@@ -9,25 +9,27 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 TOC = 'Interface/FrameXML/FrameXML.toc'
-LUA = 'Interface/FrameXML/XPHotspots.lua'
+FRAMEXML = 'Interface/FrameXML/'
+DEFAULT_LUA = ['XPHotspots.lua']
 
 
 def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def extend_toc(data):
+def extend_toc(data, name='XPHotspots.lua'):
     text = data.decode('utf-8-sig')
-    matches = [line for line in text.splitlines() if line.strip().lower() == 'xphotspots.lua']
+    matches = [line for line in text.splitlines() if line.strip().lower() == name.lower()]
     if len(matches) > 1:
-        raise ValueError('Duplicate hotspot loader entries in the baseline')
+        raise ValueError(f'Duplicate {name} loader entries in the baseline')
     if matches:
         return data
     newline = b'\r\n' if b'\r\n' in data else b'\n'
-    return data + (b'' if data.endswith(b'\n') else newline) + b'XPHotspots.lua' + newline
+    return data + (b'' if data.endswith(b'\n') else newline) + name.encode() + newline
 
 
-def package(baseline, output, executable):
+def package(baseline, output, executable, lua_files=None):
+    lua_files = list(lua_files or DEFAULT_LUA)
     baseline, output = Path(baseline).resolve(), Path(output).resolve()
     executable = str(Path(executable).resolve())
     if baseline == output or output.exists():
@@ -59,10 +61,14 @@ def package(baseline, output, executable):
         payload = temp / 'payload'
         payload.mkdir()
         new_toc = payload / 'FrameXML.toc'
-        new_toc.write_bytes(extend_toc(toc.read_bytes()))
+        toc_data = toc.read_bytes()
+        for name in lua_files:
+            toc_data = extend_toc(toc_data, name)
+        new_toc.write_bytes(toc_data)
         candidate = temp / 'candidate.MPQ'
         shutil.copyfile(baseline, candidate)
-        for member, source in ((TOC, new_toc), (LUA, ROOT / 'client' / LUA)):
+        members = [(TOC, new_toc)] + [(FRAMEXML + name, ROOT / 'client' / FRAMEXML / name) for name in lua_files]
+        for member, source in members:
             run('add', '--overwrite', '--game', 'wow-wotlk', '--path', member.replace('/', '\\'),
                 candidate, source)
             wanted[member.lower()] = sha(source)
@@ -74,7 +80,7 @@ def package(baseline, output, executable):
             raise RuntimeError('Baseline changed while building; discard this candidate and retry')
         report = dict(baseline_sha256=original_hash, candidate_sha256=sha(candidate),
                       mpqcli_sha256=sha(executable), members_checked=len(actual),
-                      changed_members=[TOC, LUA], state='built; not installed or published')
+                      changed_members=[member for member, _ in members], state='built; not installed or published')
         shutil.copyfile(candidate, output)
     output.with_suffix(output.suffix + '.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
     return report
@@ -85,8 +91,10 @@ def main():
     parser.add_argument('--baseline', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--mpqcli', type=Path, required=True)
+    parser.add_argument('--lua', action='append', default=None,
+                        help='FrameXML Lua file from client/Interface/FrameXML to add; repeatable, default XPHotspots.lua')
     args = parser.parse_args()
-    print(json.dumps(package(args.baseline, args.output, args.mpqcli), indent=2))
+    print(json.dumps(package(args.baseline, args.output, args.mpqcli, args.lua), indent=2))
 
 
 if __name__ == '__main__':
