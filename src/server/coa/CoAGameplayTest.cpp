@@ -123,7 +123,18 @@ public:
         return !NoRegenerationActors.contains(player->GetGUID());
     }
 };
-constexpr uint32 MaximumActors = 8;
+constexpr uint32 MaximumCreatures = 8;
+
+uint32 MaximumPlayers(uint32 schema)
+{
+    return schema == 2 ? 25 : 8;
+}
+
+uint32 MaximumTimeoutMs(uint32 schema)
+{
+    return schema == 2 ? 1200000 : 600000;
+}
+
 constexpr uint16 LevelScalingOpcode = 0x0667;
 constexpr uint16 ApplyAppearancesOpcode = 0x0697;
 constexpr uint16 KnownEntriesUploadOpcode = 0x0727;
@@ -1277,9 +1288,10 @@ public:
     void Load(std::string const& scenarioFile)
     {
         boost::property_tree::read_json(scenarioFile, _scenario);
-        Require(_scenario.get<uint32>("schema") == 1, "Unsupported scenario schema");
+        _schema = _scenario.get<uint32>("schema");
+        Require(_schema == 1 || _schema == 2, "Unsupported scenario schema");
         _timeout = _scenario.get<uint32>("timeout_ms", 90000);
-        Require(_timeout > 0 && _timeout <= 600000, "Invalid scenario timeout");
+        Require(_timeout > 0 && _timeout <= MaximumTimeoutMs(_schema), "Invalid scenario timeout");
         if (_scenario.get<bool>("creature_scaling", false))
             _creatureScaling.emplace();
         if (auto ownership = _scenario.get_child_optional("vanity_ownership"))
@@ -1303,7 +1315,8 @@ public:
         _nextStep = _steps.begin();
 
         auto const& players = _scenario.get_child("players");
-        Require(!players.empty() && players.size() <= MaximumActors, "Scenario needs 1..8 players");
+        Require(!players.empty() && players.size() <= MaximumPlayers(_schema),
+            "Scenario needs 1.." + std::to_string(MaximumPlayers(_schema)) + " players");
         uint32 index = 0;
         for (auto const& entry : players)
         {
@@ -2078,7 +2091,7 @@ private:
     {
         if (auto creatures = _scenario.get_child_optional("creatures"))
         {
-            Require(creatures->size() <= MaximumActors, "Too many creatures");
+            Require(creatures->size() <= MaximumCreatures, "Too many creatures");
             for (auto const& entry : *creatures)
             {
                 Tree const& definition = entry.second;
@@ -5820,6 +5833,7 @@ private:
     bool _characterQueueReached = false;
     bool _measured = false;
     uint8 _castCount = 0;
+    uint32 _schema = 1;
     uint32 _timeout = 90000;
     uint32 _assertions = 0;
     uint32 _completed = 0;

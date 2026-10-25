@@ -347,8 +347,10 @@ its current motion. Other creatures retain their original movement. Use it for a
 wandering or fleeing would invalidate ordinary cast range or facing; it does not change spell hit or proc chance.
 
 Start from [scenarios/frostbolt.json](scenarios/frostbolt.json). Schema version 1 accepts up to eight players,
-eight creatures and 10,000 sequential steps. Optional `timeout_ms` bounds setup plus execution (default 90s,
-maximum 10 minutes); execution counts in game time, which the simulated clock advances past waits. Optional
+eight creatures and 10,000 sequential steps. Schema version 2 raises the limits for raid encounters to 25 players
+and a 20-minute `timeout_ms` maximum, with the same eight creatures and 10,000 steps. Optional `timeout_ms` bounds
+setup plus execution (default 90s, maximum 10 minutes under schema 1); execution counts in game time, which the
+simulated clock advances past waits. Optional
 `contract` records the independently established expected behavior. Optional `hour` (0-23) starts the case in that
 realm-local hour, for mechanics that read the time of day: the simulated clock, which otherwise starts at 10:00,
 jumps ahead to it, and the real clock runs the case in single mode with a fixed `TZ` offset

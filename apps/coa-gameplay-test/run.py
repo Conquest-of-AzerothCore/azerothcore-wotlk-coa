@@ -305,13 +305,18 @@ def read_json(path):
     return json.loads(Path(path).read_text(encoding='utf-8-sig'), object_pairs_hook=unique_object)
 
 
+MAX_PLAYERS = {1: 8, 2: 25}
+MAX_TIMEOUT_MS = {1: 600000, 2: 1200000}
+
+
 def validate(scenario):
     keys(scenario, {'schema', 'name', 'players', 'steps'},
          {'schema', 'name', 'players', 'creatures', 'steps', 'timeout_ms', 'location', 'contract', 'hour',
           'creature_scaling', 'vanity_ownership', 'two_side'}, 'scenario')
-    require(type(scenario['schema']) is int and scenario['schema'] == 1, 'Unsupported scenario schema')
+    schema = scenario['schema']
+    require(type(schema) is int and schema in MAX_PLAYERS, 'Unsupported scenario schema')
     require(isinstance(scenario['name'], str) and scenario['name'].strip(), 'Scenario needs a name')
-    number(scenario.get('timeout_ms', 90000), 'timeout_ms', 1, 600000, True)
+    number(scenario.get('timeout_ms', 90000), 'timeout_ms', 1, MAX_TIMEOUT_MS[schema], True)
     if 'hour' in scenario:
         number(scenario['hour'], 'hour', 0, HOURS_PER_DAY - 1, True)
     require(type(scenario.get('creature_scaling', False)) is bool, 'creature_scaling must be boolean')
@@ -330,7 +335,8 @@ def validate(scenario):
             require(type(value) is bool, f'two_side.{name} must be boolean')
     players = scenario['players']
     creatures = scenario.get('creatures', [])
-    require(isinstance(players, list) and 1 <= len(players) <= 8, 'Expected 1..8 players')
+    require(isinstance(players, list) and 1 <= len(players) <= MAX_PLAYERS[schema],
+            f'Expected 1..{MAX_PLAYERS[schema]} players')
     require(isinstance(creatures, list) and len(creatures) <= 8, 'Expected at most eight creatures')
     player_ids = set()
     actor_ids = set()

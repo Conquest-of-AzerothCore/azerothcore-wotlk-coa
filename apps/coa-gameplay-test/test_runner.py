@@ -15,6 +15,41 @@ import run
 
 
 class RunnerTests(unittest.TestCase):
+    def with_players(self, schema, count):
+        scenario = copy.deepcopy(self.scenario)
+        scenario['schema'] = schema
+        template = scenario['players'][0]
+        scenario['players'] += [{**template, 'id': f'raider{index}'} for index in range(count - 1)]
+        return scenario
+
+    def test_schema_2_accepts_twenty_five_players(self):
+        scenario = self.with_players(2, 25)
+        self.assertIs(run.validate(scenario), scenario)
+
+    def test_schema_2_rejects_twenty_six_players(self):
+        with self.assertRaisesRegex(ValueError, r'1\.\.25 players'):
+            run.validate(self.with_players(2, 26))
+
+    def test_schema_1_still_rejects_nine_players(self):
+        with self.assertRaisesRegex(ValueError, r'1\.\.8 players'):
+            run.validate(self.with_players(1, 9))
+
+    def test_schema_2_timeout_limit(self):
+        scenario = self.with_players(2, 1)
+        scenario['timeout_ms'] = 1200000
+        self.assertIs(run.validate(scenario), scenario)
+        scenario['timeout_ms'] = 1200001
+        with self.assertRaisesRegex(ValueError, 'too large'):
+            run.validate(scenario)
+        legacy = self.with_players(1, 1)
+        legacy['timeout_ms'] = 600001
+        with self.assertRaisesRegex(ValueError, 'too large'):
+            run.validate(legacy)
+
+    def test_unknown_schema_rejected(self):
+        with self.assertRaisesRegex(ValueError, 'Unsupported scenario schema'):
+            run.validate(self.with_players(3, 1))
+
     def test_player_account_sharing_requires_an_earlier_player(self):
         self.scenario['players'].append({'id': 'alt', 'race': 1, 'class': 1, 'account_of': 'caster'})
         self.assertIs(run.validate(self.scenario), self.scenario)
