@@ -4,7 +4,9 @@
 
 -- 1) Heirlooms leave Tiraxis (900011, rev_20261023_02) and are sold in the Vanity Store only, at twice their old
 --    Tiraxis price (one-hand, shield and off-hand 900 -> 1800, ranged and relics 1000 -> 2000, two-hand 1800 -> 3600);
---    trinkets cost what a Heirloom Cache would after the same doubling, 3000. The 14 Heirloom and Experience Heirloom
+--    trinkets cost what a Heirloom Cache would after the same doubling, 3000, and so do the heirloom rings and the
+--    heirloom trinkets that had no price (raid medallions, Insignias of the Burning Legion, Stick on a Carrot). Heirloom
+--    armor and necklaces stay unpriced: they only came from the caches. The 14 Heirloom and Experience Heirloom
 --    Caches are not sold at all any more (they have no Vanity Store row).
 -- 2) Tiraxis' Convenience Items (900008): new prices, and the Vanity Store sells the same items at the same price.
 INSERT INTO `coa_client_vanity_collection` (`ItemID`, `DonationPointCost`, `SeasonalPointCost`, `BazaarTokenCost`)
@@ -62,7 +64,20 @@ FROM (VALUES
   ROW(106960, 3000),   -- Tome of Specialization VII
   ROW(777998, 3000),   -- Tradesman's Scroll
   ROW(3211010, 5000),  -- Riding Tome: Artisan Riding
-  ROW(1179243, 7500)   -- Riding Tome: Extraordinary Riding
+  ROW(1179243, 7500),  -- Riding Tome: Extraordinary Riding
+  ROW(1339081, 3000),  -- Ring of the Bulwark
+  ROW(1339082, 3000),  -- Ring of the Lionhearted
+  ROW(1339083, 3000),  -- Ring of the Seer
+  ROW(1339080, 3000),  -- Ring of the Sorcerer
+  ROW(1339079, 3000),  -- Ring of the Vanguard
+  ROW(12344, 3000),    -- Seal of Ascension
+  ROW(666002, 3000),   -- Battle for Mount Hyjal Medallion
+  ROW(666001, 3000),   -- Blackwing Lair Medallion
+  ROW(101428, 3000),   -- Greater Insignia of the Burning Legion
+  ROW(409, 3000),      -- Insignia of the Burning Legion
+  ROW(666000, 3000),   -- Molten Core Medallion
+  ROW(666003, 3000),   -- Serpentshrine Cavern Medallion
+  ROW(339075, 3000)    -- Stick on a Carrot
 ) `n` (`ItemID`, `BazaarTokenCost`)
 WHERE EXISTS (SELECT 1 FROM `coa_client_vanity_collection` WHERE `BazaarTokenCost` > 0)
 ON DUPLICATE KEY UPDATE `DonationPointCost` = 0, `SeasonalPointCost` = 0, `BazaarTokenCost` = `n`.`BazaarTokenCost`;
