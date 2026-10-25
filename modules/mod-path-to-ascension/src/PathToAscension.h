@@ -120,6 +120,7 @@ namespace PathToAscension
     constexpr char TrackingSetting[] = "core.ascension.tutorial_tracking";
     constexpr char RidingSetting[] = "core.ascension.tutorial_riding";
     constexpr char AppearanceSetting[] = "core.ascension.tutorial_appearances";
+    constexpr char CountSetting[] = "core.ascension.tutorial_counts";
 
     uint32 SettingValue(Player const* player, char const* source, uint32 index);
     bool MatchesRaceAndClass(Player const* player, Tutorial const& tutorial);

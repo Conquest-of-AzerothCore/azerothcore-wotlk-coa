@@ -279,6 +279,21 @@ inline bool PublishableCategory(std::uint32_t category, bool gm)
         category == CATEGORY_BUILD_DRAFT_END_GAME_PVP);
 }
 
+constexpr std::uint32_t ACTIVATION_FEATURED = 1;
+constexpr std::uint32_t ACTIVATION_END_GAME = 2;
+
+inline std::uint32_t ActivationProgress(Build const* build)
+{
+    if (!build)
+        return 0;
+    std::uint32_t progress = 0;
+    if (build->Flags & FEATURED_FLAG)
+        progress |= ACTIVATION_FEATURED;
+    if (build->Category > CATEGORY_LEVELING && build->Category <= CATEGORY_LEVEL_70_PVPVE)
+        progress |= ACTIVATION_END_GAME;
+    return progress;
+}
+
 template <class KnownSpell>
 std::uint32_t ValidateContent(Build const& build, Publisher const& publisher, KnownSpell const& knownSpell)
 {

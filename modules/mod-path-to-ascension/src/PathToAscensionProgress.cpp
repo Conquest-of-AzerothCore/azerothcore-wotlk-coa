@@ -7,7 +7,9 @@
 #include "AllGameObjectScript.h"
 #include "AllSpellScript.h"
 #include "AscensionAverageItemLevel.h"
+#include "AscensionBuildCreatorRules.h"
 #include "AscensionItemPower.h"
+#include "AscensionMysticEnchant.h"
 #include "AscensionWildcard.h"
 #include "AuctionHouseMgr.h"
 #include "Battleground.h"
@@ -546,6 +548,93 @@ namespace PathToAscension
                 return !player->HasAura(aura.first, aura.second);
             });
         }
+
+        namespace Mystic = AscensionMysticEnchant;
+
+        constexpr uint32 MysticReforgeGoal = 10;
+        constexpr uint32 GoldenAbilityPack = 778998;
+
+        // Tutorials 3 and 275 share one objective list: buy, reforge ten times, earn an extract.
+        void RecordMysticExtracting(Player* player, uint32 bit)
+        {
+            RecordTutorialEvent(player, 3, bit);
+            if ((SettingValue(player, EventSetting, 3) & 7u) != 7u)
+                return;
+
+            CompleteGameModeTutorial(player, 3);
+            CompleteGameModeTutorial(player, 275);
+        }
+
+        void RecordMysticReforge(Player* player)
+        {
+            if (!CountsForPlayer(player) || player->IsGameMaster())
+                return;
+
+            uint32 const reforges = SettingValue(player, CountSetting, 3);
+            if (reforges < MysticReforgeGoal)
+                player->UpdatePlayerSetting(CountSetting, 3, reforges + 1);
+            if (reforges + 1 >= MysticReforgeGoal)
+                RecordMysticExtracting(player, 2);
+        }
+
+        void CheckMysticCollection(Player* player)
+        {
+            std::optional<Mystic::Collection> const collection = Mystic::Summarize(player);
+            if (!collection)
+                return;
+
+            if (collection->Known[Mystic::QUALITY_EPIC] >= 3)
+                CompleteGameModeTutorial(player, 11);
+            if (collection->Known[Mystic::QUALITY_LEGENDARY])
+                CompleteGameModeTutorial(player, 12);
+            if (collection->KnownTotal >= 10)
+                CompleteGameModeTutorial(player, 26);
+            if (collection->KnownWorldforged)
+                CompleteGameModeTutorial(player, 63);
+
+            // Every quality the player's class can find on a scroll on this realm.
+            bool offered = false;
+            bool everyQuality = true;
+            for (uint32 quality = 0; quality < Mystic::QUALITY_MAX; ++quality)
+                if (collection->Offered[quality])
+                {
+                    offered = true;
+                    everyQuality &= collection->Known[quality] != 0;
+                }
+            if (offered && everyQuality)
+                CompleteGameModeTutorial(player, 273);
+        }
+
+        void CheckMysticSlots(Player* player)
+        {
+            std::optional<Mystic::Collection> const collection = Mystic::Summarize(player);
+            if (!collection)
+                return;
+
+            if (collection->OpenSlots && collection->FilledSlots == collection->OpenSlots)
+                CompleteGameModeTutorial(player, 59);
+            if (collection->Active[Mystic::QUALITY_LEGENDARY])
+                CompleteGameModeTutorial(player, 60);
+            if (collection->Active[Mystic::QUALITY_EPIC] >= 3)
+                CompleteGameModeTutorial(player, 61);
+        }
+
+        void RecordArchitect(Player* player, uint32 bit)
+        {
+            RecordTutorialEvent(player, 75, bit);
+            if ((SettingValue(player, EventSetting, 75) & 3u) == 3u)
+                CompleteGameModeTutorial(player, 75);
+        }
+
+        void RecordBuildActivation(Player* player, uint32 progress)
+        {
+            constexpr uint32 featured = AscensionBuildCreator::ACTIVATION_FEATURED;
+            constexpr uint32 featuredEndGame = featured | AscensionBuildCreator::ACTIVATION_END_GAME;
+            if ((progress & featuredEndGame) == featuredEndGame)
+                CompleteGameModeTutorial(player, 7);
+            if (progress & featured)
+                RecordArchitect(player, 2);
+        }
     }
 
     Settings const& GetSettings()
@@ -693,15 +782,17 @@ namespace PathToAscension
     {
         static constexpr uint32 ids[] =
         {
-            2, 5, 6, 8, 9, 10, 13, 14, 15, 16, 18, 19, 22, 24, 27, 28, 29, 30, 31, 32,
-            33, 36, 40, 41, 50, 51, 56, 57, 58, 64, 65, 74, 76, 78, 80, 82, 83, 84, 89, 90, 91, 92,
-            93, 101, 104, 105, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 121, 122, 124, 125,
+            2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 19, 22, 23, 24, 26, 27, 28, 29, 30,
+            31, 32, 33, 36, 39, 40, 41, 50, 51, 52, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 74, 75, 76,
+            78, 80, 82, 83, 84, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 100, 101, 104, 105, 110, 111,
+            112, 113, 114, 115, 116, 117, 118, 119, 121, 122, 124, 125,
             126, 128, 129, 131, 132, 133, 135, 136, 138, 139, 140, 142, 143, 145, 146, 147, 149, 150,
             151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168,
             169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 193, 200,
             201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218,
-            219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 237, 239, 241,
-            244, 245, 247, 249, 250, 251, 258, 259, 260, 261, 265, 266, 267, 268, 269, 270, 271
+            219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 237, 238, 239,
+            240, 241, 242, 244, 245, 247, 249, 250, 251, 258, 259, 260, 261, 265, 266, 267, 268, 269, 270,
+            271, 273, 275, 276, 277
         };
         return std::binary_search(std::begin(ids), std::end(ids), tutorialId);
     }
@@ -971,6 +1062,67 @@ public:
                 break;
             case CoAProgressEvent::OutfitSaved:
                 CompleteVerifiedTutorial(player, 247);
+                break;
+            case CoAProgressEvent::MysticScrollPurchased:
+                RecordMysticExtracting(player, 1);
+                break;
+            case CoAProgressEvent::MysticScrollReforged:
+                RecordMysticReforge(player);
+                break;
+            case CoAProgressEvent::MysticExtractEarned:
+                RecordMysticExtracting(player, 4);
+                break;
+            case CoAProgressEvent::MysticEnchantExtracted:
+                CompleteGameModeTutorial(player, 4);
+                CompleteGameModeTutorial(player, 276);
+                CheckMysticCollection(player);
+                break;
+            case CoAProgressEvent::MysticCollectionApplied:
+                CompleteGameModeTutorial(player, 39);
+                CompleteGameModeTutorial(player, 277);
+                CheckMysticSlots(player);
+                break;
+            case CoAProgressEvent::MysticScrollApplied:
+                CompleteGameModeTutorial(player, 52);
+                CheckMysticSlots(player);
+                break;
+            case CoAProgressEvent::MysticPresetActivated:
+                CompleteGameModeTutorial(player, 62);
+                CheckMysticSlots(player);
+                break;
+            case CoAProgressEvent::ArchitectOpened:
+                RecordArchitect(player, 1);
+                break;
+            case CoAProgressEvent::BuildActivated:
+                RecordBuildActivation(player, value);
+                break;
+            case CoAProgressEvent::SoloArenaQueued:
+                if (value == ARENA_TYPE_2v2)
+                    CompleteGameModeTutorial(player, 23);
+                break;
+            case CoAProgressEvent::WildcardScrollUnlearned:
+                CompleteGameModeTutorial(player, value ? 95 : 94);
+                break;
+            case CoAProgressEvent::WildcardEntryLocked:
+                CompleteGameModeTutorial(player, 96);
+                break;
+            case CoAProgressEvent::WildcardCardPackOpened:
+                CompleteGameModeTutorial(player, 97);
+                if (value == GoldenAbilityPack)
+                    CompleteGameModeTutorial(player, 98);
+                break;
+            case CoAProgressEvent::WildcardStarterCardSet:
+                if (player->GetLevel() < 10)
+                    CompleteGameModeTutorial(player, 100);
+                break;
+            case CoAProgressEvent::WildcardScrollsClaimed:
+                CompleteGameModeTutorial(player, 238);
+                break;
+            case CoAProgressEvent::WildcardScrollsRepurchased:
+                CompleteGameModeTutorial(player, 240);
+                break;
+            case CoAProgressEvent::WildcardRapidRolled:
+                CompleteGameModeTutorial(player, 242);
                 break;
         }
     }

@@ -278,7 +278,24 @@ enum class CoAProgressEvent : uint8
     VanityCollected,
     AppearanceCollected,
     ExperimentalTeleporter,
-    OutfitSaved
+    OutfitSaved,
+    MysticScrollPurchased,
+    MysticScrollReforged,
+    MysticExtractEarned,
+    MysticEnchantExtracted,
+    MysticCollectionApplied,
+    MysticScrollApplied,
+    MysticPresetActivated,
+    ArchitectOpened,
+    BuildActivated,
+    SoloArenaQueued,
+    WildcardScrollUnlearned,
+    WildcardEntryLocked,
+    WildcardCardPackOpened,
+    WildcardStarterCardSet,
+    WildcardScrollsClaimed,
+    WildcardScrollsRepurchased,
+    WildcardRapidRolled
 };
 
 class PlayerScript : public ScriptObject

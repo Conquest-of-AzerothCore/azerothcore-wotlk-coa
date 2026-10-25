@@ -12,8 +12,11 @@
   the fourteen original raids by spawn mode, world bosses, battlegrounds, War Games, arena vendors, PvE/PvP power
   and item level thresholds, Titan Scrolls, profession training at the Book of Artisans, rank training at a
   Book of Ascension, pet talents, auction wins, the Ethereal Bazaar, transmogrification, vanity items, appearance
-  collection, saved outfits, Closest Town/City resurrection, Prestige, the Hero's stat path, Wildcard level 10 and
-  the Manastorm (entry, purchases, potions, loadout, clears). A delivered vanity item counts as a store delivery.
+  collection, saved outfits, Closest Town/City resurrection, Prestige, the Hero's stat path, Mystic Enchanting
+  (scroll purchase, reforges, extracts, collection quality and count, active slots, presets), the Hero Architect
+  (opening it, loading a featured end-game build), the 2v2 solo arena queue, Wildcard (level 10, Scrolls of Fortune
+  claims, buyback and rerolls, locks, card packs, starter cards, rapid rolling) and the Manastorm (entry,
+  purchases, potions, loadout, clears). A delivered vanity item counts as a store delivery.
   A completed tutorial also completes its client achievement.
 - **Rewards.** The client's claim (`0x6A8`) grants the tutorial's `TutorialRewards.dbc` items once per character,
   all or nothing, in one character save. Eligibility follows the tutorial's realm, expansion, race, class,
@@ -30,14 +33,15 @@ Progress lives in the character's `core.ascension.tutorial_*` settings, which th
 ## Dependencies on other systems
 
 The module listens to generic hooks only: `PlayerScript` hooks for trainer spells, pet talents, mail items and quest
-eligibility, and `OnPlayerCoAProgress` for the CoA core's Manastorm, collection and resurrection events.
+eligibility, and `OnPlayerCoAProgress` for the CoA core's Manastorm, collection, resurrection, Mystic Enchant,
+Hero Architect, solo arena and Wildcard events.
 Game-mode-restricted tutorials ask `OnPlayerGetGameModeMask`, which `mod-coa-challenges` answers; without it those
 tutorials stay unavailable. `mod-war-games` supplies the War Games tutorial's matches and `mod-hero-call-board`
 the boards.
 
 ## Not restored
 
-About 150 of the 196 client quest references have a progress callback. The pet appearance tutorial, the
+196 of the 262 tutorials have a progress callback. The pet appearance tutorial, the
 custom-difficulty raid tutorials beyond the spawn modes the server offers, the Mark of Triumph vendors, Warchests and
 the Callboard Cache contents are outside this module.
 

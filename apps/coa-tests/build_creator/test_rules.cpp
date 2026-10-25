@@ -345,6 +345,30 @@ void Activation()
     assert(empty.bytes == (std::vector<std::uint8_t>{ 0, 0, 0 }));
     assert(ActiveBuilds{}.size() == SPECIALIZATIONS);
 }
+
+void ActivationProgressFlags()
+{
+    Build build = Valid();
+    assert(ActivationProgress(nullptr) == 0);
+    build.Flags = 0;
+    build.Category = CATEGORY_LEVELING;
+    assert(ActivationProgress(&build) == 0);
+    build.Flags = FEATURED_FLAG;
+    assert(ActivationProgress(&build) == ACTIVATION_FEATURED);
+    for (std::uint32_t category = CATEGORY_LEVELING + 1; category <= CATEGORY_LEVEL_70_PVPVE; ++category)
+    {
+        build.Category = category;
+        assert(ActivationProgress(&build) == (ACTIVATION_FEATURED | ACTIVATION_END_GAME));
+    }
+    build.Flags = 0;
+    assert(ActivationProgress(&build) == ACTIVATION_END_GAME);
+    for (std::uint32_t category : { CATEGORY_NONE, CATEGORY_BUILD_DRAFT, CATEGORY_ARCHIVED,
+        CATEGORY_BUILD_DRAFT_END_GAME_PVE, CATEGORY_BUILD_DRAFT_END_GAME_PVP })
+    {
+        build.Category = category;
+        assert(ActivationProgress(&build) == 0);
+    }
+}
 }
 
 int main()
@@ -356,4 +380,5 @@ int main()
     Paging();
     Ids();
     Activation();
+    ActivationProgressFlags();
 }

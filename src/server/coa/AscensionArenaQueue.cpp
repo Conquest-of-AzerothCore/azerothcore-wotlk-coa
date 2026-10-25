@@ -293,6 +293,7 @@ namespace
         player->SendDirectMessage(&status);
 
         sScriptMgr->OnPlayerJoinArena(player);
+        sScriptMgr->OnPlayerCoAProgress(player, CoAProgressEvent::SoloArenaQueued, bracket->ArenaType);
         sBattlegroundMgr->ScheduleQueueUpdate(std::max<uint32>(matchmakerRating, 1), bracket->ArenaType, queueType,
             BATTLEGROUND_AA, bracketEntry->GetBracketId());
     }

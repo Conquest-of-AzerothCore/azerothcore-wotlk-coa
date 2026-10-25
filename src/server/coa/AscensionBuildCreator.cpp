@@ -462,12 +462,15 @@ void HandleActivate(Player* player, WorldPacket& packet)
     uint32 const spec = AscensionFreepick::ActiveSpecialization(player);
     ActiveBuild const next = { id, { first, second } };
     uint32 result = ACTIVATE_FAILED;
+    uint32 progress = 0;
     {
         std::lock_guard<std::mutex> activeLock(ActiveLock);
         ActiveBuild& current = Active[player->GetGUID()][spec];
         {
             std::lock_guard<std::mutex> catalogLock(CatalogLock);
-            result = Activate(Find(id), player->getClass(), current.Id);
+            Build const* build = Find(id);
+            result = Activate(build, player->getClass(), current.Id);
+            progress = ActivationProgress(build);
         }
         if (result == ACTIVATE_OK)
             current = next;
@@ -477,6 +480,7 @@ void HandleActivate(Player* player, WorldPacket& packet)
         StoreActiveBuild(player, spec, next);
         SendActiveBuild(player, spec, next);
         AutoLearn(player, next);
+        sScriptMgr->OnPlayerCoAProgress(player, CoAProgressEvent::BuildActivated, progress);
     }
     SendText(player, SMSG_ACTIVATE_BUILD_RESULT, ACTIVATE_RESULTS[result]);
 }
@@ -512,6 +516,7 @@ void HandleQueryCategory(Player* player, WorldPacket& packet)
     std::string name;
     packet >> name;
     std::optional<uint32> const category = CategoryIndex(name);
+    sScriptMgr->OnPlayerCoAProgress(player, CoAProgressEvent::ArchitectOpened, category.value_or(0));
     std::vector<ByteBuffer> entries;
     {
         std::lock_guard<std::mutex> lock(CatalogLock);
