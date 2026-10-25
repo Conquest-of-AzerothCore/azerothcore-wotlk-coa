@@ -58,6 +58,19 @@ namespace CoAGameplay
         return role == RaidRole::Tank;
     }
 
+    float ThreatFloor(float highestOther)
+    {
+        return highestOther * RaidTankThreatFactor + RaidTankThreatMargin;
+    }
+
+    float TankThreatRaise(float tankThreat, float highestOther)
+    {
+        if (highestOther <= 0.0f)
+            return 0.0f;
+        float const floor = ThreatFloor(highestOther);
+        return tankThreat < floor ? floor - tankThreat : 0.0f;
+    }
+
     std::optional<uint32> NextRotationSpell(std::vector<uint32> const& rotation,
         std::function<bool(uint32)> const& canCast)
     {

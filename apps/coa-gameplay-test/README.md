@@ -389,7 +389,10 @@ Optional `allow_regeneration: false` suppresses only that fixture player's ordin
 through the native regeneration hook. Spell costs, healing, energize effects and combat remain enabled.
 It defaults to true and has no effect on other players or on a disabled harness.
 Optional `role`, `rotation`, `heal_spell` and `taunt_spell` make the player a
-[raid bot](#raid-bot-roles) during an encounter.
+[raid bot](#raid-bot-roles) during an encounter. A living tank bot holds a threat floor on the boss as a test
+fixture, not threat realism: each tick it raises its threat through the native threat manager to 110 percent of
+the highest threat of any non-tank unit plus 100, so boss mechanics see the tank as the victim deterministically.
+The floor stops when no tank bot is alive, so a tank death still shows as the boss switching targets.
 Optional `expansion` (0..2, default 2) is the fixture session's expansion, as a realm with a lower `Expansion`
 setting caps a real client's; it gates maps and profession ranks.
 Optional `ascension_client: true` marks the socketless session as having negotiated Ascension compatibility,
@@ -1013,13 +1016,13 @@ until the boss's current victim is a tank, so the tank holds the first threat; h
 
 | Role | Each tick |
 | --- | --- |
-| `tank` | Teleports in front of the boss when out of native melee range, turns to face it, swings at it, casts `taunt_spell` when the boss targets someone else, otherwise its rotation on the boss. |
+| `tank` | Holds the threat floor, teleports in front of the boss when out of native melee range, turns to face it, swings at it, casts `taunt_spell` when the boss targets someone else, otherwise its rotation on the boss. |
 | `melee` | The same behind the boss, without a taunt. |
 | `ranged` | Stays in place; within 30 yards of the boss it turns to face it and casts its rotation on it. |
 | `healer` | Stays in place and casts `heal_spell` on the living scenario player within 40 yards with the lowest health below 90 percent (the first listed on a tie). |
 
 Bots do not dodge mechanics. The [raid bot scenario](scenarios/raid-bots-tank-healer.json) runs a tank, a melee
-bot and a healer against a defensive fixture.
+bot casting its rotation and a healer against a defensive fixture, whose swings must land only on the tank.
 
 ## Evidence boundaries
 

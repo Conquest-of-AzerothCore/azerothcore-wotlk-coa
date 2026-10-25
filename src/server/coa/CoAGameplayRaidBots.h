@@ -27,6 +27,8 @@ namespace CoAGameplay
     constexpr float RaidHealThresholdPct = 90.0f;
     constexpr float RaidHealRange = 40.0f;
     constexpr float RaidRangedDistance = 30.0f;
+    constexpr float RaidTankThreatFactor = 1.1f;
+    constexpr float RaidTankThreatMargin = 100.0f;
 
     struct HealCandidate
     {
@@ -42,6 +44,8 @@ namespace CoAGameplay
     bool ShouldTaunt(bool bossTargetsTank, bool tauntReady);
     bool RoleMayAct(RaidRole role, bool bossTargetsTank);
     bool ActsInTankPass(RaidRole role);
+    float ThreatFloor(float highestOther);
+    float TankThreatRaise(float tankThreat, float highestOther);
     std::optional<uint32> NextRotationSpell(std::vector<uint32> const& rotation,
         std::function<bool(uint32)> const& canCast);
 }

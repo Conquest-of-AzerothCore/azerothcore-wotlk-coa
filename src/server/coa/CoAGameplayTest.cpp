@@ -1693,15 +1693,30 @@ public:
             SubmitBotCast(player, healer.healSpell, patient);
     }
 
+    bool IsTankActor(ObjectGuid guid) const
+    {
+        for (auto const& [id, actor] : _actors)
+            if (actor.raidRole == CoAGameplay::RaidRole::Tank && actor.guid == guid)
+                return true;
+        return false;
+    }
+
+    void HoldThreatFloor(Player* tank, Creature* boss) const
+    {
+        ThreatManager& threat = boss->GetThreatMgr();
+        float highestOther = 0.0f;
+        for (ThreatReference const* ref : threat.GetUnsortedThreatList())
+            if (!IsTankActor(ref->GetVictim()->GetGUID()))
+                highestOther = std::max(highestOther, ref->GetThreat());
+        float const raise = CoAGameplay::TankThreatRaise(threat.GetThreat(tank), highestOther);
+        if (raise > 0.0f)
+            threat.AddThreat(tank, raise, nullptr, true, true);
+    }
+
     bool BossTargetsTank(Creature* boss) const
     {
         Unit const* victim = boss->GetVictim();
-        if (!victim)
-            return false;
-        for (auto const& [id, actor] : _actors)
-            if (actor.raidRole == CoAGameplay::RaidRole::Tank && actor.guid == victim->GetGUID())
-                return true;
-        return false;
+        return victim && IsTankActor(victim->GetGUID());
     }
 
     void DriveRaidBot(Actor const& actor, Player* player, Creature* boss)
@@ -1719,6 +1734,8 @@ public:
         {
             case CoAGameplay::RaidRole::Tank:
             case CoAGameplay::RaidRole::Melee:
+                if (actor.raidRole == CoAGameplay::RaidRole::Tank)
+                    HoldThreatFloor(player, boss);
                 if (KeepInMelee(player, boss, actor.raidRole == CoAGameplay::RaidRole::Tank))
                     return;
                 if (player->GetVictim() != boss)

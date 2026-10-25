@@ -95,6 +95,23 @@ TEST(CoAGameplayRaidBots, TanksActInTheFirstPass)
     EXPECT_FALSE(ActsInTankPass(RaidRole::None));
 }
 
+TEST(CoAGameplayRaidBots, ThreatFloorLeadsTheHighestOtherThreat)
+{
+    EXPECT_FLOAT_EQ(RaidTankThreatFactor, 1.1f);
+    EXPECT_FLOAT_EQ(RaidTankThreatMargin, 100.0f);
+    EXPECT_FLOAT_EQ(ThreatFloor(1000.0f), 1200.0f);
+    EXPECT_FLOAT_EQ(ThreatFloor(0.0f), 100.0f);
+}
+
+TEST(CoAGameplayRaidBots, TankThreatRaiseOnlyWhenBelowTheFloor)
+{
+    EXPECT_FLOAT_EQ(TankThreatRaise(500.0f, 1000.0f), 700.0f);
+    EXPECT_FLOAT_EQ(TankThreatRaise(1200.0f, 1000.0f), 0.0f);
+    EXPECT_FLOAT_EQ(TankThreatRaise(5000.0f, 1000.0f), 0.0f);
+    EXPECT_FLOAT_EQ(TankThreatRaise(0.0f, 0.0f), 0.0f);
+    EXPECT_FLOAT_EQ(TankThreatRaise(50.0f, -1.0f), 0.0f);
+}
+
 TEST(CoAGameplayRaidBots, NextRotationSpellSkipsUncastable)
 {
     std::set<uint32> castable{30, 40};
