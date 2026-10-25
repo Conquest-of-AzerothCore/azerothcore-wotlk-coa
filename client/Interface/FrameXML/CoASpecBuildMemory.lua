@@ -1,6 +1,6 @@
 CoASpecBuildMemory = { debug = true }
 
-local snapshots = {}
+local knownSpec
 local installed = false
 
 local function Say(text)
@@ -9,17 +9,11 @@ local function Say(text)
     end
 end
 
-local function Forget()
-    for key in pairs(snapshots) do
-        snapshots[key] = nil
-    end
-end
-
 function CoASpecBuildMemory.Install(api)
     if installed or type(api) ~= "table" then
         return false
     end
-    for _, name in ipairs({ "SwitchActiveChrSpec", "GetActiveChrSpec", "ExportBuild", "ImportPendingBuild" }) do
+    for _, name in ipairs({ "SwitchActiveChrSpec", "GetActiveChrSpec", "IsPending", "CancelPendingBuild" }) do
         if type(api[name]) ~= "function" then
             return false
         end
@@ -30,41 +24,24 @@ function CoASpecBuildMemory.Install(api)
     local switch = api.SwitchActiveChrSpec
     api.SwitchActiveChrSpec = function(specID, ...)
         local from = api.GetActiveChrSpec()
-        if from and from ~= 0 and from ~= specID then
-            local ok, build = pcall(api.ExportBuild, false)
-            if ok and type(build) == "string" and build ~= "" then
-                snapshots[from] = build
-                Say("remembered spec " .. tostring(from) .. " (" .. #build .. " chars)")
-            else
-                Say("could not export spec " .. tostring(from) .. ": " .. tostring(build))
-            end
+        local ok, dirty = pcall(api.IsPending)
+        if from and from ~= 0 and ok and dirty == false then
+            knownSpec = from
         end
         local results = { switch(specID, ...) }
-        local saved = snapshots[specID]
-        if saved and from ~= specID then
-            snapshots[specID] = nil
-            local ok, imported, reason, entry, rank = pcall(api.ImportPendingBuild, saved)
-            Say("restore spec " .. tostring(specID) .. ": " .. tostring(ok) .. " " .. tostring(imported) .. " " ..
-                tostring(reason) .. " " .. tostring(entry) .. " " .. tostring(rank))
+        if knownSpec and specID == knownSpec and from ~= specID then
+            Say("back on saved spec " .. tostring(specID) .. ", restoring its build")
+            RefreshFromCancel = true
+            api.CancelPendingBuild()
         end
         return unpack(results)
-    end
-
-    for _, name in ipairs({ "ClearPendingBuild", "ClearPendingBuildByTab" }) do
-        local original = api[name]
-        if type(original) == "function" then
-            api[name] = function(...)
-                Forget()
-                return original(...)
-            end
-        end
     end
     return true
 end
 
 function CoASpecBuildMemory.OnEvent(event)
     if event == "ASCENSION_KNOWN_ENTRY_UPDATED" or event == "ASCENSION_KNOWN_ENTRY_REMOVED" then
-        Forget()
+        knownSpec = nil
     else
         CoASpecBuildMemory.Install(C_CharacterAdvancement)
     end

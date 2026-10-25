@@ -14,43 +14,42 @@ function CreateFrame()
  return f
 end
 
-pending = {spec = 0, ranks = {}}
-importFails = false
-local identity = {[10] = 1, [20] = 2}
+known = {spec = 10, ranks = {[10] = 1, [101] = 3, [102] = 1}}
+pending = {spec = 10, ranks = {[10] = 1, [101] = 3, [102] = 1}}
+noPending = false
+RefreshFromCancel = false
+refreshSeenOnCancel = nil
+
+local function copy(ranks)
+ local out = {}
+ for id, rank in pairs(ranks) do out[id] = rank end
+ return out
+end
+
+function Ranks(build)
+ local ids, out = {}, {}
+ for id in pairs(build.ranks) do ids[#ids + 1] = id end
+ table.sort(ids)
+ for _, id in ipairs(ids) do out[#out + 1] = id .. ":" .. build.ranks[id] end
+ return table.concat(out, ",")
+end
 
 C_CharacterAdvancement = {
  GetActiveChrSpec = function() return pending.spec end,
  SwitchActiveChrSpec = function(spec)
-  pending.ranks = {}
+  if spec == pending.spec then return end
+  pending.ranks = {[spec] = 1}
   pending.spec = spec
-  pending.ranks[spec] = 1
  end,
- ExportBuild = function(includeREs)
-  return pending.spec .. "|" .. Ranks()
+ IsPending = function()
+  if noPending then error("pending build is not available") end
+  return pending.spec ~= known.spec or Ranks(pending) ~= Ranks(known)
  end,
- ImportPendingBuild = function(text)
-  if importFails then return false, "CA_LEARN_BAD_ABILITY" end
-  local spec, list = text:match("^(%d+)|(.*)$")
-  pending.spec = tonumber(spec)
-  pending.ranks = {}
-  for id, rank in list:gmatch("(%d+):(%d+)") do pending.ranks[tonumber(id)] = tonumber(rank) end
-  return true
+ CancelPendingBuild = function()
+  refreshSeenOnCancel = RefreshFromCancel
+  pending = {spec = known.spec, ranks = copy(known.ranks)}
  end,
- ClearPendingBuild = function() pending.ranks = {}; pending.spec = 0 end,
 }
-
-function Build(spec, ranks)
- pending.spec = spec
- pending.ranks = ranks
-end
-
-function Ranks()
- local ids, out = {}, {}
- for id in pairs(pending.ranks) do ids[#ids + 1] = id end
- table.sort(ids)
- for _, id in ipairs(ids) do out[#out + 1] = id .. ":" .. pending.ranks[id] end
- return table.concat(out, ",")
-end
 '''
 
 
@@ -62,58 +61,65 @@ class SpecBuildMemoryTests(unittest.TestCase):
         self.lua.execute('CoASpecBuildMemory.debug = false')
         self.lua.execute('CoASpecBuildMemory.OnEvent("PLAYER_ENTERING_WORLD")')
 
-    def ranks(self):
-        return self.lua.eval('Ranks()')
+    def switch(self, spec):
+        self.lua.execute(f'C_CharacterAdvancement.SwitchActiveChrSpec({spec})')
 
-    def test_returning_to_the_original_spec_restores_its_pending_build(self):
-        self.lua.execute('Build(10, {[10]=1,[101]=3,[102]=1,[103]=2})')
-        self.lua.execute('C_CharacterAdvancement.SwitchActiveChrSpec(20)')
-        self.assertEqual(self.ranks(), '20:1')
-        self.lua.execute('C_CharacterAdvancement.SwitchActiveChrSpec(10)')
-        self.assertEqual(self.ranks(), '10:1,101:3,102:1,103:2')
-        self.assertEqual(self.lua.eval('pending.spec'), 10)
+    def pending(self):
+        return self.lua.eval('Ranks(pending)')
 
-    def test_unsaved_edits_made_in_the_inspected_spec_survive_a_second_visit(self):
-        self.lua.execute('Build(10, {[10]=1,[101]=1})')
-        self.lua.execute('C_CharacterAdvancement.SwitchActiveChrSpec(20)')
-        self.lua.execute('pending.ranks[201]=2')
-        self.lua.execute('C_CharacterAdvancement.SwitchActiveChrSpec(10)')
-        self.lua.execute('C_CharacterAdvancement.SwitchActiveChrSpec(20)')
-        self.assertEqual(self.ranks(), '20:1,201:2')
+    def test_returning_to_the_saved_spec_restores_the_saved_build(self):
+        self.switch(20)
+        self.assertEqual(self.pending(), '20:1')
+        self.switch(10)
+        self.assertEqual(self.pending(), '10:1,101:3,102:1')
+        self.assertFalse(self.lua.eval('C_CharacterAdvancement.IsPending()'))
 
-    def test_a_spec_never_left_is_not_restored_from_anything(self):
-        self.lua.execute('Build(0, {})')
-        self.lua.execute('C_CharacterAdvancement.SwitchActiveChrSpec(20)')
-        self.assertEqual(self.ranks(), '20:1')
+    def test_the_window_is_told_to_refresh_when_the_build_is_restored(self):
+        self.switch(20)
+        self.switch(10)
+        self.assertTrue(self.lua.eval('refreshSeenOnCancel'))
 
-    def test_clearing_the_pending_build_forgets_the_remembered_builds(self):
-        self.lua.execute('Build(10, {[10]=1,[101]=3})')
-        self.lua.execute('C_CharacterAdvancement.SwitchActiveChrSpec(20)')
-        self.lua.execute('C_CharacterAdvancement.ClearPendingBuild(0)')
-        self.lua.execute('C_CharacterAdvancement.SwitchActiveChrSpec(10)')
-        self.assertEqual(self.ranks(), '10:1')
+    def test_a_visit_through_a_third_spec_still_returns_to_the_saved_build(self):
+        self.switch(20)
+        self.switch(30)
+        self.assertEqual(self.pending(), '30:1')
+        self.switch(10)
+        self.assertEqual(self.pending(), '10:1,101:3,102:1')
 
-    def test_a_server_state_change_forgets_the_remembered_builds(self):
-        for event in ('ASCENSION_KNOWN_ENTRY_UPDATED', 'ASCENSION_KNOWN_ENTRY_REMOVED'):
-            self.lua.execute('Build(10, {[10]=1,[101]=3})')
-            self.lua.execute('C_CharacterAdvancement.SwitchActiveChrSpec(20)')
-            self.lua.execute(f'CoASpecBuildMemory.OnEvent("{event}")')
-            self.lua.execute('C_CharacterAdvancement.SwitchActiveChrSpec(10)')
-            self.assertEqual(self.ranks(), '10:1', event)
+    def test_switching_between_two_other_specs_changes_nothing_extra(self):
+        self.switch(20)
+        self.switch(30)
+        self.assertEqual(self.pending(), '30:1')
+        self.switch(20)
+        self.assertEqual(self.pending(), '20:1')
 
-    def test_a_refused_import_leaves_the_plain_switch_result(self):
-        self.lua.execute('Build(10, {[10]=1,[101]=3})')
-        self.lua.execute('C_CharacterAdvancement.SwitchActiveChrSpec(20)')
-        self.lua.execute('importFails=true')
-        self.lua.execute('C_CharacterAdvancement.SwitchActiveChrSpec(10)')
-        self.assertEqual(self.ranks(), '10:1')
+    def test_a_spec_that_is_not_the_saved_one_is_never_restored(self):
+        self.lua.execute('known = {spec = 20, ranks = {[20] = 1, [201] = 2}}; pending = {spec = 20, ranks = {[20] = 1, [201] = 2}}')
+        self.switch(10)
+        self.assertEqual(self.pending(), '10:1')
+        self.switch(30)
+        self.assertEqual(self.pending(), '30:1')
 
-    def test_switching_to_the_current_spec_changes_nothing(self):
-        self.lua.execute('Build(10, {[10]=1,[101]=3})')
-        self.lua.execute('C_CharacterAdvancement.SwitchActiveChrSpec(10)')
-        self.assertEqual(self.ranks(), '10:1')
+    def test_switching_to_the_current_spec_does_not_cancel_anything(self):
+        self.lua.execute('pending.ranks[103] = 1')
+        self.switch(10)
+        self.assertEqual(self.pending(), '10:1,101:3,102:1,103:1')
+        self.assertIsNone(self.lua.eval('refreshSeenOnCancel'))
 
-    def test_install_is_idempotent_and_needs_the_whole_api(self):
+    def test_after_the_server_changes_the_saved_build_the_next_clean_switch_relearns_it(self):
+        self.switch(20)
+        self.lua.execute('known = {spec = 20, ranks = {[20] = 1, [201] = 2}}; pending = {spec = 20, ranks = {[20] = 1, [201] = 2}}')
+        self.lua.execute('CoASpecBuildMemory.OnEvent("ASCENSION_KNOWN_ENTRY_UPDATED")')
+        self.switch(10)
+        self.switch(20)
+        self.assertEqual(self.pending(), '20:1,201:2')
+
+    def test_a_missing_pending_build_never_breaks_the_switch(self):
+        self.lua.execute('noPending = true')
+        self.switch(20)
+        self.assertEqual(self.pending(), '20:1')
+
+    def test_install_needs_the_whole_api_and_is_idempotent(self):
         self.assertFalse(self.lua.eval('CoASpecBuildMemory.Install(C_CharacterAdvancement)'))
         self.assertFalse(self.lua.eval('CoASpecBuildMemory.Install({})'))
         self.assertFalse(self.lua.eval('CoASpecBuildMemory.Install(nil)'))
@@ -133,10 +139,9 @@ class SpecBuildMemoryTests(unittest.TestCase):
         lua.execute('C_CharacterAdvancement = full')
         lua.execute('frames[1].scripts.OnUpdate(frames[1], 2)')
         self.assertIsNone(lua.eval('frames[1].scripts.OnUpdate'))
-        lua.execute('Build(10, {[10]=1,[101]=3})')
         lua.execute('C_CharacterAdvancement.SwitchActiveChrSpec(20)')
         lua.execute('C_CharacterAdvancement.SwitchActiveChrSpec(10)')
-        self.assertEqual(lua.eval('Ranks()'), '10:1,101:3')
+        self.assertEqual(lua.eval('Ranks(pending)'), '10:1,101:3,102:1')
 
 
 if __name__ == '__main__':
