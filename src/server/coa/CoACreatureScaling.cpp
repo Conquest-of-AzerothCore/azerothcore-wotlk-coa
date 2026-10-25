@@ -69,7 +69,7 @@ namespace
         if (!Enabled || !target || !attacker || !target->GetCharmerOrOwnerPlayerOrPlayerItself())
             return 1.0f;
         Creature const* creature = attacker->ToCreature();
-        if (!IsEligible(creature) || !creature->IsHostileTo(target))
+        if (!IsEligible(creature) || creature->IsFriendlyTo(target))
             return 1.0f;
         CreatureScaling::Context const context = ContextOf(creature);
         if (context == CreatureScaling::Context::None)
