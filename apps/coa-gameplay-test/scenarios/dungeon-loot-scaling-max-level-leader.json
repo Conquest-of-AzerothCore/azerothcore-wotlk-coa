@@ -6,10 +6,11 @@
     "CoA.ItemScaling=1 and CoA.ItemScaling.Native=1 with ItemStat.dbc in the data directory. Loot scales only inside",
     "a scaled dungeon, whatever the leader's open world switch, and only down to the looter's level: an item whose",
     "own item level is at or below it keeps its authored stats. War Master Voone 9237 drops Flightblade Throwing",
-    "Axe 28972 (blue, item level 57, required level 55, 5 stamina, 8 attack power) at 100%; its ItemStat.dbc row at",
-    "30 requires level 27 and carries 1 stamina and 2 attack power. The Rake 5807 drops Lionfur Armor 17922",
+    "Axe 28972 (blue, item level 57, required level 55, 5 stamina, 8 attack power) at 100%; the client's item key",
+    "for level 30 is 30 + 3 = 33, and its ItemStat.dbc row at 33 requires level 30 and carries 2 stamina and",
+    "2 attack power. The Rake 5807 drops Lionfur Armor 17922",
     "(green, item level 10, required level 5, 108 armor) at 100%. In Maraudon (map 349) a level-30 member of a group",
-    "led by a level-60 character with the switch off loots the axe at scaling level 30 with that row's stats, and",
+    "led by a level-60 character with the switch off loots the axe at scaling level 33 with that row's stats, and",
     "Lionfur Armor stays authored rather than rising to 30. The leader's own axe stays authored, because level 60",
     "is above its item level. Free-for-all loot keeps a roll out of the way."
   ],
@@ -60,29 +61,29 @@
     { "action": "loot_slot", "actor": "member", "item": 28972 },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: the item-level-57 axe scales down to the member's level 30",
+      "label": "DISCRIMINATING: the item-level-57 axe scales down to the client key 33 for the member's level 30",
       "actor": "member",
       "metric": "carried_item_scaling_level",
       "item": 28972,
-      "equals": 30,
+      "equals": 33,
       "within_ms": 2000
     },
     {
       "action": "assert",
-      "label": "The axe requires level 27 from its row at 30 instead of 55",
+      "label": "The axe requires the member's level 30 from its row at 33 instead of 55",
       "actor": "member",
       "metric": "carried_item_required_level",
       "item": 28972,
-      "equals": 27
+      "equals": 30
     },
     {
       "action": "assert",
-      "label": "The axe carries the row's 1 stamina instead of 5",
+      "label": "The axe carries the row's 2 stamina instead of 5",
       "actor": "member",
       "metric": "carried_item_stat",
       "item": 28972,
       "stat": 7,
-      "equals": 1
+      "equals": 2
     },
     {
       "action": "assert",
