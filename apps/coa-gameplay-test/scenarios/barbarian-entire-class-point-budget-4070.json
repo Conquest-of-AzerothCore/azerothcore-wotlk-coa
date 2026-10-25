@@ -24,7 +24,7 @@
     {
       "action": "advancement_rank",
       "actor": "b",
-      "entry": 4297,
+      "entry": 7720,
       "rank": 1
     },
     {
@@ -32,13 +32,13 @@
       "actor": "b",
       "metric": "knows_spell",
       "label": "Every affordable class point activates its purchased node",
-      "spell": 801767,
+      "spell": 560883,
       "equals": 1
     },
     {
       "action": "advancement_rank",
       "actor": "b",
-      "entry": 5373,
+      "entry": 14277,
       "rank": 1
     },
     {
@@ -46,13 +46,13 @@
       "actor": "b",
       "metric": "knows_spell",
       "label": "Every affordable class point activates its purchased node",
-      "spell": 800131,
+      "spell": 560452,
       "equals": 1
     },
     {
       "action": "advancement_rank",
       "actor": "b",
-      "entry": 6374,
+      "entry": 29783,
       "rank": 1
     },
     {
@@ -60,7 +60,7 @@
       "actor": "b",
       "metric": "knows_spell",
       "label": "Every affordable class point activates its purchased node",
-      "spell": 801549,
+      "spell": 802792,
       "equals": 1
     },
     {
@@ -80,7 +80,7 @@
     {
       "action": "advancement_rank",
       "actor": "b",
-      "entry": 6753,
+      "entry": 29793,
       "rank": 1
     },
     {
@@ -88,7 +88,7 @@
       "actor": "b",
       "metric": "knows_spell",
       "label": "Every affordable class point activates its purchased node",
-      "spell": 560364,
+      "spell": 804137,
       "equals": 1
     },
     {
