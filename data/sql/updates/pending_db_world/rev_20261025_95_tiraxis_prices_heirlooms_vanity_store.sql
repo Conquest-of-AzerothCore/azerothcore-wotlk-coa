@@ -2,12 +2,12 @@
 -- Like rev_20261024_01 every statement only acts on a realm that fills the Vanity Store price table, and every
 -- statement writes fixed values, so a reapply leaves the result unchanged.
 
--- 1) Heirloom weapons, off-hands, relics, rings, necklaces and trinkets leave Tiraxis (900011, rev_20261023_02) and are
---    sold in the Vanity Store only, at twice their old Tiraxis price (one-hand, shield and off-hand 900 -> 1800, ranged
---    and relics 1000 -> 2000, two-hand 1800 -> 3600); trinkets, rings, necklaces and Stick on a Carrot cost 3000. The
---    raid medallions and the Insignias of the Burning Legion are not sold (price 0).
---    Heirloom armor is not sold piece by piece (price 0): it comes in the set caches, which stay on Tiraxis at
---    4500 each (Heirloom Cache and Experience Heirloom Cache). The caches have no VanityCollection.dbc row.
+-- 1) Heirloom weapons, shields, off-hands and relics leave Tiraxis (900011, rev_20261023_02) and are sold in the Vanity
+--    Store only, at twice their old Tiraxis price (one-hand, shield and off-hand 900 -> 1800, ranged and relics
+--    1000 -> 2000, two-hand 1800 -> 3600).
+--    Heirloom armor, rings, necklaces and trinkets are not sold piece by piece (price 0): armor, rings and trinkets come
+--    in the set caches, which stay on Tiraxis at 4500 each (Heirloom Cache and Experience Heirloom Cache). The caches
+--    have no VanityCollection.dbc row. The raid medallions and the Insignias of the Burning Legion are not sold either.
 -- 2) Tiraxis' Convenience Items (900008): new prices, and the Vanity Store sells the same items at the same price.
 INSERT INTO `coa_client_vanity_collection` (`ItemID`, `DonationPointCost`, `SeasonalPointCost`, `BazaarTokenCost`)
 SELECT `n`.`ItemID`, 0, 0, `n`.`BazaarTokenCost`
@@ -34,10 +34,10 @@ FROM (VALUES
   ROW(1642902, 2000),  -- Thrown Axe of the Executioner
   ROW(1644093, 2000),  -- Upgraded Dwarven Hand Cannon
   ROW(1642846, 2000),  -- Wand of the Forgotten Lich
-  ROW(1642992, 3000),  -- Discerning Eye of the Beast
-  ROW(1644098, 3000),  -- Inherited Insignia of the Alliance
-  ROW(1644097, 3000),  -- Inherited Insignia of the Horde
-  ROW(1642991, 3000),  -- Swift Hand of Justice
+  ROW(1642992, 0),  -- Discerning Eye of the Beast
+  ROW(1644098, 0),  -- Inherited Insignia of the Alliance
+  ROW(1644097, 0),  -- Inherited Insignia of the Horde
+  ROW(1642991, 0),  -- Swift Hand of Justice
   ROW(1642943, 3600),  -- Bloodied Arcanite Reaper
   ROW(1642947, 3600),  -- Dignified Headmaster's Charge
   ROW(1644095, 3600),  -- Grand Staff of Jordan
@@ -65,25 +65,25 @@ FROM (VALUES
   ROW(777998, 3000),   -- Tradesman's Scroll
   ROW(3211010, 5000),  -- Riding Tome: Artisan Riding
   ROW(1179243, 7500),  -- Riding Tome: Extraordinary Riding
-  ROW(1339081, 3000),  -- Ring of the Bulwark
-  ROW(1339082, 3000),  -- Ring of the Lionhearted
-  ROW(1339083, 3000),  -- Ring of the Seer
-  ROW(1339080, 3000),  -- Ring of the Sorcerer
-  ROW(1339079, 3000),  -- Ring of the Vanguard
-  ROW(12344, 3000),    -- Seal of Ascension
+  ROW(1339081, 0),  -- Ring of the Bulwark
+  ROW(1339082, 0),  -- Ring of the Lionhearted
+  ROW(1339083, 0),  -- Ring of the Seer
+  ROW(1339080, 0),  -- Ring of the Sorcerer
+  ROW(1339079, 0),  -- Ring of the Vanguard
+  ROW(12344, 0),    -- Seal of Ascension
   ROW(666002, 0),   -- Battle for Mount Hyjal Medallion
   ROW(666001, 0),   -- Blackwing Lair Medallion
   ROW(101428, 0),   -- Greater Insignia of the Burning Legion
   ROW(409, 0),      -- Insignia of the Burning Legion
   ROW(666000, 0),   -- Molten Core Medallion
   ROW(666003, 0),   -- Serpentshrine Cavern Medallion
-  ROW(339075, 3000),   -- Stick on a Carrot
-  ROW(16309, 3000),    -- Drakefire Amulet
-  ROW(339076, 3000),   -- Pendant of Adventure
-  ROW(339100, 3000),   -- Pendant of Discovery
-  ROW(1339078, 3000),  -- Pendant of the Bulwark
-  ROW(1339077, 3000),  -- Pendant of the Sorcerer
-  ROW(1339076, 3000),  -- Pendant of the Warrior
+  ROW(339075, 0),   -- Stick on a Carrot
+  ROW(16309, 0),    -- Drakefire Amulet
+  ROW(339076, 0),   -- Pendant of Adventure
+  ROW(339100, 0),   -- Pendant of Discovery
+  ROW(1339078, 0),  -- Pendant of the Bulwark
+  ROW(1339077, 0),  -- Pendant of the Sorcerer
+  ROW(1339076, 0),  -- Pendant of the Warrior
   ROW(1339126, 0),   -- Burnished Helmet of Might
   ROW(1339124, 0),   -- Champion Herod's Helmet
   ROW(1339123, 0),   -- Mystical Helm of Elements
