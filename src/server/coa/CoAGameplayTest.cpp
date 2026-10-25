@@ -79,6 +79,7 @@
 
 #include "CoAGameplayClock.h"
 #include "CoAGameplayIsolation.h"
+#include "CoAGameplayRaidBots.h"
 #include "CoAGameplayTimeline.h"
 #include "CoASpellbook.h"
 #include <boost/bind/placeholders.hpp>
@@ -675,6 +676,10 @@ struct Actor
     ActorStage stage = ActorStage::Account;
     std::vector<std::pair<ActorStage, Clock::time_point>> reached;
     bool generatedName = false;
+    CoAGameplay::RaidRole raidRole = CoAGameplay::RaidRole::None;
+    std::vector<uint32> rotation;
+    uint32 healSpell = 0;
+    uint32 tauntSpell = 0;
 };
 
 char const* StageName(ActorStage stage)
@@ -1458,6 +1463,7 @@ public:
             Require(!id.empty() && !_actors.count(id), "Duplicate or empty player id");
             auto& actor = _actors[id];
             actor.definition = entry.second;
+            ReadRaidRole(actor);
             for (auto const& step : _steps)
                 if (step.second.get<std::string>("actor", "") == id)
                     if (auto row = step.second.get_optional<uint32>("row"))
@@ -1602,6 +1608,142 @@ public:
             return nullptr;
         Map* map = sMapMgr->FindMap(_encounterBoss->map, _encounterBoss->instance);
         return map ? map->GetCreature(_encounterBoss->guid) : nullptr;
+    }
+
+    static void SubmitAttackSwing(Player* player, Unit* target)
+    {
+        WorldPacket packet(CMSG_ATTACKSWING, 8);
+        packet << target->GetGUID();
+        player->GetSession()->HandleAttackSwingOpcode(packet);
+    }
+
+    static bool HasPowerFor(Player* player, SpellInfo const* info)
+    {
+        int32 const cost = info->CalcPowerCost(player, info->GetSchoolMask());
+        if (info->PowerType == POWER_HEALTH)
+            return int32(player->GetHealth()) > cost;
+        return info->PowerType < MAX_POWERS && int32(player->GetPower(Powers(info->PowerType))) >= cost;
+    }
+
+    static bool CanBotCast(Player* player, uint32 spellId, Unit* target)
+    {
+        SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId);
+        if (!info || !player->HasActiveSpell(spellId) || player->HasSpellCooldown(spellId) ||
+            player->GetGlobalCooldownMgr().HasGlobalCooldown(info) || player->IsNonMeleeSpellCast(false) ||
+            !player->SpellQueue.empty() || !HasPowerFor(player, info))
+            return false;
+        SpellCastTargets targets;
+        targets.SetUnitTarget(target);
+        Spell probe(player, info, TRIGGERED_NONE);
+        probe.InitExplicitTargets(targets);
+        return probe.CheckRange(true) == SPELL_CAST_OK;
+    }
+
+    void SubmitBotCast(Player* player, uint32 spellId, Unit* target)
+    {
+        SpellCastTargets targets;
+        targets.SetUnitTarget(target);
+        WorldPacket packet(CMSG_CAST_SPELL, 64);
+        packet << uint8(++_castCount) << spellId << uint8(0);
+        targets.Write(packet);
+        player->GetSession()->HandleCastSpellOpcode(packet);
+    }
+
+    bool CastRotation(Actor const& actor, Player* player, Unit* target)
+    {
+        std::optional<uint32> const spell = CoAGameplay::NextRotationSpell(actor.rotation,
+            [player, target](uint32 candidate) { return CanBotCast(player, candidate, target); });
+        if (!spell)
+            return false;
+        SubmitBotCast(player, *spell, target);
+        return true;
+    }
+
+    static bool FaceBoss(Player* player, Creature* boss)
+    {
+        if (player->HasInArc(float(M_PI), boss))
+            return false;
+        player->NearTeleportTo(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(),
+            player->GetAngle(boss));
+        return true;
+    }
+
+    static bool KeepInMelee(Player* player, Creature* boss, bool inFront)
+    {
+        if (player->IsWithinMeleeRange(boss))
+            return FaceBoss(player, boss);
+        float const angle = boss->GetOrientation() + (inFront ? 0.0f : float(M_PI));
+        float x, y, z;
+        boss->GetNearPoint(player, x, y, z, player->GetCombatReach(), 0.0f, angle);
+        Position stand(x, y, z);
+        player->NearTeleportTo(x, y, z, stand.GetAngle(boss));
+        return true;
+    }
+
+    void HealLowest(Actor const& healer, Player* player)
+    {
+        std::vector<CoAGameplay::HealCandidate> members;
+        for (auto const& [id, actor] : _actors)
+            if (Player* member = actor.session ? actor.session->GetPlayer() : nullptr)
+                if (member->IsInWorld() && member->GetMap() == player->GetMap())
+                    members.push_back({ member->GetGUID(), member->IsAlive(), member->GetHealthPct(),
+                        player->GetDistance(member) });
+        std::optional<ObjectGuid> const target = CoAGameplay::SelectHealTarget(members,
+            CoAGameplay::RaidHealThresholdPct, CoAGameplay::RaidHealRange);
+        if (!target)
+            return;
+        Player* patient = ObjectAccessor::GetPlayer(*player, *target);
+        if (patient && CanBotCast(player, healer.healSpell, patient))
+            SubmitBotCast(player, healer.healSpell, patient);
+    }
+
+    void DriveRaidBot(Actor const& actor, Player* player, Creature* boss)
+    {
+        if (actor.raidRole == CoAGameplay::RaidRole::Healer)
+        {
+            HealLowest(actor, player);
+            return;
+        }
+        if (!player->IsValidAttackTarget(boss))
+            return;
+        switch (actor.raidRole)
+        {
+            case CoAGameplay::RaidRole::Tank:
+            case CoAGameplay::RaidRole::Melee:
+                if (KeepInMelee(player, boss, actor.raidRole == CoAGameplay::RaidRole::Tank))
+                    return;
+                if (player->GetVictim() != boss)
+                    SubmitAttackSwing(player, boss);
+                if (actor.raidRole == CoAGameplay::RaidRole::Tank && CoAGameplay::ShouldTaunt(
+                    boss->GetVictim() == player, actor.tauntSpell && CanBotCast(player, actor.tauntSpell, boss)))
+                {
+                    SubmitBotCast(player, actor.tauntSpell, boss);
+                    return;
+                }
+                CastRotation(actor, player, boss);
+                return;
+            case CoAGameplay::RaidRole::Ranged:
+                if (player->IsWithinDistInMap(boss, CoAGameplay::RaidRangedDistance) && !FaceBoss(player, boss))
+                    CastRotation(actor, player, boss);
+                return;
+            default:
+                return;
+        }
+    }
+
+    void DriveRaidBots()
+    {
+        if (!EncounterActive())
+            return;
+        Creature* boss = EncounterBoss();
+        if (!boss || !boss->IsAlive())
+            return;
+        for (auto const& [id, actor] : _actors)
+            if (actor.raidRole != CoAGameplay::RaidRole::None)
+                if (Player* player = actor.session ? actor.session->GetPlayer() : nullptr)
+                    if (player->IsInWorld() && player->IsAlive() && !player->IsBeingTeleported() &&
+                        player->GetMap() == boss->GetMap())
+                        DriveRaidBot(actor, player, boss);
     }
 
     bool Dismiss(bool leaveGroups)
@@ -1844,6 +1986,7 @@ private:
             CreateTargets();
         if (!TargetsSettled())
             return false;
+        DriveRaidBots();
         if (_nextStep == _steps.end())
         {
             Require(_assertions > 0, "Scenario completed without assertions");
@@ -1954,6 +2097,33 @@ private:
             create << uint8(0);
         actor.session->HandleCharCreateOpcode(create);
         Reach(actor, ActorStage::Creating);
+    }
+
+    static uint32 RaidSpell(Tree const& value)
+    {
+        uint32 const spell = value.get_value<uint32>();
+        Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown raid bot spell " + std::to_string(spell));
+        return spell;
+    }
+
+    static void ReadRaidRole(Actor& actor)
+    {
+        Tree const& definition = actor.definition;
+        auto const role = definition.get_optional<std::string>("role");
+        if (!role)
+            return;
+        actor.raidRole = CoAGameplay::RaidRoleFromName(*role);
+        Require(actor.raidRole != CoAGameplay::RaidRole::None, "Unknown raid role: " + *role);
+        if (auto rotation = definition.get_child_optional("rotation"))
+            for (auto const& spell : *rotation)
+                actor.rotation.push_back(RaidSpell(spell.second));
+        if (auto heal = definition.get_child_optional("heal_spell"))
+            actor.healSpell = RaidSpell(*heal);
+        if (auto taunt = definition.get_child_optional("taunt_spell"))
+            actor.tauntSpell = RaidSpell(*taunt);
+        Require((actor.healSpell != 0) == (actor.raidRole == CoAGameplay::RaidRole::Healer),
+            "heal_spell is required for a healer and only for one");
+        Require(!actor.tauntSpell || actor.raidRole == CoAGameplay::RaidRole::Tank, "taunt_spell is only for a tank");
     }
 
     static void LogIn(Actor& actor)
@@ -5535,11 +5705,7 @@ private:
                 player->GetSession()->HandlePetAction(packet);
             }
             else
-            {
-                WorldPacket packet(CMSG_ATTACKSWING, 8);
-                packet << target->GetGUID();
-                player->GetSession()->HandleAttackSwingOpcode(packet);
-            }
+                SubmitAttackSwing(player, target);
         }
         else if (action == "cancel_aura")
         {

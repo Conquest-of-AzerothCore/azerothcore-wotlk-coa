@@ -581,6 +581,42 @@ class RunnerTests(unittest.TestCase):
                     with self.assertRaises(ValueError):
                         run.validate(scenario)
 
+    def with_role(self, **fields):
+        scenario = copy.deepcopy(self.scenario)
+        scenario['players'][0].update(fields)
+        return scenario
+
+    def test_role_requires_known_value(self):
+        for fields in ({'role': 'tank'}, {'role': 'tank', 'taunt_spell': 355, 'rotation': [801576]},
+                       {'role': 'healer', 'heal_spell': 500143}, {'role': 'melee', 'rotation': [801576]},
+                       {'role': 'ranged', 'rotation': [133, 116]}):
+            scenario = self.with_role(**fields)
+            with self.subTest(fields=fields):
+                self.assertIs(run.validate(scenario), scenario)
+        for role in ('Tank', 'dps', '', 1, None, ['tank']):
+            with self.subTest(role=role), self.assertRaisesRegex(ValueError, 'role'):
+                run.validate(self.with_role(role=role))
+        for fields in ({'rotation': [801576]}, {'heal_spell': 500143}, {'taunt_spell': 355},
+                       {'role': 'melee', 'taunt_spell': 355}, {'role': 'tank', 'heal_spell': 500143},
+                       {'role': 'healer', 'heal_spell': 500143, 'rotation': [801576]}, {'role': 'ranged'}):
+            with self.subTest(fields=fields), self.assertRaises(ValueError):
+                run.validate(self.with_role(**fields))
+
+    def test_healer_requires_heal_spell(self):
+        with self.assertRaisesRegex(ValueError, 'heal_spell'):
+            run.validate(self.with_role(role='healer'))
+        for spell in (0, -1, 2**32, '500143', 1.5, None):
+            with self.subTest(spell=spell), self.assertRaisesRegex(ValueError, 'heal_spell'):
+                run.validate(self.with_role(role='healer', heal_spell=spell))
+
+    def test_rotation_spells_are_positive_ids(self):
+        for rotation in ([0], [-5], [801576, 0], ['801576'], [1.5], [], 801576, [801576, 801576]):
+            with self.subTest(rotation=rotation), self.assertRaisesRegex(ValueError, 'rotation'):
+                run.validate(self.with_role(role='melee', rotation=rotation))
+        for spell in (0, 2**32, '355'):
+            with self.subTest(taunt=spell), self.assertRaisesRegex(ValueError, 'taunt_spell'):
+                run.validate(self.with_role(role='tank', taunt_spell=spell))
+
     def test_cancel_mount_requires_player(self):
         self.scenario['steps'].append({'action': 'cancel_mount', 'actor': 'caster'})
         self.assertIs(run.validate(self.scenario), self.scenario)

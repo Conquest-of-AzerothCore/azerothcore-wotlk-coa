@@ -388,6 +388,8 @@ parries, or forcing critical hits, in deterministic tests.
 Optional `allow_regeneration: false` suppresses only that fixture player's ordinary health/power regeneration
 through the native regeneration hook. Spell costs, healing, energize effects and combat remain enabled.
 It defaults to true and has no effect on other players or on a disabled harness.
+Optional `role`, `rotation`, `heal_spell` and `taunt_spell` make the player a
+[raid bot](#raid-bot-roles) during an encounter.
 Optional `expansion` (0..2, default 2) is the fixture session's expansion, as a realm with a lower `Expansion`
 setting caps a real client's; it gates maps and profession ranks.
 Optional `ascension_client: true` marks the socketless session as having negotiated Ascension compatibility,
@@ -994,6 +996,27 @@ asserted event came later.
 The case result gains `timeline`, an array of `{at_ms, event, source_entry, spell, target, value}` with `at_ms`
 from `encounter_start` and `target` the scenario actor id, else the native GUID, else empty. It is written whether
 the case passes or fails, so an uncertain expectation keeps its evidence.
+
+### Raid bot roles
+
+A player with a `role` (`tank`, `healer`, `melee` or `ranged`) acts on its own every world tick while an encounter
+is active, from `encounter_start` to the end of the case, as long as it is alive and in the boss's map. No bot acts
+while the boss is missing or dead. `rotation` lists spell ids, the first castable one wins; `heal_spell` is
+required for a healer and only for one; a tank may add `taunt_spell`. A healer takes no `rotation` and a ranged
+role needs one. A spell is castable when the player knows it (`HasActiveSpell`), it has no cooldown
+(`HasSpellCooldown`) or global cooldown, the player is not casting and has no queued cast, it can pay the cost
+(`SpellInfo::CalcPowerCost`) and the target passes the native range and facing check (`Spell::CheckRange`).
+Casts go through `CMSG_CAST_SPELL` and swings through `CMSG_ATTACKSWING`, like the `cast` and `attack` actions.
+
+| Role | Each tick |
+| --- | --- |
+| `tank` | Teleports in front of the boss when out of native melee range, turns to face it, swings at it, casts `taunt_spell` when the boss targets someone else, otherwise its rotation on the boss. |
+| `melee` | The same behind the boss, without a taunt. |
+| `ranged` | Stays in place; within 30 yards of the boss it turns to face it and casts its rotation on it. |
+| `healer` | Stays in place and casts `heal_spell` on the living scenario player within 40 yards with the lowest health below 90 percent (the first listed on a tie). |
+
+Bots do not dodge mechanics. The [raid bot scenario](scenarios/raid-bots-tank-healer.json) runs a tank and a
+healer against a defensive fixture.
 
 ## Evidence boundaries
 
