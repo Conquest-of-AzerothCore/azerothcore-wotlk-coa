@@ -287,8 +287,8 @@ class aura_ascension_felsworn_stagger : public AuraScript
         {
             auto& state = State(player);
             state.debt.push_back({amount, 5});
-            if (!state.timers.HasTimeUntilEvent(807727))
-                state.timers.ScheduleEvent(807727, 1s);
+            if (!state.timers.HasTimeUntilEvent(StaggerTick))
+                state.timers.ScheduleEvent(StaggerTick, 1s);
         }
     }
     void Register() override
