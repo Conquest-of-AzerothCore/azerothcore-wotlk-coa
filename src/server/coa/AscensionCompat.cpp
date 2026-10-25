@@ -4249,6 +4249,9 @@ private:
       504582, 572343, 572344, 572345, 572383, 680902, 680903, 680904, 680905, 806288,
       572614, 804136, 806876, 806877, 806878, 806879, 806880, 806881};
   static constexpr uint32 SPELL_LEVEL_FIELD = 39;
+  static constexpr uint32 SPELL_VISUAL_FIELD = 131;
+  static constexpr uint32 VAULT_CLIENT_SPELL = 500085;
+  static constexpr uint32 CHARGE_SPELL_VISUAL = 867;
   struct ClientSpellText {
     std::string Description;
     std::string ToolTip;
@@ -5134,6 +5137,8 @@ private:
     }
     if (IsChromaticShardRank(info->Id))
       row.Values[SPELL_WIRE_SLOT(SPELL_INTERRUPT_FLAGS_FIELD)] &= ~uint32(SPELL_INTERRUPT_FLAG_MOVEMENT);
+    if (info->Id == VAULT_CLIENT_SPELL)
+      row.Values[SPELL_WIRE_SLOT(SPELL_VISUAL_FIELD)] = CHARGE_SPELL_VISUAL;
 
     if ((info->Attributes & SPELL_ATTR0_USES_RANGED_SLOT) && !info->IsAutoRepeatRangedSpell() &&
         info->CastTimeEntry && (info->CastTimeEntry->CastTime > 0 || !info->IsChanneled()))
@@ -5210,6 +5215,7 @@ private:
     for (uint32 const spellId : {801292u, 501836u, 501837u, 501838u, 501839u, 501840u, 574346u, 567543u, 567544u,
         805027u, 807938u, 807939u, 807940u, 807941u})
       Ascension::ClientSpellPatches::Instance().Register(spellId);
+    Ascension::ClientSpellPatches::Instance().Register(VAULT_CLIENT_SPELL);
     std::unordered_set<uint32> requested = Ascension::ClientSpellPatches::Instance().GetIds(true);
     for (auto const& tier : blacksmithingTiers)
     {

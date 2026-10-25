@@ -76,18 +76,11 @@ bool SixfoldShotReady(Player* player)
 
 void LeapVault(Player* player, float distance, float angle)
 {
-    float const speedZ = 10.0f;
     Position end = player->GetPosition();
     player->MovePositionToFirstCollision(end, distance, angle);
-    float const dx = end.GetPositionX() - player->GetPositionX();
-    float const dy = end.GetPositionY() - player->GetPositionY();
-    float reached = std::sqrt(dx * dx + dy * dy);
-    if (reached < 1.0f)
-        reached = distance;
-    float const speedXY = reached * float(Movement::gravity) / (2.0f * speedZ);
     sScriptMgr->AnticheatSetUnderACKmount(player);
-    player->GetMotionMaster()->MoveJumpFixedFacing(end.GetPositionX(), end.GetPositionY(), end.GetPositionZ(),
-                                                  speedXY, speedZ);
+    player->GetMotionMaster()->MoveCharge(end.GetPositionX(), end.GetPositionY(), end.GetPositionZ(),
+                                          12.0f * player->GetSpeed(MOVE_RUN));
 }
 
 class witch_hunter_casts : public AllSpellScript
@@ -353,7 +346,7 @@ class spell_ascension_witch_hunter_ability : public SpellScript
             if (player->HasUnitMovementFlag(MOVEMENTFLAG_STRAFE_RIGHT))
                 y -= 1.0f;
             float angle = x || y ? std::atan2(y, x) : 0.0f;
-            float distance = 16.0f * player->GetSpeedRate(MOVE_RUN);
+            float distance = 15.0f * player->GetSpeedRate(MOVE_RUN);
             if (AuraEffect* extra = player->GetAuraEffect(789256, EFFECT_0))
                 distance += extra->GetAmount();
             LeapVault(player, distance, angle);
