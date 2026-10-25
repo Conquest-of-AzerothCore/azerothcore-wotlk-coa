@@ -388,7 +388,7 @@ parries, or forcing critical hits, in deterministic tests.
 Optional `allow_regeneration: false` suppresses only that fixture player's ordinary health/power regeneration
 through the native regeneration hook. Spell costs, healing, energize effects and combat remain enabled.
 It defaults to true and has no effect on other players or on a disabled harness.
-Optional `role`, `rotation`, `heal_spell` and `taunt_spell` make the player a
+Optional `role`, `rotation`, `heal_spell`, `taunt_spell` and `rotation_assist` make the player a
 [raid bot](#raid-bot-roles) during an encounter. A living tank bot holds a threat floor on the boss as a test
 fixture, not threat realism: each tick it raises its threat through the native threat manager to 110 percent of
 the highest threat of any non-tank unit plus 100, so boss mechanics see the tank as the victim deterministically.
@@ -1021,8 +1021,24 @@ until the boss's current victim is a tank, so the tank holds the first threat; h
 | `ranged` | Stays in place; within 30 yards of the boss it turns to face it and casts its rotation on it. |
 | `healer` | Stays in place and casts `heal_spell` on the living scenario player within 40 yards with the lowest health below 90 percent (the first listed on a tie). |
 
+Optional `rotation_assist: true` (boolean, default false, only with a `role`) makes the bot choose its damage
+and heal spells with the [`.rotation` selection](../../docs/coa/rotation-assist.md) of its active CoA
+specialization whenever that specialization has imported rules: a damage role asks for a spell on the boss, a
+healer for a heal on the patient chosen as above. The choice is still asked only while the bot is not casting and
+has no queued cast, and still goes through `CMSG_CAST_SPELL`. The bot then never falls back to `rotation` or
+`heal_spell` during the fight; those stay required where they are today and are the spells it casts when it does
+not opt in, has no active specialization, or its specialization has no rules. The rotation never chooses a taunt,
+so a tank's `taunt_spell` keeps running before its rotation. Harness bots ignore `CoA.RotationAssist.Enable`,
+which gates only the player command. All 21 CoA classes (12-32) have rules for all 70 of their specializations
+(1-63 and 95-101); a character without an active specialization, the ten stock classes and HERO (94) use the
+scenario spells. Rules existing does not mean each profile is tuned: Starcaller Hydromancy (45) has 9 rules and
+Spirit Mage Runic (61) 10.
+
 Bots do not dodge mechanics. The [raid bot scenario](scenarios/raid-bots-tank-healer.json) runs a tank, a melee
 bot casting its rotation and a healer against a defensive fixture, whose swings must land only on the tank.
+[`raid-bots-rotation-assist`](scenarios/raid-bots-rotation-assist.json) adds an Incineration Pyromancer with
+`rotation_assist` next to a tank and a healer that use their scenario spells, and checks that it casts Ignite once
+and then Flare Bolt, never its scenario fallback Fire Blast.
 
 ## Evidence boundaries
 

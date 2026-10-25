@@ -37,7 +37,7 @@ TIMELINE_FIELDS = {'event', 'source_entry', 'state', 'target_actors', 'exclude_t
 ENCOUNTER_STATES = {'NOT_STARTED', 'IN_PROGRESS', 'FAIL', 'DONE', 'SPECIAL'}
 MAX_ENCOUNTER_RADIUS = 200
 RAID_ROLES = {'tank', 'healer', 'melee', 'ranged'}
-RAID_ROLE_FIELDS = {'rotation', 'heal_spell', 'taunt_spell'}
+RAID_ROLE_FIELDS = {'rotation', 'heal_spell', 'taunt_spell', 'rotation_assist'}
 METRICS = TIMELINE_METRICS | {
     'item_random_property', 'item_suffix_factor', 'item_enchantment', 'item_guid', 'item_soulbound', 'item_duration',
     'mana_regen', 'mana_regen_interrupted', 'resting',
@@ -347,6 +347,7 @@ def validate_raid_role(player):
         return
     role = player['role']
     require(isinstance(role, str) and role in RAID_ROLES, f'role must be one of {sorted(RAID_ROLES)}')
+    require(type(player.get('rotation_assist', False)) is bool, 'rotation_assist must be boolean')
     for field in ('heal_spell', 'taunt_spell'):
         if field in player:
             number(player[field], field, 1, 2**32 - 1, True)
@@ -399,7 +400,7 @@ def validate(scenario):
              {'id', 'race', 'class', 'level', 'bot', 'spell_hit_rating', 'spell_crit_rating',
               'melee_crit_rating', 'ranged_crit_rating', 'ranged_hit_rating', 'melee_hit_rating',
               'expertise_rating', 'allow_regeneration', 'name', 'expansion', 'ascension_client', 'account_of',
-              'role', 'rotation', 'heal_spell', 'taunt_spell'}, 'player')
+              'role', 'rotation', 'heal_spell', 'taunt_spell', 'rotation_assist'}, 'player')
         identity = player['id']
         require(isinstance(identity, str) and ACTOR_ID.fullmatch(identity), 'Invalid player id')
         require(identity not in actor_ids, 'Duplicate actor id')

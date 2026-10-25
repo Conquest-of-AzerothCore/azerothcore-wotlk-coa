@@ -81,6 +81,7 @@
 #include "CoAGameplayIsolation.h"
 #include "CoAGameplayRaidBots.h"
 #include "CoAGameplayTimeline.h"
+#include "CoARotationData.h"
 #include "CoASpellbook.h"
 #include <boost/bind/placeholders.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -681,6 +682,7 @@ struct Actor
     std::vector<uint32> rotation;
     uint32 healSpell = 0;
     uint32 tauntSpell = 0;
+    bool rotationAssist = false;
 };
 
 char const* StageName(ActorStage stage)
@@ -1620,11 +1622,15 @@ public:
         player->GetSession()->HandleAttackSwingOpcode(packet);
     }
 
+    static bool BotIdle(Player* player)
+    {
+        return !player->IsNonMeleeSpellCast(false) && player->SpellQueue.empty();
+    }
+
     static bool CanBotCast(Player* player, uint32 spellId, Unit* target)
     {
         SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId);
-        if (!info || !player->HasActiveSpell(spellId) || player->IsNonMeleeSpellCast(false) ||
-            !player->SpellQueue.empty())
+        if (!info || !player->HasActiveSpell(spellId) || !BotIdle(player))
             return false;
         Spell probe(player, info, TRIGGERED_NONE);
         SpellCastTargets targets;
@@ -1647,10 +1653,22 @@ public:
         player->GetSession()->HandleCastSpellOpcode(packet);
     }
 
+    static std::optional<uint32> NextBotSpell(Actor const& actor, Player* player, Unit* target,
+        std::vector<uint32> const& scenarioSpells, bool healing)
+    {
+        CoAGameplay::RaidSpellSource const source = CoAGameplay::SpellSourceFor(actor.rotationAssist,
+            GetAscensionActiveSpecialization(player), CoARotationAssist::Rules);
+        return CoAGameplay::NextRaidSpell(source,
+            [player, target, healing]
+            {
+                return BotIdle(player) ? CoARotationAssist::ChooseSpell(player, target, healing) : 0u;
+            },
+            scenarioSpells, [player, target](uint32 candidate) { return CanBotCast(player, candidate, target); });
+    }
+
     void CastRotation(Actor const& actor, Player* player, Unit* target)
     {
-        std::optional<uint32> const spell = CoAGameplay::NextRotationSpell(actor.rotation,
-            [player, target](uint32 candidate) { return CanBotCast(player, candidate, target); });
+        std::optional<uint32> const spell = NextBotSpell(actor, player, target, actor.rotation, false);
         if (spell)
             SubmitBotCast(player, *spell, target);
     }
@@ -1689,8 +1707,10 @@ public:
         if (!target)
             return;
         Player* patient = ObjectAccessor::GetPlayer(*player, *target);
-        if (patient && CanBotCast(player, healer.healSpell, patient))
-            SubmitBotCast(player, healer.healSpell, patient);
+        if (!patient)
+            return;
+        if (std::optional<uint32> const spell = NextBotSpell(healer, player, patient, { healer.healSpell }, true))
+            SubmitBotCast(player, *spell, patient);
     }
 
     bool IsTankActor(ObjectGuid guid) const
@@ -2149,6 +2169,7 @@ private:
             actor.healSpell = RaidSpell(*heal);
         if (auto taunt = definition.get_child_optional("taunt_spell"))
             actor.tauntSpell = RaidSpell(*taunt);
+        actor.rotationAssist = definition.get<bool>("rotation_assist", false);
         Require((actor.healSpell != 0) == (actor.raidRole == CoAGameplay::RaidRole::Healer),
             "heal_spell is required for a healer and only for one");
         Require(!actor.tauntSpell || actor.raidRole == CoAGameplay::RaidRole::Tank, "taunt_spell is only for a tank");

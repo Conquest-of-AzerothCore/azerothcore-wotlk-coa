@@ -618,6 +618,18 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(fields=fields), self.assertRaises(ValueError):
                 run.validate(self.with_role(**fields))
 
+    def test_rotation_assist_is_a_boolean_opt_in_for_a_role(self):
+        for fields in ({'role': 'ranged', 'rotation': [133], 'rotation_assist': True},
+                       {'role': 'healer', 'heal_spell': 500143, 'rotation_assist': False}):
+            scenario = self.with_role(**fields)
+            with self.subTest(fields=fields):
+                self.assertIs(run.validate(scenario), scenario)
+        for value in (1, 0, 'true', None, [True]):
+            with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'rotation_assist'):
+                run.validate(self.with_role(role='tank', rotation_assist=value))
+        with self.assertRaisesRegex(ValueError, 'need a player role'):
+            run.validate(self.with_role(rotation_assist=True))
+
     def test_healer_requires_heal_spell(self):
         with self.assertRaisesRegex(ValueError, 'heal_spell'):
             run.validate(self.with_role(role='healer'))
