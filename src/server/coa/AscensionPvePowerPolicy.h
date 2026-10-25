@@ -20,7 +20,7 @@ enum MapKind : std::uint8_t
 
 constexpr std::uint8_t AllMaps = OpenWorld | Instance | Battleground;
 constexpr std::uint8_t DamageMaps = AllMaps;
-constexpr std::uint8_t HealingMaps = AllMaps & ~OpenWorld;
+constexpr std::uint8_t HealingMaps = Instance;
 
 constexpr bool Applies(std::uint8_t maps, MapKind kind)
 {

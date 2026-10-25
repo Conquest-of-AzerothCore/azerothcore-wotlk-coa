@@ -40,7 +40,7 @@ int main()
         Expect(Applies(DamageMaps, kind), "damage applies on every map");
     Expect(!Applies(HealingMaps, OpenWorld), "healing does not apply in the open world");
     Expect(Applies(HealingMaps, Instance), "healing applies in instances");
-    Expect(Applies(HealingMaps, Battleground), "healing applies in battlegrounds");
+    Expect(!Applies(HealingMaps, Battleground), "healing does not apply in battlegrounds");
 
     if (failures)
         return 1;

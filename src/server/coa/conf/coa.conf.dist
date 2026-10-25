@@ -440,8 +440,8 @@ PvpPower.Enable = 1
 #    PvePower.Enable
 #        Description: Item spells named "PvE Power (+N)" scale damage and healing at level 60, capped at
 #                     495 points. Damage dealt to creatures +0.05% per point and damage received from
-#                     creatures -0.05% per point on every map; healing and shields +0.02% per point on
-#                     every map except the open world. Stacks with PvP Power.
+#                     creatures -0.05% per point on every map; healing and shields +0.02% per point in
+#                     dungeons and raids. Stacks with PvP Power.
 #        Default:     1 - (Enabled)
 #                     0 - (Disabled)
 
