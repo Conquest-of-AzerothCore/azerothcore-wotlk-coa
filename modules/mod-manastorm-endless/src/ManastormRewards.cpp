@@ -93,6 +93,7 @@ bool ManastormRewards::Load()
     _loaded = false;
     _cacheBrackets.clear();
     _cacheUnlockRequirements.clear();
+    _releasedItemLevelCaps.fill(std::numeric_limits<uint32>::max());
     _bedlam = {};
     _bonzo = {};
     _completionRewards.clear();
@@ -111,6 +112,8 @@ bool ManastormRewards::Load()
     {
         return false;
     }
+
+    LoadReleasedItemLevelCaps();
 
     _loaded = true;
 
@@ -338,6 +341,71 @@ bool ManastormRewards::LoadCacheUnlockRequirements()
     return true;
 }
 
+void ManastormRewards::LoadReleasedItemLevelCaps()
+{
+    std::string entries;
+    for (CacheBracket const& bracket : _cacheBrackets)
+    {
+        if (bracket.Track != ManastormTrackBits::Endgame)
+            continue;
+
+        if (!entries.empty())
+            entries += ',';
+        entries += std::to_string(bracket.CacheItemEntry);
+    }
+
+    if (entries.empty())
+        return;
+
+    QueryResult result = WorldDatabase.Query(
+        "WITH RECURSIVE tree (root, item, reference) AS ("
+        "SELECT Entry, Item, Reference FROM item_loot_template WHERE Entry IN ({}) "
+        "UNION "
+        "SELECT tree.root, r.Item, r.Reference FROM tree "
+        "JOIN reference_loot_template r ON r.Entry = tree.reference WHERE tree.reference <> 0) "
+        "SELECT tree.root, MAX(it.ItemLevel) FROM tree "
+        "JOIN item_template it ON it.entry = tree.item WHERE tree.reference = 0 GROUP BY tree.root",
+        entries);
+
+    std::array<uint32, ManastormReleaseStage::AllReleased + 1> caps{};
+    if (result)
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+            uint32 const stage = ManastormReleaseStage::RequiredStage(fields[0].Get<uint32>());
+            uint32 const itemLevel = fields[1].Get<uint16>();
+            for (uint32 released = stage; released < caps.size(); ++released)
+                caps[released] = std::max(caps[released], itemLevel);
+        } while (result->NextRow());
+    }
+
+    for (uint32 stage = 0; stage < caps.size(); ++stage)
+    {
+        if (caps[stage])
+            _releasedItemLevelCaps[stage] = caps[stage];
+        else
+            LOG_WARN(LOG_FILTER, "No Manastorm endgame cache loot found up to release stage {}; "
+                "Greedy Demon loot is not item-level capped at that stage.", stage);
+    }
+
+    if (!ManastormModuleConfig::FollowReleaseStage())
+        return;
+
+    uint32 const stage = ManastormModuleConfig::ReleaseStage();
+    LOG_INFO(LOG_FILTER, "Manastorm follows release stage {}: endgame caches above it are locked and Greedy Demon "
+        "loot is capped at item level {}.", stage, _releasedItemLevelCaps[stage]);
+}
+
+uint32 ManastormRewards::GetReleasedItemLevelCap() const
+{
+    if (!_loaded)
+        return std::numeric_limits<uint32>::max();
+
+    return _releasedItemLevelCaps[std::min<uint32>(ManastormModuleConfig::ReleaseStage(),
+        ManastormReleaseStage::AllReleased)];
+}
+
 bool ManastormRewards::ResolveCacheItemEntry(
     bool endgame,
     uint32 depth,
@@ -374,6 +442,9 @@ bool ManastormRewards::ResolveCacheItemEntry(
     uint32 completedDepth = 0;
     auto eligible = [&](CacheBracket const& bracket)
     {
+        if (ManastormReleaseStage::RequiredStage(bracket.CacheItemEntry) > ManastormModuleConfig::ReleaseStage())
+            return false;
+
         for (CacheUnlockRequirement const& requirement : _cacheUnlockRequirements)
         {
             if (requirement.ItemEntry != bracket.CacheItemEntry || requirement.Track != track ||

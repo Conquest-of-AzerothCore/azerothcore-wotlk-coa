@@ -777,10 +777,26 @@ public:
             SyncRunningWildJourneyman(player);
     }
 };
+
+class aura_ascension_bloodmage_shadow_colony : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_bloodmage_shadow_colony);
+
+    bool Check(Unit* target)
+    {
+        return target && target->IsPlayer();
+    }
+
+    void Register() override
+    {
+        DoCheckAreaTarget += AuraCheckAreaTargetFn(aura_ascension_bloodmage_shadow_colony::Check);
+    }
+};
 }
 
 void AddSC_AscensionBloodmageSecondary()
 {
+    RegisterSpellScript(aura_ascension_bloodmage_shadow_colony);
     RegisterSpellScript(spell_ascension_bloodmage_bloodfang_bite);
     RegisterSpellScript(aura_ascension_bloodmage_bite_wound);
     RegisterSpellScript(aura_ascension_bloodmage_sacrificial_rite);

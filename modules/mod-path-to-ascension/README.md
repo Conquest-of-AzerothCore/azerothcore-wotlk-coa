@@ -12,7 +12,8 @@
   the fourteen original raids by spawn mode, world bosses, battlegrounds, War Games, arena vendors, PvE/PvP power
   and item level thresholds, Titan Scrolls, profession training at the Book of Artisans, rank training at a
   Book of Ascension, pet talents, auction wins, the Ethereal Bazaar, transmogrification, vanity items, appearance
-  collection, Closest Town/City resurrection and the Manastorm (entry, purchases, potions, loadout, clears).
+  collection, saved outfits, Closest Town/City resurrection, Prestige, the Hero's stat path, Wildcard level 10 and
+  the Manastorm (entry, purchases, potions, loadout, clears). A delivered vanity item counts as a store delivery.
   A completed tutorial also completes its client achievement.
 - **Rewards.** The client's claim (`0x6A8`) grants the tutorial's `TutorialRewards.dbc` items once per character,
   all or nothing, in one character save. Eligibility follows the tutorial's realm, expansion, race, class,
@@ -36,9 +37,9 @@ the boards.
 
 ## Not restored
 
-About 85 of the 196 client quest references have a progress callback. Outfit creation and pet appearance
-tutorials, the custom-difficulty raid tutorials beyond the spawn modes the server offers, the Mark of Triumph
-vendors, Warchests and the Callboard Cache contents are outside this module.
+About 150 of the 196 client quest references have a progress callback. The pet appearance tutorial, the
+custom-difficulty raid tutorials beyond the spawn modes the server offers, the Mark of Triumph vendors, Warchests and
+the Callboard Cache contents are outside this module.
 
 ## Configuration
 

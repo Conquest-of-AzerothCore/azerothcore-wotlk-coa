@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "name": "Adventure Mode shows a monster's scaled health before the first hit, without scaling it twice",
+  "contract": "Issue #9033. Adventure Mode (211) raises a monster's real maximum health by the tier's percentage (+100% at tier 1) when the first Adventure player hits it while untapped or tapped by their group, and restores it when the monster leaves combat. Before that hit the Adventure player is sent the scaled health already: the maximum health in their value updates is twice the real one, while the monster's real maximum health and the value a player outside the mode is sent stay unchanged. Entering the mode re-sends the health of the monsters already in view. After the first hit the real pool is scaled once and every player is sent that real pool, so the Adventure player sees no second doubling. A monster another player outside the group has tapped will not scale for the Adventure player, so they are sent its real health.",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [
+    { "id": "adventurer", "race": 1, "class": 1, "level": 1 },
+    { "id": "outsider", "race": 1, "class": 1, "level": 1 }
+  ],
+  "creatures": [
+    { "id": "wolf", "owner": "adventurer", "entry": 299, "faction": 7, "level": 1, "health": 42, "distance": 3 },
+    { "id": "kobold", "owner": "outsider", "entry": 6, "faction": 7, "level": 1, "health": 42, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "snapshot", "actor": "wolf", "metric": "max_health", "save_as": "wolf_real" },
+    { "action": "start_challenge", "actor": "adventurer", "challenge": 211, "level": 1 },
+    {
+      "action": "assert", "label": "Entering the mode re-sends the wolf with its doubled maximum health",
+      "actor": "adventurer", "metric": "sent_max_health", "target": "wolf", "ratio_to": "wolf_real",
+      "min": 1.99, "max": 2.01, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The wolf's real maximum health is unchanged before any hit",
+      "actor": "wolf", "metric": "max_health", "relative_to": "wolf_real", "equals": 0
+    },
+    {
+      "action": "assert", "label": "A player outside the mode is sent the real maximum health",
+      "actor": "outsider", "metric": "sent_max_health", "target": "wolf", "ratio_to": "wolf_real",
+      "min": 0.99, "max": 1.01
+    },
+    { "action": "attack_nearby", "actor": "adventurer", "entry": 299, "damage_pct": 10 },
+    {
+      "action": "assert", "label": "The first hit doubles the wolf's real maximum health once",
+      "actor": "wolf", "metric": "max_health", "ratio_to": "wolf_real", "min": 1.99, "max": 2.01, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "After the hit the adventurer is sent the real doubled pool, not four times it",
+      "actor": "adventurer", "metric": "sent_max_health", "target": "wolf", "ratio_to": "wolf_real",
+      "min": 1.99, "max": 2.01, "within_ms": 2000
+    },
+    { "action": "snapshot", "actor": "kobold", "metric": "max_health", "save_as": "kobold_real" },
+    { "action": "attack_nearby", "actor": "outsider", "entry": 6, "damage_pct": 10 },
+    {
+      "action": "assert", "label": "A kobold tapped by the outsider is not previewed for the adventurer",
+      "actor": "adventurer", "metric": "sent_max_health", "target": "kobold", "ratio_to": "kobold_real",
+      "min": 0.99, "max": 1.01, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The outsider's tap leaves the kobold's real pool unscaled",
+      "actor": "kobold", "metric": "max_health", "relative_to": "kobold_real", "equals": 0
+    }
+  ]
+}

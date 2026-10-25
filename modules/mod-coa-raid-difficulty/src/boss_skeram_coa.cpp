@@ -34,7 +34,7 @@
  * Decided here, not in the data: every timer, all players trapped at once,
  * that he and his images stand in every nightmare while veiled (Ascension's
  * "Skeram Phasing" auras point the same way), the group sizes and creature
- * health (3% of his per two players, 10% per player for the Monstrosity), the 60s
+ * health (on Normal a share of his health per player, see StartNightmares), the 60s
  * limit and its insanity, the gaze rule, and the split-damage share handled
  * in code. The five nightmare creatures are new (9780024-9780028) with models
  * of murloc, spider, wasp, panther and Lady Prestor. Vanquished-nightmare
@@ -43,6 +43,7 @@
 
 #include "Containers.h"
 #include "CreatureScript.h"
+#include "FlexHealth.h"
 #include "InstanceScript.h"
 #include "Player.h"
 #include "ScriptedCreature.h"
@@ -50,6 +51,7 @@
 #include "../../../src/server/scripts/Kalimdor/TempleOfAhnQiraj/temple_of_ahnqiraj.h"
 #include "zg_coa_common.h"
 
+#include <algorithm>
 #include <array>
 #include <map>
 
@@ -128,6 +130,11 @@ namespace
     constexpr uint32 WORSHIP_PCT = 25;
     constexpr float GAZE_RADIUS  = 5.0f;
     constexpr float SHOCK_RADIUS = 2.0f;
+
+    // Nightmare health on Normal, per trapped player, in percent of Skeram's
+    // health per player (his pool over the flex player count). See StartNightmares.
+    constexpr uint64 NIGHTMARE_SHARE_PCT   = 8;
+    constexpr uint64 MONSTROSITY_SHARE_PCT = 6;
 
     struct boss_skeram_coa : public BossAI
     {
@@ -266,6 +273,19 @@ namespace
                 if (Creature* image = ObjectAccessor::GetCreature(*me, guid))
                     Veil(image, true);
 
+            // On Normal each trapped player brings a fixed share of Skeram's health
+            // per player: 8%, and 6% for the Monstrosity, whose kit slows her group.
+            // His pool grows with the raid (coa_boss_flex is health per player), so
+            // the old rule (6% of his whole pool per creature, one creature for two
+            // players; 10% of it per player for the Monstrosity) asked a trapped
+            // player at 20 players for 0.6 times what an average player deals to
+            // Skeram in the whole fight, and 2.0 times in the Monstrosity's group,
+            // within 60s. A share of his health per player is the same part of the
+            // fight at every raid size. Heroic and above keep the old rule until
+            // they are tuned on their own.
+            bool const shareOfSkeram = me->GetMap()->IsRegularDifficulty();
+            uint64 const perPlayer = shareOfSkeram ? me->GetMaxHealth() / coa_flex::CountPlayers(me->GetMap()) : 0;
+
             for (uint8 f = 0; f < PHOBIAS; ++f)
             {
                 if (groups[f].empty())
@@ -277,6 +297,11 @@ namespace
                     _trapped[p->GetGUID()] = f;
                 }
                 uint32 const count = f == STEPMOM ? 1 : std::max<uint32>(1, uint32(groups[f].size() + 1) / 2);
+                // The group's share, split over its creatures.
+                uint64 const share = f == STEPMOM ? MONSTROSITY_SHARE_PCT : NIGHTMARE_SHARE_PCT;
+                uint32 const hp = shareOfSkeram ?
+                    uint32(std::min<uint64>(perPlayer * share * groups[f].size() / (100 * count), UINT32_MAX)) :
+                    uint32(me->GetMaxHealth() * (f == STEPMOM ? 0.10f : 0.03f) * (f == STEPMOM ? groups[f].size() : 2));
                 for (uint32 i = 0; i < count; ++i)
                 {
                     Position pos = center;
@@ -284,7 +309,6 @@ namespace
                     if (Creature* dread = me->SummonCreature(NPC_NIGHTMARE_FIRST + f, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000))
                     {
                         dread->SetPhaseMask(NightmarePhase[f], true);
-                        uint32 const hp = uint32(me->GetMaxHealth() * (f == STEPMOM ? 0.10f : 0.03f) * (f == STEPMOM ? groups[f].size() : 2));
                         dread->SetMaxHealth(std::max<uint32>(hp, 1));
                         dread->SetFullHealth();
                         _dreads[f].push_back(dread->GetGUID());

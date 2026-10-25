@@ -183,7 +183,7 @@ class spell_pri_circle_of_healing : public SpellScript
     {
         targets.remove_if(Acore::RaidCheck(GetCaster(), false));
 
-        uint32 const maxTargets = GetCaster()->HasAura(SPELL_PRIEST_GLYPH_OF_CIRCLE_OF_HEALING) ? 6 : 5; // Glyph of Circle of Healing
+        uint32 const maxTargets = GetCaster()->HasAuraOrTwin(SPELL_PRIEST_GLYPH_OF_CIRCLE_OF_HEALING) ? 6 : 5; // Glyph of Circle of Healing
 
         if (targets.size() > maxTargets)
         {
@@ -411,7 +411,7 @@ class spell_pri_lightwell_renew : public AuraScript
         if (Unit* caster = GetCaster())
         {
             // Bonus from Glyph of Lightwell
-            if (AuraEffect* modHealing = caster->GetAuraEffect(SPELL_PRIEST_GLYPH_OF_LIGHTWELL, EFFECT_0))
+            if (AuraEffect* modHealing = caster->GetAuraEffectOfRankedSpellOrTwin(SPELL_PRIEST_GLYPH_OF_LIGHTWELL, EFFECT_0))
                 AddPct(amount, modHealing->GetAmount());
         }
     }

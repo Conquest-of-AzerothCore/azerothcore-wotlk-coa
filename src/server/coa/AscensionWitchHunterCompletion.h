@@ -12,7 +12,9 @@ namespace AscensionWitchHunter
 {
 enum WitchHunterSharedSpells : uint32
 {
-    SPELL_BRAND_OF_THE_DAMNED_DAMAGE = 807683
+    SPELL_BRAND_OF_THE_DAMNED_DAMAGE = 807683,
+    SPELL_SILVER_BOLTS = 804026,
+    SPELL_SHADOW_TRAPPED = 681177
 };
 
 inline bool Family(SpellInfo const* info, uint8 word, uint32 mask)

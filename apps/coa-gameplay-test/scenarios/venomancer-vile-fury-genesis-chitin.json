@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Venomancer: Vile Fury, Genesis and Enchanted Chitin (#911, #954, #1010)",
-  "contract": "#911 Vile Fury (706006): effect 0 is aura 107 (flat modifier) misc 14 (SPELLMOD_COST), BasePoints -31 + die 1 = -30, class mask word0 0x200002 selecting Hivebreak (803193, Rage 200) and Carapace Crash (803199, Rage 250) and their other ranks; SpellInfo::CalcPowerCost applies SPELLMOD_COST at SpellInfo.cpp:3069, so 200 -> 170 and 250 -> 220 (Rage is stored x10, tooltip 3 Rage). Effect 1 is aura 333 (SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT), 1 + 1 = +2, folded into m_modMeleeHitChance and m_modSpellHitChance by StatSystem.cpp:999/1011. #954 Genesis (705962): aura 192 (MOD_MELEE_RANGED_HASTE) and aura 216 (HASTE_SPELLS), 3 + 1 = 4% each, handled at SpellAuraEffects.cpp:257/281; cast_speed_multiplier and attack_time_ms are divided by 1.04 (same method as bloodmage-consolidation.json). #1010 Enchanted Chitin (706955, 707872): aura 142 (MOD_BASE_RESISTANCE_PCT) misc 1 (physical), miscB 8 (1 << ITEM_SUBCLASS_ARMOR_MAIL), 24/49 + 1 = +25/+50; SpellEffectInfo::GetItemArmorSubclassMask returns 8 for exactly these ids (SpellInfo.cpp:371) and Player::UpdateArmor multiplies only the mail item armor (StatSystem.cpp:357). Mail chest 35842 has armor 800 in the running world database (ArmorDamageModifier 0; the data/sql/base/db_world/item_template.sql dump shows a stale 706 for this row, not what the deployed acore_world.item_template and the test's isolated world DB actually serve), so rank 1 adds 200 and rank 2 adds 400; cloth chest 35859 (armor 533 in the running DB) is the control and must gain nothing. The rank 1 and rank 2 wearers are separate actors so the multipliers do not stack. Item ids and armor values were verified with `docker exec coa-s2-database mysql ... SELECT entry, armor FROM acore_world.item_template WHERE entry IN (35842, 35859)`, not from the base SQL dump.",
+  "contract": "#911 Vile Fury (706006): effect 0 is aura 107 (flat modifier) misc 14 (SPELLMOD_COST), BasePoints -31 + die 1 = -30, class mask word0 0x200002 selecting Hivebreak (803193, Rage 200) and Carapace Crash (803199, Rage 250) and their other ranks; SpellInfo::CalcPowerCost applies SPELLMOD_COST at SpellInfo.cpp:3069, so 200 -> 170 and 250 -> 220 (Rage is stored x10, tooltip 3 Rage). Effect 1 is aura 333 (SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT), 1 + 1 = +2, folded into m_modMeleeHitChance and m_modSpellHitChance by StatSystem.cpp:999/1011. #954 Genesis (705962): aura 192 (MOD_MELEE_RANGED_HASTE) and aura 216 (HASTE_SPELLS), 3 + 1 = 4% each, handled at SpellAuraEffects.cpp:257/281; cast_speed_multiplier and attack_time_ms are divided by 1.04 (same method as bloodmage-consolidation.json). #1010 Enchanted Chitin (706955, 707872): aura 142 (MOD_BASE_RESISTANCE_PCT) misc 1 (physical), miscB 8 (1 << ITEM_SUBCLASS_ARMOR_MAIL), 24/49 + 1 = +25/+50; SpellEffectInfo::GetItemArmorSubclassMask returns 8 for exactly these ids (SpellInfo.cpp:371) and Player::UpdateArmor multiplies only the mail item armor (StatSystem.cpp:357). Mail chest 35842 has armor 800 in the running world database (ArmorDamageModifier 0; the data/sql/base/db_world/item_template.sql dump shows a stale 706 for this row, not what the deployed acore_world.item_template and the test's isolated world DB actually serve), and a Venomancer (29), like every class but Hero, wears its ItemAddon.dbc reborn armor 621, so rank 1 adds 155 (621 / 4, truncated) and rank 2 adds 310 or 311; cloth chest 35859 (armor 533 in the running DB) is the control and must gain nothing. The rank 1 and rank 2 wearers are separate actors so the multipliers do not stack. Item ids and armor values were verified with `docker exec coa-s2-database mysql ... SELECT entry, armor FROM acore_world.item_template WHERE entry IN (35842, 35859)`, not from the base SQL dump.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -319,22 +319,22 @@
     },
     {
       "action": "assert",
-      "label": "Rank 1 adds a quarter of the mail chest's 800 armor (200)",
+      "label": "Rank 1 adds a quarter of the mail chest's 621 reborn armor (155)",
       "actor": "m1",
       "metric": "armor",
       "relative_to": "armor_before_m1",
-      "min": 199.9,
-      "max": 200.1,
+      "min": 154.9,
+      "max": 155.4,
       "within_ms": 5000
     },
     {
       "action": "assert",
-      "label": "Rank 2 adds half of the mail chest's 800 armor (400)",
+      "label": "Rank 2 adds half of the mail chest's 621 reborn armor (310.5)",
       "actor": "m2",
       "metric": "armor",
       "relative_to": "armor_before_m2",
-      "min": 399.9,
-      "max": 400.1,
+      "min": 309.9,
+      "max": 311.1,
       "within_ms": 5000
     },
     {

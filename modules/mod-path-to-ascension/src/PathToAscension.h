@@ -123,7 +123,7 @@ namespace PathToAscension
 
     uint32 SettingValue(Player const* player, char const* source, uint32 index);
     bool MatchesRaceAndClass(Player const* player, Tutorial const& tutorial);
-    std::optional<uint32> GameModeMask(Player const* player);
+    bool MatchesGameModes(Player const* player, Tutorial const& tutorial);
 
     void CompleteVerifiedTutorial(Player* player, uint32 tutorialId);
     void RecordTutorialEvent(Player* player, uint32 tutorialId, uint32 bit);

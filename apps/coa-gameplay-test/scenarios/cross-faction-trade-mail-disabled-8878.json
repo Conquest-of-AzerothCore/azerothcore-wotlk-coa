@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "name": "Cross-faction trade and mail stay refused with the AllowTwoSide options disabled (#8878)",
+  "contract": "With AllowTwoSide.Trade and AllowTwoSide.Interaction.Mail at their default 0, an ordinary Alliance player's trade request to a Horde player is refused with TRADE_STATUS_WRONG_FACTION (11) and never reaches the Horde player, and mail to that Horde player is refused with MAIL_ERR_NOT_YOUR_TEAM (5) without taking the item or the postage.",
+  "two_side": {},
+  "players": [
+    {
+      "id": "alliance",
+      "name": "Coatradea",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    },
+    {
+      "id": "horde",
+      "name": "Coatradeh",
+      "race": 2,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "opcode": 288,
+      "save_as": "alliance_trade"
+    },
+    {
+      "action": "snapshot",
+      "actor": "horde",
+      "metric": "server_packets",
+      "opcode": 288,
+      "save_as": "horde_trade"
+    },
+    {
+      "action": "client_packet",
+      "actor": "alliance",
+      "opcode": 278,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "horde"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "opcode": 288,
+      "relative_to": "alliance_trade",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packet_u32",
+      "opcode": 288,
+      "index": 0,
+      "equals": 11,
+      "label": "The cross-faction trade request is refused"
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "server_packets",
+      "opcode": 288,
+      "relative_to": "horde_trade",
+      "equals": 0,
+      "label": "The Horde player never sees the request"
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "alliance",
+      "entry": 142119
+    },
+    {
+      "action": "money",
+      "actor": "alliance",
+      "copper": 30
+    },
+    {
+      "action": "add_item",
+      "actor": "alliance",
+      "item": 2447
+    },
+    {
+      "action": "client_packet",
+      "actor": "alliance",
+      "opcode": 568,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "string": "Coatradeh"
+        },
+        {
+          "string": "CoA cross-faction mail regression"
+        },
+        {
+          "string": "Native mail request"
+        },
+        {
+          "u32": 41
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 1
+        },
+        {
+          "u8": 0
+        },
+        {
+          "item_guid": 2447
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u64": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packet_u32",
+      "opcode": 569,
+      "index": 2,
+      "equals": 5,
+      "label": "Cross-faction mail is refused"
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "item_count",
+      "item": 2447,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "carried_money",
+      "equals": 30
+    }
+  ]
+}

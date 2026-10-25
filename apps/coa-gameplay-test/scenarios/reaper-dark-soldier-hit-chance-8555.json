@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Reaper Dark Soldier raises hit chance (#8555)",
+  "contract": "Dark Soldier (560490 rank 1, 561338 rank 2) effect 1 carries SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT (333, BasePoints 2, DieSides 1) which resolves to +3 (rank 2: +6) into m_modMeleeHitChance and m_modSpellHitChance.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "reaper", "race": 1, "class": 30, "level": 13 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "snapshot", "label": "Baseline melee hit chance", "actor": "reaper", "metric": "melee_hit_chance", "save_as": "mhit0" },
+    { "action": "snapshot", "label": "Baseline spell hit chance", "actor": "reaper", "metric": "spell_hit_chance", "save_as": "shit0" },
+    { "action": "learn", "actor": "reaper", "spell": 560490 },
+    { "action": "assert", "label": "Dark Soldier is applied", "actor": "reaper", "metric": "aura", "spell": 560490, "equals": 1, "within_ms": 15000 },
+    { "action": "assert", "label": "Hit effect resolves to 3", "actor": "reaper", "metric": "aura_amount", "spell": 560490, "effect": 1, "equals": 3 },
+    { "action": "client_packet", "label": "The panel asks for its hit statistics", "actor": "reaper", "opcode": 1911, "fields": [ { "u32": 7 } ] },
+    { "action": "assert", "label": "Panel melee hit bonus is 3", "actor": "reaper", "metric": "server_packet_u32", "opcode": 1901, "row": 1, "offset": 4, "equals": 3, "within_ms": 5000 },
+    { "action": "assert", "label": "Panel ranged hit bonus is 3", "actor": "reaper", "metric": "server_packet_u32", "opcode": 1901, "row": 2, "offset": 4, "equals": 3, "within_ms": 5000 },
+    { "action": "assert", "label": "Panel spell hit bonus is 3", "actor": "reaper", "metric": "server_packet_u32", "opcode": 1901, "row": 4, "offset": 4, "equals": 3, "within_ms": 5000 },
+    { "action": "assert", "label": "Melee hit chance rises by 3", "actor": "reaper", "metric": "melee_hit_chance", "relative_to": "mhit0", "min": 2.9, "max": 3.1 },
+    { "action": "assert", "label": "Spell hit chance rises by 3", "actor": "reaper", "metric": "spell_hit_chance", "relative_to": "shit0", "min": 2.9, "max": 3.1 },
+    { "action": "unlearn", "actor": "reaper", "spell": 560490 },
+    { "action": "learn", "actor": "reaper", "spell": 561338 },
+    { "action": "assert", "label": "Rank 2 hit effect resolves to 6", "actor": "reaper", "metric": "aura_amount", "spell": 561338, "effect": 1, "equals": 6, "within_ms": 15000 },
+    { "action": "assert", "label": "Rank 2 melee hit chance rises by 6", "actor": "reaper", "metric": "melee_hit_chance", "relative_to": "mhit0", "min": 5.9, "max": 6.1 },
+    { "action": "assert", "label": "Rank 2 spell hit chance rises by 6", "actor": "reaper", "metric": "spell_hit_chance", "relative_to": "shit0", "min": 5.9, "max": 6.1 },
+    { "action": "client_packet", "label": "The panel asks again after rank 2", "actor": "reaper", "opcode": 1911, "fields": [ { "u32": 1 } ] },
+    { "action": "assert", "label": "Panel melee hit bonus is 6", "actor": "reaper", "metric": "server_packet_u32", "opcode": 1901, "row": 1, "offset": 4, "equals": 6, "within_ms": 5000 },
+    { "action": "unlearn", "actor": "reaper", "spell": 561338 }
+  ]
+}

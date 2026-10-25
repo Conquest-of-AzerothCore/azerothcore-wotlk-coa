@@ -5551,7 +5551,7 @@ ManastormRun* ManastormMgr::StartRun(
         ManastormDataStore::Instance()
         .GetScalingForDepth(
             depth,
-            uint32(members.size()));
+            uint32(members.size()), endgame);
 
     uint8 const creatureLevel =
         ResolveCreatureLevel(
@@ -9200,7 +9200,7 @@ bool ManastormMgr::TransitionToNextStage(
                     nextDepth,
                     uint32(
                         run.GetMembers()
-                            .size()));
+                            .size()), run.IsEndgame());
 
     for (ObjectGuid::LowType memberGuid :
         run.GetMembers())

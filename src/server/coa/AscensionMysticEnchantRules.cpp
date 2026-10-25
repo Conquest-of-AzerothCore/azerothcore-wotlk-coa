@@ -265,9 +265,10 @@ std::unordered_map<std::uint32_t, std::uint32_t> TaughtSpells()
     {
         ClientDBC::Record const record = spells.GetRecord(index);
         std::string_view const description = record.GetString(SPELL_DESCRIPTION);
-        if (!description.starts_with("Teaches you"))
+        std::size_t const teaches = description.starts_with("Teaches you") ? 0 : description.find("\nTeaches you");
+        if (teaches == std::string_view::npos)
             continue;
-        std::size_t const token = description.find("@s:");
+        std::size_t const token = description.find("@s:", teaches);
         if (token == std::string_view::npos)
             continue;
         std::uint32_t spell = 0;

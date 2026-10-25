@@ -431,7 +431,7 @@ class spell_warr_execute : public SpellScript
 
             caster->SetPower(POWER_RAGE, uint32(newRage));
             // Glyph of Execution bonus
-            if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_WARRIOR_GLYPH_OF_EXECUTION, EFFECT_0))
+            if (AuraEffect* aurEff = caster->GetAuraEffectOfRankedSpellOrTwin(SPELL_WARRIOR_GLYPH_OF_EXECUTION, EFFECT_0))
                 rageUsed += aurEff->GetAmount() * 10;
 
             int32 bp = GetEffectValue() + int32(rageUsed * spellInfo->Effects[effIndex].DamageMultiplier + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.2f);
@@ -823,7 +823,7 @@ class spell_warr_vigilance_redirect_threat : public SpellScript
     void HandleGlyph(SpellEffIndex /*effIndex*/)
     {
         if (Unit* warrior = GetHitUnit())
-            if (AuraEffect const* glyph = warrior->GetAuraEffect(SPELL_WARRIOR_GLYPH_OF_VIGILANCE, EFFECT_0))
+            if (AuraEffect const* glyph = warrior->GetAuraEffectOfRankedSpellOrTwin(SPELL_WARRIOR_GLYPH_OF_VIGILANCE, EFFECT_0))
                 SetEffectValue(GetEffectValue() + glyph->GetAmount());
     }
 

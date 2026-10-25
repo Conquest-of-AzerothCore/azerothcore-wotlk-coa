@@ -1,7 +1,7 @@
-# Optional monster linear magic resistance
+# Monster linear magic resistance
 
 Live Conquest of Azeroth monsters resist magic damage, including Holy, by an amount that grows with their level and
-that player spell penetration can remove completely. This optional mode reproduces that behavior. The resistance
+that player spell penetration can remove completely. This mode, on by default, reproduces that behavior. The resistance
 calculation follows the live evidence below; `PerPercent` is a reconstruction choice that the logs cannot pin down.
 
 ## Behavior
@@ -76,7 +76,7 @@ derived from the logs alone, because penetration and player gear are not recorde
 
 ## Configuration
 
-Add these values to the active `worldserver.conf` (not `modules/coa.conf`) and restart a server built with this change:
+The settings live in `modules/coa.conf` (template `src/server/coa/conf/coa.conf.dist`):
 
 ```ini
 CoA.MonsterResistance.Enable = 1
@@ -87,13 +87,14 @@ CoA.MonsterResistance.MaxReductionPct = 75.0
 
 | Setting | Default | Valid values |
 | --- | ---: | --- |
-| `CoA.MonsterResistance.Enable` | `0` | `0` or `1` |
+| `CoA.MonsterResistance.Enable` | `1` | `0` or `1` |
 | `CoA.MonsterResistance.PerLevel` | `1.0` | Finite, at least 0 |
 | `CoA.MonsterResistance.PerPercent` | `5.0` | Finite, greater than 0 |
 | `CoA.MonsterResistance.MaxReductionPct` | `75.0` | Finite, from 0 to 100 |
 
-Invalid numeric values fall back to their defaults. The feature defaults off so the change does not silently
-rebalance an existing realm. After the first restart the settings follow the normal configuration reload.
+Invalid numeric values fall back to their defaults. `CoA.MonsterResistance.Enable = 0` restores the native resistance
+paths. `modules/coa.conf` is read after `worldserver.conf`, so a value there wins over a leftover entry in
+`worldserver.conf`. The settings follow the normal configuration reload.
 
 ## Verification and limitations
 
@@ -103,6 +104,5 @@ flat and percentage modifiers, penetration and its zero floor, the 10% step dist
 periodic damage, Holy, binary damage against binary crowd control, accuracy, mechanic resistance, player/pet
 exclusions, scaled and relative boss levels, configurable rates and caps, explicit bypasses and mixed-defense handling.
 
-It does not exercise absorption, full server linking, DBC spell records or live combat. Before enabling the feature on
-a realm, confirm the 0/30/60/excess penetration cases, a DoT, a binary damage spell and a binary crowd-control spell
-against a monster in a development realm.
+It does not exercise absorption, full server linking, DBC spell records or live combat. On a development realm, confirm
+the 0/30/60/excess penetration cases, a DoT, a binary damage spell and a binary crowd-control spell against a monster.

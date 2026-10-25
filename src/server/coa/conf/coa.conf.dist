@@ -74,6 +74,19 @@ CoA.CreatureScaling.Dungeon.Damage = 1.5
 CoA.CreatureScaling.Raid.Damage = 1.0
 CoA.CreatureScaling.MapDamage = ""
 
+# Live-like magic resistance for NPCs not controlled by players, including Holy
+# (docs/coa/monster-linear-resistance.md). Each combat level adds PerLevel resistance to every magic school;
+# penetration and debuffs reduce it to at least 0. Every PerPercent resistance adds 1% average resist, capped by
+# MaxReductionPct. Direct hits and DoT ticks roll the native 10% partial-resist steps around that average; damaging
+# spells are never fully resisted, crowd control can be. Players, pets and charmed creatures keep the native rules.
+# PerPercent is a reconstruction choice, not a verified live value.
+# 1 - enabled (default).
+# 0 - native resistance, including the hidden level-difference term and the Classic+ resist table.
+CoA.MonsterResistance.Enable = 1
+CoA.MonsterResistance.PerLevel = 1.0
+CoA.MonsterResistance.PerPercent = 5.0
+CoA.MonsterResistance.MaxReductionPct = 75.0
+
 # Wardrobe, outfits, vanity and mount/companion collections for characters played by bots.
 # 0 - never: bot sessions skip the collections (default).
 # 1 - only characters of player accounts played as bots (alts), never random bot accounts:
@@ -171,13 +184,11 @@ CoA.ItemScaling.Native = 1
 CoA.ItemScaling.Native.LootLevelOffset = 0
 CoA.ItemScaling.Native.QuestRewards = 1
 
-# LevelKeys stores the client's item key for the level instead of the level itself (level + 2 up to 20,
-# + 3 up to 30, + 4 up to 50, + 5 up to 60, the client's table above), as the Ascension client does;
-# a quest reward then takes the quest's own scaled level, or the key of the player's level.
-# Preview (needs LevelKeys) shows each character the version of an item they would receive: the
-# loot window and corpse level, roll frames, inspect, mail and auctions. Both are read at startup only.
-CoA.ItemScaling.Native.LevelKeys = 0
-CoA.ItemScaling.Native.Preview = 0
+# RebornArmor gives every class but the classless Hero the reborn armor the client shows them: the
+# ladder row's second armor column for a scaled item, ItemAddon.dbc's reborn armor for an authored one
+# (items without that value keep their own armor). The stat reply then carries both columns. With 0,
+# items give their full armor to everyone and the reply repeats it. Needs Native; read at startup only.
+CoA.ItemScaling.Native.RebornArmor = 1
 
 # Automatic progression: hand out the class abilities and rank upgrades for the
 # character's class and level as they level up. Set to 0 to stop that

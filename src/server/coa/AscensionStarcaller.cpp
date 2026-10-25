@@ -214,12 +214,12 @@ void Stars(Player* player, Unit* target, uint32 count)
 }
 void StartConsume(Player* player, Unit* target)
 {
-    if (player && target && target->HasAura(804378, player->GetGUID()))
-        Cast(player, target, 804716);
+    if (player && target && player->IsInWorld() && target->HasAura(804378, player->GetGUID()))
+        player->CastSpell(target, 804716, true);
 }
 bool Consume(Player* player, Unit* target)
 {
-    if (!player || !target || !player->IsValidAttackTarget(target))
+    if (!player || !target || !player->IsValidAttackTarget(target, sSpellMgr->GetSpellInfo(804716)))
         return false;
     Aura* stars = target->GetAura(804378, player->GetGUID());
     if (!stars || !stars->GetStackAmount())

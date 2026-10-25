@@ -240,6 +240,7 @@ void WorldConfig::BuildConfigCache()
 
     SetConfigValue<float>(CONFIG_GROUP_XP_DISTANCE, "MaxGroupXPDistance", 74.0f);
     SetConfigValue<float>(CONFIG_MAX_RECRUIT_A_FRIEND_DISTANCE, "MaxRecruitAFriendBonusDistance", 100.0f);
+    SetConfigValue<float>(CONFIG_MAX_RECRUIT_A_FRIEND_XP_DISTANCE, "MaxRecruitAFriendXPDistance", 200.0f);
 
     SetConfigValue<float>(CONFIG_SIGHT_MONSTER, "MonsterSight", 50.0f);
 
@@ -266,6 +267,8 @@ void WorldConfig::BuildConfigCache()
     SetConfigValue<bool>(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD, "AllowTwoSide.Interaction.Guild", false);
     SetConfigValue<bool>(CONFIG_ALLOW_TWO_SIDE_INTERACTION_ARENA, "AllowTwoSide.Interaction.Arena", false);
     SetConfigValue<bool>(CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION, "AllowTwoSide.Interaction.Auction", false);
+    SetConfigValue<bool>(CONFIG_ALLOW_TWO_SIDE_INTERACTION_MAIL, "AllowTwoSide.Interaction.Mail", true);
+    SetConfigValue<bool>(CONFIG_ALLOW_TWO_SIDE_TRADE, "AllowTwoSide.Trade", true);
     SetConfigValue<bool>(CONFIG_ALLOW_TWO_SIDE_WHO_LIST, "AllowTwoSide.WhoList", true);
 
     SetConfigValue<uint32>(CONFIG_MIN_PLAYER_NAME, "MinPlayerName", 2, ConfigValueCache::Reloadable::Yes, [](uint32 const& value) { return value > 0 && value <= MAX_PLAYER_NAME_PART; }, "> 0 && <= MAX_PLAYER_NAME_PART");
@@ -362,7 +365,7 @@ void WorldConfig::BuildConfigCache()
     SetConfigValue<bool>(CONFIG_CLASSIC_PLUS_COMBAT_RULES, "ClassicPlus.CombatRules", true);
     SetConfigValue<bool>(CONFIG_CLASSIC_PLUS_STAT_FORMULAS, "ClassicPlus.StatFormulas", true);
     SetConfigValue<bool>(CONFIG_CLASSIC_PLUS_REPUTATION_SPILLOVER, "ClassicPlus.ReputationSpillover", true);
-    SetConfigValue<bool>(CONFIG_MONSTER_RESISTANCE_ENABLE, "CoA.MonsterResistance.Enable", false);
+    SetConfigValue<bool>(CONFIG_MONSTER_RESISTANCE_ENABLE, "CoA.MonsterResistance.Enable", true);
     SetConfigValue<float>(CONFIG_MONSTER_RESISTANCE_PER_LEVEL, "CoA.MonsterResistance.PerLevel", 1.0f,
         ConfigValueCache::Reloadable::Yes,
         [](float const& value) { return std::isfinite(value) && value >= 0.0f; }, "finite and >= 0");

@@ -473,7 +473,7 @@ class spell_rog_preparation : public SpellScript
         Player* caster = GetCaster()->ToPlayer();
         //immediately finishes the cooldown on certain Rogue abilities
 
-        bool hasGlyph = caster->HasAura(SPELL_ROGUE_GLYPH_OF_PREPARATION);
+        bool hasGlyph = caster->HasAuraOrTwin(SPELL_ROGUE_GLYPH_OF_PREPARATION);
         PlayerSpellMap const& spellMap = caster->GetSpellMap();
         for (PlayerSpellMap::const_iterator itr = spellMap.begin(); itr != spellMap.end(); ++itr)
         {
@@ -559,11 +559,19 @@ class spell_rog_rupture : public AuraScript
         return caster && caster->IsPlayer();
     }
 
-    void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)
+    void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& canBeRecalculated)
     {
         if (Unit* caster = GetCaster())
         {
             canBeRecalculated = false;
+
+            // Ascension's Rupture ranks carry their own (AP+SP) * cp * cp coefficient
+            if (GetSpellInfo()->HasComboPointPowerBonus(aurEff->GetEffIndex()))
+            {
+                amount += GetSpellInfo()->GetComboPointPowerBonus(caster, aurEff->GetEffIndex(),
+                    std::min<uint32>(caster->ToPlayer()->GetComboPoints(), 5));
+                return;
+            }
 
             float const attackpowerPerCombo[6] =
             {

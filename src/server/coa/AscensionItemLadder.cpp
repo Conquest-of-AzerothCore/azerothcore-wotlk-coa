@@ -126,7 +126,17 @@ uint32 ClientBaseForKey(uint32 key)
     return below;
 }
 
-Row StockRow(ItemTemplate const& proto)
+bool WearsRebornArmor(uint8 playerClass)
+{
+    return playerClass >= CLASS_WARRIOR && playerClass <= CLASS_SPIRIT_MAGE && playerClass != CLASS_HERO;
+}
+
+uint32 AuthoredRebornArmor(uint32 itemAddonReborn, uint32 ownArmor)
+{
+    return itemAddonReborn ? itemAddonReborn : ownArmor;
+}
+
+Row StockRow(ItemTemplate const& proto, uint32 armorReborn)
 {
     Row row;
     row.ItemId = proto.ItemId;
@@ -139,7 +149,7 @@ Row StockRow(ItemTemplate const& proto)
         row.DamageMax[i] = proto.Damage[i].DamageMax;
     }
     row.Armor = proto.Armor;
-    row.ArmorReborn = proto.Armor;
+    row.ArmorReborn = armorReborn;
     row.Resistances = { proto.HolyRes, proto.FireRes, proto.NatureRes, proto.FrostRes, proto.ShadowRes,
         proto.ArcaneRes };
     row.Block = proto.Block;
@@ -185,7 +195,7 @@ WorldPacket BuildItemStatResponse(uint32 itemId, uint32 level, Row const& row, I
         data << stat.ItemStatType << stat.ItemStatValue;
     for (uint32 i = 0; i < MAX_ITEM_PROTO_DAMAGES; ++i)
         data << row.DamageMin[i] << row.DamageMax[i] << uint32(proto ? proto->Damage[i].DamageType : 0);
-    data << row.Armor << row.Armor;
+    data << row.Armor << row.ArmorReborn;
     for (int32 resistance : row.Resistances)
         data << resistance;
     data << row.Block << row.RandomProperty << row.RequiredLevel << row.SellPrice;

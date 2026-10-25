@@ -8,6 +8,7 @@
 #include "Battleground.h"
 #include "Chat.h"
 #include "Config.h"
+#include "DBCStores.h"
 #include "GameEventMgr.h"
 #include "Item.h"
 #include "Log.h"
@@ -23,6 +24,7 @@
 #include "Tokenize.h"
 #include "World.h"
 #include <algorithm>
+#include <array>
 #include <string_view>
 #include <unordered_set>
 
@@ -474,14 +476,48 @@ std::uint32_t InvestedEssence(Player const* player, std::uint32_t classType, std
     return talent ? build.TabTE(classType, tab, 0) : build.TabAE(classType, tab, 0);
 }
 
+constexpr std::array<uint32, 1> SKILL_COMPANION_SPELLS = { 56815 };
+
+void LearnSkillCompanions(Player* player, uint32 spellId)
+{
+    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
+    if (!spellInfo)
+        return;
+    SkillLineAbilityMapBounds const bounds = sSpellMgr->GetSkillLineAbilityMapBounds(spellId);
+    for (auto itr = bounds.first; itr != bounds.second; ++itr)
+    {
+        uint32 const skill = itr->second->SkillLine;
+        if (player->HasSkill(skill))
+            continue;
+        for (SkillLineAbilityEntry const* ability : GetSkillLineAbilitiesBySkillLine(skill))
+        {
+            if (ability->Spell == spellId || ability->AcquireMethod != SKILL_LINE_ABILITY_LEARNED_ON_SKILL_LEARN ||
+                player->HasSpell(ability->Spell))
+                continue;
+            SpellInfo const* companion = sSpellMgr->GetSpellInfo(ability->Spell);
+            if (companion && std::string_view(companion->SpellName[0]) == spellInfo->SpellName[0])
+                player->learnSpell(ability->Spell);
+        }
+    }
+}
+
 class AscensionFreepickPlayer final : public PlayerScript
 {
 public:
-    AscensionFreepickPlayer() : PlayerScript("AscensionFreepickPlayer", { PLAYERHOOK_ON_LOGIN }) { }
+    AscensionFreepickPlayer() : PlayerScript("AscensionFreepickPlayer", { PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LEARN_SPELL })
+    { }
 
     void OnPlayerLogin(Player* player) override
     {
         Synchronize(player);
+        for (uint32 spellId : SKILL_COMPANION_SPELLS)
+            if (player->HasSpell(spellId))
+                LearnSkillCompanions(player, spellId);
+    }
+
+    void OnPlayerLearnSpell(Player* player, uint32 spellId) override
+    {
+        LearnSkillCompanions(player, spellId);
     }
 };
 

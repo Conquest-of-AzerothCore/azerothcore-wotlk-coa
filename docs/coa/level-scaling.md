@@ -275,11 +275,12 @@ character whose scaling is on, by the same answer the creature view asks (their 
 in a group, and no challenge or open-world ruleset holding them to the authored world); everyone else
 receives the authored item, and their corpse and roll frame preview none.
 
-With `CoA.ItemScaling.Native.LevelKeys` the stored level is the client's own item key for that level
+The stored level is the client's own item key for that level
 (level + 2 up to 20, + 3 up to 30, + 4 up to 50, + 5 up to 60, the client's table above 60), and a quest
 reward takes the level the quest's `QuestTemplateScaling.dbc` row puts it at, or the key of the
-character's level for a quest without one. `CoA.ItemScaling.Native.Preview` (needs LevelKeys; both off by
-default and read at startup) lets each character see the version they would receive before it is theirs:
+character's level for a quest without one. Items stored before keys were used keep their plain level, which
+the client reads as a key three to five levels low; only items acquired afterwards store keys.
+The preview lets each character see the version they would receive before it is theirs:
 
 | Where | What the server sends |
 |---|---|
@@ -292,6 +293,11 @@ default and read at startup) lets each character see the version they would rece
 
 An item whose key equals its own item level is the authored item: the server answers the client's
 `0x6FF` query for that key with the authored stats instead of a ladder row.
+
+A stat query carries only `(item ID, level)`. Carried, banked and mailed items resolve the ambiguity between
+a stored key that equals the item level and an unowned preview by asking whether the character owns an
+instance stored at that key. Inspect, trade and auction queries cannot be tied to the viewer's own items, so
+for them a key equal to the item level is still answered with the authored item.
 
 ### Many characters, one creature
 

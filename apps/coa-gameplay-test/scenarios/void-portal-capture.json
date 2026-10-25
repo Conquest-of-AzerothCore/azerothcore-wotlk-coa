@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "name": "Void Portal capture grants the mount item and removes the portal",
+  "contract": "Using gameobject 239828 grants item 121815 instantly, removes the portal from the world and lets the manager activate another zone group, so the capture point is empty afterwards. With one forced failed proximity roll the portal survives the player's arrival; with a forced successful roll a fresh portal disappears as soon as the player stands within 20 yards.",
+  "players": [
+    { "id": "p", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "voidportal", "actor": "p", "op": "force", "group": 9000001, "spawn": 8001308 },
+    { "action": "voidportal", "actor": "p", "op": "roll", "success": false },
+    { "action": "teleport", "actor": "p", "map": 0, "x": 3460.597656, "y": -4946.015625, "z": 182.513626, "o": 0 },
+    { "action": "assert", "actor": "p", "metric": "nearby_gameobject_count", "entry": 239828, "equals": 1 },
+    { "action": "use_nearby_gameobject", "actor": "p", "entry": 239828 },
+    { "action": "assert", "actor": "p", "metric": "item_count", "item": 121815, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "actor": "p", "metric": "nearby_gameobject_count", "entry": 239828, "equals": 0, "within_ms": 5000 },
+    { "action": "voidportal", "actor": "p", "op": "force", "group": 9000001, "spawn": 8001309 },
+    { "action": "voidportal", "actor": "p", "op": "roll", "success": true },
+    { "action": "teleport", "actor": "p", "map": 0, "x": 2858.920898, "y": -2883.853516, "z": 97.198929, "o": 0 },
+    { "action": "assert", "actor": "p", "metric": "nearby_gameobject_count", "entry": 239828, "equals": 0, "within_ms": 5000 },
+    { "action": "assert", "actor": "p", "metric": "voidportal_group", "min": 1, "within_ms": 5000 }
+  ]
+}

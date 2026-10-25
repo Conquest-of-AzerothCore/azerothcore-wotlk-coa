@@ -293,7 +293,7 @@ SHIPPED_EXCLUSIVE = {'bloodforged-high-risk-drop', 'coa-prestige-chromie-spawns'
                      'native-fixture-descendant-cleanup-producer', 'native-fixture-descendant-cleanup-consumer',
                      'vanilla-dungeons-normal', 'vanilla-dungeons-heroic', 'vanilla-dungeons-mythic',
                      'vanilla-dungeons-health', 'mythic-plus-keystone-run', 'mythic-plus-client-data-at-login',
-                     'test-zone-bonus-command', 'test-zone-bonus-westfall'}
+                     'test-zone-bonus-command', 'test-zone-bonus-westfall', 'void-portal-capture'}
 UTC_EVENING = datetime(2026, 9, 24, 22, 40, tzinfo=timezone.utc)
 
 
@@ -921,6 +921,16 @@ class BatchTests(unittest.TestCase):
     def test_vanity_ownership_cases_run_exclusively_without_a_policy_entry(self):
         self.write(self.definitions / 'scenarios' / 'beta.json',
                    {**SCENARIOS['beta'], 'vanity_ownership': {'unlock_all': False}})
+        code, result = self.simulated('--lanes', '3', '--scenario', 'beta', *SLOW[:3])
+        self.assertEqual(code, 0, self.stderr.getvalue())
+        admissions = self.events('lanes.log')
+        self.assertEqual((admissions[0]['name'], admissions[0]['exclusive'], admissions[0]['running']),
+                         ('Beta', True, []))
+        self.assertEqual([event['exclusive'] for event in admissions[1:]], [False] * 3)
+        self.assertEqual(result['simulation']['exclusive'], ['beta'])
+
+    def test_two_side_cases_run_exclusively_without_a_policy_entry(self):
+        self.write(self.definitions / 'scenarios' / 'beta.json', {**SCENARIOS['beta'], 'two_side': {'trade': True}})
         code, result = self.simulated('--lanes', '3', '--scenario', 'beta', *SLOW[:3])
         self.assertEqual(code, 0, self.stderr.getvalue())
         admissions = self.events('lanes.log')

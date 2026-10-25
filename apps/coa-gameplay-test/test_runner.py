@@ -268,6 +268,18 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(value=value), self.assertRaisesRegex(ValueError, error):
                 run.validate(scenario)
 
+    def test_two_side_accepts_boolean_trade_and_mail(self):
+        for value in ({}, {'trade': True}, {'trade': False, 'mail': True}):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['two_side'] = value
+            self.assertIs(run.validate(scenario), scenario)
+        for value, error in ((True, 'two_side: expected an object'), ({'trade': 1}, 'two_side.trade must be boolean'),
+                             ({'mail': 'true'}, 'two_side.mail must be boolean'), ({'auction': True}, 'two_side')):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['two_side'] = value
+            with self.subTest(value=value), self.assertRaisesRegex(ValueError, error):
+                run.validate(scenario)
+
     def test_game_event_needs_an_event_id_and_a_boolean_state(self):
         for step in ({'action': 'game_event', 'event': 12, 'active': True},
                      {'action': 'game_event', 'event': 12, 'active': False}):

@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Disenchant: a natively scaled quest reward yields the disenchant bracket of its scaled item level",
-  "contract": "Requires DestinyWeaver.Enable=1, CoA.QuestLevelScaling=1, CoA.ItemScaling=1, CoA.ItemScaling.Native=1 and CoA.ItemScaling.Native.QuestRewards=1 with ItemStat.dbc in the data directory. Wanted: Hogger 176 rewards Footman Tunic 6085 (green leather chest, item level 13, DisenchantID 1: Strange Dust 10940 or Lesser Magic Essence 10938). A level 30 character with scaling on receives the tunic at scaling level 30; stock green leather chests of item level 30 disenchant with DisenchantID 4 (Soul Dust 11083, Greater Astral Essence 11082 or Large Glimmering Shard 11084, Enchanting 50), so disenchanting the scaled tunic yields one of those. A level 30 character with scaling off receives the authored tunic, which still yields Strange Dust or Lesser Magic Essence. Both enchanters have Enchanting 300. Client tooltips are not tested.",
+  "contract": "Requires DestinyWeaver.Enable=1, CoA.QuestLevelScaling=1, CoA.ItemScaling=1, CoA.ItemScaling.Native=1 and CoA.ItemScaling.Native.QuestRewards=1 with ItemStat.dbc in the data directory. Wanted: Hogger 176 rewards Footman Tunic 6085 (green leather chest, item level 13, DisenchantID 1: Strange Dust 10940 or Lesser Magic Essence 10938). A level 30 character with scaling on receives the tunic at the quest's curve level 26; stock green leather chests of item level 26 disenchant with DisenchantID 4 (Soul Dust 11083, Greater Astral Essence 11082 or Large Glimmering Shard 11084, Enchanting 50), so disenchanting the scaled tunic yields one of those. A level 30 character with scaling off receives the authored tunic, which still yields Strange Dust or Lesser Magic Essence. Both enchanters have Enchanting 300. Client tooltips are not tested.",
   "timeout_ms": 60000,
   "players": [
     { "id": "scaled", "race": 1, "class": 1, "level": 30 },
@@ -19,10 +19,10 @@
 
     { "action": "prepare_quest", "actor": "scaled", "quest": 176 },
     { "action": "reward_quest", "actor": "scaled", "quest": 176, "choice": 0 },
-    { "action": "assert", "label": "The scaled tunic stores the character's level 30", "actor": "scaled", "metric": "carried_item_scaling_level", "item": 6085, "equals": 30 },
+    { "action": "assert", "label": "The scaled tunic stores the quest's curve level 26", "actor": "scaled", "metric": "carried_item_scaling_level", "item": 6085, "equals": 26 },
     { "action": "cast", "label": "Disenchant the scaled tunic", "actor": "scaled", "spell": 13262, "target_item": 6085 },
     { "action": "assert", "label": "The scaled tunic's disenchant loot window holds one item", "actor": "scaled", "metric": "loot_count", "equals": 1, "within_ms": 6000 },
-    { "action": "assert", "label": "The scaled tunic yields an item level 30 material", "actor": "scaled", "metric": "loot_entry", "min": 11082, "max": 11084 },
+    { "action": "assert", "label": "The scaled tunic yields an item level 26 material", "actor": "scaled", "metric": "loot_entry", "min": 11082, "max": 11084 },
     { "action": "collect_loot", "actor": "scaled" },
     { "action": "close_loot", "actor": "scaled" },
     { "action": "assert", "label": "Disenchanting consumes the scaled tunic", "actor": "scaled", "metric": "item_count", "item": 6085, "equals": 0, "within_ms": 2000 },

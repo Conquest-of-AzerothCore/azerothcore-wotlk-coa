@@ -218,7 +218,7 @@ TEST(AscensionItemLadder, StatResponseIsTheClientsItemStatRecord)
     EXPECT_FLOAT_EQ(data.read<float>(), 6.0f);
     EXPECT_EQ(data.read<uint32>(), 4u);
     EXPECT_EQ(data.read<uint32>(), 111u);
-    EXPECT_EQ(data.read<uint32>(), 111u);
+    EXPECT_EQ(data.read<uint32>(), 33u);
     for (int32 i = 1; i <= 6; ++i)
         EXPECT_EQ(data.read<int32>(), i);
     EXPECT_EQ(data.read<uint32>(), 44u);
@@ -277,6 +277,37 @@ TEST(AscensionItemLadder, RebornArmorReachesTheTemplateAndBothTooltipFields)
     EXPECT_EQ(data.read<uint32>(), 97u);
 }
 
+TEST(AscensionItemLadder, RawItemsSendBothArmorColumnsForTheClientToChoose)
+{
+    ItemTemplate const raw = Authored(29, 170);
+    ItemLadder::Ladder const ladder = CowlLadder(&raw);
+    ItemLadder::Row const& row = *ladder.At(60);
+
+    ItemTemplate scaled = raw;
+    ItemLadder::ApplyRow(scaled, row);
+    EXPECT_EQ(scaled.Armor, 355u);
+
+    WorldPacket data = ItemLadder::BuildItemStatResponse(2244, 60, row, &raw);
+    data.read_skip(4 * sizeof(uint32) + 10 * 2 * sizeof(uint32) + 2 * 3 * sizeof(uint32));
+    EXPECT_EQ(data.read<uint32>(), 355u);
+    EXPECT_EQ(data.read<uint32>(), 97u);
+}
+
+TEST(AscensionItemLadder, EveryClassButHeroWearsRebornArmor)
+{
+    for (uint8 playerClass = CLASS_WARRIOR; playerClass <= CLASS_SPIRIT_MAGE; ++playerClass)
+        EXPECT_EQ(ItemLadder::WearsRebornArmor(playerClass), playerClass != CLASS_HERO) << int(playerClass);
+    EXPECT_FALSE(ItemLadder::WearsRebornArmor(CLASS_NONE));
+    EXPECT_FALSE(ItemLadder::WearsRebornArmor(MAX_CLASSES));
+}
+
+TEST(AscensionItemLadder, AuthoredItemWithoutRebornArmorKeepsItsOwnArmor)
+{
+    EXPECT_EQ(ItemLadder::AuthoredRebornArmor(57, 130), 57u);
+    EXPECT_EQ(ItemLadder::AuthoredRebornArmor(0, 130), 130u);
+    EXPECT_EQ(ItemLadder::AuthoredRebornArmor(0, 0), 0u);
+}
+
 TEST(AscensionItemLadder, ClientKeysFollowTheClientBands)
 {
     EXPECT_EQ(ItemLadder::ClientKey(1), 3u);
@@ -316,11 +347,11 @@ TEST(AscensionItemLadder, StockRowAnswersTheAuthoredItem)
     cowl.RequiredLevel = 24;
     cowl.ItemStat[0] = { 7, 5 };
 
-    ItemLadder::Row const row = ItemLadder::StockRow(cowl);
+    ItemLadder::Row const row = ItemLadder::StockRow(cowl, 25);
     EXPECT_EQ(row.ItemId, 2244u);
     EXPECT_EQ(row.Level, 29u);
     EXPECT_EQ(row.Armor, 61u);
-    EXPECT_EQ(row.ArmorReborn, 61u);
+    EXPECT_EQ(row.ArmorReborn, 25u);
     EXPECT_EQ(row.RequiredLevel, 24u);
     EXPECT_EQ(row.Stats[0].ItemStatType, 7u);
     EXPECT_EQ(row.Stats[0].ItemStatValue, 5);

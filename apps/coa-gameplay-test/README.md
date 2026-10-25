@@ -357,7 +357,9 @@ jumps ahead to it, and the real clock runs the case in single mode with a fixed 
 for that case, whatever the module config says, and restores the configured state when the case ends; the batch
 runs such a case exclusively because the setting is process-global. Optional
 `vanity_ownership: {"unlock_all": false, "starter_items": [98457]}` replaces `CoA.UnlockAllVanity` and
-`CoA.StarterVanityItems` for that case in the same way, and is likewise run exclusively.
+`CoA.StarterVanityItems` for that case in the same way, and is likewise run exclusively. Optional
+`two_side: {"trade": true, "mail": false}` sets `AllowTwoSide.Trade` and `AllowTwoSide.Interaction.Mail` for that
+case (an omitted field is disabled) and is likewise run exclusively.
 The [talent and item scenario](scenarios/talent-and-items.json) exercises talent learning, passive removal,
 equipping a shirt and consuming a healing potion. It does not measure the talent's damage coefficient.
 The [Shadowblast scenario](scenarios/shadowblast-shadow-rage.json) reproduces a Shadow Rage pet-targeting crash
@@ -481,6 +483,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `use_nearby_gameobject` | `actor`, `entry`, optional `owner` (a player id): native use request for the single gameobject of that entry within 20 yards in the actor's phase; `owner` narrows the choice to the object that player owns, so one of several nearby objects can be clicked. |
 | `spell_click_nearby` | `actor`, `entry`: native `CMSG_SPELLCLICK` on the nearest living creature of that entry within 20 yards, as the client sends on right-clicking a spell-click creature. |
 | `use_gameobject` | `actor`, `entry`: native use request for the actor's single nearby owned gameobject. |
+| `voidportal` | Player `actor`, `op` `force` with `group` and `spawn`, or `op` `roll` with `success`: put the one realm-wide Void Portal on that configured point as a point rotation does, or replace the next proximity roll; the manager is process-global, so the case runs exclusively. |
 | `summon` | Player `actor`, `as`, `entry`, optional `distance` (yards along +x, default 5) and `ai_action` (an integer passed to the creature AI's `DoAction`, for a scripted step such as finishing a boss intro): summon a creature into the actor's map and phase under the id `as`. |
 | `summon_gameobject` | Player `actor`, `entry`, optional `distance` (yards in front, default 2) and `duration_s` (default 300; 0 keeps it until the actor logs out, and only an untimed summon counts as spawned for scripts that check it): summon a gameobject the actor owns; fails if the actor already owns one of that entry. |
 | `loot_gameobject` | Player `actor`, `entry`: open the loot of the actor's single owned chest as a successful open-lock cast does, so chest loot is generated for that player. Lock, key and skill checks are not exercised. |
@@ -701,6 +704,9 @@ only reflects native `ApplySpellMod(SPELLMOD_CRITICAL_CHANCE)` modifiers (a bare
 it does not invoke `AllSpellScript::OnSpellCritChance`, which only runs mid-cast (`Spell::DoAllEffectOnTarget`).
 `spell_done_crit_chance_scripted` requires the same `spell`/`target` and additionally runs that hook via a
 throwaway, never-cast `Spell` instance, so a script-hook-only crit bonus is observable without a real cast.
+`melee_spell_damage_done_scripted` requires the same `spell`/`target`, takes `melee_spell_damage_done`'s result and
+additionally runs `UnitScript::ModifySpellDamageTaken` with the player as attacker and `target` as the victim, so a
+module's damage-taken hook is observable on the done side without a real cast or its crit-roll sampling.
 `spell_taken_crit_chance` applies the target's native `SpellTakenCritChance` to the caster's done chance,
 including target health and school conditions. It requires the same `spell` and `target`.
 `aura_crit_chance` reads a
@@ -907,6 +913,9 @@ server lists for that dungeon in the player's Dungeon Finder info (0 when it is 
 `LfgLockStatusType`, such as 2 too low level or 4 too low gear score).
 `lfg_state` takes a player `actor` and returns its native Dungeon Finder state (0 none, 1 role check, 2 queued,
 3 proposal, 4 vote kick, 5 in dungeon, 6 finished dungeon, 7 raid browser).
+`lfg_need_allowed` takes a player `actor` and an `item` entry and returns 1 when the native Dungeon Finder
+loot rule lets the actor roll Need on that item at the actor's position, otherwise 0. Outside a Dungeon Finder
+group or its dungeon every item returns 1.
 `in_arena` takes a player `actor` and returns 1 while that player is inside an arena match.
 `arena_team_members`, `arena_team_season_games` and `arena_team_season_wins` take a player `actor` and arena
 `slot` (0 2v2, 1 3v3, 2 5v5) and read the team in that slot: its member count (0 without a team), or its
@@ -949,6 +958,7 @@ anywhere on the player's map, in any phase; a spawn whose grid is not loaded is 
 20 yards (0 when none).
 `nearby_gameobject_at_client` takes `entry` and is 1 while the nearest such gameobject within 20 yards is in
 the player's client-visible set. Owners always see their own objects, so per-player visibility needs a world spawn.
+`voidportal_group` returns the active Void Portal spawn group id, or 0 while the manager has no portal up.
 ## Evidence boundaries
 
 ### Optional character names

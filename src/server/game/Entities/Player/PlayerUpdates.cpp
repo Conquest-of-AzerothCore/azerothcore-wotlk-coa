@@ -852,7 +852,7 @@ void Player::RewardProfessionXP(uint32 skillId, uint32 current, uint32 gray, uin
     double const reward = rates * auraMultiplier;
     uint32 xp = static_cast<uint32>(std::min(reward, double(std::numeric_limits<uint32>::max())));
     sScriptMgr->OnPlayerGiveXP(this, xp, nullptr, XPSOURCE_PROFESSION);
-    GiveXP(xp, nullptr);
+    GiveXP(xp, nullptr, 1.0f, false, XPSOURCE_PROFESSION);
 }
 
 bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue,

@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Item scaling: a laddered green looted from a creature scales to the looter's level and keeps its entry",
-  "contract": "Requires DestinyWeaver.Enable=1, DestinyWeaver.LevelScaling=1, DestinyWeaver.Scaling.Offset=4, CoA.ItemScaling=1 and CoA.ItemScaling.Native=1 with ItemStat.dbc in the data directory. The Rake 5807 is a level 10 creature that drops Lionfur Armor 17922 (green, item level 10, required level 5, 108 armor) at 100%. Lionfur Armor has an ItemStat.dbc ladder, so native item scaling keeps the authored entry and gives the looted item its own scaling level, the looter's level 30 (CoA.ItemScaling.Native.LootLevelOffset 0). The ladder row at 30 requires level 27 and carries 174 armor; the item level stays 10. A level 30 character with open-world scaling on sees The Rake at level 26 and with scaling off at 10; both corpses hold the authored entry because the level belongs to the looted item, not to the loot. Client rendering of the item is not tested.",
+  "contract": "Requires DestinyWeaver.Enable=1, DestinyWeaver.LevelScaling=1, DestinyWeaver.Scaling.Offset=4, CoA.ItemScaling=1 and CoA.ItemScaling.Native=1 with ItemStat.dbc in the data directory. The Rake 5807 is a level 10 creature that drops Lionfur Armor 17922 (green, item level 10, required level 5, 108 armor) at 100%. Lionfur Armor has an ItemStat.dbc ladder, so native item scaling keeps the authored entry and gives the looted item its own scaling level: the client's item key for the looter's level 30 (CoA.ItemScaling.Native.LootLevelOffset 0), 30 + 3 = 33. The ladder row at 33 requires level 30, the looter's own level, and carries 186 armor; the item level stays 10. A level 30 character with open-world scaling on sees The Rake at level 26 and with scaling off at 10; both corpses hold the authored entry because the level belongs to the looted item, not to the loot. Client rendering of the item is not tested.",
   "timeout_ms": 120000,
   "location": { "map": 0, "x": -9465, "y": 64, "z": 56, "o": 0 },
   "players": [
@@ -22,9 +22,9 @@
     { "action": "assert", "label": "The loot window shows the authored item level 10", "actor": "hero", "metric": "loot_item_level", "item": 17922, "equals": 10 },
     { "action": "assert", "label": "The loot window shows the authored 108 armor", "actor": "hero", "metric": "loot_item_armor", "item": 17922, "equals": 108 },
     { "action": "loot_slot", "actor": "hero", "item": 17922 },
-    { "action": "assert", "label": "The looted armor scales to the looter's level 30", "actor": "hero", "metric": "carried_item_scaling_level", "item": 17922, "equals": 30, "within_ms": 2000 },
-    { "action": "assert", "label": "The looted armor requires level 27 from its ladder row", "actor": "hero", "metric": "carried_item_required_level", "item": 17922, "equals": 27 },
-    { "action": "assert", "label": "The looted armor carries the ladder row's 174 armor", "actor": "hero", "metric": "carried_item_armor", "item": 17922, "equals": 174 },
+    { "action": "assert", "label": "The looted armor stores the client key 33 for the looter's level 30", "actor": "hero", "metric": "carried_item_scaling_level", "item": 17922, "equals": 33, "within_ms": 2000 },
+    { "action": "assert", "label": "The looted armor requires the looter's level 30 from its ladder row", "actor": "hero", "metric": "carried_item_required_level", "item": 17922, "equals": 30 },
+    { "action": "assert", "label": "The looted armor carries the ladder row's 186 armor", "actor": "hero", "metric": "carried_item_armor", "item": 17922, "equals": 186 },
     { "action": "assert", "label": "The looted armor keeps item level 10", "actor": "hero", "metric": "carried_item_level", "item": 17922, "equals": 10 },
     { "action": "close_loot", "actor": "hero" },
 

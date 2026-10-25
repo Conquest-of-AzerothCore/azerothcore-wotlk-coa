@@ -38,6 +38,20 @@ bool RulesetBlocksLevelScaling(Player const* player)
     return map && !map->Instanceable() && InPvPRuleset(player);
 }
 
+void SyncRulesetPvP(Player* player)
+{
+    if (InPvPRuleset(player))
+    {
+        player->SetPlayerFlag(PLAYER_FLAGS_IN_PVP);
+        player->UpdatePvP(true, true);
+    }
+    else if (player->HasAura(SPELL_PVE) && player->HasPlayerFlag(PLAYER_FLAGS_IN_PVP))
+    {
+        player->RemovePlayerFlag(PLAYER_FLAGS_IN_PVP);
+        player->UpdatePvP(false);
+    }
+}
+
 void ApplyRuleset(Player* player, uint32 selectionId)
 {
     bool const blockedBefore = RulesetBlocksLevelScaling(player);
@@ -51,6 +65,8 @@ void ApplyRuleset(Player* player, uint32 selectionId)
         player->CastSpell(player, SPELL_PVE, true);
     else
         player->CastSpell(player, SPELL_WAR_MODE, true);
+    player->ForceValuesUpdateAtIndex(UNIT_FIELD_BYTES_2);
+    SyncRulesetPvP(player);
 
     if (player->IsInWorld() && RulesetBlocksLevelScaling(player) != blockedBefore &&
         !LocalLevelScaling::NotifyScalingChanged(player))
@@ -150,6 +166,7 @@ public:
 
     void OnPlayerMapChanged(Player* player) override
     {
+        SyncRulesetPvP(player);
         if (pvpRulesetsDisableLevelScaling.load(std::memory_order_relaxed) && InPvPRuleset(player))
             player->RefreshQuestLogQueries();
     }
@@ -173,6 +190,8 @@ public:
             !player->HasAura(SPELL_PVE);
         if (noRuleset)
             ApplyRuleset(player, SPELL_SELECT_PVE);
+        else
+            SyncRulesetPvP(player);
     }
 };
 }

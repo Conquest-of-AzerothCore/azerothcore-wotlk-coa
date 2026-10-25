@@ -4422,9 +4422,10 @@ void Spell::_handle_finish_phase()
         }
 
         // For trap activation, pass the original target (trap triggerer) so proc trigger spells
-        // like Entrapment can find a valid target to cast on
+        // like Entrapment can find a valid target to cast on; likewise a finishing move's target, which
+        // Ruthlessness gives its combo point to
         Unit* finishVictim = nullptr;
-        if (procAttacker & PROC_FLAG_DONE_TRAP_ACTIVATION)
+        if (procAttacker & PROC_FLAG_DONE_TRAP_ACTIVATION || m_spellInfo->NeedsComboPoints())
             finishVictim = GetOriginalTarget();
 
         Unit::ProcSkillsAndAuras(m_originalCaster, finishVictim, procAttacker, PROC_FLAG_NONE, hitMask, 1, BASE_ATTACK, m_spellInfo, m_triggeredByAuraSpell.spellInfo,
@@ -7052,7 +7053,7 @@ SpellCastResult Spell::CheckCasterAuras(bool preventionOnly) const
 
     // Glyph of Pain Suppression
     // there is no other way to handle it
-    if (m_spellInfo->Id == 33206 && !m_caster->HasAura(63248))
+    if (m_spellInfo->Id == 33206 && !m_caster->HasAuraOrTwin(63248))
         usableInStun = false;
 
     // Check whether the cast should be prevented by any state you might have.

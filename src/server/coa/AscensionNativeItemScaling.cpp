@@ -29,6 +29,7 @@
 #include <mutex>
 #include <shared_mutex>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace NativeItemScaling
@@ -37,12 +38,62 @@ namespace
 {
 constexpr uint32 HeaderBytes = 20;
 constexpr uint32 ScanChunkRecords = 8192;
+constexpr uint32 AddonFields = 48;
+constexpr uint32 AddonRecordSize = AddonFields * sizeof(uint32);
+constexpr uint32 AddonEntryField = 1;
+constexpr uint32 AddonRebornArmorField = 43;
 
 std::atomic<bool> enabled{false};
 std::atomic<int32> lootLevelOffset{0};
 std::atomic<bool> questRewards{true};
-std::atomic<bool> levelKeys{false};
 std::atomic<bool> preview{false};
+std::atomic<bool> rebornArmor{false};
+
+std::vector<std::pair<uint32, uint32>> authoredRebornArmor;
+
+bool LoadAuthoredRebornArmor(std::filesystem::path const& path)
+{
+    std::ifstream file(path, std::ios::binary);
+    uint32 header[5] = {};
+    if (!file || !file.read(reinterpret_cast<char*>(header), sizeof(header)) || header[0] != 0x43424457 ||
+        header[2] != AddonFields || header[3] != AddonRecordSize)
+        return false;
+
+    uint32 const records = header[1];
+    std::vector<std::pair<uint32, uint32>> armor;
+    std::vector<uint8> chunk(std::size_t(ScanChunkRecords) * AddonRecordSize);
+    for (uint32 first = 0; first < records; first += ScanChunkRecords)
+    {
+        uint32 const count = std::min(ScanChunkRecords, records - first);
+        if (!file.read(reinterpret_cast<char*>(chunk.data()), std::streamsize(count) * AddonRecordSize))
+            return false;
+
+        for (uint32 i = 0; i < count; ++i)
+        {
+            uint8 const* record = chunk.data() + std::size_t(i) * AddonRecordSize;
+            uint32 entry;
+            uint32 reborn;
+            std::memcpy(&entry, record + AddonEntryField * sizeof(uint32), sizeof(uint32));
+            std::memcpy(&reborn, record + AddonRebornArmorField * sizeof(uint32), sizeof(uint32));
+            if (reborn)
+                armor.emplace_back(entry, reborn);
+        }
+    }
+
+    std::sort(armor.begin(), armor.end());
+    armor.erase(std::unique(armor.begin(), armor.end(),
+        [](auto const& a, auto const& b) { return a.first == b.first; }), armor.end());
+    authoredRebornArmor = std::move(armor);
+    return true;
+}
+
+uint32 AuthoredRebornArmor(ItemTemplate const& proto)
+{
+    auto const found = std::lower_bound(authoredRebornArmor.begin(), authoredRebornArmor.end(),
+        std::pair<uint32, uint32>(proto.ItemId, 0));
+    bool const listed = found != authoredRebornArmor.end() && found->first == proto.ItemId;
+    return ItemLadder::AuthoredRebornArmor(listed ? found->second : 0, proto.Armor);
+}
 
 class LadderStore
 {
@@ -163,6 +214,7 @@ std::unordered_map<ObjectGuid::LowType, uint8> instanceLevels;
 
 std::mutex templatesMutex;
 std::unordered_map<uint64, ItemTemplate> scaledTemplates;
+std::unordered_map<ItemTemplate const*, uint32> scaledRebornArmor;
 
 uint8 StoredLevel(Item const* item)
 {
@@ -202,7 +254,7 @@ ItemTemplate const* InstanceTemplate(Item const* item)
 
     uint8 const level = StoredLevel(item);
     ItemTemplate const* base = level ? item->GetTemplate() : nullptr;
-    if (!base || (PreviewOn() && level == base->ItemLevel))
+    if (!base)
         return nullptr;
 
     ItemLadder::Row const* row = LadderStore::Instance().Row(base->ItemId, level);
@@ -215,8 +267,22 @@ ItemTemplate const* InstanceTemplate(Item const* item)
     {
         ItemLadder::ApplyRow(scaled->second, *row);
         ItemScaling::RebracketDisenchant(scaled->second, *base, row->Level);
+        scaledRebornArmor.emplace(&scaled->second, row->ArmorReborn);
     }
     return &scaled->second;
+}
+
+uint32 WornArmor(Player const* player, ItemTemplate const* proto, uint32 armor)
+{
+    if (!armor || !rebornArmor.load(std::memory_order_relaxed) || !ItemLadder::WearsRebornArmor(player->getClass()))
+        return armor;
+
+    {
+        std::lock_guard lock(templatesMutex);
+        if (auto const scaled = scaledRebornArmor.find(proto); scaled != scaledRebornArmor.end())
+            return scaled->second;
+    }
+    return sObjectMgr->GetItemTemplate(proto->ItemId) == proto ? AuthoredRebornArmor(*proto) : armor;
 }
 
 void SendLevel(Player* player, Item const* item)
@@ -228,23 +294,44 @@ void SendLevel(Player* player, Item const* item)
     }
 }
 
-void SendAllLevels(Player* player)
+template <typename Visitor>
+void ForEachCarriedItem(Player const* player, Visitor&& visit)
 {
     for (uint8 slot = EQUIPMENT_SLOT_START; slot < PLAYER_SLOT_END; ++slot)
         if (Item const* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
-            SendLevel(player, item);
+            visit(item);
 
-    auto sendBag = [player](uint8 slot)
+    auto visitBag = [&](uint8 slot)
     {
         if (Bag const* bag = player->GetBagByPos(slot))
             for (uint32 index = 0; index < bag->GetBagSize(); ++index)
                 if (Item const* item = bag->GetItemByPos(uint8(index)))
-                    SendLevel(player, item);
+                    visit(item);
     };
     for (uint8 slot = INVENTORY_SLOT_BAG_START; slot < INVENTORY_SLOT_BAG_END; ++slot)
-        sendBag(slot);
+        visitBag(slot);
     for (uint8 slot = BANK_SLOT_BAG_START; slot < BANK_SLOT_BAG_END; ++slot)
-        sendBag(slot);
+        visitBag(slot);
+}
+
+void SendAllLevels(Player* player)
+{
+    ForEachCarriedItem(player, [player](Item const* item) { SendLevel(player, item); });
+}
+
+bool OwnsStoredKey(Player* player, uint32 itemId, uint32 key)
+{
+    bool owns = false;
+    auto check = [&](Item const* item)
+    {
+        owns = owns || (item->GetEntry() == itemId && StoredLevel(item) == key);
+    };
+    ForEachCarriedItem(player, check);
+    for (Mail const* mail : player->GetMails())
+        for (MailItemInfo const& info : mail->items)
+            if (Item const* item = player->GetMItem(info.item_guid))
+                check(item);
+    return owns;
 }
 
 void ItemArrived(Player* player, Item* item)
@@ -268,7 +355,7 @@ uint32 DropKey(Player const* looter, uint32 base)
 {
     if (!base)
         base = DropBase(looter);
-    return levelKeys.load(std::memory_order_relaxed) ? ItemLadder::ClientKey(base) : base;
+    return ItemLadder::ClientKey(base);
 }
 
 void AssignLevel(Player* owner, Item* item, uint32 key)
@@ -324,8 +411,7 @@ void MasterLooted(Player* receiver, Item* item)
 
 void QuestRewardStored(Player* player, Item* item, Quest const* quest)
 {
-    if (!levelKeys.load(std::memory_order_relaxed) || !questRewards.load(std::memory_order_relaxed) ||
-        !ScalingChosenBy(player))
+    if (!questRewards.load(std::memory_order_relaxed) || !ScalingChosenBy(player))
         return;
 
     LocalLevelScaling::QuestCurve const* curve = LocalLevelScaling::QuestCurveFor(quest->GetQuestId());
@@ -412,18 +498,24 @@ bool HandleItemStatQuery(WorldSession* session, WorldPacket const& packet)
     if (!level || !proto)
         return true;
 
-    if (PreviewOn() && level == proto->ItemLevel)
+    bool const reborn = rebornArmor.load(std::memory_order_relaxed);
+    if (PreviewOn() && level == proto->ItemLevel && !OwnsStoredKey(session->GetPlayer(), itemId, level))
     {
-        WorldPacket stock = ItemLadder::BuildItemStatResponse(itemId, level, ItemLadder::StockRow(*proto), proto);
+        ItemLadder::Row const stockRow =
+            ItemLadder::StockRow(*proto, reborn ? AuthoredRebornArmor(*proto) : proto->Armor);
+        WorldPacket stock = ItemLadder::BuildItemStatResponse(itemId, level, stockRow, proto);
         session->SendPacket(&stock);
         return true;
     }
 
-    ItemLadder::Row const* row = LadderStore::Instance().Row(itemId, level);
-    if (!row)
+    ItemLadder::Row const* found = LadderStore::Instance().Row(itemId, level);
+    if (!found)
         return true;
 
-    WorldPacket reply = ItemLadder::BuildItemStatResponse(itemId, level, *row, proto);
+    ItemLadder::Row row = *found;
+    if (!reborn)
+        row.ArmorReborn = row.Armor;
+    WorldPacket reply = ItemLadder::BuildItemStatResponse(itemId, level, row, proto);
     session->SendPacket(&reply);
     return true;
 }
@@ -468,15 +560,7 @@ public:
         if (reload)
             return;
 
-        levelKeys.store(sConfigMgr->GetOption<bool>("CoA.ItemScaling.Native.LevelKeys", false),
-            std::memory_order_relaxed);
-        _previewRequested = sConfigMgr->GetOption<bool>("CoA.ItemScaling.Native.Preview", false);
-        if (_previewRequested && !levelKeys.load(std::memory_order_relaxed))
-        {
-            LOG_ERROR("server.loading", "CoA.ItemScaling.Native.Preview needs CoA.ItemScaling.Native.LevelKeys; "
-                "the loot preview stays off");
-            _previewRequested = false;
-        }
+        _rebornArmorRequested = sConfigMgr->GetOption<bool>("CoA.ItemScaling.Native.RebornArmor", true);
     }
 
     void OnStartup() override
@@ -495,18 +579,32 @@ public:
 
         LoadInstanceLevels();
         enabled.store(true, std::memory_order_relaxed);
-        if (_previewRequested)
-        {
-            preview.store(true, std::memory_order_relaxed);
-            LocalLevelScaling::ItemPreviewOwner.store(&PreviewHooks, std::memory_order_relaxed);
-        }
+        preview.store(true, std::memory_order_relaxed);
+        LocalLevelScaling::ItemPreviewOwner.store(&PreviewHooks, std::memory_order_relaxed);
+        if (_rebornArmorRequested)
+            LoadRebornArmor();
         LOG_INFO("server.loading", ">> Indexed {} native item scaling ladders in {} ms",
             LadderStore::Instance().Items(), GetMSTimeDiffToNow(started));
     }
 
 private:
+    static void LoadRebornArmor()
+    {
+        std::filesystem::path const path = std::filesystem::path(sWorld->GetDataPath()) / "dbc" / "ItemAddon.dbc";
+        if (!LoadAuthoredRebornArmor(path))
+        {
+            LOG_ERROR("server.loading", "Reborn armor is off: {} is missing or not an ItemAddon table",
+                path.string());
+            return;
+        }
+
+        rebornArmor.store(true, std::memory_order_relaxed);
+        LocalLevelScaling::WornArmorOwner.store(&WornArmor, std::memory_order_relaxed);
+        LOG_INFO("server.loading", ">> Loaded reborn armor for {} authored items", authoredRebornArmor.size());
+    }
+
     bool _requested = false;
-    bool _previewRequested = false;
+    bool _rebornArmorRequested = true;
 };
 
 class Acquisition : public PlayerScript

@@ -880,7 +880,7 @@ std::array<SpellEffectInfo::StaticData, TOTAL_SPELL_EFFECTS> SpellEffectInfo::_d
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 194 unknown Ascension effect
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 195 SPELL_EFFECT_ASCENSION_RESET_COOLDOWN
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 196 unknown Ascension effect
-    {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 197 unknown Ascension effect
+    {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 197 SPELL_EFFECT_ASCENSION_MODIFY_FAMILY_COOLDOWN
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 198 unknown Ascension effect
 } };
 
@@ -1422,6 +1422,16 @@ bool SpellInfo::NeedsComboPoints() const
 bool SpellInfo::IsBreakingStealth() const
 {
     return !(AttributesEx & SPELL_ATTR1_ALLOW_WHILE_STEALTHED);
+}
+
+int32 SpellInfo::GetComboPointPowerBonus(Unit* caster, uint8 effIndex, uint32 comboPoints) const
+{
+    if (!caster || !HasComboPointPowerBonus(effIndex))
+        return 0;
+
+    float const power = caster->GetTotalAttackPowerValue(BASE_ATTACK) + caster->SpellBaseDamageBonusDone(GetSchoolMask());
+    float const cp = float(comboPoints);
+    return int32(power * (ComboPointPowerSquare[effIndex] * cp * cp + ComboPointPowerFlat[effIndex]));
 }
 
 bool SpellInfo::IsRangedWeaponSpell() const

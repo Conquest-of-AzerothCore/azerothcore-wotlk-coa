@@ -322,6 +322,7 @@ public:
     void EffectAscensionPctDamage(SpellEffIndex effIndex);
     void EffectAscensionTriggerSpellDelayed(SpellEffIndex effIndex);
     void EffectAscensionResetCooldown(SpellEffIndex effIndex);
+    void EffectAscensionModifyFamilyCooldown(SpellEffIndex effIndex);
     void EffectAscensionRestoreSpellCharges(SpellEffIndex effIndex);
     void EffectDistract(SpellEffIndex effIndex);
     void EffectPull(SpellEffIndex effIndex);

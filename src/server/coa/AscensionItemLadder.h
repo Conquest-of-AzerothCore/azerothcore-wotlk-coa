@@ -63,7 +63,9 @@ private:
 [[nodiscard]] uint8 ClampLevel(uint32 key);
 [[nodiscard]] uint32 ClientKey(uint32 level);
 [[nodiscard]] uint32 ClientBaseForKey(uint32 key);
-[[nodiscard]] Row StockRow(ItemTemplate const& proto);
+[[nodiscard]] bool WearsRebornArmor(uint8 playerClass);
+[[nodiscard]] uint32 AuthoredRebornArmor(uint32 itemAddonReborn, uint32 ownArmor);
+[[nodiscard]] Row StockRow(ItemTemplate const& proto, uint32 armorReborn);
 void ApplyRow(ItemTemplate& proto, Row const& row);
 [[nodiscard]] WorldPacket BuildItemStatResponse(uint32 itemId, uint32 level, Row const& row,
     ItemTemplate const* proto);

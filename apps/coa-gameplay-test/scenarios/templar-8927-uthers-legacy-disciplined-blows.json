@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Uther's Legacy healing triggers Disciplined Blows (#8927, #8884)",
+  "contract": "Uther's Legacy 706385 reads \"Condemn now heals you for 75% of the damage dealt\" and Disciplined Blows 680397 reads \"Your healing done triggers a holy pulse around healed targets\" (pulse 680398, once every 0.5 sec). Condemn 804906 ticks hand the Templar's event aura 706385 a periodic hit, which casts the heal copy 707302 on the Templar. 707302 is a Templar copy, and copies are excluded from every other event aura so a proc cannot feed itself; 680397 had no exemption, and it also ignored the heal because the copy is cast while the Uther's Legacy handler holds the Templar's event flag. Reports: the pair worked in the original CoA and never fires here. The Templar starts wounded so the heal is effective, no other healing is cast, so every 680398 pulse comes from 707302. Discriminating metric: spell_damage_count of 680398 against the dummy, zero before Condemn and positive after.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "templar",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "templar", "entry": 36, "level": 60, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "templar", "spell": 804906 },
+    { "action": "learn", "actor": "templar", "spell": 706385 },
+    { "action": "learn", "actor": "templar", "spell": 680397 },
+    { "action": "add_item", "actor": "templar", "item": 2495 },
+    { "action": "equip", "actor": "templar", "item": 2495, "slot": 15 },
+    { "action": "set_power", "actor": "templar", "power": 3, "value": 100 },
+    { "action": "set_health", "label": "Start wounded so Uther's Legacy heals effectively", "actor": "templar", "value": 1000 },
+    { "action": "assert", "label": "SETUP: Uther's Legacy is known", "actor": "templar", "metric": "knows_spell", "spell": 706385, "equals": 1 },
+    { "action": "assert", "label": "SETUP: Disciplined Blows is known", "actor": "templar", "metric": "knows_spell", "spell": 680397, "equals": 1 },
+    { "action": "assert", "label": "SETUP: no pulse has been cast yet", "actor": "templar", "metric": "spell_damage_count", "spell": 680398, "target": "dummy", "equals": 0 },
+    { "action": "cast", "actor": "templar", "spell": 804906, "target": "dummy" },
+    { "action": "assert", "label": "Condemn ticks heal the Templar through Uther's Legacy", "actor": "templar", "metric": "spell_heal_count", "spell": 707302, "min": 1, "within_ms": 15000 },
+    { "action": "assert", "label": "DISCRIMINATING: that heal triggers a Disciplined Blows pulse on the dummy", "actor": "templar", "metric": "spell_damage_count", "spell": 680398, "target": "dummy", "min": 1, "within_ms": 5000 }
+  ]
+}

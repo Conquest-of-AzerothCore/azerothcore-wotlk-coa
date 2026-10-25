@@ -36,6 +36,7 @@ enum Context : std::uint8_t
 
 constexpr std::array<std::uint32_t, 4> OVERPOWER_RANKS = { 7384, 7887, 11584, 11585 };
 constexpr std::array<std::uint32_t, 7> COUNTERATTACK_RANKS = { 19306, 19308, 20909, 20910, 27067, 48998, 48999 };
+constexpr std::array<std::uint32_t, 1> RIPOSTE_RANKS = { 14251 };
 
 template <std::size_t Count, class HasSpell>
 bool OwnsAny(std::array<std::uint32_t, Count> const& ranks, HasSpell const& hasSpell)
@@ -55,7 +56,7 @@ std::optional<bool> Answer(std::uint8_t stockClass, std::uint8_t context, HasSpe
             if (stockClass == WARRIOR)
                 return OwnsAny(OVERPOWER_RANKS, hasSpell);
             if (stockClass == HUNTER)
-                return OwnsAny(COUNTERATTACK_RANKS, hasSpell);
+                return OwnsAny(COUNTERATTACK_RANKS, hasSpell) || OwnsAny(RIPOSTE_RANKS, hasSpell);
             return std::nullopt;
         case CONTEXT_ABILITY:
             if (stockClass == DEATH_KNIGHT || stockClass == SHAMAN || stockClass == DRUID || stockClass == PRIEST)

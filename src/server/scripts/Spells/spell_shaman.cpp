@@ -235,7 +235,7 @@ class spell_sha_feral_spirit_scaling : public AuraScript
         if (Unit* owner = GetUnitOwner()->GetOwner())
         {
             int32 modifier = 30;
-            if (AuraEffect const* gofsEff = owner->GetAuraEffect(SPELL_SHAMAN_GLYPH_OF_FERAL_SPIRIT, EFFECT_0))
+            if (AuraEffect const* gofsEff = owner->GetAuraEffectOfRankedSpellOrTwin(SPELL_SHAMAN_GLYPH_OF_FERAL_SPIRIT, EFFECT_0))
                 modifier += gofsEff->GetAmount();
 
             amount = CalculatePct(std::max<int32>(0, owner->GetTotalAttackPowerValue(BASE_ATTACK)), modifier);
@@ -248,7 +248,7 @@ class spell_sha_feral_spirit_scaling : public AuraScript
         if (Unit* owner = GetUnitOwner()->GetOwner())
         {
             int32 modifier = 30;
-            if (AuraEffect const* gofsEff = owner->GetAuraEffect(SPELL_SHAMAN_GLYPH_OF_FERAL_SPIRIT, EFFECT_0))
+            if (AuraEffect const* gofsEff = owner->GetAuraEffectOfRankedSpellOrTwin(SPELL_SHAMAN_GLYPH_OF_FERAL_SPIRIT, EFFECT_0))
                 modifier += gofsEff->GetAmount();
 
             amount = CalculatePct(std::max<int32>(0, owner->GetTotalAttackPowerValue(BASE_ATTACK)), modifier);
@@ -601,7 +601,7 @@ class spell_sha_earth_shield : public AuraScript
             // Glyph of Earth Shield
             //! WORKAROUND
             //! this glyphe is a proc
-            if (AuraEffect* glyphe = caster->GetAuraEffect(SPELL_SHAMAN_GLYPH_OF_EARTH_SHIELD, EFFECT_0))
+            if (AuraEffect* glyphe = caster->GetAuraEffectOfRankedSpellOrTwin(SPELL_SHAMAN_GLYPH_OF_EARTH_SHIELD, EFFECT_0))
                 AddPct(amount, glyphe->GetAmount());
 
             // xinef: Improved Shields
@@ -1257,7 +1257,7 @@ class spell_sha_thunderstorm : public SpellScript
     void HandleKnockBack(SpellEffIndex effIndex)
     {
         // Glyph of Thunderstorm
-        if (GetCaster()->HasAura(SPELL_SHAMAN_GLYPH_OF_THUNDERSTORM))
+        if (GetCaster()->HasAuraOrTwin(SPELL_SHAMAN_GLYPH_OF_THUNDERSTORM))
             PreventHitDefaultEffect(effIndex);
     }
 

@@ -13,6 +13,7 @@
 #include "AscensionQuestLog.h"
 #include "AscensionSpecialization.h"
 #include "AscensionVanityOwnership.h"
+#include "AscensionVoidPortal.h"
 #include "AscensionWisdomball.h"
 #include "AscensionWildcard.h"
 #include "AscensionWildcardStarterData.h"
@@ -294,6 +295,34 @@ private:
     }
 
     std::map<uint16, bool> _original;
+};
+
+class TwoSideConfig
+{
+public:
+    explicit TwoSideConfig(boost::property_tree::ptree const& settings)
+    {
+        Set(CONFIG_ALLOW_TWO_SIDE_TRADE, settings.get<bool>("trade", false));
+        Set(CONFIG_ALLOW_TWO_SIDE_INTERACTION_MAIL, settings.get<bool>("mail", false));
+    }
+
+    TwoSideConfig(TwoSideConfig const&) = delete;
+    TwoSideConfig& operator=(TwoSideConfig const&) = delete;
+
+    ~TwoSideConfig()
+    {
+        for (auto const& [config, value] : _original)
+            sWorld->setBoolConfig(config, value);
+    }
+
+private:
+    void Set(ServerConfigs config, bool value)
+    {
+        _original.try_emplace(config, sWorld->getBoolConfig(config));
+        sWorld->setBoolConfig(config, value);
+    }
+
+    std::map<ServerConfigs, bool> _original;
 };
 
 struct CaseAccounts
@@ -695,7 +724,8 @@ void ObserveExtensionPacket(Actor& actor, WorldPacket const& packet)
         packet.GetOpcode() != SMSG_DUEL_REQUESTED && packet.GetOpcode() != SMSG_DUEL_COUNTDOWN &&
         packet.GetOpcode() != SMSG_DUEL_COMPLETE && packet.GetOpcode() != SMSG_FRIEND_STATUS &&
         packet.GetOpcode() != SMSG_SEND_MAIL_RESULT && packet.GetOpcode() != SMSG_GOSSIP_MESSAGE &&
-        packet.GetOpcode() != SMSG_BINDPOINTUPDATE && packet.GetOpcode() != SMSG_PET_SPELLS)
+        packet.GetOpcode() != SMSG_BINDPOINTUPDATE && packet.GetOpcode() != SMSG_PET_SPELLS &&
+        packet.GetOpcode() != SMSG_TRADE_STATUS)
         return;
 
     ++actor.extensionPackets[packet.GetOpcode()];
@@ -1260,6 +1290,8 @@ public:
                     starterItems += (starterItems.empty() ? "" : " ") + item.second.get_value<std::string>();
             _vanityOwnership.emplace(ownership->get<bool>("unlock_all"), starterItems);
         }
+        if (auto twoSide = _scenario.get_child_optional("two_side"))
+            _twoSide.emplace(*twoSide);
         _report.put("schema", 1);
         _report.put("run_id", _runId);
         _report.put("scenario", _scenario.get<std::string>("name"));
@@ -2097,6 +2129,8 @@ private:
         uint32 spell = step.get<uint32>("spell", 0);
         if (metric == "victim")
             return unit->GetVictim() == GetUnit(step.get<std::string>("target")) ? 1.0 : 0.0;
+        if (metric == "has_redirects")
+            return unit->GetThreatMgr().HasRedirects() ? 1.0 : 0.0;
         if (metric == "player_name")
             return unit->GetName() == step.get<std::string>("name") ? 1.0 : 0.0;
         if (metric == "race")
@@ -2252,6 +2286,14 @@ private:
         {
             Require(unit->IsPlayer(), "LFG state needs a player");
             return double(sLFGMgr->GetState(unit->GetGUID()));
+        }
+        if (metric == "lfg_need_allowed")
+        {
+            Player* player = unit->ToPlayer();
+            Require(player != nullptr, "LFG Need metric needs a player");
+            ItemTemplate const* item = sObjectMgr->GetItemTemplate(step.get<uint32>("item"));
+            Require(item != nullptr, "LFG Need metric needs a known item");
+            return player->CanRollForItemInLFG(item, player) == EQUIP_ERR_OK ? 1 : 0;
         }
         if (metric == "in_arena")
         {
@@ -2769,6 +2811,8 @@ private:
         }
         if (metric == "loot_received")
             return _actors.at(step.get<std::string>("actor")).lootReceived;
+        if (metric == "voidportal_group")
+            return double(Ascension::VoidPortal::ActiveGroupForTest());
         if (metric == "nearby_gameobject_count" || metric == "nearby_gameobject_quest_active")
         {
             bool const questActiveOnly = metric == "nearby_gameobject_quest_active";
@@ -2936,6 +2980,21 @@ private:
         }
         if (metric == "carried_money")
             return player->GetMoney();
+        if (metric == "loot_offered_item_count")
+        {
+            Creature* corpse = player->GetMap()->GetCreature(player->GetLootGUID());
+            Require(corpse != nullptr, "The player has no creature loot window open");
+            uint32 const wanted = step.get<uint32>("item");
+            uint32 offered = 0;
+            for (uint32 slot = 0; slot < corpse->loot.GetMaxSlotInLootFor(player); ++slot)
+            {
+                QuestItem* questItem = nullptr;
+                LootItem* item = corpse->loot.LootItemInSlot(slot, player, &questItem);
+                if (item && item->itemid == wanted && !(questItem ? questItem->is_looted : item->is_looted))
+                    ++offered;
+            }
+            return offered;
+        }
         if (metric == "loot_count" || metric == "loot_entry" || metric == "loot_gold" ||
             metric == "loot_required_level" || metric == "loot_item_level" || metric == "loot_base_entry" ||
             metric == "loot_item_armor" || metric == "loot_gear_item_level")
@@ -3189,8 +3248,8 @@ private:
         }
         if (metric == "spell_done_crit_chance" || metric == "spell_taken_crit_chance" ||
             metric == "spell_done_crit_chance_scripted" ||
-            metric == "melee_spell_damage_done" || metric == "spell_critical_damage" ||
-            metric == "armor_reduced_damage")
+            metric == "melee_spell_damage_done" || metric == "melee_spell_damage_done_scripted" ||
+            metric == "spell_critical_damage" || metric == "armor_reduced_damage")
         {
             Unit* target = GetUnit(step.get<std::string>("target"));
             SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
@@ -3209,6 +3268,12 @@ private:
                 sScriptMgr->OnSpellCritChance(probe, target, chance);
                 delete probe;
                 return chance;
+            }
+            if (metric == "melee_spell_damage_done_scripted")
+            {
+                int32 damage = int32(player->MeleeDamageBonusDone(target, 1000, BASE_ATTACK, info, info->GetSchoolMask()));
+                sScriptMgr->ModifySpellDamageTaken(target, player, damage, info);
+                return damage;
             }
             if (metric == "spell_critical_damage")
                 return Unit::SpellCriticalDamageBonus(player, info, 1000, target);
@@ -4866,6 +4931,16 @@ private:
             if (sScriptMgr->CanPacketReceive(player->GetSession(), packet))
                 player->GetSession()->HandleGameObjectUseOpcode(packet);
         }
+        else if (action == "voidportal")
+        {
+            std::string op = step.get<std::string>("op");
+            if (op == "force")
+                Ascension::VoidPortal::ForceSpawnForTest(step.get<uint32>("group"), step.get<uint32>("spawn"));
+            else if (op == "roll")
+                Ascension::VoidPortal::ForceProximityRollForTest(step.get<bool>("success"));
+            else
+                Require(false, "Unknown voidportal op");
+        }
         else if (action == "spell_click_nearby")
         {
             Creature* creature = player->FindNearestCreature(step.get<uint32>("entry"), 20.0f, true);
@@ -5771,6 +5846,7 @@ private:
     QueryCallbackProcessor _queries;
     std::optional<CreatureScaling::TestOverride> _creatureScaling;
     std::optional<AscensionVanityOwnership::TestOverride> _vanityOwnership;
+    std::optional<TwoSideConfig> _twoSide;
     GameEventStates _gameEvents;
 };
 

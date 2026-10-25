@@ -256,8 +256,10 @@ class spell_ascension_witch_hunter_ability : public SpellScript
             if (Noctis(GetSpellInfo()) && dealt && player->HasAura(707067))
                 target->RemoveAurasDueToSpell(680517, player->GetGUID());
         }
-        if ((Heartseeking(GetSpellInfo()) || id == 680230) && dealt)
+        if (Heartseeking(GetSpellInfo()) && dealt)
             player->RewardRage(dealt, 0, true);
+        if (id == 680230 && dealt)
+            Cast(player, player, 500179);
         if (Desecrate(GetSpellInfo()) && dealt && player->HasAura(560208) &&
             target->HasAura(680517, player->GetGUID()))
             player->CastCustomSpell(574335, SPELLVALUE_BASE_POINT0, int32(player->CountPctFromMaxHealth(1)), player,
