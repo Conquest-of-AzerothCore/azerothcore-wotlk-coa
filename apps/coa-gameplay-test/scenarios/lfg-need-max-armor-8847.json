@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Dungeon Finder Need follows a CoA class's best armor and shield proficiency (#8847, #8967)",
+  "contract": [
+    "Issues #8847 and #8967: in a Dungeon Finder dungeon a Templar could not roll Need on mail and a Primalist could not roll Need on plate, although both can wear it, because the Need rule capped armor at the stock class each CoA class borrows formulas from (Templar and Primalist resolve to leather wearers).",
+    "Inside the group's dungeon the native rule allows Need on armor up to the player's main armor type. For a CoA class that is the best armor proficiency it holds; a shield needs the Shield proficiency. The stock Rogue keeps its leather limit.",
+    "Drake-scale Vest 1677 (mail), Heavy Mithril Breastplate 7930 (plate) and Chief Brigadier Shield 4068 are uncommon, unrestricted and below the item level 70 main-type rule."
+  ],
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [
+    { "id": "rogue", "race": 1, "class": 4, "level": 60 },
+    { "id": "templar", "race": 1, "class": 19, "level": 60 },
+    { "id": "primalist", "race": 1, "class": 31, "level": 60 },
+    { "id": "cleric", "race": 1, "class": 27, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "group", "actor": "rogue", "target": "templar" },
+    { "action": "group", "actor": "rogue", "target": "primalist" },
+    { "action": "group", "actor": "rogue", "target": "cleric" },
+    { "action": "lfg_dungeon", "label": "The group is assigned Scarlet Monastery - Graveyard", "actor": "rogue", "dungeon": 18 },
+    { "action": "lfg_teleport", "actor": "rogue" },
+    { "action": "lfg_teleport", "actor": "templar" },
+    { "action": "lfg_teleport", "actor": "primalist" },
+    { "action": "lfg_teleport", "actor": "cleric" },
+    { "action": "assert", "label": "The rogue enters Scarlet Monastery", "actor": "rogue", "metric": "map_id", "equals": 189, "within_ms": 15000 },
+    { "action": "assert", "label": "The Templar enters Scarlet Monastery", "actor": "templar", "metric": "map_id", "equals": 189, "within_ms": 15000 },
+    { "action": "assert", "label": "The Primalist enters Scarlet Monastery", "actor": "primalist", "metric": "map_id", "equals": 189, "within_ms": 15000 },
+    { "action": "assert", "label": "The Sun Cleric enters Scarlet Monastery", "actor": "cleric", "metric": "map_id", "equals": 189, "within_ms": 15000 },
+    { "action": "wait", "ms": 1000 },
+
+    { "action": "assert", "label": "The Templar knows Mail", "actor": "templar", "metric": "skill_value", "skill": 413, "min": 1 },
+    { "action": "assert", "label": "The Templar does not know Plate Mail", "actor": "templar", "metric": "skill_value", "skill": 293, "equals": 0 },
+    { "action": "assert", "label": "The Primalist knows Plate Mail", "actor": "primalist", "metric": "skill_value", "skill": 293, "min": 1 },
+    { "action": "assert", "label": "The Sun Cleric knows Plate Mail", "actor": "cleric", "metric": "skill_value", "skill": 293, "min": 1 },
+    { "action": "assert", "label": "The Sun Cleric knows Shield", "actor": "cleric", "metric": "skill_value", "skill": 433, "min": 1 },
+
+    { "action": "assert", "label": "The rogue still cannot Need mail", "actor": "rogue", "metric": "lfg_need_allowed", "item": 1677, "equals": 0 },
+    { "action": "assert", "label": "The Templar can Need mail", "actor": "templar", "metric": "lfg_need_allowed", "item": 1677, "equals": 1 },
+    { "action": "assert", "label": "The Templar cannot Need plate", "actor": "templar", "metric": "lfg_need_allowed", "item": 7930, "equals": 0 },
+    { "action": "assert", "label": "The Primalist can Need plate", "actor": "primalist", "metric": "lfg_need_allowed", "item": 7930, "equals": 1 },
+    { "action": "assert", "label": "The Primalist can Need mail", "actor": "primalist", "metric": "lfg_need_allowed", "item": 1677, "equals": 1 },
+    { "action": "assert", "label": "The Sun Cleric can Need plate", "actor": "cleric", "metric": "lfg_need_allowed", "item": 7930, "equals": 1 },
+    { "action": "assert", "label": "The Sun Cleric can Need a shield", "actor": "cleric", "metric": "lfg_need_allowed", "item": 4068, "equals": 1 },
+    { "action": "assert", "label": "The Templar cannot Need a shield", "actor": "templar", "metric": "lfg_need_allowed", "item": 4068, "equals": 0 }
+  ]
+}
