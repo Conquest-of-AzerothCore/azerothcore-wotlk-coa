@@ -105,7 +105,7 @@ def admit(case, sequence):
     pace = case.get('pace', 'accelerated')
     lane = min(set(range(lanes)) - set(running))
     ahead = [path for path in Path(cases).glob('case-*.json') if int(path.stem[5:]) > sequence]
-    log('lanes.log', {'sequence': sequence, 'name': scenario['name'], 'lane': lane, 'pace': pace,
+    log('lanes.log', {'pid': os.getpid(), 'sequence': sequence, 'name': scenario['name'], 'lane': lane, 'pace': pace,
                       'exclusive': case.get('exclusive', False), 'ahead': len(ahead), 'hour': case.get('hour'),
                       'running': sorted(item['name'] for item in running.values())})
     realm['hour'] = case.get('hour', start_hour)
@@ -117,10 +117,21 @@ def admit(case, sequence):
     running[lane] = {
         'case': case, 'scenario': scenario, 'name': scenario['name'], 'sequence': sequence, 'admitted': now,
         'exclusive': case.get('exclusive') is True, 'realm_local_start': f"2026-09-25 {realm['hour']:02d}:00:00",
-        'finish': float('inf') if 'batch-hang' in contract else now + duration,
+        'finish': float('inf') if 'batch-hang' in contract or 'hold-for-peer' in contract else now + duration,
+        'hold': 'hold-for-peer' in contract,
         'crash': now + 0.15 if 'lane-crash' in contract and accelerated else float('inf'),
         'passed': 'batch-fail' not in contract and 'always-fail' not in contract
         and not ('accelerated-fail' in contract and accelerated)}
+
+
+def peer_admitted():
+    for line in Path(__file__).with_name('lanes.log').read_text().splitlines():
+        try:
+            if json.loads(line)['pid'] != os.getpid():
+                return True
+        except ValueError:
+            continue
+    return False
 
 
 def report(scenario, run_id, passed, extra):
@@ -216,6 +227,8 @@ while True:
         item = running[lane]
         if now >= item['crash']:
             crash()
+        if item['hold'] and peer_admitted():
+            item.update(hold=False, finish=now + 1.2)
         if now >= item['finish']:
             del running[lane]
             extra = {'batch_id': run_id, 'sequence': str(item['sequence']),
@@ -1360,13 +1373,7 @@ class BatchTests(unittest.TestCase):
         self.assertEqual({server['status'] for server in parallel['servers']}, {'stopped'})
         self.assertEqual(parallel['simulation'], serial['simulation'])
 
-    def test_exclusive_cases_spread_over_servers(self):
-        exclusive = ['linger-one', 'linger-two']
-        for key in exclusive:
-            self.write(self.definitions / 'scenarios' / f'{key}.json', scenario(key.title(), 'linger', wait=5000))
-        self.write(self.definitions / batch.POLICY_FILE,
-                   {'schema': 1, 'exclusive': {key: 'The fake worldserver treats it as process-global'
-                                               for key in exclusive}})
+    def assert_exclusive_cases_spread(self, exclusive):
         code, result = self.simulated('--jobs', '2', '--lanes', '3', '--scenario', *exclusive, *SLOW[:2], 'beta')
         self.assertEqual(code, 0, self.stderr.getvalue())
         self.assertEqual(result['simulation']['exclusive'], exclusive)
@@ -1379,6 +1386,24 @@ class BatchTests(unittest.TestCase):
         self.assertFalse(any(names & set(event['running']) for event in admissions))
         self.assertEqual(sorted(event['name'] for event in admissions if not event['exclusive']),
                          ['Beta', 'Slow one', 'Slow two'])
+
+    def test_exclusive_cases_spread_over_servers(self):
+        exclusive = ['linger-one', 'linger-two']
+        for key in exclusive:
+            self.write(self.definitions / 'scenarios' / f'{key}.json',
+                       scenario(key.title(), 'hold-for-peer', wait=5000))
+        self.write(self.definitions / batch.POLICY_FILE,
+                   {'schema': 1, 'exclusive': {key: 'The fake worldserver treats it as process-global'
+                                               for key in exclusive}})
+        self.assert_exclusive_cases_spread(exclusive)
+
+    def test_encounter_cases_spread_over_servers_one_per_server(self):
+        exclusive = ['linger-one', 'linger-two']
+        for key in exclusive:
+            encounter = scenario(key.title(), 'hold-for-peer', wait=5000)
+            encounter['steps'].insert(0, {'action': 'encounter_start', 'actor': 'caster', 'boss_entry': 36})
+            self.write(self.definitions / 'scenarios' / f'{key}.json', encounter)
+        self.assert_exclusive_cases_spread(exclusive)
 
     def test_each_job_has_its_own_cache_slot_and_port(self):
         ports = iter([40001, 40001, 40002, 40003, 40004])
@@ -1467,7 +1492,7 @@ class BatchTests(unittest.TestCase):
                          [(0, 'failed'), (0, 'stopped')])
 
     def test_real_pace_reruns_wait_for_every_server(self):
-        self.write(self.definitions / 'scenarios' / 'linger.json', scenario('Linger', 'linger', wait=5000))
+        self.write(self.definitions / 'scenarios' / 'linger.json', scenario('Linger', 'hold-for-peer', wait=5000))
         self.write(self.definitions / batch.POLICY_FILE,
                    {'schema': 1, 'exclusive': {'linger': 'The fake worldserver treats it as process-global'}})
         code, result = self.simulated('--jobs', '2', '--lanes', '2', '--real-pace-rerun', '--scenario', 'linger',
