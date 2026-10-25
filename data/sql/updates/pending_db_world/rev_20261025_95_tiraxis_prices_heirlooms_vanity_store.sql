@@ -4,9 +4,10 @@
 
 -- 1) Heirlooms leave Tiraxis (900011, rev_20261023_02) and are sold in the Vanity Store only, at twice their old
 --    Tiraxis price (one-hand, shield and off-hand 900 -> 1800, ranged and relics 1000 -> 2000, two-hand 1800 -> 3600);
---    trinkets cost what a Heirloom Cache would after the same doubling, 3000, and so do the heirloom rings and the
---    heirloom trinkets that had no price (raid medallions, Insignias of the Burning Legion, Stick on a Carrot). Heirloom
---    armor and necklaces stay unpriced: they only came from the caches. The 14 Heirloom and Experience Heirloom
+--    trinkets cost what a Heirloom Cache would after the same doubling, 3000, and so do the heirloom rings, necklaces
+--    and Stick on a Carrot. The raid medallions and the Insignias of the Burning Legion are not sold (price 0).
+--    Heirloom armor: a full set costs 6000 - chest (or robe) 2000, shoulders 2000, and the other seven pieces (head,
+--    waist, legs, feet, wrists, hands, back) 286 each. The 14 Heirloom and Experience Heirloom
 --    Caches are not sold at all any more (they have no Vanity Store row).
 -- 2) Tiraxis' Convenience Items (900008): new prices, and the Vanity Store sells the same items at the same price.
 INSERT INTO `coa_client_vanity_collection` (`ItemID`, `DonationPointCost`, `SeasonalPointCost`, `BazaarTokenCost`)
@@ -71,13 +72,89 @@ FROM (VALUES
   ROW(1339080, 3000),  -- Ring of the Sorcerer
   ROW(1339079, 3000),  -- Ring of the Vanguard
   ROW(12344, 3000),    -- Seal of Ascension
-  ROW(666002, 3000),   -- Battle for Mount Hyjal Medallion
-  ROW(666001, 3000),   -- Blackwing Lair Medallion
-  ROW(101428, 3000),   -- Greater Insignia of the Burning Legion
-  ROW(409, 3000),      -- Insignia of the Burning Legion
-  ROW(666000, 3000),   -- Molten Core Medallion
-  ROW(666003, 3000),   -- Serpentshrine Cavern Medallion
-  ROW(339075, 3000)    -- Stick on a Carrot
+  ROW(666002, 0),   -- Battle for Mount Hyjal Medallion
+  ROW(666001, 0),   -- Blackwing Lair Medallion
+  ROW(101428, 0),   -- Greater Insignia of the Burning Legion
+  ROW(409, 0),      -- Insignia of the Burning Legion
+  ROW(666000, 0),   -- Molten Core Medallion
+  ROW(666003, 0),   -- Serpentshrine Cavern Medallion
+  ROW(339075, 3000),   -- Stick on a Carrot
+  ROW(16309, 3000),    -- Drakefire Amulet
+  ROW(339076, 3000),   -- Pendant of Adventure
+  ROW(339100, 3000),   -- Pendant of Discovery
+  ROW(1339078, 3000),  -- Pendant of the Bulwark
+  ROW(1339077, 3000),  -- Pendant of the Sorcerer
+  ROW(1339076, 3000),  -- Pendant of the Warrior
+  ROW(1339126, 286),   -- Burnished Helmet of Might
+  ROW(1339124, 286),   -- Champion Herod's Helmet
+  ROW(1339123, 286),   -- Mystical Helm of Elements
+  ROW(1339125, 286),   -- Polished Helmet of Valor
+  ROW(1339122, 286),   -- Preened Ironfeather Headguard
+  ROW(1339121, 286),   -- Stained Shadowcraft Hood
+  ROW(1339120, 286),   -- Tattered Dreadmist Hood
+  ROW(1644102, 2000),  -- Aged Pauldrons of The Five Thunders
+  ROW(3142949, 2000),  -- Burnished Spaulders of Might
+  ROW(1642950, 2000),  -- Champion Herod's Shoulder
+  ROW(1644103, 2000),  -- Exceptional Stormshroud Shoulders
+  ROW(1644107, 2000),  -- Exquisite Sunderseer Mantle
+  ROW(1644105, 2000),  -- Lasting Feralheart Spaulders
+  ROW(1642951, 2000),  -- Mystical Pauldrons of Elements
+  ROW(1642949, 2000),  -- Polished Spaulders of Valor
+  ROW(1642984, 2000),  -- Preened Ironfeather Shoulders
+  ROW(1644100, 2000),  -- Pristine Lightforge Spaulders
+  ROW(1644101, 2000),  -- Prized Beastmaster's Mantle
+  ROW(1642952, 2000),  -- Stained Shadowcraft Spaulders
+  ROW(1644099, 2000),  -- Strengthened Stockade Pauldrons
+  ROW(1642985, 2000),  -- Tattered Dreadmist Mantle
+  ROW(3148685, 2000),  -- Burnished Breastplate of Might
+  ROW(1648677, 2000),  -- Champion's Deathdealer Breastplate
+  ROW(1648683, 2000),  -- Mystical Vest of Elements
+  ROW(1648685, 2000),  -- Polished Breastplate of Valor
+  ROW(1648687, 2000),  -- Preened Ironfeather Breastplate
+  ROW(1648689, 2000),  -- Stained Shadowcraft Tunic
+  ROW(1648691, 2000),  -- Tattered Dreadmist Robe
+  ROW(1339098, 286),   -- Burnished Belt of Might
+  ROW(1339096, 286),   -- Champion Herod's Belt
+  ROW(1339095, 286),   -- Mystical Belt of Elements
+  ROW(1339097, 286),   -- Polished Belt of Valor
+  ROW(1339094, 286),   -- Preened Ironfeather Belt
+  ROW(1339093, 286),   -- Stained Shadowcraft Belt
+  ROW(1339092, 286),   -- Tattered Dreadmist Belt
+  ROW(1339119, 286),   -- Burnished Platelegs of Might
+  ROW(1339117, 286),   -- Champion Herod's Legguards
+  ROW(1339116, 286),   -- Mystical Kilt of Elements
+  ROW(1339118, 286),   -- Polished Platelegs of Valor
+  ROW(1339115, 286),   -- Preened Ironfeather Legguards
+  ROW(1339114, 286),   -- Stained Shadowcraft Pants
+  ROW(1339113, 286),   -- Tattered Dreadmist Leggings
+  ROW(1339105, 286),   -- Burnished Boots of Might
+  ROW(1339103, 286),   -- Champion Herod's Boots
+  ROW(1339102, 286),   -- Mystical Boots of Elements
+  ROW(1339104, 286),   -- Polished Boots of Valor
+  ROW(1339101, 286),   -- Preened Ironfeather Boots
+  ROW(1339100, 286),   -- Stained Shadowcraft Boots
+  ROW(1339099, 286),   -- Tattered Dreadmist Boots
+  ROW(1339112, 286),   -- Burnished Bracers of Might
+  ROW(1339110, 286),   -- Champion Herod's Bracers
+  ROW(1339109, 286),   -- Mystical Bracers of Elements
+  ROW(1339111, 286),   -- Polished Bracers of Valor
+  ROW(1339108, 286),   -- Preened Ironfeather Bracers
+  ROW(1339107, 286),   -- Stained Shadowcraft Bracers
+  ROW(1339106, 286),   -- Tattered Dreadmist Bracers
+  ROW(1339133, 286),   -- Burnished Gauntlets of Might
+  ROW(1339131, 286),   -- Champion Herod's Gloves
+  ROW(1339130, 286),   -- Mystical Gloves of Elements
+  ROW(1339132, 286),   -- Polished Gauntlets of Valor
+  ROW(1339129, 286),   -- Preened Ironfeather Gloves
+  ROW(1339128, 286),   -- Stained Shadowcraft Gloves
+  ROW(1339127, 286),   -- Tattered Dreadmist Gloves
+  ROW(1339084, 286),   -- Champion's Deathdealer Cloak
+  ROW(1339090, 286),   -- Mystical Cloak of Elements
+  ROW(1339085, 286),   -- Polished Cloak of Valor
+  ROW(1339089, 286),   -- Preened Ironfeather Cloak
+  ROW(1339088, 286),   -- Stained Shadowcraft Cloak
+  ROW(1339087, 286),   -- Strengthened Cloak of Might
+  ROW(1339086, 286)    -- Tattered Dreadmist Cloak
 ) `n` (`ItemID`, `BazaarTokenCost`)
 WHERE EXISTS (SELECT 1 FROM `coa_client_vanity_collection` WHERE `BazaarTokenCost` > 0)
 ON DUPLICATE KEY UPDATE `DonationPointCost` = 0, `SeasonalPointCost` = 0, `BazaarTokenCost` = `n`.`BazaarTokenCost`;
