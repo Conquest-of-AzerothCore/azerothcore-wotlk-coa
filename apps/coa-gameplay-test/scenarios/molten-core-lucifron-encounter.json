@@ -9,7 +9,7 @@
     "access level (rev_20260930_82): a Barbarian tank and four Barbarian melee with Ancestral Strike 802450",
     "(the level 56 rank, AscensionSpellProgressionData.h) and a Worn Shortsword, two Sun Clerics healing with",
     "Illumination 502429 (level 60 rank) and three Pyromancers casting Flare Bolt 502018 (level 60 rank;",
-    "Spell.dbc 800790: 1500 ms cast, 35 yd range). They group into one raid before entering, so every member",
+    "Spell.dbc CastingTimeIndex 19 = SpellCastTimes 2500 ms; SpellRange 35 = 35 yd). They group into one raid before entering, so every member",
     "follows the leader's instance bind (InstanceSaveMgr::PlayerGetDestinationInstanceId); a scenario location",
     "inside the raid would give each ungrouped player its own instance. Phase 1 shows them the real spawns.",
     "They gather 37.8 yd from Lucifron on the floor of his previous spawn (rev_20260930_98, .gps -181.997),",
@@ -765,6 +765,16 @@
       "actor": "tank",
       "boss_entry": 12118,
       "radius": 60
+    },
+    {
+      "action": "assert",
+      "actor": "tank",
+      "label": "Lucifron engages within five seconds of the encounter start",
+      "metric": "timeline_count",
+      "event": "enter_combat",
+      "source_entry": 12118,
+      "min": 1,
+      "within_ms": 5000
     },
     {
       "action": "wait",

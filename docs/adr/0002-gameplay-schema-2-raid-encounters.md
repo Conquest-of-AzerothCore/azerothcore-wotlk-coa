@@ -27,7 +27,19 @@ Option 1. Scenario `"schema": 2` is accepted next to schema 1:
   declarative and gains no control flow (loops, conditions, variables).
 - Timeline checks reuse the existing `assert` and snapshot machinery; no second assertion framework is added.
 
-Option 2 is heavy to embed and brings no assertion framework. Option 3 has no raid or encounter opcodes.
+- A living tank bot holds a threat floor on the boss (110 percent of the highest non-tank threat plus 100, each
+  tick). It is a test fixture, not threat realism: it makes the tank the victim deterministically and masks
+  threat-wipe mechanics while the tank lives. It stops when no tank is alive, so a tank death still shows.
+- A case with `encounter_start` runs exclusively, because the timeline recorder is process-wide; batching puts such
+  cases on exclusive lanes.
+
+Option 2 is heavy to embed and brings no assertion framework. Option 3 was rejected for reasons read in
+`~/Projects/ConquestOfAzerothGhost` (head `ee9c9cc`): its README states the goal as E2E testing of classes, talents
+and features; it has no role routines in its client library (tank and healer appear only in e2e harness helpers and
+tests); its Molten Core raid tests (`e2e/zzmcraid/`) drive a raid with raw opcodes and GM commands such as
+`.modify hp`, and read server state by parsing chat output (for example `.npc info` health and position), so
+`enter_combat`, evade and boss state transitions are not observable there as events. Ghost stays the end-to-end
+network test.
 
 ## Consequences
 
