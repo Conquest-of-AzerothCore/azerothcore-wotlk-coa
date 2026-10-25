@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Parry comes from the class spell list, not PlayerStart.CustomSpells (COA-7194)",
+  "contract": "With the shipped PlayerStart.CustomSpells = 0, a Sun Cleric still knows Parry 3124 and has base parry, from the class spell list like the Guardian. An existing Sun Cleric without Parry gets it back on the next login.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "assert", "label": "a new Sun Cleric knows Parry", "actor": "cleric",
+      "metric": "knows_spell", "spell": 3124, "equals": 1 },
+    { "action": "assert", "label": "base parry is about 5%", "actor": "cleric",
+      "metric": "parry_chance", "min": 4, "max": 6 },
+    { "action": "unlearn", "label": "an older character without Parry", "actor": "cleric", "spell": 3124 },
+    { "action": "relog", "actor": "cleric" },
+    { "action": "assert", "label": "Parry comes back on login", "actor": "cleric",
+      "metric": "knows_spell", "spell": 3124, "equals": 1, "within_ms": 10000 }
+  ]
+}
