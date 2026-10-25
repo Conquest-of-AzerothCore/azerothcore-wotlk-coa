@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "The Killing Fields: Farmer Saldean offers each part of the chain once, never the old duplicates (#7809)",
+  "contract": "#7809 reported 'The Killing Fields' taken three times from Farmer Saldean 233, one copy finished but impossible to turn in. Five quests share that title: the chain 26993 -> 26994 (Farmer Furlbrow 237) -> 26995 -> 26996 -> 26997 (Saldean, each PrevQuestID the one before) and the older 9 (Harvest Watchers) and 17014 (Harvest Reapers). #7630 removed Saldean's starter rows for 9 and 17014 and kept their enders. Expected: with 26994 done Saldean offers 26995 and neither 9 nor 17014; once a part is rewarded he offers only the next part, and after 26997 none of the five.",
+  "timeout_ms": 45000,
+  "location": { "map": 0, "x": -10130.17, "y": 1057.23, "z": 36.3, "o": 0 },
+  "players": [
+    { "id": "farmhand", "race": 1, "class": 1, "level": 17 }
+  ],
+  "creatures": [
+    { "id": "saldean", "owner": "farmhand", "entry": 233, "distance": 2, "faction": 12 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "prepare_quest", "label": "Finish the golem part from Furlbrow", "actor": "farmhand", "quest": 26993 },
+    { "action": "reward_quest", "actor": "farmhand", "quest": 26993 },
+    { "action": "prepare_quest", "label": "Finish the second Furlbrow part", "actor": "farmhand", "quest": 26994 },
+    { "action": "reward_quest", "actor": "farmhand", "quest": 26994 },
+    { "action": "gossip_hello", "label": "Talk to Saldean", "actor": "farmhand", "target": "saldean" },
+    {
+      "action": "assert", "label": "Saldean offers the next chain part 26995", "actor": "farmhand",
+      "metric": "quest_menu_has", "quest": 26995, "equals": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Saldean does not offer the old Harvest Watchers copy 9",
+      "actor": "farmhand", "metric": "quest_menu_has", "quest": 9, "equals": 0
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Saldean does not offer the old Harvest Reapers copy 17014",
+      "actor": "farmhand", "metric": "quest_menu_has", "quest": 17014, "equals": 0
+    },
+    {
+      "action": "assert", "label": "26996 waits for 26995", "actor": "farmhand",
+      "metric": "quest_menu_has", "quest": 26996, "equals": 0
+    },
+    { "action": "prepare_quest", "actor": "farmhand", "quest": 26995 },
+    { "action": "reward_quest", "actor": "farmhand", "quest": 26995 },
+    { "action": "gossip_hello", "label": "Talk to Saldean after 26995", "actor": "farmhand", "target": "saldean" },
+    {
+      "action": "assert", "label": "26995 is not offered again", "actor": "farmhand",
+      "metric": "quest_menu_has", "quest": 26995, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Saldean offers 26996", "actor": "farmhand",
+      "metric": "quest_menu_has", "quest": 26996, "equals": 1
+    },
+    { "action": "prepare_quest", "actor": "farmhand", "quest": 26996 },
+    { "action": "reward_quest", "actor": "farmhand", "quest": 26996 },
+    { "action": "gossip_hello", "label": "Talk to Saldean after 26996", "actor": "farmhand", "target": "saldean" },
+    {
+      "action": "assert", "label": "26996 is not offered again", "actor": "farmhand",
+      "metric": "quest_menu_has", "quest": 26996, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Saldean offers 26997", "actor": "farmhand",
+      "metric": "quest_menu_has", "quest": 26997, "equals": 1
+    },
+    { "action": "prepare_quest", "actor": "farmhand", "quest": 26997 },
+    { "action": "reward_quest", "actor": "farmhand", "quest": 26997 },
+    { "action": "gossip_hello", "label": "Talk to Saldean after the chain", "actor": "farmhand", "target": "saldean" },
+    {
+      "action": "assert", "label": "26997 is not offered again", "actor": "farmhand",
+      "metric": "quest_menu_has", "quest": 26997, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Harvest Watchers 9 is still not offered after the chain", "actor": "farmhand",
+      "metric": "quest_menu_has", "quest": 9, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Harvest Reapers 17014 is still not offered after the chain", "actor": "farmhand",
+      "metric": "quest_menu_has", "quest": 17014, "equals": 0
+    }
+  ]
+}
