@@ -1142,7 +1142,7 @@ class RunnerTests(unittest.TestCase):
                     database.prepare(roles=('world',))
                 self.assertEqual(database.cleanup(), [])
             database.remove_credentials()
-        self.assertLess(len(server.scripts), 20)
+        self.assertIn('table_0', [table for table, _ in server.scripts])
         self.assertEqual(server.queries[-1], 'DROP DATABASE `coa_test_012345abcdef_world`;')
 
     def test_admin_credentials_preserve_source_endpoint_and_schema(self):

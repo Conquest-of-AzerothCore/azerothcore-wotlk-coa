@@ -1253,8 +1253,8 @@ def parser():
     result.add_argument('--world-cache-root', type=Path, default=CACHE_ROOT,
                         help='Parent directory of the per-worker world-cache slots')
     result.add_argument('--copy-workers', type=run.copy_worker_count, default=run.DEFAULT_COPY_WORKERS,
-                        help='MySQL connections that copy test schemas in parallel and, capped at 8, checksum the world '
-                             'for each worldserver '
+                        help='MySQL connections that copy test schemas in parallel and, capped at 8, checksum the '
+                             'world for each worldserver '
                              f'(1-{run.MAX_COPY_WORKERS}, default {run.DEFAULT_COPY_WORKERS}: min(8, CPU count))')
     return result
 

@@ -397,6 +397,100 @@ class FingerprintTests(unittest.TestCase):
     def test_run_parallel_stops_and_joins_started_threads_when_a_start_fails(self):
         release = threading.Event()
         started = []
+        finished = []
+        threads = []
+        original_start = threading.Thread.start
+        original_join = threading.Thread.join
+
+        def start(thread):
+            if threads:
+                raise RuntimeError("can't start new thread")
+            threads.append(thread)
+            original_start(thread)
+
+        def join(thread, timeout=None):
+            release.set()
+            original_join(thread, timeout)
+
+        def work(item):
+            started.append(item)
+            release.wait(10)
+            finished.append(item)
+
+        with patch.object(threading.Thread, 'start', start), patch.object(threading.Thread, 'join', join):
+            with self.assertRaisesRegex(RuntimeError, "can't start"):
+                run_parallel(work, list(range(10)), 4)
+        self.assertEqual((started, finished), ([0], [0]))
+        self.assertFalse(threads[0].is_alive())
+
+    def test_parallel_fingerprint_equals_serial(self):
+        tables = [f'table_{index:02d}' for index in range(11)]
+        lock = threading.Lock()
+        statements = []
+
+        def sql(role, statement, timeout=None):
+            with lock:
+                statements.append(statement)
+            if statement.startswith('SHOW FULL TABLES'):
+                return '\n'.join(f'{table}\tBASE TABLE' for table in tables)
+            if statement.startswith('CHECKSUM TABLE'):
+                names = re.findall(r'`world`\.`(\w+)`', statement)
+                return '\n'.join(f'world.{table}\t{1000 + int(table[-2:])}' for table in names)
+            if statement.startswith('SHOW CREATE TABLE'):
+                return '\n'.join(f'{table}\tCREATE TABLE {table} (...)' for table in tables)
+            return '0'
+
+        serial = world_fingerprint(SimpleNamespace(sql=sql, copy_workers=1), 'world')
+        serial_checksums = [item for item in statements if item.startswith('CHECKSUM')]
+        self.assertEqual(len(serial_checksums), 1)
+        statements.clear()
+        parallel = world_fingerprint(SimpleNamespace(sql=sql, copy_workers=4), 'world')
+        self.assertEqual(parallel, serial)
+        self.assertEqual(len([item for item in statements if item.startswith('CHECKSUM')]), 4)
+        statements.clear()
+        capped = world_fingerprint(SimpleNamespace(sql=sql, copy_workers=64), 'world')
+        self.assertEqual(capped, serial)
+        self.assertEqual(len([item for item in statements if item.startswith('CHECKSUM')]), 8)
+
+    def test_run_parallel_runs_inline_for_one_worker_or_one_item(self):
+        threads = []
+
+        def record(item):
+            threads.append(threading.get_ident())
+            return item * 2
+
+        self.assertEqual(run_parallel(record, [1, 2, 3], 1), [2, 4, 6])
+        self.assertEqual(run_parallel(record, [5], 4), [10])
+        self.assertEqual(set(threads), {threading.get_ident()})
+
+    def test_run_parallel_preserves_item_order(self):
+        barrier = threading.Barrier(3, timeout=10)
+
+        def slow_first(item):
+            if item < 3:
+                barrier.wait()
+            return item
+
+        self.assertEqual(run_parallel(slow_first, list(range(8)), 3), list(range(8)))
+
+    def test_run_parallel_reraises_first_failure_and_starts_nothing_after_it(self):
+        started = []
+
+        def fail(item):
+            started.append(item)
+            raise ValueError(f'failed {item}')
+
+        with self.assertRaisesRegex(ValueError, 'failed 0'):
+            run_parallel(fail, list(range(50)), 1)
+        self.assertEqual(started, [0])
+        started.clear()
+        with self.assertRaises(ValueError):
+            run_parallel(fail, list(range(50)), 2)
+        self.assertLessEqual(len(started), 2)
+
+    def test_run_parallel_stops_and_joins_started_threads_when_a_start_fails(self):
+        release = threading.Event()
+        started = []
         original = threading.Thread.start
         calls = []
 
