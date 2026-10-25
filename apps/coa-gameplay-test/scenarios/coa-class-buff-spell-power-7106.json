@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "CoA class buffs: spell power buffs from different classes do not stack (COA-7106)",
+  "contract": "Witching Edict 707684, Whispers of C'thun 572791 and Devotion of Radiance 575040 all grant spell power and form one exclusive category: each new one replaces the previous one on the target.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "target", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_aura", "actor": "target", "spell": 707684, "stacks": 1 },
+    { "action": "assert", "label": "SETUP: Witching Edict is on the target", "actor": "target",
+      "metric": "aura", "spell": 707684, "equals": 1, "within_ms": 2000 },
+    { "action": "set_aura", "actor": "target", "spell": 572791, "stacks": 1 },
+    { "action": "assert", "label": "Whispers of C'thun is applied", "actor": "target",
+      "metric": "aura", "spell": 572791, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "it replaces Witching Edict", "actor": "target",
+      "metric": "aura", "spell": 707684, "equals": 0 },
+    { "action": "set_aura", "actor": "target", "spell": 575040, "stacks": 1 },
+    { "action": "assert", "label": "Devotion of Radiance is applied", "actor": "target",
+      "metric": "aura", "spell": 575040, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "it replaces Whispers of C'thun", "actor": "target",
+      "metric": "aura", "spell": 572791, "equals": 0 }
+  ]
+}
