@@ -40,6 +40,7 @@
 #include "GossipDef.h"
 #include "Group.h"
 #include "GroupMgr.h"
+#include "InstanceScript.h"
 #include "Item.h"
 #include "LFGMgr.h"
 #include "LFGPackets.h"
@@ -78,6 +79,7 @@
 
 #include "CoAGameplayClock.h"
 #include "CoAGameplayIsolation.h"
+#include "CoAGameplayTimeline.h"
 #include "CoASpellbook.h"
 #include <boost/bind/placeholders.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -400,6 +402,138 @@ private:
 bool ProcCounter::_enabled = false;
 std::map<std::pair<ObjectGuid, uint32>, uint32> ProcCounter::_counts;
 std::map<std::pair<ObjectGuid, uint32>, uint32> ProcCounter::_casts;
+
+constexpr float DefaultEncounterRadius = 100.0f;
+constexpr float MaximumEncounterRadius = 200.0f;
+
+uint64 GameNowMs()
+{
+    return uint64(std::chrono::duration_cast<Milliseconds>(GameTime::Now().time_since_epoch()).count());
+}
+
+class TimelineRecorder
+{
+public:
+    static void Begin(Creature const* boss, uint64 nowMs)
+    {
+        _mapId = boss->GetMapId();
+        _instanceId = boss->GetInstanceId();
+        _phaseMask = boss->GetPhaseMask();
+        _boss = boss->GetGUID();
+        _timeline.Start(nowMs);
+        _active = true;
+    }
+
+    static void End()
+    {
+        _active = false;
+        _boss.Clear();
+    }
+
+    static bool Active()
+    {
+        return _active;
+    }
+
+    static ObjectGuid Boss()
+    {
+        return _boss;
+    }
+
+    static void Record(WorldObject const* subject, CoAGameplay::TimelineEvent event)
+    {
+        if (!_active || !subject || !subject->InSamePhase(_phaseMask)
+            || !CoAGameplay::RecordsUnit(_mapId, _instanceId, subject->GetMapId(), subject->GetInstanceId()))
+            return;
+        event.atMs = GameNowMs();
+        _timeline.Record(event);
+    }
+
+    static void Record(Map const* map, CoAGameplay::TimelineEvent event)
+    {
+        if (!_active || !map || !CoAGameplay::RecordsUnit(_mapId, _instanceId, map->GetId(), map->GetInstanceId()))
+            return;
+        event.atMs = GameNowMs();
+        _timeline.Record(event);
+    }
+
+    static void Engage(Unit const* unit)
+    {
+        if (_active && unit->GetGUID() == _boss)
+            _timeline.MarkEngaged(GameNowMs());
+    }
+
+    static CoAGameplay::Timeline const& Get()
+    {
+        return _timeline;
+    }
+
+private:
+    static bool _active;
+    static uint32 _mapId;
+    static uint32 _instanceId;
+    static uint32 _phaseMask;
+    static ObjectGuid _boss;
+    static CoAGameplay::Timeline _timeline;
+};
+
+bool TimelineRecorder::_active = false;
+uint32 TimelineRecorder::_mapId = 0;
+uint32 TimelineRecorder::_instanceId = 0;
+uint32 TimelineRecorder::_phaseMask = 0;
+ObjectGuid TimelineRecorder::_boss;
+CoAGameplay::Timeline TimelineRecorder::_timeline;
+
+using TimelineEventNames = std::array<std::pair<char const*, CoAGameplay::TimelineEventKind>, 8>;
+
+TimelineEventNames const& TimelineEvents()
+{
+    using Kind = CoAGameplay::TimelineEventKind;
+    static TimelineEventNames const names{{
+        { "cast", Kind::Cast }, { "aura_applied", Kind::AuraApplied }, { "aura_removed", Kind::AuraRemoved },
+        { "death", Kind::Death }, { "enter_combat", Kind::EnterCombat }, { "evade", Kind::Evade },
+        { "spawn", Kind::Spawn }, { "boss_state", Kind::BossState } }};
+    return names;
+}
+
+CoAGameplay::TimelineEventKind TimelineEventKindNamed(std::string const& name)
+{
+    for (auto const& [candidate, kind] : TimelineEvents())
+        if (name == candidate)
+            return kind;
+    throw std::runtime_error("Unknown timeline event: " + name);
+}
+
+char const* TimelineEventName(CoAGameplay::TimelineEventKind kind)
+{
+    for (auto const& [name, candidate] : TimelineEvents())
+        if (kind == candidate)
+            return name;
+    return "unknown";
+}
+
+EncounterState EncounterStateNamed(std::string const& name)
+{
+    static std::array<std::pair<char const*, EncounterState>, 5> const states{{
+        { "NOT_STARTED", NOT_STARTED }, { "IN_PROGRESS", IN_PROGRESS }, { "FAIL", FAIL }, { "DONE", DONE },
+        { "SPECIAL", SPECIAL } }};
+    for (auto const& [candidate, state] : states)
+        if (name == candidate)
+            return state;
+    throw std::runtime_error("Unknown encounter state: " + name);
+}
+
+uint32 CreatureEntry(Unit const* unit)
+{
+    return unit && unit->IsCreature() ? unit->GetEntry() : 0;
+}
+
+double Median(std::vector<uint64> values)
+{
+    std::sort(values.begin(), values.end());
+    std::size_t const middle = values.size() / 2;
+    return values.size() % 2 ? double(values[middle]) : (double(values[middle - 1]) + double(values[middle])) / 2.0;
+}
 
 enum class ActorStage
 {
@@ -1451,12 +1585,32 @@ public:
         _report.put("assertions", _assertions);
         _report.put("completed_steps", _completed);
         _report.put_child("steps", _records);
+        if (EncounterActive())
+            _report.put_child("timeline", DescribeTimeline());
         if (_measured)
             RecordTiming();
     }
 
+    bool EncounterActive() const
+    {
+        return _encounterBoss.has_value();
+    }
+
+    Creature* EncounterBoss() const
+    {
+        if (!_encounterBoss)
+            return nullptr;
+        Map* map = sMapMgr->FindMap(_encounterBoss->map, _encounterBoss->instance);
+        return map ? map->GetCreature(_encounterBoss->guid) : nullptr;
+    }
+
     bool Dismiss(bool leaveGroups)
     {
+        if (EncounterActive())
+        {
+            TimelineRecorder::End();
+            _encounterBoss.reset();
+        }
         std::set<ObjectGuid> units;
         RemoveFixtureDescendants(units);
         for (auto const& [id, target] : _targets)
@@ -1991,6 +2145,96 @@ private:
         return SentAddonField<uint32>(player, step, firstField + slot);
     }
 
+    ObjectGuid ActorGuid(std::string const& id) const
+    {
+        if (auto actor = _actors.find(id); actor != _actors.end())
+            return actor->second.guid;
+        auto target = _targets.find(id);
+        Require(target != _targets.end(), "Unknown actor: " + id);
+        return target->second.guid;
+    }
+
+    std::vector<ObjectGuid> ActorGuids(Tree const& step, std::string const& field) const
+    {
+        std::vector<ObjectGuid> guids;
+        if (auto actors = step.get_child_optional(field))
+            for (auto const& [key, id] : *actors)
+                guids.push_back(ActorGuid(id.get_value<std::string>()));
+        return guids;
+    }
+
+    CoAGameplay::TimelineFilter TimelineFilterFor(Tree const& step) const
+    {
+        CoAGameplay::TimelineFilter filter;
+        filter.kind = TimelineEventKindNamed(step.get<std::string>("event"));
+        if (auto spell = step.get_optional<uint32>("spell"))
+            filter.spell = *spell;
+        if (auto entry = step.get_optional<uint32>("source_entry"))
+            filter.sourceEntry = *entry;
+        if (auto state = step.get_optional<std::string>("state"))
+        {
+            Require(filter.kind == CoAGameplay::TimelineEventKind::BossState, "Timeline state needs boss_state");
+            filter.value = uint32(EncounterStateNamed(*state));
+        }
+        filter.targets = ActorGuids(step, "target_actors");
+        filter.excludedTargets = ActorGuids(step, "exclude_target_actors");
+        return filter;
+    }
+
+    double MeasureTimeline(std::string const& metric, Tree const& step) const
+    {
+        Require(EncounterActive(), "Timeline metrics need encounter_start");
+        CoAGameplay::TimelineFilter const filter = TimelineFilterFor(step);
+        CoAGameplay::Timeline const& timeline = TimelineRecorder::Get();
+        double const missing = std::numeric_limits<double>::quiet_NaN();
+        if (metric == "timeline_count")
+            return timeline.Count(filter);
+        if (metric == "timeline_first_ms")
+        {
+            std::optional<int64> const first = timeline.FirstMs(filter);
+            return first ? double(*first) : missing;
+        }
+        std::vector<uint64> const intervals = timeline.Intervals(filter);
+        if (intervals.empty())
+            return missing;
+        if (metric == "timeline_interval_min_ms")
+            return double(*std::min_element(intervals.begin(), intervals.end()));
+        if (metric == "timeline_interval_max_ms")
+            return double(*std::max_element(intervals.begin(), intervals.end()));
+        Require(metric == "timeline_interval_median_ms", "Unknown metric: " + metric);
+        return Median(intervals);
+    }
+
+    std::string TimelineTargetName(ObjectGuid guid) const
+    {
+        if (guid.IsEmpty())
+            return "";
+        for (auto const& [id, actor] : _actors)
+            if (actor.guid == guid)
+                return id;
+        for (auto const& [id, target] : _targets)
+            if (target.guid == guid)
+                return id;
+        return guid.ToString();
+    }
+
+    Tree DescribeTimeline() const
+    {
+        Tree events;
+        for (CoAGameplay::TimelineEvent const& event : TimelineRecorder::Get().Events())
+        {
+            Tree entry;
+            entry.put("at_ms", event.atMs);
+            entry.put("event", TimelineEventName(event.kind));
+            entry.put("source_entry", event.sourceEntry);
+            entry.put("spell", event.spell);
+            entry.put("target", TimelineTargetName(event.target));
+            entry.put("value", event.value);
+            events.push_back({ "", entry });
+        }
+        return events;
+    }
+
     double ListedInstanceBinds(Tree const& step) const
     {
         auto const& payloads = _actors.at(step.get<std::string>("actor")).extensionPayloads;
@@ -2135,6 +2379,8 @@ private:
 
     double Measure(Tree const& step)
     {
+        if (std::string const requested = step.get<std::string>("metric"); requested.starts_with("timeline_"))
+            return MeasureTimeline(requested, step);
         Unit* unit = GetUnit(step.get<std::string>("actor"));
         std::string metric = step.get<std::string>("metric");
         if (metric == "spell_hit_chance")
@@ -4822,6 +5068,19 @@ private:
             record.put("dungeon", dungeon);
             record.put("entry", (*finalEncounter)->creditEntry);
         }
+        else if (action == "encounter_start")
+        {
+            uint32 const entry = step.get<uint32>("boss_entry");
+            float const radius = step.get<float>("radius", DefaultEncounterRadius);
+            Require(radius > 0.0f && radius <= MaximumEncounterRadius, "Encounter radius must be 0-200 yards");
+            Require(!TimelineRecorder::Active(), "Another encounter timeline is already recording");
+            Creature* boss = player->FindNearestCreature(entry, radius, true);
+            Require(boss != nullptr,
+                Acore::StringFormat("encounter_start found no creature {} within {} yards", entry, radius));
+            _encounterBoss = Target{ boss->GetMapId(), boss->GetInstanceId(), boss->GetGUID() };
+            TimelineRecorder::Begin(boss, GameNowMs());
+            record.put("boss", boss->GetGUID().ToString());
+        }
         else if (action == "encounter_credit")
         {
             Map* map = player->GetMap();
@@ -5857,6 +6116,7 @@ private:
     std::map<std::string, Actor> _actors;
     std::map<std::string, Target> _targets;
     std::map<std::string, double> _snapshots;
+    std::optional<Target> _encounterBoss;
     QueryCallbackProcessor _queries;
     std::optional<CreatureScaling::TestOverride> _creatureScaling;
     std::optional<AscensionVanityOwnership::TestOverride> _vanityOwnership;
@@ -6595,9 +6855,88 @@ public:
         if (!caster || !spell)
             return;
         if (info)
+        {
             ProcCounter::RecordCast(caster->GetGUID(), info->Id);
+            TimelineRecorder::Record(caster, { 0, CoAGameplay::TimelineEventKind::Cast, caster->GetGUID(),
+                spell->m_targets.GetUnitTargetGUID(), CreatureEntry(caster), info->Id, 0 });
+        }
         if (SpellInfo const* triggeredBy = spell->GetTriggeredByAuraSpellInfo())
             ProcCounter::Record(caster->GetGUID(), triggeredBy->Id);
+    }
+};
+
+class CoAGameplayTestTimelineUnits final : public UnitScript
+{
+public:
+    CoAGameplayTestTimelineUnits() : UnitScript("CoAGameplayTestTimelineUnits", true, { UNITHOOK_ON_AURA_APPLY,
+        UNITHOOK_ON_AURA_REMOVE, UNITHOOK_ON_UNIT_DEATH, UNITHOOK_ON_UNIT_ENTER_COMBAT,
+        UNITHOOK_ON_UNIT_ENTER_EVADE_MODE }) { }
+
+    void OnAuraApply(Unit* unit, Aura* aura) override
+    {
+        if (!TimelineRecorder::Active() || !unit || !aura)
+            return;
+        TimelineRecorder::Record(unit, { 0, CoAGameplay::TimelineEventKind::AuraApplied, aura->GetCasterGUID(),
+            unit->GetGUID(), CreatureEntry(aura->GetCaster()), aura->GetId(), aura->GetStackAmount() });
+    }
+
+    void OnAuraRemove(Unit* unit, AuraApplication* application, AuraRemoveMode mode) override
+    {
+        if (!TimelineRecorder::Active() || !unit || !application)
+            return;
+        Aura const* aura = application->GetBase();
+        TimelineRecorder::Record(unit, { 0, CoAGameplay::TimelineEventKind::AuraRemoved, aura->GetCasterGUID(),
+            unit->GetGUID(), CreatureEntry(aura->GetCaster()), aura->GetId(), uint32(mode) });
+    }
+
+    void OnUnitDeath(Unit* unit, Unit*) override
+    {
+        if (unit)
+            TimelineRecorder::Record(unit, { 0, CoAGameplay::TimelineEventKind::Death, unit->GetGUID(),
+                unit->GetGUID(), CreatureEntry(unit), 0, 0 });
+    }
+
+    void OnUnitEnterCombat(Unit* unit, Unit* victim) override
+    {
+        if (!unit)
+            return;
+        TimelineRecorder::Record(unit, { 0, CoAGameplay::TimelineEventKind::EnterCombat, unit->GetGUID(),
+            victim ? victim->GetGUID() : ObjectGuid::Empty, CreatureEntry(unit), 0, 0 });
+        TimelineRecorder::Engage(unit);
+    }
+
+    void OnUnitEnterEvadeMode(Unit* unit, uint8 reason) override
+    {
+        if (unit)
+            TimelineRecorder::Record(unit, { 0, CoAGameplay::TimelineEventKind::Evade, unit->GetGUID(),
+                ObjectGuid::Empty, CreatureEntry(unit), 0, reason });
+    }
+};
+
+class CoAGameplayTestTimelineSpawns final : public AllCreatureScript
+{
+public:
+    CoAGameplayTestTimelineSpawns() : AllCreatureScript("CoAGameplayTestTimelineSpawns") { }
+
+    void OnCreatureAddWorld(Creature* creature) override
+    {
+        if (creature)
+            TimelineRecorder::Record(creature, { 0, CoAGameplay::TimelineEventKind::Spawn, creature->GetGUID(),
+                ObjectGuid::Empty, creature->GetEntry(), 0, 0 });
+    }
+};
+
+class CoAGameplayTestTimelineBossStates final : public GlobalScript
+{
+public:
+    CoAGameplayTestTimelineBossStates() : GlobalScript("CoAGameplayTestTimelineBossStates",
+        { GLOBALHOOK_ON_BEFORE_SET_BOSS_STATE }) { }
+
+    void OnBeforeSetBossState(uint32, EncounterState newState, EncounterState oldState, Map* instance) override
+    {
+        if (newState != oldState)
+            TimelineRecorder::Record(instance, { 0, CoAGameplay::TimelineEventKind::BossState, ObjectGuid::Empty,
+                ObjectGuid::Empty, 0, 0, uint32(newState) });
     }
 };
 }
@@ -6607,4 +6946,7 @@ void AddCoAGameplayTestScripts()
     new CoAGameplayTest();
     new CoAGameplayTestRegeneration();
     new CoAGameplayTestProcCounter();
+    new CoAGameplayTestTimelineUnits();
+    new CoAGameplayTestTimelineSpawns();
+    new CoAGameplayTestTimelineBossStates();
 }

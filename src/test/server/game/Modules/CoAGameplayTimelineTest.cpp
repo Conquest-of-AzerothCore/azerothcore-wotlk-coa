@@ -177,3 +177,10 @@ TEST(CoAGameplayTimeline, StartClearsPreviousEvents)
     timeline.Record(Cast(10500, ImpactSpell));
     EXPECT_EQ(timeline.FirstMs(CastOf(ImpactSpell)), std::optional<int64>(500));
 }
+
+TEST(CoAGameplayTimeline, RecorderIgnoresOtherInstances)
+{
+    EXPECT_FALSE(RecordsUnit(409, 7, 409, 8));
+    EXPECT_TRUE(RecordsUnit(409, 7, 409, 7));
+    EXPECT_FALSE(RecordsUnit(409, 7, 0, 0));
+}

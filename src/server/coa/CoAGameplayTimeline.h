@@ -46,6 +46,8 @@ namespace CoAGameplay
         std::vector<ObjectGuid> excludedTargets;
     };
 
+    bool RecordsUnit(uint32 encounterMapId, uint32 encounterInstanceId, uint32 unitMapId, uint32 unitInstanceId);
+
     class Timeline
     {
     public:

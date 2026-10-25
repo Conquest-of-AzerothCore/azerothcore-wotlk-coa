@@ -465,6 +465,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `lfg_accept` | Player `actor`: native `CMSG_LFG_PROPOSAL_RESULT` acceptance of the last Dungeon Finder proposal the actor received. |
 | `lfg_final_credit` | Player `actor` in a Dungeon Finder dungeon: credits the final encounter of the group's assigned dungeon, as `encounter_credit` does for that boss, when the proposal chose the dungeon. |
 | `encounter_credit` | Player `actor` in a dungeon, creature `entry`: credits that dungeon boss kill to the actor's map through the native encounter update, as a boss death does, including the Dungeon Finder completion it triggers. |
+| `encounter_start` | Player `actor`, `boss_entry`, optional `radius` (yards, default 100, maximum 200): finds the nearest living creature of that entry in the actor's phase and starts recording its [encounter timeline](#encounter-timelines). It fails at once with `encounter_start found no creature <entry> within <radius> yards` when none is in range. A scenario has at most one; the case runs exclusively because the recorder is process-global. |
 | `leave_group` | Player `actor`: native `CMSG_GROUP_DISBAND` leave request; fails if the player stays grouped. |
 | `die` | Player `actor`: fixture death through self damage equal to current health; the body stays unreleased. |
 | `release_spirit` | Player `actor`: native `CMSG_REPOP_REQUEST` for an unreleased body; fails if the player is neither a ghost nor alive afterwards. |
@@ -961,6 +962,38 @@ anywhere on the player's map, in any phase; a spawn whose grid is not loaded is 
 `nearby_gameobject_at_client` takes `entry` and is 1 while the nearest such gameobject within 20 yards is in
 the player's client-visible set. Owners always see their own objects, so per-player visibility needs a world spawn.
 `voidportal_group` returns the active Void Portal spawn group id, or 0 while the manager has no portal up.
+### Encounter timelines
+
+`encounter_start` records the native events of the boss's map instance and phase, timestamped in game time, until
+the case ends. The [timeline scenario](scenarios/timeline-player-casts.json) checks it with three player casts.
+Each event has a `source_entry` (the creature entry of its source, 0 for players), `spell`, `target` and `value`:
+
+| Event | Source, target and value |
+| --- | --- |
+| `cast` | Every successful cast, including triggered ones: the caster, the spell's explicit unit target. |
+| `aura_applied` | Each application or added stack: the aura's caster, the unit carrying it, `value` the stack count. |
+| `aura_removed` | The aura's caster, the unit that lost it, `value` the native `AuraRemoveMode`. |
+| `death` | The unit that died is both source and target. |
+| `enter_combat` | A creature engaging, and its first victim. The boss's first engagement is time zero. |
+| `evade` | A creature entering evade mode, `value` the native evade reason. |
+| `spawn` | A creature added to the world, including summons. |
+| `boss_state` | An instance boss state change, `value` the new `EncounterState`. |
+
+Timeline metrics read the recording on `snapshot` and `assert`; their `actor` is required but not used. Each takes
+`event`, optional `spell`, `source_entry`, `target_actors` and `exclude_target_actors` (lists of scenario actor
+ids that the event's target must or must not be), and with `boss_state` only, `state` (`NOT_STARTED`,
+`IN_PROGRESS`, `FAIL`, `DONE` or `SPECIAL`). `timeline_count` counts matching events. `timeline_first_ms` is the
+first match's time from the boss's engagement, or from `encounter_start` before it, and negative for an event
+before the engagement. `timeline_interval_min_ms`, `timeline_interval_max_ms` and `timeline_interval_median_ms`
+(the mean of the two middle values for an even count) read the gaps between consecutive matches. Without a match,
+or with fewer than two for the intervals, they are not a number and the assertion fails. Express order with a
+`snapshot` of one event's `timeline_first_ms` and an assertion `relative_to` it: a positive difference means the
+asserted event came later.
+
+The case result gains `timeline`, an array of `{at_ms, event, source_entry, spell, target, value}` with `at_ms`
+from `encounter_start` and `target` the scenario actor id, else the native GUID, else empty. It is written whether
+the case passes or fails, so an uncertain expectation keeps its evidence.
+
 ## Evidence boundaries
 
 ### Optional character names

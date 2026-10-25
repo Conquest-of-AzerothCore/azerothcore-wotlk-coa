@@ -16,6 +16,11 @@ namespace CoAGameplay
         }
     }
 
+    bool RecordsUnit(uint32 encounterMapId, uint32 encounterInstanceId, uint32 unitMapId, uint32 unitInstanceId)
+    {
+        return encounterMapId == unitMapId && encounterInstanceId == unitInstanceId;
+    }
+
     void Timeline::Start(uint64 nowMs)
     {
         _started = true;

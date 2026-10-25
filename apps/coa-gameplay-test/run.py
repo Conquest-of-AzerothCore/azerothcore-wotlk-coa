@@ -30,7 +30,13 @@ LOCAL_HOSTS = {'127.0.0.1', 'localhost', '::1'}
 HOURS_PER_DAY = 24
 MINUTES_PER_HOUR = 60
 MINUTES_PER_DAY = HOURS_PER_DAY * MINUTES_PER_HOUR
-METRICS = {
+TIMELINE_METRICS = {'timeline_count', 'timeline_first_ms', 'timeline_interval_min_ms', 'timeline_interval_max_ms',
+                    'timeline_interval_median_ms'}
+TIMELINE_EVENTS = {'cast', 'aura_applied', 'aura_removed', 'death', 'enter_combat', 'evade', 'spawn', 'boss_state'}
+TIMELINE_FIELDS = {'event', 'source_entry', 'state', 'target_actors', 'exclude_target_actors'}
+ENCOUNTER_STATES = {'NOT_STARTED', 'IN_PROGRESS', 'FAIL', 'DONE', 'SPECIAL'}
+MAX_ENCOUNTER_RADIUS = 200
+METRICS = TIMELINE_METRICS | {
     'item_random_property', 'item_suffix_factor', 'item_enchantment', 'item_guid', 'item_soulbound', 'item_duration',
     'mana_regen', 'mana_regen_interrupted', 'resting',
     'sent_mana_regen', 'sent_mana_regen_interrupted',
@@ -163,7 +169,7 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'phase_mask', 'trigger_spell', 'trials', 'incoming', 'heal', 'quality',
                  'row', 'offset', 'skip_strings', 'from_end', 'x', 'y', 'min_required_level', 'max_required_level',
                  'flat_coefficient_modifier', 'dominant_stat', 'off_stat', 'spells',
-                 'min_level', 'max_level', 'min_home_distance', 'spawn'}
+                 'min_level', 'max_level', 'min_home_distance', 'spawn'} | TIMELINE_FIELDS
 ACTIONS = {
     'stop_attack': ({'actor'}, {'actor'}),
     'set_moving': ({'actor', 'enabled'}, {'actor', 'enabled', 'flag'}),
@@ -204,6 +210,7 @@ ACTIONS = {
     'lfg_accept': ({'actor'}, {'actor'}),
     'lfg_final_credit': ({'actor'}, {'actor'}),
     'encounter_credit': ({'actor', 'entry'}, {'actor', 'entry'}),
+    'encounter_start': ({'actor', 'boss_entry'}, {'actor', 'boss_entry', 'radius'}),
     'leave_group': ({'actor'}, {'actor'}),
     'die': ({'actor'}, {'actor', 'revived'}),
     'release_spirit': ({'actor'}, {'actor'}),
@@ -305,6 +312,25 @@ def read_json(path):
     return json.loads(Path(path).read_text(encoding='utf-8-sig'), object_pairs_hook=unique_object)
 
 
+def validate_timeline_step(step, where, encounter_started, actor_ids):
+    require(encounter_started, f'{where}: timeline metrics need an earlier encounter_start')
+    event = step.get('event')
+    require(isinstance(event, str) and event in TIMELINE_EVENTS, f'{where}: timeline metric needs a known event')
+    for field in ('spell', 'source_entry'):
+        if field in step:
+            number(step[field], f'{where}.{field}', 1, 2**32 - 1, True)
+    if 'state' in step:
+        state = step['state']
+        require(event == 'boss_state' and isinstance(state, str) and state in ENCOUNTER_STATES,
+                f'{where}: state needs the boss_state event and a known encounter state')
+    for field in ('target_actors', 'exclude_target_actors'):
+        if field in step:
+            actors = step[field]
+            require(isinstance(actors, list) and actors
+                    and all(isinstance(actor, str) and actor in actor_ids for actor in actors)
+                    and len(set(actors)) == len(actors), f'{where}: {field} must list distinct known actors')
+
+
 MAX_PLAYERS = {1: 8, 2: 25}
 MAX_TIMEOUT_MS = {1: 600000, 2: 1200000}
 
@@ -399,6 +425,7 @@ def validate(scenario):
     require(isinstance(steps, list) and 1 <= len(steps) <= 10000, 'Expected 1..10000 steps')
     snapshots = {}
     assertions = 0
+    encounter_started = False
     for index, step in enumerate(steps):
         where = f'step {index}'
         require(isinstance(step, dict) and step.get('action') in ACTIONS, f'{where}: unknown action')
@@ -525,6 +552,13 @@ def validate(scenario):
             number(step['dungeon'], f'{where}.dungeon', 1, 2**24 - 1, True)
         if action == 'encounter_credit':
             number(step['entry'], f'{where}.entry', 1, 2**32 - 1, True)
+        if action == 'encounter_start':
+            number(step['boss_entry'], f'{where}.boss_entry', 1, 2**32 - 1, True)
+            if 'radius' in step:
+                number(step['radius'], f'{where}.radius', 0, MAX_ENCOUNTER_RADIUS)
+                require(step['radius'] > 0, f'{where}: radius must be positive')
+            require(not encounter_started, f'{where}: a scenario allows only one encounter_start')
+            encounter_started = True
         if action == 'lfg_join':
             require(type(step['dungeons']) is list and 0 < len(step['dungeons']) <= 50,
                     f'{where}: dungeons must list 1-50 LFGDungeons ids')
@@ -652,6 +686,10 @@ def validate(scenario):
             require(step['value'] <= step['maximum'], f'{where}: health exceeds fixture maximum')
         if action in {'snapshot', 'assert'}:
             metric = step['metric']
+            if metric in TIMELINE_METRICS:
+                validate_timeline_step(step, where, encounter_started, actor_ids)
+            else:
+                require(not TIMELINE_FIELDS & step.keys(), f'{where}: event fields only apply to timeline metrics')
             if 'creator_only' in step:
                 require(metric == 'owned_creature_count', f'{where}: creator_only needs owned_creature_count')
                 require(type(step['creator_only']) is bool, f'{where}: creator_only must be boolean')

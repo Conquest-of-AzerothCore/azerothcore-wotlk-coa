@@ -471,6 +471,91 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(missing=field), self.assertRaises(ValueError):
                 run.validate(invalid)
 
+    def with_encounter(self, *steps):
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'] += [{'action': 'encounter_start', 'actor': 'caster', 'boss_entry': 36, 'radius': 30},
+                              *steps]
+        return scenario
+
+    def timeline_step(self, **fields):
+        return {'action': 'assert', 'actor': 'caster', 'metric': 'timeline_count', 'event': 'cast', 'min': 0,
+                **fields}
+
+    def test_encounter_start_requires_actor_and_boss_entry(self):
+        scenario = self.with_encounter()
+        self.assertIs(run.validate(scenario), scenario)
+        del scenario['steps'][-1]['radius']
+        self.assertIs(run.validate(scenario), scenario)
+        for change in ({'actor': 'target'}, {'actor': 'absent'}, {'boss_entry': 0}, {'boss_entry': -36},
+                       {'boss_entry': True}, {'boss_entry': 36.5}, {'radius': 0}, {'radius': 201},
+                       {'radius': -5}, {'radius': True}, {'spell': 116}):
+            invalid = self.with_encounter()
+            invalid['steps'][-1].update(change)
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                run.validate(invalid)
+        for field in ('actor', 'boss_entry'):
+            invalid = self.with_encounter()
+            del invalid['steps'][-1][field]
+            with self.subTest(missing=field), self.assertRaises(ValueError):
+                run.validate(invalid)
+        twice = self.with_encounter({'action': 'encounter_start', 'actor': 'caster', 'boss_entry': 36})
+        with self.assertRaisesRegex(ValueError, 'one encounter_start'):
+            run.validate(twice)
+
+    def test_timeline_metrics_require_known_event(self):
+        metrics = ('timeline_count', 'timeline_first_ms', 'timeline_interval_min_ms', 'timeline_interval_max_ms',
+                   'timeline_interval_median_ms')
+        for metric in metrics:
+            for event in ('cast', 'aura_applied', 'aura_removed', 'death', 'enter_combat', 'evade', 'spawn',
+                          'boss_state'):
+                scenario = self.with_encounter(self.timeline_step(metric=metric, event=event))
+                with self.subTest(metric=metric, event=event):
+                    self.assertIs(run.validate(scenario), scenario)
+        for change in ({'event': 'heal'}, {'event': ''}, {'event': 1}, {'spell': 0}, {'source_entry': 0},
+                       {'source_entry': 'boss'}):
+            invalid = self.with_encounter(self.timeline_step(**change))
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                run.validate(invalid)
+        missing = self.with_encounter(self.timeline_step())
+        del missing['steps'][-1]['event']
+        with self.assertRaisesRegex(ValueError, 'event'):
+            run.validate(missing)
+        before = copy.deepcopy(self.scenario)
+        before['steps'].append(self.timeline_step())
+        with self.assertRaisesRegex(ValueError, 'encounter_start'):
+            run.validate(before)
+        other = self.with_encounter({'action': 'assert', 'actor': 'caster', 'metric': 'health', 'event': 'cast',
+                                     'min': 0})
+        with self.assertRaisesRegex(ValueError, 'timeline'):
+            run.validate(other)
+        ordered = self.with_encounter(
+            {'action': 'snapshot', 'actor': 'caster', 'metric': 'timeline_first_ms', 'event': 'spawn',
+             'save_as': 'first_spawn'},
+            self.timeline_step(metric='timeline_first_ms', event='cast', relative_to='first_spawn'))
+        self.assertIs(run.validate(ordered), ordered)
+
+    def test_timeline_state_only_with_boss_state(self):
+        for state in ('NOT_STARTED', 'IN_PROGRESS', 'FAIL', 'DONE', 'SPECIAL'):
+            scenario = self.with_encounter(self.timeline_step(event='boss_state', state=state))
+            with self.subTest(state=state):
+                self.assertIs(run.validate(scenario), scenario)
+        for event, state in (('cast', 'DONE'), ('death', 'DONE'), ('boss_state', 'done'),
+                             ('boss_state', 'TO_BE_DECIDED'), ('boss_state', 3)):
+            invalid = self.with_encounter(self.timeline_step(event=event, state=state))
+            with self.subTest(event=event, state=state), self.assertRaises(ValueError):
+                run.validate(invalid)
+
+    def test_timeline_target_actors_must_exist(self):
+        for field in ('target_actors', 'exclude_target_actors'):
+            for actors in (['caster'], ['target'], ['caster', 'target']):
+                scenario = self.with_encounter(self.timeline_step(**{field: actors}))
+                with self.subTest(field=field, actors=actors):
+                    self.assertIs(run.validate(scenario), scenario)
+            for actors in (['absent'], [], 'caster', ['caster', 'caster'], [1]):
+                invalid = self.with_encounter(self.timeline_step(**{field: actors}))
+                with self.subTest(field=field, actors=actors), self.assertRaises(ValueError):
+                    run.validate(invalid)
+
     def test_cancel_mount_requires_player(self):
         self.scenario['steps'].append({'action': 'cancel_mount', 'actor': 'caster'})
         self.assertIs(run.validate(self.scenario), self.scenario)
