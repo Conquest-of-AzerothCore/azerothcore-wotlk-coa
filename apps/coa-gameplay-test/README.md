@@ -496,6 +496,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `set_xp_enabled` | `actor`, boolean `enabled`: fixture the native XP-lock flag. |
 | `set_level` | `actor`, `value` (1..80): fixture level change through native `GiveLevel`, including level-change hooks. |
 | `set_health`, `set_power` | `actor`, `value` within native maximums; `set_power` accepts `power` (default 0). Optional `pet: true` selects the player's current pet. |
+| `set_health_pct` | Player `actor`, `pct` (1..99) and exactly one of `entry` (nearest living creature within 100 yards) or `target` (creature fixture id): deals the missing health as direct damage from the actor through `Unit::DealDamage`, so damage-driven phase hooks fire. Refuses to raise health. Use `attack_nearby` with `kill: true` for an early exit through the normal death path. |
 | `reset_cooldown` | Player `actor`, `spell`: reset that native spell cooldown between independent cases. |
 | `restore_charges` | Player `actor`, `spell`: restore the native charge pool between independent cases. Separate from ordinary cooldowns. |
 | `wait` | `ms`: let the world continue updating for that much game time. |

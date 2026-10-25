@@ -5858,6 +5858,38 @@ private:
             Require(health > 0 && health <= target->GetMaxHealth(), "Health fixture outside valid range");
             target->SetHealth(health);
         }
+        else if (action == "set_health_pct")
+        {
+            Creature* creature = nullptr;
+            if (step.get_optional<std::string>("target"))
+            {
+                creature = GetUnit(step.get<std::string>("target"))->ToCreature();
+                Require(creature != nullptr, "Health threshold target must be a creature");
+            }
+            else
+            {
+                std::list<Creature*> creatures;
+                player->GetCreatureListWithEntryInGrid(creatures, step.get<uint32>("entry"), 100.0f);
+                creatures.remove_if([](Creature* candidate)
+                {
+                    return !candidate->IsInWorld() || !candidate->IsAlive();
+                });
+                Require(!creatures.empty(), "No living creature of that entry within 100 yards");
+                creatures.sort([player](Creature* first, Creature* second)
+                {
+                    return player->GetExactDist(first) < player->GetExactDist(second);
+                });
+                creature = creatures.front();
+            }
+            Require(creature->IsAlive(), "Health threshold target is not alive");
+            uint32 wanted = creature->CountPctFromMaxHealth(step.get<uint32>("pct"));
+            Require(wanted > 0, "Health threshold rounds to zero health");
+            Require(wanted <= creature->GetHealth(), "set_health_pct cannot raise health");
+            Unit::DealDamage(player, creature, creature->GetHealth() - wanted, nullptr, DIRECT_DAMAGE,
+                SPELL_SCHOOL_MASK_NORMAL);
+            Require(creature->IsAlive() && creature->GetHealth() == wanted,
+                "Health threshold left health " + std::to_string(creature->GetHealth()));
+        }
         else if (action == "set_power")
         {
             Unit* target = player;

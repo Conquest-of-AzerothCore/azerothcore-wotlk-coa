@@ -269,6 +269,7 @@ ACTIONS = {
     'set_xp_enabled': ({'actor', 'enabled'}, {'actor', 'enabled'}),
     'set_level': ({'actor', 'value'}, {'actor', 'value'}),
     'set_health': ({'actor', 'value'}, {'actor', 'value', 'pet', 'maximum'}),
+    'set_health_pct': ({'actor', 'pct'}, {'actor', 'pct', 'entry', 'target'}),
     'reset_cooldown': ({'actor', 'spell'}, {'actor', 'spell'}),
     'restore_charges': ({'actor', 'spell'}, {'actor', 'spell'}),
     'set_power': ({'actor', 'value'}, {'actor', 'value', 'power', 'pet'}),
@@ -680,6 +681,9 @@ def validate(scenario):
                     number(value, f'{where}.fields[{index}]', 0, maximum, True)
         if 'value' in step:
             number(step['value'], f'{where}.value', 1 if action == 'set_health' else 0, 2**31 - 1, True)
+        if action == 'set_health_pct':
+            require(('entry' in step) != ('target' in step), f'{where}: needs exactly one of entry or target')
+            number(step['pct'], f'{where}.pct', 1, 99, True)
         if action == 'set_health' and 'maximum' in step:
             require(step['actor'] in player_ids, f'{where}: maximum health fixture needs a player or their pet')
             number(step['maximum'], f'{where}.maximum', 1, 2**31 - 1, True)

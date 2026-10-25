@@ -556,6 +556,31 @@ class RunnerTests(unittest.TestCase):
                 with self.subTest(field=field, actors=actors), self.assertRaises(ValueError):
                     run.validate(invalid)
 
+    def test_set_health_pct_requires_actor_and_one_target(self):
+        base = {'action': 'set_health_pct', 'actor': 'caster', 'pct': 50}
+        for extra in ({'target': 'target'}, {'entry': 36}):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({**base, **extra})
+            with self.subTest(extra=extra):
+                self.assertIs(run.validate(scenario), scenario)
+        for step in ({**base}, {**base, 'target': 'target', 'entry': 36}, {'action': 'set_health_pct', 'pct': 50,
+                     'target': 'target'}, {**base, 'target': 'absent'}, {**base, 'actor': 'target', 'entry': 36}):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append(step)
+            with self.subTest(step=step), self.assertRaises(ValueError):
+                run.validate(scenario)
+
+    def test_set_health_pct_range(self):
+        for pct, valid in ((0, False), (100, False), (1, True), (99, True), (50.5, False), ('50', False)):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({'action': 'set_health_pct', 'actor': 'caster', 'target': 'target', 'pct': pct})
+            with self.subTest(pct=pct):
+                if valid:
+                    self.assertIs(run.validate(scenario), scenario)
+                else:
+                    with self.assertRaises(ValueError):
+                        run.validate(scenario)
+
     def test_cancel_mount_requires_player(self):
         self.scenario['steps'].append({'action': 'cancel_mount', 'actor': 'caster'})
         self.assertIs(run.validate(self.scenario), self.scenario)
