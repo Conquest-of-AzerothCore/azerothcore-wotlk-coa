@@ -2967,6 +2967,21 @@ private:
         }
         if (metric == "carried_money")
             return player->GetMoney();
+        if (metric == "loot_offered_item_count")
+        {
+            Creature* corpse = player->GetMap()->GetCreature(player->GetLootGUID());
+            Require(corpse != nullptr, "The player has no creature loot window open");
+            uint32 const wanted = step.get<uint32>("item");
+            uint32 offered = 0;
+            for (uint32 slot = 0; slot < corpse->loot.GetMaxSlotInLootFor(player); ++slot)
+            {
+                QuestItem* questItem = nullptr;
+                LootItem* item = corpse->loot.LootItemInSlot(slot, player, &questItem);
+                if (item && item->itemid == wanted && !(questItem ? questItem->is_looted : item->is_looted))
+                    ++offered;
+            }
+            return offered;
+        }
         if (metric == "loot_count" || metric == "loot_entry" || metric == "loot_gold" ||
             metric == "loot_required_level" || metric == "loot_item_level" || metric == "loot_base_entry" ||
             metric == "loot_item_armor" || metric == "loot_gear_item_level")
