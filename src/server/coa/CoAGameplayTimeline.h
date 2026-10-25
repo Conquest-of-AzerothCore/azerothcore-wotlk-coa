@@ -55,7 +55,7 @@ namespace CoAGameplay
         void MarkEngaged(uint64 nowMs);
         std::vector<TimelineEvent> const& Events() const;
         uint32 Count(TimelineFilter const& filter) const;
-        std::optional<uint64> FirstMs(TimelineFilter const& filter) const;
+        std::optional<int64> FirstMs(TimelineFilter const& filter) const;
         std::vector<uint64> Intervals(TimelineFilter const& filter) const;
 
     private:

@@ -41,6 +41,7 @@ TEST(CoAGameplayTimeline, IgnoresEventsBeforeStart)
     timeline.Record(Cast(500, ImpactSpell));
     EXPECT_TRUE(timeline.Events().empty());
     timeline.Start(1000);
+    timeline.Record(Cast(999, ImpactSpell));
     EXPECT_TRUE(timeline.Started());
     EXPECT_TRUE(timeline.Events().empty());
 }
@@ -95,8 +96,17 @@ TEST(CoAGameplayTimeline, FirstMsIsRelativeToEngage)
     timeline.Start(1000);
     timeline.MarkEngaged(3000);
     timeline.Record(Cast(8300, ImpactSpell));
-    EXPECT_EQ(timeline.FirstMs(CastOf(ImpactSpell)), std::optional<uint64>(5300));
+    EXPECT_EQ(timeline.FirstMs(CastOf(ImpactSpell)), std::optional<int64>(5300));
     EXPECT_FALSE(timeline.FirstMs(CastOf(OtherSpell)).has_value());
+}
+
+TEST(CoAGameplayTimeline, FirstMsIsNegativeBeforeEngage)
+{
+    Timeline timeline;
+    timeline.Start(1000);
+    timeline.Record(Cast(2000, ImpactSpell));
+    timeline.MarkEngaged(3000);
+    EXPECT_EQ(timeline.FirstMs(CastOf(ImpactSpell)), std::optional<int64>(-1000));
 }
 
 TEST(CoAGameplayTimeline, FirstMsFallsBackToStartWhenNeverEngaged)
@@ -104,7 +114,7 @@ TEST(CoAGameplayTimeline, FirstMsFallsBackToStartWhenNeverEngaged)
     Timeline timeline;
     timeline.Start(1000);
     timeline.Record(Cast(8300, ImpactSpell));
-    EXPECT_EQ(timeline.FirstMs(CastOf(ImpactSpell)), std::optional<uint64>(7300));
+    EXPECT_EQ(timeline.FirstMs(CastOf(ImpactSpell)), std::optional<int64>(7300));
 }
 
 TEST(CoAGameplayTimeline, MarkEngagedKeepsTheFirstEngage)
@@ -114,7 +124,7 @@ TEST(CoAGameplayTimeline, MarkEngagedKeepsTheFirstEngage)
     timeline.MarkEngaged(3000);
     timeline.MarkEngaged(9000);
     timeline.Record(Cast(8300, ImpactSpell));
-    EXPECT_EQ(timeline.FirstMs(CastOf(ImpactSpell)), std::optional<uint64>(5300));
+    EXPECT_EQ(timeline.FirstMs(CastOf(ImpactSpell)), std::optional<int64>(5300));
 }
 
 TEST(CoAGameplayTimeline, IntervalsBetweenSuccessiveMatches)
@@ -152,7 +162,7 @@ TEST(CoAGameplayTimeline, TargetsRestrictMatches)
     TimelineFilter filter = CastOf(ImpactSpell);
     filter.targets = {healer};
     EXPECT_EQ(timeline.Count(filter), 1u);
-    EXPECT_EQ(timeline.FirstMs(filter), std::optional<uint64>(2000));
+    EXPECT_EQ(timeline.FirstMs(filter), std::optional<int64>(2000));
 }
 
 TEST(CoAGameplayTimeline, StartClearsPreviousEvents)
@@ -165,5 +175,5 @@ TEST(CoAGameplayTimeline, StartClearsPreviousEvents)
     EXPECT_TRUE(timeline.Events().empty());
     EXPECT_EQ(timeline.Count(CastOf(ImpactSpell)), 0u);
     timeline.Record(Cast(10500, ImpactSpell));
-    EXPECT_EQ(timeline.FirstMs(CastOf(ImpactSpell)), std::optional<uint64>(500));
+    EXPECT_EQ(timeline.FirstMs(CastOf(ImpactSpell)), std::optional<int64>(500));
 }

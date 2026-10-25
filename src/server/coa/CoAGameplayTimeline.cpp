@@ -31,10 +31,10 @@ namespace CoAGameplay
 
     void Timeline::Record(TimelineEvent event)
     {
-        if (!_started)
+        if (!_started || event.atMs < _startMs)
             return;
 
-        event.atMs = event.atMs > _startMs ? event.atMs - _startMs : 0;
+        event.atMs -= _startMs;
         _events.push_back(event);
     }
 
@@ -72,15 +72,14 @@ namespace CoAGameplay
             [&](TimelineEvent const& event) { return Matches(event, filter); }));
     }
 
-    std::optional<uint64> Timeline::FirstMs(TimelineFilter const& filter) const
+    std::optional<int64> Timeline::FirstMs(TimelineFilter const& filter) const
     {
         auto const first = std::find_if(_events.begin(), _events.end(),
             [&](TimelineEvent const& event) { return Matches(event, filter); });
         if (first == _events.end())
             return std::nullopt;
 
-        uint64 const origin = _engagedAtMs.value_or(0);
-        return first->atMs > origin ? first->atMs - origin : 0;
+        return static_cast<int64>(first->atMs) - static_cast<int64>(_engagedAtMs.value_or(0));
     }
 
     std::vector<uint64> Timeline::Intervals(TimelineFilter const& filter) const
