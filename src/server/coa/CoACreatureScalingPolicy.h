@@ -285,7 +285,7 @@ struct Multipliers
 };
 
 inline constexpr char WorldDefault[] = "1.17 + 0.013 * level";
-inline constexpr char WorldDamageDefault[] = "4.32 + 0.013 * level";
+inline constexpr char WorldDamageDefault[] = "2.75 + 0.013 * level";
 inline constexpr char WorldDamageSpreadDefault[] = "max(1.55, 1.85 - 0.05 * level)";
 
 struct Settings
