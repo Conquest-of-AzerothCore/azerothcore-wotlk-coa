@@ -4,8 +4,9 @@
 
 -- 1) Heirlooms on Tiraxis' heirloom list (900011, rev_20261023_02) and in the Vanity Store, at the same price in both:
 --    one-hand weapons, shields and off-hands 1800 (was 900), ranged weapons, wands and relics 2000 (was 1000), two-hand
---    weapons 3600 (was 1800), Stick on a Carrot 2000, Pendant of the Bulwark / Sorcerer / Warrior 1500.
---    Heirloom armor, rings and trinkets are not sold piece by piece (price 0): they come in the set caches, 4500 each on
+--    weapons 3600 (was 1800), Stick on a Carrot 2000, Pendant of the Bulwark / Sorcerer / Warrior and the five heirloom
+--    rings (not the Seal of Ascension) 1500.
+--    Heirloom armor and trinkets are not sold piece by piece (price 0): they come in the set caches, 4500 each on
 --    Tiraxis (Heirloom Cache and Experience Heirloom Cache; the caches have no VanityCollection.dbc row). The Drakefire
 --    Amulet, Pendant of Adventure, Pendant of Discovery, the raid medallions and the Insignias of the Burning Legion are
 --    not sold.
@@ -66,11 +67,11 @@ FROM (VALUES
   ROW(777998, 3000),   -- Tradesman's Scroll
   ROW(3211010, 5000),  -- Riding Tome: Artisan Riding
   ROW(1179243, 7500),  -- Riding Tome: Extraordinary Riding
-  ROW(1339081, 0),  -- Ring of the Bulwark
-  ROW(1339082, 0),  -- Ring of the Lionhearted
-  ROW(1339083, 0),  -- Ring of the Seer
-  ROW(1339080, 0),  -- Ring of the Sorcerer
-  ROW(1339079, 0),  -- Ring of the Vanguard
+  ROW(1339081, 1500),  -- Ring of the Bulwark
+  ROW(1339082, 1500),  -- Ring of the Lionhearted
+  ROW(1339083, 1500),  -- Ring of the Seer
+  ROW(1339080, 1500),  -- Ring of the Sorcerer
+  ROW(1339079, 1500),  -- Ring of the Vanguard
   ROW(12344, 0),    -- Seal of Ascension
   ROW(666002, 0),   -- Battle for Mount Hyjal Medallion
   ROW(666001, 0),   -- Blackwing Lair Medallion
@@ -214,7 +215,12 @@ WHERE `entry` = 900011 AND EXISTS (SELECT 1 FROM `coa_client_vanity_collection` 
   1339078,    -- Pendant of the Bulwark
   1339077,    -- Pendant of the Sorcerer
   1339076,    -- Pendant of the Warrior
-  339075      -- Stick on a Carrot
+  339075,     -- Stick on a Carrot
+  1339081,    -- Ring of the Bulwark
+  1339082,    -- Ring of the Lionhearted
+  1339083,    -- Ring of the Seer
+  1339080,    -- Ring of the Sorcerer
+  1339079     -- Ring of the Vanguard
 );
 
 INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`)
@@ -265,7 +271,12 @@ FROM (VALUES
   ROW(48, 1339078, 10344),  -- Pendant of the Bulwark, 1500 tokens
   ROW(49, 1339077, 10344),  -- Pendant of the Sorcerer, 1500 tokens
   ROW(50, 1339076, 10344),  -- Pendant of the Warrior, 1500 tokens
-  ROW(51, 339075, 10349)    -- Stick on a Carrot, 2000 tokens
+  ROW(51, 1339081, 10344),  -- Ring of the Bulwark, 1500 tokens
+  ROW(52, 1339082, 10344),  -- Ring of the Lionhearted, 1500 tokens
+  ROW(53, 1339083, 10344),  -- Ring of the Seer, 1500 tokens
+  ROW(54, 1339080, 10344),  -- Ring of the Sorcerer, 1500 tokens
+  ROW(55, 1339079, 10344),  -- Ring of the Vanguard, 1500 tokens
+  ROW(56, 339075, 10349)    -- Stick on a Carrot, 2000 tokens
 ) `c` (`slot`, `item`, `ExtendedCost`)
 WHERE EXISTS (SELECT 1 FROM `coa_client_vanity_collection` WHERE `BazaarTokenCost` > 0);
 
