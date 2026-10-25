@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 import re
 import tempfile
+import threading
 from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
@@ -327,6 +328,44 @@ class FingerprintTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'Incomplete world table definitions'):
                 world_fingerprint(database, 'world')
         self.assertEqual(query.call_count, 5)
+
+    def test_parallel_fingerprint_equals_serial(self):
+        tables = [f'table_{index:02d}' for index in range(11)]
+        lock = threading.Lock()
+        statements = []
+
+        def sql(role, statement, timeout=None):
+            with lock:
+                statements.append(statement)
+            if statement.startswith('SHOW FULL TABLES'):
+                return '\n'.join(f'{table}\tBASE TABLE' for table in tables)
+            if statement.startswith('CHECKSUM TABLE'):
+                names = re.findall(r'`world`\.`(\w+)`', statement)
+                return '\n'.join(f'world.{table}\t{1000 + int(table[-2:])}' for table in names)
+            if statement.startswith('SHOW CREATE TABLE'):
+                return '\n'.join(f'{table}\tCREATE TABLE {table} (...)' for table in tables)
+            return '0'
+
+        serial = world_fingerprint(SimpleNamespace(sql=sql, copy_workers=1), 'world')
+        serial_checksums = [item for item in statements if item.startswith('CHECKSUM')]
+        self.assertEqual(len(serial_checksums), 1)
+        statements.clear()
+        parallel = world_fingerprint(SimpleNamespace(sql=sql, copy_workers=4), 'world')
+        self.assertEqual(parallel, serial)
+        self.assertEqual(len([item for item in statements if item.startswith('CHECKSUM')]), 4)
+        statements.clear()
+        capped = world_fingerprint(SimpleNamespace(sql=sql, copy_workers=64), 'world')
+        self.assertEqual(capped, serial)
+        self.assertEqual(len([item for item in statements if item.startswith('CHECKSUM')]), 8)
+
+    def test_parallel_checksum_failure_is_raised(self):
+        def sql(role, statement, timeout=None):
+            if statement.startswith('SHOW FULL TABLES'):
+                return 'a\tBASE TABLE\nb\tBASE TABLE'
+            raise ValueError('checksum timed out')
+
+        with self.assertRaisesRegex(ValueError, 'checksum timed out'):
+            world_fingerprint(SimpleNamespace(sql=sql, copy_workers=2), 'world')
 
 
 if __name__ == '__main__':

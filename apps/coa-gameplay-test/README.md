@@ -172,7 +172,8 @@ The copy runs inside MySQL: each source table is recreated from its `SHOW CREATE
 foreign keys, checks, table options and the `AUTO_INCREMENT` counter match the source, and its rows are copied with
 `INSERT ... SELECT` at READ-COMMITTED, which reads the source without locking its rows. Tables are copied largest
 first over `--copy-workers` MySQL connections (1-32, default `min(8, CPU count)`; `gameplay_copy_workers` in
-`conf/verify-all.json`); 1 copies one table at a time. Each table is read in its own statement, so unlike a
+`conf/verify-all.json`); 1 copies one table at a time. The same setting, capped at 8, sets how many
+connections checksum the world schema. Each table is read in its own statement, so unlike a
 single-transaction dump the copy is not one snapshot of the source; the world cache checks the source again after
 copying, and other source changes during a copy are not detected. When a source schema has views, triggers,
 routines or events, or the server uses statement-based binary logging, that schema is copied with

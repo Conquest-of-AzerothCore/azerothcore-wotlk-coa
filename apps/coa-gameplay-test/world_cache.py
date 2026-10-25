@@ -3,9 +3,12 @@ import json
 import os
 import re
 import secrets
+import threading
 
 IDENTIFIER = re.compile(r'[A-Za-z_][A-Za-z0-9_]*\Z')
 OWNER_TABLE = 'coa_gameplay_cache_owner'
+MAX_CHECKSUM_WORKERS = 8
+CHECKSUM_TIMEOUT = 300
 
 
 def require(condition, message):
@@ -48,6 +51,43 @@ def input_fingerprint(root, source_config, module_source, environment=None):
     return result.hexdigest()
 
 
+def checksum_batches(database, name, tables):
+    workers = max(1, min(getattr(database, 'copy_workers', 1), MAX_CHECKSUM_WORKERS, len(tables)))
+    statements = [
+        'CHECKSUM TABLE ' + ', '.join(f'`{name}`.`{table}`' for table in tables[index::workers]) + ' EXTENDED;'
+        for index in range(workers)
+    ]
+    if workers == 1:
+        return [database.sql('world', statements[0], timeout=CHECKSUM_TIMEOUT).splitlines()]
+    results = [None] * workers
+    failures = []
+    stop = threading.Event()
+    lock = threading.Lock()
+
+    def work(index):
+        if stop.is_set():
+            return
+        try:
+            results[index] = database.sql('world', statements[index], timeout=CHECKSUM_TIMEOUT).splitlines()
+        except Exception as error:
+            with lock:
+                failures.append(error)
+            stop.set()
+
+    threads = [threading.Thread(target=work, args=(index,), daemon=True) for index in range(workers)]
+    try:
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+    except BaseException:
+        stop.set()
+        raise
+    if failures:
+        raise failures[0]
+    return results
+
+
 def world_fingerprint(database, name):
     require(IDENTIFIER.fullmatch(name), 'Invalid world schema name')
     rows = database.sql('world', f'SHOW FULL TABLES FROM `{name}`;').splitlines()
@@ -60,14 +100,13 @@ def world_fingerprint(database, name):
             tables.append(table)
     require(tables, 'World database is empty')
     tables.sort()
-    names = ', '.join(f'`{name}`.`{table}`' for table in tables)
-    checksums = database.sql('world', f'CHECKSUM TABLE {names} EXTENDED;', timeout=300).splitlines()
     expected = {f'{name}.{table}' for table in tables}
     values = {}
-    for row in checksums:
-        table, checksum = row.split('\t')
-        require(table in expected and checksum.isdecimal(), 'World checksum unavailable; use --fresh-databases')
-        values[table.split('.', 1)[1]] = checksum
+    for checksums in checksum_batches(database, name, tables):
+        for row in checksums:
+            table, checksum = row.split('\t')
+            require(table in expected and checksum.isdecimal(), 'World checksum unavailable; use --fresh-databases')
+            values[table.split('.', 1)[1]] = checksum
     require(len(values) == len(tables), 'Incomplete world checksums')
     for _ in range(3):
         definitions = database.sql('world', '\n'.join(f'SHOW CREATE TABLE `{name}`.`{table}`;' for table in tables))

@@ -92,7 +92,7 @@ The macOS CMake configuration also creates static libraries with `/usr/bin/libto
   schemas inside MySQL, largest tables first, and falls back to `mysqldump | mysql` for a source schema with views,
   triggers, routines or events, or under statement-based binary logging
   ([gameplay README](../../apps/coa-gameplay-test/README.md#run)). Lower it on a small machine or a busy MySQL
-  server.
+  server. It also bounds (at most 8) the connections that checksum the world schema for the world cache audit.
 - During a run the gameplay stage copies the source module `.conf` files into the server modules directory and
   removes them afterwards. That directory must not hold `.conf` files of its own (`.conf.dist` files are
   ignored), so keep the source module configs in another directory, beside another worldserver config or in
