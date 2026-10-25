@@ -51,9 +51,9 @@ Keep secrets out of this file: credentials stay in the worldserver config or the
 | `datamine_directory` | none |
 | `mysql_server_bin` | none; a MySQL `bin` directory holding both `mysql` and `mysqld`, for `--mysql-bin` |
 | `jobs` | the CPU count |
-| `gameplay_jobs` | `max(1, min(4, cpu // 3))`; used only with `--gameplay-clock real` (the simulated clock runs 1 worldserver unless `--gameplay-jobs` asks for more) |
+| `gameplay_jobs` | `max(1, min(4, cpu // 3))`; used only with `--gameplay-clock real` |
 | `gameplay_db_workers` | `16` (1-32); character database workers, used only with the simulated clock |
-| `gameplay_copy_workers` | `min(8, cpu)` (1-32); MySQL connections that copy each test schema and, capped at 8, checksum the world |
+| `gameplay_copy_workers` | `min(8, cpu)` (1-32); MySQL connections per schema copy and (up to 8) world checksum |
 
 `cmake_args` is used only to configure a build directory that has no `CMakeCache.txt` or whose last configure
 did not generate build files. Its default adds `-G` with the generator already in the cache, else `-G Ninja`
@@ -396,7 +396,8 @@ worldserver until it finishes; see [Several simulated servers](#several-simulate
 rejects ids missing from the catalog and empty reasons. The list holds `who-custom-classes`, `who-hides-bots` and
 `who-lists-bots` (the Who list is process-global) and `bloodforged-high-risk-drop` and
 `coa-prestige-chromie-spawns` (`set_phase 1` affects live creatures) and `wildcard-season-event` (it stops the
-Wildcard season game event). A case with an [`hour`](#realm-local-time) or a `set_phase` step whose mask includes
+Wildcard season game event). A case with an [`hour`](#realm-local-time), a `game_event` or `encounter_start` step
+(game events and the encounter timeline recorder are process-global), or a `set_phase` step whose mask includes
 the normal world phase (mask 1) is exclusive without being listed. The phase rule also applies to exploratory
 scenarios. Add a case, with its reason, when it reads or changes other process-global state;
 exclusivity does not fix timing failures. Chat that ignores
@@ -420,15 +421,18 @@ server. A server that finds the queue empty stops, so the last cases can end up 
 a result. `gameplay.json` has the same cases, verdicts and files as a one-server run; `servers` lists every server
 and each case's `summary.json` names its `batch.slot`.
 
-A simulated server that exits before it becomes ready fails the batch when more than one runs, because its cases
-would otherwise run silently on fewer servers. Its slot's world copy is dropped, since the SQL updater may already
-have changed it before the startup barrier, and the next run copies it again.
+A simulated server that exits before it becomes ready fails the batch when the run starts more than one server
+(`--gameplay-jobs` above 1 and more than one queued case), because its cases would otherwise run silently on fewer
+servers; a run that starts one server restarts it as before. Its slot's world copy is dropped, since the SQL
+updater may already have changed it before the startup barrier, and the next run copies it again.
 
 Every server costs memory and MySQL resources. Measured on one workstation on 2026-10-25 with the vanilla dungeon
 set and the default 16 character database workers (measurements, not guarantees): about 7,700 prepared statements
 on the MySQL server and a peak of 5.1 GB RSS per worldserver, plus a full world copy on first use of each slot.
-MySQL's default `max_prepared_stmt_count` is 16382, so a stock MySQL server fits two simulated servers; a third
-cannot prepare its statements, and the runner names `max_prepared_stmt_count` in the failure. Either raise the
+MySQL's default `max_prepared_stmt_count` is 16382, so a stock MySQL server with no other client fits two
+simulated servers; a third cannot prepare its statements, and the runner names `max_prepared_stmt_count` in the
+failure. A running worldserver or authserver on the same MySQL server holds prepared statements too, which can leave
+room for only one. Either raise the
 limit on the test MySQL server, which resets on restart:
 
 ```sql
@@ -604,9 +608,9 @@ After three consecutive server failures without a completed case a worker stops,
 other workers continue with the shared queue. Cases that no worker could run are `not_run`, which is a failure.
 A batch in which no queue-mode worldserver became ready fails without isolated reruns. A cleanup failure marks
 every case of that server `cleanup_failed` and fails the batch. Each `cleanup_failed` entry is
-`{"schema": name, "error": text}`; a schema drop may take up to 600 s before it counts as failed. The binary is hashed before each server starts;
-a change during the batch stops new servers and fails the batch. Ctrl+C or SIGTERM (a console break on Windows)
-stops all servers and cleans up.
+`{"schema": name, "error": text}`; a schema drop may take up to 600 s before it counts as failed. The binary is
+hashed before each server starts; a change during the batch stops new servers and fails the batch. Ctrl+C or
+SIGTERM (a console break on Windows) stops all servers and cleans up.
 
 ## Optional: in-RAM test database
 
@@ -627,7 +631,8 @@ a cold run no longer wait on disk.
   per simulated worldserver ([several servers](#several-simulated-servers)). Keep the standard route on a machine
   that cannot spare that memory.
 
-Start the server (set `MYSQL_ROOT_PASSWORD` in an env file that is not in the repository):
+Start the server. Keep the root password in an env file that is not in the repository, `test-mysql.env` below,
+holding the single line `MYSQL_ROOT_PASSWORD=<password>` without quotes:
 
 ```sh
 docker run -d --name coa-test-mysql \
@@ -648,6 +653,13 @@ docker run -d --name coa-test-mysql \
 `--max-prepared-stmt-count=65528` lets more than two simulated servers start; see the
 [`--gameplay-jobs` paragraph](#several-simulated-servers). Drop it if you run one server.
 
+The image first initialises the data directory on a temporary server without networking (its log line says
+`port: 0`), then restarts. Wait for the final server before seeding:
+
+```sh
+until docker logs coa-test-mysql 2>&1 | grep -q 'mysqld: ready for connections.* port: 3306 '; do sleep 1; done
+```
+
 Seed it from the server you already use: dump your own `acore_world`, `acore_auth` and `acore_characters` and load
 them into the container. Put the credentials in two MySQL client files (`[client]` with `host`, `port`, `user`
 and `password`), `source.cnf` for your existing server and `test.cnf` for the container, instead of putting
@@ -663,6 +675,8 @@ done
 wait
 ```
 
+Seeding took 54-59 s on the workstation measured below.
+
 Point the settings at the container: a worldserver config whose three `*DatabaseInfo` entries use the container's
 host (`127.0.0.1`), port and credentials, and `test.cnf` as the client file. Keep both outside the repository:
 
@@ -676,20 +690,21 @@ host (`127.0.0.1`), port and credentials, and `test.cnf` as the client file. Kee
 Use a separate settings file (`--settings <file>`) so the standard route stays one command away. The first gameplay
 run copies the world database into the container as usual.
 
-Medians of three repetitions from the same workstation and day, from the gameplay stage with the standard route on a
-stock disk MySQL 8.4 (binary log on, `sync_binlog=1`, `innodb_flush_log_at_trx_commit=1`) against the container
-above (wall seconds, container start included; the standard route also shared its disk with other sessions' servers):
+Medians of three repetitions from the same workstation and day, from the gameplay stage of this runner with the
+standard route on a stock disk MySQL 8.4 (binary log on, `sync_binlog=1`, `innodb_flush_log_at_trx_commit=1`)
+against the container above (wall seconds, container start included):
 
 | Run | Standard route | In-RAM route |
 | --- | --- | --- |
-| One short scenario, cold (`--refresh-world`) | 378.4 s | 91.3 s |
-| One short scenario, warm | 109.3 s | 33.7 s |
-| Ten short scenarios | 90.7 s | 34.2 s |
-| Four vanilla dungeons (exclusive) | 212.9 s | 156.6 s |
-| One short scenario, real clock, `--gameplay-jobs 1` | 95.6 s | 42.4 s |
+| One short scenario, cold (`--refresh-world`) | 150.1 s | 41.2 s |
+| One short scenario, warm | 59.6 s | 29.3 s |
+| Ten short scenarios | 54.5 s | 29.5 s |
+| Four vanilla dungeons (exclusive), one server | 164.9 s | 138.1 s |
+| Four vanilla dungeons, `--gameplay-jobs 4` | 122.5 s | 62.5 s |
+| One short scenario, real clock, `--gameplay-jobs 1` | 61.2 s | 37.0 s |
 
-These are "before" figures: they predate the server-side copy and the parallel simulated servers, which speed up
-the standard route as well, so the gap is smaller now. They will be refreshed.
+The `--gameplay-jobs 4` row ran with `max_prepared_stmt_count` raised to 65528 on each route and reused existing
+world-cache slots.
 
 ## Harness prerequisites
 

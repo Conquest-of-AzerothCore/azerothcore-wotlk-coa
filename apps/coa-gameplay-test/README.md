@@ -9,8 +9,8 @@ implementation. `--gameplay-jobs N` (`batch.py --jobs N`, default 1) runs N simu
 its own world-cache slot, port and auth/characters schemas, and runs each exclusive case alone on one of them. Each
 server needed about 7,700 MySQL prepared statements and up to 5.1 GB RSS on one workstation (measured 2026-10-25
 with the default 16 character database workers; not a guarantee), and a world copy on first use. A stock MySQL
-(`max_prepared_stmt_count` 16382) therefore fits two; raise `max_prepared_stmt_count` or lower
-`--gameplay-db-workers` for more
+(`max_prepared_stmt_count` 16382) with no other client therefore fits two, fewer when a running worldserver or
+authserver uses it too; raise `max_prepared_stmt_count` or lower `--gameplay-db-workers` for more
 ([several simulated servers](../../docs/coa/verification.md#several-simulated-servers)).
 
 ## Find and verify a mechanic

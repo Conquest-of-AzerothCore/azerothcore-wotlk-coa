@@ -44,9 +44,9 @@ access to the server's data directory and per-table locks on the source, which a
 ## Consequences
 
 - On the stock disk MySQL above, preparing all three schemas for a fresh run took 71.2 s with 8 workers and
-  196.6 s with 1. Every one
-  of the 627 copied tables had the same `SHOW CREATE TABLE` as its source, `AUTO_INCREMENT` included; the world
-  copy had the same `CHECKSUM TABLE ... EXTENDED` values and the same `world_fingerprint`.
+  196.6 s with 1. Every one of the 627 copied tables had the same `SHOW CREATE TABLE` as its source,
+  `AUTO_INCREMENT` included; the world copy had the same `CHECKSUM TABLE ... EXTENDED` values and the same
+  `world_fingerprint`.
 - A run that refreshes the world cache on that server spent 102.9 s and 119.2 s preparing databases in two runs,
   against the 310.7 s median before. That time still includes two source checksums and the drop of the old cache.
 - Each table is copied in its own statement, so the copy is not one consistent snapshot of the source, unlike
@@ -62,18 +62,18 @@ access to the server's data directory and per-table locks on the source, which a
 
 ### Context
 
-Exclusive cases (real-spawn dungeons, later raid boss encounters) run alone on their worldserver, and the simulated
-clock ran a single worldserver, so they ran one after another: the four vanilla dungeon scenarios took a median
-171.6 s on the stock disk MySQL above. `batch.py` and `verify_all.py` rejected more than one simulated server since
-#5108, which records "run all scenarios in one worldserver instead of several" as a maintainer correction but no
-technical reason. The state that makes a case exclusive (Who list, live creatures, game events, the realm clock)
-belongs to one process, and every server already has its own process, port, auth/characters schemas and world-cache
-slot, as several real-clock servers do.
+Exclusive cases (real-spawn dungeons, raid boss encounters with `encounter_start` since #9116) run alone on their
+worldserver, and the simulated clock ran a single worldserver, so they ran one after another: the four vanilla
+dungeon scenarios took a median 171.6 s on the stock disk MySQL above. `batch.py` and `verify_all.py` rejected more
+than one simulated server since #5108, which records "run all scenarios in one worldserver instead of several" as a
+maintainer correction but no technical reason. The state that makes a case exclusive (Who list, live creatures, game
+events, the encounter recorder, the realm clock) belongs to one process, and every server already has its own
+process, port, auth/characters schemas and world-cache slot, as several real-clock servers do.
 
 The first parallel runs exposed a limit the servers share: each simulated server with the default 16 character
-database workers prepared about 7,700 statements, and MySQL's default `max_prepared_stmt_count` is 16382. A third
-server failed to start, the batch still passed on two servers, and the failed slots copied their world again on
-every run.
+database workers prepared about 7,700 statements, and MySQL's default `max_prepared_stmt_count` is 16382. With four
+servers requested, the servers beyond two failed to start, the batch still passed on two servers, and the failed
+slots copied their world again on every run.
 
 ### Considered options
 
@@ -101,8 +101,9 @@ parallel run is compared against.
   median 122.6 s (110.3-138.0 s) against 171.6 s serially, with the same verdicts; every assertion value also
   appeared in a serial run. Four servers held 30,824 prepared statements and up to 16.0 GB RSS together; one server
   peaked at 5.1 GB. These are measurements from one workstation, not guarantees.
-- A stock MySQL fits two simulated servers; more fail the batch with a message naming `max_prepared_stmt_count`
-  and its remedies: raise the limit or lower `--gameplay-db-workers`.
+- A stock MySQL with no other client fits two simulated servers, and fewer when a running worldserver or authserver
+  shares it; more fail the batch with a message naming `max_prepared_stmt_count` and its remedies: raise the limit
+  or lower `--gameplay-db-workers`.
 - A server that dies before its startup barrier still loses its slot's world copy: the SQL updater may have changed
   it, and no baseline exists to audit it. The next run copies it again.
 - Each extra server needs another world copy on first use of its slot, and memory for one more worldserver.
