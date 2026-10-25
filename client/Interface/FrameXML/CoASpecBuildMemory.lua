@@ -1,4 +1,4 @@
-CoASpecBuildMemory = { debug = true }
+CoASpecBuildMemory = { debug = false }
 
 local knownSpec
 local installed = false

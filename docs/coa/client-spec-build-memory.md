@@ -6,12 +6,15 @@ one, so going back to your own specialization showed an empty tree until you pre
 was never involved and nothing was lost, but pressing Apply in that state would have saved the empty tree.
 
 `client/Interface/FrameXML/CoASpecBuildMemory.lua` wraps `C_CharacterAdvancement.SwitchActiveChrSpec`. Before
-a switch it exports the pending build of the specialization being left with `ExportBuild`. When the switch
-returns to a specialization whose build was exported earlier in the same pending session, it imports that build
-back with `ImportPendingBuild`, which validates it in full and leaves the plain switch result when it is
-refused. The remembered builds are forgotten when the pending build is cleared (Discard, reset) and when the
-server reports a known-entry change (Apply, level up, login). It never sends anything to the server, never
-changes what Apply uploads, and does not touch the Apply, Go Back and Discard dialog.
+a switch, while nothing is pending, it notes which specialization the saved build belongs to. When a switch
+returns to that specialization it calls `CancelPendingBuild`, the call Discard makes, which resets the pending
+build to the saved one, and sets the talent frame's own `RefreshFromCancel` flag so the window redraws. Looking
+at a third specialization or hopping between two others changes nothing extra. The note is forgotten when the
+server reports a known-entry change (Apply, level up, login) and relearned at the next clean switch. It never
+sends anything to the server, never changes what Apply uploads, and does not touch the Apply, Go Back and
+Discard dialog. Unsaved edits made in the saved specialization before leaving it are not kept, as before.
+
+Run `/run CoASpecBuildMemory.debug = true` to print what it does in the chat frame.
 
 ## Package
 
