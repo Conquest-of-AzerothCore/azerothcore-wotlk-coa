@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "DBCStores.h"
 #include "Map.h"
 #include "Player.h"
 #include "ScriptMgr.h"
@@ -52,6 +53,28 @@ void SetMercenaryFaction(Player* player, uint32 factionTemplate)
     for (Unit* controlled : player->m_Controlled)
         if (controlled->GetOwnerGUID() == player->GetGUID())
             controlled->SetFaction(factionTemplate);
+}
+
+uint32 RaceFaction(Player const* player)
+{
+    ChrRacesEntry const* race = sChrRacesStore.LookupEntry(player->getRace(true));
+    return race ? race->FactionID : 0;
+}
+
+ReputationRank RaceReactionTo(Player const* player, Unit const* target)
+{
+    FactionTemplateEntry const* own = sFactionTemplateStore.LookupEntry(RaceFaction(player));
+    FactionTemplateEntry const* other = target->GetFactionTemplateEntry();
+    if (!own || !other)
+        return REP_NEUTRAL;
+    if (FactionEntry const* faction = sFactionStore.LookupEntry(other->faction))
+        if (faction->CanHaveReputation())
+            return player->GetReputationRank(faction->ID);
+    if (own->IsFriendlyTo(*other))
+        return REP_FRIENDLY;
+    if (own->IsHostileTo(*other))
+        return REP_HOSTILE;
+    return REP_NEUTRAL;
 }
 
 bool ShowsFreeForAllTo(Player const* player, Player const* viewer)
@@ -154,6 +177,16 @@ public:
 
         Player const* first = unit->GetCharmerOrOwnerPlayerOrPlayerItself();
         Player const* second = target->GetCharmerOrOwnerPlayerOrPlayerItself();
+        if (first && !second && first->HasAura(SPELL_MERCENARY))
+        {
+            reaction = RaceReactionTo(first, target);
+            return false;
+        }
+        if (second && !first && second->HasAura(SPELL_MERCENARY))
+        {
+            reaction = RaceReactionTo(second, unit);
+            return false;
+        }
         if (!first || !second || first == second)
             return true;
 
@@ -175,6 +208,8 @@ public:
 
     void OnPatchValuesUpdate(Unit const* unit, ByteBuffer& data, BuildValuesCachePosPointers& pos, Player* target) override
     {
+        if (pos.UnitFieldFactionTemplatePos >= 0 && unit && unit == target && target->HasAura(SPELL_MERCENARY))
+            data.put(pos.UnitFieldFactionTemplatePos, RaceFaction(target));
         if (pos.UnitFieldBytes2Pos < 0 || !unit || !ShowsFreeForAllTo(unit->ToPlayer(), target))
             return;
         uint32 const bytes = data.read<uint32>(pos.UnitFieldBytes2Pos);
