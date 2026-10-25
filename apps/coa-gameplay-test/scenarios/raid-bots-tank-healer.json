@@ -1,19 +1,24 @@
 {
   "schema": 1,
-  "name": "Raid bots: a tank keeps swinging at the encounter boss while a healer heals it",
+  "name": "Raid bots: the tank holds the boss, a melee bot joins only once it does, a healer heals the tank",
   "contract": [
     "Roles act only while an encounter is active, so every bot action follows encounter_start. Classes and spells",
     "are CoA class baselines (src/server/coa/AscensionLiveBaselineData.h): Barbarian (class 12) row {12, 0, 801576}",
-    "Ancestral Strike for the tank, Sun Cleric (class 27) row {27, 0, 500143} Illumination for the healer. Both",
-    "are the first ranks at level 2 (AscensionSpellProgressionData.h: next ranks 802444 at level 8 and 502421 at",
-    "level 6), and the same spells drive timeline-player-casts and sun-cleric-solar-power-resource. Client",
+    "Ancestral Strike for the tank and the melee bot, Sun Cleric (class 27) row {27, 0, 500143} Illumination for the",
+    "healer. Both are the first ranks at level 2 (AscensionSpellProgressionData.h: next ranks 802444 at level 8 and",
+    "502421 at level 6), and the same spells drive timeline-player-casts and sun-cleric-solar-power-resource. Client",
     "Spell.dbc (coa-dbc-viewer record against /home/fab/CoaServer/dbc_clientset): Illumination casts in 2000 ms",
-    "(SpellCastTimes 5), 40 yd range (SpellRange 5), 30 percent base mana, 1500 ms global cooldown, no facing",
-    "flag; Ancestral Strike is instant, 35 Energy, melee range (SpellRange 2), facing required. The tank wields",
-    "a Worn Shortsword (item_template 25, delay 1900 ms), so 20000 ms of auto attack allows about ten swings and",
-    "at least five survive the setup of the first swing. The tank is set to half health at engage, below the",
-    "90 percent heal threshold, so at least one Illumination completes within the 20000 ms window. The level-2",
-    "defensive fixture cannot drop a 500-of-1000-health tank to zero in that time while being healed."
+    "(SpellCastTimes 5), 40 yd range (SpellRange 5), 30 percent base mana, 1500 ms global cooldown, no facing flag;",
+    "Ancestral Strike is instant, 35 Energy, melee range (SpellRange 2), facing required, no weapon requirement",
+    "(EquippedItemClass -1). The tank wields a Worn Shortsword (item_template 25, delay 1900 ms), so 20000 ms of auto",
+    "attack allows about ten swings and at least five survive the setup of the first swing. The fixture is",
+    "defensive (react state 1): it attacks only the unit that attacks it, and tanks act first each tick while melee",
+    "bots wait until the boss's victim is a tank, so the tank holds the first threat. The melee bot fights unarmed",
+    "so its lower damage stays under the tank's lead; any fixture swing at it or the healer fails the case. The",
+    "tank has no regeneration, so the fixture's hits are the only health change apart from the heals and give the",
+    "healer its work; the",
+    "heal assertion needs at least one hit to bring the tank under the 90 percent threshold. All asserted values",
+    "come from the harness's own observation of native packets and the encounter timeline."
   ],
   "timeout_ms": 90000,
   "players": [
@@ -25,6 +30,19 @@
       "melee_hit_rating": 10000,
       "expertise_rating": 10000,
       "role": "tank",
+      "rotation": [
+        801576
+      ],
+      "allow_regeneration": false
+    },
+    {
+      "id": "striker",
+      "race": 1,
+      "class": 12,
+      "level": 2,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "role": "melee",
       "rotation": [
         801576
       ]
@@ -86,6 +104,14 @@
     },
     {
       "action": "assert",
+      "label": "SETUP: the melee bot knows its rotation spell",
+      "actor": "striker",
+      "metric": "knows_spell",
+      "spell": 801576,
+      "equals": 1
+    },
+    {
+      "action": "assert",
       "label": "SETUP: the healer knows its heal",
       "actor": "healer",
       "metric": "knows_spell",
@@ -100,17 +126,18 @@
       "equals": 0
     },
     {
+      "action": "assert",
+      "label": "CONTROL: the fixture has not swung at the tank before the encounter",
+      "actor": "tank",
+      "metric": "melee_attacks_taken",
+      "target": "boss",
+      "equals": 0
+    },
+    {
       "action": "encounter_start",
       "actor": "tank",
       "boss_entry": 36,
       "radius": 30
-    },
-    {
-      "action": "set_health",
-      "label": "Engage below the heal threshold",
-      "actor": "tank",
-      "value": 500,
-      "maximum": 1000
     },
     {
       "action": "wait",
@@ -123,6 +150,37 @@
       "actor": "tank",
       "metric": "melee_attack_count",
       "min": 5
+    },
+    {
+      "action": "assert",
+      "label": "The melee bot joined the fight",
+      "actor": "striker",
+      "metric": "melee_attack_count",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The fixture's swings landed on the tank",
+      "actor": "tank",
+      "metric": "melee_attacks_taken",
+      "target": "boss",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "No fixture swing at the melee bot",
+      "actor": "striker",
+      "metric": "melee_attacks_taken",
+      "target": "boss",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No fixture swing at the healer",
+      "actor": "healer",
+      "metric": "melee_attacks_taken",
+      "target": "boss",
+      "equals": 0
     },
     {
       "action": "assert",

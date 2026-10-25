@@ -38,6 +38,26 @@ namespace CoAGameplay
         return !bossTargetsTank && tauntReady;
     }
 
+    bool RoleMayAct(RaidRole role, bool bossTargetsTank)
+    {
+        switch (role)
+        {
+            case RaidRole::Tank:
+            case RaidRole::Healer:
+                return true;
+            case RaidRole::Melee:
+            case RaidRole::Ranged:
+                return bossTargetsTank;
+            default:
+                return false;
+        }
+    }
+
+    bool ActsInTankPass(RaidRole role)
+    {
+        return role == RaidRole::Tank;
+    }
+
     std::optional<uint32> NextRotationSpell(std::vector<uint32> const& rotation,
         std::function<bool(uint32)> const& canCast)
     {

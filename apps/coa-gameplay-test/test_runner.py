@@ -617,6 +617,20 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(taunt=spell), self.assertRaisesRegex(ValueError, 'taunt_spell'):
                 run.validate(self.with_role(role='tank', taunt_spell=spell))
 
+    def test_melee_attacks_taken_needs_a_player(self):
+        for extra in ({}, {'target': 'target'}):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'melee_attacks_taken',
+                                      'equals': 0, **extra})
+            with self.subTest(extra=extra):
+                self.assertIs(run.validate(scenario), scenario)
+        for change in ({'actor': 'target'}, {'target': 'absent'}):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'melee_attacks_taken',
+                                      'equals': 0, **change})
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                run.validate(scenario)
+
     def test_cancel_mount_requires_player(self):
         self.scenario['steps'].append({'action': 'cancel_mount', 'actor': 'caster'})
         self.assertIs(run.validate(self.scenario), self.scenario)

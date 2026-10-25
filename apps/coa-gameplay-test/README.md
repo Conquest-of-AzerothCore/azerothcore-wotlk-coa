@@ -637,6 +637,8 @@ accepts `effect` (default 0). These queries submit no attack.
 `melee_attack_count` counts the actor's native melee combat packets, including extra attacks and misses.
 `melee_damage_count` counts only those dealing positive damage. Both accept `hand` (0 main hand, 1 off hand).
 `melee_damage_total` sums the positive melee damage in those packets and accepts the same hand filter.
+`melee_attacks_taken` counts the melee combat packets whose victim is the player actor, optionally only those from
+the `target` attacker.
 These observations do not test delivery to a network client.
 `spell_damage_count` and `spell_damage_total` require `spell` and count positive direct or periodic spell
 damage events, or sum their post-mitigation damage, from the actor's native combat packets. Optional `target`
@@ -1003,10 +1005,11 @@ A player with a `role` (`tank`, `healer`, `melee` or `ranged`) acts on its own e
 is active, from `encounter_start` to the end of the case, as long as it is alive and in the boss's map. No bot acts
 while the boss is missing or dead. `rotation` lists spell ids, the first castable one wins; `heal_spell` is
 required for a healer and only for one; a tank may add `taunt_spell`. A healer takes no `rotation` and a ranged
-role needs one. A spell is castable when the player knows it (`HasActiveSpell`), it has no cooldown
-(`HasSpellCooldown`) or global cooldown, the player is not casting and has no queued cast, it can pay the cost
-(`SpellInfo::CalcPowerCost`) and the target passes the native range and facing check (`Spell::CheckRange`).
-Casts go through `CMSG_CAST_SPELL` and swings through `CMSG_ATTACKSWING`, like the `cast` and `attack` actions.
+role needs one. A spell is castable when the player knows it (`HasActiveSpell`), is not casting, has no queued
+cast and the native `Spell::CheckPetCast` probe, which runs the full `Spell::CheckCast` (cooldowns, power, range,
+facing, line of sight, caster auras), accepts it. Casts go through `CMSG_CAST_SPELL` and swings through
+`CMSG_ATTACKSWING`, like the `cast` and `attack` actions. Each tick tanks act first. Melee and ranged bots wait
+until the boss's current victim is a tank, so the tank holds the first threat; healers act at any time.
 
 | Role | Each tick |
 | --- | --- |
@@ -1015,8 +1018,8 @@ Casts go through `CMSG_CAST_SPELL` and swings through `CMSG_ATTACKSWING`, like t
 | `ranged` | Stays in place; within 30 yards of the boss it turns to face it and casts its rotation on it. |
 | `healer` | Stays in place and casts `heal_spell` on the living scenario player within 40 yards with the lowest health below 90 percent (the first listed on a tie). |
 
-Bots do not dodge mechanics. The [raid bot scenario](scenarios/raid-bots-tank-healer.json) runs a tank and a
-healer against a defensive fixture.
+Bots do not dodge mechanics. The [raid bot scenario](scenarios/raid-bots-tank-healer.json) runs a tank, a melee
+bot and a healer against a defensive fixture.
 
 ## Evidence boundaries
 

@@ -75,6 +75,26 @@ TEST(CoAGameplayRaidBots, ShouldTauntOnlyWhenBossOffTankAndReady)
     EXPECT_FALSE(ShouldTaunt(true, false));
 }
 
+TEST(CoAGameplayRaidBots, DamageRolesHoldUntilBossTargetsTank)
+{
+    EXPECT_FALSE(RoleMayAct(RaidRole::Melee, false));
+    EXPECT_FALSE(RoleMayAct(RaidRole::Ranged, false));
+    EXPECT_TRUE(RoleMayAct(RaidRole::Melee, true));
+    EXPECT_TRUE(RoleMayAct(RaidRole::Ranged, true));
+    EXPECT_TRUE(RoleMayAct(RaidRole::Tank, false));
+    EXPECT_TRUE(RoleMayAct(RaidRole::Healer, false));
+    EXPECT_FALSE(RoleMayAct(RaidRole::None, true));
+}
+
+TEST(CoAGameplayRaidBots, TanksActInTheFirstPass)
+{
+    EXPECT_TRUE(ActsInTankPass(RaidRole::Tank));
+    EXPECT_FALSE(ActsInTankPass(RaidRole::Healer));
+    EXPECT_FALSE(ActsInTankPass(RaidRole::Melee));
+    EXPECT_FALSE(ActsInTankPass(RaidRole::Ranged));
+    EXPECT_FALSE(ActsInTankPass(RaidRole::None));
+}
+
 TEST(CoAGameplayRaidBots, NextRotationSpellSkipsUncastable)
 {
     std::set<uint32> castable{30, 40};

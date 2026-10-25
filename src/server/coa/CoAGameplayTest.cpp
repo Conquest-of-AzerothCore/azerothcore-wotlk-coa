@@ -637,6 +637,7 @@ struct Actor
     uint32 whoResponses = 0;
     uint32 lootReceived = 0;
     std::array<uint32, 2> meleeAttacksByHand{};
+    std::map<ObjectGuid, uint32> meleeAttacksTakenFrom;
     std::array<uint32, 2> meleeDamageByHand{};
     std::array<uint64, 2> meleeDamageTotalByHand{};
     uint64 castPushbackMs = 0;
@@ -1049,6 +1050,8 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
                 actor.meleeDamageTotalByHand[hand] += damage;
             }
         }
+        if (victim == actor.guid)
+            ++actor.meleeAttacksTakenFrom[attacker];
     }
 
     ++actor.packetOrdinal;
@@ -1617,26 +1620,21 @@ public:
         player->GetSession()->HandleAttackSwingOpcode(packet);
     }
 
-    static bool HasPowerFor(Player* player, SpellInfo const* info)
-    {
-        int32 const cost = info->CalcPowerCost(player, info->GetSchoolMask());
-        if (info->PowerType == POWER_HEALTH)
-            return int32(player->GetHealth()) > cost;
-        return info->PowerType < MAX_POWERS && int32(player->GetPower(Powers(info->PowerType))) >= cost;
-    }
-
     static bool CanBotCast(Player* player, uint32 spellId, Unit* target)
     {
         SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId);
-        if (!info || !player->HasActiveSpell(spellId) || player->HasSpellCooldown(spellId) ||
-            player->GetGlobalCooldownMgr().HasGlobalCooldown(info) || player->IsNonMeleeSpellCast(false) ||
-            !player->SpellQueue.empty() || !HasPowerFor(player, info))
+        if (!info || !player->HasActiveSpell(spellId) || player->IsNonMeleeSpellCast(false) ||
+            !player->SpellQueue.empty())
             return false;
+        Spell probe(player, info, TRIGGERED_NONE);
         SpellCastTargets targets;
         targets.SetUnitTarget(target);
-        Spell probe(player, info, TRIGGERED_NONE);
         probe.InitExplicitTargets(targets);
-        return probe.CheckRange(true) == SPELL_CAST_OK;
+        probe.m_cast_count = 1;
+        probe.LoadScripts();
+        SpellCastResult const result = probe.CheckPetCast(target);
+        player->RestoreSpellMods(&probe);
+        return result == SPELL_CAST_OK;
     }
 
     void SubmitBotCast(Player* player, uint32 spellId, Unit* target)
@@ -1649,14 +1647,12 @@ public:
         player->GetSession()->HandleCastSpellOpcode(packet);
     }
 
-    bool CastRotation(Actor const& actor, Player* player, Unit* target)
+    void CastRotation(Actor const& actor, Player* player, Unit* target)
     {
         std::optional<uint32> const spell = CoAGameplay::NextRotationSpell(actor.rotation,
             [player, target](uint32 candidate) { return CanBotCast(player, candidate, target); });
-        if (!spell)
-            return false;
-        SubmitBotCast(player, *spell, target);
-        return true;
+        if (spell)
+            SubmitBotCast(player, *spell, target);
     }
 
     static bool FaceBoss(Player* player, Creature* boss)
@@ -1697,8 +1693,21 @@ public:
             SubmitBotCast(player, healer.healSpell, patient);
     }
 
+    bool BossTargetsTank(Creature* boss) const
+    {
+        Unit const* victim = boss->GetVictim();
+        if (!victim)
+            return false;
+        for (auto const& [id, actor] : _actors)
+            if (actor.raidRole == CoAGameplay::RaidRole::Tank && actor.guid == victim->GetGUID())
+                return true;
+        return false;
+    }
+
     void DriveRaidBot(Actor const& actor, Player* player, Creature* boss)
     {
+        if (!CoAGameplay::RoleMayAct(actor.raidRole, BossTargetsTank(boss)))
+            return;
         if (actor.raidRole == CoAGameplay::RaidRole::Healer)
         {
             HealLowest(actor, player);
@@ -1738,12 +1747,14 @@ public:
         Creature* boss = EncounterBoss();
         if (!boss || !boss->IsAlive())
             return;
-        for (auto const& [id, actor] : _actors)
-            if (actor.raidRole != CoAGameplay::RaidRole::None)
-                if (Player* player = actor.session ? actor.session->GetPlayer() : nullptr)
-                    if (player->IsInWorld() && player->IsAlive() && !player->IsBeingTeleported() &&
-                        player->GetMap() == boss->GetMap())
-                        DriveRaidBot(actor, player, boss);
+        for (bool const tankPass : { true, false })
+            for (auto const& [id, actor] : _actors)
+                if (actor.raidRole != CoAGameplay::RaidRole::None &&
+                    CoAGameplay::ActsInTankPass(actor.raidRole) == tankPass)
+                    if (Player* player = actor.session ? actor.session->GetPlayer() : nullptr)
+                        if (player->IsInWorld() && player->IsAlive() && !player->IsBeingTeleported() &&
+                            player->GetMap() == boss->GetMap())
+                            DriveRaidBot(actor, player, boss);
     }
 
     bool Dismiss(bool leaveGroups)
@@ -3510,6 +3521,19 @@ private:
             return player->GetShieldBlockValue();
         if (metric == "critical_block_chance")
             return player->GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_CRIT_CHANCE);
+        if (metric == "melee_attacks_taken")
+        {
+            Actor const& actor = _actors.at(step.get<std::string>("actor"));
+            if (auto attacker = step.get_optional<std::string>("target"))
+            {
+                auto const found = actor.meleeAttacksTakenFrom.find(GetUnit(*attacker)->GetGUID());
+                return found == actor.meleeAttacksTakenFrom.end() ? 0 : found->second;
+            }
+            uint32 total = 0;
+            for (auto const& [attacker, count] : actor.meleeAttacksTakenFrom)
+                total += count;
+            return total;
+        }
         if (metric == "melee_attack_count" || metric == "melee_damage_count" ||
             metric == "melee_damage_total")
         {

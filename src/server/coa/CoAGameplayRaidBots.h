@@ -40,6 +40,8 @@ namespace CoAGameplay
     std::optional<ObjectGuid> SelectHealTarget(std::vector<HealCandidate> const& members, float thresholdPct,
         float maxRange);
     bool ShouldTaunt(bool bossTargetsTank, bool tauntReady);
+    bool RoleMayAct(RaidRole role, bool bossTargetsTank);
+    bool ActsInTankPass(RaidRole role);
     std::optional<uint32> NextRotationSpell(std::vector<uint32> const& rotation,
         std::function<bool(uint32)> const& canCast);
 }
