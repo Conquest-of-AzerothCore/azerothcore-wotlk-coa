@@ -3248,8 +3248,8 @@ private:
         }
         if (metric == "spell_done_crit_chance" || metric == "spell_taken_crit_chance" ||
             metric == "spell_done_crit_chance_scripted" ||
-            metric == "melee_spell_damage_done" || metric == "spell_critical_damage" ||
-            metric == "armor_reduced_damage")
+            metric == "melee_spell_damage_done" || metric == "melee_spell_damage_done_scripted" ||
+            metric == "spell_critical_damage" || metric == "armor_reduced_damage")
         {
             Unit* target = GetUnit(step.get<std::string>("target"));
             SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
@@ -3268,6 +3268,12 @@ private:
                 sScriptMgr->OnSpellCritChance(probe, target, chance);
                 delete probe;
                 return chance;
+            }
+            if (metric == "melee_spell_damage_done_scripted")
+            {
+                int32 damage = int32(player->MeleeDamageBonusDone(target, 1000, BASE_ATTACK, info, info->GetSchoolMask()));
+                sScriptMgr->ModifySpellDamageTaken(target, player, damage, info);
+                return damage;
             }
             if (metric == "spell_critical_damage")
                 return Unit::SpellCriticalDamageBonus(player, info, 1000, target);

@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Silver Bolts doubles its bonus against Undead and Demons (#3342)",
-  "contract": "Silver Bolts 804026 reads 'Damage dealt by Heartseeking Bolt, Shadowblast, and Damnation is increased by $s1%, doubled against Undead or Demons or enemies affected by Shadow Trap' with $s1 = 15 (Spell.dbc 2026-09-17). Effect 2 is a SPELLMOD_DAMAGE +15% on Damnation and Heartseeking Bolt. Effect 0 is a raw aura 112 record with the private selector 20014 and MiscValueB 36 (creature-type mask: Demon 1 << (3 - 1) = 4 plus Undead 1 << (6 - 1) = 32), class mask (0x10000, 0x800, 0x10), which nothing reads; native aura 168 honours the effect's class mask once the selector is in MiscValueB (Unit.cpp:8863, 10808). Both factors multiply in MeleeDamageBonusDone (Heartseeking Bolt 805754 and Damnation 520062 are DmgClass 3), so Undead and Demons read 1.15 x 1.15 = 1.3225, inside 1.29..1.33 which also admits an exact 1.30 'doubled'; a non-Undead target reads 1.15. On main the Undead and Demon ratios equal the control's 1.15. Creature types come from data/sql/base/db_world/creature_template.sql: 201 Brittlebones Skeleton type 6 (Undead), 49 Lesser Succubus type 3 (Demon), 36 Harvest Golem type 9 (Mechanical). Shadowblast is not asserted: its class mask sits only in effect 0, so it gets no base +15%, a separate open question. The Shadow Trap clause is a different effect and is not covered.",
+  "contract": "Silver Bolts 804026 reads 'Damage dealt by Heartseeking Bolt, Shadowblast, and Damnation is increased by $s1%, doubled against Undead or Demons or enemies affected by Shadow Trap' with $s1 = 15 (Spell.dbc 2026-09-17). Effect 2 is a SPELLMOD_DAMAGE +15% on Damnation and Heartseeking Bolt. Effect 0 is a raw aura 112 record with the private selector 20014 and MiscValueB 36 (creature-type mask: Demon 1 << (3 - 1) = 4 plus Undead 1 << (6 - 1) = 32), class mask (0x10000, 0x800, 0x10), which nothing reads; native aura 168 honours the effect's class mask once the selector is in MiscValueB (Unit.cpp:9250, 11276, unchanged). Both factors multiply in MeleeDamageBonusDone (Heartseeking Bolt 805754 and Damnation 520062 are DmgClass 3), so Undead and Demons read 1.15 x 1.15 = 1.3225, inside 1.29..1.33 which also admits an exact 1.30 'doubled'; a non-Undead target reads 1.15. On main the Undead and Demon ratios equal the control's 1.15. Creature types come from data/sql/base/db_world/creature_template.sql: 201 Brittlebones Skeleton type 6 (Undead), 49 Lesser Succubus type 3 (Demon), 36 Harvest Golem type 9 (Mechanical). Shadowblast is not asserted: its class mask sits only in effect 0, so it gets no base +15%, a separate open question. The Shadow Trap clause (#4715) checks victim->HasAura(681177), 'Shadow Trapped', the debuff Witch Hunter field entity 506250 casts (data/sql/updates/pending_db_world/rev_20260908_07_witch_hunter_completion.sql; AscensionWitchHunterSummons.cpp). It is now honoured entirely in CoA code: witch_hunter_silver_bolts_shadow_trap (AscensionWitchHunterCompletion.cpp, UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN) finds the player's own converted Silver Bolts (804026) MOD_DAMAGE_DONE_VERSUS aura effect, applies its own effect 2 percentage again when the victim carries 681177 and is not already Undead/Demon (reading the mask from that same aura effect, not a literal), so a Mechanical target under Shadow Trapped reads 1.29..1.33 without needing creature type and without double-counting an Undead-and-trapped target. Native Unit.cpp carries no CoA spell ID for this; 574149/574163's identical creature-type conversion is unaffected since the hook only matches aura id 804026. Asserted via the new melee_spell_damage_done_scripted metric (apps/coa-gameplay-test/README.md), which adds UnitScript::ModifySpellDamageTaken on top of the existing deterministic melee_spell_damage_done calculation so the hook is observable without a real cast or its crit-roll sampling (the wall that blocked PR #5650).",
   "timeout_ms": 60000,
   "players": [
     {
@@ -36,6 +36,15 @@
       "level": 80,
       "health": 1000000,
       "distance": 9
+    },
+    {
+      "id": "trapped",
+      "owner": "wh",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 1.5,
+      "stationary": true
     }
   ],
   "steps": [
@@ -190,6 +199,84 @@
       "ratio_to": "heart_undead",
       "min": 0.999,
       "max": 1.001
+    },
+    {
+      "action": "snapshot",
+      "label": "Heartseeking Bolt against the Mechanical control before Shadow Trap, without Silver Bolts",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done_scripted",
+      "spell": 805754,
+      "target": "trapped",
+      "save_as": "heart_trapped"
+    },
+    {
+      "action": "snapshot",
+      "label": "Damnation against the Mechanical control before Shadow Trap, without Silver Bolts",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done_scripted",
+      "spell": 520062,
+      "target": "trapped",
+      "save_as": "damna_trapped"
+    },
+    {
+      "action": "learn",
+      "label": "Shadow Trapped is otherwise triggered-only; learn it so the player's own cast is accepted",
+      "actor": "wh",
+      "spell": 681177
+    },
+    {
+      "action": "cast",
+      "label": "Apply Shadow Trapped (681177), the debuff Shadow Trap's field entity casts on nearby enemies",
+      "actor": "wh",
+      "spell": 681177,
+      "target": "trapped"
+    },
+    {
+      "action": "assert",
+      "label": "The Mechanical control is now Shadow Trapped",
+      "actor": "trapped",
+      "metric": "aura",
+      "spell": 681177,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "unlearn",
+      "actor": "wh",
+      "spell": 681177
+    },
+    {
+      "action": "learn",
+      "label": "Silver Bolts",
+      "actor": "wh",
+      "spell": 804026
+    },
+    {
+      "action": "assert",
+      "label": "#4715: Heartseeking Bolt doubles against a Shadow-Trapped Mechanical target, 1.15 x 1.15",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done_scripted",
+      "spell": 805754,
+      "target": "trapped",
+      "ratio_to": "heart_trapped",
+      "min": 1.29,
+      "max": 1.33
+    },
+    {
+      "action": "assert",
+      "label": "#4715: Damnation doubles against a Shadow-Trapped Mechanical target, 1.15 x 1.15",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done_scripted",
+      "spell": 520062,
+      "target": "trapped",
+      "ratio_to": "damna_trapped",
+      "min": 1.29,
+      "max": 1.33
+    },
+    {
+      "action": "unlearn",
+      "actor": "wh",
+      "spell": 804026
     }
   ]
 }

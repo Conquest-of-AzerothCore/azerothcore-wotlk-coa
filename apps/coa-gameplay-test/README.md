@@ -704,6 +704,9 @@ only reflects native `ApplySpellMod(SPELLMOD_CRITICAL_CHANCE)` modifiers (a bare
 it does not invoke `AllSpellScript::OnSpellCritChance`, which only runs mid-cast (`Spell::DoAllEffectOnTarget`).
 `spell_done_crit_chance_scripted` requires the same `spell`/`target` and additionally runs that hook via a
 throwaway, never-cast `Spell` instance, so a script-hook-only crit bonus is observable without a real cast.
+`melee_spell_damage_done_scripted` requires the same `spell`/`target`, takes `melee_spell_damage_done`'s result and
+additionally runs `UnitScript::ModifySpellDamageTaken` with the player as attacker and `target` as the victim, so a
+module's damage-taken hook is observable on the done side without a real cast or its crit-roll sampling.
 `spell_taken_crit_chance` applies the target's native `SpellTakenCritChance` to the caster's done chance,
 including target health and school conditions. It requires the same `spell` and `target`.
 `aura_crit_chance` reads a
