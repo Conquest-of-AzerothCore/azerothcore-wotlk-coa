@@ -6,8 +6,8 @@
 --    Store only, at twice their old Tiraxis price (one-hand, shield and off-hand 900 -> 1800, ranged and relics
 --    1000 -> 2000, two-hand 1800 -> 3600).
 --    Heirloom armor, rings and trinkets are not sold piece by piece (price 0): they come in the set caches, which stay on
---    Tiraxis at 4500 each (Heirloom Cache and Experience Heirloom Cache). The six heirloom necklaces, which no cache
---    holds, are sold by Tiraxis and in the Vanity Store at 1500. The caches
+--    Tiraxis at 4500 each (Heirloom Cache and Experience Heirloom Cache). The heirloom pendants, which no cache
+--    holds, are sold by Tiraxis and in the Vanity Store at 1500 (not the Drakefire Amulet, which is not sold). The caches
 --    have no VanityCollection.dbc row. Stick on a Carrot is sold on its own at 2000. The raid medallions and the
 --    Insignias of the Burning Legion are not sold.
 -- 2) Tiraxis' Convenience Items (900008): new prices, and the Vanity Store sells the same items at the same price.
@@ -80,7 +80,7 @@ FROM (VALUES
   ROW(666000, 0),   -- Molten Core Medallion
   ROW(666003, 0),   -- Serpentshrine Cavern Medallion
   ROW(339075, 2000),   -- Stick on a Carrot
-  ROW(16309, 1500),    -- Drakefire Amulet
+  ROW(16309, 0),    -- Drakefire Amulet
   ROW(339076, 1500),   -- Pendant of Adventure
   ROW(339100, 1500),   -- Pendant of Discovery
   ROW(1339078, 1500),  -- Pendant of the Bulwark
@@ -228,7 +228,6 @@ FROM (VALUES
   ROW(4, 1339062, 10374),   -- Polished Battlegear of Valor - Heirloom Cache, 4500 tokens
   ROW(5, 1339063, 10374),   -- Armor of Might - Heirloom Cache, 4500 tokens
   ROW(6, 1339064, 10374),   -- The Mystical Elements - Heirloom Cache, 4500 tokens
-  ROW(7, 16309, 10344),     -- Drakefire Amulet, 1500 tokens
   ROW(8, 339076, 10344),    -- Pendant of Adventure, 1500 tokens
   ROW(9, 339100, 10344),    -- Pendant of Discovery, 1500 tokens
   ROW(10, 1339078, 10344),  -- Pendant of the Bulwark, 1500 tokens
