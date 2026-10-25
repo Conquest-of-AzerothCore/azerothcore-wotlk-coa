@@ -53,6 +53,7 @@ Keep secrets out of this file: credentials stay in the worldserver config or the
 | `jobs` | the CPU count |
 | `gameplay_jobs` | `max(1, min(4, cpu // 3))`; used only with `--gameplay-clock real` |
 | `gameplay_db_workers` | `16` (1-32); character database workers, used only with the simulated clock |
+| `gameplay_copy_workers` | `min(8, cpu)` (1-32); MySQL connections that copy each test schema |
 
 `cmake_args` is used only to configure a build directory that has no `CMakeCache.txt` or whose last configure
 did not generate build files. Its default adds `-G` with the generator already in the cache, else `-G Ninja`
@@ -87,6 +88,11 @@ The macOS CMake configuration also creates static libraries with `/usr/bin/libto
   `Spell.dbc` is taken, so a stale `COA_DBC_DIR` wins over the config; set `dbc_directory` to be explicit.
 - `database_client_config` is the existing MySQL `[client]` file described in the
   [gameplay README](../../apps/coa-gameplay-test/README.md#run), for accounts that cannot create schemas.
+- `gameplay_copy_workers` is passed to the gameplay runner as `--copy-workers`. The runner copies the test
+  schemas inside MySQL, largest tables first, and falls back to `mysqldump | mysql` for a source schema with views,
+  triggers, routines or events, or under statement-based binary logging
+  ([gameplay README](../../apps/coa-gameplay-test/README.md#run)). Lower it on a small machine or a busy MySQL
+  server.
 - During a run the gameplay stage copies the source module `.conf` files into the server modules directory and
   removes them afterwards. That directory must not hold `.conf` files of its own (`.conf.dist` files are
   ignored), so keep the source module configs in another directory, beside another worldserver config or in

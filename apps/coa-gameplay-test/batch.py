@@ -329,7 +329,8 @@ class Server:
         refresh = batch.refresh_pending(self.slot)
         try:
             self.case_directory.mkdir(parents=True)
-            database = run.Databases(batch.mysql, batch.dump, credentials, batch.connections, self.batch_id)
+            database = run.Databases(batch.mysql, batch.dump, credentials, batch.connections, self.batch_id,
+                                     batch.args.copy_workers)
             self.summary['databases'] = database.names
             if not batch.args.fresh_databases:
                 cache = run.WorldCache(database, batch.cache_root / f'slot-{self.slot}', batch.inputs,
@@ -973,6 +974,7 @@ class Batch:
             output=directory, startup_timeout=self.args.startup_timeout, fresh_databases=self.args.fresh_databases,
             refresh_world=refresh, world_cache_dir=self.cache_root / f'slot-{slot}',
             staged_module_configs=self.staged if self.args.server_modules_dir else None,
+            copy_workers=self.args.copy_workers,
             should_stop=self.stopping.is_set)
         kind = 'single-mode run' if mode == 'single' else 'isolated rerun'
         started = time.monotonic()
@@ -1250,6 +1252,9 @@ def parser():
     result.add_argument('--skip-scenario', nargs='+', default=[], help='Catalog ids omitted from default selection')
     result.add_argument('--world-cache-root', type=Path, default=CACHE_ROOT,
                         help='Parent directory of the per-worker world-cache slots')
+    result.add_argument('--copy-workers', type=run.copy_worker_count, default=run.DEFAULT_COPY_WORKERS,
+                        help='MySQL connections that copy test schemas in parallel for each worldserver '
+                             f'(1-{run.MAX_COPY_WORKERS}, default {run.DEFAULT_COPY_WORKERS}: min(8, CPU count))')
     return result
 
 

@@ -121,7 +121,8 @@ class SettingsTests(WorkspaceTest):
 
     def test_setting_values_are_type_checked(self):
         for data in [{'jobs': 0}, {'gameplay_jobs': True}, {'cmake_args': '-G Ninja'}, {'mysql': ''}, [],
-                     {'gameplay_db_workers': 0}, {'gameplay_db_workers': '4'}, {'gameplay_db_workers': 33}]:
+                     {'gameplay_db_workers': 0}, {'gameplay_db_workers': '4'}, {'gameplay_db_workers': 33},
+                     {'gameplay_copy_workers': 0}, {'gameplay_copy_workers': 33}]:
             with self.subTest(data=data):
                 path = write(Path(self.directory.name) / 'settings.json', json.dumps(data))
                 with self.assertRaises(ValueError):
@@ -920,6 +921,18 @@ class GameplayTests(WorkspaceTest):
                                       str(db_workers)])
                 else:
                     self.assertFalse({'--clock', '--lanes', '--character-db-workers'} & set(command))
+
+    def test_copy_workers_setting_reaches_the_gameplay_runner(self):
+        workspace = self.workspace()
+        self.assertNotIn('--copy-workers', self.planned_gameplay(workspace, [])['commands'][0])
+        settings = write(workspace.base / 'settings.json', json.dumps({'gameplay_copy_workers': 3}))
+        for clock in verify_all.GAMEPLAY_CLOCKS:
+            with self.subTest(clock=clock):
+                command = self.planned_gameplay(workspace, ['--settings', str(settings), '--gameplay-clock', clock])
+                command = command['commands'][0]
+                self.assertEqual(command[command.index('--copy-workers') + 1], '3')
+                self.assertEqual(verify_all.gameplay_module('batch').parser().parse_args(command[3:]).copy_workers,
+                                 3)
 
     def test_gameplay_concurrency_options_must_match_the_clock(self):
         workspace = self.workspace()

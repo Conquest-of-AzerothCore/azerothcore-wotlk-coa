@@ -168,6 +168,17 @@ Existing accounts and characters are not copied. The MySQL user needs read acces
 to create/import/drop the test schemas. Sources must be local. No authserver or game client is needed.
 The copies omit MySQL triggers, routines and scheduled events.
 
+The copy runs inside MySQL: each source table is recreated from its `SHOW CREATE TABLE` definition, so keys,
+foreign keys, checks, table options and the `AUTO_INCREMENT` counter match the source, and its rows are copied with
+`INSERT ... SELECT` at READ-COMMITTED, which reads the source without locking its rows. Tables are copied largest
+first over `--copy-workers` MySQL connections (1-32, default `min(8, CPU count)`; `gameplay_copy_workers` in
+`conf/verify-all.json`); 1 copies one table at a time. Each table is read in its own statement, so unlike a
+single-transaction dump the copy is not one snapshot of the source; the world cache checks the source again after
+copying, and other source changes during a copy are not detected. When a source schema has views, triggers,
+routines or events, or the server uses statement-based binary logging, that schema is copied with
+`mysqldump | mysql` instead and the run log says why. A failed copy stops the remaining tables and drops the
+partial schema; a partial world cache is never marked ready.
+
 If the normal server account cannot create schemas, set `database_client_config` in `conf/verify-all.json`
 (the runners' `--database-client-config`). The existing MySQL `[client]` file must provide `host`, `port`,
 `user` and `password`, with the same host/port as all source connections. Its credentials are used for

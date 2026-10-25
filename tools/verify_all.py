@@ -44,7 +44,7 @@ DEFAULT_SETTINGS = 'conf/verify-all.json'
 PATH_SETTINGS = ('build_directory', 'worldserver', 'worldserver_config', 'mysql', 'mysqldump',
                  'database_client_config', 'server_modules_dir', 'modules_config_dir', 'dbc_directory',
                  'workspace_tools', 'datamine_directory', 'mysql_server_bin')
-COUNT_SETTINGS = ('jobs', 'gameplay_jobs', 'gameplay_db_workers')
+COUNT_SETTINGS = ('jobs', 'gameplay_jobs', 'gameplay_db_workers', 'gameplay_copy_workers')
 SETTING_KEYS = frozenset((*PATH_SETTINGS, *COUNT_SETTINGS, 'cmake_args'))
 CONFIGURED_DIRECTORIES = ('dbc_directory', 'datamine_directory', 'workspace_tools', 'mysql_server_bin')
 PROGRAM_SETTINGS = ('mysql', 'mysqldump')
@@ -79,6 +79,7 @@ DEFAULT_GAMEPLAY_LANES = 15
 MAXIMUM_GAMEPLAY_LANES = 15
 DEFAULT_GAMEPLAY_DB_WORKERS = 16
 MAXIMUM_GAMEPLAY_DB_WORKERS = 32
+MAXIMUM_GAMEPLAY_COPY_WORKERS = 32
 USAGE_ERROR = 2
 GAMEPLAY_EXPLORATORY_EXIT = 3
 EXPLORATORY_ONLY = 'only exploratory scenarios ran; they passed natively, without combined verification'
@@ -117,6 +118,7 @@ class Context:
     world_databases: str | None = None
     gameplay_db_workers: int = 1
     gameplay_real_pace_rerun: bool = False
+    gameplay_copy_workers: int | None = None
 
 
 def absolute(value, base):
@@ -155,6 +157,8 @@ def load_settings(path, explicit):
             raise ValueError(f'Setting {key} must be a positive integer')
     if data.get('gameplay_db_workers', 1) > MAXIMUM_GAMEPLAY_DB_WORKERS:
         raise ValueError(f'Setting gameplay_db_workers must be at most {MAXIMUM_GAMEPLAY_DB_WORKERS}')
+    if data.get('gameplay_copy_workers', 1) > MAXIMUM_GAMEPLAY_COPY_WORKERS:
+        raise ValueError(f'Setting gameplay_copy_workers must be at most {MAXIMUM_GAMEPLAY_COPY_WORKERS}')
     arguments = data.get('cmake_args', [])
     if not isinstance(arguments, list) or not all(isinstance(argument, str) for argument in arguments):
         raise ValueError('Setting cmake_args must be a list of strings')
@@ -975,6 +979,8 @@ def gameplay_command(context):
     if context.gameplay_clock == SIMULATED_CLOCK:
         command += ['--clock', SIMULATED_CLOCK, '--lanes', context.gameplay_lanes,
                     '--character-db-workers', context.gameplay_db_workers]
+    if context.gameplay_copy_workers:
+        command += ['--copy-workers', context.gameplay_copy_workers]
     if context.gameplay_real_pace_rerun:
         command.append('--real-pace-rerun')
     if context.world_databases:
@@ -1365,7 +1371,7 @@ def prepare(args, root, environment):
     scenarios = resolve_scenarios(args) if 'gameplay' in stages else []
     context = Context(root, raw, settings, output, stages, jobs, gameplay_jobs, args.gameplay_clock, gameplay_lanes,
                       args.base, scenarios, harness, environment, args.world_databases,
-                      gameplay_db_workers(args, raw), args.gameplay_real_pace_rerun)
+                      gameplay_db_workers(args, raw), args.gameplay_real_pace_rerun, raw.get('gameplay_copy_workers'))
     check_command_length(context)
     if not args.plan:
         context.output = claim_output(requested, root)
