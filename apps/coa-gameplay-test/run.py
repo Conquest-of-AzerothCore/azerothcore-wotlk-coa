@@ -1238,6 +1238,8 @@ def database_credentials(connections, path):
 DEFAULT_COPY_WORKERS = min(8, os.cpu_count() or 1)
 MAX_COPY_WORKERS = 32
 COPY_TIMEOUT = 1800
+DROP_TIMEOUT = 600
+ERROR_LIMIT = 500
 COPY_SESSION = ("SET SESSION sql_mode = 'NO_AUTO_VALUE_ON_ZERO', foreign_key_checks = 0, "
                 "transaction_isolation = 'READ-COMMITTED';")
 COPY_OBSTACLES = ('views', 'triggers', 'routines', 'events', 'statement-based binary logging')
@@ -1302,6 +1304,9 @@ class Databases:
             detail = self.redact(result.stderr)
             raise ValueError(f'MySQL operation failed for {role}: {detail or result.returncode}')
         return result.stdout.strip()
+
+    def drop(self, role, name):
+        self.sql(role, f'DROP DATABASE `{name}`;', timeout=DROP_TIMEOUT)
 
     def inventory(self, role):
         if role in self.inventories:
@@ -1429,9 +1434,9 @@ class Databases:
         failures = []
         for role in reversed(self.created):
             try:
-                self.sql(role, f'DROP DATABASE `{self.names[role]}`;')
-            except (ValueError, subprocess.SubprocessError):
-                failures.append(self.names[role])
+                self.drop(role, self.names[role])
+            except (ValueError, subprocess.SubprocessError) as error:
+                failures.append(cleanup_failure(self.names[role], error))
         return failures
 
     def remove_credentials(self):
@@ -1509,14 +1514,25 @@ def prepare_databases(database, cache, refresh=False):
     database.prepare(roles=('auth', 'characters') if cache else ('auth', 'characters', 'world'))
 
 
+def failure_text(error):
+    if isinstance(error, subprocess.TimeoutExpired):
+        return f'timed out after {error.timeout:g} s'
+    return str(error).strip()[-ERROR_LIMIT:]
+
+
+def cleanup_failure(schema, error):
+    return {'schema': schema, 'error': error if isinstance(error, str) else failure_text(error)}
+
+
 def release_databases(database, cache, server_still_running, summary):
-    failures = list(database.names.values()) if server_still_running else database.cleanup()
+    failures = ([cleanup_failure(name, 'worldserver still running') for name in database.names.values()]
+                if server_still_running else database.cleanup())
     if cache:
         try:
             cache.finish(server_still_running=server_still_running)
         except (ValueError, OSError, subprocess.SubprocessError, KeyError) as error:
             summary['cache_cleanup_error'] = str(error)
-            failures.append(database.names['world'])
+            failures.append(cleanup_failure(database.names['world'], error))
     if failures:
         summary.update(status='failed', cleanup_failed=failures)
     return failures

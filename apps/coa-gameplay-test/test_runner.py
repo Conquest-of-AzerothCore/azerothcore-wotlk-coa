@@ -1133,6 +1133,43 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual([table for table, _ in server.scripts], ['broken'])
         self.assertEqual(server.queries[-1], 'DROP DATABASE `coa_test_012345abcdef_world`;')
 
+    def test_drop_uses_long_timeout(self):
+        self.assertEqual(run.DROP_TIMEOUT, 600)
+        with tempfile.TemporaryDirectory() as temporary:
+            database = self.database(Path(temporary))
+            database.created.append('world')
+            result = subprocess.CompletedProcess([], 0, stdout='', stderr='')
+            with patch('run.subprocess.run', return_value=result) as runner:
+                self.assertEqual(database.cleanup(), [])
+            database.remove_credentials()
+        self.assertEqual(runner.call_args.args[0][0], 'mysql')
+        self.assertEqual(runner.call_args.kwargs['input'], 'DROP DATABASE `coa_test_012345abcdef_world`;')
+        self.assertEqual(runner.call_args.kwargs['timeout'], 600)
+
+    def test_cleanup_failed_keeps_error_text(self):
+        errors = [subprocess.TimeoutExpired(['mysql', '--defaults-extra-file=/private/world.cnf'], 600),
+                  ValueError('MySQL operation failed for characters: ERROR 1051 table is locked\n')]
+        with tempfile.TemporaryDirectory() as temporary:
+            database = self.database(Path(temporary))
+            database.created.extend(['characters', 'world'])
+            with patch.object(database, 'drop', side_effect=errors):
+                failures = database.cleanup()
+            database.remove_credentials()
+        self.assertEqual(failures, [
+            {'schema': 'coa_test_012345abcdef_world', 'error': 'timed out after 600 s'},
+            {'schema': 'coa_test_012345abcdef_characters',
+             'error': 'MySQL operation failed for characters: ERROR 1051 table is locked'}])
+        self.assertNotIn('private', json.dumps(failures))
+
+    def test_release_databases_records_schema_and_error(self):
+        database = SimpleNamespace(names={'world': 'coa_test_world'}, cleanup=lambda: [])
+        cache = SimpleNamespace(finish=lambda server_still_running: (_ for _ in ()).throw(ValueError('drop refused')))
+        summary = {}
+        failures = run.release_databases(database, cache, False, summary)
+        expected = [{'schema': 'coa_test_world', 'error': 'drop refused'}]
+        self.assertEqual(failures, expected)
+        self.assertEqual(summary['cleanup_failed'], expected)
+
     def test_parallel_copy_failure_is_wrapped_and_the_partial_copy_dropped(self):
         server = CopyServer({f'table_{index}': 100 - index for index in range(20)}, fail='table_0')
         with tempfile.TemporaryDirectory() as temporary:
@@ -1169,7 +1206,7 @@ class RunnerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             database = self.database(Path(temporary))
             statements = []
-            with patch.object(database, 'sql', side_effect=lambda role, sql: statements.append(sql)), \
+            with patch.object(database, 'sql', side_effect=lambda role, sql, timeout=60: statements.append(sql)), \
                     patch.object(database, 'copy', side_effect=ValueError('copy failed')):
                 with self.assertRaisesRegex(ValueError, 'copy failed'):
                     database.prepare()

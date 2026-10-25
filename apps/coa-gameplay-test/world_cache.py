@@ -190,7 +190,7 @@ class WorldCache:
     def drop(self):
         if not self.created_here:
             self.verify_owner()
-        self.database.sql('world', f'DROP DATABASE `{self.name}`;')
+        self.database.drop('world', self.name)
         self.owned = False
         self.created_here = False
         self.path.unlink(missing_ok=True)

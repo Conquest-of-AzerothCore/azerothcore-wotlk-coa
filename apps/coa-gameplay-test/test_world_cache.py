@@ -8,6 +8,7 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
+import run
 from world_cache import WorldCache, input_fingerprint, run_parallel, world_fingerprint
 
 SERVER_UUID = '11111111-2222-3333-4444-555555555555'
@@ -21,6 +22,7 @@ class DatabaseFixture:
         self.schemas = {'source_world': {'data': 'original data', 'token': None}}
         self.copies = 0
         self.dropped = []
+        self.drop_timeouts = []
 
     def sql(self, role, statement, timeout=60):
         if statement == 'SELECT @@server_uuid;':
@@ -32,6 +34,7 @@ class DatabaseFixture:
             self.schemas[name] = {'data': '', 'token': None}
         elif statement.startswith('DROP DATABASE'):
             self.dropped.append(name)
+            self.drop_timeouts.append(timeout)
             del self.schemas[name]
         elif statement.startswith('CREATE TABLE'):
             self.schemas[name]['token'] = re.search(r"VALUES \('([0-9a-f]+)'\)", statement)[1]
@@ -40,6 +43,8 @@ class DatabaseFixture:
         else:
             raise AssertionError(statement)
         return ''
+
+    drop = run.Databases.drop
 
     def copy(self, role):
         self.copies += 1
@@ -89,6 +94,13 @@ class WorldCacheTests(unittest.TestCase):
         self.assertEqual(self.database.dropped, [first.name])
         self.assertEqual(second.info['mode'], 'refreshed')
         self.assertEqual(self.database.schemas[second.name]['data'], 'new spell data')
+
+    def test_drop_uses_long_timeout(self):
+        first = self.cache()
+        self.run_clean(first)
+        self.database.schemas['source_world']['data'] = 'new spell data'
+        self.run_clean(self.cache())
+        self.assertEqual(self.database.drop_timeouts, [run.DROP_TIMEOUT])
 
     def test_sql_or_configuration_change_refreshes_copy(self):
         first = self.cache()

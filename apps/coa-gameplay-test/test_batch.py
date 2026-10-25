@@ -570,13 +570,14 @@ class BatchTests(unittest.TestCase):
             'completed case', 'No queue-mode worldserver became ready'])
 
     def test_cleanup_failure_fails_every_case_of_that_server(self):
-        self.cleanup_result = ['coa_test_leftover_auth']
+        self.cleanup_result = [{'schema': 'coa_test_leftover_auth', 'error': 'MySQL operation failed'}]
         code, result = self.batch('--fresh-databases', '--no-isolated-rerun', '--scenario', 'alpha', 'beta')
         self.assertEqual(code, 1)
         for key in ('alpha', 'beta'):
             summary = self.summary(key)
             self.assertEqual(summary['status'], 'failed')
-            self.assertEqual(summary['cleanup_failed'], ['coa_test_leftover_auth'])
+            self.assertEqual(summary['cleanup_failed'],
+                             [{'schema': 'coa_test_leftover_auth', 'error': 'MySQL operation failed'}])
             self.assertEqual(result['cases'][key]['status'], 'failed')
         self.assertTrue(result['failures'])
         self.assertEqual(verification.verify([self.output / 'cases' / 'alpha'], self.definitions)['status'],

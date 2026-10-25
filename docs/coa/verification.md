@@ -564,7 +564,8 @@ lane could have been running (the first `lanes` unfinished case files, as exclus
 After three consecutive server failures without a completed case a worker stops, which fails the batch; the
 other workers continue with the shared queue. Cases that no worker could run are `not_run`, which is a failure.
 A batch in which no queue-mode worldserver became ready fails without isolated reruns. A cleanup failure marks
-every case of that server `cleanup_failed` and fails the batch. The binary is hashed before each server starts;
+every case of that server `cleanup_failed` and fails the batch. Each `cleanup_failed` entry is
+`{"schema": name, "error": text}`; a schema drop may take up to 600 s before it counts as failed. The binary is hashed before each server starts;
 a change during the batch stops new servers and fails the batch. Ctrl+C or SIGTERM (a console break on Windows)
 stops all servers and cleans up.
 
