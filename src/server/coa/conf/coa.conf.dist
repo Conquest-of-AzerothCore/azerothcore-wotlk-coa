@@ -462,10 +462,12 @@ PvpPower.Enable = 1
 PvePower.Enable = 1
 
 #    Bloodforged.Enable
-#        Description: Adds one independent Bloodforged roll to eligible open-world creature corpses
-#                     for High-Risk players from level 15, drawn from the reviewed catalogue in
-#                     coa_bloodforged_catalogue. The item and rate band follow the player's level;
-#                     creatures grey to the player give no roll. Requires PvpPower.Enable.
+#        Description: Adds Bloodforged equipment to the native loot roll of eligible open-world
+#                     creature corpses for High-Risk players from level 15, drawn from the reviewed
+#                     catalogue in coa_bloodforged_catalogue. The item pool and rate band follow the
+#                     player's level; creatures grey to the player give no roll. Drops obey the
+#                     standard corpse item limit and are scaled by Rate.Drop.Item.Uncommon, .Rare and
+#                     .Epic. Requires PvpPower.Enable.
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
@@ -476,8 +478,9 @@ Bloodforged.Enable = 0
 #    Bloodforged.Rates35
 #    Bloodforged.Rates45
 #    Bloodforged.Rates55
-#        Description: Percent per eligible corpse for the level band starting at that level, as three
-#                     values: uncommon, rare, epic. Independent rolls, one quality per roll.
+#        Description: Base percent per eligible corpse for the level band starting at that level, as
+#                     three values: uncommon, rare, epic. One roll per quality, spread evenly across
+#                     that quality's pool, before the Rate.Drop.Item.* multipliers.
 #        Default:     "4.50 0.50 0.00", "4.00 1.00 0.00", "3.80 1.40 0.15", "3.60 1.80 0.25", "3.40 2.20 0.40"
 
 Bloodforged.Rates15 = "4.50 0.50 0.00"

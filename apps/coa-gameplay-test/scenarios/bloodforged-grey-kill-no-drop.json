@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "No Bloodforged drop on a grey High-Risk kill",
-  "contract": "Requires Bloodforged.Enable = 1 with Bloodforged.Rates55 = \"99.98 0.01 0.00\" (a rate that guarantees the roll), PvpPower.Enable = 1 and the catalogue SQL. A creature grey to the player gives no Bloodforged roll: a level 60 High-Risk character kills a natural Riverpaw Mongrel (level 14, grey to them), opens its corpse (the mongrel always carries coins) and finds no Bloodforged item.",
+  "contract": "Requires Bloodforged.Enable = 1 with Bloodforged.Rates55 = \"99.98 0.01 0.00\" (a rate that guarantees the roll), Rate.Drop.Item.Uncommon, .Rare and .Epic = 1 (they scale Bloodforged drops), PvpPower.Enable = 1 and the catalogue SQL. A creature grey to the player gives no Bloodforged roll: a level 60 High-Risk character kills a natural Riverpaw Mongrel (level 14, grey to them), opens its corpse (the mongrel always carries coins) and finds no Bloodforged item.",
   "players": [
     {
       "id": "h",
