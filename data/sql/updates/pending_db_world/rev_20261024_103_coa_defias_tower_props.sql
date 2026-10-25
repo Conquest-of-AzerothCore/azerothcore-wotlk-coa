@@ -1,7 +1,9 @@
 -- Defias Tower, Westfall (#8981): the realm's top-floor props and the tower fixes the release-day footage
 -- (YouTube 2HEuXunIEbk 07:56-07:58) and the realm-dump sightings support. Prop templates are the WDB cache
--- records; the three Hellfire Supplies displays are inferred from their model names. Prop facings are unknown.
-DELETE FROM `gameobject_template` WHERE `entry` BETWEEN 97493 AND 97506;
+-- records; the three Hellfire Supplies displays are inferred from their model names. Prop facings are unknown
+-- except where set in game against the footage: the rug, the far crate stack and the table the poison cases
+-- stand on (the realm's Inn Table prop 98022; the dump did not record its spot here).
+DELETE FROM `gameobject_template` WHERE `entry` BETWEEN 97493 AND 97506 OR `entry` = 98022;
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`,
   `size`, `Data0`, `Data1`, `Data2`, `Data3`, `Data4`, `Data5`, `Data6`, `Data7`, `Data8`, `Data9`, `Data10`,
   `Data11`, `Data12`, `Data13`, `Data14`, `Data15`, `Data16`, `Data17`, `Data18`, `Data19`, `Data20`, `Data21`,
@@ -20,14 +22,15 @@ VALUES
 (97503, 5, 1032285, 'Rogue Poison Case 3 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
 (97504, 5, 1037826, 'Rogue Poison Case 2 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
 (97505, 5, 98121, 'Human Pulley Crates RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
-(97506, 5, 8359, 'Northrend Torch RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0);
+(97506, 5, 8359, 'Northrend Torch RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(98022, 5, 221, 'Inn Table RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0);
 
-DELETE FROM `gameobject` WHERE `guid` BETWEEN 9950300 AND 9950313;
+DELETE FROM `gameobject` WHERE `guid` BETWEEN 9950300 AND 9950314;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`,
   `animprogress`, `state`, `ScriptName`, `VerifiedBuild`, `Comment`) VALUES
-(9950300, 97497, 0, 0, 0, 1, 1, -10259.701, 1780.790, 73.768, 0, 0, 0, 0, 1, 120, 100, 1, '', 0, 'Defias Tower top floor (realm dump)'),
-(9950301, 97493, 0, 0, 0, 1, 1, -10265.883, 1788.572, 73.892, 0, 0, 0, 0, 1, 120, 100, 1, '', 0, 'Defias Tower top floor (realm dump)'),
+(9950300, 97497, 0, 0, 0, 1, 1, -10259.701, 1780.790, 73.768, 1.5708, 0, 0, 0.7071081, 0.7071055, 120, 100, 1, '', 0, 'Defias Tower top floor (realm dump)'),
+(9950301, 97493, 0, 0, 0, 1, 1, -10265.883, 1788.572, 73.892, 5.98, 0, 0, -0.1510127, 0.9885318, 120, 100, 1, '', 0, 'Defias Tower top floor (realm dump)'),
 (9950302, 97495, 0, 0, 0, 1, 1, -10254.262, 1781.714, 73.807, 0, 0, 0, 0, 1, 120, 100, 1, '', 0, 'Defias Tower top floor (realm dump)'),
 (9950303, 97494, 0, 0, 0, 1, 1, -10264.842, 1763.562, 73.837, 0, 0, 0, 0, 1, 120, 100, 1, '', 0, 'Defias Tower top floor (realm dump)'),
 (9950304, 97496, 0, 0, 0, 1, 1, -10256.309, 1759.084, 73.843, 0, 0, 0, 0, 1, 120, 100, 1, '', 0, 'Defias Tower top floor (realm dump)'),
@@ -39,7 +42,8 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, 
 (9950310, 97501, 0, 0, 0, 1, 1, -10259.479, 1769.801, 74.885, 0, 0, 0, 0, 1, 120, 100, 1, '', 0, 'Defias Tower top floor (realm dump)'),
 (9950311, 97499, 0, 0, 0, 1, 1, -10250.600, 1787.081, 74.876, 0, 0, 0, 0, 1, 120, 100, 1, '', 0, 'Defias Tower top floor (realm dump)'),
 (9950312, 97505, 0, 0, 0, 1, 1, -10249.773, 1771.814, 42.169, 0, 0, 0, 0, 1, 120, 100, 1, '', 0, 'Defias Tower ground floor (realm dump)'),
-(9950313, 97506, 0, 0, 0, 1, 1, -10256.027, 1763.869, 38.848, 0, 0, 0, 0, 1, 120, 100, 1, '', 0, 'Defias Tower ground floor (realm dump)');
+(9950313, 97506, 0, 0, 0, 1, 1, -10256.027, 1763.869, 38.848, 0, 0, 0, 0, 1, 120, 100, 1, '', 0, 'Defias Tower ground floor (realm dump)'),
+(9950314, 98022, 0, 0, 0, 1, 1, -10258.02, 1771.85, 73.819, 5.664, 0, 0, -0.3046707, 0.9524578, 120, 100, 1, '', 0, 'Defias Tower top floor: table under the poison cases (estimated)');
 
 -- Lenore stood 0.94 yd above the top floor; the Westfall Supply Cache returns to the realm dump's point.
 UPDATE `creature` SET `position_z` = 73.892 WHERE `guid` = 9950107 AND `id` = 991515;
