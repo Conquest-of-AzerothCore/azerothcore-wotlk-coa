@@ -1043,8 +1043,9 @@ Lucifron before the pull. After 80 s of fighting it asserts on the recorded enco
 Recorded without assertion, because the expectation is still uncertain: Curse of Lucifron (schedule 79.9 s;
 the logs repeat it every 66.6-70.7 s, 79.9 s only in fight 1289), Suppressing Shadows (cast every 25.0-25.1 s
 in the logs, matching the schedule; only its per-target aura events recur every 1-5 s) and Impending Doom
-(schedule 7 s/20 s, a DBM borrow; fight 1289 alone logs it, first at 13.3 s and then every 26.5-27.7 s). Each
-run's result keeps their casts in its `timeline`. Health fixtures keep the raid alive through the window, and
+(schedule first 20.9-27.5 s, every 22.2-22.6 s, `rev_20261005_20`, from its 2105205 hits in fights 1289, 1602
+and 1734; fight 1289 alone logs its 2105201 aura, first at 13.3 s and then every 26.5-27.7 s, so the two readings
+disagree). Each run's result keeps their casts in its `timeline`. Health fixtures keep the raid alive through the window, and
 the tank's threat floor is a harness fixture, so the scenario does not measure Lucifron's damage or threat.
 
 ## 9. Batch G mechanics (2026-10-01)

@@ -36,9 +36,10 @@
     "in the result timeline): Curse of Lucifron 2105206 (schedule 18.8 s first, 79.9 s period; the four logs",
     "start it at 16.6-19.9 s and repeat it every 66.6-70.7 s, except 79.9 s in fight 1289); Suppressing",
     "Shadows 2105218 (schedule 29.2 s first, 25.1 s period; the logs start the cast at 29.9-30.0 s and every",
-    "25.0-25.1 s, and only its per-target aura events recur every 1-5 s); Impending Doom 2105201 (schedule 7 s",
-    "first, 20 s period, a DBM borrow; only fight 1289 logs its aura, first at 13.3 s and then every 26.5-27.7",
-    "s). The bots follow the harness raid roles; the tank's threat floor is a test fixture that keeps the",
+    "25.0-25.1 s, and only its per-target aura events recur every 1-5 s); Impending Doom 2105201 (schedule",
+    "first 20.9-27.5 s, every 22.2-22.6 s, rev_20261005_20, from its 2105205 hits in fights 1289, 1602 and 1734;",
+    "fight 1289 alone logs its 2105201 aura, first at 13.3 s and then every 26.5-27.7 s, so the readings",
+    "disagree). The bots follow the harness raid roles; the tank's threat floor is a test fixture that keeps the",
     "victim deterministic, not threat realism."
   ],
   "timeout_ms": 300000,
