@@ -12,6 +12,7 @@
 #include "ScriptMgr.h"
 #include "SpellScript.h"
 #include "SpellScriptLoader.h"
+#include <unordered_map>
 
 namespace AscensionTaming
 {
@@ -21,6 +22,31 @@ bool IsKind(uint32 creatureEntry, uint32 kind)
 {
     CreatureTemplate const* creature = sObjectMgr->GetCreatureTemplate(creatureEntry);
     return creature && creature->type == kind;
+}
+
+uint32 FamilyPetStatsEntry(uint32 family)
+{
+    static std::unordered_map<uint32, uint32> const entries = []
+    {
+        std::unordered_map<uint32, uint32> lowest;
+        for (auto const& [entry, creature] : *sObjectMgr->GetCreatureTemplates())
+            if (creature.family && sObjectMgr->GetPetLevelInfo(entry, 1))
+                if (uint32& found = lowest[creature.family]; !found || entry < found)
+                    found = entry;
+        return lowest;
+    }();
+    auto const found = entries.find(family);
+    return found == entries.end() ? 0 : found->second;
+}
+
+uint32 TamedPetBaseMana(CreatureTemplate const* creature, uint8 level)
+{
+    if (uint32 const entry = FamilyPetStatsEntry(creature->family))
+        if (uint32 const mana = sObjectMgr->GetPetLevelInfo(entry, level)->mana)
+            return mana;
+    if (uint32 const mana = sObjectMgr->GetCreatureBaseStats(level, creature->unit_class)->BaseMana)
+        return mana;
+    return sObjectMgr->GetCreatureBaseStats(level, CLASS_PALADIN)->BaseMana;
 }
 
 bool IsHunterPetOfKind(PetStable::PetInfo const& pet, uint32 kind)
@@ -263,10 +289,27 @@ public:
             player->RemovePet(out, PET_SAVE_AS_CURRENT);
     }
 };
+
+class AscensionTamingPet final : public PetScript
+{
+public:
+    AscensionTamingPet() : PetScript("AscensionTamingPet", { PETHOOK_ON_INIT_STATS_FOR_LEVEL }) { }
+
+    void OnInitStatsForLevel(Guardian* guardian, uint8 petlevel) override
+    {
+        CreatureTemplate const* creature = guardian->GetCreatureTemplate();
+        if (!guardian->IsHunterPet() || creature->type == CREATURE_TYPE_BEAST)
+            return;
+        uint32 const mana = TamedPetBaseMana(creature, petlevel);
+        guardian->SetCreateMana(mana);
+        guardian->SetStatFlatModifier(UNIT_MOD_MANA, BASE_VALUE, float(mana));
+    }
+};
 }
 
 void AddAscensionTamingScripts()
 {
     RegisterSpellScriptWithArgs(AscensionTaming::spell_ascension_family_call, "spell_ascension_family_call");
     new AscensionTaming::AscensionTamingPlayer();
+    new AscensionTaming::AscensionTamingPet();
 }
