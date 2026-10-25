@@ -3698,6 +3698,12 @@ private:
         {
             Unit* attacker = GetUnit(step.get<std::string>("target"));
             SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
+            if (metric == "script_melee_damage_dealt")
+            {
+                uint32 damage = 1000;
+                sScriptMgr->ModifyMeleeDamage(attacker, player, damage);
+                return damage;
+            }
             if (metric == "script_melee_damage_taken")
             {
                 uint32 damage = 1000;
