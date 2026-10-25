@@ -67,7 +67,9 @@ DestinyWeaver.Scaling.WorldMaps = "0 1"
 #                     1-60 uses 15-59, and a map listed by several entries covers all of them. A
 #                     dungeon that is not listed keeps its authored levels. A listed dungeon scales
 #                     for every character inside it, whatever their own or their leader's open-world
-#                     choice; only a challenge rule holds a character to its authored levels.
+#                     choice; only a challenge rule holds a character to its authored levels. The
+#                     entries of the default list always scale, so a config written before an entry
+#                     joined the default still scales it; entries listed here add to them.
 #        Default:     "1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 163 164 165 272 273 274 276 601 402"
 #        Reloadable:  yes (.reload config)
 

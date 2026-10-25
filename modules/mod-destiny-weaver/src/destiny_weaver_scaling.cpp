@@ -158,10 +158,10 @@ namespace
         return bands;
     }
 
-    /// The bands come from LFGDungeons.dbc unless DestinyWeaver.Scaling.DungeonBands sets one. An entry with a band
-    /// of its own scales even when DestinyWeaver.Scaling.DungeonIds leaves it out: a config written before the entry
-    /// joined the default list still has the old list. The first config load runs before the store is filled, so
-    /// it publishes a scope without dungeons; startup publishes the complete one.
+    /// The bands come from LFGDungeons.dbc unless DestinyWeaver.Scaling.DungeonBands sets one. The default entries
+    /// and every entry with a band of its own scale even when DestinyWeaver.Scaling.DungeonIds leaves them out: a
+    /// config written before an entry joined the default list still has the old list. The first config load runs
+    /// before the store is filled, so it publishes a scope without dungeons; startup publishes the complete one.
     void PublishScope()
     {
         auto scope = std::make_unique<ScalingScope>();
@@ -170,6 +170,10 @@ namespace
 
         std::unordered_map<uint32, LocalLevelScaling::LevelBand> const configured = ConfigBands();
         std::vector<uint32> dungeonIds = ConfigIds("DestinyWeaver.Scaling.DungeonIds", DEFAULT_SCALING_DUNGEONS);
+        for (std::string_view token : Acore::Tokenize(DEFAULT_SCALING_DUNGEONS, ' ', false))
+            if (Optional<uint32> dungeonId = Acore::StringTo<uint32>(token))
+                if (std::find(dungeonIds.begin(), dungeonIds.end(), *dungeonId) == dungeonIds.end())
+                    dungeonIds.push_back(*dungeonId);
         for (auto const& [dungeonId, band] : configured)
             if (std::find(dungeonIds.begin(), dungeonIds.end(), dungeonId) == dungeonIds.end())
                 dungeonIds.push_back(dungeonId);
