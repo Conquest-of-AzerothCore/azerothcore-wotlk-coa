@@ -397,7 +397,7 @@ class Server:
             failures = run.release_databases(database, cache, self.stuck, self.summary)
         except FAILURES as error:
             failures = [run.cleanup_failure(name, error) for name in database.names.values()]
-            self.summary.update(status='failed', cleanup_failed=failures, cleanup_error=str(error))
+            self.summary.update(status='failed', cleanup_failed=failures, cleanup_error=run.failure_text(error))
         self.summary['cleanup'] = 'failed' if failures else 'passed'
         if failures:
             self.fail(f"Database cleanup failed: {[failure['schema'] for failure in failures]}", unattributed=True)

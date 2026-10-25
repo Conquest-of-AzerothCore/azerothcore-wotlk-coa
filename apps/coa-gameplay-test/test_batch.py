@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import secrets
 import signal
+import subprocess
 import sys
 import tempfile
 import threading
@@ -1442,6 +1443,19 @@ class BatchTests(unittest.TestCase):
         self.assertEqual((result['status'], result['failures']), ('passed', []))
         self.assertEqual([server['status'] for server in result['servers']], ['failed', 'stopped'])
         self.assertIn('max_prepared_stmt_count', result['servers'][0]['message'])
+
+    def test_server_cleanup_error_keeps_the_defaults_file_out(self):
+        timeout = subprocess.TimeoutExpired(['mysql', '--defaults-extra-file=/private/world.cnf'], 600)
+        messages = []
+        server = SimpleNamespace(stuck=False, summary={}, fail=lambda message, unattributed: messages.append(message))
+        database = SimpleNamespace(names={'world': 'coa_test_world'})
+        with patch.object(run, 'release_databases', side_effect=timeout):
+            batch.Server.release(server, database, None)
+        self.assertEqual(server.summary['cleanup_error'], 'timed out after 600 s')
+        self.assertEqual(server.summary['cleanup_failed'],
+                         [{'schema': 'coa_test_world', 'error': 'timed out after 600 s'}])
+        self.assertNotIn('private', json.dumps(server.summary))
+        self.assertEqual(messages, ["Database cleanup failed: ['coa_test_world']"])
 
     def test_one_queued_case_keeps_the_restart_behaviour_whatever_the_jobs(self):
         command = self.command

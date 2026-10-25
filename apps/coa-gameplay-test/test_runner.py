@@ -1170,6 +1170,24 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual(failures, expected)
         self.assertEqual(summary['cleanup_failed'], expected)
 
+    def test_release_databases_keeps_the_defaults_file_out_of_the_cache_error(self):
+        timeout = subprocess.TimeoutExpired(['mysql', '--defaults-extra-file=/private/world.cnf'], 600)
+        database = SimpleNamespace(names={'world': 'coa_test_world'}, cleanup=lambda: [])
+        cache = SimpleNamespace(finish=lambda server_still_running: (_ for _ in ()).throw(timeout))
+        summary = {}
+        run.release_databases(database, cache, False, summary)
+        self.assertEqual(summary['cache_cleanup_error'], 'timed out after 600 s')
+        self.assertNotIn('private', json.dumps(summary))
+
+    def test_sql_decodes_mysql_text_as_utf8(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            database = self.database(Path(temporary))
+            result = subprocess.CompletedProcess([], 0, stdout="COMMENT 'caf\u00e9'\n", stderr='')
+            with patch('run.subprocess.run', return_value=result) as runner:
+                self.assertEqual(database.sql('world', 'SHOW CREATE TABLE `t`;'), "COMMENT 'caf\u00e9'")
+            database.remove_credentials()
+        self.assertEqual(runner.call_args.kwargs['encoding'], 'utf-8')
+
     def test_parallel_copy_failure_is_wrapped_and_the_partial_copy_dropped(self):
         server = CopyServer({f'table_{index}': 100 - index for index in range(20)}, fail='table_0')
         with tempfile.TemporaryDirectory() as temporary:

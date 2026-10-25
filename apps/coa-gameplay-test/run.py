@@ -1299,7 +1299,7 @@ class Databases:
     def sql(self, role, statement, timeout=60):
         result = subprocess.run([self.mysql, f'--defaults-extra-file={self.option_files[role]}',
                                  '--batch', '--skip-column-names'], input=statement, text=True,
-                                capture_output=True, timeout=timeout, creationflags=CREATE_FLAGS)
+                                encoding='utf-8', capture_output=True, timeout=timeout, creationflags=CREATE_FLAGS)
         if result.returncode:
             detail = self.redact(result.stderr)
             raise ValueError(f'MySQL operation failed for {role}: {detail or result.returncode}')
@@ -1531,7 +1531,7 @@ def release_databases(database, cache, server_still_running, summary):
         try:
             cache.finish(server_still_running=server_still_running)
         except (ValueError, OSError, subprocess.SubprocessError, KeyError) as error:
-            summary['cache_cleanup_error'] = str(error)
+            summary['cache_cleanup_error'] = failure_text(error)
             failures.append(cleanup_failure(database.names['world'], error))
     if failures:
         summary.update(status='failed', cleanup_failed=failures)
