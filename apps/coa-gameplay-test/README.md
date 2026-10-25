@@ -1070,6 +1070,30 @@ runtime by scripts or waypoints are not read. The
 [placement metrics scenario](scenarios/placement-metrics-reported-spawns.json) checks spawns whose positions
 players reported in game and records calibration gaps for earlier, reported positions.
 
+The `placement_audit` action (no `actor`) checks every spawn of a map or zone with the same rules in one world
+tick. It takes `map`, optional `zone` (an AreaTable zone id), `tolerance` (more than 0 and at most 10, default 0.8
+yards, chosen from the Moonglade calibration recorded in ADR 0005) and `gameobject_types` (distinct gameobject
+types 0..35; only those gameobjects are audited). With `zone`, spawns are first kept inside the zone's
+`WorldMapArea` rectangle, then where the base map's `GetZoneId` is the zone. It fails with "Zone has no world map
+bounds" for a zone without a `WorldMapArea` row and "Placement audit selected no spawns" when nothing is left, for
+example a zone of another map. The step record holds:
+
+| Field | Content |
+| --- | --- |
+| `tolerance` | The tolerance used. |
+| `audited` | `creatures`, `gameobjects`, and how many of them were `unchecked` or `exempt`. |
+| `anomaly_counts` | `floating`, `under_ground` and `invalid_display` (a `missing` display) row counts. |
+| `anomalies` | One row per spawn with at least one kind, creatures first, each by guid: `spawn_type`, `guid`, `entry`, `go_type` (gameobjects), `x`, `y`, `z`, `floor_z`, `gap`, `liquid_level` (empty when absent), `submerged`, `verdict`, `displays` (`id`, `state`) and `kinds`. |
+| `server_only_display_count`, `server_only_displays` | Spawns with a `server_only` display, listed apart (`spawn_type`, `guid`, `entry`, `go_type`, `x`, `y`, `z`, `displays`); they are not anomalies. |
+| `real_ms` | The audit's real duration. |
+
+The result writer renders an empty list as an empty string. `placement_audit_spawns` (spawns selected) and
+`placement_audit_anomalies` (anomaly rows) read the latest audit of the case and need an earlier `placement_audit`.
+The [Moonglade audit](scenarios/placement-audit-moonglade.json) only guards the mechanism: it asserts that the audit
+selected spawns, and its rows are findings to triage. To audit another zone, copy it to a scratch file outside
+`scenarios/`, change `map` and `zone`, run `python -B tools/verify_all.py --stages gameplay --scenario <file>`, and
+read the record in `gameplay/exploratory/<key>/result.json` (see the verification guide, Placement audits).
+
 ## Evidence boundaries
 
 ### Optional character names

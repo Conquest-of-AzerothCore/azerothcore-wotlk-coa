@@ -151,6 +151,31 @@ class RunnerTests(unittest.TestCase):
             self.assert_step_rejected({'action': 'assert', 'actor': 'target', 'metric': 'health', field: value,
                                        'min': 1})
 
+    def test_placement_audit_action_fields(self):
+        step = {'action': 'placement_audit', 'map': 1, 'zone': 493}
+        self.assert_step_validates(step)
+        self.assert_step_validates({**step, 'tolerance': 0.5})
+        self.assert_step_validates({**step, 'gameobject_types': [3, 10]})
+        self.assert_step_validates({'action': 'placement_audit', 'map': 409})
+        self.assert_step_rejected({'action': 'placement_audit', 'zone': 493})
+        for change in ({'map': -1}, {'zone': 0}, {'tolerance': 0}, {'gameobject_types': []},
+                       {'gameobject_types': [3, 3]}, {'gameobject_types': [36]}, {'gameobject_types': ['3']},
+                       {'actor': 'caster'}):
+            self.assert_step_rejected({**step, **change})
+
+    def test_placement_audit_metrics_need_an_earlier_audit(self):
+        audit = {'action': 'placement_audit', 'map': 1, 'zone': 493}
+        for metric in ('placement_audit_spawns', 'placement_audit_anomalies'):
+            measured = {'action': 'assert', 'actor': 'caster', 'metric': metric, 'min': 0}
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'] += [audit, measured]
+            self.assertIs(run.validate(scenario), scenario)
+            for steps in ([measured, audit], [measured]):
+                scenario = copy.deepcopy(self.scenario)
+                scenario['steps'] += steps
+                with self.subTest(metric=metric, steps=steps), self.assertRaises(ValueError):
+                    run.validate(scenario)
+
     def test_player_packet_fields_require_a_player(self):
         step = {'action': 'client_packet', 'actor': 'caster', 'opcode': 364, 'consumed': False}
         self.scenario['steps'].append(step)

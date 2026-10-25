@@ -197,6 +197,20 @@ python -B tools/verify_all.py --base origin/main
 
 Such a run does not currently end `PASSED`; see [Full runs](#full-runs) for how to read it.
 
+### Placement audits
+
+The gameplay harness's `placement_audit` action lists the floating, under-ground and invalid-display spawns of a
+map or zone (see the gameplay-test README, World placement). The catalog scenario `placement-audit-moonglade`
+only guards the mechanism. To audit another zone, copy it to a scratch file outside the catalog, change `map` and
+`zone`, and run the file:
+
+```sh
+python -B tools/verify_all.py --stages gameplay --scenario /path/to/audit-zone.json
+```
+
+The file is exploratory, so the run ends `INCOMPLETE` even when the audit passes, and it never blocks a PR. The
+report is the `placement_audit` step record in `gameplay/exploratory/<key>/result.json` of the output directory.
+
 ## Results and exit codes
 
 Output defaults to a new `.cache/verify-all/<UTC YYYYmmdd-HHMMSS>/` directory (with a `-2`, `-3` suffix when

@@ -32,7 +32,7 @@ namespace CoAGameplay
         Client = 2
     };
 
-    inline constexpr float DefaultPlacementTolerance = 1.0f;
+    inline constexpr float DefaultPlacementTolerance = 0.8f;
 
     struct PlacementSample
     {
