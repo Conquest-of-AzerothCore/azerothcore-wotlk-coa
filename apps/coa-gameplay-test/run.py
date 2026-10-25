@@ -38,6 +38,11 @@ ENCOUNTER_STATES = {'NOT_STARTED', 'IN_PROGRESS', 'FAIL', 'DONE', 'SPECIAL'}
 MAX_ENCOUNTER_RADIUS = 200
 RAID_ROLES = {'tank', 'healer', 'melee', 'ranged'}
 RAID_ROLE_FIELDS = {'rotation', 'heal_spell', 'taunt_spell'}
+SPAWN_PLACEMENT_METRICS = {'spawn_placement', 'spawn_ground_gap', 'spawn_submerged', 'spawn_display_state'}
+POINT_PLACEMENT_METRICS = {'point_placement', 'point_ground_gap'}
+PLACEMENT_VERDICT_METRICS = {'spawn_placement', 'point_placement'}
+SPAWN_TYPES = {'creature', 'gameobject'}
+MAX_PLACEMENT_TOLERANCE = 10
 METRICS = TIMELINE_METRICS | {
     'item_random_property', 'item_suffix_factor', 'item_enchantment', 'item_guid', 'item_soulbound', 'item_duration',
     'mana_regen', 'mana_regen_interrupted', 'resting',
@@ -54,6 +59,8 @@ METRICS = TIMELINE_METRICS | {
     'map_difficulty', 'nearby_creature_template', 'nearby_creature_max_health', 'nearby_creature_health_pct',
     'nearby_creature_sent_spellclick',
     'spawn_respawn_remaining',
+    'spawn_placement', 'spawn_ground_gap', 'spawn_submerged', 'spawn_display_state',
+    'point_placement', 'point_ground_gap',
     'loot_gear_item_level',
     'position_x', 'position_y', 'position_z',
     'view_level', 'sent_level', 'sent_max_health', 'sent_average_item_level', 'sent_average_item_level_count',
@@ -174,7 +181,8 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'phase_mask', 'trigger_spell', 'trials', 'incoming', 'heal', 'quality',
                  'row', 'offset', 'skip_strings', 'from_end', 'x', 'y', 'min_required_level', 'max_required_level',
                  'flat_coefficient_modifier', 'dominant_stat', 'off_stat', 'spells',
-                 'min_level', 'max_level', 'min_home_distance', 'spawn'} | TIMELINE_FIELDS
+                 'min_level', 'max_level', 'min_home_distance', 'spawn',
+                 'guid', 'spawn_type', 'tolerance', 'map', 'z'} | TIMELINE_FIELDS
 ACTIONS = {
     'stop_attack': ({'actor'}, {'actor'}),
     'set_moving': ({'actor', 'enabled'}, {'actor', 'enabled', 'flag'}),
@@ -339,6 +347,31 @@ def validate_timeline_step(step, where, encounter_started, actor_ids):
 
 MAX_PLAYERS = {1: 8, 2: 25}
 MAX_TIMEOUT_MS = {1: 600000, 2: 1200000}
+
+
+def placement_tolerance(value, where):
+    number(value, where, 0, MAX_PLACEMENT_TOLERANCE)
+    require(value > 0, f'{where}: value is too small')
+
+
+def validate_placement_metric(step, where, player_ids):
+    metric = step['metric']
+    if metric in SPAWN_PLACEMENT_METRICS:
+        require(step['actor'] in player_ids, f'{where}: spawn placement metric needs a player')
+        number(step.get('guid'), f'{where}.guid', 1, 2**32 - 1, True)
+        require(step.get('spawn_type') in SPAWN_TYPES, f'{where}: spawn_type must be creature or gameobject')
+    else:
+        require(not {'guid', 'spawn_type'} & step.keys(), f'{where}: guid and spawn_type only apply to spawn metrics')
+    if metric in POINT_PLACEMENT_METRICS:
+        require(step['actor'] in player_ids, f'{where}: point placement metric needs a player')
+        number(step.get('map'), f'{where}.map', 0, 2**31 - 1, True)
+        number(step.get('z'), f'{where}.z', -17000, 17000)
+    else:
+        require(not {'map', 'z'} & step.keys(), f'{where}: map and z only apply to point placement metrics')
+    if metric in PLACEMENT_VERDICT_METRICS:
+        placement_tolerance(step.get('tolerance'), f'{where}.tolerance')
+    else:
+        require('tolerance' not in step, f'{where}: tolerance only applies to placement verdicts')
 
 
 def validate_raid_role(player):
@@ -776,6 +809,7 @@ def validate(scenario):
             if metric == 'spawn_respawn_remaining':
                 require(step['actor'] in player_ids, f'{where}: spawn respawn metric needs a player')
                 number(step.get('spawn'), f'{where}.spawn', 1, 2**32 - 1, True)
+            validate_placement_metric(step, where, player_ids)
             if metric == 'map_creature_count':
                 require(step['actor'] in player_ids, f'{where}: creature count needs a player')
                 number(step.get('entry'), f'{where}.entry', 1, 2**32 - 1, True)
@@ -881,11 +915,11 @@ def validate(scenario):
                         require(type(step[key]) is bool, f'{where}: {key} must be boolean')
             if metric == 'distance':
                 require('target' in step, f'{where}: {metric} metric needs target')
-            if metric == 'point_distance_2d':
+            if metric == 'point_distance_2d' or metric in POINT_PLACEMENT_METRICS:
                 for key in ('x', 'y'):
                     number(step.get(key), f'{where}.{key}', -17000, 17000)
             elif 'x' in step or 'y' in step:
-                require(False, f'{where}: x and y only apply to point_distance_2d')
+                require(False, f'{where}: x and y only apply to point metrics')
             if metric == 'stat':
                 number(step.get('stat'), f'{where}.stat', 0, 4, True)
             if metric == 'aura_script_value':

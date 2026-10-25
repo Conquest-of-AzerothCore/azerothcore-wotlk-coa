@@ -1024,6 +1024,52 @@ until the boss's current victim is a tank, so the tank holds the first threat; h
 Bots do not dodge mechanics. The [raid bot scenario](scenarios/raid-bots-tank-healer.json) runs a tank, a melee
 bot casting its rotation and a healer against a defensive fixture, whose swings must land only on the tank.
 
+### World placement
+
+Placement metrics compare a spawn's stored position (`creature` and `gameobject` rows, as loaded) with the ground
+the server computes from its static data: the `.map` terrain and the vmap models of the spawn's base map, the
+same for every lane whatever grids other cases loaded. Gameobject models, including platforms built from
+gameobjects, are not ground. The ground under a point is the native `Map::GetHeight` result searched 50 yards down
+from 2 yards above it; without one, the `.map` terrain height. Liquid comes from `Map::GetLiquidData`. The
+metrics need `vmap.enableHeight = 1` and fail with "VMap height calculation is disabled" otherwise. Their `actor`
+must be a player but is not used.
+
+| Metric | Fields | Value |
+| --- | --- | --- |
+| `spawn_ground_gap` | `guid`, `spawn_type` | The spawn's height above its ground in yards, negative under it. Fails "No ground found for the spawn" without ground. |
+| `spawn_placement` | `guid`, `spawn_type`, `tolerance` | The verdict code below. |
+| `spawn_submerged` | `guid`, `spawn_type` | 1 when the spawn is below a liquid surface, else 0. |
+| `spawn_display_state` | `guid`, `spawn_type` | The worst state of the spawn's displays: 0 `missing`, 1 `server_only`, 2 `client`. Fails "Spawn has no display to check" without a display. |
+| `point_ground_gap` | `map`, `x`, `y`, `z` | The point's height above its ground, as for a spawn. Fails "No ground found for the point". |
+| `point_placement` | `map`, `x`, `y`, `z`, `tolerance` | The verdict code of the point, phase 1, without exemptions. |
+
+`guid` is the spawn id and `spawn_type` `creature` or `gameobject`. `tolerance` (yards, more than 0 and at most 10)
+is required on the two verdict metrics and allowed only there: each scenario states its own bound, as it does
+with `min` and `max` on a gap. Verdict codes:
+
+| Code | Verdict | Rule |
+| --- | --- | --- |
+| 0 | `grounded` | The gap is within the tolerance. |
+| 1 | `floating` | The gap exceeds the tolerance and no exemption applies. |
+| 2 | `under_ground` | The gap is below minus the tolerance, or there is neither ground nor liquid. No exemption applies. |
+| 3 | `exempt` | Above the tolerance, but the spawn may float, is on a liquid surface (within the tolerance), or is a swimmer below the surface. |
+| 4 | `unchecked` | The spawn's grid has neither a `.map` nor a vmap file, or only liquid was found. |
+
+A creature may float when its movement (the spawn's `creature_movement_override`, else the template's) allows
+flight or hovering, when it has the trigger flag (`flags_extra` 0x80), or when its addon (the spawn's, else the
+template's) sets the hover anim tier; it is a swimmer when its movement allows swimming. A gameobject may float when
+its template has no display or is a transport (types 11 and 15). A creature's displays are the spawn's model and
+every template model; a gameobject's is its template display. A display is `client` when its id is a record of
+`CreatureDisplayInfo.dbc` or `GameObjectDisplayInfo.dbc` under `DataDir/dbc` (the client set the server
+enforces), `server_only` when only the server store has it (a row of the `*_dbc` world tables, streamed to clients
+by the display patch service), and `missing` otherwise.
+
+Known limits: a spawn on the wrong floor layer (a cave spawn placed on the terrain above the cave) stands on
+ground and reads as grounded; a wrong but existing model needs an external reference; positions changed at
+runtime by scripts or waypoints are not read. The
+[placement metrics scenario](scenarios/placement-metrics-reported-spawns.json) checks spawns whose positions
+players reported in game and records calibration gaps for earlier, reported positions.
+
 ## Evidence boundaries
 
 ### Optional character names
