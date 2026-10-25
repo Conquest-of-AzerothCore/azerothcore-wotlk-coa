@@ -51,7 +51,7 @@ Keep secrets out of this file: credentials stay in the worldserver config or the
 | `datamine_directory` | none |
 | `mysql_server_bin` | none; a MySQL `bin` directory holding both `mysql` and `mysqld`, for `--mysql-bin` |
 | `jobs` | the CPU count |
-| `gameplay_jobs` | `max(1, min(4, cpu // 3))`; used only with `--gameplay-clock real` |
+| `gameplay_jobs` | `max(1, min(4, cpu // 3))`; used only with `--gameplay-clock real` (the simulated clock runs 1 worldserver unless `--gameplay-jobs` asks for more) |
 | `gameplay_db_workers` | `16` (1-32); character database workers, used only with the simulated clock |
 | `gameplay_copy_workers` | `min(8, cpu)` (1-32); MySQL connections that copy each test schema and, capped at 8, checksum the world |
 
@@ -131,8 +131,9 @@ Stages run in this order. Each reports `passed`, `failed`, `unavailable` (a prer
    each and `COA_DBC_DIR` set when a DBC directory is known. An untracked scratch test in the checkout runs too.
    See [Harness prerequisites](#harness-prerequisites).
 5. `gameplay`: `apps/coa-gameplay-test/batch.py` in [queue mode](#gameplay-queue-mode): one worldserver on a
-   simulated clock, or `gameplay_jobs` real-clock worldservers with `--gameplay-clock real`. Blocked when the
-   build failed. It is `unavailable`, naming the reason, when the worldserver,
+   simulated clock (`--gameplay-jobs N` for [several](#several-simulated-servers)), or `gameplay_jobs` real-clock
+   worldservers with `--gameplay-clock real`. Blocked when the build failed. It is `unavailable`, naming the
+   reason, when the worldserver,
    its config, `mysql`, `mysqldump` or (outside Windows) the server modules directory cannot be found, when a
    configured `database_client_config` or `modules_config_dir` does not exist, when the config's `DataDir` has
    no `dbc/Spell.dbc`, when the server modules directory already holds `.conf` files, and when the selection
@@ -180,10 +181,10 @@ disable the others, so pair it with `--stages`; a filter for a stage that is not
 
 Companion scenarios required by a registered numerical check are added to any gameplay selection. All selected
 definitions are validated before a server starts. `--jobs N` sets build, unit and harness parallelism;
-`--gameplay-jobs N` sets the number of real-clock worldservers. When the gameplay stage is selected, a
-`--gameplay-jobs` above 1 is rejected with the simulated clock and a `--gameplay-lanes` or
-`--gameplay-db-workers` above 1 with the real clock; the `gameplay_jobs` setting applies only to the real clock and
-`gameplay_db_workers` only to the simulated clock.
+`--gameplay-jobs N` sets the number of gameplay worldservers: 1 by default on the simulated clock
+([several simulated servers](#several-simulated-servers)), `gameplay_jobs` on the real clock. When the gameplay
+stage is selected, a `--gameplay-lanes` or `--gameplay-db-workers` above 1 is rejected with the real clock; the
+`gameplay_jobs` setting applies only to the real clock and `gameplay_db_workers` only to the simulated clock.
 
 ```sh
 python -B tools/verify_all.py --stages source --base origin/main
@@ -286,6 +287,7 @@ longest first. The server needs the queue-mode runtime of the current source; th
 
 - `--gameplay-clock simulated` (default): one worldserver runs up to `--gameplay-lanes` cases (default 15) at
   once on a simulated clock; see [Accelerated single-server mode](#accelerated-single-server-mode).
+  `--gameplay-jobs N` runs N such worldservers; see [Several simulated servers](#several-simulated-servers).
 - `--gameplay-clock real`: each of the `gameplay_jobs` workers starts a worldserver that runs one case at a time
   on the real clock, followed by [isolated reruns](#isolated-reruns-and-batch_sensitive). This is the
   [real-clock reference](#real-clock-reference-runs).
@@ -360,12 +362,12 @@ case has `mode: simulated`. The runner does not turn a failed accelerated attemp
 retry. Repair the failed mechanic, fixture or independent expectation and run a new accelerated verification.
 
 For a controlled comparison, `verify_all.py --gameplay-real-pace-rerun` explicitly enables slower same-server
-diagnostics after the accelerated queue. The underlying runner option is `batch.py --real-pace-rerun`; continue
-to execute verification through `verify_all.py`. Each failed catalog case then runs with `pace: real`: while it
-runs no lane requests clock steps. A case passing this diagnostic has `mode: real_pace` and appears in
-`acceleration_sensitive`. Report it as a diagnostic-only pass, not a clean accelerated pass. `batch.py
---isolated-rerun` separately opts into single-mode reruns; the regular simulated `verify_all.py` invocation
-enables neither slower path.
+diagnostics once every accelerated case has a result, on whichever simulated server is idle. The underlying runner
+option is `batch.py --real-pace-rerun`; continue to execute verification through `verify_all.py`. Each failed catalog
+case then runs with `pace: real`: while it runs no lane of its server requests clock steps. A case passing this
+diagnostic has `mode: real_pace` and appears in `acceleration_sensitive`. Report it as a diagnostic-only pass, not a
+clean accelerated pass. `batch.py --isolated-rerun` separately opts into single-mode reruns; the regular simulated
+`verify_all.py` invocation enables neither slower path.
 
 A failed accelerated attempt followed by a passing retry does not by itself establish timing sensitivity.
 Independent random hit/proc rolls and invalid fixture assumptions can produce the same pattern. First inspect
@@ -389,7 +391,8 @@ case, each with its reason:
 {"schema": 1, "exclusive": {"who-lists-bots": "Who list is process-global"}}
 ```
 
-An exclusive case is admitted only when every lane is idle, and no other case starts until it finishes. The runner
+An exclusive case is admitted only when every lane of its worldserver is idle, and no other case starts on that
+worldserver until it finishes; see [Several simulated servers](#several-simulated-servers). The runner
 rejects ids missing from the catalog and empty reasons. The list holds `who-custom-classes`, `who-hides-bots` and
 `who-lists-bots` (the Who list is process-global) and `bloodforged-high-risk-drop` and
 `coa-prestige-chromie-spawns` (`set_phase 1` affects live creatures) and `wildcard-season-event` (it stops the
@@ -400,20 +403,56 @@ exclusivity does not fix timing failures. Chat that ignores
 phases is a known limit that the list does not cover: `treasure-keeper` asserts exact `system_messages` deltas and
 shares the server, so [creature text on its map](#fidelity-limits) from another lane can fail it.
 
+### Several simulated servers
+
+`--gameplay-jobs N` (default 1) runs N simulated-clock worldservers at once; `gameplay_jobs` in
+`conf/verify-all.json` applies only to the real clock, so the simulated clock starts a second server only when the
+command line asks for it. Each server is a separate process with its own game clock, `--gameplay-lanes` lanes, an
+unused loopback `WorldServerPort` that no other server of the run uses, its own auth and characters schemas and its
+own [world-cache slot](#world-cache-slots); the servers share no lease and no schema. A slot that another run still
+leases fails that server with `World cache is leased: ...` in its `summary.json` and `SERVER ... FAILED` line.
+
+The servers take cases from one queue in the usual order. Exclusive cases come first, and each runs alone on one
+server: a server that holds an exclusive case takes no other case until it finishes, and a server with running
+cases leaves the next exclusive case to an idle one. Other cases fill lanes and are written ahead as with one
+server. A server that finds the queue empty stops, so the last cases can end up on one server. With
+`--gameplay-real-pace-rerun`, the real-pace diagnostics are queued once every accelerated case of every server has
+a result. `gameplay.json` has the same cases, verdicts and files as a one-server run; `servers` lists every server
+and each case's `summary.json` names its `batch.slot`.
+
+A simulated server that exits before it becomes ready fails the batch when more than one runs, because its cases
+would otherwise run silently on fewer servers. Its slot's world copy is dropped, since the SQL updater may already
+have changed it before the startup barrier, and the next run copies it again.
+
+Every server costs memory and MySQL resources. Measured on one workstation on 2026-10-25 with the vanilla dungeon
+set and the default 16 character database workers (measurements, not guarantees): about 7,700 prepared statements
+on the MySQL server and a peak of 5.1 GB RSS per worldserver, plus a full world copy on first use of each slot.
+MySQL's default `max_prepared_stmt_count` is 16382, so a stock MySQL server fits two simulated servers; a third
+cannot prepare its statements, and the runner names `max_prepared_stmt_count` in the failure. Either raise the
+limit on the test MySQL server, which resets on restart:
+
+```sql
+SET GLOBAL max_prepared_stmt_count = 65528;
+```
+
+or start it with `--max-prepared-stmt-count=65528` (`max_prepared_stmt_count = 65528` under `[mysqld]`), or lower
+`--gameplay-db-workers`, which also changes how character writes are ordered. Keep the default of 1 on a machine
+with little memory.
+
 ### Realm-local time
 
 Some mechanics read the realm-local hour from game time, in the worldserver's `TZ`. A scenario that needs a part
 of the day sets a top-level `hour` (0-23), and `realm_local_start` in each result shows the game time, as
 `YYYY-MM-DD HH:MM:SS`, at which the case started.
 
-- Simulated clock: realm-local time starts at the next 10:00 that is not in the past
-  (`CoAGameplayTest.StartHour`), so cases without an `hour` run at a known time of day. A case with an `hour` is
-  exclusive and queued after the others. Unless realm-local time is already in that hour's first minute, the
-  server moves every game clock ahead to the next `hour`:00 while no case runs, without a world update for the
-  skipped time, and then starts the case. The next case without an `hour`, such as a real-pace rerun, moves the
-  clocks ahead to the next start hour the same way, unless realm-local time is already in it. Daily, weekly and
-  monthly quest resets and the battleground, calendar and guild resets are scheduled from game time, so a move
-  past a reset time runs that reset once.
+- Simulated clock: realm-local time starts at the next 10:00 that is not in the past (`CoAGameplayTest.StartHour`), so
+  cases without an `hour` run at a known time of day. A case with an `hour` is exclusive and queued after the others;
+  with several simulated servers it can start on one of them while the others still run earlier cases, since each server
+  has its own clock. Unless realm-local time is already in that hour's first minute, the server moves every game clock
+  ahead to the next `hour`:00 while no case runs, without a world update for the skipped time, and then starts the case.
+  The next case without an `hour`, such as a real-pace rerun, moves the clocks ahead to the next start hour the same
+  way, unless realm-local time is already in it. Daily, weekly and monthly quest resets and the battleground, calendar
+  and guild resets are scheduled from game time, so a move past a reset time runs that reset once.
 - Real clock: the runner runs a case with an `hour` in single mode after the queue, on a worldserver whose `TZ`
   is a fixed offset, to the minute, that puts local time at the start of that hour when the runner starts the
   worldserver, for example `UTC+10:40` at 22:40 UTC for `hour` 12 (POSIX inverts the sign). The rest of the hour
@@ -529,7 +568,7 @@ a fresh server. Report `isolated_only` ids as well: they passed only in isolatio
 
 ### World-cache slots
 
-Worker `k` (only worker 0 on the simulated clock) uses the world cache at
+Worker `k` (on the simulated clock, only worker 0 unless `--gameplay-jobs` is above 1) uses the world cache at
 `.cache/coa-gameplay-tests/world-cache/slots/slot-<k>`, separate from the single-run cache in
 `.cache/coa-gameplay-tests/world-cache/`. Each slot has its own lease and retains its own
 `coa_test_<cache-id>_world` copy, so the first run of a new slot copies the world database and every extra

@@ -5,7 +5,13 @@ The runtime component is `src/server/coa/CoAGameplayTest.cpp`; it is disabled by
 through the gameplay stage of [`tools/verify_all.py`](../../docs/coa/verification.md), which runs them with
 `batch.py` in queue mode, by default up to 15 at once in one worldserver on a
 [simulated clock](../../docs/coa/verification.md#accelerated-single-server-mode); this directory's runners are its
-implementation.
+implementation. `--gameplay-jobs N` (`batch.py --jobs N`, default 1) runs N simulated-clock worldservers, each with
+its own world-cache slot, port and auth/characters schemas, and runs each exclusive case alone on one of them. Each
+server needed about 7,700 MySQL prepared statements and up to 5.1 GB RSS on one workstation (measured 2026-10-25
+with the default 16 character database workers; not a guarantee), and a world copy on first use. A stock MySQL
+(`max_prepared_stmt_count` 16382) therefore fits two; raise `max_prepared_stmt_count` or lower
+`--gameplay-db-workers` for more
+([several simulated servers](../../docs/coa/verification.md#several-simulated-servers)).
 
 ## Find and verify a mechanic
 
