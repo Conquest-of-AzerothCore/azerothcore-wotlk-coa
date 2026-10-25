@@ -32,6 +32,7 @@ class aura_ascension_necromancer_lifecycle : public AuraScript
 {
     PrepareAuraScript(aura_ascension_necromancer_lifecycle);
     int32 _cost = 0;
+    int32 _harvestPlagueRoll = 0;
     bool _expired = false;
     bool First(AuraEffect const* effect) const
     {
@@ -101,6 +102,8 @@ class aura_ascension_necromancer_lifecycle : public AuraScript
             _expired = false;
         if (Named(GetSpellInfo(), 500217))
             _cost = GetSpellInfo()->CalcPowerCost(player, GetSpellInfo()->GetSchoolMask());
+        if (Named(GetSpellInfo(), 500968))
+            _harvestPlagueRoll = GetSpellInfo()->Effects[EFFECT_0].CalcValue(nullptr);
         if (GetTarget() != player)
             return;
         if (id == SPELL_FETID_WARD || id == SPELL_GLACIAL_WARD || id == SPELL_BONE_WARD)
@@ -129,6 +132,19 @@ class aura_ascension_necromancer_lifecycle : public AuraScript
                 GetAura()->SetScriptValue(805011, ++State(player).sequence);
             }
     }
+    void HarvestPlagueSiphon(Player* player)
+    {
+        Unit* target = GetTarget();
+        if (target == player || !target->IsAlive() || target->IsImmunedToDamage(player, GetSpellInfo()))
+            return;
+        float const siphonShare = 0.3f + (1.0f - target->GetHealthPct() / 100.0f);
+        uint32 heal = uint32(std::max(0, _harvestPlagueRoll) * siphonShare);
+        heal = player->SpellHealingBonusDone(player, GetSpellInfo(), heal, DOT, EFFECT_0);
+        heal = player->SpellHealingBonusTaken(player, GetSpellInfo(), heal, DOT);
+        HealInfo healInfo(player, player, heal, GetSpellInfo(), GetSpellInfo()->GetSchoolMask());
+        float const threat = float(player->HealBySpell(healInfo)) * 0.5f;
+        player->GetThreatMgr().ForwardThreatForAssistingMe(player, threat, GetSpellInfo());
+    }
     void Tick(AuraEffect const* effect)
     {
         Player* player = Owner(GetCaster());
@@ -137,6 +153,8 @@ class aura_ascension_necromancer_lifecycle : public AuraScript
         uint32 id = GetId();
         if (Named(GetSpellInfo(), 500338) && effect->GetEffIndex() == 0)
             Cast(player, player, 804272);
+        if (Named(GetSpellInfo(), 500968) && effect->GetEffIndex() == 0)
+            HarvestPlagueSiphon(player);
         if (Named(GetSpellInfo(), 562210))
         {
             PreventDefaultAction();
