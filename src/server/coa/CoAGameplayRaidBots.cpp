@@ -79,4 +79,24 @@ namespace CoAGameplay
                 return spell;
         return std::nullopt;
     }
+
+    RaidSpellSource SpellSourceFor(bool rotationAssist, uint32 specialization,
+        std::span<CoARotationAssist::Rule const> rules)
+    {
+        if (rotationAssist)
+            for (CoARotationAssist::Rule const& rule : rules)
+                if (rule.Specialization == specialization)
+                    return RaidSpellSource::RotationAssist;
+        return RaidSpellSource::Scenario;
+    }
+
+    std::optional<uint32> NextRaidSpell(RaidSpellSource source, std::function<uint32()> const& rotationChoice,
+        std::vector<uint32> const& scenarioSpells, std::function<bool(uint32)> const& canCast)
+    {
+        if (source == RaidSpellSource::Scenario)
+            return NextRotationSpell(scenarioSpells, canCast);
+        if (uint32 const spell = rotationChoice())
+            return spell;
+        return std::nullopt;
+    }
 }
