@@ -6,7 +6,7 @@
 --    one-hand weapons, shields and off-hands 1800 (was 900), ranged weapons, wands and relics 2000 (was 1000), two-hand
 --    weapons 3600 (was 1800), Stick on a Carrot 2000, Pendant of the Bulwark / Sorcerer / Warrior and the five heirloom
 --    rings (not the Seal of Ascension) 1500.
---    Heirloom armor and trinkets are not sold piece by piece (price 0): they come in the set caches, 4500 each on
+--    Heirloom armor and trinkets are not sold piece by piece (price 0): they come in the set caches (no rings any more), 4500 each on
 --    Tiraxis (Heirloom Cache and Experience Heirloom Cache; the caches have no VanityCollection.dbc row). The Drakefire
 --    Amulet, Pendant of Adventure, Pendant of Discovery, the raid medallions and the Insignias of the Burning Legion are
 --    not sold.
@@ -309,3 +309,24 @@ WHERE `entry` = 900008 AND EXISTS (SELECT 1 FROM `coa_client_vanity_collection` 
   106958, 1006971, 106959, 818061, 3001005, 1004036, 3211009, 97871,
   1004040, 106960, 777998, 3211010, 1179243
 );
+
+-- The heirloom rings are sold on their own now (above), so the Heirloom Caches no longer hold them
+-- (1339058-1339064, and the unused second set 1339065-1339071).
+DELETE FROM `ethereal_bazaar_set_cache`
+WHERE `cache_item` BETWEEN 1339058 AND 1339071
+  AND `member_item` IN (1339079, 1339080, 1339081, 1339082, 1339083)  -- Rings of the Vanguard, Sorcerer, Bulwark, Lionhearted, Seer
+  AND EXISTS (SELECT 1 FROM `coa_client_vanity_collection` WHERE `BazaarTokenCost` > 0);
+
+-- ... and their tooltips stop listing the rings (the descriptions call them Finger of the Sorceror / Seer,
+-- Band of the Bulwark and Ring of the ...). REPLACE of a line that is already gone changes nothing.
+UPDATE `item_template` SET `description` =
+  REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`description`,
+    CONCAT(CHAR(10), 'Contains x1 Finger of the Sorceror'), ''),
+    CONCAT(CHAR(10), 'Contains x1 Finger of the Seer'), ''),
+    CONCAT(CHAR(10), 'Contains x1 Ring of the Vanguard'), ''),
+    CONCAT(CHAR(10), 'Contains x1 Ring of the Lionhearted'), ''),
+    CONCAT(CHAR(10), 'Contains x2 Band of the Bulwark'), ''),
+    CONCAT(CHAR(10), 'Contains x2 Ring of the Bulwark'), ''),
+    CONCAT(CHAR(10), 'Contains x1 Ring of the Bulwark'), '')
+WHERE `entry` BETWEEN 1339058 AND 1339071
+  AND EXISTS (SELECT 1 FROM `coa_client_vanity_collection` WHERE `BazaarTokenCost` > 0);
