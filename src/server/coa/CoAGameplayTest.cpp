@@ -3679,6 +3679,12 @@ private:
             Require(creature != nullptr, "Creature mount metric needs a living nearby creature");
             return creature->GetMountID();
         }
+        if (metric == "nearby_creature_display")
+        {
+            Creature* creature = player->FindNearestCreature(step.get<uint32>("entry"), 60.0f, true);
+            Require(creature != nullptr, "Creature display metric needs a living nearby creature");
+            return creature->GetDisplayId();
+        }
         if (metric == "nearby_creature_aura_count")
         {
             std::list<Creature*> creatures;

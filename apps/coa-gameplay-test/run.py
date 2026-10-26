@@ -61,7 +61,7 @@ METRICS = TIMELINE_METRICS | {
     'battleground_team', 'team', 'name_query_race',
     'map_difficulty', 'nearby_creature_template', 'nearby_creature_max_health', 'nearby_creature_health_pct',
     'nearby_creature_sent_spellclick', 'nearby_creature_can_attack', 'nearby_creature_mount_display',
-    'nearby_creature_aura_count',
+    'nearby_creature_display', 'nearby_creature_aura_count',
     'spawn_respawn_remaining',
     'spawn_placement', 'spawn_ground_gap', 'spawn_submerged', 'spawn_display_state',
     'point_placement', 'point_ground_gap', 'placement_audit_spawns', 'placement_audit_anomalies',
@@ -835,11 +835,12 @@ def validate(scenario):
                 number(step.get('item'), f'{where}.item', 1, 2**32 - 1, True)
             if metric in {'map_id', 'map_difficulty', 'nearby_creature_template', 'nearby_creature_max_health',
                           'nearby_creature_health_pct', 'nearby_creature_sent_spellclick', 'nearby_creature_can_attack',
-                          'nearby_creature_mount_display', 'nearby_creature_aura_count', 'loot_gear_item_level'}:
+                          'nearby_creature_mount_display', 'nearby_creature_display', 'nearby_creature_aura_count',
+                          'loot_gear_item_level'}:
                 require(step['actor'] in player_ids, f'{where}: dungeon/loot metric needs a player')
             if metric in {'nearby_creature_template', 'nearby_creature_max_health', 'nearby_creature_health_pct',
                           'nearby_creature_sent_spellclick', 'nearby_creature_can_attack',
-                          'nearby_creature_mount_display', 'nearby_creature_aura_count'}:
+                          'nearby_creature_mount_display', 'nearby_creature_display', 'nearby_creature_aura_count'}:
                 number(step.get('entry'), f'{where}.entry', 1, 2**32 - 1, True)
             if metric == 'nearby_creature_aura_count':
                 number(step.get('spell'), f'{where}.spell', 1, 2**31 - 1, True)
