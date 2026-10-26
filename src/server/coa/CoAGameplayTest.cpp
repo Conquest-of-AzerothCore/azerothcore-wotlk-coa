@@ -848,6 +848,7 @@ struct Actor
     std::map<uint32, uint32> clientSpellTargets;
     std::map<uint32, uint32> questQueryFlags;
     std::map<uint32, uint32> questQueryFirstChoiceItem;
+    std::map<uint32, std::string> questQueryResponse;
     std::map<uint32, uint32> questOfferXP;
     uint32 lastQuestWindow = 0;
     uint32 lastStableResult = 0;
@@ -1206,6 +1207,9 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
     if (packet.GetOpcode() == SMSG_QUEST_QUERY_RESPONSE
         && packet.size() >= QuestQueryFirstChoiceItemOffset + sizeof(uint32))
         actor.questQueryFirstChoiceItem[packet.read<uint32>(0)] = packet.read<uint32>(QuestQueryFirstChoiceItemOffset);
+    if (packet.GetOpcode() == SMSG_QUEST_QUERY_RESPONSE && packet.size() >= sizeof(uint32))
+        actor.questQueryResponse[packet.read<uint32>(0)].assign(reinterpret_cast<char const*>(packet.contents()),
+            packet.size());
     if (packet.GetOpcode() == SMSG_CREATURE_QUERY_RESPONSE)
     {
         WorldPacket response(packet);
@@ -3037,6 +3041,14 @@ private:
             Actor& actor = _actors.at(step.get<std::string>("actor"));
             auto itr = actor.questQueryFirstChoiceItem.find(step.get<uint32>("quest"));
             return itr == actor.questQueryFirstChoiceItem.end() ? -1 : int64(itr->second);
+        }
+        if (metric == "quest_query_text_contains")
+        {
+            Actor& actor = _actors.at(step.get<std::string>("actor"));
+            auto itr = actor.questQueryResponse.find(step.get<uint32>("quest"));
+            if (itr == actor.questQueryResponse.end())
+                return -1;
+            return itr->second.find(step.get<std::string>("text")) != std::string::npos ? 1 : 0;
         }
         if (metric == "creature_query_rank")
         {

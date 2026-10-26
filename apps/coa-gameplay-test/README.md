@@ -973,6 +973,9 @@ or -1 before the session receives a reward offer.
 carried the client's scaled-quest flag `0x01000000`, 0 when it did not, or -1 before one arrives.
 `quest_query_reward_choice` takes the same arguments and returns the first choice reward item id in the last quest
 query response for that quest, or -1 before one arrives.
+`quest_query_text_contains` takes the same arguments plus `text` and returns 1 when the last quest query response
+for that quest contains that text anywhere (title, log, tracker or completion strings), 0 when it does not, or -1
+before one arrives.
 
 `dungeon_difficulty_packet` takes a player `actor` and `value` (0, 1 or 2), sends the native dungeon
 selection packet through the packet hook and typed session handler, and does not bypass its group or

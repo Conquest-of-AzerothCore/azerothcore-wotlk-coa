@@ -70,6 +70,7 @@ METRICS = TIMELINE_METRICS | {
     'sent_average_item_level', 'sent_average_item_level_count',
     'creature_query_rank', 'creature_query_quest_item', 'quest_level', 'quest_xp',
     'quest_log_sent_level', 'quest_log_sent_xp', 'quest_offer_sent_xp', 'quest_query_scaled', 'quest_query_reward_choice',
+    'quest_query_text_contains',
     'health', 'health_pct', 'max_health', 'creature_type', 'respawn_remaining', 'power', 'max_power', 'alive', 'combat', 'can_attack', 'victim', 'has_redirects', 'casting', 'level',
     'aura', 'aura_stacks', 'aura_charges', 'aura_duration_ms', 'aura_amount', 'aura_positive', 'aura_visible',
     'carried_aura_count',
@@ -876,9 +877,12 @@ def validate(scenario):
                 number(step.get('dungeon'), f'{where}.dungeon', 1, 2**24 - 1, True)
             if metric in {'quest_level', 'quest_xp', 'quest_log_sent_level', 'quest_log_sent_xp',
                           'quest_offer_sent_xp', 'quest_query_scaled',
-                          'quest_query_reward_choice'}:
+                          'quest_query_reward_choice', 'quest_query_text_contains'}:
                 require(step['actor'] in player_ids and 'quest' in step,
                         f'{where}: quest metric needs a player and quest')
+            if metric == 'quest_query_text_contains':
+                require(isinstance(step.get('text'), str) and bool(step['text']),
+                        f'{where}: quest_query_text_contains needs text')
             if metric.startswith('aura') or metric in {
                     'knows_spell', 'cooldown_ms', 'global_cooldown_ms', 'spell_charges', 'cast_remaining_ms', 'has_talent',
                     'pet_knows_spell', 'client_knows_spell', 'client_spellbook_copies',
