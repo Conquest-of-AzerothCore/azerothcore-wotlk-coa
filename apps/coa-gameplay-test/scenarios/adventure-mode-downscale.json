@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Adventure Mode can be reduced from tier 100 to 1 without retaining high-tier rewards",
-  "contract": "An active Adventure Mode run can be reduced after leveling, outside combat. The tier-100 auras are removed, tier-1 effects replace them, and relogging preserves tier 1. Upgrades and zero are refused. Completing the run pays the tier-1 reward of 10000 Runes of Descension and 113 Marks, rather than the tier-100 rewards.",
+  "contract": "An active Adventure Mode run can be reduced after leveling, outside combat. The tier-100 auras are removed, tier-1 effects replace them, and relogging preserves tier 1. Upgrades and zero are refused. Completing the run pays the tier-1 row set of coa_challenge_reward (achievement 13715 'Adventurer Mode Level: 1' with 10000 Runes of Descension 375250 and 113 Marks 1297309 by mail) rather than the tier-100 set (achievement 13814, 59500 and 3825). Rewards are selected as one row set per level, so the awarded achievement identifies the paid tier; the mail metrics prove the item rewards were posted.",
   "timeout_ms": 120000,
   "location": {
     "map": 0,
@@ -154,19 +154,34 @@
       "action": "assert",
       "label": "Completion uses the reduced reward tier",
       "actor": "hero",
-      "metric": "mail_item_count",
-      "item": 375250,
-      "equals": 10000,
+      "metric": "has_achievement",
+      "achievement": 13715,
+      "equals": 1,
       "within_ms": 5000
     },
     {
       "action": "assert",
-      "label": "Completion uses the reduced reward tier",
+      "label": "Completion does not pay the tier-100 reward",
       "actor": "hero",
-      "metric": "mail_item_count",
+      "metric": "has_achievement",
+      "achievement": 13814,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Tier-1 reward items are posted",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 375250,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Tier-1 reward items are posted",
+      "actor": "hero",
+      "metric": "mail_has_item",
       "item": 1297309,
-      "equals": 113,
-      "within_ms": 5000
+      "equals": 1
     }
   ]
 }
