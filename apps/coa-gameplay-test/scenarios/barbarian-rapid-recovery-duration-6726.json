@@ -34,6 +34,13 @@
       "actor": "rapid",
       "spell": 801758
     },
+    { "action": "advancement_rank", "actor": "rapid", "entry": 34277, "rank": 2 },
+    { "action": "advancement_rank", "actor": "rapid", "entry": 14277, "rank": 2 },
+    { "action": "advancement_rank", "actor": "rapid", "entry": 34291, "rank": 1 },
+    { "action": "advancement_rank", "actor": "rapid", "entry": 34279, "rank": 1 },
+    { "action": "advancement_rank", "actor": "rapid", "entry": 30870, "rank": 1 },
+    { "action": "advancement_rank", "actor": "rapid", "entry": 30762, "rank": 1 },
+    { "action": "advancement_rank", "actor": "rapid", "entry": 30162, "rank": 1 },
     {
       "action": "advancement_rank",
       "actor": "rapid",

@@ -43,6 +43,8 @@ enum AdvancementDwordField : uint32
     ADVANCEMENT_GROUP        = 29,
     ADVANCEMENT_CLASS_TYPE   = 32,
     ADVANCEMENT_TAB          = 33,
+    ADVANCEMENT_TAB_AE_INVESTMENT = 38,
+    ADVANCEMENT_TAB_TE_INVESTMENT = 39,
     ADVANCEMENT_FLAGS        = 73,
 };
 
@@ -234,6 +236,8 @@ bool LoadCoATalentData()
         node.Entry.RequiredLevel = uint8(record.GetUInt32(ADVANCEMENT_LEVEL));
         node.Entry.Talent = record.GetString(ADVANCEMENT_TYPE) == "Talent";
         node.Entry.FreeUnlearn = (record.GetUInt32(ADVANCEMENT_FLAGS) & ADVANCEMENT_FLAG_FREE_UNLEARN) != 0;
+        node.Entry.TabAEInvestment = uint8(std::min<uint32>(record.GetUInt32(ADVANCEMENT_TAB_AE_INVESTMENT), 255));
+        node.Entry.TabTEInvestment = uint8(std::min<uint32>(record.GetUInt32(ADVANCEMENT_TAB_TE_INVESTMENT), 255));
         node.Group = record.GetUInt32(ADVANCEMENT_GROUP);
         node.ClassTab = tab == SHARED_CLASS_TAB_ID;
 

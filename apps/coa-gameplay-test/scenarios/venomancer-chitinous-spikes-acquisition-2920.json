@@ -12,6 +12,13 @@
       "action": "assert", "label": "Chitinous Spikes is not known before it is chosen", "actor": "v",
       "metric": "knows_spell", "spell": 504406, "equals": 0
     },
+    { "action": "advancement_rank", "actor": "v", "entry": 6118, "rank": 2 },
+    { "action": "advancement_rank", "actor": "v", "entry": 6082, "rank": 2 },
+    { "action": "advancement_rank", "actor": "v", "entry": 30482, "rank": 1 },
+    { "action": "advancement_rank", "actor": "v", "entry": 29607, "rank": 1 },
+    { "action": "advancement_rank", "actor": "v", "entry": 29588, "rank": 1 },
+    { "action": "advancement_rank", "actor": "v", "entry": 7722, "rank": 1 },
+    { "action": "advancement_rank", "actor": "v", "entry": 7252, "rank": 1 },
     {
       "action": "advancement_rank", "label": "Choose Chitinous Spikes", "actor": "v",
       "entry": 7237, "rank": 1

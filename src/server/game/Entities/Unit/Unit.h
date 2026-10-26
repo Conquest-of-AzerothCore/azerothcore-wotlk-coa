@@ -1617,7 +1617,7 @@ public:
     // set withDelayed to true to account delayed spells as casted
     // delayed+channeled spells are always accounted as casted
     // we can skip channeled or delayed checks using flags
-    [[nodiscard]] bool IsNonMeleeSpellCast(bool withDelayed, bool skipChanneled = false, bool skipAutorepeat = false, bool isAutoshoot = false, bool skipInstant = true) const;
+    [[nodiscard]] bool IsNonMeleeSpellCast(bool withDelayed, bool skipChanneled = false, bool skipAutorepeat = false, bool isAutoshoot = false, bool skipInstant = true, bool skipGeneric = false) const;
     [[nodiscard]] bool HasManastormMovementGrace() const;
 
     // set withDelayed to true to interrupt delayed spells too
@@ -1756,6 +1756,7 @@ public:
     [[nodiscard]] bool IsActionPreventedByCasting() const;
     [[nodiscard]] bool CanCastDuringChannel(SpellInfo const* info) const;
     [[nodiscard]] bool CanDefendDuringChannel() const;
+    [[nodiscard]] bool CanDefendDuringCast() const;
 
     [[nodiscard]] virtual bool CanEnterWater() const = 0;
     [[nodiscard]] virtual bool CanSwim() const;

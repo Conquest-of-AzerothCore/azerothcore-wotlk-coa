@@ -20,6 +20,8 @@ struct CoATalentEntry
     bool Talent = false;
     bool FreeUnlearn = false;
     std::array<std::uint32_t, 3> RequiredEntryIds{};
+    std::uint8_t TabAEInvestment = 0;
+    std::uint8_t TabTEInvestment = 0;
 };
 
 struct CoASelectableFreeEntry

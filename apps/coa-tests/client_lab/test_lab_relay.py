@@ -152,7 +152,7 @@ class LabRelayTest(unittest.TestCase):
         path.write_text(json.dumps(self.descriptor))
         argv = ["run.py", "--client-lab", str(path), "--dbc-dir", self.tmp.name]
         with patch("sys.argv", argv), patch.object(lab_run, "spell_name", return_value="Fel Fireball"), \
-                redirect_stdout(io.StringIO()) as output:
+                patch.object(lab_run, "run_memory_checks"), redirect_stdout(io.StringIO()) as output:
             self.assertEqual(lab_run.main(), 0, output.getvalue())
         self.assertIn(".labprobe send Coalabone r1 eval 1", self.soap.commands)
 
@@ -170,7 +170,7 @@ class LabRelayTest(unittest.TestCase):
         path.write_text(json.dumps(self.descriptor))
         argv = ["run.py", "--client-lab", str(path), "--dbc-dir", self.tmp.name]
         with patch("sys.argv", argv), patch.object(lab_run, "spell_name", return_value="Fel Fireball"), \
-                redirect_stdout(io.StringIO()) as output:
+                patch.object(lab_run, "run_memory_checks"), redirect_stdout(io.StringIO()) as output:
             self.assertEqual(lab_run.main(), 1)
         self.assertIn("FAIL: all answers come from one UI load", output.getvalue())
 

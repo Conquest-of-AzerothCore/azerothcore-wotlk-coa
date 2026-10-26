@@ -833,6 +833,7 @@ struct Actor
     std::map<uint32, uint8> castFailureReason;
     uint32 bankShows = 0;
     uint32 systemMessages = 0;
+    uint32 monsterChats = 0;
     std::vector<std::string> systemMessageTexts;
     std::vector<std::pair<ObjectGuid, std::string>> whispers;
     uint32 notifications = 0;
@@ -1160,6 +1161,8 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         WorldPacket chat(packet);
         uint8 chatType = 0;
         chat >> chatType;
+        if (chatType == CHAT_MSG_MONSTER_SAY || chatType == CHAT_MSG_MONSTER_YELL)
+            ++actor.monsterChats;
         if (chatType == CHAT_MSG_SYSTEM || chatType == CHAT_MSG_WHISPER)
         {
             int32 language;
@@ -2891,6 +2894,8 @@ private:
             return unit->GetPositionZ();
         if (metric == "combat")
             return unit->IsInCombat();
+        if (metric == "can_attack")
+            return unit->IsValidAttackTarget(GetUnit(step.get<std::string>("target")));
         if (metric == "channel_object_entry")
         {
             ObjectGuid const channelObject = unit->GetGuidValue(UNIT_FIELD_CHANNEL_OBJECT);
@@ -3003,11 +3008,12 @@ private:
         }
         if (metric == "view_level")
             return GetUnit(step.get<std::string>("target"))->getLevelForTarget(unit);
-        if (metric == "sent_level" || metric == "sent_max_health")
+        if (metric == "sent_level" || metric == "sent_max_health" || metric == "sent_faction")
         {
             Actor& actor = _actors.at(step.get<std::string>("actor"));
             uint64 guid = GetUnit(step.get<std::string>("target"))->GetGUID().GetRawValue();
-            uint16 field = metric == "sent_level" ? UNIT_FIELD_LEVEL : UNIT_FIELD_MAXHEALTH;
+            uint16 field = metric == "sent_level" ? UNIT_FIELD_LEVEL :
+                metric == "sent_faction" ? UNIT_FIELD_FACTIONTEMPLATE : UNIT_FIELD_MAXHEALTH;
             auto itr = actor.unitValues.find(guid);
             if (itr == actor.unitValues.end() || !itr->second.count(field))
                 return 0;
@@ -4237,6 +4243,12 @@ private:
             }
             return 0.0;
         }
+        if (metric == "owned_creature_armor")
+        {
+            Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
+            Require(creature != nullptr, "Armor observation needs a present owned creature");
+            return creature->GetArmor();
+        }
         if (metric == "owned_creature_virtual_item")
         {
             Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
@@ -4499,6 +4511,8 @@ private:
                         count += token->GetCount();
             return count;
         }
+        if (metric == "monster_chat_count")
+            return double(_actors.at(step.get<std::string>("actor")).monsterChats);
         if (metric == "item_sell_price")
         {
             uint32 item = step.get<uint32>("item");

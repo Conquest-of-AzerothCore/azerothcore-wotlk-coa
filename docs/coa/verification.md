@@ -770,7 +770,8 @@ while a lab is logged in. It checks the lab slot's deployed server, not the buil
 slot's deployed commit beside the checkout's `HEAD` for comparison. A containerised run needs host networking (without it, an existing descriptor makes the script fail
 with a refused connection instead of `unavailable`; the
 SOAP port is published on the host's loopback) and read-only mounts of the lab state directory and the DBC
-directory.
+directory. It also reads the lab client's own process memory and checks it against the relay
+([client-lab-memory.md](client-lab-memory.md)).
 
 ## Full runs
 

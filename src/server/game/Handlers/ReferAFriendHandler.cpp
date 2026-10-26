@@ -36,6 +36,7 @@
 #include "ObjectMgr.h"
 #include "Opcodes.h"
 #include "Player.h"
+#include "PlayerSettings.h"
 #include "ScriptMgr.h"
 #include "SocialMgr.h"
 #include "WorldSession.h"
@@ -52,9 +53,14 @@ namespace
     {
         if (!target || target == donor)
             return ERR_REFER_A_FRIEND_NO_TARGET;
+        if (PlayerSettingVector const* prestige = target->FindPlayerSettings("core.coa_prestige");
+            prestige && prestige->size() > 1 && (*prestige)[1].value != 0)
+            return ERR_REFER_A_FRIEND_NOT_NOW;
         if (!donor->GetGrantableLevels())
             return ERR_REFER_A_FRIEND_INSUFFICIENT_GRANTABLE_LEVELS;
-        if (donor->GetSession()->GetRecruiterId() != target->GetSession()->GetAccountId())
+        if (donor->GetSession()->GetAccountId() == target->GetSession()->GetAccountId() ||
+            (donor->GetSession()->GetRecruiterId() != target->GetSession()->GetAccountId() &&
+                target->GetSession()->GetRecruiterId() != donor->GetSession()->GetAccountId()))
             return ERR_REFER_A_FRIEND_NOT_REFERRED_BY;
         if (donor->GetTeamId() != target->GetTeamId())
             return ERR_REFER_A_FRIEND_DIFFERENT_FACTION;
@@ -420,12 +426,56 @@ void WorldSession::UpdateRecruitAFriendRewards(bool force)
         trans->Append(validate);
         LoginDatabase.DirectCommitTransaction(trans);
     }
+    UpdateRecruitMilestoneRewards();
     RecoverRecruitAFriendRewards();
+    RecoverRecruitAFriendRewards(true);
 }
 
-void WorldSession::RecoverRecruitAFriendRewards()
+void WorldSession::UpdateRecruitMilestoneRewards()
 {
-    auto* claims = LoginDatabase.GetPreparedStatement(LOGIN_SEL_RAF_CLAIMS);
+    if (!_player || !recruiterId)
+        return;
+
+    uint32 reachedLevel = _player->GetLevel();
+    if (PlayerSettingVector const* settings = _player->FindPlayerSettings("core.coa_prestige");
+        settings && !settings->empty() && settings->front().value > 0)
+        reachedLevel = std::max(reachedLevel, std::min<uint32>(60,
+            sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL)));
+
+    auto* query = WorldDatabase.GetPreparedStatement(WORLD_SEL_RAF_RECRUIT_MILESTONES);
+    PreparedQueryResult rewards = WorldDatabase.Query(query);
+    if (!rewards)
+        return;
+
+    uint8 const realmMask = RecruitRewardRealmMask();
+    do
+    {
+        Field* fields = rewards->Fetch();
+        uint32 const rewardId = fields[0].Get<uint32>();
+        uint32 const requiredLevel = fields[1].Get<uint32>();
+        uint8 const mask = fields[2].Get<uint8>();
+        uint32 const itemId = fields[3].Get<uint32>();
+        uint32 const quantity = fields[4].Get<uint32>();
+        if (!rewardId || !requiredLevel || reachedLevel < requiredLevel || !(mask & realmMask) ||
+            (mask & ~15) || !ValidRecruitReward(itemId, quantity))
+            continue;
+
+        auto* claim = LoginDatabase.GetPreparedStatement(LOGIN_INS_RAF_RECRUIT_CLAIM);
+        claim->SetData(0, GetAccountId());
+        claim->SetData(1, rewardId);
+        claim->SetData(2, realm.Id.Realm);
+        claim->SetData(3, _player->GetGUID().GetCounter());
+        claim->SetData(4, itemId);
+        claim->SetData(5, quantity);
+        claim->SetData(6, GetAccountId());
+        LoginDatabase.DirectExecute(claim);
+    } while (rewards->NextRow());
+}
+
+void WorldSession::RecoverRecruitAFriendRewards(bool recruit)
+{
+    auto* claims = LoginDatabase.GetPreparedStatement(
+        recruit ? LOGIN_SEL_RAF_RECRUIT_CLAIMS : LOGIN_SEL_RAF_CLAIMS);
     claims->SetData(0, GetAccountId());
     PreparedQueryResult rows = LoginDatabase.Query(claims);
     if (!rows)
@@ -439,9 +489,10 @@ void WorldSession::RecoverRecruitAFriendRewards()
         ObjectGuid::LowType const guid = fields[3].Get<uint32>();
         uint32 const itemId = fields[4].Get<uint32>();
         uint32 const quantity = fields[5].Get<uint32>();
-        auto receiptQuery = [claimId]()
+        auto receiptQuery = [claimId, recruit]()
         {
-            auto* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_RAF_DELIVERY);
+            auto* stmt = CharacterDatabase.GetPreparedStatement(
+                recruit ? CHAR_SEL_RAF_RECRUIT_DELIVERY : CHAR_SEL_RAF_DELIVERY);
             stmt->SetData(0, claimId);
             return CharacterDatabase.Query(stmt);
         };
@@ -464,6 +515,7 @@ void WorldSession::RecoverRecruitAFriendRewards()
             while (remaining && valid)
             {
                 auto draft = std::make_unique<MailDraft>("Recruit-A-Friend reward",
+                    recruit ? "Welcome! Your recruit milestone reward is enclosed. Each milestone is rewarded once per account on this realm." :
                     "Thank you for recruiting your friends! Your account-wide reward is enclosed.");
                 for (uint32 slot = 0; remaining && slot < MAX_MAIL_ITEMS; ++slot)
                 {
@@ -492,7 +544,8 @@ void WorldSession::RecoverRecruitAFriendRewards()
                     draft->DiscardItems();
                 continue;
             }
-            auto* marker = CharacterDatabase.GetPreparedStatement(CHAR_INS_RAF_DELIVERY);
+            auto* marker = CharacterDatabase.GetPreparedStatement(
+                recruit ? CHAR_INS_RAF_RECRUIT_DELIVERY : CHAR_INS_RAF_DELIVERY);
             marker->SetData(0, claimId);
             marker->SetData(1, GetAccountId());
             marker->SetData(2, guid);
@@ -511,7 +564,8 @@ void WorldSession::RecoverRecruitAFriendRewards()
         }
         if (receipt)
         {
-            auto* delivered = LoginDatabase.GetPreparedStatement(LOGIN_UPD_RAF_CLAIM_DELIVERED);
+            auto* delivered = LoginDatabase.GetPreparedStatement(
+                recruit ? LOGIN_UPD_RAF_RECRUIT_CLAIM_DELIVERED : LOGIN_UPD_RAF_CLAIM_DELIVERED);
             delivered->SetData(0, claimId);
             LoginDatabase.DirectExecute(delivered);
         }
@@ -546,6 +600,27 @@ bool WorldSession::HandleRecruitAFriendRewardsCommand(std::string const& command
         chat.PSendSysMessage("Direct recruits: {} total, {} validated, {} pending. Progress updates every minute.",
             total, validated, total - validated);
         return true;
+    }
+    if (recruiterId && command == "rewards")
+    {
+        auto* milestonesQuery = WorldDatabase.GetPreparedStatement(WORLD_SEL_RAF_RECRUIT_MILESTONES);
+        if (PreparedQueryResult milestones = WorldDatabase.Query(milestonesQuery))
+        {
+            uint8 const mode = RecruitRewardRealmMask();
+            do
+            {
+                Field* fields = milestones->Fetch();
+                uint8 const mask = fields[2].Get<uint8>();
+                uint32 const itemId = fields[3].Get<uint32>();
+                uint32 const quantity = fields[4].Get<uint32>();
+                if (!(mask & mode) || (mask & ~15) || !ValidRecruitReward(itemId, quantity))
+                    continue;
+                ItemTemplate const* item = sObjectMgr->GetItemTemplate(itemId);
+                if (item)
+                    chat.PSendSysMessage("Recruit bonus at level {}: {} x{}. Mailed automatically once per account on this realm.",
+                        fields[1].Get<uint32>(), item->Name1, quantity);
+            } while (milestones->NextRow());
+        }
     }
     auto* countQuery = LoginDatabase.GetPreparedStatement(LOGIN_SEL_RAF_VALID_COUNT);
     countQuery->SetData(0, GetAccountId());

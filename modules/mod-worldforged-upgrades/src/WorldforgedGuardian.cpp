@@ -15,6 +15,7 @@
 
 #include "WorldforgedUpgrades.h"
 
+#include "AscensionAccountProgress.h"
 #include "AscensionFreepick.h"
 #include "AscensionWarcraftReborn.h"
 #include "Chat.h"
@@ -161,9 +162,10 @@ public:
                 player->GetSession()->SendListInventory(creature->GetGUID(), GENERAL_GOODS);
                 return true;
             case ACTION_HEIRLOOMS:
-                if (player->GetLevel() < HEIRLOOM_LEVEL)
+                if (!AscensionAccountProgress::HasLevelOrPrestige(player, HEIRLOOM_LEVEL))
                 {
-                    ChatHandler(player->GetSession()).SendSysMessage("You must be level 60 to buy heirlooms.");
+                    ChatHandler(player->GetSession()).SendSysMessage(
+                        "Your account needs a level 60 or a previously prestiged character on this realm to buy heirlooms.");
                     SendMainMenu(player, creature);
                     return true;
                 }

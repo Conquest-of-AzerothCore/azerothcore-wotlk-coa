@@ -55,6 +55,8 @@ With the relay disabled, the addon's answer whispers reach the client again; the
 - Read-only allowlist on both ends: the relay refuses any other first word, and the addon refuses to run anything
   outside its own allowlist (`eval`, `pksend`, `pkwatch` and `evwatch` are never reachable over the relay).
 - No client memory access, injected code or anti-cheat change: requests and answers are ordinary addon messages.
+  Memory diagnostics are a separate, later addition on top of this relay: see
+  [client-lab-memory.md](client-lab-memory.md).
 
 ## SOAP on a lab slot
 

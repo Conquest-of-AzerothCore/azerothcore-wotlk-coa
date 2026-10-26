@@ -66,6 +66,12 @@
       "metric": "spell_crit_chance",
       "save_as": "control_crit"
     },
+    { "action": "advancement_rank", "actor": "talented", "entry": 34691, "rank": 2 },
+    { "action": "advancement_rank", "actor": "talented", "entry": 9641, "rank": 2 },
+    { "action": "advancement_rank", "actor": "talented", "entry": 34692, "rank": 1 },
+    { "action": "advancement_rank", "actor": "talented", "entry": 31163, "rank": 1 },
+    { "action": "advancement_rank", "actor": "talented", "entry": 29837, "rank": 1 },
+    { "action": "advancement_rank", "actor": "talented", "entry": 29833, "rank": 1 },
     {
       "action": "advancement_rank",
       "actor": "talented",

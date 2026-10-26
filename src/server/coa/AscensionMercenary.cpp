@@ -77,6 +77,11 @@ ReputationRank RaceReactionTo(Player const* player, Unit const* target)
     return REP_NEUTRAL;
 }
 
+bool InMercenaryWar(Player const* player)
+{
+    return player->HasAura(SPELL_MERCENARY) || IsPvPRuleset(player);
+}
+
 bool ShowsFreeForAllTo(Player const* player, Player const* viewer)
 {
     if (!player || !viewer || player->HasAura(SPELL_MERCENARY) || !IsPvPRuleset(player) ||
@@ -190,14 +195,16 @@ public:
         if (!first || !second || first == second)
             return true;
 
-        auto isTarget = [](Player const* player) { return player->HasAura(SPELL_MERCENARY) || IsPvPRuleset(player); };
-        if ((first->HasAura(SPELL_MERCENARY) && isTarget(second)) ||
-            (second->HasAura(SPELL_MERCENARY) && isTarget(first)))
-        {
+        bool const firstMercenary = first->HasAura(SPELL_MERCENARY);
+        bool const secondMercenary = second->HasAura(SPELL_MERCENARY);
+        if (!firstMercenary && !secondMercenary)
+            return true;
+
+        if ((firstMercenary && InMercenaryWar(second)) || (secondMercenary && InMercenaryWar(first)))
             reaction = REP_HOSTILE;
-            return false;
-        }
-        return true;
+        else
+            reaction = firstMercenary ? RaceReactionTo(first, target) : RaceReactionTo(second, unit);
+        return false;
     }
 };
 
@@ -208,8 +215,12 @@ public:
 
     void OnPatchValuesUpdate(Unit const* unit, ByteBuffer& data, BuildValuesCachePosPointers& pos, Player* target) override
     {
-        if (pos.UnitFieldFactionTemplatePos >= 0 && unit && unit == target && target->HasAura(SPELL_MERCENARY))
-            data.put(pos.UnitFieldFactionTemplatePos, RaceFaction(target));
+        if (pos.UnitFieldFactionTemplatePos >= 0 && unit && target)
+        {
+            Player const* owner = unit->GetCharmerOrOwnerPlayerOrPlayerItself();
+            if (owner && owner->HasAura(SPELL_MERCENARY) && (unit == target || !InMercenaryWar(target)))
+                data.put(pos.UnitFieldFactionTemplatePos, RaceFaction(owner));
+        }
         if (pos.UnitFieldBytes2Pos < 0 || !unit || !ShowsFreeForAllTo(unit->ToPlayer(), target))
             return;
         uint32 const bytes = data.read<uint32>(pos.UnitFieldBytes2Pos);

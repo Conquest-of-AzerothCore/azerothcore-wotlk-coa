@@ -422,8 +422,11 @@ class npc_ascension_necromancer : public ScriptedAI
             me->CastSpell(me, champion, true);
         for (uint32 ward : {680388, 681460, 681529})
             if (Aura const* active = player->GetAura(ward))
-                if (Aura* copy = player->AddAura(ward, me))
+            {
+                SpellInfo const* wardInfo = sSpellMgr->GetSpellInfo(ward);
+                if (Aura* copy = player->AddAura(wardInfo, WardMinionEffectMask(wardInfo), me))
                     copy->SetDuration(active->GetDuration());
+            }
         if (me->GetEntry() == 50132)
         {
             ObjectGuid previous = State(player).phylactery;
