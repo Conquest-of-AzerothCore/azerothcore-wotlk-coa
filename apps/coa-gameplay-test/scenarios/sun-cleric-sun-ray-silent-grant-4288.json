@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "name": "Sun Ray does not announce a Sunflare learn on every Burning Heat proc (#4288)",
+  "contract": "#4288: 'everytime proc happens im leaning [sic] Sunflare spell and it shows on pop out window'. Burning Heat 704908 triggers 707529, which stacks the buff 803238; AscensionSunCleric::Refresh (sun_cleric_player::OnPlayerUpdate, every 500 ms) grants Sun Ray 504764 while 803238 is up and Sunflare 800231 is known, and revokes it when the buff drops (AscensionSunCleric.cpp:372-379). Player::learnSpell(spellId, true) reaches Player::_addSpell with announce=true, whose own guard (Player.cpp, around _addSpell) sends SMSG_LEARNED_SPELL for any temporary grant that is not passive/DO_NOT_DISPLAY and has no SPELL_EFFECT_LEARN_SPELL effect; Sun Ray has neither, so every proc cycle sent the client a New Spell Learned toast. The fix grants it with Player::learnSpellWithoutAnnouncement(504764), the same call already used for Blood Curse/Sanguine Essence (#6721) and other temporary replacements in this tree. The buff is applied directly (set_aura) across two independent proc cycles, each followed by the buff dropping, to prove the toast stays suppressed on a repeat grant and not only the first one.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login state settle", "ms": 3000 },
+    { "action": "learn", "actor": "cleric", "spell": 800231 },
+
+    { "action": "set_aura", "label": "First proc: gain the Sun Ray buff", "actor": "cleric", "spell": 803238, "stacks": 1 },
+    {
+      "action": "assert",
+      "label": "SETUP: the buff replaces Sunflare with Sun Ray",
+      "actor": "cleric",
+      "metric": "temporary_spell_replacement",
+      "spell": 800231,
+      "equals": 504764,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the first grant of Sun Ray is not announced as a learned spell",
+      "actor": "cleric",
+      "metric": "spellbook_learned_alerts",
+      "spell": 504764,
+      "equals": 0
+    },
+
+    { "action": "set_aura", "label": "The buff drops, Sun Ray is revoked", "actor": "cleric", "spell": 803238, "stacks": 0 },
+    {
+      "action": "assert",
+      "label": "SETUP: Sunflare is restored",
+      "actor": "cleric",
+      "metric": "temporary_spell_replacement",
+      "spell": 800231,
+      "equals": 800231,
+      "within_ms": 3000
+    },
+
+    { "action": "set_aura", "label": "Second proc: gain the Sun Ray buff again", "actor": "cleric", "spell": 803238, "stacks": 1 },
+    {
+      "action": "assert",
+      "label": "SETUP: the buff replaces Sunflare with Sun Ray again",
+      "actor": "cleric",
+      "metric": "temporary_spell_replacement",
+      "spell": 800231,
+      "equals": 504764,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the repeat grant across a second proc cycle stays unannounced",
+      "actor": "cleric",
+      "metric": "spellbook_learned_alerts",
+      "spell": 504764,
+      "equals": 0
+    }
+  ]
+}
