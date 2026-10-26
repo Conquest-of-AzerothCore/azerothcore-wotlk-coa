@@ -112,6 +112,13 @@
 #       Default: 1 - Random
 #                0 - Player choice
 #
+#   CFBG.KeepRace
+#       Description: Players who fight for the opposite team keep their own race and
+#                    appearance; only their team and faction change. When enabled,
+#                    CFBG.RandomRaceSelection and .cfbg race have no effect.
+#       Default: 1 - (Keep race and appearance)
+#                0 - (Morph into a race of the assigned team)
+#
 #   CFBG.BalanceTeamsOnEntry.Enabled
 #       Description: When a solo player enters a battleground while the teams are
 #                    uneven, move them to the smaller team according to the
@@ -151,5 +158,6 @@ CFBG.EvenTeams.MaxPlayersThreshold = 0
 CFBG.ResetCooldowns = 0
 CFBG.Show.PlayerName = 0
 CFBG.RandomRaceSelection = 1
+CFBG.KeepRace = 1
 CFBG.BalanceTeamsOnEntry.Enabled = 1
 CFBG.BalanceTeamsAtStart.Enabled = 1

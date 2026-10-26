@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Cross-faction battleground: two Alliance players queue for Warsong Gulch and fight on opposite sides",
-  "contract": "Battlegrounds match players regardless of faction. Two Alliance players who queue for Warsong Gulch one after the other enter the same match on opposite sides: the first keeps the Alliance side, the second fights for the Horde and counts as Horde while inside. Leaving the battleground returns the second player to the Alliance.",
+  "contract": "Battlegrounds match players regardless of faction. Two Alliance players who queue for Warsong Gulch one after the other enter the same match on opposite sides: the first keeps the Alliance side, the second fights for the Horde and counts as Horde while inside, while keeping their own race and appearance. Leaving the battleground returns the second player to the Alliance.",
   "timeout_ms": 180000,
   "players": [
     {
@@ -29,6 +29,13 @@
       "action": "wait",
       "label": "Let the characters settle",
       "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Remember the second player's appearance",
+      "actor": "second",
+      "metric": "display_id",
+      "save_as": "second_display"
     },
     {
       "action": "console",
@@ -179,6 +186,21 @@
       "actor": "second",
       "metric": "team",
       "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The second player stays Human on the Horde side",
+      "actor": "second",
+      "metric": "race",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The second player keeps their own appearance",
+      "actor": "second",
+      "metric": "display_id",
+      "relative_to": "second_display",
+      "equals": 0
     },
     {
       "action": "client_packet",

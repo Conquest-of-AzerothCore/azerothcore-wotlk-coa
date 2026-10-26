@@ -138,6 +138,7 @@ public:
     inline uint8 GetBalanceClassMaxLevel() const { return _balanceClassMaxLevel; }
     inline uint8 GetBalanceClassLevelDiff() const { return _balanceClassLevelDiff; }
     inline bool RandomizeRaces() const { return _randomizeRaces; }
+    inline bool KeepRace() const { return _keepRace; }
 
     uint32 GetBGTeamAverageItemLevel(Battleground* bg, TeamId team);
     uint32 GetBGTeamSumPlayerLevel(Battleground* bg, TeamId team);
@@ -221,6 +222,8 @@ private:
 
     uint32 GetMorphFromRace(uint8 race, uint8 gender);
 
+    void ApplyFakePlayer(Player* player, FakePlayer const& fake);
+
     // Projected head counts per team: in-BG players plus invited-not-yet-entered
     // ones. bg == nullptr (formation) yields zeros.
     std::array<uint32, 2> GetProjectedBaseCounts(Battleground* bg, BattlegroundQueue* queue, BattlegroundBracketId bracketId) const;
@@ -261,6 +264,7 @@ private:
     bool _IsEnableBalanceTeamsAtStart;
     bool _showPlayerName;
     bool _randomizeRaces;
+    bool _keepRace;
     uint32 _EvenTeamsMaxPlayersThreshold;
     uint32 _MaxPlayersCountInGroup;
     uint8 _balanceClassMinLevel;

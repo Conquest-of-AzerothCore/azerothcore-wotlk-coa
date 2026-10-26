@@ -40,7 +40,7 @@ public:
 
         uint8 raceId = 0;
 
-        if (sCFBG->RandomizeRaces())
+        if (sCFBG->RandomizeRaces() || sCFBG->KeepRace())
         {
             handler->SendSysMessage("Race selection is currently disabled.");
             handler->SetSentErrorMessage(true);

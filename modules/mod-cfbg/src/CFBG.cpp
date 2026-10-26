@@ -150,6 +150,7 @@ void CFBG::LoadConfig()
     _balanceClassMaxLevel = sConfigMgr->GetOption<uint8>("CFBG.BalancedTeams.Class.MaxLevel", 19);
     _balanceClassLevelDiff = sConfigMgr->GetOption<uint8>("CFBG.BalancedTeams.Class.LevelDiff", 2);
     _randomizeRaces = sConfigMgr->GetOption<bool>("CFBG.RandomRaceSelection", true);
+    _keepRace = sConfigMgr->GetOption<bool>("CFBG.KeepRace", true);
 }
 
 uint32 CFBG::GetBGTeamAverageItemLevel(Battleground* bg, TeamId team)
@@ -661,21 +662,21 @@ void CFBG::SetFakeRaceAndMorph(Player* player)
         skinInfo.second = GetMorphFromRace(skinInfo.first, player->getGender());
     }
 
+    if (KeepRace())
+        skinInfo = { player->getRace(true), player->GetNativeDisplayId() };
+
     FakePlayer fakePlayerInfo
     {
         skinInfo.first,
         skinInfo.second,
-        player->TeamIdForRace(skinInfo.first),
+        player->GetBgTeamId(),
         player->getRace(true),
         player->GetDisplayId(),
         player->GetNativeDisplayId(),
         player->GetTeamId(true)
     };
 
-    player->setRace(fakePlayerInfo.FakeRace);
-    SetFactionForRace(player, fakePlayerInfo.FakeRace, fakePlayerInfo.FakeTeamID);
-    player->SetDisplayId(fakePlayerInfo.FakeMorph);
-    player->SetNativeDisplayId(fakePlayerInfo.FakeMorph);
+    ApplyFakePlayer(player, fakePlayerInfo);
 
     _fakePlayerStore.emplace(player, std::move(fakePlayerInfo));
 }
@@ -700,6 +701,9 @@ void CFBG::SetFakeRaceAndMorphForBF(Player* player, TeamId assignedTeam)
         skinInfo.second = GetMorphFromRace(skinInfo.first, player->getGender());
     }
 
+    if (KeepRace())
+        skinInfo = { player->getRace(true), player->GetNativeDisplayId() };
+
     FakePlayer fakePlayerInfo
     {
         skinInfo.first,
@@ -711,12 +715,23 @@ void CFBG::SetFakeRaceAndMorphForBF(Player* player, TeamId assignedTeam)
         realTeam
     };
 
-    player->setRace(fakePlayerInfo.FakeRace);
-    SetFactionForRace(player, fakePlayerInfo.FakeRace, assignedTeam);
-    player->SetDisplayId(fakePlayerInfo.FakeMorph);
-    player->SetNativeDisplayId(fakePlayerInfo.FakeMorph);
+    ApplyFakePlayer(player, fakePlayerInfo);
 
     _fakePlayerStore.emplace(player, std::move(fakePlayerInfo));
+}
+
+void CFBG::ApplyFakePlayer(Player* player, FakePlayer const& fake)
+{
+    if (KeepRace())
+    {
+        SetFactionForRace(player, fake.FakeTeamID == TEAM_ALLIANCE ? RACE_HUMAN : RACE_ORC, fake.FakeTeamID);
+        return;
+    }
+
+    player->setRace(fake.FakeRace);
+    SetFactionForRace(player, fake.FakeRace, fake.FakeTeamID);
+    player->SetDisplayId(fake.FakeMorph);
+    player->SetNativeDisplayId(fake.FakeMorph);
 }
 
 void CFBG::SetFactionForRace(Player* player, uint8 Race, TeamId teamId)
@@ -779,10 +794,7 @@ void CFBG::ReapplyFakePlayer(Player* player)
 
     // Re-push the stored fake values after a resurrect so the assigned faction
     // and morph survive the ghost->alive transition.
-    player->setRace(info->FakeRace);
-    SetFactionForRace(player, info->FakeRace, info->FakeTeamID);
-    player->SetDisplayId(info->FakeMorph);
-    player->SetNativeDisplayId(info->FakeMorph);
+    ApplyFakePlayer(player, *info);
 }
 
 bool CFBG::IsPlayerFake(Player* player)
