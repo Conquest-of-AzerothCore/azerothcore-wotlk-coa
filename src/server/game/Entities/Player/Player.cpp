@@ -2708,7 +2708,7 @@ void Player::GiveLevel(uint8 level)
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL);
 
     // Refer-A-Friend
-    if (GetSession()->GetRecruiterId() && level > oldLevel)
+    if ((GetSession()->GetRecruiterId() || GetSession()->IsARecruiter()) && level > oldLevel)
     {
         uint32 const cap = sWorld->getIntConfig(CONFIG_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL);
         uint32 const earned = std::min<uint32>(level, cap) / 2 - std::min<uint32>(oldLevel, cap) / 2;

@@ -32,6 +32,9 @@ void WorldDatabaseConnection::DoPrepareStatements()
         "LEFT JOIN quest_template q ON q.ID = m.QuestId WHERE m.QuestId = 0 OR q.ID IS NOT NULL "
         "ORDER BY m.CreatureEntry, m.Priority DESC, m.QuestId", CONNECTION_SYNCH);
 
+    PrepareStatement(WORLD_SEL_RAF_RECRUIT_MILESTONES,
+        "SELECT reward_id, required_level, realm_mode_mask, item_id, quantity "
+        "FROM recruit_milestone_rewards WHERE enabled = 1 ORDER BY required_level, reward_id", CONNECTION_SYNCH);
     PrepareStatement(WORLD_SEL_RAF_REWARDS, "SELECT reward_id, required_recruits, realm_mode_mask, item_id, quantity FROM recruit_rewards WHERE enabled = 1 ORDER BY required_recruits, reward_id", CONNECTION_SYNCH);
 
     PrepareStatement(WORLD_SEL_CROWS_CACHE_REWARDS, "SELECT kind,item,count FROM coa_crows_cache_rewards ORDER BY kind,item", CONNECTION_SYNCH);

@@ -515,11 +515,12 @@ Ascension.PrestigiousCache.SecondTokenChancePercent = 5
 
 #
 #    Ascension.PrestigiousCache.ClassicStages
-#        Description: How many of the Classic Prestigious Caches are released, 0-8, in the
-#                     order 1287304 held for Heroic Dungeons, Zul'Gurub, Molten Core,
+#        Description: Additional Classic pool limit, 0-8. Pools must also be released by
+#                     Ascension.CallboardCache.ReleaseStage. Existing tier caches obey both limits.
+#                     Pool order: 1287304 onwards for Heroic Dungeons, Zul'Gurub, Molten Core,
 #                     Onyxia, Blackwing Lair, Ruins of Ahn'Qiraj, Temple of Ahn'Qiraj,
 #                     Naxxramas. The generic "most recent Prestigious Cache available"
-#                     resolves to the newest released one.
+#                     resolves to the newest allowed populated pool.
 #        Default:     8
 
 Ascension.PrestigiousCache.ClassicStages = 8

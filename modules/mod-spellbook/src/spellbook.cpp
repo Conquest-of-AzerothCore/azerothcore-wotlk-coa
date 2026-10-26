@@ -41,6 +41,7 @@
 #include "ScriptMgr.h"
 #include "ScriptedGossip.h"
 #include "SpellMgr.h"
+#include "TemporarySummon.h"
 #include "WorldSession.h"
 
 #include <algorithm>
@@ -123,13 +124,38 @@ namespace
         return sConfigMgr->GetOption<bool>(COST_ENABLE_KEY, true);
     }
 
+    constexpr char const *PURCHASED_RANKS_KEY = "core.ascension_purchased_ranks";
+
+    bool PreviouslyLearned(Player const *player, uint32 spellId)
+    {
+        PlayerSettingVector const *values = player->FindPlayerSettings(PURCHASED_RANKS_KEY);
+        if (!values || values->empty())
+            return false;
+        std::size_t const count = std::min<std::size_t>((*values)[0].value, values->size() - 1);
+        for (std::size_t index = 1; index <= count; ++index)
+            if ((*values)[index].value == spellId)
+                return true;
+        return false;
+    }
+
+    void RememberLearned(Player *player, uint32 spellId)
+    {
+        if (!player->HasSpell(spellId) || PreviouslyLearned(player, spellId))
+            return;
+        PlayerSettingVector const *values = player->FindPlayerSettings(PURCHASED_RANKS_KEY);
+        uint32 const count = values && !values->empty()
+            ? uint32(std::min<std::size_t>((*values)[0].value, values->size() - 1)) : 0;
+        player->UpdatePlayerSetting(PURCHASED_RANKS_KEY, count + 1, spellId);
+        player->UpdatePlayerSetting(PURCHASED_RANKS_KEY, 0, count + 1);
+    }
+
     /// Copper this row costs this viewer: the band price for the level the window gates the row
     /// at, times the configured multiplier, times the viewer's reputation discount with the
     /// book. Trainer::SendSpells and Trainer::TeachSpell apply the same two steps, so the price
     /// the window shows and the price the Train button charges cannot drift apart.
     int32 RowPrice(Player *player, Creature *book, Row const &row)
     {
-        if (!Charging() || !row.Cost)
+        if (!Charging() || !row.Cost || PreviouslyLearned(player, row.SpellId))
             return 0;
 
         float price = float(row.Cost) * sConfigMgr->GetOption<float>(COST_MULTIPLIER_KEY, 1.0f);
@@ -534,6 +560,36 @@ namespace
         return true;
     }
 
+    void RememberKnownBookSpells(Player *player)
+    {
+        if (!player || !IsAscensionClass(player->getClass()))
+            return;
+        for (Row const &row : BuildRows(player, false))
+            RememberLearned(player, row.SpellId);
+    }
+
+    void RestoreBookRanks(Player *player, Creature *book)
+    {
+        bool learned;
+        do
+        {
+            learned = false;
+            for (Row const &row : BuildRows(player))
+            {
+                if (row.State != RowState::Available || !row.RequiredAbility ||
+                    !PreviouslyLearned(player, row.SpellId))
+                    continue;
+                SpellbookNotify::Push(player, row.SpellId);
+                player->learnSpell(row.SpellId, false);
+                if (player->HasSpell(row.SpellId))
+                {
+                    learned = true;
+                    sScriptMgr->OnPlayerLearnTrainerSpell(player, book, row.SpellId);
+                }
+            }
+        } while (learned);
+    }
+
     /// Learns everything the window currently offers as available. This is the book's
     /// "catch me up" action, so a character who fell behind does not have to click through
     /// eighty rows after a fix or a level cap change.
@@ -864,8 +920,38 @@ public:
     }
 };
 
+class spellbook_purchased_ranks final : public PlayerScript
+{
+public:
+    spellbook_purchased_ranks() : PlayerScript("spellbook_purchased_ranks",
+        {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LEARN_TRAINER_SPELL,
+            PLAYERHOOK_ON_BEFORE_TEMP_SUMMON_INIT_STATS}) { }
+
+    void OnPlayerLogin(Player *player) override
+    {
+        RememberKnownBookSpells(player);
+    }
+
+    void OnPlayerLearnTrainerSpell(Player *player, Creature *trainer, uint32 spellId) override
+    {
+        if (player && IsAscensionClass(player->getClass()) && IsBook(trainer) &&
+            Spellbook::OffersSpell(player, spellId))
+            RememberLearned(player, spellId);
+    }
+
+    void OnPlayerBeforeTempSummonInitStats(Player *player, TempSummon *summon, uint32 & /*duration*/) override
+    {
+        if (Enabled() && player && IsAscensionClass(player->getClass()) && IsBook(summon))
+        {
+            RememberKnownBookSpells(player);
+            RestoreBookRanks(player, summon);
+        }
+    }
+};
+
 void AddSpellbookScripts()
 {
+    new spellbook_purchased_ranks();
     new spellbook_notify_config();
     new spellbook_metric_provider();
     new spellbook_swap_notice();

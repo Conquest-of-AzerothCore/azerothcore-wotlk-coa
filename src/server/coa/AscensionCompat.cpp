@@ -5,6 +5,7 @@
  */
 
 #include "AccountMgr.h"
+#include "AscensionAccountProgress.h"
 #include "AscensionFelsworn.h"
 #include "AscensionHighRiskPolicy.h"
 #include "AscensionItemScaling.h"
@@ -6554,18 +6555,13 @@ public:
 
     [[nodiscard]] bool RequiresVanityRealmLevel(ItemTemplate const* proto) const
     {
-        return proto->ItemId == ITEM_AURA_OF_EXPERIENCE ||
+        return proto->ItemId == ITEM_AURA_OF_EXPERIENCE || proto->ItemId == 818046 ||
             (proto->Quality == ITEM_QUALITY_HEIRLOOM && _vanityItems.contains(proto->ItemId));
     }
 
     static bool AccountHasVanityRealmLevel(Player* player)
     {
-        if (player->GetLevel() >= VANITY_REALM_LEVEL)
-            return true;
-
-        return CharacterDatabase.Query(
-            "SELECT 1 FROM `characters` WHERE `account` = {} AND `guid` <> {} AND `level` >= {} LIMIT 1",
-            player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(), VANITY_REALM_LEVEL) != nullptr;
+        return AscensionAccountProgress::HasLevelOrPrestige(player, VANITY_REALM_LEVEL);
     }
 
     bool RefuseWithoutVanityRealmLevel(Player* player, ItemTemplate const* proto) const
@@ -6574,7 +6570,8 @@ public:
             return false;
 
         ChatHandler(player->GetSession()).PSendSysMessage(
-            "This item requires you to have a level {} on this realm to be able to {}.", VANITY_REALM_LEVEL,
+            "This item requires a level {} or a previously prestiged character on your account on this realm to {}.",
+            VANITY_REALM_LEVEL,
             proto->Class == ITEM_CLASS_CONSUMABLE ? "consume" : "use");
         return true;
     }
