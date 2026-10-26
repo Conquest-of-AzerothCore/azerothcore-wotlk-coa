@@ -477,6 +477,9 @@ supports. Client binaries are maintained outside this repository.
 - `SMSG_ACCOUNT_INFO` (0x09BB) is sent at login with the account's GM level and characters.
 - Help menu tickets use the ticket packets 0x0701-0x071E and the `.support` GM commands; see
   [player tickets](player-tickets.md).
+- `SMSG_PATCH_GLOBAL_STRINGS` (0x0676) carries the eight PvE and PvP Power tooltip lines at login with `%g` in
+  place of the client's `%d`, so the character sheet shows the exact percentage; see
+  [item power](item-power.md).
 - Requests the core session handles like stock ones, registered in its opcode table and let
   through the CoA packet filter: the portrait menu's reset all dungeons (`CMSG_RESET_DUNGEONS`,
   0x061F); the ghost frame's return to graveyard (`CMSG_PORT_GRAVEYARD`, 0x0544), which
