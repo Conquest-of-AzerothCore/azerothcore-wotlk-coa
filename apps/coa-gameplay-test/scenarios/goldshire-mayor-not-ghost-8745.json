@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "name": "Goldshire's mayor and farmer are drawn opaque, not as ghosts",
+  "contract": "Issue #8745: Harvend Thorm (162807, Mayor of Goldshire) and a Goldshire Farmer (162822) used display 10478, the Ghostly Citizen, whose CreatureDisplayInfo alpha is 128, so the client drew them translucent. Display 26602 has the same model (49) and the same CreatureDisplayInfoExtra (7465) with alpha 255. The case summons both NPCs and expects them on 26602.",
+  "timeout_ms": 30000,
+  "location": {
+    "map": 0,
+    "x": -9558.4,
+    "y": 60.0,
+    "z": 62.2,
+    "o": 1.6
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 8
+    }
+  ],
+  "steps": [
+    {
+      "action": "summon",
+      "actor": "p",
+      "as": "mayor",
+      "entry": 162807,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "as": "farmer",
+      "entry": 162822,
+      "distance": 5
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Harvend Thorm uses the opaque display",
+      "actor": "mayor",
+      "metric": "display_id",
+      "equals": 26602
+    },
+    {
+      "action": "assert",
+      "label": "the Goldshire Farmer uses the opaque display",
+      "actor": "farmer",
+      "metric": "display_id",
+      "equals": 26602
+    }
+  ]
+}
