@@ -101,7 +101,7 @@ CFBG* CFBG::instance()
 void CFBG::LoadConfig()
 {
     bool const wasEnabled = _IsEnableSystem;
-    _IsEnableSystem = sConfigMgr->GetOption<bool>("CFBG.Enable", false);
+    _IsEnableSystem = sConfigMgr->GetOption<bool>("CFBG.Enable", true);
     if (!_IsEnableSystem)
     {
         // Live-disable via .reload: restore every online faked player and drop
@@ -137,9 +137,9 @@ void CFBG::LoadConfig()
     }
 
     _IsEnableAvgIlvl = sConfigMgr->GetOption<bool>("CFBG.Include.Avg.Ilvl.Enable", false);
-    _IsEnableBalancedTeams = sConfigMgr->GetOption<bool>("CFBG.BalancedTeams", false);
+    _IsEnableBalancedTeams = sConfigMgr->GetOption<bool>("CFBG.BalancedTeams", true);
     _IsEnableEvenTeams = sConfigMgr->GetOption<bool>("CFBG.EvenTeams.Enabled", false);
-    _IsEnableBalanceClassLowLevel = sConfigMgr->GetOption<bool>("CFBG.BalancedTeams.Class.LowLevel", true);
+    _IsEnableBalanceClassLowLevel = sConfigMgr->GetOption<bool>("CFBG.BalancedTeams.Class.LowLevel", false);
     _IsEnableResetCooldowns = sConfigMgr->GetOption<bool>("CFBG.ResetCooldowns", false);
     _IsEnableBalanceTeamsOnEntry = sConfigMgr->GetOption<bool>("CFBG.BalanceTeamsOnEntry.Enabled", true);
     _IsEnableBalanceTeamsAtStart = sConfigMgr->GetOption<bool>("CFBG.BalanceTeamsAtStart.Enabled", true);

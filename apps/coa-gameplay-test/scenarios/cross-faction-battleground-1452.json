@@ -40,6 +40,7 @@
       "label": "The first player queues for Warsong Gulch",
       "actor": "first",
       "opcode": 750,
+      "consumed": false,
       "fields": [
         {
           "u64": 0
@@ -60,6 +61,7 @@
       "label": "The second player queues for Warsong Gulch",
       "actor": "second",
       "opcode": 750,
+      "consumed": false,
       "fields": [
         {
           "u64": 0
@@ -183,6 +185,7 @@
       "label": "The second player leaves the battleground",
       "actor": "second",
       "opcode": 737,
+      "consumed": false,
       "fields": [
         {
           "u8": 0
