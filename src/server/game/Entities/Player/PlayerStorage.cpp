@@ -7936,6 +7936,20 @@ void Player::_SaveSpells(CharacterDatabaseTransaction trans)
 {
     CharacterDatabasePreparedStatement* stmt = nullptr;
 
+    constexpr uint32 SPELLS_PER_INSERT = 200;
+    std::string newSpellRows;
+    uint32 newSpellCount = 0;
+    auto flushNewSpells = [&]()
+    {
+        if (!newSpellCount)
+            return;
+        newSpellRows.pop_back();
+        trans->Append("INSERT INTO character_spell (guid, spell, specMask) VALUES " + newSpellRows +
+            " ON DUPLICATE KEY UPDATE specMask = VALUES(specMask)");
+        newSpellRows.clear();
+        newSpellCount = 0;
+    };
+
     for (PlayerSpellMap::iterator itr = m_spells.begin(); itr != m_spells.end();)
     {
         // xinef: skip temporary spells
@@ -7955,7 +7969,13 @@ void Player::_SaveSpells(CharacterDatabaseTransaction trans)
         }
 
         // xinef: insert statement for new / updated spell
-        if (itr->second->State == PLAYERSPELL_NEW || itr->second->State == PLAYERSPELL_CHANGED)
+        if (itr->second->State == PLAYERSPELL_NEW)
+        {
+            newSpellRows += Acore::StringFormat("({},{},{}),", GetGUID().GetRawValue(), uint32(itr->first), uint32(itr->second->specMask));
+            if (++newSpellCount >= SPELLS_PER_INSERT)
+                flushNewSpells();
+        }
+        else if (itr->second->State == PLAYERSPELL_CHANGED)
         {
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHAR_SPELL);
             stmt->SetData(0, GetGUID().GetRawValue());
@@ -7975,6 +7995,7 @@ void Player::_SaveSpells(CharacterDatabaseTransaction trans)
             ++itr;
         }
     }
+    flushNewSpells();
 }
 
 // save player stats -- only for external usage
