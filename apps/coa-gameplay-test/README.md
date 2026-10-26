@@ -1211,7 +1211,9 @@ real early receive hook and session queue; follow it with a wait before teleport
 requires an entry and reads the nearest living matching creature within 60 yards; `nearby_creature_health_pct`
 reads that creature's current health as a percentage of its maximum, so a real spawn such as a raid boss can be
 checked undamaged before its encounter. `nearby_creature_can_attack` returns 1 when the native
-`IsValidAttackTarget` lets the actor attack that creature, otherwise 0.
+`IsValidAttackTarget` lets the actor attack that creature, otherwise 0. `nearby_creature_mount_display` reads
+that creature's mount display id (0 when on foot). `nearby_creature_aura_count` requires `spell` and counts the
+living creatures of the entry within 60 yards that carry that aura.
 `nearby_creature_sent_spellclick` reads that creature's NPC flags from the last values update the actor's client
 received: 1 with the spell-click flag, 0 without, -1 when no values update carried them (creation packets are not
 parsed). The
