@@ -394,7 +394,8 @@ class spell_ascension_sun_cleric_ability : public SpellScript
         uint32 id = GetSpellInfo()->Id;
         if (id == 807064 && index == EFFECT_1)
             PreventHitDefaultEffect(index);
-        if (id == DawnCast || id == 680630 || id == 802161 || id == 520024 || id == 520026 || id == 807441)
+        if (id == DawnCast || id == RadiantConversion || id == 680630 || id == 802161 || id == 520024 || id == 520026 ||
+            id == 807441)
             PreventHitDefaultEffect(index);
         if (id == 800764 && index == 1)
             PreventHitDefaultEffect(index);
@@ -407,6 +408,12 @@ class spell_ascension_sun_cleric_ability : public SpellScript
                 dawn->Remove(AURA_REMOVE_BY_CANCEL);
             else
                 ActivateDawn(player);
+        }
+        if (id == RadiantConversion)
+        {
+            done = true;
+            if (Aura* dawn = player->GetAura(Dawn))
+                dawn->Remove(AURA_REMOVE_BY_CANCEL);
         }
         if (id == 680630)
         {

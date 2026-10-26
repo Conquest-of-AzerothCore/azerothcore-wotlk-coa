@@ -15,6 +15,7 @@ namespace AscensionSunCleric
 constexpr uint32 SolarPower = 500149;
 constexpr uint32 Dawn = 807440;
 constexpr uint32 DawnCast = 804584;
+constexpr uint32 RadiantConversion = 807453;
 constexpr uint32 Bless = 804247;
 constexpr uint32 HolyForm = 805301;
 constexpr uint32 Sunrise = 500477;

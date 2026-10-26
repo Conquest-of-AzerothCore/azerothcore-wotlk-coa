@@ -377,6 +377,13 @@ void Refresh(Player* player)
             player->SetTemporarySpellReplacement(pair.first, replacement ? 504764 : 0);
     if (!replacement)
         player->removeSpell(504764, SPEC_MASK_ALL, true);
+    bool conversion = player->IsAlive() && player->HasAura(Dawn) && player->HasSpell(DawnCast);
+    if (conversion && !player->HasSpell(RadiantConversion))
+        player->learnSpellWithoutAnnouncement(RadiantConversion);
+    if (player->HasSpell(DawnCast))
+        player->SetTemporarySpellReplacement(DawnCast, conversion ? RadiantConversion : 0);
+    if (!conversion)
+        player->removeSpell(RadiantConversion, SPEC_MASK_ALL, true);
     if (!player->IsInCombat())
         state.firstAttacks.clear();
     state.refreshing = false;
