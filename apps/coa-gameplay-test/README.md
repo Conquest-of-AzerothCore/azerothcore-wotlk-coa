@@ -557,13 +557,13 @@ a previously named snapshot of the same metric; it is available on snapshots and
 `cast` accepts an optional `destination` with `x`, `y`, `z` to send an explicit ground target.
 `target_pet: true` in place of `target` sends a player's cast at their current pet.
 
-Metrics: `health`, `max_health`, `creature_type`, `power`, `max_power`, `alive`, `map_id`, `instance_id`, `combat`, `casting`,
-`level`, `quest_objective_count` (needs `quest`, optional `index`), `knows_spell`, `has_talent`, `talent_points`, `active_talent_spec`,
-`cooldown_ms`, `item_count`, `carried_item_count`, `bank_bag_slots`, `aura`, `aura_stacks`, `aura_charges`,
-`aura_duration_ms`, `aura_amount`, `pet_entry`, `pet_aura_stacks`, `owned_creature_count`, `owned_creature_spacing`,
-`charm_entry`, `charm_aura_stacks`, `controls_self`, `private_instance`, `dynamic_object`,
-`dynamic_object_duration_ms`, `dynamic_object_height`, `distance`, `spell_proc_count`, `spell_proc_chance`,
-`aura_proc_rate`, `spell_cast_count`, `temporary_spell_replacement`,
+Metrics: `health`, `max_health`, `creature_type`, `power`, `max_power`, `alive`, `map_id`, `instance_id`, `combat`,
+`casting`, `level`, `quest_objective_count` (needs `quest`, optional `index`), `knows_spell`, `has_talent`,
+`talent_points`, `active_talent_spec`, `cooldown_ms`, `item_count`, `carried_item_count`, `bank_bag_slots`, `aura`,
+`aura_stacks`, `aura_charges`, `aura_duration_ms`, `aura_amount`, `pet_entry`, `pet_aura_stacks`,
+`owned_creature_count`, `owned_creature_spacing`, `charm_entry`, `charm_aura_stacks`, `controls_self`,
+`private_instance`, `dynamic_object`, `dynamic_object_duration_ms`, `dynamic_object_height`, `distance`,
+`spell_proc_count`, `spell_proc_chance`, `aura_proc_rate`, `spell_cast_count`, `temporary_spell_replacement`,
 `carried_aura_count` (how many of the `spells` list the unit carries, optionally only from `caster`; for an
 effect that picks one of several auras at random),
 `bank_shows`, `system_messages`, `cast_failure`, `pet_is_banker`, `pet_display`, `pet_scale`,
