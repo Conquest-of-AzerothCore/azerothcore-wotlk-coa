@@ -4,6 +4,7 @@
 #define ASCENSION_QUEST_LOG_H
 
 #include "ObjectGuid.h"
+#include "QuestDef.h"
 #include "WorldPacket.h"
 
 class Player;
@@ -13,7 +14,7 @@ namespace AscensionQuestLog
 {
 constexpr uint16 UpdateObjectAddonOpcode = 0x0578;
 constexpr uint32 RewardXPField = 36;
-constexpr uint32 LevelField = 61;
+constexpr uint32 LevelField = RewardXPField + MAX_QUEST_LOG_SIZE;
 constexpr uint32 ScaledQuestFlag = 0x01000000;
 
 [[nodiscard]] uint32 RewardXPForDisplay(Player* player, Quest const* quest);
