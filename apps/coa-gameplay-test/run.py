@@ -157,6 +157,10 @@ METRICS = TIMELINE_METRICS | {
     'player_class', 'cached_class', 'at_login_flag', 'wildcard_starter_spells_known', 'action_bar_unknown_spells',
     'wildcard_spells_known', 'wildcard_cards_pending', 'wildcard_cards_collected', 'wildcard_roll_cards_set',
     'wildcard_roll_cards_used', 'wildcard_bonus_pack_progress',
+    'balance_outcome', 'balance_duration_s', 'balance_ttk_s', 'balance_ttd_s', 'balance_health_pct_end',
+    'balance_damage_done_player', 'balance_damage_done_pets', 'balance_damage_taken_player',
+    'balance_damage_taken_pets', 'balance_healing_done_player', 'balance_healing_done_pets',
+    'balance_pets_owned_start', 'balance_pets_alive_end', 'balance_last_reset_health',
 }
 PLAYER_STAT_METRICS = {
     'mana_regen', 'mana_regen_interrupted', 'resting',
@@ -194,7 +198,7 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'row', 'offset', 'skip_strings', 'from_end', 'x', 'y', 'min_required_level', 'max_required_level',
                  'flat_coefficient_modifier', 'dominant_stat', 'off_stat', 'spells',
                  'min_level', 'max_level', 'min_home_distance', 'spawn',
-                 'guid', 'spawn_type', 'tolerance', 'map', 'z'} | TIMELINE_FIELDS
+                 'guid', 'spawn_type', 'tolerance', 'map', 'z', 'outcome'} | TIMELINE_FIELDS
 ACTIONS = {
     'stop_attack': ({'actor'}, {'actor'}),
     'set_moving': ({'actor', 'enabled'}, {'actor', 'enabled', 'flag'}),
@@ -307,6 +311,7 @@ ACTIONS = {
     'quest_complete': ({'actor', 'quest'}, {'actor', 'quest'}),
     'quest_turn_in': ({'actor', 'quest'}, {'actor', 'quest', 'entry', 'gameobject', 'reward'}),
     'balance_spawn': ({'actor', 'entry', 'level'}, {'actor', 'entry', 'level', 'count', 'distance'}),
+    'balance_stage': ({'actor', 'stage', 'enemies'}, {'actor', 'stage', 'enemies', 'distance', 'cap_s'}),
 }
 
 
@@ -594,6 +599,17 @@ def validate(scenario):
                 spawn_id = f"{step['actor']}_balance_{offset}"
                 require(spawn_id not in actor_ids, f'{where}: duplicate balance spawn id')
                 actor_ids.add(spawn_id)
+        if action == 'balance_stage':
+            require(isinstance(step['stage'], str) and step['stage'].strip(), f'{where}: stage needs a name')
+            number(step.get('distance', 8), f'{where}.distance', 0, 100)
+            number(step.get('cap_s', 120), f'{where}.cap_s', 1, 3600, True)
+            enemies = step['enemies']
+            require(isinstance(enemies, list) and 1 <= len(enemies) <= 10, f'{where}: expected 1..10 enemies')
+            for enemy in enemies:
+                keys(enemy, {'entry', 'level'}, {'entry', 'level', 'count'}, f'{where}.enemies')
+                number(enemy['entry'], f'{where}.enemies.entry', 1, 2**32 - 1, True)
+                number(enemy['level'], f'{where}.enemies.level', 1, 255, True)
+                number(enemy.get('count', 1), f'{where}.enemies.count', 1, 20, True)
         if 'actor' in step:
             require(step['actor'] in actor_ids, f'{where}: unknown actor')
             require(action in {'snapshot', 'assert', 'set_health', 'cast', 'attack_owned_creature'}
@@ -874,6 +890,12 @@ def validate(scenario):
                         and bool(step['name']), f'{where}: name metric needs a player and name')
             elif 'name' in step:
                 require(False, f'{where}: name only applies to name metrics')
+            if metric == 'balance_outcome':
+                require(step['actor'] in player_ids and step.get('outcome') in
+                        {'win', 'loss', 'timeout', 'invalid'},
+                        f'{where}: balance_outcome metric needs a player and a known outcome')
+            elif 'outcome' in step:
+                require(False, f'{where}: outcome only applies to balance_outcome')
             if metric in {'view_level', 'sent_level', 'sent_max_health', 'sent_faction'}:
                 require(step['actor'] in player_ids and 'target' in step,
                         f'{where}: view metric needs a player and target')

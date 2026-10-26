@@ -1105,11 +1105,9 @@ is castable, else the first such `upkeep` rule, else (a `healer` role under 65 p
 itself, else drives its rotation:
 a `tank`/`melee` role repositions into native melee range and faces the target (`KeepInMelee`) then swings and
 casts its rotation on it; a `ranged` role, and a `healer` role at or above 65 percent of its own health, stays in
-place and casts its rotation within 30 yards. `opener` is read but cast only by `balance_stage` (a later scenario
-action), not by the driver
+place and casts its rotation within 30 yards. `opener` is read but cast only by `balance_stage`, not by the driver
 itself. `StopOwnedUnits` sends every owned unit back to following the player (native `COMMAND_FOLLOW` state and
-`MoveFollow`) and stops its own attack state; nothing in this harness calls it yet, ahead of the staged resets a
-later action adds.
+`MoveFollow`) and stops its own attack state; `balance_stage` calls it between stages.
 
 [`balance-solo-driver-switches-targets`](scenarios/balance-solo-driver-switches-targets.json) gives a bare level
 40 melee fixture one weapon and a large fixture health pool (`set_health`), balance-spawns two level 30 Scarlet
@@ -1119,6 +1117,40 @@ own AI to attack the owner right after it joins the map, so the fight starts wit
 aggro, which this fixture (a stationary player next to creatures that only just spawned) would not otherwise
 trigger. The fixture's own gear does not carry real damage output: measuring a spec against real dungeon numbers
 is the catalog's job (a later task), not this regression's.
+
+### balance_stage
+
+`balance_stage` runs one timed fight for a `solo` actor and records its outcome. It requires `actor`, `stage`
+(a free-form name copied into the record) and `enemies` (a list of 1-10 `{entry, level, count}` dungeon spawns,
+the same shape `balance_spawn` takes per entry); optional `distance` (default 8 yards ahead of the actor) and
+`cap_s` (default 120 game seconds). Each call first resets the actor: revive and `SpawnCorpseBones` if dead,
+`SetFullHealth`, every power to its maximum, `RemoveAllSpellCooldown`, despawn the previous call's surviving
+enemies, and `StopOwnedUnits`; when a kit rule with `when: "owned_below"` holds (from either `upkeep` or
+`defensives`), it casts every `opener` spell in order, waiting for each to be castable, before continuing. It then
+spawns the stage's enemies with `SpawnBalanceEnemies` (so CoA's dungeon scaling applies to them as to a real
+spawn) at `distance` yards ahead of the actor's current position, each already attacking the actor, and polls every
+tick until `CoAGameplay::Balance::ResolveStage` leaves `Running`: the actor dying is a `loss`, any stage enemy
+entering native evade mode is `invalid`, every stage enemy dead is a `win`, and reaching `cap_s` with both sides
+alive is a `timeout`. It then stops owned units and despawns any survivor. A `UnitScript` (`OnDamage`, `OnHeal`)
+tallies damage and healing for the duration of the call only, crediting the actor or any unit it owns
+(`GetCharmerOrOwnerPlayerOrPlayerItself`) as player or pet separately; nothing outside an active `balance_stage`
+call is counted. The step's record gets a `balance` object: `stage`, `outcome` (`win`, `loss`, `timeout` or
+`invalid`), `duration_s`, `ttk_s` (present only for `win`), `ttd_s` (present only for `loss`), `health_pct_end`,
+`damage_done_player`, `damage_done_pets`, `damage_taken_player`, `damage_taken_pets`, `healing_done_player`,
+`healing_done_pets`, `pets_owned_start` (owned units alive right after the reset, before this call's enemies
+spawn), `pets_alive_end`, and `enemies` (the step's own list, echoed back). A later scenario queries that
+record through metrics named `balance_<field>` (for example `balance_ttk_s`, `balance_damage_done_player`):
+`balance_outcome` instead takes an `outcome` field naming the expected outcome and returns 1 or 0, the way
+`player_name` compares its own `name` field; `balance_last_reset_health` is not part of the recorded object — it
+is the actor's health right after the most recent reset (before that call's own fight could lower it again), for
+proving a reset actually restores full health between two calls.
+
+[`balance-stage-records-metrics`](scenarios/balance-stage-records-metrics.json) gives a solo melee fixture (the
+same setup as the solo-driver regression, with its 20000/20000 health pool) one `balance_stage` call against a
+single level 30 Scarlet Soldier and checks a real win, a positive `ttk_s`, and damage recorded on both sides; a
+second call (after a `teleport` back to the fight spot, since the first call's chase can drift the fixture away
+from it) checks that the reset actually restored full health (`balance_last_reset_health` against a `max_health`
+snapshot) and that its own outcome does not simply repeat the first call's.
 
 ### World placement
 
