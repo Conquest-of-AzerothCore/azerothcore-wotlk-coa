@@ -38,14 +38,17 @@ class aura_ascension_venomancer_lifecycle : public AuraScript
             GetAura()->SetUsingCharges(false);
         }
         if (Named(GetSpellInfo(),804983) && (mode & AURA_EFFECT_HANDLE_REAPPLY))
-            GetAura()->GetEffect(EFFECT_2)->SetAmount(0);
+            if (AuraEffect* effect = GetAura()->GetEffect(EFFECT_2))
+                effect->SetAmount(0);
         if (Named(GetSpellInfo(),706962))
         {
             if (mode & AURA_EFFECT_HANDLE_REAPPLY)
-                GetAura()->GetEffect(EFFECT_2)->SetAmount(0);
+                if (AuraEffect* effect = GetAura()->GetEffect(EFFECT_2))
+                    effect->SetAmount(0);
             if (AuraEffect* base = GetAura()->GetEffect(EFFECT_1))
-                if (!base->GetAmount() || (mode & AURA_EFFECT_HANDLE_REAPPLY))
-                    base->SetAmount(GetAura()->GetEffect(EFFECT_0)->GetAmount());
+                if (AuraEffect* source = GetAura()->GetEffect(EFFECT_0))
+                    if (!base->GetAmount() || (mode & AURA_EFFECT_HANDLE_REAPPLY))
+                        base->SetAmount(source->GetAmount());
             if (player->HasAura(805104) && player->HasAura(Spider))
                 player->CastSpell(target->GetPositionX(),target->GetPositionY(),target->GetPositionZ(),570208,true);
         }
