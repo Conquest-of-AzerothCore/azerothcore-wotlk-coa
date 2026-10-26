@@ -388,7 +388,7 @@ namespace
 
 void WorldSession::UpdateRecruitAFriendRewards(bool force)
 {
-    if (!_player || !_player->IsInWorld())
+    if (IsBot() || !_player || !_player->IsInWorld())
         return;
     time_t const now = GameTime::GetGameTime().count();
     if (!force && now < _rafRewardsNextUpdate)
@@ -477,7 +477,15 @@ void WorldSession::RecoverRecruitAFriendRewards(bool recruit)
     auto* claims = LoginDatabase.GetPreparedStatement(
         recruit ? LOGIN_SEL_RAF_RECRUIT_CLAIMS : LOGIN_SEL_RAF_CLAIMS);
     claims->SetData(0, GetAccountId());
-    PreparedQueryResult rows = LoginDatabase.Query(claims);
+    GetQueryProcessor().AddCallback(LoginDatabase.AsyncQuery(claims).WithPreparedCallback(
+        [this, recruit](PreparedQueryResult rows)
+        {
+            DeliverRecruitAFriendRewards(std::move(rows), recruit);
+        }));
+}
+
+void WorldSession::DeliverRecruitAFriendRewards(PreparedQueryResult rows, bool recruit)
+{
     if (!rows)
         return;
     do
