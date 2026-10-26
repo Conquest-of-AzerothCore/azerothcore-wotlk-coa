@@ -566,6 +566,9 @@ void AchievementMgr::DeleteFromDB(ObjectGuid::LowType lowguid)
 
 void AchievementMgr::SaveToDB(CharacterDatabaseTransaction trans)
 {
+    if (WorldSession* session = GetPlayer()->GetSession(); session && session->IsBot())
+        return;
+
     if (!_completedAchievements.empty())
     {
         for (CompletedAchievementMap::iterator iter = _completedAchievements.begin(); iter != _completedAchievements.end(); ++iter)
