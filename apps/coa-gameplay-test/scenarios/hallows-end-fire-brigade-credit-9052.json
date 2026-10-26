@@ -32,7 +32,7 @@
     { "action": "add_item", "label": "SETUP: a Water Bucket from the barrel", "actor": "brigade", "item": 32971 },
     { "action": "use_item", "label": "Throw the bucket onto training fire 240016", "actor": "brigade",
       "item": 32971, "spell": 42340, "destination": { "x": -9328.26, "y": 55.9236, "z": 62.8563 } },
-    { "action": "assert", "label": "DISCRIMINATING: the splashed training fire gives one credit", "actor": "brigade",
+    { "action": "assert", "label": "The splashed training fire gives one credit", "actor": "brigade",
       "metric": "quest_objective_count", "quest": 11360, "equals": 1, "within_ms": 5000 }
   ]
 }

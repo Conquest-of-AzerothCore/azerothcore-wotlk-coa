@@ -158,7 +158,7 @@
     },
     {
       "action": "assert",
-      "label": "Skull light hanging inside the inn 39746 (entry 180472) stands within a yard of its surface",
+      "label": "Skull light 39746 (entry 180472) inside the inn rests within a yard of the surface below it",
       "actor": "auditor",
       "metric": "spawn_ground_gap",
       "guid": 39746,
@@ -168,7 +168,7 @@
     },
     {
       "action": "assert",
-      "label": "Skull light hanging inside the inn 39747 (entry 180472) stands within a yard of its surface",
+      "label": "Skull light 39747 (entry 180472) inside the inn rests within a yard of the surface below it",
       "actor": "auditor",
       "metric": "spawn_ground_gap",
       "guid": 39747,
@@ -178,7 +178,7 @@
     },
     {
       "action": "assert",
-      "label": "Skull light hanging inside the inn 39750 (entry 180472) stands within a yard of its surface",
+      "label": "Skull light 39750 (entry 180472) inside the inn rests within a yard of the surface below it",
       "actor": "auditor",
       "metric": "spawn_ground_gap",
       "guid": 39750,
