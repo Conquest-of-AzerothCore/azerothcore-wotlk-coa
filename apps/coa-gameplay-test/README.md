@@ -950,6 +950,9 @@ server lists for that dungeon in the player's Dungeon Finder info (0 when it is 
 loot rule lets the actor roll Need on that item at the actor's position, otherwise 0. Outside a Dungeon Finder
 group or its dungeon every item returns 1.
 `in_arena` takes a player `actor` and returns 1 while that player is inside an arena match.
+`battleground_team` takes a player `actor` and returns the side that player fights for inside a battleground or
+arena (0 Alliance, 1 Horde), or -1 outside one. `team` returns the player's current team (0 Alliance, 1 Horde),
+which a cross-faction battleground replaces while the player is inside it.
 `arena_team_members`, `arena_team_season_games` and `arena_team_season_wins` take a player `actor` and arena
 `slot` (0 2v2, 1 3v3, 2 5v5) and read the team in that slot: its member count (0 without a team), or its
 season games and wins (-1 without a team).

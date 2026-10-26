@@ -2979,6 +2979,14 @@ private:
             Require(player != nullptr, "Arena metric needs a player");
             return player->InArena() ? 1 : 0;
         }
+        if (metric == "battleground_team" || metric == "team")
+        {
+            Player* player = unit->ToPlayer();
+            Require(player != nullptr, "Team metric needs a player");
+            if (metric == "team")
+                return double(player->GetTeamId());
+            return player->InBattleground() ? double(player->GetBgTeamId()) : -1;
+        }
         if (metric == "arena_team_members" || metric == "arena_team_season_games" || metric == "arena_team_season_wins")
         {
             Player* player = unit->ToPlayer();

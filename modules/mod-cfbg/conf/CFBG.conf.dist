@@ -1,0 +1,155 @@
+#
+# Copyright (С) since 2019 Andrei Guluaev (Winfidonarleyan/Kargatum) https://github.com/Winfidonarleyan
+# Copyright (С) since 2019+ AzerothCore <www.azerothcore.org>
+# Licence MIT https://opensource.org/MIT
+#
+
+#############################
+# CFBG configuration system #
+#############################
+[worldserver]
+
+###################################################################################################
+#   CFBG
+#
+#   CFBG.Enable
+#       Description: Enable mixed alliance and horde in one battleground
+#       Default: 1
+#
+#   CFBG.Battlefield.Enable
+#       Description: Enable cross-faction queue for Wintergrasp battlefield.
+#                    Requires CFBG.Enable = 1. Players are assigned to the team
+#                    with fewer members, applying a visual race/faction change
+#                    for the duration of their stay in the zone.
+#       Default: 1
+#
+#   CFBG.Battlefield.TeamLock.Enable
+#       Description: Lock a player to the team they were first assigned for the
+#                    current Wintergrasp war. Prevents re-rolling their faction
+#                    by dropping out of the war and rejoining (also survives
+#                    leaving the zone and relogging). The lock is per-war and
+#                    resets when the war ends. Requires CFBG.Battlefield.Enable = 1.
+#       Default: 1 - (Enabled)
+#                0 - (Disabled)
+#
+#   CFBG.Battlefield.NativePriority.Enable
+#       Description: When assigning teams for a Wintergrasp war, keep the minority
+#                    faction entirely on its native side and morph only the
+#                    majority's surplus to even the teams. The majority fills its
+#                    fair share native in invite-accept order, so the players moved
+#                    are the last to commit. Disable to fall back to the per-join
+#                    greedy balance. Requires CFBG.Battlefield.Enable = 1.
+#       Default: 1 - (Enabled)
+#                0 - (Disabled, greedy per-join balance)
+#
+#   CFBG.Battlefield.ReapplyOnResurrect.Enable
+#       Description: Re-apply a cross-faction player's assigned race/faction/morph
+#                    when they resurrect inside Wintergrasp, so the ghost->alive
+#                    transition does not revert them to their native faction.
+#                    Requires CFBG.Battlefield.Enable = 1.
+#       Default: 1 - (Enabled)
+#                0 - (Disabled)
+#
+#   CFBG.Battlefield.SkipClasses
+#       Description: Comma-separated list of class IDs excluded from Wintergrasp
+#                    cross-faction selection. Players of these classes always keep
+#                    their native faction and are never morphed/reassigned.
+#                    Class IDs: 1 Warrior, 2 Paladin, 3 Hunter, 4 Rogue, 5 Priest,
+#                    6 Death Knight, 7 Shaman, 8 Mage, 9 Warlock, 11 Druid.
+#                    Requires CFBG.Battlefield.Enable = 1.
+#       Example: "2,7" - (Paladins and Shamans stay native)
+#       Default: "" - (no class skipped)
+#
+#   CFBG.Include.Avg.Ilvl.Enable
+#       Description: Enable check average item level for bg.
+#                    Only takes effect when CFBG.BalancedTeams = 0. When
+#                    CFBG.BalancedTeams = 1 the average item level is always
+#                    consulted as an intrinsic tiebreaker of the balancing
+#                    cascade, regardless of this setting.
+#       Default: 0
+#
+#   CFBG.BalancedTeams
+#       Description: Enable check average player level for bg
+#       Default: 1
+#
+#   CFBG.BalancedTeams.Class.LowLevel
+#       Description: Enable class balance for BGs LowLevel
+#       Default: 0
+#                1 - (Enabled. Balance the number of Hunters per team)
+#
+#   CFBG.BalancedTeams.Class.MinLevel
+#       Description: Define min level to use the LowLevelClass balance
+#       Default: 10
+#
+#   CFBG.BalancedTeams.Class.MaxLevel
+#       Description: Define max level to use the LowLevelClass balance
+#       Default: 19
+#
+#   CFBG.BalancedTeams.Class.LevelDiff
+#       Description: Only taking into account characters having level >= BgMaxLevel - LevelDiff
+#                    for example in a 10-19 BG, if this value is set to 2, then it will consider only
+#                    players of level 17, 18, 19 (>= 19-2)
+#       Default: 2
+#
+#   CFBG.Players.Count.In.Group
+#       Description: Maximum players in party for enter queue
+#       Default: 3
+#
+#   CFBG.EvenTeams.Enabled
+#        Description: Set Battleground invitation type.
+#        Default:     0 - (Disabled, one team can have one extra player if an odd number of players queues)
+#                     1 - (Enabled. Get even teams.)
+#
+#   CFBG.EvenTeams.MaxPlayersThreshold
+#       Description: Per-team player count at which the EvenTeams rule stops being
+#                    enforced. While each team is below this size, teams are kept
+#                    strictly even (N vs N) and any surplus player waits in queue.
+#       Default: 0 - (EvenTeams enforced for all match sizes, no upper limit)
+#                >0 - (Once both teams reach this size, one team may gain an extra player)
+#
+#   CFBG.RandomRaceSelection
+#       Description: allows players to choose the race they will be morphed into when joining battlegrounds as the opposite team.
+#       Default: 1 - Random
+#                0 - Player choice
+#
+#   CFBG.BalanceTeamsOnEntry.Enabled
+#       Description: When a solo player enters a battleground while the teams are
+#                    uneven, move them to the smaller team according to the
+#                    invited counts at that moment (players inside plus accepted
+#                    or pending invitees still on their way). If the teams are
+#                    already even they keep the team chosen at invite time, and
+#                    grouped players are never moved.
+#       Default: 1 - (Enabled)
+#                0 - (Disabled)
+#
+#   CFBG.BalanceTeamsAtStart.Enabled
+#       Description: When the gates open, if declined or ignored invites left the
+#                    physical teams uneven by 2 or more, flip surplus entrants to
+#                    the smaller side so the match starts within 1 of even (e.g. a
+#                    4v1 opens 3v2). Real battleground premades are never split; a
+#                    solo player merely sitting in a social/questing party still
+#                    counts as flippable. Decisions use live head counts only, so
+#                    reservations that never showed up don't skew the repair.
+#       Default: 1 - (Enabled)
+#                0 - (Disabled)
+
+CFBG.Enable = 1
+CFBG.Battlefield.Enable = 1
+CFBG.Battlefield.TeamLock.Enable = 1
+CFBG.Battlefield.NativePriority.Enable = 1
+CFBG.Battlefield.ReapplyOnResurrect.Enable = 1
+CFBG.Battlefield.SkipClasses = ""
+CFBG.BalancedTeams = 1
+CFBG.BalancedTeams.Class.LowLevel = 0
+CFBG.BalancedTeams.Class.MinLevel = 10
+CFBG.BalancedTeams.Class.MaxLevel = 19
+CFBG.BalancedTeams.Class.LevelDiff = 2
+CFBG.Include.Avg.Ilvl.Enable = 0
+CFBG.Players.Count.In.Group = 3
+CFBG.EvenTeams.Enabled = 0
+CFBG.EvenTeams.MaxPlayersThreshold = 0
+CFBG.ResetCooldowns = 0
+CFBG.Show.PlayerName = 0
+CFBG.RandomRaceSelection = 1
+CFBG.BalanceTeamsOnEntry.Enabled = 1
+CFBG.BalanceTeamsAtStart.Enabled = 1
