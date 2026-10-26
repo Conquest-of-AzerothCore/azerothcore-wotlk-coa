@@ -34,6 +34,9 @@ Option 1. A pure module, `CoAGameplayPlacement`, classifies a sample; the harnes
   `DBCStores.cpp` enforces. A display only in the server store is reported apart as `server_only_display`, not as
   an anomaly, because the display patch service (`AscensionDisplayPatchService`, `CoA.SendDisplayPatches`) streams
   those rows to clients.
+- Spawns that a game event adds (positive event ids in the server's `game_event_creature` and
+  `game_event_gameobject` data) are listed apart with their event id, not counted as anomalies: they exist only while
+  the event runs and are often hung on buildings or doodads. In Moonglade they are 128 of the 145 rows at 0.8 yards.
 - The audit's default tolerance is 0.8 yards, chosen from the Moonglade calibration below.
 
 verify_all integration: the gameplay stage only. Catalog scenarios guard the mechanism
@@ -67,8 +70,17 @@ An audit of zone 493 on map 1 with tolerance 0.01 yards selected 354 creatures a
 Every creature lies above its ground by at most 0.744 yards (p99 0.481); gameobjects split into rows placed on the
 ground and a spread on both sides. The reported defects measured in the placement scenario are 0.830 yards above
 (Silk Drape before #9146) and 1.011 yards below (Right Hand of His Majesty before #9176). 0.8 yards sits above every
-Moonglade creature gap and below the smallest reported defect; 1.0 would miss the Silk Drape. With 0.8 the
-Moonglade audit reports gameobject rows only (82 above, 63 below in the calibration data).
+Moonglade creature gap and below the smallest reported defect; 1.0 would miss the Silk Drape.
+
+The gameobject data do not separate good from bad positions. The Drudger Smash after #8891, a position confirmed
+in game on the oil platform deck, measures 0.998 yards above the static ground found under it, so 0.8 flags it as
+floating, while the Silk Drape defect measures 0.830. No single tolerance keeps the confirmed Drudger Smash and
+catches the Silk Drape: 0.8 trades one false positive for one caught defect, 1.0 the reverse. What that surface
+1 yard under the deck is (a lower part of the platform model, or the deck being a gameobject the static data do not
+hold) is not established. Three Moonglade signposts also sit at 0.80 to 0.81 yards below their floor, at the edge.
+0.8 stays the default because the audit produces a list for triage: a false positive costs one look, a missed
+defect stays in the world until a player reports it, and every creature measured so far stays below 0.8. Scenarios
+that need another bound pass their own `tolerance`.
 
 ## Consequences
 
@@ -76,7 +88,8 @@ Moonglade audit reports gameobject rows only (82 above, 63 below in the calibrat
   wrong but existing model needs an external reference; positions changed at runtime by scripts or waypoints are not
   read; ground visible in game but absent from map and vmap data is not seen. The Mossy Shortbow fix (#8943) is such
   a case: its pre-fix position reads 0.0 yards from static ground although players saw it 2.3 yards under the
-  ground, and its in-game position after the fix reads 4.3 yards above it.
+  ground, and its in-game position after the fix reads 4.3 yards above it. On a map without `.map` terrain, a spawn
+  more than 48 yards above the floor below it reads `under_ground`, flying creatures included.
 - The audit runs in one world tick and creates terrain grids on the base map; a zone of a few hundred spawns takes
   tens of milliseconds.
 - No SQL changes; confirmed anomalies are fixed one by one in their own issues, each with a targeted
