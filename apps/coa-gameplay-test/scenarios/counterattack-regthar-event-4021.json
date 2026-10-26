@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Counterattack!: Regthar Deathgate's assault runs to Krom'zar's Banner (COA-7158)",
+  "contract": "Regthar Deathgate 3389 starts the Counterattack! event (actionlist 338900) when a player accepts quest 4021: Horde defenders, Kolkar Invaders 9524, Kolkar Stormseers 9523 and Warlord Krom'zar 9456 are summoned around the Stronghold. They are only ever summoned, so their setup rows run when they are summoned: Krom'zar yells as he arrives. Killing him leaves Krom'zar's Banner 164690.",
+  "timeout_ms": 480000,
+  "location": { "map": 1, "x": -305.0, "y": -1968.0, "z": 96.5, "o": 0 },
+  "players": [ { "id": "p", "race": 2, "class": 1, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 4000 },
+    { "action": "assert", "label": "SETUP: Regthar is here", "actor": "p", "metric": "nearby_creature_count", "entry": 3389, "min": 1 },
+    { "action": "prepare_quest", "actor": "p", "quest": 850, "complete": true },
+    { "action": "reward_quest", "actor": "p", "quest": 850 },
+    { "action": "prepare_quest", "actor": "p", "quest": 851, "complete": true },
+    { "action": "reward_quest", "actor": "p", "quest": 851 },
+    { "action": "prepare_quest", "actor": "p", "quest": 852, "complete": true },
+    { "action": "reward_quest", "actor": "p", "quest": 852 },
+    { "action": "quest_accept", "label": "accept Counterattack! from Regthar", "actor": "p", "quest": 4021, "entry": 3389 },
+    { "action": "assert", "label": "the Kolkar assault is summoned", "actor": "p",
+      "metric": "nearby_creature_count", "entry": 9524, "min": 1, "within_ms": 15000 },
+    { "action": "snapshot", "actor": "p", "metric": "monster_chat_count", "save_as": "chats" },
+    { "action": "teleport", "actor": "p", "map": 1, "x": -296.7, "y": -1856.4, "z": 93.23 },
+    { "action": "assert", "label": "Warlord Krom'zar arrives", "actor": "p", "metric": "nearby_creature_count", "entry": 9456, "min": 1, "within_ms": 330000 },
+    { "action": "assert", "label": "Krom'zar yells as he arrives", "actor": "p", "metric": "monster_chat_count", "relative_to": "chats", "min": 1, "within_ms": 5000 },
+    { "action": "attack_nearby", "actor": "p", "entry": 9456, "kill": true },
+    { "action": "assert", "label": "Krom'zar's Banner appears where he falls", "actor": "p", "metric": "nearby_gameobject_count", "entry": 164690, "min": 1, "within_ms": 15000 }
+  ]
+}

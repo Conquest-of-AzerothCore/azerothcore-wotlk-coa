@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "name": "Verog the Dervish yells when he is summoned (COA-7214)",
+  "contract": "Verog the Dervish 3395 is summoned, never respawned, so his 'I am summoned!' yell (creature_text group 0) runs on SMART_EVENT_JUST_SUMMONED. A player next to him hears one monster yell when he appears.",
+  "timeout_ms": 30000,
+  "location": { "map": 1, "x": -1216.06, "y": -2753.49, "z": 101.01, "o": 0 },
+  "players": [ { "id": "p", "race": 2, "class": 1, "level": 25 } ],
+  "creatures": [ { "id": "verog", "owner": "p", "entry": 3395, "distance": 5, "faction": 35 } ],
+  "steps": [
+    { "action": "assert", "label": "Verog yells when he is summoned", "actor": "p",
+      "metric": "monster_chat_count", "min": 1, "within_ms": 5000 }
+  ]
+}
