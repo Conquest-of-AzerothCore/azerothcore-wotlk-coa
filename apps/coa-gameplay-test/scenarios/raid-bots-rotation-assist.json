@@ -1,0 +1,252 @@
+{
+  "schema": 1,
+  "name": "Raid bots: a Pyromancer opting in to rotation assistance casts its Incineration priorities in a raid fight",
+  "contract": [
+    "Only the Pyromancer opts in with rotation_assist. Its damage spells come from the .rotation selection",
+    "(CoARotationAssist::ChooseSpell) for its active CoA specialization, Incineration (class 24, specialization",
+    "38). src/server/coa/CoARotationData.h lists for specialization 38 Ignite while the target misses it, then",
+    "Flare Bolt; Fire Blast is not in the profile. The fixture teaches Flare Bolt 800790, Ignite 800791 and Fire",
+    "Blast 2137 directly, as rotation-assist-profile does, to isolate selection. Client Spell.dbc",
+    "(coa-dbc-viewer record against /home/fab/CoaServer/dbc_clientset, sha256 9d77d79e...): Ignite casts in",
+    "1500 ms (SpellCastTimes 16), lasts 21000 ms (SpellDuration 86), 35 yd (SpellRange 35), 12 percent base",
+    "mana, periodic damage aura; Flare Bolt casts in 1500 ms, 35 yd, 11 percent, facing required, projectile",
+    "speed 35; Fire Blast is instant, 20 yd (SpellRange 3), 8000 ms cooldown, 17 percent, SpellLevel 14, facing",
+    "required. All three share global cooldown category 133 (1500 ms). Ignite outlasts the 20000 ms window, so",
+    "the rotation casts it once and Flare Bolt fills the remaining global cooldowns. Fire Blast is the",
+    "Pyromancer's scenario rotation, the fallback a bot casts without rotation_assist; it is castable in range,",
+    "so any fallback would show as a Fire Blast cast; the case asserts that the Pyromancer stays within",
+    "its 20 yd range of the boss (2D distance), since a ranged bot casts in place. The tank (Barbarian, class 12,",
+    "Ancestral Strike 801576) and the healer (Sun Cleric, class 27, Illumination 500143) keep the",
+    "raid-bots-tank-healer fixture without rotation_assist and without a specialization, so they act from their",
+    "scenario spells in the same fight.",
+    "The boss has 100000 health so the level-14 Pyromancer cannot end the encounter inside the window. All",
+    "asserted values come from the harness's own observation of native packets and the encounter timeline."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 12,
+      "level": 2,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "role": "tank",
+      "rotation": [
+        801576
+      ],
+      "allow_regeneration": false
+    },
+    {
+      "id": "healer",
+      "race": 1,
+      "class": 27,
+      "level": 2,
+      "role": "healer",
+      "heal_spell": 500143
+    },
+    {
+      "id": "pyro",
+      "race": 1,
+      "class": 24,
+      "level": 14,
+      "spell_hit_rating": 10000,
+      "role": "ranged",
+      "rotation": [
+        2137
+      ],
+      "rotation_assist": true
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "tank",
+      "entry": 36,
+      "level": 2,
+      "distance": 3,
+      "reaction": 1,
+      "stationary": true,
+      "health": 100000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and local level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "specialization",
+      "actor": "pyro",
+      "id": 38
+    },
+    {
+      "action": "learn",
+      "actor": "pyro",
+      "spell": 800790
+    },
+    {
+      "action": "learn",
+      "actor": "pyro",
+      "spell": 800791
+    },
+    {
+      "action": "learn",
+      "actor": "pyro",
+      "spell": 2137
+    },
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "tank",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "healer",
+      "spell": 500143
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Pyromancer knows Flare Bolt",
+      "actor": "pyro",
+      "metric": "knows_spell",
+      "spell": 800790,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Pyromancer knows Ignite",
+      "actor": "pyro",
+      "metric": "knows_spell",
+      "spell": 800791,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Pyromancer knows Fire Blast, its scenario fallback",
+      "actor": "pyro",
+      "metric": "knows_spell",
+      "spell": 2137,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the tank knows its rotation spell",
+      "actor": "tank",
+      "metric": "knows_spell",
+      "spell": 801576,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the healer knows its heal",
+      "actor": "healer",
+      "metric": "knows_spell",
+      "spell": 500143,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Pyromancer cast before the encounter",
+      "actor": "pyro",
+      "metric": "spell_go_count",
+      "spell": 800790,
+      "equals": 0
+    },
+    {
+      "action": "encounter_start",
+      "actor": "tank",
+      "boss_entry": 36,
+      "radius": 30
+    },
+    {
+      "action": "wait",
+      "label": "Let the bots fight",
+      "ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "Incineration applies Ignite once: it lasts longer than the fight window",
+      "actor": "pyro",
+      "metric": "spell_go_count",
+      "spell": 800791,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The boss carries the Pyromancer's Ignite",
+      "actor": "boss",
+      "metric": "aura",
+      "spell": 800791,
+      "caster": "pyro",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Flare Bolt follows while Ignite is active",
+      "actor": "pyro",
+      "metric": "spell_go_count",
+      "spell": 800790,
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "label": "The Pyromancer stayed within Fire Blast's 20 yd range of the boss",
+      "actor": "pyro",
+      "metric": "distance",
+      "target": "boss",
+      "max": 20
+    },
+    {
+      "action": "assert",
+      "label": "The scenario fallback is never cast: the rotation drives the Pyromancer",
+      "actor": "pyro",
+      "metric": "spell_go_count",
+      "spell": 2137,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No fixture swing at the Pyromancer",
+      "actor": "pyro",
+      "metric": "melee_attacks_taken",
+      "target": "boss",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The tank kept swinging at the boss",
+      "actor": "tank",
+      "metric": "melee_attack_count",
+      "min": 5
+    },
+    {
+      "action": "assert",
+      "label": "The healer completed at least one heal with its scenario heal_spell",
+      "actor": "healer",
+      "metric": "timeline_count",
+      "event": "cast",
+      "spell": 500143,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The tank is alive",
+      "actor": "tank",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

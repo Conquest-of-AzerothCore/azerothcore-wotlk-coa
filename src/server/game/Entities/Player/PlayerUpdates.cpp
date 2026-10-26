@@ -16,6 +16,7 @@
  */
 
 #include "AchievementMgr.h"
+#include "AscensionQuestMarkers.h"
 #include "BattlefieldMgr.h"
 #include "CellImpl.h"
 #include "Channel.h"
@@ -1817,6 +1818,8 @@ void Player::UpdateVisibilityOf(T* target, UpdateData& data,
 void Player::GetInitialVisiblePackets(Unit* target)
 {
     GetAurasForTarget(target);
+    if (Creature* creature = target->ToCreature())
+        AscensionQuestMarkers::Refresh(this, creature);
     if (target->IsAlive())
     {
         if (target->HasUnitState(UNIT_STATE_MELEE_ATTACKING) &&

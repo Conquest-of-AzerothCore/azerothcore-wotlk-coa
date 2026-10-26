@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "name": "Flight Master's Whistle has its 30 minute cooldown (COA-7253)",
+  "contract": "Using the Flight Master's Whistle (item 10) casts spell 158, whose client data gives it a 30 minute cooldown. The item row no longer overrides that with 0, so right after a use the whistle is on cooldown.",
+  "timeout_ms": 60000,
+  "players": [{ "id": "p", "race": 1, "class": 1, "level": 80 }],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "add_item", "actor": "p", "item": 10 },
+    { "action": "use_item", "actor": "p", "item": 10, "spell": 158 },
+    { "action": "assert", "label": "the whistle is used", "actor": "p", "metric": "cast_failure", "spell": 158, "equals": 0, "within_ms": 3000 },
+    { "action": "assert", "label": "the whistle is on its 30 minute cooldown", "actor": "p",
+      "metric": "cooldown_ms", "spell": 158, "min": 1700000, "within_ms": 3000 }
+  ]
+}

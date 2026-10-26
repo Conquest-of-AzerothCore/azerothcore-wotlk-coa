@@ -915,6 +915,65 @@ void ObjectMgr::LoadCreatureTemplateSpells()
     LOG_INFO("server.loading", " ");
 }
 
+void ObjectMgr::LoadAscensionNpcOverheadIcons()
+{
+    _ascensionNpcOverheadIcons.clear();
+    WorldDatabasePreparedStatement* statement =
+        WorldDatabase.GetPreparedStatement(WORLD_SEL_ASCENSION_NPC_OVERHEAD_ICONS);
+    if (PreparedQueryResult result = WorldDatabase.Query(statement))
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+            uint32 const entry = fields[0].Get<uint32>();
+            uint32 const spellId = fields[1].Get<uint32>();
+            if (!GetCreatureTemplate(entry))
+            {
+                LOG_ERROR("sql.sql", "ascension_npc_overhead_icons: missing creature template {}", entry);
+                continue;
+            }
+
+            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
+            if (!spellInfo)
+            {
+                LOG_ERROR("sql.sql", "ascension_npc_overhead_icons: creature {} has missing spell {}", entry, spellId);
+                continue;
+            }
+
+            bool visualAura = spellInfo->GetDuration() == -1 &&
+                (spellInfo->SpellVisual[0] || spellInfo->SpellVisual[1]);
+            bool hasAura = false;
+            for (SpellEffectInfo const& effect : spellInfo->GetEffects())
+            {
+                if (!effect.IsEffect())
+                    continue;
+                if (!effect.IsEffect(SPELL_EFFECT_APPLY_AURA) || effect.ApplyAuraName != SPELL_AURA_NONE)
+                    visualAura = false;
+                else
+                    hasAura = true;
+            }
+            if (!visualAura || !hasAura)
+            {
+                LOG_ERROR("sql.sql", "ascension_npc_overhead_icons: creature {} spell {} is not a permanent visual aura",
+                    entry, spellId);
+                continue;
+            }
+
+            _ascensionNpcOverheadIcons.emplace(entry, spellId);
+        } while (result->NextRow());
+    }
+    LOG_INFO("server.loading", ">> Loaded {} Ascension NPC overhead icon mappings", _ascensionNpcOverheadIcons.size());
+}
+
+void ObjectMgr::ApplyAscensionNpcOverheadIcon(Creature& creature) const
+{
+    if (!creature.IsAlive())
+        return;
+    auto const found = _ascensionNpcOverheadIcons.find(creature.GetEntry());
+    if (found != _ascensionNpcOverheadIcons.end() && !creature.HasAura(found->second))
+        creature.AddAura(found->second, &creature);
+}
+
 void ObjectMgr::LoadCreatureTemplateAddons()
 {
     uint32 oldMSTime = getMSTime();

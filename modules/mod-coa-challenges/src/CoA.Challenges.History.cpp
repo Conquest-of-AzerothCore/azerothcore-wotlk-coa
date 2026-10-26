@@ -183,6 +183,13 @@ namespace CoAChallenges
 
         if (accept)
         {
+            for (auto const& [id, level] : pending.pairs)
+                if ((id == 211 || id == 425) && AdventureModeChangeBlocked(player))
+                {
+                    SendActiveList(player);
+                    SendCriteriaState(player);
+                    return;
+                }
             g_suppressSyncBroadcast = true;
             for (auto const& [id, level] : pending.pairs)
             {
@@ -210,7 +217,7 @@ namespace CoAChallenges
                 return;
             std::set<uint32> active = ActiveChallenges(p->GetGUID().GetCounter());
             for (auto const& [id, level] : pending.rollback)
-                if (active.count(id))
+                if (active.count(id) && ((id != 211 && id != 425) || !AdventureModeChangeBlocked(p)))
                     DeactivateChallenge(p, id);
         };
 

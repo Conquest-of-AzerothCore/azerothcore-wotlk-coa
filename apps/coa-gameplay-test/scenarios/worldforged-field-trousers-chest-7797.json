@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "name": "Worldforged Field Trousers chest stands at the live realm's farmhouse spot and can be opened there (COA-7797)",
+  "contract": "The live gameobject dump stands the Unlocked Chest pickup (95809, guid 6960040, Field Trousers 450775) at (-10114.0996, 1046.77, 43.7252) in Saldean's farmhouse. rev_20261014_95_worldforged_lootcollector_alignment.sql moved it to (-10122.9, 1055.16, 36.381), 12 yd away and half inside the farmhouse wall. A character standing at the live spot opens it with Opening, whose interaction range is 5 yd.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -10114.0996, "y": 1046.77, "z": 43.7252, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 1, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the chest is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95809, "equals": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 95809 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "DISCRIMINATING: the chest is within reach of the live spot and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

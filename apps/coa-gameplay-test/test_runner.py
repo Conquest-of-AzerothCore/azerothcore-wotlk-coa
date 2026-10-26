@@ -4,14 +4,57 @@ import io
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
 import tempfile
+import threading
 from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
 import run
+
+
+class CopyServer:
+    def __init__(self, tables, obstacles=(0, 0, 0, 0, 0), fail=None, barrier=None):
+        self.tables = tables
+        self.obstacles = obstacles
+        self.fail = fail
+        self.barrier = barrier
+        self.queries = []
+        self.scripts = []
+        self.threads = set()
+        self.active = self.peak = 0
+        self.lock = threading.Lock()
+
+    def sql(self, role, statement, timeout=60):
+        if not statement.startswith(run.COPY_SESSION):
+            self.queries.append(statement)
+            if 'information_schema.VIEWS' in statement:
+                return '\t'.join(map(str, self.obstacles))
+            if 'information_schema.TABLES' in statement:
+                return '\n'.join(f'{name}\tBASE TABLE\t{size}' for name, size in self.tables.items())
+            if 'information_schema.COLUMNS' in statement:
+                return '\n'.join(f'{name}\t{column}' for name in self.tables for column in ('id', 'value'))
+            names = re.findall(r'SHOW CREATE TABLE `[^`]+`\.`([^`]+)`;', statement)
+            return '\n'.join(f'{name}\tCREATE TABLE `{name}` (\\n  `id` int NOT NULL\\n) ENGINE=InnoDB'
+                             for name in names)
+        table = re.search(r'(?:CREATE TABLE|INSERT INTO `[^`]+`\.) ?`([^`]+)`', statement)[1]
+        with self.lock:
+            self.scripts.append((table, statement))
+            self.threads.add(threading.get_ident())
+            self.active += 1
+            self.peak = max(self.peak, self.active)
+        try:
+            if self.barrier and len(self.scripts) <= self.barrier.parties:
+                self.barrier.wait()
+            if table == self.fail:
+                raise ValueError(f'MySQL operation failed for {role}: ERROR 1062 (23000): Duplicate entry')
+        finally:
+            with self.lock:
+                self.active -= 1
+        return ''
 
 
 class RunnerTests(unittest.TestCase):
@@ -97,6 +140,84 @@ class RunnerTests(unittest.TestCase):
         scenario['steps'].append({key: value for key, value in step.items() if key != 'entry'})
         with self.assertRaises(ValueError):
             run.validate(scenario)
+
+    def assert_step_validates(self, step):
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].append(step)
+        self.assertIs(run.validate(scenario), scenario)
+
+    def assert_step_rejected(self, step):
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].append(step)
+        with self.subTest(step=step), self.assertRaises(ValueError):
+            run.validate(scenario)
+
+    def test_spawn_placement_metrics_need_a_player_guid_and_spawn_type(self):
+        for metric in ('spawn_placement', 'spawn_ground_gap', 'spawn_submerged', 'spawn_display_state'):
+            step = {'action': 'assert', 'actor': 'caster', 'metric': metric, 'guid': 6942106,
+                    'spawn_type': 'gameobject', 'equals': 0}
+            if metric == 'spawn_placement':
+                step['tolerance'] = 1
+            self.assert_step_validates(step)
+            for change in ({'actor': 'target'}, {'guid': 0}, {'guid': '1'}, {'guid': True}, {'spawn_type': 'unit'}):
+                self.assert_step_rejected({**step, **change})
+            for missing in ('guid', 'spawn_type'):
+                self.assert_step_rejected({key: value for key, value in step.items() if key != missing})
+
+    def test_point_placement_metrics_need_map_and_coordinates(self):
+        step = {'action': 'assert', 'actor': 'caster', 'metric': 'point_placement', 'map': 1, 'x': 10269.8,
+                'y': 1472.1, 'z': 1340.21, 'tolerance': 1, 'equals': 2}
+        self.assert_step_validates(step)
+        gap = {key: value for key, value in step.items() if key not in {'tolerance', 'equals'}}
+        self.assert_step_validates({**gap, 'metric': 'point_ground_gap', 'max': -1})
+        self.assert_step_rejected({key: value for key, value in step.items() if key != 'z'})
+        for change in ({'map': -1}, {'x': 17001}, {'actor': 'target'}):
+            self.assert_step_rejected({**step, **change})
+
+    def test_placement_tolerance_only_applies_to_placement_verdicts(self):
+        spawn = {'action': 'assert', 'actor': 'caster', 'metric': 'spawn_placement', 'guid': 42919,
+                 'spawn_type': 'creature', 'tolerance': 0.5, 'equals': 0}
+        point = {'action': 'assert', 'actor': 'caster', 'metric': 'point_placement', 'map': 0, 'x': 1, 'y': 2,
+                 'z': 3, 'tolerance': 0.5, 'equals': 0}
+        self.assert_step_validates(spawn)
+        self.assert_step_validates(point)
+        for step in (spawn, point):
+            self.assert_step_rejected({key: value for key, value in step.items() if key != 'tolerance'})
+            for tolerance in (0, -1, 11, '1'):
+                self.assert_step_rejected({**step, 'tolerance': tolerance})
+        self.assert_step_rejected({**spawn, 'metric': 'spawn_ground_gap'})
+        self.assert_step_rejected({'action': 'assert', 'actor': 'target', 'metric': 'health', 'tolerance': 0.5,
+                                   'min': 1})
+
+    def test_spawn_fields_only_apply_to_placement_metrics(self):
+        for field, value in (('guid', 42919), ('spawn_type', 'creature'), ('map', 0), ('z', 1)):
+            self.assert_step_rejected({'action': 'assert', 'actor': 'target', 'metric': 'health', field: value,
+                                       'min': 1})
+
+    def test_placement_audit_action_fields(self):
+        step = {'action': 'placement_audit', 'map': 1, 'zone': 493}
+        self.assert_step_validates(step)
+        self.assert_step_validates({**step, 'tolerance': 0.5})
+        self.assert_step_validates({**step, 'gameobject_types': [3, 10]})
+        self.assert_step_validates({'action': 'placement_audit', 'map': 409})
+        self.assert_step_rejected({'action': 'placement_audit', 'zone': 493})
+        for change in ({'map': -1}, {'zone': 0}, {'tolerance': 0}, {'gameobject_types': []},
+                       {'gameobject_types': [3, 3]}, {'gameobject_types': [36]}, {'gameobject_types': ['3']},
+                       {'actor': 'caster'}):
+            self.assert_step_rejected({**step, **change})
+
+    def test_placement_audit_metrics_need_an_earlier_audit(self):
+        audit = {'action': 'placement_audit', 'map': 1, 'zone': 493}
+        for metric in ('placement_audit_spawns', 'placement_audit_anomalies', 'placement_audit_event_spawns'):
+            measured = {'action': 'assert', 'actor': 'caster', 'metric': metric, 'min': 0}
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'] += [audit, measured]
+            self.assertIs(run.validate(scenario), scenario)
+            for steps in ([measured, audit], [measured]):
+                scenario = copy.deepcopy(self.scenario)
+                scenario['steps'] += steps
+                with self.subTest(metric=metric, steps=steps), self.assertRaises(ValueError):
+                    run.validate(scenario)
 
     def test_player_packet_fields_require_a_player(self):
         step = {'action': 'client_packet', 'actor': 'caster', 'opcode': 364, 'consumed': False}
@@ -618,6 +739,18 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(fields=fields), self.assertRaises(ValueError):
                 run.validate(self.with_role(**fields))
 
+    def test_rotation_assist_is_a_boolean_opt_in_for_a_role(self):
+        for fields in ({'role': 'ranged', 'rotation': [133], 'rotation_assist': True},
+                       {'role': 'healer', 'heal_spell': 500143, 'rotation_assist': False}):
+            scenario = self.with_role(**fields)
+            with self.subTest(fields=fields):
+                self.assertIs(run.validate(scenario), scenario)
+        for value in (1, 0, 'true', None, [True]):
+            with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'rotation_assist'):
+                run.validate(self.with_role(role='tank', rotation_assist=value))
+        with self.assertRaisesRegex(ValueError, 'need a player role'):
+            run.validate(self.with_role(rotation_assist=True))
+
     def test_healer_requires_heal_spell(self):
         with self.assertRaisesRegex(ValueError, 'heal_spell'):
             run.validate(self.with_role(role='healer'))
@@ -1008,10 +1141,154 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(text=text), self.assertRaises(ValueError):
                 run.Connection.parse(text)
 
-    def database(self, directory):
+    def database(self, directory, copy_workers=1):
         connections = {role: run.Connection('127.0.0.1', 3306, 'user', 'secret', f'source_{role}')
                        for role in ('auth', 'characters', 'world')}
-        return run.Databases('mysql', 'mysqldump', directory, connections, '012345abcdef')
+        return run.Databases('mysql', 'mysqldump', directory, connections, '012345abcdef', copy_workers=copy_workers)
+
+    def copy_with(self, server, copy_workers=1, **arguments):
+        with tempfile.TemporaryDirectory() as temporary:
+            database = self.database(Path(temporary), copy_workers)
+            with patch.object(database, 'sql', side_effect=server.sql), \
+                    patch.object(database, 'dump_copy') as dump, patch('sys.stdout', new=io.StringIO()) as output:
+                database.copy(arguments.pop('role', 'world'), **arguments)
+            return dump, output.getvalue()
+
+    def test_copy_uses_server_side_statements_for_plain_tables(self):
+        server = CopyServer({'creature': 500, 'item_template': 900, 'version': 1})
+        dump, _ = self.copy_with(server)
+        dump.assert_not_called()
+        self.assertEqual([table for table, _ in server.scripts], ['item_template', 'creature', 'version'])
+        target = '`coa_test_012345abcdef_world`'
+        for table, script in server.scripts:
+            self.assertEqual(script, f"{run.COPY_SESSION}\nUSE {target};\n"
+                                     f'CREATE TABLE `{table}` (\n  `id` int NOT NULL\n) ENGINE=InnoDB;\n'
+                                     'USE `source_world`;\n'
+                                     f'INSERT INTO {target}.`{table}` (`id`, `value`) SELECT `id`, `value` '
+                                     f'FROM `{table}`;')
+        self.assertNotIn('LIKE', '\n'.join(script for _, script in server.scripts))
+
+    def test_copy_falls_back_to_dump_when_source_has_triggers(self):
+        for index, reason in enumerate(('views', 'triggers', 'routines', 'events', 'statement-based binary logging')):
+            server = CopyServer({'creature': 1}, obstacles=[int(position == index) for position in range(5)])
+            with self.subTest(reason=reason):
+                dump, output = self.copy_with(server, tables=('creature',), where='id > 0')
+                dump.assert_called_once_with('world', False, ('creature',), 'id > 0')
+                self.assertEqual(server.scripts, [])
+                self.assertIn(f'Copying world with mysqldump: source_world has {reason}', output)
+
+    def test_copy_schema_only_creates_tables_without_rows(self):
+        server = CopyServer({'account': 10, 'realmlist': 20})
+        self.copy_with(server, role='auth', schema_only=True)
+        self.assertEqual([table for table, _ in server.scripts], ['realmlist', 'account'])
+        for table, script in server.scripts:
+            self.assertIn(f'CREATE TABLE `{table}`', script)
+            self.assertNotIn('INSERT', script)
+        self.assertFalse(any('information_schema.COLUMNS' in statement for statement in server.queries))
+
+    def test_copy_respects_where_and_tables(self):
+        server = CopyServer({'coa_build_creator': 5, 'coa_build_creator_spell': 50, 'characters': 500})
+        where = 'entry IN (SELECT entry FROM coa_build_creator WHERE owner_account = 0)'
+        self.copy_with(server, role='characters', tables=('coa_build_creator', 'coa_build_creator_spell'), where=where)
+        self.assertEqual([table for table, _ in server.scripts], ['coa_build_creator_spell', 'coa_build_creator'])
+        for table, script in server.scripts:
+            self.assertNotIn('CREATE TABLE', script)
+            self.assertIn('USE `source_characters`;\n', script)
+            self.assertTrue(script.endswith(f'FROM `{table}` WHERE {where};'))
+        with self.assertRaisesRegex(ValueError, 'Missing source table for characters: missing'):
+            self.copy_with(CopyServer({'characters': 1}), role='characters', tables=('missing',))
+
+    def test_copy_workers_one_runs_serially(self):
+        tables = {f'table_{index}': index for index in range(6)}
+        serial = CopyServer(tables)
+        self.copy_with(serial)
+        self.assertEqual((serial.peak, serial.threads), (1, {threading.get_ident()}))
+        self.assertEqual([table for table, _ in serial.scripts], sorted(tables, key=tables.get, reverse=True))
+        concurrent = CopyServer(tables, barrier=threading.Barrier(3, timeout=10))
+        self.copy_with(concurrent, copy_workers=3)
+        self.assertEqual(concurrent.peak, 3)
+        self.assertEqual(sorted(table for table, _ in concurrent.scripts), sorted(tables))
+        with self.assertRaisesRegex(ValueError, 'copy workers'):
+            self.database(Path(tempfile.gettempdir()), copy_workers=0)
+
+    def test_partial_copy_is_dropped_on_failure(self):
+        server = CopyServer({'broken': 900, 'creature': 500, 'version': 1}, fail='broken')
+        with tempfile.TemporaryDirectory() as temporary:
+            database = self.database(Path(temporary))
+            with patch.object(database, 'sql', side_effect=server.sql), patch('sys.stdout', new=io.StringIO()):
+                with self.assertRaisesRegex(ValueError, 'Database copy failed for world: .*ERROR 1062'):
+                    database.prepare(roles=('world',))
+                self.assertEqual(database.cleanup(), [])
+            database.remove_credentials()
+        self.assertEqual([table for table, _ in server.scripts], ['broken'])
+        self.assertEqual(server.queries[-1], 'DROP DATABASE `coa_test_012345abcdef_world`;')
+
+    def test_drop_uses_long_timeout(self):
+        self.assertEqual(run.DROP_TIMEOUT, 600)
+        with tempfile.TemporaryDirectory() as temporary:
+            database = self.database(Path(temporary))
+            database.created.append('world')
+            result = subprocess.CompletedProcess([], 0, stdout='', stderr='')
+            with patch('run.subprocess.run', return_value=result) as runner:
+                self.assertEqual(database.cleanup(), [])
+            database.remove_credentials()
+        self.assertEqual(runner.call_args.args[0][0], 'mysql')
+        self.assertEqual(runner.call_args.kwargs['input'], 'DROP DATABASE `coa_test_012345abcdef_world`;')
+        self.assertEqual(runner.call_args.kwargs['timeout'], 600)
+
+    def test_cleanup_failed_keeps_error_text(self):
+        errors = [subprocess.TimeoutExpired(['mysql', '--defaults-extra-file=/private/world.cnf'], 600),
+                  ValueError('MySQL operation failed for characters: ERROR 1051 table is locked\n')]
+        with tempfile.TemporaryDirectory() as temporary:
+            database = self.database(Path(temporary))
+            database.created.extend(['characters', 'world'])
+            with patch.object(database, 'drop', side_effect=errors):
+                failures = database.cleanup()
+            database.remove_credentials()
+        self.assertEqual(failures, [
+            {'schema': 'coa_test_012345abcdef_world', 'error': 'timed out after 600 s'},
+            {'schema': 'coa_test_012345abcdef_characters',
+             'error': 'MySQL operation failed for characters: ERROR 1051 table is locked'}])
+        self.assertNotIn('private', json.dumps(failures))
+
+    def test_release_databases_records_schema_and_error(self):
+        database = SimpleNamespace(names={'world': 'coa_test_world'}, cleanup=lambda: [])
+        cache = SimpleNamespace(finish=lambda server_still_running: (_ for _ in ()).throw(ValueError('drop refused')))
+        summary = {}
+        failures = run.release_databases(database, cache, False, summary)
+        expected = [{'schema': 'coa_test_world', 'error': 'drop refused'}]
+        self.assertEqual(failures, expected)
+        self.assertEqual(summary['cleanup_failed'], expected)
+
+    def test_release_databases_keeps_the_defaults_file_out_of_the_cache_error(self):
+        timeout = subprocess.TimeoutExpired(['mysql', '--defaults-extra-file=/private/world.cnf'], 600)
+        database = SimpleNamespace(names={'world': 'coa_test_world'}, cleanup=lambda: [])
+        cache = SimpleNamespace(finish=lambda server_still_running: (_ for _ in ()).throw(timeout))
+        summary = {}
+        run.release_databases(database, cache, False, summary)
+        self.assertEqual(summary['cache_cleanup_error'], 'timed out after 600 s')
+        self.assertNotIn('private', json.dumps(summary))
+
+    def test_sql_decodes_mysql_text_as_utf8(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            database = self.database(Path(temporary))
+            result = subprocess.CompletedProcess([], 0, stdout="COMMENT 'caf\u00e9'\n", stderr='')
+            with patch('run.subprocess.run', return_value=result) as runner:
+                self.assertEqual(database.sql('world', 'SHOW CREATE TABLE `t`;'), "COMMENT 'caf\u00e9'")
+            database.remove_credentials()
+        self.assertEqual(runner.call_args.kwargs['encoding'], 'utf-8')
+
+    def test_parallel_copy_failure_is_wrapped_and_the_partial_copy_dropped(self):
+        server = CopyServer({f'table_{index}': 100 - index for index in range(20)}, fail='table_0')
+        with tempfile.TemporaryDirectory() as temporary:
+            database = self.database(Path(temporary), copy_workers=3)
+            with patch.object(database, 'sql', side_effect=server.sql), patch('sys.stdout', new=io.StringIO()):
+                with self.assertRaisesRegex(ValueError, 'Database copy failed for world: .*ERROR 1062'):
+                    database.prepare(roles=('world',))
+                self.assertEqual(database.cleanup(), [])
+            database.remove_credentials()
+        self.assertIn('table_0', [table for table, _ in server.scripts])
+        self.assertEqual(server.queries[-1], 'DROP DATABASE `coa_test_012345abcdef_world`;')
 
     def test_admin_credentials_preserve_source_endpoint_and_schema(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -1037,7 +1314,7 @@ class RunnerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             database = self.database(Path(temporary))
             statements = []
-            with patch.object(database, 'sql', side_effect=lambda role, sql: statements.append(sql)), \
+            with patch.object(database, 'sql', side_effect=lambda role, sql, timeout=60: statements.append(sql)), \
                     patch.object(database, 'copy', side_effect=ValueError('copy failed')):
                 with self.assertRaisesRegex(ValueError, 'copy failed'):
                     database.prepare()
@@ -1234,7 +1511,7 @@ class RunnerTests(unittest.TestCase):
                 worldserver=worldserver, config=config, mysql=mysql, mysqldump=mysqldump,
                 database_client_config=None, modules_config_dir=None,
                 server_modules_dir=directory / 'server-modules', output=output, startup_timeout=3,
-                fresh_databases=True, refresh_world=False, world_cache_dir=directory / 'cache')
+                fresh_databases=True, refresh_world=False, world_cache_dir=directory / 'cache', copy_workers=1)
             report = self.report()
             credential_dirs = []
             server_settings = []
@@ -1303,7 +1580,7 @@ class RunnerTests(unittest.TestCase):
                         mysqldump=directory / 'mysqldump', database_client_config=None, modules_config_dir=None,
                         server_modules_dir=directory / name / 'modules', output=directory / name,
                         startup_timeout=3, fresh_databases=True, refresh_world=False,
-                        world_cache_dir=directory / 'cache')
+                        world_cache_dir=directory / 'cache', copy_workers=1)
                     self.assertEqual(run.execute(args, scenario), 0)
             self.assertEqual([environment['TZ'] for environment in observed], ['UTC+10:40', 'Europe/Moscow'])
             summaries = [run.read_json(directory / name / 'summary.json') for name in ('noon', 'plain')]

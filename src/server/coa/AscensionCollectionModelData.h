@@ -13,7 +13,7 @@ struct Entry
     char const* Name;
 };
 
-inline constexpr std::array<Entry, 6309> Entries =
+inline constexpr std::array<Entry, 6331> Entries =
 {{
     { 3, 987, "Flesh Eater" },
     { 5, 13444, "Tsunis" },
@@ -5175,6 +5175,17 @@ inline constexpr std::array<Entry, 6309> Entries =
     { 257897, 377356, "Progenitor Wombat" },
     { 257898, 377357, "Silver Progenitor Wombat" },
     { 257899, 377358, "Stained Progenitor Wombat" },
+    { 267700, 141910, "Adorned Black Stallion" },
+    { 267701, 141911, "Adorned Bay Stallion" },
+    { 267702, 141912, "Adorned Chestnut Stallion" },
+    { 267703, 141913, "Adorned Grey Stallion" },
+    { 267704, 141914, "Adorned Palomino Stallion" },
+    { 267705, 141915, "Adorned Pale Stallion" },
+    { 267706, 141916, "Adorned Piebald Stallion" },
+    { 267707, 141917, "Adorned Pinto Stallion" },
+    { 267708, 141918, "Adorned Dark Bay Stallion" },
+    { 267709, 141919, "Adorned White Stallion" },
+    { 267710, 141920, "Adorned Undead Stallion" },
     { 292302, 96617, "Solar Tracker" },
     { 292303, 96618, "Lunar Tracker" },
     { 300074, 19066, "Temporus" },
@@ -5573,6 +5584,17 @@ inline constexpr std::array<Entry, 6309> Entries =
     { 379988, 142605, "Pale Rootbound Beast" },
     { 379989, 142066, "Dark Iron Armored Yak" },
     { 379991, 142074, "Goat of Winter" },
+    { 379992, 141899, "Midnight Black Stallion" },
+    { 379993, 141900, "Bay Stallion" },
+    { 379994, 141901, "Chestnut Stallion" },
+    { 379995, 141902, "Grey Stallion" },
+    { 379996, 141903, "Palomino Stallion" },
+    { 379997, 141904, "Pale Stallion" },
+    { 379998, 141905, "Piebald Stallion" },
+    { 379999, 141906, "Pinto Stallion" },
+    { 380000, 141907, "Dark Bay Stallion" },
+    { 380001, 141908, "White Stallion" },
+    { 380002, 141909, "Undead Stallion" },
     { 380003, 142778, "Ancient Spiritwalker" },
     { 392238, 100536, "Charcoal Primal Dog" },
     { 392239, 101602, "Chestnut Primal Dog" },

@@ -23,6 +23,18 @@ void WorldDatabaseConnection::DoPrepareStatements()
     if (!m_reconnecting)
         m_stmts.resize(MAX_WORLDDATABASE_STATEMENTS);
 
+    PrepareStatement(WORLD_SEL_ASCENSION_NPC_OVERHEAD_ICONS,
+        "SELECT creature_entry, spell_id FROM ascension_npc_overhead_icons WHERE enabled = 1", CONNECTION_SYNCH);
+
+    PrepareStatement(WORLD_SEL_ASCENSION_QUEST_MARKER_STYLES,
+        "SELECT m.CreatureEntry, m.QuestId, m.Style, m.Priority FROM ascension_quest_marker_style m "
+        "INNER JOIN creature_template c ON c.entry = m.CreatureEntry "
+        "LEFT JOIN quest_template q ON q.ID = m.QuestId WHERE m.QuestId = 0 OR q.ID IS NOT NULL "
+        "ORDER BY m.CreatureEntry, m.Priority DESC, m.QuestId", CONNECTION_SYNCH);
+
+    PrepareStatement(WORLD_SEL_RAF_RECRUIT_MILESTONES,
+        "SELECT reward_id, required_level, realm_mode_mask, item_id, quantity "
+        "FROM recruit_milestone_rewards WHERE enabled = 1 ORDER BY required_level, reward_id", CONNECTION_SYNCH);
     PrepareStatement(WORLD_SEL_RAF_REWARDS, "SELECT reward_id, required_recruits, realm_mode_mask, item_id, quantity FROM recruit_rewards WHERE enabled = 1 ORDER BY required_recruits, reward_id", CONNECTION_SYNCH);
 
     PrepareStatement(WORLD_SEL_CROWS_CACHE_REWARDS, "SELECT kind,item,count FROM coa_crows_cache_rewards ORDER BY kind,item", CONNECTION_SYNCH);

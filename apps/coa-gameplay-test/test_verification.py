@@ -131,7 +131,7 @@ class VerificationTests(unittest.TestCase):
         self.assertEqual(result['required_scenarios'], ['measured', 'other'])
 
     def test_missing_evidence_failed_cleanup_and_wrong_hash_cannot_pass(self):
-        for changes in [{'status': 'failed'}, {'cleanup_failed': ['owned_test_db']},
+        for changes in [{'status': 'failed'}, {'cleanup_failed': [{'schema': 'owned_test_db', 'error': ''}]},
                         {'scenario_sha256': '0' * 64}, {'run_id': 'wrong'}, {'binary_sha256': ''}]:
             summary = catalog.read_json(self.folder / 'summary.json')
             original = copy.deepcopy(summary)
@@ -232,7 +232,7 @@ class VerificationTests(unittest.TestCase):
 
     def test_native_failure_still_writes_combined_outcome_and_blocks_checker(self):
         summary = catalog.read_json(self.folder / 'summary.json')
-        summary.update(status='failed', cleanup_failed=['owned_test_db'])
+        summary.update(status='failed', cleanup_failed=[{'schema': 'owned_test_db', 'error': ''}])
         self.write(self.folder / 'summary.json', summary)
         def native(args, scenario):
             args.result_directory = self.folder

@@ -27,6 +27,13 @@
       "actor": "n",
       "id": 34
     },
+    { "action": "advancement_rank", "actor": "n", "entry": 6863, "rank": 2 },
+    { "action": "advancement_rank", "actor": "n", "entry": 6295, "rank": 1 },
+    { "action": "advancement_rank", "actor": "n", "entry": 31245, "rank": 1 },
+    { "action": "advancement_rank", "actor": "n", "entry": 30821, "rank": 1 },
+    { "action": "advancement_rank", "actor": "n", "entry": 29866, "rank": 1 },
+    { "action": "advancement_rank", "actor": "n", "entry": 11904, "rank": 1 },
+    { "action": "advancement_rank", "actor": "n", "entry": 7808, "rank": 1 },
     {
       "action": "advancement_rank",
       "actor": "n",

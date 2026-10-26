@@ -1,0 +1,170 @@
+{
+  "schema": 1,
+  "name": "Adventure Mode cannot change during a party fight through commands, start or stop requests",
+  "contract": "An ongoing party fight blocks Adventure Mode downscaling through both the player command and the challenge-start packet. Stopping the challenge also leaves its tier-100 aura intact. Once the party leaves combat, the same command succeeds.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 1
+    },
+    {
+      "id": "friend",
+      "race": 1,
+      "class": 1,
+      "level": 1
+    }
+  ],
+  "creatures": [
+    {
+      "id": "wolf",
+      "owner": "friend",
+      "entry": 299,
+      "faction": 7,
+      "level": 1,
+      "health": 1000000,
+      "distance": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "start_challenge",
+      "actor": "hero",
+      "challenge": 211,
+      "level": 100
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "start_challenge",
+      "actor": "friend",
+      "challenge": 211,
+      "level": 100
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "group",
+      "actor": "hero",
+      "target": "friend"
+    },
+    {
+      "action": "teleport",
+      "actor": "friend",
+      "map": 0,
+      "x": -8854,
+      "y": -133,
+      "z": 80.6
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "friend",
+      "entry": 299,
+      "damage_pct": 1
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "command",
+      "actor": "hero",
+      "command": ".coa adventure 1",
+      "rejected": true
+    },
+    {
+      "action": "start_challenge",
+      "actor": "hero",
+      "challenge": 211,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "challenge_start_code",
+      "equals": 8
+    },
+    {
+      "action": "stop_challenge",
+      "actor": "hero",
+      "challenge": 211
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 302882,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 302053,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "friend",
+      "entry": 299,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "command",
+      "actor": "hero",
+      "command": ".coa adventure 1"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 302053,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 302882,
+      "equals": 0
+    }
+  ]
+}

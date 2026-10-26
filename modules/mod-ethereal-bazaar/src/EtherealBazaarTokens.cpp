@@ -16,6 +16,10 @@
  *
  * The zero in the lower two ranges is deliberate: most kills and some quests
  * give nothing at all, so tokens stay something one notices.
+ *
+ * A kill pays everyone the native kill credit rewards: whoever tapped the
+ * creature, and every member of a tapping group in reward range, whether they
+ * attacked, healed or watched. Each member rolls their own amount.
  */
 
 #include "EtherealBazaar.h"
@@ -25,8 +29,8 @@
 #include "Configuration/Config.h"
 #include "Creature.h"
 #include "GameTime.h"
-#include "Log.h"
 #include "KillRewarder.h"
+#include "Log.h"
 #include "Map.h"
 #include "ObjectMgr.h"
 #include "Player.h"

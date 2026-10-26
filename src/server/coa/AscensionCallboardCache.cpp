@@ -416,7 +416,7 @@ void SendCacheConfig(Player* player)
     player->SendDirectMessage(&config);
 }
 
-void GrantCache(Player* player, uint32 cacheItemId)
+bool GrantCache(Player* player, uint32 cacheItemId)
 {
     ItemPosCountVec dest;
     if (player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, cacheItemId, 1) == EQUIP_ERR_OK)
@@ -424,13 +424,13 @@ void GrantCache(Player* player, uint32 cacheItemId)
         if (Item* item = player->StoreNewItem(dest, cacheItemId, true))
         {
             player->SendNewItem(item, 1, true, false);
-            return;
+            return true;
         }
     }
 
     Item* item = Item::CreateItem(cacheItemId, 1, player);
     if (!item)
-        return;
+        return false;
 
     CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
     item->SaveToDB(trans);
@@ -438,6 +438,7 @@ void GrantCache(Player* player, uint32 cacheItemId)
         .AddItem(item)
         .SendMailTo(trans, MailReceiver(player), MailSender(player));
     CharacterDatabase.CommitTransaction(trans);
+    return true;
 }
 
 void AwardQuestPoints(Player* player, uint32 questId)
@@ -457,7 +458,8 @@ void AwardQuestPoints(Player* player, uint32 questId)
     uint32 const threshold = PointsPerCache();
     while (points >= threshold)
     {
-        GrantCache(player, cacheItemId);
+        if (!GrantCache(player, cacheItemId))
+            break;
         points -= threshold;
         SetPoints(player, points);
     }

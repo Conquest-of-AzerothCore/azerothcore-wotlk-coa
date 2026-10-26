@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "A Brewing Potent Mixes purchase reports exactly its own native entry (#6371)",
-  "contract": "Brewing entry 7131 purchases Potent Mixes 503748/504888 with TE; class entry 12264 reuses 503748 with AE. One actual purchase must add one native known-entry record without inventing the other purchase. A following talent purchase, rank upgrade, unlearning, real relog, two specialization slots and a paid native purge must retain explicit entry ownership and keep physical shared spells only while an owner remains.",
+  "contract": "Brewing entry 7131 purchases Potent Mixes 503748/504888 with TE; class entry 12264 reuses 503748 with AE. One actual purchase must add one native known-entry record without inventing the other purchase. A following talent purchase, rank upgrade, unlearning, real relog, two specialization slots and a paid native purge must retain explicit entry ownership and keep physical shared spells only while an owner remains. Entry 7132 (TabTEInvestment 8) and entry 12264 (TabAEInvestment 9) are both gated; the actor is level 30 (class 13's 10 TE / 11 AE points at that level) and spends the required 6 further TE and 9 further AE on ungated Brewing/class entries before each. Picking Brewing (spec 6) also grants its signature entry 29744 (500957), itself a 1-AE class entry, so the AE side needs one extra point of headroom beyond the 9 filler points plus 12264's own cost.",
   "timeout_ms": 120000,
   "location": {
     "map": 0,
@@ -15,7 +15,7 @@
       "id": "p",
       "race": 1,
       "class": 13,
-      "level": 19,
+      "level": 30,
       "allow_regeneration": false,
       "spell_hit_rating": 10000,
       "melee_hit_rating": 10000,
@@ -49,6 +49,21 @@
       "actor": "p",
       "id": 6
     },
+    { "action": "advancement_rank", "actor": "p", "entry": 5055, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 6645, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 7128, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 7129, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 29736, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 30884, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 6030, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 6044, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 6047, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 6054, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 7088, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 7092, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 7154, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 11154, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 29301, "rank": 1 },
     {
       "action": "wait",
       "ms": 2000

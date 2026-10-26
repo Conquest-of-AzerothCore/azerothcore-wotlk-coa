@@ -28,6 +28,13 @@ CoA.AllowRemoteClients = 0
 # 0 - Create a Hero. Use this on a realm with CoA.ClassModel = "hero".
 CoA.MapClass10ToWarrior = 1
 
+# Client lab probe relay: the admin command .labprobe whispers read-only CoaProbe requests to an
+# online lab character as addon messages and collects the chunked answers the addon whispers back.
+# Accepted only for accounts whose name starts with CoA.ProbeRelay.AccountPrefix (case-insensitive).
+# Enable only on a lab server. Default: 0.
+CoA.ProbeRelay.Enable = 0
+CoA.ProbeRelay.AccountPrefix = "COALAB"
+
 # Log each consumed extension packet during protocol discovery.
 CoA.LogConsumedPackets = 1
 
@@ -508,11 +515,12 @@ Ascension.PrestigiousCache.SecondTokenChancePercent = 5
 
 #
 #    Ascension.PrestigiousCache.ClassicStages
-#        Description: How many of the Classic Prestigious Caches are released, 0-8, in the
-#                     order 1287304 held for Heroic Dungeons, Zul'Gurub, Molten Core,
+#        Description: Additional Classic pool limit, 0-8. Pools must also be released by
+#                     Ascension.CallboardCache.ReleaseStage. Existing tier caches obey both limits.
+#                     Pool order: 1287304 onwards for Heroic Dungeons, Zul'Gurub, Molten Core,
 #                     Onyxia, Blackwing Lair, Ruins of Ahn'Qiraj, Temple of Ahn'Qiraj,
 #                     Naxxramas. The generic "most recent Prestigious Cache available"
-#                     resolves to the newest released one.
+#                     resolves to the newest allowed populated pool.
 #        Default:     8
 
 Ascension.PrestigiousCache.ClassicStages = 8

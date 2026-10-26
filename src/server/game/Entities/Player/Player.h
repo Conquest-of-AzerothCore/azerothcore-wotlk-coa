@@ -1509,7 +1509,7 @@ public:
     void RemoveActiveQuest(uint32 questId, bool update = true);
     void RemoveRewardedQuest(uint32 questId, bool update = true);
     void SendQuestUpdate(uint32 questId);
-    QuestGiverStatus GetQuestDialogStatus(Object* questGiver);
+    QuestGiverStatus GetQuestDialogStatus(Object* questGiver, uint32 questFilter = 0);
     float GetQuestRate(bool isDFQuest = false, int32 questLevel = 0);
     void SetDailyQuestStatus(uint32 quest_id);
     bool IsDailyQuestDone(uint32 quest_id);
