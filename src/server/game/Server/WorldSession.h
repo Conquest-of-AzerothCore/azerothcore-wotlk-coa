@@ -1286,6 +1286,11 @@ public:                                                 // opcodes handlers
         return _isBot;
     }
 
+    [[nodiscard]] bool IsHeadlessBot() const
+    {
+        return _isBot && !m_Socket && !_socketlessPacketObserver;
+    }
+
 private:
     void ProcessQueryCallbacks();
 
