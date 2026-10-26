@@ -918,6 +918,7 @@ struct BalanceStageState
     bool resummonNeeded = false;
     std::size_t openerIndex = 0;
     uint32 petsOwnedStart = 0;
+    ObjectGuid actor;
     std::vector<Target> enemies;
     TimePoint fightStart;
 };
@@ -1658,50 +1659,51 @@ class BalanceAccounting
 public:
     static void Begin(ObjectGuid actor)
     {
-        _active = true;
-        _actor = actor;
-        _tally = {};
+        _tallies[actor] = {};
     }
 
-    static void End()
+    static void End(ObjectGuid actor)
     {
-        _active = false;
-        _actor.Clear();
+        _tallies.erase(actor);
     }
 
-    static BalanceStageTally const& Get()
+    static BalanceStageTally Get(ObjectGuid actor)
     {
-        return _tally;
+        auto const it = _tallies.find(actor);
+        return it != _tallies.end() ? it->second : BalanceStageTally{};
     }
 
     static void OnDamage(Unit* attacker, Unit* victim, uint32 damage)
     {
-        if (!_active || !attacker || !victim)
+        if (!attacker || !victim)
             return;
-        if (Player* owner = attacker->GetCharmerOrOwnerPlayerOrPlayerItself(); owner && owner->GetGUID() == _actor)
-            (attacker->GetGUID() == _actor ? _tally.damageDonePlayer : _tally.damageDonePets) += damage;
-        if (Player* owner = victim->GetCharmerOrOwnerPlayerOrPlayerItself(); owner && owner->GetGUID() == _actor)
-            (victim->GetGUID() == _actor ? _tally.damageTakenPlayer : _tally.damageTakenPets) += damage;
+        if (Player* owner = attacker->GetCharmerOrOwnerPlayerOrPlayerItself(); owner)
+            if (auto it = _tallies.find(owner->GetGUID()); it != _tallies.end())
+                (attacker->GetGUID() == owner->GetGUID() ? it->second.damageDonePlayer
+                                                           : it->second.damageDonePets) += damage;
+        if (Player* owner = victim->GetCharmerOrOwnerPlayerOrPlayerItself(); owner)
+            if (auto it = _tallies.find(owner->GetGUID()); it != _tallies.end())
+                (victim->GetGUID() == owner->GetGUID() ? it->second.damageTakenPlayer
+                                                         : it->second.damageTakenPets) += damage;
     }
 
     static void OnHeal(Unit* healer, Unit* receiver, uint32 gain)
     {
-        if (!_active || !healer || !receiver)
+        if (!healer || !receiver)
             return;
         Player* owner = healer->GetCharmerOrOwnerPlayerOrPlayerItself();
-        if (owner && owner->GetGUID() == _actor)
-            (healer->GetGUID() == _actor ? _tally.healingDonePlayer : _tally.healingDonePets) += gain;
+        if (!owner)
+            return;
+        if (auto it = _tallies.find(owner->GetGUID()); it != _tallies.end())
+            (healer->GetGUID() == owner->GetGUID() ? it->second.healingDonePlayer
+                                                     : it->second.healingDonePets) += gain;
     }
 
 private:
-    static bool _active;
-    static ObjectGuid _actor;
-    static BalanceStageTally _tally;
+    static std::map<ObjectGuid, BalanceStageTally> _tallies;
 };
 
-bool BalanceAccounting::_active = false;
-ObjectGuid BalanceAccounting::_actor;
-BalanceStageTally BalanceAccounting::_tally;
+std::map<ObjectGuid, BalanceStageTally> BalanceAccounting::_tallies;
 
 class GameplayCase
 {
@@ -2279,7 +2281,7 @@ public:
         }
         if (_balanceStage)
         {
-            BalanceAccounting::End();
+            BalanceAccounting::End(_balanceStage->actor);
             _balanceStage.reset();
         }
         DespawnBalanceStageEnemies();
@@ -3233,6 +3235,7 @@ private:
         {
             ResetBalanceStageActor(actor, player);
             BalanceStageState state;
+            state.actor = player->GetGUID();
             state.resummonNeeded = BalanceStageOpenerHolds(actor, player);
             _balanceStage = state;
         }
@@ -3252,7 +3255,7 @@ private:
             float const distance = step.get<float>("distance", 8.0f);
             uint32 const mapId = player->GetMapId();
             uint32 const instanceId = player->GetInstanceId();
-            BalanceAccounting::Begin(player->GetGUID());
+            BalanceAccounting::Begin(state.actor);
             for (auto const& enemy : step.get_child("enemies"))
             {
                 Position enemySpot = spot;
@@ -3289,8 +3292,8 @@ private:
 
         DespawnBalanceStageEnemies();
         StopOwnedUnits(player);
-        BalanceStageTally const tally = BalanceAccounting::Get();
-        BalanceAccounting::End();
+        BalanceStageTally const tally = BalanceAccounting::Get(state.actor);
+        BalanceAccounting::End(state.actor);
 
         double const durationS = double(elapsedMs) / 1000.0;
         Tree balance;
