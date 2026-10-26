@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import secrets
 import signal
+import subprocess
 import sys
 import tempfile
 import threading
@@ -104,7 +105,7 @@ def admit(case, sequence):
     pace = case.get('pace', 'accelerated')
     lane = min(set(range(lanes)) - set(running))
     ahead = [path for path in Path(cases).glob('case-*.json') if int(path.stem[5:]) > sequence]
-    log('lanes.log', {'sequence': sequence, 'name': scenario['name'], 'lane': lane, 'pace': pace,
+    log('lanes.log', {'pid': os.getpid(), 'sequence': sequence, 'name': scenario['name'], 'lane': lane, 'pace': pace,
                       'exclusive': case.get('exclusive', False), 'ahead': len(ahead), 'hour': case.get('hour'),
                       'running': sorted(item['name'] for item in running.values())})
     realm['hour'] = case.get('hour', start_hour)
@@ -116,10 +117,21 @@ def admit(case, sequence):
     running[lane] = {
         'case': case, 'scenario': scenario, 'name': scenario['name'], 'sequence': sequence, 'admitted': now,
         'exclusive': case.get('exclusive') is True, 'realm_local_start': f"2026-09-25 {realm['hour']:02d}:00:00",
-        'finish': float('inf') if 'batch-hang' in contract else now + duration,
+        'finish': float('inf') if 'batch-hang' in contract or 'hold-for-peer' in contract else now + duration,
+        'hold': 'hold-for-peer' in contract,
         'crash': now + 0.15 if 'lane-crash' in contract and accelerated else float('inf'),
         'passed': 'batch-fail' not in contract and 'always-fail' not in contract
         and not ('accelerated-fail' in contract and accelerated)}
+
+
+def peer_admitted():
+    for line in Path(__file__).with_name('lanes.log').read_text().splitlines():
+        try:
+            if json.loads(line)['pid'] != os.getpid():
+                return True
+        except ValueError:
+            continue
+    return False
 
 
 def report(scenario, run_id, passed, extra):
@@ -165,6 +177,7 @@ log('clocks.log', {'mode': 'queue' if cases else 'single',
                    **{name: config[f'CoAGameplayTest.{name}'] for name in run.CLOCK_SETTINGS}})
 log('databases.log', {'mode': 'queue' if cases else 'single', **{key: config[key] for key in DATABASE_KEYS}})
 log('timezones.log', {'mode': 'queue' if cases else 'single', 'TZ': os.environ.get('TZ')})
+log('ports.log', {'mode': 'queue' if cases else 'single', 'port': config['WorldServerPort']})
 if cases and (config['CoAGameplayTest.ScenarioFile'] or config['CoAGameplayTest.ResultFile']):
     sys.exit(6)
 if clock not in ('real', 'simulated') or not 1 <= lanes <= 15 or lanes > 1 and not simulated \
@@ -173,6 +186,13 @@ if clock not in ('real', 'simulated') or not 1 <= lanes <= 15 or lanes > 1 and n
 if cases and '--queue-limit' in sys.argv:
     queue_starts = [line for line in starts.read_text().splitlines() if line.startswith('queue')]
     if len(queue_starts) > int(sys.argv[sys.argv.index('--queue-limit') + 1]):
+        sys.exit(1)
+if cases and ('--statement-limit-slot' in sys.argv or '--statement-limit-once' in sys.argv):
+    server = Path(config['LogsDir']).name
+    if (server == 'slot-0-1' if '--statement-limit-once' in sys.argv
+            else server.startswith(f"slot-{sys.argv[sys.argv.index('--statement-limit-slot') + 1]}-")):
+        (Path(config['LogsDir']) / 'Errors.log').write_text(
+            "Can't create more than max_prepared_stmt_count statements (current value: 16382)\n")
         sys.exit(1)
 ready = {'run_id': run_id, 'status': 'ready', 'waiting_for_start': 'true' if start else 'false'}
 if cases:
@@ -207,6 +227,8 @@ while True:
         item = running[lane]
         if now >= item['crash']:
             crash()
+        if item['hold'] and peer_admitted():
+            item.update(hold=False, finish=now + 1.2)
         if now >= item['finish']:
             del running[lane]
             extra = {'batch_id': run_id, 'sequence': str(item['sequence']),
@@ -570,13 +592,14 @@ class BatchTests(unittest.TestCase):
             'completed case', 'No queue-mode worldserver became ready'])
 
     def test_cleanup_failure_fails_every_case_of_that_server(self):
-        self.cleanup_result = ['coa_test_leftover_auth']
+        self.cleanup_result = [{'schema': 'coa_test_leftover_auth', 'error': 'MySQL operation failed'}]
         code, result = self.batch('--fresh-databases', '--no-isolated-rerun', '--scenario', 'alpha', 'beta')
         self.assertEqual(code, 1)
         for key in ('alpha', 'beta'):
             summary = self.summary(key)
             self.assertEqual(summary['status'], 'failed')
-            self.assertEqual(summary['cleanup_failed'], ['coa_test_leftover_auth'])
+            self.assertEqual(summary['cleanup_failed'],
+                             [{'schema': 'coa_test_leftover_auth', 'error': 'MySQL operation failed'}])
             self.assertEqual(result['cases'][key]['status'], 'failed')
         self.assertTrue(result['failures'])
         self.assertEqual(verification.verify([self.output / 'cases' / 'alpha'], self.definitions)['status'],
@@ -1311,8 +1334,7 @@ class BatchTests(unittest.TestCase):
         self.assertFalse(batch.applied_database_settings(ready | {'character_db_workers': '16'}, settings))
 
     def test_clock_arguments_are_validated_before_any_server_starts(self):
-        for arguments, message in ((['--clock', 'simulated', '--jobs', '2'], 'runs one worldserver'),
-                                   (['--lanes', '2'], '--lanes above 1 requires --clock simulated'),
+        for arguments, message in ((['--lanes', '2'], '--lanes above 1 requires --clock simulated'),
                                    (['--step-ms', '5', '--poll-cap-ms', '5'],
                                     'Clock tuning (--step-ms, --poll-cap-ms) requires --clock simulated'),
                                    (['--clock', 'simulated', '--lanes', '16'], '--lanes must be between 1 and 15'),
@@ -1326,6 +1348,162 @@ class BatchTests(unittest.TestCase):
                 self.assertIn(message, self.stderr.getvalue())
         self.assertEqual(self.starts(), [])
         self.assertFalse(self.output.exists())
+
+    def shape(self, result):
+        cases = {key: (record['status'], record['mode'], sorted(set(record) - {'server', 'seconds'}))
+                 for key, record in result['cases'].items()}
+        files = {key: sorted(path.name for path in (self.output / 'cases' / key).iterdir()) for key in result['cases']}
+        return sorted(result), result['selected'], result['counts'], cases, files
+
+    def test_simulated_clock_accepts_several_jobs(self):
+        selection = ['--lanes', '2', '--scenario', *SLOW, 'beta', 'alpha']
+        code, serial = self.simulated(*selection)
+        self.assertEqual(code, 0, self.stderr.getvalue())
+        serial_shape = self.shape(serial)
+        self.output = self.path / 'parallel-output'
+        (self.path / 'starts.log').unlink()
+        code, parallel = self.simulated('--jobs', '2', *selection)
+        self.assertEqual(code, 0, self.stderr.getvalue())
+        self.assertEqual((parallel['status'], parallel['clock'], parallel['jobs'], parallel['lanes']),
+                         ('passed', 'simulated', 2, 2))
+        self.assertEqual(self.shape(parallel), serial_shape)
+        self.assertEqual(parallel['verification']['status'], 'passed')
+        self.assertEqual([mode for mode, pid in self.starts()], ['queue', 'queue'])
+        self.assertEqual({server['slot'] for server in parallel['servers']}, {0, 1})
+        self.assertEqual({server['status'] for server in parallel['servers']}, {'stopped'})
+        self.assertEqual(parallel['simulation'], serial['simulation'])
+
+    def assert_exclusive_cases_spread(self, exclusive):
+        code, result = self.simulated('--jobs', '2', '--lanes', '3', '--scenario', *exclusive, *SLOW[:2], 'beta')
+        self.assertEqual(code, 0, self.stderr.getvalue())
+        self.assertEqual(result['simulation']['exclusive'], exclusive)
+        self.assertEqual({self.summary(key)['batch']['slot'] for key in exclusive}, {0, 1})
+        admissions = self.events('lanes.log')
+        names = {'Linger-One', 'Linger-Two'}
+        alone = [event for event in admissions if event['name'] in names]
+        self.assertEqual([(event['exclusive'], event['running'], event['ahead']) for event in alone],
+                         [(True, [], 0)] * 2)
+        self.assertFalse(any(names & set(event['running']) for event in admissions))
+        self.assertEqual(sorted(event['name'] for event in admissions if not event['exclusive']),
+                         ['Beta', 'Slow one', 'Slow two'])
+
+    def test_exclusive_cases_spread_over_servers(self):
+        exclusive = ['linger-one', 'linger-two']
+        for key in exclusive:
+            self.write(self.definitions / 'scenarios' / f'{key}.json',
+                       scenario(key.title(), 'hold-for-peer', wait=5000))
+        self.write(self.definitions / batch.POLICY_FILE,
+                   {'schema': 1, 'exclusive': {key: 'The fake worldserver treats it as process-global'
+                                               for key in exclusive}})
+        self.assert_exclusive_cases_spread(exclusive)
+
+    def test_encounter_cases_spread_over_servers_one_per_server(self):
+        exclusive = ['linger-one', 'linger-two']
+        for key in exclusive:
+            encounter = scenario(key.title(), 'hold-for-peer', wait=5000)
+            encounter['steps'].insert(0, {'action': 'encounter_start', 'actor': 'caster', 'boss_entry': 36})
+            self.write(self.definitions / 'scenarios' / f'{key}.json', encounter)
+        self.assert_exclusive_cases_spread(exclusive)
+
+    def test_each_job_has_its_own_cache_slot_and_port(self):
+        ports = iter([40001, 40001, 40002, 40003, 40004])
+        with patch.object(run, 'WorldCache', FakeCache), patch.object(run, 'unused_port', lambda: next(ports)):
+            code, result = self.batch('--clock', 'simulated', '--jobs', '2', '--lanes', '2', '--scenario', *SLOW)
+        self.assertEqual(code, 0, self.stderr.getvalue())
+        self.assertEqual({cache.root for cache in FakeCache.instances},
+                         {(self.path / 'cache' / 'slot-0').resolve(), (self.path / 'cache' / 'slot-1').resolve()})
+        self.assertEqual(len({cache.metadata['world_id'] for cache in FakeCache.instances}), 2)
+        self.assertEqual(sorted(entry['port'] for entry in self.events('ports.log')), ['40001', '40002'])
+        self.assertEqual({server['slot'] for server in result['servers']}, {0, 1})
+
+        class LeasedCache(FakeCache):
+            def prepare(self, refresh=False):
+                run.require(self.root.name != 'slot-1', f'World cache is leased: {self.root / "lease.json"}')
+                super().prepare(refresh)
+
+        self.output = self.path / 'leased-output'
+        with patch.object(run, 'WorldCache', LeasedCache):
+            code, result = self.batch('--clock', 'simulated', '--jobs', '2', '--lanes', '2', '--scenario', *SLOW)
+        leased = [server for server in result['servers'] if server['slot'] == 1]
+        self.assertTrue(leased)
+        self.assertTrue(all(server['status'] == 'failed' and 'World cache is leased' in server['message']
+                            and 'slot-1' in server['message'] for server in leased))
+        self.assertIn('SERVER slot-1-1 FAILED: World cache is leased', self.stdout.getvalue())
+        self.assertEqual({key: case['status'] for key, case in result['cases'].items()},
+                         dict.fromkeys(SLOW, 'passed'))
+
+    def test_default_jobs_is_unchanged(self):
+        arguments = ['--worldserver', 'w', '--config', 'c', '--mysql', 'm', '--mysqldump', 'd', '--output', 'o']
+        for clock in (batch.REAL_CLOCK, batch.SIMULATED_CLOCK):
+            with self.subTest(clock=clock):
+                self.assertEqual(batch.parser().parse_args([*arguments, '--clock', clock]).jobs, 1)
+        code, result = self.simulated('--lanes', '2', '--scenario', 'alpha', *SLOW)
+        self.assertEqual(code, 0, self.stderr.getvalue())
+        self.assertEqual(result['jobs'], 1)
+        self.assertEqual([mode for mode, pid in self.starts()], ['queue'])
+        self.assertEqual([server['slot'] for server in result['servers']], [0])
+        self.assertEqual(len(self.events('ports.log')), 1)
+
+    def test_simulated_server_lost_before_readiness_fails_the_batch_and_names_the_statement_limit(self):
+        command = self.command
+        self.command = lambda config: [*command(config), '--statement-limit-slot', '1']
+        code, result = self.simulated('--jobs', '2', '--lanes', '2', '--scenario', *SLOW)
+        self.assertEqual(code, 1)
+        self.assertEqual(result['status'], 'failed')
+        self.assertEqual({case['status'] for case in result['cases'].values()}, {'passed'})
+        lost = [server for server in result['servers'] if server['status'] == 'failed']
+        self.assertTrue(lost)
+        self.assertTrue(all('before readiness' in server['message'] and 'max_prepared_stmt_count' in server['message']
+                            for server in lost))
+        remedy = ('raise max_prepared_stmt_count on the MySQL server or lower the character database workers '
+                  '(verify_all.py --gameplay-db-workers or setting gameplay_db_workers; '
+                  'batch.py --character-db-workers)')
+        self.assertTrue(any(remedy in failure for failure in result['failures']))
+
+    def test_single_simulated_server_still_restarts_after_a_startup_exit(self):
+        command = self.command
+        self.command = lambda config: [*command(config), '--statement-limit-once']
+        code, result = self.simulated('--lanes', '2', '--scenario', 'beta')
+        self.assertEqual(code, 0, self.stderr.getvalue())
+        self.assertEqual((result['status'], result['failures']), ('passed', []))
+        self.assertEqual([server['status'] for server in result['servers']], ['failed', 'stopped'])
+        self.assertIn('max_prepared_stmt_count', result['servers'][0]['message'])
+
+    def test_server_cleanup_error_keeps_the_defaults_file_out(self):
+        timeout = subprocess.TimeoutExpired(['mysql', '--defaults-extra-file=/private/world.cnf'], 600)
+        messages = []
+        server = SimpleNamespace(stuck=False, summary={}, fail=lambda message, unattributed: messages.append(message))
+        database = SimpleNamespace(names={'world': 'coa_test_world'})
+        with patch.object(run, 'release_databases', side_effect=timeout):
+            batch.Server.release(server, database, None)
+        self.assertEqual(server.summary['cleanup_error'], 'timed out after 600 s')
+        self.assertEqual(server.summary['cleanup_failed'],
+                         [{'schema': 'coa_test_world', 'error': 'timed out after 600 s'}])
+        self.assertNotIn('private', json.dumps(server.summary))
+        self.assertEqual(messages, ["Database cleanup failed: ['coa_test_world']"])
+
+    def test_one_queued_case_keeps_the_restart_behaviour_whatever_the_jobs(self):
+        command = self.command
+        self.command = lambda config: [*command(config), '--statement-limit-once']
+        code, result = self.simulated('--jobs', '4', '--lanes', '2', '--scenario', 'beta')
+        self.assertEqual(code, 0, self.stderr.getvalue())
+        self.assertEqual((result['status'], result['failures']), ('passed', []))
+        self.assertEqual([(server['slot'], server['status']) for server in result['servers']],
+                         [(0, 'failed'), (0, 'stopped')])
+
+    def test_real_pace_reruns_wait_for_every_server(self):
+        self.write(self.definitions / 'scenarios' / 'linger.json', scenario('Linger', 'hold-for-peer', wait=5000))
+        self.write(self.definitions / batch.POLICY_FILE,
+                   {'schema': 1, 'exclusive': {'linger': 'The fake worldserver treats it as process-global'}})
+        code, result = self.simulated('--jobs', '2', '--lanes', '2', '--real-pace-rerun', '--scenario', 'linger',
+                                      'jittery')
+        self.assertEqual(code, 0, self.stderr.getvalue())
+        self.assertEqual({self.summary(key)['batch']['slot'] for key in ('linger', 'jittery')}, {0, 1})
+        real = [event['name'] for event in self.events('lanes.log') if event['pace'] == 'real']
+        self.assertEqual(real, ['Jittery'])
+        self.assertEqual(result['acceleration_sensitive'], ['jittery'])
+        self.assertEqual((result['cases']['linger']['status'], result['cases']['linger']['mode']),
+                         ('passed', 'simulated'))
 
     def test_invalid_clock_policy_fails_before_any_server_starts(self):
         for policy, message in (({'schema': 1, 'exclusive': {'missing': 'Global state'}}, 'unknown scenario missing'),

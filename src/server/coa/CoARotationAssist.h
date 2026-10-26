@@ -5,6 +5,9 @@
 #include <span>
 #include <string_view>
 
+class Player;
+class Unit;
+
 namespace CoARotationAssist
 {
     enum class RuleCondition : uint8_t
@@ -63,6 +66,8 @@ namespace CoARotationAssist
                     return spell;
         return 0;
     }
+
+    uint32_t ChooseSpell(Player* player, Unit* target, bool healing);
 }
 
 #endif

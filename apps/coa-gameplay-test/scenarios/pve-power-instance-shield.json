@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "PvE Power raises absorb shields in instances only",
+  "contract": "Requires PvePower.Enable = 1. A level 60 priest wearing three cloth pieces with PvE Power +38 each (114 x 0.02% = 2.28%) gets 2.28% more Power Word: Shield inside the Deadmines than the same priest in the open world, where PvE Power adds nothing to absorbs. The gear's own scaled stats are identical in both places, so the ratio isolates PvE Power.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "p", "race": 1, "class": 5, "level": 60 }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "ms": 6000 },
+    { "action": "learn", "actor": "p", "spell": 25218 },
+    { "action": "add_item", "actor": "p", "item": 24585, "count": 1 },
+    { "action": "add_item", "actor": "p", "item": 24583, "count": 1 },
+    { "action": "add_item", "actor": "p", "item": 24602, "count": 1 },
+    { "action": "equip", "actor": "p", "item": 24585, "slot": 0 },
+    { "action": "equip", "actor": "p", "item": 24583, "slot": 4 },
+    { "action": "equip", "actor": "p", "item": 24602, "slot": 6 },
+    { "action": "wait", "ms": 6000 },
+    { "action": "cast", "actor": "p", "spell": 25218, "target": "p" },
+    { "action": "assert", "label": "The geared priest gets a shield in the open world", "actor": "p", "metric": "aura", "spell": 25218, "equals": 1, "within_ms": 4000 },
+    { "action": "snapshot", "actor": "p", "metric": "aura_amount", "spell": 25218, "save_as": "shield_open_world" },
+    { "action": "set_aura", "actor": "p", "spell": 25218, "stacks": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 6788, "stacks": 0 },
+    { "action": "teleport", "actor": "p", "map": 36, "x": -16.4, "y": -383.07, "z": 61.78 },
+    { "action": "wait", "ms": 6000 },
+    { "action": "assert", "label": "The priest is in the Deadmines", "actor": "p", "metric": "map_id", "equals": 36 },
+    { "action": "cast", "actor": "p", "spell": 25218, "target": "p" },
+    { "action": "assert", "label": "The geared priest gets a shield in the instance", "actor": "p", "metric": "aura", "spell": 25218, "equals": 1, "within_ms": 4000 },
+    { "action": "assert", "label": "PvE Power +114 adds 2.28% to a shield in an instance and nothing in the open world", "actor": "p", "metric": "aura_amount", "spell": 25218, "ratio_to": "shield_open_world", "min": 1.0205, "max": 1.0245 }
+  ]
+}

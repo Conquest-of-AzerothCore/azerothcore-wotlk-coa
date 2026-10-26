@@ -26,6 +26,7 @@
 #include "GridNotifiers.h"
 #include "LocalLevelScaling.h"
 #include "Log.h"
+#include "MountDisplayFallback.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"
@@ -3545,6 +3546,8 @@ void AuraEffect::HandleAuraMounted(AuraApplication const* aurApp, uint8 mode, bo
             }
 
         }
+        else
+            displayId = MountDisplayFallback::For(creatureEntry);
         target->Mount(displayId, vehicleId, GetMiscValue());
     }
     else

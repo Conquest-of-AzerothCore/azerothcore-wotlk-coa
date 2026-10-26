@@ -572,7 +572,7 @@ private:
         SelectTargetList(players, 40, SelectTargetMethod::Random, 0, 150.0f, true);
         for (Unit* player : players)
             if (player->GetExactDist2d(&swirl) <= BatCrashRadius)
-                DealSpellValue(me, player, spellId, Rolled(me, player, BatCrash));
+                DealSpellValue(me, player, spellId, Rolled(me, player, BatCrash, spellInfo));
     }
 
     void TickWebs()
@@ -583,7 +583,7 @@ private:
         SelectTargetList(players, 40, SelectTargetMethod::Random, 0, 150.0f, true);
         for (Unit* player : players)
             if (player->HasAura(spellId, me->GetGUID()))
-                DealSpellValue(me, player, spellId, int32(Unscaled(me, player, float(player->CountPctFromMaxHealth(pct)))));
+                DealSpellValue(me, player, spellId, int32(Unscaled(me, player, float(player->CountPctFromMaxHealth(pct)), sSpellMgr->GetSpellInfo(spellId))));
     }
 
     struct FallingBat
@@ -690,7 +690,7 @@ class spell_coa_muzah_ripped_by_the_glaives : public SpellScript
 
     void HandleHit()
     {
-        SetHitDamage(Rolled(GetCaster(), GetHitUnit(), GlaiveHit));
+        SetHitDamage(Rolled(GetCaster(), GetHitUnit(), GlaiveHit, GetSpellInfo()));
     }
 
     void AddStack()
@@ -720,7 +720,7 @@ class spell_coa_muzah_ripped_by_the_glaives_aura : public AuraScript
     {
         canBeRecalculated = true;
         if (Unit* owner = GetUnitOwner())
-            amount = int32(Logged(GetCaster() ? GetCaster() : owner, owner, GlaiveBleedPerStack));
+            amount = int32(Logged(GetCaster() ? GetCaster() : owner, owner, GlaiveBleedPerStack, GetSpellInfo()));
     }
 
     void Register() override
@@ -747,7 +747,7 @@ class spell_coa_muzah_cobra_shot : public SpellScript
     void HandleHit()
     {
         if (Unit* target = GetHitUnit())
-            SetHitDamage(Rolled(GetCaster(), target, target == GetExplTargetUnit() ? CobraPrimary : CobraSplash));
+            SetHitDamage(Rolled(GetCaster(), target, target == GetExplTargetUnit() ? CobraPrimary : CobraSplash, GetSpellInfo()));
     }
 
     void RemoveDot()
@@ -776,7 +776,7 @@ class spell_coa_muzah_glaive_strike : public SpellScript
 
     void HandleHit()
     {
-        SetHitDamage(Rolled(GetCaster(), GetHitUnit(), GlaiveStrike));
+        SetHitDamage(Rolled(GetCaster(), GetHitUnit(), GlaiveStrike, GetSpellInfo()));
     }
 
     void Register() override
@@ -794,7 +794,7 @@ class spell_coa_muzah_entangling_web : public SpellScript
     void HandleHit()
     {
         if (Unit* target = GetHitUnit())
-            SetHitDamage(int32(Unscaled(GetCaster(), target, float(target->CountPctFromMaxHealth(WebHitPct(target))))));
+            SetHitDamage(int32(Unscaled(GetCaster(), target, float(target->CountPctFromMaxHealth(WebHitPct(target))), GetSpellInfo())));
     }
 
     void Register() override

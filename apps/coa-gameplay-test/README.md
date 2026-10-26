@@ -5,7 +5,13 @@ The runtime component is `src/server/coa/CoAGameplayTest.cpp`; it is disabled by
 through the gameplay stage of [`tools/verify_all.py`](../../docs/coa/verification.md), which runs them with
 `batch.py` in queue mode, by default up to 15 at once in one worldserver on a
 [simulated clock](../../docs/coa/verification.md#accelerated-single-server-mode); this directory's runners are its
-implementation.
+implementation. `--gameplay-jobs N` (`batch.py --jobs N`, default 1) runs N simulated-clock worldservers, each with
+its own world-cache slot, port and auth/characters schemas, and runs each exclusive case alone on one of them. Each
+server needed about 7,700 MySQL prepared statements and up to 5.1 GB RSS on one workstation (measured 2026-10-25
+with the default 16 character database workers; not a guarantee), and a world copy on first use. A stock MySQL
+(`max_prepared_stmt_count` 16382) with no other client therefore fits two, fewer when a running worldserver or
+authserver uses it too; raise `max_prepared_stmt_count` or lower `--gameplay-db-workers` for more
+([several simulated servers](../../docs/coa/verification.md#several-simulated-servers)).
 
 ## Find and verify a mechanic
 
@@ -168,6 +174,19 @@ Existing accounts and characters are not copied. The MySQL user needs read acces
 to create/import/drop the test schemas. Sources must be local. No authserver or game client is needed.
 The copies omit MySQL triggers, routines and scheduled events.
 
+The copy runs inside MySQL: each source table is recreated from its `SHOW CREATE TABLE` definition, so keys,
+foreign keys, checks, table options and the `AUTO_INCREMENT` counter match the source, and its rows are copied with
+`INSERT ... SELECT` at READ-COMMITTED, which reads the source without locking its rows. Tables are copied largest
+first over `--copy-workers` MySQL connections (1-32, default `min(8, CPU count)`; `gameplay_copy_workers` in
+`conf/verify-all.json`); 1 copies one table at a time. The same setting, capped at 8, sets how many
+connections checksum the world schema. The limit is per server: a batch whose servers prepare at once
+(`--jobs` above 1) opens up to `--copy-workers` times the number of those servers. Each table is read in its own
+statement, so unlike a single-transaction dump the copy is not one snapshot of the source; the world cache checks
+the source again after copying, and other source changes during a copy are not detected. When a source schema has
+views, triggers, routines or events, or the server uses statement-based binary logging, that schema is copied with
+`mysqldump | mysql` instead and the run log says why. A failed copy stops the remaining tables and drops the
+partial schema; a partial world cache is never marked ready.
+
 If the normal server account cannot create schemas, set `database_client_config` in `conf/verify-all.json`
 (the runners' `--database-client-config`). The existing MySQL `[client]` file must provide `host`, `port`,
 `user` and `password`, with the same host/port as all source connections. Its credentials are used for
@@ -271,7 +290,8 @@ files.
 - `result.json`: server version, actual values and step outcomes.
   Failed cases include `failure_actors` with native positions, combat targets and controlled-unit movement.
   Fixture teardown removes descendants of cloned creatures before their private phase is reused.
-- `summary.json`: native-stage result, binary/scenario SHA-256 and any cleanup failure.
+- `summary.json`: native-stage result, binary/scenario SHA-256 and any cleanup failure
+  (`cleanup_failed`: a list of `{"schema", "error"}` entries; dropping a schema may take up to 600 s).
 - `verification.json`: combined native and registered numerical verification for catalog scenarios (one file
   for the whole selection in a batch).
 
@@ -388,7 +408,7 @@ parries, or forcing critical hits, in deterministic tests.
 Optional `allow_regeneration: false` suppresses only that fixture player's ordinary health/power regeneration
 through the native regeneration hook. Spell costs, healing, energize effects and combat remain enabled.
 It defaults to true and has no effect on other players or on a disabled harness.
-Optional `role`, `rotation`, `heal_spell` and `taunt_spell` make the player a
+Optional `role`, `rotation`, `heal_spell`, `taunt_spell` and `rotation_assist` make the player a
 [raid bot](#raid-bot-roles) during an encounter. A living tank bot holds a threat floor on the boss as a test
 fixture, not threat realism: each tick it raises its threat through the native threat manager to 110 percent of
 the highest threat of any non-tank unit plus 100, so boss mechanics see the tank as the victim deterministically.
@@ -725,6 +745,8 @@ periodic aura effect's snapshotted crit chance; `aura_script_value` requires `ke
 `script_spell_damage_taken` and `script_periodic_damage_taken` require `target` as the attacker (and `spell` for
 the latter two) and return 1000 after the registered module damage-taken hooks. `script_heal_received` requires
 `spell` and `target` as the healer and returns 1000 after the registered heal-received hooks, with the actor as recipient.
+`script_melee_damage_dealt` requires `target` as the victim and returns 1000 after the registered melee damage hooks
+with the actor as the attacker.
 `set_health` also accepts a creature actor, or `pet: true` with a player actor to set its current pet's health.
 `cast` also accepts a creature actor: the creature casts `spell` on `target` (itself by default) with
 `TRIGGERED_FULL_MASK`, like `.cast back ... triggered`, and the step fails unless the cast starts.
@@ -1021,8 +1043,24 @@ until the boss's current victim is a tank, so the tank holds the first threat; h
 | `ranged` | Stays in place; within 30 yards of the boss it turns to face it and casts its rotation on it. |
 | `healer` | Stays in place and casts `heal_spell` on the living scenario player within 40 yards with the lowest health below 90 percent (the first listed on a tie). |
 
+Optional `rotation_assist: true` (boolean, default false, only with a `role`) makes the bot choose its damage
+and heal spells with the [`.rotation` selection](../../docs/coa/rotation-assist.md) of its active CoA
+specialization whenever that specialization has imported rules: a damage role asks for a spell on the boss, a
+healer for a heal on the patient chosen as above. The choice is still asked only while the bot is not casting and
+has no queued cast, and still goes through `CMSG_CAST_SPELL`. The bot then never falls back to `rotation` or
+`heal_spell` during the fight; those stay required where they are today and are the spells it casts when it does
+not opt in, has no active specialization, or its specialization has no rules. The rotation never chooses a taunt,
+so a tank's `taunt_spell` keeps running before its rotation. Harness bots ignore `CoA.RotationAssist.Enable`,
+which gates only the player command. All 21 CoA classes (12-32) have rules for all 70 of their specializations
+(1-63 and 95-101); a character without an active specialization, the ten stock classes and HERO (94) use the
+scenario spells. Rules existing does not mean each profile is tuned: Starcaller Hydromancy (45) has 9 rules and
+Spirit Mage Runic (61) 10.
+
 Bots do not dodge mechanics. The [raid bot scenario](scenarios/raid-bots-tank-healer.json) runs a tank, a melee
 bot casting its rotation and a healer against a defensive fixture, whose swings must land only on the tank.
+[`raid-bots-rotation-assist`](scenarios/raid-bots-rotation-assist.json) adds an Incineration Pyromancer with
+`rotation_assist` next to a tank and a healer that use their scenario spells, and checks that it casts Ignite once
+and then Flare Bolt, never its scenario fallback Fire Blast, while it stands within Fire Blast's 20 yd range.
 
 ## Evidence boundaries
 
