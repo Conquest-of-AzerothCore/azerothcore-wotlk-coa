@@ -336,6 +336,7 @@ void ApplyContracts(SpellInfo* info)
     {
         info->Effects[EFFECT_2].Effect = 0;
         info->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_TAKE_DAMAGE | AURA_INTERRUPT_FLAG_DIRECT_DAMAGE;
+        info->AttributesCu |= SPELL_ATTR0_CU_POSITIVE_EFF1;
     }
     if (id == 805773 || id == 92093)
         for (SpellEffectInfo& effect : info->Effects)
