@@ -1904,6 +1904,9 @@ void Player::UpdateTriggerVisibility()
 
 void Player::UpdateForQuestWorldObjects()
 {
+    if (!GetSession() || GetSession()->IsHeadlessBot())
+        return;
+
     if (GetObjectVisibilityContainer().GetVisibleWorldObjectsMap()->empty())
         return;
 
