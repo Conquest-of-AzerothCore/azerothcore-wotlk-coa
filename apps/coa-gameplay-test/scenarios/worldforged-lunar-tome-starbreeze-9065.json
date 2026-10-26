@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "name": "Worldforged Lunar Tome stands on the Starbreeze house's upper floor",
+  "contract": "Issues #8776 and #9065 report the Lunar Tome (entry 515431, guid 6941937) in Starbreeze Village, Teldrassil, floating inside the two-storey house, out of reach from the upper floor where Gaerolas Talvethren (creature 46222 at map 1 (9845.15,440.93,1317.27)) stands; the #9065 reporter stood upstairs at (9832.41,437.54,1317.18). Expected position, independent of the current row: the AscensionDB world-object catalogue (cachedata/catalogue/gameobjects.tsv, 4 sightings from GameObjects-Bronzebeard, dumps_part2 and dumps_part4) records the object itself at map 1 (9819.400,435.697,1317.230); the archived worldforged provenance (supplemental/worldforged dump_zips_wf_locations.csv) puts the nearest dumped object 515431 at Z 1317.2284 and 7.0, 8.2 and 20.4 yd from three map-pin conversions, distances that place it at that same XY. The module's first catalog row 6900438 (2026_09_16_00_worldforged_pickups.sql) stood there; the realm-map pass 2026_09_23_05_worldforged_map.sql replaced it with the map marker XY (9823.8,442.2) and 2026_09_23_06_worldforged_recorded_heights.sql gave that XY the sighting's Z 1317.228, 7.9 yd from the sighting. In the client's NightElf2Story.wmo (common-2.MPQ, unchanged in patch-WB1; placement uid 166302 at (9828.46,435.84,1304.00), yaw 16.5 from the MODF extents) the sighting XY has the upper floor at 1317.18 and the marker XY has no surface between the ground floor at 1307.79 and the roof at 1330.1, no upper floor within 4.4 yd. rev_1793039644379343700.sql moves the spawn to the sighting. The marker-XY point is a calibration snapshot, not an assertion.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "auditor",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Lunar Tome stands within a yard of the house's upper floor",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 6941937,
+      "spawn_type": "gameobject",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Lunar Tome is grounded",
+      "actor": "auditor",
+      "metric": "spawn_placement",
+      "guid": 6941937,
+      "spawn_type": "gameobject",
+      "tolerance": 1,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Calibration snapshot only: Lunar Tome before #9065, over the stairwell at the map-marker XY",
+      "actor": "auditor",
+      "metric": "point_ground_gap",
+      "map": 1,
+      "x": 9823.8,
+      "y": 442.2,
+      "z": 1317.228,
+      "save_as": "lunar_tome_before"
+    }
+  ]
+}
