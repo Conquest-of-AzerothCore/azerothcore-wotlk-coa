@@ -2337,6 +2337,15 @@ Achievement.RealmFirstKillWindow = 60
 Achievement.RealmFirstRaceLimitOnePerCharacter = 1
 
 #
+#    Achievement.RealmFirstBlockBots
+#        Description: Companions (bots) cannot earn 'Realm First!' achievements, so they never take
+#                     a server first away from real players.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled, bots can earn them like any player)
+
+Achievement.RealmFirstBlockBots = 1
+
+#
 ###################################################################################################
 
 ###################################################################################################

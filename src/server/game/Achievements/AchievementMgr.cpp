@@ -1840,6 +1840,10 @@ bool AchievementMgr::IsCompletedCriteria(AchievementCriteriaEntry const* achieve
         if (sAchievementMgr->IsRealmCompleted(achievement))
             return false;
 
+        if (sWorld->getBoolConfig(CONFIG_ACHIEVEMENT_REALM_FIRST_BLOCK_BOTS))
+            if (Player* owner = GetPlayer(); owner && owner->GetSession() && owner->GetSession()->IsBot())
+                return false;
+
         if (sWorld->getBoolConfig(CONFIG_ACHIEVEMENT_REALM_FIRST_RACE_LIMIT_ONE_PER_CHARACTER))
         {
             // A character may only have 1 race-specific 'Realm First!' achievement
