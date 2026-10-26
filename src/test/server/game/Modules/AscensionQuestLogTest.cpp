@@ -1,8 +1,11 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "AscensionGlory.h"
+#include "AscensionItemLadder.h"
 #include "AscensionQuestLog.h"
 #include "UpdateFieldFlags.h"
 #include "gtest/gtest.h"
+#include <array>
 
 namespace
 {
@@ -16,23 +19,23 @@ void ExpectAddonField(WorldPacket data, ObjectGuid guid, uint32 field, uint32 va
 }
 }
 
-TEST(AscensionQuestLog, LevelOfFirstSlotIsAddonField100)
+TEST(AscensionQuestLog, LevelOfFirstSlotIsAddonField152)
 {
     ObjectGuid const guid = ObjectGuid::Create<HighGuid::Player>(4242);
-    ExpectAddonField(AscensionQuestLog::BuildLevel(guid, 0, 12), guid, 100, 12);
+    ExpectAddonField(AscensionQuestLog::BuildLevel(guid, 0, 12), guid, 152, 12);
 }
 
-TEST(AscensionQuestLog, RewardXPOfFirstSlotIsAddonField36)
+TEST(AscensionQuestLog, RewardXPOfFirstSlotIsAddonField88)
 {
     ObjectGuid const guid = ObjectGuid::Create<HighGuid::Player>(4242);
-    ExpectAddonField(AscensionQuestLog::BuildRewardXP(guid, 0, 1450), guid, 36, 1450);
+    ExpectAddonField(AscensionQuestLog::BuildRewardXP(guid, 0, 1450), guid, 88, 1450);
 }
 
 TEST(AscensionQuestLog, LastSlotStaysInsideItsFieldRange)
 {
     ObjectGuid const guid = ObjectGuid::Create<HighGuid::Player>(7);
-    ExpectAddonField(AscensionQuestLog::BuildRewardXP(guid, 63, 90), guid, 99, 90);
-    ExpectAddonField(AscensionQuestLog::BuildLevel(guid, 63, 80), guid, 163, 80);
+    ExpectAddonField(AscensionQuestLog::BuildRewardXP(guid, 63, 90), guid, 151, 90);
+    ExpectAddonField(AscensionQuestLog::BuildLevel(guid, 63, 80), guid, 215, 80);
 }
 
 TEST(AscensionQuestLog, All64SlotsHavePrivateStateAndPartyQuestIds)
@@ -55,4 +58,24 @@ TEST(AscensionQuestLog, AddonRewardAndLevelRangesDoNotOverlap)
 {
     EXPECT_EQ(AscensionQuestLog::RewardXPField + MAX_QUEST_LOG_SIZE, AscensionQuestLog::LevelField);
     EXPECT_LT(AscensionQuestLog::RewardXPField + MAX_QUEST_LOG_SIZE - 1, AscensionQuestLog::LevelField);
+}
+
+TEST(AscensionQuestLog, QuestFieldsLieBeyondEveryGenuineClientUnitField)
+{
+    ASSERT_LT(ItemLadder::PreviewAddonField, AscensionQuestLog::GenuineClientUnitAddonFields);
+    ASSERT_LT(AscensionGlory::AddonField, AscensionQuestLog::GenuineClientUnitAddonFields);
+    ObjectGuid const guid = ObjectGuid::Create<HighGuid::Player>(9);
+    for (uint16 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
+    {
+        std::array<WorldPacket, 2> packets = { AscensionQuestLog::BuildRewardXP(guid, slot, 1),
+            AscensionQuestLog::BuildLevel(guid, slot, 1) };
+        for (WorldPacket& data : packets)
+        {
+            data.read_skip<uint64>();
+            uint32 const field = data.read<uint32>();
+            EXPECT_GE(field, AscensionQuestLog::GenuineClientUnitAddonFields);
+            EXPECT_LT(field, AscensionQuestLog::RequiredClientUnitAddonFields);
+        }
+    }
+    EXPECT_EQ(AscensionQuestLog::RequiredClientUnitAddonFields, 216u);
 }

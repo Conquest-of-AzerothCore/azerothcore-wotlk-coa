@@ -13,8 +13,10 @@ class Quest;
 namespace AscensionQuestLog
 {
 constexpr uint16 UpdateObjectAddonOpcode = 0x0578;
-constexpr uint32 RewardXPField = 36;
+constexpr uint32 GenuineClientUnitAddonFields = 0x58;
+constexpr uint32 RewardXPField = GenuineClientUnitAddonFields;
 constexpr uint32 LevelField = RewardXPField + MAX_QUEST_LOG_SIZE;
+constexpr uint32 RequiredClientUnitAddonFields = LevelField + MAX_QUEST_LOG_SIZE;
 constexpr uint32 ScaledQuestFlag = 0x01000000;
 
 [[nodiscard]] uint32 RewardXPForDisplay(Player* player, Quest const* quest);

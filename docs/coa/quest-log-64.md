@@ -15,8 +15,11 @@ Existing character quest-status rows need no schema change; the normal login/sav
   `PLAYER_VISIBLE_ITEM_1_ENTRYID` through `PLAYER_END` moves by 195 words. Item, unit, gameobject and corpse
   layouts are unchanged. The player visibility mask has five entries per quest: party-visible quest ID,
   followed by four private words for state, counters and timer.
-- Match the player extension packet `0x0578`: reward XP occupies fields 36–99 and quest levels occupy
-  fields 100–163. These ranges replace the old 36–60 and 61–85 ranges. The packet remains GUID, field, value.
+- Match the player extension packet `0x0578`: reward XP occupies fields 88–151 and quest levels occupy
+  fields 152–215. These ranges replace the old 36–60 and 61–85 ranges. The packet remains GUID, field, value.
+  The client keeps 88 unit fields (0–87) per GUID and ignores higher indices, so its unit table must grow to
+  at least 216 fields. The new ranges start after that table because every existing index is taken: 86 is read
+  by the attachment fix and 87 is the item-ladder preview flag (`PlayerScales`); 36–99 would overwrite both.
 - Update FrameXML/addon limits, quest-log counters and scrolling to display and operate on all 64 entries.
   Updating Lua limits alone is insufficient; the native and extension field layouts must also match.
 
