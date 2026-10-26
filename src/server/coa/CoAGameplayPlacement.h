@@ -7,6 +7,7 @@
 #define COA_GAMEPLAY_PLACEMENT_H
 
 #include "Define.h"
+#include <cstddef>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -54,6 +55,7 @@ namespace CoAGameplay
     std::string_view PlacementVerdictName(PlacementVerdict verdict);
     std::string_view DisplayStateName(DisplayState state);
     std::optional<std::unordered_set<uint32>> ReadClientDbcIds(std::string const& path);
+    std::optional<uint32> PositiveGameEventId(std::size_t eventCount, std::size_t spawnListIndex);
 }
 
 #endif

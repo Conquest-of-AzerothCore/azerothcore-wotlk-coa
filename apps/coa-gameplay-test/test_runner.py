@@ -165,7 +165,7 @@ class RunnerTests(unittest.TestCase):
 
     def test_placement_audit_metrics_need_an_earlier_audit(self):
         audit = {'action': 'placement_audit', 'map': 1, 'zone': 493}
-        for metric in ('placement_audit_spawns', 'placement_audit_anomalies'):
+        for metric in ('placement_audit_spawns', 'placement_audit_anomalies', 'placement_audit_event_spawns'):
             measured = {'action': 'assert', 'actor': 'caster', 'metric': metric, 'min': 0}
             scenario = copy.deepcopy(self.scenario)
             scenario['steps'] += [audit, measured]

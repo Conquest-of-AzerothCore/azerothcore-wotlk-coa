@@ -208,3 +208,12 @@ TEST(CoAGameplayPlacement, ReadClientDbcIdsRejectsUnreadableFile)
     EXPECT_FALSE(ReadClientDbcIds(missing.string()).has_value());
     EXPECT_FALSE(ReadClientDbcIds(WriteFile("-badmagic", TwoRecordFile(0x12345678u))).has_value());
 }
+
+TEST(CoAGameplayPlacement, PositiveGameEventIdFromSpawnListIndex)
+{
+    EXPECT_EQ(PositiveGameEventId(10, 10), 1u);
+    EXPECT_EQ(PositiveGameEventId(10, 16), 7u);
+    EXPECT_EQ(PositiveGameEventId(10, 18), 9u);
+    EXPECT_FALSE(PositiveGameEventId(10, 9).has_value());
+    EXPECT_FALSE(PositiveGameEventId(10, 2).has_value());
+}

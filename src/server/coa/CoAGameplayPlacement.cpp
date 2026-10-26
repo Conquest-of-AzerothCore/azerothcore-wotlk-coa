@@ -114,4 +114,11 @@ namespace CoAGameplay
             ids.insert(dbc.GetRecord(row).GetUInt32(0));
         return ids;
     }
+
+    std::optional<uint32> PositiveGameEventId(std::size_t eventCount, std::size_t spawnListIndex)
+    {
+        if (spawnListIndex < eventCount)
+            return std::nullopt;
+        return uint32(spawnListIndex - eventCount + 1);
+    }
 }

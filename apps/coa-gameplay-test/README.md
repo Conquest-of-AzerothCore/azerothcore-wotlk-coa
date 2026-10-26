@@ -1066,7 +1066,9 @@ by the display patch service), and `missing` otherwise.
 
 Known limits: a spawn on the wrong floor layer (a cave spawn placed on the terrain above the cave) stands on
 ground and reads as grounded; a wrong but existing model needs an external reference; positions changed at
-runtime by scripts or waypoints are not read. The
+runtime by scripts or waypoints are not read; on a map without `.map` terrain (WMO only, such as Molten Core), a
+spawn more than 48 yards above the floor below it (the search runs 50 yards down from 2 yards above) finds neither
+floor nor terrain and reads `under_ground`, flying and hovering creatures included. The
 [placement metrics scenario](scenarios/placement-metrics-reported-spawns.json) checks spawns whose positions
 players reported in game and records calibration gaps for earlier, reported positions.
 
@@ -1081,16 +1083,25 @@ example a zone of another map. The step record holds:
 | Field | Content |
 | --- | --- |
 | `tolerance` | The tolerance used. |
-| `audited` | `creatures`, `gameobjects`, and how many of them were `unchecked` or `exempt`. |
-| `anomaly_counts` | `floating`, `under_ground` and `invalid_display` (a `missing` display) row counts. |
+| `audited` | `creatures`, `gameobjects`, how many of them were `unchecked` or `exempt`, and how many are `event_linked`. |
+| `anomaly_counts` | `floating`, `under_ground` and `invalid_display` (a `missing` display) row counts, event-linked spawns excluded. |
 | `anomalies` | One row per spawn with at least one kind, creatures first, each by guid: `spawn_type`, `guid`, `entry`, `go_type` (gameobjects), `x`, `y`, `z`, `floor_z`, `gap`, `liquid_level` (empty when absent), `submerged`, `verdict`, `displays` (`id`, `state`) and `kinds`. |
+| `event_spawn_anomaly_count`, `event_spawn_anomalies` | Rows of event-linked spawns, in the `anomalies` layout plus `game_event`; listed apart, not counted as anomalies. |
 | `server_only_display_count`, `server_only_displays` | Spawns with a `server_only` display, listed apart (`spawn_type`, `guid`, `entry`, `go_type`, `x`, `y`, `z`, `displays`); they are not anomalies. |
 | `real_ms` | The audit's real duration. |
 
-The result writer renders an empty list as an empty string. `placement_audit_spawns` (spawns selected) and
-`placement_audit_anomalies` (anomaly rows) read the latest audit of the case and need an earlier `placement_audit`.
+A spawn is event-linked when the server's `game_event_creature` or `game_event_gameobject` data
+(`GameEventMgr::GameEventCreatureGuids`, `GameEventGameobjectGuids`) adds it during a game event (a positive event
+id; the lowest one is reported as `game_event`). Such spawns exist only while their event runs and are often hung on
+buildings or doodads, so they are reported apart from the standing world rather than dropped. A spawn that an event
+removes (a negative id) stays a standing spawn. The result writer renders an empty list as an empty string.
+`placement_audit_spawns` (spawns selected), `placement_audit_anomalies` (anomaly rows) and
+`placement_audit_event_spawns` (event-linked spawns selected) read the latest audit of the case and need an earlier
+`placement_audit`.
 The [Moonglade audit](scenarios/placement-audit-moonglade.json) only guards the mechanism: it asserts that the audit
-selected spawns, and its rows are findings to triage. To audit another zone, copy it to a scratch file outside
+selected spawns and linked the Lunar Festival spawns to their event; its rows are findings to triage. Only a zone
+audit has been timed (Moonglade, 849 spawns, under 0.1 s); the duration and memory of a whole-continent audit, which
+creates every touched grid with its terrain, vmap and mmap tiles in one tick, are not measured. To audit another zone, copy it to a scratch file outside
 `scenarios/`, change `map` and `zone`, run `python -B tools/verify_all.py --stages gameplay --scenario <file>`, and
 read the record in `gameplay/exploratory/<key>/result.json` (see the verification guide, Placement audits).
 

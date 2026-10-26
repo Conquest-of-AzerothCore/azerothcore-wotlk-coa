@@ -43,7 +43,7 @@ POINT_PLACEMENT_METRICS = {'point_placement', 'point_ground_gap'}
 PLACEMENT_VERDICT_METRICS = {'spawn_placement', 'point_placement'}
 SPAWN_TYPES = {'creature', 'gameobject'}
 MAX_PLACEMENT_TOLERANCE = 10
-PLACEMENT_AUDIT_METRICS = {'placement_audit_spawns', 'placement_audit_anomalies'}
+PLACEMENT_AUDIT_METRICS = {'placement_audit_spawns', 'placement_audit_anomalies', 'placement_audit_event_spawns'}
 MAX_GAMEOBJECT_TYPE = 35
 METRICS = TIMELINE_METRICS | {
     'item_random_property', 'item_suffix_factor', 'item_enchantment', 'item_guid', 'item_soulbound', 'item_duration',
@@ -63,6 +63,7 @@ METRICS = TIMELINE_METRICS | {
     'spawn_respawn_remaining',
     'spawn_placement', 'spawn_ground_gap', 'spawn_submerged', 'spawn_display_state',
     'point_placement', 'point_ground_gap', 'placement_audit_spawns', 'placement_audit_anomalies',
+    'placement_audit_event_spawns',
     'loot_gear_item_level',
     'position_x', 'position_y', 'position_z',
     'view_level', 'sent_level', 'sent_max_health', 'sent_average_item_level', 'sent_average_item_level_count',

@@ -336,6 +336,18 @@ SpawnInspection InspectSpawn(Tree const& step, float tolerance)
     return InspectGameObjectSpawn(*spawn, tolerance);
 }
 
+std::unordered_map<ObjectGuid::LowType, uint32> PositiveEventSpawns(
+    std::vector<std::list<ObjectGuid::LowType>> const& spawnLists)
+{
+    std::size_t const eventCount = sGameEventMgr->GetEventMap().size();
+    std::unordered_map<ObjectGuid::LowType, uint32> linked;
+    for (std::size_t index = 0; index < spawnLists.size(); ++index)
+        if (std::optional<uint32> const eventId = CoAGameplay::PositiveGameEventId(eventCount, index))
+            for (ObjectGuid::LowType spawnId : spawnLists[index])
+                linked.try_emplace(spawnId, *eventId);
+    return linked;
+}
+
 bool IsPlacementMetric(std::string const& metric)
 {
     return metric == "spawn_placement" || metric == "spawn_ground_gap" || metric == "spawn_submerged"
@@ -1581,6 +1593,7 @@ struct PlacementAuditTotals
 {
     uint32 spawns{0};
     uint32 anomalies{0};
+    uint32 eventLinked{0};
 };
 
 class GameplayCase
@@ -2755,10 +2768,13 @@ private:
     {
         if (std::string const requested = step.get<std::string>("metric"); requested.starts_with("timeline_"))
             return MeasureTimeline(requested, step);
-        else if (requested == "placement_audit_spawns" || requested == "placement_audit_anomalies")
+        else if (requested == "placement_audit_spawns" || requested == "placement_audit_anomalies"
+            || requested == "placement_audit_event_spawns")
         {
             Require(_placementAudit.has_value(), "Placement audit metric needs an earlier placement_audit");
-            return requested == "placement_audit_spawns" ? _placementAudit->spawns : _placementAudit->anomalies;
+            if (requested == "placement_audit_spawns")
+                return _placementAudit->spawns;
+            return requested == "placement_audit_anomalies" ? _placementAudit->anomalies : _placementAudit->eventLinked;
         }
         Unit* unit = GetUnit(step.get<std::string>("actor"));
         std::string metric = step.get<std::string>("metric");
@@ -5327,6 +5343,12 @@ private:
         uint32 exempt = 0;
         Tree anomalies;
         Tree serverOnlyDisplays;
+        Tree eventSpawnAnomalies;
+        uint32 eventLinked = 0;
+        std::unordered_map<ObjectGuid::LowType, uint32> const creatureEvents =
+            PositiveEventSpawns(sGameEventMgr->GameEventCreatureGuids);
+        std::unordered_map<ObjectGuid::LowType, uint32> const gameObjectEvents =
+            PositiveEventSpawns(sGameEventMgr->GameEventGameobjectGuids);
         auto const optionalValue = [](Tree& row, std::string const& key, std::optional<float> value)
         {
             if (value)
@@ -5335,8 +5357,11 @@ private:
                 row.put(key, "");
         };
         auto const report = [&](std::string const& spawnType, SpawnData const& spawn,
-            SpawnInspection const& inspection, std::optional<uint32> goType)
+            SpawnInspection const& inspection, std::optional<uint32> goType,
+            std::unordered_map<ObjectGuid::LowType, uint32> const& events)
         {
+            auto const event = events.find(spawn.spawnId);
+            eventLinked += event != events.end();
             unchecked += inspection.verdict == CoAGameplay::PlacementVerdict::Unchecked;
             exempt += inspection.verdict == CoAGameplay::PlacementVerdict::Exempt;
             Tree displays;
@@ -5367,6 +5392,8 @@ private:
             row.put("x", spawn.posX);
             row.put("y", spawn.posY);
             row.put("z", spawn.posZ);
+            if (event != events.end())
+                row.put("game_event", event->second);
             if (serverOnly)
             {
                 Tree note = row;
@@ -5384,21 +5411,22 @@ private:
             Tree kindList;
             for (std::string const& kind : kinds)
             {
-                ++anomalyCounts[kind];
+                if (event == events.end())
+                    ++anomalyCounts[kind];
                 Tree item;
                 item.put_value(kind);
                 kindList.push_back({ "", item });
             }
             row.add_child("kinds", kindList);
-            anomalies.push_back({ "", row });
+            (event == events.end() ? anomalies : eventSpawnAnomalies).push_back({ "", row });
         };
         for (CreatureData const* spawn : creatures)
-            report("creature", *spawn, InspectCreatureSpawn(*spawn, tolerance), std::nullopt);
+            report("creature", *spawn, InspectCreatureSpawn(*spawn, tolerance), std::nullopt, creatureEvents);
         for (GameObjectData const* spawn : gameObjects)
         {
             GameObjectTemplate const* objectTemplate = sObjectMgr->GetGameObjectTemplate(spawn->id);
             report("gameobject", *spawn, InspectGameObjectSpawn(*spawn, tolerance),
-                objectTemplate ? std::optional<uint32>(objectTemplate->type) : std::nullopt);
+                objectTemplate ? std::optional<uint32>(objectTemplate->type) : std::nullopt, gameObjectEvents);
         }
 
         record.put("tolerance", tolerance);
@@ -5406,14 +5434,17 @@ private:
         record.put("audited.gameobjects", uint32(gameObjects.size()));
         record.put("audited.unchecked", unchecked);
         record.put("audited.exempt", exempt);
+        record.put("audited.event_linked", eventLinked);
         for (auto const& [kind, count] : anomalyCounts)
             record.put("anomaly_counts." + kind, count);
         record.put("server_only_display_count", uint32(serverOnlyDisplays.size()));
+        record.put("event_spawn_anomaly_count", uint32(eventSpawnAnomalies.size()));
         record.put("real_ms", Elapsed(started));
         record.add_child("anomalies", anomalies);
         record.add_child("server_only_displays", serverOnlyDisplays);
+        record.add_child("event_spawn_anomalies", eventSpawnAnomalies);
         _placementAudit = PlacementAuditTotals{uint32(creatures.size() + gameObjects.size()),
-            uint32(anomalies.size())};
+            uint32(anomalies.size()), eventLinked};
     }
 
     void Act(Tree const& step, Tree& record)
