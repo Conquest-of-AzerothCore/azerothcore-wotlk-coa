@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "name": "A solo balance actor fights its own balance_spawn enemies without a raid group",
+  "contract": "solo: true drives the actor the way DriveRaidBot drives a raid bot (melee positioning, auto-attack, CastRotation) but with no tank gate and no boss encounter: candidates come from whoever the player (or a unit it owns) is already in combat with. role selects melee positioning as for a raid bot; rotation_assist with specialization 1 (Barbarian, CoARotationData.h) resolves to Ancestral Strike 801576, the only rotation spell the fixture teaches, so a cast proves the solo driver reached CastRotation on its own, outside DriveRaidBots' boss-only path. SpawnBalanceEnemies now sends each spawn's own AI to attack the owner (CreatureAI::AttackStart) right after it joins the map, so the fight starts deterministically instead of depending on proximity aggro from a relocation event the fixture never sends. The two balance_spawn Scarlet Soldiers (4286) are an ordinary elite melee entry (rank 1, creature_template) forced to level 30 by balance_spawn/CoAGameplayTestBalanceLevels; with CoA dungeon scaling applied to them and no armor on the bare level-40 fixture beyond its single weapon, the fixture's set_health gives it a large health pool so the regression proves the driver engages, kills and switches targets rather than measuring real class balance (the catalog in later tasks supplies real gear).",
+  "timeout_ms": 300000,
+  "location": {
+    "map": 189,
+    "x": 1688.99,
+    "y": 1053.48,
+    "z": 18.6775,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "fighter",
+      "race": 1,
+      "class": 12,
+      "level": 40,
+      "melee_hit_rating": 10000,
+      "melee_crit_rating": 10000,
+      "expertise_rating": 10000,
+      "role": "melee",
+      "solo": true,
+      "rotation_assist": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and local level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "fighter",
+      "id": 1
+    },
+    {
+      "action": "learn",
+      "actor": "fighter",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "fighter",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "fighter",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "fighter",
+      "spell": 801576
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the fighter knows its only rotation spell",
+      "actor": "fighter",
+      "metric": "knows_spell",
+      "spell": 801576,
+      "equals": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "fighter",
+      "value": 20000,
+      "maximum": 20000
+    },
+    {
+      "action": "balance_spawn",
+      "actor": "fighter",
+      "entry": 4286,
+      "level": 30,
+      "count": 2,
+      "distance": 5
+    },
+    {
+      "action": "assert",
+      "label": "The first balance-spawned Scarlet Soldier dies to the unassisted solo driver",
+      "actor": "fighter_balance_0",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 120000
+    },
+    {
+      "action": "assert",
+      "label": "The solo driver switches to the second Scarlet Soldier and kills it too",
+      "actor": "fighter_balance_1",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 150000
+    },
+    {
+      "action": "assert",
+      "label": "The solo actor cast its rotation spell without a raid encounter or boss",
+      "actor": "fighter",
+      "metric": "spell_go_count",
+      "spell": 801576,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The fighter survives soloing two elites",
+      "actor": "fighter",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

@@ -83,6 +83,7 @@
 #include "WhoListCacheMgr.h"
 
 #include "CoAGameplayClock.h"
+#include "CoAGameplayBalance.h"
 #include "CoAGameplayIsolation.h"
 #include "CoAGameplayPlacement.h"
 #include "CoAGameplayRaidBots.h"
@@ -871,6 +872,12 @@ struct Actor
     uint32 healSpell = 0;
     uint32 tauntSpell = 0;
     bool rotationAssist = false;
+    bool solo = false;
+    std::string group;
+    std::vector<uint32> kitOpener;
+    std::vector<CoAGameplay::Balance::KitRule> kitUpkeep;
+    std::vector<CoAGameplay::Balance::KitRule> kitDefensives;
+    std::optional<ObjectGuid> soloTarget;
 };
 
 char const* StageName(ActorStage stage)
@@ -1683,6 +1690,7 @@ public:
             auto& actor = _actors[id];
             actor.definition = entry.second;
             ReadRaidRole(actor);
+            ReadSoloKit(actor);
             for (auto const& step : _steps)
                 if (step.second.get<std::string>("actor", "") == id)
                     if (auto row = step.second.get_optional<uint32>("row"))
@@ -2008,6 +2016,191 @@ public:
                             DriveRaidBot(actor, player, boss);
     }
 
+    static void CollectHostileAttackers(Unit* unit, std::map<ObjectGuid, Unit*>& out)
+    {
+        for (auto const& [guid, ref] : unit->GetCombatManager().GetPvECombatRefs())
+        {
+            Unit* other = ref->GetOther(unit);
+            if (other && other->IsAlive() && other->IsInWorld())
+                out.emplace(other->GetGUID(), other);
+        }
+    }
+
+    static void CommandOwnedUnitsAttack(Player* player, Unit* target)
+    {
+        for (Unit* owned : player->m_Controlled)
+        {
+            Creature* creature = owned ? owned->ToCreature() : nullptr;
+            if (!creature || !creature->IsAlive() || !creature->IsInWorld())
+                continue;
+            if (CharmInfo* charmInfo = creature->GetCharmInfo())
+            {
+                charmInfo->SetIsCommandAttack(true);
+                charmInfo->SetIsAtStay(false);
+                charmInfo->SetIsFollowing(false);
+                charmInfo->SetIsCommandFollow(false);
+                charmInfo->SetIsReturning(false);
+            }
+            if (creature->IsAIEnabled && creature->AI())
+                creature->AI()->AttackStart(target);
+        }
+    }
+
+    static void StopOwnedUnits(Player* owner)
+    {
+        for (Unit* owned : owner->m_Controlled)
+        {
+            Creature* creature = owned ? owned->ToCreature() : nullptr;
+            if (!creature || !creature->IsInWorld())
+                continue;
+            if (CharmInfo* charmInfo = creature->GetCharmInfo())
+            {
+                charmInfo->SetIsCommandAttack(false);
+                charmInfo->SetIsAtStay(false);
+                charmInfo->SetIsFollowing(true);
+                charmInfo->SetIsCommandFollow(true);
+                charmInfo->SetIsReturning(true);
+            }
+            creature->AttackStop();
+            creature->GetMotionMaster()->Clear();
+            creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, creature->GetFollowAngle());
+        }
+    }
+
+    static bool KitRuleHolds(CoAGameplay::Balance::KitRule const& rule, Player* player)
+    {
+        using CoAGameplay::Balance::KitCondition;
+        switch (rule.when)
+        {
+            case KitCondition::Always:
+                return true;
+            case KitCondition::SelfAuraMissing:
+                return !player->HasAura(rule.aura);
+            case KitCondition::PetAuraMissing:
+                for (Unit* owned : player->m_Controlled)
+                    if (owned && owned->IsAlive() && !owned->HasAura(rule.aura))
+                        return true;
+                return false;
+            case KitCondition::OwnedBelow:
+            {
+                uint32 alive = 0;
+                for (Unit* owned : player->m_Controlled)
+                    if (owned && owned->IsAlive())
+                        ++alive;
+                return float(alive) < rule.value;
+            }
+            case KitCondition::HealthBelow:
+                return player->GetHealthPct() < rule.value;
+        }
+        return false;
+    }
+
+    static Unit* ResolveKitTarget(CoAGameplay::Balance::KitTarget kitTarget, Player* player, Unit* enemy,
+        uint32 aura)
+    {
+        using CoAGameplay::Balance::KitTarget;
+        switch (kitTarget)
+        {
+            case KitTarget::Self:
+                return player;
+            case KitTarget::Enemy:
+                return enemy;
+            case KitTarget::Pet:
+                for (Unit* owned : player->m_Controlled)
+                    if (owned && owned->IsAlive() && (!aura || !owned->HasAura(aura)))
+                        return owned;
+                return player->GetFirstControlled();
+        }
+        return nullptr;
+    }
+
+    bool CastFirstKitRule(std::vector<CoAGameplay::Balance::KitRule> const& rules, Player* player, Unit* enemy)
+    {
+        std::optional<std::size_t> const index = CoAGameplay::Balance::NextKitRule(rules,
+            [player](CoAGameplay::Balance::KitRule const& rule) { return KitRuleHolds(rule, player); },
+            [player, enemy](CoAGameplay::Balance::KitRule const& rule)
+            {
+                Unit* target = ResolveKitTarget(rule.target, player, enemy, rule.aura);
+                return target && CanBotCast(player, rule.spell, target);
+            });
+        if (!index)
+            return false;
+        CoAGameplay::Balance::KitRule const& rule = rules[*index];
+        SubmitBotCast(player, rule.spell, ResolveKitTarget(rule.target, player, enemy, rule.aura));
+        return true;
+    }
+
+    static constexpr float SoloSelfHealThresholdPct = 65.0f;
+
+    void DriveSoloActor(Actor& actor, Player* player)
+    {
+        std::map<ObjectGuid, Unit*> hostiles;
+        CollectHostileAttackers(player, hostiles);
+        for (Unit* owned : player->m_Controlled)
+            if (owned && owned->IsAlive() && owned->IsInWorld() && owned->GetMap() == player->GetMap())
+                CollectHostileAttackers(owned, hostiles);
+
+        std::vector<CoAGameplay::Balance::SoloCandidate> candidates;
+        for (auto const& [guid, unit] : hostiles)
+            if (unit->GetMap() == player->GetMap())
+                candidates.push_back({ guid, true, unit->GetHealthPct(), player->GetDistance(unit) });
+
+        std::optional<ObjectGuid> const selected =
+            CoAGameplay::Balance::SelectSoloTarget(candidates, actor.soloTarget);
+        bool const targetChanged = selected != actor.soloTarget;
+        actor.soloTarget = selected;
+        if (!selected)
+            return;
+        Unit* target = ObjectAccessor::GetUnit(*player, *selected);
+        if (!target)
+            return;
+
+        if (targetChanged)
+            CommandOwnedUnitsAttack(player, target);
+
+        if (CastFirstKitRule(actor.kitDefensives, player, target))
+            return;
+        if (CastFirstKitRule(actor.kitUpkeep, player, target))
+            return;
+        if (actor.raidRole == CoAGameplay::RaidRole::Healer)
+        {
+            if (player->GetHealthPct() < SoloSelfHealThresholdPct)
+            {
+                HealLowest(actor, player);
+                return;
+            }
+            return;
+        }
+        if (actor.raidRole == CoAGameplay::RaidRole::Tank || actor.raidRole == CoAGameplay::RaidRole::Melee)
+        {
+            if (Creature* enemy = target->ToCreature(); enemy && KeepInMelee(player, enemy, false))
+                return;
+            if (player->GetVictim() != target)
+                SubmitAttackSwing(player, target);
+            CastRotation(actor, player, target);
+            return;
+        }
+        if (actor.raidRole == CoAGameplay::RaidRole::Ranged)
+        {
+            Creature* enemy = target->ToCreature();
+            if (player->IsWithinDistInMap(target, CoAGameplay::RaidRangedDistance) &&
+                (!enemy || !FaceBoss(player, enemy)))
+                CastRotation(actor, player, target);
+        }
+    }
+
+    void DriveSoloBots()
+    {
+        for (auto& [id, actor] : _actors)
+        {
+            if (!actor.solo)
+                continue;
+            Player* player = actor.session ? actor.session->GetPlayer() : nullptr;
+            if (player && player->IsInWorld() && player->IsAlive() && !player->IsBeingTeleported())
+                DriveSoloActor(actor, player);
+        }
+    }
+
     bool Dismiss(bool leaveGroups)
     {
         if (EncounterActive())
@@ -2249,6 +2442,7 @@ private:
         if (!TargetsSettled())
             return false;
         DriveRaidBots();
+        DriveSoloBots();
         if (_nextStep == _steps.end())
         {
             Require(_assertions > 0, "Scenario completed without assertions");
@@ -2387,6 +2581,67 @@ private:
         Require((actor.healSpell != 0) == (actor.raidRole == CoAGameplay::RaidRole::Healer),
             "heal_spell is required for a healer and only for one");
         Require(!actor.tauntSpell || actor.raidRole == CoAGameplay::RaidRole::Tank, "taunt_spell is only for a tank");
+    }
+
+    static CoAGameplay::Balance::KitCondition KitConditionFromName(std::string const& name)
+    {
+        using CoAGameplay::Balance::KitCondition;
+        if (name == "always")
+            return KitCondition::Always;
+        if (name == "self_aura_missing")
+            return KitCondition::SelfAuraMissing;
+        if (name == "pet_aura_missing")
+            return KitCondition::PetAuraMissing;
+        if (name == "owned_below")
+            return KitCondition::OwnedBelow;
+        if (name == "health_below")
+            return KitCondition::HealthBelow;
+        Require(false, "Unknown kit rule condition: " + name);
+        return KitCondition::Always;
+    }
+
+    static CoAGameplay::Balance::KitTarget KitTargetFromName(std::string const& name)
+    {
+        using CoAGameplay::Balance::KitTarget;
+        if (name == "self")
+            return KitTarget::Self;
+        if (name == "pet")
+            return KitTarget::Pet;
+        if (name == "enemy")
+            return KitTarget::Enemy;
+        Require(false, "Unknown kit rule target: " + name);
+        return KitTarget::Self;
+    }
+
+    static CoAGameplay::Balance::KitRule ReadKitRule(Tree const& value)
+    {
+        CoAGameplay::Balance::KitRule rule{};
+        rule.spell = RaidSpell(value.get_child("spell"));
+        rule.when = KitConditionFromName(value.get<std::string>("when"));
+        rule.aura = value.get<uint32>("aura", 0);
+        rule.value = value.get<float>("value", 0.0f);
+        rule.target = KitTargetFromName(value.get<std::string>("target"));
+        return rule;
+    }
+
+    static void ReadSoloKit(Actor& actor)
+    {
+        Tree const& definition = actor.definition;
+        actor.solo = definition.get<bool>("solo", false);
+        actor.group = definition.get<std::string>("group", "");
+        auto const kit = definition.get_child_optional("kit");
+        Require(!kit || actor.solo, "kit requires solo");
+        if (!kit)
+            return;
+        if (auto opener = kit->get_child_optional("opener"))
+            for (auto const& spell : *opener)
+                actor.kitOpener.push_back(RaidSpell(spell.second));
+        if (auto upkeep = kit->get_child_optional("upkeep"))
+            for (auto const& rule : *upkeep)
+                actor.kitUpkeep.push_back(ReadKitRule(rule.second));
+        if (auto defensives = kit->get_child_optional("defensives"))
+            for (auto const& rule : *defensives)
+                actor.kitDefensives.push_back(ReadKitRule(rule.second));
     }
 
     static void LogIn(Actor& actor)
@@ -2832,6 +3087,8 @@ private:
             creature->SetHomePosition(spot);
             map->AddToMap(creature);
             creature->setActive(true);
+            if (CreatureAI* ai = creature->AI())
+                ai->AttackStart(owner);
             guids.push_back(creature->GetGUID());
         }
         return guids;

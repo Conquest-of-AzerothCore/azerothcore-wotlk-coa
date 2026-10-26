@@ -1090,6 +1090,34 @@ bot casting its rotation and a healer against a defensive fixture, whose swings 
 `rotation_assist` next to a tank and a healer that use their scenario spells, and checks that it casts Ignite once
 and then Flare Bolt, never its scenario fallback Fire Blast, while it stands within Fire Blast's 20 yd range.
 
+### Solo balance driver
+
+A player with `solo: true` acts on its own every world tick, independent of any encounter: each tick, its
+candidates are every hostile unit in combat with the player or with any unit it owns, alive and in the player's
+map. It keeps its current target while that target is still a candidate; otherwise it switches to the candidate
+with the lowest health percentage, ties broken by distance. On a target change it sends every owned unit's
+attack command at the new target (`CharmInfo::SetIsCommandAttack` plus a native `CreatureAI::AttackStart`).
+Optional `group` (`tank`, `healer`, `dps` or `dps-support`) is informational only. Optional `kit` adds
+pet/defensive upkeep: `{ "opener": [spell...], "upkeep": [rule...], "defensives": [rule...] }`, where a rule is
+`{ "spell", "when" ("always"|"self_aura_missing"|"pet_aura_missing"|"owned_below"|"health_below"), "aura",
+"value", "target" ("self"|"pet"|"enemy") }`. Each tick the actor casts the first `defensives` rule that holds and
+is castable, else the first such `upkeep` rule, else (a `healer` role under 65 percent of its own health) heals
+itself, else drives its rotation: a `tank`/`melee` role repositions into native melee range and faces the target
+(`KeepInMelee`) then swings and casts its rotation on it; a `ranged` role stays in place and casts its rotation
+within 30 yards. `opener` is read but cast only by `balance_stage` (a later scenario action), not by the driver
+itself. `StopOwnedUnits` sends every owned unit back to following the player (native `COMMAND_FOLLOW` state and
+`MoveFollow`) and stops its own attack state; nothing in this harness calls it yet, ahead of the staged resets a
+later action adds.
+
+[`balance-solo-driver-switches-targets`](scenarios/balance-solo-driver-switches-targets.json) gives a bare level
+40 melee fixture one weapon and a large fixture health pool (`set_health`), balance-spawns two level 30 Scarlet
+Soldiers, and checks that the driver kills the first, switches to the second on its own and kills that one too,
+casting its rotation spell throughout, without an encounter or a boss. `SpawnBalanceEnemies` sends each spawn's
+own AI to attack the owner right after it joins the map, so the fight starts without depending on proximity
+aggro, which this fixture (a stationary player next to creatures that only just spawned) would not otherwise
+trigger. The fixture's own gear does not carry real damage output: measuring a spec against real dungeon numbers
+is the catalog's job (a later task), not this regression's.
+
 ### World placement
 
 Placement metrics compare a spawn's stored position (`creature` and `gameobject` rows, as loaded) with the ground

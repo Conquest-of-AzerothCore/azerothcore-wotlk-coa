@@ -37,6 +37,9 @@ TIMELINE_FIELDS = {'event', 'source_entry', 'state', 'target_actors', 'exclude_t
 ENCOUNTER_STATES = {'NOT_STARTED', 'IN_PROGRESS', 'FAIL', 'DONE', 'SPECIAL'}
 MAX_ENCOUNTER_RADIUS = 200
 RAID_ROLES = {'tank', 'healer', 'melee', 'ranged'}
+BALANCE_GROUPS = {'tank', 'healer', 'dps', 'dps-support'}
+KIT_CONDITIONS = {'always', 'self_aura_missing', 'pet_aura_missing', 'owned_below', 'health_below'}
+KIT_TARGETS = {'self', 'pet', 'enemy'}
 RAID_ROLE_FIELDS = {'rotation', 'heal_spell', 'taunt_spell', 'rotation_assist'}
 SPAWN_PLACEMENT_METRICS = {'spawn_placement', 'spawn_ground_gap', 'spawn_submerged', 'spawn_display_state'}
 POINT_PLACEMENT_METRICS = {'point_placement', 'point_ground_gap'}
@@ -422,6 +425,43 @@ def validate_raid_role(player):
     require(len(set(rotation)) == len(rotation), 'rotation must not repeat a spell')
 
 
+def validate_kit_rule(rule, where):
+    keys(rule, {'spell', 'when', 'target'}, {'spell', 'when', 'aura', 'value', 'target'}, where)
+    number(rule['spell'], f'{where}.spell', 1, 2**32 - 1, True)
+    require(rule['when'] in KIT_CONDITIONS, f'{where}.when must be one of {sorted(KIT_CONDITIONS)}')
+    require(rule['target'] in KIT_TARGETS, f'{where}.target must be one of {sorted(KIT_TARGETS)}')
+    needs_aura = rule['when'] in ('self_aura_missing', 'pet_aura_missing')
+    require(('aura' in rule) == needs_aura, f'{where}.aura is required for self/pet_aura_missing only')
+    if 'aura' in rule:
+        number(rule['aura'], f'{where}.aura', 1, 2**32 - 1, True)
+    needs_value = rule['when'] in ('owned_below', 'health_below')
+    require(('value' in rule) == needs_value, f'{where}.value is required for owned_below/health_below only')
+    if 'value' in rule:
+        number(rule['value'], f'{where}.value', 0)
+
+
+def validate_solo_kit(player):
+    require(type(player.get('solo', False)) is bool, 'solo must be boolean')
+    if 'group' in player:
+        require(player['group'] in BALANCE_GROUPS, f'group must be one of {sorted(BALANCE_GROUPS)}')
+    require('kit' not in player or player.get('solo', False), 'kit requires solo')
+    if 'kit' not in player:
+        return
+    kit = player['kit']
+    keys(kit, set(), {'opener', 'upkeep', 'defensives'}, 'kit')
+    if 'opener' in kit:
+        opener = kit['opener']
+        require(isinstance(opener, list) and opener, 'kit.opener must be a non-empty list of spell ids')
+        for spell in opener:
+            number(spell, 'kit.opener', 1, 2**32 - 1, True)
+    for group_name in ('upkeep', 'defensives'):
+        if group_name in kit:
+            rules = kit[group_name]
+            require(isinstance(rules, list) and rules, f'kit.{group_name} must be a non-empty list of rules')
+            for index, rule in enumerate(rules):
+                validate_kit_rule(rule, f'kit.{group_name}[{index}]')
+
+
 def validate(scenario):
     keys(scenario, {'schema', 'name', 'players', 'steps'},
          {'schema', 'name', 'players', 'creatures', 'steps', 'timeout_ms', 'location', 'contract', 'hour',
@@ -458,7 +498,8 @@ def validate(scenario):
              {'id', 'race', 'class', 'level', 'bot', 'spell_hit_rating', 'spell_crit_rating',
               'melee_crit_rating', 'ranged_crit_rating', 'ranged_hit_rating', 'melee_hit_rating',
               'expertise_rating', 'allow_regeneration', 'name', 'expansion', 'ascension_client', 'account_of',
-              'role', 'rotation', 'heal_spell', 'taunt_spell', 'rotation_assist'}, 'player')
+              'role', 'rotation', 'heal_spell', 'taunt_spell', 'rotation_assist', 'solo', 'group', 'kit'},
+             'player')
         identity = player['id']
         require(isinstance(identity, str) and ACTOR_ID.fullmatch(identity), 'Invalid player id')
         require(identity not in actor_ids, 'Duplicate actor id')
@@ -485,6 +526,7 @@ def validate(scenario):
         number(player.get('expertise_rating', 0), 'expertise_rating', 0, 100000, True)
         require(type(player.get('allow_regeneration', True)) is bool, 'allow_regeneration must be boolean')
         validate_raid_role(player)
+        validate_solo_kit(player)
     for creature in creatures:
         keys(creature, {'id', 'owner', 'entry'},
              {'id', 'owner', 'entry', 'distance', 'faction', 'level', 'health', 'reaction', 'spell_hit_bonus',
