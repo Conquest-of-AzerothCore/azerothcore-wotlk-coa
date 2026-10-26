@@ -95,10 +95,6 @@ keys are appended automatically on deploy.
 - Some rules/objectives/conditions are still being mapped; the module applies
   the subset described in `conf/mod-coa-challenges.conf.dist`.
 
-## License
-
-GNU General Public License v2.0 — see [LICENSE](LICENSE).
-
 ## Reducing Adventure Mode difficulty
 
 Players can use `.coa adventure <level>` to lower an active Adventure Mode or Prestige Adventure Mode run.
@@ -110,3 +106,7 @@ Changes are refused while the player, a party member or their controlled units a
 instance encounter, or while the player is dead, flying, charmed or teleporting. Start, stop, group-sync and
 custom-trial requests enforce the same restriction. Custom trials cannot be downscaled, and an already-completed
 tier cannot be selected. Tier changes cannot raise the difficulty again within the same run.
+
+## License
+
+GNU General Public License v2.0 — see [LICENSE](LICENSE).
