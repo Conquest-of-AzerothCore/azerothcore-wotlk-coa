@@ -25,13 +25,13 @@ namespace CoAOtherSide
     constexpr float LogNormalLevel = 25.0f;
     constexpr float MaxLevel = 60.0f;
 
-    inline float Unscaled(Unit const* attacker, Unit const* target, float value)
+    inline float Unscaled(Unit const* attacker, Unit const* target, float value, SpellInfo const* spell)
     {
-        float const multiplier = CreatureScaling::DamageMultiplier(target, attacker);
+        float const multiplier = CreatureScaling::SpellDamageMultiplier(target, attacker, spell);
         return multiplier > 0.0f ? value / multiplier : value;
     }
 
-    inline float Logged(Unit const* attacker, Unit const* target, Damage3 const& damage)
+    inline float Logged(Unit const* attacker, Unit const* target, Damage3 const& damage, SpellInfo const* spell)
     {
         float const mythic = float(damage.mythic);
         float const heroic = mythic * HeroicShareOfMythic;
@@ -52,12 +52,12 @@ namespace CoAOtherSide
             normal = normal25 * std::max(1.0f, level) / LogNormalLevel;
         else if (level < MaxLevel)
             normal = normal25 + (normal60 - normal25) * (level - LogNormalLevel) / (MaxLevel - LogNormalLevel);
-        return Unscaled(attacker, target, normal);
+        return Unscaled(attacker, target, normal, spell);
     }
 
-    inline int32 Rolled(Unit const* attacker, Unit const* target, Damage3 const& damage)
+    inline int32 Rolled(Unit const* attacker, Unit const* target, Damage3 const& damage, SpellInfo const* spell)
     {
-        return std::max(1, int32(Logged(attacker, target, damage) * frand(0.9f, 1.1f)));
+        return std::max(1, int32(Logged(attacker, target, damage, spell) * frand(0.9f, 1.1f)));
     }
 
     inline uint32 BaseSpellId(uint32 spellId)
