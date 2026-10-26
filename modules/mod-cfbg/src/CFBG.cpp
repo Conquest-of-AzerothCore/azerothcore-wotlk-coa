@@ -724,7 +724,7 @@ void CFBG::ApplyFakePlayer(Player* player, FakePlayer const& fake)
 {
     if (KeepRace())
     {
-        SetFactionForRace(player, fake.FakeTeamID == TEAM_ALLIANCE ? RACE_HUMAN : RACE_ORC, fake.FakeTeamID);
+        SetFactionForRace(player, GetTeamRace(fake.FakeTeamID), fake.FakeTeamID);
         return;
     }
 
@@ -777,6 +777,12 @@ void CFBG::ClearFakePlayer(Player* player)
     player->GetReputationMgr().ApplyForceReaction(FACTION_STORMPIKE_GUARD, REP_FRIENDLY, false);
 
     _fakePlayerStore.erase(player);
+
+    // The player's own name cache still holds the assigned team's race.
+    WorldPacket data(SMSG_INVALIDATE_PLAYER, 8);
+    data << player->GetGUID();
+    player->GetSession()->SendPacket(&data);
+    player->GetSession()->SendNameQueryOpcode(player->GetGUID());
 }
 
 // Erase-only: no race/morph/faction/m_team restore. Used at wartime WG logout,

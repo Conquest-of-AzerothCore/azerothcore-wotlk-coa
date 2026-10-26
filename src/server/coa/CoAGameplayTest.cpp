@@ -4902,6 +4902,12 @@ private:
         }
         if (metric == "player_class")
             return player->getClass();
+        if (metric == "name_query_race")
+        {
+            uint8 race = player->getRace();
+            sScriptMgr->OnPlayerGetNameQueryRace(player, race);
+            return race;
+        }
         if (metric == "cached_class")
         {
             CharacterCacheEntry const* cached = sCharacterCache->GetCharacterCacheByGuid(player->GetGUID());

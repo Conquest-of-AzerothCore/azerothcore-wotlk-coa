@@ -105,7 +105,8 @@ public:
         PLAYERHOOK_ON_BEFORE_UPDATE,
         PLAYERHOOK_ON_BEFORE_SEND_CHAT_MESSAGE,
         PLAYERHOOK_ON_REPUTATION_CHANGE,
-        PLAYERHOOK_ON_PLAYER_RESURRECT
+        PLAYERHOOK_ON_PLAYER_RESURRECT,
+        PLAYERHOOK_ON_GET_NAME_QUERY_RACE
     }) { }
 
     void OnPlayerLogin(Player* player) override
@@ -181,6 +182,17 @@ public:
         if (FakePlayer const* fake = sCFBG->GetFakePlayer(player))
             if (player->GetTeamId() != fake->FakeTeamID)
                 player->setTeamId(fake->FakeTeamID);
+    }
+
+    // A kept-race player is still their own race, but the client places a
+    // battleground scoreboard row by the faction of the race in its name cache.
+    void OnPlayerGetNameQueryRace(Player* player, uint8& race) override
+    {
+        if (!sCFBG->IsEnableSystem() || !sCFBG->KeepRace())
+            return;
+
+        if (FakePlayer const* fake = sCFBG->GetFakePlayer(player))
+            race = CFBG::GetTeamRace(fake->FakeTeamID);
     }
 
     bool OnPlayerCanJoinInBattlegroundQueue(Player* player, ObjectGuid /*BattlemasterGuid*/ , BattlegroundTypeId /*BGTypeID*/, uint8 joinAsGroup, GroupJoinBattlegroundResult& err) override

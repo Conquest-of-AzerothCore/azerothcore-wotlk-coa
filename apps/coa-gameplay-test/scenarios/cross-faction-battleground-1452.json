@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Cross-faction battleground: two Alliance players queue for Warsong Gulch and fight on opposite sides",
-  "contract": "Battlegrounds match players regardless of faction. Two Alliance players who queue for Warsong Gulch one after the other enter the same match on opposite sides: the first keeps the Alliance side, the second fights for the Horde and counts as Horde while inside, while keeping their own race and appearance. Leaving the battleground returns the second player to the Alliance.",
+  "contract": "Battlegrounds match players regardless of faction. Two Alliance players who queue for Warsong Gulch one after the other enter the same match on opposite sides: the first keeps the Alliance side, the second fights for the Horde and counts as Horde while inside, while keeping their own race and appearance; name queries answer with a Horde race so the client's scoreboard lists them as Horde. Leaving the battleground returns the second player to the Alliance.",
   "timeout_ms": 180000,
   "players": [
     {
@@ -203,6 +203,20 @@
       "equals": 0
     },
     {
+      "action": "assert",
+      "label": "Name queries answer with a Horde race so the scoreboard lists the second player as Horde",
+      "actor": "second",
+      "metric": "name_query_race",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Name queries for the first player keep their own race",
+      "actor": "first",
+      "metric": "name_query_race",
+      "equals": 1
+    },
+    {
       "action": "client_packet",
       "label": "The second player leaves the battleground",
       "actor": "second",
@@ -241,6 +255,13 @@
       "metric": "team",
       "equals": 0,
       "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Name queries answer with the second player's own race again",
+      "actor": "second",
+      "metric": "name_query_race",
+      "equals": 1
     }
   ]
 }

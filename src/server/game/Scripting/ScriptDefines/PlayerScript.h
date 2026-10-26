@@ -260,6 +260,7 @@ enum PlayerHook
     PLAYERHOOK_ON_COA_PRESTIGE_SAVED,
     PLAYERHOOK_ON_MASTER_LOOT_ITEM,
     PLAYERHOOK_ON_GET_SHAPESHIFT_MODEL,
+    PLAYERHOOK_ON_GET_NAME_QUERY_RACE,
     PLAYERHOOK_END
 };
 
@@ -718,6 +719,9 @@ public:
 
     // Model the player takes in a shapeshift form; leaving modelId at 0 keeps the form's own model.
     virtual void OnPlayerGetShapeshiftModel(Player* /*player*/, uint8 /*form*/, uint32 /*spellId*/, uint32& /*modelId*/) { }
+
+    // Race sent in name query responses; the client places a battleground scoreboard row by its faction.
+    virtual void OnPlayerGetNameQueryRace(Player* /*player*/, uint8& /*race*/) { }
 
     [[nodiscard]] virtual bool OnPlayerCanEquipItem(Player* /*player*/, uint8 /*slot*/, uint16& /*dest*/, Item* /*pItem*/, bool /*swap*/, bool /*not_loading*/) { return true; }
 

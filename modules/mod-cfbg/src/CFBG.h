@@ -139,6 +139,9 @@ public:
     inline uint8 GetBalanceClassLevelDiff() const { return _balanceClassLevelDiff; }
     inline bool RandomizeRaces() const { return _randomizeRaces; }
     inline bool KeepRace() const { return _keepRace; }
+    // Race standing for a team where a kept-race player needs one: faction
+    // template and the race the client sees in name query responses.
+    static inline uint8 GetTeamRace(TeamId teamId) { return teamId == TEAM_ALLIANCE ? RACE_HUMAN : RACE_ORC; }
 
     uint32 GetBGTeamAverageItemLevel(Battleground* bg, TeamId team);
     uint32 GetBGTeamSumPlayerLevel(Battleground* bg, TeamId team);
