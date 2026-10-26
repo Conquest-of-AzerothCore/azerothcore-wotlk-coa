@@ -816,6 +816,7 @@ struct Actor
     uint32 vendorItems = 0;
     std::map<uint32, uint32> vendorPrice;
     std::map<uint32, uint32> vendorExtendedCost;
+    std::map<uint32, int32> vendorStock;
     uint32 vendorPriceSum = 0;
     uint32 whoResponses = 0;
     uint32 lootReceived = 0;
@@ -1550,6 +1551,7 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         actor.vendorItems = rows;
         actor.vendorPrice.clear();
         actor.vendorExtendedCost.clear();
+        actor.vendorStock.clear();
         actor.vendorPriceSum = 0;
         for (uint8 i = 0; i < rows; ++i)
         {
@@ -1567,6 +1569,7 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
             {
                 actor.vendorPrice[shelfItem] = price;
                 actor.vendorExtendedCost[shelfItem] = extendedCost;
+                actor.vendorStock[shelfItem] = leftInStock;
                 actor.vendorPriceSum += price;
             }
         }
@@ -3461,6 +3464,12 @@ private:
             auto const& prices = _actors.at(step.get<std::string>("actor")).vendorPrice;
             auto const found = prices.find(step.get<uint32>("item", 0));
             return found == prices.end() ? -1.0 : double(found->second);
+        }
+        if (metric == "vendor_stock")
+        {
+            auto const& stock = _actors.at(step.get<std::string>("actor")).vendorStock;
+            auto const found = stock.find(step.get<uint32>("item", 0));
+            return found == stock.end() ? -2.0 : double(found->second);
         }
         if (metric == "vendor_extended_cost")
         {
