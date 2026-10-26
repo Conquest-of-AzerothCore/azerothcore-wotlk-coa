@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <memory>
 #include <mutex>
+#include <shared_mutex>
 #include <tuple>
 #include <unordered_map>
 namespace AscensionTinker
@@ -25,7 +26,7 @@ namespace AscensionTinker
 namespace
 {
 std::unordered_map<ObjectGuid, std::unique_ptr<TinkerState>> states;
-std::mutex stateMutex;
+std::shared_mutex stateMutex;
 }
 Player* Owner(Unit const* unit)
 {
@@ -38,8 +39,16 @@ Player* Owner(Unit const* unit)
 }
 TinkerState& State(Player* player)
 {
-    std::lock_guard<std::mutex> lock(stateMutex);
-    return *states.try_emplace(player->GetGUID(), std::make_unique<TinkerState>()).first->second;
+    {
+        std::shared_lock<std::shared_mutex> lock(stateMutex);
+        if (auto itr = states.find(player->GetGUID()); itr != states.end())
+            return *itr->second;
+    }
+    std::unique_lock<std::shared_mutex> lock(stateMutex);
+    auto& state = states[player->GetGUID()];
+    if (!state)
+        state = std::make_unique<TinkerState>();
+    return *state;
 }
 bool NotifyAttack(Player* player, Unit* target)
 {
@@ -402,7 +411,7 @@ public:
         using namespace AscensionTinker;
         if (Owner(player) == player)
             ExitMechsuit(player);
-        std::lock_guard<std::mutex> lock(stateMutex);
+        std::unique_lock<std::shared_mutex> lock(stateMutex);
         states.erase(player->GetGUID());
     }
 };
