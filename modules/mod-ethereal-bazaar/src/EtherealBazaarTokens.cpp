@@ -16,6 +16,10 @@
  *
  * The zero in the lower two ranges is deliberate: most kills and some quests
  * give nothing at all, so tokens stay something one notices.
+ *
+ * A kill pays the player with the killing blow, or, with
+ * EtherealBazaar.Tokens.GroupShare, whoever tapped the creature: every member
+ * of a tapping group in reward range receives the same roll.
  */
 
 #include "EtherealBazaar.h"
@@ -24,6 +28,7 @@
 #include "CoATestZoneBonus.h"
 #include "Configuration/Config.h"
 #include "Creature.h"
+#include "Group.h"
 #include "GameTime.h"
 #include "Log.h"
 #include "Map.h"
@@ -118,10 +123,17 @@ public:
 
         Grant(player, Wuerfeln("Quest", 0, 12), "a quest");
     }
+};
 
-    void OnPlayerCreatureKill(Player* killer, Creature* killed) override
+class ethereal_bazaar_kill_tokens : public UnitScript
+{
+public:
+    ethereal_bazaar_kill_tokens() : UnitScript("ethereal_bazaar_kill_tokens", true, { UNITHOOK_ON_UNIT_DEATH }) { }
+
+    void OnUnitDeath(Unit* victim, Unit* killer) override
     {
-        if (!Enabled() || !killer || !killed)
+        Creature* killed = victim ? victim->ToCreature() : nullptr;
+        if (!Enabled() || !killed)
             return;
 
         // Nothing for what a player made themselves, and nothing for the
@@ -129,23 +141,67 @@ public:
         if (killed->IsSummon() || killed->IsCritter() || killed->IsTotem())
             return;
 
+        std::vector<Player*> const recipients = Recipients(killed, killer);
+        if (recipients.empty())
+            return;
+
         // Bosses are worth a real amount, and a raid boss more than a dungeon
         // one. IsDungeonBoss covers the flagged encounters; the world bosses
         // outside an instance are deliberately left with the ordinary rate.
+        uint32 amount;
+        char const* grund;
         if (killed->IsDungeonBoss())
         {
             Map const* map = killed->GetMap();
             bool const raid = map && map->IsRaid();
-            Grant(killer, Wuerfeln(raid ? "RaidBoss" : "DungeonBoss", raid ? 41 : 14, raid ? 53 : 22),
-                  raid ? "a raid boss" : "a dungeon boss");
-            return;
+            amount = Wuerfeln(raid ? "RaidBoss" : "DungeonBoss", raid ? 41 : 14, raid ? 53 : 22);
+            grund = raid ? "a raid boss" : "a dungeon boss";
+        }
+        else
+        {
+            amount = Wuerfeln("Creature", 0, 3);
+            grund = "a creature";
         }
 
-        Grant(killer, Wuerfeln("Creature", 0, 3), "a creature");
+        // One roll for the whole group, so a healer who never touched the
+        // target earns what the tank who killed it earns.
+        for (Player* recipient : recipients)
+            Grant(recipient, amount, grund);
+    }
+
+private:
+    static std::vector<Player*> Recipients(Creature* killed, Unit* killer)
+    {
+        std::vector<Player*> recipients;
+
+        if (!sConfigMgr->GetOption<bool>("EtherealBazaar.Tokens.GroupShare", false))
+        {
+            if (Player* player = killer ? killer->ToPlayer() : nullptr)
+                recipients.push_back(player);
+            return recipients;
+        }
+
+        // The loot recipient is cleared when the kill earns no reward (too
+        // little player damage), so those kills pay nobody here either.
+        if (Group* group = killed->GetLootRecipientGroup())
+        {
+            for (GroupReference* itr = group->GetFirstMember(); itr; itr = itr->next())
+                if (Player* member = itr->GetSource())
+                    if (member->IsAtGroupRewardDistance(killed))
+                        recipients.push_back(member);
+            return recipients;
+        }
+
+        if (Player* tapper = killed->GetLootRecipient())
+            if (tapper->IsInMap(killed))
+                recipients.push_back(tapper);
+
+        return recipients;
     }
 };
 
 void AddEtherealBazaarTokenScripts()
 {
     new ethereal_bazaar_tokens();
+    new ethereal_bazaar_kill_tokens();
 }
