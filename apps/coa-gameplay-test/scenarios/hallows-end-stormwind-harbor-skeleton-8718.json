@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "No Hallow's End skeleton hangs in mid-air by the Stormwind harbor entrance",
+  "contract": "Issue #8718. Hallow's End (game event 12) hanging skeleton 2375 (entry 180410, G_HangingSkeleton_01, 2.07 yd tall from its feet) stands at map 0 (-8491.07,930.815,99.118), facing a 4 yd wall block of group 285 'HarborEntrance' in the stock Stormwind.wmo (z 98.98 to 102.44). patch-WB1 replaces Stormwind.wmo with district WMOs at the same placement; A01SW_HARBORDISTRICT has the floor at 97.28 there and no geometry between z 99.5 and 125 within 10 yd, and no WMO doodad within 12 yd, so the skeleton hangs 1.8 yd above an open walkway. Nothing in patch-WB1 offers a matching support, so the spawn is removed. With the event running, pumpkin 68329 (180406) 18.6 yd away is visible from the same spot, and no skeleton 180410 is within 20 yd.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8491.07, "y": 930.815, "z": 97.3, "o": 0.0 },
+  "players": [
+    { "id": "visitor", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "set_phase", "label": "Join world phase 1, where the event spawns live", "actor": "visitor",
+      "value": 1 },
+    { "action": "game_event", "event": 12, "active": true },
+    { "action": "assert", "label": "CONTROL: Hallow's End pumpkin 68329 spawns near the spot", "actor": "visitor",
+      "metric": "nearby_gameobject_state", "entry": 180406, "min": 0, "max": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "No hanging skeleton 180410 floats over the harbor walkway", "actor": "visitor",
+      "metric": "nearby_gameobject_state", "entry": 180410, "equals": 99 },
+    { "action": "snapshot", "label": "Calibration snapshot only: the removed skeleton's feet above the WB1 walkway",
+      "actor": "visitor", "metric": "point_ground_gap", "map": 0, "x": -8491.07, "y": 930.815, "z": 99.1179,
+      "save_as": "skeleton_before" }
+  ]
+}
