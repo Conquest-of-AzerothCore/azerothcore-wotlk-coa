@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Hallow's End: the Shade of the Horseman rides his horse over Goldshire",
+  "contract": "The Shade of the Horseman 23543 that the Costumed Orphan Matron summons over Goldshire rides the steed of Headless Horseman's Mount 48025, whose Mounted effect names creature 27153 (Headless Horseman's Mount) with client displays 25958 and 25159. The summoned Shade carries that non-zero mount display and flies, and keeps it while he turns, moves and casts his fires; without it he hovers on foot in a swimming pose (#8649, #9052). The 48025 aura itself is removed by movement, turning and casting (AuraInterruptFlags 261182), so it cannot hold the mount. Rendering is untested.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9431.25,
+    "y": 52.69,
+    "z": 56.59,
+    "o": 1.5
+  },
+  "players": [
+    { "id": "orphan", "race": 1, "class": 1, "level": 10 }
+  ],
+  "steps": [
+    { "action": "set_phase", "label": "Join world phase 1", "actor": "orphan", "value": 1 },
+    { "action": "summon", "label": "The Shade of the Horseman arrives", "actor": "orphan", "entry": 23543,
+      "as": "shade", "distance": 10 },
+    { "action": "assert", "label": "DISCRIMINATING: the Shade sits on his horse", "actor": "shade",
+      "metric": "mount_display_id", "min": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "The Shade flies", "actor": "shade", "metric": "can_fly", "equals": 1 },
+    { "action": "wait", "label": "The Shade starts casting his fires at 25 s", "ms": 30000 },
+    { "action": "assert", "label": "He is still on his horse after casting", "actor": "shade",
+      "metric": "mount_display_id", "min": 1 }
+  ]
+}
