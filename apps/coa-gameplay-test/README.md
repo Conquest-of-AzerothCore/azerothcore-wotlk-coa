@@ -957,6 +957,8 @@ group or its dungeon every item returns 1.
 season games and wins (-1 without a team).
 `creature_query_rank` takes a player `actor` and creature `entry` and returns the rank of the
 last creature query response delivered to that session, or -1 before one arrives.
+`creature_query_quest_item` takes the same arguments plus `item` and returns 1 when that response lists the item
+among the creature's quest drops (`creature_questitem`), 0 when it does not, or -1 before one arrives.
 `quest_level` and `quest_xp` take a player `actor` and `quest`
 and query the native quest level and XP calculations without awarding a reward.
 `quest_log_sent_level` and `quest_log_sent_xp` take the same arguments and return the last level or reward XP

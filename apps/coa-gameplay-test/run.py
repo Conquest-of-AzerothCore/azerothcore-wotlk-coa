@@ -68,7 +68,7 @@ METRICS = TIMELINE_METRICS | {
     'position_x', 'position_y', 'position_z',
     'view_level', 'sent_level', 'sent_max_health', 'sent_faction',
     'sent_average_item_level', 'sent_average_item_level_count',
-    'creature_query_rank', 'quest_level', 'quest_xp',
+    'creature_query_rank', 'creature_query_quest_item', 'quest_level', 'quest_xp',
     'quest_log_sent_level', 'quest_log_sent_xp', 'quest_offer_sent_xp', 'quest_query_scaled', 'quest_query_reward_choice',
     'health', 'health_pct', 'max_health', 'creature_type', 'respawn_remaining', 'power', 'max_power', 'alive', 'combat', 'can_attack', 'victim', 'has_redirects', 'casting', 'level',
     'aura', 'aura_stacks', 'aura_charges', 'aura_duration_ms', 'aura_amount', 'aura_positive', 'aura_visible',
@@ -824,9 +824,11 @@ def validate(scenario):
             if metric in {'view_level', 'sent_level', 'sent_max_health', 'sent_faction'}:
                 require(step['actor'] in player_ids and 'target' in step,
                         f'{where}: view metric needs a player and target')
-            if metric == 'creature_query_rank':
+            if metric in {'creature_query_rank', 'creature_query_quest_item'}:
                 require(step['actor'] in player_ids, f'{where}: creature query metric needs a player')
                 number(step.get('entry'), f'{where}.entry', 1, 2**31 - 1, True)
+            if metric == 'creature_query_quest_item':
+                number(step.get('item'), f'{where}.item', 1, 2**32 - 1, True)
             if metric in {'map_id', 'map_difficulty', 'nearby_creature_template', 'nearby_creature_max_health',
                           'nearby_creature_health_pct', 'nearby_creature_sent_spellclick', 'loot_gear_item_level'}:
                 require(step['actor'] in player_ids, f'{where}: dungeon/loot metric needs a player')
