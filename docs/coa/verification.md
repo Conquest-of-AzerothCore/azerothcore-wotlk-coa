@@ -93,6 +93,8 @@ The macOS CMake configuration also creates static libraries with `/usr/bin/libto
   triggers, routines or events, or under statement-based binary logging
   ([gameplay README](../../apps/coa-gameplay-test/README.md#run)). Lower it on a small machine or a busy MySQL
   server. It also bounds (at most 8) the connections that checksum the world schema for the world cache audit.
+  The limit applies per server: when several servers prepare at once (`--gameplay-jobs`, or the real clock's
+  `gameplay_jobs`), the copy connections total `gameplay_copy_workers` times the number of servers preparing.
 - During a run the gameplay stage copies the source module `.conf` files into the server modules directory and
   removes them afterwards. That directory must not hold `.conf` files of its own (`.conf.dist` files are
   ignored), so keep the source module configs in another directory, beside another worldserver config or in
@@ -429,6 +431,7 @@ updater may already have changed it before the startup barrier, and the next run
 Every server costs memory and MySQL resources. Measured on one workstation on 2026-10-25 with the vanilla dungeon
 set and the default 16 character database workers (measurements, not guarantees): about 7,700 prepared statements
 on the MySQL server and a peak of 5.1 GB RSS per worldserver, plus a full world copy on first use of each slot.
+Each server copies over its own `gameplay_copy_workers` connections, so servers preparing at once multiply them.
 MySQL's default `max_prepared_stmt_count` is 16382, so a stock MySQL server with no other client fits two
 simulated servers; a third cannot prepare its statements, and the runner names `max_prepared_stmt_count` in the
 failure. A running worldserver or authserver on the same MySQL server holds prepared statements too, which can leave
