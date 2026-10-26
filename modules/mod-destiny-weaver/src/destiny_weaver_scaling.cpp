@@ -67,6 +67,7 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -525,7 +526,7 @@ namespace
         data.put(pos.UnitDynamicFlagsPos, flags);
     }
 
-    constexpr char DAMAGE_REMAINDER_KEY[] = "DestinyWeaver.DamageRemainder";
+    std::string const DAMAGE_REMAINDER_KEY = "DestinyWeaver.DamageRemainder";
 
     // The remainder belongs to the shared health pool, not to a particular attacker.
     struct DamageRemainder : DataMap::Base
@@ -533,7 +534,7 @@ namespace
         double Value = 0.0;
     };
 
-    constexpr char SEEN_FACTION_KEY[] = "DestinyWeaver.SeenFaction";
+    std::string const SEEN_FACTION_KEY = "DestinyWeaver.SeenFaction";
 
     struct SeenFaction : DataMap::Base
     {
