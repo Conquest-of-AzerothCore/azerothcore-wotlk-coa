@@ -143,7 +143,7 @@ METRICS = TIMELINE_METRICS | {
     'equipped_item',
     'pet_aura_amount', 'pet_aura_amplitude_ms', 'pet_max_health', 'pet_health', 'pet_attack_power',
     'pet_run_speed_rate',
-    'distance', 'spell_proc_count', 'spell_proc_chance', 'aura_proc_rate', 'temporary_spell_replacement',
+    'distance', 'threat', 'threat_per_damage', 'spell_proc_count', 'spell_proc_chance', 'aura_proc_rate', 'temporary_spell_replacement',
     'spell_family_flags',
     'creature_loot_quality_rate', 'equipped_gear_loot_rate',
     'quest_menu_items', 'quest_menu_has', 'player_setting', 'server_packets', 'server_packet_u8', 'server_packet_u32',

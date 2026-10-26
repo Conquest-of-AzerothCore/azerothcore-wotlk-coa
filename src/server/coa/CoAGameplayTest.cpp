@@ -3192,6 +3192,21 @@ private:
         }
         if (metric == "distance")
             return unit->GetExactDist2d(GetUnit(step.get<std::string>("target")));
+        if (metric == "threat_per_damage")
+        {
+            Creature* creature = unit->ToCreature();
+            Require(creature != nullptr, "Threat metric needs a creature actor");
+            uint32 const taken = creature->GetMaxHealth() - creature->GetHealth();
+            if (!taken)
+                return 0.0f;
+            return creature->GetThreatMgr().GetThreat(GetUnit(step.get<std::string>("target"))) / float(taken);
+        }
+        if (metric == "threat")
+        {
+            Creature* creature = unit->ToCreature();
+            Require(creature != nullptr, "Threat metric needs a creature actor");
+            return creature->GetThreatMgr().GetThreat(GetUnit(step.get<std::string>("target")));
+        }
         if (metric == "spell_cast_count")
         {
             Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown spell in metric");
