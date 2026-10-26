@@ -3667,6 +3667,12 @@ private:
             Require(creature != nullptr, "Creature health metric needs a living nearby creature");
             return 100.0 * creature->GetHealth() / creature->GetMaxHealth();
         }
+        if (metric == "nearby_creature_can_attack")
+        {
+            Creature* creature = player->FindNearestCreature(step.get<uint32>("entry"), 60.0f, true);
+            Require(creature != nullptr, "Creature attack metric needs a living nearby creature");
+            return player->IsValidAttackTarget(creature) ? 1 : 0;
+        }
         if (metric == "nearby_creature_sent_spellclick")
         {
             Creature* creature = player->FindNearestCreature(step.get<uint32>("entry"), 60.0f, true);
