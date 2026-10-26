@@ -5,6 +5,7 @@
 
 #include "AscensionReaperTalents.h"
 #include "AccountMgr.h"
+#include "AllCreatureScript.h"
 #include "ArenaTeam.h"
 #include "ArenaTeamMgr.h"
 #include "AscensionCoATalentState.h"
@@ -122,6 +123,7 @@ using CoAGameplay::LaneActivity;
 using CoAGameplay::StepRequest;
 
 std::set<ObjectGuid> NoRegenerationActors;
+std::optional<uint8> PendingBalanceSpawnLevel;
 
 class CoAGameplayTestRegeneration final : public PlayerScript
 {
@@ -2808,6 +2810,33 @@ private:
         _targetsCreated = true;
     }
 
+    std::vector<ObjectGuid> SpawnBalanceEnemies(Player* owner, uint32 entry, uint8 level, uint32 count,
+        Position const& spot)
+    {
+        Require(sObjectMgr->GetCreatureTemplate(entry) != nullptr, "Unknown balance spawn entry");
+        Map* map = owner->GetMap();
+        std::vector<ObjectGuid> guids;
+        for (uint32 index = 0; index < count; ++index)
+        {
+            Creature* creature = new Creature();
+            PendingBalanceSpawnLevel = level;
+            bool const created = creature->Create(map->GenerateLowGuid<HighGuid::Unit>(), map, owner->GetPhaseMask(),
+                entry, 0, spot.GetPositionX(), spot.GetPositionY(), spot.GetPositionZ(), spot.GetOrientation());
+            PendingBalanceSpawnLevel.reset();
+            if (!created)
+            {
+                delete creature;
+                Require(false, "Could not create balance spawn creature");
+            }
+            Require(!creature->IsSummon(), "Balance spawn must be an ordinary creature");
+            creature->SetHomePosition(spot);
+            map->AddToMap(creature);
+            creature->setActive(true);
+            guids.push_back(creature->GetGUID());
+        }
+        return guids;
+    }
+
     double Measure(Tree const& step)
     {
         if (std::string const requested = step.get<std::string>("metric"); requested.starts_with("timeline_"))
@@ -2903,6 +2932,8 @@ private:
             return unit->IsAlive();
         if (metric == "map_id")
             return unit->GetMapId();
+        if (metric == "instance_id")
+            return unit->GetInstanceId();
         if (metric == "position_x")
             return unit->GetPositionX();
         if (metric == "position_y")
@@ -6791,6 +6822,23 @@ private:
             player->CompleteQuest(quest);
             record.put("result", "quest marked complete as a fixture");
         }
+        else if (action == "balance_spawn")
+        {
+            uint32 const entry = step.get<uint32>("entry");
+            uint8 const level = uint8(step.get<uint32>("level"));
+            uint32 const count = step.get<uint32>("count", 1);
+            float const distance = step.get<float>("distance", 8.0f);
+            Position spot = player->GetPosition();
+            spot.m_positionX += distance;
+            std::vector<ObjectGuid> const guids = SpawnBalanceEnemies(player, entry, level, count, spot);
+            for (std::size_t index = 0; index < guids.size(); ++index)
+            {
+                std::string const spawnId = id + "_balance_" + std::to_string(index);
+                Require(!_actors.count(spawnId) && !_targets.count(spawnId), "Duplicate actor id");
+                _targets.emplace(spawnId, Target{ player->GetMapId(), player->GetInstanceId(), guids[index] });
+            }
+            record.put("result", "spawned " + std::to_string(guids.size()) + " balance enemies");
+        }
         else
             throw std::runtime_error("Unknown action: " + action);
     }
@@ -7714,6 +7762,18 @@ public:
                 ObjectGuid::Empty, 0, 0, uint32(newState) });
     }
 };
+
+class CoAGameplayTestBalanceLevels final : public AllCreatureScript
+{
+public:
+    CoAGameplayTestBalanceLevels() : AllCreatureScript("CoAGameplayTestBalanceLevels") { }
+
+    void OnBeforeCreatureSelectLevel(CreatureTemplate const*, Creature*, uint8& level) override
+    {
+        if (PendingBalanceSpawnLevel)
+            level = *PendingBalanceSpawnLevel;
+    }
+};
 }
 
 void AddCoAGameplayTestScripts()
@@ -7724,4 +7784,5 @@ void AddCoAGameplayTestScripts()
     new CoAGameplayTestTimelineUnits();
     new CoAGameplayTestTimelineSpawns();
     new CoAGameplayTestTimelineBossStates();
+    new CoAGameplayTestBalanceLevels();
 }

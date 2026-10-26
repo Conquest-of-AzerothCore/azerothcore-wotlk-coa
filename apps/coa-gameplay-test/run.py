@@ -56,7 +56,7 @@ METRICS = TIMELINE_METRICS | {
     'pet_power', 'pet_max_power', 'spell_energize_count', 'spell_energize_total',
     'xp', 'next_level_xp', 'skill_value', 'skill_maximum', 'lfg_dungeon_disabled', 'lfg_lock_status', 'lfg_state',
     'lfg_need_allowed',
-    'map_id',
+    'map_id', 'instance_id',
     'in_arena', 'arena_team_members', 'arena_team_season_games', 'arena_team_season_wins',
     'battleground_team', 'team', 'name_query_race',
     'map_difficulty', 'nearby_creature_template', 'nearby_creature_max_health', 'nearby_creature_health_pct',
@@ -303,6 +303,7 @@ ACTIONS = {
     'quest_click': ({'actor', 'quest', 'entry'}, {'actor', 'quest', 'entry'}),
     'quest_complete': ({'actor', 'quest'}, {'actor', 'quest'}),
     'quest_turn_in': ({'actor', 'quest'}, {'actor', 'quest', 'entry', 'gameobject', 'reward'}),
+    'balance_spawn': ({'actor', 'entry', 'level'}, {'actor', 'entry', 'level', 'count', 'distance'}),
 }
 
 
@@ -545,6 +546,12 @@ def validate(scenario):
         if action == 'summon':
             require(isinstance(step['as'], str) and step['as'] not in actor_ids, f'{where}: duplicate summon id')
             actor_ids.add(step['as'])
+        if action == 'balance_spawn':
+            number(step.get('distance', 8), f'{where}.distance', 0, 100)
+            for offset in range(step.get('count', 1)):
+                spawn_id = f"{step['actor']}_balance_{offset}"
+                require(spawn_id not in actor_ids, f'{where}: duplicate balance spawn id')
+                actor_ids.add(spawn_id)
         if 'actor' in step:
             require(step['actor'] in actor_ids, f'{where}: unknown actor')
             require(action in {'snapshot', 'assert', 'set_health', 'cast', 'attack_owned_creature'}

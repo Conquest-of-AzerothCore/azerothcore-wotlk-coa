@@ -557,7 +557,7 @@ a previously named snapshot of the same metric; it is available on snapshots and
 `cast` accepts an optional `destination` with `x`, `y`, `z` to send an explicit ground target.
 `target_pet: true` in place of `target` sends a player's cast at their current pet.
 
-Metrics: `health`, `max_health`, `creature_type`, `power`, `max_power`, `alive`, `map_id`, `combat`, `casting`,
+Metrics: `health`, `max_health`, `creature_type`, `power`, `max_power`, `alive`, `map_id`, `instance_id`, `combat`, `casting`,
 `level`, `quest_objective_count` (needs `quest`, optional `index`), `knows_spell`, `has_talent`, `talent_points`, `active_talent_spec`,
 `cooldown_ms`, `item_count`, `carried_item_count`, `bank_bag_slots`, `aura`, `aura_stacks`, `aura_charges`,
 `aura_duration_ms`, `aura_amount`, `pet_entry`, `pet_aura_stacks`, `owned_creature_count`, `owned_creature_spacing`,
@@ -919,6 +919,18 @@ The pet queries require a player with a current pet. Aura metrics optionally acc
 ownership; `aura_visible` observes whether the native aura application occupies a client-visible buff slot.
 `aura_amount` also accepts an effect index (0..2, default 0). Missing auras yield zero;
 check aura presence separately when zero is a valid effect amount. Permanent aura duration is -1.
+
+### Balance dungeon spawns
+
+`balance_spawn` requires a player `actor`, an `entry` and a `level`; optional `count` (default 1) and
+`distance` (default 8 yards ahead of the actor). It creates that many ordinary creatures (`Creature::Create` +
+`Map::AddToMap`, never `SummonCreature`) in the actor's own map/instance and phase, at the forced level, so
+`creature_classlevelstats`, the actor's instance and CoA's dungeon health/damage scaling apply exactly as for a
+native dungeon spawn, unlike scenario `creatures` and other fixture summons, which `CoACreatureScaling::IsEligible`
+excludes. Each spawn becomes addressable as `<actor>_balance_<index>` (0-based), the same way other scenario
+targets are, for metrics and later steps; it is despawned with the rest of the case's fixtures.
+`instance_id` reads a unit's native instance id (zero outside an instance); it is how a scenario checks that two
+ungrouped actors who teleport to the same dungeon location get separate instances.
 
 ### Destiny Weaver regressions
 
