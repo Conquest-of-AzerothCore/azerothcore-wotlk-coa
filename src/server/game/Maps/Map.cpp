@@ -718,11 +718,12 @@ ZoneWideVisibleWorldObjectsSet const* Map::GetZoneWideVisibleWorldObjectsForZone
 
 void Map::HandleDelayedVisibility()
 {
-    if (i_objectsForDelayedVisibility.empty())
-        return;
-    for (std::unordered_set<Unit*>::iterator itr = i_objectsForDelayedVisibility.begin(); itr != i_objectsForDelayedVisibility.end(); ++itr)
-        (*itr)->ExecuteDelayedUnitRelocationEvent();
-    i_objectsForDelayedVisibility.clear();
+    while (!i_objectsForDelayedVisibility.empty())
+    {
+        Unit* unit = *i_objectsForDelayedVisibility.begin();
+        i_objectsForDelayedVisibility.erase(i_objectsForDelayedVisibility.begin());
+        unit->ExecuteDelayedUnitRelocationEvent();
+    }
 }
 
 struct ResetNotifier

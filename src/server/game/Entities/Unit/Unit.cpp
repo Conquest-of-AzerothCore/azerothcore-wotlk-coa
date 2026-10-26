@@ -13750,6 +13750,9 @@ void Unit::RemoveFromWorld()
     if (IsInWorld())
     {
         m_duringRemoveFromWorld = true;
+        if (Map* map = FindMap())
+            map->i_objectsForDelayedVisibility.erase(this);
+
         if (IsAIEnabled)
             GetAI()->OnDespawn();
 
