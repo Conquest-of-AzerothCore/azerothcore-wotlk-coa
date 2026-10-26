@@ -26,6 +26,7 @@
 #include "Creature.h"
 #include "GameTime.h"
 #include "Log.h"
+#include "KillRewarder.h"
 #include "Map.h"
 #include "ObjectMgr.h"
 #include "Player.h"
@@ -119,9 +120,10 @@ public:
         Grant(player, Wuerfeln("Quest", 0, 12), "a quest");
     }
 
-    void OnPlayerCreatureKill(Player* killer, Creature* killed) override
+    void OnPlayerRewardKillRewarder(Player* player, KillRewarder* rewarder, bool, float&) override
     {
-        if (!Enabled() || !killer || !killed)
+        Creature* killed = rewarder && rewarder->GetVictim() ? rewarder->GetVictim()->ToCreature() : nullptr;
+        if (!Enabled() || !player || !killed)
             return;
 
         // Nothing for what a player made themselves, and nothing for the
@@ -136,12 +138,12 @@ public:
         {
             Map const* map = killed->GetMap();
             bool const raid = map && map->IsRaid();
-            Grant(killer, Wuerfeln(raid ? "RaidBoss" : "DungeonBoss", raid ? 41 : 14, raid ? 53 : 22),
+            Grant(player, Wuerfeln(raid ? "RaidBoss" : "DungeonBoss", raid ? 41 : 14, raid ? 53 : 22),
                   raid ? "a raid boss" : "a dungeon boss");
             return;
         }
 
-        Grant(killer, Wuerfeln("Creature", 0, 3), "a creature");
+        Grant(player, Wuerfeln("Creature", 0, 3), "a creature");
     }
 };
 
