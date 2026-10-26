@@ -606,7 +606,8 @@ Report these scripts as unavailable, never as passed.
 ([client-lab-probe-relay.md](client-lab-probe-relay.md)). The guide's `coa-client-lab login ACCOUNT PASSWORD
 CHARACTER` writes the lab descriptor `state/lab.json` and `coa-client-lab stop` removes it, so the script runs only
 while a lab is logged in. It checks the lab slot's deployed server, not the build stage's binary, and prints the
-slot's deployed commit beside the checkout's `HEAD` for comparison. A containerised run needs host networking (the
+slot's deployed commit beside the checkout's `HEAD` for comparison. A containerised run needs host networking (without it, an existing descriptor makes the script fail
+with a refused connection instead of `unavailable`; the
 SOAP port is published on the host's loopback) and read-only mounts of the lab state directory and the DBC
 directory.
 

@@ -7,6 +7,7 @@ slot, not the build stage's binary. See docs/coa/client-lab-probe-relay.md.
 """
 
 import argparse
+from datetime import datetime
 import importlib.util
 from pathlib import Path
 import shutil
@@ -33,6 +34,22 @@ def spell_name(dbc_dir, spell):
         shutil.copyfile(Path(dbc_dir) / "Spell.dbc", Path(directory) / "Spell.dbc")
         record = inspect_dbc.DataSet(directory).record("Spell", spell)
     return next(field["value"] for field in record["fields"] if field["name"] == "SpellName[enUS]")
+
+
+def preflight_problem(descriptor):
+    if descriptor["preflight"] != "pass":
+        return f"lab preflight is {descriptor['preflight']!r}"
+    if descriptor["preflight_slot"] != descriptor["slot"]:
+        return f"lab preflight was recorded for slot {descriptor['preflight_slot']}, not slot {descriptor['slot']}"
+    try:
+        checked = datetime.fromisoformat(descriptor["preflight_time"])
+        deployed = datetime.fromisoformat(descriptor["deployed_at"])
+    except (TypeError, ValueError):
+        return (f"lab preflight time {descriptor['preflight_time']!r} or deploy time "
+                f"{descriptor['deployed_at']!r} is unreadable")
+    if checked < deployed:
+        return f"lab preflight ({descriptor['preflight_time']}) is older than the deploy ({descriptor['deployed_at']})"
+    return None
 
 
 def checkout_head():
@@ -83,13 +100,14 @@ def main():
     descriptor = lab_relay.load_descriptor(args.client_lab)
     print(f"lab slot {descriptor['slot']}, deployed {descriptor['deployed_commit']}, checkout {checkout_head()}, "
           f"character {descriptor['character']}")
-    if descriptor["preflight"] != "pass":
-        print(f"FAIL: lab preflight is {descriptor['preflight']!r}; run coa-client-lab preflight N")
+    problem = preflight_problem(descriptor)
+    if problem:
+        print(f"FAIL: {problem}; run coa-client-lab preflight N")
         return 1
     checks = Checks()
     try:
         run_checks(descriptor, spell_name(args.dbc_dir, SPELL), checks)
-    except (lab_relay.SoapFault, TimeoutError, OSError) as error:
+    except (lab_relay.SoapFault, TimeoutError, OSError, ValueError, KeyError, StopIteration) as error:
         checks.check(False, "relay reachable", error)
     print(f"client lab: {checks.failures} failure(s)")
     return 1 if checks.failures else 0

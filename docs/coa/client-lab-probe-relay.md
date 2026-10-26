@@ -1,7 +1,9 @@
 # Client lab probe relay
 
 The probe relay lets a test harness ask the CoaProbe addon of a running lab client for a read-only UI fact
-(tooltip text, frame state, auras, captured Lua errors) without `/reload`. The harness reaches the worldserver over
+(tooltip text, frame state, auras) without `/reload`. Lua error text is not captured: on the CoA client the
+addon's error handler is replaced after login, so `errors` stays empty, and a Lua error shows only as the client's
+own `UI Error` system line in `probe log`. The harness reaches the worldserver over
 SOAP; the worldserver whispers the request to the lab character as an addon message and collects the addon's
 chunked answer. Code: `src/server/coa/CoAProbeRelay.h`, `CoAProbeRelayCore.cpp` (wire format and reply book) and
 `CoAProbeRelay.cpp` (configuration, chat hook, command). Tests: `src/test/server/coa/ProbeRelayTest.cpp`.

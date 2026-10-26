@@ -9,7 +9,7 @@ from xml.etree import ElementTree
 from xml.sax.saxutils import escape
 
 DESCRIPTOR_KEYS = ("instance", "slot", "soap_url", "soap_account", "soap_password_file", "account", "character",
-                   "deployed_commit", "preflight")
+                   "deployed_commit", "deployed_at", "preflight", "preflight_slot", "preflight_time")
 
 ENVELOPE = (
     '<?xml version="1.0" encoding="UTF-8"?>'

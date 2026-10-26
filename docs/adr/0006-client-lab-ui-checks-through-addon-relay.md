@@ -46,3 +46,5 @@ cannot be supplied.
   contracts as the guide's `scripts/coa-lab-relay`, because verification must not execute scripts from the public
   guide. Both copies must change together when the wire format changes.
 - Warden and the anti-cheat path are untouched; requests and answers are ordinary addon whispers.
+- Lua error text stays unreadable on this route: the client replaces the addon's error handler after login, and
+  only the client's own `UI Error` system line reaches `probe log` (guide `docs/design/client-lab-level3.md`).

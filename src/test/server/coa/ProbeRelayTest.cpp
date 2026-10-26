@@ -23,7 +23,8 @@ TEST(ProbeRelay, RequestMessageBuildsPrefixedQuery)
 
 TEST(ProbeRelay, RequestMessageRejectsWriteCommands)
 {
-    for (std::string_view line : {"eval 1", "pksend 1", "pkwatch 1", "evwatch X", "evunwatch X", "pkunwatch 1", "", " ping"})
+    for (std::string_view line :
+             {"eval 1", "pksend 1", "pkwatch 1", "evwatch X", "evunwatch X", "pkunwatch 1", "", " ping"})
         EXPECT_FALSE(RequestMessage("r1", line).has_value()) << line;
 }
 

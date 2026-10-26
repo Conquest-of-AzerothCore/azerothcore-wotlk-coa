@@ -70,7 +70,8 @@ public:
     ProbeRelayPlayers() : PlayerScript("coa_probe_relay_players",
         {PLAYERHOOK_CAN_PLAYER_USE_PRIVATE_CHAT, PLAYERHOOK_ON_LOGOUT}) { }
 
-    bool OnPlayerCanUseChat(Player* player, uint32 type, uint32 language, std::string& message, Player* receiver) override
+    bool OnPlayerCanUseChat(Player* player, uint32 type, uint32 language, std::string& message,
+        Player* receiver) override
     {
         if (type != CHAT_MSG_WHISPER || language != LANG_ADDON || receiver != player
             || !message.starts_with(std::string(Prefix) + "\t"))

@@ -108,7 +108,8 @@ std::optional<ReplyChunk> ParseReplyChunk(std::string_view message)
 
 void ReplyBook::Expire(uint32 nowMs)
 {
-    std::erase_if(_entries, [nowMs](Entry const& entry) { return getMSTimeDiff(entry.armedMs, nowMs) > ReplyLifetimeMs; });
+    std::erase_if(_entries,
+        [nowMs](Entry const& entry) { return getMSTimeDiff(entry.armedMs, nowMs) > ReplyLifetimeMs; });
 }
 
 ReplyBook::Entry* ReplyBook::Find(uint64 player, std::string_view req)

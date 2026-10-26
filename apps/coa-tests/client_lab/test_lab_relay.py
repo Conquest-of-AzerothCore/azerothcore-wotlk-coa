@@ -70,7 +70,8 @@ class LabRelayTest(unittest.TestCase):
         self.descriptor = {
             "instance": "", "slot": 2, "soap_url": self.soap.url, "soap_account": "COALABSOAP",
             "soap_password_file": str(self.password_file), "account": "COALAB1", "character": "Coalabone",
-            "deployed_commit": "abc", "preflight": "pass",
+            "deployed_commit": "abc", "deployed_at": "2026-10-26T00:32:54+01:00", "preflight": "pass",
+            "preflight_slot": 2, "preflight_time": "2026-10-26T00:36:21+01:00",
         }
 
     def tearDown(self):
@@ -126,6 +127,19 @@ class LabRelayTest(unittest.TestCase):
             self.assertEqual(lab_run.main(), 1)
         self.assertEqual(self.soap.commands, [])
         self.assertIn("lab preflight is 'fail'", output.getvalue())
+
+    def test_run_fails_on_a_stale_preflight_before_any_soap_call(self):
+        path = Path(self.tmp.name) / "lab.json"
+        stale = {"another slot": {"preflight_slot": 3}, "older than the deploy":
+                 {"preflight_time": "2026-10-26T00:30:00+01:00"}, "unreadable time": {"preflight_time": "unknown"}}
+        for name, change in stale.items():
+            with self.subTest(name):
+                path.write_text(json.dumps({**self.descriptor, **change}))
+                argv = ["run.py", "--client-lab", str(path), "--dbc-dir", self.tmp.name]
+                with patch("sys.argv", argv), redirect_stdout(io.StringIO()) as output:
+                    self.assertEqual(lab_run.main(), 1)
+                self.assertIn("FAIL: lab preflight", output.getvalue())
+        self.assertEqual(self.soap.commands, [])
 
     def test_run_passes_with_three_fast_answers_from_one_load(self):
         def complete(answer):
