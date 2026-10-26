@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Barometric/Crushing Pressure self buffs can be cancelled, enemy debuff stays negative (#4422)",
+  "contract": "Barometric Pressure (803563) and Crushing Pressure (803564) each pack a permanent self APPLY_AURA buff (Effect[1] for 803563, Effects[0]/[1] for 803564) with an APPLY_AREA_AURA_ENEMY slow/cast-speed debuff on nearby hostile targets (Effect[0] for 803563, Effect[2] for 803564) into the same spell id. SpellInfo::IsPositive() ORs every effect's sign, so the hardcoded-negative enemy effect made the whole spell read negative and WorldSession::HandleCancelAuraOpcode (`!spellInfo->IsPositive()`) refused CMSG_CANCEL_AURA for the caster's own buff, leaving it permanently stuck. The fix marks each spell's self-buff effect index positive (SPELL_ATTR0_CU_POSITIVE_EFFn) without touching the enemy effect's negative bit, so the self buff becomes cancellable while the area-aura application on the enemy target keeps its own negative classification while it is up, and still ends (as any area aura's child application does) once the caster's anchoring buff is cancelled.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "storm", "race": 1, "class": 16, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "barometric_target", "owner": "storm", "entry": 36, "level": 60, "health": 1000000, "distance": 3 },
+    { "id": "crushing_target", "owner": "storm", "entry": 36, "level": 60, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+
+    { "action": "learn", "actor": "storm", "spell": 803563 },
+    { "action": "set_power", "actor": "storm", "value": 1000 },
+    { "action": "cast", "actor": "storm", "spell": 803563 },
+    { "action": "assert", "label": "SETUP: Barometric Pressure buff is applied on the caster",
+      "actor": "storm", "metric": "aura", "spell": 803563, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTRACT: Barometric Pressure debuff lands on the nearby enemy",
+      "actor": "barometric_target", "metric": "aura", "spell": 803563, "caster": "storm", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTRACT: the enemy-side application still reads as a debuff",
+      "actor": "barometric_target", "metric": "aura_positive", "spell": 803563, "caster": "storm", "equals": 0 },
+
+    { "action": "cancel_aura", "actor": "storm", "spell": 803563 },
+    { "action": "assert", "label": "FIX: cancelling Barometric Pressure removes the caster's own buff",
+      "actor": "storm", "metric": "aura", "spell": 803563, "equals": 0, "within_ms": 1000 },
+    { "action": "assert", "label": "CONTRACT: cancelling the anchoring buff also ends its area-aura child on the enemy",
+      "actor": "barometric_target", "metric": "aura", "spell": 803563, "caster": "storm", "equals": 0, "within_ms": 1000 },
+
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1600 },
+    { "action": "learn", "actor": "storm", "spell": 803564 },
+    { "action": "set_power", "actor": "storm", "value": 1000 },
+    { "action": "cast", "actor": "storm", "spell": 803564 },
+    { "action": "assert", "label": "SETUP: Crushing Pressure buff is applied on the caster",
+      "actor": "storm", "metric": "aura", "spell": 803564, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTRACT: Crushing Pressure debuff lands on the nearby enemy",
+      "actor": "crushing_target", "metric": "aura", "spell": 803564, "caster": "storm", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTRACT: the enemy-side application still reads as a debuff",
+      "actor": "crushing_target", "metric": "aura_positive", "spell": 803564, "caster": "storm", "equals": 0 },
+
+    { "action": "cancel_aura", "actor": "storm", "spell": 803564 },
+    { "action": "assert", "label": "FIX: cancelling Crushing Pressure removes the caster's own buff",
+      "actor": "storm", "metric": "aura", "spell": 803564, "equals": 0, "within_ms": 1000 },
+    { "action": "assert", "label": "CONTRACT: cancelling the anchoring buff also ends its area-aura child on the enemy",
+      "actor": "crushing_target", "metric": "aura", "spell": 803564, "caster": "storm", "equals": 0, "within_ms": 1000 }
+  ]
+}
