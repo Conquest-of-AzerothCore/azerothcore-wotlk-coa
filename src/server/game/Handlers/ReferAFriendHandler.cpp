@@ -53,6 +53,9 @@ namespace
     {
         if (!target || target == donor)
             return ERR_REFER_A_FRIEND_NO_TARGET;
+        if (PlayerSettingVector const* prestige = target->FindPlayerSettings("core.coa_prestige");
+            prestige && prestige->size() > 1 && (*prestige)[1].value != 0)
+            return ERR_REFER_A_FRIEND_NOT_NOW;
         if (!donor->GetGrantableLevels())
             return ERR_REFER_A_FRIEND_INSUFFICIENT_GRANTABLE_LEVELS;
         if (donor->GetSession()->GetAccountId() == target->GetSession()->GetAccountId() ||
