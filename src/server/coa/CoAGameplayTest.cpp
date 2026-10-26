@@ -2891,6 +2891,8 @@ private:
             return unit->GetPositionZ();
         if (metric == "combat")
             return unit->IsInCombat();
+        if (metric == "can_attack")
+            return unit->IsValidAttackTarget(GetUnit(step.get<std::string>("target")));
         if (metric == "channel_object_entry")
         {
             ObjectGuid const channelObject = unit->GetGuidValue(UNIT_FIELD_CHANNEL_OBJECT);
@@ -2995,11 +2997,12 @@ private:
         }
         if (metric == "view_level")
             return GetUnit(step.get<std::string>("target"))->getLevelForTarget(unit);
-        if (metric == "sent_level" || metric == "sent_max_health")
+        if (metric == "sent_level" || metric == "sent_max_health" || metric == "sent_faction")
         {
             Actor& actor = _actors.at(step.get<std::string>("actor"));
             uint64 guid = GetUnit(step.get<std::string>("target"))->GetGUID().GetRawValue();
-            uint16 field = metric == "sent_level" ? UNIT_FIELD_LEVEL : UNIT_FIELD_MAXHEALTH;
+            uint16 field = metric == "sent_level" ? UNIT_FIELD_LEVEL :
+                metric == "sent_faction" ? UNIT_FIELD_FACTIONTEMPLATE : UNIT_FIELD_MAXHEALTH;
             auto itr = actor.unitValues.find(guid);
             if (itr == actor.unitValues.end() || !itr->second.count(field))
                 return 0;

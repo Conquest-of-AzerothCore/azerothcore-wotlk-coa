@@ -66,10 +66,11 @@ METRICS = TIMELINE_METRICS | {
     'placement_audit_event_spawns',
     'loot_gear_item_level',
     'position_x', 'position_y', 'position_z',
-    'view_level', 'sent_level', 'sent_max_health', 'sent_average_item_level', 'sent_average_item_level_count',
+    'view_level', 'sent_level', 'sent_max_health', 'sent_faction',
+    'sent_average_item_level', 'sent_average_item_level_count',
     'creature_query_rank', 'quest_level', 'quest_xp',
     'quest_log_sent_level', 'quest_log_sent_xp', 'quest_offer_sent_xp', 'quest_query_scaled', 'quest_query_reward_choice',
-    'health', 'health_pct', 'max_health', 'creature_type', 'respawn_remaining', 'power', 'max_power', 'alive', 'combat', 'victim', 'has_redirects', 'casting', 'level',
+    'health', 'health_pct', 'max_health', 'creature_type', 'respawn_remaining', 'power', 'max_power', 'alive', 'combat', 'can_attack', 'victim', 'has_redirects', 'casting', 'level',
     'aura', 'aura_stacks', 'aura_charges', 'aura_duration_ms', 'aura_amount', 'aura_positive', 'aura_visible',
     'carried_aura_count',
     'knows_spell', 'spell_active', 'has_talent', 'talent_points', 'active_talent_spec', 'cooldown_ms', 'global_cooldown_ms', 'spell_charges',
@@ -797,6 +798,8 @@ def validate(scenario):
                 require(step['actor'] in player_ids, f'{where}: metric needs a player')
             if metric == 'victim':
                 require('target' in step, f'{where}: victim metric requires a target')
+            if metric == 'can_attack':
+                require(step.get('target') in actor_ids, f'{where}: can_attack metric needs the attacked unit')
             if metric == 'carried_aura_count':
                 require(type(step.get('spells')) is list and 0 < len(step['spells']) <= 50,
                         f'{where}: carried_aura_count must list 1-50 spells')
@@ -818,7 +821,7 @@ def validate(scenario):
                         and bool(step['name']), f'{where}: name metric needs a player and name')
             elif 'name' in step:
                 require(False, f'{where}: name only applies to name metrics')
-            if metric in {'view_level', 'sent_level', 'sent_max_health'}:
+            if metric in {'view_level', 'sent_level', 'sent_max_health', 'sent_faction'}:
                 require(step['actor'] in player_ids and 'target' in step,
                         f'{where}: view metric needs a player and target')
             if metric == 'creature_query_rank':

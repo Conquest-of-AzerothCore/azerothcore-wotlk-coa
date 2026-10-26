@@ -448,8 +448,10 @@ Creatures require `id`, player `owner` and template `entry`. Optional `distance`
 (default 3 yards); `faction`, `level`, `health` default to 14, 80, 100000. They retain template data and AI,
 with health regeneration disabled and `reaction` defaulting to passive (0); defensive (1) and aggressive (2)
 fixtures exercise native target selection and movement. `victim` with a `target` measures whether that unit is
-the actor's current attack victim. The native player-damage share a kill needs for loot and
-reward is taken from the declared health, so a player's kill leaves a lootable or skinnable corpse. Pick a
+the actor's current attack victim. `can_attack` with a `target` returns one when the native `IsValidAttackTarget`
+check lets the actor attack that unit, including faction reaction, PvP flags and sanctuaries. The native
+player-damage share a kill needs for loot and reward is taken from the declared health, so a player's kill leaves
+a lootable or skinnable corpse. Pick a
 template whose scripts suit the experiment.
 Setup clears combat initiated by spawn-time AI before starting the scenario: a fixture whose AI engaged a player
 while spawning evades at once. No step runs while any fixture is evading, so a spell or attack is never aimed at
@@ -937,8 +939,8 @@ before a player update, then leaves subsequent assertions to verify the queued c
 It tests dispatch and deferral, not a real socket, packet delivery, or every possible concurrent schedule.
 
 `view_level` takes a player `actor` and unit `target` and queries the target-relative combat level.
-`sent_level` and `sent_max_health` use the same fields and observe values-only object updates emitted to
-the socketless session. They return zero until the corresponding field has been observed; they do not
+`sent_level`, `sent_max_health` and `sent_faction` (the faction template) use the same fields and observe
+values-only object updates emitted to the socketless session. They return zero until the corresponding field has been observed; they do not
 force updates or inspect client rendering. `lfg_dungeon_disabled` takes an LFGDungeons.dbc `dungeon` id and
 returns 1 when the `disables` table locks that dungeon's map and difficulty out of Dungeon Finder, otherwise 0.
 `lfg_lock_status` takes a player `actor` and an LFGDungeons.dbc `dungeon` id and returns the lock status the

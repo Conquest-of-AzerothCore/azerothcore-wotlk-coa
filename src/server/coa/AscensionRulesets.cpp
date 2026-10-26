@@ -52,6 +52,20 @@ void SyncRulesetPvP(Player* player)
     }
 }
 
+void RefreshMercenariesFor(Player* viewer)
+{
+    if (Map* map = viewer->FindMap())
+        map->DoForAllPlayers([viewer](Player* mercenary)
+        {
+            if (mercenary == viewer || !mercenary->HasAura(SPELL_MERCENARY))
+                return;
+            mercenary->ForceValuesUpdateAtIndex(UNIT_FIELD_FACTIONTEMPLATE);
+            for (Unit* controlled : mercenary->m_Controlled)
+                if (controlled->GetOwnerGUID() == mercenary->GetGUID())
+                    controlled->ForceValuesUpdateAtIndex(UNIT_FIELD_FACTIONTEMPLATE);
+        });
+}
+
 void ApplyRuleset(Player* player, uint32 selectionId)
 {
     bool const blockedBefore = RulesetBlocksLevelScaling(player);
@@ -67,6 +81,7 @@ void ApplyRuleset(Player* player, uint32 selectionId)
         player->CastSpell(player, SPELL_WAR_MODE, true);
     player->ForceValuesUpdateAtIndex(UNIT_FIELD_BYTES_2);
     SyncRulesetPvP(player);
+    RefreshMercenariesFor(player);
 
     if (player->IsInWorld() && RulesetBlocksLevelScaling(player) != blockedBefore &&
         !LocalLevelScaling::NotifyScalingChanged(player))

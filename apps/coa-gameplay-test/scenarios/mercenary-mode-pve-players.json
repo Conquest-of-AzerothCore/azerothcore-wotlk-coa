@@ -1,0 +1,168 @@
+{
+  "schema": 1,
+  "name": "Mercenary for Hire!: same-faction PvE players stay out of the fight",
+  "contract": "PvE Mode prevents attacking or being attacked by other players, and Mercenary for Hire! only makes its user hostile to their own faction while in War Mode or High-Risk. A level 20 High-Risk Mercenary and a same-faction PvE Mode player therefore cannot attack each other in either direction and the PvE player receives the Mercenary's race faction, while a same-faction High-Risk player and the Mercenary can still attack each other and that player receives the Outlaw faction 1163. Rendering, AoE and pets are untested.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "mercenary",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    },
+    {
+      "id": "victim",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    },
+    {
+      "id": "peaceful",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "mercenary",
+      "spell": 9931032,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "mercenary",
+      "spell": 1004119,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "mercenary",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "victim",
+      "spell": 9931032,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "victim",
+      "spell": 1004119,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "victim",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "peaceful",
+      "spell": 1004019,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "peaceful",
+      "spell": 1004119,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "peaceful",
+      "spell": 9931032,
+      "stacks": 1
+    },
+    {
+      "action": "pvp",
+      "actor": "mercenary",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "victim",
+      "enabled": true
+    },
+    {
+      "action": "cast",
+      "actor": "mercenary",
+      "spell": 9930874
+    },
+    {
+      "action": "assert",
+      "label": "Cast grants the status",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "The PvE player cannot attack the same-faction Mercenary",
+      "actor": "peaceful",
+      "metric": "can_attack",
+      "target": "mercenary",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Mercenary cannot attack the same-faction PvE player",
+      "actor": "mercenary",
+      "metric": "can_attack",
+      "target": "peaceful",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Mercenary can attack the same-faction High-Risk player",
+      "actor": "mercenary",
+      "metric": "can_attack",
+      "target": "victim",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The same-faction High-Risk player can attack the Mercenary",
+      "actor": "victim",
+      "metric": "can_attack",
+      "target": "mercenary",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The PvE player receives the Mercenary's Human faction",
+      "actor": "peaceful",
+      "metric": "sent_faction",
+      "target": "mercenary",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The High-Risk player receives the Outlaw faction",
+      "actor": "victim",
+      "metric": "sent_faction",
+      "target": "mercenary",
+      "equals": 1163,
+      "within_ms": 5000
+    }
+  ]
+}
