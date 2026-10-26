@@ -13,7 +13,7 @@ struct Entry
     char const* Name;
 };
 
-inline constexpr std::array<Entry, 6309> Entries =
+inline constexpr std::array<Entry, 6310> Entries =
 {{
     { 3, 987, "Flesh Eater" },
     { 5, 13444, "Tsunis" },
@@ -5573,6 +5573,7 @@ inline constexpr std::array<Entry, 6309> Entries =
     { 379988, 142605, "Pale Rootbound Beast" },
     { 379989, 142066, "Dark Iron Armored Yak" },
     { 379991, 142074, "Goat of Winter" },
+    { 379995, 141902, "Grey Stallion" },
     { 380003, 142778, "Ancient Spiritwalker" },
     { 392238, 100536, "Charcoal Primal Dog" },
     { 392239, 101602, "Chestnut Primal Dog" },
