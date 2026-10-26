@@ -3,44 +3,28 @@
 #ifndef COA_ASCENSION_ITEM_POWER_H
 #define COA_ASCENSION_ITEM_POWER_H
 
+#include "AscensionItemPowerTable.h"
+#include "AscensionPvePowerPolicy.h"
+#include "AscensionPvpPowerPolicy.h"
 #include "Item.h"
 #include "ItemTemplate.h"
 #include "Player.h"
-#include "SpellInfo.h"
-#include "SpellMgr.h"
 #include <algorithm>
-#include <charconv>
-#include <string_view>
 
 namespace AscensionItemPower
 {
-constexpr uint32 MaxMarkerAmount = 1000;
 constexpr uint32 EquippedCap = 495;
 
 [[nodiscard]] inline uint32 OfItem(ItemTemplate const* proto, bool pvp)
 {
+    ItemPowerTable::Table const& table = ItemPowerTable::Loaded();
+    if (uint32 const authored = pvp ? table.Pvp(proto->ItemId) : table.Pve(proto->ItemId))
+        return authored;
+
     uint32 power = 0;
-    std::string_view const prefix = pvp ? "PvP Power (+" : "PvE Power (+";
     for (auto const& effect : proto->Spells)
-    {
-        if (effect.SpellTrigger != ITEM_SPELLTRIGGER_ON_EQUIP)
-            continue;
-
-        SpellInfo const* spell = sSpellMgr->GetSpellInfo(effect.SpellId);
-        if (!spell || !spell->SpellName[0])
-            continue;
-
-        std::string_view const name(spell->SpellName[0]);
-        if (!name.starts_with(prefix) || !name.ends_with(')'))
-            continue;
-
-        uint32 amount = 0;
-        char const* first = name.data() + prefix.size();
-        char const* last = name.data() + name.size() - 1;
-        auto const parsed = std::from_chars(first, last, amount);
-        if (parsed.ec == std::errc() && parsed.ptr == last && amount <= MaxMarkerAmount)
-            power += amount;
-    }
+        if (effect.SpellTrigger == ITEM_SPELLTRIGGER_ON_EQUIP)
+            power += pvp ? PvpPower::SpellPower(effect.SpellId) : PvePower::SpellPower(effect.SpellId);
     return power;
 }
 

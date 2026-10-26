@@ -6,11 +6,14 @@ on by default (`src/server/coa/conf/coa.conf.dist`).
 
 ## Where a point comes from
 
-An item carries its power as an equip spell named `PvE Power (+N)` (spell id 101600 + N) or `PvP Power (+N)`
-(101700 + N), N from 0 to 99. The server sums the marker spells on a player's equipped, unbroken gear and caps
-the total at 495. The character sheet reads the same numbers from the client's own `ItemAddon.dbc`. Where the two
-disagree the sheet shows the client's value and the server applies its marker. Values above 99 cannot be one
-marker spell and exist only in the client data.
+The server reads each item's PvE and PvP Power from the client's own `ItemAddon.dbc` (`DataDir/dbc`, fields 38
+and 39 of a record), the numbers the character sheet shows, and sums them over a player's equipped, unbroken gear,
+capped at 495. A value of 0 or above 1000 is not power. An item without one uses its equip spell named
+`PvE Power (+N)` (spell id 101600 + N) or `PvP Power (+N)` (101700 + N) instead. If `ItemAddon.dbc` is missing the
+log says so at startup and every item uses its spell.
+
+The two sources disagree on many Bloodforged and PvP items, mostly at required level 60 and under, where the spell
+holds half the client value; the file wins, so a level 60 twin gives what its tooltip says.
 
 Bloodforged gear carries no PvE Power.
 
@@ -44,7 +47,10 @@ A line can be tried in game before changing code: `.clientpush string <id> <KEY>
 ## Tests
 
 * `apps/coa-tests/pve_power` checks the marker mapping, the cap, the scaling and the map constants.
-* The gameplay scenarios `pve-power-damage`, `pve-power-bloodforged-gives-none`,
+* `apps/coa-tests/item_power_table` checks loading `ItemAddon.dbc`: the two power fields, the 1000 limit, duplicate
+  rows and rejected files.
+* The gameplay scenarios `pvp-power-level60-client-value` (a level 60 twin gives its tooltip value, 42, where its
+  spell holds 21), `pve-power-damage`, `pve-power-bloodforged-gives-none`,
   `pvp-power-creatures-high-risk-only`, `pve-pvp-power-stack-high-risk` and `pve-power-instance-shield` assert
   exact results on a base of 1000 (see `script_melee_damage_dealt` in the gameplay-test README). The shield
   scenario compares the same gear in the open world and in the Deadmines.

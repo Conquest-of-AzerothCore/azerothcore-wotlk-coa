@@ -441,8 +441,8 @@ HighRisk.FelCommutation.ToggleAnywhere = 0
 HighRisk.FelCommutation.ClickToggle = 0
 
 #    PvpPower.Enable
-#        Description: Item spells named "PvP Power (+N)" scale damage and healing at level 60, capped at
-#                     495 points. Damage +0.05% per point against players (and against uncontrolled
+#        Description: PvP Power on equipped items (the value in ItemAddon.dbc, else the item's "PvP Power
+#                     (+N)" spell) scales damage and healing at level 60, capped at 495 points. Damage +0.05% per point against players (and against uncontrolled
 #                     creatures for a High-Risk attacker in the open world); creature damage received
 #                     there -0.05% per point; healing and shields +0.02% per point in War Mode,
 #                     High-Risk open world and battlegrounds.
@@ -452,8 +452,8 @@ HighRisk.FelCommutation.ClickToggle = 0
 PvpPower.Enable = 1
 
 #    PvePower.Enable
-#        Description: Item spells named "PvE Power (+N)" scale damage and healing at level 60, capped at
-#                     495 points. Damage dealt to creatures +0.05% per point and damage received from
+#        Description: PvE Power on equipped items (the value in ItemAddon.dbc, else the item's "PvE Power
+#                     (+N)" spell) scales damage and healing at level 60, capped at 495 points. Damage dealt to creatures +0.05% per point and damage received from
 #                     creatures -0.05% per point on every map; healing and shields +0.02% per point in
 #                     dungeons and raids. Stacks with PvP Power.
 #        Default:     1 - (Enabled)
