@@ -44,8 +44,8 @@ int main()
     assert(Multiplier(settings.health, Context::Raid, 409, 60) == 2.2f);
     assert(Multiplier(settings.health, Context::Raid, 469, 60) == 5.0f);
     assert(Multiplier(settings.health, Context::None, 469, 60) == 1.0f);
-    assert(Near(Multiplier(settings.damage, Context::World, 0, 1), 4.333f));
-    assert(Near(Multiplier(settings.damage, Context::World, 1, 60), 5.1f));
+    assert(Near(Multiplier(settings.damage, Context::World, 0, 1), 2.173f));
+    assert(Near(Multiplier(settings.damage, Context::World, 1, 60), 2.94f));
     assert(Multiplier(settings.damage, Context::Dungeon, 36, 20) == 1.5f);
     assert(Multiplier(settings.damage, Context::Raid, 469, 60) == 1.0f);
     assert(Multiplier(settings.damage, Context::None, 36, 20) == 1.0f);
@@ -103,6 +103,16 @@ int main()
     assert(Near(Multiplier(settings.damageSpread, Context::World, 0, 60), 1.55f));
     assert(Multiplier(settings.damageSpread, Context::Dungeon, 36, 20) == 0.0f);
     assert(Multiplier(settings.damageSpread, Context::Raid, 409, 63) == 0.0f);
+    assert(SpellMultiplier(settings, Context::World, 0, 60, false) == 1.0f);
+    assert(Near(SpellMultiplier(settings, Context::World, 0, 60, true), 2.94f));
+    assert(SpellMultiplier(settings, Context::Dungeon, 36, 20, false) == 1.5f);
+    assert(SpellMultiplier(settings, Context::Raid, 409, 63, false) == 1.0f);
+    assert(SpellMultiplier(settings, Context::None, 0, 60, false) == 1.0f);
+    Settings mapped;
+    mapped.spellDamage.maps = ParseMapMultipliers("36:0.8");
+    assert(Near(SpellMultiplier(mapped, Context::Dungeon, 36, 20, false), 0.8f));
+    assert(SpellMultiplier(mapped, Context::Dungeon, 36, 20, true) == 1.5f);
+    assert(SpellMultiplier(mapped, Context::None, 36, 20, false) == 1.0f);
     float low = 1.55f;
     float high = 1.68f;
     ScaleRange(low, high, 4.0f, 1.55f);

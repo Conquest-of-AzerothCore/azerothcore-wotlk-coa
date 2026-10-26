@@ -66,5 +66,8 @@ The `rotation_assist` harness checks the imported priorities, condition boundari
 selection of at most one action. The `rotation-assist` gameplay scenario exercises the ordinary player command,
 selected-target requirement, native spell effects, resource costs, cooldowns and idle behavior. The
 `rotation-assist-profile` scenario checks Incineration against a competing fallback spell.
-`rotation-assist-target-aura` checks a matching target debuff from another caster. Run them through
+`rotation-assist-target-aura` checks a matching target debuff from another caster. Gameplay-test raid bots with
+`rotation_assist` call the same selection (`CoARotationAssist::ChooseSpell`) for their active specialization,
+regardless of `CoA.RotationAssist.Enable`; `raid-bots-rotation-assist` checks an Incineration Pyromancer bot in a
+raid fight. Run them through
 `tools/verify_all.py` as described in [verification](verification.md).

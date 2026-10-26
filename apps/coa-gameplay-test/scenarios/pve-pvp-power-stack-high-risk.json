@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "PvE Power and PvP Power stack against creatures in the High-Risk open world",
+  "contract": "Requires PvePower.Enable = 1 and PvpPower.Enable = 1. A level 60 player wearing PvP Power +42 (chestpiece) and PvE Power +38 (trousers) deals 1.021 x 1.019 and takes 0.979 x 0.981 of the base damage against a creature in the High-Risk open world. Outside High Risk only PvE Power applies.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "k", "race": 1, "class": 1, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "e", "owner": "k", "entry": 36, "level": 60, "health": 500000, "distance": 15 }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "k", "spell": 750 },
+    { "action": "learn", "actor": "k", "spell": 8737 },
+    { "action": "learn", "actor": "k", "spell": 9078 },
+    { "action": "add_item", "actor": "k", "item": 14948, "count": 1 },
+    { "action": "add_item", "actor": "k", "item": 1718, "count": 1 },
+    { "action": "equip", "actor": "k", "item": 14948, "slot": 4 },
+    { "action": "equip", "actor": "k", "item": 1718, "slot": 6 },
+    { "action": "assert", "label": "Outside High Risk only PvE Power +38 raises damage dealt", "actor": "k", "metric": "script_melee_damage_dealt", "target": "e", "equals": 1019 },
+    { "action": "assert", "label": "Outside High Risk only PvE Power +38 lowers damage taken", "actor": "k", "metric": "script_melee_damage_taken", "target": "e", "equals": 981 },
+    { "action": "set_aura", "actor": "k", "spell": 1004019, "stacks": 1 },
+    { "action": "assert", "label": "In High Risk the two powers multiply on damage dealt", "actor": "k", "metric": "script_melee_damage_dealt", "target": "e", "min": 1039, "max": 1041 },
+    { "action": "assert", "label": "In High Risk the two powers multiply on damage taken", "actor": "k", "metric": "script_melee_damage_taken", "target": "e", "min": 959, "max": 961 }
+  ]
+}

@@ -62,15 +62,15 @@ CoA.EquippedGearLootChance = 5
 # max(a, b), e.g. CoA.CreatureScaling.World.Health = "1.17 + 0.013 * level". In MapHealth/MapDamage write a formula
 # without spaces ("43:0.3+0.08*level"), or separate the entries with ';' ("43: 0.3 + 0.08 * level; 36: 2.2").
 # World health is fitted to live open-world creature health seen in videos of live Ascension (levels 1-59). World
-# damage is fitted to a live video of a level 1 Duskbat hitting a new level 1 character (72 armor) for 5-8. Dungeon
-# and Raid keep their earlier estimates.
+# melee damage is half the base of the fit to a live video of a level 1 Duskbat hitting a new level 1 character
+# (72 armor) for 5-8 ("4.32 + 0.013 * level"), as the live PTR now does. Dungeon and Raid keep their earlier estimates.
 # Without this section the server keeps these multipliers but leaves the feature disabled.
 CoA.CreatureScaling.Enable = 1
 CoA.CreatureScaling.World.Health = "1.17 + 0.013 * level"
 CoA.CreatureScaling.Dungeon.Health = 2.5
 CoA.CreatureScaling.Raid.Health = 2.2
 CoA.CreatureScaling.MapHealth = "36:2.2 43:2.0 229:4.0 389:3.0 469:5.0"
-CoA.CreatureScaling.World.Damage = "4.32 + 0.013 * level"
+CoA.CreatureScaling.World.Damage = "2.16 + 0.013 * level"
 CoA.CreatureScaling.Dungeon.Damage = 1.5
 CoA.CreatureScaling.Raid.Damage = 1.0
 CoA.CreatureScaling.MapDamage = ""
@@ -81,6 +81,13 @@ CoA.CreatureScaling.World.DamageSpread = "max(1.55, 1.85 - 0.05 * level)"
 CoA.CreatureScaling.Dungeon.DamageSpread = 0
 CoA.CreatureScaling.Raid.DamageSpread = 0
 CoA.CreatureScaling.MapDamageSpread = ""
+# Spell and periodic damage from creatures. Damage above covers melee swings and melee/ranged spells (weapon strikes,
+# bleeds); every other open-world spell takes World.SpellDamage instead. Live creature spells hit for about their
+# spell data value at the creature's own level in player combat logs, so the default is unscaled. Dungeons and raids
+# have no spell factor of their own: their spells keep Dungeon.Damage/Raid.Damage unless MapSpellDamage names the map.
+# Formulas and MapSpellDamage as above.
+CoA.CreatureScaling.World.SpellDamage = 1
+CoA.CreatureScaling.MapSpellDamage = ""
 
 # Live-like magic resistance for NPCs not controlled by players, including Holy
 # (docs/coa/monster-linear-resistance.md). Each combat level adds PerLevel resistance to every magic school;
@@ -432,10 +439,20 @@ HighRisk.FelCommutation.ClickToggle = 0
 #                     creatures for a High-Risk attacker in the open world); creature damage received
 #                     there -0.05% per point; healing and shields +0.02% per point in War Mode,
 #                     High-Risk open world and battlegrounds.
-#        Default:     0 - (Disabled)
-#                     1 - (Enabled)
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
 
-PvpPower.Enable = 0
+PvpPower.Enable = 1
+
+#    PvePower.Enable
+#        Description: Item spells named "PvE Power (+N)" scale damage and healing at level 60, capped at
+#                     495 points. Damage dealt to creatures +0.05% per point and damage received from
+#                     creatures -0.05% per point on every map; healing and shields +0.02% per point in
+#                     dungeons and raids. Stacks with PvP Power.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+PvePower.Enable = 1
 
 #    Bloodforged.Enable
 #        Description: Adds one independent Bloodforged roll to eligible open-world creature corpses

@@ -218,8 +218,11 @@ namespace
         }
         return 0;
     }
+}
 
-    uint32 ChooseSpell(Player* player, Unit* target, bool healing)
+namespace CoARotationAssist
+{
+    uint32_t ChooseSpell(Player* player, Unit* target, bool healing)
     {
         std::map<std::string, SpellInfo const*> learned;
         for (auto const& [id, state] : player->GetSpellMap())
@@ -273,6 +276,11 @@ namespace
                 return spell;
         return 0;
     }
+}
+
+namespace
+{
+    using namespace CoARotationAssist;
 
     class RotationConfig final : public WorldScript
     {

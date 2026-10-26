@@ -70,7 +70,7 @@ public:
     Configuration() : WorldScript("PvpPowerConfiguration") { }
     void OnAfterConfigLoad(bool) override
     {
-        enabled.store(sConfigMgr->GetOption<bool>("PvpPower.Enable", false));
+        enabled.store(sConfigMgr->GetOption<bool>("PvpPower.Enable", true));
     }
 };
 

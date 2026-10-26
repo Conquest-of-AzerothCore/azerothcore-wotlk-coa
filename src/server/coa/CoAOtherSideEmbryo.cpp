@@ -804,7 +804,7 @@ class spell_coa_embryo_spike_hit : public SpellScript
     void HandleHit()
     {
         Unit* source = GetOriginalCaster() ? GetOriginalCaster() : GetCaster();
-        SetHitDamage(Rolled(source, GetHitUnit(), SpikeHit));
+        SetHitDamage(Rolled(source, GetHitUnit(), SpikeHit, GetSpellInfo()));
     }
 
     void Register() override
@@ -888,7 +888,7 @@ class spell_coa_embryo_poison_bolt : public SpellScript
     {
         if (!GetHitDamage())
             return;
-        SetHitDamage(Rolled(GetCaster(), GetHitUnit(), PoisonBoltHit));
+        SetHitDamage(Rolled(GetCaster(), GetHitUnit(), PoisonBoltHit, GetSpellInfo()));
     }
 
     void Register() override
@@ -904,7 +904,7 @@ class spell_coa_embryo_poison_bolt_aura : public AuraScript
     void CalcTick(AuraEffect const* , int32& amount, bool& )
     {
         if (Unit* caster = GetCaster())
-            amount = Rolled(caster, GetUnitOwner(), PoisonBoltTick);
+            amount = Rolled(caster, GetUnitOwner(), PoisonBoltTick, GetSpellInfo());
     }
 
     void Register() override
