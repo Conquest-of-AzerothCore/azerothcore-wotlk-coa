@@ -42,19 +42,25 @@ void SendReleasedDifficulties(Player* player)
     }
 }
 
-class LoginAnnouncer : public PlayerScript
+class ReleaseAnnouncer : public PlayerScript
 {
 public:
-    LoginAnnouncer() : PlayerScript("AscensionDifficultyRelease", {PLAYERHOOK_ON_LOGIN}) { }
+    ReleaseAnnouncer() : PlayerScript("AscensionDifficultyRelease", {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_MAP_CHANGED}) { }
 
     void OnPlayerLogin(Player* player) override
     {
         SendReleasedDifficulties(player);
+    }
+
+    void OnPlayerMapChanged(Player* player) override
+    {
+        if (!player->GetSession()->IsHeadlessBot())
+            SendReleasedDifficulties(player);
     }
 };
 }
 
 void AddSC_AscensionDifficultyRelease()
 {
-    new AscensionDifficultyRelease::LoginAnnouncer();
+    new AscensionDifficultyRelease::ReleaseAnnouncer();
 }
