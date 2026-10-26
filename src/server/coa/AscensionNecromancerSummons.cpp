@@ -404,6 +404,8 @@ class npc_ascension_necromancer : public ScriptedAI
         }
         me->SetOwnerGUID(_owner);
         me->SetCreatorGUID(_owner);
+        me->m_ControlledByPlayer = true;
+        me->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
         me->SetFaction(player->GetFaction());
         me->SetReactState(REACT_DEFENSIVE);
         me->SetCombatMovement(!Stationary(me->GetEntry()) && !Ranged(me->GetEntry()));

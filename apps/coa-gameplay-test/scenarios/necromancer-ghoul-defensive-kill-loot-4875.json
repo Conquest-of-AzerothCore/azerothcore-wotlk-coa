@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "name": "Necromancer: a mob killed by an unordered Ghoul defending its owner is lootable (#4875)",
+  "contract": "npc_ascension_necromancer::IsSummonedBy set the minion's owner GUID directly instead of routing through Unit::SetMinion, so the summon never got m_ControlledByPlayer or UNIT_FLAG_PLAYER_CONTROLLED. Unit::DealDamage only counts a kill's damage toward Creature::LowerPlayerDamageReq's _playerDamageReq threshold when the attacker IsControlledByPlayer() and is owned by a player; without that flag a mob killed purely by the Ghoul's own damage never cleared the 50 percent threshold and Unit::Kill cleared its loot recipient, exactly as #4875 reports (XP sometimes arrives from incidental player damage, loot does not). This scenario never casts a Command spell (which would otherwise bypass the gate directly through Order()'s own LowerPlayerDamageReq call) and the Necromancer never attacks: the aggressive Grimtotem Marauder (mulgore-grimtotem-aggro-range.json's proven natural-aggro fixture, not civilian) engages the player on its own, and the Ghoul's own UpdateAI picks it up solely through the player->getAttackers() fallback, fights it off and kills it unordered. The fix must make that kill lootable and worth experience.",
+  "timeout_ms": 180000,
+  "location": { "map": 1, "x": -2712.6, "y": 19.0, "z": 14.5, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 20 }
+  ],
+  "creatures": [
+    { "id": "marauder", "owner": "necro", "entry": 161809, "faction": 16, "level": 20, "health": 300, "distance": 30, "reaction": 2, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle out of aggro range", "ms": 3000 },
+    {
+      "action": "assert", "label": "SETUP: the Marauder leaves a distant Necromancer alone",
+      "actor": "necro", "metric": "combat", "max": 0
+    },
+    { "action": "teleport", "label": "Walk the Necromancer into the Marauder's aggro range", "actor": "necro",
+      "map": 1, "x": -2688.6, "y": 19.0, "z": 14.5, "o": 0 },
+    {
+      "action": "assert", "label": "SETUP: the aggressive Marauder engages the Necromancer on its own",
+      "actor": "marauder", "metric": "victim", "target": "necro", "equals": 1, "within_ms": 15000
+    },
+    { "action": "learn", "actor": "necro", "spell": 500971 },
+    { "action": "set_power", "actor": "necro", "power": 0, "value": 500 },
+    { "action": "cast", "label": "Raise a Ghoul", "actor": "necro", "spell": 500971 },
+    {
+      "action": "assert", "label": "SETUP: one Ghoul is raised",
+      "actor": "necro", "metric": "owned_creature_count", "entry": 50073, "equals": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Let the Ghoul pick up the player's existing attacker unordered", "ms": 2000 },
+    { "action": "snapshot", "actor": "necro", "metric": "xp", "save_as": "xp_before" },
+    {
+      "action": "assert", "label": "SETUP: the Ghoul kills the Marauder without any Command cast",
+      "actor": "marauder", "metric": "alive", "equals": 0, "within_ms": 120000
+    },
+    {
+      "action": "assert", "label": "CONTROL: the Necromancer never swung at the Marauder",
+      "actor": "necro", "metric": "melee_attack_count", "equals": 0
+    },
+    {
+      "action": "assert", "label": "An unordered, minion-only kill is worth experience",
+      "actor": "necro", "metric": "xp", "relative_to": "xp_before", "min": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "The experience did not cross a level, so the delta is meaningful",
+      "actor": "necro", "metric": "level", "equals": 20
+    },
+    { "action": "snapshot", "actor": "necro", "metric": "carried_money", "save_as": "money_before_loot" },
+    { "action": "loot_nearby", "actor": "necro", "entry": 161809 },
+    {
+      "action": "assert", "actor": "necro", "metric": "loot_gold", "min": 1,
+      "label": "The owner can open the Marauder's guaranteed copper loot despite never ordering or attacking it"
+    },
+    { "action": "loot_money", "actor": "necro" },
+    {
+      "action": "assert", "actor": "necro", "metric": "carried_money", "relative_to": "money_before_loot", "min": 1,
+      "label": "The owner receives the guaranteed copper"
+    }
+  ]
+}
