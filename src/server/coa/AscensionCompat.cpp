@@ -34,6 +34,7 @@
 #include "AscensionFreepick.h"
 #include "AscensionRunemasterEchoes.h"
 #include "AscensionCollectionModelData.h"
+#include "MountDisplayFallback.h"
 #include "AscensionWitchHunterCompletion.h"
 #include "AscensionAmmunitionData.h"
 #include "AscensionAverageItemLevel.h"
@@ -7902,6 +7903,12 @@ AscensionCollectionModels::Entry const* FindCollectionModel(uint32 creatureId)
     return itr != models.end() && itr->CreatureId == creatureId ? &*itr : nullptr;
 }
 
+uint32 CollectionMountDisplay(uint32 creatureId)
+{
+    AscensionCollectionModels::Entry const* model = FindCollectionModel(creatureId);
+    return model && sCreatureDisplayInfoStore.LookupEntry(model->DisplayId) ? model->DisplayId : 0;
+}
+
 bool SendCollectionCreatureQueryResponse(WorldSession* session, uint32 creatureId)
 {
     AscensionCollectionModels::Entry const* model = FindCollectionModel(creatureId);
@@ -10626,6 +10633,7 @@ void AppendConfiguredClientConfigs(AscensionClientConfig& config) {
 }
 
 void AddAscensionCompatScripts() {
+  MountDisplayFallback::Owner.store(&CollectionMountDisplay, std::memory_order_relaxed);
   Ascension::ClientItemPatches::Instance().Register(ITEM_HEARTWOOD_KEY);
   Ascension::ClientItemPatches::Instance().Register(ITEM_CUIRBOULLI_BOOTS);
   Ascension::ClientItemPatches::Instance().Register(ITEM_RED_RIBBONED_WRAPPING_PAPER);
