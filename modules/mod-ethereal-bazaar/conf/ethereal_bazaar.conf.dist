@@ -66,16 +66,6 @@ EtherealBazaar.Tokens.RaidBoss.Max = 53
 EtherealBazaar.Tokens.BonusLevel = 60
 EtherealBazaar.Tokens.BonusPercent = 150
 
-# Who receives the tokens for a creature kill.
-#   0 - the player who lands the killing blow, nobody else.
-#   1 - whoever tapped the creature (holds its loot rights). For a party or
-#       raid, every member within group reward distance (the XP range)
-#       receives the same roll, whether they attacked, healed or watched. A
-#       pet's killing blow pays its owner's group. Bots are group members like
-#       any player and are paid the same, never instead of the group.
-# Default: 0 (killing blow)
-EtherealBazaar.Tokens.GroupShare = 0
-
 # The "item received" toast in the top right. Tokens drop often enough that it
 # turns into noise; the bag updates either way.
 # Default: 0 (no toast)

@@ -12,6 +12,9 @@ def main():
     extract = runpy.run_path(str(ROOT / 'apps/coa-tests/client_compat/run.py'))['method']
     source = (ROOT / 'modules/mod-ethereal-bazaar/src/EtherealBazaarTokens.cpp').read_text()
     assert 'void OnPlayerCreatureKill(' not in source
+    assert 'OnUnitDeath' not in source and 'UnitScript' not in source
+    conf = (ROOT / 'modules/mod-ethereal-bazaar/conf/ethereal_bazaar.conf.dist').read_text()
+    assert 'GroupShare' not in source and 'GroupShare' not in conf
     callback = extract(source, 'void OnPlayerRewardKillRewarder(').replace(' override', '')
     code = r'''
 #include <cassert>
@@ -77,7 +80,7 @@ int main()
         subprocess.run([compiler, '-std=c++20', '-Wall', '-Wextra', '-Werror', str(cpp), '-o', str(exe)],
                        check=True, timeout=60)
         subprocess.run([str(exe)], check=True, timeout=15)
-    print('PASS: credited recipients, boss reward bands, excluded creatures, PvP, disabled and null guards')
+    print('PASS: one kill-credit path for all group members, reward bands, exclusions, PvP, disabled and null guards')
 
 
 if __name__ == '__main__':
