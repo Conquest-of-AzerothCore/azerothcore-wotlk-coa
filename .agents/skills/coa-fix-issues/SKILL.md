@@ -32,8 +32,9 @@ assignment, evidence, verification, review and publication requirements still ap
    combat interactions; exclude quests, world content and unrelated UI, item or deployment reports. For quests,
    crashes or another topic, apply that topic's boundary instead. Select the next 32 eligible issues in ascending
    number order unless the user specified otherwise; use a smaller final batch when fewer remain. Recheck
-   assignments, existing PRs and full reopening history. Skip reopened reports and work owned by others or
-   another active task, and record those dispositions separately. Create a named
+   assignments, existing PRs, merged fixes and full reopening history. Skip reopened reports and work owned by
+   others or another active task, close reports a merged fix already resolved (see Merged fixes left open), and
+   record those dispositions separately. Create a named
    `codex/fix-<topic>-batch-<n>` branch from freshly fetched `origin/main`. Never
    include an earlier unmerged batch's changes in the next independent batch.
 2. **Verify the reports.** Claim each issue for the user immediately before investigating it, following the
@@ -143,6 +144,21 @@ assignment, evidence, verification, review and publication requirements still ap
   when no implementation or PR is retained. Preserve existing work and PRs; report any retained claim and
   reopening blocker without automatically discarding work or changing another person's assignments.
 
+## Merged fixes left open
+
+- An open issue may already be fixed: a merged PR that cited it with `Refs`, mentioned it in its body or commits,
+  or forgot the closure keyword leaves it open. Before claiming or investigating an issue, look for merged PRs and
+  `origin/main` commits that reference it: the timeline's `cross-referenced` and `referenced` events (merged PRs,
+  not only open ones) and `git log origin/main --grep '#<number>\b'`. Read what each one changed and any
+  decision it records.
+- If a merged fix covers the report, do not reimplement it. Verify the behavior on fetched `origin/main` as an
+  already-fixed report (section 4, step 8) and close the issue with a pointer to that PR. Record
+  `already fixed by #PR` separately from this run's fixes.
+- If the merged PR fixed part of the report and recorded a decision on the rest (for example "intended" or
+  "still does not"), treat that decision as the expectation. Close the issue when the decision settles the
+  remainder; otherwise keep it open as an uncertain expectation. Never change gameplay against a recorded
+  decision without the user's explicit approval.
+
 ## 1. Select the queue
 
 1. Inspect checkout state, remotes, and existing work; preserve unrelated changes and use an isolated worktree
@@ -163,10 +179,11 @@ assignment, evidence, verification, review and publication requirements still ap
    `gh api --hostname <host> user --jq .login`. Use an explicitly supplied assignee if the user names one.
    Do not hard-code a maintainer or infer identity from Git commit author fields. If authentication is known
    to be a shared/bot account and the human user's login is unknown, ask for that login before assigning.
-2. Immediately before starting, re-read the issue's state, assignees, linked/open PRs and complete reopening
-   history. Apply the reopening exclusion before claiming or investigating. If it is closed,
-   record its disposition. If another user is assigned, record `assigned elsewhere` and continue independent
-   issues without investigating or implementing this one, unless the user explicitly authorizes a takeover.
+2. Immediately before starting, re-read the issue's state, assignees, linked/open PRs, merged fixes and complete
+   reopening history. Apply the reopening exclusion and the merged-fix check before claiming or investigating.
+   If it is closed, record its disposition. If another user is assigned, record `assigned elsewhere` and
+   continue independent issues without investigating or implementing this one, unless the user explicitly
+   authorizes a takeover.
    A number in the requested queue alone does not authorize taking over someone else's assignment.
 3. If already assigned to this user, check the current task's history, branch, and PR to establish whether this
    is resumed work. Reuse a verified existing PR. Assignment to the same user alone does not authorize a second
