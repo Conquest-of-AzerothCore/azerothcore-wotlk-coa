@@ -52,6 +52,33 @@ uint32 TamedPetBaseMana(CreatureTemplate const* creature, uint8 level)
     return sObjectMgr->GetCreatureBaseStats(level, CLASS_PALADIN)->BaseMana;
 }
 
+Powers TamedPetPowerType(uint32 family)
+{
+    static std::unordered_map<uint32, Powers> const types = []
+    {
+        std::unordered_map<uint32, Powers> kits;
+        for (CreatureFamilyEntry const* entry : sCreatureFamilyStore)
+        {
+            PetLevelupSpellSet const* spells = sSpellMgr->GetPetLevelupSpellList(entry->ID);
+            if (!spells)
+                continue;
+            bool energy = false, mana = false;
+            for (auto const& [level, spellId] : *spells)
+                if (SpellInfo const* spell = sSpellMgr->GetSpellInfo(spellId);
+                    spell && (spell->ManaCost || spell->ManaCostPercentage))
+                {
+                    energy |= spell->PowerType == POWER_ENERGY;
+                    mana |= spell->PowerType == POWER_MANA;
+                }
+            if (energy || mana)
+                kits[entry->ID] = energy ? POWER_ENERGY : POWER_MANA;
+        }
+        return kits;
+    }();
+    auto const found = types.find(family);
+    return found == types.end() ? POWER_FOCUS : found->second;
+}
+
 bool IsHunterPetOfKind(PetStable::PetInfo const& pet, uint32 kind)
 {
     return pet.Type == HUNTER_PET && IsKind(pet.CreatureId, kind);
@@ -306,6 +333,11 @@ public:
         uint32 const mana = TamedPetBaseMana(creature, petlevel);
         guardian->SetCreateMana(mana);
         guardian->SetStatFlatModifier(UNIT_MOD_MANA, BASE_VALUE, float(mana));
+
+        Powers const power = TamedPetPowerType(creature->family);
+        guardian->setPowerType(power);
+        if (power == POWER_ENERGY)
+            guardian->SetPower(POWER_ENERGY, guardian->GetMaxPower(POWER_ENERGY));
     }
 };
 
