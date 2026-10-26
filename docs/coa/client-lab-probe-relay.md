@@ -17,7 +17,8 @@ Every message is a whisper with language `LANG_ADDON` whose text is `CoaProbe\t<
   errors`, without tab, newline or NUL.
 - Answer, client to server (the addon whispers its own character): `CoaProbe\tR:<req>:<index>:<total>:<data>`,
   `1 <= index <= total <= 64`. The addon cuts its JSON answer into chunks of at most 200 bytes; `<data>` may contain
-  `:`. An answer that needs more than 64 chunks is replaced by a short error answer.
+  `:`. An answer that needs more than 64 chunks is replaced by a short error answer. The answer carries `loadId`
+  (changes on every UI load) and the answering `character`.
 
 The relay keeps at most 16 pending requests per character and forgets a request 120 s after it was sent, or when the
 character logs out. A chunk for a request that was never sent, a duplicate chunk, or a chunk announcing a different
