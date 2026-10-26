@@ -116,7 +116,7 @@ class aura_ascension_necromancer_lifecycle : public AuraScript
                         minion->RemoveAurasDueToSpell(ward, player->GetGUID());
                 }
             for (Creature* minion : Minions(player))
-                if (Aura* ward = player->AddAura(id, minion))
+                if (Aura* ward = player->AddAura(GetSpellInfo(), WardMinionEffectMask(GetSpellInfo()), minion))
                     ward->SetDuration(GetDuration());
         }
         if (id == 500981 || id == 804371)
