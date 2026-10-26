@@ -82,7 +82,7 @@ private:
         std::atomic_store(&settings, std::make_shared<Settings const>());
         if (!sConfigMgr->GetOption<bool>("Bloodforged.Enable", false))
             return;
-        if (!sConfigMgr->GetOption<bool>("PvpPower.Enable", false))
+        if (!sConfigMgr->GetOption<bool>("PvpPower.Enable", true))
         {
             LOG_ERROR("server.loading", "Bloodforged disabled: PvP Power support must be enabled first");
             return;

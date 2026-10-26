@@ -65,6 +65,13 @@
       "spell": 801063,
       "within_ms": 3000
     },
+    { "action": "advancement_rank", "actor": "p", "entry": 6620, "rank": 2 },
+    { "action": "advancement_rank", "actor": "p", "entry": 34085, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 30237, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 30236, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 30235, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 29329, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 6928, "rank": 1 },
     {
       "action": "advancement_rank",
       "actor": "p",

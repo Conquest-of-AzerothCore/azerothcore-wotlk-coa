@@ -1258,6 +1258,7 @@ bool Creature::Create(ObjectGuid::LowType guidlow, Map* map, uint32 phaseMask, u
     }
 
     LoadCreaturesAddon();
+    sObjectMgr->ApplyAscensionNpcOverheadIcon(*this);
     LoadSparringPct();
 
     //! Need to be called after LoadCreaturesAddon - MOVEMENTFLAG_HOVER is set there
@@ -2181,6 +2182,7 @@ void Creature::setDeathState(DeathState state, bool despawn)
 
         Motion_Initialize();
         LoadCreaturesAddon(true);
+        sObjectMgr->ApplyAscensionNpcOverheadIcon(*this);
         LoadSparringPct();
 
         if (GetCreatureData() && GetPhaseMask() != GetCreatureData()->phaseMask)

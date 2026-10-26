@@ -95,6 +95,18 @@ keys are appended automatically on deploy.
 - Some rules/objectives/conditions are still being mapped; the module applies
   the subset described in `conf/mod-coa-challenges.conf.dist`.
 
+## Reducing Adventure Mode difficulty
+
+Players can use `.coa adventure <level>` to lower an active Adventure Mode or Prestige Adventure Mode run.
+The level must be between 1 and the current level minus one. The run keeps its start time, deaths and objective
+progress; its auras, displayed quest XP and completion rewards switch to the selected lower tier. The normal
+challenge-start request also accepts a lower tier for an already-active Adventure Mode run.
+
+Changes are refused while the player, a party member or their controlled units are fighting, during an active
+instance encounter, or while the player is dead, flying, charmed or teleporting. Start, stop, group-sync and
+custom-trial requests enforce the same restriction. Custom trials cannot be downscaled, and an already-completed
+tier cannot be selected. Tier changes cannot raise the difficulty again within the same run.
+
 ## License
 
 GNU General Public License v2.0 — see [LICENSE](LICENSE).

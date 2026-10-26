@@ -26,6 +26,7 @@
 #include "Pet.h"
 #include "Player.h"
 #include "QueryPackets.h"
+#include "ScriptMgr.h"
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -48,6 +49,8 @@ void WorldSession::SendNameQueryOpcode(ObjectGuid guid)
     nameQueryResponse.NameUnknown = false;
     nameQueryResponse.Name = playerData->Name;
     nameQueryResponse.Race = player ? player->getRace() : playerData->Race;
+    if (player)
+        sScriptMgr->OnPlayerGetNameQueryRace(player, nameQueryResponse.Race);
     nameQueryResponse.Sex = player ? player->getGender() : playerData->Sex;
     nameQueryResponse.Class = player ? player->getClass() : playerData->Class;
 

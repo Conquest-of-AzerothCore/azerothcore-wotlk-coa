@@ -3368,7 +3368,8 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(Unit const* victim, WeaponAttackTy
         tmp = dodge_chance;
 
         // xinef: if casting or stunned - cant dodge
-        if (victim->IsNonMeleeSpellCast(false, victim->CanDefendDuringChannel(), true) || victim->HasUnitState(UNIT_STATE_CONTROLLED))
+        if (victim->IsNonMeleeSpellCast(false, victim->CanDefendDuringChannel(), true, false, true,
+                victim->CanDefendDuringCast()) || victim->HasUnitState(UNIT_STATE_CONTROLLED))
             tmp = 0;
 
         if ((tmp > 0)                                        // check if unit _can_ dodge
@@ -3401,7 +3402,8 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(Unit const* victim, WeaponAttackTy
             tmp = parry_chance;
 
             // xinef: cant parry while casting or while stunned
-            if (victim->IsNonMeleeSpellCast(false, victim->CanDefendDuringChannel(), true) || victim->HasUnitState(UNIT_STATE_CONTROLLED))
+            if (victim->IsNonMeleeSpellCast(false, victim->CanDefendDuringChannel(), true, false, true,
+                    victim->CanDefendDuringCast()) || victim->HasUnitState(UNIT_STATE_CONTROLLED))
                 tmp = 0;
 
             if (tmp > 0                                         // check if unit _can_ parry
@@ -3860,7 +3862,8 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spellInfo
             dodgeChance -= GetTotalAuraModifier(SPELL_AURA_MOD_EXPERTISE) * 25;
 
         // xinef: cant dodge while casting or while stunned
-        if (dodgeChance < 0 || victim->IsNonMeleeSpellCast(false, victim->CanDefendDuringChannel(), true) || victim->HasUnitState(UNIT_STATE_CONTROLLED))
+        if (dodgeChance < 0 || victim->IsNonMeleeSpellCast(false, victim->CanDefendDuringChannel(), true, false, true,
+                victim->CanDefendDuringCast()) || victim->HasUnitState(UNIT_STATE_CONTROLLED))
             dodgeChance = 0;
 
         tmp += dodgeChance;
@@ -3881,7 +3884,8 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spellInfo
             parryChance -= GetTotalAuraModifier(SPELL_AURA_MOD_EXPERTISE) * 25;
 
         // xinef: cant parry while casting or while stunned
-        if (parryChance < 0 || victim->IsNonMeleeSpellCast(false, victim->CanDefendDuringChannel(), true) || victim->HasUnitState(UNIT_STATE_CONTROLLED))
+        if (parryChance < 0 || victim->IsNonMeleeSpellCast(false, victim->CanDefendDuringChannel(), true, false, true,
+                victim->CanDefendDuringCast()) || victim->HasUnitState(UNIT_STATE_CONTROLLED))
             parryChance = 0;
 
         tmp += parryChance;
@@ -4855,13 +4859,13 @@ void Unit::FinishSpell(CurrentSpellTypes spellType, bool ok /*= true*/)
     spell->finish(ok);
 }
 
-bool Unit::IsNonMeleeSpellCast(bool withDelayed, bool skipChanneled, bool skipAutorepeat, bool isAutoshoot, bool skipInstant) const
+bool Unit::IsNonMeleeSpellCast(bool withDelayed, bool skipChanneled, bool skipAutorepeat, bool isAutoshoot, bool skipInstant, bool skipGeneric) const
 {
     // We don't do loop here to explicitly show that melee spell is excluded.
     // Maybe later some special spells will be excluded too.
 
     // generic spells are cast when they are not finished and not delayed
-    if (m_currentSpells[CURRENT_GENERIC_SPELL] &&
+    if (!skipGeneric && m_currentSpells[CURRENT_GENERIC_SPELL] &&
             (m_currentSpells[CURRENT_GENERIC_SPELL]->getState() != SPELL_STATE_FINISHED) &&
             (withDelayed || m_currentSpells[CURRENT_GENERIC_SPELL]->getState() != SPELL_STATE_DELAYED))
     {
@@ -5011,6 +5015,11 @@ bool Unit::CanDefendDuringChannel() const
     return IsPlayer() && getClass() == CLASS_DEMON_HUNTER && channel && channel->IsChannelActive() &&
         channel->getState() != SPELL_STATE_FINISHED && channel->GetSpellInfo()->Id == 800206 &&
         (!generic || generic->getState() == SPELL_STATE_FINISHED);
+}
+
+bool Unit::CanDefendDuringCast() const
+{
+    return IsPlayer() && getClass() == CLASS_SON_OF_ARUGAL && HasAura(801955);
 }
 
 bool Unit::CanCastDuringChannel(SpellInfo const* info) const

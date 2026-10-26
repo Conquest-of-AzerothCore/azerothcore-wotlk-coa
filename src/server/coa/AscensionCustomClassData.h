@@ -1376,7 +1376,7 @@ struct ClassProficiency
     std::uint32_t SpellId;
 };
 
-inline constexpr std::array<ClassProficiency, 127> ClassProficiencies =
+inline constexpr std::array<ClassProficiency, 128> ClassProficiencies =
 {{
     {12, 197},
     {12, 200},
@@ -1488,6 +1488,7 @@ inline constexpr std::array<ClassProficiency, 127> ClassProficiencies =
     {30, 197},
     {30, 200},
     {30, 750},
+    {30, 2567},
     {30, 8737},
     {30, 9077},
     {30, 9078},

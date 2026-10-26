@@ -1048,6 +1048,8 @@ public:
     void LoadCreatureTemplate(Field* fields, bool triggerHook = false);
     void LoadCreatureTemplateModels();
     void LoadCreatureTemplateAddons();
+    void LoadAscensionNpcOverheadIcons();
+    void ApplyAscensionNpcOverheadIcon(Creature& creature) const;
     void LoadCreatureTemplateResistances();
     void LoadCreatureTemplateSpells();
     void LoadCreatureCustomIDs();
@@ -1679,6 +1681,7 @@ private:
     CreatureModelContainer _creatureModelStore;
     CreatureAddonContainer _creatureAddonStore;
     CreatureAddonContainer _creatureTemplateAddonStore;
+    std::unordered_map<uint32, uint32> _ascensionNpcOverheadIcons;
     std::unordered_map<ObjectGuid::LowType, CreatureMovementData> _creatureMovementOverrides;
     GameObjectAddonContainer _gameObjectAddonStore;
     GameObjectQuestItemMap _gameObjectQuestItemStore;

@@ -1,6 +1,7 @@
 // mod-coa-challenges (review split): CoA.Challenges.Lifecycle.cpp
 // Mechanical split of review-CoAChallenges.cpp; no logic changes.
 #include "CoA.Challenges.Review.h"
+#include "InstanceScript.h"
 
 #include <atomic>
 #include <mutex>
@@ -377,12 +378,42 @@ namespace CoAChallenges
         return false;
     }
 
+    bool AdventureModeChangeBlocked(Player* player)
+    {
+        auto fighting = [](Player* member)
+        {
+            if (member->IsInCombat())
+                return true;
+            for (Unit* controlled : member->m_Controlled)
+                if (controlled && controlled->IsInCombat())
+                    return true;
+            return false;
+        };
+        bool blocked = !player->IsAlive() || player->IsBeingTeleported() || player->IsInFlight()
+            || player->IsCharmed() || fighting(player);
+        if (!player->FindMap())
+            blocked = true;
+        else if (InstanceScript* instance = player->GetInstanceScript())
+            blocked = blocked || instance->IsEncounterInProgress();
+        if (Group* group = player->GetGroup())
+            for (GroupReference* member = group->GetFirstMember(); member; member = member->next())
+                if (Player* participant = member->GetSource())
+                    blocked = blocked || fighting(participant);
+        if (blocked)
+            ChatHandler(player->GetSession()).SendSysMessage(
+                "Adventure Mode cannot change during combat, an encounter, death, flight, control or teleportation. "
+                "Your party and pets must also be out of combat.");
+        return blocked;
+    }
+
     // ---- Challenge activation (shared by StartChallenge and ActivateTrial) --
     // Validates one challenge against the client's activation rules. Returns the
     // Enum.ChallengeResponse code (0 = OK, 1..14 = reason). Sends a chat hint
     // for every rejection so the player always sees WHY activation failed.
     uint32 ValidateChallenge(Player* player, uint32 challengeID, uint32 level)
     {
+        if ((challengeID == 211 || challengeID == 425) && AdventureModeChangeBlocked(player))
+            return 8;
         uint32 guid = player->GetGUID().GetCounter();
 
         if (!ChallengeExists(challengeID))                       // 1 NOT_FOUND
@@ -569,9 +600,50 @@ namespace CoAChallenges
         BroadcastChallengeSync(player, challengeID, level, false);
     }
 
+    uint32 LowerAdventureModeLevel(Player* player, uint32 challengeID, uint32 level)
+    {
+        uint32 const guid = player->GetGUID().GetCounter();
+        uint32 const current = ActiveChallengeLevel(guid, challengeID);
+        if ((challengeID != 211 && challengeID != 425) || !ActiveChallenges(guid).contains(challengeID)
+            || !level || level >= current || level > ChallengeLevelCount(challengeID))
+        {
+            ChatHandler(player->GetSession()).SendSysMessage("Choose a lower Adventure Mode level, at least 1.");
+            return 4;
+        }
+        if (AdventureModeChangeBlocked(player))
+            return 8;
+        if (!GetActiveCustomTrial(guid).empty() || HasCompletionLevel(guid, challengeID, level))
+        {
+            ChatHandler(player->GetSession()).SendSysMessage(
+                "Cannot lower a custom trial or select an Adventure Mode level already completed.");
+            return 12;
+        }
+
+        auto* update = CharacterDatabase.GetPreparedStatement(CHAR_UPD_COA_ADVENTURE_LEVEL);
+        update->SetData(0, level);
+        update->SetData(1, guid);
+        update->SetData(2, challengeID);
+        CharacterDatabase.DirectExecute(update);
+        ClearCharChallengeCache(guid);
+        RemoveChallengeSpell(player, challengeID);
+        ApplyChallengeSpell(player, challengeID, level);
+        player->RefreshQuestLogQueries();
+        RefreshLevelScalingTracking(player);
+        SendActiveList(player);
+        SendCriteriaState(player);
+        BroadcastChallengeSync(player, challengeID, level, false);
+        ChatHandler(player->GetSession()).PSendSysMessage(
+            "Adventure Mode reduced to level {}. Difficulty and rewards now use this level.", level);
+        return 0;
+    }
+
     // Validate + activate a single challenge. Returns 0 on success.
     uint32 ActivateChallenge(Player* player, uint32 challengeID, uint32 level)
     {
+        if ((challengeID == 211 || challengeID == 425)
+            && ActiveChallenges(player->GetGUID().GetCounter()).contains(challengeID))
+            return LowerAdventureModeLevel(player, challengeID, level);
+
         uint32 code = ValidateChallenge(player, challengeID, level);
         if (code)
             return code;

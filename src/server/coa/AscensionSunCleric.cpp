@@ -371,7 +371,7 @@ void Refresh(Player* player)
         player->RemoveAurasDueToSpell(id);
     bool replacement = player->IsAlive() && player->HasAura(803238) && player->HasSpell(Highest(player, 800231));
     if (replacement && !player->HasSpell(504764))
-        player->learnSpell(504764, true);
+        player->learnSpellWithoutAnnouncement(504764);
     for (auto const& pair : player->GetSpellMap())
         if (player->HasSpell(pair.first) && Named(sSpellMgr->GetSpellInfo(pair.first), 800231))
             player->SetTemporarySpellReplacement(pair.first, replacement ? 504764 : 0);

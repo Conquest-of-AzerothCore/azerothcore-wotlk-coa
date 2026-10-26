@@ -38,6 +38,8 @@
 #include "GameTime.h"
 #include "GitRevision.h"
 #include "GossipDef.h"
+#include "GridDefines.h"
+#include "GridTerrainLoader.h"
 #include "Group.h"
 #include "GroupMgr.h"
 #include "InstanceScript.h"
@@ -72,6 +74,8 @@
 #include "TypeContainerVisitor.h"
 #include "UpdateData.h"
 #include "UpdateFields.h"
+#include "VMapFactory.h"
+#include "VMapMgr2.h"
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -79,8 +83,10 @@
 
 #include "CoAGameplayClock.h"
 #include "CoAGameplayIsolation.h"
+#include "CoAGameplayPlacement.h"
 #include "CoAGameplayRaidBots.h"
 #include "CoAGameplayTimeline.h"
+#include "CoARotationData.h"
 #include "CoASpellbook.h"
 #include <boost/bind/placeholders.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -93,6 +99,7 @@
 #include <ctime>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <future>
 #include <list>
 #include <limits>
@@ -103,6 +110,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <stdexcept>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -202,6 +210,181 @@ bool WriteCaseResult(std::string const& path, Tree const& result)
         LOG_ERROR("coa.gameplay_test", "Could not write gameplay result: {}", error.what());
         return false;
     }
+}
+
+bool TerrainTileExists(uint32 mapId, float x, float y)
+{
+    static std::map<std::tuple<uint32, uint32, uint32>, bool> known;
+    GridCoord const grid = Acore::ComputeGridCoord(x, y);
+    auto const key = std::make_tuple(mapId, grid.x_coord, grid.y_coord);
+    if (auto const itr = known.find(key); itr != known.end())
+        return itr->second;
+    bool const exists = GridTerrainLoader::ExistMap(mapId, int(grid.x_coord), int(grid.y_coord))
+        || GridTerrainLoader::ExistVMap(mapId, int(grid.x_coord), int(grid.y_coord));
+    known.emplace(key, exists);
+    return exists;
+}
+
+CoAGameplay::PlacementSample ProbeTerrain(uint32 mapId, uint32 phaseMask, float x, float y, float z)
+{
+    Require(sMapStore.LookupEntry(mapId) != nullptr, "Unknown map: " + std::to_string(mapId));
+    Require(VMAP::VMapFactory::createOrGetVMapMgr()->isHeightCalcEnabled(), "VMap height calculation is disabled");
+    Map* map = sMapMgr->CreateBaseMap(mapId);
+    map->GetGridTerrainData(x, y);
+
+    CoAGameplay::PlacementSample sample;
+    sample.z = z;
+    if (float const floor = map->GetHeight(x, y, z + Z_OFFSET_FIND_HEIGHT, true, DEFAULT_HEIGHT_SEARCH);
+        floor > INVALID_HEIGHT)
+        sample.floorZ = floor;
+    if (float const terrain = map->GetGridHeight(x, y); terrain > INVALID_HEIGHT)
+        sample.terrainZ = terrain;
+    LiquidData const liquid = map->GetLiquidData(phaseMask, x, y, z, DEFAULT_COLLISION_HEIGHT, MAP_ALL_LIQUIDS);
+    if (liquid.Status != LIQUID_MAP_NO_WATER)
+        sample.liquidLevel = liquid.Level;
+    sample.terrainAvailable = TerrainTileExists(mapId, x, y);
+    return sample;
+}
+
+struct ClientDisplayIds
+{
+    std::unordered_set<uint32> creatures;
+    std::unordered_set<uint32> gameObjects;
+};
+
+ClientDisplayIds const& LoadedClientDisplayIds()
+{
+    static std::optional<ClientDisplayIds> loaded;
+    if (!loaded)
+    {
+        std::optional<std::unordered_set<uint32>> creatures =
+            CoAGameplay::ReadClientDbcIds(GetClientDBCPath("CreatureDisplayInfo.dbc"));
+        std::optional<std::unordered_set<uint32>> gameObjects =
+            CoAGameplay::ReadClientDbcIds(GetClientDBCPath("GameObjectDisplayInfo.dbc"));
+        Require(creatures && gameObjects, "Client display DBC files are unreadable");
+        loaded = ClientDisplayIds{std::move(*creatures), std::move(*gameObjects)};
+    }
+    return *loaded;
+}
+
+struct SpawnInspection
+{
+    uint32 entry{0};
+    CoAGameplay::PlacementSample sample;
+    CoAGameplay::PlacementVerdict verdict{CoAGameplay::PlacementVerdict::Unchecked};
+    std::vector<std::pair<uint32, CoAGameplay::DisplayState>> displays;
+};
+
+SpawnInspection InspectCreatureSpawn(CreatureData const& spawn, float tolerance)
+{
+    CreatureTemplate const* creatureTemplate = sObjectMgr->GetCreatureTemplate(spawn.id);
+    Require(creatureTemplate != nullptr, "Creature spawn " + std::to_string(spawn.spawnId) + " has no template");
+    CreatureAddon const* addon = sObjectMgr->GetCreatureAddon(spawn.spawnId);
+    if (!addon)
+        addon = sObjectMgr->GetCreatureTemplateAddon(spawn.id);
+    CreatureMovementData const* movementOverride = sObjectMgr->GetCreatureMovementOverride(spawn.spawnId);
+    CreatureMovementData const& movement = movementOverride ? *movementOverride : creatureTemplate->Movement;
+    uint8 const animTier = addon ? uint8((addon->bytes1 >> 24) & 0xFF) : 0;
+
+    SpawnInspection inspection;
+    inspection.entry = spawn.id;
+    inspection.sample = ProbeTerrain(spawn.mapid, spawn.phaseMask, spawn.posX, spawn.posY, spawn.posZ);
+    inspection.sample.mayFloat = CoAGameplay::CreatureMayFloat(movement, creatureTemplate->flags_extra, animTier);
+    inspection.sample.maySwim = movement.IsSwimAllowed();
+    inspection.verdict = CoAGameplay::ClassifyPlacement(inspection.sample, tolerance);
+
+    std::unordered_set<uint32> const& client = LoadedClientDisplayIds().creatures;
+    std::vector<uint32> displayIds;
+    if (spawn.displayid)
+        displayIds.push_back(spawn.displayid);
+    for (CreatureModel const& model : creatureTemplate->Models)
+        if (std::find(displayIds.begin(), displayIds.end(), model.CreatureDisplayID) == displayIds.end())
+            displayIds.push_back(model.CreatureDisplayID);
+    for (uint32 displayId : displayIds)
+        inspection.displays.emplace_back(displayId, CoAGameplay::ClassifyDisplay(
+            sCreatureDisplayInfoStore.LookupEntry(displayId) != nullptr, client.contains(displayId)));
+    return inspection;
+}
+
+SpawnInspection InspectGameObjectSpawn(GameObjectData const& spawn, float tolerance)
+{
+    GameObjectTemplate const* objectTemplate = sObjectMgr->GetGameObjectTemplate(spawn.id);
+    Require(objectTemplate != nullptr, "Gameobject spawn " + std::to_string(spawn.spawnId) + " has no template");
+
+    SpawnInspection inspection;
+    inspection.entry = spawn.id;
+    inspection.sample = ProbeTerrain(spawn.mapid, spawn.phaseMask, spawn.posX, spawn.posY, spawn.posZ);
+    inspection.sample.mayFloat = CoAGameplay::GameObjectMayFloat(objectTemplate->type, objectTemplate->displayId);
+    inspection.verdict = CoAGameplay::ClassifyPlacement(inspection.sample, tolerance);
+    if (uint32 const displayId = objectTemplate->displayId)
+        inspection.displays.emplace_back(displayId, CoAGameplay::ClassifyDisplay(
+            sGameObjectDisplayInfoStore.LookupEntry(displayId) != nullptr,
+            LoadedClientDisplayIds().gameObjects.contains(displayId)));
+    return inspection;
+}
+
+SpawnInspection InspectSpawn(Tree const& step, float tolerance)
+{
+    uint32 const guid = step.get<uint32>("guid");
+    if (step.get<std::string>("spawn_type") == "creature")
+    {
+        CreatureData const* spawn = sObjectMgr->GetCreatureData(guid);
+        Require(spawn != nullptr, "Unknown creature spawn: " + std::to_string(guid));
+        return InspectCreatureSpawn(*spawn, tolerance);
+    }
+    GameObjectData const* spawn = sObjectMgr->GetGameObjectData(guid);
+    Require(spawn != nullptr, "Unknown gameobject spawn: " + std::to_string(guid));
+    return InspectGameObjectSpawn(*spawn, tolerance);
+}
+
+std::unordered_map<ObjectGuid::LowType, uint32> PositiveEventSpawns(
+    std::vector<std::list<ObjectGuid::LowType>> const& spawnLists)
+{
+    std::size_t const eventCount = sGameEventMgr->GetEventMap().size();
+    std::unordered_map<ObjectGuid::LowType, uint32> linked;
+    for (std::size_t index = 0; index < spawnLists.size(); ++index)
+        if (std::optional<uint32> const eventId = CoAGameplay::PositiveGameEventId(eventCount, index))
+            for (ObjectGuid::LowType spawnId : spawnLists[index])
+                linked.try_emplace(spawnId, *eventId);
+    return linked;
+}
+
+bool IsPlacementMetric(std::string const& metric)
+{
+    return metric == "spawn_placement" || metric == "spawn_ground_gap" || metric == "spawn_submerged"
+        || metric == "spawn_display_state" || metric == "point_placement" || metric == "point_ground_gap";
+}
+
+double MeasurePlacement(std::string const& metric, Tree const& step)
+{
+    if (metric == "point_placement" || metric == "point_ground_gap")
+    {
+        CoAGameplay::PlacementSample const sample = ProbeTerrain(step.get<uint32>("map"), PHASEMASK_NORMAL,
+            step.get<float>("x"), step.get<float>("y"), step.get<float>("z"));
+        if (metric == "point_placement")
+            return double(CoAGameplay::ClassifyPlacement(sample, step.get<float>("tolerance")));
+        std::optional<float> const gap = CoAGameplay::GroundGap(sample);
+        Require(gap.has_value(), "No ground found for the point");
+        return *gap;
+    }
+
+    SpawnInspection const inspection = InspectSpawn(step,
+        metric == "spawn_placement" ? step.get<float>("tolerance") : CoAGameplay::DefaultPlacementTolerance);
+    if (metric == "spawn_placement")
+        return double(inspection.verdict);
+    if (metric == "spawn_ground_gap")
+    {
+        std::optional<float> const gap = CoAGameplay::GroundGap(inspection.sample);
+        Require(gap.has_value(), "No ground found for the spawn");
+        return *gap;
+    }
+    if (metric == "spawn_submerged")
+        return CoAGameplay::IsSubmerged(inspection.sample) ? 1.0 : 0.0;
+    Require(!inspection.displays.empty(), "Spawn has no display to check");
+    CoAGameplay::DisplayState worst = CoAGameplay::DisplayState::Client;
+    for (auto const& [displayId, state] : inspection.displays)
+        worst = std::min(worst, state);
+    return double(worst);
 }
 
 uint64 Elapsed(Clock::time_point start)
@@ -633,6 +816,7 @@ struct Actor
     uint32 vendorItems = 0;
     std::map<uint32, uint32> vendorPrice;
     std::map<uint32, uint32> vendorExtendedCost;
+    std::map<uint32, int32> vendorStock;
     uint32 vendorPriceSum = 0;
     uint32 whoResponses = 0;
     uint32 lootReceived = 0;
@@ -649,6 +833,7 @@ struct Actor
     std::map<uint32, uint8> castFailureReason;
     uint32 bankShows = 0;
     uint32 systemMessages = 0;
+    uint32 monsterChats = 0;
     std::vector<std::string> systemMessageTexts;
     std::vector<std::pair<ObjectGuid, std::string>> whispers;
     uint32 notifications = 0;
@@ -657,11 +842,13 @@ struct Actor
     uint32 challengeStartLastCode = 0;
     std::map<uint64, std::map<uint16, uint32>> unitValues;
     std::map<uint32, uint32> creatureQueryRank;
+    std::map<uint32, std::vector<uint32>> creatureQueryQuestItems;
     std::map<uint32, uint32> clientCastTimeMs;
     std::map<uint32, uint32> clientAttributes;
     std::map<uint32, uint32> clientSpellTargets;
     std::map<uint32, uint32> questQueryFlags;
     std::map<uint32, uint32> questQueryFirstChoiceItem;
+    std::map<uint32, std::string> questQueryResponse;
     std::map<uint32, uint32> questOfferXP;
     uint32 lastQuestWindow = 0;
     uint32 lastStableResult = 0;
@@ -681,6 +868,7 @@ struct Actor
     std::vector<uint32> rotation;
     uint32 healSpell = 0;
     uint32 tauntSpell = 0;
+    bool rotationAssist = false;
 };
 
 char const* StageName(ActorStage stage)
@@ -975,6 +1163,8 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         WorldPacket chat(packet);
         uint8 chatType = 0;
         chat >> chatType;
+        if (chatType == CHAT_MSG_MONSTER_SAY || chatType == CHAT_MSG_MONSTER_YELL)
+            ++actor.monsterChats;
         if (chatType == CHAT_MSG_SYSTEM || chatType == CHAT_MSG_WHISPER)
         {
             int32 language;
@@ -1017,6 +1207,9 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
     if (packet.GetOpcode() == SMSG_QUEST_QUERY_RESPONSE
         && packet.size() >= QuestQueryFirstChoiceItemOffset + sizeof(uint32))
         actor.questQueryFirstChoiceItem[packet.read<uint32>(0)] = packet.read<uint32>(QuestQueryFirstChoiceItemOffset);
+    if (packet.GetOpcode() == SMSG_QUEST_QUERY_RESPONSE && packet.size() >= sizeof(uint32))
+        actor.questQueryResponse[packet.read<uint32>(0)].assign(reinterpret_cast<char const*>(packet.contents()),
+            packet.size());
     if (packet.GetOpcode() == SMSG_CREATURE_QUERY_RESPONSE)
     {
         WorldPacket response(packet);
@@ -1030,6 +1223,18 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
             response >> name >> unusedName >> unusedName >> unusedName >> subName >> iconName;
             response >> typeFlags >> type >> family >> rank;
             actor.creatureQueryRank[entry] = rank;
+
+            constexpr size_t QuestItemsOffsetFromRank = 2 * sizeof(uint32) + 4 * sizeof(uint32) + 2 * sizeof(float)
+                + sizeof(uint8);
+            if (response.size() - response.rpos() >= QuestItemsOffsetFromRank
+                + MAX_CREATURE_QUEST_ITEMS * sizeof(uint32))
+            {
+                response.read_skip(QuestItemsOffsetFromRank);
+                std::vector<uint32>& questItems = actor.creatureQueryQuestItems[entry];
+                questItems.clear();
+                for (size_t i = 0; i < MAX_CREATURE_QUEST_ITEMS; ++i)
+                    questItems.push_back(response.read<uint32>());
+            }
         }
     }
     ObserveUnitValues(actor, packet);
@@ -1366,6 +1571,7 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         actor.vendorItems = rows;
         actor.vendorPrice.clear();
         actor.vendorExtendedCost.clear();
+        actor.vendorStock.clear();
         actor.vendorPriceSum = 0;
         for (uint8 i = 0; i < rows; ++i)
         {
@@ -1383,6 +1589,7 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
             {
                 actor.vendorPrice[shelfItem] = price;
                 actor.vendorExtendedCost[shelfItem] = extendedCost;
+                actor.vendorStock[shelfItem] = leftInStock;
                 actor.vendorPriceSum += price;
             }
         }
@@ -1406,6 +1613,13 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
     Require(response.rpos() == response.size(), "Unexpected Who response fields");
     ++actor.whoResponses;
 }
+
+struct PlacementAuditTotals
+{
+    uint32 spawns{0};
+    uint32 anomalies{0};
+    uint32 eventLinked{0};
+};
 
 class GameplayCase
 {
@@ -1620,11 +1834,15 @@ public:
         player->GetSession()->HandleAttackSwingOpcode(packet);
     }
 
+    static bool BotIdle(Player* player)
+    {
+        return !player->IsNonMeleeSpellCast(false) && player->SpellQueue.empty();
+    }
+
     static bool CanBotCast(Player* player, uint32 spellId, Unit* target)
     {
         SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId);
-        if (!info || !player->HasActiveSpell(spellId) || player->IsNonMeleeSpellCast(false) ||
-            !player->SpellQueue.empty())
+        if (!info || !player->HasActiveSpell(spellId) || !BotIdle(player))
             return false;
         Spell probe(player, info, TRIGGERED_NONE);
         SpellCastTargets targets;
@@ -1647,10 +1865,22 @@ public:
         player->GetSession()->HandleCastSpellOpcode(packet);
     }
 
+    static std::optional<uint32> NextBotSpell(Actor const& actor, Player* player, Unit* target,
+        std::vector<uint32> const& scenarioSpells, bool healing)
+    {
+        CoAGameplay::RaidSpellSource const source = CoAGameplay::SpellSourceFor(actor.rotationAssist,
+            GetAscensionActiveSpecialization(player), CoARotationAssist::Rules);
+        return CoAGameplay::NextRaidSpell(source,
+            [player, target, healing]
+            {
+                return BotIdle(player) ? CoARotationAssist::ChooseSpell(player, target, healing) : 0u;
+            },
+            scenarioSpells, [player, target](uint32 candidate) { return CanBotCast(player, candidate, target); });
+    }
+
     void CastRotation(Actor const& actor, Player* player, Unit* target)
     {
-        std::optional<uint32> const spell = CoAGameplay::NextRotationSpell(actor.rotation,
-            [player, target](uint32 candidate) { return CanBotCast(player, candidate, target); });
+        std::optional<uint32> const spell = NextBotSpell(actor, player, target, actor.rotation, false);
         if (spell)
             SubmitBotCast(player, *spell, target);
     }
@@ -1689,8 +1919,10 @@ public:
         if (!target)
             return;
         Player* patient = ObjectAccessor::GetPlayer(*player, *target);
-        if (patient && CanBotCast(player, healer.healSpell, patient))
-            SubmitBotCast(player, healer.healSpell, patient);
+        if (!patient)
+            return;
+        if (std::optional<uint32> const spell = NextBotSpell(healer, player, patient, { healer.healSpell }, true))
+            SubmitBotCast(player, *spell, patient);
     }
 
     bool IsTankActor(ObjectGuid guid) const
@@ -2149,6 +2381,7 @@ private:
             actor.healSpell = RaidSpell(*heal);
         if (auto taunt = definition.get_child_optional("taunt_spell"))
             actor.tauntSpell = RaidSpell(*taunt);
+        actor.rotationAssist = definition.get<bool>("rotation_assist", false);
         Require((actor.healSpell != 0) == (actor.raidRole == CoAGameplay::RaidRole::Healer),
             "heal_spell is required for a healer and only for one");
         Require(!actor.tauntSpell || actor.raidRole == CoAGameplay::RaidRole::Tank, "taunt_spell is only for a tank");
@@ -2579,6 +2812,14 @@ private:
     {
         if (std::string const requested = step.get<std::string>("metric"); requested.starts_with("timeline_"))
             return MeasureTimeline(requested, step);
+        else if (requested == "placement_audit_spawns" || requested == "placement_audit_anomalies"
+            || requested == "placement_audit_event_spawns")
+        {
+            Require(_placementAudit.has_value(), "Placement audit metric needs an earlier placement_audit");
+            if (requested == "placement_audit_spawns")
+                return _placementAudit->spawns;
+            return requested == "placement_audit_anomalies" ? _placementAudit->anomalies : _placementAudit->eventLinked;
+        }
         Unit* unit = GetUnit(step.get<std::string>("actor"));
         std::string metric = step.get<std::string>("metric");
         if (metric == "spell_hit_chance")
@@ -2670,6 +2911,8 @@ private:
             return unit->GetPositionZ();
         if (metric == "combat")
             return unit->IsInCombat();
+        if (metric == "can_attack")
+            return unit->IsValidAttackTarget(GetUnit(step.get<std::string>("target")));
         if (metric == "channel_object_entry")
         {
             ObjectGuid const channelObject = unit->GetGuidValue(UNIT_FIELD_CHANNEL_OBJECT);
@@ -2758,6 +3001,14 @@ private:
             Require(player != nullptr, "Arena metric needs a player");
             return player->InArena() ? 1 : 0;
         }
+        if (metric == "battleground_team" || metric == "team")
+        {
+            Player* player = unit->ToPlayer();
+            Require(player != nullptr, "Team metric needs a player");
+            if (metric == "team")
+                return double(player->GetTeamId());
+            return player->InBattleground() ? double(player->GetBgTeamId()) : -1;
+        }
         if (metric == "arena_team_members" || metric == "arena_team_season_games" || metric == "arena_team_season_wins")
         {
             Player* player = unit->ToPlayer();
@@ -2774,11 +3025,12 @@ private:
         }
         if (metric == "view_level")
             return GetUnit(step.get<std::string>("target"))->getLevelForTarget(unit);
-        if (metric == "sent_level" || metric == "sent_max_health")
+        if (metric == "sent_level" || metric == "sent_max_health" || metric == "sent_faction")
         {
             Actor& actor = _actors.at(step.get<std::string>("actor"));
             uint64 guid = GetUnit(step.get<std::string>("target"))->GetGUID().GetRawValue();
-            uint16 field = metric == "sent_level" ? UNIT_FIELD_LEVEL : UNIT_FIELD_MAXHEALTH;
+            uint16 field = metric == "sent_level" ? UNIT_FIELD_LEVEL :
+                metric == "sent_faction" ? UNIT_FIELD_FACTIONTEMPLATE : UNIT_FIELD_MAXHEALTH;
             auto itr = actor.unitValues.find(guid);
             if (itr == actor.unitValues.end() || !itr->second.count(field))
                 return 0;
@@ -2798,11 +3050,28 @@ private:
             auto itr = actor.questQueryFirstChoiceItem.find(step.get<uint32>("quest"));
             return itr == actor.questQueryFirstChoiceItem.end() ? -1 : int64(itr->second);
         }
+        if (metric == "quest_query_text_contains")
+        {
+            Actor& actor = _actors.at(step.get<std::string>("actor"));
+            auto itr = actor.questQueryResponse.find(step.get<uint32>("quest"));
+            if (itr == actor.questQueryResponse.end())
+                return -1;
+            return itr->second.find(step.get<std::string>("text")) != std::string::npos ? 1 : 0;
+        }
         if (metric == "creature_query_rank")
         {
             Actor& actor = _actors.at(step.get<std::string>("actor"));
             auto itr = actor.creatureQueryRank.find(step.get<uint32>("entry"));
             return itr == actor.creatureQueryRank.end() ? -1 : int64(itr->second);
+        }
+        if (metric == "creature_query_quest_item")
+        {
+            Actor& actor = _actors.at(step.get<std::string>("actor"));
+            auto itr = actor.creatureQueryQuestItems.find(step.get<uint32>("entry"));
+            if (itr == actor.creatureQueryQuestItems.end())
+                return -1;
+            uint32 const item = step.get<uint32>("item");
+            return std::find(itr->second.begin(), itr->second.end(), item) != itr->second.end() ? 1 : 0;
         }
         if (metric == "client_cast_time_ms")
         {
@@ -3244,6 +3513,12 @@ private:
             auto const found = prices.find(step.get<uint32>("item", 0));
             return found == prices.end() ? -1.0 : double(found->second);
         }
+        if (metric == "vendor_stock")
+        {
+            auto const& stock = _actors.at(step.get<std::string>("actor")).vendorStock;
+            auto const found = stock.find(step.get<uint32>("item", 0));
+            return found == stock.end() ? -2.0 : double(found->second);
+        }
         if (metric == "vendor_extended_cost")
         {
             auto const& costs = _actors.at(step.get<std::string>("actor")).vendorExtendedCost;
@@ -3441,6 +3716,8 @@ private:
                 return spawn.second->GetEntry() == entry && spawn.second->IsInWorld() && spawn.second->IsAlive();
             });
         }
+        if (IsPlacementMetric(metric))
+            return MeasurePlacement(metric, step);
         if (metric == "carried_money")
             return player->GetMoney();
         if (metric == "loot_offered_item_count")
@@ -3698,6 +3975,12 @@ private:
         {
             Unit* attacker = GetUnit(step.get<std::string>("target"));
             SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
+            if (metric == "script_melee_damage_dealt")
+            {
+                uint32 damage = 1000;
+                sScriptMgr->ModifyMeleeDamage(attacker, player, damage);
+                return damage;
+            }
             if (metric == "script_melee_damage_taken")
             {
                 uint32 damage = 1000;
@@ -3994,6 +4277,12 @@ private:
             }
             return 0.0;
         }
+        if (metric == "owned_creature_armor")
+        {
+            Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
+            Require(creature != nullptr, "Armor observation needs a present owned creature");
+            return creature->GetArmor();
+        }
         if (metric == "owned_creature_virtual_item")
         {
             Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
@@ -4256,6 +4545,8 @@ private:
                         count += token->GetCount();
             return count;
         }
+        if (metric == "monster_chat_count")
+            return double(_actors.at(step.get<std::string>("actor")).monsterChats);
         if (metric == "item_sell_price")
         {
             uint32 item = step.get<uint32>("item");
@@ -4659,6 +4950,12 @@ private:
         }
         if (metric == "player_class")
             return player->getClass();
+        if (metric == "name_query_race")
+        {
+            uint8 race = player->getRace();
+            sScriptMgr->OnPlayerGetNameQueryRace(player, race);
+            return race;
+        }
         if (metric == "cached_class")
         {
             CharacterCacheEntry const* cached = sCharacterCache->GetCharacterCacheByGuid(player->GetGUID());
@@ -5075,6 +5372,179 @@ private:
         return false;
     }
 
+    void RunPlacementAudit(Tree const& step, Tree& record)
+    {
+        Clock::time_point const started = Clock::now();
+        uint32 const mapId = step.get<uint32>("map");
+        Require(sMapStore.LookupEntry(mapId) != nullptr, "Unknown map: " + std::to_string(mapId));
+        float const tolerance = step.get<float>("tolerance", CoAGameplay::DefaultPlacementTolerance);
+        std::optional<std::set<uint32>> gameObjectTypes;
+        if (auto const types = step.get_child_optional("gameobject_types"))
+        {
+            gameObjectTypes.emplace();
+            for (auto const& type : *types)
+                gameObjectTypes->insert(type.second.get_value<uint32>());
+        }
+
+        Map* map = sMapMgr->CreateBaseMap(mapId);
+        std::function<bool(SpawnData const&)> selected = [mapId](SpawnData const& spawn)
+        {
+            return spawn.mapid == mapId;
+        };
+        if (auto const zone = step.get_optional<uint32>("zone"))
+        {
+            float firstX = 0.0f;
+            float firstY = 0.0f;
+            float secondX = 100.0f;
+            float secondY = 100.0f;
+            Zone2MapCoordinates(firstX, firstY, *zone);
+            Zone2MapCoordinates(secondX, secondY, *zone);
+            Require(firstX != 0.0f || firstY != 0.0f || secondX != 100.0f || secondY != 100.0f,
+                "Zone has no world map bounds: " + std::to_string(*zone));
+            float const minX = std::min(firstX, secondX);
+            float const maxX = std::max(firstX, secondX);
+            float const minY = std::min(firstY, secondY);
+            float const maxY = std::max(firstY, secondY);
+            selected = [mapId, zoneId = *zone, map, minX, maxX, minY, maxY](SpawnData const& spawn)
+            {
+                if (spawn.mapid != mapId || spawn.posX < minX || spawn.posX > maxX || spawn.posY < minY
+                    || spawn.posY > maxY)
+                    return false;
+                map->GetGridTerrainData(spawn.posX, spawn.posY);
+                return map->GetZoneId(spawn.phaseMask, spawn.posX, spawn.posY, spawn.posZ) == zoneId;
+            };
+        }
+
+        std::vector<CreatureData const*> creatures;
+        for (auto const& [spawnId, spawn] : sObjectMgr->GetAllCreatureData())
+            if (selected(spawn))
+                creatures.push_back(&spawn);
+        std::vector<GameObjectData const*> gameObjects;
+        for (auto const& [spawnId, spawn] : sObjectMgr->GetAllGOData())
+        {
+            if (!selected(spawn))
+                continue;
+            GameObjectTemplate const* objectTemplate = sObjectMgr->GetGameObjectTemplate(spawn.id);
+            if (!gameObjectTypes || (objectTemplate && gameObjectTypes->contains(objectTemplate->type)))
+                gameObjects.push_back(&spawn);
+        }
+        Require(!creatures.empty() || !gameObjects.empty(), "Placement audit selected no spawns");
+        auto const bySpawnId = [](SpawnData const* first, SpawnData const* second)
+        {
+            return first->spawnId < second->spawnId;
+        };
+        std::sort(creatures.begin(), creatures.end(), bySpawnId);
+        std::sort(gameObjects.begin(), gameObjects.end(), bySpawnId);
+
+        std::map<std::string, uint32> anomalyCounts{{"floating", 0}, {"under_ground", 0}, {"invalid_display", 0}};
+        uint32 unchecked = 0;
+        uint32 exempt = 0;
+        Tree anomalies;
+        Tree serverOnlyDisplays;
+        Tree eventSpawnAnomalies;
+        uint32 eventLinked = 0;
+        std::unordered_map<ObjectGuid::LowType, uint32> const creatureEvents =
+            PositiveEventSpawns(sGameEventMgr->GameEventCreatureGuids);
+        std::unordered_map<ObjectGuid::LowType, uint32> const gameObjectEvents =
+            PositiveEventSpawns(sGameEventMgr->GameEventGameobjectGuids);
+        auto const optionalValue = [](Tree& row, std::string const& key, std::optional<float> value)
+        {
+            if (value)
+                row.put(key, *value);
+            else
+                row.put(key, "");
+        };
+        auto const report = [&](std::string const& spawnType, SpawnData const& spawn,
+            SpawnInspection const& inspection, std::optional<uint32> goType,
+            std::unordered_map<ObjectGuid::LowType, uint32> const& events)
+        {
+            auto const event = events.find(spawn.spawnId);
+            eventLinked += event != events.end();
+            unchecked += inspection.verdict == CoAGameplay::PlacementVerdict::Unchecked;
+            exempt += inspection.verdict == CoAGameplay::PlacementVerdict::Exempt;
+            Tree displays;
+            std::vector<std::string> kinds;
+            bool serverOnly = false;
+            for (auto const& [displayId, state] : inspection.displays)
+            {
+                Tree display;
+                display.put("id", displayId);
+                display.put("state", std::string(CoAGameplay::DisplayStateName(state)));
+                displays.push_back({ "", display });
+                serverOnly |= state == CoAGameplay::DisplayState::ServerOnly;
+                if (state == CoAGameplay::DisplayState::Missing
+                    && std::find(kinds.begin(), kinds.end(), "invalid_display") == kinds.end())
+                    kinds.push_back("invalid_display");
+            }
+            if (inspection.verdict == CoAGameplay::PlacementVerdict::Floating)
+                kinds.insert(kinds.begin(), "floating");
+            else if (inspection.verdict == CoAGameplay::PlacementVerdict::UnderGround)
+                kinds.insert(kinds.begin(), "under_ground");
+
+            Tree row;
+            row.put("spawn_type", spawnType);
+            row.put("guid", spawn.spawnId);
+            row.put("entry", inspection.entry);
+            if (goType)
+                row.put("go_type", *goType);
+            row.put("x", spawn.posX);
+            row.put("y", spawn.posY);
+            row.put("z", spawn.posZ);
+            if (event != events.end())
+                row.put("game_event", event->second);
+            if (serverOnly)
+            {
+                Tree note = row;
+                note.add_child("displays", displays);
+                serverOnlyDisplays.push_back({ "", note });
+            }
+            if (kinds.empty())
+                return;
+            optionalValue(row, "floor_z", inspection.sample.floorZ);
+            optionalValue(row, "gap", CoAGameplay::GroundGap(inspection.sample));
+            optionalValue(row, "liquid_level", inspection.sample.liquidLevel);
+            row.put("submerged", CoAGameplay::IsSubmerged(inspection.sample));
+            row.put("verdict", std::string(CoAGameplay::PlacementVerdictName(inspection.verdict)));
+            row.add_child("displays", displays);
+            Tree kindList;
+            for (std::string const& kind : kinds)
+            {
+                if (event == events.end())
+                    ++anomalyCounts[kind];
+                Tree item;
+                item.put_value(kind);
+                kindList.push_back({ "", item });
+            }
+            row.add_child("kinds", kindList);
+            (event == events.end() ? anomalies : eventSpawnAnomalies).push_back({ "", row });
+        };
+        for (CreatureData const* spawn : creatures)
+            report("creature", *spawn, InspectCreatureSpawn(*spawn, tolerance), std::nullopt, creatureEvents);
+        for (GameObjectData const* spawn : gameObjects)
+        {
+            GameObjectTemplate const* objectTemplate = sObjectMgr->GetGameObjectTemplate(spawn->id);
+            report("gameobject", *spawn, InspectGameObjectSpawn(*spawn, tolerance),
+                objectTemplate ? std::optional<uint32>(objectTemplate->type) : std::nullopt, gameObjectEvents);
+        }
+
+        record.put("tolerance", tolerance);
+        record.put("audited.creatures", uint32(creatures.size()));
+        record.put("audited.gameobjects", uint32(gameObjects.size()));
+        record.put("audited.unchecked", unchecked);
+        record.put("audited.exempt", exempt);
+        record.put("audited.event_linked", eventLinked);
+        for (auto const& [kind, count] : anomalyCounts)
+            record.put("anomaly_counts." + kind, count);
+        record.put("server_only_display_count", uint32(serverOnlyDisplays.size()));
+        record.put("event_spawn_anomaly_count", uint32(eventSpawnAnomalies.size()));
+        record.put("real_ms", Elapsed(started));
+        record.add_child("anomalies", anomalies);
+        record.add_child("server_only_displays", serverOnlyDisplays);
+        record.add_child("event_spawn_anomalies", eventSpawnAnomalies);
+        _placementAudit = PlacementAuditTotals{uint32(creatures.size() + gameObjects.size()),
+            uint32(anomalies.size()), eventLinked};
+    }
+
     void Act(Tree const& step, Tree& record)
     {
         std::string action = step.get<std::string>("action");
@@ -5093,6 +5563,11 @@ private:
         if (action == "game_event")
         {
             _gameEvents.Set(step.get<uint16>("event"), step.get<bool>("active"));
+            return;
+        }
+        if (action == "placement_audit")
+        {
+            RunPlacementAudit(step, record);
             return;
         }
         std::string id = step.get<std::string>("actor");
@@ -6370,6 +6845,7 @@ private:
     std::optional<AscensionVanityOwnership::TestOverride> _vanityOwnership;
     std::optional<TwoSideConfig> _twoSide;
     GameEventStates _gameEvents;
+    std::optional<PlacementAuditTotals> _placementAudit;
 };
 
 enum class TeardownStage

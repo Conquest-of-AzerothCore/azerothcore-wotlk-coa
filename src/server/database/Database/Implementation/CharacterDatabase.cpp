@@ -37,6 +37,11 @@ void CharacterDatabaseConnection::DoPrepareStatements()
 
     PrepareStatement(CHAR_SEL_RAF_DELIVERY, "SELECT mail_id FROM raf_reward_delivery WHERE claim_id = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_INS_RAF_DELIVERY, "INSERT INTO raf_reward_delivery (claim_id, account_id, guid, mail_id) VALUES (?, ?, ?, ?)", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_RAF_RECRUIT_DELIVERY,
+        "SELECT mail_id FROM raf_recruit_reward_delivery WHERE claim_id = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_RAF_RECRUIT_DELIVERY,
+        "INSERT INTO raf_recruit_reward_delivery (claim_id, account_id, guid, mail_id) VALUES (?, ?, ?, ?)",
+        CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_RAF_RECIPIENT, "SELECT account FROM characters WHERE guid = ?", CONNECTION_SYNCH);
 
     PrepareStatement(CHAR_SEL_COA_ACCOUNT_CHALLENGE_COMPLETION,
@@ -48,6 +53,8 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_INS_COA_ACCOUNT_CHALLENGE_COMPLETION,
         "INSERT IGNORE INTO coa_account_challenge_completion (account, challengeId, level, completeTime, startTime) "
         "VALUES (?, ?, ?, UNIX_TIMESTAMP(), ?)", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_UPD_COA_ADVENTURE_LEVEL,
+        "UPDATE coa_character_challenge SET level = ? WHERE guid = ? AND challengeId = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_DEL_COA_ACCOUNT_CHALLENGE_COMPLETIONS,
         "DELETE FROM coa_account_challenge_completion WHERE account = ?", CONNECTION_SYNCH);
 
@@ -848,6 +855,11 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_SEL_ACCOUNT_CHARACTER_SETTINGS_BY_SOURCE,
         "SELECT s.data FROM character_settings s JOIN characters c ON c.guid = s.guid "
         "WHERE c.account = ? AND s.guid <> ? AND s.source = ?", CONNECTION_ASYNC);
+
+    PrepareStatement(CHAR_SEL_ACCOUNT_LEVEL_OR_PRESTIGE,
+        "SELECT c.level, COALESCE(s.data, '') FROM characters c "
+        "LEFT JOIN character_settings s ON s.guid = c.guid AND s.source = ? "
+        "WHERE c.account = ? AND c.guid <> ? AND c.deleteDate IS NULL", CONNECTION_SYNCH);
 
     // Instance saved data. Stores the states of gameobjects in instances to be loaded on server start
     PrepareStatement(CHAR_SELECT_INSTANCE_SAVED_DATA, "SELECT guid, state FROM instance_saved_go_state_data WHERE id = ?", CONNECTION_SYNCH);

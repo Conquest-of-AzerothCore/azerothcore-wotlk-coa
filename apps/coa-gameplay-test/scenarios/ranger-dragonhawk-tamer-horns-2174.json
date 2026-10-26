@@ -67,6 +67,12 @@
       "actor": "war",
       "id": 29
     },
+    { "action": "advancement_rank", "actor": "war", "entry": 30926, "rank": 2 },
+    { "action": "advancement_rank", "actor": "war", "entry": 7050, "rank": 2 },
+    { "action": "advancement_rank", "actor": "war", "entry": 34184, "rank": 1 },
+    { "action": "advancement_rank", "actor": "war", "entry": 34181, "rank": 1 },
+    { "action": "advancement_rank", "actor": "war", "entry": 34147, "rank": 1 },
+    { "action": "advancement_rank", "actor": "war", "entry": 31133, "rank": 1 },
     {
       "action": "advancement_rank",
       "actor": "war",
@@ -100,6 +106,12 @@
       "actor": "perseverance",
       "id": 29
     },
+    { "action": "advancement_rank", "actor": "perseverance", "entry": 30926, "rank": 2 },
+    { "action": "advancement_rank", "actor": "perseverance", "entry": 7050, "rank": 2 },
+    { "action": "advancement_rank", "actor": "perseverance", "entry": 34184, "rank": 1 },
+    { "action": "advancement_rank", "actor": "perseverance", "entry": 34181, "rank": 1 },
+    { "action": "advancement_rank", "actor": "perseverance", "entry": 34147, "rank": 1 },
+    { "action": "advancement_rank", "actor": "perseverance", "entry": 31133, "rank": 1 },
     {
       "action": "advancement_rank",
       "actor": "perseverance",
@@ -133,6 +145,12 @@
       "actor": "endurance",
       "id": 29
     },
+    { "action": "advancement_rank", "actor": "endurance", "entry": 30926, "rank": 2 },
+    { "action": "advancement_rank", "actor": "endurance", "entry": 7050, "rank": 2 },
+    { "action": "advancement_rank", "actor": "endurance", "entry": 34184, "rank": 1 },
+    { "action": "advancement_rank", "actor": "endurance", "entry": 34181, "rank": 1 },
+    { "action": "advancement_rank", "actor": "endurance", "entry": 34147, "rank": 1 },
+    { "action": "advancement_rank", "actor": "endurance", "entry": 31133, "rank": 1 },
     {
       "action": "advancement_rank",
       "actor": "endurance",
@@ -166,6 +184,12 @@
       "actor": "alacrity",
       "id": 29
     },
+    { "action": "advancement_rank", "actor": "alacrity", "entry": 30926, "rank": 2 },
+    { "action": "advancement_rank", "actor": "alacrity", "entry": 7050, "rank": 2 },
+    { "action": "advancement_rank", "actor": "alacrity", "entry": 34184, "rank": 1 },
+    { "action": "advancement_rank", "actor": "alacrity", "entry": 34181, "rank": 1 },
+    { "action": "advancement_rank", "actor": "alacrity", "entry": 34147, "rank": 1 },
+    { "action": "advancement_rank", "actor": "alacrity", "entry": 31133, "rank": 1 },
     {
       "action": "advancement_rank",
       "actor": "alacrity",

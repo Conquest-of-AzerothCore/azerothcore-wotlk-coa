@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Placement audit of Moonglade runs and reports",
+  "contract": "Mechanism guard: the placement_audit action selects the creature and gameobject spawns of Moonglade (AreaTable zone 493 on map 1) and writes its report into the step record. Moonglade is WorldMapArea row 241 (map 1, area 493, y -1381..-3689, x 8491..6952), read from /srv/coa/server-data/dbc/WorldMapArea.dbc on 2026-10-25. The case asserts only that the audit ran, selected spawns and linked event spawns: Moonglade holds Lunar Festival (event 7) gameobjects in data/sql/base/db_world/game_event_gameobject.sql, which the audit lists apart from anomalies; the anomalies it reports are findings for triage, never a failure of this case.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "auditor",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "placement_audit",
+      "label": "Audit every Moonglade spawn",
+      "map": 1,
+      "zone": 493
+    },
+    {
+      "action": "assert",
+      "label": "The audit selected Moonglade spawns",
+      "actor": "auditor",
+      "metric": "placement_audit_spawns",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The audit linked Lunar Festival decorations to their game event",
+      "actor": "auditor",
+      "metric": "placement_audit_event_spawns",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The audit reported its anomaly rows",
+      "actor": "auditor",
+      "metric": "placement_audit_anomalies",
+      "min": 0
+    }
+  ]
+}

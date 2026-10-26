@@ -89,6 +89,8 @@ namespace
         ManastormRun const& run,
         ObjectGuid targetGuid)
     {
+        if (!ManastormModuleConfig::ObjectiveRaidSkull())
+            targetGuid.Clear();
         ObjectGuid const ownerGuid =
             ObjectGuid::Create<HighGuid::Player>(
                 run.GetOwnerGuid());

@@ -78,6 +78,12 @@
       "actor": "doctor",
       "id": 4
     },
+    { "action": "advancement_rank", "actor": "doctor", "entry": 7779, "rank": 2 },
+    { "action": "advancement_rank", "actor": "doctor", "entry": 1969, "rank": 2 },
+    { "action": "advancement_rank", "actor": "doctor", "entry": 30895, "rank": 1 },
+    { "action": "advancement_rank", "actor": "doctor", "entry": 8574, "rank": 1 },
+    { "action": "advancement_rank", "actor": "doctor", "entry": 7086, "rank": 1 },
+    { "action": "advancement_rank", "actor": "doctor", "entry": 6074, "rank": 1 },
     {
       "action": "advancement_rank",
       "actor": "doctor",

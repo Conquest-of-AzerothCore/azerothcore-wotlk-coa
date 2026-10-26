@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Wind, Black Knight and Valkyrie native repurchases and budgets (#4287, #4466, #4657, #5039)",
-  "contract": "Native 0x0727 uploads buy authored entries and switch to another specialization and back. An\nidentity-only return leaves omitted purchases absent; explicit repurchase, paid removal and repurchase\nsucceed. Level 11 has one specialization point, so a second paid entry must be refused without losing the\nfirst. This checks server authority; unlimited point display and client tree rendering are not observed.\nNative removals and resets retain their original prices; fixture actors have 100 gold to pay them.",
+  "contract": "Native 0x0727 uploads buy authored entries and switch to another specialization and back. An\nidentity-only return leaves omitted purchases absent; explicit repurchase, paid removal and repurchase\nsucceed. Wind and Black Knight stay at level 60/11, where their purchases (entry 6337, entry 6613) have no\ntab-investment gate; Level 11 gives Black Knight one specialization point, so a second paid entry must be\nrefused without losing the first. Valkyrie's entry 3830 has TabTEInvestment 8, so Valkyrie is level 27 (class\n27's 9 TE points at that level) and spends 8 TE on ungated specialization entries before 3830; a further\nentry (4978, also TabTEInvestment 8, already satisfied by the same 8 points) exhausts the 9-point budget and\nis refused without losing the first purchase. This checks server authority; unlimited point display and\nclient tree rendering are not observed. Native removals and resets retain their original prices; fixture\nactors have 100 gold to pay them.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -20,7 +20,7 @@
       "id": "valkyrie",
       "race": 1,
       "class": 27,
-      "level": 11
+      "level": 27
     }
   ],
   "steps": [
@@ -51,6 +51,11 @@
       "actor": "wind",
       "id": 13
     },
+    { "action": "advancement_rank", "actor": "wind", "entry": 30819, "rank": 2 },
+    { "action": "advancement_rank", "actor": "wind", "entry": 30141, "rank": 2 },
+    { "action": "advancement_rank", "actor": "wind", "entry": 7838, "rank": 2 },
+    { "action": "advancement_rank", "actor": "wind", "entry": 34948, "rank": 1 },
+    { "action": "advancement_rank", "actor": "wind", "entry": 31267, "rank": 1 },
     {
       "action": "advancement_rank",
       "actor": "wind",
@@ -89,6 +94,11 @@
       "equals": 0,
       "spell": 704211
     },
+    { "action": "advancement_rank", "actor": "wind", "entry": 30819, "rank": 2 },
+    { "action": "advancement_rank", "actor": "wind", "entry": 30141, "rank": 2 },
+    { "action": "advancement_rank", "actor": "wind", "entry": 7838, "rank": 2 },
+    { "action": "advancement_rank", "actor": "wind", "entry": 34948, "rank": 1 },
+    { "action": "advancement_rank", "actor": "wind", "entry": 31267, "rank": 1 },
     {
       "action": "advancement_rank",
       "label": "Repurchase through the complete native upload",
@@ -231,6 +241,14 @@
       "actor": "valkyrie",
       "id": 47
     },
+    { "action": "advancement_rank", "actor": "valkyrie", "entry": 6539, "rank": 1 },
+    { "action": "advancement_rank", "actor": "valkyrie", "entry": 7638, "rank": 1 },
+    { "action": "advancement_rank", "actor": "valkyrie", "entry": 7640, "rank": 1 },
+    { "action": "advancement_rank", "actor": "valkyrie", "entry": 9596, "rank": 1 },
+    { "action": "advancement_rank", "actor": "valkyrie", "entry": 31196, "rank": 1 },
+    { "action": "advancement_rank", "actor": "valkyrie", "entry": 32502, "rank": 1 },
+    { "action": "advancement_rank", "actor": "valkyrie", "entry": 33983, "rank": 1 },
+    { "action": "advancement_rank", "actor": "valkyrie", "entry": 33997, "rank": 1 },
     {
       "action": "advancement_rank",
       "actor": "valkyrie",
@@ -269,6 +287,14 @@
       "equals": 0,
       "spell": 680618
     },
+    { "action": "advancement_rank", "actor": "valkyrie", "entry": 6539, "rank": 1 },
+    { "action": "advancement_rank", "actor": "valkyrie", "entry": 7638, "rank": 1 },
+    { "action": "advancement_rank", "actor": "valkyrie", "entry": 7640, "rank": 1 },
+    { "action": "advancement_rank", "actor": "valkyrie", "entry": 9596, "rank": 1 },
+    { "action": "advancement_rank", "actor": "valkyrie", "entry": 31196, "rank": 1 },
+    { "action": "advancement_rank", "actor": "valkyrie", "entry": 32502, "rank": 1 },
+    { "action": "advancement_rank", "actor": "valkyrie", "entry": 33983, "rank": 1 },
+    { "action": "advancement_rank", "actor": "valkyrie", "entry": 33997, "rank": 1 },
     {
       "action": "advancement_rank",
       "label": "Repurchase through the complete native upload",

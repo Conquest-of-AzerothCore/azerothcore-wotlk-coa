@@ -66,6 +66,11 @@
       "spell": 802586,
       "equals": 1
     },
+    { "action": "advancement_rank", "actor": "k", "entry": 34127, "rank": 3 },
+    { "action": "advancement_rank", "actor": "k", "entry": 7881, "rank": 2 },
+    { "action": "advancement_rank", "actor": "k", "entry": 31166, "rank": 1 },
+    { "action": "advancement_rank", "actor": "k", "entry": 30694, "rank": 1 },
+    { "action": "advancement_rank", "actor": "k", "entry": 29621, "rank": 1 },
     {
       "action": "advancement_rank",
       "actor": "k",

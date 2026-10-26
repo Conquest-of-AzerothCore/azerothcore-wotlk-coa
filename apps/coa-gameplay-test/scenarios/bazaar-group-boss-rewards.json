@@ -1,0 +1,155 @@
+{
+  "schema": 1,
+  "name": "Bazaar boss rewards include a nearby healer without killing blows",
+  "contract": "At default token rates, killing Bloodmage Thalnos 4543, a Scarlet Monastery dungeon boss (real spawn guid 39934, map 189), awards 14-22 tokens to each level-59 group member inside the instance, including a healer who never attacks. A group member who stays outside the instance receives none. The reward is granted once per member through native kill credit, so neither member exceeds the 22-token maximum.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "killer",
+      "race": 1,
+      "class": 1,
+      "level": 59
+    },
+    {
+      "id": "healer",
+      "race": 1,
+      "class": 5,
+      "level": 59
+    },
+    {
+      "id": "distant",
+      "race": 1,
+      "class": 1,
+      "level": 59
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "killer",
+      "target": "healer"
+    },
+    {
+      "action": "group",
+      "actor": "killer",
+      "target": "distant"
+    },
+    {
+      "action": "set_phase",
+      "label": "killer sees the real Scarlet Monastery spawns",
+      "actor": "killer",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "healer sees the real Scarlet Monastery spawns",
+      "actor": "healer",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "killer enters the group's Scarlet Monastery at Bloodmage Thalnos",
+      "actor": "killer",
+      "guid": 39934
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: killer is in Scarlet Monastery",
+      "actor": "killer",
+      "metric": "map_id",
+      "equals": 189,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "healer joins the killer beside Bloodmage Thalnos",
+      "actor": "healer",
+      "guid": 39934
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: healer is in Scarlet Monastery",
+      "actor": "healer",
+      "metric": "map_id",
+      "equals": 189,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Bloodmage Thalnos is alive beside the killer",
+      "actor": "killer",
+      "metric": "nearby_creature_count",
+      "entry": 4543,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "killer",
+      "metric": "item_count",
+      "item": 975001,
+      "save_as": "killer_tokens"
+    },
+    {
+      "action": "snapshot",
+      "actor": "healer",
+      "metric": "item_count",
+      "item": 975001,
+      "save_as": "healer_tokens"
+    },
+    {
+      "action": "snapshot",
+      "actor": "distant",
+      "metric": "item_count",
+      "item": 975001,
+      "save_as": "distant_tokens"
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "killer",
+      "entry": 4543,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "killer token entitlement",
+      "actor": "killer",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "killer_tokens",
+      "min": 14,
+      "max": 22,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "healer token entitlement",
+      "actor": "healer",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "healer_tokens",
+      "min": 14,
+      "max": 22,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "distant token entitlement",
+      "actor": "distant",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "distant_tokens",
+      "equals": 0
+    }
+  ]
+}

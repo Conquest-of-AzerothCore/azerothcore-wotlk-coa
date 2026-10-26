@@ -4745,9 +4745,10 @@ RecruitAFriend.MaxLevel = 60
 #    RecruitAFriend.MaxDifference
 #        Description: Highest level difference between linked Recruiter and Friend benefit from
 #                     the Recruit-A-Friend experience multiplier.
-#        Default:     4
+#        Default:     30
 
-RecruitAFriend.MaxDifference = 4
+#    Legacy value 4 is automatically treated as 30 when loading or reloading the config.
+RecruitAFriend.MaxDifference = 30
 
 #
 #    MaxRecruitAFriendBonusDistance

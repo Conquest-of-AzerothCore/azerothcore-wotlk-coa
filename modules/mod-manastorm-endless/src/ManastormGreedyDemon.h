@@ -39,6 +39,7 @@ struct ManastormGreedyLootCandidate
     uint8 MinPlayerLevel = 1;
     uint8 MaxPlayerLevel = 80;
     uint32 Weight = 1;
+    uint32 ItemLevel = 0;
 };
 
 class ManastormGreedyDemon
