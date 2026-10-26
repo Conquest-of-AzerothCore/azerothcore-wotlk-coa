@@ -161,6 +161,9 @@ METRICS = TIMELINE_METRICS | {
     'balance_damage_done_player', 'balance_damage_done_pets', 'balance_damage_taken_player',
     'balance_damage_taken_pets', 'balance_healing_done_player', 'balance_healing_done_pets',
     'balance_pets_owned_start', 'balance_pets_alive_end', 'balance_last_reset_health',
+    'balance_white_swings', 'balance_white_normal', 'balance_white_crit', 'balance_white_glancing',
+    'balance_white_crushing', 'balance_white_miss', 'balance_white_dodge', 'balance_white_parry',
+    'balance_white_block', 'balance_white_avg_normal_hit', 'balance_white_avg_normal_hit_pct_max_health',
 }
 PLAYER_STAT_METRICS = {
     'mana_regen', 'mana_regen_interrupted', 'resting',
@@ -198,7 +201,7 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'row', 'offset', 'skip_strings', 'from_end', 'x', 'y', 'min_required_level', 'max_required_level',
                  'flat_coefficient_modifier', 'dominant_stat', 'off_stat', 'spells',
                  'min_level', 'max_level', 'min_home_distance', 'spawn',
-                 'guid', 'spawn_type', 'tolerance', 'map', 'z', 'outcome'} | TIMELINE_FIELDS
+                 'guid', 'spawn_type', 'tolerance', 'map', 'z', 'outcome', 'side'} | TIMELINE_FIELDS
 ACTIONS = {
     'stop_attack': ({'actor'}, {'actor'}),
     'set_moving': ({'actor', 'enabled'}, {'actor', 'enabled', 'flag'}),
@@ -312,6 +315,7 @@ ACTIONS = {
     'quest_turn_in': ({'actor', 'quest'}, {'actor', 'quest', 'entry', 'gameobject', 'reward'}),
     'balance_spawn': ({'actor', 'entry', 'level'}, {'actor', 'entry', 'level', 'count', 'distance'}),
     'balance_stage': ({'actor', 'stage', 'enemies'}, {'actor', 'stage', 'enemies', 'distance', 'cap_s'}),
+    'balance_white': ({'actor', 'entry', 'level'}, {'actor', 'entry', 'level', 'swings'}),
 }
 
 
@@ -610,6 +614,10 @@ def validate(scenario):
                 number(enemy['entry'], f'{where}.enemies.entry', 1, 2**32 - 1, True)
                 number(enemy['level'], f'{where}.enemies.level', 1, 255, True)
                 number(enemy.get('count', 1), f'{where}.enemies.count', 1, 20, True)
+        if action == 'balance_white':
+            number(step['entry'], f'{where}.entry', 1, 2**32 - 1, True)
+            number(step['level'], f'{where}.level', 1, 255, True)
+            number(step.get('swings', 20), f'{where}.swings', 1, 1000, True)
         if 'actor' in step:
             require(step['actor'] in actor_ids, f'{where}: unknown actor')
             require(action in {'snapshot', 'assert', 'set_health', 'cast', 'attack_owned_creature'}
@@ -896,6 +904,15 @@ def validate(scenario):
                         f'{where}: balance_outcome metric needs a player and a known outcome')
             elif 'outcome' in step:
                 require(False, f'{where}: outcome only applies to balance_outcome')
+            if metric.startswith('balance_white_'):
+                require(step['actor'] in player_ids and step.get('side') in {'received', 'given'},
+                        f'{where}: balance_white metric needs a player and side received or given')
+                if 'pet' in step:
+                    require(type(step['pet']) is bool, f'{where}: pet must be boolean')
+                if 'entry' in step:
+                    number(step['entry'], f'{where}.entry', 1, 2**32 - 1, True)
+            elif 'side' in step:
+                require(False, f'{where}: side only applies to balance_white metrics')
             if metric in {'view_level', 'sent_level', 'sent_max_health', 'sent_faction'}:
                 require(step['actor'] in player_ids and 'target' in step,
                         f'{where}: view metric needs a player and target')
@@ -992,7 +1009,7 @@ def validate(scenario):
                     'client_placing_supersedes_for', 'client_spell_rank_for', 'client_spell_row_restored'}:
                 require('spell' in step, f'{where}: metric needs spell')
             for key in ('pet', 'critical'):
-                if key in step:
+                if key in step and not (key == 'pet' and metric.startswith('balance_white_')):
                     require(metric in {'spell_damage_count', 'spell_damage_total', 'spell_heal_count',
                                        'spell_heal_total', 'spell_effective_heal_total'}
                             or (key == 'pet' and metric in {'spell_go_count', 'spell_energize_count',

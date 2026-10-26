@@ -1152,6 +1152,42 @@ second call (after a `teleport` back to the fight spot, since the first call's c
 from it) checks that the reset actually restored full health (`balance_last_reset_health` against a `max_health`
 snapshot) and that its own outcome does not simply repeat the first call's.
 
+### balance_white
+
+`balance_white` measures a passive white-hit baseline against one `SpawnBalanceEnemies` spawn (`actor`, `entry`,
+`level`; optional `swings`, default 20). Phase A spawns the enemy next to the actor, puts every owned unit
+(`REACT_PASSIVE` plus `UNIT_FLAG_PACIFIED`, teleported to the enemy's spot) and the actor itself out of action
+(the solo driver skips an actor while a `balance_white` call is active for it), then directs the enemy's full
+threat (`ThreatManager::ClearAllThreat`/`AddThreat`) and target at the actor, then at each owned unit in turn,
+until each has taken `swings` swings. Phase B stops and pacifies/roots the enemy
+(`UNIT_FLAG_PACIFIED`/`UNIT_FLAG_DISABLE_MOVE`), restores every owned unit's attack state and lets the actor and
+each owned unit auto-attack it, in parallel, for `swings` swings each; a swing is stopped (and, for an owned
+unit, flagged `UNIT_FLAG_PACIFIED` itself) the instant it reaches `swings`, inside the same packet observation
+that recorded it, so a unit whose own AI keeps re-engaging after the native `AttackStop` cannot land another
+hit. A `UnitScript` damage clamp (`BalanceWhiteGuard`) keeps whichever side is being measured at 1 HP instead of
+letting a swing kill it: `SMSG_ATTACKERSTATEUPDATE` is sent before `Unit::DealDamage` applies the clamp, so the
+recorded swing is never affected by it.
+
+Each `SMSG_ATTACKERSTATEUPDATE` the actor's session observes while active is decoded past the fields
+`melee_attacks_taken` already reads (sub-damage entries, absorb/resist, `TargetState`) into a
+`CoAGameplay::Balance::SwingResult` (dodge/parry take priority, then miss, then block, then crit/glancing/
+crushing, else normal; an evade, immune, interrupt or deflect swing is not counted) and tallied with `AddSwing`,
+keyed by victim for the enemy's own swings (`received`) and by attacker for swings landed on the enemy
+(`given`) — whichever direction the packet's attacker/victim pairing matches the enemy, regardless of the
+call's current phase. The step's record gets a `balance_white` object: `received` and `given`, each a map from
+`player` or `pet:<entry>` to `{swings, normal, crit, glancing, crushing, miss, dodge, parry, block,
+avg_normal_hit, avg_normal_hit_pct_max_health}` (`AverageNormalHit`, zero without a normal hit; the percentage is
+of the victim's own max health for `received`, the enemy's for `given`). A later scenario reads it through
+`balance_white_<field>` metrics (`swings`, `normal`, `crit`, `glancing`, `crushing`, `miss`, `dodge`, `parry`,
+`block`, `avg_normal_hit`, `avg_normal_hit_pct_max_health`), with a required `side` (`received` or `given`) and
+an optional `pet` boolean (default the actor; an optional `entry` picks among several pet types).
+
+[`balance-white-hits`](scenarios/balance-white-hits.json) raises a level 40 Necromancer's Ghoul (`learn`/`cast`
+500971) against a level 36 Scarlet Soldier and checks exactly `swings` landed, both ways, for the player and the
+pet, with a positive average normal hit each way; the Ghoul's own custom AI (`npc_ascension_necromancer`)
+re-picks a target from the owner's attackers every second regardless of `ReactState`, which is why the enemy's
+own target needs the threat-table reset every tick rather than a one-time `AttackStart`.
+
 ### World placement
 
 Placement metrics compare a spawn's stored position (`creature` and `gameobject` rows, as loaded) with the ground

@@ -880,6 +880,12 @@ struct Actor
     std::optional<ObjectGuid> soloTarget;
     Tree lastBalance;
     double lastResetHealth = 0.0;
+    bool balanceWhiteActive = false;
+    uint32 balanceWhiteSwingsTarget = 20;
+    ObjectGuid balanceWhiteEnemy;
+    std::map<ObjectGuid, CoAGameplay::Balance::SwingTally> balanceWhiteReceived;
+    std::map<ObjectGuid, CoAGameplay::Balance::SwingTally> balanceWhiteGiven;
+    Tree lastBalanceWhite;
 };
 
 char const* StageName(ActorStage stage)
@@ -922,6 +928,69 @@ struct BalanceStageState
     std::vector<Target> enemies;
     TimePoint fightStart;
 };
+
+struct BalanceWhiteState
+{
+    enum class Phase : uint8 { Received, Given };
+    Phase phase = Phase::Received;
+    ObjectGuid actor;
+    Target enemy;
+    std::vector<ObjectGuid> victims;
+    std::map<ObjectGuid, ReactStates> ownedOriginalReact;
+    std::size_t victimIndex = 0;
+    uint32 swingsTarget = 20;
+};
+
+std::optional<CoAGameplay::Balance::SwingResult> ClassifyBalanceSwing(uint32 hitInfo, uint8 targetState)
+{
+    using CoAGameplay::Balance::SwingResult;
+    if (targetState == VICTIMSTATE_EVADES || targetState == VICTIMSTATE_IS_IMMUNE ||
+        targetState == VICTIMSTATE_INTERRUPT || targetState == VICTIMSTATE_DEFLECTS)
+        return std::nullopt;
+    if (targetState == VICTIMSTATE_DODGE)
+        return SwingResult::Dodge;
+    if (targetState == VICTIMSTATE_PARRY)
+        return SwingResult::Parry;
+    if (hitInfo & HITINFO_MISS)
+        return SwingResult::Miss;
+    if (hitInfo & HITINFO_BLOCK)
+        return SwingResult::Block;
+    if (hitInfo & HITINFO_CRITICALHIT)
+        return SwingResult::Crit;
+    if (hitInfo & HITINFO_GLANCING)
+        return SwingResult::Glancing;
+    if (hitInfo & HITINFO_CRUSHING)
+        return SwingResult::Crushing;
+    return SwingResult::Normal;
+}
+
+class BalanceWhiteGuard
+{
+public:
+    static void Protect(std::set<ObjectGuid> guids)
+    {
+        _protected = std::move(guids);
+    }
+
+    static void Clear()
+    {
+        _protected.clear();
+    }
+
+    static void OnDamage(Unit* victim, uint32& damage)
+    {
+        if (!victim || !_protected.count(victim->GetGUID()))
+            return;
+        uint32 const health = victim->GetHealth();
+        if (damage >= health)
+            damage = health > 1 ? health - 1 : 0;
+    }
+
+private:
+    static std::set<ObjectGuid> _protected;
+};
+
+std::set<ObjectGuid> BalanceWhiteGuard::_protected;
 
 void ObserveSpellCasts(Actor& actor, WorldPacket const& packet)
 {
@@ -1280,6 +1349,58 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         }
         if (victim == actor.guid)
             ++actor.meleeAttacksTakenFrom[attacker];
+        if (actor.balanceWhiteActive && (attacker == actor.balanceWhiteEnemy || victim == actor.balanceWhiteEnemy))
+        {
+            uint32 overkill;
+            uint8 subCount;
+            response >> overkill >> subCount;
+            for (uint8 index = 0; index < subCount; ++index)
+            {
+                uint32 school;
+                float subDamageFloat;
+                uint32 subDamage;
+                response >> school >> subDamageFloat >> subDamage;
+            }
+            if (hitInfo & (HITINFO_FULL_ABSORB | HITINFO_PARTIAL_ABSORB))
+                for (uint8 index = 0; index < subCount; ++index)
+                {
+                    uint32 absorb;
+                    response >> absorb;
+                }
+            if (hitInfo & (HITINFO_FULL_RESIST | HITINFO_PARTIAL_RESIST))
+                for (uint8 index = 0; index < subCount; ++index)
+                {
+                    uint32 resist;
+                    response >> resist;
+                }
+            uint8 targetState;
+            response >> targetState;
+            std::optional<CoAGameplay::Balance::SwingResult> const result =
+                ClassifyBalanceSwing(hitInfo, targetState);
+            if (result)
+            {
+                Player* balanceWhitePlayer = actor.session ? actor.session->GetPlayer() : nullptr;
+                if (attacker == actor.balanceWhiteEnemy)
+                {
+                    CoAGameplay::Balance::SwingTally& tally = actor.balanceWhiteReceived[victim];
+                    CoAGameplay::Balance::AddSwing(tally, *result, damage);
+                    if (balanceWhitePlayer && tally.swings >= actor.balanceWhiteSwingsTarget)
+                        if (Unit* enemyUnit = ObjectAccessor::GetUnit(*balanceWhitePlayer, actor.balanceWhiteEnemy))
+                            enemyUnit->AttackStop();
+                }
+                if (victim == actor.balanceWhiteEnemy)
+                {
+                    CoAGameplay::Balance::SwingTally& tally = actor.balanceWhiteGiven[attacker];
+                    CoAGameplay::Balance::AddSwing(tally, *result, damage);
+                    if (balanceWhitePlayer && tally.swings >= actor.balanceWhiteSwingsTarget)
+                        if (Unit* attackerUnit = ObjectAccessor::GetUnit(*balanceWhitePlayer, attacker))
+                        {
+                            attackerUnit->AttackStop();
+                            attackerUnit->SetUnitFlag(UNIT_FLAG_PACIFIED);
+                        }
+                }
+            }
+        }
     }
 
     ++actor.packetOrdinal;
@@ -2264,7 +2385,7 @@ public:
     {
         for (auto& [id, actor] : _actors)
         {
-            if (!actor.solo)
+            if (!actor.solo || actor.balanceWhiteActive)
                 continue;
             Player* player = actor.session ? actor.session->GetPlayer() : nullptr;
             if (player && player->IsInWorld() && player->IsAlive() && !player->IsBeingTeleported())
@@ -2283,6 +2404,16 @@ public:
         {
             BalanceAccounting::End(_balanceStage->actor);
             _balanceStage.reset();
+        }
+        if (_balanceWhite)
+        {
+            BalanceWhiteGuard::Clear();
+            if (Map* map = sMapMgr->FindMap(_balanceWhite->enemy.map, _balanceWhite->enemy.instance))
+                if (Creature* enemy = map->GetCreature(_balanceWhite->enemy.guid))
+                    enemy->DespawnOrUnsummon();
+            for (auto& [id, actor] : _actors)
+                actor.balanceWhiteActive = false;
+            _balanceWhite.reset();
         }
         DespawnBalanceStageEnemies();
         std::set<ObjectGuid> units;
@@ -3320,6 +3451,178 @@ private:
         return true;
     }
 
+    static float BalanceWhiteMaxHealthFor(ObjectGuid guid, Player* player)
+    {
+        if (guid == player->GetGUID())
+            return player->GetMaxHealth();
+        if (Unit* unit = ObjectAccessor::GetUnit(*player, guid))
+            return float(unit->GetMaxHealth());
+        return 0.0f;
+    }
+
+    static std::string BalanceWhiteKeyFor(ObjectGuid guid, Player* player)
+    {
+        if (guid == player->GetGUID())
+            return "player";
+        if (Unit* unit = ObjectAccessor::GetUnit(*player, guid))
+            return "pet:" + std::to_string(unit->GetEntry());
+        return "pet:unknown";
+    }
+
+    static Tree BuildBalanceWhiteSide(std::map<ObjectGuid, CoAGameplay::Balance::SwingTally> const& tallies,
+        std::vector<ObjectGuid> const& victims, Player* player, std::optional<float> sharedMaxHealth)
+    {
+        using CoAGameplay::Balance::SwingResult;
+        Tree side;
+        for (ObjectGuid const& guid : victims)
+        {
+            auto const found = tallies.find(guid);
+            CoAGameplay::Balance::SwingTally const tally =
+                found != tallies.end() ? found->second : CoAGameplay::Balance::SwingTally{};
+            Tree entry;
+            entry.put("swings", tally.swings);
+            entry.put("normal", tally.results[std::size_t(SwingResult::Normal)]);
+            entry.put("crit", tally.results[std::size_t(SwingResult::Crit)]);
+            entry.put("glancing", tally.results[std::size_t(SwingResult::Glancing)]);
+            entry.put("crushing", tally.results[std::size_t(SwingResult::Crushing)]);
+            entry.put("miss", tally.results[std::size_t(SwingResult::Miss)]);
+            entry.put("dodge", tally.results[std::size_t(SwingResult::Dodge)]);
+            entry.put("parry", tally.results[std::size_t(SwingResult::Parry)]);
+            entry.put("block", tally.results[std::size_t(SwingResult::Block)]);
+            float const avgNormal = CoAGameplay::Balance::AverageNormalHit(tally);
+            entry.put("avg_normal_hit", avgNormal);
+            float const maxHealth = sharedMaxHealth ? *sharedMaxHealth : BalanceWhiteMaxHealthFor(guid, player);
+            entry.put("avg_normal_hit_pct_max_health", maxHealth > 0.0f ? avgNormal / maxHealth * 100.0f : 0.0f);
+            side.put_child(BalanceWhiteKeyFor(guid, player), entry);
+        }
+        return side;
+    }
+
+    bool AdvanceBalanceWhite(Actor& actor, Player* player, Tree const& step, Tree& record)
+    {
+        if (!_balanceWhite)
+        {
+            BalanceWhiteState state;
+            state.actor = player->GetGUID();
+            state.swingsTarget = step.get<uint32>("swings", 20);
+            state.victims.push_back(player->GetGUID());
+            for (Unit* owned : player->m_Controlled)
+                if (owned && owned->IsAlive() && owned->IsInWorld())
+                    state.victims.push_back(owned->GetGUID());
+
+            Position spot = player->GetPosition();
+            spot.m_positionX += 3.0f;
+            std::vector<ObjectGuid> const spawned =
+                SpawnBalanceEnemies(player, step.get<uint32>("entry"), uint8(step.get<uint32>("level")), 1, spot);
+            Require(spawned.size() == 1, "balance_white needs exactly one spawned enemy");
+            state.enemy = { player->GetMapId(), player->GetInstanceId(), spawned.front() };
+
+            for (ObjectGuid const& guid : state.victims)
+                if (guid != player->GetGUID())
+                    if (Creature* owned = ObjectAccessor::GetCreature(*player, guid))
+                    {
+                        state.ownedOriginalReact[guid] = owned->GetReactState();
+                        owned->SetReactState(REACT_PASSIVE);
+                        owned->SetUnitFlag(UNIT_FLAG_PACIFIED);
+                        owned->NearTeleportTo(spot.GetPositionX(), spot.GetPositionY(), spot.GetPositionZ(),
+                            owned->GetAngle(spot.GetPositionX(), spot.GetPositionY()));
+                    }
+
+            actor.balanceWhiteActive = true;
+            actor.balanceWhiteSwingsTarget = state.swingsTarget;
+            actor.balanceWhiteEnemy = state.enemy.guid;
+            actor.balanceWhiteReceived.clear();
+            actor.balanceWhiteGiven.clear();
+            BalanceWhiteGuard::Protect(std::set<ObjectGuid>(state.victims.begin(), state.victims.end()));
+            _balanceWhite = state;
+            return false;
+        }
+
+        BalanceWhiteState& state = *_balanceWhite;
+        Map* map = sMapMgr->FindMap(state.enemy.map, state.enemy.instance);
+        Creature* enemy = map ? map->GetCreature(state.enemy.guid) : nullptr;
+        Require(enemy != nullptr, "balance_white enemy disappeared");
+
+        if (state.phase == BalanceWhiteState::Phase::Received)
+        {
+            Require(enemy->IsAlive(), "balance_white enemy died while measuring received swings");
+            StopOwnedUnits(player);
+            ObjectGuid const currentVictim = state.victims[state.victimIndex];
+            if (Unit* desired = ObjectAccessor::GetUnit(*player, currentVictim))
+            {
+                ThreatManager& threat = enemy->GetThreatMgr();
+                threat.ClearAllThreat();
+                threat.AddThreat(desired, 1.0f, nullptr, true, true);
+                if (CreatureAI* ai = enemy->AI(); ai && enemy->GetVictim() != desired)
+                    ai->AttackStart(desired);
+            }
+            auto const found = actor.balanceWhiteReceived.find(currentVictim);
+            uint32 const swings = found != actor.balanceWhiteReceived.end() ? found->second.swings : 0;
+            if (swings < state.swingsTarget)
+                return false;
+            ++state.victimIndex;
+            if (state.victimIndex < state.victims.size())
+                return false;
+
+            enemy->AttackStop();
+            enemy->SetUnitFlag(UNIT_FLAG_PACIFIED);
+            enemy->SetUnitFlag(UNIT_FLAG_DISABLE_MOVE);
+            enemy->StopMoving();
+            enemy->GetMotionMaster()->MoveIdle();
+            for (ObjectGuid const& guid : state.victims)
+                if (guid != player->GetGUID())
+                    if (Creature* owned = ObjectAccessor::GetCreature(*player, guid))
+                        owned->RemoveUnitFlag(UNIT_FLAG_PACIFIED);
+            BalanceWhiteGuard::Protect({ state.enemy.guid });
+            KeepInMelee(player, enemy, false);
+            SubmitAttackSwing(player, enemy);
+            CommandOwnedUnitsAttack(player, enemy);
+            state.phase = BalanceWhiteState::Phase::Given;
+            return false;
+        }
+
+        bool allDone = true;
+        for (ObjectGuid const& guid : state.victims)
+        {
+            auto const found = actor.balanceWhiteGiven.find(guid);
+            uint32 const swings = found != actor.balanceWhiteGiven.end() ? found->second.swings : 0;
+            if (swings < state.swingsTarget)
+            {
+                allDone = false;
+                continue;
+            }
+            if (guid == player->GetGUID())
+                player->AttackStop();
+            else if (Unit* owned = ObjectAccessor::GetUnit(*player, guid))
+                owned->AttackStop();
+        }
+        if (!allDone)
+            return false;
+
+        Tree received = BuildBalanceWhiteSide(actor.balanceWhiteReceived, state.victims, player, std::nullopt);
+        Tree given = BuildBalanceWhiteSide(actor.balanceWhiteGiven, state.victims, player,
+            std::optional<float>(float(enemy->GetMaxHealth())));
+        Tree balanceWhite;
+        balanceWhite.put_child("received", received);
+        balanceWhite.put_child("given", given);
+        record.put_child("balance_white", balanceWhite);
+        actor.lastBalanceWhite = balanceWhite;
+
+        BalanceWhiteGuard::Clear();
+        actor.balanceWhiteActive = false;
+        player->RemoveUnitFlag(UNIT_FLAG_PACIFIED);
+        for (auto const& [guid, react] : state.ownedOriginalReact)
+            if (Creature* owned = ObjectAccessor::GetCreature(*player, guid))
+            {
+                owned->SetReactState(react);
+                owned->RemoveUnitFlag(UNIT_FLAG_PACIFIED);
+            }
+        StopOwnedUnits(player);
+        enemy->DespawnOrUnsummon();
+        _balanceWhite.reset();
+        return true;
+    }
+
     double Measure(Tree const& step)
     {
         if (std::string const requested = step.get<std::string>("metric"); requested.starts_with("timeline_"))
@@ -3334,6 +3637,29 @@ private:
         }
         Unit* unit = GetUnit(step.get<std::string>("actor"));
         std::string metric = step.get<std::string>("metric");
+        if (metric.starts_with("balance_white_"))
+        {
+            Actor const& actor = _actors.at(step.get<std::string>("actor"));
+            std::string const field = metric.substr(std::string("balance_white_").size());
+            std::string const side = step.get<std::string>("side");
+            Require(side == "received" || side == "given", "balance_white metric needs a known side");
+            Tree const sideTree = actor.lastBalanceWhite.get_child(side, Tree());
+            std::string key = "player";
+            if (step.get<bool>("pet", false))
+            {
+                key.clear();
+                auto const entry = step.get_optional<uint32>("entry");
+                std::string const wanted = entry ? "pet:" + std::to_string(*entry) : "";
+                for (auto const& [candidateKey, unused] : sideTree)
+                    if (candidateKey.starts_with("pet:") && (wanted.empty() || candidateKey == wanted))
+                    {
+                        key = candidateKey;
+                        break;
+                    }
+                Require(!key.empty(), "balance_white metric found no matching pet");
+            }
+            return sideTree.get<double>(key + "." + field, std::numeric_limits<double>::quiet_NaN());
+        }
         if (metric.starts_with("balance_"))
         {
             Actor const& actor = _actors.at(step.get<std::string>("actor"));
@@ -5886,6 +6212,16 @@ private:
             if (!AdvanceBalanceStage(actor, player, step, record))
                 return;
         }
+        else if (action == "balance_white")
+        {
+            std::string const actorId = step.get<std::string>("actor");
+            Actor& actor = _actors.at(actorId);
+            Player* player = ObjectAccessor::FindPlayer(actor.guid);
+            if (!player || !player->FindMap() || player->IsBeingTeleported())
+                return;
+            if (!AdvanceBalanceWhite(actor, player, step, record))
+                return;
+        }
         else if (action == "relog")
         {
             Actor& actor = _actors.at(step.get<std::string>("actor"));
@@ -7445,6 +7781,7 @@ private:
     std::optional<Target> _encounterBoss;
     std::optional<BalanceStageState> _balanceStage;
     std::vector<Target> _balanceStageEnemies;
+    std::optional<BalanceWhiteState> _balanceWhite;
     QueryCallbackProcessor _queries;
     std::optional<CreatureScaling::TestOverride> _creatureScaling;
     std::optional<AscensionVanityOwnership::TestOverride> _vanityOwnership;
@@ -8289,6 +8626,7 @@ public:
 
     void OnDamage(Unit* attacker, Unit* victim, uint32& damage) override
     {
+        BalanceWhiteGuard::OnDamage(victim, damage);
         BalanceAccounting::OnDamage(attacker, victim, damage);
     }
 
