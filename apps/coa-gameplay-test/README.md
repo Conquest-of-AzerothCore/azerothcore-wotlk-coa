@@ -1102,9 +1102,11 @@ pet/defensive upkeep: `{ "opener": [spell...], "upkeep": [rule...], "defensives"
 `{ "spell", "when" ("always"|"self_aura_missing"|"pet_aura_missing"|"owned_below"|"health_below"), "aura",
 "value", "target" ("self"|"pet"|"enemy") }`. Each tick the actor casts the first `defensives` rule that holds and
 is castable, else the first such `upkeep` rule, else (a `healer` role under 65 percent of its own health) heals
-itself, else drives its rotation: a `tank`/`melee` role repositions into native melee range and faces the target
-(`KeepInMelee`) then swings and casts its rotation on it; a `ranged` role stays in place and casts its rotation
-within 30 yards. `opener` is read but cast only by `balance_stage` (a later scenario action), not by the driver
+itself, else drives its rotation:
+a `tank`/`melee` role repositions into native melee range and faces the target (`KeepInMelee`) then swings and
+casts its rotation on it; a `ranged` role, and a `healer` role at or above 65 percent of its own health, stays in
+place and casts its rotation within 30 yards. `opener` is read but cast only by `balance_stage` (a later scenario
+action), not by the driver
 itself. `StopOwnedUnits` sends every owned unit back to following the player (native `COMMAND_FOLLOW` state and
 `MoveFollow`) and stops its own attack state; nothing in this harness calls it yet, ahead of the staged resets a
 later action adds.

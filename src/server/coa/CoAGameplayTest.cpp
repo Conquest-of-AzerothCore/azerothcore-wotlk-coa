@@ -2162,13 +2162,9 @@ public:
             return;
         if (CastFirstKitRule(actor.kitUpkeep, player, target))
             return;
-        if (actor.raidRole == CoAGameplay::RaidRole::Healer)
+        if (actor.raidRole == CoAGameplay::RaidRole::Healer && player->GetHealthPct() < SoloSelfHealThresholdPct)
         {
-            if (player->GetHealthPct() < SoloSelfHealThresholdPct)
-            {
-                HealLowest(actor, player);
-                return;
-            }
+            HealLowest(actor, player);
             return;
         }
         if (actor.raidRole == CoAGameplay::RaidRole::Tank || actor.raidRole == CoAGameplay::RaidRole::Melee)
@@ -2180,7 +2176,7 @@ public:
             CastRotation(actor, player, target);
             return;
         }
-        if (actor.raidRole == CoAGameplay::RaidRole::Ranged)
+        if (actor.raidRole == CoAGameplay::RaidRole::Ranged || actor.raidRole == CoAGameplay::RaidRole::Healer)
         {
             Creature* enemy = target->ToCreature();
             if (player->IsWithinDistInMap(target, CoAGameplay::RaidRangedDistance) &&
