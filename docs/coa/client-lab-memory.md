@@ -29,8 +29,9 @@ copies must change together when an offset, the guard rule or the client build c
 Refused before any read:
 
 1. the target process maps `Ascension.exe` from under the lab descriptor's `client_dir`;
-2. the descriptor's `slot` is not `1`;
-3. the slot's `worldserver_conf` has `Warden.Enabled = 0`.
+2. the slot's `worldserver_conf` has `Warden.Enabled = 0`.
+
+Any slot qualifies, slot 1 included: it is a development slot like the others since 2026-10-26.
 
 These two descriptor keys, `client_dir` and `worldserver_conf`, are written by the guide's `coa-client-lab
 login ACCOUNT PASSWORD CHARACTER` alongside the existing relay keys. An older descriptor without them makes

@@ -48,7 +48,7 @@ the memory aura array (memory also keeps auras the UI hides, reported as `memory
 errors` must answer through `ERROR_HANDLER_DATABASE` without error.
 
 Guards, refused before any read: the target process maps `Ascension.exe` from under the lab descriptor's
-`client_dir`; the descriptor's `slot` is not 1; the slot's `worldserver_conf` has `Warden.Enabled = 0`. The lab
+`client_dir`; the slot's `worldserver_conf` has `Warden.Enabled = 0`. The lab
 descriptor (`state/lab.json`, written by the guide's `coa-client-lab login`) gained these two keys for this;
 an older descriptor without them makes the memory checks report one `FAIL` line naming the missing keys and
 skip the memory reads, while the relay checks (including `probe errors`) still run.

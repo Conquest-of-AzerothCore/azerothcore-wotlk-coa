@@ -284,13 +284,6 @@ class GuardsTest(unittest.TestCase):
         base.update(overrides)
         return base
 
-    def test_slot_one_is_refused(self):
-        with self.assertRaises(mem.GuardError):
-            mem.check_slot_not_one(self.descriptor(slot=1))
-
-    def test_slot_two_is_accepted(self):
-        mem.check_slot_not_one(self.descriptor())
-
     def test_warden_enabled_is_refused(self):
         conf = self.root / "worldserver.conf"
         conf.write_text("Warden.Enabled = 1\n")

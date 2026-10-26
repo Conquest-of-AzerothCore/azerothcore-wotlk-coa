@@ -87,11 +87,6 @@ def read_cstring(pid: int, addr: int, maxlen: int) -> str:
     return data[: end if end >= 0 else maxlen].decode("latin1", "replace")
 
 
-def check_slot_not_one(descriptor: dict) -> None:
-    if descriptor.get("slot") == 1:
-        raise GuardError("the lab descriptor names slot 1; refusing to read a non-lab slot")
-
-
 def check_warden_disabled(descriptor: dict) -> None:
     conf_path = descriptor.get("worldserver_conf")
     try:
@@ -120,7 +115,6 @@ def _maps_ascension_under(pid: int, client_dir: str, proc_root: Path) -> bool:
 
 
 def find_lab_client_pid(descriptor: dict, proc_root: Path = Path("/proc")) -> int:
-    check_slot_not_one(descriptor)
     check_warden_disabled(descriptor)
     client_dir = descriptor.get("client_dir")
     if not client_dir:
