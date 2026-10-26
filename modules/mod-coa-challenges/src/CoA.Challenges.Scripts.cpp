@@ -2686,6 +2686,12 @@ namespace CoAChallenges
                     uint32 level = 0;
                     if (player)
                     {
+                        if ((challengeID == 211 || challengeID == 425) && AdventureModeChangeBlocked(player))
+                        {
+                            SendActiveList(player);
+                            SendCriteriaState(player);
+                            return false;
+                        }
                         uint32 guid = player->GetGUID().GetCounter();
                         if (QueryResult r = CharacterDatabase.Query(
                                 "SELECT level FROM coa_character_challenge WHERE guid = {} AND challengeId = {}",
@@ -2826,6 +2832,7 @@ namespace CoAChallenges
             };
             static ChatCommandTable coaCommandTable =
             {
+                { "adventure", HandleAdventureLevelCommand, SEC_PLAYER, Console::No },
                 { "trial",     coaActionsTable },
                 { "challenge", coaActionsTable },
                 { "challenges", coaChallengesTable },
@@ -2853,6 +2860,18 @@ namespace CoAChallenges
                 { "coa", coaCommandTable }
             };
             return commandTable;
+        }
+
+        static bool HandleAdventureLevelCommand(ChatHandler* handler, uint32 level)
+        {
+            Player* player = handler->GetPlayer();
+            if (!player || !ChallengesEnabled())
+                return false;
+            for (uint32 challengeID : ActiveChallenges(player->GetGUID().GetCounter()))
+                if (challengeID == 211 || challengeID == 425)
+                    return ActivateChallenge(player, challengeID, level) == 0;
+            handler->SendErrorMessage("You do not have an active Adventure Mode run.");
+            return false;
         }
 
         // .coa <trial|challenge> unlock <id> [player]

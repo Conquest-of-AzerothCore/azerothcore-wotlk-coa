@@ -48,6 +48,8 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_INS_COA_ACCOUNT_CHALLENGE_COMPLETION,
         "INSERT IGNORE INTO coa_account_challenge_completion (account, challengeId, level, completeTime, startTime) "
         "VALUES (?, ?, ?, UNIX_TIMESTAMP(), ?)", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_UPD_COA_ADVENTURE_LEVEL,
+        "UPDATE coa_character_challenge SET level = ? WHERE guid = ? AND challengeId = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_DEL_COA_ACCOUNT_CHALLENGE_COMPLETIONS,
         "DELETE FROM coa_account_challenge_completion WHERE account = ?", CONNECTION_SYNCH);
 
