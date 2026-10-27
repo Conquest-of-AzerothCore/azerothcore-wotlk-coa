@@ -1254,30 +1254,34 @@
       ],
       "13/dps/agility": [
         {
-          "item": 404200,
+          "item": 1542943,
           "slot": 15
         }
       ],
       "13/dps/intellect": [
         {
-          "item": 42947,
-          "slot": 15
-        }
-      ],
-      "13/healer/intellect": [
-        {
-          "item": 42947,
-          "slot": 15
-        }
-      ],
-      "14/dps/agility": [
-        {
-          "item": 400064,
+          "item": 42948,
           "slot": 15
         },
         {
           "item": 1540350,
           "slot": 16
+        }
+      ],
+      "13/healer/intellect": [
+        {
+          "item": 42948,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "14/dps/agility": [
+        {
+          "item": 1542943,
+          "slot": 15
         }
       ],
       "14/dps/intellect": [
@@ -1302,17 +1306,13 @@
       ],
       "15/dps/agility": [
         {
-          "item": 42944,
+          "item": 44092,
           "slot": 15
-        },
-        {
-          "item": 1540350,
-          "slot": 16
         }
       ],
       "15/tank/agility": [
         {
-          "item": 42944,
+          "item": 400064,
           "slot": 15
         },
         {
@@ -1322,19 +1322,27 @@
       ],
       "16/dps/intellect": [
         {
-          "item": 42947,
+          "item": 42948,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "16/dps-support/intellect": [
         {
-          "item": 42947,
+          "item": 42948,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "17/dps/strength": [
         {
-          "item": 42943,
+          "item": 1542943,
           "slot": 15
         }
       ],
@@ -1344,20 +1352,28 @@
           "slot": 15
         },
         {
-          "item": 1540350,
+          "item": 400063,
           "slot": 16
         }
       ],
       "18/dps/strength": [
         {
-          "item": 44092,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "18/dps-support/strength": [
         {
-          "item": 44092,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "18/tank/strength": [
@@ -1372,17 +1388,13 @@
       ],
       "19/dps/agility": [
         {
-          "item": 48716,
+          "item": 1542943,
           "slot": 15
-        },
-        {
-          "item": 1540350,
-          "slot": 16
         }
       ],
       "19/tank/agility": [
         {
-          "item": 48716,
+          "item": 400064,
           "slot": 15
         },
         {
@@ -1392,13 +1404,13 @@
       ],
       "20/dps/agility": [
         {
-          "item": 404200,
+          "item": 1542943,
           "slot": 15
         }
       ],
       "20/dps/intellect": [
         {
-          "item": 44091,
+          "item": 42945,
           "slot": 15
         },
         {
@@ -1408,7 +1420,7 @@
       ],
       "20/healer/intellect": [
         {
-          "item": 44091,
+          "item": 42945,
           "slot": 15
         },
         {
@@ -1418,7 +1430,7 @@
       ],
       "20/tank/agility": [
         {
-          "item": 42944,
+          "item": 400064,
           "slot": 15
         },
         {
@@ -1428,17 +1440,19 @@
       ],
       "21/dps/agility": [
         {
-          "item": 42944,
+          "item": 1542943,
           "slot": 15
-        },
-        {
-          "item": 1540350,
-          "slot": 16
         }
       ],
       "21/dps-support/agility": [
         {
-          "item": 42944,
+          "item": 1542943,
+          "slot": 15
+        }
+      ],
+      "22/dps/intellect": [
+        {
+          "item": 42948,
           "slot": 15
         },
         {
@@ -1446,39 +1460,49 @@
           "slot": 16
         }
       ],
-      "22/dps/intellect": [
-        {
-          "item": 42947,
-          "slot": 15
-        }
-      ],
       "22/healer/intellect": [
         {
-          "item": 42947,
+          "item": 42948,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "23/dps/intellect": [
         {
-          "item": 42947,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "24/dps/intellect": [
         {
-          "item": 42947,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "24/healer/intellect": [
         {
-          "item": 42947,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "25/dps/intellect": [
         {
-          "item": 44091,
+          "item": 42945,
           "slot": 15
         },
         {
@@ -1494,7 +1518,7 @@
       ],
       "25/healer/intellect": [
         {
-          "item": 44091,
+          "item": 42945,
           "slot": 15
         },
         {
@@ -1504,7 +1528,7 @@
       ],
       "25/tank/strength": [
         {
-          "item": 44091,
+          "item": 42945,
           "slot": 15
         },
         {
@@ -1514,44 +1538,68 @@
       ],
       "26/dps/intellect": [
         {
-          "item": 42947,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "26/healer/intellect": [
         {
-          "item": 42947,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "26/tank/intellect": [
         {
-          "item": 42947,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 401883,
+          "slot": 16
         }
       ],
       "27/dps/intellect": [
         {
-          "item": 48718,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "27/dps/strength": [
         {
-          "item": 404195,
+          "item": 1542943,
           "slot": 15
         }
       ],
       "27/healer/intellect": [
         {
-          "item": 48718,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "27/tank/strength": [
         {
-          "item": 404195,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 400063,
+          "slot": 16
         }
       ],
       "28/dps/agility": [
@@ -1572,7 +1620,7 @@
       ],
       "29/dps/intellect": [
         {
-          "item": 44091,
+          "item": 42948,
           "slot": 15
         },
         {
@@ -1582,7 +1630,7 @@
       ],
       "29/healer/intellect": [
         {
-          "item": 44091,
+          "item": 42948,
           "slot": 15
         },
         {
@@ -1592,7 +1640,7 @@
       ],
       "29/tank/agility": [
         {
-          "item": 42944,
+          "item": 48716,
           "slot": 15
         },
         {
@@ -1608,8 +1656,12 @@
       ],
       "30/tank/strength": [
         {
-          "item": 1542943,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "31/dps/intellect": [
@@ -1624,22 +1676,14 @@
       ],
       "31/dps/strength": [
         {
-          "item": 44094,
+          "item": 1542943,
           "slot": 15
-        },
-        {
-          "item": 1540350,
-          "slot": 16
         }
       ],
       "31/dps-support/strength": [
         {
-          "item": 44094,
+          "item": 1542943,
           "slot": 15
-        },
-        {
-          "item": 1540350,
-          "slot": 16
         }
       ],
       "31/tank/strength": [
@@ -1648,7 +1692,7 @@
           "slot": 15
         },
         {
-          "item": 400063,
+          "item": 1540350,
           "slot": 16
         }
       ],
@@ -1660,8 +1704,12 @@
       ],
       "32/dps/intellect": [
         {
-          "item": 1542943,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ]
     },
@@ -1680,30 +1728,34 @@
       ],
       "13/dps/agility": [
         {
-          "item": 404200,
+          "item": 1542943,
           "slot": 15
         }
       ],
       "13/dps/intellect": [
         {
-          "item": 42947,
-          "slot": 15
-        }
-      ],
-      "13/healer/intellect": [
-        {
-          "item": 42947,
-          "slot": 15
-        }
-      ],
-      "14/dps/agility": [
-        {
-          "item": 400064,
+          "item": 42948,
           "slot": 15
         },
         {
           "item": 1540350,
           "slot": 16
+        }
+      ],
+      "13/healer/intellect": [
+        {
+          "item": 42948,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "14/dps/agility": [
+        {
+          "item": 1542943,
+          "slot": 15
         }
       ],
       "14/dps/intellect": [
@@ -1728,17 +1780,13 @@
       ],
       "15/dps/agility": [
         {
-          "item": 42944,
+          "item": 44092,
           "slot": 15
-        },
-        {
-          "item": 1540350,
-          "slot": 16
         }
       ],
       "15/tank/agility": [
         {
-          "item": 42944,
+          "item": 400064,
           "slot": 15
         },
         {
@@ -1748,19 +1796,27 @@
       ],
       "16/dps/intellect": [
         {
-          "item": 42947,
+          "item": 42948,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "16/dps-support/intellect": [
         {
-          "item": 42947,
+          "item": 42948,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "17/dps/strength": [
         {
-          "item": 42943,
+          "item": 1542943,
           "slot": 15
         }
       ],
@@ -1770,20 +1826,28 @@
           "slot": 15
         },
         {
-          "item": 1540350,
+          "item": 400063,
           "slot": 16
         }
       ],
       "18/dps/strength": [
         {
-          "item": 44092,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "18/dps-support/strength": [
         {
-          "item": 44092,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "18/tank/strength": [
@@ -1798,17 +1862,13 @@
       ],
       "19/dps/agility": [
         {
-          "item": 48716,
+          "item": 1542943,
           "slot": 15
-        },
-        {
-          "item": 1540350,
-          "slot": 16
         }
       ],
       "19/tank/agility": [
         {
-          "item": 48716,
+          "item": 400064,
           "slot": 15
         },
         {
@@ -1818,13 +1878,13 @@
       ],
       "20/dps/agility": [
         {
-          "item": 404200,
+          "item": 1542943,
           "slot": 15
         }
       ],
       "20/dps/intellect": [
         {
-          "item": 44091,
+          "item": 42945,
           "slot": 15
         },
         {
@@ -1834,7 +1894,7 @@
       ],
       "20/healer/intellect": [
         {
-          "item": 44091,
+          "item": 42945,
           "slot": 15
         },
         {
@@ -1844,7 +1904,7 @@
       ],
       "20/tank/agility": [
         {
-          "item": 42944,
+          "item": 400064,
           "slot": 15
         },
         {
@@ -1854,17 +1914,19 @@
       ],
       "21/dps/agility": [
         {
-          "item": 42944,
+          "item": 1542943,
           "slot": 15
-        },
-        {
-          "item": 1540350,
-          "slot": 16
         }
       ],
       "21/dps-support/agility": [
         {
-          "item": 42944,
+          "item": 1542943,
+          "slot": 15
+        }
+      ],
+      "22/dps/intellect": [
+        {
+          "item": 42948,
           "slot": 15
         },
         {
@@ -1872,39 +1934,49 @@
           "slot": 16
         }
       ],
-      "22/dps/intellect": [
-        {
-          "item": 42947,
-          "slot": 15
-        }
-      ],
       "22/healer/intellect": [
         {
-          "item": 42947,
+          "item": 42948,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "23/dps/intellect": [
         {
-          "item": 42947,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "24/dps/intellect": [
         {
-          "item": 42947,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "24/healer/intellect": [
         {
-          "item": 42947,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "25/dps/intellect": [
         {
-          "item": 44091,
+          "item": 42945,
           "slot": 15
         },
         {
@@ -1920,7 +1992,7 @@
       ],
       "25/healer/intellect": [
         {
-          "item": 44091,
+          "item": 42945,
           "slot": 15
         },
         {
@@ -1930,7 +2002,7 @@
       ],
       "25/tank/strength": [
         {
-          "item": 44091,
+          "item": 42945,
           "slot": 15
         },
         {
@@ -1940,44 +2012,68 @@
       ],
       "26/dps/intellect": [
         {
-          "item": 42947,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "26/healer/intellect": [
         {
-          "item": 42947,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "26/tank/intellect": [
         {
-          "item": 42947,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 401883,
+          "slot": 16
         }
       ],
       "27/dps/intellect": [
         {
-          "item": 48718,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "27/dps/strength": [
         {
-          "item": 404195,
+          "item": 1542943,
           "slot": 15
         }
       ],
       "27/healer/intellect": [
         {
-          "item": 48718,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "27/tank/strength": [
         {
-          "item": 404195,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 400063,
+          "slot": 16
         }
       ],
       "28/dps/agility": [
@@ -1998,7 +2094,7 @@
       ],
       "29/dps/intellect": [
         {
-          "item": 44091,
+          "item": 42948,
           "slot": 15
         },
         {
@@ -2008,7 +2104,7 @@
       ],
       "29/healer/intellect": [
         {
-          "item": 44091,
+          "item": 42948,
           "slot": 15
         },
         {
@@ -2018,7 +2114,7 @@
       ],
       "29/tank/agility": [
         {
-          "item": 42944,
+          "item": 48716,
           "slot": 15
         },
         {
@@ -2034,8 +2130,12 @@
       ],
       "30/tank/strength": [
         {
-          "item": 1542943,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "31/dps/intellect": [
@@ -2050,22 +2150,14 @@
       ],
       "31/dps/strength": [
         {
-          "item": 44094,
+          "item": 1542943,
           "slot": 15
-        },
-        {
-          "item": 1540350,
-          "slot": 16
         }
       ],
       "31/dps-support/strength": [
         {
-          "item": 44094,
+          "item": 1542943,
           "slot": 15
-        },
-        {
-          "item": 1540350,
-          "slot": 16
         }
       ],
       "31/tank/strength": [
@@ -2074,7 +2166,7 @@
           "slot": 15
         },
         {
-          "item": 400063,
+          "item": 1540350,
           "slot": 16
         }
       ],
@@ -2086,8 +2178,12 @@
       ],
       "32/dps/intellect": [
         {
-          "item": 1542943,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ]
     },
@@ -2106,30 +2202,34 @@
       ],
       "13/dps/agility": [
         {
-          "item": 404200,
+          "item": 1542943,
           "slot": 15
         }
       ],
       "13/dps/intellect": [
         {
-          "item": 42947,
-          "slot": 15
-        }
-      ],
-      "13/healer/intellect": [
-        {
-          "item": 42947,
-          "slot": 15
-        }
-      ],
-      "14/dps/agility": [
-        {
-          "item": 400064,
+          "item": 42948,
           "slot": 15
         },
         {
           "item": 1540350,
           "slot": 16
+        }
+      ],
+      "13/healer/intellect": [
+        {
+          "item": 42948,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "14/dps/agility": [
+        {
+          "item": 1542943,
+          "slot": 15
         }
       ],
       "14/dps/intellect": [
@@ -2154,17 +2254,13 @@
       ],
       "15/dps/agility": [
         {
-          "item": 42944,
+          "item": 44092,
           "slot": 15
-        },
-        {
-          "item": 1540350,
-          "slot": 16
         }
       ],
       "15/tank/agility": [
         {
-          "item": 42944,
+          "item": 400064,
           "slot": 15
         },
         {
@@ -2174,19 +2270,27 @@
       ],
       "16/dps/intellect": [
         {
-          "item": 42947,
+          "item": 42948,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "16/dps-support/intellect": [
         {
-          "item": 42947,
+          "item": 42948,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "17/dps/strength": [
         {
-          "item": 42943,
+          "item": 1542943,
           "slot": 15
         }
       ],
@@ -2196,20 +2300,28 @@
           "slot": 15
         },
         {
-          "item": 1540350,
+          "item": 400063,
           "slot": 16
         }
       ],
       "18/dps/strength": [
         {
-          "item": 44092,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "18/dps-support/strength": [
         {
-          "item": 44092,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "18/tank/strength": [
@@ -2224,17 +2336,13 @@
       ],
       "19/dps/agility": [
         {
-          "item": 48716,
+          "item": 1542943,
           "slot": 15
-        },
-        {
-          "item": 1540350,
-          "slot": 16
         }
       ],
       "19/tank/agility": [
         {
-          "item": 48716,
+          "item": 400064,
           "slot": 15
         },
         {
@@ -2244,13 +2352,13 @@
       ],
       "20/dps/agility": [
         {
-          "item": 404200,
+          "item": 1542943,
           "slot": 15
         }
       ],
       "20/dps/intellect": [
         {
-          "item": 44091,
+          "item": 42945,
           "slot": 15
         },
         {
@@ -2260,7 +2368,7 @@
       ],
       "20/healer/intellect": [
         {
-          "item": 44091,
+          "item": 42945,
           "slot": 15
         },
         {
@@ -2270,7 +2378,7 @@
       ],
       "20/tank/agility": [
         {
-          "item": 42944,
+          "item": 400064,
           "slot": 15
         },
         {
@@ -2280,17 +2388,19 @@
       ],
       "21/dps/agility": [
         {
-          "item": 42944,
+          "item": 1542943,
           "slot": 15
-        },
-        {
-          "item": 1540350,
-          "slot": 16
         }
       ],
       "21/dps-support/agility": [
         {
-          "item": 42944,
+          "item": 1542943,
+          "slot": 15
+        }
+      ],
+      "22/dps/intellect": [
+        {
+          "item": 42948,
           "slot": 15
         },
         {
@@ -2298,39 +2408,49 @@
           "slot": 16
         }
       ],
-      "22/dps/intellect": [
-        {
-          "item": 42947,
-          "slot": 15
-        }
-      ],
       "22/healer/intellect": [
         {
-          "item": 42947,
+          "item": 42948,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "23/dps/intellect": [
         {
-          "item": 42947,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "24/dps/intellect": [
         {
-          "item": 42947,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "24/healer/intellect": [
         {
-          "item": 42947,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "25/dps/intellect": [
         {
-          "item": 44091,
+          "item": 42945,
           "slot": 15
         },
         {
@@ -2346,7 +2466,7 @@
       ],
       "25/healer/intellect": [
         {
-          "item": 44091,
+          "item": 42945,
           "slot": 15
         },
         {
@@ -2356,7 +2476,7 @@
       ],
       "25/tank/strength": [
         {
-          "item": 44091,
+          "item": 42945,
           "slot": 15
         },
         {
@@ -2366,44 +2486,68 @@
       ],
       "26/dps/intellect": [
         {
-          "item": 42947,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "26/healer/intellect": [
         {
-          "item": 42947,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "26/tank/intellect": [
         {
-          "item": 42947,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 401883,
+          "slot": 16
         }
       ],
       "27/dps/intellect": [
         {
-          "item": 48718,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "27/dps/strength": [
         {
-          "item": 404195,
+          "item": 1542943,
           "slot": 15
         }
       ],
       "27/healer/intellect": [
         {
-          "item": 48718,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "27/tank/strength": [
         {
-          "item": 404195,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 400063,
+          "slot": 16
         }
       ],
       "28/dps/agility": [
@@ -2424,7 +2568,7 @@
       ],
       "29/dps/intellect": [
         {
-          "item": 44091,
+          "item": 42948,
           "slot": 15
         },
         {
@@ -2434,7 +2578,7 @@
       ],
       "29/healer/intellect": [
         {
-          "item": 44091,
+          "item": 42948,
           "slot": 15
         },
         {
@@ -2444,7 +2588,7 @@
       ],
       "29/tank/agility": [
         {
-          "item": 42944,
+          "item": 48716,
           "slot": 15
         },
         {
@@ -2460,8 +2604,12 @@
       ],
       "30/tank/strength": [
         {
-          "item": 1542943,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ],
       "31/dps/intellect": [
@@ -2476,22 +2624,14 @@
       ],
       "31/dps/strength": [
         {
-          "item": 44094,
+          "item": 1542943,
           "slot": 15
-        },
-        {
-          "item": 1540350,
-          "slot": 16
         }
       ],
       "31/dps-support/strength": [
         {
-          "item": 44094,
+          "item": 1542943,
           "slot": 15
-        },
-        {
-          "item": 1540350,
-          "slot": 16
         }
       ],
       "31/tank/strength": [
@@ -2500,7 +2640,7 @@
           "slot": 15
         },
         {
-          "item": 400063,
+          "item": 1540350,
           "slot": 16
         }
       ],
@@ -2512,8 +2652,12 @@
       ],
       "32/dps/intellect": [
         {
-          "item": 1542943,
+          "item": 42945,
           "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
         }
       ]
     }

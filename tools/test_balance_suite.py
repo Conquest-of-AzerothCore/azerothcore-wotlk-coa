@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+import re
 import sys
 import tempfile
 import unittest
@@ -233,6 +234,59 @@ class GearTests(unittest.TestCase):
                         failures.append(f'{key} at {level}: weapon {row["item"]} (subclass {row_facts["subclass"]}) '
                                          f'not in {class_id}\'s proficiency {sorted(proficiency)}')
         self.assertEqual(failures, [])
+
+    def test_class_proficiencies_match_live_baseline_header(self):
+        header = (ROOT / 'src/server/coa/AscensionLiveBaselineData.h').read_text(encoding='utf-8')
+        table = re.search(r'Proficiencies\s*=\s*\{\{(.*?)\}\};', header, re.DOTALL)
+        self.assertIsNotNone(table)
+        rows = re.findall(r'\{\s*(\d+)\s*,\s*\d+\s*,\s*(\d+)\s*\}', table.group(1))
+        self.assertTrue(rows)
+        live = {}
+        for class_id, spell in rows:
+            live.setdefault(int(class_id), set()).add(int(spell))
+        by_class = generate_gear.class_proficiencies()
+        skill_to_spell = {name: spell for spell, name in generate_gear.PROFICIENCY_SPELL_SKILL.items()}
+        for class_id, skills in by_class.items():
+            spells = {skill_to_spell[name] for name in skills}
+            self.assertEqual(spells, live[class_id], class_id)
+        self.assertNotIn(202, live[18])
+        self.assertNotIn(9116, live[31])
+
+    def test_weapon_kits_never_use_a_proficiency_absent_from_the_live_baseline_for_any_class(self):
+        catalog = load_catalog()
+        gear = load_gear()
+        facts = load_item_facts()
+        by_class = generate_gear.class_proficiencies()
+        subclass_to_skill = {v: k for k, v in generate_gear.WEAPON_SUBCLASS.items()}
+        shield_subclass = 6
+        triples = {(spec['class_id'], spec['group'], spec['primary_stat']) for spec in catalog['specs']}
+        failures = []
+        for level in ('20', '40', '60'):
+            for class_id, group, stat in triples:
+                key = f'{class_id}/{group}/{stat}'
+                proficiency = by_class[class_id]
+                for row in gear['weapons'][level][key]:
+                    row_facts = facts[row['item']]
+                    if row_facts['class'] == ITEM_CLASS_ARMOR:
+                        if row_facts['subclass'] == shield_subclass and 'Shield' not in proficiency:
+                            failures.append(f'{key} at {level}: shield {row["item"]} without Shield '
+                                             f'proficiency')
+                        continue
+                    skill = subclass_to_skill.get(row_facts['subclass'])
+                    if skill is None or skill not in proficiency:
+                        failures.append(f'{key} at {level}: weapon {row["item"]} (subclass '
+                                         f'{row_facts["subclass"]}) not in {class_id}\'s proficiency '
+                                         f'{sorted(proficiency)}')
+        self.assertEqual(failures, [])
+        for level in ('20', '40', '60'):
+            for key in ('18/dps/strength', '18/dps-support/strength'):
+                items = {row['item'] for row in gear['weapons'][level][key]}
+                self.assertNotIn(44092, items, (key, level))
+            for row in gear['weapons'][level]['31/tank/strength']:
+                row_facts = facts[row['item']]
+                is_shield = row_facts['class'] == ITEM_CLASS_ARMOR and row_facts['subclass'] == shield_subclass
+                self.assertFalse(is_shield, (row, level))
+                self.assertNotEqual(row['item'], 400063, (row, level))
 
     def test_armor_kits_share_the_same_quality_tier_per_slot_per_level(self):
         gear = load_gear()

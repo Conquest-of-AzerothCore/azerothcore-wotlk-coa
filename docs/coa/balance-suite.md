@@ -70,10 +70,22 @@ shows as `error: <message>`; the suite still writes the rest of the table (Task 
 - **New kit** (pet summons/upkeep, defensives): a `KitRule` list (`spell`, `when`
   `always|self_aura_missing|pet_aura_missing|owned_below|health_below`, `aura`, `value`, `target`
   `self|pet|enemy`) under `opener`/`upkeep`/`defensives` — see `src/server/coa/CoAGameplayBalance.h`'s
-  `NextKitRule` and the Necromancer kit in `catalog.json` for the pattern. Only the Necromancer (Animation) has
-  a kit today; every other spec whose spells summon units (for example Tinker Demolition/Mechanics, Primalist
-  Wildwalker, per the design's recon) runs without one, so its stages may show `pets_missing` or weak dps/dtps
-  that reflects the missing kit, not the class.
+  `NextKitRule` and the Necromancer kit in `catalog.json` for the pattern. Three specs have a kit today:
+  Necromancer Animation (`Spell.dbc` 680388 "Fetid Ward" + 500971 "Raise: Ghoul"), Felsworn Infernal (637278
+  "Summon Infernal", `SPELL_EFFECT_SUMMON` creature 610043), and Witch Hunter Houndmaster (801343 "Houndmaster's
+  Whistle", `SPELL_EFFECT_SUMMON_PET` creature 50124). Every other spec whose spells summon units (confirmed
+  in source: Cultist, Tinker, Venomancer, Knight of Xoroth all have a dedicated `Ascension<Class>Summons.cpp`;
+  Primalist has a tamed-beast path in `AscensionPrimalistSpiritBeast.cpp`; Stormbringer has
+  `AscensionStormbringerPet.cpp`'s air elemental) still runs without a kit: the summon-capable ability was found,
+  but which spec learns it and the right upkeep/resummon rule were not confirmed from spell/talent data in the
+  session that added the three kits above, so adding one would have meant guessing. Their stages may show
+  `pets_missing` or weak dps/dtps that reflects the missing kit, not the class.
+
+  The Necromancer ghoul population was previously capped at 1 (`upkeep`'s `owned_below` value), tighter than
+  the server's own `AscensionNecromancer.cpp` `Capacity()` (base 2 minion-capacity points, `Raise: Ghoul`
+  costs 1), so a real player's base 2 ghouls never matched the suite's 1. The opener now casts `Raise: Ghoul`
+  twice and `upkeep`'s `owned_below` is 2, matching `Capacity()`'s base value (no capacity-boosting talent is
+  in the catalog's Animation build, so 2 is the correct ceiling here, not a guess at "several").
 - **New gear tier**: `apps/coa-gameplay-test/balance/gear.json` is generated, not edited by hand — see
   "Full-kit gear generator" below. A new `armor/primary_stat` or `class_id/group/primary_stat` combination
   needs no new gear entry: re-run `generate_gear.py` and it is covered from `item_pool.json`.
@@ -259,22 +271,31 @@ tolerance `GearTests.test_armor_kits_share_the_same_quality_tier_per_slot_per_le
 `ScalingStatDistribution` candidate is additionally filtered to one whose `MaxLevel` covers the level bucket
 (`CanEquipItem` rejects it above that otherwise — see below).
 
-**Weapon mapping is this generator's call, from evidence**: `AscensionCustomClassData.h`'s `ClassProficiencies`
-(cross-checked against `ItemSubClass.dbc` naming, read directly rather than
-assumed) gives each CoA class's actual weapon/armor skills — several classes catalogued as a given armor/stat
-combination do not share the same weapon proficiency (for example `leather/agility/tank` covers both Felsworn,
-which has no Shield proficiency, and a sibling that does), which is why weapons are keyed by class, not by
-`armor/primary_stat`. The rule, uniform across all 54 combinations: an `intellect` spec gets a one-hand weapon
-tagged `intellect` (dagger/mace/sword/axe/fist, in that preference order) plus an off-hand holdable item, or a
-two-hand staff if the class has no one-hand type at all; a `tank` spec gets a one-hand weapon plus a shield if
-the class has Shield proficiency, an off-hand holdable otherwise, or a two-hand weapon if the class has no
-one-hand type; every other (non-tank, non-intellect) spec gets a two-hand weapon (polearm/sword/axe/mace/staff)
-matching its proficiency, falling back to one-hand plus holdable if it has no two-hand type. `playerbots_coa_rotations.sql`
-tags every one of the twelve tank specs "Position: close", including the one `intellect` tank
-(Starcaller/Moon Guard), which is why tanks are not split into a separate caster-tank branch: all twelve use
-the melee weapon branch. `tools/test_balance_suite.py`'s `GearTests.test_weapon_items_match_class_proficiency`
-checks every generated weapon item's subclass against the class's actual proficiency, so a wrong mapping fails
-the harness stage, not only a human reading the table.
+**Weapon mapping is this generator's call, from evidence**: `generate_gear.py` parses
+`src/server/coa/AscensionLiveBaselineData.h`'s `AscensionLiveBaseline::Proficiencies` table directly (regex over
+the header, no build step) to get each CoA class's actual weapon/armor skills, since that is the table
+`AscensionCompat.cpp`'s `AscensionCompatHandler::SynchronizeProficiencies` enforces on every login/spec sync —
+it both grants any proficiency a player is missing and `removeSpell`s one a player holds that it does not list,
+so it overrides whatever `AscensionCustomClassData.h`'s `ClassProficiencies` (or `playercreateinfo_spell_custom`)
+granted at character creation. `TalentProficiencies` (also in `AscensionCustomClassData.h`) adds a few more
+proficiencies, but only while a specific talent is held, and `gear.json` is shared across every spec of a class,
+so those talent-gated entries are not used: only a proficiency every spec of a class keeps unconditionally is
+safe to equip. Several classes catalogued as a given armor/stat combination do not share the same weapon
+proficiency (for example `leather/agility/tank` covers both Felsworn, which has no Shield proficiency, and a
+sibling that does), which is why weapons are keyed by class, not by `armor/primary_stat`. The rule, uniform
+across all 54 combinations: an `intellect` spec gets a one-hand weapon tagged `intellect` (dagger/mace/sword/axe/
+fist, in that preference order) plus an off-hand holdable item, or a two-hand staff if the class has no one-hand
+type at all; a `tank` spec gets a one-hand weapon plus a shield if the class has Shield proficiency, an off-hand
+holdable otherwise, or a two-hand weapon if the class has no one-hand type; every other (non-tank, non-intellect)
+spec gets a two-hand weapon (polearm/sword/axe/mace/staff) matching its proficiency, falling back to one-hand
+plus holdable if it has no two-hand type. `playerbots_coa_rotations.sql` tags every one of the twelve tank specs
+"Position: close", including the one `intellect` tank (Starcaller/Moon Guard), which is why tanks are not split
+into a separate caster-tank branch: all twelve use the melee weapon branch. `tools/test_balance_suite.py`'s
+`GearTests.test_weapon_items_match_class_proficiency` and
+`GearTests.test_class_proficiencies_match_live_baseline_header` check every generated weapon item's subclass
+against the class's actual live-baseline proficiency (the latter re-parses the header independently of
+`generate_gear.py`), so a wrong mapping or a regression back to the creation-time table fails the harness stage,
+not only a human reading the table.
 
 `apps/coa-gameplay-test/balance/item_facts.json` is the subset of `item_pool.json` that `gear.json` actually
 references (`required_level`, `max_level`, `class`, `subclass`, `inventory_type`, `quality`); `GearTests` reads
@@ -306,3 +327,39 @@ equal-budget parity across kits.
 
 A smoke run comparing generated scenarios against `final-run-1` is recorded in
 `.agents/plans/balance-suite/reports/gear-fix-1.md`.
+
+### Weapon proficiency derived from the wrong table (fixed 2026-10-27)
+
+`final-run-2` had 9 "Equipment change rejected: equip error 8" (`EQUIP_ERR_NO_REQUIRED_PROFICIENCY`) failures:
+Guardian dps/dps-support (`18/dps/strength`, `18/dps-support/strength`) and Primalist tank (`31/tank/strength`)
+at all three levels. `generate_gear.py`'s weapon mapping used `AscensionCustomClassData.h`'s
+`ClassProficiencies`, which only reflects what a character is granted at creation. `AscensionCompat.cpp`'s
+`AscensionCompatHandler::SynchronizeProficiencies`, which runs on every login/spec sync, strips any
+proficiency spell not present in `AscensionLiveBaselineData.h`'s `AscensionLiveBaseline::Proficiencies` for the
+player's class — Guardian's creation grant included Sword2H (spell 202), which the live baseline never lists
+for class 18, and Primalist's creation grant included Shield (spell 9116), which the live baseline never lists
+for class 31 — so both were removed from the live character before the fixture ever equipped the item the
+generator picked for it. Full root-cause trace: `.agents/plans/balance-suite/reports/equip-error-8.md`.
+
+`generate_gear.py` now derives `CLASS_PROFICIENCY_SPELLS` by parsing `AscensionLiveBaselineData.h`'s
+`Proficiencies` array directly instead of hard-coding a copy of `ClassProficiencies`, so it cannot drift from
+the table the server actually enforces again. The live baseline grants several classes more weapon types than
+the old creation-time table did (for example class 12's Axe/Sword/Mace/Dagger, present in the live baseline but
+absent from `ClassProficiencies`), so most classes' weapon kits changed, not only Guardian and Primalist's.
+`TalentProficiencies` is still excluded, as before, since it is conditional on holding a specific talent and
+`gear.json` is shared across every spec of a class. `apps/coa-gameplay-test/balance/item_facts.json` was
+regenerated from `item_pool.json` for the resulting set of items `gear.json` references: item 44092 (Sword2H)
+no longer appears (replaced by item 42945, a one-hand Sword, for `18/dps/strength` and
+`18/dps-support/strength`), item 400063 (Shield) no longer appears for `31/tank/strength` (replaced by holdable
+item 1540350), and the wider live-baseline proficiencies elsewhere (for example class 26's `tank/intellect`
+gaining Shield) brought in further new items such as 401883.
+
+`tools/test_balance_suite.py`'s `GearTests.test_class_proficiencies_match_live_baseline_header` independently
+re-parses `AscensionLiveBaselineData.h` (not through `generate_gear.py`) and asserts it matches
+`generate_gear.class_proficiencies()`, and explicitly that spell 202 is absent for class 18 and spell 9116 is
+absent for class 31 in the live baseline — a regression back to the creation-time table fails this test even if
+`generate_gear.py`'s own derivation were also reverted.
+`GearTests.test_weapon_kits_never_use_a_proficiency_absent_from_the_live_baseline_for_any_class` checks every
+weapon/shield item in `gear.json`, for every class/group/stat and level, against that same independently-parsed
+set, and specifically that item 44092 (Sword2H) is never selected for `18/dps/strength` or
+`18/dps-support/strength` and that `31/tank/strength` never carries a shield or item 400063.

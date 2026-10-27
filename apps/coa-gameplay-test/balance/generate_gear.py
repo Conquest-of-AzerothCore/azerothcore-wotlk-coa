@@ -3,21 +3,28 @@ CLI_DESCRIPTION = """Regenerate apps/coa-gameplay-test/balance/gear.json from it
 item_pool.json is a committed snapshot of item_template (class IN (2, 4), ScalingStatDistribution != 0,
 Quality IN (4, 6, 7), AllowableClass=-1, plus a plain-necklace fallback) joined with
 ScalingStatDistribution.dbc's StatMod and MaxLevel, refreshed against the configured world database with
-refresh_item_pool.py. This script is a pure function of that snapshot and of catalog.json; it runs without a
-database or a DBC directory and is deterministic. It excludes any ScalingStatDistribution candidate whose
-MaxLevel is below the level bucket being generated: CanEquipItem rejects such an item above that level
-(Player.cpp), the exact defect a level 60 "Necklace of the Sunken Empire" (ssd MaxLevel 55) hit before this
-check existed.
+refresh_item_pool.py. Weapon/shield proficiency per class is derived from
+src/server/coa/AscensionLiveBaselineData.h's AscensionLiveBaseline::Proficiencies, the table
+AscensionCompatHandler::SynchronizeProficiencies enforces at runtime (talent-gated proficiencies in
+AscensionCustomClassData.h's TalentProficiencies are excluded: gear.json is shared across all specs of a
+class, so only a proficiency every spec keeps is safe to equip). This script is a pure function of that
+snapshot, of catalog.json and of that header; it runs without a database or a DBC directory and is
+deterministic. It excludes any ScalingStatDistribution candidate whose MaxLevel is below the level bucket
+being generated: CanEquipItem rejects such an item above that level (Player.cpp), the exact defect a level 60
+"Necklace of the Sunken Empire" (ssd MaxLevel 55) hit before this check existed.
 """
 
 import argparse
 import json
+import re
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+REPO_ROOT = HERE.parents[2]
 ITEM_POOL_PATH = HERE / "item_pool.json"
 CATALOG_PATH = HERE / "catalog.json"
 GEAR_PATH = HERE / "gear.json"
+LIVE_BASELINE_PATH = REPO_ROOT / "src/server/coa/AscensionLiveBaselineData.h"
 
 LEVELS = (20, 40, 60)
 QUALITY_PRIORITY = (7, 6, 4)
@@ -54,31 +61,22 @@ ARMOR_SLOTS = (
     ("feet", ((8, "material"),), EQUIPMENT_SLOT_FEET),
 )
 
-CLASS_PROFICIENCY_SPELLS = (
-    (12, 197), (12, 200), (12, 2567), (12, 9077), (12, 9078), (12, 15590),
-    (13, 227), (13, 5009), (13, 8737), (13, 9077), (13, 9078), (13, 15590),
-    (14, 201), (14, 9077), (14, 9078),
-    (15, 264), (15, 266), (15, 1180), (15, 5011), (15, 8737), (15, 9077), (15, 9078),
-    (16, 227), (16, 5009), (16, 9078),
-    (17, 197), (17, 201), (17, 750), (17, 8737), (17, 9077), (17, 9078),
-    (18, 201), (18, 202), (18, 264), (18, 266), (18, 750), (18, 2567), (18, 5009), (18, 5011),
-    (18, 8737), (18, 9077), (18, 9078), (18, 9116),
-    (19, 198), (19, 8737), (19, 9077), (19, 9078), (19, 15590),
-    (20, 227), (20, 1180), (20, 5009), (20, 9077), (20, 9078), (20, 15590),
-    (21, 264), (21, 1180), (21, 5011), (21, 9077), (21, 9078),
-    (22, 227), (22, 5009), (22, 9078),
-    (23, 227), (23, 5009), (23, 9078),
-    (24, 227), (24, 5009), (24, 9078),
-    (25, 197), (25, 200), (25, 227), (25, 750), (25, 1180), (25, 5009), (25, 8737), (25, 9077),
-    (25, 9078), (25, 9116),
-    (26, 197), (26, 200), (26, 227), (26, 750), (26, 5009), (26, 8737), (26, 9077), (26, 9078), (26, 9116),
-    (27, 199), (27, 750), (27, 5009), (27, 8737), (27, 9077), (27, 9078), (27, 9116),
-    (28, 198), (28, 200), (28, 266), (28, 8737), (28, 9077), (28, 9078), (28, 9116),
-    (29, 227), (29, 1180), (29, 5009), (29, 8737), (29, 9077), (29, 9078),
-    (30, 197), (30, 200), (30, 750), (30, 2567), (30, 8737), (30, 9077), (30, 9078),
-    (31, 198), (31, 750), (31, 8737), (31, 9077), (31, 9078), (31, 9116), (31, 15590),
-    (32, 197), (32, 199), (32, 200), (32, 202), (32, 5009), (32, 9077), (32, 9078),
-)
+PROFICIENCY_TABLE_PATTERN = re.compile(r"Proficiencies\s*=\s*\{\{(.*?)\}\};", re.DOTALL)
+PROFICIENCY_ROW_PATTERN = re.compile(r"\{\s*(\d+)\s*,\s*\d+\s*,\s*(\d+)\s*\}")
+
+
+def load_class_proficiency_spells(path=LIVE_BASELINE_PATH):
+    text = path.read_text(encoding="utf-8")
+    table = PROFICIENCY_TABLE_PATTERN.search(text)
+    if table is None:
+        raise SystemExit(f"could not find AscensionLiveBaseline::Proficiencies in {path}")
+    rows = PROFICIENCY_ROW_PATTERN.findall(table.group(1))
+    if not rows:
+        raise SystemExit(f"found no proficiency rows in {path}")
+    return tuple((int(class_id), int(spell)) for class_id, spell in rows)
+
+
+CLASS_PROFICIENCY_SPELLS = load_class_proficiency_spells()
 
 PROFICIENCY_SPELL_SKILL = {
     196: "Axe", 197: "Axe2H", 198: "Mace", 199: "Mace2H", 200: "Polearm", 201: "Sword",
