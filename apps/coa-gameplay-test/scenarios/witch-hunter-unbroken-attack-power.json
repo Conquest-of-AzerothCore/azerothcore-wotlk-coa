@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "name": "Witch Hunter: Unbroken grants 20% of maximum health attack power on the first hit and walks it down in tiers",
+  "contract": [
+    "Unbroken 707407 is the passive Witch Hunter talent whose description reads 'Taking damage increases your attack",
+    "power, up to 20% of maximum health. Increased further against Demons and Undead. This degrades slowly over time,",
+    "and while out of combat.' Its three Spell.dbc effects are passive dummy auras (base 325/150/75, misc 5/10/20,",
+    "miscB 10/5/50) and its row carries ProcFlags 0, so the core generated no proc from it and no spell_proc row",
+    "existed: the talent granted no attack power at all.",
+    "The AP buff 707487 is a flat SPELL_AURA_MOD_ATTACK_POWER (99, misc 1) with melee and ranged AP-versus",
+    "effects, so its amount is a flat attack power number, not a percentage. 20% of maximum health is therefore the",
+    "cap the amount is measured against, and the expected amount is a fraction of the holder's maximum health.",
+    "The misc 5/10/20 values are the decay tiers as percentages of that cap and miscB 10/5/50 the ticks each tier",
+    "holds for, so the expected behaviour is: the first qualifying taken hit sets the amount to the whole cap rather",
+    "than accumulating it, further hits hold it at the cap instead of exceeding it, and out of combat the amount",
+    "falls in that tier's percentage of the cap every that tier's ticks, so the walk down is independent of how much",
+    "health the character has. The buff is also reapplied with a 6 s duration on every tick, so it must still be",
+    "present long after the last qualifying hit instead of expiring.",
+    "A control of the same race, class and level without the passive takes the same kind of damage and must never",
+    "gain the buff. The decay walk is asserted as a fraction of maximum health because the cap is 20% of it."
+  ],
+  "timeout_ms": 480000,
+  "players": [
+    {
+      "id": "hunter", "race": 1, "class": 15, "level": 60,
+      "melee_hit_rating": 10000, "expertise_rating": 10000
+    },
+    {
+      "id": "ctl", "race": 1, "class": 15, "level": 60
+    }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "hunter", "entry": 36, "level": 60, "health": 800, "distance": 3 },
+    { "id": "ctl_enemy", "owner": "ctl", "entry": 36, "level": 60, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "hunter", "spell": 201 },
+    { "action": "learn", "actor": "hunter", "spell": 1180 },
+    { "action": "learn", "actor": "hunter", "spell": 674 },
+    { "action": "add_item", "actor": "hunter", "item": 25 },
+    { "action": "equip", "actor": "hunter", "item": 25, "slot": 15 },
+    { "action": "add_item", "actor": "hunter", "item": 2092 },
+    { "action": "equip", "actor": "hunter", "item": 2092, "slot": 16 },
+    { "action": "learn", "actor": "ctl", "spell": 201 },
+    { "action": "learn", "actor": "ctl", "spell": 1180 },
+    { "action": "learn", "actor": "ctl", "spell": 674 },
+    { "action": "add_item", "actor": "ctl", "item": 25 },
+    { "action": "equip", "actor": "ctl", "item": 25, "slot": 15 },
+    { "action": "add_item", "actor": "ctl", "item": 2092 },
+    { "action": "equip", "actor": "ctl", "item": 2092, "slot": 16 },
+    { "action": "learn", "actor": "hunter", "spell": 707407, "label": "Learn Unbroken" },
+    {
+      "action": "assert", "label": "The talent grants the Unbroken passive", "actor": "hunter",
+      "metric": "aura", "spell": 707407, "equals": 1
+    },
+    { "action": "snapshot", "actor": "hunter", "metric": "max_health", "save_as": "hp" },
+    { "action": "snapshot", "actor": "ctl", "metric": "max_health", "save_as": "ctl_hp" },
+    {
+      "action": "assert", "label": "SETUP: the control has the same maximum health", "actor": "ctl",
+      "metric": "max_health", "ratio_to": "ctl_hp", "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: no attack power buff before taking damage", "actor": "hunter",
+      "metric": "aura", "spell": 707487, "equals": 0
+    },
+    { "action": "attack", "actor": "hunter", "target": "enemy" },
+    { "action": "attack", "actor": "ctl", "target": "ctl_enemy" },
+    {
+      "action": "assert", "label": "SETUP: the hunter's auto attacks land", "actor": "hunter",
+      "metric": "melee_damage_count", "min": 1, "within_ms": 10000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the first hit taken already grants the whole 20% cap", "actor": "hunter",
+      "metric": "aura_amount", "spell": 707487, "effect": 0, "ratio_to": "hp", "min": 0.199, "max": 0.201,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert", "label": "The control gains no attack power buff while taking the same damage",
+      "actor": "ctl", "metric": "aura", "spell": 707487, "equals": 0
+    },
+    { "action": "wait", "label": "Stay in combat so further procs land", "ms": 6000 },
+    {
+      "action": "assert", "label": "Further procs hold the cap instead of exceeding it", "actor": "hunter",
+      "metric": "aura_amount", "spell": 707487, "effect": 0, "ratio_to": "hp", "min": 0.199, "max": 0.201
+    },
+    {
+      "action": "assert", "label": "SETUP: the enemy dies, so no further hit keeps the buff at the cap",
+      "actor": "enemy", "metric": "alive", "equals": 0, "within_ms": 40000
+    },
+    {
+      "action": "assert", "label": "The hunter leaves combat, so the decay can run", "actor": "hunter",
+      "metric": "combat", "equals": 0, "within_ms": 30000
+    },
+    { "action": "wait", "label": "Pass the buff's own 6 s duration with no qualifying hit", "ms": 9000 },
+    {
+      "action": "assert", "label": "The buff is still present past its duration, so every tick refreshes it",
+      "actor": "hunter", "metric": "aura", "spell": 707487, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The first decay tier has not elapsed yet", "actor": "hunter",
+      "metric": "aura_amount", "spell": 707487, "effect": 0, "ratio_to": "hp", "min": 0.199, "max": 0.201
+    },
+    {
+      "action": "assert", "label": "The first tier drops the amount by 20% of the cap, to 16% of maximum health",
+      "actor": "hunter", "metric": "aura_amount", "spell": 707487, "effect": 0, "ratio_to": "hp",
+      "min": 0.159, "max": 0.161, "within_ms": 70000
+    },
+    {
+      "action": "assert", "label": "The second tier drops it to 12% of maximum health", "actor": "hunter",
+      "metric": "aura_amount", "spell": 707487, "effect": 0, "ratio_to": "hp",
+      "min": 0.119, "max": 0.121, "within_ms": 70000
+    },
+    {
+      "action": "assert", "label": "The walk down reaches zero and the buff is removed", "actor": "hunter",
+      "metric": "aura", "spell": 707487, "equals": 0, "within_ms": 200000
+    }
+  ]
+}

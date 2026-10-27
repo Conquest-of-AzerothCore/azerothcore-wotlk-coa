@@ -28,6 +28,144 @@ void Tracking(Player* player, bool night)
     player->SetUInt32Value(PLAYER_TRACK_CREATURES, tracking);
 }
 
+constexpr uint32 SPELL_UNBROKEN = 707407;
+constexpr uint32 SPELL_UNBROKEN_BUFF = 707487;
+constexpr int32 UNBROKEN_AP_PERCENT = 20;
+constexpr int32 UNBROKEN_TICK = 1000;
+constexpr int32 UNBROKEN_BUFF_DURATION = 6000;
+
+struct UnbrokenDecay
+{
+    int32 percent;
+    uint32 ticks;
+};
+constexpr std::array<UnbrokenDecay, 3> UNBROKEN_DECAY = {{{20, 50}, {10, 5}, {5, 10}}};
+
+class aura_ascension_witch_hunter_unbroken : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_witch_hunter_unbroken);
+    int32 _amount = 0;
+    uint32 _ticks = 0;
+
+    bool First(AuraEffect const* effect) const
+    {
+        for (uint8 i = 0; i < effect->GetEffIndex(); ++i)
+            if (GetEffect(i))
+                return false;
+        return true;
+    }
+
+    int32 Cap() const
+    {
+        Unit* owner = GetUnitOwner();
+        return owner ? int32(owner->GetMaxHealth() * UNBROKEN_AP_PERCENT / 100) : 0;
+    }
+
+    void Refresh(Unit* owner, int32 amount)
+    {
+        if (!owner)
+            return;
+        if (amount <= 0)
+        {
+            owner->RemoveAurasDueToSpell(SPELL_UNBROKEN_BUFF);
+            return;
+        }
+        CustomSpellValues values;
+        values.AddSpellMod(SPELLVALUE_BASE_POINT0, amount);
+        values.AddSpellMod(SPELLVALUE_BASE_POINT1, amount);
+        values.AddSpellMod(SPELLVALUE_AURA_DURATION, UNBROKEN_BUFF_DURATION);
+        Unit* caster = GetCaster() ? GetCaster() : owner;
+        caster->CastCustomSpell(SPELL_UNBROKEN_BUFF, values, owner, TRIGGERED_FULL_MASK);
+    }
+
+    bool Validate(SpellInfo const* spellInfo) override
+    {
+        std::array<int32, 3> misc = {5, 10, 20};
+        if (!spellInfo || spellInfo->Id != SPELL_UNBROKEN || spellInfo->ProcFlags || !spellInfo->IsPassive() ||
+            spellInfo->SpellFamilyName != uint32(CLASS_WITCH_HUNTER) + 6)
+            return false;
+        for (uint8 i = EFFECT_0; i <= EFFECT_2; ++i)
+            if (!spellInfo->Effects[i].IsAura(SPELL_AURA_DUMMY) ||
+                spellInfo->Effects[i].MiscValue != misc[i - EFFECT_0])
+                return false;
+        return ValidateSpellInfo({SPELL_UNBROKEN_BUFF});
+    }
+
+    void Apply(AuraEffect const* effect, AuraEffectHandleModes)
+    {
+        if (!First(effect))
+            return;
+        _amount = 0;
+        _ticks = 0;
+        GetTarget()->RemoveAurasDueToSpell(SPELL_UNBROKEN_BUFF);
+    }
+
+    void Periodic(AuraEffect const* effect, bool& periodic, int32& amplitude)
+    {
+        if (!First(effect))
+            return;
+        periodic = true;
+        amplitude = UNBROKEN_TICK;
+    }
+
+    void Tick(AuraEffect const* effect)
+    {
+        if (!First(effect))
+            return;
+        PreventDefaultAction();
+        Unit* owner = GetTarget();
+        if (!owner || !owner->IsAlive() || _amount <= 0)
+            return;
+        int32 cap = Cap();
+        int32 percent = cap > 0 ? _amount * 100 / cap : 0;
+        UnbrokenDecay const* decay = &UNBROKEN_DECAY.back();
+        for (UnbrokenDecay const& row : UNBROKEN_DECAY)
+            if (percent >= row.percent)
+            {
+                decay = &row;
+                break;
+            }
+        if (++_ticks >= decay->ticks)
+        {
+            _ticks = 0;
+            _amount = std::max(0, _amount - cap * decay->percent / 100);
+        }
+        Refresh(owner, _amount);
+    }
+
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        DamageInfo const* damage = eventInfo.GetDamageInfo();
+        Unit* owner = GetUnitOwner();
+        return owner && damage && damage->GetDamage() && damage->GetVictim() == owner && damage->GetAttacker() &&
+            damage->GetAttacker() != owner && !(eventInfo.GetTypeMask() & PROC_FLAG_TAKEN_PERIODIC);
+    }
+
+    void Proc(ProcEventInfo&)
+    {
+        PreventDefaultAction();
+        Unit* owner = GetUnitOwner();
+        int32 cap = Cap();
+        if (!owner || !owner->IsAlive() || cap <= 0)
+            return;
+        _amount = cap;
+        _ticks = 0;
+        Refresh(owner, _amount);
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(aura_ascension_witch_hunter_unbroken::Apply, EFFECT_ALL,
+            SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+        DoEffectCalcPeriodic += AuraEffectCalcPeriodicFn(aura_ascension_witch_hunter_unbroken::Periodic, EFFECT_ALL,
+            SPELL_AURA_DUMMY);
+        OnEffectPeriodic +=
+            AuraEffectPeriodicFn(aura_ascension_witch_hunter_unbroken::Tick, EFFECT_ALL, SPELL_AURA_DUMMY);
+        DoCheckProc += AuraCheckProcFn(aura_ascension_witch_hunter_unbroken::CheckProc);
+        OnProc += AuraProcFn(aura_ascension_witch_hunter_unbroken::Proc);
+    }
+};
+
 class aura_ascension_witch_hunter_lifecycle : public AuraScript
 {
     PrepareAuraScript(aura_ascension_witch_hunter_lifecycle);
@@ -451,5 +589,6 @@ class witch_hunter_state : public UnitScript
 void AddAscensionWitchHunterDefenseScripts()
 {
     new witch_hunter_state();
+    RegisterSpellScript(aura_ascension_witch_hunter_unbroken);
     RegisterSpellScript(aura_ascension_witch_hunter_lifecycle);
 }
