@@ -939,6 +939,7 @@ struct BalanceWhiteState
     std::map<ObjectGuid, ReactStates> ownedOriginalReact;
     std::size_t victimIndex = 0;
     uint32 swingsTarget = 20;
+    std::set<ObjectGuid> guardedGuids;
 };
 
 std::optional<CoAGameplay::Balance::SwingResult> ClassifyBalanceSwing(uint32 hitInfo, uint8 targetState)
@@ -967,14 +968,20 @@ std::optional<CoAGameplay::Balance::SwingResult> ClassifyBalanceSwing(uint32 hit
 class BalanceWhiteGuard
 {
 public:
-    static void Protect(std::set<ObjectGuid> guids)
+    static void Protect(std::set<ObjectGuid> const& guids)
     {
-        _protected = std::move(guids);
+        for (ObjectGuid const& guid : guids)
+            ++_protected[guid];
     }
 
-    static void Clear()
+    static void Unprotect(std::set<ObjectGuid> const& guids)
     {
-        _protected.clear();
+        for (ObjectGuid const& guid : guids)
+            if (auto const it = _protected.find(guid); it != _protected.end())
+            {
+                if (--it->second == 0)
+                    _protected.erase(it);
+            }
     }
 
     static void OnDamage(Unit* victim, uint32& damage)
@@ -987,10 +994,10 @@ public:
     }
 
 private:
-    static std::set<ObjectGuid> _protected;
+    static std::map<ObjectGuid, uint32> _protected;
 };
 
-std::set<ObjectGuid> BalanceWhiteGuard::_protected;
+std::map<ObjectGuid, uint32> BalanceWhiteGuard::_protected;
 
 void ObserveSpellCasts(Actor& actor, WorldPacket const& packet)
 {
@@ -2407,7 +2414,7 @@ public:
         }
         if (_balanceWhite)
         {
-            BalanceWhiteGuard::Clear();
+            BalanceWhiteGuard::Unprotect(_balanceWhite->guardedGuids);
             if (Map* map = sMapMgr->FindMap(_balanceWhite->enemy.map, _balanceWhite->enemy.instance))
                 if (Creature* enemy = map->GetCreature(_balanceWhite->enemy.guid))
                     enemy->DespawnOrUnsummon();
@@ -3533,7 +3540,8 @@ private:
             actor.balanceWhiteEnemy = state.enemy.guid;
             actor.balanceWhiteReceived.clear();
             actor.balanceWhiteGiven.clear();
-            BalanceWhiteGuard::Protect(std::set<ObjectGuid>(state.victims.begin(), state.victims.end()));
+            state.guardedGuids = std::set<ObjectGuid>(state.victims.begin(), state.victims.end());
+            BalanceWhiteGuard::Protect(state.guardedGuids);
             _balanceWhite = state;
             return false;
         }
@@ -3542,6 +3550,7 @@ private:
         Map* map = sMapMgr->FindMap(state.enemy.map, state.enemy.instance);
         Creature* enemy = map ? map->GetCreature(state.enemy.guid) : nullptr;
         Require(enemy != nullptr, "balance_white enemy disappeared");
+        Require(player->IsAlive(), "balance_white actor died while measuring swings");
 
         if (state.phase == BalanceWhiteState::Phase::Received)
         {
@@ -3573,7 +3582,9 @@ private:
                 if (guid != player->GetGUID())
                     if (Creature* owned = ObjectAccessor::GetCreature(*player, guid))
                         owned->RemoveUnitFlag(UNIT_FLAG_PACIFIED);
-            BalanceWhiteGuard::Protect({ state.enemy.guid });
+            BalanceWhiteGuard::Unprotect(state.guardedGuids);
+            state.guardedGuids = { state.enemy.guid };
+            BalanceWhiteGuard::Protect(state.guardedGuids);
             KeepInMelee(player, enemy, false);
             SubmitAttackSwing(player, enemy);
             CommandOwnedUnitsAttack(player, enemy);
@@ -3608,7 +3619,8 @@ private:
         record.put_child("balance_white", balanceWhite);
         actor.lastBalanceWhite = balanceWhite;
 
-        BalanceWhiteGuard::Clear();
+        BalanceWhiteGuard::Unprotect(state.guardedGuids);
+        state.guardedGuids.clear();
         actor.balanceWhiteActive = false;
         player->RemoveUnitFlag(UNIT_FLAG_PACIFIED);
         for (auto const& [guid, react] : state.ownedOriginalReact)
