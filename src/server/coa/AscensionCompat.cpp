@@ -9557,6 +9557,9 @@ public:
                 case 40120:
                     spellInfo->AttributesEx4 |= SPELL_ATTR4_ONLY_FLYING_AREAS;
                     break;
+                case 256779:
+                    spellInfo->AttributesEx5 |= SPELL_ATTR5_AI_DOESNT_FACE_TARGET;
+                    break;
                 case 83086:
                 case 9930889:
                     spellInfo->AttributesEx6 |= SPELL_ATTR6_NOT_IN_RAID_INSTANCES;
