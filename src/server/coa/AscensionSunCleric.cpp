@@ -280,11 +280,11 @@ void ActivateDawn(Player* player)
                 Cast(player, player, helper);
     Refresh(player);
 }
-void Fulfill(Player* player, Spell* spell, Unit* target)
+void Fulfill(Player* player, Spell* spell, Spell* guard, Unit* target)
 {
-    if (!spell || !spell->GetScriptValue(Dawn) || spell->GetScriptValue(807441))
+    if (!spell || !guard || !spell->GetScriptValue(Dawn) || guard->GetScriptValue(807441))
         return;
-    spell->SetScriptValue(807441, 1);
+    guard->SetScriptValue(807441, 1);
     if (player->HasAura(805581))
         Reduce(player, 500154, std::abs(Amount(807445)));
     if (player->HasAura(680622))

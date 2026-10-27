@@ -126,7 +126,8 @@ class aura_ascension_sun_cleric_event : public AuraScript
             return;
         uint32 id = GetId();
         auto* info = event.GetSpellInfo();
-        Spell* spell = Origin(player,const_cast<Spell*>(event.GetProcSpell()));
+        Spell* raw = const_cast<Spell*>(event.GetProcSpell());
+        Spell* spell = Origin(player,raw);
         uint32 damage = event.GetDamageInfo() ? event.GetDamageInfo()->GetDamage() : 0;
         uint32 healing = event.GetHealInfo() ? event.GetHealInfo()->GetEffectiveHeal() : 0;
         Unit* target = event.GetActionTarget();
@@ -141,7 +142,7 @@ class aura_ascension_sun_cleric_event : public AuraScript
             bool automatic = event.GetTypeMask() & PROC_FLAG_DONE_MELEE_AUTO_ATTACK;
             bool compatible = id != 807749 || !automatic;
             if (fulfillment && compatible)
-                Fulfill(player, spell, target);
+                Fulfill(player, spell, raw && raw->GetSpellInfo()->Id == 805639 ? raw : spell, target);
             if (!State(player).dawnEvent)
             {
                 int32 gain = (id == 803489) ? 2 : (id == 803719 || (id == 807749 && !automatic)) ? 0 : 1;

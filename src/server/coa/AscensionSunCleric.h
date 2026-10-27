@@ -63,7 +63,7 @@ void SetAmount(Player* player, uint32 id, uint8 slot, int32 amount);
 void Extend(Player* player, uint32 id, int32 milliseconds);
 void StackWithoutRefresh(Player* player, uint32 id);
 void ActivateDawn(Player* player);
-void Fulfill(Player* player, Spell* spell, Unit* target);
+void Fulfill(Player* player, Spell* spell, Spell* guard, Unit* target);
 void Eclipse(Player* player, Unit* target, uint32 amount);
 void ReleaseSuncharge(Player* player, Unit* target, uint32 stacks);
 bool Daytime();
