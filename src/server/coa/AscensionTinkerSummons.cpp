@@ -184,6 +184,7 @@ void Summon(Player* player, Unit* target, uint32 spell, Position const* destinat
             player->MovePositionToFirstCollision(position,1 + n * 1.5f,0);
         if (TempSummon* device = player->SummonCreature(entry,position,TEMPSUMMON_TIMED_DESPAWN,duration,0,properties))
         {
+            device->SetOwnerGUID(player->GetGUID());
             device->AI()->SetData(1,spell);
             if (target)
                 device->AI()->SetGUID(target->GetGUID(),1);
