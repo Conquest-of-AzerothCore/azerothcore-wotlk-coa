@@ -322,6 +322,7 @@ void AddSC_AscensionStormbringerSurge();
 void AddSC_AscensionStormbringerIonicAura();
 void AddSC_AscensionBloodmageSecondary();
 void AddSC_AscensionBloodmageHemostasis();
+void AddSC_AscensionBloodmageDarkwing();
 void AddSC_AscensionRangerSecondary();
 void AddSC_AscensionRangerDirtyFighter();
 void AddSC_AscensionRangerDeadeye();
@@ -614,6 +615,7 @@ void AddCoAScripts()
     AddSC_AscensionStormbringerIonicAura();
     AddSC_AscensionBloodmageSecondary();
     AddSC_AscensionBloodmageHemostasis();
+    AddSC_AscensionBloodmageDarkwing();
     AddSC_AscensionRangerSecondary();
     AddSC_AscensionRangerDirtyFighter();
     AddSC_AscensionRangerDeadeye();
