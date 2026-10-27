@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric Sun-Touched Armor adds armor from Strength as well as Intellect (#7357)",
+  "contract": [
+    "Sun-Touched Armor 561023 tooltip: 'Increases your Armor by $s2% of your Strength and Intellect...'. Effect 0",
+    "is SPELL_AURA_MOD_RESISTANCE_OF_STAT_PERCENT (182) MiscValueB=0 (Strength), Effect 1 is the same aura type",
+    "MiscValueB=3 (Intellect), both EffectBasePoints=249. Player::UpdateArmor() (inherited engine code,",
+    "src/server/game/Entities/Unit/StatSystem.cpp) sums CalculatePct(GetStat(MiscValueB), GetAmount()) for every",
+    "SPELL_AURA_MOD_RESISTANCE_OF_STAT_PERCENT aura whose MiscValue matches Normal armor, with no CoA script",
+    "touching effect 0 or 1 (AscensionSunClericAuras.cpp only overrides effect index 2, the shield-health term).",
+    "The reporter believed Armor only responds to Intellect; Juju Power (16323, a stock single-effect",
+    "'+30 Strength' elixir aura, independent of this spell) isolates the Strength term: Armor must rise by",
+    "CalculatePct(30, 249) = 74.7 (~70-85 after float accumulation and rounding) purely from a Strength-only",
+    "change, with no Intellect change at all."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and stat updates settle", "ms": 3000 },
+    { "action": "learn", "actor": "cleric", "spell": 561023 },
+    {
+      "action": "assert", "label": "SETUP: Sun-Touched Armor is applied", "actor": "cleric",
+      "metric": "aura", "spell": 561023, "equals": 1, "within_ms": 2000
+    },
+    { "action": "snapshot", "actor": "cleric", "metric": "stat", "stat": 3, "save_as": "intellect0" },
+    { "action": "snapshot", "actor": "cleric", "metric": "stat", "stat": 0, "save_as": "strength0" },
+    { "action": "snapshot", "actor": "cleric", "metric": "armor", "save_as": "armor0" },
+    { "action": "set_aura", "label": "Juju Power: a stock, Strength-only +30 buff", "actor": "cleric", "spell": 16323, "stacks": 1 },
+    {
+      "action": "assert", "label": "SETUP: Strength rose by exactly 30, nothing else", "actor": "cleric",
+      "metric": "stat", "stat": 0, "relative_to": "strength0", "equals": 30, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: Intellect is unchanged", "actor": "cleric",
+      "metric": "stat", "stat": 3, "relative_to": "intellect0", "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Armor rises from the Strength-only buff, not only from Intellect",
+      "actor": "cleric", "metric": "armor", "relative_to": "armor0", "min": 60, "max": 90
+    },
+    { "action": "set_aura", "actor": "cleric", "spell": 16323, "stacks": 0 },
+    {
+      "action": "assert", "label": "Removing the Strength buff restores the original Armor", "actor": "cleric",
+      "metric": "armor", "relative_to": "armor0", "equals": 0, "within_ms": 2000
+    }
+  ]
+}

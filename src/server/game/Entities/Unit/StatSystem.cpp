@@ -162,6 +162,7 @@ bool Player::UpdateStats(Stats stat)
     {
         case STAT_STRENGTH:
             UpdateShieldBlockValue();
+            UpdateArmor();                                  //SPELL_AURA_MOD_RESISTANCE_OF_STAT_PERCENT, strength term
             break;
         case STAT_AGILITY:
             UpdateArmor();
