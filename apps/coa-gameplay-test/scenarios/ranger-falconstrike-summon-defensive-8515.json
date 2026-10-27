@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "name": "Ranger Falconstrike summons a defensive War Falcon instead of an aggressive one (#8515)",
+  "contract": [
+    "Falconstrike Summon 520588 (triggered by Falconstrike's effect 1 through 520587) summons a War Falcon (creature 50393) as a Guardian. Every Guardian leaves Guardian::InitStats with REACT_AGGRESSIVE, so PetAI::UpdateAI lets it SelectNextTarget on its own and attack any hostile nearby, chain-pulling instead of only assisting the Ranger.",
+    "The fix sets the Falconstrike falcon's react state to REACT_DEFENSIVE through the new ALLSPELLHOOK_ON_GUARDIAN_SUMMONED hook fired from Spell::SummonGuardian, scoped to spell 520588 only: a defensive pet only takes a target through AttackedBy/OwnerAttacked, never on its own.",
+    "A level 60 Ranger equips bow 3036 and learns the 573060 passive that grants Falconstrike, as in ranger-falconstrike-falcons-call-cooldown-7617.json. Falconstrike is cast on 'enemy'; a second hostile 'bystander' stands far enough away that Falconstrike's own hit never reaches it and is never attacked by anyone else either. The War Falcon must leave 'bystander' alone for the whole observation window."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 60,
+      "ranged_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "ranger", "entry": 36, "level": 60, "health": 1000000, "distance": 10, "faction": 14, "reaction": 0, "stationary": true },
+    { "id": "bystander", "owner": "ranger", "entry": 36, "level": 60, "health": 1000000, "distance": 40, "faction": 14, "reaction": 0, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "add_item", "actor": "ranger", "item": 3036 },
+    { "action": "equip", "actor": "ranger", "item": 3036, "slot": 17 },
+    { "action": "learn", "actor": "ranger", "spell": 573060 },
+    { "action": "learn", "actor": "ranger", "spell": 806360 },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 100 },
+    { "action": "cast", "label": "A Horn cast prepares Falconstrike", "actor": "ranger", "spell": 806360 },
+    { "action": "assert", "actor": "ranger", "metric": "cast_failure", "spell": 806360, "equals": 0 },
+    { "action": "wait", "ms": 1500 },
+    {
+      "action": "assert", "label": "SETUP: the Horn readied the rank 8 Falconstrike", "actor": "ranger",
+      "metric": "knows_spell", "spell": 806443, "equals": 1, "within_ms": 2000
+    },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 100 },
+    { "action": "cast", "label": "Falconstrike on the Ranger's own target", "actor": "ranger", "spell": 806443, "target": "enemy" },
+    { "action": "assert", "actor": "ranger", "metric": "cast_failure", "spell": 806443, "equals": 0 },
+    {
+      "action": "assert", "label": "SETUP: Falconstrike fired its summon helper", "actor": "ranger",
+      "metric": "spell_cast_count", "spell": 520588, "min": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: a War Falcon is out", "actor": "ranger",
+      "metric": "owned_creature_count", "entry": 50393, "min": 1, "within_ms": 3000
+    },
+    { "action": "snapshot", "actor": "bystander", "metric": "health", "save_as": "bystander_before" },
+    { "action": "wait", "label": "Let the falcon act on its own for a while", "ms": 1500 },
+    {
+      "action": "assert", "label": "The falcon never targets the unprovoked bystander", "actor": "ranger",
+      "metric": "owned_creature_victim", "entry": 50393, "target": "bystander", "equals": 0
+    },
+    {
+      "action": "assert", "label": "The bystander takes no damage", "actor": "bystander",
+      "metric": "health", "relative_to": "bystander_before", "equals": 0
+    }
+  ]
+}

@@ -728,6 +728,7 @@ public: /* SpellSC */
     void OnSpellSuccessfulSteal(Spell* spell, Unit* target, uint32 count);
     void OnSpellSuccessfulDispel(Spell* spell, Unit* target, SpellEffIndex effect, uint32 count);
     void OnSpellCritChance(Spell* spell, Unit* target, float& chance);
+    void OnGuardianSummoned(Spell* spell, TempSummon* summon);
 
 public: /* GameEventScript */
     void OnGameEventStart(uint16 EventID);

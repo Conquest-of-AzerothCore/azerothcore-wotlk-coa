@@ -46,11 +46,13 @@ enum AllSpellHook
     ALLSPELLHOOK_ON_CRIT_CHANCE,
     ALLSPELLHOOK_ON_INTERRUPT_DURATION,
     ALLSPELLHOOK_ON_SUCCESSFUL_DISPEL,
+    ALLSPELLHOOK_ON_GUARDIAN_SUMMONED,
     ALLSPELLHOOK_END
 };
 
 enum SpellCastResult : uint8;
 enum SpellEffIndex : uint8;
+class TempSummon;
 
 class AllSpellScript : public ScriptObject
 {
@@ -148,6 +150,9 @@ public:
 
     // After caster critical chance, before target resistance and the single native roll.
     virtual void OnSpellCritChance(Spell* /*spell*/, Unit* /*target*/, float& /*chance*/) { }
+
+    // Called once per guardian Spell::SummonGuardian creates, after its level and stats are set.
+    virtual void OnGuardianSummoned(Spell* /*spell*/, TempSummon* /*summon*/) { }
 };
 
 // Compatibility for old scripts

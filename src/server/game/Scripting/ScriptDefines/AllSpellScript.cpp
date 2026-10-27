@@ -144,6 +144,12 @@ void ScriptMgr::OnSpellCritChance(Spell* spell, Unit* target, float& chance)
         script->OnSpellCritChance(spell, target, chance));
 }
 
+void ScriptMgr::OnGuardianSummoned(Spell* spell, TempSummon* summon)
+{
+    CALL_ENABLED_HOOKS(AllSpellScript, ALLSPELLHOOK_ON_GUARDIAN_SUMMONED,
+        script->OnGuardianSummoned(spell, summon));
+}
+
 AllSpellScript::AllSpellScript(char const* name, std::vector<uint16> enabledHooks)
     : ScriptObject(name, ALLSPELLHOOK_END)
 {
