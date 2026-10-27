@@ -626,6 +626,9 @@ unit; `target` identifies the attacker, and `melee_damage_taken` optionally acce
 These queries do not execute attacks or include hit rolls, critical hits, armor/resistance mitigation, or proc
 effects.
 `spell_power_cost` requires `spell` and queries its current native resource cost; it does not submit a cast.
+`skill_line_for_spell` requires `spell` and returns the server's loaded `SkillLineAbility` entry's `SkillLine`
+for it (the client spellbook tab the spell's own row places it under), or `-1` when no row carries a nonzero
+skill line for that spell.
 `spell_crit_chance` optionally accepts `school` (0..6, default Shadow). `melee_crit_chance`, `dodge_chance` and
 `parry_chance` read the player's percentage fields; `expertise` reads main-hand expertise; `combat_rating` requires
 `rating` (0..24, native `CombatRating`) and reads the rating value. `stat` requires `stat` (0..4), `resistance`

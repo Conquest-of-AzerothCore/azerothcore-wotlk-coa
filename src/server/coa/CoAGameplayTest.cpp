@@ -4167,6 +4167,14 @@ private:
             Require(info != nullptr, "Unknown spell for power cost");
             return info->CalcPowerCost(player, info->GetSchoolMask());
         }
+        if (metric == "skill_line_for_spell")
+        {
+            auto const bounds = sSpellMgr->GetSkillLineAbilityMapBounds(spell);
+            for (auto itr = bounds.first; itr != bounds.second; ++itr)
+                if (itr->second->SkillLine)
+                    return itr->second->SkillLine;
+            return -1;
+        }
         if (metric == "has_talent")
         {
             Require(GetTalentSpellPos(spell) != nullptr, "Metric needs a talent rank's spell ID");
