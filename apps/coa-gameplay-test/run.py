@@ -117,6 +117,7 @@ METRICS = TIMELINE_METRICS | {
     'carried_item_level', 'carried_item_required_level', 'carried_item_armor', 'carried_item_scaling_level',
     'carried_item_stat',
     'nearby_gameobject_count', 'nearby_gameobject_quest_active', 'nearby_gameobject_state', 'nearby_gameobject_scale',
+    'nearby_gameobject_ground_offset',
     'nearby_creature_count', 'map_creature_count', 'nearby_gameobject_at_client', 'voidportal_group',
     'carried_money',
     'channel_object_entry',

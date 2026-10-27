@@ -1005,6 +1005,8 @@ anywhere on the player's map, in any phase; a spawn whose grid is not loaded is 
 (0 open, 1 closed, 99 none).
 `nearby_gameobject_scale` takes `entry` and returns the object scale of the nearest such gameobject within
 20 yards (0 when none).
+`nearby_gameobject_ground_offset` takes `entry` and returns the nearest such gameobject's Z minus the map's terrain
+height under it (negative when buried); it requires a gameobject to exist within 20 yards.
 `nearby_gameobject_at_client` takes `entry` and is 1 while the nearest such gameobject within 20 yards is in
 the player's client-visible set. Owners always see their own objects, so per-player visibility needs a world spawn.
 `voidportal_group` returns the active Void Portal spawn group id, or 0 while the manager has no portal up.

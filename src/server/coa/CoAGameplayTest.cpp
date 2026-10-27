@@ -3586,6 +3586,13 @@ private:
             GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
             return object ? object->GetObjectScale() : 0.0f;
         }
+        if (metric == "nearby_gameobject_ground_offset")
+        {
+            GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
+            Require(object != nullptr, "Ground offset needs an existing nearby gameobject");
+            return object->GetPositionZ() - object->GetMap()->GetHeight(object->GetPhaseMask(),
+                object->GetPositionX(), object->GetPositionY(), MAX_HEIGHT);
+        }
         if (metric == "nearby_gameobject_at_client")
         {
             GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
