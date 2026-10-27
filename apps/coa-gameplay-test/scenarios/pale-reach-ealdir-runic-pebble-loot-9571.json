@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "name": "Ealdir Runes: a Runic Pebble near Cair Cragg can be gathered for the quest (COA-9571)",
+  "contract": "Ealdir Runes 175115 needs 9 Ealdir Runic Pebbles 559910. They come from the Ealdir Runic Pebble chests 2300691 (lock 57, quest 175115) spawned in the Cair Cragg canyon, not from the Runic Ealdir, whose recorded loot never had the pebble.",
+  "timeout_ms": 30000,
+  "location": {
+    "map": 0,
+    "x": -7591.5,
+    "y": 1276.0,
+    "z": 210.5,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "a",
+      "race": 1,
+      "class": 1,
+      "level": 48
+    }
+  ],
+  "steps": [
+    {
+      "action": "prepare_quest",
+      "actor": "a",
+      "quest": 175111,
+      "complete": true
+    },
+    {
+      "action": "reward_quest",
+      "actor": "a",
+      "quest": 175111
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "quest_accept",
+      "actor": "a",
+      "quest": 175115,
+      "entry": 164340
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: a is on Ealdir Runes",
+      "actor": "a",
+      "metric": "quest_status",
+      "quest": 175115,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "SETUP: Divine Shield keeps the canyon's Ealdir from interrupting",
+      "actor": "a",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "set_phase",
+      "actor": "a",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "the nearest pebble is in a's world",
+      "actor": "a",
+      "metric": "nearby_gameobject_at_client",
+      "entry": 2300691,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "a",
+      "spell": 3365,
+      "target_gameobject": 2300691
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "a opens the pebble",
+      "actor": "a",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "loot_slot",
+      "actor": "a",
+      "item": 559910
+    },
+    {
+      "action": "close_loot",
+      "actor": "a"
+    },
+    {
+      "action": "assert",
+      "label": "a receives a Runic Pebble",
+      "actor": "a",
+      "metric": "item_count",
+      "item": 559910,
+      "min": 1
+    }
+  ],
+  "creatures": [
+    {
+      "id": "giver",
+      "owner": "a",
+      "entry": 164340,
+      "distance": 3,
+      "faction": 35,
+      "level": 50
+    }
+  ]
+}
