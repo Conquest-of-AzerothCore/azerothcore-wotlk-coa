@@ -37,6 +37,9 @@ TIMELINE_FIELDS = {'event', 'source_entry', 'state', 'target_actors', 'exclude_t
 ENCOUNTER_STATES = {'NOT_STARTED', 'IN_PROGRESS', 'FAIL', 'DONE', 'SPECIAL'}
 MAX_ENCOUNTER_RADIUS = 200
 RAID_ROLES = {'tank', 'healer', 'melee', 'ranged'}
+BALANCE_GROUPS = {'tank', 'healer', 'dps', 'dps-support'}
+KIT_CONDITIONS = {'always', 'self_aura_missing', 'pet_aura_missing', 'owned_below', 'health_below'}
+KIT_TARGETS = {'self', 'pet', 'enemy'}
 RAID_ROLE_FIELDS = {'rotation', 'heal_spell', 'taunt_spell', 'rotation_assist'}
 SPAWN_PLACEMENT_METRICS = {'spawn_placement', 'spawn_ground_gap', 'spawn_submerged', 'spawn_display_state'}
 POINT_PLACEMENT_METRICS = {'point_placement', 'point_ground_gap'}
@@ -56,7 +59,7 @@ METRICS = TIMELINE_METRICS | {
     'pet_power', 'pet_max_power', 'spell_energize_count', 'spell_energize_total',
     'xp', 'next_level_xp', 'skill_value', 'skill_maximum', 'lfg_dungeon_disabled', 'lfg_lock_status', 'lfg_state',
     'lfg_need_allowed',
-    'map_id',
+    'map_id', 'instance_id',
     'in_arena', 'arena_team_members', 'arena_team_season_games', 'arena_team_season_wins',
     'battleground_team', 'team', 'name_query_race',
     'map_difficulty', 'nearby_creature_template', 'nearby_creature_max_health', 'nearby_creature_health_pct',
@@ -154,6 +157,13 @@ METRICS = TIMELINE_METRICS | {
     'player_class', 'cached_class', 'at_login_flag', 'wildcard_starter_spells_known', 'action_bar_unknown_spells',
     'wildcard_spells_known', 'wildcard_cards_pending', 'wildcard_cards_collected', 'wildcard_roll_cards_set',
     'wildcard_roll_cards_used', 'wildcard_bonus_pack_progress',
+    'balance_outcome', 'balance_duration_s', 'balance_ttk_s', 'balance_ttd_s', 'balance_health_pct_end',
+    'balance_damage_done_player', 'balance_damage_done_pets', 'balance_damage_taken_player',
+    'balance_damage_taken_pets', 'balance_healing_done_player', 'balance_healing_done_pets',
+    'balance_pets_owned_start', 'balance_pets_alive_end', 'balance_last_reset_health',
+    'balance_white_swings', 'balance_white_normal', 'balance_white_crit', 'balance_white_glancing',
+    'balance_white_crushing', 'balance_white_miss', 'balance_white_dodge', 'balance_white_parry',
+    'balance_white_block', 'balance_white_avg_normal_hit', 'balance_white_avg_normal_hit_pct_max_health',
 }
 PLAYER_STAT_METRICS = {
     'mana_regen', 'mana_regen_interrupted', 'resting',
@@ -191,7 +201,7 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'row', 'offset', 'skip_strings', 'from_end', 'x', 'y', 'min_required_level', 'max_required_level',
                  'flat_coefficient_modifier', 'dominant_stat', 'off_stat', 'spells',
                  'min_level', 'max_level', 'min_home_distance', 'spawn',
-                 'guid', 'spawn_type', 'tolerance', 'map', 'z'} | TIMELINE_FIELDS
+                 'guid', 'spawn_type', 'tolerance', 'map', 'z', 'outcome', 'side'} | TIMELINE_FIELDS
 ACTIONS = {
     'stop_attack': ({'actor'}, {'actor'}),
     'set_moving': ({'actor', 'enabled'}, {'actor', 'enabled', 'flag'}),
@@ -303,6 +313,9 @@ ACTIONS = {
     'quest_click': ({'actor', 'quest', 'entry'}, {'actor', 'quest', 'entry'}),
     'quest_complete': ({'actor', 'quest'}, {'actor', 'quest'}),
     'quest_turn_in': ({'actor', 'quest'}, {'actor', 'quest', 'entry', 'gameobject', 'reward'}),
+    'balance_spawn': ({'actor', 'entry', 'level'}, {'actor', 'entry', 'level', 'count', 'distance'}),
+    'balance_stage': ({'actor', 'stage', 'enemies'}, {'actor', 'stage', 'enemies', 'distance', 'cap_s'}),
+    'balance_white': ({'actor', 'entry', 'level'}, {'actor', 'entry', 'level', 'swings'}),
 }
 
 
@@ -421,6 +434,43 @@ def validate_raid_role(player):
     require(len(set(rotation)) == len(rotation), 'rotation must not repeat a spell')
 
 
+def validate_kit_rule(rule, where):
+    keys(rule, {'spell', 'when', 'target'}, {'spell', 'when', 'aura', 'value', 'target'}, where)
+    number(rule['spell'], f'{where}.spell', 1, 2**32 - 1, True)
+    require(rule['when'] in KIT_CONDITIONS, f'{where}.when must be one of {sorted(KIT_CONDITIONS)}')
+    require(rule['target'] in KIT_TARGETS, f'{where}.target must be one of {sorted(KIT_TARGETS)}')
+    needs_aura = rule['when'] in ('self_aura_missing', 'pet_aura_missing')
+    require(('aura' in rule) == needs_aura, f'{where}.aura is required for self/pet_aura_missing only')
+    if 'aura' in rule:
+        number(rule['aura'], f'{where}.aura', 1, 2**32 - 1, True)
+    needs_value = rule['when'] in ('owned_below', 'health_below')
+    require(('value' in rule) == needs_value, f'{where}.value is required for owned_below/health_below only')
+    if 'value' in rule:
+        number(rule['value'], f'{where}.value', 0)
+
+
+def validate_solo_kit(player):
+    require(type(player.get('solo', False)) is bool, 'solo must be boolean')
+    if 'group' in player:
+        require(player['group'] in BALANCE_GROUPS, f'group must be one of {sorted(BALANCE_GROUPS)}')
+    require('kit' not in player or player.get('solo', False), 'kit requires solo')
+    if 'kit' not in player:
+        return
+    kit = player['kit']
+    keys(kit, set(), {'opener', 'upkeep', 'defensives'}, 'kit')
+    if 'opener' in kit:
+        opener = kit['opener']
+        require(isinstance(opener, list) and opener, 'kit.opener must be a non-empty list of spell ids')
+        for spell in opener:
+            number(spell, 'kit.opener', 1, 2**32 - 1, True)
+    for group_name in ('upkeep', 'defensives'):
+        if group_name in kit:
+            rules = kit[group_name]
+            require(isinstance(rules, list) and rules, f'kit.{group_name} must be a non-empty list of rules')
+            for index, rule in enumerate(rules):
+                validate_kit_rule(rule, f'kit.{group_name}[{index}]')
+
+
 def validate(scenario):
     keys(scenario, {'schema', 'name', 'players', 'steps'},
          {'schema', 'name', 'players', 'creatures', 'steps', 'timeout_ms', 'location', 'contract', 'hour',
@@ -457,7 +507,8 @@ def validate(scenario):
              {'id', 'race', 'class', 'level', 'bot', 'spell_hit_rating', 'spell_crit_rating',
               'melee_crit_rating', 'ranged_crit_rating', 'ranged_hit_rating', 'melee_hit_rating',
               'expertise_rating', 'allow_regeneration', 'name', 'expansion', 'ascension_client', 'account_of',
-              'role', 'rotation', 'heal_spell', 'taunt_spell', 'rotation_assist'}, 'player')
+              'role', 'rotation', 'heal_spell', 'taunt_spell', 'rotation_assist', 'solo', 'group', 'kit'},
+             'player')
         identity = player['id']
         require(isinstance(identity, str) and ACTOR_ID.fullmatch(identity), 'Invalid player id')
         require(identity not in actor_ids, 'Duplicate actor id')
@@ -484,6 +535,7 @@ def validate(scenario):
         number(player.get('expertise_rating', 0), 'expertise_rating', 0, 100000, True)
         require(type(player.get('allow_regeneration', True)) is bool, 'allow_regeneration must be boolean')
         validate_raid_role(player)
+        validate_solo_kit(player)
     for creature in creatures:
         keys(creature, {'id', 'owner', 'entry'},
              {'id', 'owner', 'entry', 'distance', 'faction', 'level', 'health', 'reaction', 'spell_hit_bonus',
@@ -545,6 +597,27 @@ def validate(scenario):
         if action == 'summon':
             require(isinstance(step['as'], str) and step['as'] not in actor_ids, f'{where}: duplicate summon id')
             actor_ids.add(step['as'])
+        if action == 'balance_spawn':
+            number(step.get('distance', 8), f'{where}.distance', 0, 100)
+            for offset in range(step.get('count', 1)):
+                spawn_id = f"{step['actor']}_balance_{offset}"
+                require(spawn_id not in actor_ids, f'{where}: duplicate balance spawn id')
+                actor_ids.add(spawn_id)
+        if action == 'balance_stage':
+            require(isinstance(step['stage'], str) and step['stage'].strip(), f'{where}: stage needs a name')
+            number(step.get('distance', 8), f'{where}.distance', 0, 100)
+            number(step.get('cap_s', 120), f'{where}.cap_s', 1, 3600, True)
+            enemies = step['enemies']
+            require(isinstance(enemies, list) and 1 <= len(enemies) <= 10, f'{where}: expected 1..10 enemies')
+            for enemy in enemies:
+                keys(enemy, {'entry', 'level'}, {'entry', 'level', 'count'}, f'{where}.enemies')
+                number(enemy['entry'], f'{where}.enemies.entry', 1, 2**32 - 1, True)
+                number(enemy['level'], f'{where}.enemies.level', 1, 255, True)
+                number(enemy.get('count', 1), f'{where}.enemies.count', 1, 20, True)
+        if action == 'balance_white':
+            number(step['entry'], f'{where}.entry', 1, 2**32 - 1, True)
+            number(step['level'], f'{where}.level', 1, 255, True)
+            number(step.get('swings', 20), f'{where}.swings', 1, 1000, True)
         if 'actor' in step:
             require(step['actor'] in actor_ids, f'{where}: unknown actor')
             require(action in {'snapshot', 'assert', 'set_health', 'cast', 'attack_owned_creature'}
@@ -825,6 +898,21 @@ def validate(scenario):
                         and bool(step['name']), f'{where}: name metric needs a player and name')
             elif 'name' in step:
                 require(False, f'{where}: name only applies to name metrics')
+            if metric == 'balance_outcome':
+                require(step['actor'] in player_ids and step.get('outcome') in
+                        {'win', 'loss', 'timeout', 'invalid'},
+                        f'{where}: balance_outcome metric needs a player and a known outcome')
+            elif 'outcome' in step:
+                require(False, f'{where}: outcome only applies to balance_outcome')
+            if metric.startswith('balance_white_'):
+                require(step['actor'] in player_ids and step.get('side') in {'received', 'given'},
+                        f'{where}: balance_white metric needs a player and side received or given')
+                if 'pet' in step:
+                    require(type(step['pet']) is bool, f'{where}: pet must be boolean')
+                if 'entry' in step:
+                    number(step['entry'], f'{where}.entry', 1, 2**32 - 1, True)
+            elif 'side' in step:
+                require(False, f'{where}: side only applies to balance_white metrics')
             if metric in {'view_level', 'sent_level', 'sent_max_health', 'sent_faction'}:
                 require(step['actor'] in player_ids and 'target' in step,
                         f'{where}: view metric needs a player and target')
@@ -921,7 +1009,7 @@ def validate(scenario):
                     'client_placing_supersedes_for', 'client_spell_rank_for', 'client_spell_row_restored'}:
                 require('spell' in step, f'{where}: metric needs spell')
             for key in ('pet', 'critical'):
-                if key in step:
+                if key in step and not (key == 'pet' and metric.startswith('balance_white_')):
                     require(metric in {'spell_damage_count', 'spell_damage_total', 'spell_heal_count',
                                        'spell_heal_total', 'spell_effective_heal_total'}
                             or (key == 'pet' and metric in {'spell_go_count', 'spell_energize_count',

@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Balance dungeon spawns are real creatures scaled per actor instance",
+  "contract": "balance_spawn creates an ordinary (non-summon) creature inside the caller's own dungeon instance, at the requested level, so creature_classlevelstats and CoA dungeon health scaling apply exactly as for a native spawn. Scarlet Soldier (4286) has creature_template HealthModifier 4 and creature_classlevelstats level 36 class 1 basehp0 1277 in the test world DB, Rate.Creature.Elite.Elite.HP is 1 and CoA.CreatureScaling.Dungeon.Health is 2.5 by default, so a level-36 spawn's max health is ceil(1277*4)*1*2.5 = 12770. Two unrelated players who are not grouped and teleport to the same dungeon spot each get their own instance (MapMgr hands out a strictly increasing instance id per new instance), so their instance_id metrics differ and the spawn each creates is isolated to its own instance.",
+  "creature_scaling": true,
+  "timeout_ms": 30000,
+  "location": {
+    "map": 189,
+    "x": 1688.99,
+    "y": 1053.48,
+    "z": 18.6775,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "one",
+      "race": 1,
+      "class": 12,
+      "level": 36
+    },
+    {
+      "id": "two",
+      "race": 1,
+      "class": 12,
+      "level": 36
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "one",
+      "metric": "instance_id",
+      "save_as": "one_instance"
+    },
+    {
+      "action": "balance_spawn",
+      "actor": "one",
+      "entry": 4286,
+      "level": 36
+    },
+    {
+      "action": "balance_spawn",
+      "actor": "two",
+      "entry": 4286,
+      "level": 36
+    },
+    {
+      "action": "assert",
+      "label": "A level-36 Scarlet Soldier balance spawn gets CoA's dungeon health scaling",
+      "actor": "one_balance_0",
+      "metric": "max_health",
+      "equals": 12770
+    },
+    {
+      "action": "assert",
+      "label": "The second player's balance spawn is scaled the same way in its own instance",
+      "actor": "two_balance_0",
+      "metric": "max_health",
+      "equals": 12770
+    },
+    {
+      "action": "assert",
+      "label": "Ungrouped players entering the same dungeon spot land in different instances",
+      "actor": "two",
+      "metric": "instance_id",
+      "relative_to": "one_instance",
+      "min": 1
+    }
+  ]
+}

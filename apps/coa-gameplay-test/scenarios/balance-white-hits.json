@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "name": "balance_white measures a passive white-hit baseline for the player and its pet, both ways",
+  "contract": "balance_white reuses SpawnBalanceEnemies (Task 2) and the SMSG_ATTACKERSTATEUPDATE parsing behind melee_attacks_taken (Task 3), extended to decode HitInfo/TargetState into CoAGameplay::Balance::SwingResult. Raise: Ghoul 500971 (creature 50073) gives the Necromancer a pet. Against a single level 36 Scarlet Soldier (4286, the same dungeon spawn Task 2/4 use), Phase A keeps the player and its ghoul passive (owned units get REACT_PASSIVE) while the enemy swings 20 times at the player, then 20 times at the ghoul; Phase B pacifies and roots the enemy (UNIT_FLAG_PACIFIED/UNIT_FLAG_DISABLE_MOVE) and lets the player and ghoul auto-attack it 20 times each, in parallel. A UnitScript clamp (BalanceWhiteGuard) keeps whichever side is being measured at 1 HP instead of letting a swing kill it, since the packet already carries the uncapped hit before DealDamage reduces health, so the recorded swing data is unaffected by the clamp. The record's balance_white.received/given map 'player' and 'pet:50073' to swing counts by result and the average non-crit/non-glancing hit, in absolute value and percent of the victim's own max health (the enemy's, for the given side). balance_white_<field> metrics read that record with a required 'side' (received|given) and an optional 'pet' boolean (default the player).",
+  "timeout_ms": 240000,
+  "location": {
+    "map": 189,
+    "x": 1688.99,
+    "y": 1053.48,
+    "z": 18.6775,
+    "ignore_access": true
+  },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 40 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and stat updates settle", "ms": 3000 },
+    { "action": "learn", "actor": "necro", "spell": 500971 },
+    { "action": "cast", "label": "Raise a Ghoul", "actor": "necro", "spell": 500971 },
+    {
+      "action": "assert", "label": "SETUP: the Ghoul is raised", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50073, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "balance_white", "label": "White-hit baseline against a level 36 Scarlet Soldier",
+      "actor": "necro", "entry": 4286, "level": 36
+    },
+    {
+      "action": "assert", "label": "Phase A: the enemy landed 20 swings on the player",
+      "actor": "necro", "metric": "balance_white_swings", "side": "received", "equals": 20
+    },
+    {
+      "action": "assert", "label": "Phase A: the enemy landed 20 swings on the Ghoul",
+      "actor": "necro", "metric": "balance_white_swings", "side": "received", "pet": true, "equals": 20
+    },
+    {
+      "action": "assert", "label": "Phase A: the player's average normal hit received is positive",
+      "actor": "necro", "metric": "balance_white_avg_normal_hit", "side": "received", "min": 0.001
+    },
+    {
+      "action": "assert", "label": "Phase A: the Ghoul's average normal hit received is positive",
+      "actor": "necro", "metric": "balance_white_avg_normal_hit", "side": "received", "pet": true, "min": 0.001
+    },
+    {
+      "action": "assert", "label": "Phase B: the player landed 20 swings on the pacified enemy",
+      "actor": "necro", "metric": "balance_white_swings", "side": "given", "equals": 20
+    },
+    {
+      "action": "assert", "label": "Phase B: the Ghoul landed 20 swings on the pacified enemy",
+      "actor": "necro", "metric": "balance_white_swings", "side": "given", "pet": true, "equals": 20
+    },
+    {
+      "action": "assert", "label": "Phase B: the player's average normal hit given is positive",
+      "actor": "necro", "metric": "balance_white_avg_normal_hit", "side": "given", "min": 0.001
+    },
+    {
+      "action": "assert", "label": "Phase B: the Ghoul's average normal hit given is positive",
+      "actor": "necro", "metric": "balance_white_avg_normal_hit", "side": "given", "pet": true, "min": 0.001
+    },
+    {
+      "action": "assert", "label": "SETUP: the player survived the whole measurement",
+      "actor": "necro", "metric": "alive", "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: the Ghoul survived the whole measurement",
+      "actor": "necro", "metric": "owned_creature_count", "entry": 50073, "equals": 1
+    }
+  ]
+}

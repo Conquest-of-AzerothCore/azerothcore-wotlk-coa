@@ -1,0 +1,979 @@
+{
+  "schema": 1,
+  "source": "subset of item_pool.json referenced by gear.json",
+  "items": {
+    "10778": {
+      "entry": 10778,
+      "class": 4,
+      "subclass": 0,
+      "inventory_type": 2,
+      "quality": 2,
+      "required_level": 45,
+      "item_level": 60,
+      "ssd": 0,
+      "stats": [],
+      "max_level": 999
+    },
+    "21934": {
+      "entry": 21934,
+      "class": 4,
+      "subclass": 0,
+      "inventory_type": 2,
+      "quality": 2,
+      "required_level": 15,
+      "item_level": 20,
+      "ssd": 0,
+      "stats": [],
+      "max_level": 999
+    },
+    "27976": {
+      "entry": 27976,
+      "class": 4,
+      "subclass": 0,
+      "inventory_type": 2,
+      "quality": 1,
+      "required_level": 0,
+      "item_level": 40,
+      "ssd": 0,
+      "stats": [],
+      "max_level": 999
+    },
+    "42945": {
+      "entry": 42945,
+      "class": 2,
+      "subclass": 7,
+      "inventory_type": 21,
+      "quality": 7,
+      "required_level": 0,
+      "item_level": 1,
+      "ssd": 3,
+      "stats": [],
+      "max_level": 80
+    },
+    "42948": {
+      "entry": 42948,
+      "class": 2,
+      "subclass": 4,
+      "inventory_type": 21,
+      "quality": 7,
+      "required_level": 0,
+      "item_level": 1,
+      "ssd": 6,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "42949": {
+      "entry": 42949,
+      "class": 4,
+      "subclass": 4,
+      "inventory_type": 3,
+      "quality": 7,
+      "required_level": 0,
+      "item_level": 1,
+      "ssd": 7,
+      "stats": [
+        "strength"
+      ],
+      "max_level": 80
+    },
+    "42950": {
+      "entry": 42950,
+      "class": 4,
+      "subclass": 2,
+      "inventory_type": 3,
+      "quality": 7,
+      "required_level": 0,
+      "item_level": 1,
+      "ssd": 8,
+      "stats": [
+        "agility",
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "42985": {
+      "entry": 42985,
+      "class": 4,
+      "subclass": 1,
+      "inventory_type": 3,
+      "quality": 7,
+      "required_level": 0,
+      "item_level": 1,
+      "ssd": 16,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "42991": {
+      "entry": 42991,
+      "class": 4,
+      "subclass": 0,
+      "inventory_type": 12,
+      "quality": 7,
+      "required_level": 0,
+      "item_level": 1,
+      "ssd": 251,
+      "stats": [],
+      "max_level": 80
+    },
+    "42992": {
+      "entry": 42992,
+      "class": 4,
+      "subclass": 0,
+      "inventory_type": 12,
+      "quality": 7,
+      "required_level": 0,
+      "item_level": 1,
+      "ssd": 271,
+      "stats": [],
+      "max_level": 80
+    },
+    "44092": {
+      "entry": 44092,
+      "class": 2,
+      "subclass": 8,
+      "inventory_type": 17,
+      "quality": 7,
+      "required_level": 0,
+      "item_level": 1,
+      "ssd": 293,
+      "stats": [
+        "strength"
+      ],
+      "max_level": 80
+    },
+    "44094": {
+      "entry": 44094,
+      "class": 2,
+      "subclass": 4,
+      "inventory_type": 21,
+      "quality": 7,
+      "required_level": 0,
+      "item_level": 1,
+      "ssd": 295,
+      "stats": [],
+      "max_level": 80
+    },
+    "48677": {
+      "entry": 48677,
+      "class": 4,
+      "subclass": 2,
+      "inventory_type": 5,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 331,
+      "stats": [
+        "agility",
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "48685": {
+      "entry": 48685,
+      "class": 4,
+      "subclass": 4,
+      "inventory_type": 5,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 333,
+      "stats": [
+        "strength"
+      ],
+      "max_level": 80
+    },
+    "48691": {
+      "entry": 48691,
+      "class": 4,
+      "subclass": 1,
+      "inventory_type": 20,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 336,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "48716": {
+      "entry": 48716,
+      "class": 2,
+      "subclass": 4,
+      "inventory_type": 13,
+      "quality": 7,
+      "required_level": 0,
+      "item_level": 1,
+      "ssd": 351,
+      "stats": [
+        "agility"
+      ],
+      "max_level": 80
+    },
+    "50255": {
+      "entry": 50255,
+      "class": 4,
+      "subclass": 0,
+      "inventory_type": 11,
+      "quality": 7,
+      "required_level": 0,
+      "item_level": 1,
+      "ssd": 371,
+      "stats": [],
+      "max_level": 80
+    },
+    "360141": {
+      "entry": 360141,
+      "class": 4,
+      "subclass": 3,
+      "inventory_type": 3,
+      "quality": 7,
+      "required_level": 0,
+      "item_level": 1,
+      "ssd": 8,
+      "stats": [
+        "agility",
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "385409": {
+      "entry": 385409,
+      "class": 4,
+      "subclass": 3,
+      "inventory_type": 5,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 331,
+      "stats": [
+        "agility",
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "390799": {
+      "entry": 390799,
+      "class": 4,
+      "subclass": 0,
+      "inventory_type": 11,
+      "quality": 7,
+      "required_level": 0,
+      "item_level": 1,
+      "ssd": 371,
+      "stats": [],
+      "max_level": 80
+    },
+    "400055": {
+      "entry": 400055,
+      "class": 4,
+      "subclass": 4,
+      "inventory_type": 9,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 7,
+      "stats": [
+        "strength"
+      ],
+      "max_level": 80
+    },
+    "400056": {
+      "entry": 400056,
+      "class": 4,
+      "subclass": 4,
+      "inventory_type": 10,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 7,
+      "stats": [
+        "strength"
+      ],
+      "max_level": 80
+    },
+    "400057": {
+      "entry": 400057,
+      "class": 4,
+      "subclass": 4,
+      "inventory_type": 8,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 7,
+      "stats": [
+        "strength"
+      ],
+      "max_level": 80
+    },
+    "400058": {
+      "entry": 400058,
+      "class": 4,
+      "subclass": 4,
+      "inventory_type": 6,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 7,
+      "stats": [
+        "strength"
+      ],
+      "max_level": 80
+    },
+    "400060": {
+      "entry": 400060,
+      "class": 4,
+      "subclass": 4,
+      "inventory_type": 7,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 333,
+      "stats": [
+        "strength"
+      ],
+      "max_level": 80
+    },
+    "400061": {
+      "entry": 400061,
+      "class": 4,
+      "subclass": 4,
+      "inventory_type": 1,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 7,
+      "stats": [
+        "strength"
+      ],
+      "max_level": 80
+    },
+    "400062": {
+      "entry": 400062,
+      "class": 4,
+      "subclass": 1,
+      "inventory_type": 16,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 7,
+      "stats": [
+        "strength"
+      ],
+      "max_level": 80
+    },
+    "400063": {
+      "entry": 400063,
+      "class": 4,
+      "subclass": 6,
+      "inventory_type": 14,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 333,
+      "stats": [
+        "strength"
+      ],
+      "max_level": 80
+    },
+    "400064": {
+      "entry": 400064,
+      "class": 2,
+      "subclass": 7,
+      "inventory_type": 13,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 351,
+      "stats": [
+        "agility"
+      ],
+      "max_level": 80
+    },
+    "401569": {
+      "entry": 401569,
+      "class": 4,
+      "subclass": 1,
+      "inventory_type": 9,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 16,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "401570": {
+      "entry": 401570,
+      "class": 4,
+      "subclass": 1,
+      "inventory_type": 6,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 16,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "401571": {
+      "entry": 401571,
+      "class": 4,
+      "subclass": 1,
+      "inventory_type": 8,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 16,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "401572": {
+      "entry": 401572,
+      "class": 4,
+      "subclass": 1,
+      "inventory_type": 1,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 16,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "401573": {
+      "entry": 401573,
+      "class": 4,
+      "subclass": 1,
+      "inventory_type": 16,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 16,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "401667": {
+      "entry": 401667,
+      "class": 4,
+      "subclass": 1,
+      "inventory_type": 7,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 336,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "401668": {
+      "entry": 401668,
+      "class": 4,
+      "subclass": 1,
+      "inventory_type": 10,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 16,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "401875": {
+      "entry": 401875,
+      "class": 4,
+      "subclass": 4,
+      "inventory_type": 5,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 332,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "401876": {
+      "entry": 401876,
+      "class": 4,
+      "subclass": 4,
+      "inventory_type": 3,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 9,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "401877": {
+      "entry": 401877,
+      "class": 4,
+      "subclass": 4,
+      "inventory_type": 1,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 9,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "401878": {
+      "entry": 401878,
+      "class": 4,
+      "subclass": 4,
+      "inventory_type": 9,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 9,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "401879": {
+      "entry": 401879,
+      "class": 4,
+      "subclass": 4,
+      "inventory_type": 6,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 9,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "401880": {
+      "entry": 401880,
+      "class": 4,
+      "subclass": 4,
+      "inventory_type": 8,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 9,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "401883": {
+      "entry": 401883,
+      "class": 4,
+      "subclass": 6,
+      "inventory_type": 14,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 9,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "401987": {
+      "entry": 401987,
+      "class": 4,
+      "subclass": 4,
+      "inventory_type": 7,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 332,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "401989": {
+      "entry": 401989,
+      "class": 4,
+      "subclass": 2,
+      "inventory_type": 9,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 10,
+      "stats": [],
+      "max_level": 80
+    },
+    "401990": {
+      "entry": 401990,
+      "class": 4,
+      "subclass": 2,
+      "inventory_type": 10,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 10,
+      "stats": [],
+      "max_level": 80
+    },
+    "401991": {
+      "entry": 401991,
+      "class": 4,
+      "subclass": 2,
+      "inventory_type": 6,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 10,
+      "stats": [],
+      "max_level": 80
+    },
+    "401992": {
+      "entry": 401992,
+      "class": 4,
+      "subclass": 2,
+      "inventory_type": 8,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 10,
+      "stats": [],
+      "max_level": 80
+    },
+    "401995": {
+      "entry": 401995,
+      "class": 4,
+      "subclass": 2,
+      "inventory_type": 7,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 335,
+      "stats": [],
+      "max_level": 80
+    },
+    "402567": {
+      "entry": 402567,
+      "class": 4,
+      "subclass": 2,
+      "inventory_type": 7,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 336,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "402568": {
+      "entry": 402568,
+      "class": 4,
+      "subclass": 2,
+      "inventory_type": 10,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 16,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "402569": {
+      "entry": 402569,
+      "class": 4,
+      "subclass": 2,
+      "inventory_type": 9,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 16,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "402570": {
+      "entry": 402570,
+      "class": 4,
+      "subclass": 2,
+      "inventory_type": 6,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 16,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "402571": {
+      "entry": 402571,
+      "class": 4,
+      "subclass": 2,
+      "inventory_type": 8,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 16,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "402572": {
+      "entry": 402572,
+      "class": 4,
+      "subclass": 2,
+      "inventory_type": 1,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 16,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "402767": {
+      "entry": 402767,
+      "class": 4,
+      "subclass": 3,
+      "inventory_type": 7,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 336,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "402768": {
+      "entry": 402768,
+      "class": 4,
+      "subclass": 3,
+      "inventory_type": 10,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 16,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "402769": {
+      "entry": 402769,
+      "class": 4,
+      "subclass": 3,
+      "inventory_type": 9,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 16,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "402770": {
+      "entry": 402770,
+      "class": 4,
+      "subclass": 3,
+      "inventory_type": 6,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 16,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "402771": {
+      "entry": 402771,
+      "class": 4,
+      "subclass": 3,
+      "inventory_type": 8,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 16,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "402772": {
+      "entry": 402772,
+      "class": 4,
+      "subclass": 3,
+      "inventory_type": 1,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 16,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "402880": {
+      "entry": 402880,
+      "class": 4,
+      "subclass": 3,
+      "inventory_type": 7,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 331,
+      "stats": [
+        "agility",
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "402882": {
+      "entry": 402882,
+      "class": 4,
+      "subclass": 3,
+      "inventory_type": 9,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 8,
+      "stats": [
+        "agility",
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "402883": {
+      "entry": 402883,
+      "class": 4,
+      "subclass": 3,
+      "inventory_type": 10,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 8,
+      "stats": [
+        "agility",
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "402884": {
+      "entry": 402884,
+      "class": 4,
+      "subclass": 3,
+      "inventory_type": 6,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 8,
+      "stats": [
+        "agility",
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "402885": {
+      "entry": 402885,
+      "class": 4,
+      "subclass": 3,
+      "inventory_type": 8,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 8,
+      "stats": [
+        "agility",
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "402886": {
+      "entry": 402886,
+      "class": 4,
+      "subclass": 1,
+      "inventory_type": 16,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 8,
+      "stats": [
+        "agility",
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "404210": {
+      "entry": 404210,
+      "class": 4,
+      "subclass": 2,
+      "inventory_type": 1,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 10,
+      "stats": [],
+      "max_level": 80
+    },
+    "404216": {
+      "entry": 404216,
+      "class": 4,
+      "subclass": 3,
+      "inventory_type": 1,
+      "quality": 7,
+      "required_level": 1,
+      "item_level": 1,
+      "ssd": 8,
+      "stats": [
+        "agility",
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "1540350": {
+      "entry": 1540350,
+      "class": 4,
+      "subclass": 0,
+      "inventory_type": 23,
+      "quality": 7,
+      "required_level": 0,
+      "item_level": 1,
+      "ssd": 502,
+      "stats": [
+        "intellect"
+      ],
+      "max_level": 80
+    },
+    "1542943": {
+      "entry": 1542943,
+      "class": 2,
+      "subclass": 6,
+      "inventory_type": 17,
+      "quality": 7,
+      "required_level": 0,
+      "item_level": 1,
+      "ssd": 501,
+      "stats": [],
+      "max_level": 80
+    }
+  }
+}

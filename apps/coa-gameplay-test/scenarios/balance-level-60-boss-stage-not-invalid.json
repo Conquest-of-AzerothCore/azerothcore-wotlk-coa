@@ -1,0 +1,123 @@
+{
+  "schema": 1,
+  "name": "The level 60 balance dungeon's boss stage fights normally; Ramstein the Gorger does not",
+  "contract": "dungeons.json's level 60 row used Ramstein the Gorger (10439, Stratholme) as the boss. Ramstein's own smart_scripts On Reset (entryorguid 10439, id 0) always runs timed actionlist 1043900, whose id 1 sets unit flags 768 (UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_IMMUNE_TO_NPC) and only removes them at id 6/7 (Remove Unit Flags/Attack Start), roughly 6s later in the real Baron Rivendare gauntlet - a cinematic intro, not a standalone-boss delay. Spawned directly by balance_stage at a fixed fight spot, Ramstein carries UNIT_FLAG_IMMUNE_TO_PC from the first tick: ThreatReference::FlagsAllowFighting (ThreatManager.cpp) marks any threat reference against a player offline while that flag holds, so ThreatManager::ReselectVictim's only reference is never available, Unit::SelectVictim finds no acceptable target and calls AI()->EnterEvadeMode() on the very next update - matching final-run-1's recorded boss stage (duration_s 0.017, health_pct_end 100, zero damage either side, outcome invalid) for all 70 level 60 cases. ramstein_immune_intro_evades reproduces this directly against the historical boss entry and pins it down as invalid so the defect cannot silently return. Maleki the Pallid (10438), the row's replacement boss, is a standalone Stratholme SmartAI caster with no On Reset actions and no unit-flag toggling, so boss_stage_fights_normally spawning him at the same fight spot must leave Running within the stage cap and end with both sides having exchanged damage.",
+  "timeout_ms": 240000,
+  "location": {
+    "map": 329,
+    "x": 3660.0,
+    "y": -3560.0,
+    "z": 137.85,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "fighter",
+      "race": 1,
+      "class": 12,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "melee_crit_rating": 10000,
+      "expertise_rating": 10000,
+      "role": "melee",
+      "solo": true,
+      "rotation_assist": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let local level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "fighter",
+      "id": 1
+    },
+    {
+      "action": "learn",
+      "actor": "fighter",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "fighter",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "fighter",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "fighter",
+      "spell": 801576
+    },
+    {
+      "action": "set_health",
+      "actor": "fighter",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "balance_stage",
+      "actor": "fighter",
+      "stage": "ramstein_immune_intro_evades",
+      "enemies": [
+        { "entry": 10439, "level": 61, "count": 1 }
+      ],
+      "cap_s": 30
+    },
+    {
+      "action": "assert",
+      "label": "Ramstein the Gorger's On Reset intro leaves him immune to the fighter and he evades almost immediately",
+      "actor": "fighter",
+      "metric": "balance_outcome",
+      "outcome": "invalid",
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "label": "Return to the fixed fight spot: the Ramstein probe's own fighter movement never happened, but keep the spot pinned for the next stage",
+      "actor": "fighter",
+      "map": 329,
+      "x": 3660.0,
+      "y": -3560.0,
+      "z": 137.85
+    },
+    {
+      "action": "balance_stage",
+      "actor": "fighter",
+      "stage": "boss_stage_fights_normally",
+      "enemies": [
+        { "entry": 10438, "level": 61, "count": 1 }
+      ],
+      "cap_s": 30
+    },
+    {
+      "action": "assert",
+      "label": "Maleki the Pallid's boss stage does not evade",
+      "actor": "fighter",
+      "metric": "balance_outcome",
+      "outcome": "invalid",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "boss_stage_fights_normally recorded the player dealing damage",
+      "actor": "fighter",
+      "metric": "balance_damage_done_player",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "boss_stage_fights_normally recorded the player taking damage",
+      "actor": "fighter",
+      "metric": "balance_damage_taken_player",
+      "min": 1
+    }
+  ]
+}

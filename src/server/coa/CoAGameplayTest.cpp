@@ -5,6 +5,7 @@
 
 #include "AscensionReaperTalents.h"
 #include "AccountMgr.h"
+#include "AllCreatureScript.h"
 #include "ArenaTeam.h"
 #include "ArenaTeamMgr.h"
 #include "AscensionCoATalentState.h"
@@ -82,6 +83,7 @@
 #include "WhoListCacheMgr.h"
 
 #include "CoAGameplayClock.h"
+#include "CoAGameplayBalance.h"
 #include "CoAGameplayIsolation.h"
 #include "CoAGameplayPlacement.h"
 #include "CoAGameplayRaidBots.h"
@@ -122,6 +124,7 @@ using CoAGameplay::LaneActivity;
 using CoAGameplay::StepRequest;
 
 std::set<ObjectGuid> NoRegenerationActors;
+std::optional<uint8> PendingBalanceSpawnLevel;
 
 class CoAGameplayTestRegeneration final : public PlayerScript
 {
@@ -589,6 +592,7 @@ std::map<std::pair<ObjectGuid, uint32>, uint32> ProcCounter::_casts;
 
 constexpr float DefaultEncounterRadius = 100.0f;
 constexpr float MaximumEncounterRadius = 200.0f;
+constexpr uint64 OpenerSettleLimitMs = 20000;
 
 uint64 GameNowMs()
 {
@@ -869,6 +873,20 @@ struct Actor
     uint32 healSpell = 0;
     uint32 tauntSpell = 0;
     bool rotationAssist = false;
+    bool solo = false;
+    std::string group;
+    std::vector<uint32> kitOpener;
+    std::vector<CoAGameplay::Balance::KitRule> kitUpkeep;
+    std::vector<CoAGameplay::Balance::KitRule> kitDefensives;
+    std::optional<ObjectGuid> soloTarget;
+    Tree lastBalance;
+    double lastResetHealth = 0.0;
+    bool balanceWhiteActive = false;
+    uint32 balanceWhiteSwingsTarget = 20;
+    ObjectGuid balanceWhiteEnemy;
+    std::map<ObjectGuid, CoAGameplay::Balance::SwingTally> balanceWhiteReceived;
+    std::map<ObjectGuid, CoAGameplay::Balance::SwingTally> balanceWhiteGiven;
+    Tree lastBalanceWhite;
 };
 
 char const* StageName(ActorStage stage)
@@ -899,6 +917,90 @@ struct Target
     uint32 instance;
     ObjectGuid guid;
 };
+
+struct BalanceStageState
+{
+    enum class Phase : uint8 { Opener, Fight };
+    Phase phase = Phase::Opener;
+    bool resummonNeeded = false;
+    std::size_t openerIndex = 0;
+    bool openerSettling = false;
+    TimePoint openerSettleStart;
+    uint32 petsOwnedStart = 0;
+    ObjectGuid actor;
+    std::vector<Target> enemies;
+    TimePoint fightStart;
+};
+
+struct BalanceWhiteState
+{
+    enum class Phase : uint8 { Received, Given };
+    Phase phase = Phase::Received;
+    ObjectGuid actor;
+    Target enemy;
+    std::vector<ObjectGuid> victims;
+    std::map<ObjectGuid, ReactStates> ownedOriginalReact;
+    std::size_t victimIndex = 0;
+    uint32 swingsTarget = 20;
+    std::set<ObjectGuid> guardedGuids;
+};
+
+std::optional<CoAGameplay::Balance::SwingResult> ClassifyBalanceSwing(uint32 hitInfo, uint8 targetState)
+{
+    using CoAGameplay::Balance::SwingResult;
+    if (targetState == VICTIMSTATE_EVADES || targetState == VICTIMSTATE_IS_IMMUNE ||
+        targetState == VICTIMSTATE_INTERRUPT || targetState == VICTIMSTATE_DEFLECTS)
+        return std::nullopt;
+    if (targetState == VICTIMSTATE_DODGE)
+        return SwingResult::Dodge;
+    if (targetState == VICTIMSTATE_PARRY)
+        return SwingResult::Parry;
+    if (hitInfo & HITINFO_MISS)
+        return SwingResult::Miss;
+    if (hitInfo & HITINFO_BLOCK)
+        return SwingResult::Block;
+    if (hitInfo & HITINFO_CRITICALHIT)
+        return SwingResult::Crit;
+    if (hitInfo & HITINFO_GLANCING)
+        return SwingResult::Glancing;
+    if (hitInfo & HITINFO_CRUSHING)
+        return SwingResult::Crushing;
+    return SwingResult::Normal;
+}
+
+class BalanceWhiteGuard
+{
+public:
+    static void Protect(std::set<ObjectGuid> const& guids)
+    {
+        for (ObjectGuid const& guid : guids)
+            ++_protected[guid];
+    }
+
+    static void Unprotect(std::set<ObjectGuid> const& guids)
+    {
+        for (ObjectGuid const& guid : guids)
+            if (auto const it = _protected.find(guid); it != _protected.end())
+            {
+                if (--it->second == 0)
+                    _protected.erase(it);
+            }
+    }
+
+    static void OnDamage(Unit* victim, uint32& damage)
+    {
+        if (!victim || !_protected.count(victim->GetGUID()))
+            return;
+        uint32 const health = victim->GetHealth();
+        if (damage >= health)
+            damage = health > 1 ? health - 1 : 0;
+    }
+
+private:
+    static std::map<ObjectGuid, uint32> _protected;
+};
+
+std::map<ObjectGuid, uint32> BalanceWhiteGuard::_protected;
 
 void ObserveSpellCasts(Actor& actor, WorldPacket const& packet)
 {
@@ -1257,6 +1359,58 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         }
         if (victim == actor.guid)
             ++actor.meleeAttacksTakenFrom[attacker];
+        if (actor.balanceWhiteActive && (attacker == actor.balanceWhiteEnemy || victim == actor.balanceWhiteEnemy))
+        {
+            uint32 overkill;
+            uint8 subCount;
+            response >> overkill >> subCount;
+            for (uint8 index = 0; index < subCount; ++index)
+            {
+                uint32 school;
+                float subDamageFloat;
+                uint32 subDamage;
+                response >> school >> subDamageFloat >> subDamage;
+            }
+            if (hitInfo & (HITINFO_FULL_ABSORB | HITINFO_PARTIAL_ABSORB))
+                for (uint8 index = 0; index < subCount; ++index)
+                {
+                    uint32 absorb;
+                    response >> absorb;
+                }
+            if (hitInfo & (HITINFO_FULL_RESIST | HITINFO_PARTIAL_RESIST))
+                for (uint8 index = 0; index < subCount; ++index)
+                {
+                    uint32 resist;
+                    response >> resist;
+                }
+            uint8 targetState;
+            response >> targetState;
+            std::optional<CoAGameplay::Balance::SwingResult> const result =
+                ClassifyBalanceSwing(hitInfo, targetState);
+            if (result)
+            {
+                Player* balanceWhitePlayer = actor.session ? actor.session->GetPlayer() : nullptr;
+                if (attacker == actor.balanceWhiteEnemy)
+                {
+                    CoAGameplay::Balance::SwingTally& tally = actor.balanceWhiteReceived[victim];
+                    CoAGameplay::Balance::AddSwing(tally, *result, damage);
+                    if (balanceWhitePlayer && tally.swings >= actor.balanceWhiteSwingsTarget)
+                        if (Unit* enemyUnit = ObjectAccessor::GetUnit(*balanceWhitePlayer, actor.balanceWhiteEnemy))
+                            enemyUnit->AttackStop();
+                }
+                if (victim == actor.balanceWhiteEnemy)
+                {
+                    CoAGameplay::Balance::SwingTally& tally = actor.balanceWhiteGiven[attacker];
+                    CoAGameplay::Balance::AddSwing(tally, *result, damage);
+                    if (balanceWhitePlayer && tally.swings >= actor.balanceWhiteSwingsTarget)
+                        if (Unit* attackerUnit = ObjectAccessor::GetUnit(*balanceWhitePlayer, attacker))
+                        {
+                            attackerUnit->AttackStop();
+                            attackerUnit->SetUnitFlag(UNIT_FLAG_PACIFIED);
+                        }
+                }
+            }
+        }
     }
 
     ++actor.packetOrdinal;
@@ -1621,6 +1775,67 @@ struct PlacementAuditTotals
     uint32 eventLinked{0};
 };
 
+struct BalanceStageTally
+{
+    uint64 damageDonePlayer{0};
+    uint64 damageDonePets{0};
+    uint64 damageTakenPlayer{0};
+    uint64 damageTakenPets{0};
+    uint64 healingDonePlayer{0};
+    uint64 healingDonePets{0};
+};
+
+class BalanceAccounting
+{
+public:
+    static void Begin(ObjectGuid actor)
+    {
+        _tallies[actor] = {};
+    }
+
+    static void End(ObjectGuid actor)
+    {
+        _tallies.erase(actor);
+    }
+
+    static BalanceStageTally Get(ObjectGuid actor)
+    {
+        auto const it = _tallies.find(actor);
+        return it != _tallies.end() ? it->second : BalanceStageTally{};
+    }
+
+    static void OnDamage(Unit* attacker, Unit* victim, uint32 damage)
+    {
+        if (!attacker || !victim)
+            return;
+        if (Player* owner = attacker->GetCharmerOrOwnerPlayerOrPlayerItself(); owner)
+            if (auto it = _tallies.find(owner->GetGUID()); it != _tallies.end())
+                (attacker->GetGUID() == owner->GetGUID() ? it->second.damageDonePlayer
+                                                           : it->second.damageDonePets) += damage;
+        if (Player* owner = victim->GetCharmerOrOwnerPlayerOrPlayerItself(); owner)
+            if (auto it = _tallies.find(owner->GetGUID()); it != _tallies.end())
+                (victim->GetGUID() == owner->GetGUID() ? it->second.damageTakenPlayer
+                                                         : it->second.damageTakenPets) += damage;
+    }
+
+    static void OnHeal(Unit* healer, Unit* receiver, uint32 gain)
+    {
+        if (!healer || !receiver)
+            return;
+        Player* owner = healer->GetCharmerOrOwnerPlayerOrPlayerItself();
+        if (!owner)
+            return;
+        if (auto it = _tallies.find(owner->GetGUID()); it != _tallies.end())
+            (healer->GetGUID() == owner->GetGUID() ? it->second.healingDonePlayer
+                                                     : it->second.healingDonePets) += gain;
+    }
+
+private:
+    static std::map<ObjectGuid, BalanceStageTally> _tallies;
+};
+
+std::map<ObjectGuid, BalanceStageTally> BalanceAccounting::_tallies;
+
 class GameplayCase
 {
 public:
@@ -1681,6 +1896,7 @@ public:
             auto& actor = _actors[id];
             actor.definition = entry.second;
             ReadRaidRole(actor);
+            ReadSoloKit(actor);
             for (auto const& step : _steps)
                 if (step.second.get<std::string>("actor", "") == id)
                     if (auto row = step.second.get_optional<uint32>("row"))
@@ -2006,6 +2222,187 @@ public:
                             DriveRaidBot(actor, player, boss);
     }
 
+    static void CollectHostileAttackers(Unit* unit, std::map<ObjectGuid, Unit*>& out)
+    {
+        for (auto const& [guid, ref] : unit->GetCombatManager().GetPvECombatRefs())
+        {
+            Unit* other = ref->GetOther(unit);
+            if (other && other->IsAlive() && other->IsInWorld())
+                out.emplace(other->GetGUID(), other);
+        }
+    }
+
+    static void CommandOwnedUnitsAttack(Player* player, Unit* target)
+    {
+        for (Unit* owned : player->m_Controlled)
+        {
+            Creature* creature = owned ? owned->ToCreature() : nullptr;
+            if (!creature || !creature->IsAlive() || !creature->IsInWorld())
+                continue;
+            if (CharmInfo* charmInfo = creature->GetCharmInfo())
+            {
+                charmInfo->SetIsCommandAttack(true);
+                charmInfo->SetIsAtStay(false);
+                charmInfo->SetIsFollowing(false);
+                charmInfo->SetIsCommandFollow(false);
+                charmInfo->SetIsReturning(false);
+            }
+            if (creature->IsAIEnabled && creature->AI())
+                creature->AI()->AttackStart(target);
+        }
+    }
+
+    static void StopOwnedUnits(Player* owner)
+    {
+        for (Unit* owned : owner->m_Controlled)
+        {
+            Creature* creature = owned ? owned->ToCreature() : nullptr;
+            if (!creature || !creature->IsInWorld())
+                continue;
+            if (CharmInfo* charmInfo = creature->GetCharmInfo())
+            {
+                charmInfo->SetIsCommandAttack(false);
+                charmInfo->SetIsAtStay(false);
+                charmInfo->SetIsFollowing(true);
+                charmInfo->SetIsCommandFollow(true);
+                charmInfo->SetIsReturning(true);
+            }
+            creature->AttackStop();
+            creature->GetMotionMaster()->Clear();
+            creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, creature->GetFollowAngle());
+        }
+    }
+
+    static bool KitRuleHolds(CoAGameplay::Balance::KitRule const& rule, Player* player)
+    {
+        using CoAGameplay::Balance::KitCondition;
+        switch (rule.when)
+        {
+            case KitCondition::Always:
+                return true;
+            case KitCondition::SelfAuraMissing:
+                return !player->HasAura(rule.aura);
+            case KitCondition::PetAuraMissing:
+                for (Unit* owned : player->m_Controlled)
+                    if (owned && owned->IsAlive() && !owned->HasAura(rule.aura))
+                        return true;
+                return false;
+            case KitCondition::OwnedBelow:
+            {
+                uint32 alive = 0;
+                for (Unit* owned : player->m_Controlled)
+                    if (owned && owned->IsAlive())
+                        ++alive;
+                return float(alive) < rule.value;
+            }
+            case KitCondition::HealthBelow:
+                return player->GetHealthPct() < rule.value;
+        }
+        return false;
+    }
+
+    static Unit* ResolveKitTarget(CoAGameplay::Balance::KitTarget kitTarget, Player* player, Unit* enemy,
+        uint32 aura)
+    {
+        using CoAGameplay::Balance::KitTarget;
+        switch (kitTarget)
+        {
+            case KitTarget::Self:
+                return player;
+            case KitTarget::Enemy:
+                return enemy;
+            case KitTarget::Pet:
+                for (Unit* owned : player->m_Controlled)
+                    if (owned && owned->IsAlive() && (!aura || !owned->HasAura(aura)))
+                        return owned;
+                return player->GetFirstControlled();
+        }
+        return nullptr;
+    }
+
+    bool CastFirstKitRule(std::vector<CoAGameplay::Balance::KitRule> const& rules, Player* player, Unit* enemy)
+    {
+        std::optional<std::size_t> const index = CoAGameplay::Balance::NextKitRule(rules,
+            [player](CoAGameplay::Balance::KitRule const& rule) { return KitRuleHolds(rule, player); },
+            [player, enemy](CoAGameplay::Balance::KitRule const& rule)
+            {
+                Unit* target = ResolveKitTarget(rule.target, player, enemy, rule.aura);
+                return target && CanBotCast(player, rule.spell, target);
+            });
+        if (!index)
+            return false;
+        CoAGameplay::Balance::KitRule const& rule = rules[*index];
+        SubmitBotCast(player, rule.spell, ResolveKitTarget(rule.target, player, enemy, rule.aura));
+        return true;
+    }
+
+    static constexpr float SoloSelfHealThresholdPct = 65.0f;
+
+    void DriveSoloActor(Actor& actor, Player* player)
+    {
+        std::map<ObjectGuid, Unit*> hostiles;
+        CollectHostileAttackers(player, hostiles);
+        for (Unit* owned : player->m_Controlled)
+            if (owned && owned->IsAlive() && owned->IsInWorld() && owned->GetMap() == player->GetMap())
+                CollectHostileAttackers(owned, hostiles);
+
+        std::vector<CoAGameplay::Balance::SoloCandidate> candidates;
+        for (auto const& [guid, unit] : hostiles)
+            if (unit->GetMap() == player->GetMap())
+                candidates.push_back({ guid, true, unit->GetHealthPct(), player->GetDistance(unit) });
+
+        std::optional<ObjectGuid> const selected =
+            CoAGameplay::Balance::SelectSoloTarget(candidates, actor.soloTarget);
+        bool const targetChanged = selected != actor.soloTarget;
+        actor.soloTarget = selected;
+        if (!selected)
+            return;
+        Unit* target = ObjectAccessor::GetUnit(*player, *selected);
+        if (!target)
+            return;
+
+        if (targetChanged)
+            CommandOwnedUnitsAttack(player, target);
+
+        if (CastFirstKitRule(actor.kitDefensives, player, target))
+            return;
+        if (CastFirstKitRule(actor.kitUpkeep, player, target))
+            return;
+        if (actor.raidRole == CoAGameplay::RaidRole::Healer && player->GetHealthPct() < SoloSelfHealThresholdPct)
+        {
+            HealLowest(actor, player);
+            return;
+        }
+        if (actor.raidRole == CoAGameplay::RaidRole::Tank || actor.raidRole == CoAGameplay::RaidRole::Melee)
+        {
+            if (Creature* enemy = target->ToCreature(); enemy && KeepInMelee(player, enemy, false))
+                return;
+            if (player->GetVictim() != target)
+                SubmitAttackSwing(player, target);
+            CastRotation(actor, player, target);
+            return;
+        }
+        if (actor.raidRole == CoAGameplay::RaidRole::Ranged || actor.raidRole == CoAGameplay::RaidRole::Healer)
+        {
+            Creature* enemy = target->ToCreature();
+            if (player->IsWithinDistInMap(target, CoAGameplay::RaidRangedDistance) &&
+                (!enemy || !FaceBoss(player, enemy)))
+                CastRotation(actor, player, target);
+        }
+    }
+
+    void DriveSoloBots()
+    {
+        for (auto& [id, actor] : _actors)
+        {
+            if (!actor.solo || actor.balanceWhiteActive)
+                continue;
+            Player* player = actor.session ? actor.session->GetPlayer() : nullptr;
+            if (player && player->IsInWorld() && player->IsAlive() && !player->IsBeingTeleported())
+                DriveSoloActor(actor, player);
+        }
+    }
+
     bool Dismiss(bool leaveGroups)
     {
         if (EncounterActive())
@@ -2013,6 +2410,22 @@ public:
             TimelineRecorder::End();
             _encounterBoss.reset();
         }
+        if (_balanceStage)
+        {
+            BalanceAccounting::End(_balanceStage->actor);
+            _balanceStage.reset();
+        }
+        if (_balanceWhite)
+        {
+            BalanceWhiteGuard::Unprotect(_balanceWhite->guardedGuids);
+            if (Map* map = sMapMgr->FindMap(_balanceWhite->enemy.map, _balanceWhite->enemy.instance))
+                if (Creature* enemy = map->GetCreature(_balanceWhite->enemy.guid))
+                    enemy->DespawnOrUnsummon();
+            for (auto& [id, actor] : _actors)
+                actor.balanceWhiteActive = false;
+            _balanceWhite.reset();
+        }
+        DespawnBalanceStageEnemies();
         std::set<ObjectGuid> units;
         RemoveFixtureDescendants(units);
         for (auto const& [id, target] : _targets)
@@ -2247,6 +2660,7 @@ private:
         if (!TargetsSettled())
             return false;
         DriveRaidBots();
+        DriveSoloBots();
         if (_nextStep == _steps.end())
         {
             Require(_assertions > 0, "Scenario completed without assertions");
@@ -2385,6 +2799,67 @@ private:
         Require((actor.healSpell != 0) == (actor.raidRole == CoAGameplay::RaidRole::Healer),
             "heal_spell is required for a healer and only for one");
         Require(!actor.tauntSpell || actor.raidRole == CoAGameplay::RaidRole::Tank, "taunt_spell is only for a tank");
+    }
+
+    static CoAGameplay::Balance::KitCondition KitConditionFromName(std::string const& name)
+    {
+        using CoAGameplay::Balance::KitCondition;
+        if (name == "always")
+            return KitCondition::Always;
+        if (name == "self_aura_missing")
+            return KitCondition::SelfAuraMissing;
+        if (name == "pet_aura_missing")
+            return KitCondition::PetAuraMissing;
+        if (name == "owned_below")
+            return KitCondition::OwnedBelow;
+        if (name == "health_below")
+            return KitCondition::HealthBelow;
+        Require(false, "Unknown kit rule condition: " + name);
+        return KitCondition::Always;
+    }
+
+    static CoAGameplay::Balance::KitTarget KitTargetFromName(std::string const& name)
+    {
+        using CoAGameplay::Balance::KitTarget;
+        if (name == "self")
+            return KitTarget::Self;
+        if (name == "pet")
+            return KitTarget::Pet;
+        if (name == "enemy")
+            return KitTarget::Enemy;
+        Require(false, "Unknown kit rule target: " + name);
+        return KitTarget::Self;
+    }
+
+    static CoAGameplay::Balance::KitRule ReadKitRule(Tree const& value)
+    {
+        CoAGameplay::Balance::KitRule rule{};
+        rule.spell = RaidSpell(value.get_child("spell"));
+        rule.when = KitConditionFromName(value.get<std::string>("when"));
+        rule.aura = value.get<uint32>("aura", 0);
+        rule.value = value.get<float>("value", 0.0f);
+        rule.target = KitTargetFromName(value.get<std::string>("target"));
+        return rule;
+    }
+
+    static void ReadSoloKit(Actor& actor)
+    {
+        Tree const& definition = actor.definition;
+        actor.solo = definition.get<bool>("solo", false);
+        actor.group = definition.get<std::string>("group", "");
+        auto const kit = definition.get_child_optional("kit");
+        Require(!kit || actor.solo, "kit requires solo");
+        if (!kit)
+            return;
+        if (auto opener = kit->get_child_optional("opener"))
+            for (auto const& spell : *opener)
+                actor.kitOpener.push_back(RaidSpell(spell.second));
+        if (auto upkeep = kit->get_child_optional("upkeep"))
+            for (auto const& rule : *upkeep)
+                actor.kitUpkeep.push_back(ReadKitRule(rule.second));
+        if (auto defensives = kit->get_child_optional("defensives"))
+            for (auto const& rule : *defensives)
+                actor.kitDefensives.push_back(ReadKitRule(rule.second));
     }
 
     static void LogIn(Actor& actor)
@@ -2808,6 +3283,381 @@ private:
         _targetsCreated = true;
     }
 
+    std::vector<ObjectGuid> SpawnBalanceEnemies(Player* owner, uint32 entry, uint8 level, uint32 count,
+        Position const& spot)
+    {
+        Require(sObjectMgr->GetCreatureTemplate(entry) != nullptr, "Unknown balance spawn entry");
+        Map* map = owner->GetMap();
+        std::vector<ObjectGuid> guids;
+        for (uint32 index = 0; index < count; ++index)
+        {
+            Creature* creature = new Creature();
+            PendingBalanceSpawnLevel = level;
+            bool const created = creature->Create(map->GenerateLowGuid<HighGuid::Unit>(), map, owner->GetPhaseMask(),
+                entry, 0, spot.GetPositionX(), spot.GetPositionY(), spot.GetPositionZ(), spot.GetOrientation());
+            PendingBalanceSpawnLevel.reset();
+            if (!created)
+            {
+                delete creature;
+                Require(false, "Could not create balance spawn creature");
+            }
+            Require(!creature->IsSummon(), "Balance spawn must be an ordinary creature");
+            creature->SetHomePosition(spot);
+            map->AddToMap(creature);
+            creature->setActive(true);
+            if (CreatureAI* ai = creature->AI())
+                ai->AttackStart(owner);
+            guids.push_back(creature->GetGUID());
+        }
+        return guids;
+    }
+
+    static uint32 CountAliveOwned(Player* player)
+    {
+        uint32 alive = 0;
+        for (Unit* owned : player->m_Controlled)
+            if (owned && owned->IsAlive())
+                ++alive;
+        return alive;
+    }
+
+    static char const* BalanceOutcomeName(CoAGameplay::Balance::StageOutcome outcome)
+    {
+        using CoAGameplay::Balance::StageOutcome;
+        switch (outcome)
+        {
+            case StageOutcome::Win: return "win";
+            case StageOutcome::Loss: return "loss";
+            case StageOutcome::Timeout: return "timeout";
+            case StageOutcome::Invalid: return "invalid";
+            case StageOutcome::Running: break;
+        }
+        return "running";
+    }
+
+    void DespawnBalanceStageEnemies()
+    {
+        for (Target const& target : _balanceStageEnemies)
+            if (Map* map = sMapMgr->FindMap(target.map, target.instance))
+                if (Creature* creature = map->GetCreature(target.guid))
+                    creature->DespawnOrUnsummon();
+        _balanceStageEnemies.clear();
+    }
+
+    static void RemoveDeadPet(Player* player)
+    {
+        if (Pet* pet = player->GetPet())
+            if (pet->isDead())
+                player->RemovePet(pet, PET_SAVE_NOT_IN_SLOT, false);
+    }
+
+    void ResetBalanceStageActor(Actor& actor, Player* player)
+    {
+        DespawnBalanceStageEnemies();
+        if (!player->IsAlive())
+        {
+            player->ResurrectPlayer(1.0f);
+            player->SpawnCorpseBones();
+        }
+        player->SetFullHealth();
+        for (uint8 power = 0; power < MAX_POWERS; ++power)
+            player->SetPower(Powers(power), player->GetMaxPower(Powers(power)));
+        player->RemoveAllSpellCooldown();
+        StopOwnedUnits(player);
+        RemoveDeadPet(player);
+        actor.lastResetHealth = player->GetHealth();
+    }
+
+    bool BalanceStageOpenerHolds(Actor const& actor, Player* player) const
+    {
+        auto holds = [player](CoAGameplay::Balance::KitRule const& rule)
+        {
+            return rule.when == CoAGameplay::Balance::KitCondition::OwnedBelow && KitRuleHolds(rule, player);
+        };
+        return std::any_of(actor.kitUpkeep.begin(), actor.kitUpkeep.end(), holds) ||
+            std::any_of(actor.kitDefensives.begin(), actor.kitDefensives.end(), holds);
+    }
+
+    bool AdvanceBalanceStage(Actor& actor, Player* player, Tree const& step, Tree& record)
+    {
+        if (!_balanceStage)
+        {
+            ResetBalanceStageActor(actor, player);
+            BalanceStageState state;
+            state.actor = player->GetGUID();
+            state.resummonNeeded = BalanceStageOpenerHolds(actor, player);
+            _balanceStage = state;
+        }
+        BalanceStageState& state = *_balanceStage;
+        if (state.phase == BalanceStageState::Phase::Opener)
+        {
+            bool const openerCastsPending = state.resummonNeeded && !actor.kitOpener.empty() &&
+                state.openerIndex < actor.kitOpener.size();
+            if (openerCastsPending)
+            {
+                if (BotIdle(player))
+                    SubmitBotCast(player, actor.kitOpener[state.openerIndex++], player);
+                return false;
+            }
+            bool const openerSummonStillSettling = state.resummonNeeded && !actor.kitOpener.empty() &&
+                (!BotIdle(player) || BalanceStageOpenerHolds(actor, player));
+            if (openerSummonStillSettling)
+            {
+                if (!state.openerSettling)
+                {
+                    state.openerSettling = true;
+                    state.openerSettleStart = GameTime::Now();
+                }
+                if (GameElapsed(state.openerSettleStart) < OpenerSettleLimitMs)
+                    return false;
+            }
+            state.petsOwnedStart = CountAliveOwned(player);
+            Position spot = player->GetPosition();
+            float const distance = step.get<float>("distance", 8.0f);
+            uint32 const mapId = player->GetMapId();
+            uint32 const instanceId = player->GetInstanceId();
+            BalanceAccounting::Begin(state.actor);
+            for (auto const& enemy : step.get_child("enemies"))
+            {
+                Position enemySpot = spot;
+                enemySpot.m_positionX += distance;
+                std::vector<ObjectGuid> const spawned = SpawnBalanceEnemies(player,
+                    enemy.second.get<uint32>("entry"), uint8(enemy.second.get<uint32>("level")),
+                    enemy.second.get<uint32>("count", 1), enemySpot);
+                for (ObjectGuid const& guid : spawned)
+                    state.enemies.push_back({ mapId, instanceId, guid });
+            }
+            _balanceStageEnemies = state.enemies;
+            state.fightStart = GameTime::Now();
+            state.phase = BalanceStageState::Phase::Fight;
+            return false;
+        }
+
+        uint32 enemiesAlive = 0;
+        bool anyEvading = false;
+        for (Target const& target : state.enemies)
+        {
+            Map* map = sMapMgr->FindMap(target.map, target.instance);
+            if (Creature* creature = map ? map->GetCreature(target.guid) : nullptr; creature && creature->IsAlive())
+            {
+                ++enemiesAlive;
+                anyEvading = anyEvading || creature->IsInEvadeMode();
+            }
+        }
+        uint32 const elapsedMs = uint32(GameElapsed(state.fightStart));
+        uint32 const capMs = step.get<uint32>("cap_s", 120) * 1000;
+        CoAGameplay::Balance::StageOutcome const outcome = CoAGameplay::Balance::ResolveStage(player->IsAlive(),
+            enemiesAlive, anyEvading, elapsedMs, capMs);
+        if (outcome == CoAGameplay::Balance::StageOutcome::Running)
+            return false;
+
+        DespawnBalanceStageEnemies();
+        StopOwnedUnits(player);
+        BalanceStageTally const tally = BalanceAccounting::Get(state.actor);
+        BalanceAccounting::End(state.actor);
+
+        double const durationS = double(elapsedMs) / 1000.0;
+        Tree balance;
+        balance.put("stage", step.get<std::string>("stage"));
+        balance.put("outcome", BalanceOutcomeName(outcome));
+        balance.put("duration_s", durationS);
+        if (outcome == CoAGameplay::Balance::StageOutcome::Win)
+            balance.put("ttk_s", durationS);
+        if (outcome == CoAGameplay::Balance::StageOutcome::Loss)
+            balance.put("ttd_s", durationS);
+        balance.put("health_pct_end", player->GetHealthPct());
+        balance.put("damage_done_player", tally.damageDonePlayer);
+        balance.put("damage_done_pets", tally.damageDonePets);
+        balance.put("damage_taken_player", tally.damageTakenPlayer);
+        balance.put("damage_taken_pets", tally.damageTakenPets);
+        balance.put("healing_done_player", tally.healingDonePlayer);
+        balance.put("healing_done_pets", tally.healingDonePets);
+        balance.put("pets_owned_start", state.petsOwnedStart);
+        balance.put("pets_alive_end", CountAliveOwned(player));
+        balance.put_child("enemies", step.get_child("enemies"));
+        record.put_child("balance", balance);
+        actor.lastBalance = balance;
+        _balanceStage.reset();
+        return true;
+    }
+
+    static float BalanceWhiteMaxHealthFor(ObjectGuid guid, Player* player)
+    {
+        if (guid == player->GetGUID())
+            return player->GetMaxHealth();
+        if (Unit* unit = ObjectAccessor::GetUnit(*player, guid))
+            return float(unit->GetMaxHealth());
+        return 0.0f;
+    }
+
+    static std::string BalanceWhiteKeyFor(ObjectGuid guid, Player* player)
+    {
+        if (guid == player->GetGUID())
+            return "player";
+        if (Unit* unit = ObjectAccessor::GetUnit(*player, guid))
+            return "pet:" + std::to_string(unit->GetEntry());
+        return "pet:unknown";
+    }
+
+    static Tree BuildBalanceWhiteSide(std::map<ObjectGuid, CoAGameplay::Balance::SwingTally> const& tallies,
+        std::vector<ObjectGuid> const& victims, Player* player, std::optional<float> sharedMaxHealth)
+    {
+        using CoAGameplay::Balance::SwingResult;
+        Tree side;
+        for (ObjectGuid const& guid : victims)
+        {
+            auto const found = tallies.find(guid);
+            CoAGameplay::Balance::SwingTally const tally =
+                found != tallies.end() ? found->second : CoAGameplay::Balance::SwingTally{};
+            Tree entry;
+            entry.put("swings", tally.swings);
+            entry.put("normal", tally.results[std::size_t(SwingResult::Normal)]);
+            entry.put("crit", tally.results[std::size_t(SwingResult::Crit)]);
+            entry.put("glancing", tally.results[std::size_t(SwingResult::Glancing)]);
+            entry.put("crushing", tally.results[std::size_t(SwingResult::Crushing)]);
+            entry.put("miss", tally.results[std::size_t(SwingResult::Miss)]);
+            entry.put("dodge", tally.results[std::size_t(SwingResult::Dodge)]);
+            entry.put("parry", tally.results[std::size_t(SwingResult::Parry)]);
+            entry.put("block", tally.results[std::size_t(SwingResult::Block)]);
+            float const avgNormal = CoAGameplay::Balance::AverageNormalHit(tally);
+            entry.put("avg_normal_hit", avgNormal);
+            float const maxHealth = sharedMaxHealth ? *sharedMaxHealth : BalanceWhiteMaxHealthFor(guid, player);
+            entry.put("avg_normal_hit_pct_max_health", maxHealth > 0.0f ? avgNormal / maxHealth * 100.0f : 0.0f);
+            side.put_child(BalanceWhiteKeyFor(guid, player), entry);
+        }
+        return side;
+    }
+
+    bool AdvanceBalanceWhite(Actor& actor, Player* player, Tree const& step, Tree& record)
+    {
+        if (!_balanceWhite)
+        {
+            BalanceWhiteState state;
+            state.actor = player->GetGUID();
+            state.swingsTarget = step.get<uint32>("swings", 20);
+            state.victims.push_back(player->GetGUID());
+            for (Unit* owned : player->m_Controlled)
+                if (owned && owned->IsAlive() && owned->IsInWorld())
+                    state.victims.push_back(owned->GetGUID());
+
+            Position spot = player->GetPosition();
+            spot.m_positionX += 3.0f;
+            std::vector<ObjectGuid> const spawned =
+                SpawnBalanceEnemies(player, step.get<uint32>("entry"), uint8(step.get<uint32>("level")), 1, spot);
+            Require(spawned.size() == 1, "balance_white needs exactly one spawned enemy");
+            state.enemy = { player->GetMapId(), player->GetInstanceId(), spawned.front() };
+
+            for (ObjectGuid const& guid : state.victims)
+                if (guid != player->GetGUID())
+                    if (Creature* owned = ObjectAccessor::GetCreature(*player, guid))
+                    {
+                        state.ownedOriginalReact[guid] = owned->GetReactState();
+                        owned->SetReactState(REACT_PASSIVE);
+                        owned->SetUnitFlag(UNIT_FLAG_PACIFIED);
+                        owned->NearTeleportTo(spot.GetPositionX(), spot.GetPositionY(), spot.GetPositionZ(),
+                            owned->GetAngle(spot.GetPositionX(), spot.GetPositionY()));
+                    }
+
+            actor.balanceWhiteActive = true;
+            actor.balanceWhiteSwingsTarget = state.swingsTarget;
+            actor.balanceWhiteEnemy = state.enemy.guid;
+            actor.balanceWhiteReceived.clear();
+            actor.balanceWhiteGiven.clear();
+            state.guardedGuids = std::set<ObjectGuid>(state.victims.begin(), state.victims.end());
+            BalanceWhiteGuard::Protect(state.guardedGuids);
+            _balanceWhite = state;
+            return false;
+        }
+
+        BalanceWhiteState& state = *_balanceWhite;
+        Map* map = sMapMgr->FindMap(state.enemy.map, state.enemy.instance);
+        Creature* enemy = map ? map->GetCreature(state.enemy.guid) : nullptr;
+        Require(enemy != nullptr, "balance_white enemy disappeared");
+        Require(player->IsAlive(), "balance_white actor died while measuring swings");
+
+        if (state.phase == BalanceWhiteState::Phase::Received)
+        {
+            Require(enemy->IsAlive(), "balance_white enemy died while measuring received swings");
+            StopOwnedUnits(player);
+            ObjectGuid const currentVictim = state.victims[state.victimIndex];
+            if (Unit* desired = ObjectAccessor::GetUnit(*player, currentVictim))
+            {
+                ThreatManager& threat = enemy->GetThreatMgr();
+                threat.ClearAllThreat();
+                threat.AddThreat(desired, 1.0f, nullptr, true, true);
+                if (CreatureAI* ai = enemy->AI(); ai && enemy->GetVictim() != desired)
+                    ai->AttackStart(desired);
+            }
+            auto const found = actor.balanceWhiteReceived.find(currentVictim);
+            uint32 const swings = found != actor.balanceWhiteReceived.end() ? found->second.swings : 0;
+            if (swings < state.swingsTarget)
+                return false;
+            ++state.victimIndex;
+            if (state.victimIndex < state.victims.size())
+                return false;
+
+            enemy->AttackStop();
+            enemy->SetUnitFlag(UNIT_FLAG_PACIFIED);
+            enemy->SetUnitFlag(UNIT_FLAG_DISABLE_MOVE);
+            enemy->StopMoving();
+            enemy->GetMotionMaster()->MoveIdle();
+            for (ObjectGuid const& guid : state.victims)
+                if (guid != player->GetGUID())
+                    if (Creature* owned = ObjectAccessor::GetCreature(*player, guid))
+                        owned->RemoveUnitFlag(UNIT_FLAG_PACIFIED);
+            BalanceWhiteGuard::Unprotect(state.guardedGuids);
+            state.guardedGuids = { state.enemy.guid };
+            BalanceWhiteGuard::Protect(state.guardedGuids);
+            KeepInMelee(player, enemy, false);
+            SubmitAttackSwing(player, enemy);
+            CommandOwnedUnitsAttack(player, enemy);
+            state.phase = BalanceWhiteState::Phase::Given;
+            return false;
+        }
+
+        bool allDone = true;
+        for (ObjectGuid const& guid : state.victims)
+        {
+            auto const found = actor.balanceWhiteGiven.find(guid);
+            uint32 const swings = found != actor.balanceWhiteGiven.end() ? found->second.swings : 0;
+            if (swings < state.swingsTarget)
+            {
+                allDone = false;
+                continue;
+            }
+            if (guid == player->GetGUID())
+                player->AttackStop();
+            else if (Unit* owned = ObjectAccessor::GetUnit(*player, guid))
+                owned->AttackStop();
+        }
+        if (!allDone)
+            return false;
+
+        Tree received = BuildBalanceWhiteSide(actor.balanceWhiteReceived, state.victims, player, std::nullopt);
+        Tree given = BuildBalanceWhiteSide(actor.balanceWhiteGiven, state.victims, player,
+            std::optional<float>(float(enemy->GetMaxHealth())));
+        Tree balanceWhite;
+        balanceWhite.put_child("received", received);
+        balanceWhite.put_child("given", given);
+        record.put_child("balance_white", balanceWhite);
+        actor.lastBalanceWhite = balanceWhite;
+
+        BalanceWhiteGuard::Unprotect(state.guardedGuids);
+        state.guardedGuids.clear();
+        actor.balanceWhiteActive = false;
+        player->RemoveUnitFlag(UNIT_FLAG_PACIFIED);
+        for (auto const& [guid, react] : state.ownedOriginalReact)
+            if (Creature* owned = ObjectAccessor::GetCreature(*player, guid))
+            {
+                owned->SetReactState(react);
+                owned->RemoveUnitFlag(UNIT_FLAG_PACIFIED);
+            }
+        StopOwnedUnits(player);
+        enemy->DespawnOrUnsummon();
+        _balanceWhite.reset();
+        return true;
+    }
+
     double Measure(Tree const& step)
     {
         if (std::string const requested = step.get<std::string>("metric"); requested.starts_with("timeline_"))
@@ -2822,6 +3672,40 @@ private:
         }
         Unit* unit = GetUnit(step.get<std::string>("actor"));
         std::string metric = step.get<std::string>("metric");
+        if (metric.starts_with("balance_white_"))
+        {
+            Actor const& actor = _actors.at(step.get<std::string>("actor"));
+            std::string const field = metric.substr(std::string("balance_white_").size());
+            std::string const side = step.get<std::string>("side");
+            Require(side == "received" || side == "given", "balance_white metric needs a known side");
+            Tree const sideTree = actor.lastBalanceWhite.get_child(side, Tree());
+            std::string key = "player";
+            if (step.get<bool>("pet", false))
+            {
+                key.clear();
+                auto const entry = step.get_optional<uint32>("entry");
+                std::string const wanted = entry ? "pet:" + std::to_string(*entry) : "";
+                for (auto const& [candidateKey, unused] : sideTree)
+                    if (candidateKey.starts_with("pet:") && (wanted.empty() || candidateKey == wanted))
+                    {
+                        key = candidateKey;
+                        break;
+                    }
+                Require(!key.empty(), "balance_white metric found no matching pet");
+            }
+            return sideTree.get<double>(key + "." + field, std::numeric_limits<double>::quiet_NaN());
+        }
+        if (metric.starts_with("balance_"))
+        {
+            Actor const& actor = _actors.at(step.get<std::string>("actor"));
+            std::string const field = metric.substr(8);
+            if (field == "outcome")
+                return actor.lastBalance.get<std::string>("outcome", "") == step.get<std::string>("outcome")
+                    ? 1.0 : 0.0;
+            if (field == "last_reset_health")
+                return actor.lastResetHealth;
+            return actor.lastBalance.get<double>(field, std::numeric_limits<double>::quiet_NaN());
+        }
         if (metric == "spell_hit_chance")
             return unit->m_modSpellHitChance;
         uint32 spell = step.get<uint32>("spell", 0);
@@ -2903,6 +3787,8 @@ private:
             return unit->IsAlive();
         if (metric == "map_id")
             return unit->GetMapId();
+        if (metric == "instance_id")
+            return unit->GetInstanceId();
         if (metric == "position_x")
             return unit->GetPositionX();
         if (metric == "position_y")
@@ -5351,6 +6237,26 @@ private:
                 return;
             }
         }
+        else if (action == "balance_stage")
+        {
+            std::string const actorId = step.get<std::string>("actor");
+            Actor& actor = _actors.at(actorId);
+            Player* player = ObjectAccessor::FindPlayer(actor.guid);
+            if (!player || !player->FindMap() || player->IsBeingTeleported())
+                return;
+            if (!AdvanceBalanceStage(actor, player, step, record))
+                return;
+        }
+        else if (action == "balance_white")
+        {
+            std::string const actorId = step.get<std::string>("actor");
+            Actor& actor = _actors.at(actorId);
+            Player* player = ObjectAccessor::FindPlayer(actor.guid);
+            if (!player || !player->FindMap() || player->IsBeingTeleported())
+                return;
+            if (!AdvanceBalanceWhite(actor, player, step, record))
+                return;
+        }
         else if (action == "relog")
         {
             Actor& actor = _actors.at(step.get<std::string>("actor"));
@@ -6791,6 +7697,23 @@ private:
             player->CompleteQuest(quest);
             record.put("result", "quest marked complete as a fixture");
         }
+        else if (action == "balance_spawn")
+        {
+            uint32 const entry = step.get<uint32>("entry");
+            uint8 const level = uint8(step.get<uint32>("level"));
+            uint32 const count = step.get<uint32>("count", 1);
+            float const distance = step.get<float>("distance", 8.0f);
+            Position spot = player->GetPosition();
+            spot.m_positionX += distance;
+            std::vector<ObjectGuid> const guids = SpawnBalanceEnemies(player, entry, level, count, spot);
+            for (std::size_t index = 0; index < guids.size(); ++index)
+            {
+                std::string const spawnId = id + "_balance_" + std::to_string(index);
+                Require(!_actors.count(spawnId) && !_targets.count(spawnId), "Duplicate actor id");
+                _targets.emplace(spawnId, Target{ player->GetMapId(), player->GetInstanceId(), guids[index] });
+            }
+            record.put("result", "spawned " + std::to_string(guids.size()) + " balance enemies");
+        }
         else
             throw std::runtime_error("Unknown action: " + action);
     }
@@ -6891,6 +7814,9 @@ private:
     std::map<std::string, Target> _targets;
     std::map<std::string, double> _snapshots;
     std::optional<Target> _encounterBoss;
+    std::optional<BalanceStageState> _balanceStage;
+    std::vector<Target> _balanceStageEnemies;
+    std::optional<BalanceWhiteState> _balanceWhite;
     QueryCallbackProcessor _queries;
     std::optional<CreatureScaling::TestOverride> _creatureScaling;
     std::optional<AscensionVanityOwnership::TestOverride> _vanityOwnership;
@@ -7714,6 +8640,36 @@ public:
                 ObjectGuid::Empty, 0, 0, uint32(newState) });
     }
 };
+
+class CoAGameplayTestBalanceLevels final : public AllCreatureScript
+{
+public:
+    CoAGameplayTestBalanceLevels() : AllCreatureScript("CoAGameplayTestBalanceLevels") { }
+
+    void OnBeforeCreatureSelectLevel(CreatureTemplate const*, Creature*, uint8& level) override
+    {
+        if (PendingBalanceSpawnLevel)
+            level = *PendingBalanceSpawnLevel;
+    }
+};
+
+class CoAGameplayTestBalanceAccounting final : public UnitScript
+{
+public:
+    CoAGameplayTestBalanceAccounting() : UnitScript("CoAGameplayTestBalanceAccounting", true,
+        { UNITHOOK_ON_DAMAGE, UNITHOOK_ON_HEAL }) { }
+
+    void OnDamage(Unit* attacker, Unit* victim, uint32& damage) override
+    {
+        BalanceWhiteGuard::OnDamage(victim, damage);
+        BalanceAccounting::OnDamage(attacker, victim, damage);
+    }
+
+    void OnHeal(Unit* healer, Unit* receiver, uint32& gain) override
+    {
+        BalanceAccounting::OnHeal(healer, receiver, gain);
+    }
+};
 }
 
 void AddCoAGameplayTestScripts()
@@ -7724,4 +8680,6 @@ void AddCoAGameplayTestScripts()
     new CoAGameplayTestTimelineUnits();
     new CoAGameplayTestTimelineSpawns();
     new CoAGameplayTestTimelineBossStates();
+    new CoAGameplayTestBalanceLevels();
+    new CoAGameplayTestBalanceAccounting();
 }

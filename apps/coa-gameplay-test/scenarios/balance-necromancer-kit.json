@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "The Necromancer Animation kit raises a Ghoul, applies Fetid Ward to it and the pet deals damage",
+  "contract": "The 'necro' actor is solo with a kit (Task 3/4 mechanism) whose opener casts Fetid Ward (680388, CharacterAdvancement 29244) before Raise: Ghoul (500971, CharacterAdvancement 33775) so a new Ghoul (creature 50073) inherits the ward at creation (AscensionNecromancerSummons.cpp: a new minion copies any of 680388/681460/681529 active on the owner). Fetid Ward's own aura id, checked everywhere in AscensionNecromancerEvents.cpp/AscensionNecromancerAuras.cpp, is 680388 itself (680388's own apply-aura effect on TARGET_UNIT_CASTER), not the spell (681463) it periodically triggers. The upkeep rules resummon the Ghoul when owned_below 1 and refresh Fetid Ward (recast 680388 on self) when pet_aura_missing on 680388. The opener sequence is also run explicitly as plain 'cast' steps right after the talent purchase, before any stage, so the Ghoul-carries-Fetid-Ward assertion is checked on a living Ghoul: the stage's own internal opener (Task 4) would only run again if the Ghoul were missing, and a loss against a real elite can kill the Ghoul before the assertion runs. balance_stage against one level 36 Scarlet Soldier (4286, the Task 2/4/5 dungeon spawn) separately proves pets_owned_start and damage_done_pets are non-zero (the pets_missing rule in Task 8 flags a kit whose pets never spawn or never deal damage); that stage's own opener is a no-op here because the Ghoul already exists, so pets_owned_start reflects the same pre-raised Ghoul.",
+  "timeout_ms": 240000,
+  "location": {
+    "map": 189,
+    "x": 1688.99,
+    "y": 1053.48,
+    "z": 18.6775,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "necro",
+      "race": 5,
+      "class": 23,
+      "level": 40,
+      "role": "ranged",
+      "rotation_assist": true,
+      "rotation": [5019],
+      "solo": true,
+      "group": "dps",
+      "kit": {
+        "opener": [680388, 500971],
+        "upkeep": [
+          { "spell": 500971, "when": "owned_below", "value": 1, "target": "self" },
+          { "spell": 680388, "when": "pet_aura_missing", "aura": 680388, "target": "self" }
+        ]
+      }
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and stat updates settle", "ms": 3000 },
+    { "action": "learn", "label": "Wand fallback for the ranged rotation", "actor": "necro", "spell": 5019 },
+    { "action": "specialization", "label": "Choose Animation", "actor": "necro", "id": 35 },
+    {
+      "action": "advancement_rank", "label": "Buy Fetid Ward", "actor": "necro",
+      "entry": 29244, "rank": 1
+    },
+    {
+      "action": "advancement_rank", "label": "Buy Raise: Ghoul", "actor": "necro",
+      "entry": 33775, "rank": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: Fetid Ward is owned", "actor": "necro",
+      "metric": "knows_spell", "spell": 680388, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: Raise: Ghoul is owned", "actor": "necro",
+      "metric": "knows_spell", "spell": 500971, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "cast", "label": "Opener step 1: apply Fetid Ward to self first", "actor": "necro", "spell": 680388
+    },
+    {
+      "action": "assert", "label": "SETUP: the Necromancer carries Fetid Ward", "actor": "necro",
+      "metric": "aura", "spell": 680388, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "cast", "label": "Opener step 2: raise the Ghoul so it inherits the active ward", "actor": "necro",
+      "spell": 500971
+    },
+    {
+      "action": "assert", "label": "SETUP: the Ghoul is raised", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50073, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "The Ghoul itself carries Fetid Ward (680388) after the opener",
+      "actor": "necro", "metric": "owned_creature_count", "entry": 50073, "spell": 680388, "min": 1
+    },
+    {
+      "action": "balance_stage", "label": "elite_1: the stage's own opener is a no-op, the Ghoul already exists",
+      "actor": "necro", "stage": "elite_1",
+      "enemies": [ { "entry": 4286, "level": 36, "count": 1 } ],
+      "cap_s": 120
+    },
+    {
+      "action": "assert", "label": "The kit raised at least one Ghoul before the fight",
+      "actor": "necro", "metric": "balance_pets_owned_start", "min": 1
+    },
+    {
+      "action": "assert", "label": "The Ghoul dealt damage during the stage",
+      "actor": "necro", "metric": "balance_damage_done_pets", "min": 1
+    }
+  ]
+}

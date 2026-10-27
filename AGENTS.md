@@ -102,6 +102,7 @@ Read the relevant sections when needed for the work. Do not read every guide or 
 - Spell/quest ranks, acquisition, expected behavior, execution paths and regression links →
   `apps/coa-mechanics/README.md` (compact mechanic maps)
 - Finding gameplay regression scenarios or checking recorded results → `apps/coa-gameplay-test/README.md`
+- PvE balance suite → `docs/coa/balance-suite.md`
 - Scoped source checks (boundaries, registrations, tooling regressions) →
   `python -B tools/verify_all.py --stages source --base <ref>`; `report.json` and `source.log` list the suites
   it selected (`--plan` shows only the command).

@@ -1,0 +1,163 @@
+{
+  "schema": 1,
+  "name": "balance_stage resets the actor, fights the configured enemies and records outcome, timing and damage",
+  "contract": "balance_stage reuses the Task 3 solo driver (role melee, rotation_assist with specialization 1, spell 801576) and SpawnBalanceEnemies (Task 2). Reset order per the design: revive/full health+power/clear cooldowns/despawn the previous stage's enemies/StopOwnedUnits, then (no kit here, so no opener) spawn the stage's enemies and let the solo driver fight until ResolveStage leaves Running. elite_1 fights a single level 30 Scarlet Soldier (4286), the same elite as the solo-driver regression, so the fixture kills it inside the stage cap and the step's balance object (win/ttk_s/damage_done_player/damage_taken_player) comes from a real fight, not a forced outcome. set_health gives the fixture the same 20000/20000 health pool as the solo-driver regression (its bare gear would otherwise die to this elite, as a first run of this scenario measured: 1122 max health against 1161 damage taken). unreachable_spawn_evades teleports the fighter back to the fixed fight spot, then spawns the next elite at the maximum allowed `distance` (100 yards): at that offset from this spot the elite aggros but cannot path to the fighter, so it evades a few seconds in (confirmed directly: an isolated probe at the same map/spot/distance recorded outcome invalid at duration_s 10.0 with zero damage either way), which AdvanceBalanceStage/ResolveStage must record as invalid rather than win or timeout. after_reset then repeats the same single elite at the default distance to prove the reset between balance_stage calls actually restores full health: balance_last_reset_health is read right after ResetBalanceStageActor runs, before the second fight can lower it again, and is asserted equal to max_health via a ratio_to snapshot.",
+  "timeout_ms": 300000,
+  "location": {
+    "map": 189,
+    "x": 1688.99,
+    "y": 1053.48,
+    "z": 18.6775,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "fighter",
+      "race": 1,
+      "class": 12,
+      "level": 40,
+      "melee_hit_rating": 10000,
+      "melee_crit_rating": 10000,
+      "expertise_rating": 10000,
+      "role": "melee",
+      "solo": true,
+      "rotation_assist": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let local level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "fighter",
+      "id": 1
+    },
+    {
+      "action": "learn",
+      "actor": "fighter",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "fighter",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "fighter",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "fighter",
+      "spell": 801576
+    },
+    {
+      "action": "set_health",
+      "actor": "fighter",
+      "value": 20000,
+      "maximum": 20000
+    },
+    {
+      "action": "snapshot",
+      "label": "SETUP: the fighter's max health before any stage",
+      "actor": "fighter",
+      "metric": "max_health",
+      "save_as": "max_health"
+    },
+    {
+      "action": "balance_stage",
+      "actor": "fighter",
+      "stage": "elite_1",
+      "enemies": [
+        { "entry": 4286, "level": 30, "count": 1 }
+      ],
+      "cap_s": 120
+    },
+    {
+      "action": "assert",
+      "label": "elite_1 ends in a win",
+      "actor": "fighter",
+      "metric": "balance_outcome",
+      "outcome": "win",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "elite_1 reports a positive time to kill",
+      "actor": "fighter",
+      "metric": "balance_ttk_s",
+      "min": 0.001
+    },
+    {
+      "action": "assert",
+      "label": "elite_1 recorded the player dealing damage",
+      "actor": "fighter",
+      "metric": "balance_damage_done_player",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "elite_1 recorded the player taking damage",
+      "actor": "fighter",
+      "metric": "balance_damage_taken_player",
+      "min": 1
+    },
+    {
+      "action": "teleport",
+      "label": "Return to the fixed fight spot: elite_1's chase can drift the fighter away from it",
+      "actor": "fighter",
+      "map": 189,
+      "x": 1688.99,
+      "y": 1053.48,
+      "z": 18.6775
+    },
+    {
+      "action": "balance_stage",
+      "actor": "fighter",
+      "stage": "unreachable_spawn_evades",
+      "enemies": [
+        { "entry": 4286, "level": 30, "count": 1 }
+      ],
+      "distance": 100,
+      "cap_s": 30
+    },
+    {
+      "action": "assert",
+      "label": "unreachable_spawn_evades' enemy cannot path to the fighter and evades, invalidating the stage",
+      "actor": "fighter",
+      "metric": "balance_outcome",
+      "outcome": "invalid",
+      "equals": 1
+    },
+    {
+      "action": "balance_stage",
+      "actor": "fighter",
+      "stage": "after_reset",
+      "enemies": [
+        { "entry": 4286, "level": 30, "count": 1 }
+      ],
+      "cap_s": 120
+    },
+    {
+      "action": "assert",
+      "label": "after_reset's reset gave the fighter full health before the second fight could lower it again",
+      "actor": "fighter",
+      "metric": "balance_last_reset_health",
+      "ratio_to": "max_health",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "after_reset also ends in a win, independent of elite_1's own record",
+      "actor": "fighter",
+      "metric": "balance_outcome",
+      "outcome": "win",
+      "equals": 1
+    }
+  ]
+}

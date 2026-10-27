@@ -557,13 +557,13 @@ a previously named snapshot of the same metric; it is available on snapshots and
 `cast` accepts an optional `destination` with `x`, `y`, `z` to send an explicit ground target.
 `target_pet: true` in place of `target` sends a player's cast at their current pet.
 
-Metrics: `health`, `max_health`, `creature_type`, `power`, `max_power`, `alive`, `map_id`, `combat`, `casting`,
-`level`, `quest_objective_count` (needs `quest`, optional `index`), `knows_spell`, `has_talent`, `talent_points`, `active_talent_spec`,
-`cooldown_ms`, `item_count`, `carried_item_count`, `bank_bag_slots`, `aura`, `aura_stacks`, `aura_charges`,
-`aura_duration_ms`, `aura_amount`, `pet_entry`, `pet_aura_stacks`, `owned_creature_count`, `owned_creature_spacing`,
-`charm_entry`, `charm_aura_stacks`, `controls_self`, `private_instance`, `dynamic_object`,
-`dynamic_object_duration_ms`, `dynamic_object_height`, `distance`, `spell_proc_count`, `spell_proc_chance`,
-`aura_proc_rate`, `spell_cast_count`, `temporary_spell_replacement`,
+Metrics: `health`, `max_health`, `creature_type`, `power`, `max_power`, `alive`, `map_id`, `instance_id`, `combat`,
+`casting`, `level`, `quest_objective_count` (needs `quest`, optional `index`), `knows_spell`, `has_talent`,
+`talent_points`, `active_talent_spec`, `cooldown_ms`, `item_count`, `carried_item_count`, `bank_bag_slots`, `aura`,
+`aura_stacks`, `aura_charges`, `aura_duration_ms`, `aura_amount`, `pet_entry`, `pet_aura_stacks`,
+`owned_creature_count`, `owned_creature_spacing`, `charm_entry`, `charm_aura_stacks`, `controls_self`,
+`private_instance`, `dynamic_object`, `dynamic_object_duration_ms`, `dynamic_object_height`, `distance`,
+`spell_proc_count`, `spell_proc_chance`, `aura_proc_rate`, `spell_cast_count`, `temporary_spell_replacement`,
 `carried_aura_count` (how many of the `spells` list the unit carries, optionally only from `caster`; for an
 effect that picks one of several auras at random),
 `bank_shows`, `system_messages`, `cast_failure`, `pet_is_banker`, `pet_display`, `pet_scale`,
@@ -920,6 +920,18 @@ ownership; `aura_visible` observes whether the native aura application occupies 
 `aura_amount` also accepts an effect index (0..2, default 0). Missing auras yield zero;
 check aura presence separately when zero is a valid effect amount. Permanent aura duration is -1.
 
+### Balance dungeon spawns
+
+`balance_spawn` requires a player `actor`, an `entry` and a `level`; optional `count` (default 1) and
+`distance` (default 8 yards ahead of the actor). It creates that many ordinary creatures (`Creature::Create` +
+`Map::AddToMap`, never `SummonCreature`) in the actor's own map/instance and phase, at the forced level, so
+`creature_classlevelstats`, the actor's instance and CoA's dungeon health/damage scaling apply exactly as for a
+native dungeon spawn, unlike scenario `creatures` and other fixture summons, which `CoACreatureScaling::IsEligible`
+excludes. Each spawn becomes addressable as `<actor>_balance_<index>` (0-based), the same way other scenario
+targets are, for metrics and later steps; it is despawned with the rest of the case's fixtures.
+`instance_id` reads a unit's native instance id (zero outside an instance); it is how a scenario checks that two
+ungrouped actors who teleport to the same dungeon location get separate instances.
+
 ### Destiny Weaver regressions
 
 `scenarios/destiny-weaver-scaling.json` checks deferred scaling choices, armor debuffs, creature values
@@ -1077,6 +1089,109 @@ bot casting its rotation and a healer against a defensive fixture, whose swings 
 [`raid-bots-rotation-assist`](scenarios/raid-bots-rotation-assist.json) adds an Incineration Pyromancer with
 `rotation_assist` next to a tank and a healer that use their scenario spells, and checks that it casts Ignite once
 and then Flare Bolt, never its scenario fallback Fire Blast, while it stands within Fire Blast's 20 yd range.
+
+### Solo balance driver
+
+A player with `solo: true` acts on its own every world tick, independent of any encounter: each tick, its
+candidates are every hostile unit in combat with the player or with any unit it owns, alive and in the player's
+map. It keeps its current target while that target is still a candidate; otherwise it switches to the candidate
+with the lowest health percentage, ties broken by distance. On a target change it sends every owned unit's
+attack command at the new target (`CharmInfo::SetIsCommandAttack` plus a native `CreatureAI::AttackStart`).
+Optional `group` (`tank`, `healer`, `dps` or `dps-support`) is informational only. Optional `kit` adds
+pet/defensive upkeep: `{ "opener": [spell...], "upkeep": [rule...], "defensives": [rule...] }`, where a rule is
+`{ "spell", "when" ("always"|"self_aura_missing"|"pet_aura_missing"|"owned_below"|"health_below"), "aura",
+"value", "target" ("self"|"pet"|"enemy") }`. Each tick the actor casts the first `defensives` rule that holds and
+is castable, else the first such `upkeep` rule, else (a `healer` role under 65 percent of its own health) heals
+itself, else drives its rotation:
+a `tank`/`melee` role repositions into native melee range and faces the target (`KeepInMelee`) then swings and
+casts its rotation on it; a `ranged` role, and a `healer` role at or above 65 percent of its own health, stays in
+place and casts its rotation within 30 yards. `opener` is read but cast only by `balance_stage`, not by the driver
+itself. `StopOwnedUnits` sends every owned unit back to following the player (native `COMMAND_FOLLOW` state and
+`MoveFollow`) and stops its own attack state; `balance_stage` calls it between stages.
+
+[`balance-solo-driver-switches-targets`](scenarios/balance-solo-driver-switches-targets.json) gives a bare level
+40 melee fixture one weapon and a large fixture health pool (`set_health`), balance-spawns two level 30 Scarlet
+Soldiers, and checks that the driver kills the first, switches to the second on its own and kills that one too,
+casting its rotation spell throughout, without an encounter or a boss. `SpawnBalanceEnemies` sends each spawn's
+own AI to attack the owner right after it joins the map, so the fight starts without depending on proximity
+aggro, which this fixture (a stationary player next to creatures that only just spawned) would not otherwise
+trigger. The fixture's own gear does not carry real damage output: measuring a spec against real dungeon numbers
+is the catalog's job (a later task), not this regression's.
+
+### balance_stage
+
+`balance_stage` runs one timed fight for a `solo` actor and records its outcome. It requires `actor`, `stage`
+(a free-form name copied into the record) and `enemies` (a list of 1-10 `{entry, level, count}` dungeon spawns,
+the same shape `balance_spawn` takes per entry); optional `distance` (default 8 yards ahead of the actor) and
+`cap_s` (default 120 game seconds). Each call first resets the actor: revive and `SpawnCorpseBones` if dead,
+`SetFullHealth`, every power to its maximum, `RemoveAllSpellCooldown`, despawn the previous call's surviving
+enemies, and `StopOwnedUnits`; when a kit rule with `when: "owned_below"` holds (from either `upkeep` or
+`defensives`), it casts every `opener` spell in order, waiting for each to be castable, before continuing. It then
+spawns the stage's enemies with `SpawnBalanceEnemies` (so CoA's dungeon scaling applies to them as to a real
+spawn) at `distance` yards ahead of the actor's current position, each already attacking the actor, and polls every
+tick until `CoAGameplay::Balance::ResolveStage` leaves `Running`: the actor dying is a `loss`, any stage enemy
+entering native evade mode is `invalid`, every stage enemy dead is a `win`, and reaching `cap_s` with both sides
+alive is a `timeout`. It then stops owned units and despawns any survivor. A `UnitScript` (`OnDamage`, `OnHeal`)
+tallies damage and healing for the duration of the call only, crediting the actor or any unit it owns
+(`GetCharmerOrOwnerPlayerOrPlayerItself`) as player or pet separately; nothing outside an active `balance_stage`
+call is counted. The step's record gets a `balance` object: `stage`, `outcome` (`win`, `loss`, `timeout` or
+`invalid`), `duration_s`, `ttk_s` (present only for `win`), `ttd_s` (present only for `loss`), `health_pct_end`,
+`damage_done_player`, `damage_done_pets`, `damage_taken_player`, `damage_taken_pets`, `healing_done_player`,
+`healing_done_pets`, `pets_owned_start` (owned units alive right after the reset, before this call's enemies
+spawn), `pets_alive_end`, and `enemies` (the step's own list, echoed back). A later scenario queries that
+record through metrics named `balance_<field>` (for example `balance_ttk_s`, `balance_damage_done_player`):
+`balance_outcome` instead takes an `outcome` field naming the expected outcome and returns 1 or 0, the way
+`player_name` compares its own `name` field; `balance_last_reset_health` is not part of the recorded object — it
+is the actor's health right after the most recent reset (before that call's own fight could lower it again), for
+proving a reset actually restores full health between two calls.
+
+[`balance-stage-records-metrics`](scenarios/balance-stage-records-metrics.json) gives a solo melee fixture (the
+same setup as the solo-driver regression, with its 20000/20000 health pool) one `balance_stage` call against a
+single level 30 Scarlet Soldier and checks a real win, a positive `ttk_s`, and damage recorded on both sides; a
+second call (after a `teleport` back to the fight spot, since the first call's chase can drift the fixture away
+from it) checks that the reset actually restored full health (`balance_last_reset_health` against a `max_health`
+snapshot) and that its own outcome does not simply repeat the first call's.
+
+### balance_white
+
+`balance_white` measures a passive white-hit baseline against one `SpawnBalanceEnemies` spawn (`actor`, `entry`,
+`level`; optional `swings`, default 20). Phase A spawns the enemy next to the actor, puts every owned unit
+(`REACT_PASSIVE` plus `UNIT_FLAG_PACIFIED`, teleported to the enemy's spot) and the actor itself out of action
+(the solo driver skips an actor while a `balance_white` call is active for it), then directs the enemy's full
+threat (`ThreatManager::ClearAllThreat`/`AddThreat`) and target at the actor, then at each owned unit in turn,
+until each has taken `swings` swings. Phase B stops and pacifies/roots the enemy
+(`UNIT_FLAG_PACIFIED`/`UNIT_FLAG_DISABLE_MOVE`), restores every owned unit's attack state and lets the actor and
+each owned unit auto-attack it, in parallel, for `swings` swings each; a swing is stopped (and, for an owned
+unit, flagged `UNIT_FLAG_PACIFIED` itself) the instant it reaches `swings`, inside the same packet observation
+that recorded it, so a unit whose own AI keeps re-engaging after the native `AttackStop` cannot land another
+hit. A `UnitScript` damage clamp (`BalanceWhiteGuard`) keeps whichever side is being measured at 1 HP instead of
+letting a swing kill it: `SMSG_ATTACKERSTATEUPDATE` is sent before `Unit::DealDamage` applies the clamp, so the
+recorded swing is never affected by it.
+
+Each `SMSG_ATTACKERSTATEUPDATE` the actor's session observes while active is decoded past the fields
+`melee_attacks_taken` already reads (sub-damage entries, absorb/resist, `TargetState`) into a
+`CoAGameplay::Balance::SwingResult` (dodge/parry take priority, then miss, then block, then crit/glancing/
+crushing, else normal; an evade, immune, interrupt or deflect swing is not counted) and tallied with `AddSwing`,
+keyed by victim for the enemy's own swings (`received`) and by attacker for swings landed on the enemy
+(`given`) — whichever direction the packet's attacker/victim pairing matches the enemy, regardless of the
+call's current phase. The step's record gets a `balance_white` object: `received` and `given`, each a map from
+`player` or `pet:<entry>` to `{swings, normal, crit, glancing, crushing, miss, dodge, parry, block,
+avg_normal_hit, avg_normal_hit_pct_max_health}` (`AverageNormalHit`, zero without a normal hit; the percentage is
+of the victim's own max health for `received`, the enemy's for `given`). A later scenario reads it through
+`balance_white_<field>` metrics (`swings`, `normal`, `crit`, `glancing`, `crushing`, `miss`, `dodge`, `parry`,
+`block`, `avg_normal_hit`, `avg_normal_hit_pct_max_health`), with a required `side` (`received` or `given`) and
+an optional `pet` boolean (default the actor; an optional `entry` picks among several pet types).
+
+[`balance-white-hits`](scenarios/balance-white-hits.json) raises a level 40 Necromancer's Ghoul (`learn`/`cast`
+500971) against a level 36 Scarlet Soldier and checks exactly `swings` landed, both ways, for the player and the
+pet, with a positive average normal hit each way; the Ghoul's own custom AI (`npc_ascension_necromancer`)
+re-picks a target from the owner's attackers every second regardless of `ReactState`, which is why the enemy's
+own target needs the threat-table reset every tick rather than a one-time `AttackStart`.
+
+`solo`, `kit`, `balance_white` and `balance_stage` back the PvE balance suite
+(`tools/balance_suite.py`), which runs every CoA spec alone through a white-hit baseline and four dungeon
+stages at levels 20/40/60 and flags the ones that stray from their role group; see
+[`docs/coa/balance-suite.md`](../../docs/coa/balance-suite.md).
 
 ### World placement
 
