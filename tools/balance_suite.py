@@ -92,6 +92,8 @@ def build_steps(spec, level, dungeon, gear_items):
     for stage in STAGES:
         steps.append({'action': 'balance_stage', 'label': stage, 'actor': actor_id, 'stage': stage,
                        'enemies': stage_enemies(dungeon, stage), 'cap_s': CAP_S_SECONDS})
+        steps.append({'action': 'assert', 'label': f'{stage} ran to a measured health percentage',
+                       'actor': actor_id, 'metric': 'balance_health_pct_end', 'min': 0, 'max': 100})
     return steps
 
 

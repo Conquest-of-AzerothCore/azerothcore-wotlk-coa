@@ -12,6 +12,7 @@ GAMEPLAY_TEST_DIR = ROOT / 'apps/coa-gameplay-test'
 if str(GAMEPLAY_TEST_DIR) not in sys.path:
     sys.path.insert(0, str(GAMEPLAY_TEST_DIR))
 import batch  # noqa: E402
+import run as gameplay_run  # noqa: E402
 
 KNOWN_GROUPS = {'tank', 'healer', 'dps', 'dps-support'}
 KNOWN_ARMORS = {'cloth', 'leather', 'mail', 'plate'}
@@ -224,6 +225,20 @@ class GenerateScenariosTests(unittest.TestCase):
             self.assertLess(white_index, actions.index('balance_stage'))
             self.assertEqual(scenario['players'][0]['class'], 23)
             self.assertEqual(scenario['players'][0]['solo'], True)
+
+    def test_generated_scenario_passes_run_py_schema_validation(self):
+        non_healer_specs = [spec for spec in FIXTURE_CATALOG['specs'] if spec['group'] != 'healer']
+        catalog = {'specs': non_healer_specs}
+        with tempfile.TemporaryDirectory() as tmp:
+            out_dir = Path(tmp)
+            paths = balance_suite.generate_scenarios(catalog, FIXTURE_DUNGEONS, FIXTURE_GEAR,
+                                                       list(FIXTURE_LEVELS), out_dir)
+            self.assertTrue(paths)
+            for path in paths:
+                scenario = json.loads(path.read_text())
+                gameplay_run.validate(scenario)
+                assertions = sum(step['action'] == 'assert' for step in scenario['steps'])
+                self.assertGreater(assertions, 0)
 
 
 class HarvestTests(unittest.TestCase):
