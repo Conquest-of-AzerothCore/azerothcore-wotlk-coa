@@ -23,6 +23,7 @@ DEFAULT_THRESHOLD = 1.5
 DEFAULT_WHITE_SWINGS = 20
 FALLBACK_SPELL = 6603
 CAP_S_SECONDS = 120
+SETUP_AND_WHITE_S = 120
 
 CLASS_RACE = {
     12: 1, 13: 1, 14: 2, 15: 1, 16: 1, 17: 2, 18: 1, 19: 1, 20: 1, 21: 1,
@@ -84,6 +85,7 @@ def build_steps(spec, level, dungeon, gear_items):
         steps.append({'action': 'advancement_rank', 'label': 'advancement_rank', 'actor': actor_id,
                        'entry': entry, 'rank': rank})
     for row in gear_items:
+        steps.append({'action': 'add_item', 'label': 'add_item', 'actor': actor_id, 'item': row['item']})
         steps.append({'action': 'equip', 'label': 'equip', 'actor': actor_id,
                        'item': row['item'], 'slot': row['slot']})
     first_elite = dungeon['elites'][0]
@@ -102,7 +104,7 @@ def build_scenario(spec, level, dungeon, gear_items):
     return {
         'schema': 1,
         'name': f"Balance suite: {spec['class_name']} {spec['spec_name']} at level {level}",
-        'timeout_ms': 240000,
+        'timeout_ms': (len(STAGES) * CAP_S_SECONDS + SETUP_AND_WHITE_S) * 1000,
         'location': {'map': dungeon['map'], 'x': location['x'], 'y': location['y'], 'z': location['z'],
                       'o': location['o'], 'ignore_access': True},
         'players': [build_player(spec, level)],

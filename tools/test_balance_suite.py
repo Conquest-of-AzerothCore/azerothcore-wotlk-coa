@@ -218,12 +218,18 @@ class GenerateScenariosTests(unittest.TestCase):
             self.assertEqual(actions[0], 'wait')
             self.assertEqual(actions[1], 'specialization')
             self.assertIn('advancement_rank', actions)
-            self.assertIn('equip', actions)
+            equips = [step for step in scenario['steps'] if step['action'] == 'equip']
+            self.assertTrue(equips)
+            for equip in equips:
+                grant = scenario['steps'][scenario['steps'].index(equip) - 1]
+                self.assertEqual((grant['action'], grant['item']), ('add_item', equip['item']))
             white_index = actions.index('balance_white')
             stage_steps = [step for step in scenario['steps'] if step['action'] == 'balance_stage']
             self.assertEqual([step['stage'] for step in stage_steps], ['elite_1', 'elite_2', 'elite_3', 'boss'])
             self.assertLess(white_index, actions.index('balance_stage'))
             self.assertEqual(scenario['players'][0]['class'], 23)
+            self.assertGreaterEqual(scenario['timeout_ms'],
+                                    sum(step['cap_s'] for step in stage_steps) * 1000 + 60000)
             self.assertEqual(scenario['players'][0]['solo'], True)
 
     def test_generated_scenario_passes_run_py_schema_validation(self):
