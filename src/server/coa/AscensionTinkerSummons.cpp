@@ -307,7 +307,7 @@ struct npc_ascension_tinker_device : ScriptedAI
         me->SetOwnerGUID(owner);
         player->m_Controlled.insert(me);
         me->SetFaction(player->GetFaction());
-        if (Turret(me->GetEntry()) || Explosive())
+        if (Turret(me->GetEntry()) || Explosive() || Beacon(me->GetEntry()))
         {
             me->m_ControlledByPlayer = true;
             me->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
