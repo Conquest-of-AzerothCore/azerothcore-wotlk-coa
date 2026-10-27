@@ -238,7 +238,7 @@ inline constexpr std::array<ScalingBaseEntry, 454> ScalingBaseSpells =
     {891072, 1},
     {891100, 1},
     {891101, 1},
-    {892101, 1},
+    {892101, 3},
     {892102, 1},
     {892111, 1},
     {892112, 1},
