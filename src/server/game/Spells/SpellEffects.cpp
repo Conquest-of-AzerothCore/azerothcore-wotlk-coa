@@ -3661,7 +3661,10 @@ void Spell::EffectEnchantItemTmp(SpellEffIndex effIndex)
     // Rockbiter Weapon apply to both weapon
     if (!itemTarget)
         return;
-    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN && m_spellInfo->SpellFamilyFlags[0] & 0x400000 &&
+    // The hardcoded damage-to-enchant table below only covers the stock ranks (ids below 100000);
+    // GetSpellTwinSource() answers its own id for any spell that is not a registered twin, so a custom spell
+    // sharing this family and flag would wrongly take this branch and leave its own enchant (Effects[effIndex].MiscValue) unapplied.
+    if (m_spellInfo->Id < 100000 && m_spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN && m_spellInfo->SpellFamilyFlags[0] & 0x400000 &&
         sSpellMgr->GetSpellTwinSource(m_spellInfo->Id) == m_spellInfo->Id)
     {
         uint32 spell_id = 0;
