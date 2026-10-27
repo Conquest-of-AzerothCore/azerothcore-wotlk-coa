@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Ritualistic refunds 20% of base mana on each Green Salve cast (#9349)",
+  "contract": "#9349: Ritualistic 503918 reads 'Casting Green Salve now also refunds you $504797s1% of your base mana.'; 504797 effect 0 is SPELL_EFFECT_ASCENSION_RESTORE_BASE_MANA_PCT with BasePoints 19 + DieSides 1 = 20. Green Salve rank 4 502976 (BaseLevel 28) costs ManaCostPercentage 15 of base mana. player_class_stats class 29 level 28 BaseMana is 598, so the cast costs int(598*15/100) = 89 and the refund is uint(598*20/100) = 119, logged through the Energize Base 5% helper 681318; the net mana change of one cast is +30. The baseline in the same run (Ritualistic unlearned) must pay 89 and log no refund. Regeneration is suppressed so power deltas are exact.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "v", "race": 1, "class": 29, "level": 28, "allow_regeneration": false}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let level scaling settle", "ms": 3000},
+    {"action": "learn", "actor": "v", "spell": 502976},
+    {"action": "assert", "label": "SETUP: Green Salve rank 4 costs 15% of the level-28 base mana 598 (89)", "actor": "v", "metric": "spell_power_cost", "spell": 502976, "equals": 89},
+    {"action": "assert", "label": "SETUP: Ritualistic is not applied yet", "actor": "v", "metric": "aura", "spell": 503918, "equals": 0},
+    {"action": "set_power", "actor": "v", "power": 0, "value": 200},
+    {"action": "snapshot", "actor": "v", "metric": "power", "power": 0, "save_as": "mana_base"},
+    {"action": "snapshot", "actor": "v", "metric": "spell_energize_total", "spell": 681318, "power": 0, "save_as": "refund_base"},
+    {"action": "cast", "actor": "v", "spell": 502976},
+    {"action": "assert", "label": "BASELINE: Green Salve lands on the caster", "actor": "v", "metric": "aura", "spell": 502976, "within_ms": 3000, "equals": 1},
+    {"action": "assert", "label": "BASELINE: without Ritualistic the cast only pays its 89 mana", "actor": "v", "metric": "power", "power": 0, "relative_to": "mana_base", "within_ms": 3000, "equals": -89},
+    {"action": "assert", "label": "BASELINE: without Ritualistic no refund is logged", "actor": "v", "metric": "spell_energize_total", "spell": 681318, "power": 0, "relative_to": "refund_base", "equals": 0},
+    {"action": "learn", "actor": "v", "spell": 503918},
+    {"action": "assert", "label": "Ritualistic passive is applied", "actor": "v", "metric": "aura", "spell": 503918, "within_ms": 3000, "equals": 1},
+    {"action": "wait", "label": "Let the global cooldown pass", "ms": 2000},
+    {"action": "reset_cooldown", "actor": "v", "spell": 502976},
+    {"action": "set_power", "actor": "v", "power": 0, "value": 200},
+    {"action": "snapshot", "actor": "v", "metric": "power", "power": 0, "save_as": "mana_ritual"},
+    {"action": "snapshot", "actor": "v", "metric": "spell_energize_total", "spell": 681318, "power": 0, "save_as": "refund_ritual"},
+    {"action": "cast", "actor": "v", "spell": 502976},
+    {"action": "assert", "label": "Ritualistic refunds 20% of the level-28 base mana 598 (119)", "actor": "v", "metric": "spell_energize_total", "spell": 681318, "power": 0, "relative_to": "refund_ritual", "within_ms": 3000, "equals": 119},
+    {"action": "assert", "label": "Net mana after one Green Salve with Ritualistic is +30 (119 refund - 89 cost)", "actor": "v", "metric": "power", "power": 0, "relative_to": "mana_ritual", "within_ms": 3000, "equals": 30}
+  ]
+}
