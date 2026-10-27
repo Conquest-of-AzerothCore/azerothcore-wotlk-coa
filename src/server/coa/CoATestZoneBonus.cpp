@@ -99,6 +99,19 @@ uint32 PercentFor(Bonus const& bonus, TestZoneBonus::Reward reward)
     return 100;
 }
 
+bool EarnsTestZoneExperience(uint8 xpSource)
+{
+    switch (xpSource)
+    {
+        case PlayerXPSource::XPSOURCE_BATTLEGROUND:
+        case PlayerXPSource::XPSOURCE_PROFESSION:
+        case PlayerXPSource::XPSOURCE_PROFESSION_SKILL:
+            return false;
+        default:
+            return true;
+    }
+}
+
 void GrantExtraRunes(Player* player, Item const* item, uint32 count)
 {
     if (!player || !item || item->GetEntry() != RUNE_OF_DESCENSION)
@@ -312,8 +325,7 @@ public:
 
     void OnPlayerGiveXP(Player* player, uint32& amount, Unit*, uint8 xpSource) override
     {
-        if (player && xpSource != PlayerXPSource::XPSOURCE_BATTLEGROUND
-            && !sScriptMgr->OnPlayerHasNoBonusExperience(player))
+        if (player && EarnsTestZoneExperience(xpSource) && !sScriptMgr->OnPlayerHasNoBonusExperience(player))
             amount = TestZoneBonus::Apply(player, TestZoneBonus::Reward::Experience, amount);
     }
 
