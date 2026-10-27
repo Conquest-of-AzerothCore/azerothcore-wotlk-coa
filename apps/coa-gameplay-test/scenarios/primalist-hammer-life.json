@@ -1056,6 +1056,76 @@
     {
       "action": "wait",
       "ms": 1700
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 803973
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 300733
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally2",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally3",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520566
+    },
+    {
+      "action": "assert",
+      "label": "Battleweaver (#9412): no stray buff before the heal",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 300737,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520566,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING (#9412): Hammer of Life's heal (806073) is cast with TRIGGERED_DISALLOW_PROC_EVENTS stripped, so its effective healing procs Battleweaver",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 300737,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
     }
   ]
 }
