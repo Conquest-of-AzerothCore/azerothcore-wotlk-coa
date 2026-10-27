@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "schema": {
+    "level": {
+      "armor/primary_stat": "list of { item, slot } equipped on the fixture for that armor type and primary stat"
+    }
+  },
+  "gear": {
+    "20": {
+      "leather/agility": [{ "item": 14562, "slot": 4 }],
+      "leather/strength": [{ "item": 1489, "slot": 4 }],
+      "leather/intellect": [{ "item": 6709, "slot": 4 }],
+      "mail/agility": [{ "item": 48677, "slot": 4 }],
+      "mail/strength": [{ "item": 6627, "slot": 4 }],
+      "mail/intellect": [{ "item": 48683, "slot": 4 }],
+      "cloth/intellect": [{ "item": 2292, "slot": 4 }],
+      "plate/strength": [{ "item": 48685, "slot": 4 }],
+      "plate/intellect": [{ "item": 6199, "slot": 11 }]
+    },
+    "40": {
+      "leather/agility": [{ "item": 14601, "slot": 4 }],
+      "leather/strength": [{ "item": 1489, "slot": 4 }],
+      "leather/intellect": [{ "item": 8200, "slot": 4 }],
+      "mail/agility": [{ "item": 48677, "slot": 4 }],
+      "mail/strength": [{ "item": 3845, "slot": 4 }],
+      "mail/intellect": [{ "item": 48683, "slot": 4 }],
+      "cloth/intellect": [{ "item": 10021, "slot": 4 }],
+      "plate/strength": [{ "item": 48685, "slot": 4 }],
+      "plate/intellect": [{ "item": 5743, "slot": 11 }]
+    },
+    "60": {
+      "leather/agility": [{ "item": 21680, "slot": 4 }],
+      "leather/strength": [{ "item": 19405, "slot": 4 }],
+      "leather/intellect": [{ "item": 22488, "slot": 4 }],
+      "mail/agility": [{ "item": 48677, "slot": 4 }],
+      "mail/strength": [{ "item": 31127, "slot": 4 }],
+      "mail/intellect": [{ "item": 48683, "slot": 4 }],
+      "cloth/intellect": [{ "item": 20331, "slot": 4 }],
+      "plate/strength": [{ "item": 48685, "slot": 4 }],
+      "plate/intellect": [{ "item": 19138, "slot": 11 }]
+    }
+  }
+}
