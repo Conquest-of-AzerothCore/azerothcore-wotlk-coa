@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "name": "Worldforged Travel Sack at the Red Cloud Mesa well is on the ground and can be opened (#8577)",
+  "contract": [
+    "Report #8577 (and #8504): the Travel Sack pickup (95612, guid 6942353, item 450510) floated above the Red Cloud Mesa well at",
+    "z 33.4 and could not be looted from the ground. The reporter stood at (-3068.52, -536.60, 26.86) on map 1, and LootCollector",
+    "(installed StarterDB 2026-08-20) records the sack at 44.81, 41.35 in Camp Narache, world (-3063.0, -540.0).",
+    "Expected: a character standing at the reported ground spot finds one Travel Sack within 20 yd and opens it."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": -3068.52, "y": -536.6, "z": 26.86, "o": 0 },
+  "players": [ { "id": "p", "race": 6, "class": 1, "level": 5 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the Travel Sack is in the area", "actor": "p", "metric": "nearby_gameobject_count",
+      "entry": 95612, "equals": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 95612 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "DISCRIMINATING: the sack is within reach of the ground spot and opens", "actor": "p",
+      "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}
