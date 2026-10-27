@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "name": "Manastorm Shadowfang Keep: solo Archmage Arugal does not full-heal when his Curse charms the only attacker (#8345)",
+  "contract": [
+    "#8345: in a solo Manastorm run of Shadowfang Keep, Archmage Arugal's Arugal's Curse charms the lone",
+    "player (spell 7621). With no other threat left in his list, generic evade logic used to reset him to",
+    "full health and drop combat the instant the charm landed, soft-locking a solo-advertised floor. The fix",
+    "suppresses that evade for the charm's duration so the fight continues once control returns; it never",
+    "changes the curse or the boss.",
+    "This scenario proves setup correctness (private run, phase match, combat engaged, Chaotic Link present,",
+    "player not pre-charmed) up to the charm itself. Forcing the charm directly with '.cast target 7621'",
+    "(caster = the player's selected victim, bypassing SmartAI's own In-Combat timer) fails with a",
+    "permission error distinct from the plain security-level gate that '.manastorm segment test' passes:",
+    "RBAC_PERM_COMMAND_CAST_TARGET (271) requires a full RBACData::HasPermission lookup",
+    "(ChatCommand.cpp:520-521), unlike plain-security-level commands, and this harness's test account",
+    "never observably resolves it. Left unresolved; see impl-2.md."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "n",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "security": 2,
+      "melee_hit_rating": 100000,
+      "melee_crit_rating": 100000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "n",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "n",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "command",
+      "actor": "n",
+      "command": ".manastorm segment test 49"
+    },
+    {
+      "action": "assert",
+      "label": "The player entered a private Manastorm instance",
+      "actor": "n",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "Match the native phase 1 Manastorm room so the boss is visible to this lane",
+      "actor": "n",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "n",
+      "guid": 16255
+    },
+    {
+      "action": "assert",
+      "label": "Leaving the preparation bubble at the boss clears its safety aura",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "n",
+      "entry": 4275
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the player is not charmed before Arugal's Curse is cast",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 7621,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Arugal's Chaotic Link encounter aura is present before the charm",
+      "actor": "n",
+      "metric": "nearby_creature_aura_count",
+      "entry": 4275,
+      "spell": 93459,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Arugal is engaged and attackable ahead of the charm (setup is otherwise correct)",
+      "actor": "n",
+      "metric": "nearby_creature_can_attack",
+      "entry": 4275,
+      "equals": 1
+    }
+  ]
+}
