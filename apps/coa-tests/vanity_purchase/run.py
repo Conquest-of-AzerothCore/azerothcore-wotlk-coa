@@ -176,7 +176,7 @@ struct ChatHandler
 enum InventoryResult { EQUIP_ERR_OK, EQUIP_ERR_INVENTORY_FULL };
 using ItemPosCountVec=std::vector<int>;
 constexpr uint8 NULL_BAG=0, NULL_SLOT=255;
-struct Item { uint32 entry; };
+struct Item { uint32 entry; bool bound=false; void SetBinding(bool value) { bound=value; } };
 struct Player
 {
     Session session; uint8 cls=10, race=1; bool full=false;
@@ -265,7 +265,7 @@ int main()
     }
     {
         Case c; c.cosmetics.state->OwnedVanityItems.insert(SCROLL);
-        c.Buy(SCROLL); assert(c.player.bags[SCROLL]==1 && c.Tokens()==40 && c.player.announced==1);
+        c.Buy(SCROLL); assert(c.player.bags[SCROLL]==1 && c.Tokens()==40 && c.player.announced==1 && c.player.created.back().bound);
         c.Buy(SCROLL); assert(c.player.bags[SCROLL]==1 && c.Tokens()==40 && c.Said()=="You do not have enough Bazaar Tokens.");
         assert(c.cosmetics.collected.empty());
     }
@@ -278,7 +278,7 @@ int main()
 }
 """
     compile_and_run(code, "coa-vanity-purchase-")
-    print("PASS: token purchases, ownership, price, offer gates, unlock-all, repeatable consumables, "
+    print("PASS: token purchases, ownership, price, offer gates, unlock-all, repeatable soulbound consumables, "
           "full bags, other currencies, malformed requests, the collection-added event and the price stream")
 
 

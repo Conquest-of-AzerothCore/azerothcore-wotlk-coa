@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "name": "Vanity collection: Deliver Item hands over a soulbound copy",
+  "contract": "Issue #9400. The Vanity collection's Deliver Item button sends CMSG_CUSTOM_ASCENSION_POINT_SPEND_REQUEST (0x0523) with u8 currency 2 and the u32 item id, and DeliverVanityItem stores a fresh copy each time. Player::StoreNewItem binds only Bind on Pickup templates, so Bind on Use vanity items such as Violet Slimesaber's Reins 8200180 (bonding 3) arrived unbound and could be traded, sold or used by another account to unlock the appearance. CoA.UnlockAllVanity is on in the test realm, so the character is entitled to it. Expected: the delivered reins are soulbound.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "collector", "race": 1, "class": 1, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "No reins before the request", "actor": "collector", "metric": "item_count", "item": 8200180, "equals": 0 },
+    {
+      "action": "client_packet", "label": "Deliver Violet Slimesaber's Reins", "actor": "collector", "opcode": 1315,
+      "fields": [ { "u8": 2 }, { "u32": 8200180 } ]
+    },
+    { "action": "assert", "label": "The reins were delivered", "actor": "collector", "metric": "item_count", "item": 8200180, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "The delivered reins are soulbound", "actor": "collector", "metric": "item_soulbound", "item": 8200180, "equals": 1 }
+  ]
+}

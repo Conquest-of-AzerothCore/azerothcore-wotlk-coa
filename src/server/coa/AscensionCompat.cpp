@@ -6549,6 +6549,7 @@ public:
 
       if (Item* delivered = player->StoreNewItem(destinations, itemId, true))
       {
+        delivered->SetBinding(true);
         player->SendNewItem(delivered, 1, true, false);
         sScriptMgr->OnPlayerCoAProgress(player, CoAProgressEvent::VanityDelivered, itemId);
       }
@@ -7509,7 +7510,10 @@ private:
 
         player->DestroyItemCount(VANITY_BAZAAR_TOKEN_ITEM, cost, true);
         if (Item* bought = player->StoreNewItem(destinations, itemId, true))
+        {
+            bought->SetBinding(true);
             player->SendNewItem(bought, 1, true, false);
+        }
 
         LOG_INFO("coa", "{} bought consumable vanity item {} for {} Bazaar Tokens", player->GetName(), itemId, cost);
     }
