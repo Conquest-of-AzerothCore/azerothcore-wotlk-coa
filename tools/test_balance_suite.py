@@ -35,6 +35,30 @@ OWNER_ROLE_DECISIONS = {
 
 DPS_SUPPORT_IDS = {3, 13, 20, 29, 58}
 
+ITEM_CLASS_ARMOR = 4
+
+ITEM_TEMPLATE_FACTS = {
+    1489: {'class': 4, 'subclass': 2, 'required_level': 20, 'allowable_class': -1},
+    2292: {'class': 4, 'subclass': 1, 'required_level': 20, 'allowable_class': -1},
+    3845: {'class': 4, 'subclass': 3, 'required_level': 35, 'allowable_class': -1},
+    6627: {'class': 4, 'subclass': 3, 'required_level': 20, 'allowable_class': -1},
+    6709: {'class': 4, 'subclass': 2, 'required_level': 13, 'allowable_class': -1},
+    8200: {'class': 4, 'subclass': 2, 'required_level': 38, 'allowable_class': -1},
+    10021: {'class': 4, 'subclass': 1, 'required_level': 40, 'allowable_class': -1},
+    14562: {'class': 4, 'subclass': 2, 'required_level': 18, 'allowable_class': -1},
+    14601: {'class': 4, 'subclass': 2, 'required_level': 39, 'allowable_class': -1},
+    19405: {'class': 4, 'subclass': 2, 'required_level': 60, 'allowable_class': -1},
+    20331: {'class': 4, 'subclass': 1, 'required_level': 0, 'allowable_class': -1},
+    25701: {'class': 4, 'subclass': 4, 'required_level': 60, 'allowable_class': -1},
+    28051: {'class': 4, 'subclass': 2, 'required_level': 60, 'allowable_class': -1},
+    29781: {'class': 4, 'subclass': 2, 'required_level': 60, 'allowable_class': -1},
+    31127: {'class': 4, 'subclass': 3, 'required_level': 60, 'allowable_class': -1},
+    48677: {'class': 4, 'subclass': 2, 'required_level': 1, 'allowable_class': -1},
+    48683: {'class': 4, 'subclass': 2, 'required_level': 1, 'allowable_class': -1},
+    48685: {'class': 4, 'subclass': 4, 'required_level': 1, 'allowable_class': -1},
+    401875: {'class': 4, 'subclass': 4, 'required_level': 1, 'allowable_class': -1},
+}
+
 
 def load_catalog():
     return json.loads((BALANCE_DIR / 'catalog.json').read_text())
@@ -132,6 +156,34 @@ class GearTests(unittest.TestCase):
                     self.assertIn('slot', row)
                     self.assertIsInstance(row['item'], int)
                     self.assertIsInstance(row['slot'], int)
+
+    def test_gear_items_are_equippable_by_every_mapped_spec(self):
+        catalog = load_catalog()
+        gear = load_gear()
+        specs_by_armor_stat = {}
+        for spec in catalog['specs']:
+            specs_by_armor_stat.setdefault((spec['armor'], spec['primary_stat']), []).append(spec)
+        failures = []
+        for level_str, level_gear in gear['gear'].items():
+            level = int(level_str)
+            for key, items in level_gear.items():
+                armor, stat = key.split('/')
+                for row in items:
+                    item = row['item']
+                    facts = ITEM_TEMPLATE_FACTS.get(item)
+                    if facts is None:
+                        failures.append(f'{key} at level {level}: item {item} has no recorded item_template facts')
+                        continue
+                    if facts['class'] != ITEM_CLASS_ARMOR:
+                        failures.append(f'{key} at level {level}: item {item} is not armor (class {facts["class"]})')
+                    if facts['required_level'] > level:
+                        failures.append(f'{key} at level {level}: item {item} requires level '
+                                         f'{facts["required_level"]}')
+                    if facts['allowable_class'] != -1:
+                        for spec in specs_by_armor_stat.get((armor, stat), []):
+                            failures.append(f'{key} at level {level}: item {item} restricts AllowableClass to '
+                                             f'{facts["allowable_class"]}, excluding {spec["class_name"]}')
+        self.assertEqual(failures, [])
 
 
 class DungeonTests(unittest.TestCase):

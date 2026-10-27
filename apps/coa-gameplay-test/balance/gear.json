@@ -15,7 +15,7 @@
       "mail/intellect": [{ "item": 48683, "slot": 4 }],
       "cloth/intellect": [{ "item": 2292, "slot": 4 }],
       "plate/strength": [{ "item": 48685, "slot": 4 }],
-      "plate/intellect": [{ "item": 28055, "slot": 4 }]
+      "plate/intellect": [{ "item": 401875, "slot": 4 }]
     },
     "40": {
       "leather/agility": [{ "item": 14601, "slot": 4 }],
@@ -26,7 +26,7 @@
       "mail/intellect": [{ "item": 48683, "slot": 4 }],
       "cloth/intellect": [{ "item": 10021, "slot": 4 }],
       "plate/strength": [{ "item": 48685, "slot": 4 }],
-      "plate/intellect": [{ "item": 22089, "slot": 4 }]
+      "plate/intellect": [{ "item": 401875, "slot": 4 }]
     },
     "60": {
       "leather/agility": [{ "item": 28051, "slot": 4 }],

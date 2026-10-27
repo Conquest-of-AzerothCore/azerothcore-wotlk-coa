@@ -41,6 +41,10 @@ int main(int, char** argv)
     std::puts("BUDGETS");
     for (CoATalentBudget const& b : CoATalentBudgets)
         std::printf("%u\t%u\t%u\t%u\n", unsigned(b.ClassId), unsigned(b.Level), unsigned(b.AE), unsigned(b.TE));
+    std::puts("SPECIALIZATIONS");
+    for (CoASpecialization const& s : CoASpecializations)
+        std::printf("%u\t%u\t%u\t%u\n", unsigned(s.SpecId), unsigned(s.ClassId), s.IdentityEntryId,
+            s.SignatureEntryId);
     return 0;
 }
 """
@@ -90,6 +94,7 @@ def dump_gating(dbc_directory):
     lines = text.splitlines()
     entries = []
     budgets = []
+    specializations = []
     section = None
     for line in lines:
         if line == "ENTRIES":
@@ -97,6 +102,9 @@ def dump_gating(dbc_directory):
             continue
         if line == "BUDGETS":
             section = budgets
+            continue
+        if line == "SPECIALIZATIONS":
+            section = specializations
             continue
         if section is None:
             continue
@@ -122,8 +130,32 @@ def dump_gating(dbc_directory):
             {"class_id": row[0], "level": row[1], "ae": row[2], "te": row[3]}
             for row in budgets
         ],
+        "specializations": [
+            {"spec_id": row[0], "class_id": row[1], "identity_entry": row[2], "signature_entry": row[3]}
+            for row in specializations
+        ],
     }
     return gating
+
+
+def mandatory_spend(gating, class_id, spec_id):
+    by_id = {e["entry"]: e for e in gating["entries"]}
+    spend_ae = 0
+    spend_te = 0
+    seen = set()
+    for spec in gating["specializations"]:
+        if spec["class_id"] != class_id or spec["spec_id"] != spec_id:
+            continue
+        for entry_id in (spec["identity_entry"], spec["signature_entry"]):
+            entry = by_id.get(entry_id)
+            if not entry or entry_id in seen:
+                continue
+            seen.add(entry_id)
+            if entry["spec_id"] == 0:
+                spend_ae += entry["ae_cost"]
+            else:
+                spend_te += entry["te_cost"]
+    return spend_ae, spend_te
 
 
 def budget_at(budgets, class_id, level):
@@ -139,11 +171,24 @@ def budget_at(budgets, class_id, level):
 def validate_build(gating, class_id, spec_id, level, build):
     by_id = {e["entry"]: e for e in gating["entries"]}
     ae_budget, te_budget = budget_at(gating["budgets"], class_id, level)
-    spent_ae = 0
-    spent_te = 0
+    mandatory_ae, mandatory_te = mandatory_spend(gating, class_id, spec_id)
+    spent_ae = mandatory_ae
+    spent_te = mandatory_te
+    mandatory_ids = set()
+    for spec in gating["specializations"]:
+        if spec["class_id"] == class_id and spec["spec_id"] == spec_id:
+            mandatory_ids.update({spec["identity_entry"], spec["signature_entry"]})
     accepted_ids = set()
     tier_spend_ae = []
     tier_spend_te = []
+    for entry_id in mandatory_ids:
+        entry = by_id.get(entry_id)
+        if not entry:
+            continue
+        class_tree = entry["spec_id"] == 0
+        cost = entry["ae_cost"] if class_tree else entry["te_cost"]
+        threshold = entry["tab_ae_investment"] if class_tree else entry["tab_te_investment"]
+        (tier_spend_ae if class_tree else tier_spend_te).append((cost, threshold))
 
     for entry_id, rank in build:
         entry = by_id.get(entry_id)
@@ -160,7 +205,9 @@ def validate_build(gating, class_id, spec_id, level, build):
         if entry["required_level"] > level:
             return f"entry {entry_id} requires level {entry['required_level']}, build is for level {level}"
 
+        known_ids = accepted_ids | mandatory_ids
         class_tree = entry["spec_id"] == 0
+        mandatory_already = entry_id in mandatory_ids
         threshold = entry["tab_ae_investment"] if class_tree else entry["tab_te_investment"]
         tiers = tier_spend_ae if class_tree else tier_spend_te
         invested = sum(cost for cost, tier in tiers if tier < threshold)
@@ -169,11 +216,11 @@ def validate_build(gating, class_id, spec_id, level, build):
 
         for required_id in entry["required_entry_ids"]:
             required = by_id.get(required_id)
-            if required and (required["ae_cost"] or required["te_cost"]) and required_id not in accepted_ids:
+            if required and (required["ae_cost"] or required["te_cost"]) and required_id not in known_ids:
                 return f"entry {entry_id} requires entry {required_id}, not yet in the build"
 
         cost_per_rank = entry["ae_cost"] or entry["te_cost"]
-        cost = cost_per_rank * rank
+        cost = 0 if mandatory_already else cost_per_rank * rank
         budget = ae_budget if class_tree else te_budget
         spent = spent_ae if class_tree else spent_te
         if spent + cost > budget:

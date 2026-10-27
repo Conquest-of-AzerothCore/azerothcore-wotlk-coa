@@ -160,3 +160,55 @@ gating data and replays every spec's build at every level, one upload step at a 
 `talent_gating.validate_build` (an independent reimplementation of the same checks, not a call into
 `generate_talents.spend_build`), so a hand-edited or regressed `catalog.json` entry fails this test before it
 ever reaches a live `advancement_rank` upload. It skips if no DBC set or C++ compiler is available.
+
+### A second gating cost the first fix missed: the spec's own identity/signature entry (fixed 2026-10-27)
+
+After the fix above, every level 20 build for 48 of the 70 specs still failed the same `advancement_rank` step
+with "The server did not apply the uploaded talent rank", always at the step that reached the build's full AE
+budget. Raising `Logger.coa` to INFO for one failing case showed the real server-side reason
+(`AscensionCompat.cpp`'s `ApplyKnownEntriesUpload`): `"That build spends 7 class ... point(s); level 20 has 6"`
+— one point more than the catalog build itself ever spends.
+
+The extra point comes from `AscensionCoATalentState::SpecializationSwitch` (what the `specialization` step and
+`CoAGameplayTest.cpp`'s `KnownEntriesWithRank` upload alongside any purchase): switching into a specialization
+auto-grants that spec's identity and signature `CoATalentEntry` (`AscensionCoATalentData.cpp`'s
+`CoASpecializations`), and `ApplyKnownEntriesUpload` counts their `AECost`/`TECost` against the same
+class/specialization budget a purchased build spends from. Every spec's signature entry costs 1 class (AE)
+point; `talent_gating.py` and `generate_talents.py` never reserved it, so a build that spent the full AE budget
+on catalog entries left no room for the point the server charges automatically on top. At level 40/60 there was
+enough slack in the AE budget for this to go unnoticed; at level 20 it was not.
+
+`talent_gating.dump_gating` now also dumps `CoASpecializations` (identity/signature entry per class+spec), and
+`talent_gating.mandatory_spend(gating, class_id, spec_id)` sums the AE/TE cost of those two entries. Both
+`talent_gating.validate_build` and `generate_talents.spend_build` reserve this cost from the level's budget
+before validating/spending on catalog entries (and treat the identity/signature entries as already known, for
+the `RequiredEntryIds`/tier checks, without re-charging a build that also lists one of them explicitly — level
+40/60 builds already did, since the greedy spend used to pick them up as ordinary candidates when the budget
+had room). `generate_talents.spend_build` also excludes the identity/signature entries from the candidate pool
+it buys from, so a regenerated catalog no longer lists them as if they were purchased choices.
+`tools/test_balance_suite.py`'s existing `TalentGatingTests` test needed no change: it calls `validate_build`
+directly, so it picked up the reservation automatically.
+
+### Two level-tier plate/intellect gear entries exceeded their level (fixed 2026-10-27)
+
+The remaining 12 failures were "Equipment change rejected: equip error 1" (`EQUIP_ERR_CANT_EQUIP_LEVEL_I`):
+`gear.json`'s `plate/intellect` entry was item 22089 (Soulforge Breastplate, `RequiredLevel` 58) at level 40, and
+item 28055 (Gilded Crimson Chestplate, `RequiredLevel` 60) at level 20 — both above the level of the player
+trying to equip them. Vanilla WotLK plate armor pairs intellect with low levels only rarely, which is likely why
+the catalog's original author reached for a raid-tier item at both levels.
+
+Both are now item 401875 (Lightbringer's Chestplate of Divinity), a `RequiredLevel` 1, `AllowableClass -1`
+scaling-stat (`ScalingStatDistribution` 332) plate chest piece — the same distribution `gear.json`'s existing
+`mail/intellect` entry (item 48683) already uses, and the same pattern as the other scaling items already in
+`gear.json` (`plate/strength` 48685, `mail/agility` 48677), so it fits every level the suite tests, not just the
+two that were failing. Level 60's `plate/intellect` (item 25701, `RequiredLevel` 60) was left unchanged: it was
+not reported broken.
+
+`tools/test_balance_suite.py`'s `GearTests.test_gear_items_are_equippable_by_every_mapped_spec` checks every
+`gear.json` item against a small table of `item_template` facts (`class`, `required_level`, `allowable_class`,
+read from `acore_world.item_template` via this worktree's `verify.sh` MySQL): the item's `class` must be armor,
+its `required_level` must not exceed the level bucket it is listed under, and an `allowable_class` other than
+`-1` must not exclude any catalog spec mapped to that `armor/primary_stat` key. This is a static table, not a
+live query, so it does not catch a future `item_template` edit to one of these specific items; it does catch a
+new `gear.json` entry that forgets to add a fact row, or a `RequiredLevel`/class mismatch in the facts already
+recorded.

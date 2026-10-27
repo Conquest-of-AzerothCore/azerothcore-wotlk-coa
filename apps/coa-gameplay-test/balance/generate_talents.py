@@ -15,7 +15,7 @@ import sys
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-from talent_gating import dump_gating  # noqa: E402
+from talent_gating import dump_gating, mandatory_spend  # noqa: E402
 sys.path.insert(0, str(HERE.parents[1] / "coa-tests"))
 from client_data import dbc_dir  # noqa: E402
 
@@ -39,19 +39,36 @@ def candidates_for(entries, class_id, spec_id):
             (e["spec_id"] == 0 or e["spec_id"] == spec_id)]
 
 
-def spend_build(entries, budgets, class_id, spec_id, level):
-    pool = [e for e in candidates_for(entries, class_id, spec_id) if e["required_level"] <= level]
+def spend_build(gating, class_id, spec_id, level):
+    entries = gating["entries"]
+    mandatory_ids = set()
+    for spec in gating["specializations"]:
+        if spec["class_id"] == class_id and spec["spec_id"] == spec_id:
+            mandatory_ids.update({spec["identity_entry"], spec["signature_entry"]})
+
+    pool = [e for e in candidates_for(entries, class_id, spec_id)
+            if e["required_level"] <= level and e["entry"] not in mandatory_ids]
     pool.sort(key=lambda e: (0 if e["spec_id"] == 0 else 1, e["tab_ae_investment"] if e["spec_id"] == 0
                              else e["tab_te_investment"], e["entry"]))
-    ae_budget, te_budget = budget_at(budgets, class_id, level)
+    ae_budget, te_budget = budget_at(gating["budgets"], class_id, level)
+    mandatory_ae, mandatory_te = mandatory_spend(gating, class_id, spec_id)
     paid_entry_ids = {e["entry"] for e in candidates_for(entries, class_id, spec_id)}
 
-    spent_ae = 0
-    spent_te = 0
+    spent_ae = mandatory_ae
+    spent_te = mandatory_te
     accepted = []
-    accepted_ids = set()
+    accepted_ids = set(mandatory_ids)
     tier_spend_ae = []
     tier_spend_te = []
+    by_id = {e["entry"]: e for e in entries}
+    for entry_id in mandatory_ids:
+        entry = by_id.get(entry_id)
+        if not entry:
+            continue
+        class_tree = entry["spec_id"] == 0
+        cost = entry["ae_cost"] if class_tree else entry["te_cost"]
+        threshold = entry["tab_ae_investment"] if class_tree else entry["tab_te_investment"]
+        (tier_spend_ae if class_tree else tier_spend_te).append((cost, threshold))
 
     def invested_below(tiers, threshold):
         return sum(cost for cost, tier in tiers if tier < threshold)
@@ -94,7 +111,7 @@ def regenerate(gating):
             continue
         talents = {}
         for level in LEVELS:
-            build = spend_build(gating["entries"], gating["budgets"], spec["class_id"], spec["spec_id"], level)
+            build = spend_build(gating, spec["class_id"], spec["spec_id"], level)
             talents[str(level)] = [[entry, rank] for entry, rank in build]
         spec["talents"] = talents
         changed.append(key)
