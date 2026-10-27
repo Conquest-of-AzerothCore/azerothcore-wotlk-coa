@@ -110,6 +110,7 @@ void AddSC_AscensionWildcardShadowfall();
 void AddSC_AscensionWildcardFrostSpree();
 void AddSC_AscensionWildcardCursedEffigy();
 void AddSC_AscensionWildcardConsecratedWeapon();
+void AddSC_AscensionWildcardDeconstruct();
 void AddAscensionFreepickScripts();
 void AddAscensionHeroBloomingShotScripts();
 void AddAscensionMysticEnchantScripts();
@@ -735,6 +736,7 @@ void AddCoAScripts()
     AddSC_AscensionWildcardFrostSpree();
     AddSC_AscensionWildcardCursedEffigy();
     AddSC_AscensionWildcardConsecratedWeapon();
+    AddSC_AscensionWildcardDeconstruct();
     AddAscensionFreepickScripts();
     AddAscensionHeroBloomingShotScripts();
     AddAscensionMysticEnchantScripts();
