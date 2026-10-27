@@ -105,6 +105,7 @@ void AddSC_AscensionHeroMissileBarrage();
 void AddSC_AscensionWildcardCremation();
 void AddSC_AscensionWildcardSealOfFervor();
 void AddSC_AscensionWildcardElementalBlast();
+void AddSC_AscensionWildcardShadowfall();
 void AddAscensionFreepickScripts();
 void AddAscensionHeroBloomingShotScripts();
 void AddAscensionMysticEnchantScripts();
@@ -726,6 +727,7 @@ void AddCoAScripts()
     AddSC_AscensionWildcardCremation();
     AddSC_AscensionWildcardSealOfFervor();
     AddSC_AscensionWildcardElementalBlast();
+    AddSC_AscensionWildcardShadowfall();
     AddAscensionFreepickScripts();
     AddAscensionHeroBloomingShotScripts();
     AddAscensionMysticEnchantScripts();
