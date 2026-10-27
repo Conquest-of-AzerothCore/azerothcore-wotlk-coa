@@ -36,6 +36,19 @@ public:
     }
 };
 
+class guardian_battle_rush_metadata : public GlobalScript
+{
+public:
+    guardian_battle_rush_metadata() : GlobalScript("guardian_battle_rush_metadata",
+        {GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR}) { }
+
+    void OnLoadSpellCustomAttr(SpellInfo* info) override
+    {
+        if (info->Id == 501546 || info->Id == 501547 || info->Id == 501548 || info->Id == 802197)
+            info->Mechanic = MECHANIC_NONE;
+    }
+};
+
 class GuardianLanding : public BasicEvent
 {
 public:
@@ -285,6 +298,7 @@ class aura_ascension_guardian_hold_the_line : public AuraScript
 void AddAscensionGuardianAbilityScripts()
 {
     new guardian_hammer_of_the_law_metadata();
+    new guardian_battle_rush_metadata();
     RegisterSpellScript(spell_ascension_guardian_ability);
     RegisterSpellScript(aura_ascension_guardian_advance);
     RegisterSpellScript(aura_ascension_guardian_hold_the_line);
