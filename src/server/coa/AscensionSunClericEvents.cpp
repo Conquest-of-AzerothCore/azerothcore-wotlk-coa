@@ -176,7 +176,9 @@ class aura_ascension_sun_cleric_event : public AuraScript
                     });
                 }
                 nearby.remove_if([player,damage](Unit* unit) { return damage && !player->IsValidAttackTarget(unit); });
-                uint32 count = uint32(Amount(803492)) * (fulfillment ? 2 : 1);
+                uint32 count = uint32(Amount(803492));
+                if (fulfillment)
+                    count = (count + 1) * 2 - 1;
                 for (Unit* unit : nearby)
                 {
                     if (!count--)
