@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Manifestation of Y'Shaarj uses its own display, not Herald of the Depths (#9105)",
+  "contract": "Dark Calling (560715) spawns three entry-397771 'Manifestation of Y''Shaarj' creatures on the Cultist, named correctly, but creature_template_model pointed them at display 28844, the Herald of the Depths/FacelessOne transform display (rev_20261022_13_cultist_herald_display.sql), reading as a massive monster rather than the tooltip's small adds. Two independent client captures (conquest-of-azeroth, 2026-08-06 and 2026-09-04) and the Exiles DB export (db.exil.es/npc/397771) all name entry 397771's own display as 427990. This checks the corrected display directly against creature_template_model, independent of Dark Calling's 35%-health/2-minute proc gate.",
+  "timeout_ms": 30000,
+  "players": [
+    {
+      "id": "cultist",
+      "race": 1,
+      "class": 25,
+      "level": 30
+    }
+  ],
+  "creatures": [
+    {
+      "id": "manifestation",
+      "owner": "cultist",
+      "entry": 397771,
+      "level": 30,
+      "health": 1000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 2000 },
+    { "action": "assert", "label": "CONTRACT: Manifestation of Y'Shaarj uses its own display, not Herald's 28844", "actor": "manifestation", "metric": "display_id", "equals": 427990 }
+  ]
+}
