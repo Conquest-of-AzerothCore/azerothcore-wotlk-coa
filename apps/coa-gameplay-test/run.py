@@ -804,6 +804,8 @@ def validate(scenario):
                 require('target' in step, f'{where}: victim metric requires a target')
             if metric == 'can_attack':
                 require(step.get('target') in actor_ids, f'{where}: can_attack metric needs the attacked unit')
+                if 'spell' in step:
+                    number(step['spell'], f'{where}.spell', 1, 2**32 - 1, True)
             if metric == 'carried_aura_count':
                 require(type(step.get('spells')) is list and 0 < len(step['spells']) <= 50,
                         f'{where}: carried_aura_count must list 1-50 spells')

@@ -2912,7 +2912,11 @@ private:
         if (metric == "combat")
             return unit->IsInCombat();
         if (metric == "can_attack")
-            return unit->IsValidAttackTarget(GetUnit(step.get<std::string>("target")));
+        {
+            auto spell = step.get_optional<uint32>("spell");
+            return unit->IsValidAttackTarget(GetUnit(step.get<std::string>("target")),
+                spell ? sSpellMgr->GetSpellInfo(*spell) : nullptr);
+        }
         if (metric == "channel_object_entry")
         {
             ObjectGuid const channelObject = unit->GetGuidValue(UNIT_FIELD_CHANNEL_OBJECT);

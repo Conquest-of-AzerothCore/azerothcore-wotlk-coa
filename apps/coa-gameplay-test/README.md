@@ -448,10 +448,10 @@ Creatures require `id`, player `owner` and template `entry`. Optional `distance`
 (default 3 yards); `faction`, `level`, `health` default to 14, 80, 100000. They retain template data and AI,
 with health regeneration disabled and `reaction` defaulting to passive (0); defensive (1) and aggressive (2)
 fixtures exercise native target selection and movement. `victim` with a `target` measures whether that unit is
-the actor's current attack victim. `can_attack` with a `target` returns one when the native `IsValidAttackTarget`
-check lets the actor attack that unit, including faction reaction, PvP flags and sanctuaries. The native
-player-damage share a kill needs for loot and reward is taken from the declared health, so a player's kill leaves
-a lootable or skinnable corpse. Pick a
+the actor's current attack victim. `can_attack` with a `target` (and an optional `spell`, checked as that spell's
+target) returns one when the native `IsValidAttackTarget` check lets the actor attack that unit, including faction
+reaction, PvP flags and sanctuaries. The native player-damage share a kill needs for loot and reward is taken from
+the declared health, so a player's kill leaves a lootable or skinnable corpse. Pick a
 template whose scripts suit the experiment.
 Setup clears combat initiated by spawn-time AI before starting the scenario: a fixture whose AI engaged a player
 while spawning evades at once. No step runs while any fixture is evading, so a spell or attack is never aimed at
