@@ -3813,6 +3813,9 @@ private:
                 REAPER_ALL_SOUL_CONSUMERS.end(), spellId) !=
             REAPER_ALL_SOUL_CONSUMERS.end())
         {
+            if (WasAvoidedByEveryTarget(player, spell))
+                return;
+
             player->RemoveAurasDueToSpell(SPELL_REAPER_REAPED_SOUL);
             player->RemoveAurasDueToSpell(SPELL_REAPER_SOUL_INFUSION);
             if (requiresSoulInfusion)
