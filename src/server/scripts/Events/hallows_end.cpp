@@ -926,10 +926,15 @@ struct npc_hallows_end_train_fire : public NullCreatureAI
 
     void UpdateAI(uint32 diff) override
     {
+        if (me->HasAura(SPELL_FIRE_AURA_BASE))
+            return;
+
         timer += diff;
         if (timer >= 5000)
-            if (!me->GetAuraEffect(SPELL_FIRE_AURA_BASE, EFFECT_0))
-                me->CastSpell(me, SPELL_FIRE_AURA_BASE, true);
+        {
+            me->CastSpell(me, SPELL_FIRE_AURA_BASE, true);
+            timer = 0;
+        }
     }
 
     void SpellHit(Unit* caster, SpellInfo const* spellInfo) override
