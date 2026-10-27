@@ -1188,6 +1188,11 @@ pet, with a positive average normal hit each way; the Ghoul's own custom AI (`np
 re-picks a target from the owner's attackers every second regardless of `ReactState`, which is why the enemy's
 own target needs the threat-table reset every tick rather than a one-time `AttackStart`.
 
+`solo`, `kit`, `balance_white` and `balance_stage` back the PvE balance suite
+(`tools/balance_suite.py`), which runs every CoA spec alone through a white-hit baseline and four dungeon
+stages at levels 20/40/60 and flags the ones that stray from their role group; see
+[`docs/coa/balance-suite.md`](../../docs/coa/balance-suite.md).
+
 ### World placement
 
 Placement metrics compare a spawn's stored position (`creature` and `gameobject` rows, as loaded) with the ground
