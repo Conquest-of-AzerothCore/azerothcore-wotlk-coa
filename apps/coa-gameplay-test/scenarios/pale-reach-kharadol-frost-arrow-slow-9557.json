@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Enemies under the Bridge: Kharadol Ealdir's Frost Arrow slows the player by 30% (COA-9557)",
+  "contract": "Kharadol Ealdir 164317 casts Frost Arrow 365154 at the player in the Gilded Vale. Its tooltip says it slows movement speed; its SPELL_AURA_MOD_DECREASE_SPEED effect now carries -30, so a struck player runs at 70% speed while the debuff lasts.",
+  "timeout_ms": 30000,
+  "location": { "map": 0, "x": -7091.0, "y": 271.6, "z": 269.3, "o": 0 },
+  "players": [
+    { "id": "a", "race": 1, "class": 1, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "kharadol", "owner": "a", "entry": 164317, "distance": 10, "faction": 14, "level": 22 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "cast", "label": "Kharadol shoots a Frost Arrow at a", "actor": "kharadol", "spell": 365154, "target": "a" },
+    { "action": "assert", "label": "DISCRIMINATING: the Frost Arrow slows a to 70% run speed", "actor": "a", "metric": "run_speed_rate", "min": 0.69, "max": 0.71, "within_ms": 3000 }
+  ]
+}
