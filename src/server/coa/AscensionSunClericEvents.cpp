@@ -332,7 +332,9 @@ class aura_ascension_sun_cleric_event : public AuraScript
                 uint32 amount=std::max(0,GetEffect(EFFECT_0)->GetAmount());
                 Unit* ally=GetTarget();
                 GetAura()->Remove();
-                Copy(player,ally,707522,amount);
+                if (amount && ally->IsAlive())
+                    ally->CastCustomSpell(301004,SPELLVALUE_BASE_POINT0,int32(amount),ally,true,nullptr,nullptr,
+                        player->GetGUID());
                 break;
             }
             case 680911:
