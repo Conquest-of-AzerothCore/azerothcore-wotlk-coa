@@ -1,43 +1,2521 @@
 {
-  "version": 1,
+  "version": 2,
   "schema": {
-    "level": {
-      "armor/primary_stat": "list of { item, slot } equipped on the fixture for that armor type and primary stat"
+    "armor": {
+      "level": {
+        "armor_type/primary_stat": "shared armor-slot kit (head..trinket2) for that armor material and primary stat"
+      }
+    },
+    "weapons": {
+      "level": {
+        "class_id/group/primary_stat": "mainhand (+ offhand/shield) kit for that class's proficiency, role group and primary stat"
+      }
     }
   },
-  "gear": {
+  "armor": {
     "20": {
-      "leather/agility": [{ "item": 14562, "slot": 4 }],
-      "leather/strength": [{ "item": 1489, "slot": 4 }],
-      "leather/intellect": [{ "item": 6709, "slot": 4 }],
-      "mail/agility": [{ "item": 48677, "slot": 4 }],
-      "mail/strength": [{ "item": 6627, "slot": 4 }],
-      "mail/intellect": [{ "item": 48683, "slot": 4 }],
-      "cloth/intellect": [{ "item": 2292, "slot": 4 }],
-      "plate/strength": [{ "item": 48685, "slot": 4 }],
-      "plate/intellect": [{ "item": 401875, "slot": 4 }]
+      "cloth/intellect": [
+        {
+          "item": 401572,
+          "slot": 0
+        },
+        {
+          "item": 21934,
+          "slot": 1
+        },
+        {
+          "item": 42985,
+          "slot": 2
+        },
+        {
+          "item": 401573,
+          "slot": 14
+        },
+        {
+          "item": 48691,
+          "slot": 4
+        },
+        {
+          "item": 401569,
+          "slot": 8
+        },
+        {
+          "item": 401668,
+          "slot": 9
+        },
+        {
+          "item": 401570,
+          "slot": 5
+        },
+        {
+          "item": 401667,
+          "slot": 6
+        },
+        {
+          "item": 401571,
+          "slot": 7
+        },
+        {
+          "item": 50255,
+          "slot": 10
+        },
+        {
+          "item": 390799,
+          "slot": 11
+        },
+        {
+          "item": 42991,
+          "slot": 12
+        },
+        {
+          "item": 42992,
+          "slot": 13
+        }
+      ],
+      "leather/agility": [
+        {
+          "item": 404210,
+          "slot": 0
+        },
+        {
+          "item": 21934,
+          "slot": 1
+        },
+        {
+          "item": 42950,
+          "slot": 2
+        },
+        {
+          "item": 402886,
+          "slot": 14
+        },
+        {
+          "item": 48677,
+          "slot": 4
+        },
+        {
+          "item": 401989,
+          "slot": 8
+        },
+        {
+          "item": 401990,
+          "slot": 9
+        },
+        {
+          "item": 401991,
+          "slot": 5
+        },
+        {
+          "item": 401995,
+          "slot": 6
+        },
+        {
+          "item": 401992,
+          "slot": 7
+        },
+        {
+          "item": 50255,
+          "slot": 10
+        },
+        {
+          "item": 390799,
+          "slot": 11
+        },
+        {
+          "item": 42991,
+          "slot": 12
+        },
+        {
+          "item": 42992,
+          "slot": 13
+        }
+      ],
+      "leather/intellect": [
+        {
+          "item": 402572,
+          "slot": 0
+        },
+        {
+          "item": 21934,
+          "slot": 1
+        },
+        {
+          "item": 42950,
+          "slot": 2
+        },
+        {
+          "item": 401573,
+          "slot": 14
+        },
+        {
+          "item": 48677,
+          "slot": 4
+        },
+        {
+          "item": 402569,
+          "slot": 8
+        },
+        {
+          "item": 402568,
+          "slot": 9
+        },
+        {
+          "item": 402570,
+          "slot": 5
+        },
+        {
+          "item": 402567,
+          "slot": 6
+        },
+        {
+          "item": 402571,
+          "slot": 7
+        },
+        {
+          "item": 50255,
+          "slot": 10
+        },
+        {
+          "item": 390799,
+          "slot": 11
+        },
+        {
+          "item": 42991,
+          "slot": 12
+        },
+        {
+          "item": 42992,
+          "slot": 13
+        }
+      ],
+      "mail/agility": [
+        {
+          "item": 404216,
+          "slot": 0
+        },
+        {
+          "item": 21934,
+          "slot": 1
+        },
+        {
+          "item": 360141,
+          "slot": 2
+        },
+        {
+          "item": 402886,
+          "slot": 14
+        },
+        {
+          "item": 385409,
+          "slot": 4
+        },
+        {
+          "item": 402882,
+          "slot": 8
+        },
+        {
+          "item": 402883,
+          "slot": 9
+        },
+        {
+          "item": 402884,
+          "slot": 5
+        },
+        {
+          "item": 402880,
+          "slot": 6
+        },
+        {
+          "item": 402885,
+          "slot": 7
+        },
+        {
+          "item": 50255,
+          "slot": 10
+        },
+        {
+          "item": 390799,
+          "slot": 11
+        },
+        {
+          "item": 42991,
+          "slot": 12
+        },
+        {
+          "item": 42992,
+          "slot": 13
+        }
+      ],
+      "mail/intellect": [
+        {
+          "item": 402772,
+          "slot": 0
+        },
+        {
+          "item": 21934,
+          "slot": 1
+        },
+        {
+          "item": 360141,
+          "slot": 2
+        },
+        {
+          "item": 401573,
+          "slot": 14
+        },
+        {
+          "item": 385409,
+          "slot": 4
+        },
+        {
+          "item": 402769,
+          "slot": 8
+        },
+        {
+          "item": 402768,
+          "slot": 9
+        },
+        {
+          "item": 402770,
+          "slot": 5
+        },
+        {
+          "item": 402767,
+          "slot": 6
+        },
+        {
+          "item": 402771,
+          "slot": 7
+        },
+        {
+          "item": 50255,
+          "slot": 10
+        },
+        {
+          "item": 390799,
+          "slot": 11
+        },
+        {
+          "item": 42991,
+          "slot": 12
+        },
+        {
+          "item": 42992,
+          "slot": 13
+        }
+      ],
+      "plate/intellect": [
+        {
+          "item": 401877,
+          "slot": 0
+        },
+        {
+          "item": 21934,
+          "slot": 1
+        },
+        {
+          "item": 401876,
+          "slot": 2
+        },
+        {
+          "item": 401573,
+          "slot": 14
+        },
+        {
+          "item": 401875,
+          "slot": 4
+        },
+        {
+          "item": 401878,
+          "slot": 8
+        },
+        {
+          "item": 400056,
+          "slot": 9
+        },
+        {
+          "item": 401879,
+          "slot": 5
+        },
+        {
+          "item": 401987,
+          "slot": 6
+        },
+        {
+          "item": 401880,
+          "slot": 7
+        },
+        {
+          "item": 50255,
+          "slot": 10
+        },
+        {
+          "item": 390799,
+          "slot": 11
+        },
+        {
+          "item": 42991,
+          "slot": 12
+        },
+        {
+          "item": 42992,
+          "slot": 13
+        }
+      ],
+      "plate/strength": [
+        {
+          "item": 400061,
+          "slot": 0
+        },
+        {
+          "item": 21934,
+          "slot": 1
+        },
+        {
+          "item": 42949,
+          "slot": 2
+        },
+        {
+          "item": 400062,
+          "slot": 14
+        },
+        {
+          "item": 48685,
+          "slot": 4
+        },
+        {
+          "item": 400055,
+          "slot": 8
+        },
+        {
+          "item": 400056,
+          "slot": 9
+        },
+        {
+          "item": 400058,
+          "slot": 5
+        },
+        {
+          "item": 400060,
+          "slot": 6
+        },
+        {
+          "item": 400057,
+          "slot": 7
+        },
+        {
+          "item": 50255,
+          "slot": 10
+        },
+        {
+          "item": 390799,
+          "slot": 11
+        },
+        {
+          "item": 42991,
+          "slot": 12
+        },
+        {
+          "item": 42992,
+          "slot": 13
+        }
+      ]
     },
     "40": {
-      "leather/agility": [{ "item": 14601, "slot": 4 }],
-      "leather/strength": [{ "item": 1489, "slot": 4 }],
-      "leather/intellect": [{ "item": 8200, "slot": 4 }],
-      "mail/agility": [{ "item": 48677, "slot": 4 }],
-      "mail/strength": [{ "item": 3845, "slot": 4 }],
-      "mail/intellect": [{ "item": 48683, "slot": 4 }],
-      "cloth/intellect": [{ "item": 10021, "slot": 4 }],
-      "plate/strength": [{ "item": 48685, "slot": 4 }],
-      "plate/intellect": [{ "item": 401875, "slot": 4 }]
+      "cloth/intellect": [
+        {
+          "item": 401572,
+          "slot": 0
+        },
+        {
+          "item": 27976,
+          "slot": 1
+        },
+        {
+          "item": 42985,
+          "slot": 2
+        },
+        {
+          "item": 401573,
+          "slot": 14
+        },
+        {
+          "item": 48691,
+          "slot": 4
+        },
+        {
+          "item": 401569,
+          "slot": 8
+        },
+        {
+          "item": 401668,
+          "slot": 9
+        },
+        {
+          "item": 401570,
+          "slot": 5
+        },
+        {
+          "item": 401667,
+          "slot": 6
+        },
+        {
+          "item": 401571,
+          "slot": 7
+        },
+        {
+          "item": 50255,
+          "slot": 10
+        },
+        {
+          "item": 390799,
+          "slot": 11
+        },
+        {
+          "item": 42991,
+          "slot": 12
+        },
+        {
+          "item": 42992,
+          "slot": 13
+        }
+      ],
+      "leather/agility": [
+        {
+          "item": 404210,
+          "slot": 0
+        },
+        {
+          "item": 27976,
+          "slot": 1
+        },
+        {
+          "item": 42950,
+          "slot": 2
+        },
+        {
+          "item": 402886,
+          "slot": 14
+        },
+        {
+          "item": 48677,
+          "slot": 4
+        },
+        {
+          "item": 401989,
+          "slot": 8
+        },
+        {
+          "item": 401990,
+          "slot": 9
+        },
+        {
+          "item": 401991,
+          "slot": 5
+        },
+        {
+          "item": 401995,
+          "slot": 6
+        },
+        {
+          "item": 401992,
+          "slot": 7
+        },
+        {
+          "item": 50255,
+          "slot": 10
+        },
+        {
+          "item": 390799,
+          "slot": 11
+        },
+        {
+          "item": 42991,
+          "slot": 12
+        },
+        {
+          "item": 42992,
+          "slot": 13
+        }
+      ],
+      "leather/intellect": [
+        {
+          "item": 402572,
+          "slot": 0
+        },
+        {
+          "item": 27976,
+          "slot": 1
+        },
+        {
+          "item": 42950,
+          "slot": 2
+        },
+        {
+          "item": 401573,
+          "slot": 14
+        },
+        {
+          "item": 48677,
+          "slot": 4
+        },
+        {
+          "item": 402569,
+          "slot": 8
+        },
+        {
+          "item": 402568,
+          "slot": 9
+        },
+        {
+          "item": 402570,
+          "slot": 5
+        },
+        {
+          "item": 402567,
+          "slot": 6
+        },
+        {
+          "item": 402571,
+          "slot": 7
+        },
+        {
+          "item": 50255,
+          "slot": 10
+        },
+        {
+          "item": 390799,
+          "slot": 11
+        },
+        {
+          "item": 42991,
+          "slot": 12
+        },
+        {
+          "item": 42992,
+          "slot": 13
+        }
+      ],
+      "mail/agility": [
+        {
+          "item": 404216,
+          "slot": 0
+        },
+        {
+          "item": 27976,
+          "slot": 1
+        },
+        {
+          "item": 360141,
+          "slot": 2
+        },
+        {
+          "item": 402886,
+          "slot": 14
+        },
+        {
+          "item": 385409,
+          "slot": 4
+        },
+        {
+          "item": 402882,
+          "slot": 8
+        },
+        {
+          "item": 402883,
+          "slot": 9
+        },
+        {
+          "item": 402884,
+          "slot": 5
+        },
+        {
+          "item": 402880,
+          "slot": 6
+        },
+        {
+          "item": 402885,
+          "slot": 7
+        },
+        {
+          "item": 50255,
+          "slot": 10
+        },
+        {
+          "item": 390799,
+          "slot": 11
+        },
+        {
+          "item": 42991,
+          "slot": 12
+        },
+        {
+          "item": 42992,
+          "slot": 13
+        }
+      ],
+      "mail/intellect": [
+        {
+          "item": 402772,
+          "slot": 0
+        },
+        {
+          "item": 27976,
+          "slot": 1
+        },
+        {
+          "item": 360141,
+          "slot": 2
+        },
+        {
+          "item": 401573,
+          "slot": 14
+        },
+        {
+          "item": 385409,
+          "slot": 4
+        },
+        {
+          "item": 402769,
+          "slot": 8
+        },
+        {
+          "item": 402768,
+          "slot": 9
+        },
+        {
+          "item": 402770,
+          "slot": 5
+        },
+        {
+          "item": 402767,
+          "slot": 6
+        },
+        {
+          "item": 402771,
+          "slot": 7
+        },
+        {
+          "item": 50255,
+          "slot": 10
+        },
+        {
+          "item": 390799,
+          "slot": 11
+        },
+        {
+          "item": 42991,
+          "slot": 12
+        },
+        {
+          "item": 42992,
+          "slot": 13
+        }
+      ],
+      "plate/intellect": [
+        {
+          "item": 401877,
+          "slot": 0
+        },
+        {
+          "item": 27976,
+          "slot": 1
+        },
+        {
+          "item": 401876,
+          "slot": 2
+        },
+        {
+          "item": 401573,
+          "slot": 14
+        },
+        {
+          "item": 401875,
+          "slot": 4
+        },
+        {
+          "item": 401878,
+          "slot": 8
+        },
+        {
+          "item": 400056,
+          "slot": 9
+        },
+        {
+          "item": 401879,
+          "slot": 5
+        },
+        {
+          "item": 401987,
+          "slot": 6
+        },
+        {
+          "item": 401880,
+          "slot": 7
+        },
+        {
+          "item": 50255,
+          "slot": 10
+        },
+        {
+          "item": 390799,
+          "slot": 11
+        },
+        {
+          "item": 42991,
+          "slot": 12
+        },
+        {
+          "item": 42992,
+          "slot": 13
+        }
+      ],
+      "plate/strength": [
+        {
+          "item": 400061,
+          "slot": 0
+        },
+        {
+          "item": 27976,
+          "slot": 1
+        },
+        {
+          "item": 42949,
+          "slot": 2
+        },
+        {
+          "item": 400062,
+          "slot": 14
+        },
+        {
+          "item": 48685,
+          "slot": 4
+        },
+        {
+          "item": 400055,
+          "slot": 8
+        },
+        {
+          "item": 400056,
+          "slot": 9
+        },
+        {
+          "item": 400058,
+          "slot": 5
+        },
+        {
+          "item": 400060,
+          "slot": 6
+        },
+        {
+          "item": 400057,
+          "slot": 7
+        },
+        {
+          "item": 50255,
+          "slot": 10
+        },
+        {
+          "item": 390799,
+          "slot": 11
+        },
+        {
+          "item": 42991,
+          "slot": 12
+        },
+        {
+          "item": 42992,
+          "slot": 13
+        }
+      ]
     },
     "60": {
-      "leather/agility": [{ "item": 28051, "slot": 4 }],
-      "leather/strength": [{ "item": 19405, "slot": 4 }],
-      "leather/intellect": [{ "item": 29781, "slot": 4 }],
-      "mail/agility": [{ "item": 48677, "slot": 4 }],
-      "mail/strength": [{ "item": 31127, "slot": 4 }],
-      "mail/intellect": [{ "item": 48683, "slot": 4 }],
-      "cloth/intellect": [{ "item": 20331, "slot": 4 }],
-      "plate/strength": [{ "item": 48685, "slot": 4 }],
-      "plate/intellect": [{ "item": 25701, "slot": 4 }]
+      "cloth/intellect": [
+        {
+          "item": 401572,
+          "slot": 0
+        },
+        {
+          "item": 10778,
+          "slot": 1
+        },
+        {
+          "item": 42985,
+          "slot": 2
+        },
+        {
+          "item": 401573,
+          "slot": 14
+        },
+        {
+          "item": 48691,
+          "slot": 4
+        },
+        {
+          "item": 401569,
+          "slot": 8
+        },
+        {
+          "item": 401668,
+          "slot": 9
+        },
+        {
+          "item": 401570,
+          "slot": 5
+        },
+        {
+          "item": 401667,
+          "slot": 6
+        },
+        {
+          "item": 401571,
+          "slot": 7
+        },
+        {
+          "item": 50255,
+          "slot": 10
+        },
+        {
+          "item": 390799,
+          "slot": 11
+        },
+        {
+          "item": 42991,
+          "slot": 12
+        },
+        {
+          "item": 42992,
+          "slot": 13
+        }
+      ],
+      "leather/agility": [
+        {
+          "item": 404210,
+          "slot": 0
+        },
+        {
+          "item": 10778,
+          "slot": 1
+        },
+        {
+          "item": 42950,
+          "slot": 2
+        },
+        {
+          "item": 402886,
+          "slot": 14
+        },
+        {
+          "item": 48677,
+          "slot": 4
+        },
+        {
+          "item": 401989,
+          "slot": 8
+        },
+        {
+          "item": 401990,
+          "slot": 9
+        },
+        {
+          "item": 401991,
+          "slot": 5
+        },
+        {
+          "item": 401995,
+          "slot": 6
+        },
+        {
+          "item": 401992,
+          "slot": 7
+        },
+        {
+          "item": 50255,
+          "slot": 10
+        },
+        {
+          "item": 390799,
+          "slot": 11
+        },
+        {
+          "item": 42991,
+          "slot": 12
+        },
+        {
+          "item": 42992,
+          "slot": 13
+        }
+      ],
+      "leather/intellect": [
+        {
+          "item": 402572,
+          "slot": 0
+        },
+        {
+          "item": 10778,
+          "slot": 1
+        },
+        {
+          "item": 42950,
+          "slot": 2
+        },
+        {
+          "item": 401573,
+          "slot": 14
+        },
+        {
+          "item": 48677,
+          "slot": 4
+        },
+        {
+          "item": 402569,
+          "slot": 8
+        },
+        {
+          "item": 402568,
+          "slot": 9
+        },
+        {
+          "item": 402570,
+          "slot": 5
+        },
+        {
+          "item": 402567,
+          "slot": 6
+        },
+        {
+          "item": 402571,
+          "slot": 7
+        },
+        {
+          "item": 50255,
+          "slot": 10
+        },
+        {
+          "item": 390799,
+          "slot": 11
+        },
+        {
+          "item": 42991,
+          "slot": 12
+        },
+        {
+          "item": 42992,
+          "slot": 13
+        }
+      ],
+      "mail/agility": [
+        {
+          "item": 404216,
+          "slot": 0
+        },
+        {
+          "item": 10778,
+          "slot": 1
+        },
+        {
+          "item": 360141,
+          "slot": 2
+        },
+        {
+          "item": 402886,
+          "slot": 14
+        },
+        {
+          "item": 385409,
+          "slot": 4
+        },
+        {
+          "item": 402882,
+          "slot": 8
+        },
+        {
+          "item": 402883,
+          "slot": 9
+        },
+        {
+          "item": 402884,
+          "slot": 5
+        },
+        {
+          "item": 402880,
+          "slot": 6
+        },
+        {
+          "item": 402885,
+          "slot": 7
+        },
+        {
+          "item": 50255,
+          "slot": 10
+        },
+        {
+          "item": 390799,
+          "slot": 11
+        },
+        {
+          "item": 42991,
+          "slot": 12
+        },
+        {
+          "item": 42992,
+          "slot": 13
+        }
+      ],
+      "mail/intellect": [
+        {
+          "item": 402772,
+          "slot": 0
+        },
+        {
+          "item": 10778,
+          "slot": 1
+        },
+        {
+          "item": 360141,
+          "slot": 2
+        },
+        {
+          "item": 401573,
+          "slot": 14
+        },
+        {
+          "item": 385409,
+          "slot": 4
+        },
+        {
+          "item": 402769,
+          "slot": 8
+        },
+        {
+          "item": 402768,
+          "slot": 9
+        },
+        {
+          "item": 402770,
+          "slot": 5
+        },
+        {
+          "item": 402767,
+          "slot": 6
+        },
+        {
+          "item": 402771,
+          "slot": 7
+        },
+        {
+          "item": 50255,
+          "slot": 10
+        },
+        {
+          "item": 390799,
+          "slot": 11
+        },
+        {
+          "item": 42991,
+          "slot": 12
+        },
+        {
+          "item": 42992,
+          "slot": 13
+        }
+      ],
+      "plate/intellect": [
+        {
+          "item": 401877,
+          "slot": 0
+        },
+        {
+          "item": 10778,
+          "slot": 1
+        },
+        {
+          "item": 401876,
+          "slot": 2
+        },
+        {
+          "item": 401573,
+          "slot": 14
+        },
+        {
+          "item": 401875,
+          "slot": 4
+        },
+        {
+          "item": 401878,
+          "slot": 8
+        },
+        {
+          "item": 400056,
+          "slot": 9
+        },
+        {
+          "item": 401879,
+          "slot": 5
+        },
+        {
+          "item": 401987,
+          "slot": 6
+        },
+        {
+          "item": 401880,
+          "slot": 7
+        },
+        {
+          "item": 50255,
+          "slot": 10
+        },
+        {
+          "item": 390799,
+          "slot": 11
+        },
+        {
+          "item": 42991,
+          "slot": 12
+        },
+        {
+          "item": 42992,
+          "slot": 13
+        }
+      ],
+      "plate/strength": [
+        {
+          "item": 400061,
+          "slot": 0
+        },
+        {
+          "item": 10778,
+          "slot": 1
+        },
+        {
+          "item": 42949,
+          "slot": 2
+        },
+        {
+          "item": 400062,
+          "slot": 14
+        },
+        {
+          "item": 48685,
+          "slot": 4
+        },
+        {
+          "item": 400055,
+          "slot": 8
+        },
+        {
+          "item": 400056,
+          "slot": 9
+        },
+        {
+          "item": 400058,
+          "slot": 5
+        },
+        {
+          "item": 400060,
+          "slot": 6
+        },
+        {
+          "item": 400057,
+          "slot": 7
+        },
+        {
+          "item": 50255,
+          "slot": 10
+        },
+        {
+          "item": 390799,
+          "slot": 11
+        },
+        {
+          "item": 42991,
+          "slot": 12
+        },
+        {
+          "item": 42992,
+          "slot": 13
+        }
+      ]
+    }
+  },
+  "weapons": {
+    "20": {
+      "12/dps/agility": [
+        {
+          "item": 1542943,
+          "slot": 15
+        }
+      ],
+      "12/dps-support/agility": [
+        {
+          "item": 1542943,
+          "slot": 15
+        }
+      ],
+      "13/dps/agility": [
+        {
+          "item": 404200,
+          "slot": 15
+        }
+      ],
+      "13/dps/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "13/healer/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "14/dps/agility": [
+        {
+          "item": 400064,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "14/dps/intellect": [
+        {
+          "item": 42945,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "14/tank/agility": [
+        {
+          "item": 400064,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "15/dps/agility": [
+        {
+          "item": 42944,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "15/tank/agility": [
+        {
+          "item": 42944,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "16/dps/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "16/dps-support/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "17/dps/strength": [
+        {
+          "item": 42943,
+          "slot": 15
+        }
+      ],
+      "17/tank/strength": [
+        {
+          "item": 42945,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "18/dps/strength": [
+        {
+          "item": 44092,
+          "slot": 15
+        }
+      ],
+      "18/dps-support/strength": [
+        {
+          "item": 44092,
+          "slot": 15
+        }
+      ],
+      "18/tank/strength": [
+        {
+          "item": 42945,
+          "slot": 15
+        },
+        {
+          "item": 400063,
+          "slot": 16
+        }
+      ],
+      "19/dps/agility": [
+        {
+          "item": 48716,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "19/tank/agility": [
+        {
+          "item": 48716,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "20/dps/agility": [
+        {
+          "item": 404200,
+          "slot": 15
+        }
+      ],
+      "20/dps/intellect": [
+        {
+          "item": 44091,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "20/healer/intellect": [
+        {
+          "item": 44091,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "20/tank/agility": [
+        {
+          "item": 42944,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "21/dps/agility": [
+        {
+          "item": 42944,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "21/dps-support/agility": [
+        {
+          "item": 42944,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "22/dps/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "22/healer/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "23/dps/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "24/dps/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "24/healer/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "25/dps/intellect": [
+        {
+          "item": 44091,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "25/dps/strength": [
+        {
+          "item": 1542943,
+          "slot": 15
+        }
+      ],
+      "25/healer/intellect": [
+        {
+          "item": 44091,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "25/tank/strength": [
+        {
+          "item": 44091,
+          "slot": 15
+        },
+        {
+          "item": 400063,
+          "slot": 16
+        }
+      ],
+      "26/dps/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "26/healer/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "26/tank/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "27/dps/intellect": [
+        {
+          "item": 48718,
+          "slot": 15
+        }
+      ],
+      "27/dps/strength": [
+        {
+          "item": 404195,
+          "slot": 15
+        }
+      ],
+      "27/healer/intellect": [
+        {
+          "item": 48718,
+          "slot": 15
+        }
+      ],
+      "27/tank/strength": [
+        {
+          "item": 404195,
+          "slot": 15
+        }
+      ],
+      "28/dps/agility": [
+        {
+          "item": 1542943,
+          "slot": 15
+        }
+      ],
+      "28/healer/intellect": [
+        {
+          "item": 42948,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "29/dps/intellect": [
+        {
+          "item": 44091,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "29/healer/intellect": [
+        {
+          "item": 44091,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "29/tank/agility": [
+        {
+          "item": 42944,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "30/dps/strength": [
+        {
+          "item": 1542943,
+          "slot": 15
+        }
+      ],
+      "30/tank/strength": [
+        {
+          "item": 1542943,
+          "slot": 15
+        }
+      ],
+      "31/dps/intellect": [
+        {
+          "item": 42948,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "31/dps/strength": [
+        {
+          "item": 44094,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "31/dps-support/strength": [
+        {
+          "item": 44094,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "31/tank/strength": [
+        {
+          "item": 44094,
+          "slot": 15
+        },
+        {
+          "item": 400063,
+          "slot": 16
+        }
+      ],
+      "32/dps/agility": [
+        {
+          "item": 1542943,
+          "slot": 15
+        }
+      ],
+      "32/dps/intellect": [
+        {
+          "item": 1542943,
+          "slot": 15
+        }
+      ]
+    },
+    "40": {
+      "12/dps/agility": [
+        {
+          "item": 1542943,
+          "slot": 15
+        }
+      ],
+      "12/dps-support/agility": [
+        {
+          "item": 1542943,
+          "slot": 15
+        }
+      ],
+      "13/dps/agility": [
+        {
+          "item": 404200,
+          "slot": 15
+        }
+      ],
+      "13/dps/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "13/healer/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "14/dps/agility": [
+        {
+          "item": 400064,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "14/dps/intellect": [
+        {
+          "item": 42945,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "14/tank/agility": [
+        {
+          "item": 400064,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "15/dps/agility": [
+        {
+          "item": 42944,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "15/tank/agility": [
+        {
+          "item": 42944,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "16/dps/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "16/dps-support/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "17/dps/strength": [
+        {
+          "item": 42943,
+          "slot": 15
+        }
+      ],
+      "17/tank/strength": [
+        {
+          "item": 42945,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "18/dps/strength": [
+        {
+          "item": 44092,
+          "slot": 15
+        }
+      ],
+      "18/dps-support/strength": [
+        {
+          "item": 44092,
+          "slot": 15
+        }
+      ],
+      "18/tank/strength": [
+        {
+          "item": 42945,
+          "slot": 15
+        },
+        {
+          "item": 400063,
+          "slot": 16
+        }
+      ],
+      "19/dps/agility": [
+        {
+          "item": 48716,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "19/tank/agility": [
+        {
+          "item": 48716,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "20/dps/agility": [
+        {
+          "item": 404200,
+          "slot": 15
+        }
+      ],
+      "20/dps/intellect": [
+        {
+          "item": 44091,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "20/healer/intellect": [
+        {
+          "item": 44091,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "20/tank/agility": [
+        {
+          "item": 42944,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "21/dps/agility": [
+        {
+          "item": 42944,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "21/dps-support/agility": [
+        {
+          "item": 42944,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "22/dps/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "22/healer/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "23/dps/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "24/dps/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "24/healer/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "25/dps/intellect": [
+        {
+          "item": 44091,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "25/dps/strength": [
+        {
+          "item": 1542943,
+          "slot": 15
+        }
+      ],
+      "25/healer/intellect": [
+        {
+          "item": 44091,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "25/tank/strength": [
+        {
+          "item": 44091,
+          "slot": 15
+        },
+        {
+          "item": 400063,
+          "slot": 16
+        }
+      ],
+      "26/dps/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "26/healer/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "26/tank/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "27/dps/intellect": [
+        {
+          "item": 48718,
+          "slot": 15
+        }
+      ],
+      "27/dps/strength": [
+        {
+          "item": 404195,
+          "slot": 15
+        }
+      ],
+      "27/healer/intellect": [
+        {
+          "item": 48718,
+          "slot": 15
+        }
+      ],
+      "27/tank/strength": [
+        {
+          "item": 404195,
+          "slot": 15
+        }
+      ],
+      "28/dps/agility": [
+        {
+          "item": 1542943,
+          "slot": 15
+        }
+      ],
+      "28/healer/intellect": [
+        {
+          "item": 42948,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "29/dps/intellect": [
+        {
+          "item": 44091,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "29/healer/intellect": [
+        {
+          "item": 44091,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "29/tank/agility": [
+        {
+          "item": 42944,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "30/dps/strength": [
+        {
+          "item": 1542943,
+          "slot": 15
+        }
+      ],
+      "30/tank/strength": [
+        {
+          "item": 1542943,
+          "slot": 15
+        }
+      ],
+      "31/dps/intellect": [
+        {
+          "item": 42948,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "31/dps/strength": [
+        {
+          "item": 44094,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "31/dps-support/strength": [
+        {
+          "item": 44094,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "31/tank/strength": [
+        {
+          "item": 44094,
+          "slot": 15
+        },
+        {
+          "item": 400063,
+          "slot": 16
+        }
+      ],
+      "32/dps/agility": [
+        {
+          "item": 1542943,
+          "slot": 15
+        }
+      ],
+      "32/dps/intellect": [
+        {
+          "item": 1542943,
+          "slot": 15
+        }
+      ]
+    },
+    "60": {
+      "12/dps/agility": [
+        {
+          "item": 1542943,
+          "slot": 15
+        }
+      ],
+      "12/dps-support/agility": [
+        {
+          "item": 1542943,
+          "slot": 15
+        }
+      ],
+      "13/dps/agility": [
+        {
+          "item": 404200,
+          "slot": 15
+        }
+      ],
+      "13/dps/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "13/healer/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "14/dps/agility": [
+        {
+          "item": 400064,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "14/dps/intellect": [
+        {
+          "item": 42945,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "14/tank/agility": [
+        {
+          "item": 400064,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "15/dps/agility": [
+        {
+          "item": 42944,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "15/tank/agility": [
+        {
+          "item": 42944,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "16/dps/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "16/dps-support/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "17/dps/strength": [
+        {
+          "item": 42943,
+          "slot": 15
+        }
+      ],
+      "17/tank/strength": [
+        {
+          "item": 42945,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "18/dps/strength": [
+        {
+          "item": 44092,
+          "slot": 15
+        }
+      ],
+      "18/dps-support/strength": [
+        {
+          "item": 44092,
+          "slot": 15
+        }
+      ],
+      "18/tank/strength": [
+        {
+          "item": 42945,
+          "slot": 15
+        },
+        {
+          "item": 400063,
+          "slot": 16
+        }
+      ],
+      "19/dps/agility": [
+        {
+          "item": 48716,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "19/tank/agility": [
+        {
+          "item": 48716,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "20/dps/agility": [
+        {
+          "item": 404200,
+          "slot": 15
+        }
+      ],
+      "20/dps/intellect": [
+        {
+          "item": 44091,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "20/healer/intellect": [
+        {
+          "item": 44091,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "20/tank/agility": [
+        {
+          "item": 42944,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "21/dps/agility": [
+        {
+          "item": 42944,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "21/dps-support/agility": [
+        {
+          "item": 42944,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "22/dps/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "22/healer/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "23/dps/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "24/dps/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "24/healer/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "25/dps/intellect": [
+        {
+          "item": 44091,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "25/dps/strength": [
+        {
+          "item": 1542943,
+          "slot": 15
+        }
+      ],
+      "25/healer/intellect": [
+        {
+          "item": 44091,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "25/tank/strength": [
+        {
+          "item": 44091,
+          "slot": 15
+        },
+        {
+          "item": 400063,
+          "slot": 16
+        }
+      ],
+      "26/dps/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "26/healer/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "26/tank/intellect": [
+        {
+          "item": 42947,
+          "slot": 15
+        }
+      ],
+      "27/dps/intellect": [
+        {
+          "item": 48718,
+          "slot": 15
+        }
+      ],
+      "27/dps/strength": [
+        {
+          "item": 404195,
+          "slot": 15
+        }
+      ],
+      "27/healer/intellect": [
+        {
+          "item": 48718,
+          "slot": 15
+        }
+      ],
+      "27/tank/strength": [
+        {
+          "item": 404195,
+          "slot": 15
+        }
+      ],
+      "28/dps/agility": [
+        {
+          "item": 1542943,
+          "slot": 15
+        }
+      ],
+      "28/healer/intellect": [
+        {
+          "item": 42948,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "29/dps/intellect": [
+        {
+          "item": 44091,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "29/healer/intellect": [
+        {
+          "item": 44091,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "29/tank/agility": [
+        {
+          "item": 42944,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "30/dps/strength": [
+        {
+          "item": 1542943,
+          "slot": 15
+        }
+      ],
+      "30/tank/strength": [
+        {
+          "item": 1542943,
+          "slot": 15
+        }
+      ],
+      "31/dps/intellect": [
+        {
+          "item": 42948,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "31/dps/strength": [
+        {
+          "item": 44094,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "31/dps-support/strength": [
+        {
+          "item": 44094,
+          "slot": 15
+        },
+        {
+          "item": 1540350,
+          "slot": 16
+        }
+      ],
+      "31/tank/strength": [
+        {
+          "item": 44094,
+          "slot": 15
+        },
+        {
+          "item": 400063,
+          "slot": 16
+        }
+      ],
+      "32/dps/agility": [
+        {
+          "item": 1542943,
+          "slot": 15
+        }
+      ],
+      "32/dps/intellect": [
+        {
+          "item": 1542943,
+          "slot": 15
+        }
+      ]
     }
   }
 }

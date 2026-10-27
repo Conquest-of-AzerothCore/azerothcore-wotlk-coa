@@ -43,8 +43,12 @@ def driver_role(spec):
     return 'ranged' if spec['primary_stat'] == 'intellect' else 'melee'
 
 
-def gear_key(spec):
+def armor_key(spec):
     return f"{spec['armor']}/{spec['primary_stat']}"
+
+
+def weapon_key(spec):
+    return f"{spec['class_id']}/{spec['group']}/{spec['primary_stat']}"
 
 
 def stage_enemies(dungeon, stage):
@@ -120,7 +124,7 @@ def generate_scenarios(catalog, dungeons, gear, levels, out_dir):
     for spec in catalog['specs']:
         for level in levels:
             dungeon = dungeons['levels'][str(level)]
-            gear_items = gear['gear'][str(level)][gear_key(spec)]
+            gear_items = gear['armor'][str(level)][armor_key(spec)] + gear['weapons'][str(level)][weapon_key(spec)]
             scenario = build_scenario(spec, level, dungeon, gear_items)
             path = out_dir / f'{scenario_id(spec["spec_id"], level)}.json'
             path.write_text(json.dumps(scenario, indent=2), encoding='utf-8')

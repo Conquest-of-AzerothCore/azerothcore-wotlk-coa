@@ -74,9 +74,9 @@ shows as `error: <message>`; the suite still writes the rest of the table (Task 
   a kit today; every other spec whose spells summon units (for example Tinker Demolition/Mechanics, Primalist
   Wildwalker, per the design's recon) runs without one, so its stages may show `pets_missing` or weak dps/dtps
   that reflects the missing kit, not the class.
-- **New gear tier**: `apps/coa-gameplay-test/balance/gear.json` needs one `{item, slot}` chest piece per level ×
-  `armor/primary_stat` pair, equal stat budget across armor types at that level (Task 7's
-  `every_armor_stat_pair_has_gear_at_each_level` test enforces the keys, not the budget — check it by hand).
+- **New gear tier**: `apps/coa-gameplay-test/balance/gear.json` is generated, not edited by hand — see
+  "Full-kit gear generator" below. A new `armor/primary_stat` or `class_id/group/primary_stat` combination
+  needs no new gear entry: re-run `generate_gear.py` and it is covered from `item_pool.json`.
 
 ## Dungeons and substitutions
 
@@ -212,3 +212,85 @@ its `required_level` must not exceed the level bucket it is listed under, and an
 live query, so it does not catch a future `item_template` edit to one of these specific items; it does catch a
 new `gear.json` entry that forgets to add a fact row, or a `RequiredLevel`/class mismatch in the facts already
 recorded.
+
+### Full-kit gear generator (fixed 2026-10-27)
+
+`final-run-1` (`.agents/plans/balance-suite/reports/out/final-run-1/report.csv`) fitted fixtures with a single
+chest item (`gear.json`'s only slot) and nothing else: at level 60 the median elite kill took ~14 s and a white
+hit received cost a median 15.7% of max HP, both far outside what a geared player takes, and the level 60 boss
+stage was `invalid` for all 70 specs. `gear.json` now fills every armor slot an armor type uses (head, neck,
+shoulders, back, chest, wrist, hands, waist, legs, feet, two rings, two trinkets) plus a weapon kit, instead of
+one chest piece.
+
+**Source data.** `apps/coa-gameplay-test/balance/item_pool.json` is a snapshot of `item_template` rows with
+`class IN (2, 4)` (weapon/armor), `ScalingStatDistribution != 0`, `Quality IN (4, 6, 7)` and `AllowableClass = -1`,
+each tagged with the primary stat(s) its `ScalingStatDistribution` id carries (`ScalingStatDistribution.dbc`'s
+`StatMod`, matched against `ITEM_MOD_STRENGTH`/`AGILITY`/`INTELLECT`). `ScalingStatDistribution` items scale
+their stats from the player's level and the item's quality at equip/update time, the same mechanic item 401875
+already relied on, so two kits built from the same quality tier at the same level carry the same stat budget by
+construction — no stat math has to be replicated here. Refresh the snapshot by re-running the same query this
+worktree's `verify.sh`/`run.py` database settings already expose (`apps/coa-gameplay-test/run.py`'s
+`Connection`/`read_config`, the pattern `apps/coa-dbc/capture_sql.py` uses for spell/quest data) against
+`item_template`, joined with a direct `ScalingStatDistribution.dbc` read; it needs the coa-verify-env image for
+a MySQL client, not a running worldserver.
+
+**Generator.** `apps/coa-gameplay-test/balance/generate_gear.py` is a pure function of `item_pool.json` and
+`catalog.json` — no database or DBC directory at generation time — and writes `gear.json` with two sections:
+`armor` (keyed `armor_type/primary_stat`, the 9 combinations the catalog uses; shared across every class with
+that combination, since the slots don't depend on weapon proficiency) and `weapons` (keyed
+`class_id/group/primary_stat`, 54 combinations, since weapon proficiency is per class and a class can appear in
+more than one role or stat). Per slot it picks the lowest-entry Quality-7 item tagged with the kit's primary
+stat, falling back to Quality 6, then 4, then to an untagged item of the same quality, then (for the one slot
+with no scaling candidate at all below level 45 — see below) the closest-item-level plain item; every
+`armor/stat` combination at a given level and slot still ends up on the same quality tier (the budget-equality
+tolerance `GearTests.test_armor_kits_share_the_same_quality_tier_per_slot_per_level` checks), and every
+`ScalingStatDistribution` candidate is additionally filtered to one whose `MaxLevel` covers the level bucket
+(`CanEquipItem` rejects it above that otherwise — see below).
+
+**Weapon mapping is this generator's call, from evidence**: `AscensionCustomClassData.h`'s `ClassProficiencies`
+(cross-checked against `ItemSubClass.dbc` naming, read directly rather than
+assumed) gives each CoA class's actual weapon/armor skills — several classes catalogued as a given armor/stat
+combination do not share the same weapon proficiency (for example `leather/agility/tank` covers both Felsworn,
+which has no Shield proficiency, and a sibling that does), which is why weapons are keyed by class, not by
+`armor/primary_stat`. The rule, uniform across all 54 combinations: an `intellect` spec gets a one-hand weapon
+tagged `intellect` (dagger/mace/sword/axe/fist, in that preference order) plus an off-hand holdable item, or a
+two-hand staff if the class has no one-hand type at all; a `tank` spec gets a one-hand weapon plus a shield if
+the class has Shield proficiency, an off-hand holdable otherwise, or a two-hand weapon if the class has no
+one-hand type; every other (non-tank, non-intellect) spec gets a two-hand weapon (polearm/sword/axe/mace/staff)
+matching its proficiency, falling back to one-hand plus holdable if it has no two-hand type. `playerbots_coa_rotations.sql`
+tags every one of the twelve tank specs "Position: close", including the one `intellect` tank
+(Starcaller/Moon Guard), which is why tanks are not split into a separate caster-tank branch: all twelve use
+the melee weapon branch. `tools/test_balance_suite.py`'s `GearTests.test_weapon_items_match_class_proficiency`
+checks every generated weapon item's subclass against the class's actual proficiency, so a wrong mapping fails
+the harness stage, not only a human reading the table.
+
+`apps/coa-gameplay-test/balance/item_facts.json` is the subset of `item_pool.json` that `gear.json` actually
+references (`required_level`, `max_level`, `class`, `subclass`, `inventory_type`, `quality`); `GearTests` reads
+it instead of a hand-maintained table so a regenerated `gear.json` cannot drift from the facts it is checked
+against.
+
+**Two equip-time defects found while building the full kit** (both reproduced with a minimal two-item
+scenario before being fixed, not guessed from the error code alone):
+
+- **Vanity-collection gating.** A chunk of the `Quality 7` scaling pool (the `1339xxx`-range entries, e.g.
+  "Pendant of the Sorcerer") also appears in `VanityCollection.dbc`. `AscensionCompat.cpp`'s
+  `OnPlayerCanEquipItem` → `RefuseWithoutVanityRealmLevel` requires the *account*, not the character, to have
+  reached level 60 or prestiged on this realm before equipping one — a fresh level 20/40 fixture account never
+  has that, so equip failed with `EQUIP_ERR_CANT_DO_RIGHT_NOW` (39) on every item in that set; a level 60
+  character passed only because reaching level 60 *is* the unlock. `refresh_item_pool.py` excludes every
+  `VanityCollection.dbc` item id from `item_pool.json`.
+- **`ScalingStatDistribution.MaxLevel` cap.** `Player::CanEquipItem` (`Player.cpp`) returns
+  `EQUIP_ERR_ITEM_CANT_BE_EQUIPPED` (20) when an item's distribution `MaxLevel` is below the player's level.
+  The one non-vanity scaling necklace in this item_template (`Necklace of the Sunken Empire`, Epic,
+  `MaxLevel 55`) passed at 20/40 but failed at 60. `item_pool.json` records `max_level` per item and
+  `generate_gear.py`'s `eligible()` filters out any candidate whose `max_level` is below the level bucket.
+
+That necklace gap also showed that **no account-unrestricted scaling necklace exists below `RequiredLevel
+45`**: `refresh_item_pool.py` additionally queries plain (non-scaling), `RequiredLevel`-eligible necklaces and
+`generate_gear.py` falls back to the one closest to the level bucket's own item level for 20 and 40 — the
+deterministic, closest-item-level fallback the design calls for when no scaling item exists for a slot. Every
+`armor/stat` combination still gets the *same* necklace at a given level, so the fallback does not break
+equal-budget parity across kits.
+
+A smoke run comparing generated scenarios against `final-run-1` is recorded in
+`.agents/plans/balance-suite/reports/gear-fix-1.md`.

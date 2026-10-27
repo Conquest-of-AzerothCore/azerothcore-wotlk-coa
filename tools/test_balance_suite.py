@@ -19,6 +19,7 @@ if str(COA_TESTS_DIR) not in sys.path:
 import batch  # noqa: E402
 import run as gameplay_run  # noqa: E402
 import talent_gating  # noqa: E402
+import generate_gear  # noqa: E402
 from client_data import dbc_dir  # noqa: E402
 
 KNOWN_GROUPS = {'tank', 'healer', 'dps', 'dps-support'}
@@ -36,28 +37,10 @@ OWNER_ROLE_DECISIONS = {
 DPS_SUPPORT_IDS = {3, 13, 20, 29, 58}
 
 ITEM_CLASS_ARMOR = 4
-
-ITEM_TEMPLATE_FACTS = {
-    1489: {'class': 4, 'subclass': 2, 'required_level': 20, 'allowable_class': -1},
-    2292: {'class': 4, 'subclass': 1, 'required_level': 20, 'allowable_class': -1},
-    3845: {'class': 4, 'subclass': 3, 'required_level': 35, 'allowable_class': -1},
-    6627: {'class': 4, 'subclass': 3, 'required_level': 20, 'allowable_class': -1},
-    6709: {'class': 4, 'subclass': 2, 'required_level': 13, 'allowable_class': -1},
-    8200: {'class': 4, 'subclass': 2, 'required_level': 38, 'allowable_class': -1},
-    10021: {'class': 4, 'subclass': 1, 'required_level': 40, 'allowable_class': -1},
-    14562: {'class': 4, 'subclass': 2, 'required_level': 18, 'allowable_class': -1},
-    14601: {'class': 4, 'subclass': 2, 'required_level': 39, 'allowable_class': -1},
-    19405: {'class': 4, 'subclass': 2, 'required_level': 60, 'allowable_class': -1},
-    20331: {'class': 4, 'subclass': 1, 'required_level': 0, 'allowable_class': -1},
-    25701: {'class': 4, 'subclass': 4, 'required_level': 60, 'allowable_class': -1},
-    28051: {'class': 4, 'subclass': 2, 'required_level': 60, 'allowable_class': -1},
-    29781: {'class': 4, 'subclass': 2, 'required_level': 60, 'allowable_class': -1},
-    31127: {'class': 4, 'subclass': 3, 'required_level': 60, 'allowable_class': -1},
-    48677: {'class': 4, 'subclass': 2, 'required_level': 1, 'allowable_class': -1},
-    48683: {'class': 4, 'subclass': 2, 'required_level': 1, 'allowable_class': -1},
-    48685: {'class': 4, 'subclass': 4, 'required_level': 1, 'allowable_class': -1},
-    401875: {'class': 4, 'subclass': 4, 'required_level': 1, 'allowable_class': -1},
-}
+ITEM_CLASS_WEAPON = 2
+ARMOR_SUBCLASS = {'cloth': 1, 'leather': 2, 'mail': 3, 'plate': 4}
+GEAR_SLOT_TOLERANCE_LEVELS = (20, 40, 60)
+REQUIRED_ARMOR_EQUIP_SLOTS = {0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}
 
 
 def load_catalog():
@@ -70,6 +53,15 @@ def load_dungeons():
 
 def load_gear():
     return json.loads((BALANCE_DIR / 'gear.json').read_text())
+
+
+def load_item_pool():
+    return json.loads((BALANCE_DIR / 'item_pool.json').read_text())['items']
+
+
+def load_item_facts():
+    facts = json.loads((BALANCE_DIR / 'item_facts.json').read_text())['items']
+    return {int(entry): row for entry, row in facts.items()}
 
 
 class CatalogTests(unittest.TestCase):
@@ -140,49 +132,121 @@ class TalentGatingTests(unittest.TestCase):
 
 
 class GearTests(unittest.TestCase):
-    def test_every_armor_stat_pair_has_gear_at_each_level(self):
+    def test_every_armor_stat_pair_has_a_full_kit_at_each_level(self):
         catalog = load_catalog()
         gear = load_gear()
         pairs = {(spec['armor'], spec['primary_stat']) for spec in catalog['specs']}
         for level in ('20', '40', '60'):
-            level_gear = gear['gear'][level]
+            level_gear = gear['armor'][level]
             for armor, stat in pairs:
                 key = f'{armor}/{stat}'
                 self.assertIn(key, level_gear, (level, key))
                 items = level_gear[key]
-                self.assertTrue(items)
+                slots = {row['slot'] for row in items}
+                self.assertEqual(slots, REQUIRED_ARMOR_EQUIP_SLOTS, (level, key))
                 for row in items:
-                    self.assertIn('item', row)
-                    self.assertIn('slot', row)
                     self.assertIsInstance(row['item'], int)
                     self.assertIsInstance(row['slot'], int)
 
-    def test_gear_items_are_equippable_by_every_mapped_spec(self):
+    def test_every_mapped_spec_has_a_weapon_kit_at_each_level(self):
         catalog = load_catalog()
         gear = load_gear()
-        specs_by_armor_stat = {}
-        for spec in catalog['specs']:
-            specs_by_armor_stat.setdefault((spec['armor'], spec['primary_stat']), []).append(spec)
+        triples = {(spec['class_id'], spec['group'], spec['primary_stat']) for spec in catalog['specs']}
+        for level in ('20', '40', '60'):
+            level_gear = gear['weapons'][level]
+            for class_id, group, stat in triples:
+                key = f'{class_id}/{group}/{stat}'
+                self.assertIn(key, level_gear, (level, key))
+                items = level_gear[key]
+                self.assertTrue(items, (level, key))
+                self.assertIn(15, {row['slot'] for row in items}, (level, key))
+
+    def test_gear_items_are_equippable_at_their_level(self):
+        catalog = load_catalog()
+        gear = load_gear()
+        facts = load_item_facts()
         failures = []
-        for level_str, level_gear in gear['gear'].items():
+        for level_str, level_gear in gear['armor'].items():
             level = int(level_str)
             for key, items in level_gear.items():
-                armor, stat = key.split('/')
+                armor, _stat = key.split('/')
                 for row in items:
-                    item = row['item']
-                    facts = ITEM_TEMPLATE_FACTS.get(item)
-                    if facts is None:
-                        failures.append(f'{key} at level {level}: item {item} has no recorded item_template facts')
+                    row_facts = facts.get(row['item'])
+                    if row_facts is None:
+                        failures.append(f'armor {key} at level {level}: item {row["item"]} missing from '
+                                         f'item_facts.json')
                         continue
-                    if facts['class'] != ITEM_CLASS_ARMOR:
-                        failures.append(f'{key} at level {level}: item {item} is not armor (class {facts["class"]})')
-                    if facts['required_level'] > level:
-                        failures.append(f'{key} at level {level}: item {item} requires level '
-                                         f'{facts["required_level"]}')
-                    if facts['allowable_class'] != -1:
-                        for spec in specs_by_armor_stat.get((armor, stat), []):
-                            failures.append(f'{key} at level {level}: item {item} restricts AllowableClass to '
-                                             f'{facts["allowable_class"]}, excluding {spec["class_name"]}')
+                    if row_facts['required_level'] > level:
+                        failures.append(f'armor {key} at level {level}: item {row["item"]} requires level '
+                                         f'{row_facts["required_level"]}')
+                    if row_facts.get('max_level', 999) < level:
+                        failures.append(f'armor {key} at level {level}: item {row["item"]} caps its scaling '
+                                         f'at level {row_facts["max_level"]} (CanEquipItem rejects it above that)')
+                    if row_facts['class'] != ITEM_CLASS_ARMOR:
+                        failures.append(f'armor {key} at level {level}: item {row["item"]} is class '
+                                         f'{row_facts["class"]}, not armor')
+        for level_str, level_gear in gear['weapons'].items():
+            level = int(level_str)
+            for key, items in level_gear.items():
+                for row in items:
+                    row_facts = facts.get(row['item'])
+                    if row_facts is None:
+                        failures.append(f'weapon {key} at level {level}: item {row["item"]} missing from '
+                                         f'item_facts.json')
+                        continue
+                    if row_facts['required_level'] > level:
+                        failures.append(f'weapon {key} at level {level}: item {row["item"]} requires level '
+                                         f'{row_facts["required_level"]}')
+                    if row_facts.get('max_level', 999) < level:
+                        failures.append(f'weapon {key} at level {level}: item {row["item"]} caps its scaling '
+                                         f'at level {row_facts["max_level"]} (CanEquipItem rejects it above that)')
+                    if row_facts['class'] not in (ITEM_CLASS_WEAPON, ITEM_CLASS_ARMOR):
+                        failures.append(f'weapon {key} at level {level}: item {row["item"]} is class '
+                                         f'{row_facts["class"]}')
+        self.assertEqual(failures, [])
+
+    def test_weapon_items_match_class_proficiency(self):
+        catalog = load_catalog()
+        gear = load_gear()
+        facts = load_item_facts()
+        by_class = generate_gear.class_proficiencies()
+        subclass_to_skill = {v: k for k, v in generate_gear.WEAPON_SUBCLASS.items()}
+        shield_subclass = 6
+        holdable_class, holdable_subclass = 4, 0
+        triples = {(spec['class_id'], spec['group'], spec['primary_stat']) for spec in catalog['specs']}
+        failures = []
+        for level in ('20', '40', '60'):
+            for class_id, group, stat in triples:
+                key = f'{class_id}/{group}/{stat}'
+                proficiency = by_class[class_id]
+                for row in gear['weapons'][level][key]:
+                    row_facts = facts[row['item']]
+                    if row_facts['class'] == ITEM_CLASS_ARMOR:
+                        if row_facts['subclass'] == shield_subclass:
+                            if 'Shield' not in proficiency:
+                                failures.append(f'{key} at {level}: shield {row["item"]} without Shield proficiency')
+                        elif row_facts['subclass'] != holdable_subclass or row_facts['inventory_type'] != 23:
+                            failures.append(f'{key} at {level}: unexpected armor-class item {row["item"]}')
+                        continue
+                    skill = subclass_to_skill.get(row_facts['subclass'])
+                    if skill is None or skill not in proficiency:
+                        failures.append(f'{key} at {level}: weapon {row["item"]} (subclass {row_facts["subclass"]}) '
+                                         f'not in {class_id}\'s proficiency {sorted(proficiency)}')
+        self.assertEqual(failures, [])
+
+    def test_armor_kits_share_the_same_quality_tier_per_slot_per_level(self):
+        gear = load_gear()
+        facts = load_item_facts()
+        failures = []
+        for level, level_gear in gear['armor'].items():
+            by_slot = {}
+            for key, items in level_gear.items():
+                for row in items:
+                    by_slot.setdefault(row['slot'], set()).add(facts[row['item']]['quality'])
+            for slot, qualities in by_slot.items():
+                if len(qualities) > 1:
+                    failures.append(f'level {level} slot {slot} mixes quality tiers across armor/stat '
+                                     f'combinations: {sorted(qualities)}')
         self.assertEqual(failures, [])
 
 
@@ -240,11 +304,18 @@ FIXTURE_DUNGEONS = {
 }
 
 FIXTURE_GEAR = {
-    'gear': {
+    'armor': {
         str(level): {
             'cloth/intellect': [{'item': 1, 'slot': 4}],
             'plate/strength': [{'item': 2, 'slot': 4}],
             'mail/intellect': [{'item': 3, 'slot': 4}],
+        } for level in FIXTURE_LEVELS
+    },
+    'weapons': {
+        str(level): {
+            '23/dps/intellect': [{'item': 101, 'slot': 15}],
+            '18/tank/strength': [{'item': 102, 'slot': 15}, {'item': 103, 'slot': 16}],
+            '13/healer/intellect': [{'item': 104, 'slot': 15}],
         } for level in FIXTURE_LEVELS
     },
 }
