@@ -22,6 +22,7 @@
 #include "ScriptMgr.h"
 
 #include <algorithm>
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
@@ -83,7 +84,6 @@ public:
         // Every piece has to fit before anything is handed over. Opening a
         // nine-piece set into two free slots and losing seven of them would be
         // the kind of bug a player never forgives.
-        ItemPosCountVec dest;
         for (auto const& [member, count] : it->second)
         {
             ItemPosCountVec one;
@@ -93,6 +93,31 @@ public:
                 player->SendEquipError(check, nullptr, nullptr, member);
                 return true;
             }
+        }
+
+        // Each piece fitting on its own is not enough: they all need room at once.
+        std::vector<std::unique_ptr<Item>> pieces;
+        std::vector<Item*> pointers;
+        for (auto const& [member, count] : it->second)
+        {
+            uint32 const stackSize = std::max<uint32>(1, sObjectMgr->GetItemTemplate(member)->GetMaxStackSize());
+            for (uint32 left = count; left > 0;)
+            {
+                uint32 const stack = std::min(left, stackSize);
+                pieces.emplace_back(Item::CreateItem(member, stack, player, false, 0, true));
+                if (!pieces.back())
+                    return true;
+                pointers.push_back(pieces.back().get());
+                left -= stack;
+            }
+        }
+
+        uint32 limited = 0;
+        InventoryResult const room = player->CanStoreItems(pointers.data(), int(pointers.size()), &limited);
+        if (room != EQUIP_ERR_OK)
+        {
+            player->SendEquipError(room, item, nullptr, limited);
+            return true;
         }
 
         player->DestroyItemCount(item->GetEntry(), 1, true);
