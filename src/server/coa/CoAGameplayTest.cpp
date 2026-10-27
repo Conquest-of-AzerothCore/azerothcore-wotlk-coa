@@ -3564,6 +3564,14 @@ private:
             return _actors.at(step.get<std::string>("actor")).lootReceived;
         if (metric == "voidportal_group")
             return double(Ascension::VoidPortal::ActiveGroupForTest());
+        if (metric == "spawn_active")
+        {
+            auto range = player->GetMap()->GetGameObjectBySpawnIdStore().equal_range(step.get<uint32>("spawn"));
+            for (auto itr = range.first; itr != range.second; ++itr)
+                if (itr->second->IsInWorld() && itr->second->isSpawned())
+                    return 1.0;
+            return 0.0;
+        }
         if (metric == "nearby_gameobject_count" || metric == "nearby_gameobject_quest_active")
         {
             bool const questActiveOnly = metric == "nearby_gameobject_quest_active";
