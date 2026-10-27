@@ -7938,10 +7938,17 @@ private:
           categories.begin(), categories.end(), [](uint32 categoryId) {
             return categoryId >= 1 && categoryId <= 14;
           });
-      if (categoryItr == categories.end())
+
+      uint32 category = 0;
+      if (ItemTemplate const *itemTemplate = sObjectMgr->GetItemTemplate(itemId))
+        category = AscensionItemAppearanceAliases::CategoryFromInventoryType(
+            itemTemplate->InventoryType);
+      if (!category && categoryItr != categories.end())
+        category = *categoryItr;
+      if (!category)
         continue;
 
-      activeAppearances[*categoryItr] = itemAppearanceItr->second;
+      activeAppearances[category] = itemAppearanceItr->second;
       expanded = true;
     }
 

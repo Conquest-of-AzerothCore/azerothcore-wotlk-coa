@@ -57,4 +57,48 @@ void AddAliases(std::unordered_map<uint32, uint32>& mappings, std::unordered_map
             mappings.emplace(entry, found->second);
     }
 }
+
+uint32 CategoryFromInventoryType(uint32 inventoryType)
+{
+    switch (inventoryType)
+    {
+        case INVTYPE_HEAD:
+            return 1;
+        case INVTYPE_SHOULDERS:
+            return 2;
+        case INVTYPE_CLOAK:
+            return 3;
+        case INVTYPE_CHEST:
+        case INVTYPE_ROBE:
+            return 4;
+        case INVTYPE_TABARD:
+            return 5;
+        case INVTYPE_BODY:
+            return 6;
+        case INVTYPE_WRISTS:
+            return 7;
+        case INVTYPE_HANDS:
+            return 8;
+        case INVTYPE_WAIST:
+            return 9;
+        case INVTYPE_LEGS:
+            return 10;
+        case INVTYPE_FEET:
+            return 11;
+        case INVTYPE_RANGED:
+        case INVTYPE_RANGEDRIGHT:
+        case INVTYPE_THROWN:
+            return 12;
+        case INVTYPE_WEAPON:
+        case INVTYPE_2HWEAPON:
+        case INVTYPE_WEAPONMAINHAND:
+            return 13;
+        case INVTYPE_WEAPONOFFHAND:
+        case INVTYPE_SHIELD:
+        case INVTYPE_HOLDABLE:
+            return 14;
+        default:
+            return 0;
+    }
+}
 }
