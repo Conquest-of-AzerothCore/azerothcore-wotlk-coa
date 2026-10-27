@@ -86,6 +86,7 @@ void AddAscensionWildcardScripts();
 void AddSC_AscensionWildcardRecuperate();
 void AddSC_AscensionWildcardArcane();
 void AddSC_AscensionWildcardCorruptedBear();
+void AddSC_AscensionWildcardMassEntanglement();
 void AddSC_AscensionWildcardPhysical();
 void AddSC_AscensionWildcardBloodbath();
 void AddSC_AscensionWildcardSolarStrike();
@@ -706,6 +707,7 @@ void AddCoAScripts()
     AddSC_AscensionWildcardRecuperate();
     AddSC_AscensionWildcardArcane();
     AddSC_AscensionWildcardCorruptedBear();
+    AddSC_AscensionWildcardMassEntanglement();
     AddSC_AscensionWildcardPhysical();
     AddSC_AscensionWildcardBloodbath();
     AddSC_AscensionWildcardSolarStrike();
