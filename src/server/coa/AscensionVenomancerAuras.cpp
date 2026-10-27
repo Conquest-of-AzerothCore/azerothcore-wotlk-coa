@@ -218,6 +218,8 @@ class aura_ascension_venomancer_lifecycle : public AuraScript
             player->RemoveAurasDueToSpell(520890);
         if ((id == Spider || id == Beetle) && !player->HasAura(Spider) && !player->HasAura(Beetle))
             player->RemoveAurasDueToSpell(803184);
+        if (id == Spider && !player->HasAura(Spider))
+            player->RemoveAurasDueToSpell(Skulk);
         if (id == 800892)
             player->RemoveAurasDueToSpell(800960);
         if (id == Spider || id == Beetle || id == 804980 || id == 800912 || id == 705970 ||
