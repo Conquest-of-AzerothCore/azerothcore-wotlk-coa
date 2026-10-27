@@ -104,7 +104,7 @@ class aura_ascension_sun_cleric_event : public AuraScript
             case 582832: return damage && melee && critical;
             case 805647: return damage && info && info->Id == 800691 && Chance(player,id);
             case 300349: return healing && critical && Chance(player,id,1000);
-            case 806058: return damage && info && info->SpellFamilyFlags[2] == 134217728 && Chance(player,id);
+            case 806058: return damage && Named(info,520359) && Chance(player,id);
             case 301266: return damage && ((Named(info,500154) && player->HasAura(Sunrise)) ||
                 (Named(info,806477) && player->HasAura(Sunset)));
             case 680643: return damage && automatic && State(player).firstAttacks.insert(event.GetActionTarget()->GetGUID()).second;
