@@ -134,23 +134,29 @@ at 15-lane concurrency on one server), so wall time scales with the slowest lane
 world copy per server — `docs/coa/verification.md`), not with the raw 210 × (white-hit + 4 stage caps) game-time
 total.
 
-## Known defect: most specs' talents never apply (2026-10-27)
+## Talent builds are generated against the real gating data (fixed 2026-10-27)
 
-The first full 210-case run (`.agents/plans/balance-suite/reports/out/task-9-full-2`) measured the infrastructure
-correctly (194.3 s, 9 cases passed, 201 failed) but exposed a catalog data defect that the table above cannot
-paper over: **201 of 210 cases fail at their second `advancement_rank` step** with "The server did not apply the
-uploaded talent rank". Only the three Necromancer specs (34 Death, 35 Animation, 36 Rime — `spec.talents` has 1-2
-entries each) pass; every other spec's `talents` list in `catalog.json` has 4-5 entries per level, and the
-upload of the second entry onward is rejected by the server. `AscensionCoATalentState.cpp`'s talent entries carry
-per-entry gating (`RequiredEntryIds`, `TECost`/`AECost`, `RequiredLevel`) that a selectable talent must satisfy;
-Task 7's "deterministic spend inside the spec tree by tier order" (used wherever no external build was locally
-available) evidently does not check these, so most non-Necromancer builds pick entries the server refuses.
+The first full 210-case run (`.agents/plans/balance-suite/reports/out/task-9-full-2`) found 201 of 210 cases
+failing an `advancement_rank` step with "The server did not apply the uploaded talent rank". Reading the
+server path that handles the upload (`AscensionCompat.cpp`'s `SetTalentRank`/`ApplyKnownEntriesUpload`) against
+the live `CharacterAdvancement.dbc` data showed the actual rejection cause: each CoA talent entry carries a
+`TabAEInvestment`/`TabTEInvestment` tier threshold (how many points must already be spent in that same AE/TE
+pool before the entry is purchasable), on top of `RequiredEntryIds`, `RequiredLevel` and the class/specialization
+AE/TE budget. Task 7's "deterministic spend inside the spec tree by tier order" picked entries by raw entry-id
+order, not by this tier gate, so most non-Necromancer builds tried to buy a high-tier entry before any lower-tier
+points were spent and were rejected on the very upload that tried it.
 
-This means **the flagged-spec table from that run is not trustworthy**: 201/210 cases are `error` rows (no
-`balance` record past step 2), and the 9 Necromancer rows that do have stage data have nothing in their own role
-group to compare against beyond themselves. Re-authoring `catalog.json`'s `talents` for the affected specs so
-each upload respects its entries' real dependencies (reading `AscensionCoATalentState`/`AscensionCompatData`
-rather than picking entries by tier position alone) is a catalog-authoring fix, not a suite-mechanics one; it is
-out of this task's scope and is the next required step before this suite's report says anything about the
-reported creature-power hypothesis. Until then, treat a run's `report.html`/`report.csv` as a demonstration of
-the pipeline, not as balance data, outside the Necromancer rows.
+`apps/coa-gameplay-test/balance/talent_gating.py` compiles the real `AscensionCoATalentData` loader against the
+client DBC set (the same standalone-compile pattern as `apps/coa-tests/coa_talent_catalog.py`) and dumps every
+`CoATalentEntry`'s gating fields plus the `CoATalentBudget` table as JSON — no server build or running
+worldserver needed. `apps/coa-gameplay-test/balance/generate_talents.py` uses that dump to regenerate
+`catalog.json`'s `talents` for every spec except the three Necromancer specs (34 Death, 35 Animation, 36 Rime,
+which already cite a working external build): entries are picked tier-ascending, so the catalog's own upload
+order stays valid at every incremental `advancement_rank` step, honoring `RequiredLevel`, `RequiredEntryIds`,
+the tier gates and the level's AE/TE budget.
+
+`tools/test_balance_suite.py`'s `TalentGatingTests.test_catalog_talents_satisfy_server_gating` re-dumps the
+gating data and replays every spec's build at every level, one upload step at a time, through
+`talent_gating.validate_build` (an independent reimplementation of the same checks, not a call into
+`generate_talents.spend_build`), so a hand-edited or regressed `catalog.json` entry fails this test before it
+ever reaches a live `advancement_rank` upload. It skips if no DBC set or C++ compiler is available.

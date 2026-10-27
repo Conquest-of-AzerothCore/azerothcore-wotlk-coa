@@ -9,10 +9,17 @@ import balance_suite
 ROOT = Path(__file__).resolve().parents[1]
 BALANCE_DIR = ROOT / 'apps/coa-gameplay-test/balance'
 GAMEPLAY_TEST_DIR = ROOT / 'apps/coa-gameplay-test'
+COA_TESTS_DIR = ROOT / 'apps/coa-tests'
 if str(GAMEPLAY_TEST_DIR) not in sys.path:
     sys.path.insert(0, str(GAMEPLAY_TEST_DIR))
+if str(BALANCE_DIR) not in sys.path:
+    sys.path.insert(0, str(BALANCE_DIR))
+if str(COA_TESTS_DIR) not in sys.path:
+    sys.path.insert(0, str(COA_TESTS_DIR))
 import batch  # noqa: E402
 import run as gameplay_run  # noqa: E402
+import talent_gating  # noqa: E402
+from client_data import dbc_dir  # noqa: E402
 
 KNOWN_GROUPS = {'tank', 'healer', 'dps', 'dps-support'}
 KNOWN_ARMORS = {'cloth', 'leather', 'mail', 'plate'}
@@ -74,6 +81,38 @@ class CatalogTests(unittest.TestCase):
                     self.assertIsInstance(entry[0], int)
                     self.assertIsInstance(entry[1], int)
                     self.assertGreater(entry[1], 0)
+
+
+class TalentGatingTests(unittest.TestCase):
+    _gating = None
+
+    @classmethod
+    def _load_gating(cls):
+        if cls._gating is None:
+            try:
+                directory = dbc_dir()
+            except SystemExit as error:
+                raise unittest.SkipTest(str(error))
+            try:
+                cls._gating = talent_gating.dump_gating(directory)
+            except (AssertionError, RuntimeError) as error:
+                raise unittest.SkipTest(str(error))
+        return cls._gating
+
+    def test_catalog_talents_satisfy_server_gating(self):
+        gating = self._load_gating()
+        catalog = load_catalog()
+        failures = []
+        for spec in catalog['specs']:
+            for level in (20, 40, 60):
+                build = spec['talents'][str(level)]
+                for step in range(1, len(build) + 1):
+                    error = talent_gating.validate_build(gating, spec['class_id'], spec['spec_id'], level,
+                                                          build[:step])
+                    if error:
+                        failures.append(f"{spec['class_name']}/{spec['spec_name']} level {level}: {error}")
+                        break
+        self.assertEqual(failures, [])
 
 
 class GearTests(unittest.TestCase):
