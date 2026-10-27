@@ -256,8 +256,8 @@ class spell_ascension_the_bieko_effect : public SpellScript
         if (!player || spellId <= 0)
             return;
         if (uint32 const remaining = player->GetSpellCooldownDelay(uint32(spellId)))
-            player->ModifySpellCooldown(uint32(spellId),
-                -int32(CalculatePct(remaining, std::clamp(GetEffectValue(), 0, 100))));
+            if (int32 const reduction = int32(CalculatePct(remaining, std::clamp(GetEffectValue(), 0, 100))))
+                ModifyAscensionCooldown(player, uint32(spellId), -reduction, false);
     }
 
     void Register() override

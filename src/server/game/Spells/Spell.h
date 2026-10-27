@@ -296,6 +296,8 @@ struct TriggeredByAuraSpellData
     uint32 tickNumber;
 };
 
+void ModifyAscensionCooldown(Player* player, uint32 spellId, int32 delta, bool resetCategory);
+
 class Spell
 {
     friend void Unit::SetCurrentCastedSpell(Spell* pSpell);

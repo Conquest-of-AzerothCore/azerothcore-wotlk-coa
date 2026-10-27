@@ -326,6 +326,7 @@ void ModifyAscensionRankCooldown(Player* player, uint32 spellId, int32 delta, bo
 
     player->ModifySpellCooldown(spellId, delta);
 }
+}
 
 // Ascension data usually names the first rank of a ranked ability, while the
 // cooldown the player sees and CheckCast enforces belongs to the rank they own.
@@ -340,6 +341,8 @@ void ModifyAscensionCooldown(Player* player, uint32 spellId, int32 delta, bool r
             ModifyAscensionRankCooldown(player, rankId, delta, resetCategory);
 }
 
+namespace
+{
 void ModifyAscensionAuraStacks(Unit* caster, Unit* target, uint32 auraSpellId, int32 delta)
 {
     if (!caster || !target || !auraSpellId || !delta)
