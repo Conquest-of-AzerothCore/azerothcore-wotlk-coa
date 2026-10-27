@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Guardian of Time heirloom store hides heirlooms the account already owns (#9440)",
+  "contract": [
+    "On Ascension the Guardian of Time's Heirlooms store 9781001 stops listing an heirloom once the account owns it in",
+    "its vanity collection, which delivers it for free. With CoA.UnlockAllVanity = 0 and Rethreaded Left Bear Claw",
+    "1518202 owned through CoA.StarterVanityItems, the store omits 1518202 and still sells the unowned Rethreaded Right",
+    "Bear Claw 1518203 at its ItemExtendedCost 36202 (96000 Runes of Descension 375250). Buying 1518203 adds it to the",
+    "collection, and the open store is sent again without it, so it disappears without reopening the vendor."
+  ],
+  "timeout_ms": 60000,
+  "vanity_ownership": {"unlock_all": false, "starter_items": [1518202]},
+  "location": {"map": 0, "x": -8824.3, "y": 626.4, "z": 94.4, "o": 0},
+  "players": [{"id": "hero", "race": 1, "class": 1, "level": 60}],
+  "creatures": [{"id": "heirlooms", "owner": "hero", "entry": 9781001, "faction": 35, "level": 80, "distance": 2}],
+  "steps": [
+    {"action": "wait", "ms": 500},
+    {"action": "client_packet", "label": "Open the Heirlooms store", "actor": "hero", "opcode": 414,
+     "fields": [{"actor_guid": "heirlooms"}], "consumed": false},
+    {"action": "assert", "label": "The store opens", "actor": "hero", "metric": "vendor_list_packets", "equals": 1,
+     "within_ms": 2000},
+    {"action": "assert", "label": "Unowned Rethreaded Right Bear Claw is still sold", "actor": "hero",
+     "metric": "vendor_extended_cost", "item": 1518203, "equals": 36202},
+    {"action": "assert", "label": "DISCRIMINATING: owned Rethreaded Left Bear Claw is not listed", "actor": "hero",
+     "metric": "vendor_extended_cost", "item": 1518202, "equals": -1},
+    {"action": "add_item", "actor": "hero", "item": 375250, "count": 96000},
+    {"action": "client_packet", "label": "Buy the Rethreaded Right Bear Claw", "actor": "hero", "opcode": 418,
+     "consumed": false, "fields": [{"actor_guid": "heirlooms"}, {"u32": 1518203}, {"u32": 2}, {"u32": 1}, {"u8": 0}]},
+    {"action": "assert", "label": "The heirloom is bought", "actor": "hero", "metric": "item_count", "item": 1518203,
+     "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "DISCRIMINATING: the open store is sent again", "actor": "hero",
+     "metric": "vendor_list_packets", "equals": 2, "within_ms": 2000},
+    {"action": "assert", "label": "The bought heirloom is no longer listed", "actor": "hero",
+     "metric": "vendor_extended_cost", "item": 1518203, "equals": -1},
+    {"action": "assert", "label": "The rest of the store is still sold", "actor": "hero",
+     "metric": "vendor_extended_cost", "item": 1642896, "equals": 36202}
+  ]
+}

@@ -2,10 +2,15 @@
 #ifndef ASCENSION_VANITY_OWNERSHIP_H
 #define ASCENSION_VANITY_OWNERSHIP_H
 
+#include "Define.h"
 #include <string>
+
+class Player;
 
 namespace AscensionVanityOwnership
 {
+bool OwnsItem(Player const* player, uint32 itemId);
+
 class TestOverride
 {
 public:

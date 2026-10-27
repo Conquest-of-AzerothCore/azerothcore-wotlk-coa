@@ -25,6 +25,7 @@
 #include "ArenaTeamMgr.h"
 #include "ArenaSeasonMgr.h"
 #include "AscensionPooledVitality.h"
+#include "AscensionVanityOwnership.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "BattlefieldWG.h"
@@ -11573,6 +11574,10 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorguid, uint32 vendorslot, uin
         SendEquipError(EQUIP_ERR_ITEM_DOESNT_GO_TO_SLOT, nullptr, nullptr);
         return false;
     }
+
+    // A vanity item joins the account collection when stored; refresh the open list so it disappears
+    if (AscensionVanityOwnership::OwnsItem(this, item))
+        GetSession()->SendListInventory(vendorguid, GetSession()->GetCurrentVendor());
 
     return crItem->maxcount != 0;
 }

@@ -5612,6 +5612,11 @@ public:
     return instance;
   }
 
+  bool OwnsVanityItem(Player const* player, uint32 itemId) {
+    std::shared_ptr<PlayerCollectionState> state = GetState(player);
+    return state && state->OwnedVanityItems.contains(itemId);
+  }
+
   bool LoadClientData() {
     _appearances.clear();
     _itemAppearances.clear();
@@ -10414,6 +10419,11 @@ AscensionVanityOwnership::TestOverride::~TestOverride()
 {
     ascensionCompatConfig.OverwriteConfigValue<bool>(AscensionCompatConfig::UNLOCK_ALL_VANITY, _unlockAll);
     ascensionCompatConfig.OverwriteConfigValue<std::string>(AscensionCompatConfig::STARTER_VANITY_ITEMS, _starterItems);
+}
+
+bool AscensionVanityOwnership::OwnsItem(Player const* player, uint32 itemId)
+{
+    return AscensionCollectionService::Instance().OwnsVanityItem(player, itemId);
 }
 
 bool IsAscensionPrimalistTameEligible(Player const* player)
