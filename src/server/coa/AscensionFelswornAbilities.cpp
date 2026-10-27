@@ -481,7 +481,7 @@ class spell_ascension_felsworn_chaos_rush : public SpellScript
     }
     void Register() override
     {
-        OnEffectHit += SpellEffectFn(spell_ascension_felsworn_chaos_rush::Surge, EFFECT_0, SPELL_EFFECT_CHARGE_DEST);
+        OnEffectLaunch += SpellEffectFn(spell_ascension_felsworn_chaos_rush::Surge, EFFECT_0, SPELL_EFFECT_CHARGE_DEST);
     }
 };
 }
