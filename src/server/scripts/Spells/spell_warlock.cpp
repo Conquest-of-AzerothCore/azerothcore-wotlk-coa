@@ -1267,6 +1267,33 @@ class spell_warl_drain_soul : public AuraScript
     }
 };
 
+// -1101120 - Reborn Drain Soul: its ranks reverse the stock chain's effect order (channel death item at
+// EFFECT_0, periodic damage at EFFECT_1), so the per-tick Soul Shard chance needs its own registration.
+class spell_warl_drain_soul_reborn : public AuraScript
+{
+    PrepareAuraScript(spell_warl_drain_soul_reborn);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_WARLOCK_CREATE_SOULSHARD });
+    }
+
+    void HandleTick(AuraEffect const* aurEff)
+    {
+        Unit* caster = GetCaster();
+        Unit* target = GetTarget();
+
+        if (caster && caster->IsPlayer() && caster->ToPlayer()->isHonorOrXPTarget(target))
+            if (roll_chance_i(20))
+                caster->CastSpell(caster, SPELL_WARLOCK_CREATE_SOULSHARD, aurEff);
+    }
+
+    void Register() override
+    {
+        OnEffectPeriodic += AuraEffectPeriodicFn(spell_warl_drain_soul_reborn::HandleTick, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE);
+    }
+};
+
 // 29341 - Shadowburn
 class spell_warl_shadowburn : public AuraScript
 {
@@ -1841,6 +1868,7 @@ void AddSC_warlock_spell_scripts()
     RegisterSpellScript(spell_warl_soulshatter);
     RegisterSpellScript(spell_warl_unstable_affliction);
     RegisterSpellScript(spell_warl_drain_soul);
+    RegisterSpellScript(spell_warl_drain_soul_reborn);
     RegisterSpellScript(spell_warl_shadowburn);
     RegisterSpellScript(spell_warl_voidwalker_pet_passive);
     RegisterSpellScript(spell_warl_curse_of_agony);
