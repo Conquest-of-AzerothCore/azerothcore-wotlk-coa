@@ -70,23 +70,50 @@ shows as `error: <message>`; the suite still writes the rest of the table (Task 
 - **New kit** (pet summons/upkeep, defensives): a `KitRule` list (`spell`, `when`
   `always|self_aura_missing|pet_aura_missing|owned_below|health_below`, `aura`, `value`, `target`
   `self|pet|enemy`) under `opener`/`upkeep`/`defensives` — see `src/server/coa/CoAGameplayBalance.h`'s
-  `NextKitRule` and the Necromancer kit in `catalog.json` for the pattern. Only the Necromancer (Animation) has
-  a kit today. Source evidence (a dedicated `Ascension<Class>Summons.cpp`, a tamed-beast path, or a pet-system
-  file) confirms Cultist, Felsworn, Tinker, Venomancer, Witch Hunter and Knight of Xoroth each have a scripted
-  summon/pet path, Primalist has one via `AscensionPrimalistSpiritBeast.cpp`, and Stormbringer via
-  `AscensionStormbringerPet.cpp`'s air elemental; `CoARotationAssist.cpp`'s `HasManualEffect` already excludes
-  `SPELL_EFFECT_SUMMON`/`SPELL_EFFECT_SUMMON_PET` from the auto-rotation for every class, confirming the
-  design's "summons are the kit's job, not the rotation's" rule is universal, not Necromancer-specific. Two
-  DBC-plausible candidates were tried and **falsified by the runtime harness, not left as guesses**: Felsworn
-  Infernal's "Summon Infernal" (637278) and Witch Hunter Houndmaster's "Houndmaster's Whistle" (801343, the
-  `SPELL_EFFECT_SUMMON_PET` ability named for the spec) were both added as a `kit` and run through
-  `verify.sh --stages gameplay` at level 40 elite_1; both left `pets_owned_start` at 0 (Houndmaster did land
-  some later `damage_done_pets`, from the upkeep rule's retried, `CanBotCast`-gated cast succeeding mid-fight
-  after the opener's single unconditional `SubmitBotCast` did not), so neither passed the bar this doc sets
-  for a kit and both were reverted rather than committed as a plausible-looking but unverified entry. Finding
-  the actual spec-gated, opener-reliable summon spell for any of these classes — distinct from a recall-only
-  ability like Houndmaster's Whistle, which needs a pet to already exist — is still open work; their stages may
-  show `pets_missing` or weak dps/dtps that reflects the missing kit, not the class.
+  `NextKitRule` and the Necromancer/Felsworn kits in `catalog.json` for the pattern. Only Necromancer
+  (Animation) and Felsworn (Infernal) have a kit today. Source evidence (a dedicated `Ascension<Class>Summons.cpp`,
+  a tamed-beast path, or a pet-system file) confirms Cultist, Tinker, Venomancer, Witch Hunter and Knight of
+  Xoroth each have a scripted summon/pet path, Primalist has one via `AscensionPrimalistSpiritBeast.cpp`, and
+  Stormbringer via `AscensionStormbringerPet.cpp`'s air elemental; `CoARotationAssist.cpp`'s `HasManualEffect`
+  already excludes `SPELL_EFFECT_SUMMON`/`SPELL_EFFECT_SUMMON_PET` from the auto-rotation for every class,
+  confirming the design's "summons are the kit's job, not the rotation's" rule is universal, not
+  Necromancer-specific.
+
+  **Felsworn Infernal, fixed**: an earlier session's guess, "Summon Infernal" (DBC id 637278), was falsified by
+  the harness (`pets_owned_start` stayed 0; `637278` is referenced nowhere in `src/server/coa/`). The real path:
+  `AscensionFelswornSummons.cpp`'s `Summon()` calls `Map::SummonCreature(..., 572163)` directly in C++ — `572163`
+  ("Fel Doom") and `572183` ("Infernal", the extended Inner-Demon form) are only the tracking/script-hook spell
+  ids attached to that summon (`AscensionFelswornAbilities.cpp:446` hooks `SPELL_EFFECT_SUMMON` on them), never
+  themselves cast by a player. The actual player-castable signature spell is **560284** ("Infernal", DBC:
+  `Effect[2]` = `SPELL_EFFECT_TRIGGER_SPELL`, description references `$572163d`), granted by talent entry 31295
+  (`class_id` 14, `spec_id` 7, `tab_te_investment` 8) — which the catalog's Infernal build never selected. Added
+  `[31295, 1]` to the level 40/60 talent builds (swapped out `[30302, 1]` to stay within the TE budget; entry
+  31295 needs 8 TE invested below its tier, unreachable within the level-20 budget of 5, so Infernal's pet kit
+  is structurally level-40+ only, not a bug) and set `kit: {opener: [560284], upkeep: [{spell: 560284,
+  when: owned_below, value: 1, target: self}]}`. `SummonProperties.dbc` row 61 (`Category` 1 ALLY, `Type` 2
+  GUARDIAN) makes `Map::SummonCreature` build a `Guardian` (a `Minion` subclass), so the Infernal is added to
+  the player's `m_Controlled` like any other counted pet. Verified at level 40 (`balance-7-40`, all four
+  stages): `pets_owned_start` 1, `damage_done_pets` > 0 throughout.
+
+  **Witch Hunter Houndmaster, not fixed — still open**: "Houndmaster's Whistle" (801343) is a genuine
+  `SPELL_EFFECT_SUMMON_PET` spell (`EffectMiscValue` 50124, description "Summons a permanent Shadowhound
+  companion"), not a recall-only ability as an earlier session suspected — `Spell::EffectSummonPet`'s native
+  engine path (`SpellEffects.cpp`) creates a brand-new `Pet` from any creature entry when the caster has none,
+  with no class/PetStable prerequisite. The spell is gated by talent entry 17414 (`class_id` 15, `spec_id` 11,
+  cost 0, no tier threshold), also missing from the catalog's Houndmaster build; adding it and a
+  `kit: {opener: [801343], upkeep: ...}` still left `pets_owned_start` 0 at every stage's start, with
+  `damage_done_pets` > 0 appearing only later in the fight (the `CanBotCast`-gated upkeep rule's retry
+  eventually lands a cast; the opener's first unconditional `SubmitBotCast`, even duplicated to two casts, does
+  not). This looks like a timing/ordering issue in `AdvanceBalanceStage`'s opener-completion check
+  (`CoAGameplayTest.cpp`) rather than a wrong spell id, but that was not proven this session, so the Houndmaster
+  `kit`/talent addition was reverted rather than committed as an unverified entry. A future session should
+  instrument or single-step the opener phase for this spec specifically, not retry a different spell id.
+
+  Cultist, Tinker, Venomancer, Knight of Xoroth, Primalist and Stormbringer still have no kit attempt recorded:
+  finding their player-castable, opener-reliable summon spell needs the same per-class
+  `Ascension<Class>Abilities.cpp`/`Ascension<Class>Summons.cpp` trace used for Felsworn above, each followed by
+  the same harness-proven check; their stages may show `pets_missing` or weak dps/dtps that reflects the
+  missing kit, not the class.
 
   The Necromancer ghoul population was previously capped at 1 (`upkeep`'s `owned_below` value), tighter than
   the server's own `AscensionNecromancer.cpp` `Capacity()` (base 2 minion-capacity points, `Raise: Ghoul`
