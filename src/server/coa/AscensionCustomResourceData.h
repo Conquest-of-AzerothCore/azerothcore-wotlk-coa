@@ -109,7 +109,7 @@ struct ResourceGainRule
     std::uint8_t ChancePercent = 100;
 };
 
-inline constexpr std::array<ResourceGainRule, 189> ResourceGainRules =
+inline constexpr std::array<ResourceGainRule, 191> ResourceGainRules =
 {{
     {14, 524706, 524706, 800058, 1, ResourceMutation::AuraStacks,
         ResourceGainEvent::FirstSuccessfulHostileTarget},
@@ -378,6 +378,10 @@ inline constexpr std::array<ResourceGainRule, 189> ResourceGainRules =
     {30, 505326, 505326, 805077, 1, ResourceMutation::AuraStacks,
         ResourceGainEvent::FirstSuccessfulDamagingHit},
     {30, 505326, 505326, 355461, 1, ResourceMutation::TriggerSpell,
+        ResourceGainEvent::FirstSuccessfulDamagingHit},
+    {30, 500523, 500523, 805077, 1, ResourceMutation::AuraStacks,
+        ResourceGainEvent::FirstSuccessfulDamagingHit},
+    {30, 500523, 500523, 355461, 1, ResourceMutation::TriggerSpell,
         ResourceGainEvent::FirstSuccessfulDamagingHit},
     {30, 801328, 801328, 355461, 1, ResourceMutation::TriggerSpell,
         ResourceGainEvent::FirstSuccessfulHostileTarget},
