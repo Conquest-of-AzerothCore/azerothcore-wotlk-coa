@@ -48,6 +48,7 @@ void AddSC_AscensionPvpTrinketHealth();
 void AddSC_AscensionClosestResurrection();
 void AddSC_AscensionAdventureModeRandomAggro();
 void AddSC_AscensionDungeonRelease();
+void AddSC_AscensionBattlegroundSpiritQueue();
 void AddSC_AscensionRaidRelease();
 void AddSC_AscensionThreatRedirect();
 void AddSC_AscensionTalentDataProcs();
@@ -776,6 +777,7 @@ void AddCoAScripts()
     AddSC_AscensionClosestResurrection();
     AddSC_AscensionAdventureModeRandomAggro();
     AddSC_AscensionDungeonRelease();
+    AddSC_AscensionBattlegroundSpiritQueue();
     AddSC_AscensionRaidRelease();
     AddSC_AscensionThreatRedirect();
     AddSC_AscensionTalentDataProcs();
