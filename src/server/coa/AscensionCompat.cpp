@@ -9751,6 +9751,7 @@ enum StoreTitleContract : uint32
 {
     ITEM_BLOODFORGED_CONTRACT = 977220,
     ITEM_FOUNDERS_CHARTER = 134988,
+    ITEM_FOUNDERS_CHARTER_ACCOUNT = 977020,
     TITLE_THE_BLOODY = 230,
     TITLE_FOUNDER = 210
 };
@@ -9772,6 +9773,7 @@ public:
                 titleId = TITLE_THE_BLOODY;
                 break;
             case ITEM_FOUNDERS_CHARTER:
+            case ITEM_FOUNDERS_CHARTER_ACCOUNT:
                 titleId = TITLE_FOUNDER;
                 break;
             default:
