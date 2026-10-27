@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Manastorm's first floor opens in Jergosh's Ragefire room, the second opening room (#5620)",
+  "contract": [
+    "Ragefire Chasm holds the three Manastorm rooms that unlock at depth 1. Startup validation admitted only Oggleflint's room, so depths 1-5 replayed that one room. The entrance of Jergosh's room now stands 2 yd further along its facing (-X), where it passes the startup geometry check, so the opening pool holds two rooms and consecutive floors alternate between them.",
+    "Depth 1 always takes the first valid opening room in catalog order; with Jergosh's room admitted, a native 0x0651 enter request for depth 1 must place the player in a private instance of map 389 at that room's entrance (-318.556, 222.633). Taragaman's room stays excluded. Requires Ascension.Manastorm.Enable = 1."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "player", "race": 1, "class": 15, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Settle login", "ms": 5000 },
+    { "action": "client_packet", "label": "Enter Manastorm depth 1", "actor": "player", "opcode": 1617, "fields": [{ "u32": 1 }] },
+    {
+      "action": "assert", "label": "The native enter request reached a Manastorm instance",
+      "actor": "player", "metric": "private_instance", "equals": 1, "within_ms": 10000
+    },
+    {
+      "action": "assert", "label": "The first floor is in Ragefire Chasm",
+      "actor": "player", "metric": "map_id", "equals": 389
+    },
+    {
+      "action": "assert", "label": "The first floor starts at Jergosh's room entrance",
+      "actor": "player", "metric": "point_distance_2d", "x": -318.556, "y": 222.633, "max": 3
+    },
+    { "action": "wait", "ms": 3000 },
+    { "action": "client_packet", "label": "Leave Manastorm", "actor": "player", "opcode": 1637 },
+    {
+      "action": "assert", "label": "The leave request returned to the open world",
+      "actor": "player", "metric": "private_instance", "equals": 0, "within_ms": 10000
+    }
+  ]
+}
