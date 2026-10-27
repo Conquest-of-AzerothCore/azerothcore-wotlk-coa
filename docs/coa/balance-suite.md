@@ -123,6 +123,25 @@ shows as `error: <message>`; the suite still writes the rest of the table (Task 
   the correct ceiling here, not a guess at "several"). A level 40 elite_1 rerun after the fix moved from
   `pets_owned_start` 1 (previously reported dead by the end) to `pets_owned_start` 2, `pets_alive_end` 2, stage
   outcome `win`.
+
+  **Animation Life Force talents added.** `AscensionNecromancer.cpp`'s `Capacity()` is `2 +
+  player->ApplySpellMod(805011, SPELLMOD_MAX_AURA_STACKS, capacity)`. Two spec talents feed that spell mod:
+  Summoning Adept (spell 92123, CharacterAdvancement entry 4036, `RequiredLevel` 10 — also spec 35's identity
+  entry) and Summoning Expert (spell 807494, entry 4237, `RequiredLevel` 30), each `Effect[last]` =
+  `SPELL_EFFECT_APPLY_AURA`/`SPELL_AURA_ADD_FLAT_MODIFIER` with `EffectMiscValue` 31
+  (`SPELLMOD_MAX_AURA_STACKS`) and `EffectBasePoints`+`EffectDieSides` = +1 (read directly from `Spell.dbc` via
+  `coa-dbc-viewer`, matching `necromancer-audit-3678-summoning-expert.json`'s own contract for 807494). Both
+  entries cost 0 AE/TE and have no `RequiredEntryIds`/tab-investment gate (`talent_gating.py`'s gating dump),
+  so `talent_gating.validate_build` accepts them at any level that meets `RequiredLevel`; entry 4237 is
+  unaffordable (level-gated, not budget-gated) at level 20 and was left out of that build. Added `[4036, 1]` at
+  levels 20/40/60 and `[4237, 1]` at levels 40/60, raising ordinary capacity to 3 at level 20 and 4 at level
+  40/60. The kit (single opener/upkeep list, not per-level) now casts `Raise: Ghoul` four times and
+  `upkeep.owned_below` is 4 — the real `Capacity()` call still caps actual summons at the live value, so a
+  level-20 character harmlessly fails its fourth `Raise: Ghoul` attempt instead of over-filling. Verified with
+  `balance-35-20/40/60`, `elite_1` (`--gameplay-jobs 1`): `pets_owned_start` 3/4/4 matching the derived capacity
+  at each level, `pets_alive_end` equal to `pets_owned_start`, `damage_done_pets` > 0 (2576/4628/10270) and
+  every `specialization`/`advancement_rank` step `completed` with no talent-upload refusal in the worldserver
+  log.
 - **New gear tier**: `apps/coa-gameplay-test/balance/gear.json` is generated, not edited by hand — see
   "Full-kit gear generator" below. A new `armor/primary_stat` or `class_id/group/primary_stat` combination
   needs no new gear entry: re-run `generate_gear.py` and it is covered from `item_pool.json`.
