@@ -2,12 +2,11 @@
   "schema": 1,
   "name": "venomancer-mount-cancels-beetle-and-spider-6281",
   "contract": [
-    "Beetle and Spider forms carry the native mount interrupt flag. Each form is learned and cast normally. The",
-    "authored Brown Horse cast is forbidden while shapeshifted (native result 68), so the fixture applies its",
-    "mounted aura to isolate the actual native Unit::Mount event. That mounted event must remove the active",
-    "Venomancer form. Native dismount separates the two cases. This covers server mount cancellation; client",
-    "automatic unshifting before a mount cast is outside the fixture. The normal server display must return, and",
-    "Beetle armor/health and threat helpers must also be gone."
+    "Beetle and Spider forms carry the native mount interrupt flag. Each form is learned and cast normally. #8344:",
+    "Spell::CheckCast's CLASS_PROPHET (Venomancer) carve-out lets the Brown Horse cast succeed directly while",
+    "shapeshifted instead of being refused with SPELL_FAILED_NOT_SHAPESHIFT (68); the mount's own SPELL_AURA_MOUNTED",
+    "cast removes the active Venomancer form through the ordinary Unit::Mount path. Native dismount separates the",
+    "two cases. The normal server display must return, and Beetle armor/health and threat helpers must also be gone."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -94,16 +93,11 @@
     },
     {
       "action": "assert",
+      "label": "DISCRIMINATING: the mount cast is accepted while shapeshifted (#8344)",
       "actor": "p",
       "metric": "cast_failure",
       "spell": 458,
-      "equals": 68
-    },
-    {
-      "action": "set_aura",
-      "actor": "p",
-      "spell": 458,
-      "stacks": 1
+      "equals": 0
     },
     {
       "action": "wait",
@@ -118,6 +112,7 @@
     },
     {
       "action": "assert",
+      "label": "Beetle Form is dropped by the mount",
       "actor": "p",
       "metric": "aura",
       "spell": 803183,
@@ -177,16 +172,11 @@
     },
     {
       "action": "assert",
+      "label": "DISCRIMINATING: the mount cast is accepted while shapeshifted (#8344)",
       "actor": "p",
       "metric": "cast_failure",
       "spell": 458,
-      "equals": 68
-    },
-    {
-      "action": "set_aura",
-      "actor": "p",
-      "spell": 458,
-      "stacks": 1
+      "equals": 0
     },
     {
       "action": "wait",
@@ -201,6 +191,7 @@
     },
     {
       "action": "assert",
+      "label": "Spider Form is dropped by the mount",
       "actor": "p",
       "metric": "aura",
       "spell": 800841,
