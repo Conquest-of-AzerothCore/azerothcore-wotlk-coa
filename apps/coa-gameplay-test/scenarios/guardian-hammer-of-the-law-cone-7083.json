@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "name": "Guardian Hammer of the Law hits every enemy in its cone, not only the clicked target (#7083)",
+  "contract": "Hammer of the Law (704418 rank 1, 707710 rank 2, ... 707715 rank 6) has Effects 0 (SCHOOL_DAMAGE), 1 (APPLY_AURA MOD_SILENCE) and 2 (THREAT) all target TARGET_UNIT_TARGET_ENEMY (A, the clicked target) plus TARGET_UNIT_CONE_ENEMY_54 (B, a 54-degree frontal cone), but every effect's EffectRadiusIndex is 0 in Spell.dbc, so SpellInfo::CalcRadius() returns 0 and the cone search finds nobody beyond the explicit target. A new GlobalScript on GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR (AscensionGuardianAbilities.cpp, mirroring the existing Mountain Fury Cone correction in AscensionPrimalistMountainFury.cpp) sets RadiusEntry to SpellRadius id 13 (10 yards) for every effect of the full rank chain whose TargetB is TARGET_UNIT_CONE_ENEMY_54. This scenario places three creatures in a line directly ahead of the caster: the clicked target within melee range, two more within the corrected 10-yard radius, and a fourth outside it as a negative control proving the fix is bounded, not unlimited.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    { "id": "guardian", "race": 1, "class": 18, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "near", "owner": "guardian", "entry": 1601, "level": 80, "health": 500000, "distance": 3 },
+    { "id": "mid", "owner": "guardian", "entry": 1601, "level": 80, "health": 500000, "distance": 6 },
+    { "id": "far", "owner": "guardian", "entry": 1601, "level": 80, "health": 500000, "distance": 9 },
+    { "id": "outside", "owner": "guardian", "entry": 1601, "level": 80, "health": 500000, "distance": 15 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "guardian", "spell": 707710 },
+    { "action": "set_power", "actor": "guardian", "power": 1, "value": 1000 },
+    { "action": "cast", "actor": "guardian", "spell": 707710, "target": "near" },
+    {
+      "action": "assert", "label": "Hammer of the Law is accepted",
+      "actor": "guardian", "metric": "cast_failure", "spell": 707710, "equals": 0
+    },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "The clicked target is silenced",
+      "actor": "near", "metric": "aura", "spell": 707710, "caster": "guardian", "equals": 1
+    },
+    {
+      "action": "assert", "label": "A cone victim within the corrected radius is silenced too",
+      "actor": "mid", "metric": "aura", "spell": 707710, "caster": "guardian", "equals": 1
+    },
+    {
+      "action": "assert", "label": "A farther cone victim still within the corrected radius is silenced too",
+      "actor": "far", "metric": "aura", "spell": 707710, "caster": "guardian", "equals": 1
+    },
+    {
+      "action": "assert", "label": "An enemy outside the corrected radius is not hit",
+      "actor": "outside", "metric": "aura", "spell": 707710, "caster": "guardian", "equals": 0
+    },
+    {
+      "action": "assert", "label": "The clicked target takes School Damage",
+      "actor": "guardian", "metric": "spell_damage_count", "spell": 707710, "target": "near", "min": 1
+    },
+    {
+      "action": "assert", "label": "The near cone victim also takes School Damage",
+      "actor": "guardian", "metric": "spell_damage_count", "spell": 707710, "target": "mid", "min": 1
+    },
+    {
+      "action": "assert", "label": "The far cone victim also takes School Damage",
+      "actor": "guardian", "metric": "spell_damage_count", "spell": 707710, "target": "far", "min": 1
+    },
+    {
+      "action": "assert", "label": "The out-of-radius enemy takes no School Damage",
+      "actor": "guardian", "metric": "spell_damage_count", "spell": 707710, "target": "outside", "equals": 0
+    }
+  ]
+}
