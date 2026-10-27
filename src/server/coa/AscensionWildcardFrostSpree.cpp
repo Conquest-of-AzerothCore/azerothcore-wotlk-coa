@@ -32,8 +32,16 @@ Unit* SelectFrostSpreeTarget(Unit* caster)
     return targets.empty() ? nullptr : Acore::Containers::SelectRandomContainerElement(targets);
 }
 
+bool CanAssault(Unit* caster)
+{
+    return caster->IsAlive() && !caster->GetVehicleBase() &&
+        !caster->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED);
+}
+
 void FrostSpreeAssault(Unit* caster, Unit* target)
 {
+    if (!CanAssault(caster))
+        return;
     float x, y, z;
     caster->GetContactPoint(target, x, y, z);
     caster->NearTeleportTo(x, y, z, caster->GetAngle(target), true);

@@ -11,7 +11,11 @@
     "('This uses Killing Spree modifiers.'). The fix registers an equivalent SpellScript+AuraScript pair that",
     "teleports the caster to a random nearby enemy and casts Frost Blitz (913454, already-native normalized",
     "weapon damage that natively triggers its own off-hand half 913455) on cast and on each of the 4 periodic",
-    "ticks, for up to 5 total assaults, matching the tooltip exactly."
+    "ticks, for up to 5 total assaults, matching the tooltip exactly. The native vanilla Killing Spree's own",
+    "cast-time FilterTargets refuses the cast outright (FinishCast) when the caster is rooted or vehicle-bound",
+    "(src/server/scripts/Spells/spell_rogue.cpp), so the equivalent guard belongs here too: FrostSpreeAssault",
+    "skips the teleport and the weapon-damage cast whenever the caster is dead, vehicle-bound, rooted or stunned,",
+    "re-checked on every assault since this script re-queries a live nearby target instead of a pre-collected list."
   ],
   "timeout_ms": 90000,
   "players": [
@@ -34,6 +38,14 @@
     {"action": "wait", "ms": 2300},
     {"action": "assert", "actor": "hero", "metric": "spell_cast_count", "spell": 913454, "target": "enemy", "min": 5},
     {"action": "assert", "actor": "hero", "metric": "spell_cast_count", "spell": 913455, "target": "enemy", "min": 5},
-    {"action": "assert", "actor": "hero", "metric": "aura", "spell": 913453, "equals": 0}
+    {"action": "assert", "actor": "hero", "metric": "aura", "spell": 913453, "equals": 0},
+    {"action": "set_aura", "actor": "hero", "spell": 12494, "stacks": 1},
+    {"action": "assert", "label": "Fixture: the hero is rooted", "actor": "hero", "metric": "rooted", "equals": 1},
+    {"action": "snapshot", "actor": "hero", "metric": "distance", "target": "enemy", "save_as": "distance_before_rooted_cast"},
+    {"action": "snapshot", "actor": "hero", "metric": "spell_cast_count", "spell": 913454, "save_as": "casts_before_rooted_cast"},
+    {"action": "cast", "label": "Cast Frost Spree again while rooted", "actor": "hero", "spell": 913453, "target": "enemy"},
+    {"action": "wait", "ms": 2300},
+    {"action": "assert", "label": "A rooted caster is never teleported to the target", "actor": "hero", "metric": "distance", "target": "enemy", "relative_to": "distance_before_rooted_cast", "min": -0.1, "max": 0.1},
+    {"action": "assert", "label": "A rooted caster lands no Frost Blitz assaults", "actor": "hero", "metric": "spell_cast_count", "spell": 913454, "relative_to": "casts_before_rooted_cast", "equals": 0}
   ]
 }
