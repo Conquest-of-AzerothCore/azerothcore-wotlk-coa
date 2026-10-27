@@ -563,7 +563,7 @@ class xoroth_scaling : public UnitScript
             }
         if (Named(info, 801016) && index == 1 && player->HasAura(92100))
             value *= 2;
-        if (info->Id == 804353 && index == 1)
+        if (Named(info, 804353) && index == 1)
             value += player->GetShieldBlockValue();
         if (info->Id == 801064 && index == 0)
             value += player->GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_DEFENSE_SKILL) * .20f;
