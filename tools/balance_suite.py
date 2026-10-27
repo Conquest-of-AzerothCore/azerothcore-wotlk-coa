@@ -227,11 +227,11 @@ def error_row(spec, level, stage, message, white_pct):
     }
 
 
-def harvest(verify_output, catalog):
-    cases_dir = Path(verify_output) / 'gameplay' / 'cases'
+def harvest(verify_output, catalog, levels=LEVELS):
+    cases_dir = Path(verify_output) / 'gameplay' / 'exploratory'
     rows = []
     for spec in catalog['specs']:
-        for level in LEVELS:
+        for level in levels:
             case_id = scenario_id(spec['spec_id'], level)
             result, message = load_case_result(cases_dir, case_id)
             steps = result.get('steps', []) if result else []
@@ -443,9 +443,10 @@ def select_specs(catalog, spec_ids):
     return {**catalog, 'specs': [spec for spec in catalog['specs'] if spec['spec_id'] in wanted]}
 
 
-def write_report(output, threshold):
-    catalog = load_json(CATALOG_PATH)
-    rows = harvest(Path(output) / 'verify', catalog)
+def write_report(output, threshold, catalog=None, levels=LEVELS):
+    if catalog is None:
+        catalog = load_json(CATALOG_PATH)
+    rows = harvest(Path(output) / 'verify', catalog, levels)
     rows = compare(rows, threshold)
     write_csv(rows, Path(output) / 'report.csv')
     write_html(rows, Path(output) / 'report.html')
@@ -463,7 +464,7 @@ def cli_run(args):
     output.mkdir(parents=True, exist_ok=True)
     scenarios = generate_scenarios(catalog, dungeons, gear, levels, output / 'scenarios')
     returncode = run_suite(scenarios, output, args.jobs, args.lanes)
-    write_report(output, args.threshold)
+    write_report(output, args.threshold, catalog, levels)
     return returncode
 
 

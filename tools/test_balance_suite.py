@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+import sys
 import tempfile
 import unittest
 
@@ -7,6 +8,10 @@ import balance_suite
 
 ROOT = Path(__file__).resolve().parents[1]
 BALANCE_DIR = ROOT / 'apps/coa-gameplay-test/balance'
+GAMEPLAY_TEST_DIR = ROOT / 'apps/coa-gameplay-test'
+if str(GAMEPLAY_TEST_DIR) not in sys.path:
+    sys.path.insert(0, str(GAMEPLAY_TEST_DIR))
+import batch  # noqa: E402
 
 KNOWN_GROUPS = {'tank', 'healer', 'dps', 'dps-support'}
 KNOWN_ARMORS = {'cloth', 'leather', 'mail', 'plate'}
@@ -226,7 +231,7 @@ class HarvestTests(unittest.TestCase):
         catalog = {'specs': [FIXTURE_CATALOG['specs'][0]]}
         with tempfile.TemporaryDirectory() as tmp:
             verify_output = Path(tmp)
-            cases_dir = verify_output / 'gameplay' / 'cases'
+            cases_dir = verify_output / 'gameplay' / 'exploratory'
             statuses = [
                 ('elite_1', 'win', 10.0, 10.0, None, 1, 50.0),
                 ('elite_2', 'win', 20.0, 20.0, None, 1, 50.0),
@@ -248,7 +253,7 @@ class HarvestTests(unittest.TestCase):
         catalog = {'specs': [FIXTURE_CATALOG['specs'][0]]}
         with tempfile.TemporaryDirectory() as tmp:
             verify_output = Path(tmp)
-            cases_dir = verify_output / 'gameplay' / 'cases'
+            cases_dir = verify_output / 'gameplay' / 'exploratory'
             statuses = [('elite_1', 'win', 10.0, 10.0, None, 1, 50.0)]
             result = balance_result(statuses)
             result['status'] = 'failed'
@@ -263,6 +268,21 @@ class HarvestTests(unittest.TestCase):
             missing_case = [row for row in rows if row['level'] == 20]
             self.assertTrue(all(row['outcome'] == 'error' for row in missing_case))
             self.assertEqual(missing_case[0]['message'], 'no result.json')
+
+    def test_harvest_reads_the_real_exploratory_placement(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            scenario_path = Path(tmp) / f'{balance_suite.scenario_id(35, 40)}.json'
+            scenario_path.write_text('{}', encoding='utf-8')
+            key = batch.exploratory_key(scenario_path, set())
+            self.assertEqual(key, balance_suite.scenario_id(35, 40))
+
+    def test_harvest_only_iterates_given_catalog_and_levels(self):
+        catalog = {'specs': [FIXTURE_CATALOG['specs'][0], FIXTURE_CATALOG['specs'][1]]}
+        with tempfile.TemporaryDirectory() as tmp:
+            verify_output = Path(tmp)
+            rows = balance_suite.harvest(verify_output, catalog, [40])
+            self.assertEqual(len(rows), len(catalog['specs']) * len(balance_suite.STAGES))
+            self.assertTrue(all(row['level'] == 40 for row in rows))
 
 
 class CompareTests(unittest.TestCase):
@@ -355,6 +375,15 @@ class ReportTests(unittest.TestCase):
             balance_suite.write_html(enriched, path)
             text = path.read_text(encoding='utf-8')
             self.assertIn('class="flagged"', text)
+
+    def test_write_report_honors_filtered_catalog_and_levels(self):
+        catalog = {'specs': [FIXTURE_CATALOG['specs'][0]]}
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp)
+            rows = balance_suite.write_report(output, balance_suite.DEFAULT_THRESHOLD, catalog, [40])
+            self.assertEqual(len(rows), len(balance_suite.STAGES))
+            self.assertTrue(all(row['level'] == 40 for row in rows))
+            self.assertTrue(all(row['outcome'] == 'error' for row in rows))
 
 
 if __name__ == '__main__':
