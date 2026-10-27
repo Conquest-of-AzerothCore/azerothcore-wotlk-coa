@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Worldforged Centaur Axe stands at its LootCollector spot in Durotar, not in the Barrens (#8422)",
+  "contract": [
+    "LootCollector (installed StarterDB 2026-08-20, union pins in Worldforged-data wf_pins_union.csv) records the Centaur Axe",
+    "(item 450689, pickup 95639) only in Durotar at 47.73, 77.37, world (-918.5, -4486.0) on map 1.",
+    "Report #8422 found it in the Barrens at (-3588.6, -2241.7), the misplaced guid 6941546.",
+    "Expected: no Centaur Axe pickup at the reported Barrens spot; one within 20 yd of the recorded Durotar spot."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": -3588.59, "y": -2241.71, "z": 91.74, "o": 0 },
+  "players": [ { "id": "p", "race": 2, "class": 1, "level": 10 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: no Centaur Axe pickup at the reported Barrens spot", "actor": "p",
+      "metric": "nearby_gameobject_count", "entry": 95639, "equals": 0 },
+    { "action": "teleport", "actor": "p", "map": 1, "x": -918.5, "y": -4486.0, "z": 31.5, "o": 0 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "the Centaur Axe stands at the recorded Durotar spot", "actor": "p",
+      "metric": "nearby_gameobject_count", "entry": 95639, "equals": 1 }
+  ]
+}
