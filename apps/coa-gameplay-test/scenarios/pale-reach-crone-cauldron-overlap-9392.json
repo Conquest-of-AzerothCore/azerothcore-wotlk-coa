@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Pale Reach: the Crone stands clear of the Three Sisters' cauldron (#9392)",
+  "contract": [
+    "Three Sisters Hollow, quest 175203 'The Three Sisters' Wisdom'. rev_20261009_62 placed Crone (creature guid",
+    "9920731, id 164590) at (-7485.6, 665.8, 238.333) by SpawnHelper capture, 2D distance 2.74 yd from the quest",
+    "cauldron (gameobject id 2300715/2309001, guid 9992006/9999301, at -7485.35, 663.074, 238.599, unrelated",
+    "SQL, untouched by this fix). rev_20261017_76 (#8051) moved Crone to (-7485.93, 663.958, 239.124), 2D",
+    "distance 1.06 yd from the cauldron: inside its model, as reported. Her untouched sisters Maiden (9920732,",
+    "-7489.64, 659.326, 239.134) and Mother (9920733, -7488.77, 663.753, 239.126) sit 5.70 yd and 3.49 yd from",
+    "the cauldron respectively. This fix restores Crone's original SpawnHelper position, 2.74 yd from the",
+    "cauldron and within her sisters' spacing pattern. The harness has no cross-spawn distance metric and the",
+    "hollow is an elevated interior (spawn_ground_gap reads ~179 yd for every sister here, confirmed on Maiden",
+    "and Crone alike, so placement metrics do not apply to this zone), so the asserts below check what remains",
+    "measurable: all three sisters stay spawned, alive and findable after the UPDATE. The 2D distances above",
+    "are computed independently from the effective creature and gameobject rows, not from this scenario."
+  ],
+  "timeout_ms": 30000,
+  "location": {"map": 0, "x": -7490.0, "y": 668.0, "z": 239.0, "o": 5.6},
+  "players": [{"id": "pilgrim", "race": 1, "class": 29, "level": 60}],
+  "steps": [
+    {"action": "wait", "label": "Let login settle", "ms": 2000},
+    {"action": "set_phase", "actor": "pilgrim", "value": 1},
+    {"action": "assert", "label": "Crone is alive in Three Sisters Hollow", "actor": "pilgrim",
+     "metric": "nearby_creature_count", "entry": 164590, "equals": 1, "within_ms": 10000},
+    {"action": "assert", "label": "Maiden is unaffected by the fix", "actor": "pilgrim",
+     "metric": "nearby_creature_count", "entry": 164588, "equals": 1},
+    {"action": "assert", "label": "Mother is unaffected by the fix", "actor": "pilgrim",
+     "metric": "nearby_creature_count", "entry": 164589, "equals": 1}
+  ]
+}
