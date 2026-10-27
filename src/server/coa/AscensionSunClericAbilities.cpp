@@ -10,6 +10,7 @@
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
+#include "Unit.h"
 #include <algorithm>
 namespace
 {
@@ -293,7 +294,13 @@ public:
                     uint32 count = 0;
                     for (Unit* enemy : Nearby(target, 8))
                         if (enemy != target && player->IsValidAttackTarget(enemy) && count++ < 5)
-                            Cast(player, enemy, info->Id);
+                        {
+                            SpellNonMeleeDamage extra(player, enemy, info, info->GetSchoolMask());
+                            player->CalculateSpellDamageTaken(&extra, int32(damage), info);
+                            Unit::DealDamageMods(enemy, extra.damage, &extra.absorb);
+                            player->SendSpellNonMeleeDamageLog(&extra);
+                            player->DealSpellDamage(&extra, true);
+                        }
                 }
             }
         }
