@@ -592,6 +592,7 @@ std::map<std::pair<ObjectGuid, uint32>, uint32> ProcCounter::_casts;
 
 constexpr float DefaultEncounterRadius = 100.0f;
 constexpr float MaximumEncounterRadius = 200.0f;
+constexpr uint64 OpenerSettleLimitMs = 20000;
 
 uint64 GameNowMs()
 {
@@ -923,6 +924,8 @@ struct BalanceStageState
     Phase phase = Phase::Opener;
     bool resummonNeeded = false;
     std::size_t openerIndex = 0;
+    bool openerSettling = false;
+    TimePoint openerSettleStart;
     uint32 petsOwnedStart = 0;
     ObjectGuid actor;
     std::vector<Target> enemies;
@@ -3341,6 +3344,13 @@ private:
         _balanceStageEnemies.clear();
     }
 
+    static void RemoveDeadPet(Player* player)
+    {
+        if (Pet* pet = player->GetPet())
+            if (pet->isDead())
+                player->RemovePet(pet, PET_SAVE_NOT_IN_SLOT, false);
+    }
+
     void ResetBalanceStageActor(Actor& actor, Player* player)
     {
         DespawnBalanceStageEnemies();
@@ -3354,6 +3364,7 @@ private:
             player->SetPower(Powers(power), player->GetMaxPower(Powers(power)));
         player->RemoveAllSpellCooldown();
         StopOwnedUnits(player);
+        RemoveDeadPet(player);
         actor.lastResetHealth = player->GetHealth();
     }
 
@@ -3380,13 +3391,25 @@ private:
         BalanceStageState& state = *_balanceStage;
         if (state.phase == BalanceStageState::Phase::Opener)
         {
-            bool const openerFinished = !state.resummonNeeded || actor.kitOpener.empty() ||
-                (state.openerIndex >= actor.kitOpener.size() && BotIdle(player));
-            if (!openerFinished)
+            bool const openerCastsPending = state.resummonNeeded && !actor.kitOpener.empty() &&
+                state.openerIndex < actor.kitOpener.size();
+            if (openerCastsPending)
             {
-                if (state.openerIndex < actor.kitOpener.size() && BotIdle(player))
+                if (BotIdle(player))
                     SubmitBotCast(player, actor.kitOpener[state.openerIndex++], player);
                 return false;
+            }
+            bool const openerSummonStillSettling = state.resummonNeeded && !actor.kitOpener.empty() &&
+                (!BotIdle(player) || BalanceStageOpenerHolds(actor, player));
+            if (openerSummonStillSettling)
+            {
+                if (!state.openerSettling)
+                {
+                    state.openerSettling = true;
+                    state.openerSettleStart = GameTime::Now();
+                }
+                if (GameElapsed(state.openerSettleStart) < OpenerSettleLimitMs)
+                    return false;
             }
             state.petsOwnedStart = CountAliveOwned(player);
             Position spot = player->GetPosition();
