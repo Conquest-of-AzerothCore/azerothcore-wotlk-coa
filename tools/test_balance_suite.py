@@ -233,11 +233,9 @@ class GenerateScenariosTests(unittest.TestCase):
             self.assertEqual(scenario['players'][0]['solo'], True)
 
     def test_generated_scenario_passes_run_py_schema_validation(self):
-        non_healer_specs = [spec for spec in FIXTURE_CATALOG['specs'] if spec['group'] != 'healer']
-        catalog = {'specs': non_healer_specs}
         with tempfile.TemporaryDirectory() as tmp:
             out_dir = Path(tmp)
-            paths = balance_suite.generate_scenarios(catalog, FIXTURE_DUNGEONS, FIXTURE_GEAR,
+            paths = balance_suite.generate_scenarios(FIXTURE_CATALOG, FIXTURE_DUNGEONS, FIXTURE_GEAR,
                                                        list(FIXTURE_LEVELS), out_dir)
             self.assertTrue(paths)
             for path in paths:
@@ -245,6 +243,12 @@ class GenerateScenariosTests(unittest.TestCase):
                 gameplay_run.validate(scenario)
                 assertions = sum(step['action'] == 'assert' for step in scenario['steps'])
                 self.assertGreater(assertions, 0)
+
+    def test_healer_player_has_no_rotation_field(self):
+        healer_spec = next(spec for spec in FIXTURE_CATALOG['specs'] if spec['group'] == 'healer')
+        player = balance_suite.build_player(healer_spec, 40)
+        self.assertNotIn('rotation', player)
+        self.assertEqual(player['heal_spell'], balance_suite.FALLBACK_SPELL)
 
 
 class HarvestTests(unittest.TestCase):

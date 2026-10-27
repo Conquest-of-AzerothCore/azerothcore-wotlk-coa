@@ -63,13 +63,14 @@ def build_player(spec, level):
         'class': spec['class_id'],
         'level': level,
         'role': role,
-        'rotation': [FALLBACK_SPELL],
         'rotation_assist': True,
         'solo': True,
         'group': spec['group'],
     }
     if role == 'healer':
         player['heal_spell'] = FALLBACK_SPELL
+    else:
+        player['rotation'] = [FALLBACK_SPELL]
     if spec.get('kit'):
         player['kit'] = spec['kit']
     return player
