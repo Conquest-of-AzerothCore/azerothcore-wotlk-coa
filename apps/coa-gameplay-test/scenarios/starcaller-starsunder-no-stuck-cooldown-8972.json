@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "name": "Starcaller Starsunder has no stuck cooldown and casts repeatedly (#8972)",
+  "contract": [
+    "Starsunder 801127 (Starcaller's baseline rank 1, learnable at level 1) carries RecoveryTime=0 and",
+    "CategoryRecoveryTime=0 in the DBC: only the standard 1250 ms GCD (StartRecoveryCategory 133) applies, with",
+    "no real spell cooldown that could get stuck. No C++ in AscensionStarcallerAbilities.cpp/",
+    "AscensionStarcallerEvents.cpp adds, extends or locks a cooldown for this spell. This proves the mechanic:",
+    "cast Starsunder, confirm its cooldown clears to 0 well before any plausible stuck-cooldown window, then cast",
+    "it again immediately and confirm it lands a second time with no cast failure."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "star", "race": 1, "class": 26, "level": 20,
+      "spell_hit_rating": 10000, "melee_hit_rating": 10000, "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "star", "entry": 299, "level": 20, "health": 500000, "distance": 3, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "label": "Weapon proficiency (Starsunder is a normalized-weapon-damage effect)", "actor": "star", "spell": 201 },
+    { "action": "add_item", "actor": "star", "item": 25 },
+    { "action": "equip", "label": "Equip a main-hand weapon", "actor": "star", "item": 25, "slot": 15 },
+    { "action": "learn", "actor": "star", "spell": 801127 },
+    { "action": "cast", "actor": "star", "spell": 801127, "target": "dummy" },
+    {
+      "action": "assert", "label": "The first cast is not rejected",
+      "actor": "star", "metric": "cast_failure", "spell": 801127, "equals": 0
+    },
+    {
+      "action": "assert", "label": "The first cast lands",
+      "actor": "star", "metric": "spell_damage_count", "spell": 801127, "target": "dummy", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "wait", "label": "Let the 1250 ms GCD (StartRecoveryCategory 133) clear fully before the next cast",
+      "ms": 1600
+    },
+    {
+      "action": "assert", "label": "Its cooldown is 0 once the GCD has elapsed; nothing keeps it stuck",
+      "actor": "star", "metric": "cooldown_ms", "spell": 801127, "equals": 0
+    },
+    { "action": "cast", "label": "Cast it again", "actor": "star", "spell": 801127, "target": "dummy" },
+    {
+      "action": "assert", "label": "The second cast is not rejected either",
+      "actor": "star", "metric": "cast_failure", "spell": 801127, "equals": 0
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the second cast lands too, back to back",
+      "actor": "star", "metric": "spell_damage_count", "spell": 801127, "target": "dummy", "equals": 2, "within_ms": 2000
+    }
+  ]
+}
