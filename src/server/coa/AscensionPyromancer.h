@@ -26,6 +26,8 @@ struct PyromancerState
     uint64 sequence = 0;
     uint32 aspectDamage = 0, earth = 0, ignis = 0;
     uint32 dashMs = 0;
+    uint32 surgeMs = 0;
+    float surgeRate = 0.0f;
     Position dashPrevious;
     std::set<ObjectGuid> dashHits;
     bool event = false, refreshing = false;
