@@ -7417,8 +7417,9 @@ void Player::_ApplyWeaponDamage(uint8 slot, ItemTemplate const* proto, ScalingSt
             SetAttackTime(OFF_ATTACK, apply ? proto->Delay : BASE_ATTACK_TIME);
     }
 
-    // No need to modify any physical damage for ferals as it is calculated from stats only
-    if (IsInFeralForm())
+    // No need to modify any physical damage for ferals whose form overrides attack speed:
+    // their damage is calculated from stats only
+    if (IsInFeralForm() && IsAttackSpeedOverridenShapeShift())
         return;
 
     if (CanModifyStats() && (GetWeaponDamageRange(attType, MAXDAMAGE) || proto->Delay))
