@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "timeout_ms": 30000,
+  "players": [
+    {
+      "id": "buyer",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "name": "Pale Reach vendors open their shop, and Hilda sells herbs in limited supply (COA-7342)",
+  "contract": "Hilda 164596 and Shopkeeper Mercel 164040 have their own gossip menus. Choosing \"I want to browse your goods\" opens their vendor list. Hilda limits Silverleaf 765 and Earthroot 2449 to 3, Peacebloom 2447, Mageroyal 785 and Bruiseweed 2453 to 2, like every other herb seller.",
+  "creatures": [
+    {
+      "id": "hilda",
+      "owner": "buyer",
+      "entry": 164596,
+      "distance": 2,
+      "faction": 35
+    },
+    {
+      "id": "mercel",
+      "owner": "buyer",
+      "entry": 164040,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "buyer",
+      "target": "mercel",
+      "label": "talk to Shopkeeper Mercel"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "buyer",
+      "option": 0,
+      "label": "I want to browse your goods"
+    },
+    {
+      "action": "assert",
+      "label": "Mercel's vendor list opens",
+      "actor": "buyer",
+      "metric": "vendor_list_packets",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "buyer",
+      "target": "hilda",
+      "label": "talk to Hilda"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "buyer",
+      "option": 0,
+      "label": "I want to browse your goods"
+    },
+    {
+      "action": "assert",
+      "label": "Hilda's vendor list opens",
+      "actor": "buyer",
+      "metric": "vendor_list_packets",
+      "min": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Silverleaf has 3 left",
+      "actor": "buyer",
+      "metric": "vendor_stock",
+      "item": 765,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Earthroot has 3 left",
+      "actor": "buyer",
+      "metric": "vendor_stock",
+      "item": 2449,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Peacebloom has 2 left",
+      "actor": "buyer",
+      "metric": "vendor_stock",
+      "item": 2447,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Mageroyal has 2 left",
+      "actor": "buyer",
+      "metric": "vendor_stock",
+      "item": 785,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Bruiseweed has 2 left",
+      "actor": "buyer",
+      "metric": "vendor_stock",
+      "item": 2453,
+      "equals": 2
+    }
+  ]
+}
