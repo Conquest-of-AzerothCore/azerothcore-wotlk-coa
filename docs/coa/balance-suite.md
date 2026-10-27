@@ -84,12 +84,24 @@ shows as `error: <message>`; the suite still writes the rest of the table (Task 
 |---|---|---|---|---|
 | 20 | Razorfen Kraul (47) | `(2020.0, 2010.0, 60.0)` | Bloodscalp entry 4511 ×3 (level 24) | entry 4420 (level 27) |
 | 40 | Scarlet Monastery (189) | `(1688.99, 1053.48, 18.6775)` | Scarlet Soldier 4286 ×3 (level 36) | entry 3975, Herod (level 37) |
-| 60 | Stratholme (329) | `(3660.0, -3560.0, 137.85)` | Crimson Guardsman 10418 ×3 (level 57) | Ramstein the Gorger 10439 (level 61) |
+| 60 | Stratholme (329) | `(3660.0, -3560.0, 137.85)` | Crimson Guardsman 10418 ×3 (level 57) | Maleki the Pallid 10438 (level 61) |
 
 The design's defaults were Shadowfang Keep (33) for level 20 and Stratholme (329) + Ramstein for level 60;
 Razorfen Kraul (47) replaces Shadowfang Keep because its fight spot was easier to place clear of native spawns at
 the time of authoring — no further record of that decision survives beyond the catalog/dungeons data, so treat
 this table as the record going forward.
+
+Ramstein the Gorger (10439) was replaced by Maleki the Pallid (10438) after a full run recorded `invalid` for
+every level 60 boss case. Ramstein's own smart_scripts On Reset action always runs a timed actionlist
+(entryorguid 1043900) built for his scripted entrance in the real Baron Rivendare gauntlet: it sets
+`UNIT_FLAG_IMMUNE_TO_PC` on him immediately and only removes it some seconds later. Spawned directly by
+`balance_stage` instead of through that gauntlet, he carries the immunity from the first tick, so the fighter's
+threat reference against him is never "online" (`ThreatReference::FlagsAllowFighting`), `Unit::SelectVictim`
+finds no acceptable target and he evades on the very next update — duration_s 0.017, zero damage either side,
+matching the recorded `invalid` outcome exactly. Maleki is a standalone Stratholme SmartAI caster of the same
+level (61) with no On Reset script and no unit-flag toggling, so the existing fight spot needed no change. See
+`apps/coa-gameplay-test/scenarios/balance-level-60-boss-stage-not-invalid.json` for the regression that pins
+both halves of this down (Ramstein still evades; Maleki does not).
 
 Both the level 20 and level 60 fight spots were re-placed in Task 9: their original coordinates were a native
 NPC's `z` copied onto a different `(x, y)` and were never checked against the server's own ground, so they sat
