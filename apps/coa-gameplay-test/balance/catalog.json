@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "schema": {
+    "spec": {
+      "class_id": "Classes enum (SharedDefines.h), CoA range 12-32",
+      "class_name": "TITLE comment of the class enum, e.g. Necromancer",
+      "spec_id": "ChrSpecs.dbc ID",
+      "spec_name": "ChrSpecs.dbc TabToken, human form",
+      "group": "tank|healer|dps|dps-support",
+      "armor": "cloth|leather|mail|plate",
+      "primary_stat": "strength|agility|intellect",
+      "talents": "{ \"20\": [[entry, rank], ...], \"40\": [...], \"60\": [...] }, CharacterAdvancement entry/rank pairs",
+      "kit": "optional { opener: [spell, ...], upkeep: [KitRule, ...], defensives: [KitRule, ...] }",
+      "kit_rule": "{ spell, when: always|self_aura_missing|pet_aura_missing|owned_below|health_below, aura, value, target: self|pet|enemy }"
+    }
+  },
+  "specs": [
+    {
+      "class_id": 23,
+      "class_name": "Necromancer",
+      "spec_id": 35,
+      "spec_name": "Animation",
+      "group": "dps",
+      "armor": "cloth",
+      "primary_stat": "intellect",
+      "talents": {
+        "20": [[29244, 1], [33775, 1]],
+        "40": [[29244, 1], [33775, 1]],
+        "60": [[29244, 1], [33775, 1]]
+      },
+      "kit": {
+        "opener": [680388, 500971],
+        "upkeep": [
+          { "spell": 500971, "when": "owned_below", "value": 1, "target": "self" },
+          { "spell": 680388, "when": "pet_aura_missing", "aura": 680388, "target": "self" }
+        ]
+      }
+    },
+    {
+      "class_id": 23,
+      "class_name": "Necromancer",
+      "spec_id": 34,
+      "spec_name": "Death",
+      "group": "dps",
+      "armor": "cloth",
+      "primary_stat": "intellect",
+      "talents": {
+        "20": [[29244, 1]],
+        "40": [[29244, 1]],
+        "60": [[29244, 1]]
+      }
+    },
+    {
+      "class_id": 23,
+      "class_name": "Necromancer",
+      "spec_id": 36,
+      "spec_name": "Rime",
+      "group": "dps",
+      "armor": "cloth",
+      "primary_stat": "intellect",
+      "talents": {
+        "20": [[29244, 1]],
+        "40": [[29244, 1]],
+        "60": [[29244, 1]]
+      }
+    }
+  ]
+}
