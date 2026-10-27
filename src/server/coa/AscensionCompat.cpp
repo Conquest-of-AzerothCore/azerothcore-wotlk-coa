@@ -396,6 +396,7 @@ constexpr std::array<std::pair<uint32, uint32>, 1> REAPER_ONE_SOUL_CONSUMERS =
 constexpr std::size_t APPEARANCE_CATEGORY_COUNT = 69;
 constexpr uint32 APPEARANCE_CATEGORY_AMMUNITION = 32;
 constexpr uint32 APPEARANCE_CATEGORY_SHADOWHOUND = 68;
+constexpr uint32 APPEARANCE_CATEGORY_NECROMANCER_LICH_FORM = 67;
 constexpr uint32 APPEARANCE_CATEGORY_TAMED_BEAST = 33;
 constexpr uint32 TAME_BEAST_SPELL = 1515;
 constexpr std::array<uint32, 3> CALL_PET_SPELLS = { 883, 574302, 1100883 };
@@ -589,6 +590,8 @@ struct AppearanceInfo {
 
 constexpr uint32 INCARNATION_KIND_FORM = 1;
 constexpr uint32 INCARNATION_KIND_CREATURE = 2;
+constexpr uint32 INCARNATION_KIND_HIDDEN_FORM = 4;
+constexpr ShapeshiftForm FORM_NECROMANCER_LICH = ShapeshiftForm(50);
 
 struct IncarnationCategory {
   uint32 Kind = 0;
@@ -5637,7 +5640,8 @@ public:
         uint64 const classMask = record.GetUInt32(23) | (uint64(record.GetUInt32(24)) << 32);
         if (categoryId < APPEARANCE_CATEGORY_COUNT && categoryId != APPEARANCE_CATEGORY_SHADOWHOUND && classMask &&
             record.GetString(1) == "APPEARANCE_TYPE_INCARNATION" &&
-            (kind == INCARNATION_KIND_FORM || kind == INCARNATION_KIND_CREATURE))
+            (kind == INCARNATION_KIND_FORM || kind == INCARNATION_KIND_CREATURE ||
+             kind == INCARNATION_KIND_HIDDEN_FORM))
           _incarnationCategories[categoryId] = IncarnationCategory{kind, record.GetUInt32(20), record.GetUInt32(21),
               classMask};
       }
@@ -6434,7 +6438,13 @@ public:
     uint32 GetIncarnationFormDisplay(Player* player, ShapeshiftForm form)
     {
         AppearanceInfo const* appearance = GetActiveFormIncarnation(player, form);
-        return appearance ? appearance->CreatureDisplay : 0;
+        if (appearance && appearance->CreatureDisplay)
+            return appearance->CreatureDisplay;
+
+        if (form == FORM_NECROMANCER_LICH && GetActiveIncarnation(player, APPEARANCE_CATEGORY_NECROMANCER_LICH_FORM))
+            return player->GetNativeDisplayId();
+
+        return 0;
     }
 
     void RefreshIncarnationSpell(Player* player)
