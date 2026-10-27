@@ -3943,7 +3943,7 @@ private:
     mutable std::unordered_map<ObjectGuid, uint32> _staticDecayTimers;
 };
 
-bool SendCollectionCreatureQueryResponse(WorldSession* session, uint32 creatureId);
+bool SendBulkCreatureQueryResponse(WorldSession* session, uint32 creatureId);
 
 class AscensionDisplayPatchService {
 public:
@@ -7229,7 +7229,7 @@ private:
         break;
       case CMSG_CREATURE_QUERY_BULK:
         for (uint32 entry : ReadBulkQueryEntries(packet, MAX_CREATURE_QUERY_BULK_ENTRIES))
-          SendCollectionCreatureQueryResponse(player->GetSession(), entry);
+          SendBulkCreatureQueryResponse(player->GetSession(), entry);
         break;
       case CMSG_CUSTOM_ASCENSION_POINT_SPEND_REQUEST:
         HandlePointSpendRequest(player, packet);
@@ -8010,6 +8010,17 @@ bool SendCollectionCreatureQueryResponse(WorldSession* session, uint32 creatureI
         response << uint32(0);
     response << uint32(0);
     session->SendPacket(&response);
+    return true;
+}
+
+bool SendBulkCreatureQueryResponse(WorldSession* session, uint32 creatureId)
+{
+    if (!session || !sObjectMgr->GetCreatureTemplate(creatureId))
+        return SendCollectionCreatureQueryResponse(session, creatureId);
+
+    WorldPacket query(CMSG_CREATURE_QUERY, sizeof(uint32) + sizeof(uint64));
+    query << creatureId << ObjectGuid::Empty;
+    session->HandleCreatureQueryOpcode(query);
     return true;
 }
 
