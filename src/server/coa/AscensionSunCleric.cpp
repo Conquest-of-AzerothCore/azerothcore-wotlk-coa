@@ -354,7 +354,7 @@ void Refresh(Player* player)
                                 std::pair(805267u, 807876u), std::pair(300314u, 301341u)})
         KeepHelper(player, helper, healthy && player->HasAura(talent));
     bool day = player->IsAlive() && Daytime();
-    SetHelper(player, 707768, day && player->HasAura(707078));
+    KeepHelper(player, 707768, day && player->HasAura(707078));
     int32 extraHaste = 0;
     for (uint32 id : {300363, 300621, 300626})
         if (player->HasAura(id))
