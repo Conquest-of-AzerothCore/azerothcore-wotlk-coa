@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Knight of Xoroth: Xorothian Warsteed stays refused inside Molten Core",
+  "contract": [
+    "The Xorothian Warsteed (804703) exception to the no-mount check covers 5-player dungeons only.",
+    "Molten Core (map 409) is a raid with instance_template.allowMount = 0, so Spell::CheckCast still",
+    "refuses 804703 with SPELL_FAILED_NO_MOUNTS_ALLOWED (83) and the knight stays unmounted."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 60 }
+  ],
+  "location": {
+    "map": 409,
+    "x": 1091.89,
+    "y": -466.985,
+    "z": -105.084,
+    "o": 3.14159,
+    "ignore_access": true
+  },
+  "steps": [
+    { "action": "wait", "label": "Let Molten Core settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP the knight is in Molten Core",
+      "actor": "knight", "metric": "map_id", "equals": 409
+    },
+    { "action": "learn", "actor": "knight", "spell": 804703 },
+    {
+      "action": "assert", "label": "SETUP the knight knows Xorothian Warsteed",
+      "actor": "knight", "metric": "knows_spell", "spell": 804703, "equals": 1
+    },
+    {
+      "action": "cast", "label": "The knight tries to summon the Warsteed inside the raid",
+      "actor": "knight", "spell": 804703
+    },
+    {
+      "action": "assert", "label": "CONTRACT the raid refuses the Warsteed with SPELL_FAILED_NO_MOUNTS_ALLOWED",
+      "actor": "knight", "metric": "cast_failure", "spell": 804703, "equals": 83, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTRACT the knight stays unmounted inside the raid",
+      "actor": "knight", "metric": "aura", "spell": 804703, "equals": 0
+    }
+  ]
+}
