@@ -70,22 +70,32 @@ shows as `error: <message>`; the suite still writes the rest of the table (Task 
 - **New kit** (pet summons/upkeep, defensives): a `KitRule` list (`spell`, `when`
   `always|self_aura_missing|pet_aura_missing|owned_below|health_below`, `aura`, `value`, `target`
   `self|pet|enemy`) under `opener`/`upkeep`/`defensives` — see `src/server/coa/CoAGameplayBalance.h`'s
-  `NextKitRule` and the Necromancer kit in `catalog.json` for the pattern. Three specs have a kit today:
-  Necromancer Animation (`Spell.dbc` 680388 "Fetid Ward" + 500971 "Raise: Ghoul"), Felsworn Infernal (637278
-  "Summon Infernal", `SPELL_EFFECT_SUMMON` creature 610043), and Witch Hunter Houndmaster (801343 "Houndmaster's
-  Whistle", `SPELL_EFFECT_SUMMON_PET` creature 50124). Every other spec whose spells summon units (confirmed
-  in source: Cultist, Tinker, Venomancer, Knight of Xoroth all have a dedicated `Ascension<Class>Summons.cpp`;
-  Primalist has a tamed-beast path in `AscensionPrimalistSpiritBeast.cpp`; Stormbringer has
-  `AscensionStormbringerPet.cpp`'s air elemental) still runs without a kit: the summon-capable ability was found,
-  but which spec learns it and the right upkeep/resummon rule were not confirmed from spell/talent data in the
-  session that added the three kits above, so adding one would have meant guessing. Their stages may show
-  `pets_missing` or weak dps/dtps that reflects the missing kit, not the class.
+  `NextKitRule` and the Necromancer kit in `catalog.json` for the pattern. Only the Necromancer (Animation) has
+  a kit today. Source evidence (a dedicated `Ascension<Class>Summons.cpp`, a tamed-beast path, or a pet-system
+  file) confirms Cultist, Felsworn, Tinker, Venomancer, Witch Hunter and Knight of Xoroth each have a scripted
+  summon/pet path, Primalist has one via `AscensionPrimalistSpiritBeast.cpp`, and Stormbringer via
+  `AscensionStormbringerPet.cpp`'s air elemental; `CoARotationAssist.cpp`'s `HasManualEffect` already excludes
+  `SPELL_EFFECT_SUMMON`/`SPELL_EFFECT_SUMMON_PET` from the auto-rotation for every class, confirming the
+  design's "summons are the kit's job, not the rotation's" rule is universal, not Necromancer-specific. Two
+  DBC-plausible candidates were tried and **falsified by the runtime harness, not left as guesses**: Felsworn
+  Infernal's "Summon Infernal" (637278) and Witch Hunter Houndmaster's "Houndmaster's Whistle" (801343, the
+  `SPELL_EFFECT_SUMMON_PET` ability named for the spec) were both added as a `kit` and run through
+  `verify.sh --stages gameplay` at level 40 elite_1; both left `pets_owned_start` at 0 (Houndmaster did land
+  some later `damage_done_pets`, from the upkeep rule's retried, `CanBotCast`-gated cast succeeding mid-fight
+  after the opener's single unconditional `SubmitBotCast` did not), so neither passed the bar this doc sets
+  for a kit and both were reverted rather than committed as a plausible-looking but unverified entry. Finding
+  the actual spec-gated, opener-reliable summon spell for any of these classes — distinct from a recall-only
+  ability like Houndmaster's Whistle, which needs a pet to already exist — is still open work; their stages may
+  show `pets_missing` or weak dps/dtps that reflects the missing kit, not the class.
 
   The Necromancer ghoul population was previously capped at 1 (`upkeep`'s `owned_below` value), tighter than
   the server's own `AscensionNecromancer.cpp` `Capacity()` (base 2 minion-capacity points, `Raise: Ghoul`
-  costs 1), so a real player's base 2 ghouls never matched the suite's 1. The opener now casts `Raise: Ghoul`
-  twice and `upkeep`'s `owned_below` is 2, matching `Capacity()`'s base value (no capacity-boosting talent is
-  in the catalog's Animation build, so 2 is the correct ceiling here, not a guess at "several").
+  costs 1), so a real player's base 2 ghouls never matched the suite's 1, and the single ghoul only got
+  resummoned after a full wipe. The opener now casts `Raise: Ghoul` twice and `upkeep`'s `owned_below` is 2,
+  matching `Capacity()`'s base value (no capacity-boosting talent is in the catalog's Animation build, so 2 is
+  the correct ceiling here, not a guess at "several"). A level 40 elite_1 rerun after the fix moved from
+  `pets_owned_start` 1 (previously reported dead by the end) to `pets_owned_start` 2, `pets_alive_end` 2, stage
+  outcome `win`.
 - **New gear tier**: `apps/coa-gameplay-test/balance/gear.json` is generated, not edited by hand — see
   "Full-kit gear generator" below. A new `armor/primary_stat` or `class_id/group/primary_stat` combination
   needs no new gear entry: re-run `generate_gear.py` and it is covered from `item_pool.json`.

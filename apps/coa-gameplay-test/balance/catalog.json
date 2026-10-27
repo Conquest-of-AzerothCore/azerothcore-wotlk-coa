@@ -58,13 +58,14 @@
       "kit": {
         "opener": [
           680388,
+          500971,
           500971
         ],
         "upkeep": [
           {
             "spell": 500971,
             "when": "owned_below",
-            "value": 1,
+            "value": 2,
             "target": "self"
           },
           {
