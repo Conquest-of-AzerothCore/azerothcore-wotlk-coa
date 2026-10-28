@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Dawn cancel refunds unused charges one for one (#5741)",
+  "contract": "The task owner clarified on 2026-10-07 that unused Dawn charges convert back to Solar Power at a 1-to-1 ratio on expiry or manual cancellation. Issue #5741 also requires casting Dawn again to cancel the active phase. Dawn 804584 spends twenty Solar Power (500149) and starts aura 807440 with ten charges; one effective Illumination (500143) consumes one charge. Vow of Radiance (803489) normally generates two Solar Power from that heal but cannot generate it during Dawn. With nine unused charges, ending the phase must return exactly nine Solar Power; a later effective heal must raise it to eleven. The readiness marker is seeded with the initial resource fixture, and all casts and cancellation use native session handlers.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 15 },
+    { "id": "ally", "race": 1, "class": 1, "level": 15 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "cleric", "spell": 804584 },
+    { "action": "learn", "actor": "cleric", "spell": 500143 },
+    { "action": "set_aura", "actor": "cleric", "spell": 803489, "stacks": 1 },
+    { "action": "set_aura", "actor": "cleric", "spell": 500149, "stacks": 20 },
+    { "action": "set_aura", "actor": "cleric", "spell": 704396, "stacks": 1 },
+    { "action": "cast", "actor": "cleric", "spell": 804584 },
+    { "action": "assert", "actor": "cleric", "metric": "aura_charges", "spell": 807440, "equals": 10,
+      "within_ms": 2000 },
+    { "action": "assert", "actor": "cleric", "metric": "aura", "spell": 500149, "equals": 0 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "set_health", "actor": "ally", "value": 10 },
+    { "action": "cast", "actor": "cleric", "spell": 500143, "target": "ally" },
+    { "action": "assert", "actor": "cleric", "metric": "aura_charges", "spell": 807440, "equals": 9,
+      "within_ms": 6000 },
+    { "action": "assert", "actor": "ally", "metric": "health", "within_ms": 6000, "min": 11 },
+    { "action": "assert", "actor": "cleric", "metric": "aura", "spell": 500149, "equals": 0,
+      "label": "Vow of Radiance does not generate Solar Power during Dawn" },
+    { "action": "cancel_aura", "actor": "cleric", "spell": 807440 },
+    { "action": "assert", "actor": "cleric", "metric": "aura", "spell": 807440, "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "actor": "cleric", "metric": "aura_stacks", "spell": 500149, "equals": 9,
+      "label": "Each unused Dawn charge returns exactly one Solar Power" },
+    { "action": "wait", "ms": 1500 },
+    { "action": "assert", "actor": "cleric", "metric": "aura_stacks", "spell": 500149, "equals": 9,
+      "label": "The phase refunds only once" },
+    { "action": "set_health", "actor": "ally", "value": 10 },
+    { "action": "cast", "actor": "cleric", "spell": 500143, "target": "ally" },
+    { "action": "assert", "actor": "cleric", "metric": "aura_stacks", "spell": 500149, "equals": 11,
+      "within_ms": 6000, "label": "Solar Power generation resumes after Dawn ends" }
+  ]
+}

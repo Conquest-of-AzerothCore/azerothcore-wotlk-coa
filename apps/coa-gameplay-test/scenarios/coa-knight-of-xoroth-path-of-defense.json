@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "name": "Knight of Xoroth is not offered the Warrior Path of Defense quest and learns none of its spells",
+  "contract": [
+    "Issue #5714: Path of Defense (quest 1498) is Warrior-only: quest_template_addon AllowableClasses = 1 (Warrior), PrevQuestID = 1505, and its RewardSpell 8121 is the wrapper for Defensive Stance, Sunder Armor and Taunt.",
+    "Quest 1505 is Warrior-only too, so the prerequisite is rewarded to both characters with the fixture, which bypasses class gating; whether 1498 can then be taken is decided only by the class check.",
+    "Expected: the Warrior can take 1498 once 1505 is rewarded, a Knight of Xoroth cannot take it with the same prerequisite and so cannot learn the Warrior spells from it."
+  ],
+  "players": [
+    {
+      "id": "warrior",
+      "race": 2,
+      "class": 1,
+      "level": 10
+    },
+    {
+      "id": "knight",
+      "race": 2,
+      "class": 17,
+      "level": 29
+    }
+  ],
+  "steps": [
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: the Warrior has the prerequisite quest",
+      "actor": "warrior",
+      "quest": 1505
+    },
+    {
+      "action": "reward_quest",
+      "actor": "warrior",
+      "quest": 1505
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Warrior's prerequisite is rewarded",
+      "actor": "warrior",
+      "metric": "quest_status",
+      "quest": 1505,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "Warrior can take Path of Defense",
+      "actor": "warrior",
+      "metric": "quest_takeable",
+      "quest": 1498,
+      "equals": 1
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: the Knight has the same prerequisite quest",
+      "actor": "knight",
+      "quest": 1505
+    },
+    {
+      "action": "reward_quest",
+      "actor": "knight",
+      "quest": 1505
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Knight's prerequisite is rewarded",
+      "actor": "knight",
+      "metric": "quest_status",
+      "quest": 1505,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "Knight of Xoroth cannot take Path of Defense",
+      "actor": "knight",
+      "metric": "quest_takeable",
+      "quest": 1498,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Knight does not know Defensive Stance",
+      "actor": "knight",
+      "metric": "knows_spell",
+      "spell": 1100071,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Knight does not know Sunder Armor",
+      "actor": "knight",
+      "metric": "knows_spell",
+      "spell": 1107386,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Knight does not know Taunt",
+      "actor": "knight",
+      "metric": "knows_spell",
+      "spell": 1100355,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Knight does not know the Path of Defense wrapper",
+      "actor": "knight",
+      "metric": "knows_spell",
+      "spell": 8121,
+      "equals": 0
+    }
+  ]
+}

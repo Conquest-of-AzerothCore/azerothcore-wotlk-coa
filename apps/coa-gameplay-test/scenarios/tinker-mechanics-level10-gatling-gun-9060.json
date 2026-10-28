@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "A level 10 Mechanics Tinker learns Gatling Gun and gets it in the Mechsuit (#9060)",
+  "contract": "#9060 reports a level 10 Tinker in Kharanos whose spellbook lacks Gatling Gun (500213) and whose Mechsuit shows no suit bar. The Mechanics specialization (ChrSpecs 50) has identity entry 4051, whose rank spell is Build: Mechsuit (92141) and which needs class entry 29203. AscensionTaughtAbilityData teaches Build: Mechsuit (801384) to a Mechanics Tinker with 92141 from level 10, and Build: Mechsuit 801384 says Scrap Shot turns into Gatling Gun while the suit is active. Gatling Gun has SpellLevel 10. Through the native specialization upload, without learn fixtures, a level 10 Tinker must therefore know 801384 and 500213, enter the suit, find Gatling Gun on the empty form bar at button 72 and see its known Scrap Shot replaced by Gatling Gun.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "tinker", "race": 1, "class": 28, "level": 10 }
+  ],
+  "location": { "map": 0, "x": -5527.1, "y": -220.26, "z": 355.096, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let login hooks and class synchronisation settle", "ms": 5000 },
+    { "action": "specialization", "label": "The level 10 Tinker chooses Mechanics", "actor": "tinker", "id": 50 },
+    {
+      "action": "advancement_rank", "label": "The Tinker takes the Mechanics class entry", "actor": "tinker",
+      "entry": 29203, "rank": 1
+    },
+    {
+      "action": "assert", "label": "The Mechanics identity Build: Mechsuit 92141 is known", "actor": "tinker",
+      "metric": "knows_spell", "spell": 92141, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT a level 10 Mechanics Tinker is taught Build: Mechsuit 801384",
+      "actor": "tinker", "metric": "knows_spell", "spell": 801384, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT #9060: Gatling Gun 500213 is in the spellbook", "actor": "tinker",
+      "metric": "knows_spell", "spell": 500213, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The level 10 Tinker knows Scrap Shot", "actor": "tinker",
+      "metric": "knows_spell", "spell": 500549, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The form bar starts empty", "actor": "tinker",
+      "metric": "action_button", "button": 72, "equals": 0
+    },
+    { "action": "set_aura", "label": "fixture: pre-fill Scrap", "actor": "tinker", "spell": 801816, "stacks": 100 },
+    { "action": "cast", "label": "Enter the Mechsuit", "actor": "tinker", "spell": 801384 },
+    {
+      "action": "assert", "label": "The Mechsuit is on", "actor": "tinker",
+      "metric": "aura", "spell": 801384, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTRACT #9060: the suit bar's first button is Gatling Gun", "actor": "tinker",
+      "metric": "action_button", "button": 72, "equals": 500213, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTRACT Scrap Shot turns into Gatling Gun inside the suit",
+      "actor": "tinker", "metric": "temporary_spell_replacement", "spell": 500549, "equals": 500213,
+      "within_ms": 1000
+    }
+  ]
+}

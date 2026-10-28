@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Blast Mine's Remote Detonation casts and explodes on a live mine (#5759, #5868)",
+  "contract": "Remote Detonation 801798 carries CasterAuraSpell = 500354 'Bomb Ready' in Spell.dbc, so Spell::CheckCast rejects the cast with SPELL_FAILED_CASTER_AURASTATE unless the Tinker holds that aura. The deployed Blast Mine 50045 casts 500354 on itself as SPELL_EFFECT_APPLY_AREA_AURA_OWNER, which AzerothCore's area-aura target map fills with the applying unit's owner, so the Tinker gains 500354 while within 60 yd of a live mine and AscensionTinker::Refresh keeps 801798 known for as long as the Tinker knows a mine spell, so the client greys it out until a mine grants Bomb Ready. Casting 801798 then reaches npc_ascension_tinker_device::DoAction(1), which calls Explode(): it casts Remote Bomb Explosion 802336 (Fire) on nearby valid enemies within the mine's 8 yd radius and despawns the mine. This scenario deploys a mine 1 yd from a hostile golem, confirms the Tinker holds 801798 from Deploy Blast Mine alone and gains 500354 from the mine, casts 801798, and asserts the mine despawns, the golem takes damage and 500354 is lost once the mine is gone.",
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "tinker", "race": 1, "class": 28, "level": 10}
+  ],
+  "creatures": [
+    {"id": "golem", "owner": "tinker", "entry": 36, "level": 6, "distance": 4, "health": 1000000}
+  ],
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "label": "Deploy Blast Mine", "actor": "tinker", "spell": 801718},
+    {"action": "assert", "label": "Remote Detonation is known with Deploy Blast Mine, before any mine exists", "actor": "tinker", "metric": "knows_spell", "spell": 801798, "equals": 1, "within_ms": 2000},
+    {"action": "snapshot", "actor": "golem", "metric": "health", "save_as": "golem_start"},
+    {"action": "cast", "label": "Deploy the mine 1 yd from the golem", "actor": "tinker", "spell": 801718, "destination": {"x": -8914.41, "y": -115.853, "z": 82.3711}},
+    {"action": "assert", "label": "One Blast Mine is placed", "actor": "tinker", "metric": "owned_creature_count", "entry": 50045, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "The live mine grants the Tinker Bomb Ready", "actor": "tinker", "metric": "aura", "spell": 500354, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "Remote Detonation stays known while a mine is live", "actor": "tinker", "metric": "knows_spell", "spell": 801798, "equals": 1, "within_ms": 2000},
+    {"action": "snapshot", "actor": "golem", "metric": "health", "save_as": "golem_before_detonation"},
+    {"action": "cast", "label": "Remote Detonation triggers the live mine", "actor": "tinker", "spell": 801798},
+    {"action": "assert", "label": "The detonated mine is gone", "actor": "tinker", "metric": "owned_creature_count", "entry": 50045, "equals": 0, "within_ms": 2000},
+    {"action": "assert", "label": "Remote Detonation actually damages the golem next to the mine", "actor": "golem", "metric": "health", "relative_to": "golem_before_detonation", "max": -1, "within_ms": 3000},
+    {"action": "assert", "label": "Bomb Ready is lost once its mine is gone", "actor": "tinker", "metric": "aura", "spell": 500354, "equals": 0, "within_ms": 3000},
+    {"action": "assert", "label": "The Tinker is unharmed", "actor": "tinker", "metric": "alive", "equals": 1}
+  ]
+}

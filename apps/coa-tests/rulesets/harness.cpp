@@ -1,3 +1,4 @@
+#include <atomic>
 #include <cassert>
 #include <cstdint>
 #include <initializer_list>
@@ -9,7 +10,7 @@ using uint8 = std::uint8_t;
 using SpellEffIndex = uint32;
 constexpr uint32 EFFECT_0 = 0, SPELL_EFFECT_DUMMY = 3;
 constexpr int GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR = 1, AURA_REMOVE_BY_DEATH = 1;
-constexpr int PLAYERHOOK_ON_LOGIN = 1;
+constexpr int PLAYERHOOK_ON_LOGIN = 1, PLAYERHOOK_ON_MAP_CHANGED = 2, WORLDHOOK_ON_AFTER_CONFIG_LOAD = 1;
 using AuraRemoveMode = int;
 struct Player;
 struct Aura;
@@ -38,11 +39,20 @@ struct Unit
     void RemoveAllAurasOnDeath();
     virtual bool HasAura(uint32) const { return false; }
 };
+struct Map
+{
+    bool instanceable = false;
+    bool Instanceable() const { return instanceable; }
+};
 struct Player : Unit
 {
     bool resting = false;
     bool inWorld = true;
+    Map* map = nullptr;
+    uint32 questLogRefreshes = 0;
     bool IsInWorld() const { return inWorld; }
+    Map const* FindMap() const { return map; }
+    void RefreshQuestLogQueries() { ++questLogRefreshes; }
     std::set<uint32> auras;
     std::set<uint32> known;
     uint32 learns = 0;
@@ -58,6 +68,18 @@ struct Player : Unit
         auras.insert(id);
     }
 };
+namespace LocalLevelScaling
+{
+using RulesetBlocksResolver = bool (*)(Player const*);
+std::atomic<RulesetBlocksResolver> RulesetBlocksOwner{nullptr};
+bool notifyHandled = false;
+uint32 notifications = 0;
+bool NotifyScalingChanged(Player*)
+{
+    ++notifications;
+    return notifyHandled;
+}
+}
 struct Aura
 {
     SpellInfo* info;
@@ -99,6 +121,12 @@ struct PlayerScript
 {
     PlayerScript(char const*, std::initializer_list<int>) { }
     virtual void OnPlayerLogin(Player*) { }
+    virtual void OnPlayerMapChanged(Player*) { }
+};
+struct WorldScript
+{
+    WorldScript(char const*, std::initializer_list<int>) { }
+    virtual void OnAfterConfigLoad(bool) { }
 };
 struct ConfigMgrStub
 {
@@ -198,5 +226,41 @@ int main()
     ruleset_aura_metadata metadata;
     metadata.OnLoadSpellCustomAttr(&info);
     assert(info.AttributesEx3 == 0);
+    AddSC_AscensionRulesets();
+    assert(LocalLevelScaling::RulesetBlocksOwner.load() == &RulesetBlocksLevelScaling);
+    Map world;
+    Map dungeon{true};
+    Player roamer;
+    roamer.map = &world;
+    for (auto const& [auras, blocked] : std::map<std::set<uint32>, bool>{
+             {{1004019}, true}, {{1004119}, true}, {{1004119, 9931032}, false}, {{9931032}, false}})
+    {
+        roamer.auras = auras;
+        assert(RulesetBlocksLevelScaling(&roamer) == blocked);
+    }
+    roamer.auras = {1004019};
+    roamer.map = &dungeon;
+    assert(!RulesetBlocksLevelScaling(&roamer));
+    roamer.map = &world;
+    ruleset_level_scaling_configuration configuration;
+    configMgrStub.rulesetLoginDefault = false;
+    configuration.OnAfterConfigLoad(false);
+    assert(!RulesetBlocksLevelScaling(&roamer));
+    configMgrStub.rulesetLoginDefault = true;
+    configuration.OnAfterConfigLoad(false);
+    assert(RulesetBlocksLevelScaling(&roamer));
+    roamer.auras = {9931032};
+    ApplyRuleset(&roamer, 84421);
+    assert(LocalLevelScaling::notifications == 1 && roamer.questLogRefreshes == 1);
+    ApplyRuleset(&roamer, 84420);
+    assert(LocalLevelScaling::notifications == 1 && roamer.questLogRefreshes == 1);
+    LocalLevelScaling::notifyHandled = true;
+    ApplyRuleset(&roamer, 84422);
+    assert(LocalLevelScaling::notifications == 2 && roamer.questLogRefreshes == 1);
+    login.OnPlayerMapChanged(&roamer);
+    assert(roamer.questLogRefreshes == 1);
+    roamer.auras = {1004019};
+    login.OnPlayerMapChanged(&roamer);
+    assert(roamer.questLogRefreshes == 2);
     // DBC_CASES
 }

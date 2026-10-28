@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "name": "A Temple in Ruins: the quest diamond leads to the Avatar of Anzuldin, not the sealed temple door (COA-9488)",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1 (the default).",
+    "A Temple in Ruins 175154 is reached through the Avatar of Anzuldin's gossip, which teleports the player into the Temple of the Snow Leopard. The client's QuestSuperTrack row 33103 pointed the Sickly Slime objective at the temple door (node 9214), which the temple model seals, so players walked into an invisible wall. The patched row tracks the Avatar (21616) or Anzuldin inside (21619) for the slimes, and Anzuldin for the altar and the turn-in."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -6520.0,
+    "y": 1206.0,
+    "z": 462.4,
+    "o": 0.13
+  },
+  "players": [
+    {
+      "id": "a",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "assert",
+      "label": "SETUP: a receives row 33103 of quest 175154",
+      "actor": "a",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 33103,
+      "index": 1,
+      "equals": 175154,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the slime objective tracks the Avatar of Anzuldin, not the sealed door",
+      "actor": "a",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 33103,
+      "index": 2,
+      "equals": 21616
+    },
+    {
+      "action": "assert",
+      "label": "and Anzuldin inside the temple",
+      "actor": "a",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 33103,
+      "index": 3,
+      "equals": 21619
+    },
+    {
+      "action": "assert",
+      "label": "the altar objective tracks Anzuldin",
+      "actor": "a",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 33103,
+      "index": 22,
+      "equals": 21619
+    },
+    {
+      "action": "assert",
+      "label": "the turn-in tracks Anzuldin",
+      "actor": "a",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 33103,
+      "index": 82,
+      "equals": 21619
+    }
+  ]
+}

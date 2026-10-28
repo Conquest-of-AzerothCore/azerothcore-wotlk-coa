@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "name": "Native stable delete removes a stabled pet for good",
+  "contract": "The original stable window's delete button calls DeleteStablePet(petNumber), which Extensions.dll sends as CMSG_STABLE_DELETE_PET (0x067C) with the u32 pet number of a stable slot. The stock client answers SMSG_STABLE_RESULT 8 or 9 by asking its stable master for the list again (Ascension.exe 0x5A17F0), which refreshes the window. Expected: deleting a pet the hunter has not stabled is refused with 6 and changes nothing; deleting the stabled wolf empties its slot, answers 8 and removes the pet's saved row, so it cannot come back at the next login.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    { "id": "hunter", "race": 1, "class": 3, "level": 20 }
+  ],
+  "creatures": [
+    { "id": "wolf", "owner": "hunter", "entry": 299, "level": 1 },
+    { "id": "stable_master", "owner": "hunter", "entry": 6749, "faction": 12, "distance": 5 }
+  ],
+  "steps": [
+    { "action": "learn", "actor": "hunter", "spell": 1515 },
+    { "action": "cast", "label": "Tame the wolf", "actor": "hunter", "spell": 1515, "target": "wolf" },
+    {
+      "action": "assert", "label": "The wolf is tamed", "actor": "hunter", "metric": "pet_entry", "equals": 299,
+      "within_ms": 30000
+    },
+    { "action": "set_money", "actor": "hunter", "value": 100000 },
+    {
+      "action": "client_packet", "label": "Buy a stable slot", "actor": "hunter", "opcode": 626,
+      "fields": [ { "actor_guid": "stable_master" } ], "consumed": false
+    },
+    { "action": "assert", "label": "The slot is bought", "actor": "hunter", "metric": "stable_result", "equals": 10 },
+    {
+      "action": "client_packet", "label": "Stable the wolf", "actor": "hunter", "opcode": 624,
+      "fields": [ { "actor_guid": "stable_master" } ], "consumed": false
+    },
+    {
+      "action": "assert", "label": "The wolf is stabled", "actor": "hunter", "metric": "stabled_pet_count",
+      "equals": 1
+    },
+    { "action": "assert", "actor": "hunter", "metric": "pet_entry", "equals": 0 },
+    {
+      "action": "assert", "label": "The wolf is saved in its stable slot", "actor": "hunter", "metric": "pet_rows",
+      "slot": 1, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "client_packet", "label": "Delete a pet the hunter has not stabled", "actor": "hunter",
+      "opcode": 1660, "fields": [ { "u32": 4000000000 } ], "consumed": false
+    },
+    {
+      "action": "assert", "label": "An unknown pet is refused", "actor": "hunter", "metric": "stable_result",
+      "equals": 6
+    },
+    { "action": "assert", "actor": "hunter", "metric": "stabled_pet_count", "equals": 1 },
+    {
+      "action": "client_packet", "label": "Delete the stabled wolf", "actor": "hunter", "opcode": 1660,
+      "fields": [ { "stabled_pet": 0 } ], "consumed": false
+    },
+    {
+      "action": "assert", "label": "The delete answers the result that relists the stable", "actor": "hunter",
+      "metric": "stable_result", "equals": 8
+    },
+    {
+      "action": "assert", "label": "The stable slot is empty", "actor": "hunter", "metric": "stabled_pet_count",
+      "equals": 0
+    },
+    {
+      "action": "assert", "label": "The pet's saved row is deleted", "actor": "hunter", "metric": "pet_rows",
+      "equals": 0, "within_ms": 5000
+    }
+  ]
+}

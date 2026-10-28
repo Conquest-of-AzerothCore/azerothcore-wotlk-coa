@@ -1,7 +1,10 @@
 {
   "schema": 1,
   "name": "Primalist Primal Rage restores one Rylak charge",
-  "contract": "Consume both Rylak charges with normal attacks, then Totemic Smash restores one charge only with Primal Rage. Cover first/highest ranks and removal, proving successful hit packets.",
+  "contract": [
+    "Consume both Rylak charges with normal attacks, then Totemic Smash restores one charge only with Primal",
+    "Rage. Cover first/highest ranks and removal, proving successful hit packets."
+  ],
   "players": [
     {
       "id": "primalist",
@@ -45,6 +48,31 @@
       "actor": "primalist",
       "item": 37,
       "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 23775
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "target": "target",
+      "spell": 23775,
+      "label": "Hold the passive target still and prevent defensive blocks"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "stunned",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "The passive target cannot block required physical damage"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the fixture stun global cooldown"
     },
     {
       "action": "unlearn",

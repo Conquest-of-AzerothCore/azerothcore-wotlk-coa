@@ -72,13 +72,17 @@ class aura_ascension_xoroth_lifecycle : public AuraScript
             return;
         GetAura()->SetScriptValue(500906, ++State(player).sequence);
         if (id == 681184)
-            GetAura()->SetScriptValue(id, 2);
+            SetRemainingUses(GetAura(), 2);
         if (id == 524913)
-            GetAura()->SetScriptValue(id, 5);
+            SetRemainingUses(GetAura(), 5);
         if (id == 524920)
-            GetAura()->SetScriptValue(id, 6 + State(player).fire);
+            SetRemainingUses(GetAura(), uint8(6 + State(player).fire));
         if (id == 712294)
+        {
+            if (player->HasAura(706502) && !player->HasSpell(504581))
+                player->learnSpell(504581, true);
             Replace(player, 800340, 504581);
+        }
         if (id == 800999 || id == 92104)
             player->UpdateMaxHealth();
         if (id == 804703)
@@ -160,6 +164,21 @@ class aura_ascension_xoroth_lifecycle : public AuraScript
                                                 AURA_EFFECT_HANDLE_REAL);
     }
 };
+class aura_ascension_xoroth_hellknight : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_xoroth_hellknight);
+    void UpdateMovement(AuraEffect const*, AuraEffectHandleModes)
+    {
+        GetTarget()->UpdateSpeed(MOVE_RUN, true);
+    }
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(aura_ascension_xoroth_hellknight::UpdateMovement, EFFECT_0,
+                                              SPELL_AURA_ADD_PCT_MODIFIER, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
+        AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_xoroth_hellknight::UpdateMovement, EFFECT_0,
+                                                SPELL_AURA_ADD_PCT_MODIFIER, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
+    }
+};
 class aura_ascension_xoroth_block : public AuraScript
 {
     PrepareAuraScript(aura_ascension_xoroth_block);
@@ -182,5 +201,6 @@ class aura_ascension_xoroth_block : public AuraScript
 void AddSC_AscensionXorothAuras()
 {
     RegisterSpellScript(aura_ascension_xoroth_lifecycle);
+    RegisterSpellScript(aura_ascension_xoroth_hellknight);
     RegisterSpellScript(aura_ascension_xoroth_block);
 }

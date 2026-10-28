@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Guardian Standard of Recovery's healing buff reaches its own owner (#4968)",
+  "contract": "Owner-recipient control for #4968, which reports cross-faction party interactions. The Standard of Recovery banner (creature 50053) sets its faction to the owner's faction before casting its aura (500266, an APPLY_AREA_AURA_FRIEND), so the owner should receive the healing-received buff from their own Standard. This control does not exercise opposite-faction party members; guardian-standards-cross-faction-recovery-4968 covers that condition.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "guardian", "race": 1, "class": 18, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "guardian", "spell": 500260 },
+    { "action": "set_power", "actor": "guardian", "power": 3, "value": 100 },
+    {
+      "action": "cast", "actor": "guardian", "spell": 500260,
+      "destination": { "x": -8946.95, "y": -132.493, "z": 83.5312 }
+    },
+    {
+      "action": "assert", "label": "The banner summons",
+      "actor": "guardian", "metric": "owned_creature_count", "entry": 50053, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The owner receives their own Standard's healing-received buff",
+      "actor": "guardian", "metric": "aura", "spell": 500266, "equals": 1, "within_ms": 2000
+    }
+  ]
+}

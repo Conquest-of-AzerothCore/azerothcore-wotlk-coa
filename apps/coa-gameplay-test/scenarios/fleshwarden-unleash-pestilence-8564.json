@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Fleshwarden: Unleash Pestilence triggers the active Pestilence on nearby enemies (#8564)",
+  "contract": "Unleash Pestilence 801002 reads 'unleashing your active Pestilence on nearby enemies to trigger a powerful effect'. Pestilence of War 802345 is granted with it at level 4; with that stance active, casting Unleash Pestilence must cast 802855 on each hostile within 10 yd. Without an active Pestilence the cast has nothing to unleash, so the stance is part of the reproduction.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "warden", "race": 1, "class": 17, "level": 20 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "warden", "entry": 36, "faction": 14, "level": 20, "health": 100000, "distance": 5 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "warden", "spell": 802345 },
+    { "action": "learn", "actor": "warden", "spell": 801002 },
+    {
+      "action": "cast", "label": "Enter Pestilence of War", "actor": "warden", "spell": 802345
+    },
+    {
+      "action": "assert", "label": "SETUP: the Pestilence stance is active",
+      "actor": "warden", "metric": "aura", "spell": 802345, "equals": 1, "within_ms": 3000
+    },
+    { "action": "snapshot", "label": "Remember the enemy's health", "actor": "enemy", "metric": "health", "save_as": "before" },
+    {
+      "action": "cast", "label": "Unleash the active Pestilence", "actor": "warden", "spell": 801002
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the enemy takes the unleashed Pestilence",
+      "actor": "enemy", "metric": "health", "relative_to": "before", "max": -1, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the unleashed payload 802855 lands on the enemy",
+      "actor": "warden", "metric": "spell_damage_count", "spell": 802855, "target": "enemy", "min": 1, "within_ms": 4000
+    }
+  ]
+}

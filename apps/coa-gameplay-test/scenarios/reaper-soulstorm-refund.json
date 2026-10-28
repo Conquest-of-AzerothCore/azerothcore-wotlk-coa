@@ -2,14 +2,12 @@
   "schema": 1,
   "name": "Soulstorm refunds a Reaped Soul when Soulrend lands (#494)",
   "contract": [
-    "Soulstorm 705403 promises: 'Requiem and Soulrend now have a 40% chance to refund a Reaped Soul.'",
-    "It is a native SPELL_AURA_PROC_TRIGGER_SPELL(42) pair (effect 0 triggers 500363 Reaped Soul,",
-    "effect 1 triggers 680338 Final Requiem) filtered by spell_ascension_reaper_talent_proc's shared",
-    "CheckProc, whose Rules table entry for 705403 lists the Soulrend/Requiem rank spell IDs (including",
-    "572342). rev_20260920_17_reaper_talent_procs.sql wires the spell_proc row and script binding.",
-    "Soulrend's own separate resource cost (issue #131) consumes the caster's Reaped Souls stack on a",
-    "landed hit; with the proc's current Chance=100 in that row, the very next hit must refund exactly",
-    "one stack back."
+    "Soulstorm 705403 promises a 40% chance for Soulrend or Requiem to refund one Reaped Soul. The active DBC",
+    "and rev_20260927_99_reaper_soulstorm_crimson_death_chance.sql agree on 40%, replacing the older 100% row.",
+    "A landed Soulrend consumes three Reaped Souls and Soul Infusion. Without Soulstorm there is no refund.",
+    "Across thirty-two landed Soulrends with Soulstorm, each remaining resource is zero or one; at least one",
+    "refund and one non-refund distinguish missing behavior and the old guaranteed proc. Native refund spell",
+    "casts count the successes. Unlearning Soulstorm removes the refund while preserving normal damage."
   ],
   "players": [
     {
@@ -23,23 +21,1761 @@
     }
   ],
   "creatures": [
-    { "id": "enemy", "owner": "reaper", "entry": 36, "level": 2, "distance": 3 }
+    {
+      "id": "enemy",
+      "owner": "reaper",
+      "entry": 36,
+      "level": 60,
+      "distance": 3,
+      "health": 1000000
+    }
   ],
   "steps": [
-    { "action": "wait", "ms": 5000 },
-    { "action": "learn", "actor": "reaper", "spell": 705403 },
-    { "action": "learn", "actor": "reaper", "spell": 572342 },
-    { "action": "assert", "actor": "reaper", "metric": "knows_spell", "spell": 705403, "equals": 1 },
-    { "action": "assert", "actor": "reaper", "metric": "knows_spell", "spell": 572342, "equals": 1 },
-
-    { "action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3 },
-    { "action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1 },
-    { "action": "assert", "actor": "reaper", "metric": "aura_stacks", "spell": 500363, "equals": 3 },
-
-    { "action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "before_hit" },
-    { "action": "cast", "actor": "reaper", "spell": 572342, "target": "enemy" },
-    { "action": "assert", "actor": "enemy", "metric": "health", "relative_to": "before_hit", "max": -1, "within_ms": 1000, "label": "Soulrend lands" },
-    { "action": "assert", "actor": "reaper", "metric": "aura", "spell": 803031, "equals": 0, "within_ms": 500, "label": "Soul Infusion consumed by Soulrend" },
-    { "action": "assert", "label": "Soulstorm refunded a Reaped Soul after Soulrend's own consumption", "actor": "reaper", "metric": "aura_stacks", "spell": 500363, "equals": 1, "within_ms": 500 }
-  ]
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 500363,
+      "save_as": "refunds_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 572342,
+      "target": "enemy",
+      "save_as": "hits_before"
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "No talent cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "No talent consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "No talent consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 500363,
+      "relative_to": "refunds_before",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 705403
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 705403,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 1 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 1 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 1 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 2 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 2 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 2 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 3 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 3 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 3 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 4 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 4 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 4 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 5 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 5 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 5 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 6 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 6 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 6 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 7 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 7 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 7 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 8 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 8 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 8 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 9 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 9 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 9 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 10 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 10 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 10 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 11 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 11 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 11 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 12 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 12 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 12 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 13 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 13 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 13 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 14 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 14 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 14 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 15 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 15 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 15 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 16 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 16 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 16 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 17 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 17 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 17 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 18 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 18 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 18 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 19 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 19 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 19 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 20 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 20 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 20 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 21 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 21 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 21 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 22 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 22 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 22 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 23 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 23 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 23 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 24 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 24 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 24 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 25 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 25 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 25 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 26 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 26 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 26 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 27 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 27 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 27 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 28 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 28 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 28 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 29 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 29 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 29 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 30 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 30 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 30 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 31 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 31 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 31 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Soulstorm trial 32 cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soulstorm trial 32 consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Soulstorm trial 32 consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 572342,
+      "target": "enemy",
+      "relative_to": "hits_before",
+      "equals": 33
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 500363,
+      "relative_to": "refunds_before",
+      "min": 1,
+      "max": 31,
+      "label": "Forty percent refunds occur without becoming guaranteed"
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 500363,
+      "save_as": "refunds_before_removal"
+    },
+    {
+      "action": "unlearn",
+      "actor": "reaper",
+      "spell": 705403
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 705403,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 572342,
+      "equals": 0,
+      "label": "Removed talent cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Removed talent consumes Soul Infusion"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "min": 0,
+      "max": 1,
+      "label": "Removed talent consumes souls and may refund one"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 500363,
+      "relative_to": "refunds_before_removal",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 572342,
+      "target": "enemy",
+      "relative_to": "hits_before",
+      "equals": 34
+    }
+  ],
+  "timeout_ms": 180000
 }

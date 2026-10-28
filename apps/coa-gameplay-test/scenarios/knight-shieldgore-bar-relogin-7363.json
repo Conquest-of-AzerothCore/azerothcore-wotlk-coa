@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "name": "Shieldgore survives relogin on the action bar for Knight of Xoroth Defiance (#7363)",
+  "contract": [
+    "#7363: a Knight of Xoroth Defiance logs in with Shieldgore missing from the action bar. Shieldgore is the rank of 301302 shown over Infernal Strike 801016 (804353 at level 0, 806869 at 18, 806870 at 26), granted TEMPORARY by SynchronizeTalentReplacements, so a button holding the rank is saved as the origin and must be upgraded to the active replacement again after login.",
+    "The scenario mirrors Choraco (level 19, Defiance): Infernal Strike ranks 801016 and 501511 are both known and share the Shieldgore replacement 806869. Rank 501511 sits on button 1 as the client saved it, then the character relogs three times; the button must never be dropped by the save."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "k",
+      "race": 1,
+      "class": 17,
+      "level": 19
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "label": "Choose Defiance",
+      "actor": "k",
+      "id": 17
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 801016
+    },
+    {
+      "action": "learn",
+      "label": "Infernal Strike rank 2 as the level-8 progression teaches it",
+      "actor": "k",
+      "spell": 501511
+    },
+    {
+      "action": "learn",
+      "label": "Pick the Shieldgore talent",
+      "actor": "k",
+      "spell": 301302
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Shieldgore talent aura is active",
+      "actor": "k",
+      "metric": "aura",
+      "spell": 301302,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: level-18 rank known in-session",
+      "actor": "k",
+      "metric": "knows_spell",
+      "spell": 806869,
+      "equals": 1
+    },
+    {
+      "action": "set_action_button",
+      "label": "Infernal Strike rank 2 on button 1, as the client saved it",
+      "actor": "k",
+      "spell": 501511,
+      "button": 1
+    },
+    {
+      "action": "relog",
+      "actor": "k"
+    },
+    {
+      "action": "login_hooks",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "label": "login 1: button 1 is not empty",
+      "actor": "k",
+      "metric": "action_button",
+      "button": 1,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "login 1: client book knows the Shieldgore rank 806869",
+      "actor": "k",
+      "metric": "client_knows_spell",
+      "spell": 806869,
+      "equals": 1
+    },
+    {
+      "action": "relog",
+      "actor": "k"
+    },
+    {
+      "action": "login_hooks",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "label": "login 2: button 1 is not empty",
+      "actor": "k",
+      "metric": "action_button",
+      "button": 1,
+      "min": 1
+    },
+    {
+      "action": "relog",
+      "actor": "k"
+    },
+    {
+      "action": "login_hooks",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "label": "login 3: button 1 is not empty",
+      "actor": "k",
+      "metric": "action_button",
+      "button": 1,
+      "min": 1
+    }
+  ]
+}

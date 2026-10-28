@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Pyromancer Pillar of Flame splashes around the primary target, not on it (#7802)",
+  "contract": [
+    "#7802: Pillar of Flame (805496) deals its direct hit plus the full splash to the primary target, which takes far more than intended while the pack around it takes only the splash. Its dest-area splash effect includes everything in radius, primary target included.",
+    "The fix filters the primary target out of the splash target list, so the primary takes only the direct hit and each nearby enemy takes only the splash. This scenario casts the base rank at a dummy with a second creature nearby: the dummy must take exactly one damage event and the neighbor at least one, which also guards the splash itself.",
+    "Damage counts (not amounts) distinguish the outcomes deterministically: pre-fix the dummy takes two events (direct plus splash), post-fix exactly one, regardless of scaling, spell power or crits."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "pyro", "race": 1, "class": 24, "level": 33, "spell_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "pyro", "entry": 36, "level": 33, "health": 1000000, "distance": 3},
+    {"id": "neighbor", "owner": "pyro", "entry": 36, "level": 33, "health": 1000000, "distance": 6}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI, level scaling and the login patch stream settle", "ms": 7000},
+    {"action": "learn", "actor": "pyro", "spell": 805496},
+    {"action": "cast", "label": "Cast Pillar of Flame at the dummy", "actor": "pyro", "spell": 805496, "target": "dummy"},
+    {"action": "assert", "label": "primary target takes exactly one hit (direct only)", "actor": "pyro", "metric": "spell_damage_count", "spell": 805496, "target": "dummy", "min": 1, "max": 1, "within_ms": 5000},
+    {"action": "assert", "label": "nearby enemy still takes the splash", "actor": "pyro", "metric": "spell_damage_count", "spell": 805496, "target": "neighbor", "min": 1, "within_ms": 5000}
+  ]
+}

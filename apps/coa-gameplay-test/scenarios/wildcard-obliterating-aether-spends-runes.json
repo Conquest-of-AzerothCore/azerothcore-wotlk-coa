@@ -1,0 +1,153 @@
+{
+  "schema": 1,
+  "name": "A Wildcard Hero spends runes on Obliterating Aether and sees them come back",
+  "contract": "On a Wildcard realm a Hero uses the Death Knight's runes. Obliterating Aether (907878) costs one Frost and one Unholy rune and gives 15 runic power (SpellRuneCost 587), so of three casts in a row the first two strike and give 30 runic power, and the third finds neither rune left. The client neither knows a Hero's rune types nor regenerates its runes, so the server names each rune's type at login (SMSG_CONVERT_RUNE, 0x486), which the client takes as a conversion that spends the rune, and then reports every ready rune, at login and whenever one comes back (SMSG_ADD_RUNE_POWER, 0x488).",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "wild",
+      "race": 1,
+      "class": 10,
+      "level": 20,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "wild",
+      "entry": 36,
+      "level": 20,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "assert",
+      "label": "Each rune's type was named at login",
+      "actor": "wild",
+      "metric": "server_packets",
+      "opcode": 1158,
+      "min": 6,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Every rune was reported ready after its type",
+      "actor": "wild",
+      "metric": "server_packets",
+      "opcode": 1160,
+      "min": 6,
+      "within_ms": 1000
+    },
+    {
+      "action": "learn",
+      "label": "A rolled Obliterating Aether",
+      "actor": "wild",
+      "spell": 907878
+    },
+    {
+      "action": "learn",
+      "actor": "wild",
+      "spell": 201,
+      "label": "The fixture learns One-Handed Swords before equipping one"
+    },
+    {
+      "action": "add_item",
+      "actor": "wild",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "wild",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "set_power",
+      "actor": "wild",
+      "power": 6,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "label": "First Obliterating Aether",
+      "actor": "wild",
+      "spell": 907878,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "The first cast gave 15 runic power",
+      "actor": "wild",
+      "metric": "power",
+      "power": 6,
+      "min": 140,
+      "max": 160,
+      "within_ms": 500
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Second Obliterating Aether",
+      "actor": "wild",
+      "spell": 907878,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Third Obliterating Aether, without runes",
+      "actor": "wild",
+      "spell": 907878,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Two casts gave 30 runic power and the third found no runes",
+      "actor": "wild",
+      "metric": "power",
+      "power": 6,
+      "min": 280,
+      "max": 310,
+      "within_ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "wild",
+      "metric": "server_packets",
+      "opcode": 1160,
+      "save_as": "runes_spent"
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "assert",
+      "label": "The runes coming back were reported",
+      "actor": "wild",
+      "metric": "server_packets",
+      "opcode": 1160,
+      "relative_to": "runes_spent",
+      "min": 1
+    }
+  ]
+}

@@ -30,7 +30,7 @@ public:
 
         uint32 const spellId = spell->GetSpellInfo()->Id;
         bool const followsCull = CulledReapers.erase(player->GetGUID()) > 0;
-        if (!player->HasAura(BloodBinding))
+        if (!player->HasActiveSpell(BloodBinding))
             return;
 
         if (spellId == ScytheRush && followsCull)

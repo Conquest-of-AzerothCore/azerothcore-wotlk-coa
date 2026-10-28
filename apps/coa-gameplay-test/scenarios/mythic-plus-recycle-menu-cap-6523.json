@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Edrim's recycle menu with more Mythic items than gossip options does not crash the server (#8180)",
+  "contract": [
+    "Edrim Skysong's recycle menu adds one gossip option per recyclable Mythic item after her info lines. With about",
+    "30 items the menu passed GOSSIP_MAX_MENU_ITEMS (32) and GossipMenu::AddMenuItem's ASSERT took the world server",
+    "down. AddMenuItem now drops options past the limit, and the recycle menu stops one short so Back still fits. A",
+    "character with 40 Mythic 1 robes opens the menu, sees 32 options, and can still recycle the first one."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "summon", "actor": "hero", "entry": 416000, "as": "edrim", "distance": 3 },
+    { "action": "add_item", "actor": "hero", "item": 4500 },
+    { "action": "add_item", "actor": "hero", "item": 4500 },
+    { "action": "equip", "actor": "hero", "item": 4500, "slot": 19 },
+    { "action": "equip", "actor": "hero", "item": 4500, "slot": 20 },
+    { "action": "add_item", "actor": "hero", "item": 400168, "count": 40 },
+    { "action": "assert", "label": "SETUP: forty Mythic 1 robes", "actor": "hero", "metric": "item_count", "item": 400168, "equals": 40 },
+    { "action": "gossip_hello", "actor": "hero", "target": "edrim" },
+    { "action": "gossip_select", "label": "Open the recycle menu", "actor": "hero", "option": 7 },
+    { "action": "assert", "label": "DISCRIMINATING: the menu is capped at 32 options", "actor": "hero", "metric": "gossip_options", "equals": 32 },
+    { "action": "gossip_select", "label": "Recycle the first robe", "actor": "hero", "option": 4 },
+    { "action": "assert", "label": "the server is still up and one robe is recycled", "actor": "hero", "metric": "item_count", "item": 400168, "equals": 39, "within_ms": 2000 }
+  ]
+}

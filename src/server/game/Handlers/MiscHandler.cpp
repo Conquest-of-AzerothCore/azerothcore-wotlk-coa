@@ -31,8 +31,10 @@
 #include "Group.h"
 #include "GuildMgr.h"
 #include "InstancePackets.h"
+#include "InstanceSaveMgr.h"
 #include "InstanceScript.h"
 #include "Language.h"
+#include "LocalLevelScaling.h"
 #include "Log.h"
 #include "LootMgr.h"
 #include "MapMgr.h"
@@ -87,6 +89,18 @@ void WorldSession::HandleRepopRequestOpcode(WorldPacket& recv_data)
     //this is spirit release confirm?
     GetPlayer()->RemovePet(nullptr, PET_SAVE_NOT_IN_SLOT, true);
     GetPlayer()->BuildPlayerRepop();
+    GetPlayer()->RepopAtGraveyard();
+}
+
+// The Ascension ghost frame's "Return to graveyard" calls PortGraveyard(), which sends this empty
+// extension opcode.
+void WorldSession::HandlePortGraveyardOpcode(WorldPacket& /*recvData*/)
+{
+    LOG_DEBUG("network", "WORLD: CMSG_PORT_GRAVEYARD");
+
+    if (GetPlayer()->IsAlive() || !GetPlayer()->HasPlayerFlag(PLAYER_FLAGS_GHOST))
+        return;
+
     GetPlayer()->RepopAtGraveyard();
 }
 
@@ -247,6 +261,10 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recv_data)
         return;
     }
 
+    if (guid.IsPlayer() && HandleRecruitAFriendInviteResponse(menuId,
+        _player->PlayerTalkClass->GetGossipOptionAction(gossipListId)))
+        return;
+
     // remove fake death
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
@@ -384,7 +402,8 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
 
     for (auto const& target : sWhoListCacheMgr->GetWhoList())
     {
-        if (target.GetTeamId() != team && !HasPermission(rbac::RBAC_PERM_TWO_SIDE_WHO_LIST))
+        if (target.GetTeamId() != team && !sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST) &&
+            !HasPermission(rbac::RBAC_PERM_TWO_SIDE_WHO_LIST))
             continue;
 
         // player can see MODERATOR, GAME MASTER, ADMINISTRATOR only if CONFIG_GM_IN_WHO_LIST
@@ -1107,6 +1126,8 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
 
     player->BuildEnchantmentsInfoData(&data);
     SendPacket(&data);
+
+    LocalLevelScaling::NotifyInspected(_player, player);
 }
 
 void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
@@ -1372,6 +1393,73 @@ void WorldSession::ResetAllDungeons()
         Player::ResetInstances(_player->GetGUID(), INSTANCE_RESET_ALL, false);
 }
 
+// The Ascension client asks for its instance binds at every world entry and instance info update; the portrait
+// menu lists them for a single reset. Only binds that can still be reset are listed.
+void WorldSession::HandleQueryInstanceBindsOpcode(WorldPacket& /*recvData*/)
+{
+    LOG_DEBUG("network", "WORLD: CMSG_QUERY_INSTANCE_BINDS");
+
+    std::vector<InstanceSave const*> saves;
+    for (uint8 difficulty = 0; difficulty < MAX_DIFFICULTY; ++difficulty)
+        for (auto const& [mapId, bind] : sInstanceSaveMgr->PlayerGetBoundInstances(_player->GetGUID(), Difficulty(difficulty)))
+            if (bind.save->CanReset())
+                saves.push_back(bind.save);
+
+    WorldPacket data(SMSG_QUERY_INSTANCE_BINDS_RESULT, 24 + 4 + saves.size() * 12);
+    data << "QUERY_INSTANCE_BINDS_OK";
+    data << uint32(saves.size());
+    for (InstanceSave const* save : saves)
+        data << uint32(save->GetInstanceId()) << uint32(save->GetMapId()) << uint32(save->GetDifficulty());
+    SendPacket(&data);
+
+    // The instance welcome of the last instance entered (HandleMoveWorldportAck), once; the client asks twice.
+    if (Map* map = _player->FindMap(); _player->CustomData.Erase("InstanceWelcomePending") && map && map->IsDungeon())
+    {
+        Difficulty diff = _player->GetDifficulty(map->IsRaid());
+        // A Normal dungeon has no reset of its own; it welcomes with the daily reset its Heroic shares.
+        Difficulty resetDiff = !map->IsRaid() && diff == DUNGEON_DIFFICULTY_NORMAL ? DUNGEON_DIFFICULTY_HEROIC : diff;
+        if (InstanceSaveMgr::GetResetDelayFor(map->GetId(), resetDiff))
+            if (time_t timeReset = sInstanceSaveMgr->GetResetTimeFor(map->GetId(), resetDiff))
+                _player->SendInstanceResetWarning(map->GetId(), diff, uint32(timeReset - GameTime::GetGameTime().count()), true);
+    }
+}
+
+// A Reset Instances list entry calls C_LootLockout.ResetInstanceDifficulty(map, difficulty), which sends this
+// extension opcode to reset one bind the query above listed.
+void WorldSession::HandleResetInstanceOpcode(WorldPacket& recvData)
+{
+    uint32 mapId;
+    uint8 difficulty;
+    recvData >> mapId >> difficulty;
+
+    LOG_DEBUG("network", "WORLD: CMSG_RESET_INSTANCE map {} difficulty {}", mapId, difficulty);
+
+    if (difficulty >= MAX_DIFFICULTY)
+        return;
+
+    if (Group* group = _player->GetGroup())
+        if (!group->IsLeader(_player->GetGUID()) || group->isLFGGroup() || group->isBGGroup() || group->isBFGroup())
+            return;
+
+    InstancePlayerBind* bind = sInstanceSaveMgr->PlayerGetBoundInstance(_player->GetGUID(), mapId, Difficulty(difficulty));
+    if (!bind || !bind->save->CanReset())
+        return;
+
+    InstanceSave* save = bind->save;
+    if (Map* map = sMapMgr->FindMap(save->GetMapId(), save->GetInstanceId()))
+    {
+        if (!map->ToInstanceMap()->Reset(INSTANCE_RESET_ALL))
+        {
+            _player->SendResetInstanceFailed(INSTANCE_RESET_FAILED, mapId);
+            return;
+        }
+    }
+
+    _player->SendResetInstanceSuccess(mapId);
+    sInstanceSaveMgr->DeleteInstanceSavedData(save->GetInstanceId());
+    sInstanceSaveMgr->UnbindAllFor(save);
+}
+
 void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPackets::Instance::SetDungeonDifficultyClient& packet)
 {
     LOG_DEBUG("network", "MSG_SET_DUNGEON_DIFFICULTY");
@@ -1419,6 +1507,7 @@ void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPackets::Instance::SetD
         }
         Player::ResetInstances(_player->GetGUID(), INSTANCE_RESET_CHANGE_DIFFICULTY, false);
         _player->SetDungeonDifficulty(Difficulty(packet.Mode));
+        _player->SendDungeonDifficulty(false);
     }
 }
 
@@ -1587,8 +1676,10 @@ void WorldSession::HandleCancelMountAuraOpcode(WorldPacket& /*recv_data*/)
     if (!_player->IsMounted())
         return;
 
-    // The client sends this with every cast while mounted; the Mechsuit is left through its own aura.
-    if (_player->IsInTinkerMechsuit())
+    // The client sends this with every cast while mounted; these combat mounts are left through their auras.
+    if (_player->IsInTinkerMechsuit() ||
+        (_player->getClass() == CLASS_STARCALLER && !_player->IsInFlight() &&
+            _player->GetMountID() == 9991 && _player->HasAura(704772, _player->GetGUID())))
         return;
 
     if (_player->IsInFlight())                               // not blizz like; no any messages on blizz

@@ -80,6 +80,13 @@ struct AC_SHARED_API Realm
     float PopulationLevel;
 
     [[nodiscard]] boost::asio::ip::tcp_endpoint GetAddressForClient(boost::asio::ip::address const& clientAddr) const;
+
+    // Whether an account may enter, by the rule the worldserver applies (World::SetPlayerSecurityLimit):
+    // a level of SEC_CONSOLE or more opens the realm to players.
+    [[nodiscard]] bool IsOpenTo(AccountTypes security) const
+    {
+        return AllowedSecurityLevel >= SEC_CONSOLE || security >= AllowedSecurityLevel;
+    }
 };
 
 #endif // Realm_h__

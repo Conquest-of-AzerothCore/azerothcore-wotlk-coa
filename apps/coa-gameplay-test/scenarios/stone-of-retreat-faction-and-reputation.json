@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "name": "Stones of Retreat refuse the other faction and Hostile Shattrath standing",
+  "contract": "Stone of Retreat: Stonetalon Peak (1777054) leads to an Alliance hub: a Horde character is refused with SPELL_FAILED_NOT_HERE and an Alliance character is teleported to Stonetalon Peak. Altar of Sha'tar (777018) and Sanctum of the Stars (777019) refuse a character that is Hated or Hostile with The Aldor or The Scryers with SPELL_FAILED_REPUTATION: a blood elf starts Hostile with The Aldor and a draenei Hostile with The Scryers (Faction.dbc base -3500), while each one's friendly side and a Neutral human still teleport to Outland.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    { "id": "human", "race": 1, "class": 1, "level": 30 },
+    { "id": "orc", "race": 2, "class": 1, "level": 30 },
+    { "id": "bloodelf", "race": 10, "class": 8, "level": 30 },
+    { "id": "draenei", "race": 11, "class": 1, "level": 30 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "learn", "actor": "orc", "spell": 1777054 },
+    { "action": "learn", "actor": "human", "spell": 1777054 },
+    { "action": "learn", "actor": "human", "spell": 777018 },
+    { "action": "learn", "actor": "bloodelf", "spell": 777018 },
+    { "action": "learn", "actor": "bloodelf", "spell": 777019 },
+    { "action": "learn", "actor": "draenei", "spell": 777018 },
+    { "action": "learn", "actor": "draenei", "spell": 777019 },
+    { "action": "cast", "actor": "orc", "spell": 1777054 },
+    { "action": "cast", "actor": "bloodelf", "spell": 777018 },
+    { "action": "cast", "actor": "draenei", "spell": 777019 },
+    {
+      "action": "assert",
+      "actor": "orc",
+      "metric": "cast_failure",
+      "spell": 1777054,
+      "equals": 60,
+      "within_ms": 1000,
+      "label": "A Horde character cannot use the Alliance Stonetalon Peak stone"
+    },
+    {
+      "action": "assert",
+      "actor": "bloodelf",
+      "metric": "cast_failure",
+      "spell": 777018,
+      "equals": 149,
+      "within_ms": 1000,
+      "label": "Hostile with The Aldor refuses Altar of Sha'tar"
+    },
+    {
+      "action": "assert",
+      "actor": "draenei",
+      "metric": "cast_failure",
+      "spell": 777019,
+      "equals": 149,
+      "within_ms": 1000,
+      "label": "Hostile with The Scryers refuses Sanctum of the Stars"
+    },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "actor": "orc", "metric": "map_id", "equals": 0 },
+    { "action": "assert", "actor": "bloodelf", "metric": "map_id", "equals": 0 },
+    { "action": "assert", "actor": "draenei", "metric": "map_id", "equals": 0 },
+    { "action": "cast", "actor": "human", "spell": 1777054 },
+    { "action": "cast", "actor": "bloodelf", "spell": 777019 },
+    { "action": "cast", "actor": "draenei", "spell": 777018 },
+    {
+      "action": "assert",
+      "actor": "human",
+      "metric": "map_id",
+      "equals": 1,
+      "within_ms": 15000,
+      "label": "An Alliance character reaches Stonetalon Peak"
+    },
+    {
+      "action": "assert",
+      "actor": "bloodelf",
+      "metric": "map_id",
+      "equals": 530,
+      "within_ms": 15000,
+      "label": "Friendly with The Scryers reaches Sanctum of the Stars"
+    },
+    {
+      "action": "assert",
+      "actor": "draenei",
+      "metric": "map_id",
+      "equals": 530,
+      "within_ms": 15000,
+      "label": "Friendly with The Aldor reaches Altar of Sha'tar"
+    },
+    { "action": "wait", "ms": 1000 },
+    { "action": "reset_cooldown", "actor": "human", "spell": 777018 },
+    { "action": "cast", "actor": "human", "spell": 777018 },
+    {
+      "action": "assert",
+      "actor": "human",
+      "metric": "map_id",
+      "equals": 530,
+      "within_ms": 15000,
+      "label": "Neutral with The Aldor still reaches Altar of Sha'tar"
+    },
+    { "action": "assert", "actor": "human", "metric": "cast_failure", "spell": 777018, "equals": 0 }
+  ]
+}

@@ -1,0 +1,142 @@
+{
+  "schema": 1,
+  "name": "Tinker: Parachute Pack clears its slow-fall on grounded bots (#7926)",
+  "contract": "Parachute Pack 804690 triggers Parachute 45472 (60 s, 100 ms tick) on party and raid members within 15 yds; its script swaps a falling holder to slow-fall 44795, an infinite aura the core removes only through the landing interrupt that ProcessMovementInfo runs on client fall-land and start-swim packets. Bots never send those packets, so a grounded bot keeps the open canopy forever while the 1 minute buff is long gone. Grouped delivery to bots is intended and stays: the cast must still put 45472 on the bot. set_aura 44795 stands in for the fall-produced buff, which the harness cannot produce without client fall packets; a grounded bot must then lose 44795 through the server-side clearance while a grounded non-bot keeps it, pinning the real-player path unchanged.",
+  "timeout_ms": 30000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 28,
+      "level": 22,
+      "allow_regeneration": false
+    },
+    {
+      "id": "botty",
+      "race": 1,
+      "class": 1,
+      "level": 20,
+      "bot": true,
+      "allow_regeneration": false
+    },
+    {
+      "id": "control",
+      "race": 1,
+      "class": 1,
+      "level": 20,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "caster",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "botty",
+      "map": 0,
+      "x": -9616.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "control",
+      "map": 0,
+      "x": -9615.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "botty"
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "control"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 804690
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 804690,
+      "target": "caster"
+    },
+    {
+      "action": "assert",
+      "label": "Parachute Pack still equips a grouped bot with Parachute",
+      "actor": "botty",
+      "metric": "aura",
+      "spell": 45472,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Parachute Pack still equips a grouped player with Parachute",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 45472,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "actor": "botty",
+      "spell": 44795,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 44795,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "A grounded bot loses the infinite slow-fall - fails before the fix, when the open canopy stays",
+      "actor": "botty",
+      "metric": "aura",
+      "spell": 44795,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "A grounded player keeps the slow-fall for its client landing packet",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 44795,
+      "equals": 1
+    }
+  ]
+}

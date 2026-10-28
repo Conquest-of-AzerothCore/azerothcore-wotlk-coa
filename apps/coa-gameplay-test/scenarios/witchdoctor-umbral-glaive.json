@@ -1,7 +1,10 @@
 {
   "schema": 1,
   "name": "Witch Doctor: Umbral Glaive",
-  "contract": "Umbral Glaive consumes its proc buff, keeps Hex of Malice known and charges the mana cost once for all its victims.",
+  "contract": [
+    "Umbral Glaive consumes its proc buff, keeps Hex of Malice known and charges the mana cost once for all",
+    "its victims."
+  ],
   "timeout_ms": 90000,
   "players": [
     {
@@ -9,7 +12,8 @@
       "race": 1,
       "class": 13,
       "level": 60,
-      "spell_hit_rating": 10000
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
     }
   ],
   "creatures": [

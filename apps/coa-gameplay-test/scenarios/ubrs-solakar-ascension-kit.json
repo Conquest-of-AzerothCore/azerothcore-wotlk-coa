@@ -1,0 +1,258 @@
+{
+  "schema": 1,
+  "name": "Upper Blackrock Spire: Solakar Flamewreath fights with Ascension's kit",
+  "contract": [
+    "Solakar Flamewreath, whom the Father Flame's last wave brings, uses Ascension's kit for him",
+    "(db.exil.es/npc/10264) instead of War Stomp: Fierce Blow 975011, Thunder Clap 2102619 and Uppercut",
+    "2102513. Supply melee hit, expertise and level-60 two-handed sword skill for the hero, explicitly equip",
+    "the original starting Worn Greatsword (49778), and require a living observer and actual native melee",
+    "damage before checking combat and kit casts. Skill 1 permits weak glancing blows, and original boss",
+    "blocks can deal zero damage; the engagement window allows subsequent ordinary swings. Original boss",
+    "spells, location, hit/block rolls and AI are retained. Solakar enters zone combat during initialization,",
+    "so the original health-only 2156414 aura is applied before the settling wait; its native",
+    "ten-million-health modifier survives subsequent equipment/stat recalculation. Raising a dead player's",
+    "health field afterward does not revive it."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 229,
+    "x": 141.0,
+    "y": -242.7,
+    "z": 110.9,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "hero",
+      "entry": 10264,
+      "level": 61,
+      "health": 400000,
+      "reaction": 2,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 2156414,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura_amount",
+      "spell": 2156414,
+      "effect": 0,
+      "equals": 10000000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura_duration_ms",
+      "spell": 2156414,
+      "min": 120000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "max_health",
+      "min": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1,
+      "label": "Prepare a living observer before the boss starts native combat"
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Upper Blackrock Spire",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 229
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "melee_hit_chance",
+      "min": 100,
+      "within_ms": 1000,
+      "label": "The hero has the native melee hit prerequisite"
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 202
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 49778,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "hero",
+      "skill": 55,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "skill_value",
+      "skill": 55,
+      "equals": 300
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "weapon_damage_min",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "max_health",
+      "min": 10000000,
+      "label": "The health budget survives native equipment and skill setup"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "melee_attack_count",
+      "save_as": "engagement_attacks_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "melee_damage_count",
+      "save_as": "engagement_damage_before"
+    },
+    {
+      "action": "attack",
+      "label": "Engage Solakar Flamewreath",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "melee_attack_count",
+      "relative_to": "engagement_attacks_before",
+      "min": 1,
+      "within_ms": 10000,
+      "label": "The ordinary attack executes a native swing"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "melee_damage_count",
+      "relative_to": "engagement_damage_before",
+      "min": 1,
+      "within_ms": 30000,
+      "label": "The ordinary melee engagement actually deals damage"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1,
+      "label": "The observer survives ordinary melee engagement"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Solakar Flamewreath fights the hero",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Solakar uses Fierce Blow",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 10264,
+      "spell": 975011,
+      "min": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Solakar uses Thunder Clap",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 10264,
+      "spell": 2102619,
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "assert",
+      "label": "Solakar uses Uppercut",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 10264,
+      "spell": 2102513,
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1,
+      "label": "The observer survives all original boss-kit checks"
+    }
+  ]
+}

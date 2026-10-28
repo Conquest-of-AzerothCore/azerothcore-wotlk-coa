@@ -1,29 +1,129 @@
 {
   "schema": 1,
   "name": "Runemaster audit: Unbound shortens an incoming Curse-dispel debuff's duration by 20% (#3654)",
-  "contract": "Unbound 806718 effect 0 is SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL (245), EffectMiscValue 2 (DISPEL_CURSE), EffectBasePoints -21 + DieSides 1 = -20%; effect 1 is the same aura for EffectMiscValue 1 (DISPEL_MAGIC), also -20%. Unit.cpp reads GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL, spellProto->Dispel) for incoming harmful auras. Curse of Weakness (702) has Dispel 2 (DISPEL_CURSE) and a 120000ms base duration (SpellDuration 4) - long enough to observe a clean 20% cut with no CoA script needed. Verification note: WorldSession::HandleCancelAuraOpcode (SpellHandler.cpp:605) refuses to remove a non-positive aura ('don't allow remove non positive spells') - Curse of Weakness is harmful, so the client-style cancel_aura action silently no-ops on it. This uses set_aura with stacks 0 (Unit::RemoveAurasDueToSpell, no positivity check) to clear the curse between the two casts instead.",
+  "contract": [
+    "Unbound 806718 effect 0 is SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL (245), EffectMiscValue 2 (DISPEL_CURSE),",
+    "EffectBasePoints -21 + DieSides 1 = -20%; effect 1 is the same aura for EffectMiscValue 1 (DISPEL_MAGIC),",
+    "also -20%. Unit.cpp reads GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL,",
+    "spellProto->Dispel) for incoming harmful auras. Curse of Weakness (702) has Dispel 2 (DISPEL_CURSE) and a",
+    "120000ms base duration (SpellDuration 4) - long enough to observe a clean 20% cut with no CoA script needed.",
+    "Verification note: WorldSession::HandleCancelAuraOpcode (SpellHandler.cpp:605) refuses to remove a non-",
+    "positive aura ('don't allow remove non positive spells') - Curse of Weakness is harmful, so the client-style",
+    "cancel_aura action silently no-ops on it. This uses set_aura with stacks 0 (Unit::RemoveAurasDueToSpell, no",
+    "positivity check) to clear the curse between the two casts instead. The NPC caster receives native spell",
+    "accuracy, and each native NPC Curse must actually apply before its duration is observed. The original",
+    "duration and exact twenty-percent reduction bounds remain unchanged."
+  ],
   "timeout_ms": 90000,
   "players": [
-    {"id": "rm", "race": 1, "class": 32, "level": 30}
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 30
+    }
   ],
   "creatures": [
-    {"id": "caster", "owner": "rm", "entry": 36, "level": 30, "distance": 3}
+    {
+      "id": "caster",
+      "owner": "rm",
+      "entry": 36,
+      "level": 30,
+      "distance": 3,
+      "spell_hit_bonus": 100
+    }
   ],
   "steps": [
-    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
-    {"action": "cast", "actor": "caster", "spell": 702, "target": "rm"},
-    {"action": "snapshot", "label": "Baseline Curse of Weakness duration", "actor": "rm",
-      "metric": "aura_duration_ms", "spell": 702, "save_as": "curse_before"},
-    {"action": "set_aura", "label": "Clear the curse (cancel_aura refuses non-positive auras)", "actor": "rm",
-      "spell": 702, "stacks": 0},
-    {"action": "assert", "label": "SETUP: the curse is cleared", "actor": "rm", "metric": "aura", "spell": 702,
-      "equals": 0, "within_ms": 1000},
-    {"action": "learn", "actor": "rm", "spell": 806718},
-    {"action": "assert", "label": "Unbound (806718) is active", "actor": "rm",
-      "metric": "aura", "spell": 806718, "equals": 1, "within_ms": 3000},
-    {"action": "cast", "actor": "caster", "spell": 702, "target": "rm"},
-    {"action": "assert", "label": "Curse of Weakness duration is cut ~20% (0.75-0.85)", "actor": "rm",
-      "metric": "aura_duration_ms", "spell": 702, "ratio_to": "curse_before", "min": 0.75, "max": 0.85,
-      "within_ms": 1000}
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_hit_chance",
+      "equals": 100,
+      "label": "The real NPC caster has native spell accuracy before duration observations"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 702,
+      "target": "rm"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 702,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "The curse is actually applied before measuring its duration"
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline Curse of Weakness duration",
+      "actor": "rm",
+      "metric": "aura_duration_ms",
+      "spell": 702,
+      "save_as": "curse_before"
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the curse (cancel_aura refuses non-positive auras)",
+      "actor": "rm",
+      "spell": 702,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the curse is cleared",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 702,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 806718
+    },
+    {
+      "action": "assert",
+      "label": "Unbound (806718) is active",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 806718,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 702,
+      "target": "rm"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 702,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "The curse is actually applied before measuring its duration"
+    },
+    {
+      "action": "assert",
+      "label": "Curse of Weakness duration is cut ~20% (0.75-0.85)",
+      "actor": "rm",
+      "metric": "aura_duration_ms",
+      "spell": 702,
+      "ratio_to": "curse_before",
+      "min": 0.75,
+      "max": 0.85,
+      "within_ms": 1000
+    }
   ]
 }

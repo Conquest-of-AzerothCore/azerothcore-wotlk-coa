@@ -1,0 +1,174 @@
+{
+  "schema": 1,
+  "name": "manastorm-preparation-tools-and-protection",
+  "contract": "Preparation permits baseline supplies and pet summoning without losing the native safety helper. Real spell-immunity probes must protect the player, the dedicated Treasure Keeper must be attackable, and leaving the entrance or run must clear protection. Requires the shared Manastorm module and current world migrations.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "n",
+      "race": 5,
+      "class": 23,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "command",
+      "actor": "n",
+      "command": ".manastorm segment test 1"
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "n",
+      "spell": 805049
+    },
+    {
+      "action": "cast",
+      "actor": "n",
+      "spell": 805049
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 500482,
+      "within_ms": 3000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 93307,
+      "equals": 1
+    },
+    {
+      "action": "summon",
+      "actor": "n",
+      "as": "enemy",
+      "entry": 36,
+      "distance": 2
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "spell_immune",
+      "spell": 686,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "n",
+      "value": 100
+    },
+    {
+      "action": "use_item",
+      "actor": "n",
+      "item": 254041,
+      "spell": 254440
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "health",
+      "min": 101,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 93307,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "use_item",
+      "actor": "n",
+      "item": 254042,
+      "spell": 93311
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 93307,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "cast_failure",
+      "spell": 93311,
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "n",
+      "as": "keeper",
+      "entry": 900026,
+      "distance": 2
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "n",
+      "entry": 900026,
+      "damage_pct": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "n",
+      "guid": 48706
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "client_packet",
+      "actor": "n",
+      "opcode": 1637
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 93307,
+      "equals": 0
+    }
+  ]
+}

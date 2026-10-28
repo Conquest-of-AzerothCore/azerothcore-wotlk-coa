@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Infiltrate can be cancelled at will and still ends when attacked (#4777)",
+  "contract": "Infiltrate (802281) tooltip: 'Take on the form of the target enemy Undead or Demon. Lasts $d, or until you mount up or deal or receive damage.' Its DurationIndex is -1 (permanent), so the only ways out are mounting, taking/dealing damage, or a manual CMSG_CANCEL_AURA. Effect[0] is a cast-time SPELL_EFFECT_DUMMY targeting the enemy being copied (TARGET_UNIT_TARGET_ENEMY), and SpellInfo::_IsPositiveEffect treats that enemy-targeted effect as negative regardless of it applying no aura; that taints SpellInfo::IsPositive() for the whole spell, so WorldSession::HandleCancelAuraOpcode (`!spellInfo->IsPositive()`) refused to let the player cancel their own disguise buff (effect 1, the self APPLY_AURA, is the only effect that is actually applied). The fix marks effect 1 positive without touching effect 0, mirroring the Pressure fix (#4422); taking damage already ends the disguise natively via the existing AURA_INTERRUPT_FLAG_TAKE_DAMAGE/DIRECT_DAMAGE on this spell.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "wh", "race": 1, "class": 15, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "undead_target", "owner": "wh", "entry": 1501, "level": 60, "health": 1000000, "distance": 15 },
+    { "id": "striker", "owner": "wh", "entry": 36, "level": 60, "health": 1000000, "distance": 8 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "wh", "spell": 802281 },
+
+    { "action": "cast", "actor": "wh", "spell": 802281, "target": "undead_target" },
+    { "action": "assert", "label": "SETUP: Infiltrate disguise is active on the Witch Hunter",
+      "actor": "wh", "metric": "aura", "spell": 802281, "equals": 1, "within_ms": 2000 },
+    { "action": "cancel_aura", "actor": "wh", "spell": 802281 },
+    { "action": "assert", "label": "FIX: the Witch Hunter can leave Infiltrate by cancelling it",
+      "actor": "wh", "metric": "aura", "spell": 802281, "equals": 0, "within_ms": 1000 },
+
+    { "action": "wait", "label": "Clear Infiltrate's 60 s cooldown", "ms": 61000 },
+    { "action": "cast", "actor": "wh", "spell": 802281, "target": "undead_target" },
+    { "action": "assert", "label": "SETUP: Infiltrate is active again",
+      "actor": "wh", "metric": "aura", "spell": 802281, "equals": 1, "within_ms": 2000 },
+    { "action": "cast", "label": "The striker hits the disguised Witch Hunter",
+      "actor": "striker", "spell": 686, "target": "wh" },
+    { "action": "assert", "label": "CONTRACT: receiving damage while disguised still ends Infiltrate",
+      "actor": "wh", "metric": "aura", "spell": 802281, "equals": 0, "within_ms": 2000 }
+  ]
+}

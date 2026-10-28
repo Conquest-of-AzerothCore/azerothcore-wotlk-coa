@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Wildcard Deconstruct grants the Deconstruction spell power buff (#7444)",
+  "contract": [
+    "Deconstruct 283344/954082 (SpellFamilyFlags[1] 0x40, reusing the Devastate hack in Spell::EffectWeaponDmg at SpellEffects.cpp:4086-4104) already sunders armor and deals weapon damage natively on every cast, adding one Sunder Armor stack each time.",
+    "It never cast Deconstruction 954083 (DBC effect 0 dummy, effect 1 SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT, BasePoints -1, RealPointsPerLevel 1.2, BaseLevel 1), so the caster never gained the stacking +SP buff described as lasting 1 second per stack of Sunder Armor on the target.",
+    "Three Deconstruct casts land three Sunder Armor stacks on a fresh target (no Glyph of Devastate fixture); the fix reads that native stack count after the hit and grants Deconstruction with duration = stacks * 1000 ms."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "wild",
+      "name": "Wilddecon",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "wild",
+      "entry": 1601,
+      "level": 60,
+      "health": 10000000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "console", "command": "coa gamemode WildCard on Wilddecon" },
+    { "action": "learn", "actor": "wild", "spell": 283344 },
+    { "action": "assert", "label": "No Deconstruction buff before casting", "actor": "wild", "metric": "aura", "spell": 954083, "equals": 0 },
+    { "action": "set_power", "actor": "wild", "power": 1, "value": 1000 },
+    { "action": "cast", "actor": "wild", "spell": 283344, "target": "e" },
+    { "action": "assert", "label": "First Deconstruct is accepted", "actor": "wild", "metric": "cast_failure", "spell": 283344, "equals": 0 },
+    { "action": "wait", "ms": 1600 },
+    { "action": "set_power", "actor": "wild", "power": 1, "value": 1000 },
+    { "action": "cast", "actor": "wild", "spell": 283344, "target": "e" },
+    { "action": "wait", "ms": 1600 },
+    { "action": "set_power", "actor": "wild", "power": 1, "value": 1000 },
+    { "action": "cast", "actor": "wild", "spell": 283344, "target": "e" },
+    { "action": "assert", "label": "Deconstruction is granted", "actor": "wild", "metric": "aura", "spell": 954083, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "Duration matches three Sunder Armor stacks (3000 ms, allowing for elapsed ms)", "actor": "wild", "metric": "aura_duration_ms", "spell": 954083, "min": 2700, "max": 3000 }
+  ]
+}

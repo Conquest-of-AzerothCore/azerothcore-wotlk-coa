@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Inquisition learns Saber Slash at 10 and it generates rage (#7194)",
+  "contract": "Saber Slash (Fire) 680230 is the Inquisition (spec 12) melee generator: SpellFamily 21, melee weapon spell (effect 121 plus triggers 802842 Fiery Judgement and 802007 Wrangler's Net), but its DBC family flags [0,0x10,0] carry no Heartseeking bit and no grant or script binding referenced it. The server teaches it at 10 through the spec-12 taught ability gated on the Flames of Sin identity 92094, binds it to spell_ascension_witch_hunter_ability, and a landed hit casts the energize 500179, whose Effect 0 is ENERGIZE of 99+1 internal rage that the client text shows as $/10;500179s1 = 10 (flag-based Heartseeking matching would also retarget its EFFECT_2 trigger to 807316 in ApplyContracts, so it is matched by spell ID). The level-10 Inquisitor therefore knows the spell after picking the spec, and a landed cast logs exactly one 100-point rage energize regardless of damage dealt.",
+  "timeout_ms": 120000,
+  "players": [
+    {"id": "hunter", "race": 1, "class": 15, "level": 10, "melee_hit_rating": 10000, "expertise_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "hunter", "entry": 36, "level": 10, "health": 100000, "distance": 3}
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 5000 },
+    { "action": "specialization", "actor": "hunter", "id": 12 },
+    {
+      "action": "assert",
+      "label": "Inquisitor knows Saber Slash after picking the spec at 10",
+      "actor": "hunter",
+      "metric": "knows_spell",
+      "spell": 680230,
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Witch Hunter has a Rage pool",
+      "actor": "hunter",
+      "metric": "max_power",
+      "power": 1,
+      "min": 1
+    },
+    { "action": "add_item", "actor": "hunter", "item": 25 },
+    { "action": "equip", "actor": "hunter", "item": 25, "slot": 15 },
+    { "action": "wait", "label": "Let the weapon swap cooldown expire", "ms": 2000 },
+    { "action": "set_power", "label": "Enough rage to pay the cast", "actor": "hunter", "power": 1, "value": 500 },
+    { "action": "snapshot", "label": "Target health before Saber Slash", "actor": "dummy", "metric": "health", "save_as": "health_before" },
+    { "action": "cast", "actor": "hunter", "spell": 680230, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "Saber Slash lands on the target",
+      "actor": "dummy",
+      "metric": "health",
+      "relative_to": "health_before",
+      "max": -1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Saber Slash generates the 10 rage its tooltip promises whatever it hit for (#8923)",
+      "actor": "hunter",
+      "metric": "spell_energize_total",
+      "spell": 500179,
+      "power": 1,
+      "equals": 100,
+      "within_ms": 20000
+    }
+  ]
+}

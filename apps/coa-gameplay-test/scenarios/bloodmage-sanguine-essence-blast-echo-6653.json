@@ -1,0 +1,146 @@
+{
+  "schema": 1,
+  "name": "Sanguine Essence replicates Bloodmoon Blast damage for three ticks (#6653)",
+  "contract": "Original Sanguine Essence680692 promises20% of Bloodmoon Blast damage every second for three seconds. Original681399 is the matching Shadow periodic damage aura with1000ms ticks and the same duration as healing680693. The native Blast must create that damage aura and produce three periodic ticks.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "blood",
+      "race": 1,
+      "class": 20,
+      "level": 15,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "blood",
+      "entry": 36,
+      "level": 15,
+      "health": 1000000,
+      "distance": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "blood",
+      "spell": 501608
+    },
+    {
+      "action": "set_aura",
+      "actor": "blood",
+      "spell": 680692,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "blood",
+      "spell": 501608,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "blood",
+      "metric": "spell_damage_count",
+      "spell": 501608,
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "snapshot",
+      "actor": "blood",
+      "metric": "spell_damage_total",
+      "spell": 501608,
+      "save_as": "original_damage"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 681399,
+      "caster": "blood",
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_amount",
+      "spell": 681399,
+      "effect": 0,
+      "caster": "blood",
+      "ratio_to": "original_damage",
+      "min": 0.18,
+      "max": 0.2
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "actor": "blood",
+      "metric": "spell_damage_count",
+      "spell": 681399,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "blood",
+      "metric": "spell_damage_total",
+      "spell": 681399,
+      "ratio_to": "original_damage",
+      "min": 0.54,
+      "max": 0.6
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 681399,
+      "equals": 0
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "blood",
+      "spell": 680692
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "blood",
+      "spell": 501608
+    },
+    {
+      "action": "cast",
+      "actor": "blood",
+      "spell": 501608,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 681399,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "blood",
+      "metric": "spell_damage_count",
+      "spell": 681399,
+      "equals": 3
+    }
+  ]
+}

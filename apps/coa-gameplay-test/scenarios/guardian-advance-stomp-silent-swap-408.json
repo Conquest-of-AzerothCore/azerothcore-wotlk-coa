@@ -1,0 +1,192 @@
+{
+  "schema": 1,
+  "name": "Guardian Advance swaps to its stomp and back without learned or unlearned lines (#408, #6475)",
+  "contract": [
+    "Half a second into Advance 500170, AscensionGuardianTalents::Synchronize teaches its stomp 500673 with",
+    "learnSpell(500673, true) and swaps it in through SMSG_SUPERCEDED_SPELL; when Advance ends the swap is reverted the",
+    "same way and the stomp is removed. Each use printed 'You have learned a new spell' for the stomp twice, 'You have",
+    "learned a new spell' for Advance when it came back and 'You have unlearned' for the stomp. The stomp's learn goes",
+    "out with a quiet SpellCustomAttr row, its swaps are silenced by a hidden CharacterAdvancement row listing it, and",
+    "its removal is sent between its Spell row with SPELL_ATTR0_DO_NOT_DISPLAY and the unchanged row. Expected over two",
+    "uses: the swap still reaches the client both ways, the stomp reaches the client's spellbook, no line for either",
+    "spell, and the stomp's Spell row is put back exactly."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "guardian",
+      "race": 1,
+      "class": 18,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login state settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 803130
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 500170
+    },
+    {
+      "action": "set_power",
+      "actor": "guardian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "guardian",
+      "spell": 803130
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "aura",
+      "spell": 803130,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "snapshot",
+      "actor": "guardian",
+      "metric": "client_chat_lines_for",
+      "spell": 500170,
+      "save_as": "advance_lines"
+    },
+    {
+      "action": "cast",
+      "label": "Advance",
+      "actor": "guardian",
+      "spell": 500170
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Advance is swapped for its stomp",
+      "actor": "guardian",
+      "metric": "temporary_spell_replacement",
+      "spell": 500170,
+      "equals": 500673,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The swap reaches the client",
+      "actor": "guardian",
+      "metric": "spellbook_superseded_for",
+      "spell": 500673,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The stomp reaches the client's spellbook",
+      "actor": "guardian",
+      "metric": "client_knows_spell",
+      "spell": 500673,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Advance ends and hands its button back",
+      "actor": "guardian",
+      "metric": "temporary_spell_replacement",
+      "spell": 500170,
+      "equals": 500170,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The swap back reaches the client",
+      "actor": "guardian",
+      "metric": "spellbook_superseded_for",
+      "spell": 500170,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The client is told the stomp is gone",
+      "actor": "guardian",
+      "metric": "client_knows_spell",
+      "spell": 500673,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "guardian",
+      "spell": 500170
+    },
+    {
+      "action": "set_power",
+      "actor": "guardian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Advance a second time",
+      "actor": "guardian",
+      "spell": 500170
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the second Advance swaps in the stomp again",
+      "actor": "guardian",
+      "metric": "temporary_spell_replacement",
+      "spell": 500170,
+      "equals": 500673,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the second Advance ends",
+      "actor": "guardian",
+      "metric": "temporary_spell_replacement",
+      "spell": 500170,
+      "equals": 500170,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "No line for the stomp over both uses",
+      "actor": "guardian",
+      "metric": "client_chat_lines_for",
+      "spell": 500673,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "No line for Advance coming back",
+      "actor": "guardian",
+      "metric": "client_chat_lines_for",
+      "spell": 500170,
+      "relative_to": "advance_lines",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The stomp's row is put back exactly",
+      "actor": "guardian",
+      "metric": "client_spell_row_restored",
+      "spell": 500673,
+      "equals": 1
+    }
+  ]
+}

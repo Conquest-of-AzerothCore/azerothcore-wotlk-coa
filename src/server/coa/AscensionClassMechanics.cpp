@@ -36,8 +36,22 @@
 #include "AscensionRunemasterZenith.h"
 #include "AscensionTemplarLibrams.h"
 #include "AscensionHealingStatSelectors.h"
+#include "AscensionHeroWarrior.h"
 #include "AscensionGuardianResources.h"
 #include "AscensionSpellProgressionData.h"
+#include "AscensionHeroHunter.h"
+#include "AscensionHeroRogue.h"
+#include "AscensionHeroPriest.h"
+#include "AscensionHeroWarlock.h"
+#include "AscensionHeroPaladin.h"
+#include "AscensionWarcraftRebornDruid.h"
+#include "AscensionWarcraftRebornHunter.h"
+#include "AscensionWarcraftRebornMage.h"
+#include "AscensionWarcraftRebornPaladin.h"
+#include "AscensionWarcraftRebornPriest.h"
+#include "AscensionWarcraftRebornRogue.h"
+#include "AscensionWarcraftRebornWarlock.h"
+#include "AscensionWarcraftRebornWarrior.h"
 #include "Cell.h"
 #include "CellImpl.h"
 #include "ClientDBC.h"
@@ -586,6 +600,33 @@ void ApplyRangerConditionalDamageContracts(SpellInfo* spellInfo)
         LOG_ERROR("coa", "Skipped unexpected Ranger conditional damage record {}", spellInfo->Id);
 }
 
+void ApplyRangerSerrationsContract(SpellInfo* spellInfo)
+{
+    if (spellInfo->Id != 705050 && spellInfo->Id != 707850)
+        return;
+
+    int32 amount = spellInfo->Id == 705050 ? 4 : 9;
+    for (SpellEffectInfo& effect : spellInfo->Effects)
+    {
+        if (effect.Effect != SPELL_EFFECT_APPLY_AURA ||
+            effect.ApplyAuraName != SPELL_AURA_OVERRIDE_CLASS_SCRIPTS ||
+            effect.MiscValue != ASCENSION_CLASSMASK_AURASTATE_DAMAGE)
+            continue;
+
+        if (effect.BasePoints == amount && effect.DieSides == 1)
+        {
+            effect.ApplyAuraName = SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE;
+            effect.MiscValue = effect.MiscValueB;
+            effect.MiscValueB = ASCENSION_CLASSMASK_AURASTATE_DAMAGE;
+        }
+        else
+            LOG_ERROR("coa", "Skipped unexpected Ranger Serrations record {}", spellInfo->Id);
+        return;
+    }
+
+    LOG_ERROR("coa", "Skipped unexpected Ranger Serrations record {}", spellInfo->Id);
+}
+
 void ApplyRangerUnderhandedContracts(SpellInfo* spellInfo)
 {
     if (!spellInfo || spellInfo->SpellFamilyName != uint32(CLASS_RANGER) + 6 ||
@@ -1035,8 +1076,7 @@ uint32 ChargeRankRoot(uint32 spellId)
 void ApplyClientSpellCharges(SpellInfo* spellInfo)
 {
     auto charge = ClientSpellCharges().find(spellInfo->Id);
-    if (charge == ClientSpellCharges().end() || spellInfo->IsDeprecatedForPlayers ||
-        !IsCustomClassFamily(spellInfo->SpellFamilyName))
+    if (charge == ClientSpellCharges().end() || spellInfo->IsDeprecatedForPlayers)
         return;
 
     uint32 const root = ChargeRankRoot(spellInfo->Id);
@@ -1058,12 +1098,27 @@ void ApplyAscensionClassMechanics(SpellInfo* spellInfo)
 
     ApplyAscensionGuardianResourceContracts(spellInfo);
 
+    if (spellInfo->Id == 707188)
+        spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_DUMMY;
+
     ApplyAscensionClassMechanics19To25(spellInfo);
     ApplyAscensionBarbarianSpellChanges(spellInfo);
+    ApplyAscensionWarcraftRebornWarriorContracts(spellInfo);
+    ApplyAscensionHeroWarriorContracts(spellInfo);
+    ApplyAscensionWarcraftRebornPaladinContracts(spellInfo);
+    ApplyAscensionWarcraftRebornHunterContracts(spellInfo);
+    ApplyAscensionWarcraftRebornRogueContracts(spellInfo);
+    ApplyAscensionWarcraftRebornPriestContracts(spellInfo);
+    ApplyAscensionWarcraftRebornMageContracts(spellInfo);
+    ApplyAscensionWarcraftRebornWarlockContracts(spellInfo);
+    ApplyAscensionWarcraftRebornDruidContracts(spellInfo);
+    ApplyAscensionHeroHunterContracts(spellInfo);
+    ApplyAscensionHeroRogueContracts(spellInfo); ApplyAscensionHeroPriestContracts(spellInfo); ApplyAscensionHeroWarlockContracts(spellInfo); ApplyAscensionHeroPaladinContracts(spellInfo);
     ApplyTinkerScrapResourceContract(spellInfo);
     ApplyTinkerScrapperContract(spellInfo);
     ApplyRangerFixedDurationContract(spellInfo);
     ApplyRangerConditionalDamageContracts(spellInfo);
+    ApplyRangerSerrationsContract(spellInfo);
     ApplyRangerUnderhandedContracts(spellInfo);
     ApplyRangerInstinctualCombatantContract(spellInfo);
     ApplyAscensionRangerDamageContracts(spellInfo);
@@ -1350,6 +1405,12 @@ void HandleAscensionClassMechanicsCast(Spell* spell)
         return;
 
     SpellInfo const* info = spell->GetSpellInfo();
+    if (player->getClass() == CLASS_WARLOCK && info->Id == 217364 &&
+        !player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
+    {
+        if (Unit* target = spell->GetOriginalTarget())
+            player->CastSpell(target, 281295, true);
+    }
     if (player->getClass() == CLASS_RANGER)
         HandleRangerAdvantageCast(spell, player);
 
@@ -1383,6 +1444,7 @@ void HandleAscensionClassMechanicsCast(Spell* spell)
     if (firstRank == 800316)
     {
         player->CastSpell(player, 500175, true);
+        player->RemoveAurasDueToSpell(SPELL_GUARDIAN_REPRISAL_READY);
     }
     else if (IsGuardianCenturionStrike(info->Id) && player->HasAura(504140))
     {

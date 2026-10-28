@@ -352,7 +352,7 @@ class spell_hun_aspect_of_the_beast : public AuraScript
         if (GetCaster())
             if (Player* caster = GetCaster()->ToPlayer())
                 if (Pet* pet = caster->GetPet())
-                    pet->RemoveAurasDueToSpell(SPELL_HUNTER_ASPECT_OF_THE_BEAST_PET);
+                    pet->RemoveAurasDueToSpell(sSpellMgr->GetSpellTwinFor(SPELL_HUNTER_ASPECT_OF_THE_BEAST_PET, GetId()));
     }
 
     void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
@@ -360,14 +360,14 @@ class spell_hun_aspect_of_the_beast : public AuraScript
         if (GetCaster())
             if (Player* caster = GetCaster()->ToPlayer())
                 if (caster->GetPet())
-                    caster->CastSpell(caster, SPELL_HUNTER_ASPECT_OF_THE_BEAST_PET, true);
+                    caster->CastSpell(caster, sSpellMgr->GetSpellTwinFor(SPELL_HUNTER_ASPECT_OF_THE_BEAST_PET, GetId()), true);
     }
 
     void OnPetApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
     {
         Unit* pet = GetUnitOwner();
         if (Unit* owner = pet->GetOwner())
-            if (owner->HasAura(SPELL_HUNTER_ASPECT_OF_THE_BEAST))
+            if (owner->HasAura(sSpellMgr->GetSpellTwinFor(SPELL_HUNTER_ASPECT_OF_THE_BEAST, GetId())))
                 return;
 
         SetDuration(0);
@@ -375,7 +375,7 @@ class spell_hun_aspect_of_the_beast : public AuraScript
 
     void Register() override
     {
-        if (m_scriptSpellId == 13161)
+        if (sSpellMgr->GetSpellTwinSource(m_scriptSpellId) == SPELL_HUNTER_ASPECT_OF_THE_BEAST)
         {
             AfterEffectApply += AuraEffectApplyFn(spell_hun_aspect_of_the_beast::OnApply, EFFECT_0, SPELL_AURA_UNTRACKABLE, AURA_EFFECT_HANDLE_REAL);
             AfterEffectRemove += AuraEffectRemoveFn(spell_hun_aspect_of_the_beast::OnRemove, EFFECT_0, SPELL_AURA_UNTRACKABLE, AURA_EFFECT_HANDLE_REAL);
@@ -417,7 +417,7 @@ class spell_hun_ascpect_of_the_viper : public AuraScript
         uint32 maxMana = GetTarget()->GetMaxPower(POWER_MANA);
         int32 mana = CalculatePct(maxMana, GetTarget()->GetAttackTime(RANGED_ATTACK) / 1000.0f);
 
-        if (AuraEffect const* glyph = GetTarget()->GetAuraEffect(SPELL_HUNTER_GLYPH_OF_ASPECT_OF_THE_VIPER, EFFECT_0))
+        if (AuraEffect const* glyph = GetTarget()->GetAuraEffectOfRankedSpellOrTwin(SPELL_HUNTER_GLYPH_OF_ASPECT_OF_THE_VIPER, EFFECT_0))
             AddPct(mana, glyph->GetAmount());
 
         GetTarget()->CastCustomSpell(SPELL_HUNTER_ASPECT_OF_THE_VIPER_ENERGIZE, SPELLVALUE_BASE_POINT0, mana, GetTarget(), true, nullptr, aurEff);
@@ -894,7 +894,7 @@ class spell_hun_misdirection : public AuraScript
     void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
     {
         if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_DEFAULT || !GetTarget()->HasAura(SPELL_HUNTER_MISDIRECTION_PROC))
-            GetTarget()->GetThreatMgr().UnregisterRedirectThreat(SPELL_HUNTER_MISDIRECTION);
+            GetTarget()->GetThreatMgr().UnregisterRedirectThreat(GetId());
     }
 
     bool CheckProc(ProcEventInfo& eventInfo)
@@ -927,7 +927,8 @@ class spell_hun_misdirection_proc : public AuraScript
 
     void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
     {
-        GetTarget()->GetThreatMgr().UnregisterRedirectThreat(SPELL_HUNTER_MISDIRECTION);
+        SpellInfo const* misdirection = GetAura()->GetTriggeredByAuraSpellInfo();
+        GetTarget()->GetThreatMgr().UnregisterRedirectThreat(misdirection ? misdirection->Id : uint32(SPELL_HUNTER_MISDIRECTION));
     }
 
     void Register() override

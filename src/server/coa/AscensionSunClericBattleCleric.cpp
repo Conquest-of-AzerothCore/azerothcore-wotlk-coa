@@ -26,9 +26,11 @@ class aura_ascension_battle_cleric : public AuraScript
             GetCaster()->getClass() == CLASS_SUN_CLERIC;
     }
 
-    void Apply(AuraEffect const*, AuraEffectHandleModes)
+    void Apply(AuraEffect const*, AuraEffectHandleModes mode)
     {
         Unit* player = GetTarget();
+        if (GetId() == SPELL_PARAGON && (mode & AURA_EFFECT_HANDLE_REAL) && player->HasAura(SPELL_BATTLE_CLERIC, player->GetGUID()))
+            player->ToPlayer()->ModifySpellCooldown(SPELL_PARAGON, -240000);
         uint32 required = GetId() == SPELL_PARAGON ? SPELL_BATTLE_CLERIC : SPELL_PARAGON;
         if (!player->HasAura(required, player->GetGUID()))
             return;
@@ -68,14 +70,12 @@ public:
             return;
         if (info->Id == SPELL_BATTLE_CLERIC)
         {
-            SpellEffectInfo& cooldown = info->Effects[EFFECT_0];
-            cooldown.Effect = SPELL_EFFECT_APPLY_AURA;
-            cooldown.ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
-            cooldown.BasePoints = -240000;
-            cooldown.DieSides = 0;
-            cooldown.MiscValue = SPELLMOD_COOLDOWN;
-            cooldown.SpellClassMask = flag96(0, 0, 8388608);
-            cooldown.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+            SpellEffectInfo& marker = info->Effects[EFFECT_0];
+            marker.Effect = SPELL_EFFECT_APPLY_AURA;
+            marker.ApplyAuraName = SPELL_AURA_DUMMY;
+            marker.BasePoints = 0;
+            marker.DieSides = 0;
+            marker.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
             info->_InitializeExplicitTargetMask();
         }
         if (info->Id == SPELL_BATTLE_CLERIC_EFFECTS)

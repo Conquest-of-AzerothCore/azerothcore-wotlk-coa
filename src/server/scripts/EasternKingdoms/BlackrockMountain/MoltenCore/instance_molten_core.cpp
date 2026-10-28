@@ -66,6 +66,9 @@ struct instance_molten_core : public InstanceScript
     {
         if (CheckMajordomoExecutus())
             SummonMajordomoExecutus();
+
+        if (GetBossState(DATA_MAJORDOMO_EXECUTUS) == DONE)
+            SummonRagnarosPortal();
     }
 
     void OnCreatureCreate(Creature* creature) override
@@ -92,12 +95,27 @@ struct instance_molten_core : public InstanceScript
                 _garrGUID = creature->GetGUID();
                 break;
             }
+            case NPC_MAGMADAR:
+            {
+                _magmadarGUID = creature->GetGUID();
+                break;
+            }
             case NPC_RAGNAROS:
             {
                 _ragnarosGUID = creature->GetGUID();
                 break;
             }
             case NPC_FIRESWORN:
+            {
+                AddMinion(creature);
+                _garrFireswornGUIDs.insert(creature->GetGUID());
+                break;
+            }
+            case NPC_REFLECTION_OF_SHAZZRAH:
+            {
+                _shazzrahReflectionGUIDs.insert(creature->GetGUID());
+                break;
+            }
             case NPC_FLAMEWALKER:
             case NPC_FLAMEWALKER_PROTECTOR:
             case NPC_FLAMEWALKER_PRIEST:
@@ -117,6 +135,12 @@ struct instance_molten_core : public InstanceScript
             case NPC_FIRESWORN:
             {
                 RemoveMinion(creature);
+                _garrFireswornGUIDs.erase(creature->GetGUID());
+                break;
+            }
+            case NPC_REFLECTION_OF_SHAZZRAH:
+            {
+                _shazzrahReflectionGUIDs.erase(creature->GetGUID());
                 break;
             }
             case NPC_FLAMEWALKER:
@@ -197,6 +221,11 @@ struct instance_molten_core : public InstanceScript
                     ragnaros->AI()->SetGUID(go->GetGUID(), GO_LAVA_BURST);
                 break;
             }
+            case GO_RAGNAROS_PORTAL_COA:
+            {
+                _ragnarosPortalCoaGUID = go->GetGUID();
+                break;
+            }
         }
     }
 
@@ -210,6 +239,8 @@ struct instance_molten_core : public InstanceScript
                 return _majordomoExecutusGUID;
             case DATA_GARR:
                 return _garrGUID;
+            case DATA_MAGMADAR:
+                return _magmadarGUID;
             case DATA_LAVA_STEAM:
                 return _lavaSteamGUID;
             case DATA_LAVA_SPLASH:
@@ -232,6 +263,48 @@ struct instance_molten_core : public InstanceScript
             {
                 cache->SetRespawnTime(7 * DAY);
                 cache->SetLootRecipient(instance);
+            }
+
+            SummonRagnarosPortal();
+        }
+        else if (bossId == DATA_GARR)
+        {
+            switch (state)
+            {
+                case NOT_STARTED:
+                case FAIL:
+                {
+                    for (ObjectGuid const& fireswornGuid : _garrFireswornGUIDs)
+                    {
+                        Creature* firesworn = instance->GetCreature(fireswornGuid);
+                        if (firesworn && firesworn->isDead())
+                            firesworn->Respawn();
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+        else if (bossId == DATA_SHAZZRAH)
+        {
+            switch (state)
+            {
+                case NOT_STARTED:
+                case FAIL:
+                case DONE:
+                {
+                    for (ObjectGuid const& reflectionGuid : _shazzrahReflectionGUIDs)
+                    {
+                        if (Creature* reflection = instance->GetCreature(reflectionGuid))
+                            reflection->DespawnOrUnsummon();
+                    }
+
+                    _shazzrahReflectionGUIDs.clear();
+                    break;
+                }
+                default:
+                    break;
             }
         }
         else if (bossId == DATA_GOLEMAGG)
@@ -337,6 +410,14 @@ struct instance_molten_core : public InstanceScript
         }
     }
 
+    void SummonRagnarosPortal()
+    {
+        if (instance->GetGameObject(_ragnarosPortalCoaGUID))
+            return;
+
+        instance->SummonGameObject(GO_RAGNAROS_PORTAL_COA, MajordomoSummonPos, 0.0f, 0.0f, 0.2568427f, -0.9664532f, 0);
+    }
+
     bool CheckMajordomoExecutus() const
     {
         if (GetBossState(DATA_RAGNAROS) == DONE)
@@ -374,7 +455,14 @@ private:
     ObjectGuid _majordomoExecutusGUID;
     ObjectGuid _cacheOfTheFirelordGUID;
     ObjectGuid _garrGUID;
+    GuidSet _garrFireswornGUIDs;
     ObjectGuid _magmadarGUID;
+    GuidSet _shazzrahReflectionGUIDs;
+
+    // CoA addition: portal to Ragnaros' lair, summoned only once DATA_MAJORDOMO_EXECUTUS reaches
+    // DONE (live defeat, or on re-entering an instance where he is already dead) -- see
+    // SummonRagnarosPortal(). Does not exist at all before that.
+    ObjectGuid _ragnarosPortalCoaGUID;
 };
 
 void AddSC_instance_molten_core()

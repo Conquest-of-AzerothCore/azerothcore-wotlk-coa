@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Item scaling: a laddered chest item scales to the looter's level inside its ladder, an unladdered one stays authored",
+  "contract": "Requires DestinyWeaver.Enable=1, DestinyWeaver.LevelScaling=1, CoA.ItemScaling=1 and CoA.ItemScaling.Native=1 with ItemStat.dbc in the data directory. Defias Turncoat's Jerkin 1345037 holds Defias Turncoat's Jerkin 500815 (green, item level 10, required level 5, 36 armor, not Worldforged) at 100%. Its ItemStat.dbc ladder covers levels 5 to 15, so native item scaling keeps the authored entry, stores the client's item key for the looter's level 30, 33, on the looted jerkin and reads the highest row, 15: required level 14 and 65 armor, item level unchanged at 10. With scaling off, Underbed Glint 90550 holds the authored Rootbark Girdle 521000 at item level 11; it has no ladder, and the copy path neither lifts for an unscaled character nor makes copies while native item scaling is active. Lock, key and skill checks of the chest are not exercised; client rendering of the item is not tested.",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -9465, "y": 64, "z": 56, "o": 0 },
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 30 }
+  ],
+  "steps": [
+    { "action": "level_scaling_packet", "actor": "hero", "value": 1 },
+    { "action": "summon_gameobject", "actor": "hero", "entry": 1345037 },
+    { "action": "wait", "label": "Let the chest become ready", "ms": 1000 },
+    { "action": "loot_gameobject", "actor": "hero", "entry": 1345037 },
+    { "action": "assert", "label": "The chest holds the authored Defias Turncoat's Jerkin", "actor": "hero", "metric": "loot_entry", "item": 500815, "equals": 500815 },
+    { "action": "assert", "label": "The loot window shows the authored item level 10", "actor": "hero", "metric": "loot_item_level", "item": 500815, "equals": 10 },
+    { "action": "assert", "label": "The loot window shows the authored 36 armor", "actor": "hero", "metric": "loot_item_armor", "item": 500815, "equals": 36 },
+    { "action": "loot_slot", "actor": "hero", "item": 500815 },
+    { "action": "assert", "label": "The looted jerkin stores the client key 33 for the looter's level 30", "actor": "hero", "metric": "carried_item_scaling_level", "item": 500815, "equals": 33, "within_ms": 2000 },
+    { "action": "assert", "label": "The looted jerkin requires level 14 from its highest ladder row", "actor": "hero", "metric": "carried_item_required_level", "item": 500815, "equals": 14 },
+    { "action": "assert", "label": "The looted jerkin carries the highest row's 65 armor", "actor": "hero", "metric": "carried_item_armor", "item": 500815, "equals": 65 },
+    { "action": "assert", "label": "The looted jerkin keeps item level 10", "actor": "hero", "metric": "carried_item_level", "item": 500815, "equals": 10 },
+    { "action": "close_loot", "actor": "hero" },
+
+    { "action": "level_scaling_packet", "actor": "hero", "value": 0 },
+    { "action": "summon_gameobject", "actor": "hero", "entry": 90550 },
+    { "action": "wait", "label": "Let the chest become ready", "ms": 1000 },
+    { "action": "loot_gameobject", "actor": "hero", "entry": 90550 },
+    { "action": "assert", "label": "The unscaled chest holds the authored Rootbark Girdle", "actor": "hero", "metric": "loot_entry", "item": 521000, "equals": 521000 },
+    { "action": "assert", "label": "The authored item keeps item level 11", "actor": "hero", "metric": "loot_item_level", "item": 521000, "equals": 11 },
+    { "action": "close_loot", "actor": "hero" }
+  ]
+}

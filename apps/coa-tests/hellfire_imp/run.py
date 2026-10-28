@@ -6,6 +6,7 @@ import runpy
 import shutil
 import subprocess
 import tempfile
+import textwrap
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -19,6 +20,8 @@ CASES = r"""
 struct Player : Unit {};
 struct Creature : Unit
 {
+    uint32 creator = 0;
+    void SetCreatorGUID(uint32 owner) { creator = owner; }
     struct Threat
     {
         void RegisterRedirectThreat(uint32 spell, uint32 owner, uint32 percent)
@@ -45,6 +48,7 @@ int main()
     imp.entry = 50301;
     assert(!imp.NativeAttackAdmission(&neutral));
     Initialize(&imp, &player);
+    assert(imp.creator == 1);
     assert(imp.m_ControlledByPlayer && imp.HasUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED));
     assert(imp.pvp == player.pvp);
     assert(imp.NativeAttackAdmission(&neutral));
@@ -60,6 +64,7 @@ int main()
         Creature other;
         other.entry = entry;
         Initialize(&other, &player);
+        assert(!other.creator);
         assert(!other.m_ControlledByPlayer && !other.flags && !other.pvp);
     }
 }
@@ -80,8 +85,10 @@ def main():
     start = attack.index("    if (target->HasUnitFlag(UNIT_FLAG_NON_ATTACKABLE")
     attack = attack[start:attack.index("    ReputationRank repThisToTarget", start)]
     harness = (HERE.parent / "tinker_sentry/harness.cpp").read_text(encoding="utf-8")
-    harness = harness[:harness.index("// ACTUAL_TIMER")].replace("// ACTUAL_ADMISSION", attack)
+    harness = harness[:harness.index("// ACTUAL_TIMER")].replace("// ACTUAL_ADMISSION", textwrap.indent(attack, "    "))
     harness += CASES.replace("// ACTUAL_IMP", imp)
+    for name in ("RANGED_ATTACK", "CURRENT_AUTOREPEAT_SPELL", "SPELL_AURA_MOD_PACIFY"):
+        harness = harness.replace("constexpr uint32 " + name, "[[maybe_unused]] constexpr uint32 " + name)
     compiler = shutil.which(os.environ.get("CXX", "g++"))
     assert compiler, "Set CXX to a C++20 compiler."
     with tempfile.TemporaryDirectory(prefix="coa-hellfire-imp-") as directory:
@@ -94,7 +101,7 @@ def main():
             flags = ["-std=c++20", "-Wall", "-Wextra", "-Werror", str(cpp), "-o", str(exe)]
         subprocess.run([compiler, *flags], cwd=out, check=True)
         subprocess.run([str(exe)], cwd=out, check=True)
-    print("PASS: Imp control flags, neutral-target admission, PC/NPC immunities, PvP state and other summons")
+    print("PASS: Imp creator, control flags, neutral-target admission, PC/NPC immunities, PvP state and other summons")
 
 
 if __name__ == "__main__":

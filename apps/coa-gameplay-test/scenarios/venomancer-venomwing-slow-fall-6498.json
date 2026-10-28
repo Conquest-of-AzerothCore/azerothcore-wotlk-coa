@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "name": "Venomwing applies its native slow-fall helper (#6498)",
+  "contract": "Venomwing Form 520307 promises slow falling. Its related passive 520330 has native FEATHER_FALL105; native form entry must apply the slow-fall helper. Actual client descent timing is outside this native aura probe.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "venom",
+      "race": 1,
+      "class": 29,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "venom",
+      "spell": 520307
+    },
+    {
+      "action": "cast",
+      "actor": "venom",
+      "spell": 520307
+    },
+    {
+      "action": "assert",
+      "actor": "venom",
+      "metric": "aura",
+      "spell": 520307,
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "venom",
+      "metric": "aura",
+      "spell": 520330,
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "venom",
+      "spell": 520307
+    },
+    {
+      "action": "assert",
+      "actor": "venom",
+      "metric": "aura",
+      "spell": 520330,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "venom",
+      "spell": 520307
+    },
+    {
+      "action": "assert",
+      "actor": "venom",
+      "metric": "aura",
+      "spell": 520330,
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "unlearn",
+      "actor": "venom",
+      "spell": 520307
+    },
+    {
+      "action": "assert",
+      "actor": "venom",
+      "metric": "aura",
+      "spell": 520330,
+      "equals": 0,
+      "within_ms": 1500
+    }
+  ]
+}

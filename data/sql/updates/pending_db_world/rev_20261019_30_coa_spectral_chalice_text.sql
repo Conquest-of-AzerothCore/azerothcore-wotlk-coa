@@ -1,0 +1,4 @@
+-- CoA: 4083 'The Spectral Chalice' showed only its title: the quest had no LogDescription
+-- or QuestDescription, and its completion text still pointed at Alterac while the chalice
+-- stands in Blackrock Depths. Give the quest its description and fix the turn-in line.
+UPDATE `quest_template` SET `LogDescription` = 'Offer gems and precious metal to the Spectral Chalice in Blackrock Depths.', `QuestDescription` = 'You have found it then, the Spectral Chalice, sung of in your people''s oldest forge-tales.$B$BIt thirsts, traveler. It does not drink water nor wine, but the wealth of the earth: gems cut clean and metal wrought true. Feed it two Star Rubies, twenty Gold Bars and ten Truesilver Bars, and it shall answer with a Rune of Descension, struck in the deeps.$B$BLay the offering within the chalice.', `QuestCompletionLog` = 'Return to the Spectral Chalice in Blackrock Depths.' WHERE `ID` = 4083;

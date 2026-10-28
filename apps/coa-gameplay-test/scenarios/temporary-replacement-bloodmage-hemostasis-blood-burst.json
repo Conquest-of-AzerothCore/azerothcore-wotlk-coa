@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "name": "Bloodmage Blood Burst on the action bar is saved as Hemostasis (#5469)",
+  "contract": "AscensionBloodmageHemostasis.cpp:48-53 (aura_ascension_hemostasis::Apply): when the Bloodmage's Hemostasis 681304 stun lands on an enemy, the caster gains the re-activation window 302895, learns Blood Burst 803326 with learnSpell(803326, true) (PLAYERSPELL_TEMPORARY, never written to character_spell) and calls SetTemporarySpellReplacement(681304, 803326). The window's removal (line 84) clears it. A button holding Blood Burst 803326 was saved by Player::_SaveActions as 803326; Player::_LoadActions at the next login runs before any Hemostasis learns it again, so IsActionButtonDataValid would refuse and delete it. persisted_action_button reads Player::GetSavedActionButtonSpell, the id _SaveActions writes: the Blood Burst button must be saved as Hemostasis 681304, and a button holding Hemostasis itself must be saved unchanged. Hemostasis (Spell.dbc) costs 25% health, has no cast time and its window lasts 4000 ms, so every assertion runs inside the window. The target is a Young Wolf (299); the mechanical Harvest Golem (36) did not take the stun and horror, so no window opened.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 299,
+      "faction": 14,
+      "level": 80,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 681304
+    },
+    {
+      "action": "cast",
+      "label": "Hemostasis traps the enemy",
+      "actor": "bloodmage",
+      "spell": 681304,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the re-activation window opens",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 302895,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Hemostasis is replaced by Blood Burst",
+      "actor": "bloodmage",
+      "metric": "temporary_spell_replacement",
+      "spell": 681304,
+      "equals": 803326,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_action_button",
+      "actor": "bloodmage",
+      "button": 2,
+      "spell": 803326
+    },
+    {
+      "action": "set_action_button",
+      "actor": "bloodmage",
+      "button": 3,
+      "spell": 681304
+    },
+    {
+      "action": "assert",
+      "label": "The bar holds Blood Burst",
+      "actor": "bloodmage",
+      "metric": "action_button",
+      "button": 2,
+      "equals": 803326
+    },
+    {
+      "action": "assert",
+      "label": "The Blood Burst button is saved as Hemostasis",
+      "actor": "bloodmage",
+      "metric": "persisted_action_button",
+      "button": 2,
+      "equals": 681304
+    },
+    {
+      "action": "assert",
+      "label": "Control: an ordinary known spell is saved unchanged",
+      "actor": "bloodmage",
+      "metric": "persisted_action_button",
+      "button": 3,
+      "equals": 681304
+    }
+  ]
+}

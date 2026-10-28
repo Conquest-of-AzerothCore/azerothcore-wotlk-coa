@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "name": "Kael'thas: the Phoenix burns 2% per second, not 7% (COA-6781)",
+  "contract": "Phoenix 21362 puts Burn 36720 on itself when it spawns. CoA's Burn deals 2% of the Phoenix's health every second, so 6 seconds after Burn it still has more than 80% health. spell_kaelthas_burn no longer adds another 5% per tick.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "watcher", "race": 1, "class": 1, "level": 70 }
+  ],
+  "creatures": [
+    { "id": "phoenix", "owner": "watcher", "entry": 21362, "level": 70, "distance": 20, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "assert", "label": "SETUP: the Phoenix has Burn", "actor": "phoenix",
+      "metric": "aura", "spell": 36720, "equals": 1, "within_ms": 8000 },
+    { "action": "wait", "ms": 6000 },
+    { "action": "assert", "label": "the Phoenix loses about 2% per second", "actor": "phoenix",
+      "metric": "health_pct", "min": 80, "max": 99 }
+  ]
+}

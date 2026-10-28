@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Issue 5695: a level 7 Runemaster casts Palm Sigil: Fire only inside Runeshroud",
+  "contract": [
+    "The report: at level 7 Palm Sigil: Fire 534803 answers 'You can't do that yet' and seems to work only in",
+    "stealth. 534803 (BaseLevel 4) has CasterAuraSpell 808089 'Runeshroud or Waveforged', the marker",
+    "SyncRuneshroudOrWaveforged keeps on the player while Runeshroud 500288 (MOD_STEALTH, BaseLevel 4) is active, and",
+    "its damage spell 807012 reads 'Requires Runeshroud'. A missing caster aura fails with",
+    "SPELL_FAILED_CASTER_AURASTATE (22), which the client shows as 'You can't do that yet'. Expected at level 7: the",
+    "cast is refused with 22 outside Runeshroud and completes inside it."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 7}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the character settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 534803},
+    {"action": "assert", "label": "SETUP: no Palm Sigil gate at rest", "actor": "rm", "metric": "aura",
+      "spell": 808089, "equals": 0},
+    {"action": "cast", "actor": "rm", "spell": 534803},
+    {"action": "assert", "label": "CONTRACT: outside Runeshroud the cast fails with 'You can't do that yet'",
+      "actor": "rm", "metric": "cast_failure", "spell": 534803, "equals": 22, "within_ms": 1000},
+    {"action": "set_aura", "actor": "rm", "spell": 500288, "stacks": 1},
+    {"action": "assert", "label": "SETUP: Runeshroud opens the Palm Sigil gate", "actor": "rm", "metric": "aura",
+      "spell": 808089, "equals": 1, "within_ms": 1000},
+    {"action": "cast", "actor": "rm", "spell": 534803},
+    {"action": "assert", "label": "CONTRACT: inside Runeshroud Palm Sigil: Fire completes at level 7", "actor": "rm",
+      "metric": "aura", "spell": 534803, "equals": 1, "within_ms": 3000},
+    {"action": "set_aura", "actor": "rm", "spell": 500288, "stacks": 0},
+    {"action": "set_aura", "actor": "rm", "spell": 534803, "stacks": 0}
+  ]
+}

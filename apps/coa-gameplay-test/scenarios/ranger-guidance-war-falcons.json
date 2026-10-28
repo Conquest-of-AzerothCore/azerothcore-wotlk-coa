@@ -1,0 +1,165 @@
+{
+  "schema": 1,
+  "name": "Ranger Guidance: +1% Physical and Nature damage per active War Falcon (#1984)",
+  "contract": "Guidance 532261 (Farstrider row 7 col 2) reads 'Increases your Physical and Nature damage dealt by 1% for each War Falcon or Dragonhawk you have active.' Effect 0 is SPELL_AURA_MOD_DAMAGE_PERCENT_DONE with MiscValue 9 (SPELL_SCHOOL_MASK_NORMAL | SPELL_SCHOOL_MASK_NATURE) and BasePoints -1 + DieSides 1 = 0; MiscValue is the school filter every reader of that aura applies, so the record already scopes it to Physical and Nature and the spell's SchoolMask (1) is irrelevant. aura_ascension_ranger_guidance sets the amount to the number of the owner's live War Falcons and Dragonhawks inside the presence radius, refreshed every 500 ms. Falcon Dive 806341 summons two War Falcons (50393) for 12 sec. Expected: amount 0 before the dive; with two falcons the amount is 2, main-hand weapon damage and a Nature spell (Lightning Bolt 403) rise by 2% while a Fire spell (Fireball 133) is unchanged; after the falcons leave everything returns to the baseline.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "ranger",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 806341
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 532261
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Guidance is active on the Ranger",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 532261,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Without a War Falcon Guidance adds nothing",
+      "actor": "ranger",
+      "metric": "aura_amount",
+      "spell": 532261,
+      "effect": 0,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "ranger",
+      "metric": "weapon_damage_min",
+      "save_as": "physical_alone"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ranger",
+      "metric": "spell_damage_done",
+      "spell": 403,
+      "target": "dummy",
+      "save_as": "nature_alone"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ranger",
+      "metric": "spell_damage_done",
+      "spell": 133,
+      "target": "dummy",
+      "save_as": "fire_alone"
+    },
+    {
+      "action": "cast",
+      "label": "Falcon Dive calls two War Falcons",
+      "actor": "ranger",
+      "spell": 806341
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: two War Falcons are active",
+      "actor": "ranger",
+      "metric": "owned_creature_count",
+      "entry": 50393,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Guidance counts both War Falcons",
+      "actor": "ranger",
+      "metric": "aura_amount",
+      "spell": 532261,
+      "effect": 0,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Physical weapon damage rises by 2%",
+      "actor": "ranger",
+      "metric": "weapon_damage_min",
+      "ratio_to": "physical_alone",
+      "min": 1.019,
+      "max": 1.021
+    },
+    {
+      "action": "assert",
+      "label": "Nature spell damage rises by 2%",
+      "actor": "ranger",
+      "metric": "spell_damage_done",
+      "spell": 403,
+      "target": "dummy",
+      "ratio_to": "nature_alone",
+      "min": 1.019,
+      "max": 1.021
+    },
+    {
+      "action": "assert",
+      "label": "Fire spell damage is unchanged",
+      "actor": "ranger",
+      "metric": "spell_damage_done",
+      "spell": 133,
+      "target": "dummy",
+      "ratio_to": "fire_alone",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "label": "The War Falcons leave after 12 seconds",
+      "actor": "ranger",
+      "metric": "owned_creature_count",
+      "entry": 50393,
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Guidance returns to 0 with the falcons gone",
+      "actor": "ranger",
+      "metric": "aura_amount",
+      "spell": 532261,
+      "effect": 0,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Physical weapon damage returns to the baseline",
+      "actor": "ranger",
+      "metric": "weapon_damage_min",
+      "ratio_to": "physical_alone",
+      "min": 0.999,
+      "max": 1.001
+    }
+  ]
+}

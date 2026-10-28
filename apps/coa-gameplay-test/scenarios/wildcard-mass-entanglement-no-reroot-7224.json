@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Wildcard Mass Entanglement's root expires instead of refreshing forever on an isolated target (#7224)",
+  "contract": "Mass Entanglement (954507) roots its explicit target for 8000ms (SpellDuration 31) and, while active, periodically (every 3000ms) triggers 954643 and 283457 (\"Spreading Roots\") in the same dest-centered area. Each of those re-applies its own 3000ms root (SpellDuration 27) via TARGET_UNIT_DEST_AREA_ENEMY and keeps a periodic trigger (amplitude 2900ms) to its own mirror (954644/283458), which triggers back the other way -- a native ping-pong with no built-in exclusion, so on a single isolated target (no other enemy within range to spread to) it kept re-rooting the same, already-rooted target forever instead of letting the root lapse. Each spread application also casts a one-shot \"Spreading Roots ICD\" dummy aura (954645 for the 954643/954644 pair, 283460 for the 283457/283458 pair) with a 10000ms duration -- clearly intended as the anti-loop guard, but nothing in the codebase ever read it (grep across src/server/coa found no script for any of these six spell IDs). The fix (spell_ascension_wildcard_mass_entanglement_spread, registered on 954643/954644/283457/283458) filters each spread's TARGET_UNIT_DEST_AREA_ENEMY area-target selection to drop any unit that already carries its pair's ICD aura from this caster, so an isolated already-rooted target is never re-selected by the root effect and the chain's rooting naturally runs out. The regression measures the reported symptom directly through the engine's own UNIT_STATE_ROOT flag (the 'rooted' metric) rather than any one chain spell ID, since a relay aura surviving briefly without an active root effect is not the reported defect. This scenario casts Mass Entanglement on one isolated dummy, confirms it is rooted immediately, then waits well past every individual root duration (8000ms root plus multiple 3000ms spread cycles, with margin) and asserts the target is no longer rooted.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "wild", "name": "Entangler", "race": 1, "class": 10, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "wild", "entry": 1601, "level": 80, "health": 500000, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "console", "command": "coa gamemode WildCard on Entangler" },
+    { "action": "learn", "actor": "wild", "spell": 954507 },
+    { "action": "cast", "actor": "wild", "spell": 954507, "target": "dummy" },
+    {
+      "action": "assert", "label": "Mass Entanglement is accepted",
+      "actor": "wild", "metric": "cast_failure", "spell": 954507, "equals": 0
+    },
+    { "action": "wait", "ms": 500 },
+    {
+      "action": "assert", "label": "The isolated target is rooted shortly after cast",
+      "actor": "dummy", "metric": "rooted", "equals": 1
+    },
+    { "action": "wait", "ms": 19500 },
+    {
+      "action": "assert", "label": "The target is no longer rooted; the chain did not refresh itself forever",
+      "actor": "dummy", "metric": "rooted", "equals": 0
+    },
+    {
+      "action": "assert", "label": "Mass Entanglement's own root aura has expired",
+      "actor": "dummy", "metric": "aura", "spell": 954507, "caster": "wild", "equals": 0
+    }
+  ]
+}

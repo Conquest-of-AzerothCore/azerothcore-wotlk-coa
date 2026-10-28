@@ -1,4 +1,4 @@
-CLI_DESCRIPTION = """Compare the actual Witch Hunter night rule with the native packed realm clock."""
+CLI_DESCRIPTION = """Compare the actual Witch Hunter night rule (the shared realm clock) with the native packed realm clock."""
 
 import argparse
 import os
@@ -53,7 +53,12 @@ struct ByteBuffer
     code += method(timer, "std::tm Acore::Time::TimeBreakdown(")
     code += method(timer, "uint32 Acore::Time::GetHours(")
     code += method(packet, "void ByteBuffer::AppendPackedTime(")
-    code += method(source, "bool Night(")
+    if "bool Night(" in source:
+        code += method(source, "bool Night(")
+    else:
+        realm_clock = ROOT.joinpath("src/server/coa/AscensionRealmClock.h").read_text()
+        code += method(realm_clock, "inline bool IsNight(")
+        code += "\nbool Night(){return IsNight();}\n"
     code += r"""
 int main()
 {

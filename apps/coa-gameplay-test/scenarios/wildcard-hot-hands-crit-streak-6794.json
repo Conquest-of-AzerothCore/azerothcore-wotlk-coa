@@ -1,0 +1,225 @@
+{
+  "schema": 1,
+  "name": "Hot Hands allows Pyroblast and Arctis to complete the native Hot Streak crit sequence",
+  "contract": [
+    "Spell275397 permits Pyroblast/Arctis to trigger Hot Streak, retaining its two consecutive eligible",
+    "critical hits requirement. Mage family bit0x400000 identifies both rank families. Rank44448 gives a",
+    "guaranteed buff after two critical direct hits. Removing Hot Hands restores the original exclusion.",
+    "Periodic damage cannot build the sequence."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false,
+      "spell_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 44448
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 11366
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 276743
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 275397
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 48108,
+      "stacks": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 11366,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 7500
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 11366,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 7500
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 11366,
+      "target": "enemy",
+      "critical": true,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 48108,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 48108,
+      "stacks": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 276743,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 7500
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 276743,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 7500
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 276743,
+      "target": "enemy",
+      "critical": true,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 48108,
+      "equals": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "hero",
+      "spell": 275397,
+      "all_specs": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 48108,
+      "stacks": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 11366,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 7500
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 11366,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 7500
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 48108,
+      "equals": 0
+    }
+  ]
+}

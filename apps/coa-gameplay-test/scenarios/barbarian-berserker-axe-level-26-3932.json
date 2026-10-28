@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "name": "Berserker Axe casts at the reported level with Enraged and a thrown weapon (#3932)",
+  "contract": "The reported 804138 is the first Berserker Axe rank. At level 26 rank 2 (503408) is active. A normal cast must work when its documented Enraged and thrown-weapon requirements are satisfied; this does not reproduce a client action bar retaining an earlier rank.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "barbarian",
+      "race": 1,
+      "class": 12,
+      "level": 26,
+      "ranged_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "barbarian",
+      "entry": 36,
+      "level": 26,
+      "health": 500000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "barbarian",
+      "item": 585
+    },
+    {
+      "action": "equip",
+      "actor": "barbarian",
+      "item": 585,
+      "slot": 17
+    },
+    {
+      "action": "learn",
+      "actor": "barbarian",
+      "spell": 503408
+    },
+    {
+      "action": "assert",
+      "label": "Berserker Axe starts with 3 charges",
+      "actor": "barbarian",
+      "metric": "spell_charges",
+      "spell": 503408,
+      "equals": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "barbarian",
+      "spell": 801761,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "barbarian",
+      "spell": 503408,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "One cast spends one charge",
+      "actor": "barbarian",
+      "metric": "spell_charges",
+      "spell": 503408,
+      "equals": 2,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "The global cooldown is 1 second",
+      "actor": "barbarian",
+      "metric": "global_cooldown_ms",
+      "spell": 503408,
+      "min": 900,
+      "max": 1000
+    }
+  ]
+}

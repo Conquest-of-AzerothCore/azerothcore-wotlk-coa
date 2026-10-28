@@ -1,0 +1,571 @@
+{
+  "schema": 1,
+  "name": "Bloodfang Bite applies Bite Wound and heals only its caster auto attacks (#4251)",
+  "contract": [
+    "The current bite descriptions and archived Exiles pages for 501695 and 572551 promise Bite Wound.",
+    "Bite Wound 706654 lasts 10 seconds and promises health equal to 50% of auto-attack damage; its tooltip",
+    "references the 50% value in 532612. Exiles source SHA256 for 706654 is",
+    "77fd33b57c04b6e5ac9af7b5e602cc51547eec838157014169f911646304b702.",
+    "Normal casts at levels 12 and 60 must apply the caster-owned wound. Measure health against actual owner",
+    "swing damage, with regeneration disabled, and control spell damage, another attacker and expiry.",
+    "The leech must emit healing logs and consume a native healing absorb, with no raw health bypass.",
+    "Healing received bonuses apply: Eternal Resolve 801962 adds 50% to the resolved leech before absorbs."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 20,
+      "level": 12,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "other",
+      "race": 1,
+      "class": 20,
+      "level": 12,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "b",
+      "entry": 36,
+      "level": 12,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "b",
+      "spell": 800157,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "b",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "other",
+      "spell": 800157,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "other",
+      "value": 100
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 501695
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "health",
+      "save_as": "control_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "melee_damage_total",
+      "save_as": "control_damage",
+      "target": "d"
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "melee_damage_total",
+      "target": "d",
+      "relative_to": "control_damage",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "health",
+      "relative_to": "control_health",
+      "equals": 0,
+      "label": "Auto attacks without a Bite Wound do not heal"
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 501695,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spell_damage_count",
+      "spell": 501695,
+      "target": "d",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "d",
+      "metric": "aura",
+      "spell": 706654,
+      "caster": "b",
+      "equals": 1,
+      "label": "The reported level-12 rank applies its own Bite Wound"
+    },
+    {
+      "action": "assert",
+      "actor": "d",
+      "metric": "aura_duration_ms",
+      "spell": 706654,
+      "caster": "b",
+      "min": 9000,
+      "max": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "health",
+      "save_as": "wound_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "melee_damage_total",
+      "save_as": "wound_damage",
+      "target": "d"
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "melee_damage_total",
+      "save_as": "dealt",
+      "target": "d",
+      "relative_to": "wound_damage"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "melee_damage_total",
+      "target": "d",
+      "relative_to": "wound_damage",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "health",
+      "relative_to": "wound_health",
+      "ratio_to": "dealt",
+      "min": 0.4,
+      "max": 0.5,
+      "label": "Owner auto attacks restore 50 percent of actual damage, rounded per swing"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spell_heal_count",
+      "spell": 706654,
+      "target": "b",
+      "min": 1,
+      "label": "Wound sustain emits native healing logs"
+    },
+    {
+      "action": "set_aura",
+      "actor": "b",
+      "spell": 23316,
+      "stacks": 1,
+      "label": "Fixture a 2600-point all-school healing absorb"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura_amount",
+      "spell": 23316,
+      "effect": 0,
+      "min": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "aura_amount",
+      "spell": 23316,
+      "effect": 0,
+      "save_as": "absorb_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "health",
+      "save_as": "absorbed_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "melee_damage_total",
+      "target": "d",
+      "save_as": "absorbed_damage"
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "melee_damage_total",
+      "target": "d",
+      "relative_to": "absorbed_damage",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "health",
+      "relative_to": "absorbed_health",
+      "equals": 0,
+      "label": "A healing absorb blocks Bite Wound healing"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura_amount",
+      "spell": 23316,
+      "effect": 0,
+      "relative_to": "absorb_before",
+      "max": -1,
+      "label": "Bite Wound consumes the healing absorb"
+    },
+    {
+      "action": "set_aura",
+      "actor": "b",
+      "spell": 23316,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "b",
+      "spell": 801962,
+      "stacks": 1,
+      "label": "Eternal Resolve increases healing received by 50 percent"
+    },
+    {
+      "action": "set_health",
+      "actor": "b",
+      "value": 100
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 501695,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "health",
+      "save_as": "bonus_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "melee_damage_total",
+      "target": "d",
+      "save_as": "bonus_damage"
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "melee_damage_total",
+      "target": "d",
+      "relative_to": "bonus_damage",
+      "save_as": "bonus_dealt"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "melee_damage_total",
+      "target": "d",
+      "relative_to": "bonus_damage",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "health",
+      "relative_to": "bonus_health",
+      "ratio_to": "bonus_dealt",
+      "min": 0.6,
+      "max": 0.75,
+      "label": "Eternal Resolve modifies the 50 percent leech, with per-swing rounding"
+    },
+    {
+      "action": "set_aura",
+      "actor": "b",
+      "spell": 801962,
+      "stacks": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "health",
+      "save_as": "spell_health"
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 501695,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "health",
+      "relative_to": "spell_health",
+      "equals": 0,
+      "label": "The bite refresh does not leech spell damage"
+    },
+    {
+      "action": "snapshot",
+      "actor": "other",
+      "metric": "health",
+      "save_as": "other_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "health",
+      "save_as": "owner_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "other",
+      "metric": "melee_damage_total",
+      "save_as": "other_damage",
+      "target": "d"
+    },
+    {
+      "action": "attack",
+      "actor": "other",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "other"
+    },
+    {
+      "action": "assert",
+      "actor": "other",
+      "metric": "melee_damage_total",
+      "target": "d",
+      "relative_to": "other_damage",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "other",
+      "metric": "health",
+      "relative_to": "other_health",
+      "equals": 0,
+      "label": "Another Bloodmage cannot leech the first caster wound"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "health",
+      "relative_to": "owner_health",
+      "equals": 0,
+      "label": "Another attacker does not heal the wound owner"
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "assert",
+      "actor": "d",
+      "metric": "aura",
+      "spell": 706654,
+      "caster": "b",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "health",
+      "save_as": "expired_health"
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "health",
+      "relative_to": "expired_health",
+      "equals": 0,
+      "label": "Leech stops when the wound expires"
+    },
+    {
+      "action": "set_level",
+      "actor": "b",
+      "value": 60
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 572551
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 572551,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spell_damage_count",
+      "spell": 572551,
+      "target": "d",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "d",
+      "metric": "aura",
+      "spell": 706654,
+      "caster": "b",
+      "equals": 1,
+      "label": "The highest rank retains Bite Wound"
+    }
+  ]
+}

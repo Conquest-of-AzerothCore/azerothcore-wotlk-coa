@@ -2,10 +2,15 @@
   "schema": 1,
   "name": "Anima Ambusher adds 125% of Spectre Stride's damage over 5 sec (#2669)",
   "contract": [
-    "Anima Ambusher 705424 (live): 'Spectre Stride now deals an additional 125% of its damage dealt over 5 seconds.'",
-    "Its effect is aura 354 with value 25 and trigger 705425, Anima Ambush: periodic damage every 1000 ms for 5 sec.",
+    "Anima Ambusher 705424 (live): 'Spectre Stride now deals an additional 125% of its damage dealt over 5",
+    "seconds.'",
+    "Its effect is aura 354 with value 25 and trigger 705425, Anima Ambush: periodic damage every 1000 ms for",
+    "5 sec.",
     "Every Spectre Stride rank deals its damage through 803742, so five ticks of 25% of that hit give 125%.",
-    "The bound allows for crits and the target's mitigation of the ticks; without the talent no tick occurs."
+    "The bound allows for crits and the target's mitigation of the ticks; without the talent no tick occurs.",
+    "Original Spectre Stride Stances 536870912 requires form 30 (stealth). Underwalk 800797 supplies it;",
+    "Ghost Form is a separate travel transformation and does not. Both tested strikes remain ordinary native",
+    "casts."
   ],
   "timeout_ms": 60000,
   "players": [
@@ -28,6 +33,7 @@
       "expertise_rating": 10000
     }
   ],
+  "location": { "map": 530, "x": 10349.6, "y": -6357.29, "z": 33.4026, "o": 5.31605 },
   "creatures": [
     {
       "id": "control_target",
@@ -75,6 +81,79 @@
       "spell": 705424,
       "equals": 1,
       "within_ms": 3000
+    },
+    {
+      "action": "unlearn",
+      "actor": "control",
+      "spell": 802795,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 800797
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 800797,
+      "label": "Enter the Underwalk stealth form required by Spectre Stride"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "cast_failure",
+      "spell": 800797,
+      "equals": 0,
+      "label": "Underwalk was accepted outside combat"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 800797,
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "The native Underwalk prerequisite is active"
+    },
+    {
+      "action": "unlearn",
+      "actor": "ambusher",
+      "spell": 802795,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "ambusher",
+      "spell": 800797
+    },
+    {
+      "action": "cast",
+      "actor": "ambusher",
+      "spell": 800797,
+      "label": "Enter the Underwalk stealth form required by Spectre Stride"
+    },
+    {
+      "action": "assert",
+      "actor": "ambusher",
+      "metric": "cast_failure",
+      "spell": 800797,
+      "equals": 0,
+      "label": "Underwalk was accepted outside combat"
+    },
+    {
+      "action": "assert",
+      "actor": "ambusher",
+      "metric": "aura",
+      "spell": 800797,
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "The native Underwalk prerequisite is active"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Ghost Form global cooldown"
     },
     {
       "action": "cast",

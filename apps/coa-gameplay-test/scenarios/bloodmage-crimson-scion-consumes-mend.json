@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "name": "Sanguine Mend consumes the Crimson Scion instant-cast buff (#6452)",
+  "contract": "Crimson Scion 806424's tooltip is 'Direct damage dealt now has a $h% chance to make your next Sanguine Mend within $806425d instant cast', so the 806425 buff it triggers must be spent by the next Sanguine Mend. 806425 is the native aura 108 instant modifier (MiscValue 10 SPELLMOD_CASTING_TIME, BasePoints -101) over the nine Sanguine Mend ranks with SpellFamilyFlags 0x80000: 802310 (Rank 1) and 504079-504086 (Ranks 2-9). Without a consumer the buff stayed for its full 10 s (DurationIndex 1) and every mend in the window was instant (#6452, level 45 Fleshweaver). This scenario fixtures the buff with set_aura - the acquisition path (direct damage proccing 806424 at its own 10% chance) is covered by bloodmage-crimson-scion-instant-mend - and measures the cast time of 504086 with and without it. Expected before the fix: 806425 is still present after the mend, and 504086 stays instant. Expected after the fix: the successful mend removes 806425, and the next cast has its normal cast time again (CastingTimeIndex 19; bloodmage-crimson-scion-instant-mend pins it at >= 2000 ms unbuffed).",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "bloodmage", "race": 1, "class": 20, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+
+    { "action": "learn", "actor": "bloodmage", "spell": 504086 },
+    { "action": "set_health", "label": "Injured fixture so the mend has something to heal", "actor": "bloodmage", "value": 5000 },
+    { "action": "set_power", "actor": "bloodmage", "power": 1, "value": 1000 },
+
+    { "action": "set_aura", "actor": "bloodmage", "spell": 806425, "stacks": 1 },
+    { "action": "assert", "label": "SETUP: the Crimson Scion buff is up", "actor": "bloodmage", "metric": "aura", "spell": 806425, "equals": 1 },
+    { "action": "assert", "label": "SETUP: the buff makes Sanguine Mend instant", "actor": "bloodmage", "metric": "spell_cast_time_ms", "spell": 504086, "equals": 0 },
+
+    { "action": "cast", "actor": "bloodmage", "spell": 504086 },
+    { "action": "assert", "label": "The mend consumes the buff", "actor": "bloodmage", "metric": "aura", "spell": 806425, "equals": 0, "within_ms": 3000 },
+    { "action": "assert", "label": "The next mend has its normal cast time again", "actor": "bloodmage", "metric": "spell_cast_time_ms", "spell": 504086, "min": 2000 }
+  ]
+}

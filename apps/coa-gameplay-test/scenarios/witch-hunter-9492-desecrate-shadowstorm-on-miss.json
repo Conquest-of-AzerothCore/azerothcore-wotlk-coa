@@ -1,0 +1,462 @@
+{
+ "schema": 1,
+ "name": "Casting Desecrate always triggers Shadowstorm, even when the cone misses everything (#9492)",
+ "contract": "Shadowstorm 520277's Description reads 'Casting Desecrate always triggers Shadowstorm', an unconditional cast-gated clause contrasted against the damage-chance-gated Pommel Smash clause in the same tooltip. Before the fix, the trigger ran through the native spell_proc dispatcher (HitMask 9283: normal/crit/block/absorb/full-block only, excluding miss/dodge/parry) and a C++ Direct(event) check requiring nonzero damage, so a Desecrate cone that connected with nothing never produced a Shadowstorm. Desecrate (680518) is SPELL_DAMAGE_CLASS_MELEE, so its hit roll resolves through Unit::MeleeSpellHitResult (dodge/parry/miss tables), not the magic hit-chance path; forcing a deterministic dodge needs QA Test 100% Dodge 10020 (SPELL_AURA_MOD_DODGE_PERCENT) on the victim, and set_aura only resolves a player actor, so the target is a second PvP-flagged, opposing-faction player ('defender', an Undead, so a same-faction 'target_friendly' Human pair does not need a duel) rather than a fixture creature. The trigger is gated on the Shadowstorm talent/passive 520277 itself: a Witch Hunter who never learned it must cast Desecrate without ever producing a Shadowstorm. The Witch Hunter fixture omits expertise_rating: expertise directly reduces the victim's dodge/parry chance, and a large expertise rating would cancel out the forced QA Test 100% Dodge aura just as reliably as it would a real one, so only melee/spell hit rating (which guards against a plain miss, not dodge) are kept.",
+ "timeout_ms": 90000,
+ "location": {
+  "map": 0,
+  "x": -9617.06,
+  "y": -288.949,
+  "z": 57.3053,
+  "o": 0
+ },
+ "players": [
+  {
+   "id": "wh",
+   "race": 1,
+   "class": 15,
+   "level": 60,
+   "melee_hit_rating": 10000,
+   "spell_hit_rating": 10000
+  },
+  {
+   "id": "defender",
+   "race": 5,
+   "class": 12,
+   "level": 60
+  }
+ ],
+ "steps": [
+  {
+   "action": "wait",
+   "label": "Let level scaling settle",
+   "ms": 5000
+  },
+  {
+   "action": "teleport",
+   "label": "Stand the defender 3 yd in front of the Witch Hunter, inside Desecrate's cone",
+   "actor": "defender",
+   "map": 0,
+   "x": -9614.06,
+   "y": -288.949,
+   "z": 57.3053,
+   "o": 3.14159
+  },
+  {
+   "action": "pvp",
+   "actor": "wh",
+   "enabled": true
+  },
+  {
+   "action": "pvp",
+   "actor": "defender",
+   "enabled": true
+  },
+  {
+   "action": "learn",
+   "actor": "wh",
+   "spell": 202
+  },
+  {
+   "action": "add_item",
+   "actor": "wh",
+   "item": 1194
+  },
+  {
+   "action": "equip",
+   "actor": "wh",
+   "item": 1194,
+   "slot": 15
+  },
+  {
+   "action": "wait",
+   "label": "Let the weapon swap cooldown expire",
+   "ms": 2000
+  },
+  {
+   "action": "learn",
+   "label": "Desecrate",
+   "actor": "wh",
+   "spell": 680518
+  },
+  {
+   "action": "assert",
+   "label": "CONTROL SETUP: Shadowstorm is not yet learned",
+   "actor": "wh",
+   "metric": "aura",
+   "spell": 520277,
+   "equals": 0
+  },
+  {
+   "action": "snapshot",
+   "actor": "wh",
+   "metric": "spell_go_count",
+   "spell": 520278,
+   "save_as": "control_go"
+  },
+  {
+   "action": "set_aura",
+   "label": "Control cast 1: grant the avoided-attack aura",
+   "actor": "wh",
+   "spell": 803166,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "wh",
+   "spell": 680518
+  },
+  {
+   "action": "set_power",
+   "actor": "wh",
+   "power": 1,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "Cast Desecrate without the Shadowstorm talent (1)",
+   "actor": "wh",
+   "spell": 680518,
+   "target": "defender"
+  },
+  {
+   "action": "wait",
+   "label": "Let the hit resolve and the global cooldown pass",
+   "ms": 1700
+  },
+  {
+   "action": "set_aura",
+   "label": "Control cast 2: grant the avoided-attack aura",
+   "actor": "wh",
+   "spell": 803166,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "wh",
+   "spell": 680518
+  },
+  {
+   "action": "set_power",
+   "actor": "wh",
+   "power": 1,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "Cast Desecrate without the Shadowstorm talent (2)",
+   "actor": "wh",
+   "spell": 680518,
+   "target": "defender"
+  },
+  {
+   "action": "wait",
+   "label": "Let the hit resolve and the global cooldown pass",
+   "ms": 1700
+  },
+  {
+   "action": "set_aura",
+   "label": "Control cast 3: grant the avoided-attack aura",
+   "actor": "wh",
+   "spell": 803166,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "wh",
+   "spell": 680518
+  },
+  {
+   "action": "set_power",
+   "actor": "wh",
+   "power": 1,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "Cast Desecrate without the Shadowstorm talent (3)",
+   "actor": "wh",
+   "spell": 680518,
+   "target": "defender"
+  },
+  {
+   "action": "wait",
+   "label": "Let the hit resolve and the global cooldown pass",
+   "ms": 1700
+  },
+  {
+   "action": "assert",
+   "label": "CONTROL: at least one of three Desecrate casts lands a real hit (base avoidance alone is not deterministic)",
+   "actor": "wh",
+   "metric": "spell_damage_count",
+   "spell": 680518,
+   "target": "defender",
+   "min": 1
+  },
+  {
+   "action": "assert",
+   "label": "CONTROL: without the talent, Desecrate never triggers a Shadowstorm",
+   "actor": "wh",
+   "metric": "spell_go_count",
+   "spell": 520278,
+   "relative_to": "control_go",
+   "equals": 0
+  },
+  {
+   "action": "wait",
+   "label": "Let the global cooldown pass",
+   "ms": 2000
+  },
+  {
+   "action": "learn",
+   "label": "Shadowstorm",
+   "actor": "wh",
+   "spell": 520277
+  },
+  {
+   "action": "assert",
+   "label": "Shadowstorm is active",
+   "actor": "wh",
+   "metric": "aura",
+   "spell": 520277,
+   "equals": 1
+  },
+  {
+   "action": "snapshot",
+   "actor": "wh",
+   "metric": "spell_go_count",
+   "spell": 520278,
+   "save_as": "sanity_go"
+  },
+  {
+   "action": "set_aura",
+   "label": "SANITY: grant the avoided-attack aura",
+   "actor": "wh",
+   "spell": 803166,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "wh",
+   "spell": 680518
+  },
+  {
+   "action": "set_power",
+   "actor": "wh",
+   "power": 1,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "SANITY: cast Desecrate with the talent present",
+   "actor": "wh",
+   "spell": 680518,
+   "target": "defender"
+  },
+  {
+   "action": "assert",
+   "label": "SANITY: casting Desecrate with the talent present triggers Shadowstorm (hit or not)",
+   "actor": "wh",
+   "metric": "spell_go_count",
+   "spell": 520278,
+   "relative_to": "sanity_go",
+   "min": 1,
+   "within_ms": 1500
+  },
+  {
+   "action": "wait",
+   "label": "Let the global cooldown pass",
+   "ms": 2000
+  },
+  {
+   "action": "set_aura",
+   "label": "The defender now dodges every melee-class hit",
+   "actor": "defender",
+   "spell": 10020,
+   "stacks": 1
+  },
+  {
+   "action": "snapshot",
+   "actor": "wh",
+   "metric": "spell_damage_count",
+   "spell": 680518,
+   "target": "defender",
+   "save_as": "dmg_0"
+  },
+  {
+   "action": "set_aura",
+   "label": "Desecrate 1: grant the avoided-attack aura",
+   "actor": "wh",
+   "spell": 803166,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "wh",
+   "spell": 680518
+  },
+  {
+   "action": "set_power",
+   "actor": "wh",
+   "power": 1,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "Cast Desecrate 1 (dodged)",
+   "actor": "wh",
+   "spell": 680518,
+   "target": "defender"
+  },
+  {
+   "action": "wait",
+   "label": "Let the hit resolve",
+   "ms": 1500
+  },
+  {
+   "action": "assert",
+   "label": "Desecrate 1 deals no damage (fully dodged)",
+   "actor": "wh",
+   "metric": "spell_damage_count",
+   "spell": 680518,
+   "target": "defender",
+   "relative_to": "dmg_0",
+   "equals": 0
+  },
+  {
+   "action": "assert",
+   "label": "Desecrate 1 still triggers a Shadowstorm (cumulative count 1)",
+   "actor": "wh",
+   "metric": "spell_go_count",
+   "spell": 520278,
+   "min": 1
+  },
+  {
+   "action": "wait",
+   "label": "Let the global cooldown pass",
+   "ms": 2000
+  },
+  {
+   "action": "snapshot",
+   "actor": "wh",
+   "metric": "spell_damage_count",
+   "spell": 680518,
+   "target": "defender",
+   "save_as": "dmg_1"
+  },
+  {
+   "action": "set_aura",
+   "label": "Desecrate 2: grant the avoided-attack aura",
+   "actor": "wh",
+   "spell": 803166,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "wh",
+   "spell": 680518
+  },
+  {
+   "action": "set_power",
+   "actor": "wh",
+   "power": 1,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "Cast Desecrate 2 (dodged)",
+   "actor": "wh",
+   "spell": 680518,
+   "target": "defender"
+  },
+  {
+   "action": "wait",
+   "label": "Let the hit resolve",
+   "ms": 1500
+  },
+  {
+   "action": "assert",
+   "label": "Desecrate 2 deals no damage (fully dodged)",
+   "actor": "wh",
+   "metric": "spell_damage_count",
+   "spell": 680518,
+   "target": "defender",
+   "relative_to": "dmg_1",
+   "equals": 0
+  },
+  {
+   "action": "assert",
+   "label": "Desecrate 2 still triggers a Shadowstorm (cumulative count 2)",
+   "actor": "wh",
+   "metric": "spell_go_count",
+   "spell": 520278,
+   "min": 2
+  },
+  {
+   "action": "wait",
+   "label": "Let the global cooldown pass",
+   "ms": 2000
+  },
+  {
+   "action": "snapshot",
+   "actor": "wh",
+   "metric": "spell_damage_count",
+   "spell": 680518,
+   "target": "defender",
+   "save_as": "dmg_2"
+  },
+  {
+   "action": "set_aura",
+   "label": "Desecrate 3: grant the avoided-attack aura",
+   "actor": "wh",
+   "spell": 803166,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "wh",
+   "spell": 680518
+  },
+  {
+   "action": "set_power",
+   "actor": "wh",
+   "power": 1,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "Cast Desecrate 3 (dodged)",
+   "actor": "wh",
+   "spell": 680518,
+   "target": "defender"
+  },
+  {
+   "action": "wait",
+   "label": "Let the hit resolve",
+   "ms": 1500
+  },
+  {
+   "action": "assert",
+   "label": "Desecrate 3 deals no damage (fully dodged)",
+   "actor": "wh",
+   "metric": "spell_damage_count",
+   "spell": 680518,
+   "target": "defender",
+   "relative_to": "dmg_2",
+   "equals": 0
+  },
+  {
+   "action": "assert",
+   "label": "Desecrate 3 still triggers a Shadowstorm (cumulative count 3)",
+   "actor": "wh",
+   "metric": "spell_go_count",
+   "spell": 520278,
+   "min": 3
+  },
+  {
+   "action": "wait",
+   "label": "Let the global cooldown pass",
+   "ms": 2000
+  }
+ ]
+}

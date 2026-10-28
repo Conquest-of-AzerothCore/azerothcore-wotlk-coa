@@ -296,7 +296,7 @@ def semicolon_check(file: io, file_path: str) -> None:
         # Remove inline comments after SQL (ignoring "--" inside string literals)
         stripped_line = strip_inline_comment(stripped_line)
 
-        if stripped_line.upper().startswith("SET") and not stripped_line.endswith(";"):
+        if not query_open and stripped_line.upper().startswith("SET") and not stripped_line.endswith(";"):
             print(f"❌ Missing semicolon in {file_path} at line {line_number}")
             check_failed = True
 

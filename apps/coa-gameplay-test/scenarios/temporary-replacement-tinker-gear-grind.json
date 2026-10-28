@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "A Gear Grind button is saved as Makeshift Dynamite (#5469)",
+  "contract": "AscensionTinker::Refresh runs every 500 ms from tinker_player::OnPlayerUpdate (AscensionTinker.cpp:388-394) and when Grinding Gears 681245 changes. While Grinding Gears is active it learns Gear Grind 504594 with learnSpell(..., true) (line 360) and replaces every known Makeshift Dynamite rank (chain of 504527) with it through SetTemporarySpellReplacement (lines 355-363). The scenario fixtures Grinding Gears (8 s). 504594 is never written to character_spell, so a button holding it must be saved as Makeshift Dynamite 504527, the spell persisted_action_button reads from Player::GetSavedActionButtonSpell; a button holding Makeshift Dynamite itself is saved unchanged.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "tinker", "race": 1, "class": 28, "level": 15 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login state settle", "ms": 3000 },
+    { "action": "learn", "actor": "tinker", "spell": 504527 },
+    { "action": "set_aura", "label": "Grinding Gears is active", "actor": "tinker", "spell": 681245, "stacks": 1 },
+    {
+      "action": "assert",
+      "label": "Makeshift Dynamite is replaced with Gear Grind",
+      "actor": "tinker",
+      "metric": "temporary_spell_replacement",
+      "spell": 504527,
+      "equals": 504594,
+      "within_ms": 2000
+    },
+    { "action": "set_action_button", "actor": "tinker", "button": 2, "spell": 504594 },
+    { "action": "set_action_button", "actor": "tinker", "button": 3, "spell": 504527 },
+    {
+      "action": "assert",
+      "label": "The bar holds Gear Grind",
+      "actor": "tinker",
+      "metric": "action_button",
+      "button": 2,
+      "equals": 504594
+    },
+    {
+      "action": "assert",
+      "label": "The Gear Grind button is saved as Makeshift Dynamite",
+      "actor": "tinker",
+      "metric": "persisted_action_button",
+      "button": 2,
+      "equals": 504527
+    },
+    {
+      "action": "assert",
+      "label": "Control: the Makeshift Dynamite button is saved unchanged",
+      "actor": "tinker",
+      "metric": "persisted_action_button",
+      "button": 3,
+      "equals": 504527
+    }
+  ]
+}

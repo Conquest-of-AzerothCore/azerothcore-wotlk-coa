@@ -15,7 +15,9 @@
       "race": 1,
       "class": 31,
       "level": 80,
-      "spell_hit_rating": 10000
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
     },
     {
       "id": "enemy",
@@ -720,6 +722,14 @@
       "target": "enemy"
     },
     {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_hit_chance",
+      "min": 100,
+      "within_ms": 1000,
+      "label": "The physical Seismic Smash fixture has native melee hit ready"
+    },
+    {
       "action": "cast",
       "actor": "primalist",
       "spell": 300693
@@ -1090,5 +1100,9 @@
       "ms": 8000
     }
   ],
-  "contract": "Each completed Seismic Spike, Tremor, Crash, Wave, Smash or Grasp extends Earthshaping once by four seconds. A same-actor timer removes elapsed-time drift; baseline, unlearning and unrelated Geode casts do not extend it."
+  "contract": [
+    "Each completed Seismic Spike, Tremor, Crash, Wave, Smash or Grasp extends Earthshaping once by four",
+    "seconds. A same-actor timer removes elapsed-time drift; baseline, unlearning and unrelated Geode casts",
+    "do not extend it."
+  ]
 }

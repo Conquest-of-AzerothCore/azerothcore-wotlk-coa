@@ -1,0 +1,164 @@
+{
+  "schema": 1,
+  "name": "Prestige Mode keeps Skinning and its experience and skill-ups",
+  "contract": "Issue #5735: Prestige keeps professions, and a prestiged character still earns profession experience and skill-ups from a non-gray gather. Skinning 300/300 survives the return to level 1. At level 11 a beast needing Skinning 10 is gray for Skinning 300, so it gives neither experience nor a skill point, exactly as before Prestige. With Skinning 1/75 an orange skin (required 1) gives experience and raises the skill.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8816.5,
+    "y": 627.0,
+    "z": 94.1,
+    "o": 3.8
+  },
+  "players": [
+    {
+      "id": "prestiger",
+      "race": 1,
+      "class": 20,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "chromie",
+      "owner": "prestiger",
+      "entry": 178081,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "prestiger",
+      "id": 25
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_skill",
+      "actor": "prestiger",
+      "skill": 185,
+      "value": 100,
+      "maximum": 150
+    },
+    {
+      "action": "set_skill",
+      "actor": "prestiger",
+      "skill": 393,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "prestiger",
+      "target": "chromie",
+      "label": "Speak to Chromie"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "prestiger",
+      "option": 0,
+      "label": "I would like to prestige!"
+    },
+    {
+      "action": "assert",
+      "label": "Back to level 1",
+      "actor": "prestiger",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Skinning keeps its value",
+      "actor": "prestiger",
+      "metric": "skill_value",
+      "skill": 393,
+      "equals": 300
+    },
+    {
+      "action": "assert",
+      "label": "Skinning keeps its maximum",
+      "actor": "prestiger",
+      "metric": "skill_maximum",
+      "skill": 393,
+      "equals": 300
+    },
+    {
+      "action": "set_level",
+      "actor": "prestiger",
+      "value": 11
+    },
+    {
+      "action": "snapshot",
+      "actor": "prestiger",
+      "metric": "xp",
+      "save_as": "gray_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "prestiger",
+      "skill": 393,
+      "required": 10
+    },
+    {
+      "action": "assert",
+      "label": "A level-11 beast is gray for Skinning 300 and gives no experience",
+      "actor": "prestiger",
+      "metric": "xp",
+      "relative_to": "gray_before",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "A gray skin gives no skill point",
+      "actor": "prestiger",
+      "metric": "skill_value",
+      "skill": 393,
+      "equals": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "prestiger",
+      "skill": 393,
+      "value": 1,
+      "maximum": 75
+    },
+    {
+      "action": "snapshot",
+      "actor": "prestiger",
+      "metric": "xp",
+      "save_as": "orange_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "prestiger",
+      "skill": 393,
+      "required": 1
+    },
+    {
+      "action": "assert",
+      "label": "An orange skin after Prestige gives experience",
+      "actor": "prestiger",
+      "metric": "xp",
+      "relative_to": "orange_before",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "An orange skin after Prestige raises Skinning",
+      "actor": "prestiger",
+      "metric": "skill_value",
+      "skill": 393,
+      "min": 2
+    }
+  ]
+}

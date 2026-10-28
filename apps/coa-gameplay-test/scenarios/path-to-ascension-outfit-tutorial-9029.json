@@ -1,0 +1,175 @@
+{
+  "schema": 1,
+  "name": "Path to Ascension: saving an outfit verifies tutorial 247, whose reward can then be claimed (#9029)",
+  "contract": "Tutorial 247 (\"Create an Outfit\", Tutorial.dbc) is open to every race and class on every realm type once prerequisite 57 or 58 is complete, and its pages say: \"Once you've made a complete transmog, you can save it with the Outfits tab in the Wardrobe!\". It pays 1000 Runes of Ascension (item 375250, TutorialRewards.dbc row 426). The client marks it done through achievement 87205, which it shares with tutorials 6, 245 and 246, so a reporter whose achievement came from another sibling saw it fulfilled and was refused. A level 24 Human Pyromancer like the reporter's completes prerequisite 58 by talking to Stephanie Turner (6174). Before saving an outfit a claim of 247 is refused as not available and pays nothing. Saving an outfit (CMSG 0x69E, answered SAVE_APPEARANCE_OUTFIT_OK on 0x69F) verifies tutorial 247 in core.ascension.tutorial_verified. A character whose outfit was saved before the tutorial was verified is verified again when it logs in with that outfit. A claim then answers CLAIM_TUTORIAL_OK, pays exactly 1000 runes and records the claim in core.ascension.tutorial_rewards.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "stylist",
+      "race": 1,
+      "class": 24,
+      "level": 24
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8833.38,
+    "y": 628.628,
+    "z": 94.0066,
+    "o": 1.06535
+  },
+  "creatures": [
+    { "id": "stephanie", "owner": "stylist", "entry": 6174, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login rewards and the tutorial state settle",
+      "ms": 3000
+    },
+    {
+      "action": "gossip_hello",
+      "label": "Talk to Stephanie Turner",
+      "actor": "stylist",
+      "target": "stephanie"
+    },
+    {
+      "action": "assert",
+      "label": "The visit completes prerequisite 58",
+      "actor": "stylist",
+      "metric": "player_setting",
+      "source": "core.ascension.tutorial_verified",
+      "index": 58,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Without an outfit tutorial 247 is not verified",
+      "actor": "stylist",
+      "metric": "player_setting",
+      "source": "core.ascension.tutorial_verified",
+      "index": 247,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Runes before any claim",
+      "actor": "stylist",
+      "metric": "item_count",
+      "item": 375250,
+      "save_as": "runes"
+    },
+    {
+      "action": "client_packet",
+      "label": "Claim tutorial 247 before saving an outfit",
+      "actor": "stylist",
+      "opcode": 1704,
+      "fields": [{"u32": 247}]
+    },
+    {
+      "action": "assert",
+      "label": "The early claim is refused",
+      "actor": "stylist",
+      "metric": "server_packet_contains",
+      "opcode": 1711,
+      "text": "not available for your character",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and pays nothing",
+      "actor": "stylist",
+      "metric": "item_count",
+      "item": 375250,
+      "relative_to": "runes",
+      "equals": 0
+    },
+    {
+      "action": "client_packet",
+      "label": "Save an outfit from the Wardrobe's Outfits tab",
+      "actor": "stylist",
+      "opcode": 1694,
+      "fields": [{"string": "Ember robes"}, {"u32": 3}, {"u32": 0}, {"u32": 0}, {"u32": 0}]
+    },
+    {
+      "action": "assert",
+      "label": "The outfit is saved",
+      "actor": "stylist",
+      "metric": "server_packet_contains",
+      "opcode": 1695,
+      "text": "SAVE_APPEARANCE_OUTFIT_OK",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: saving the outfit verifies tutorial 247",
+      "actor": "stylist",
+      "metric": "player_setting",
+      "source": "core.ascension.tutorial_verified",
+      "index": 247,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_player_setting",
+      "label": "Stand in for a character that saved its outfit before tutorial 247 was verified",
+      "actor": "stylist",
+      "source": "core.ascension.tutorial_verified",
+      "index": 247,
+      "value": 0
+    },
+    {
+      "action": "relog",
+      "label": "Log in again with the saved outfit",
+      "actor": "stylist"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: logging in with a saved outfit verifies tutorial 247",
+      "actor": "stylist",
+      "metric": "player_setting",
+      "source": "core.ascension.tutorial_verified",
+      "index": 247,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Claim tutorial 247",
+      "actor": "stylist",
+      "opcode": 1704,
+      "fields": [{"u32": 247}]
+    },
+    {
+      "action": "assert",
+      "label": "The claim is accepted",
+      "actor": "stylist",
+      "metric": "server_packet_contains",
+      "opcode": 1711,
+      "text": "CLAIM_TUTORIAL_OK",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "It pays exactly the 1000 runes of TutorialRewards.dbc",
+      "actor": "stylist",
+      "metric": "item_count",
+      "item": 375250,
+      "relative_to": "runes",
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "and records the claim",
+      "actor": "stylist",
+      "metric": "player_setting",
+      "source": "core.ascension.tutorial_rewards",
+      "index": 247,
+      "equals": 1
+    }
+  ]
+}

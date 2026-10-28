@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionFelsworn.h"
 #include "GameObject.h"
+#include "MotionMaster.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "Random.h"
@@ -295,7 +296,7 @@ class felsworn_casts : public AllSpellScript
         }
         if (info->Id == 704371 && player->HasAura(560641))
             Cast(player, target, 704397);
-        if (info->Id == 803472 && Inner(player) && target != player && !player->IsFriendlyTo(target))
+        if (Named(info, 801904) && Inner(player) && target != player && !player->IsFriendlyTo(target))
             Cast(player, player, 803089);
         if (!damage || target == player || player->IsFriendlyTo(target))
             return;
@@ -389,7 +390,16 @@ class spell_ascension_felsworn_ability : public SpellScript
             uint32 bonus = uint32(GetSpell()->GetScriptValue(560087));
             for (uint32 index = 0; index < 3; ++index)
             {
-                Position position = player->GetNearPosition(4.0f + 7.0f * index, 0);
+                float const distance = 4.0f + 7.0f * index;
+                Position position = player->GetPosition();
+                if (player->IsInWater())
+                {
+                    position.RelocateOffset(Position(distance, 0, 0, 0));
+                    Acore::NormalizeMapCoord(position.m_positionX);
+                    Acore::NormalizeMapCoord(position.m_positionY);
+                }
+                else
+                    position = player->GetNearPosition(distance, 0);
                 State(player).scheduler.Schedule(
                     Milliseconds(index * 300), [guid, position, map, phase, bonus](TaskContext) {
                         Player* player = ObjectAccessor::FindPlayer(guid);
@@ -443,9 +453,41 @@ class spell_ascension_felsworn_ability : public SpellScript
                                                SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION);
     }
 };
+class spell_ascension_felsworn_chaos_rush : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_felsworn_chaos_rush);
+
+    void Surge(SpellEffIndex effect)
+    {
+        Player* player = GetCaster() ? GetCaster()->ToPlayer() : nullptr;
+        if (!player)
+            return;
+        bool moving = player->HasUnitMovementFlag(MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_BACKWARD |
+                                                    MOVEMENTFLAG_STRAFE_LEFT | MOVEMENTFLAG_STRAFE_RIGHT);
+        if (!moving)
+            return;
+        float distance = GetSpellInfo()->Effects[EFFECT_0].CalcRadius(player);
+        if (distance <= 0.0f)
+            return;
+        float rate = player->GetSpeedRate(MOVE_RUN);
+        float speed = player->GetSpeed(MOVE_RUN);
+        if (speed <= 0.0f || speed >= SPEED_CHARGE)
+            return;
+        PreventHitDefaultEffect(effect);
+        auto& state = State(player);
+        state.rushSurgeRate = rate * SPEED_CHARGE / speed;
+        state.rushSurgeMs = uint32(1000.0f * distance / SPEED_CHARGE);
+        player->SetSpeed(MOVE_RUN, state.rushSurgeRate, true);
+    }
+    void Register() override
+    {
+        OnEffectLaunch += SpellEffectFn(spell_ascension_felsworn_chaos_rush::Surge, EFFECT_0, SPELL_EFFECT_CHARGE_DEST);
+    }
+};
 }
 void AddSC_AscensionFelswornAbilities()
 {
     new felsworn_casts();
     RegisterSpellScript(spell_ascension_felsworn_ability);
+    RegisterSpellScript(spell_ascension_felsworn_chaos_rush);
 }

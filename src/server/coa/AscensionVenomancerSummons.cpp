@@ -24,6 +24,14 @@ constexpr uint32 MushroomEntry = 506018;
 constexpr uint32 BroodTrapEntry = 52121;
 constexpr uint32 SpiderlingEntry = 999298;
 constexpr uint32 ScarabEntry = 999299;
+Unit* OwnerTarget(Player* player)
+{
+    if (Unit* victim = player->GetVictim(); victim && victim->IsAlive() && player->IsValidAttackTarget(victim))
+        return victim;
+    Unit* selected = player->GetSelectedUnit();
+    return selected && selected->IsAlive() && player->IsValidAttackTarget(selected) &&
+        player->IsInCombatWith(selected) ? selected : nullptr;
+}
 }
 void Mushroom(Player* player, Position const& position, float coefficient, bool big)
 {
@@ -140,14 +148,14 @@ struct npc_ascension_venomancer_summon : public ScriptedAI
         me->SetReactState(REACT_PASSIVE);
         bool stationary = me->GetEntry() == MushroomEntry || me->GetEntry() == BroodTrapEntry;
         me->SetCombatMovement(!stationary);
+        if (me->GetEntry() == MushroomEntry)
+            me->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
         weaponMinimum = std::max(1.0f,player->GetTotalAttackPowerValue(BASE_ATTACK)*.05f);
         weaponMaximum = std::max(2.0f,player->GetTotalAttackPowerValue(BASE_ATTACK)*.075f);
         me->SetBaseWeaponDamage(BASE_ATTACK,MINDAMAGE,weaponMinimum);
         me->SetBaseWeaponDamage(BASE_ATTACK,MAXDAMAGE,weaponMaximum);
         me->UpdateDamagePhysical(BASE_ATTACK);
         State(player).summons.insert(me->GetGUID());
-        if (me->GetEntry() == MushroomEntry)
-            Cast(me,me,31690);
         timers.ScheduleEvent(me->GetEntry() == MushroomEntry ? Detonate : Pulse,
             me->GetEntry() == MushroomEntry ? 2000ms : 200ms);
     }
@@ -163,7 +171,7 @@ struct npc_ascension_venomancer_summon : public ScriptedAI
     {
         if (damage && me->GetEntry() == SpiderlingEntry)
             if (Player* player = ObjectAccessor::FindPlayer(owner); player && player->IsInMap(me))
-                ApplyVenoms(player,target);
+                ApplyVenoms(player, target, true);
     }
     void UpdateAI(uint32 diff) override
     {
@@ -198,6 +206,9 @@ struct npc_ascension_venomancer_summon : public ScriptedAI
                 return;
             }
             Unit* target = ObjectAccessor::GetUnit(*me,command);
+            if (me->GetEntry() == FungarianEntry)
+                if (Unit* assisted = OwnerTarget(player))
+                    target = assisted;
             if (!target || !target->IsAlive() || !player->IsValidAttackTarget(target))
                 target = player->GetVictim();
             if (me->GetEntry() == BroodTrapEntry)

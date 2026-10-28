@@ -4,6 +4,7 @@
  "contract": "Soul Harvest 504012 promises that generating a Reaped Soul triggers Soul Harvest 573050, which blasts the target for Shadow damage and heals the caster for what it deals. Its record carries ProcTypeMask 0, so LoadSpellProcs makes no entry and the aura never sees an event, and a spell_proc row cannot carry it either: generating a Reaped Soul is a stack of the class's own resource aura, awarded through HandleAscensionReaperResource, not a proc event the core knows. The module answers it where it already recognises a newly harvested soul. 573050 is written for an enemy within 5 yards, so the cast goes to the unit the player has selected or is attacking, and only while that unit is one they may attack and is in range. Chance is the talent's own 100, so one generated soul is enough.",
  "timeout_ms": 180000,
  "players": [{"id": "reaper", "race": 10, "class": 30, "level": 80}],
+ "location": { "map": 530, "x": 10349.6, "y": -6357.29, "z": 33.4026, "o": 5.31605 },
  "creatures": [{"id": "enemy", "owner": "reaper", "entry": 1601, "level": 80}],
  "steps": [
   {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 6000},

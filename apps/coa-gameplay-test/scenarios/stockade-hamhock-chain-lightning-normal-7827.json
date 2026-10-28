@@ -1,0 +1,170 @@
+{
+  "schema": 1,
+  "name": "Stormwind Stockade Normal: Hamhock's kit Chain Lightning hits for its 599 base again (#7827)",
+  "contract": [
+    "Hamhock's (1717) Normal kit Chain Lightning (2102502, SmartAI row 9010) casts with custom base points 599",
+    "(#7827); #7073 had doubled them to 1198. The spell's single Nature damage effect adds one roll of 1-60 to the",
+    "base points minus one, so 599 gives 599-658 and 1198 gives 1198-1257. Its level-20 value scales with",
+    "Hamhock's level 28 by at most 11.9663/9.0674 = 1.3197 (BaseDamage for class 2), giving at most 868 for 599",
+    "and at least 1581 for 1198 after scaling. The Normal tuning row maps 2102502 to itself (factor 1.0) and the",
+    "40% cap of the hero's 1,000,000 health never applies; the damage-taken controls stay at 1000. Hand of",
+    "Protection blocks Hamhock's melee and Fierce Blow, and the first cast, 1-2 s after aggro with a 3 s cast",
+    "time, lands before his totem or Fierce Blow. One Chain Lightning on the lone hero therefore takes 580-1000",
+    "health with 599 and more than 1000 with 1198."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 34,
+    "x": 54.2,
+    "y": 0.3,
+    "z": -18.3,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 8,
+      "level": 28,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "hero",
+      "entry": 1717,
+      "level": 28,
+      "health": 400000,
+      "reaction": 2,
+      "distance": 4,
+      "spell_hit_bonus": 100
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in the Stockade",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 34
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the instance is Normal",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no damage-taken modifier changes Chain Lightning on the hero",
+      "actor": "hero",
+      "metric": "spell_damage_taken",
+      "spell": 2102502,
+      "target": "boss",
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no CoA damage hook scales Chain Lightning on the hero",
+      "actor": "hero",
+      "metric": "script_spell_damage_taken",
+      "spell": 2102502,
+      "target": "boss",
+      "equals": 1000
+    },
+    {
+      "action": "attack",
+      "label": "Engage Hamhock",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hamhock fights the hero",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "set_aura",
+      "label": "Hand of Protection keeps Hamhock's physical melee and Fierce Blow out of the measurement",
+      "actor": "hero",
+      "spell": 1022,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hand of Protection does not make the hero immune to Chain Lightning",
+      "actor": "hero",
+      "metric": "spell_immune",
+      "spell": 2102502,
+      "target": "boss",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hamhock has not finished a Chain Lightning yet",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 1717,
+      "spell": 2102502,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "health",
+      "save_as": "before_lightning"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hamhock casts his kit Chain Lightning",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 1717,
+      "spell": 2102502,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "One Chain Lightning hits for the 599 base, not the doubled 1198",
+      "actor": "hero",
+      "metric": "health",
+      "relative_to": "before_lightning",
+      "min": -1000,
+      "max": -580
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero survives the measurement",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

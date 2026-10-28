@@ -1,0 +1,228 @@
+{
+  "schema": 1,
+  "name": "venomancer-spiderling-venoms-do-not-reproduce-brood-lord-6249",
+  "contract": [
+    "Brood Lord summons Spiderlings when the Venomancer critically strikes an owned webbed target in Spider Form.",
+    "Their authored venom application must still damage the target with the owner's active Weakening Venom, but",
+    "Spiderling-sourced venom crits must not count as fresh owner strikes and create further Spiderlings. A",
+    "normal owner critical venom hit acquires the initial summons; only their attacks occur during the observed",
+    "interval. The initial count is snapshotted because the summon payload rolls one or two Spiderlings. All",
+    "summons must expire. The first observed pet venom critical hit is checked immediately to bound the failing",
+    "baseline. A second normal owner critical hit after refreshing the web must still summon one or two new",
+    "Spiderlings. Weakening Venom is activated only after the initial owner crit, so the first later venom crit",
+    "must come from a Spiderling. Its activation is removed before the second owner crit to exclude an",
+    "independent cast-time venom proc from that control."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 29,
+      "level": 80,
+      "allow_regeneration": false,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "t",
+      "owner": "p",
+      "entry": 299,
+      "level": 80,
+      "health": 1000000,
+      "distance": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 707668
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 800841
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 805778
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 712455
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 706000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 800841,
+      "target": "p"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 800841,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 712455,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 712455,
+      "caster": "p",
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 706000,
+      "target": "t"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "owned_creature_count",
+      "entry": 999298,
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "owned_creature_count",
+      "save_as": "initial_spiderlings",
+      "entry": 999298
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 805778,
+      "target": "p"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 805778,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 706000,
+      "target": "t",
+      "critical": true,
+      "min": 2,
+      "within_ms": 7000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "owned_creature_count",
+      "entry": 999298,
+      "relative_to": "initial_spiderlings",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "melee_damage_count",
+      "equals": 0
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "p",
+      "spell": 805778
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 712455,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "owned_creature_count",
+      "entry": 999298,
+      "save_as": "before_owner_crit"
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 706000,
+      "target": "t"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "owned_creature_count",
+      "entry": 999298,
+      "relative_to": "before_owner_crit",
+      "min": 1,
+      "max": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 12000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "owned_creature_count",
+      "entry": 999298,
+      "equals": 0
+    }
+  ]
+}

@@ -7,6 +7,10 @@
 // BaseLevel - the same rule spellbook.cpp uses for a chain's first rank.
 //
 // Extracted table, not hand-written: see README.md for the ladders it is built from.
+// The one exception is the Ranger's Waterskin ladder (802810-802817), added by hand:
+// its first rank, Crude Waterskin 802808, comes with the Bushcraft skill at creation
+// rather than from a book, and no source above teaches the ranks above it. Rank
+// numbers are Exiles DB's "Rank N" headings; levels follow the same BaseLevel rule.
 #ifndef SPELLBOOK_RANK_DATA_H
 #define SPELLBOOK_RANK_DATA_H
 
@@ -24,7 +28,7 @@ struct Rank
     std::uint32_t SpellId;
 };
 
-inline constexpr std::array<Rank, 34> Ranks =
+inline constexpr std::array<Rank, 41> Ranks =
 {{
     { 14, 65, 6, 501329, 501330 },   // DEMONHUNTER - Illidari Intuition rank 6
     { 14, 65, 7, 501329, 501331 },   // DEMONHUNTER - Illidari Intuition rank 7
@@ -48,6 +52,13 @@ inline constexpr std::array<Rank, 34> Ranks =
     { 21, 61, 10, 503454, 503457 },   // RANGER - Snapseed rank 10
     { 21, 68, 11, 503454, 503458 },   // RANGER - Snapseed rank 11
     { 21, 74, 12, 503454, 503459 },   // RANGER - Snapseed rank 12
+    { 21, 14, 2, 802808, 802810 },   // RANGER - Rough Waterskin rank 2
+    { 21, 22, 3, 802810, 802812 },   // RANGER - Doublestitched Waterskin rank 3
+    { 21, 30, 4, 802812, 802813 },   // RANGER - Hardened Waterskin rank 4
+    { 21, 38, 5, 802813, 802814 },   // RANGER - Refined Waterskin rank 5
+    { 21, 44, 6, 802814, 802815 },   // RANGER - Expert Waterskin rank 6
+    { 21, 50, 7, 802815, 802816 },   // RANGER - Superior Waterskin rank 7
+    { 21, 56, 8, 802816, 802817 },   // RANGER - Masterwork Waterskin rank 8
     { 29, 62, 10, 503172, 503173 },   // PROPHET - Claw Strike rank 10
     { 29, 68, 11, 503172, 503174 },   // PROPHET - Claw Strike rank 11
     { 29, 74, 12, 503172, 503175 },   // PROPHET - Claw Strike rank 12

@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "name": "Dungeon completion resurrects the dead",
+  "contract": "Killing the final boss of a 5-man dungeon resurrects every dead player in the instance at once with full health. A boss that is not the final one leaves the dead as they are. Releasing inside a 5-man dungeon puts the player back alive at the dungeon's start instead of the graveyard outside.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "alive",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "dead",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "group",
+      "actor": "alive",
+      "target": "dead"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "teleport",
+      "actor": "alive",
+      "map": 36,
+      "x": -16.4,
+      "y": -383.07,
+      "z": 61.78
+    },
+    {
+      "action": "teleport",
+      "actor": "dead",
+      "map": 36,
+      "x": -16.4,
+      "y": -383.07,
+      "z": 61.78
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the dead player is in the Deadmines",
+      "actor": "dead",
+      "metric": "map_id",
+      "equals": 36
+    },
+    {
+      "action": "die",
+      "actor": "dead"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the player is dead",
+      "actor": "dead",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "encounter_credit",
+      "actor": "alive",
+      "entry": 644
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Rhahk'Zor is not the final boss: the dead stay dead",
+      "actor": "dead",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "encounter_credit",
+      "actor": "alive",
+      "entry": 639
+    },
+    {
+      "action": "assert",
+      "label": "Edwin VanCleef completes the dungeon: the dead player is alive again",
+      "actor": "dead",
+      "metric": "alive",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "... with full health",
+      "actor": "dead",
+      "metric": "health_pct",
+      "min": 100,
+      "within_ms": 2000
+    },
+    {
+      "action": "teleport",
+      "actor": "dead",
+      "map": 36,
+      "x": -192.9,
+      "y": -448.2,
+      "z": 54.43
+    },
+    {
+      "action": "wait",
+      "ms": 800
+    },
+    {
+      "action": "die",
+      "actor": "dead"
+    },
+    {
+      "action": "client_packet",
+      "actor": "dead",
+      "opcode": 346,
+      "fields": [
+        {
+          "u8": 0
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "label": "Releasing in a dungeon brings the player back alive",
+      "actor": "dead",
+      "metric": "alive",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "... still inside the Deadmines (not at the graveyard outside)",
+      "actor": "dead",
+      "metric": "map_id",
+      "equals": 36
+    }
+  ]
+}

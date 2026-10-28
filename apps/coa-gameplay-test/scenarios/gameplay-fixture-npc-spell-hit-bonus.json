@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Gameplay fixtures: NPC spell-hit bonuses retain native defaults and land original Magic damage",
+  "contract": [
+    "A same-level NPC Magic input has a native 96 percent base hit chance. The optional fixture spell_hit_bonus",
+    "adds percentage points through the native Unit modifier. An unconfigured NPC keeps zero bonus; four points",
+    "supply the remaining accuracy, and the 100-point fixture remains capped by the native hit calculation.",
+    "Original QA Holy spell 45648 has 999 base points plus one die point, Magic defense and CANT_CRIT. Both",
+    "configured level-80 fixtures must therefore remove exactly 1000 health from a level-80 unshielded player.",
+    "The unconfigured control remains at zero before and after both real damage inputs. No DBC attribute or",
+    "production hit rule changes, and ordinary unconfigured NPCs are not required to win a random hit roll."
+  ],
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 80, "allow_regeneration": false }
+  ],
+  "creatures": [
+    { "id": "ordinary", "owner": "hero", "entry": 36, "level": 80, "faction": 14, "distance": 5 },
+    {
+      "id": "accurate", "owner": "hero", "entry": 36, "level": 80, "faction": 14, "distance": 5,
+      "spell_hit_bonus": 4
+    },
+    {
+      "id": "saturated", "owner": "hero", "entry": 36, "level": 80, "faction": 14, "distance": 5,
+      "spell_hit_bonus": 100
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "assert", "actor": "ordinary", "metric": "spell_hit_chance", "equals": 0 },
+    { "action": "assert", "actor": "accurate", "metric": "spell_hit_chance", "equals": 4 },
+    { "action": "assert", "actor": "saturated", "metric": "spell_hit_chance", "equals": 100 },
+    { "action": "assert", "actor": "hero", "metric": "health", "min": 2001 },
+    { "action": "snapshot", "actor": "hero", "metric": "health", "save_as": "starting_health" },
+    { "action": "cast", "actor": "accurate", "spell": 45648, "target": "hero" },
+    {
+      "action": "assert", "actor": "hero", "metric": "health", "relative_to": "starting_health",
+      "equals": -1000, "within_ms": 1000
+    },
+    { "action": "cast", "actor": "saturated", "spell": 45648, "target": "hero" },
+    {
+      "action": "assert", "actor": "hero", "metric": "health", "relative_to": "starting_health",
+      "equals": -2000, "within_ms": 1000
+    },
+    { "action": "assert", "actor": "ordinary", "metric": "spell_hit_chance", "equals": 0 },
+    { "action": "assert", "actor": "hero", "metric": "alive", "equals": 1 }
+  ]
+}

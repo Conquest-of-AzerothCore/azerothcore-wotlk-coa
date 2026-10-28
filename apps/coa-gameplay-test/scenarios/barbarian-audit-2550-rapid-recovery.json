@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Barbarian audit: Rapid Recovery spell modifier reaches its target spells (#2550)",
-  "contract": "Audit report #2550 asked for a script for a passive whose effects are native spell-mod auras (107 flat, 108 percent). The effect BasePoints and EffectSpellClassMask in Spell.dbc name the spell-mod operation, amount and affected Barbarian spells; Player::ApplySpellMod, which the spell_modifier metric calls, must deliver base+flat or base*(100+pct)/100. Expected values are computed from the DBC amount, not from the implementation. This scenario covers the effect with a resolvable EffectSpellClassMask (aura-108 percent modifier, op 19 ACTIVATION_TIME, targeting Onslaught). The spell's other aura-107 flat modifier (op 1 DURATION, amount 5000) carries an empty SpellClassMask and selects no family-18 spell, so it is out of scope here, matching the #1217-style carve-out for a second effect handled elsewhere.",
+  "contract": "Rapid Recovery (705171) promises that Onslaught (801758) effects occur 50% faster. Its native SPELL_AURA_ADD_PCT_MODIFIER for SPELLMOD_ACTIVATION_TIME reduces a 2000 ms interval to 1000 ms through Player::ApplySpellMod. This scenario checks that modifier independently with a 100000 ms input, while barbarian-rapid-recovery-duration-6726 observes native Energy ticks, unchanged ten-second duration, expiry and removal through normal advancement acquisition. The undescribed 5000 ms duration modifier in effect 2 is disabled by the Barbarian spell contract.",
   "timeout_ms": 90000,
   "players": [
     {

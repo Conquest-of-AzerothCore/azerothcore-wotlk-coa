@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "name": "manastorm-cogsworth-next-rank",
+  "contract": "Native vendor packets expose only the next Hearty Heal rank, hide already learned ranks, and never show later ranks before their prerequisite. Core NPC vendor conditions must enforce the same restrictions at purchase.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "n",
+      "race": 5,
+      "class": 23,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "summon",
+      "actor": "n",
+      "as": "cog",
+      "entry": 179539,
+      "distance": 2
+    },
+    {
+      "action": "client_packet",
+      "actor": "n",
+      "opcode": 414,
+      "fields": [
+        {
+          "actor_guid": "cog"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "vendor_price",
+      "item": 99269,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "vendor_price",
+      "item": 99270,
+      "equals": -1
+    },
+    {
+      "action": "learn",
+      "actor": "n",
+      "spell": 93467
+    },
+    {
+      "action": "client_packet",
+      "actor": "n",
+      "opcode": 414,
+      "fields": [
+        {
+          "actor_guid": "cog"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "vendor_price",
+      "item": 99269,
+      "equals": -1
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "vendor_price",
+      "item": 99270,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "vendor_price",
+      "item": 99271,
+      "equals": -1
+    },
+    {
+      "action": "learn",
+      "actor": "n",
+      "spell": 93468
+    },
+    {
+      "action": "client_packet",
+      "actor": "n",
+      "opcode": 414,
+      "fields": [
+        {
+          "actor_guid": "cog"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "vendor_price",
+      "item": 99270,
+      "equals": -1
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "vendor_price",
+      "item": 99271,
+      "min": 0
+    }
+  ]
+}

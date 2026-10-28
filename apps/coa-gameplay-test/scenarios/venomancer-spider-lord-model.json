@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Venomancer: Spider Lord turns Beetle Form into the Spider Lord model (#355)",
-  "contract": "Spider Lord (704264) 'Augments Beetle Form into a Spider Lord'. Beetle Form (803183) is SPELL_AURA_MOD_SHAPESHIFT form 53, whose SpellShapeshiftForm display is the beetle 110063; neither 704264 nor its helper 805139 carries a model effect. On live the Spider Lord is the blue cryptlord2 with purple armor, which the shipped client only has at full size (display 139094, duplicated as 139099-139101), shrunk to a quarter. The talented Beetle Form must show 139094 at object scale 0.25 while keeping the player's combat reach, and every other state the ordinary model at scale 1.",
+  "contract": "Spider Lord (704264) 'Augments Beetle Form into a Spider Lord'. Beetle Form (803183) is SPELL_AURA_MOD_SHAPESHIFT form 53, whose SpellShapeshiftForm display is the beetle 110063; neither 704264 nor its helper 805139 carries a model effect. On live the Spider Lord is the green cryptlord2_coa with red armor, the client's display 142811 whose CreatureDisplayInfo scale 0.3 sizes it. The talented Beetle Form must show 142811 at object scale 1, so the client draws it at its final size instead of animating a shrink, while keeping the player's combat reach, and every other state the ordinary model at scale 1.",
   "timeout_ms": 60000,
   "players": [
     {"id": "v", "race": 1, "class": 29, "level": 80}
@@ -20,10 +20,10 @@
     {"action": "assert", "label": "SETUP: Spider Lord is applied", "actor": "v", "metric": "aura", "spell": 704264,
      "within_ms": 3000, "equals": 1},
     {"action": "assert", "label": "DISCRIMINATING: learning Spider Lord in Beetle Form shows the Spider Lord",
-     "actor": "v", "metric": "display_id", "within_ms": 2000, "equals": 139094},
-    {"action": "assert", "label": "DISCRIMINATING: the Spider Lord is shrunk to a quarter", "actor": "v",
-     "metric": "unit_scale", "min": 0.24, "max": 0.26},
-    {"action": "assert", "label": "The shrunk Spider Lord keeps the player's melee reach", "actor": "v",
+     "actor": "v", "metric": "display_id", "within_ms": 2000, "equals": 142811},
+    {"action": "assert", "label": "DISCRIMINATING: the Spider Lord is drawn at its display size, not shrunk",
+     "actor": "v", "metric": "unit_scale", "min": 0.99, "max": 1.01},
+    {"action": "assert", "label": "The Spider Lord keeps the player's melee reach", "actor": "v",
      "metric": "combat_reach", "min": 1.49, "max": 1.51},
     {"action": "cancel_aura", "actor": "v", "spell": 803183},
     {"action": "assert", "label": "Leaving Beetle Form restores the character model", "actor": "v",
@@ -34,13 +34,13 @@
     {"action": "wait", "label": "Let the global cooldown pass", "ms": 1600},
     {"action": "cast", "actor": "v", "spell": 803183},
     {"action": "assert", "label": "DISCRIMINATING: shifting into Beetle Form with Spider Lord shows the Spider Lord",
-     "actor": "v", "metric": "display_id", "within_ms": 2000, "equals": 139094},
-    {"action": "assert", "label": "The reshifted Spider Lord is shrunk to a quarter", "actor": "v",
-     "metric": "unit_scale", "min": 0.24, "max": 0.26},
+     "actor": "v", "metric": "display_id", "within_ms": 2000, "equals": 142811},
+    {"action": "assert", "label": "The reshifted Spider Lord is not shrunk", "actor": "v",
+     "metric": "unit_scale", "min": 0.99, "max": 1.01},
     {"action": "unlearn", "actor": "v", "spell": 704264},
     {"action": "assert", "label": "Losing Spider Lord in Beetle Form restores the beetle model", "actor": "v",
      "metric": "display_id", "within_ms": 2000, "equals": 110063},
-    {"action": "assert", "label": "Losing Spider Lord restores full size", "actor": "v", "metric": "unit_scale",
+    {"action": "assert", "label": "Losing Spider Lord keeps full size", "actor": "v", "metric": "unit_scale",
      "min": 0.99, "max": 1.01}
   ]
 }

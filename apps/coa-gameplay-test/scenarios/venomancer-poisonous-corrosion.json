@@ -1,7 +1,32 @@
 {
   "schema": 1,
   "name": "Venomancer: Poisonous and Corrosion Nature damage modifiers (#3124, #3318)",
-  "contract": "#3124, #3318. Poisonous 707320 (Spell.dbc, passive): effect 0 is aura 237 MOD_SPELL_DAMAGE_OF_ATTACK_POWER, misc 126 (all magic schools), 29+1 = 30% of attack power, read by Unit::SpellBaseDamageBonusDone (Unit.cpp:9592); effect 1 is aura 286 ABILITY_PERIODIC_CRIT with class mask [0,0,0x4] = Expulsion 805094 and its ranks, read by AuraEffect::CalcPeriodicCritChance (SpellAuraEffects.cpp:1167). The 30% is asserted through spell_power (Nature, school 3) against the pre-learn value in the same run and against an untalented control; the periodic crit through the snapshotted crit chance of a real Expulsion aura on a dummy, the control's aura carrying 0. Corrosion 803194: effect 0 is aura 87 MOD_DAMAGE_PERCENT_TAKEN, misc 8 (Nature), 4+1 = 5; the dummy's incoming Nature damage from the caster (fixed base 1000) must be 5% above its own pre-cast value. Expulsion and Corrosion require Beetle Form 803183 (Spell.dbc CasterAuraSpell) and Rage. Unverified assumption: a class 29 fixture can hold 200 Rage via set_power. Expulsion's own effect 0 (Spell.dbc) targets TARGET_SRC_CASTER/TARGET_UNIT_SRC_AREA_ENEMY (implicitTargetA 22, implicitTargetB 15) -- it is an AoE around the caster, not the explicit unit target the cast packet carries -- so it also hits the other player's dummy when both are near each other; v's cast is asserted (landing + crit) before c ever casts, so c's later cast cannot overwrite v's non-stacking aura on dv first. Expulsion's DmgClass (Spell.dbc) is 2 (SPELL_DAMAGE_CLASS_MELEE), so AuraEffect::CalcPeriodicCritChance routes its crit chance through Unit::SpellDoneCritChance's melee branch (PLAYER_CRIT_PERCENTAGE, driven by CR_CRIT_MELEE), not the spell-crit branch; both fixtures also carry melee_crit_rating so v's snapshotted crit is provably positive while c's stays 0 because CalcPeriodicCritChance only looks at it once c is found to hold no SPELL_AURA_ABILITY_PERIODIC_CRIT effect (Poisonous is never learned by c). Generic core machinery: a regression guard for behaviour that already works.",
+  "contract": [
+    "#3124, #3318. Poisonous 707320 (Spell.dbc, passive): effect 0 is aura 237",
+    "MOD_SPELL_DAMAGE_OF_ATTACK_POWER, misc 126 (all magic schools), 29+1 = 30% of attack power, read by",
+    "Unit::SpellBaseDamageBonusDone (Unit.cpp:9592); effect 1 is aura 286 ABILITY_PERIODIC_CRIT with class",
+    "mask [0,0,0x4] = Expulsion 805094 and its ranks, read by AuraEffect::CalcPeriodicCritChance",
+    "(SpellAuraEffects.cpp:1167). The 30% is asserted through spell_power (Nature, school 3) against the",
+    "pre-learn value in the same run and against an untalented control; the periodic crit through the",
+    "snapshotted crit chance of a real Expulsion aura on a dummy, the control's aura carrying 0. Corrosion",
+    "803194: effect 0 is aura 87 MOD_DAMAGE_PERCENT_TAKEN, misc 8 (Nature), 4+1 = 5; the dummy's incoming",
+    "Nature damage from the caster (fixed base 1000) must be 5% above its own pre-cast value. Expulsion and",
+    "Corrosion require Beetle Form 803183 (Spell.dbc CasterAuraSpell) and Rage. Unverified assumption: a",
+    "class 29 fixture can hold 200 Rage via set_power. Expulsion's own effect 0 (Spell.dbc) targets",
+    "TARGET_SRC_CASTER/TARGET_UNIT_SRC_AREA_ENEMY (implicitTargetA 22, implicitTargetB 15) -- it is an AoE",
+    "around the caster, not the explicit unit target the cast packet carries -- so it also hits the other",
+    "player's dummy when both are near each other; v's cast is asserted (landing + crit) before c ever casts,",
+    "so c's later cast cannot overwrite v's non-stacking aura on dv first. Expulsion's DmgClass (Spell.dbc)",
+    "is 2 (SPELL_DAMAGE_CLASS_MELEE), so AuraEffect::CalcPeriodicCritChance routes its crit chance through",
+    "Unit::SpellDoneCritChance's melee branch (PLAYER_CRIT_PERCENTAGE, driven by CR_CRIT_MELEE), not the",
+    "spell-crit branch; both fixtures also carry melee_crit_rating so v's snapshotted crit is provably",
+    "positive while c's stays 0 because CalcPeriodicCritChance only looks at it once c is found to hold no",
+    "SPELL_AURA_ABILITY_PERIODIC_CRIT effect (Poisonous is never learned by c). Generic core machinery: a",
+    "regression guard for behaviour that already works.",
+    "Let v's cast resolve before c casts the same AoE (Expulsion targets",
+    "TARGET_SRC_CASTER/TARGET_UNIT_SRC_AREA_ENEMY, so it hits every nearby enemy, not just the explicit",
+    "target; c's later cast would otherwise overwrite v's non-stacking aura on both dummies)"
+  ],
   "timeout_ms": 90000,
   "players": [
     {
@@ -11,7 +36,9 @@
       "level": 80,
       "spell_hit_rating": 10000,
       "spell_crit_rating": 10000,
-      "melee_crit_rating": 10000
+      "melee_crit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
     },
     {
       "id": "c",
@@ -20,7 +47,9 @@
       "level": 80,
       "spell_hit_rating": 10000,
       "spell_crit_rating": 10000,
-      "melee_crit_rating": 10000
+      "melee_crit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
     }
   ],
   "creatures": [
@@ -209,7 +238,7 @@
     },
     {
       "action": "wait",
-      "label": "Let v's cast resolve before c casts the same AoE (Expulsion targets TARGET_SRC_CASTER/TARGET_UNIT_SRC_AREA_ENEMY, so it hits every nearby enemy, not just the explicit target; c's later cast would otherwise overwrite v's non-stacking aura on both dummies)",
+      "label": "Let v's cast resolve before c casts the same AoE (Expulsion targets…",
       "ms": 1500
     },
     {

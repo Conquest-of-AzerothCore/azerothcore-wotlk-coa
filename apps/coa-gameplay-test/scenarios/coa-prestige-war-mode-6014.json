@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Prestige Mode: Chromie replaces High-Risk with War Mode, and level 15 replaces War Mode with PvE Mode (#6014)",
+  "contract": "A level 60 character selects High-Risk the way the client does, casting High-Risk (PvP) 84421 in a rested area (the Goldshire inn trigger 562), which leaves the High-Risk aura 1004019 alone. Choosing 'I would like to prestige!' at Chromie 178081 returns the character to level 1 in Prestige Mode (Prestige Challenge 9930831). On live Ascension a new prestige removes High-Risk and PvE Mode and applies War Mode, so at level 1 the character carries the War Mode aura 1004119 and neither High-Risk 1004019 nor PvE Mode 9931032. Reaching level 15 again replaces War Mode with PvE Mode: PvE Mode 9931032 alone, without War Mode 1004119 or High-Risk 1004019, as pressing PvE Mode (84422) applies it.",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -9483.25, "y": -17.99, "z": 56.96, "o": 3.8 },
+  "players": [
+    { "id": "prestiger", "race": 1, "class": 20, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "chromie", "owner": "prestiger", "entry": 178081, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the fixture settle", "ms": 3000 },
+    { "action": "specialization", "actor": "prestiger", "id": 25 },
+    { "action": "learn", "actor": "prestiger", "spell": 84420 },
+    { "action": "learn", "actor": "prestiger", "spell": 84421 },
+    { "action": "learn", "actor": "prestiger", "spell": 84422 },
+    { "action": "area_trigger", "label": "Enter the Goldshire inn", "actor": "prestiger", "id": 562 },
+    { "action": "assert", "label": "The inn makes the character rested", "actor": "prestiger", "metric": "resting", "equals": 1, "within_ms": 3000 },
+    { "action": "cast", "label": "Select High-Risk (PvP)", "actor": "prestiger", "spell": 84421 },
+    { "action": "assert", "label": "High-Risk is selectable in the inn", "actor": "prestiger", "metric": "cast_failure", "spell": 84421, "equals": 0, "within_ms": 4000 },
+    { "action": "assert", "label": "High-Risk is applied", "actor": "prestiger", "metric": "aura", "spell": 1004019, "equals": 1, "within_ms": 4000 },
+    { "action": "assert", "label": "High-Risk replaced PvE Mode", "actor": "prestiger", "metric": "aura", "spell": 9931032, "equals": 0 },
+    { "action": "assert", "label": "High-Risk carries no War Mode", "actor": "prestiger", "metric": "aura", "spell": 1004119, "equals": 0 },
+
+    { "action": "gossip_hello", "actor": "prestiger", "target": "chromie", "label": "Speak to Chromie" },
+    { "action": "gossip_select", "actor": "prestiger", "option": 0, "label": "I would like to prestige!" },
+    { "action": "assert", "label": "Back to level 1", "actor": "prestiger", "metric": "level", "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "The character is in Prestige Mode", "actor": "prestiger", "metric": "aura", "spell": 9930831, "equals": 1 },
+    { "action": "assert", "label": "The new prestige applies War Mode", "actor": "prestiger", "metric": "aura", "spell": 1004119, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "High-Risk is removed", "actor": "prestiger", "metric": "aura", "spell": 1004019, "equals": 0 },
+    { "action": "assert", "label": "PvE Mode is absent", "actor": "prestiger", "metric": "aura", "spell": 9931032, "equals": 0 },
+
+    { "action": "set_level", "actor": "prestiger", "value": 15 },
+    { "action": "assert", "label": "Level 15 applies PvE Mode", "actor": "prestiger", "metric": "aura", "spell": 9931032, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "War Mode is removed at level 15", "actor": "prestiger", "metric": "aura", "spell": 1004119, "equals": 0 },
+    { "action": "assert", "label": "High-Risk stays off", "actor": "prestiger", "metric": "aura", "spell": 1004019, "equals": 0 }
+  ]
+}

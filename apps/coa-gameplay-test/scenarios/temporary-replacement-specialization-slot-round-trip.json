@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "A swapped button survives a specialization slot round trip after its swap ends",
+  "contract": "Specialization slots (#6244) snapshot every action button when the player leaves a slot (LiveSlot) and re-add those ids when the player returns (SwitchSlot). While Grinding Gears 681245 is active, AscensionTinker::Refresh learns Gear Grind 504594 as a temporary spell and replaces Makeshift Dynamite 504527 with it; once the aura is gone it removes 504594. A snapshot taken with Gear Grind on the bar stored 504594, and if Grinding Gears ends before the player returns, SwitchSlot hands addActionButton a spell the player no longer knows, so the button is refused and lost. LiveSlot must store a swapped button as the spell it replaces, exactly as _SaveActions does at logout. Expected: after leaving slot I with Gear Grind on the bar and returning once Grinding Gears has ended, the button holds Makeshift Dynamite and survives a relog.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "tinker", "race": 1, "class": 28, "level": 15 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login state settle", "ms": 5000 },
+    {
+      "action": "client_packet", "actor": "tinker", "opcode": 618, "early": false, "consumed": false,
+      "fields": [ { "actor_guid": "tinker" } ],
+      "label": "Initialize native advancement after the local player is ready"
+    },
+    { "action": "specialization", "label": "Choose Mechanics", "actor": "tinker", "id": 50 },
+    { "action": "learn", "actor": "tinker", "spell": 504527 },
+    { "action": "set_aura", "label": "Grinding Gears is active", "actor": "tinker", "spell": 681245, "stacks": 1 },
+    {
+      "action": "assert", "label": "SETUP: Gear Grind replaces Makeshift Dynamite", "actor": "tinker",
+      "metric": "temporary_spell_replacement", "spell": 504527, "equals": 504594, "within_ms": 2000
+    },
+    { "action": "set_action_button", "actor": "tinker", "button": 2, "spell": 504594 },
+    {
+      "action": "assert", "label": "SETUP: slot I's bar holds Gear Grind", "actor": "tinker",
+      "metric": "action_button", "button": 2, "equals": 504594
+    },
+    { "action": "learn", "actor": "tinker", "spell": 979994 },
+    { "action": "cast", "label": "Switch to slot II", "actor": "tinker", "spell": 979994 },
+    { "action": "wait", "ms": 6000 },
+    {
+      "action": "assert", "label": "SETUP: slot II is active", "actor": "tinker",
+      "metric": "player_setting", "source": "core.ascension_slot.active", "index": 0, "equals": 1
+    },
+    { "action": "cancel_aura", "label": "Grinding Gears ends in slot II", "actor": "tinker", "spell": 681245 },
+    {
+      "action": "assert", "label": "SETUP: Gear Grind is gone", "actor": "tinker",
+      "metric": "knows_spell", "spell": 504594, "equals": 0, "within_ms": 2000
+    },
+    { "action": "cast", "label": "Switch back to slot I", "actor": "tinker", "spell": 979993 },
+    { "action": "wait", "ms": 6000 },
+    {
+      "action": "assert", "label": "SETUP: slot I is active again", "actor": "tinker",
+      "metric": "player_setting", "source": "core.ascension_slot.active", "index": 0, "equals": 0
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the button comes back as Makeshift Dynamite", "actor": "tinker",
+      "metric": "action_button", "button": 2, "equals": 504527
+    },
+    { "action": "relog", "actor": "tinker" },
+    { "action": "wait", "ms": 2000 },
+    {
+      "action": "assert", "label": "The button survives a relog", "actor": "tinker",
+      "metric": "action_button", "button": 2, "equals": 504527, "within_ms": 3000
+    }
+  ]
+}

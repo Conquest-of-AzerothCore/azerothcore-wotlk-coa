@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "name": "Sage Nauchol asks the returning player for the disguise pieces",
+  "contract": [
+    "rev_20261004_98_coa_nauchol_disguise_return makes Sage Nauchol 161819 ask \"Have you brought everything we need",
+    "for the disguise?\" when a player carrying Death and Dishonor 1660032 comes within 15 yd. Expected: the returning",
+    "player hears a line as they step up to him, and a player without the quest who steps up the same way hears none."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -2712.6,
+    "y": 19.0,
+    "z": 14.5,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "bearer",
+      "race": 6,
+      "class": 1,
+      "level": 5
+    },
+    {
+      "id": "stranger",
+      "race": 6,
+      "class": 1,
+      "level": 5
+    }
+  ],
+  "creatures": [
+    {
+      "id": "nauchol",
+      "owner": "bearer",
+      "entry": 161819,
+      "faction": 35,
+      "level": 13,
+      "reaction": 2,
+      "distance": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "prepare_quest",
+      "actor": "bearer",
+      "quest": 1660032
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "stranger",
+      "metric": "system_messages",
+      "save_as": "stranger_before"
+    },
+    {
+      "action": "teleport",
+      "actor": "stranger",
+      "map": 1,
+      "x": -2687.6,
+      "y": 19.0,
+      "z": 14.5,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Nauchol says nothing to a player without the quest",
+      "actor": "stranger",
+      "metric": "system_messages",
+      "relative_to": "stranger_before",
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "stranger",
+      "map": 1,
+      "x": -2712.6,
+      "y": 19.0,
+      "z": 14.5,
+      "o": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "bearer",
+      "metric": "system_messages",
+      "save_as": "bearer_before"
+    },
+    {
+      "action": "teleport",
+      "actor": "bearer",
+      "map": 1,
+      "x": -2687.6,
+      "y": 19.0,
+      "z": 14.5,
+      "o": 0
+    },
+    {
+      "action": "assert",
+      "label": "Nauchol asks the returning player for the disguise pieces",
+      "actor": "bearer",
+      "metric": "system_messages",
+      "relative_to": "bearer_before",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

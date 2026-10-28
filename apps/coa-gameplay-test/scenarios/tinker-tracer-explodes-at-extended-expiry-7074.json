@@ -1,0 +1,197 @@
+{
+  "schema": 1,
+  "name": "Tinker Tracer mark explodes when its Rocket Barrage-extended duration ends (#7074)",
+  "contract": [
+    "Tracer Augmentation (653245) marks a ranged target with Stack Damage (653247): 'After $d your target explodes'.",
+    "Spell.dbc gives the mark a 5000 ms duration and one periodic damage tick every 4999 ms, so the explosion is the",
+    "tick at the end of the duration. Rocket Barrage (805314) effect 2 adds 7000 ms to the mark's duration.",
+    "With it learned the mark lasts 12000 ms and must explode once, at the end, rather than 5 s after it lands.",
+    "The target is a passive fixture with no other damage source; a landed Bomb Toss applies the first mark."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "tinker",
+      "item": 450265
+    },
+    {
+      "action": "equip",
+      "actor": "tinker",
+      "item": 450265,
+      "slot": 17
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "equipped_item",
+      "slot": 17,
+      "equals": 450265
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 801005
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 653245
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 805314
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 653245
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 653246,
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "Tracer Augmentation is active on the gun"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "client_packet",
+      "actor": "tinker",
+      "opcode": 317,
+      "fields": [
+        {
+          "actor_guid": "dummy"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801005,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 801005,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "Bomb Toss lands"
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura_stacks",
+      "spell": 653247,
+      "caster": "tinker",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "The landed ranged hit applies one Tracer mark"
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura_duration_ms",
+      "spell": 653247,
+      "caster": "tinker",
+      "min": 11000,
+      "label": "Rocket Barrage extends the mark to twelve seconds"
+    },
+    {
+      "action": "wait",
+      "ms": 6500
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 653247,
+      "caster": "tinker",
+      "equals": 1,
+      "label": "The extended mark is still present after the base five seconds"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 653247,
+      "target": "dummy",
+      "equals": 0,
+      "label": "The mark has not exploded before its extended duration ends"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 653247,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 7000,
+      "label": "The mark explodes when its duration ends"
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 653247,
+      "caster": "tinker",
+      "equals": 0,
+      "within_ms": 1000,
+      "label": "The mark is gone after its explosion"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 653247,
+      "target": "dummy",
+      "equals": 1,
+      "label": "The mark explodes only once"
+    }
+  ]
+}

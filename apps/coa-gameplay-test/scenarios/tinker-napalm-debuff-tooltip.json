@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Napalm's debuff text states the per-stack increase the client data omits",
+  "contract": [
+    "Napalm 805315 is the Tinker debuff applied by direct Fire damage. Its client",
+    "Spell.dbc text says Fire damage taken 'is increased' with no amount and no",
+    "per-stack statement. The server adds +3% Fire damage taken per stack (Effect 0",
+    "base points 2, read by the scaling script) up to 10 stacks over 8 s, with a",
+    "flat -3% healing received. The fix publishes the corrected Description and",
+    "ToolTip through coa_client_spell_description, streamed as SMSG_PATCH_SPELL",
+    "(opcode 2346) at login. This scenario reads the streamed rows: row 500639",
+    "(Runeshroud) is the control proving the stream is alive, and row 805315 must",
+    "arrive with the per-stack line in both columns."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "warrior",
+      "race": 1,
+      "class": 1,
+      "level": 12,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI, level scaling and the login patch stream settle",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the shared description table still streams Runeshroud's own text as row 500639",
+      "actor": "warrior",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500639,
+      "text": "Requires Runeshroud",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Napalm (805315) reaches the client with the dynamic per-stack Description line",
+      "actor": "warrior",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 805315,
+      "text": "$805315s1% for each stack of Napalm",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: the same row keeps the dynamic healing variable and carries the ToolTip line for the unit-frame debuff hover",
+      "actor": "warrior",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 805315,
+      "text": "healing received reduced by $803787s1%",
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

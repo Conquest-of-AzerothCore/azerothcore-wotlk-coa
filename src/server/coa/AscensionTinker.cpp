@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <memory>
 #include <mutex>
+#include <shared_mutex>
 #include <tuple>
 #include <unordered_map>
 namespace AscensionTinker
@@ -25,7 +26,7 @@ namespace AscensionTinker
 namespace
 {
 std::unordered_map<ObjectGuid, std::unique_ptr<TinkerState>> states;
-std::mutex stateMutex;
+std::shared_mutex stateMutex;
 }
 Player* Owner(Unit const* unit)
 {
@@ -38,8 +39,16 @@ Player* Owner(Unit const* unit)
 }
 TinkerState& State(Player* player)
 {
-    std::lock_guard<std::mutex> lock(stateMutex);
-    return *states.try_emplace(player->GetGUID(), std::make_unique<TinkerState>()).first->second;
+    {
+        std::shared_lock<std::shared_mutex> lock(stateMutex);
+        if (auto itr = states.find(player->GetGUID()); itr != states.end())
+            return *itr->second;
+    }
+    std::unique_lock<std::shared_mutex> lock(stateMutex);
+    auto& state = states[player->GetGUID()];
+    if (!state)
+        state = std::make_unique<TinkerState>();
+    return *state;
 }
 bool NotifyAttack(Player* player, Unit* target)
 {
@@ -284,7 +293,8 @@ void ActivateModule(Player* player, uint32 id)
     state.moduleTargets.clear();
     state.module = id;
     SetHelper(player,707495,true);
-    SetAmount(player,707495,0,int32(id));
+    if (Aura* aura = player->GetAura(707495))
+        aura->SetScriptValue(707495,id);
     for (ObjectGuid guid : previous)
         if (Player* ally = ObjectAccessor::FindPlayer(guid))
             for (uint32 other : TinkerModules)
@@ -300,8 +310,7 @@ void ReconcileModules(Player* player)
         for (uint32 module : TinkerModules)
             if (aura->GetId() == module)
                 if (Player* owner = ObjectAccessor::FindPlayer(aura->GetCasterGUID()))
-                    if (AuraEffect const* selected = owner->GetAuraEffect(707495,EFFECT_0); selected &&
-                        selected->GetAmount() > 0 && uint32(selected->GetAmount()) != module)
+                    if (uint32 selected = State(owner).module; selected && selected != module)
                         remove.push_back(aura);
     }
     for (Aura* aura : remove)
@@ -338,6 +347,9 @@ void Refresh(Player* player)
         player->learnSpell(GatlingGun);
     else if (!suit && player->HasSpell(GatlingGun))
         player->removeSpell(GatlingGun,SPEC_MASK_ALL,false);
+    for (auto const& pair : player->GetSpellMap())
+        if (player->HasSpell(pair.first) && Named(sSpellMgr->GetSpellInfo(pair.first),500549))
+            player->SetTemporarySpellReplacement(pair.first,mech && suit ? GatlingGun : 0);
     if (!mech)
     {
         player->RemoveAurasDueToSpell(803451,player->GetGUID());
@@ -345,13 +357,14 @@ void Refresh(Player* player)
     }
     else
         FillMechsuitBar(player);
-    bool mine = false;
-    for (Creature* device : Devices(player))
-        mine |= device->GetEntry() == 50045 || device->GetEntry() == 50600;
-    if (mine && !player->HasSpell(801798))
-        player->learnSpell(801798,true);
-    else if (!mine)
-        player->removeSpell(801798,SPEC_MASK_ALL,true);
+    bool mines = player->HasAura(803074);
+    for (auto const& pair : player->GetSpellMap())
+        mines |= player->HasSpell(pair.first) &&
+            Any(sSpellMgr->GetSpellInfo(pair.first),{801718,805354,704463,706647});
+    if (mines && !player->HasSpell(801798))
+        player->learnSpell(801798);
+    else if (!mines && player->HasSpell(801798))
+        player->removeSpell(801798,SPEC_MASK_ALL,false);
     bool gear = player->HasAura(681245);
     if (Spell* channel = player->GetCurrentSpell(CURRENT_CHANNELED_SPELL); channel &&
         channel->GetSpellInfo()->Id == 504594 && channel->getState() != SPELL_STATE_FINISHED)
@@ -398,7 +411,7 @@ public:
         using namespace AscensionTinker;
         if (Owner(player) == player)
             ExitMechsuit(player);
-        std::lock_guard<std::mutex> lock(stateMutex);
+        std::unique_lock<std::shared_mutex> lock(stateMutex);
         states.erase(player->GetGUID());
     }
 };

@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Sanguine Essence is listed once in the Bloodmage spellbook (#6721)",
+  "contract": "#6721 'Sanguine Essence [ID: 680692] ... There are two of it. They show up with \"show all spell ranks\" enabled or disabled', reported by a level-15 Bloodmage Fleshweaver looking at the spellbook. The client's spellbook is a list of slots, not a set: SMSG_INITIAL_SPELLS, SMSG_LEARNED_SPELL and SMSG_SUPERCEDED_SPELL each append a row, and only the highest-rank view the client draws over that list (GetKnownSlotFromHighestRankSlot, C_Spell.lua) hides a spell that has ranks - which is why the reporter's 'show all spell ranks' toggle could not remove the second row, and why the expectation is 'a spell is only listed once when it doesn't have ranks'. Sanguine Essence 680692 is exactly that: Spell.dbc rank 'Cursed Form', a one-member chain, and attributes 0x01000110 without SPELL_ATTR0_PASSIVE (0x40) or SPELL_ATTR0_DO_NOT_DISPLAY (0x80), so the client draws it. The Fleshweaver node's own spell 505188 'Sanguine Essence' carries 0x40|0x80 = PASSIVE|DO_NOT_DISPLAY, which SharedDefines.h spells out as 'Not visible in spellbook or aura bar', so it is not the second row either. The second row came from the compat layer telling the client about 680692 twice: SynchronizeTalentReplacements learned it as a temporary spell, which sends SMSG_LEARNED_SPELL, and then stood it in for Blood Curse through Player::SetTemporarySpellReplacement, which sends SMSG_SUPERCEDED_SPELL(562720, 680692) - and that packet drops the row holding Blood Curse and appends the form, leaving two 680692 rows in an unranked spellbook. The fix keeps the server-side learn (the server has to accept a cast of the form) but makes it without an announcement, so the replacement packet is the one thing that tells the client: Player::learnSpellWithoutAnnouncement. This case pins it on a spec-25 Bloodmage owning Blood Curse and the Fleshweaver node spell - the client's spellbook must hold exactly one 680692 row, delivered by the replacement. Controls: the replacement really is in force (temporary_spell_replacement 562720 == 680692 and the server knows 680692), the node spell is announced once so it cannot be the second row, Blood Curse keeps its own single row (the one whose cast the server turns into the form), and the form still works after the fix.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "bloodmage", "race": 1, "class": 20, "level": 15 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "client_packet", "actor": "bloodmage", "opcode": 618, "early": false, "consumed": false, "fields": [ { "actor_guid": "bloodmage" } ], "label": "Initialize native advancement" },
+    { "action": "specialization", "actor": "bloodmage", "id": 25, "label": "Spec 25 = Fleshweaver, the tree whose node promises the transformation" },
+    { "action": "learn", "actor": "bloodmage", "spell": 562720, "label": "FIXTURE: own Blood Curse, the ability the form replaces" },
+    { "action": "learn", "actor": "bloodmage", "spell": 505188, "label": "FIXTURE: own the Fleshweaver node's own spell, which the tree hands out" },
+    { "action": "wait", "label": "Let the talent replacement sync", "ms": 2500 },
+
+    { "action": "assert", "label": "SETUP: the Fleshweaver form now stands in for Blood Curse", "actor": "bloodmage", "metric": "temporary_spell_replacement", "spell": 562720, "equals": 680692, "within_ms": 5000 },
+    { "action": "assert", "label": "SETUP: the server knows the form, so its casts are accepted", "actor": "bloodmage", "metric": "knows_spell", "spell": 680692, "equals": 1 },
+    { "action": "assert", "label": "CONTROL: the client is told about the form through the replacement of Blood Curse", "actor": "bloodmage", "metric": "spellbook_superseded_for", "spell": 680692, "equals": 1 },
+
+    { "action": "assert", "label": "THE FIX: the client's spellbook holds exactly one Sanguine Essence row (two before the fix)", "actor": "bloodmage", "metric": "client_spellbook_copies", "spell": 680692, "equals": 1 },
+    { "action": "assert", "label": "THE FIX: nothing announces it a second time as a learned spell", "actor": "bloodmage", "metric": "spellbook_learned_alerts", "spell": 680692, "equals": 0 },
+    { "action": "assert", "label": "The row the client holds is the form it will cast", "actor": "bloodmage", "metric": "client_knows_spell", "spell": 680692, "equals": 1 },
+
+    { "action": "assert", "label": "CONTROL: the Fleshweaver node's own spell is told once - it is not the second Sanguine Essence row", "actor": "bloodmage", "metric": "client_spellbook_copies", "spell": 505188, "equals": 1 },
+    { "action": "assert", "label": "CONTROL: Blood Curse keeps its own single row, the one whose cast the server turns into the form", "actor": "bloodmage", "metric": "client_spellbook_copies", "spell": 562720, "equals": 1 },
+
+    { "action": "cast", "label": "Cast the form the client's Blood Curse slot now holds", "actor": "bloodmage", "spell": 680692 },
+    { "action": "assert", "label": "The ability still works: Sanguine Essence is active on the caster", "actor": "bloodmage", "metric": "aura", "spell": 680692, "caster": "bloodmage", "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "and the spellbook still holds the form exactly once", "actor": "bloodmage", "metric": "client_spellbook_copies", "spell": 680692, "equals": 1 }
+  ]
+}

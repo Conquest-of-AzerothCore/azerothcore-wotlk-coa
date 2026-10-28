@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Phase Out applies Runeshroud (#5772)",
+  "contract": "Phase Out 500671 reads 'Disappear from sight, entering an improved stealth for $560269d and applying Runeshroud.' It triggers 560269, whose effects are a movement-speed aura and stealth. Effect 2 is SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN on Runeshroud 500288 with base points 0 and die sides 1, so the cast changes that cooldown by 1 ms and never applies aura 500288. #5772 reports that Phase Out does not apply Runeshroud. Expected: after Phase Out, the Runemaster has both the improved-stealth aura 560269 and Runeshroud 500288.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the character settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 500671},
+    {"action": "assert", "label": "Runeshroud is not up yet", "actor": "rm", "metric": "aura", "spell": 500288, "equals": 0},
+    {"action": "cast", "label": "Phase Out", "actor": "rm", "spell": 500671},
+    {"action": "assert", "label": "Phase Out is accepted", "actor": "rm", "metric": "cast_failure", "spell": 500671, "equals": 0},
+    {"action": "assert", "label": "Improved stealth is up", "actor": "rm", "metric": "aura", "spell": 560269, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "Phase Out applies Runeshroud", "actor": "rm", "metric": "aura", "spell": 500288, "equals": 1, "within_ms": 1000}
+  ]
+}

@@ -26,6 +26,22 @@ namespace CoAChallenges
         return sConfigMgr->GetOption<bool>("CoAChallenges.GameModes.Enable", true);
     }
 
+    // Modes every character on this realm plays, from CoAChallenges.GameModes.Realm (e.g. WildCard on a
+    // Wildcard realm). The recompute ORs them in, so no trial, toggle or relog drops them.
+    uint32 RealmGameModeMask()
+    {
+        uint32 mask = 0;
+        for (std::string name : CoAParse::Split(
+                 sConfigMgr->GetOption<std::string>("CoAChallenges.GameModes.Realm", ""), ','))
+        {
+            name.erase(0, name.find_first_not_of(" \t\r\n"));
+            name.erase(name.find_last_not_of(" \t\r\n") + 1);
+            if (GameModeDef const* mode = FindGameMode(name))
+                mask |= mode->bit;
+        }
+        return mask;
+    }
+
     // Whether a mode row should be hidden on the client (CONFIG_*_HIDDEN). The
     // default hides the modes the server does not run yet (no base challenge and
     // no special handler); override with a comma-separated wire-name list.

@@ -15,6 +15,11 @@
 namespace
 {
 using namespace AscensionSunCleric;
+enum SunwellSpells : uint32
+{
+    SPELL_SUNWELL = 560123,
+    SPELL_SUNWELL_VISUAL = 560124
+};
 bool First(AuraEffect const* effect)
 {
     for (uint8 slot = 0; slot < effect->GetEffIndex(); ++slot)
@@ -26,6 +31,10 @@ class aura_ascension_sun_cleric_lifecycle : public AuraScript
 {
     PrepareAuraScript(aura_ascension_sun_cleric_lifecycle);
     bool depleted = false;
+    bool Validate(SpellInfo const* info) override
+    {
+        return info->Id != SPELL_SUNWELL || ValidateSpellInfo({SPELL_SUNWELL_VISUAL});
+    }
     void Apply(AuraEffect const* effect, AuraEffectHandleModes mode)
     {
         Player* player = Owner(GetCaster());
@@ -34,6 +43,16 @@ class aura_ascension_sun_cleric_lifecycle : public AuraScript
         uint32 id = GetId();
         Unit* target = GetTarget();
         GetAura()->SetScriptValue(SolarPower, ++State(player).sequence);
+        if (id == Sunrise || id == Sunset)
+            Cast(player, player, 500643);
+        if (id == SPELL_SUNWELL)
+        {
+            if (Aura* visual = GetCaster()->AddAura(SPELL_SUNWELL_VISUAL, target))
+            {
+                visual->SetMaxDuration(GetAura()->GetMaxDuration());
+                visual->SetDuration(GetDuration());
+            }
+        }
         for (auto list : {std::pair(SunClericVows,std::size(SunClericVows)),
                          std::pair(SunClericDevotions,std::size(SunClericDevotions))})
             if (std::find(list.first,list.first+list.second,id) != list.first+list.second)
@@ -70,7 +89,7 @@ class aura_ascension_sun_cleric_lifecycle : public AuraScript
         if (id == 680888)
             GetAura()->SetUsingCharges(false);
         if ((id == Dawn || id == 301265 || id == 301242) && (mode & AURA_EFFECT_HANDLE_REAPPLY))
-            GetAura()->SetCharges(id == Dawn ? 10 : id == 301265 ? 3 : 2);
+            GetAura()->SetCharges(id == Dawn ? GetAura()->CalcMaxCharges() : id == 301265 ? 3 : 2);
         if (id == Dawn || id == 301265 || id == 301242)
             GetAura()->SetUsingCharges(false);
         if (id == 301266)
@@ -115,12 +134,16 @@ class aura_ascension_sun_cleric_lifecycle : public AuraScript
     {
         if (!First(effect))
             return;
+        if (GetId() == SPELL_SUNWELL)
+            GetTarget()->RemoveAurasDueToSpell(SPELL_SUNWELL_VISUAL, GetCasterGUID());
         Player* player = Owner(GetCaster());
         if (!player)
             return;
         uint32 id = GetId();
         Unit* target = GetTarget();
         AuraRemoveMode mode = GetTargetApplication()->GetRemoveMode();
+        if (id == Sunrise || id == Sunset)
+            player->RemoveAurasDueToSpell(500643);
         if (id == Bless && State(player).blessed == target->GetGUID())
             State(player).blessed.Clear();
         if (id == 520647)
@@ -129,6 +152,8 @@ class aura_ascension_sun_cleric_lifecycle : public AuraScript
             Refresh(player);
         if (!player->IsAlive() || !player->IsInWorld())
             return;
+        if (id == Dawn && target == player && (mode == AURA_REMOVE_BY_CANCEL || mode == AURA_REMOVE_BY_EXPIRE))
+            Resource(player, SolarPower, GetAura()->GetCharges());
         bool old = State(player).event;
         State(player).event = true;
         if (id == 802598 && depleted && player->HasAura(680637))
@@ -189,11 +214,6 @@ class aura_ascension_sun_cleric_lifecycle : public AuraScript
                     mana *= 2;
                 Mana(player,CalculatePct(player->GetMaxPower(POWER_MANA),mana));
             }
-        }
-        if (id == 560123)
-        {
-            PreventDefaultAction();
-            Cast(player,player,853225);
         }
         if (id == 300361)
         {

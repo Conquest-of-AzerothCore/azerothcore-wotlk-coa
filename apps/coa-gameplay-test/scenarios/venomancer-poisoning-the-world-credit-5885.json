@@ -1,0 +1,223 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Poisoning the World credits every objective (#5885, #6432, #6474)",
+  "contract": "Quests 200026 (Valley of Trials) and 200025 (Shadowglen) 'Poisoning the World' require one credit each from three creatures; Mysterious Concoction 662217 casts Poison the World 685013, and each target's SmartAI SPELLHIT row for 685013 calls CALL_KILLEDMONSTER for its objective: Pangajo Sunseer 9300201, Kragar the Reanimator 502925 and Omogulg the Truthbearer 9300200 credit 200026 objectives 0-2; Exodite Telusaara 9300350, Darkslayer Harrendor 503250 and Baarelam of the Auchenai 50294 credit 200025 objectives 0-2. Using the concoction on each of them must credit its objective. Finding the creatures in the world is untested.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "orc",
+      "race": 2,
+      "class": 29,
+      "level": 3
+    },
+    {
+      "id": "elf",
+      "race": 4,
+      "class": 29,
+      "level": 3
+    }
+  ],
+  "creatures": [
+    {
+      "id": "pangajo",
+      "owner": "orc",
+      "entry": 9300201,
+      "distance": 3
+    },
+    {
+      "id": "kragar",
+      "owner": "orc",
+      "entry": 502925,
+      "distance": 3
+    },
+    {
+      "id": "omogulg",
+      "owner": "orc",
+      "entry": 9300200,
+      "distance": 3
+    },
+    {
+      "id": "telusaara",
+      "owner": "elf",
+      "entry": 9300350,
+      "distance": 3
+    },
+    {
+      "id": "harrendor",
+      "owner": "elf",
+      "entry": 503250,
+      "distance": 3
+    },
+    {
+      "id": "baarelam",
+      "owner": "elf",
+      "entry": 50294,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "orc",
+      "quest": 200026,
+      "complete": false
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: quest 200026 starts without credit",
+      "actor": "orc",
+      "metric": "quest_objective_count",
+      "quest": 200026,
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "use_item",
+      "label": "Poison pangajo",
+      "actor": "orc",
+      "item": 662217,
+      "spell": 685013,
+      "target": "pangajo"
+    },
+    {
+      "action": "assert",
+      "label": "Poisoning pangajo credits objective 0",
+      "actor": "orc",
+      "metric": "quest_objective_count",
+      "quest": 200026,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Wait out the concoction cooldown",
+      "ms": 3500
+    },
+    {
+      "action": "use_item",
+      "label": "Poison kragar",
+      "actor": "orc",
+      "item": 662217,
+      "spell": 685013,
+      "target": "kragar"
+    },
+    {
+      "action": "assert",
+      "label": "Poisoning kragar credits objective 1",
+      "actor": "orc",
+      "metric": "quest_objective_count",
+      "quest": 200026,
+      "index": 1,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Wait out the concoction cooldown",
+      "ms": 3500
+    },
+    {
+      "action": "use_item",
+      "label": "Poison omogulg",
+      "actor": "orc",
+      "item": 662217,
+      "spell": 685013,
+      "target": "omogulg"
+    },
+    {
+      "action": "assert",
+      "label": "Poisoning omogulg credits objective 2",
+      "actor": "orc",
+      "metric": "quest_objective_count",
+      "quest": 200026,
+      "index": 2,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "elf",
+      "quest": 200025,
+      "complete": false
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: quest 200025 starts without credit",
+      "actor": "elf",
+      "metric": "quest_objective_count",
+      "quest": 200025,
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "use_item",
+      "label": "Poison telusaara",
+      "actor": "elf",
+      "item": 662217,
+      "spell": 685013,
+      "target": "telusaara"
+    },
+    {
+      "action": "assert",
+      "label": "Poisoning telusaara credits objective 0",
+      "actor": "elf",
+      "metric": "quest_objective_count",
+      "quest": 200025,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Wait out the concoction cooldown",
+      "ms": 3500
+    },
+    {
+      "action": "use_item",
+      "label": "Poison harrendor",
+      "actor": "elf",
+      "item": 662217,
+      "spell": 685013,
+      "target": "harrendor"
+    },
+    {
+      "action": "assert",
+      "label": "Poisoning harrendor credits objective 1",
+      "actor": "elf",
+      "metric": "quest_objective_count",
+      "quest": 200025,
+      "index": 1,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Wait out the concoction cooldown",
+      "ms": 3500
+    },
+    {
+      "action": "use_item",
+      "label": "Poison baarelam",
+      "actor": "elf",
+      "item": 662217,
+      "spell": 685013,
+      "target": "baarelam"
+    },
+    {
+      "action": "assert",
+      "label": "Poisoning baarelam credits objective 2",
+      "actor": "elf",
+      "metric": "quest_objective_count",
+      "quest": 200025,
+      "index": 2,
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

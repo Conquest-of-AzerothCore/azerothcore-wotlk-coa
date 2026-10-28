@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "An Old History Book: Milton Sheaf stands in the Royal Library and takes the book back (#5567)",
+  "contract": [
+    "Quest 337 An Old History Book starts from item 2794 and ends at Milton Sheaf 1440. The stock spawn (guid 8704,",
+    "-8346 383.928 122.374) lies under water below the CoA Royal Library; rev_20260923_03 moves him into the library",
+    "at -8279.309 226.965 155.447, the stock room's offset. Expected: in the world phase one Milton Sheaf stands",
+    "within reach of the library spot, a human carrying the completed quest sees his turn-in marker there, and can",
+    "hand it in."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8277.5, "y": 225.0, "z": 155.45, "o": 2.2},
+  "players": [{"id": "reader", "race": 1, "class": 1, "level": 25}],
+  "steps": [
+    {"action": "wait", "label": "Let login settle", "ms": 3000},
+    {"action": "set_phase", "actor": "reader", "value": 1},
+    {"action": "assert", "label": "Milton Sheaf stands in the Royal Library", "actor": "reader",
+     "metric": "nearby_creature_count", "entry": 1440, "equals": 1, "within_ms": 10000},
+    {"action": "prepare_quest", "label": "Fixture: the reader carries the old history book", "actor": "reader",
+     "quest": 337},
+    {"action": "assert", "label": "Milton shows the turn-in marker within reach", "actor": "reader",
+     "metric": "dialog_status", "entry": 1440, "equals": 10, "within_ms": 5000},
+    {"action": "reward_quest", "label": "Hand in the book", "actor": "reader", "quest": 337},
+    {"action": "assert", "label": "An Old History Book is rewarded", "actor": "reader", "metric": "quest_rewarded",
+     "quest": 337, "equals": 1}
+  ]
+}

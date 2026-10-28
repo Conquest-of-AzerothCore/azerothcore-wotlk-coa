@@ -21,6 +21,16 @@ TEST(CoAPrestige, GossipOptionsMatchTheClientWindow)
     EXPECT_EQ(PrestigedAura, 9930831u);
 }
 
+TEST(CoAPrestige, LoginCatchesUpThePrestigeAchievementsALevelIsMissing)
+{
+    EXPECT_EQ(MissingPrestigeCredits(0, 0), 0u);
+    EXPECT_EQ(MissingPrestigeCredits(1, 0), 1u);
+    EXPECT_EQ(MissingPrestigeCredits(3, 1), 2u);
+    EXPECT_EQ(MissingPrestigeCredits(3, 3), 0u);
+    EXPECT_EQ(MissingPrestigeCredits(12, 4), 6u);
+    EXPECT_EQ(MissingPrestigeCredits(12, 10), 0u);
+}
+
 TEST(CoAPrestige, StateRoundTripsThroughTheSetting)
 {
     State const state{ 3, true, 25 };
@@ -32,10 +42,11 @@ TEST(CoAPrestige, StateRoundTripsThroughTheSetting)
     EXPECT_EQ(DecodeState({ 2, 0, 31 }), (State{ 2, false, 31 }));
 }
 
-TEST(CoAPrestige, ActivationNeedsTheLevelAClassAndASpecialization)
+TEST(CoAPrestige, ActivationNeedsTheLevelAndASpecialization)
 {
     ActivationFacts ready;
     ready.level = 60;
+    ready.requiredLevel = 60;
     ready.specialization = 25;
     EXPECT_EQ(CheckActivation(ready), Refusal::None);
 
@@ -52,10 +63,6 @@ TEST(CoAPrestige, ActivationNeedsTheLevelAClassAndASpecialization)
     EXPECT_EQ(CheckActivation(facts), Refusal::Disabled);
 
     facts = ready;
-    facts.customClass = false;
-    EXPECT_EQ(CheckActivation(facts), Refusal::NotCustomClass);
-
-    facts = ready;
     facts.active = true;
     EXPECT_EQ(CheckActivation(facts), Refusal::InProgress);
 
@@ -68,6 +75,7 @@ TEST(CoAPrestige, ActivationNeedsAQuietMomentInTheOpenWorld)
 {
     ActivationFacts ready;
     ready.level = 60;
+    ready.requiredLevel = 60;
     ready.specialization = 25;
 
     ActivationFacts facts = ready;
@@ -93,7 +101,7 @@ TEST(CoAPrestige, RefusalsExplainThemselves)
     EXPECT_EQ(RefusalMessage(Refusal::BelowLevel, 60),
         "You must be level 60 or higher to participate in Prestige Mode");
     EXPECT_TRUE(RefusalMessage(Refusal::None, 60).empty());
-    for (Refusal refusal : { Refusal::Disabled, Refusal::NotCustomClass, Refusal::InProgress, Refusal::NoSpecialization,
+    for (Refusal refusal : { Refusal::Disabled, Refusal::InProgress, Refusal::NoSpecialization,
              Refusal::Dead, Refusal::InCombat, Refusal::Travelling, Refusal::NotInOpenWorld })
         EXPECT_FALSE(RefusalMessage(refusal, 60).empty());
 }
@@ -111,7 +119,18 @@ TEST(CoAPrestige, TheSpecializationStaysLockedWhilePrestiging)
         "Your active specialization is prestige locked until you reach level 60.");
 }
 
-TEST(CoAPrestige, OnlyOrdinaryZoneQuestsAreReplayed)
+TEST(CoAPrestige, CompletedPrestigeKeepsOnlySignatureRestorationPending)
+{
+    State const pending{ 1, false, 17, true };
+    EXPECT_EQ(EncodeState(pending), (std::vector<uint32_t>{ 1, 0, 17, 1 }));
+    EXPECT_EQ(DecodeState(EncodeState(pending)), pending);
+    EXPECT_TRUE(IsSpecializationSwitchAllowed(DecodeState(EncodeState(pending)), 18));
+
+    EXPECT_FALSE(DecodeState({ 1, 0, 17 }).signaturePending);
+    EXPECT_FALSE(DecodeState({ 1, 0, 17, 0 }).signaturePending);
+}
+
+TEST(CoAPrestige, OnlyLevellingZoneAndDungeonQuestsAreReplayed)
 {
     QuestTraits const zoneQuest{ 12, 20, QuestTypeNormal, false };
     EXPECT_TRUE(IsReplayableQuest(zoneQuest, 60));
@@ -122,9 +141,10 @@ TEST(CoAPrestige, OnlyOrdinaryZoneQuestsAreReplayed)
     quest.type = QuestTypeEscort;
     EXPECT_TRUE(IsReplayableQuest(quest, 60));
 
+    quest.type = QuestTypeDungeon;
+    EXPECT_TRUE(IsReplayableQuest(quest, 60)) << "dungeon";
+
     quest = zoneQuest;
-    quest.type = 81;
-    EXPECT_FALSE(IsReplayableQuest(quest, 60)) << "dungeon";
     quest.type = 62;
     EXPECT_FALSE(IsReplayableQuest(quest, 60)) << "raid";
     quest.type = 41;
@@ -145,8 +165,18 @@ TEST(CoAPrestige, OnlyOrdinaryZoneQuestsAreReplayed)
     EXPECT_FALSE(IsReplayableQuest(quest, 60));
     quest.level = 60;
     EXPECT_TRUE(IsReplayableQuest(quest, 60));
-    quest.level = -1;
-    EXPECT_FALSE(IsReplayableQuest(quest, 60)) << "scales with the player";
+    quest.level = 0;
+    EXPECT_FALSE(IsReplayableQuest(quest, 60));
+
+    quest = zoneQuest;
+    quest.level = ScaledQuestLevel;
+    quest.minLevel = 3;
+    EXPECT_TRUE(IsReplayableQuest(quest, 60)) << "scales with the player";
+    quest.minLevel = 61;
+    EXPECT_FALSE(IsReplayableQuest(quest, 60)) << "scales, but opens above the Prestige level";
+    quest.minLevel = 3;
+    quest.zoneOrSort = -161;
+    EXPECT_FALSE(IsReplayableQuest(quest, 60)) << "scaled class quest";
 }
 
 TEST(CoAPrestige, RewardsParseAsItemCountPairs)
@@ -219,4 +249,22 @@ TEST(CoAPrestige, ThePrestigeDailiesAreExemptFromTheQuestReset)
     EXPECT_FALSE(IsPrestigeDaily(0));
     EXPECT_FALSE(IsPrestigeDaily(1));
     EXPECT_FALSE(IsPrestigeDaily(900001));
+}
+
+TEST(CoAPrestige, RealmCapControlsActivationAndCompletionThreshold)
+{
+    for (uint32_t cap : { 60u, 70u, 80u })
+    {
+        uint32_t const level = ResolveRequiredLevel(cap);
+        EXPECT_EQ(level, cap);
+        ActivationFacts facts;
+        facts.requiredLevel = level;
+        facts.specialization = 1;
+        facts.level = cap - 1;
+        EXPECT_EQ(CheckActivation(facts), Refusal::BelowLevel);
+        facts.level = cap;
+        EXPECT_EQ(CheckActivation(facts), Refusal::None);
+        EXPECT_NE(SpecializationLockedMessage(level).find(std::to_string(cap)), std::string::npos);
+    }
+    EXPECT_EQ(ResolveRequiredLevel(1), 2u);
 }

@@ -588,6 +588,22 @@ class aura_ascension_lightning_cage : public AuraScript
             EFFECT_0, SPELL_AURA_MOD_DECREASE_SPEED, AURA_EFFECT_HANDLE_REAL);
     }
 };
+
+class spell_ascension_stormbringer_aether_current : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_stormbringer_aether_current);
+
+    void SuppressHover(SpellEffIndex index)
+    {
+        PreventHitDefaultEffect(index);
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_ascension_stormbringer_aether_current::SuppressHover,
+            EFFECT_1, SPELL_EFFECT_APPLY_AURA);
+    }
+};
 }
 
 void AddSC_AscensionStormbringerTalents()
@@ -596,6 +612,7 @@ void AddSC_AscensionStormbringerTalents()
     new stormbringer_pulse_conversion();
     new stormbringer_resource_contracts();
     RegisterSpellScript(spell_ascension_stormbringer_cooldown_reduction);
+    RegisterSpellScript(spell_ascension_stormbringer_aether_current);
     RegisterSpellScript(aura_ascension_barometric_pressure);
     RegisterSpellScript(aura_ascension_electrical_charge);
     RegisterSpellScript(aura_ascension_thorims_gift);

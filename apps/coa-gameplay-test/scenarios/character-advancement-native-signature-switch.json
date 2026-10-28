@@ -1,0 +1,380 @@
+{
+  "schema": 1,
+  "name": "Native archetype uploads apply shared signatures and charge for omitted purchases",
+  "contract": "ChrSpecs 26 (Sanguine) uses shared entry 29543 for Scarlet Delirium 801074; ChrSpecs 99 (Eternal) uses\nshared entry 31117 for Blood Pact 801955. Each costs 1 AE; the level-11 Bloodmage budget is 1 AE / 1 TE.\nOriginal DLL LeaveSpec removes the old signature and EnterSpec inserts the new signature and identity\ninto the complete CMSG 0x727 upload. Rotclaw 30191 (804197, 1 TE) has no FREE_UNLEARN flag. The original\nlevel-11 first unlearn price is 32 * 11 / 4 = 88 copper. A penniless switch must refuse atomically. A\nfunded switch applies exactly the uploaded identity and signature, charges 88 copper, and removes\nRotclaw. Returning with only identity and signature must leave the omitted purchase absent, with no\nadditional signature-removal charge. An explicit native purchase restores Rotclaw. Saved specialization\nslots are separate presets.",
+  "timeout_ms": 30000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 11
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Settle login",
+      "ms": 5000
+    },
+    {
+      "action": "specialization",
+      "label": "Choose Sanguine",
+      "actor": "bloodmage",
+      "id": 26
+    },
+    {
+      "action": "assert",
+      "label": "Sanguine owns Scarlet Delirium",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 801074,
+      "equals": 1
+    },
+    {
+      "action": "client_packet",
+      "label": "Apply the native Eternal identity and Blood Pact signature",
+      "actor": "bloodmage",
+      "opcode": 1831,
+      "fields": [
+        {
+          "u32": 2
+        },
+        {
+          "u32": 4027
+        },
+        {
+          "u32": 1
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 31117
+        },
+        {
+          "u32": 1
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Eternal receives Blood Pact from the uploaded shared tree",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 801955,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The departed Scarlet Delirium signature is removed",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 801074,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Purchase Rotclaw in Eternal",
+      "actor": "bloodmage",
+      "entry": 30191,
+      "rank": 1
+    },
+    {
+      "action": "client_packet",
+      "label": "Submit a paid removal without money",
+      "actor": "bloodmage",
+      "opcode": 1831,
+      "fields": [
+        {
+          "u32": 2
+        },
+        {
+          "u32": 4025
+        },
+        {
+          "u32": 1
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 29543
+        },
+        {
+          "u32": 1
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The native switch refuses the unpaid removal",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "equals": 1,
+      "opcode": 1836,
+      "text": "CA_UPDATE_ENTRIES_BAD_UPDATE_COSTS",
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "A refused upload preserves Eternal",
+      "actor": "bloodmage",
+      "metric": "player_setting",
+      "equals": 99,
+      "source": "core.ascension_active_spec",
+      "index": 0
+    },
+    {
+      "action": "assert",
+      "label": "A refused upload preserves Rotclaw",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "equals": 1,
+      "spell": 804197
+    },
+    {
+      "action": "assert",
+      "label": "A refused upload preserves Blood Pact",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "equals": 1,
+      "spell": 801955
+    },
+    {
+      "action": "assert",
+      "label": "A refused upload grants no Scarlet Delirium",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "equals": 0,
+      "spell": 801074
+    },
+    {
+      "action": "set_money",
+      "actor": "bloodmage",
+      "value": 100000,
+      "label": "Fund the independently derived 88-copper removal"
+    },
+    {
+      "action": "client_packet",
+      "label": "Apply the native Sanguine signature",
+      "actor": "bloodmage",
+      "opcode": 1831,
+      "fields": [
+        {
+          "u32": 2
+        },
+        {
+          "u32": 4025
+        },
+        {
+          "u32": 1
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 29543
+        },
+        {
+          "u32": 1
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Sanguine receives Scarlet Delirium again",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 801074,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Blood Pact is removed on leaving Eternal",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 801955,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The paid upload removes the omitted Eternal talent",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 804197,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Only the original 88-copper removal price is charged",
+      "actor": "bloodmage",
+      "metric": "carried_money",
+      "equals": 99912
+    },
+    {
+      "action": "client_packet",
+      "label": "Return to Eternal through the same native baseline upload",
+      "actor": "bloodmage",
+      "opcode": 1831,
+      "fields": [
+        {
+          "u32": 2
+        },
+        {
+          "u32": 4027
+        },
+        {
+          "u32": 1
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 31117
+        },
+        {
+          "u32": 1
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Eternal receives its correct shared-tree signature",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 801955,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The old Sanguine signature does not survive",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 801074,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Returning does not inject an omitted talent from history",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "equals": 0,
+      "spell": 804197,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Switching signatures adds no removal fee",
+      "actor": "bloodmage",
+      "metric": "carried_money",
+      "equals": 99912
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Repurchase through the complete native upload",
+      "actor": "bloodmage",
+      "entry": 30191,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "label": "An explicit native repurchase grants Rotclaw",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "equals": 1,
+      "spell": 804197
+    }
+  ]
+}

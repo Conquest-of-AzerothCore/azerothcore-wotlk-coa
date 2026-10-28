@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "name": "Frozen Slam native cast damages its target",
+  "contract": [
+    "Frozen Slam 903130-903139 (ranks 1-10) are dummy-effect spells promising 64% weapon damage plus a flat",
+    "Froststrike amount through helper 903245; nothing bound them before this fix, so casting spent rage and",
+    "the helper never ran (#8774).",
+    "A proficient equipped weapon, native hit and expertise fixtures isolate the normal cast from avoidance.",
+    "One cast of rank 2 (903131) must damage the enemy and execute its damage helper exactly once; one cast",
+    "of rank 1 (903130) must do the same, proving the fix covers the full rank chain, not just one id."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "console", "command": "coa gamemode WildCard on Harnessa"},
+    {"action": "learn", "actor": "hero", "spell": 201},
+    {"action": "learn", "actor": "hero", "spell": 903131},
+    {"action": "add_item", "actor": "hero", "item": 25},
+    {"action": "equip", "actor": "hero", "item": 25, "slot": 15},
+    {"action": "set_power", "actor": "hero", "power": 1, "value": 1000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "enemy_before_rank2"},
+    {"action": "cast", "actor": "hero", "spell": 903131, "target": "enemy"},
+    {"action": "assert", "actor": "hero", "metric": "cast_failure", "spell": 903131, "equals": 0},
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "health",
+      "relative_to": "enemy_before_rank2",
+      "max": -1,
+      "within_ms": 3000
+    },
+    {"action": "assert", "actor": "hero", "metric": "spell_cast_count", "spell": 903245, "equals": 1},
+    {"action": "wait", "ms": 1600},
+    {"action": "learn", "actor": "hero", "spell": 903130},
+    {"action": "set_power", "actor": "hero", "power": 1, "value": 1000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "enemy_before_rank1"},
+    {"action": "cast", "actor": "hero", "spell": 903130, "target": "enemy"},
+    {"action": "assert", "actor": "hero", "metric": "cast_failure", "spell": 903130, "equals": 0},
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "health",
+      "relative_to": "enemy_before_rank1",
+      "max": -1,
+      "within_ms": 3000
+    },
+    {"action": "assert", "actor": "hero", "metric": "spell_cast_count", "spell": 903245, "equals": 2, "within_ms": 3000}
+  ]
+}

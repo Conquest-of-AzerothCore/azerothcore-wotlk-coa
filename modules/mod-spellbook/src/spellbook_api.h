@@ -8,6 +8,7 @@
 #define SPELLBOOK_API_H
 
 #include <cstdint>
+#include <vector>
 #include "CoASpellbook.h"
 
 class Player;
@@ -34,6 +35,10 @@ namespace Spellbook
     /// wants - "the class gets this spell" - because a row that has been bought correctly
     /// leaves the window and must not read as a spell that went missing.
     bool CoversSpell(Player *player, uint32 spellId);
+
+    /// The upgrade ranks this book sells to the player's class above the given level
+    /// (SpellbookRankData), which the class ability tables do not list.
+    std::vector<uint32> UpgradeRanksAbove(Player *player, uint8 level);
 }
 
 #endif

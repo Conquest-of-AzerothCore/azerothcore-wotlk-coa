@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Belduna sells food and drink, and her Roasted Kodo Meat leaves the eater Well Fed",
+  "contract": [
+    "rev_20261004_90_coa_belduna_vendor makes Belduna 161838 a Food & Drink vendor: Roasted Kodo Meat 5474 and Strider",
+    "Stew 5477, which leave the eater Well Fed, the 13 meats of Kaga Mistrunner 3025 and six drinks of Moodan Sungrain",
+    "3883. Expected: her shop opens with 21 items, and a player who eats her kodo meat for over 10 seconds is Well Fed",
+    "(19705)."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 1, "x": -2712.6, "y": 19.0, "z": 14.5, "o": 0},
+  "players": [{"id": "hero", "race": 6, "class": 1, "level": 5}],
+  "creatures": [{"id": "belduna", "owner": "hero", "entry": 161838, "faction": 35, "level": 5, "distance": 2}],
+  "steps": [
+    {"action": "wait", "ms": 500},
+    {"action": "client_packet", "label": "Ask Belduna for her wares", "actor": "hero", "opcode": 414,
+     "fields": [{"actor_guid": "belduna"}], "consumed": false},
+    {"action": "assert", "label": "Her shop opens", "actor": "hero", "metric": "vendor_list_packets", "equals": 1,
+     "within_ms": 2000},
+    {"action": "assert", "label": "She sells the kodo meat, meats and drinks", "actor": "hero",
+     "metric": "vendor_items", "equals": 21},
+    {"action": "set_health", "actor": "hero", "value": 10},
+    {"action": "add_item", "actor": "hero", "item": 5474, "count": 1},
+    {"action": "use_item", "actor": "hero", "item": 5474, "spell": 553025},
+    {"action": "assert", "label": "The hero eats", "actor": "hero", "metric": "aura", "spell": 553025, "equals": 1,
+     "within_ms": 2000},
+    {"action": "assert", "label": "Not yet Well Fed", "actor": "hero", "metric": "aura", "spell": 19705, "equals": 0},
+    {"action": "assert", "label": "Well Fed after 10 seconds of eating", "actor": "hero", "metric": "aura",
+     "spell": 19705, "equals": 1, "within_ms": 12000}
+  ]
+}

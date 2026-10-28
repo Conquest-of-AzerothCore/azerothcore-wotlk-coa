@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Ravager's minimum range removal reaches the client as a visible aura (#7294, #7295, #7337)",
+  "contract": "Ravager 92116 (Ranger Level 10 Passive, the Brigand identity granted by ChrSpecs 30 Dueling) reads 'Removes the minimum range of your ranged abilities.' Its SPELL_AURA_ASCENSION_IGNORE_MIN_RANGE (312) effect already makes the server ignore the 5 yd minimum of SpellRange 54 shots such as Quick Shot 500074, Serrated Shot 500073 and Cutthroat 800359 (#5479, #5745). The 3.3.5 client checks minimum range itself and never sends a cast it judges too close, so it must see the aura. Aura::CanBeSentToClient sends a passive aura only with an area aura effect or SPELL_AURA_ABILITY_IGNORE_AURASTATE, so before the fix Ravager has no client-visible aura slot and players keep 'Target too close' on every shot that has a minimum range, while Skullpiercer 802036 (SpellRange 4, no minimum) works. Expected: after choosing the Dueling specialization at level 10 the Ranger knows Ravager, carries its aura in a client-visible slot, keeps it there after a relog, and the server accepts Quick Shot at 2 yds.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 10 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "ranger", "entry": 36, "level": 10, "health": 500000, "distance": 2 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the character settle", "ms": 3000 },
+    { "action": "specialization", "actor": "ranger", "id": 30, "label": "Choose the Dueling (Brigand) specialization" },
+    {
+      "action": "assert", "label": "SETUP: the Brigand specialization grants Ravager", "actor": "ranger",
+      "metric": "knows_spell", "spell": 92116, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: the Ravager aura is applied", "actor": "ranger",
+      "metric": "aura", "spell": 92116, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Ravager aura occupies a client-visible slot", "actor": "ranger",
+      "metric": "aura_visible", "spell": 92116, "equals": 1
+    },
+    { "action": "relog", "actor": "ranger" },
+    {
+      "action": "assert", "label": "After a relog the Ravager aura is still client-visible", "actor": "ranger",
+      "metric": "aura_visible", "spell": 92116, "equals": 1, "within_ms": 5000
+    },
+    { "action": "learn", "actor": "ranger", "spell": 500074 },
+    { "action": "add_item", "actor": "ranger", "item": 2504 },
+    { "action": "equip", "actor": "ranger", "item": 2504, "slot": 17 },
+    { "action": "add_item", "actor": "ranger", "item": 25 },
+    { "action": "equip", "actor": "ranger", "item": 25, "slot": 15 },
+    { "action": "wait", "label": "Let the equipment settle", "ms": 1500 },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 100 },
+    { "action": "cast", "actor": "ranger", "spell": 500074, "target": "dummy" },
+    {
+      "action": "assert", "label": "CONTROL: the server accepts Quick Shot at 2 yds with Ravager", "actor": "ranger",
+      "metric": "cast_failure", "spell": 500074, "equals": 0, "within_ms": 3000
+    }
+  ]
+}

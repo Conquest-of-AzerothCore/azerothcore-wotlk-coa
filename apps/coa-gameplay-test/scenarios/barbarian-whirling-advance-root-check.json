@@ -1,33 +1,138 @@
 {
   "schema": 1,
   "name": "Whirling Advance is blocked while rooted (#5148)",
-  "contract": "Whirling Advance's own tooltip states 'Not usable while rooted.' Its effect 1 is SPELL_EFFECT_CHARGE_DEST (Spell.dbc), but Spell::CheckCast (Spell.cpp) only tests UNIT_STATE_ROOT inside case SPELL_EFFECT_CHARGE; there is no case for SPELL_EFFECT_CHARGE_DEST, so a rooted caster's cast silently skipped the root check and could still land. spell_ascension_barbarian_ability now registers OnCheckCast for any spell carrying SPELL_EFFECT_CHARGE_DEST and fails it with SPELL_FAILED_ROOTED (103) while UNIT_STATE_ROOT is set, mirroring the core's own SPELL_EFFECT_CHARGE handling. Frostbite 12494 (a plain SPELL_AURA_MOD_ROOT aura, same fixture idiom as runemaster-ley-walker.json) is applied to the Barbarian with set_aura purely to raise UNIT_STATE_ROOT, and removed the same way to prove the ability is not blocked outright.",
+  "contract": [
+    "Whirling Advance's own tooltip states 'Not usable while rooted.' Its effect 1 is SPELL_EFFECT_CHARGE_DEST",
+    "(Spell.dbc), but Spell::CheckCast (Spell.cpp) only tests UNIT_STATE_ROOT inside case SPELL_EFFECT_CHARGE;",
+    "there is no case for SPELL_EFFECT_CHARGE_DEST, so a rooted caster's cast silently skipped the root check",
+    "and could still land. spell_ascension_barbarian_ability now registers OnCheckCast for any spell carrying",
+    "SPELL_EFFECT_CHARGE_DEST and fails it with SPELL_FAILED_ROOTED (103) while UNIT_STATE_ROOT is set,",
+    "mirroring the core's own SPELL_EFFECT_CHARGE handling. Frostbite 12494 (a plain SPELL_AURA_MOD_ROOT aura,",
+    "same fixture idiom as runemaster-ley-walker.json) is applied to the Barbarian with set_aura purely to",
+    "raise UNIT_STATE_ROOT, and removed the same way to prove the ability is not blocked outright. The",
+    "successful unrooted control requires real damage. Original 504913 uses MELEE hit resolution without",
+    "guaranteed-hit attributes, so native melee hit and expertise are supplied while preserving both rooted",
+    "refusal and unrooted success checks."
+  ],
   "timeout_ms": 60000,
   "players": [
-    { "id": "b", "race": 1, "class": 12, "level": 60 }
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
   ],
   "creatures": [
-    { "id": "e", "owner": "b", "entry": 36, "level": 60, "health": 500000, "distance": 8 }
+    {
+      "id": "e",
+      "owner": "b",
+      "entry": 36,
+      "level": 60,
+      "health": 500000,
+      "distance": 8
+    }
   ],
   "steps": [
-    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
-
-    { "action": "learn", "actor": "b", "spell": 504913 },
-    { "action": "set_power", "actor": "b", "power": 3, "value": 100 },
-
-    { "action": "set_aura", "actor": "b", "spell": 12494, "stacks": 1 },
-    { "action": "assert", "label": "Fixture: the Barbarian is rooted", "actor": "b", "metric": "rooted", "equals": 1 },
-
-    { "action": "cast", "actor": "b", "spell": 504913, "target": "e" },
-    { "action": "assert", "label": "Whirling Advance fails with SPELL_FAILED_ROOTED while rooted", "actor": "b", "metric": "cast_failure", "spell": 504913, "equals": 103 },
-    { "action": "assert", "label": "Whirling Advance did not land while rooted", "actor": "e", "metric": "health", "equals": 500000, "within_ms": 2000 },
-
-    { "action": "set_aura", "actor": "b", "spell": 12494, "stacks": 0 },
-    { "action": "assert", "label": "Fixture: the root is gone", "actor": "b", "metric": "rooted", "equals": 0 },
-
-    { "action": "set_power", "actor": "b", "power": 3, "value": 100 },
-    { "action": "cast", "actor": "b", "spell": 504913, "target": "e" },
-    { "action": "assert", "label": "Whirling Advance is not blocked once the root is gone", "actor": "b", "metric": "cast_failure", "spell": 504913, "equals": 0 },
-    { "action": "assert", "label": "Whirling Advance lands once unrooted", "actor": "e", "metric": "health", "max": 499999, "within_ms": 3000 }
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 504913
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "b",
+      "spell": 12494,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Fixture: the Barbarian is rooted",
+      "actor": "b",
+      "metric": "rooted",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "melee_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 504913,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "label": "Whirling Advance fails with SPELL_FAILED_ROOTED while rooted",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 504913,
+      "equals": 103
+    },
+    {
+      "action": "assert",
+      "label": "Whirling Advance did not land while rooted",
+      "actor": "e",
+      "metric": "health",
+      "equals": 500000,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "b",
+      "spell": 12494,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Fixture: the root is gone",
+      "actor": "b",
+      "metric": "rooted",
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 504913,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "label": "Whirling Advance is not blocked once the root is gone",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 504913,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Whirling Advance lands once unrooted",
+      "actor": "e",
+      "metric": "health",
+      "max": 499999,
+      "within_ms": 3000
+    }
   ]
 }

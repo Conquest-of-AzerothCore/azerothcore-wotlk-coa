@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Dreadwake hits an enemy 28.6 degrees off the Reaper's facing (#5353)",
+  "contract": [
+    "Every Dreadwake rank (803992, 503286-503289, 503324, 503531) targets TARGET_UNIT_CONE_ENEMY_24 with a 12 yd",
+    "radius. Without a spell_cone row the core read the enum suffix as 24 degrees (+/-12), so the 'wave of souls'",
+    "missed enemies plainly in front of the Reaper. The first-rank spell_cone row restores the core's former 90",
+    "degrees for the whole chain, as for Flames of Xoroth. Fixture: orientation 0.5 with the golem 3 yd along +X,",
+    "28.6 degrees off the facing - inside 90, outside 24. Expected: rank 7 damages the golem once."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0.5},
+  "players": [
+    {"id": "p", "race": 1, "class": 30, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000,
+     "spell_hit_rating": 10000, "allow_regeneration": false}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "p", "entry": 36, "level": 60, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 5000},
+    {"action": "learn", "actor": "p", "spell": 197},
+    {"action": "set_skill", "actor": "p", "skill": 172, "value": 300, "maximum": 300},
+    {"action": "add_item", "actor": "p", "item": 12282},
+    {"action": "equip", "actor": "p", "item": 12282, "slot": 15},
+    {"action": "wait", "label": "Let the weapon swap cooldown expire", "ms": 2000},
+    {"action": "learn", "actor": "p", "spell": 503531},
+    {"action": "set_power", "actor": "p", "power": 6, "value": 1000},
+    {"action": "cast", "label": "Dreadwake rank 7", "actor": "p", "spell": 503531, "target": "dummy"},
+    {"action": "assert", "label": "Rank 7 hits the golem 28.6 degrees off the facing", "actor": "p",
+     "metric": "spell_damage_count", "spell": 503531, "target": "dummy", "equals": 1, "within_ms": 3000}
+  ]
+}

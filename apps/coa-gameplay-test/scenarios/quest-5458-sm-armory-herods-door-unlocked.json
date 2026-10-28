@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "name": "Scarlet Monastery Armory: Herod's Door needs no Scarlet Key (#5458)",
+  "contract": "#5458: a Dungeon Finder group reached the Armory door (map 189, 1930.32 -432.03 18.0) without The Scarlet Key, which nothing in Dungeon Finder hands out. The door there is Herod's Door 101854 (guid 32250); stock data locks it with Lock.dbc 299 (Scarlet Key 7146 / Lockpicking 175) plus GO_FLAG_LOCKED, which the client enforces. Ascension's client captures and the SUB dump list it with no lock, and rev_20261003_10_dm_maraudon.sql clears Data1 and GO_FLAG_LOCKED. Expected: the server answers the client's gameobject query for 101854 with type 0, displayId 444 and Data1 0.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 189,
+    "x": 1930.32,
+    "y": -432.03,
+    "z": 18.008,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where Herod's Door is spawned",
+      "actor": "c",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the Armory grid activate",
+      "ms": 2500
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the server about Herod's Door the way the client does when the object comes into view",
+      "actor": "c",
+      "opcode": 94,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 101854
+        },
+        {
+          "u64": 32250
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: 101854 answers as a door (type 0)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 95,
+      "row": 101854,
+      "offset": 4,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: and as Herod's Door model, displayId 444",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 95,
+      "row": 101854,
+      "offset": 8,
+      "index": 0,
+      "equals": 444,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Herod's Door carries no lock (stock lock 299 asks for The Scarlet Key 7146 or Lockpicking 175)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 95,
+      "row": 101854,
+      "offset": 12,
+      "index": 1,
+      "equals": 0,
+      "within_ms": 4000,
+      "skip_strings": 7
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Herod's Door stands 3.4 yd from where the report was filed",
+      "actor": "c",
+      "metric": "nearby_gameobject_count",
+      "entry": 101854,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Click the door, as a client does once it has no lock to refuse",
+      "actor": "c",
+      "entry": 101854
+    }
+  ]
+}

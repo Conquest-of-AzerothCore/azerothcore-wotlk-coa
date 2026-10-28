@@ -25,6 +25,7 @@
 #include "AddonMgr.h"
 #include "ArenaSeasonMgr.h"
 #include "ArenaTeamMgr.h"
+#include "AscensionServerMessageTime.h"
 #include "AuctionHouseMgr.h"
 #include "AutobroadcastMgr.h"
 #include "BattlefieldMgr.h"
@@ -408,11 +409,15 @@ void World::SetInitialWorldSettings()
     LOG_INFO("server.loading", "Loading Spell Cooldown Overrides...");
     sSpellMgr->LoadSpellCooldownOverrides();
 
+    sSpellMgr->LoadSpellTwins(false);
+
     LOG_INFO("server.loading", "Loading SpellInfo Data Corrections...");
     sSpellMgr->LoadSpellInfoCorrections();
 
     LOG_INFO("server.loading", "Loading Spell Rank Data...");
     sSpellMgr->LoadSpellRanks();
+    sSpellMgr->LoadAddedSpellRanks();
+    sSpellMgr->LoadSpellTwins(true);
 
     LOG_INFO("server.loading", "Loading Spell Specific And Aura State...");
     sSpellMgr->LoadSpellSpecificAndAuraState();
@@ -545,6 +550,7 @@ void World::SetInitialWorldSettings()
 
     LOG_INFO("server.loading", "Loading Creature Template Addons...");
     sObjectMgr->LoadCreatureTemplateAddons();
+    sObjectMgr->LoadAscensionNpcOverheadIcons();
 
     LOG_INFO("server.loading", "Loading Reputation Reward Rates...");
     sObjectMgr->LoadReputationRewardRate();
@@ -560,6 +566,7 @@ void World::SetInitialWorldSettings()
 
     LOG_INFO("server.loading", "Loading Creature Base Stats...");
     sObjectMgr->LoadCreatureClassLevelStats();
+    Creature::LoadDungeonHealthOverrides();
 
     LOG_INFO("server.loading", "Loading Spawn Group Templates...");
     sObjectMgr->LoadSpawnGroupTemplates();
@@ -768,6 +775,7 @@ void World::SetInitialWorldSettings()
     LOG_INFO("server.loading", "Loading Profanity Names...");
     sObjectMgr->LoadProfanityNamesFromDB();
     sObjectMgr->LoadProfanityNamesFromDBC(); // Needs to be after LoadProfanityNamesFromDB()
+    sObjectMgr->LoadCoANameFilter();
 
     LOG_INFO("server.loading", "Loading Chat Filter...");
     sObjectMgr->LoadChatFilter();
@@ -1605,7 +1613,7 @@ void World::ShutdownMsg(bool show, Player* player, std::string const& reason)
     ///- Display a message every 12 hours, hour, 5 minutes, minute, 30 seconds, 10 seconds and finally seconds
     if (show || twelveHours || oneHour || fiveMin || oneMin || thirtySec || tenSec || oneSec)
     {
-        std::string str = secsToTimeString(_shutdownTimer).append(".");
+        std::string str = AscensionServerMessage::ShutdownTimeString(_shutdownTimer).append(".");
         if (!reason.empty())
             str += " - " + reason;
         // Display the reason every 12 hours, hour, 5 minutes, minute. At 60 seconds and at 10 seconds

@@ -1,0 +1,138 @@
+{
+  "schema": 1,
+  "name": "primalist-mend-animal-spirit-acquisition-5438",
+  "contract": "Wildwalker gains beast companionship through level-10 Spirit Beast Master 92148. The normal pet care bundle must include Mend Animal Spirit 570335, whose native periodic-heal aura targets the current pet for 15 seconds with 3-second ticks. Selecting Wildwalker at level 20 must teach the heal without a fixture learn, and a normal cast must actually heal a tamed pet. Removing the parent must remove the taught ability.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 31,
+      "level": 20
+    }
+  ],
+  "creatures": [
+    {
+      "id": "beast",
+      "owner": "p",
+      "entry": 1188,
+      "level": 19,
+      "health": 100000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "p",
+      "id": 59
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 92148,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 574301,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 570335,
+      "equals": 1,
+      "label": "Selecting Wildwalker teaches Mend Animal Spirit"
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 574301,
+      "target": "beast"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "pet_entry",
+      "equals": 1188,
+      "within_ms": 24000
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "pet": true,
+      "maximum": 2000,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "spell_effective_heal_total",
+      "spell": 570335,
+      "target": "p",
+      "target_pet": true,
+      "save_as": "before_mend"
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 570335,
+      "target_pet": true
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 570335,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "pet_aura_stacks",
+      "spell": 570335,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_effective_heal_total",
+      "spell": 570335,
+      "target": "p",
+      "target_pet": true,
+      "relative_to": "before_mend",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "p",
+      "spell": 92148
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 570335,
+      "equals": 0,
+      "label": "Removing Spirit Beast Master removes its taught heal"
+    }
+  ]
+}

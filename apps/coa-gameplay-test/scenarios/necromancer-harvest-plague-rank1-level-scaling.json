@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Necromancer Harvest Plague rank 1 siphon heal includes the per-level base points",
+  "contract": "Harvest Plague rank 1 (spell 500968) heals the caster each tick for the application's base roll times 0.30 plus the target's missing health fraction, as measured in live combat logs (2026-06..08). The roll is effect 0's DBC base 28 plus 0.833 per level from level 16, capped at 22, plus 1-3 and no spell power: 34-36 at level 80. Without the per-level points the roll is 29-31, which heals 8-9 at full target health and 34-37 at 10%.",
+  "timeout_ms": 120000,
+  "players": [ { "id": "n", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 } ],
+  "creatures": [ { "id": "dummy", "owner": "n", "entry": 36, "level": 10, "distance": 8, "health": 1000000 } ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 500968 },
+    { "action": "set_health", "actor": "n", "value": 1000 },
+    { "action": "cast", "actor": "n", "spell": 500968, "target": "dummy" },
+    { "action": "wait", "ms": 4000 },
+    { "action": "assert", "label": "Plague ticked on the enemy", "actor": "n", "metric": "spell_damage_count", "spell": 500968, "target": "dummy", "min": 1 },
+    { "action": "assert", "label": "One siphon heal after the first tick", "actor": "n", "metric": "spell_heal_count", "spell": 500968, "min": 1, "max": 1 },
+    { "action": "assert", "label": "Siphon on a full-health target heals 0.30 of the level-scaled roll", "actor": "n", "metric": "spell_heal_total", "spell": 500968, "min": 10, "max": 10 },
+    { "action": "set_health", "actor": "dummy", "value": 100000 },
+    { "action": "snapshot", "actor": "n", "metric": "spell_heal_count", "spell": 500968, "save_as": "count_before_low", "label": "count_before_low" },
+    { "action": "snapshot", "actor": "n", "metric": "spell_heal_total", "spell": 500968, "save_as": "heal_before_low", "label": "heal_before_low" },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "One siphon heal at 10% target health", "actor": "n", "metric": "spell_heal_count", "spell": 500968, "relative_to": "count_before_low", "min": 1, "max": 1 },
+    { "action": "assert", "label": "Siphon at 10% target health heals 1.20 of the level-scaled roll", "actor": "n", "metric": "spell_heal_total", "spell": 500968, "relative_to": "heal_before_low", "min": 40, "max": 43 }
+  ]
+}

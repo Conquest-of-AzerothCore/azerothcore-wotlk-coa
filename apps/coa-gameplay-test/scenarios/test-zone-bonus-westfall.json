@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Test zone bonus: no zone is a test zone by default; .testzone add doubles Westfall's kill and quest rewards",
+  "contract": "coa_test_zone_bonus starts empty, so no zone is a test zone until a GM adds one. At x1 dynamic experience a level-20 character earns the live Ascension rates outside test zones (see coa-prestige-experience in Elwynn Forest): 146 for a level-20 Gravelflint Scout kill, 456 experience and 150 Runes of Descension (375250) for Raven Hill (163). Westfall (40) therefore awards a normal 146 for a kill. '.testzone add 40' makes it a test zone at the default 200% experience, Runes of Descension and Bazaar Tokens: the next kill awards 292, and Raven Hill awards 912 experience and 300 Runes. '.testzone remove 40' leaves the table empty again.",
+  "timeout_ms": 240000,
+  "location": { "map": 0, "x": -9981.23, "y": 1226.25, "z": 42.0095, "o": 0 },
+  "players": [
+    {
+      "id": "tester",
+      "race": 1,
+      "class": 1,
+      "level": 20,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "melee_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "normal_target", "owner": "tester", "entry": 2158, "level": 20, "health": 20, "distance": 2 },
+    { "id": "target", "owner": "tester", "entry": 2158, "level": 20, "health": 20, "distance": 2 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "command", "actor": "tester", "command": ".xp 1" },
+
+    { "action": "snapshot", "actor": "tester", "metric": "xp", "save_as": "normal_kill" },
+    { "action": "attack", "actor": "tester", "target": "normal_target" },
+    { "action": "assert", "actor": "normal_target", "metric": "alive", "equals": 0, "within_ms": 45000 },
+    { "action": "assert", "label": "Westfall is not a test zone by default", "actor": "tester", "metric": "xp", "relative_to": "normal_kill", "equals": 146, "within_ms": 5000 },
+    { "action": "stop_attack", "actor": "tester" },
+
+    { "action": "console", "command": "testzone add 40" },
+    { "action": "snapshot", "actor": "tester", "metric": "xp", "save_as": "before_kill" },
+    { "action": "attack", "actor": "tester", "target": "target" },
+    { "action": "assert", "actor": "target", "metric": "alive", "equals": 0, "within_ms": 45000 },
+    { "action": "assert", "label": "A kill in Westfall as a test zone", "actor": "tester", "metric": "xp", "relative_to": "before_kill", "equals": 292, "within_ms": 5000 },
+    { "action": "stop_attack", "actor": "tester" },
+
+    { "action": "assert", "actor": "tester", "metric": "item_count", "item": 375250, "equals": 0 },
+    { "action": "prepare_quest", "actor": "tester", "quest": 163 },
+    { "action": "snapshot", "actor": "tester", "metric": "xp", "save_as": "before_quest" },
+    { "action": "reward_quest", "actor": "tester", "quest": 163 },
+    { "action": "assert", "label": "Raven Hill experience in Westfall", "actor": "tester", "metric": "xp", "relative_to": "before_quest", "equals": 912, "within_ms": 5000 },
+    { "action": "assert", "label": "Raven Hill Runes in Westfall", "actor": "tester", "metric": "item_count", "item": 375250, "equals": 300 },
+    { "action": "console", "command": "testzone remove 40" }
+  ]
+}

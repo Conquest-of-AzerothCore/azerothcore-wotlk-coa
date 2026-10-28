@@ -1,7 +1,24 @@
 {
   "schema": 1,
   "name": "Sin Eater adds 5 charges to Torchlight (#2201)",
-  "contract": "Sin Eater 680542 (installed Spell.dbc) is a passive family-21 spell with one effect: SPELL_AURA_ADD_FLAT_MODIFIER (107), misc 4 = SPELLMOD_CHARGES, base 4 die 1 -> +5, SpellClassMask[0] 0x80000. Torchlight 503662 is family 21 with SpellFamilyFlags[0] 0x80000, so the modifier applies to it. Its charge pool is the spell_proc row Charges = 5 in data/sql/updates/pending_db_world/rev_20260907_15_witch_hunter_torchlight.sql, read by Aura::CalcMaxCharges, which passes it through ApplySpellMod(SPELLMOD_CHARGES). The Description reads 'Increases the amount of next attacks that grant Flames of Sin through Torchlight by 5.' A control and a holder each cast Torchlight on their own dummy; the applied aura must hold 5 and 10 charges, and the native modifier query must give the same 5 -> 10. Whether the extra attacks then grant Flames of Sin is the existing Torchlight script's job and is not asserted here. MEASURED on slot 3: the control's Torchlight read 4 charges as soon as the aura was seen and the holder's 9 a moment later (10 minus the same one), so a charge is already spent by the cast's own hit (unverified mechanism); the scenario therefore compares the holder with the control after a settling wait instead of asserting the raw 5 and 10, which raced that first spend. The first run also lost the holder's cast once (aura absent for 3 s) while a rerun and a probe applied it, so each caster throws twice (a landed aura is simply refreshed, a missed throw is retried) before the aura and charge assertions; the cause of the lost throw was not identified.",
+  "contract": [
+    "Sin Eater 680542 (installed Spell.dbc) is a passive family-21 spell with one effect:",
+    "SPELL_AURA_ADD_FLAT_MODIFIER (107), misc 4 = SPELLMOD_CHARGES, base 4 die 1 -> +5, SpellClassMask[0]",
+    "0x80000. Torchlight 503662 is family 21 with SpellFamilyFlags[0] 0x80000, so the modifier applies to it.",
+    "Its charge pool is the spell_proc row Charges = 5 in",
+    "data/sql/updates/pending_db_world/rev_20260907_15_witch_hunter_torchlight.sql, read by",
+    "Aura::CalcMaxCharges, which passes it through ApplySpellMod(SPELLMOD_CHARGES). The Description reads",
+    "'Increases the amount of next attacks that grant Flames of Sin through Torchlight by 5.' A control and a",
+    "holder each cast Torchlight on their own dummy; the applied aura must hold 5 and 10 charges, and the",
+    "native modifier query must give the same 5 -> 10. Whether the extra attacks then grant Flames of Sin is",
+    "the existing Torchlight script's job and is not asserted here. MEASURED on slot 3: the control's",
+    "Torchlight read 4 charges as soon as the aura was seen and the holder's 9 a moment later (10 minus the",
+    "same one), so a charge is already spent by the cast's own hit (unverified mechanism); the scenario",
+    "therefore compares the holder with the control after a settling wait instead of asserting the raw 5 and",
+    "10, which raced that first spend. Original Torchlight uses the melee hit table. Both players supply",
+    "melee hit and expertise so independent miss, dodge and parry rolls do not decide this charge-modifier",
+    "regression. Each caster throws twice to verify the settled charge difference after an ordinary refresh."
+  ],
   "timeout_ms": 90000,
   "players": [
     {
@@ -11,7 +28,8 @@
       "level": 60,
       "spell_hit_rating": 10000,
       "ranged_hit_rating": 10000,
-      "melee_hit_rating": 10000
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
     },
     {
       "id": "sin",
@@ -20,7 +38,8 @@
       "level": 60,
       "spell_hit_rating": 10000,
       "ranged_hit_rating": 10000,
-      "melee_hit_rating": 10000
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
     }
   ],
   "creatures": [

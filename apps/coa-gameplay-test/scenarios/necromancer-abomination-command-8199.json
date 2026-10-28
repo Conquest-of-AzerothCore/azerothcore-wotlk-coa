@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Command: Undead makes the Abomination cast Zombie Plague (#8199)",
+  "contract": [
+    "Raise: Abomination 500335 summons creature 50068 (3 Life Force). Its Command effect reads 'Instantly unleashes an empowered disease cloud around it.' Command: Undead 504868 (family 29 word 2 0x1000000, the Command flag) reads 'Command your Undead minions to perform a unique attack on your target.'",
+    "DoAction's Abomination branch self-casts Zombie Plague 504022 (effect 0 SCHOOL_DAMAGE on nearby enemies around the caster). The report says the Abomination's Command does nothing at all.",
+    "With a same-level golem 4 yd away, capped caster spell hit, full mana and an explicit enemy target, one Command: Undead must produce at least one Zombie Plague damage event from the Abomination and no player-side cast failure. Before the repair the count stays 0."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "n", "entry": 36, "level": 80, "health": 1000000, "distance": 4 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and the Life Force aura settle", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 92123 },
+    { "action": "learn", "actor": "n", "spell": 680283 },
+    { "action": "learn", "actor": "n", "spell": 500335 },
+    { "action": "learn", "actor": "n", "spell": 504868 },
+    {
+      "action": "assert", "label": "SETUP: two Life Force passives raise the capacity to 4", "actor": "n",
+      "metric": "aura_stacks", "spell": 805011, "equals": 4, "within_ms": 3000
+    },
+    { "action": "set_power", "actor": "n", "power": 0, "value": 1500 },
+    { "action": "cast", "label": "Raise the Abomination", "actor": "n", "spell": 500335 },
+    {
+      "action": "assert", "label": "SETUP: one Abomination", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50068, "equals": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Let the Abomination take its formation place", "ms": 2000 },
+    {
+      "action": "assert", "label": "CONTROL: the Abomination has cast no Zombie Plague before the order", "actor": "n",
+      "metric": "spell_damage_count", "spell": 504022, "entry": 50068, "equals": 0
+    },
+    { "action": "set_power", "actor": "n", "power": 6, "value": 1000 },
+    { "action": "cast", "label": "Command: Undead on the golem", "actor": "n", "spell": 504868, "target": "golem" },
+    {
+      "action": "assert", "label": "CONTROL: the Command itself casts cleanly", "actor": "n",
+      "metric": "cast_failure", "spell": 504868, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Abomination's Command deals Zombie Plague damage", "actor": "n",
+      "metric": "spell_damage_count", "spell": 504022, "entry": 50068, "min": 1, "within_ms": 5000
+    }
+  ]
+}

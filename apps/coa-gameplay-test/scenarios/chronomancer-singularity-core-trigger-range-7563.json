@@ -1,0 +1,139 @@
+{
+  "schema": 1,
+  "name": "Singularity Core trigger reaches wand distance (#7563)",
+  "contract": "#7563: Singularity Core 804438 never adds damage to wand attacks or wand spells. Cause: its aura-42 effect triggers 804437, whose DBC RangeIndex 6 is Ten yards, while wand combat lands at 11-30 yd; Spell.cpp CheckCast enforces range even for triggered casts ('Triggered spells also have range check'), so every proc beyond 10 yd fizzles silently. The proc itself is sound: DBC ProcFlags 0x4001C0 cover DONE_RANGED_AUTO_ATTACK and DONE_SPELL_RANGED_DMG_CLASS at 100% chance, the generated entry's empty family/mask is a wildcard match, and 804437 carries USES_RANGED_SLOT so it scales off the equipped wand. Fix: chronomancer_time_contracts sets 804437's RangeEntry to 30 yards. The dummy stands at 15 yd: inside Wand of Time's range and the fixed trigger range, outside the broken 10 yd. Fails pre-fix (Wand of Time lands, 804437 never deals damage), passes after. Magic-class wand spells (Wand of Entropy, DmgClass MAGIC) never matched these proc flags by design and stay out of scope.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 60,
+      "ranged_hit_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "chronomancer",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "chronomancer",
+      "item": 5069
+    },
+    {
+      "action": "equip",
+      "label": "Wand attacks and the trigger need a wand in the ranged slot",
+      "actor": "chronomancer",
+      "item": 5069,
+      "slot": 17
+    },
+    {
+      "action": "wait",
+      "label": "Let the weapon swap cooldown expire",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "label": "Learn Singularity Core",
+      "spell": 804438
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "label": "Learn Wand of Time",
+      "spell": 520175
+    },
+    {
+      "action": "assert",
+      "label": "The mana fixture below stays inside the character's own pool",
+      "actor": "chronomancer",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1500
+    },
+    {
+      "action": "set_power",
+      "label": "Keep mana out of the experiment",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 1500
+    },
+    {
+      "action": "set_aura",
+      "label": "Echo Fragment stack Singularity Core needs to cast",
+      "actor": "chronomancer",
+      "spell": 804455,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "label": "Cast Singularity Core",
+      "spell": 804438
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "equals": 1,
+      "label": "SETUP: Singularity Core is up",
+      "metric": "aura",
+      "spell": 804438,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown clear",
+      "ms": 1800
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "label": "Fire Wand of Time at the 15-yard dummy",
+      "spell": 520175,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "equals": 0,
+      "label": "SETUP: Wand of Time cast accepted",
+      "metric": "cast_failure",
+      "spell": 520175
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "label": "SETUP: Wand of Time damaged the dummy",
+      "metric": "spell_damage_count",
+      "spell": 520175,
+      "target": "dummy",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "label": "DISCRIMINATING: Singularity Core trigger damaged the dummy at wand distance",
+      "metric": "spell_damage_count",
+      "spell": 804437,
+      "target": "dummy",
+      "min": 1,
+      "within_ms": 5000
+    }
+  ]
+}

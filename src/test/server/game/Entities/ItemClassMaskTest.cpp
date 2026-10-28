@@ -103,7 +103,16 @@ TEST(ItemClassMaskTest, LegacyBitsArePreservedAndNormalizationIsIdempotent)
     for (uint32 original = 0; original <= 2047; ++original)
     {
         uint32 normalized = GetItemAllowableClassMask(original);
-        EXPECT_EQ(normalized & 2047u, original) << original;
+        uint32 expectedLegacyBits = (original & 1535u) == 1535u ? original | ClassMask(CLASS_HERO) : original;
+        EXPECT_EQ(normalized & 2047u, expectedLegacyBits) << original;
         EXPECT_EQ(GetItemAllowableClassMask(normalized), normalized) << original;
     }
+}
+
+TEST(ItemClassMaskTest, HeroSharesItemsOpenToEveryWotLKClassOnly)
+{
+    EXPECT_NE(GetItemAllowableClassMask(1535) & ClassMask(CLASS_HERO), 0u);
+    EXPECT_EQ(GetItemAllowableClassMask(ClassMask(CLASS_DRUID)) & ClassMask(CLASS_HERO), 0u);
+    uint32 twoClassMask = ClassMask(CLASS_WARRIOR) | ClassMask(CLASS_PALADIN);
+    EXPECT_EQ(GetItemAllowableClassMask(twoClassMask) & ClassMask(CLASS_HERO), 0u);
 }

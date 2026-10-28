@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Disenchant: Twilight Cultist set pieces can be disenchanted (COA-7173)",
+  "contract": "The Twilight Cultist Cowl 20408, Mantle 20406 and Robe 20407 are uncommon item level 60 armour and use disenchant bracket 10 like their CoA copies. A character with Enchanting 300 casting Disenchant 13262 on the Cowl gets a disenchant loot window with at least one item, and closing it consumes the Cowl.",
+  "players": [
+    { "id": "enchanter", "race": 1, "class": 1, "level": 60 }
+  ],
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_skill", "actor": "enchanter", "skill": 333, "value": 300, "maximum": 300 },
+    { "action": "learn", "actor": "enchanter", "spell": 13262 },
+    { "action": "add_item", "actor": "enchanter", "item": 20408 },
+    { "action": "cast", "label": "Disenchant the Twilight Cultist Cowl", "actor": "enchanter", "spell": 13262, "target_item": 20408 },
+    { "action": "assert", "label": "the disenchant loot window holds materials",
+      "actor": "enchanter", "metric": "loot_count", "min": 1, "within_ms": 6000 },
+    { "action": "collect_loot", "actor": "enchanter" },
+    { "action": "close_loot", "actor": "enchanter" },
+    { "action": "assert", "label": "closing the loot window consumes the Cowl",
+      "actor": "enchanter", "metric": "item_count", "item": 20408, "equals": 0, "within_ms": 2000 }
+  ]
+}

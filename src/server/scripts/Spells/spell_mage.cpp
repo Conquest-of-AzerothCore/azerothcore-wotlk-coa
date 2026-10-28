@@ -65,6 +65,7 @@ enum MageSpells
     SPELL_MAGE_T10_2P_BONUS_EFFECT               = 70753,
     SPELL_MAGE_T8_4P_BONUS                       = 64869,
     SPELL_MAGE_HOT_STREAK_PROC                   = 48108,
+    SPELL_MAGE_HOT_HANDS                         = 275397,
     SPELL_MAGE_CHILLED_R1                        = 12484,
     SPELL_MAGE_CHILLED_R2                        = 12485,
     SPELL_MAGE_CHILLED_R3                        = 12486,
@@ -401,7 +402,7 @@ class spell_mage_glyph_of_eternal_water : public AuraScript
         if (Unit* target = GetTarget())
             if (Player* player = target->ToPlayer())
                 if (Pet* pet = player->GetPet())
-                    if (pet->GetEntry() == NPC_WATER_ELEMENTAL_PERM)
+                    if (GetStockPetEntry(pet->GetEntry()) == NPC_WATER_ELEMENTAL_PERM)
                         pet->Remove(PET_SAVE_NOT_IN_SLOT);
     }
 
@@ -444,7 +445,7 @@ public:
     {
         Unit* target = GetTarget();
 
-        if (AuraEffect* talentAurEff = target->GetAuraEffectOfRankedSpell(SPELL_MAGE_INCANTERS_ABSORBTION_R1, EFFECT_0))
+        if (AuraEffect* talentAurEff = target->GetAuraEffectOfRankedSpellOrTwin(SPELL_MAGE_INCANTERS_ABSORBTION_R1, EFFECT_0))
         {
             int32 bp = CalculatePct(absorbAmount, talentAurEff->GetAmount());
             if (AuraEffect* currentAura = target->GetAuraEffect(SPELL_AURA_MOD_DAMAGE_DONE, SPELLFAMILY_MAGE, 2941, EFFECT_0))
@@ -471,7 +472,7 @@ class spell_mage_blast_wave : public SpellScript
 
     void HandleKnockBack(SpellEffIndex effIndex)
     {
-        if (GetCaster()->HasAura(SPELL_MAGE_GLYPH_OF_BLAST_WAVE))
+        if (GetCaster()->HasAuraOrTwin(SPELL_MAGE_GLYPH_OF_BLAST_WAVE))
             PreventHitDefaultEffect(effIndex);
     }
 
@@ -546,7 +547,7 @@ class spell_mage_fire_frost_ward : public spell_mage_incanters_absorbtion_base_A
     void Absorb(AuraEffect* aurEff, DamageInfo& dmgInfo, uint32& absorbAmount)
     {
         Unit* target = GetTarget();
-        if (AuraEffect* talentAurEff = target->GetAuraEffectOfRankedSpell(SPELL_MAGE_FROST_WARDING_R1, EFFECT_0))
+        if (AuraEffect* talentAurEff = target->GetAuraEffectOfRankedSpellOrTwin(SPELL_MAGE_FROST_WARDING_R1, EFFECT_0))
         {
             int32 chance = talentAurEff->GetSpellInfo()->Effects[EFFECT_1].CalcValue(); // SPELL_EFFECT_DUMMY with NO_TARGET
 
@@ -846,6 +847,8 @@ class spell_mage_master_of_elements : public AuraScript
             && !spellInfo->ManaCost && !spellInfo->ManaCostPercentage)
         {
             uint8 rank = sSpellMgr->GetSpellRank(spellInfo->Id);
+            if (rank > sSpellMgr->GetSpellRank(sSpellMgr->GetLastSpellInChain(SPELL_MAGE_LIVING_BOMB_R1)))
+                return;
             spellInfo = sSpellMgr->GetSpellInfo(
                 sSpellMgr->GetSpellWithRank(SPELL_MAGE_LIVING_BOMB_R1, rank));
             if (!spellInfo)
@@ -938,7 +941,7 @@ class spell_mage_summon_water_elemental : public SpellScript
                 pet->ToTempSummon()->UnSummon();
 
         // Glyph of Eternal Water
-        if (caster->HasAura(SPELL_MAGE_GLYPH_OF_ETERNAL_WATER))
+        if (caster->HasAuraOrTwin(SPELL_MAGE_GLYPH_OF_ETERNAL_WATER))
             caster->CastSpell(caster, SPELL_MAGE_SUMMON_WATER_ELEMENTAL_PERMANENT, true);
         else
             caster->CastSpell(caster, SPELL_MAGE_SUMMON_WATER_ELEMENTAL_TEMPORARY, true);
@@ -1260,6 +1263,13 @@ class spell_mage_hot_streak : public AuraScript
         return ValidateSpellInfo({ SPELL_MAGE_HOT_STREAK_PROC });
     }
 
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        SpellInfo const* spell = eventInfo.GetSpellInfo();
+        return !spell || spell->SpellFamilyName != SPELLFAMILY_MAGE ||
+            !(spell->SpellFamilyFlags[0] & 0x00400000) || GetTarget()->HasAura(SPELL_MAGE_HOT_HANDS);
+    }
+
     void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
     {
         PreventDefaultAction();
@@ -1285,6 +1295,7 @@ class spell_mage_hot_streak : public AuraScript
 
     void Register() override
     {
+        DoCheckProc += AuraCheckProcFn(spell_mage_hot_streak::CheckProc);
         OnEffectProc += AuraEffectProcFn(spell_mage_hot_streak::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
     }
 

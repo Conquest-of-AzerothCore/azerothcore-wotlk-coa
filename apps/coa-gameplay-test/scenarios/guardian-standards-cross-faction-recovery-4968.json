@@ -1,0 +1,166 @@
+{
+  "schema": 1,
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "guardian",
+      "race": 1,
+      "class": 18,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "wh",
+      "race": 2,
+      "class": 15,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "horde",
+      "race": 2,
+      "class": 1,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "alliance",
+      "race": 1,
+      "class": 1,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "name": "Guardian Standards: cross-faction recovery and Caltrops controls (#4968)",
+  "contract": "Opposite-faction party members must be friendly to player-owned class summons. Human Guardian and Orc Witch Hunter are grouped; ungrouped Horde and Alliance players are hostile controls, with all players PvP-enabled. Standard of Recovery500260/50053 applies friend-area aura500266. It must buff its owner and the grouped Horde ally, while leaving the ungrouped Horde enemy unbuffed. No fixture changes summon flags or faction.",
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "guardian",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "guardian",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "wh",
+      "map": 0,
+      "x": -9616.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "wh",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "horde",
+      "map": 0,
+      "x": -9615.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "horde",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "alliance",
+      "map": 0,
+      "x": -9614.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "alliance",
+      "enabled": true
+    },
+    {
+      "action": "group",
+      "actor": "guardian",
+      "target": "wh"
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 500260
+    },
+    {
+      "action": "set_power",
+      "actor": "guardian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "guardian",
+      "spell": 500260,
+      "destination": {
+        "x": -9616.06,
+        "y": -288.949,
+        "z": 57.3053
+      }
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "owned_creature_count",
+      "entry": 50053,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "aura",
+      "spell": 500266,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "aura",
+      "spell": 500266,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 2100
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "aura",
+      "spell": 500266,
+      "equals": 0
+    }
+  ]
+}

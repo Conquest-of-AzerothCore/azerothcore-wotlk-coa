@@ -92,6 +92,8 @@ struct Creature : Unit
     CreatureTemplate cinfo;
     bool _respawnCompatibilityMode = true;
     bool summon = false;
+    bool namedQuestTarget = false;
+    bool worldBoss = false;
     bool IsAIEnabled = true;
     CreatureAI ai;
     MotionMaster motion;
@@ -104,9 +106,10 @@ struct Creature : Unit
 
     DeathState getDeathState() const { return m_deathState; }
     bool IsAlive() const { return m_deathState == DeathState::Alive; }
+    bool IsSharedQuestTarget() const { return namedQuestTarget && !map.dungeon; }
     bool IsSummon() const { return summon; }
     bool IsPet() const { return false; }
-    bool isWorldBoss() const { return false; }
+    bool isWorldBoss() const { return worldBoss; }
     bool hasLootRecipient() const { return true; }
     bool HasSearchedAssistance() const { return false; }
     bool IsFlying() const { return false; }
@@ -187,6 +190,8 @@ int main(int argc, char** argv)
     Creature creature;
     creature._respawnCompatibilityMode = get("compat", 1) != 0;
     creature.m_spawnId = uint32(get("spawn", 1));
+    creature.namedQuestTarget = get("named", 0) != 0;
+    creature.worldBoss = get("worldboss", 0) != 0;
     creature.summon = get("summon", 0) != 0;
     creature.data.dbData = get("db", 1) != 0;
     creature.cinfo.rank = uint32(get("rank", 0));

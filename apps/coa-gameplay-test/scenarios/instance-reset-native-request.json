@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "name": "Native single instance reset frees one listed bind",
+  "contract": "A Reset Instances list entry calls C_LootLockout.ResetInstanceDifficulty(map, difficulty), which Extensions.dll sends as CMSG_RESET_INSTANCE (0x058C) with u32 map and u8 difficulty - 1, then queries the binds again. The stock instance reset works only outside a group or for its leader and fails while players are still inside. Expected: a reset of a map the player is not bound to changes nothing; a reset of Deadmines while the player is inside keeps the bind; after leaving, the reset frees the bind, so the next query lists nothing.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    { "id": "delver", "race": 1, "class": 1, "level": 20 }
+  ],
+  "steps": [
+    {
+      "action": "teleport", "label": "Enter Deadmines", "actor": "delver", "map": 36, "x": -16.4, "y": -383.07,
+      "z": 61.78
+    },
+    { "action": "assert", "actor": "delver", "metric": "map_id", "equals": 36, "within_ms": 15000 },
+    {
+      "action": "client_packet", "label": "Reset Deadmines from inside", "actor": "delver", "opcode": 1420,
+      "fields": [ { "u32": 36 }, { "u8": 0 } ], "consumed": false
+    },
+    {
+      "action": "client_packet", "label": "Query the binds", "actor": "delver", "opcode": 1789, "consumed": false
+    },
+    {
+      "action": "assert", "label": "A reset with a player inside keeps the bind", "actor": "delver",
+      "metric": "instance_binds_listed", "id": 36, "equals": 1
+    },
+    {
+      "action": "teleport", "label": "Leave Deadmines", "actor": "delver", "map": 0, "x": -9617.06, "y": -288.949,
+      "z": 57.3053
+    },
+    { "action": "assert", "actor": "delver", "metric": "map_id", "equals": 0, "within_ms": 15000 },
+    {
+      "action": "client_packet", "label": "Reset the Stockade, which the player is not bound to", "actor": "delver",
+      "opcode": 1420, "fields": [ { "u32": 34 }, { "u8": 0 } ], "consumed": false
+    },
+    {
+      "action": "client_packet", "label": "Query the binds", "actor": "delver", "opcode": 1789, "consumed": false
+    },
+    {
+      "action": "assert", "label": "Resetting another map keeps the Deadmines bind", "actor": "delver",
+      "metric": "instance_binds_listed", "id": 36, "equals": 1
+    },
+    {
+      "action": "client_packet", "label": "Reset Deadmines", "actor": "delver", "opcode": 1420,
+      "fields": [ { "u32": 36 }, { "u8": 0 } ], "consumed": false
+    },
+    {
+      "action": "client_packet", "label": "Query the binds", "actor": "delver", "opcode": 1789, "consumed": false
+    },
+    {
+      "action": "assert", "label": "The reset frees the bind", "actor": "delver", "metric": "instance_binds_listed",
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "name": "Level-32 Knight of Xoroth casts Flames after generating Demonfire (#5865)",
+  "contract": [
+    "Reported class ID 17 is Knight of Xoroth despite the legacy Fleshwarden token. The level-32 rank is 802413;",
+    "original Flames ranks require Demonfire 500906 and fifteen rage.",
+    "A normal cast without Demonfire is refused. With its authored resource and sufficient rage, the native cone",
+    "cast must hit and consume Demonfire. This checks the reported level, not the level-56 rank 573448."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0.5
+  },
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 32,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "knight",
+      "entry": 36,
+      "level": 32,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "knight",
+      "spell": 802413
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802413,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802413,
+      "equals": 85
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802413,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802413,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802413,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_total",
+      "spell": 802413,
+      "target": "dummy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    }
+  ]
+}

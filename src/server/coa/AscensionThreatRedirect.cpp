@@ -16,7 +16,8 @@ enum ThreatRedirectSpells : uint32
     SPELL_FERAL_PRESSURE = 534605,
     SPELL_FERAL_PRESSURE_ACTIVE = 535214,
     SPELL_WARNING_SHOT = 534480,
-    SPELL_WARNING_SHOT_ACTIVE = 535097
+    SPELL_WARNING_SHOT_ACTIVE = 535097,
+    SPELL_BARRIER_OF_LIGHT_REDIRECT = 807694
 };
 
 uint32 RedirectSpell(uint32 id, bool active)
@@ -93,6 +94,22 @@ class aura_ascension_threat_redirect_active : public AuraScript
     }
 };
 
+class aura_ascension_barrier_of_light : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_barrier_of_light);
+
+    void OnRemove(AuraEffect const*, AuraEffectHandleModes)
+    {
+        GetTarget()->GetThreatMgr().UnregisterRedirectThreat(SPELL_BARRIER_OF_LIGHT_REDIRECT, GetCasterGUID());
+    }
+
+    void Register() override
+    {
+        AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_barrier_of_light::OnRemove,
+            EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
 class threat_redirect_metadata : public GlobalScript
 {
 public:
@@ -112,5 +129,6 @@ void AddSC_AscensionThreatRedirect()
 {
     RegisterSpellScript(aura_ascension_threat_redirect);
     RegisterSpellScript(aura_ascension_threat_redirect_active);
+    RegisterSpellScript(aura_ascension_barrier_of_light);
     new threat_redirect_metadata();
 }

@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "name": "Secret of Raven Hill variants consume Dawn Knight like Dawn Blade does (#6799)",
+  "contract": [
+    "Dawn Knight 681390 makes the next Dawn Blade free and 25% stronger; both of its effects use SpellFamily 21 word 0",
+    "mask 0x400, which marks the six Dawn Blade ranks and the four Secret of Raven Hill variants (Surging Blade 681788,",
+    "Witchblood Fever 684330, Dark Peril 685020, Vampiric Rage 686020). The Witch Hunter ability script removed the buff",
+    "only for the Dawn Blade ranks, and only Witchblood Fever had that script, so while Dawn Knight lasted every variant",
+    "was free. Expected: with Secret of Raven Hill 680513 and a tonic, the level-60 Dawn Blade 574343 becomes the tonic's",
+    "variant; Dawn Knight makes that variant cost nothing, and casting it removes Dawn Knight, so the variant costs rage",
+    "again. Checked for Witchblood Tonic 802278 (Witchblood Fever, 45 rage) and Vampiric Tonic 802276 (Vampiric Rage)."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "w", "race": 1, "class": 15, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "w", "entry": 36, "level": 60, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "actor": "w", "spell": 202},
+    {"action": "add_item", "actor": "w", "item": 1194},
+    {"action": "equip", "actor": "w", "item": 1194, "slot": 15},
+    {"action": "wait", "label": "Let the weapon swap cooldown expire", "ms": 2000},
+    {"action": "learn", "actor": "w", "spell": 680513},
+    {"action": "learn", "actor": "w", "spell": 574343},
+    {"action": "learn", "actor": "w", "spell": 802278},
+    {"action": "learn", "actor": "w", "spell": 802276},
+    {"action": "cast", "label": "Drink Witchblood Tonic", "actor": "w", "spell": 802278},
+    {"action": "assert", "label": "SETUP: Dawn Blade becomes Witchblood Fever", "actor": "w",
+     "metric": "temporary_spell_replacement", "spell": 574343, "equals": 684330, "within_ms": 3000},
+    {"action": "set_aura", "label": "Dawn Knight procs", "actor": "w", "spell": 681390, "stacks": 1},
+    {"action": "assert", "label": "SETUP: Dawn Knight makes Witchblood Fever free", "actor": "w",
+     "metric": "spell_power_cost", "spell": 684330, "equals": 0},
+    {"action": "set_power", "actor": "w", "power": 1, "value": 1000},
+    {"action": "cast", "label": "Press Dawn Blade", "actor": "w", "spell": 574343, "target": "dummy"},
+    {"action": "assert", "label": "Witchblood Fever is cast", "actor": "w", "metric": "spell_cast_count",
+     "spell": 684330, "min": 1, "within_ms": 3000},
+    {"action": "assert", "label": "Witchblood Fever consumes Dawn Knight", "actor": "w", "metric": "aura",
+     "spell": 681390, "equals": 0, "within_ms": 2000},
+    {"action": "assert", "label": "Witchblood Fever costs rage again", "actor": "w", "metric": "spell_power_cost",
+     "spell": 684330, "min": 1},
+    {"action": "wait", "label": "Let the Witchblood window run out", "ms": 31000},
+    {"action": "assert", "label": "SETUP: the Raven Hill window has ended", "actor": "w", "metric": "aura",
+     "spell": 681499, "equals": 0},
+    {"action": "reset_cooldown", "actor": "w", "spell": 802276},
+    {"action": "cast", "label": "Drink Vampiric Tonic", "actor": "w", "spell": 802276},
+    {"action": "assert", "label": "SETUP: Dawn Blade becomes Vampiric Rage", "actor": "w",
+     "metric": "temporary_spell_replacement", "spell": 574343, "equals": 686020, "within_ms": 3000},
+    {"action": "set_aura", "label": "Dawn Knight procs again", "actor": "w", "spell": 681390, "stacks": 1},
+    {"action": "assert", "label": "SETUP: Dawn Knight makes Vampiric Rage free", "actor": "w",
+     "metric": "spell_power_cost", "spell": 686020, "equals": 0},
+    {"action": "set_power", "actor": "w", "power": 1, "value": 1000},
+    {"action": "reset_cooldown", "actor": "w", "spell": 574343},
+    {"action": "cast", "label": "Press Dawn Blade", "actor": "w", "spell": 574343, "target": "dummy"},
+    {"action": "assert", "label": "Vampiric Rage is cast", "actor": "w", "metric": "spell_cast_count",
+     "spell": 686020, "min": 1, "within_ms": 3000},
+    {"action": "assert", "label": "Vampiric Rage consumes Dawn Knight", "actor": "w", "metric": "aura",
+     "spell": 681390, "equals": 0, "within_ms": 2000}
+  ]
+}

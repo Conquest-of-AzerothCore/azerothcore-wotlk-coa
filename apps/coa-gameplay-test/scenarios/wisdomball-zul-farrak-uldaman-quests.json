@@ -1,0 +1,198 @@
+{
+  "schema": 1,
+  "name": "The Wondrous Wisdomball offers Zul'Farrak's and Uldaman's zone-tagged quests inside those dungeons",
+  "contract": "AscensionWisdomball.cpp's AreasOfMap(mapId) finds a dungeon's quest_template rows through AreaTable.dbc rows whose own mapid is the dungeon's map. Zul'Farrak (map 209) has one such row, 1176, but its quests use QuestSortID 978, the 'Zul'Farrak' row whose mapid is 1 (Kalimdor); Uldaman (map 70) likewise tags its quests 1517, the 'Uldaman' row on map 0. With no starter creature inside either dungeon, Zul'Farrak offered nothing at all and Uldaman only its in-dungeon starters. Both maps now add their overworld area, as Razorfen Kraul (1717) and Gnomeregan (133) already do. Quests with objectives are offered (Zul'Farrak 2770 Gahz'rilla, 2768 Divino-matic Rod, Horde 2936 The Spider God; Uldaman 2418 Power Stones, 709 Solution to Doom, Horde 2339 Find the Gems and Power Source), a taken one is carried for turn-in, and talk-to steps without a player objective (2864 Tran'rek, 2398 The Lost Dwarves) stay withheld.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "seeker",
+      "race": 10,
+      "class": 13,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 209,
+    "x": 1213.52,
+    "y": 841.59,
+    "z": 8.93,
+    "o": 6.09,
+    "ignore_access": true
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let Zul'Farrak settle",
+      "ms": 8000
+    },
+    {
+      "action": "add_item",
+      "label": "Obtain the companion, as a purchase would",
+      "actor": "seeker",
+      "item": 101169,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "label": "Using the item teaches its summon",
+      "actor": "seeker",
+      "item": 101169,
+      "spell": 55884
+    },
+    {
+      "action": "assert",
+      "label": "The summon is learned",
+      "actor": "seeker",
+      "metric": "knows_spell",
+      "spell": 83050,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "Summon the ball in Zul'Farrak",
+      "actor": "seeker",
+      "spell": 83050
+    },
+    {
+      "action": "wait",
+      "label": "Let the summon land",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The cast produced a creature this character owns",
+      "actor": "seeker",
+      "metric": "owned_creature_count",
+      "entry": 79025,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Gahz'rilla (neutral, QuestSortID 978 only) is offered",
+      "actor": "seeker",
+      "metric": "ball_offers_quest",
+      "quest": 2770,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Divino-matic Rod (neutral, QuestSortID 978 only) is offered",
+      "actor": "seeker",
+      "metric": "ball_offers_quest",
+      "quest": 2768,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Spider God (Horde, QuestSortID 978 only) is offered",
+      "actor": "seeker",
+      "metric": "ball_offers_quest",
+      "quest": 2936,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Tran'rek has no player objective and stays withheld",
+      "actor": "seeker",
+      "metric": "ball_offers_quest",
+      "quest": 2864,
+      "equals": 0
+    },
+    {
+      "action": "quest_accept",
+      "label": "Take Gahz'rilla at the ball",
+      "actor": "seeker",
+      "quest": 2770,
+      "entry": 79025
+    },
+    {
+      "action": "assert",
+      "label": "It is in the log, unfinished",
+      "actor": "seeker",
+      "metric": "quest_status",
+      "quest": 2770,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The ball carries it for turn-in",
+      "actor": "seeker",
+      "metric": "ball_carried_quest",
+      "quest": 2770,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "label": "Move to Uldaman",
+      "actor": "seeker",
+      "map": 70,
+      "x": -226.8,
+      "y": 49.09,
+      "z": -46.03,
+      "o": 1.39
+    },
+    {
+      "action": "wait",
+      "label": "Let the map change and Uldaman settle",
+      "ms": 8000
+    },
+    {
+      "action": "cast",
+      "label": "Summon the ball in Uldaman",
+      "actor": "seeker",
+      "spell": 83050
+    },
+    {
+      "action": "wait",
+      "label": "Let the summon land",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The cast produced a creature this character owns",
+      "actor": "seeker",
+      "metric": "owned_creature_count",
+      "entry": 79025,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Power Stones (neutral, QuestSortID 1517 only) is offered",
+      "actor": "seeker",
+      "metric": "ball_offers_quest",
+      "quest": 2418,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Solution to Doom (neutral, QuestSortID 1517 only) is offered",
+      "actor": "seeker",
+      "metric": "ball_offers_quest",
+      "quest": 709,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Find the Gems and Power Source (Horde, QuestSortID 1517 only) is offered",
+      "actor": "seeker",
+      "metric": "ball_offers_quest",
+      "quest": 2339,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Lost Dwarves has no player objective and stays withheld",
+      "actor": "seeker",
+      "metric": "ball_offers_quest",
+      "quest": 2398,
+      "equals": 0
+    }
+  ]
+}

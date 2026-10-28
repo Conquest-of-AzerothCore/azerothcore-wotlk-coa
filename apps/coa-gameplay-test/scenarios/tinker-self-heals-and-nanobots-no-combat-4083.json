@@ -1,0 +1,150 @@
+{
+  "schema": 1,
+  "name": "tinker-self-heals-and-nanobots-no-combat-4083",
+  "contract": [
+    "A level-twenty Tinker healing itself out of combat must heal normally, remain out of combat and retain no",
+    "Overcharged blocker. Repeat Emergency Heal after its cooldown is cleared, then verify actual Nanobot",
+    "Reconstruction periodic healing and the same combat and aura invariants. No hostile unit is present."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 20
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 802684
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 801809
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 802684
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "health",
+      "min": 51
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 560711,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 50
+    },
+    {
+      "action": "snapshot",
+      "actor": "t",
+      "metric": "spell_heal_count",
+      "spell": 802684,
+      "save_as": "first_heals"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 802684
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 802684
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "spell_heal_count",
+      "spell": 802684,
+      "relative_to": "first_heals",
+      "min": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 801809
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 801809,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "spell_heal_count",
+      "spell": 801809,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 560711,
+      "equals": 0
+    }
+  ]
+}

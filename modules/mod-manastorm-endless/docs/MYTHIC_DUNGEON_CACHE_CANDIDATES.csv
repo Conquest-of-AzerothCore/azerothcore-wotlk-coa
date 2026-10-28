@@ -1,0 +1,1834 @@
+ItemID,Name,Tier,BaseItemID,ItemLevel,RequiredLevel,Quality,Class,Subclass,InventoryType,DisplayID,Description,DumpLine
+11623,Spritecaster Cape,Normal,11623,57,47,3,4,1,16,20604,,9967
+213877,Spritecaster Cape,Heroic,11623,61,60,4,4,1,16,20604,@Heroic Dungeon@,180501
+213878,Spritecaster Cape,Mythic,11623,64,60,4,4,1,16,20604,@Mythic Dungeon@,180502
+11624,Kentic Amice,Normal,11624,57,47,3,4,1,3,22987,,9968
+213889,Kentic Amice,Heroic,11624,61,60,4,4,1,3,22987,@Heroic Dungeon@,180513
+213890,Kentic Amice,Mythic,11624,64,60,4,4,1,3,22987,@Mythic Dungeon@,180514
+11625,Enthralled Sphere,Normal,11625,57,48,3,4,0,23,16833,,9969
+213901,Enthralled Sphere,Heroic,11625,61,60,4,4,0,23,16833,@Heroic Dungeon@,180525
+213902,Enthralled Sphere,Mythic,11625,64,60,4,4,0,23,16833,@Mythic Dungeon@,180526
+11626,Blackveil Cape,Normal,11626,57,48,3,4,1,16,20745,,9970
+213913,Blackveil Cape,Heroic,11626,61,60,4,4,1,16,20745,@Heroic Dungeon@,180537
+213914,Blackveil Cape,Mythic,11626,64,60,4,4,1,16,20745,@Mythic Dungeon@,180538
+11627,Fleetfoot Greaves,Normal,11627,57,48,3,4,3,8,22857,,9971
+213925,Fleetfoot Greaves,Heroic,11627,61,60,4,4,3,8,22857,@Heroic Dungeon@,180549
+213926,Fleetfoot Greaves,Mythic,11627,64,60,4,4,3,8,22857,@Mythic Dungeon@,180550
+11628,Houndmaster's Bow,Normal,11628,57,48,3,2,2,15,22979,,9972
+213937,Houndmaster's Bow,Heroic,11628,61,60,4,2,2,15,22979,@Heroic Dungeon@,180561
+213938,Houndmaster's Bow,Mythic,11628,64,60,4,2,2,15,22979,@Mythic Dungeon@,180562
+11629,Houndmaster's Rifle,Normal,11629,57,48,3,2,3,26,22980,,9973
+213949,Houndmaster's Rifle,Heroic,11629,61,60,4,2,3,26,22980,@Heroic Dungeon@,180573
+213950,Houndmaster's Rifle,Mythic,11629,64,60,4,2,3,26,22980,@Mythic Dungeon@,180574
+11631,Stoneshell Guard,Normal,11631,57,47,3,4,6,14,16851,,9975
+213961,Stoneshell Guard,Heroic,11631,61,60,4,4,6,14,16851,@Heroic Dungeon@,180585
+213962,Stoneshell Guard,Mythic,11631,64,60,4,4,6,14,16851,@Mythic Dungeon@,180586
+11632,Earthslag Shoulders,Normal,11632,57,47,3,4,4,3,22924,,9976
+213973,Earthslag Shoulders,Heroic,11632,61,60,4,4,4,3,22924,@Heroic Dungeon@,180597
+213974,Earthslag Shoulders,Mythic,11632,64,60,4,4,4,3,22924,@Mythic Dungeon@,180598
+11633,Spiderfang Carapace,Normal,11633,57,49,3,4,4,5,16996,,9977
+213985,Spiderfang Carapace,Heroic,11633,61,60,4,4,4,5,16996,@Heroic Dungeon@,180609
+213986,Spiderfang Carapace,Mythic,11633,64,60,4,4,4,5,16996,@Mythic Dungeon@,180610
+11634,Silkweb Gloves,Normal,11634,57,49,3,4,1,10,22940,,9978
+213997,Silkweb Gloves,Heroic,11634,61,60,4,4,1,10,22940,@Heroic Dungeon@,180621
+213998,Silkweb Gloves,Mythic,11634,64,60,4,4,1,10,22940,@Mythic Dungeon@,180622
+11635,Hookfang Shanker,Normal,11635,57,49,3,2,15,13,22978,,9979
+214011,Hookfang Shanker,Heroic,11635,61,60,4,2,15,13,22978,@Heroic Dungeon@,180635
+214012,Hookfang Shanker,Mythic,11635,64,60,4,2,15,13,22978,@Mythic Dungeon@,180636
+11662,Ban'thok Sash,Normal,11662,57,49,3,4,1,6,22841,,9996
+214023,Ban'thok Sash,Heroic,11662,61,60,4,4,1,6,22841,@Heroic Dungeon@,180647
+214024,Ban'thok Sash,Mythic,11662,64,60,4,4,1,6,22841,@Mythic Dungeon@,180648
+11665,Ogreseer Fists,Normal,11665,57,49,3,4,2,10,13552,,9999
+214035,Ogreseer Fists,Heroic,11665,61,60,4,4,2,10,13552,@Heroic Dungeon@,180659
+214036,Ogreseer Fists,Mythic,11665,64,60,4,4,2,10,13552,@Mythic Dungeon@,180660
+11669,Naglering,Normal,11669,57,54,3,4,0,11,6925,,10003
+214047,Naglering,Heroic,11669,61,60,4,4,0,11,6925,@Heroic Dungeon@,180671
+214048,Naglering,Mythic,11669,64,60,4,4,0,11,6925,@Mythic Dungeon@,180672
+11675,Shadefiend Boots,Normal,11675,57,50,3,4,2,8,14863,,10009
+214059,Shadefiend Boots,Heroic,11675,61,60,4,4,2,8,14863,@Heroic Dungeon@,180683
+214060,Shadefiend Boots,Mythic,11675,64,60,4,4,2,8,14863,@Mythic Dungeon@,180684
+11677,Graverot Cape,Normal,11677,57,50,3,4,1,16,22580,,10011
+214071,Graverot Cape,Heroic,11677,61,60,4,4,1,16,22580,@Heroic Dungeon@,180695
+214072,Graverot Cape,Mythic,11677,64,60,4,4,1,16,22580,@Mythic Dungeon@,180696
+11678,Carapace of Anub'shiah,Normal,11678,57,50,3,4,4,5,21016,,10012
+214083,Carapace of Anub'shiah,Heroic,11678,61,60,4,4,4,5,21016,@Heroic Dungeon@,180707
+214084,Carapace of Anub'shiah,Mythic,11678,64,60,4,4,4,5,21016,@Mythic Dungeon@,180708
+11679,Rubicund Armguards,Normal,11679,57,50,3,4,3,9,23019,,10013
+214095,Rubicund Armguards,Heroic,11679,61,60,4,4,3,9,23019,@Heroic Dungeon@,180719
+214096,Rubicund Armguards,Mythic,11679,64,60,4,4,3,9,23019,@Mythic Dungeon@,180720
+11684,Ironfoe,Normal,11684,57,55,4,2,4,13,18417,,10017
+214107,Ironfoe,Heroic,11684,61,60,4,2,4,13,18417,@Heroic Dungeon@,180731
+214108,Ironfoe,Mythic,11684,64,60,4,2,4,13,18417,@Mythic Dungeon@,180732
+11685,Splinthide Shoulders,Normal,11685,57,50,3,4,2,3,22903,,10018
+214119,Splinthide Shoulders,Heroic,11685,61,60,4,4,2,3,22903,@Heroic Dungeon@,180743
+214120,Splinthide Shoulders,Mythic,11685,64,60,4,4,2,3,22903,@Mythic Dungeon@,180744
+11686,Girdle of Beastial Fury,Normal,11686,57,50,3,4,2,6,22962,,10019
+214131,Girdle of Beastial Fury,Heroic,11686,61,60,4,4,2,6,22962,@Heroic Dungeon@,180755
+214132,Girdle of Beastial Fury,Mythic,11686,64,60,4,4,2,6,22962,@Mythic Dungeon@,180756
+11702,Grizzle's Skinner,Normal,11702,57,50,3,2,0,13,22964,,10024
+214143,Grizzle's Skinner,Heroic,11702,61,60,4,2,0,13,22964,@Heroic Dungeon@,180767
+214144,Grizzle's Skinner,Mythic,11702,64,60,4,2,0,13,22964,@Mythic Dungeon@,180768
+11703,Stonewall Girdle,Normal,11703,57,50,3,4,4,6,22885,,10025
+214155,Stonewall Girdle,Heroic,11703,61,60,4,4,4,6,22885,@Heroic Dungeon@,180779
+214156,Stonewall Girdle,Mythic,11703,64,60,4,4,4,6,22885,@Mythic Dungeon@,180780
+11722,Dregmetal Spaulders,Normal,11722,57,50,3,4,3,3,22920,,10030
+214167,Dregmetal Spaulders,Heroic,11722,61,60,4,4,3,3,22920,@Heroic Dungeon@,180791
+214168,Dregmetal Spaulders,Mythic,11722,64,60,4,4,3,3,22920,@Mythic Dungeon@,180792
+11726,Savage Gladiator Chain,Normal,11726,57,52,4,4,3,5,22923,,10034
+214179,Savage Gladiator Chain,Heroic,11726,61,60,4,4,3,5,22923,@Heroic Dungeon@,180803
+214180,Savage Gladiator Chain,Mythic,11726,64,60,4,4,3,5,22923,@Mythic Dungeon@,180804
+11728,Savage Gladiator Leggings,Normal,11728,57,52,3,4,3,7,16880,,10036
+214191,Savage Gladiator Leggings,Heroic,11728,61,60,4,4,3,7,16880,@Heroic Dungeon@,180815
+214192,Savage Gladiator Leggings,Mythic,11728,64,60,4,4,3,7,16880,@Mythic Dungeon@,180816
+11729,Savage Gladiator Helm,Normal,11729,57,52,3,4,3,1,23025,,10037
+214203,Savage Gladiator Helm,Heroic,11729,61,60,4,4,3,1,23025,@Heroic Dungeon@,180827
+214204,Savage Gladiator Helm,Mythic,11729,64,60,4,4,3,1,23025,@Mythic Dungeon@,180828
+11730,Savage Gladiator Grips,Normal,11730,57,52,3,4,3,10,22922,,10038
+214215,Savage Gladiator Grips,Heroic,11730,61,60,4,4,3,10,22922,@Heroic Dungeon@,180839
+214216,Savage Gladiator Grips,Mythic,11730,64,60,4,4,3,10,22922,@Mythic Dungeon@,180840
+11731,Savage Gladiator Greaves,Normal,11731,57,52,3,4,3,8,22865,,10039
+214227,Savage Gladiator Greaves,Heroic,11731,61,60,4,4,3,8,22865,@Heroic Dungeon@,180851
+214228,Savage Gladiator Greaves,Mythic,11731,64,60,4,4,3,8,22865,@Mythic Dungeon@,180852
+11735,Ragefury Eyepatch,Normal,11735,57,52,3,4,2,1,16887,,10043
+214239,Ragefury Eyepatch,Heroic,11735,61,60,4,4,2,1,16887,@Heroic Dungeon@,180863
+214240,Ragefury Eyepatch,Mythic,11735,64,60,4,4,2,1,16887,@Mythic Dungeon@,180864
+11744,Bloodfist,Normal,11744,57,51,3,2,13,13,16892,,10048
+214263,Bloodfist,Heroic,11744,61,60,4,2,13,13,16892,@Heroic Dungeon@,180877
+214264,Bloodfist,Mythic,11744,64,60,4,2,13,13,16892,@Mythic Dungeon@,180878
+11745,Fists of Phalanx,Normal,11745,57,51,3,4,4,10,22939,,10049
+214275,Fists of Phalanx,Heroic,11745,61,60,4,4,4,10,22939,@Heroic Dungeon@,180889
+214276,Fists of Phalanx,Mythic,11745,64,60,4,4,4,10,22939,@Mythic Dungeon@,180890
+11746,Golem Skull Helm,Normal,11746,57,51,3,4,4,1,16894,,10050
+214287,Golem Skull Helm,Heroic,11746,61,60,4,4,4,1,16894,@Heroic Dungeon@,180901
+214288,Golem Skull Helm,Mythic,11746,64,60,4,4,4,1,16894,@Mythic Dungeon@,180902
+11747,Flamestrider Robes,Normal,11747,57,48,3,4,2,20,16896,,10051
+214299,Flamestrider Robes,Heroic,11747,61,60,4,4,2,20,16896,@Heroic Dungeon@,180913
+214300,Flamestrider Robes,Mythic,11747,64,60,4,4,2,20,16896,@Mythic Dungeon@,180914
+11748,Pyric Caduceus,Normal,11748,57,48,3,2,19,26,23006,,10052
+214311,Pyric Caduceus,Heroic,11748,61,60,4,2,19,26,23006,@Heroic Dungeon@,180925
+214312,Pyric Caduceus,Mythic,11748,64,60,4,2,19,26,23006,@Mythic Dungeon@,180926
+11749,Searingscale Leggings,Normal,11749,57,48,3,4,3,7,22921,,10053
+214323,Searingscale Leggings,Heroic,11749,61,60,4,4,3,7,22921,@Heroic Dungeon@,180937
+214324,Searingscale Leggings,Mythic,11749,64,60,4,4,3,7,22921,@Mythic Dungeon@,180938
+11750,Kindling Stave,Normal,11750,57,48,3,2,10,17,16900,,10054
+214335,Kindling Stave,Heroic,11750,61,60,4,2,10,17,16900,@Heroic Dungeon@,180949
+214336,Kindling Stave,Mythic,11750,64,60,4,2,10,17,16900,@Mythic Dungeon@,180950
+11755,Verek's Collar,Normal,11755,57,51,3,4,0,2,16902,,10059
+214348,Verek's Collar,Heroic,11755,61,60,4,4,0,2,16902,@Heroic Dungeon@,180962
+214349,Verek's Collar,Mythic,11755,64,60,4,4,0,2,16902,@Mythic Dungeon@,180963
+11768,Incendic Bracers,Normal,11768,57,52,3,4,1,9,22984,,10066
+214408,Incendic Bracers,Heroic,11768,61,60,4,4,1,9,22984,@Heroic Dungeon@,181022
+214409,Incendic Bracers,Mythic,11768,64,60,4,4,1,9,22984,@Mythic Dungeon@,181023
+11782,Boreal Mantle,Normal,11782,57,52,3,4,1,3,16916,,10067
+214420,Boreal Mantle,Heroic,11782,61,60,4,4,1,3,16916,@Heroic Dungeon@,181034
+214421,Boreal Mantle,Mythic,11782,64,60,4,4,1,3,16916,@Mythic Dungeon@,181035
+11783,Chillsteel Girdle,Normal,11783,57,52,3,4,3,6,22895,,10068
+214432,Chillsteel Girdle,Heroic,11783,61,60,4,4,3,6,22895,@Heroic Dungeon@,181046
+214433,Chillsteel Girdle,Mythic,11783,64,60,4,4,3,6,22895,@Mythic Dungeon@,181047
+11784,Arbiter's Blade,Normal,11784,57,48,3,2,7,21,16918,,10069
+214444,Arbiter's Blade,Heroic,11784,61,60,4,2,7,21,16918,@Heroic Dungeon@,181058
+214445,Arbiter's Blade,Mythic,11784,64,60,4,2,7,21,16918,@Mythic Dungeon@,181059
+11785,Rock Golem Bulwark,Normal,11785,57,53,3,4,6,14,14709,,10070
+214456,Rock Golem Bulwark,Heroic,11785,61,60,4,4,6,14,14709,@Heroic Dungeon@,181070
+214457,Rock Golem Bulwark,Mythic,11785,64,60,4,4,6,14,14709,@Mythic Dungeon@,181071
+11786,Stone of the Earth,Normal,11786,57,51,3,2,8,17,16920,,10071
+214468,Stone of the Earth,Heroic,11786,61,60,4,2,8,17,16920,@Heroic Dungeon@,181082
+214469,Stone of the Earth,Mythic,11786,64,60,4,2,8,17,16920,@Mythic Dungeon@,181083
+11787,Shalehusk Boots,Normal,11787,57,53,3,4,4,8,22868,,10072
+214480,Shalehusk Boots,Heroic,11787,61,60,4,4,4,8,22868,@Heroic Dungeon@,181094
+214481,Shalehusk Boots,Mythic,11787,64,60,4,4,4,8,22868,@Mythic Dungeon@,181095
+11802,Lavacrest Leggings,Normal,11802,57,53,3,4,4,7,15550,,10083
+214492,Lavacrest Leggings,Heroic,11802,61,60,4,4,4,7,15550,@Heroic Dungeon@,181106
+214493,Lavacrest Leggings,Mythic,11802,64,60,4,4,4,7,15550,@Mythic Dungeon@,181107
+11803,Force of Magma,Normal,11803,57,51,3,2,5,17,16923,,10084
+214504,Force of Magma,Heroic,11803,61,60,4,2,5,17,16923,@Heroic Dungeon@,181118
+214505,Force of Magma,Mythic,11803,64,60,4,2,5,17,16923,@Mythic Dungeon@,181119
+11805,Rubidium Hammer,Normal,11805,57,51,3,2,4,13,23020,,10086
+214516,Rubidium Hammer,Heroic,11805,61,60,4,2,4,13,23020,@Heroic Dungeon@,181130
+214517,Rubidium Hammer,Mythic,11805,64,60,4,2,4,13,23020,@Mythic Dungeon@,181131
+11807,Sash of the Burning Heart,Normal,11807,57,53,3,4,1,6,23024,,10088
+214528,Sash of the Burning Heart,Heroic,11807,61,60,4,4,1,6,23024,@Heroic Dungeon@,181142
+214529,Sash of the Burning Heart,Mythic,11807,64,60,4,4,1,6,23024,@Mythic Dungeon@,181143
+11808,Circle of Flame,Normal,11808,57,54,4,4,1,1,22467,,10089
+214540,Circle of Flame,Heroic,11808,61,60,4,4,1,1,22467,@Heroic Dungeon@,181154
+214541,Circle of Flame,Mythic,11808,64,60,4,4,1,1,22467,@Mythic Dungeon@,181155
+11809,Flame Wrath,Normal,11809,57,51,3,2,6,17,17096,,10090
+214556,Flame Wrath,Heroic,11809,61,60,4,2,6,17,17096,@Heroic Dungeon@,181170
+214559,Flame Wrath,Mythic,11809,64,60,4,2,6,17,17096,@Mythic Dungeon@,181173
+11810,Force of Will,Normal,11810,57,55,3,4,0,12,15491,,10091
+214570,Force of Will,Heroic,11810,61,60,4,4,0,12,15491,@Heroic Dungeon@,181184
+214571,Force of Will,Mythic,11810,64,60,4,4,0,12,15491,@Mythic Dungeon@,181185
+11812,Cape of the Fire Salamander,Normal,11812,57,53,3,4,1,16,17856,,10093
+214594,Cape of the Fire Salamander,Heroic,11812,61,60,4,4,1,16,17856,@Heroic Dungeon@,181196
+214595,Cape of the Fire Salamander,Mythic,11812,64,60,4,4,1,16,17856,@Mythic Dungeon@,181197
+11814,Molten Fists,Normal,11814,57,53,3,4,3,10,16935,,10095
+214606,Molten Fists,Heroic,11814,61,60,4,4,3,10,16935,@Heroic Dungeon@,181208
+214607,Molten Fists,Mythic,11814,64,60,4,4,3,10,16935,@Mythic Dungeon@,181209
+11815,Hand of Justice,Normal,11815,57,53,3,4,0,12,3807,,10096
+214618,Hand of Justice,Heroic,11815,61,60,4,4,0,12,3807,@Heroic Dungeon@,181220
+214619,Hand of Justice,Mythic,11815,64,60,4,4,0,12,3807,@Mythic Dungeon@,181221
+11816,Angerforge's Battle Axe,Normal,11816,57,51,3,2,1,17,17227,,10097
+214630,Angerforge's Battle Axe,Heroic,11816,61,60,4,2,1,17,17227,@Heroic Dungeon@,181232
+214631,Angerforge's Battle Axe,Mythic,11816,64,60,4,2,1,17,17227,@Mythic Dungeon@,181233
+11817,Lord General's Sword,Normal,11817,57,51,3,2,7,13,16939,,10098
+214642,Lord General's Sword,Heroic,11817,61,60,4,2,7,13,16939,@Heroic Dungeon@,181244
+214643,Lord General's Sword,Mythic,11817,64,60,4,2,7,13,16939,@Mythic Dungeon@,181245
+11819,Second Wind,Normal,11819,57,54,3,4,0,12,14679,,10100
+214654,Second Wind,Heroic,11819,61,60,4,4,0,12,14679,@Heroic Dungeon@,181256
+214655,Second Wind,Mythic,11819,64,60,4,4,0,12,14679,@Mythic Dungeon@,181257
+11820,Royal Decorated Armor,Normal,11820,57,53,3,4,3,5,23018,,10101
+214667,Royal Decorated Armor,Heroic,11820,61,60,4,4,3,5,23018,@Heroic Dungeon@,181269
+214668,Royal Decorated Armor,Mythic,11820,64,60,4,4,3,5,23018,@Mythic Dungeon@,181270
+11821,Warstrife Leggings,Normal,11821,57,53,3,4,2,7,22822,,10102
+214679,Warstrife Leggings,Heroic,11821,61,60,4,4,2,7,22822,@Heroic Dungeon@,181281
+214680,Warstrife Leggings,Mythic,11821,64,60,4,4,2,7,22822,@Mythic Dungeon@,181282
+11822,Omnicast Boots,Normal,11822,57,54,3,4,1,8,22859,,10103
+214691,Omnicast Boots,Heroic,11822,61,60,4,4,1,8,22859,@Heroic Dungeon@,181293
+214692,Omnicast Boots,Mythic,11822,64,60,4,4,1,8,22859,@Mythic Dungeon@,181294
+11823,Luminary Kilt,Normal,11823,57,54,3,4,2,7,22927,,10104
+214703,Luminary Kilt,Heroic,11823,61,60,4,4,2,7,22927,@Heroic Dungeon@,181305
+214704,Luminary Kilt,Mythic,11823,64,60,4,4,2,7,22927,@Mythic Dungeon@,181306
+11824,Cyclopean Band,Normal,11824,57,49,3,4,0,11,6935,,10105
+214720,Cyclopean Band,Heroic,11824,61,60,4,4,0,11,6935,@Heroic Dungeon@,181322
+214721,Cyclopean Band,Mythic,11824,64,60,4,4,0,11,6935,@Mythic Dungeon@,181323
+11832,Burst of Knowledge,Normal,11832,57,53,3,4,0,12,15488,,10113
+214732,Burst of Knowledge,Heroic,11832,61,60,4,4,0,12,15488,@Heroic Dungeon@,181334
+214733,Burst of Knowledge,Mythic,11832,64,60,4,4,0,12,15488,@Mythic Dungeon@,181335
+11839,Chief Architect's Monocle,Normal,11839,57,50,3,4,1,1,16951,,10120
+214744,Chief Architect's Monocle,Heroic,11839,61,60,4,4,1,1,16951,@Heroic Dungeon@,181346
+214745,Chief Architect's Monocle,Mythic,11839,64,60,4,4,1,1,16951,@Mythic Dungeon@,181347
+11841,Senior Designer's Pantaloons,Normal,11841,57,50,3,4,1,7,22919,,10122
+214756,Senior Designer's Pantaloons,Heroic,11841,61,60,4,4,1,7,22919,@Heroic Dungeon@,181358
+214757,Senior Designer's Pantaloons,Mythic,11841,64,60,4,4,1,7,22919,@Mythic Dungeon@,181359
+11842,Lead Surveyor's Mantle,Normal,11842,57,50,3,4,3,3,22991,,10123
+214768,Lead Surveyor's Mantle,Heroic,11842,61,60,4,4,3,3,22991,@Heroic Dungeon@,181370
+214769,Lead Surveyor's Mantle,Mythic,11842,64,60,4,4,3,3,22991,@Mythic Dungeon@,181371
+11920,Wraith Scythe,Normal,11920,57,51,3,2,0,13,22878,,10187
+311920,Wraith Scythe,Heroic,11920,61,60,4,2,0,13,22878,@Heroic Dungeon@,217523
+211920,Wraith Scythe,Mythic,11920,64,60,4,2,0,13,22878,@Mythic Dungeon@,179768
+11921,Impervious Giant,Normal,11921,57,52,3,2,5,17,20094,,10188
+311921,Impervious Giant,Heroic,11921,61,60,4,2,5,17,20094,@Heroic Dungeon@,217524
+211921,Impervious Giant,Mythic,11921,64,60,4,2,5,17,20094,@Mythic Dungeon@,179769
+11922,Blood-etched Blade,Normal,11922,57,52,3,2,15,21,20078,,10189
+311922,Blood-etched Blade,Heroic,11922,61,60,4,2,15,21,20078,@Heroic Dungeon@,217525
+211922,Blood-etched Blade,Mythic,11922,64,60,4,2,15,21,20078,@Mythic Dungeon@,179770
+11923,The Hammer of Grace,Normal,11923,57,52,3,2,4,21,17035,,10190
+311923,The Hammer of Grace,Heroic,11923,61,60,4,2,4,21,17035,@Heroic Dungeon@,217526
+211923,The Hammer of Grace,Mythic,11923,64,60,4,2,4,21,17035,@Mythic Dungeon@,179771
+11924,Robes of the Royal Crown,Normal,11924,57,55,3,4,1,20,23013,,10191
+215348,Robes of the Royal Crown,Heroic,11924,61,60,4,4,1,20,23013,@Heroic Dungeon@,181496
+215349,Robes of the Royal Crown,Mythic,11924,64,60,4,4,1,20,23013,@Mythic Dungeon@,181497
+11925,Ghostshroud,Normal,11925,57,52,3,4,2,1,22961,,10192
+311925,Ghostshroud,Heroic,11925,61,60,4,4,2,1,22961,@Heroic Dungeon@,217527
+211925,Ghostshroud,Mythic,11925,64,60,4,4,2,1,22961,@Mythic Dungeon@,179772
+11926,Deathdealer Breastplate,Normal,11926,57,52,3,4,3,5,22911,,10193
+311926,Deathdealer Breastplate,Heroic,11926,61,60,4,4,3,5,22911,@Heroic Dungeon@,217528
+211926,Deathdealer Breastplate,Mythic,11926,64,60,4,4,3,5,22911,@Mythic Dungeon@,179773
+11927,Legplates of the Eternal Guardian,Normal,11927,57,52,3,4,4,7,17040,,10194
+311927,Legplates of the Eternal Guardian,Heroic,11927,61,60,4,4,4,7,17040,@Heroic Dungeon@,217529
+211927,Legplates of the Eternal Guardian,Mythic,11927,64,60,4,4,4,7,17040,@Mythic Dungeon@,179774
+11928,Thaurissan's Royal Scepter,Normal,11928,57,55,3,4,0,23,17041,,10195
+215360,Thaurissan's Royal Scepter,Heroic,11928,61,60,4,4,0,23,17041,@Heroic Dungeon@,181508
+215361,Thaurissan's Royal Scepter,Mythic,11928,64,60,4,4,0,23,17041,@Mythic Dungeon@,181509
+11929,Haunting Spectre Leggings,Normal,11929,57,52,3,4,1,7,22935,,10196
+311929,Haunting Spectre Leggings,Heroic,11929,61,60,4,4,1,7,22935,@Heroic Dungeon@,217530
+211929,Haunting Spectre Leggings,Mythic,11929,64,60,4,4,1,7,22935,@Mythic Dungeon@,179775
+11930,The Emperor's New Cape,Normal,11930,57,55,3,4,1,16,17044,,10197
+215372,The Emperor's New Cape,Heroic,11930,61,60,4,4,1,16,17044,@Heroic Dungeon@,181520
+215373,The Emperor's New Cape,Mythic,11930,64,60,4,4,1,16,17044,@Mythic Dungeon@,181521
+11931,Dreadforge Retaliator,Normal,11931,57,54,3,2,1,17,22918,,10198
+215384,Dreadforge Retaliator,Heroic,11931,61,60,4,2,1,17,22918,@Heroic Dungeon@,181532
+215385,Dreadforge Retaliator,Mythic,11931,64,60,4,2,1,17,22918,@Mythic Dungeon@,181533
+11932,Guiding Stave of Wisdom,Normal,11932,57,54,3,2,10,17,17047,,10199
+215396,Guiding Stave of Wisdom,Heroic,11932,61,60,4,2,10,17,17047,@Heroic Dungeon@,181544
+215397,Guiding Stave of Wisdom,Mythic,11932,64,60,4,2,10,17,17047,@Mythic Dungeon@,181545
+11933,Imperial Jewel,Normal,11933,57,55,3,4,0,2,22983,,10200
+215409,Imperial Jewel,Heroic,11933,61,60,4,4,0,2,22983,@Heroic Dungeon@,181557
+215410,Imperial Jewel,Mythic,11933,64,60,4,4,0,2,22983,@Mythic Dungeon@,181558
+11935,Magmus Stone,Normal,11935,57,53,3,4,0,23,22994,,10202
+215433,Magmus Stone,Heroic,11935,61,60,4,4,0,23,22994,@Heroic Dungeon@,181571
+215434,Magmus Stone,Mythic,11935,64,60,4,4,0,23,22994,@Mythic Dungeon@,181572
+12103,Star of Mystaria,Normal,12103,57,58,3,4,0,2,18516,,10341
+216972,Star of Mystaria,Heroic,12103,61,60,4,4,0,2,18516,@Heroic Dungeon@,182053
+216973,Star of Mystaria,Mythic,12103,64,60,4,4,0,2,18516,@Mythic Dungeon@,182054
+12528,The Judge's Gavel,Normal,12528,57,47,3,2,5,17,22872,,10696
+217781,The Judge's Gavel,Heroic,12528,61,60,4,2,5,17,22872,@Heroic Dungeon@,182307
+217783,The Judge's Gavel,Mythic,12528,64,60,4,2,5,17,22872,@Mythic Dungeon@,182309
+12531,Searing Needle,Normal,12531,57,46,3,2,15,13,17640,,10699
+217794,Searing Needle,Heroic,12531,61,60,4,2,15,13,17640,@Heroic Dungeon@,182320
+217795,Searing Needle,Mythic,12531,64,60,4,2,15,13,17640,@Mythic Dungeon@,182321
+12532,Spire of the Stoneshaper,Normal,12532,57,51,3,2,10,17,17641,,10700
+217806,Spire of the Stoneshaper,Heroic,12532,61,60,4,2,10,17,17641,@Heroic Dungeon@,182332
+217807,Spire of the Stoneshaper,Mythic,12532,64,60,4,2,10,17,17641,@Mythic Dungeon@,182333
+12535,Doomforged Straightedge,Normal,12535,57,49,3,2,7,13,17652,,10703
+217818,Doomforged Straightedge,Heroic,12535,61,60,4,2,7,13,17652,@Heroic Dungeon@,182344
+217819,Doomforged Straightedge,Mythic,12535,64,60,4,2,7,13,17652,@Mythic Dungeon@,182345
+12542,Funeral Pyre Vestment,Normal,12542,57,46,3,4,1,20,20520,,10704
+217830,Funeral Pyre Vestment,Heroic,12542,61,60,4,4,1,20,20520,@Heroic Dungeon@,182356
+217831,Funeral Pyre Vestment,Mythic,12542,64,60,4,4,1,20,20520,@Mythic Dungeon@,182357
+12546,Aristocratic Cuffs,Normal,12546,57,49,3,4,1,9,22836,,10708
+217878,Aristocratic Cuffs,Heroic,12546,61,60,4,4,1,9,22836,@Heroic Dungeon@,182379
+217879,Aristocratic Cuffs,Mythic,12546,64,60,4,4,1,9,22836,@Mythic Dungeon@,182380
+12547,Mar Alom's Grip,Normal,12547,57,51,3,4,2,10,22996,,10709
+217890,Mar Alom's Grip,Heroic,12547,61,60,4,4,2,10,22996,@Heroic Dungeon@,182391
+217891,Mar Alom's Grip,Mythic,12547,64,60,4,4,2,10,22996,@Mythic Dungeon@,182392
+12549,Braincage,Normal,12549,57,47,3,4,3,1,12170,,10711
+217914,Braincage,Heroic,12549,61,60,4,4,3,1,12170,@Heroic Dungeon@,182405
+217915,Braincage,Mythic,12549,64,60,4,4,3,1,12170,@Mythic Dungeon@,182406
+12550,Runed Golem Shackles,Normal,12550,57,48,3,4,4,9,23023,,10712
+217926,Runed Golem Shackles,Heroic,12550,61,60,4,4,4,9,23023,@Heroic Dungeon@,182417
+217927,Runed Golem Shackles,Mythic,12550,64,60,4,4,4,9,23023,@Mythic Dungeon@,182418
+12551,Stoneshield Cloak,Normal,12551,57,51,3,4,1,16,22894,,10713
+217938,Stoneshield Cloak,Heroic,12551,61,60,4,4,1,16,22894,@Heroic Dungeon@,182429
+217939,Stoneshield Cloak,Mythic,12551,64,60,4,4,1,16,22894,@Mythic Dungeon@,182430
+12552,Blisterbane Wrap,Normal,12552,57,50,3,4,1,16,17970,,10714
+217950,Blisterbane Wrap,Heroic,12552,61,60,4,4,1,16,17970,@Heroic Dungeon@,182441
+217951,Blisterbane Wrap,Mythic,12552,64,60,4,4,1,16,17970,@Mythic Dungeon@,182442
+12553,Swiftwalker Boots,Normal,12553,57,54,3,4,2,8,22869,,10715
+217962,Swiftwalker Boots,Heroic,12553,61,60,4,4,2,8,22869,@Heroic Dungeon@,182453
+217963,Swiftwalker Boots,Mythic,12553,64,60,4,4,2,8,22869,@Mythic Dungeon@,182454
+12554,Hands of the Exalted Herald,Normal,12554,57,54,3,4,1,10,22970,,10716
+217974,Hands of the Exalted Herald,Heroic,12554,61,60,4,4,1,10,22970,@Heroic Dungeon@,182465
+217975,Hands of the Exalted Herald,Mythic,12554,64,60,4,4,1,10,22970,@Mythic Dungeon@,182466
+12555,Battlechaser's Greaves,Normal,12555,57,50,3,4,4,8,19727,,10717
+217986,Battlechaser's Greaves,Heroic,12555,61,60,4,4,4,8,19727,@Heroic Dungeon@,182477
+217987,Battlechaser's Greaves,Mythic,12555,64,60,4,4,4,8,19727,@Mythic Dungeon@,182478
+12556,High Priestess Boots,Normal,12556,57,54,3,4,1,8,17678,,10718
+217998,High Priestess Boots,Heroic,12556,61,60,4,4,1,8,17678,@Heroic Dungeon@,182489
+217999,High Priestess Boots,Mythic,12556,64,60,4,4,1,8,17678,@Mythic Dungeon@,182490
+12557,Ebonsteel Spaulders,Normal,12557,57,54,3,4,4,3,22926,,10719
+218010,Ebonsteel Spaulders,Heroic,12557,61,60,4,4,4,3,22926,@Heroic Dungeon@,182501
+218011,Ebonsteel Spaulders,Mythic,12557,64,60,4,4,4,3,22926,@Mythic Dungeon@,182502
+12582,Keris of Zul'Serak,Normal,12582,57,55,3,2,15,13,22988,,10734
+120742,Keris of Zul'Serak,Heroic,12582,61,60,4,2,15,13,22988,@Heroic Dungeon@,114080
+212582,Keris of Zul'Serak,Mythic,12582,64,60,4,2,15,13,22988,@Mythic Dungeon@,180002
+12583,Blackhand Doomsaw,Normal,12583,57,58,3,2,6,17,17689,,10735
+100304,Blackhand Doomsaw,Heroic,12583,61,60,4,2,6,17,17689,@Heroic Dungeon@,93642
+212583,Blackhand Doomsaw,Mythic,12583,64,60,4,2,6,17,17689,@Mythic Dungeon@,180003
+12587,Eye of Rend,Normal,12587,57,58,3,4,2,1,17691,,10739
+113507,Eye of Rend,Heroic,12587,61,60,4,4,2,1,17691,@Heroic Dungeon@,106845
+212587,Eye of Rend,Mythic,12587,64,60,4,4,2,1,17691,@Mythic Dungeon@,180004
+12588,Bonespike Shoulder,Normal,12588,57,58,3,4,3,3,17692,,10740
+218034,Bonespike Shoulder,Heroic,12588,61,60,4,4,3,3,17692,@Heroic Dungeon@,182514
+218035,Bonespike Shoulder,Mythic,12588,64,60,4,4,3,3,17692,@Mythic Dungeon@,182515
+12589,Dustfeather Sash,Normal,12589,57,56,3,4,1,6,16926,,10741
+103877,Dustfeather Sash,Heroic,12589,61,60,4,4,1,6,16926,@Heroic Dungeon@,97215
+212589,Dustfeather Sash,Mythic,12589,64,60,4,4,1,6,16926,@Mythic Dungeon@,180005
+12590,Felstriker,Normal,12590,57,58,4,2,15,13,20082,,10742
+114140,Felstriker,Heroic,12590,61,60,4,2,15,13,20082,@Heroic Dungeon@,107478
+212590,Felstriker,Mythic,12590,64,60,4,2,15,13,20082,@Mythic Dungeon@,180006
+12592,Blackblade of Shahram,Normal,12592,57,58,4,2,8,17,17791,,10744
+100297,Blackblade of Shahram,Heroic,12592,61,60,4,2,8,17,17791,@Heroic Dungeon@,93635
+212592,Blackblade of Shahram,Mythic,12592,64,60,4,2,8,17,17791,@Mythic Dungeon@,180007
+12602,Draconian Deflector,Normal,12602,57,58,3,4,6,14,18226,,10752
+102336,Draconian Deflector,Heroic,12602,61,60,4,4,6,14,18226,@Heroic Dungeon@,95674
+212602,Draconian Deflector,Mythic,12602,64,60,4,4,6,14,18226,@Mythic Dungeon@,180014
+12603,Nightbrace Tunic,Normal,12603,57,56,3,4,2,5,6037,,10753
+123071,Nightbrace Tunic,Heroic,12603,61,60,4,4,2,5,6037,@Heroic Dungeon@,116379
+212603,Nightbrace Tunic,Mythic,12603,64,60,4,4,2,5,6037,@Mythic Dungeon@,180015
+12604,Starfire Tiara,Normal,12604,57,55,3,4,1,1,17718,,10754
+128504,Starfire Tiara,Heroic,12604,61,60,4,4,1,1,17718,@Heroic Dungeon@,121743
+212604,Starfire Tiara,Mythic,12604,64,60,4,4,1,1,17718,@Mythic Dungeon@,180016
+12605,Serpentine Skuller,Normal,12605,57,51,3,2,19,26,18853,,10755
+123741,Serpentine Skuller,Heroic,12605,61,60,4,2,19,26,18853,@Heroic Dungeon@,117025
+212605,Serpentine Skuller,Mythic,12605,64,60,4,2,19,26,18853,@Mythic Dungeon@,180017
+12606,Crystallized Girdle,Normal,12606,57,56,3,4,2,6,17722,,10756
+100954,Crystallized Girdle,Heroic,12606,61,60,4,4,2,6,17722,@Heroic Dungeon@,94292
+212606,Crystallized Girdle,Mythic,12606,64,60,4,4,2,6,17722,@Mythic Dungeon@,180018
+12608,Butcher's Apron,Normal,12608,57,53,3,4,1,16,22892,,10758
+100703,Butcher's Apron,Heroic,12608,61,60,4,4,1,16,22892,@Heroic Dungeon@,94041
+212608,Butcher's Apron,Mythic,12608,64,60,4,4,1,16,22892,@Mythic Dungeon@,180019
+12609,Polychromatic Visionwrap,Normal,12609,57,56,3,4,1,5,17728,,10759
+123427,Polychromatic Visionwrap,Heroic,12609,61,60,4,4,1,5,17728,@Heroic Dungeon@,116723
+212609,Polychromatic Visionwrap,Mythic,12609,64,60,4,4,1,5,17728,@Mythic Dungeon@,180020
+12621,Demonfork,Normal,12621,57,54,3,2,0,13,17770,,10771
+102233,Demonfork,Heroic,12621,61,60,4,2,0,13,17770,@Heroic Dungeon@,95571
+212621,Demonfork,Mythic,12621,64,60,4,2,0,13,17770,@Mythic Dungeon@,180024
+12626,Funeral Cuffs,Normal,12626,57,54,3,4,1,9,11334,,10776
+116221,Funeral Cuffs,Heroic,12626,61,60,4,4,1,9,11334,@Heroic Dungeon@,109559
+212626,Funeral Cuffs,Mythic,12626,64,60,4,4,1,9,11334,@Mythic Dungeon@,180029
+12634,Chiselbrand Girdle,Normal,12634,57,55,3,4,3,6,17792,,10784
+100763,Chiselbrand Girdle,Heroic,12634,61,60,4,4,3,6,17792,@Heroic Dungeon@,94101
+212634,Chiselbrand Girdle,Mythic,12634,64,60,4,4,3,6,17792,@Mythic Dungeon@,180030
+12637,Backusarian Gauntlets,Normal,12637,57,55,3,4,4,10,17795,,10787
+100195,Backusarian Gauntlets,Heroic,12637,61,60,4,4,4,10,17795,@Heroic Dungeon@,93533
+212637,Backusarian Gauntlets,Mythic,12637,64,60,4,4,4,10,17795,@Mythic Dungeon@,180032
+12651,Blackcrow,Normal,12651,57,54,3,2,18,26,17813,,10801
+100298,Blackcrow,Heroic,12651,61,60,4,2,18,26,17813,@Heroic Dungeon@,93636
+212651,Blackcrow,Mythic,12651,64,60,4,2,18,26,17813,@Mythic Dungeon@,180033
+12653,Riphook,Normal,12653,57,54,3,2,2,15,23012,,10803
+123612,Riphook,Heroic,12653,61,60,4,2,2,15,23012,@Heroic Dungeon@,116901
+212653,Riphook,Mythic,12653,64,60,4,2,2,15,23012,@Mythic Dungeon@,180034
+12709,Finkle's Skinner,Normal,12709,57,58,3,2,15,13,17836,Also serves as a skinning knife.,10843
+114660,Finkle's Skinner,Heroic,12709,61,60,4,2,15,13,17836,@Heroic Dungeon@,107998
+212709,Finkle's Skinner,Mythic,12709,64,60,4,2,15,13,17836,@Mythic Dungeon@,180078
+12791,Barman Shanker,Normal,12791,57,50,3,2,15,13,18106,,10921
+218525,Barman Shanker,Heroic,12791,61,60,4,2,15,13,18106,@Heroic Dungeon@,182769
+218526,Barman Shanker,Mythic,12791,64,60,4,2,15,13,18106,@Mythic Dungeon@,182770
+12793,Mixologist's Tunic,Normal,12793,57,50,3,4,2,5,18110,,10923
+218550,Mixologist's Tunic,Heroic,12793,61,60,4,4,2,5,18110,@Heroic Dungeon@,182785
+218551,Mixologist's Tunic,Mythic,12793,64,60,4,4,2,5,18110,@Mythic Dungeon@,182786
+12905,Wildfire Cape,Normal,12905,57,56,3,4,1,16,22804,,11031
+130837,Wildfire Cape,Heroic,12905,61,60,4,4,1,16,22804,@Heroic Dungeon@,124031
+212905,Wildfire Cape,Mythic,12905,64,60,4,4,1,16,22804,@Mythic Dungeon@,180181
+12927,Truestrike Shoulders,Normal,12927,57,56,3,4,2,3,22829,,11043
+130475,Truestrike Shoulders,Heroic,12927,61,60,4,4,2,3,22829,@Heroic Dungeon@,123686
+212927,Truestrike Shoulders,Mythic,12927,64,60,4,4,2,3,22829,@Mythic Dungeon@,180187
+12929,Emberfury Talisman,Normal,12929,57,56,3,4,0,2,6754,,11045
+112956,Emberfury Talisman,Heroic,12929,61,60,4,4,0,2,6754,@Heroic Dungeon@,106294
+212929,Emberfury Talisman,Mythic,12929,64,60,4,4,0,2,6754,@Mythic Dungeon@,180188
+12930,Briarwood Reed,Normal,12930,57,55,3,4,0,12,5555,,11046
+100690,Briarwood Reed,Heroic,12930,61,60,4,4,0,12,5555,@Heroic Dungeon@,94028
+212930,Briarwood Reed,Mythic,12930,64,60,4,4,0,12,5555,@Mythic Dungeon@,180189
+12935,Warmaster Legguards,Normal,12935,57,58,3,4,4,7,22824,,11051
+130779,Warmaster Legguards,Heroic,12935,61,60,4,4,4,7,22824,@Heroic Dungeon@,123976
+212935,Warmaster Legguards,Mythic,12935,64,60,4,4,4,7,22824,@Mythic Dungeon@,180190
+12936,Battleborn Armbraces,Normal,12936,57,58,3,4,4,9,17656,,11052
+100235,Battleborn Armbraces,Heroic,12936,61,60,4,4,4,9,17656,@Heroic Dungeon@,93573
+212936,Battleborn Armbraces,Mythic,12936,64,60,4,4,4,9,17656,@Mythic Dungeon@,180191
+12939,Dal'Rend's Tribal Guardian,Normal,12939,57,58,3,2,7,22,20116,,11055
+100981,Dal'Rend's Tribal Guardian,Heroic,12939,61,60,4,2,7,22,20116,@Heroic Dungeon@,94319
+212939,Dal'Rend's Tribal Guardian,Mythic,12939,64,60,4,2,7,22,20116,@Mythic Dungeon@,180192
+12940,Dal'Rend's Sacred Charge,Normal,12940,57,58,3,2,7,21,20117,,11056
+100980,Dal'Rend's Sacred Charge,Heroic,12940,61,60,4,2,7,21,20117,@Heroic Dungeon@,94318
+212940,Dal'Rend's Sacred Charge,Mythic,12940,64,60,4,2,7,21,20117,@Mythic Dungeon@,180193
+12963,Blademaster Leggings,Normal,12963,57,58,3,4,2,7,18346,,11079
+100317,Blademaster Leggings,Heroic,12963,61,60,4,4,2,7,18346,@Heroic Dungeon@,93655
+212963,Blademaster Leggings,Mythic,12963,64,60,4,4,2,7,18346,@Mythic Dungeon@,180198
+12964,Tristam Legguards,Normal,12964,57,58,3,4,3,7,18347,,11080
+130471,Tristam Legguards,Heroic,12964,61,60,4,4,3,7,18347,@Heroic Dungeon@,123682
+212964,Tristam Legguards,Mythic,12964,64,60,4,4,3,7,18347,@Mythic Dungeon@,180199
+12965,Spiritshroud Leggings,Normal,12965,57,58,3,4,1,7,18350,,11081
+128241,Spiritshroud Leggings,Heroic,12965,61,60,4,4,1,7,18350,@Heroic Dungeon@,121487
+212965,Spiritshroud Leggings,Mythic,12965,64,60,4,4,1,7,18350,@Mythic Dungeon@,180200
+12966,Blackmist Armguards,Normal,12966,57,58,3,4,2,9,18351,,11082
+100306,Blackmist Armguards,Heroic,12966,61,60,4,4,2,9,18351,@Heroic Dungeon@,93644
+212966,Blackmist Armguards,Mythic,12966,64,60,4,4,2,9,18351,@Mythic Dungeon@,180201
+12967,Bloodmoon Cloak,Normal,12967,57,58,3,4,1,16,18352,,11083
+100373,Bloodmoon Cloak,Heroic,12967,61,60,4,4,1,16,18352,@Heroic Dungeon@,93711
+212967,Bloodmoon Cloak,Mythic,12967,64,60,4,4,1,16,18352,@Mythic Dungeon@,180202
+12968,Frostweaver Cape,Normal,12968,57,58,3,4,1,16,18353,,11084
+116162,Frostweaver Cape,Heroic,12968,61,60,4,4,1,16,18353,@Heroic Dungeon@,109500
+212968,Frostweaver Cape,Mythic,12968,64,60,4,4,1,16,18353,@Mythic Dungeon@,180203
+12969,Seeping Willow,Normal,12969,57,58,3,2,5,17,18356,,11085
+123734,Seeping Willow,Heroic,12969,61,60,4,2,5,17,18356,@Heroic Dungeon@,117018
+212969,Seeping Willow,Mythic,12969,64,60,4,2,5,17,18356,@Mythic Dungeon@,180204
+13098,Painweaver Band,Normal,13098,57,58,3,4,0,11,18407,,11214
+123180,Painweaver Band,Heroic,13098,61,60,4,4,0,11,18407,@Heroic Dungeon@,116483
+213098,Painweaver Band,Mythic,13098,64,60,4,4,0,11,18407,@Mythic Dungeon@,180271
+13141,Tooth of Gnarr,Normal,13141,57,58,3,4,0,2,6948,,11257
+130435,Tooth of Gnarr,Heroic,13141,61,60,4,4,0,2,6948,@Heroic Dungeon@,123649
+213141,Tooth of Gnarr,Mythic,13141,64,60,4,4,0,2,6948,@Mythic Dungeon@,180287
+13142,Brigam Girdle,Normal,13142,57,58,3,4,4,6,18427,,11258
+100691,Brigam Girdle,Heroic,13142,61,60,4,4,4,6,18427,@Heroic Dungeon@,94029
+213142,Brigam Girdle,Mythic,13142,64,60,4,4,4,6,18427,@Mythic Dungeon@,180288
+13143,Mark of the Dragon Lord,Normal,13143,57,56,4,4,0,11,18428,,11259
+122744,Mark of the Dragon Lord,Heroic,13143,61,60,4,4,0,11,18428,@Heroic Dungeon@,116065
+213143,Mark of the Dragon Lord,Mythic,13143,64,60,4,4,0,11,18428,@Mythic Dungeon@,180289
+13148,Chillpike,Normal,13148,57,56,3,2,6,17,20100,,11264
+220267,Chillpike,Heroic,13148,61,60,4,2,6,17,20100,@Heroic Dungeon@,183324
+220268,Chillpike,Mythic,13148,64,60,4,2,6,17,20100,@Mythic Dungeon@,183325
+13161,Trindlehaven Staff,Normal,13161,57,56,3,2,10,17,18472,,11277
+130470,Trindlehaven Staff,Heroic,13161,61,60,4,2,10,17,18472,@Heroic Dungeon@,123681
+213161,Trindlehaven Staff,Mythic,13161,64,60,4,2,10,17,18472,@Mythic Dungeon@,180294
+13162,Reiver Claws,Normal,13162,57,56,3,4,4,10,18474,,11278
+123568,Reiver Claws,Heroic,13162,61,60,4,4,4,10,18474,@Heroic Dungeon@,116858
+213162,Reiver Claws,Mythic,13162,64,60,4,4,4,10,18474,@Mythic Dungeon@,180295
+13163,Relentless Scythe,Normal,13163,57,57,3,2,8,17,18482,,11279
+123569,Relentless Scythe,Heroic,13163,61,60,4,2,8,17,18482,@Heroic Dungeon@,116859
+213163,Relentless Scythe,Mythic,13163,64,60,4,2,8,17,18482,@Mythic Dungeon@,180296
+13164,Heart of the Scale,Normal,13164,57,56,3,4,0,12,3490,,11280
+220279,Heart of the Scale,Heroic,13164,61,60,4,4,0,12,3490,@Heroic Dungeon@,183336
+220280,Heart of the Scale,Mythic,13164,64,60,4,4,0,12,3490,@Mythic Dungeon@,183337
+13166,Slamshot Shoulders,Normal,13166,57,55,3,4,4,3,18503,,11282
+124537,Slamshot Shoulders,Heroic,13166,61,60,4,4,4,3,18503,@Heroic Dungeon@,117792
+213166,Slamshot Shoulders,Mythic,13166,64,60,4,4,4,3,18503,@Mythic Dungeon@,180297
+13167,Fist of Omokk,Normal,13167,57,55,3,2,5,17,19693,,11283
+115452,Fist of Omokk,Heroic,13167,61,60,4,2,5,17,19693,@Heroic Dungeon@,108790
+213167,Fist of Omokk,Mythic,13167,64,60,4,2,5,17,19693,@Mythic Dungeon@,180298
+13168,Plate of the Shaman King,Normal,13168,57,55,3,4,4,5,18358,,11284
+123416,Plate of the Shaman King,Heroic,13168,61,60,4,4,4,5,18358,@Heroic Dungeon@,116713
+213168,Plate of the Shaman King,Mythic,13168,64,60,4,4,4,5,18358,@Mythic Dungeon@,180299
+13169,Tressermane Leggings,Normal,13169,57,55,3,4,2,7,18509,,11285
+130468,Tressermane Leggings,Heroic,13169,61,60,4,4,2,7,18509,@Heroic Dungeon@,123679
+213169,Tressermane Leggings,Mythic,13169,64,60,4,4,2,7,18509,@Mythic Dungeon@,180300
+13170,Skyshroud Leggings,Normal,13170,57,55,3,4,1,7,22912,,11286
+124532,Skyshroud Leggings,Heroic,13170,61,60,4,4,1,7,22912,@Heroic Dungeon@,117787
+213170,Skyshroud Leggings,Mythic,13170,64,60,4,4,1,7,22912,@Mythic Dungeon@,180301
+13177,Talisman of Evasion,Normal,13177,57,55,3,4,0,2,3952,,11293
+129745,Talisman of Evasion,Heroic,13177,61,60,4,4,0,2,3952,@Heroic Dungeon@,122968
+213177,Talisman of Evasion,Mythic,13177,64,60,4,4,0,2,3952,@Mythic Dungeon@,180302
+13178,Rosewine Circle,Normal,13178,57,55,3,4,0,11,18525,,11294
+123644,Rosewine Circle,Heroic,13178,61,60,4,4,0,11,18525,@Heroic Dungeon@,116929
+213178,Rosewine Circle,Mythic,13178,64,60,4,4,0,11,18525,@Mythic Dungeon@,180303
+13179,Brazecore Armguards,Normal,13179,57,55,3,4,3,9,18527,,11295
+100669,Brazecore Armguards,Heroic,13179,61,60,4,4,3,9,18527,@Heroic Dungeon@,94007
+213179,Brazecore Armguards,Mythic,13179,64,60,4,4,3,9,18527,@Mythic Dungeon@,180304
+13181,Demonskin Gloves,Normal,13181,57,52,3,4,1,10,18529,,11297
+220317,Demonskin Gloves,Heroic,13181,61,60,4,4,1,10,18529,@Heroic Dungeon@,183352
+220318,Demonskin Gloves,Mythic,13181,64,60,4,4,1,10,18529,@Mythic Dungeon@,183353
+13182,Phase Blade,Normal,13182,57,52,3,2,7,13,18531,,11298
+220329,Phase Blade,Heroic,13182,61,60,4,2,7,13,18531,@Heroic Dungeon@,183364
+220330,Phase Blade,Mythic,13182,64,60,4,2,7,13,18531,@Mythic Dungeon@,183365
+13183,Venomspitter,Normal,13183,57,55,3,2,4,13,19361,,11299
+130613,Venomspitter,Heroic,13183,61,60,4,2,4,13,19361,@Heroic Dungeon@,123813
+213183,Venomspitter,Mythic,13183,64,60,4,2,4,13,19361,@Mythic Dungeon@,180307
+13184,Fallbrush Handgrips,Normal,13184,57,56,3,4,2,10,18533,,11300
+113539,Fallbrush Handgrips,Heroic,13184,61,60,4,4,2,10,18533,@Heroic Dungeon@,106877
+213184,Fallbrush Handgrips,Mythic,13184,64,60,4,4,2,10,18533,@Mythic Dungeon@,180308
+13185,Sunderseer Mantle,Normal,13185,57,56,3,4,1,3,18534,,11301
+128974,Sunderseer Mantle,Heroic,13185,61,60,4,4,1,3,18534,@Heroic Dungeon@,122200
+213185,Sunderseer Mantle,Mythic,13185,64,60,4,4,1,3,18534,@Mythic Dungeon@,180309
+13198,Hurd Smasher,Normal,13198,57,55,3,2,13,13,18538,,11314
+120609,Hurd Smasher,Heroic,13198,61,60,4,2,13,13,18538,@Heroic Dungeon@,113947
+213198,Hurd Smasher,Mythic,13198,64,60,4,2,13,13,18538,@Mythic Dungeon@,180312
+13203,Armswake Cloak,Normal,13203,57,55,3,4,1,16,18543,,11318
+100139,Armswake Cloak,Heroic,13203,61,60,4,4,1,16,18543,@Heroic Dungeon@,93477
+213203,Armswake Cloak,Mythic,13203,64,60,4,4,1,16,18543,@Mythic Dungeon@,180314
+13204,Bashguuder,Normal,13204,57,55,3,2,4,13,20088,,11319
+100226,Bashguuder,Heroic,13204,61,60,4,2,4,13,20088,@Heroic Dungeon@,93564
+213204,Bashguuder,Mythic,13204,64,60,4,2,4,13,20088,@Mythic Dungeon@,180315
+13205,Rhombeard Protector,Normal,13205,57,56,3,4,6,14,18546,,11320
+123588,Rhombeard Protector,Heroic,13205,61,60,4,4,6,14,18546,@Heroic Dungeon@,116877
+213205,Rhombeard Protector,Mythic,13205,64,60,4,4,6,14,18546,@Mythic Dungeon@,180316
+13206,Wolfshear Leggings,Normal,13206,57,56,3,4,1,7,18549,,11321
+130941,Wolfshear Leggings,Heroic,13206,61,60,4,4,1,7,18549,@Heroic Dungeon@,124134
+213206,Wolfshear Leggings,Mythic,13206,64,60,4,4,1,7,18549,@Mythic Dungeon@,180317
+13208,Bleak Howler Armguards,Normal,13208,57,56,3,4,2,9,18556,,11323
+100322,Bleak Howler Armguards,Heroic,13208,61,60,4,4,2,9,18556,@Heroic Dungeon@,93660
+213208,Bleak Howler Armguards,Mythic,13208,64,60,4,4,2,9,18556,@Mythic Dungeon@,180318
+13210,Pads of the Dread Wolf,Normal,13210,57,55,3,4,2,8,18561,,11325
+123179,Pads of the Dread Wolf,Heroic,13210,61,60,4,4,2,8,18561,@Heroic Dungeon@,116482
+213210,Pads of the Dread Wolf,Mythic,13210,64,60,4,4,2,8,18561,@Mythic Dungeon@,180320
+13211,Slashclaw Bracers,Normal,13211,57,55,3,4,3,9,18565,,11326
+124538,Slashclaw Bracers,Heroic,13211,61,60,4,4,3,9,18565,@Heroic Dungeon@,117793
+213211,Slashclaw Bracers,Mythic,13211,64,60,4,4,3,9,18565,@Mythic Dungeon@,180321
+13212,Halycon's Spiked Collar,Normal,13212,57,55,3,4,0,2,18562,,11327
+120446,Halycon's Spiked Collar,Heroic,13212,61,60,4,4,0,2,18562,@Heroic Dungeon@,113784
+213212,Halycon's Spiked Collar,Mythic,13212,64,60,4,4,0,2,18562,@Mythic Dungeon@,180322
+13213,Smolderweb's Eye,Normal,13213,57,55,3,4,0,12,12697,,11328
+127391,Smolderweb's Eye,Heroic,13213,61,60,4,4,0,12,12697,@Heroic Dungeon@,120642
+213213,Smolderweb's Eye,Mythic,13213,64,60,4,4,0,12,12697,@Mythic Dungeon@,180323
+13218,Fang of the Crystal Spider,Normal,13218,57,56,3,2,15,13,18587,,11333
+113572,Fang of the Crystal Spider,Heroic,13218,61,60,4,2,15,13,18587,@Heroic Dungeon@,106910
+213218,Fang of the Crystal Spider,Mythic,13218,64,60,4,2,15,13,18587,@Mythic Dungeon@,180324
+13244,Gilded Gauntlets,Normal,13244,57,55,3,4,3,10,18615,,11354
+117427,Gilded Gauntlets,Heroic,13244,61,60,4,4,3,10,18615,@Heroic Dungeon@,110765
+213244,Gilded Gauntlets,Mythic,13244,64,60,4,4,3,10,18615,@Mythic Dungeon@,180341
+13252,Cloudrunner Girdle,Normal,13252,57,55,3,4,2,6,18632,,11362
+100820,Cloudrunner Girdle,Heroic,13252,61,60,4,4,2,6,18632,@Heroic Dungeon@,94158
+213252,Cloudrunner Girdle,Mythic,13252,64,60,4,4,2,6,18632,@Mythic Dungeon@,180344
+13253,Hands of Power,Normal,13253,57,55,3,4,1,10,18634,,11363
+120461,Hands of Power,Heroic,13253,61,60,4,4,1,10,18634,@Heroic Dungeon@,113799
+213253,Hands of Power,Mythic,13253,64,60,4,4,1,10,18634,@Mythic Dungeon@,180345
+13255,Trueaim Gauntlets,Normal,13255,57,54,3,4,3,10,18636,,11365
+130474,Trueaim Gauntlets,Heroic,13255,61,60,4,4,3,10,18636,@Heroic Dungeon@,123685
+213255,Trueaim Gauntlets,Mythic,13255,64,60,4,4,3,10,18636,@Mythic Dungeon@,180346
+13257,Demonic Runed Spaulders,Normal,13257,57,54,3,4,2,3,18639,,11367
+102236,Demonic Runed Spaulders,Heroic,13257,61,60,4,4,2,3,18639,@Heroic Dungeon@,95574
+213257,Demonic Runed Spaulders,Mythic,13257,64,60,4,4,2,3,18639,@Mythic Dungeon@,180347
+13259,Ribsteel Footguards,Normal,13259,57,56,3,4,4,8,18643,,11369
+123589,Ribsteel Footguards,Heroic,13259,61,60,4,4,4,8,18643,@Heroic Dungeon@,116878
+213259,Ribsteel Footguards,Mythic,13259,64,60,4,4,4,8,18643,@Mythic Dungeon@,180349
+13261,Globe of D'sak,Normal,13261,57,54,3,4,0,23,18654,Glows with the power of magiskull.,11371
+118581,Globe of D'sak,Heroic,13261,61,60,4,4,0,23,18654,@Heroic Dungeon@,111919
+213261,Globe of D'sak,Mythic,13261,64,60,4,4,0,23,18654,@Mythic Dungeon@,180351
+13282,Ogreseer Tower Boots,Normal,13282,57,54,3,4,1,8,14792,,11379
+123135,Ogreseer Tower Boots,Heroic,13282,61,60,4,4,1,8,14792,@Heroic Dungeon@,116441
+213282,Ogreseer Tower Boots,Mythic,13282,64,60,4,4,1,8,14792,@Mythic Dungeon@,180360
+13283,Magus Ring,Normal,13283,57,54,3,4,0,11,18235,,11380
+122563,Magus Ring,Heroic,13283,61,60,4,4,0,11,18235,@Heroic Dungeon@,115888
+213283,Magus Ring,Mythic,13283,64,60,4,4,0,11,18235,@Mythic Dungeon@,180361
+13284,Swiftdart Battleboots,Normal,13284,57,53,3,4,3,8,18678,,11381
+129242,Swiftdart Battleboots,Heroic,13284,61,60,4,4,3,8,18678,@Heroic Dungeon@,122466
+213284,Swiftdart Battleboots,Mythic,13284,64,60,4,4,3,8,18678,@Mythic Dungeon@,180362
+13285,The Blackrock Slicer,Normal,13285,57,53,3,2,1,17,18685,,11382
+130332,The Blackrock Slicer,Heroic,13285,61,60,4,2,1,17,18685,@Heroic Dungeon@,123551
+213285,The Blackrock Slicer,Mythic,13285,64,60,4,2,1,17,18685,@Mythic Dungeon@,180363
+13286,Rivenspike,Normal,13286,57,53,3,2,0,13,18686,,11383
+123615,Rivenspike,Heroic,13286,61,60,4,2,0,13,18686,@Heroic Dungeon@,116904
+213286,Rivenspike,Mythic,13286,64,60,4,2,0,13,18686,@Mythic Dungeon@,180364
+13314,Alanna's Embrace,Normal,13314,57,57,4,4,1,20,19381,,11408
+220477,Alanna's Embrace,Heroic,13314,61,60,4,4,1,20,19381,@Heroic Dungeon@,183386
+220478,Alanna's Embrace,Mythic,13314,64,60,4,4,1,20,19381,@Mythic Dungeon@,183387
+13340,Cape of the Black Baron,Normal,13340,57,58,3,4,1,16,18764,,11434
+220503,Cape of the Black Baron,Heroic,13340,61,60,4,4,1,16,18764,@Heroic Dungeon@,183401
+220504,Cape of the Black Baron,Mythic,13340,64,60,4,4,1,16,18764,@Mythic Dungeon@,183402
+13344,Dracorian Gauntlets,Normal,13344,57,58,3,4,3,10,23116,,11438
+220515,Dracorian Gauntlets,Heroic,13344,61,60,4,4,3,10,23116,@Heroic Dungeon@,183413
+220516,Dracorian Gauntlets,Mythic,13344,64,60,4,4,3,10,23116,@Mythic Dungeon@,183414
+13345,Seal of Rivendare,Normal,13345,57,58,3,4,0,11,18771,,11439
+220527,Seal of Rivendare,Heroic,13345,61,60,4,4,0,11,18771,@Heroic Dungeon@,183425
+220528,Seal of Rivendare,Mythic,13345,64,60,4,4,0,11,18771,@Mythic Dungeon@,183426
+13346,Robes of the Exalted,Normal,13346,57,58,3,4,1,20,18774,,11440
+220539,Robes of the Exalted,Heroic,13346,61,60,4,4,1,20,18774,@Heroic Dungeon@,183437
+220540,Robes of the Exalted,Mythic,13346,64,60,4,4,1,20,18774,@Mythic Dungeon@,183438
+13348,Demonshear,Normal,13348,57,58,3,2,8,17,18797,,11442
+220551,Demonshear,Heroic,13348,61,60,4,2,8,17,18797,@Heroic Dungeon@,183449
+220552,Demonshear,Mythic,13348,64,60,4,2,8,17,18797,@Mythic Dungeon@,183450
+13349,Scepter of the Unholy,Normal,13349,57,58,3,2,4,13,18781,,11443
+220563,Scepter of the Unholy,Heroic,13349,61,60,4,2,4,13,18781,@Heroic Dungeon@,183461
+220564,Scepter of the Unholy,Mythic,13349,64,60,4,2,4,13,18781,@Mythic Dungeon@,183462
+13353,Book of the Dead,Normal,13353,57,58,4,4,0,23,18787,,11447
+220575,Book of the Dead,Heroic,13353,61,60,4,4,0,23,18787,@Heroic Dungeon@,183473
+220576,Book of the Dead,Mythic,13353,64,60,4,4,0,23,18787,@Mythic Dungeon@,183474
+13358,Wyrmtongue Shoulders,Normal,13358,57,58,3,4,2,3,14855,,11452
+220587,Wyrmtongue Shoulders,Heroic,13358,61,60,4,4,2,3,14855,@Heroic Dungeon@,183485
+220588,Wyrmtongue Shoulders,Mythic,13358,64,60,4,4,2,3,14855,@Mythic Dungeon@,183486
+13359,Crown of Tyranny,Normal,13359,57,58,3,4,3,1,18793,,11453
+220599,Crown of Tyranny,Heroic,13359,61,60,4,4,3,1,18793,@Heroic Dungeon@,183497
+220600,Crown of Tyranny,Mythic,13359,64,60,4,4,3,1,18793,@Mythic Dungeon@,183498
+13360,Gift of the Elven Magi,Normal,13360,57,58,3,2,15,21,18794,,11454
+220611,Gift of the Elven Magi,Heroic,13360,61,60,4,2,15,21,18794,@Heroic Dungeon@,183509
+220612,Gift of the Elven Magi,Mythic,13360,64,60,4,2,15,21,18794,@Mythic Dungeon@,183510
+13361,Skullforge Reaver,Normal,13361,57,58,3,2,7,13,19572,,11455
+220623,Skullforge Reaver,Heroic,13361,61,60,4,2,7,13,19572,@Heroic Dungeon@,183521
+220624,Skullforge Reaver,Mythic,13361,64,60,4,2,7,13,19572,@Mythic Dungeon@,183522
+13368,Bonescraper,Normal,13368,57,57,3,2,15,13,20083,,11462
+220635,Bonescraper,Heroic,13368,61,60,4,2,15,13,20083,@Heroic Dungeon@,183533
+220636,Bonescraper,Mythic,13368,64,60,4,2,15,13,20083,@Mythic Dungeon@,183534
+13369,Fire Striders,Normal,13369,57,58,3,4,1,8,18802,,11463
+220647,Fire Striders,Heroic,13369,61,60,4,4,1,8,18802,@Heroic Dungeon@,183545
+220648,Fire Striders,Mythic,13369,64,60,4,4,1,8,18802,@Mythic Dungeon@,183546
+13371,Father Flame,Normal,13371,57,60,3,4,0,23,18807,,11465
+220659,Father Flame,Heroic,13371,61,60,4,4,0,23,18807,@Heroic Dungeon@,183557
+220661,Father Flame,Mythic,13371,64,60,4,4,0,23,18807,@Mythic Dungeon@,183559
+13372,Slavedriver's Cane,Normal,13372,57,55,3,2,10,17,18809,,11466
+220672,Slavedriver's Cane,Heroic,13372,61,60,4,2,10,17,18809,@Heroic Dungeon@,183570
+220673,Slavedriver's Cane,Mythic,13372,64,60,4,2,10,17,18809,@Mythic Dungeon@,183571
+13373,Band of Flesh,Normal,13373,57,55,3,4,0,11,268,,11467
+220684,Band of Flesh,Heroic,13373,61,60,4,4,0,11,268,@Heroic Dungeon@,183582
+220685,Band of Flesh,Mythic,13373,64,60,4,4,0,11,268,@Mythic Dungeon@,183583
+13374,Soulstealer Mantle,Normal,13374,57,55,3,4,1,3,18810,,11468
+220696,Soulstealer Mantle,Heroic,13374,61,60,4,4,1,3,18810,@Heroic Dungeon@,183594
+220697,Soulstealer Mantle,Mythic,13374,64,60,4,4,1,3,18810,@Mythic Dungeon@,183595
+13375,Crest of Retribution,Normal,13375,57,55,3,4,6,14,18613,,11469
+220708,Crest of Retribution,Heroic,13375,61,60,4,4,6,14,18613,@Heroic Dungeon@,183606
+220709,Crest of Retribution,Mythic,13375,64,60,4,4,6,14,18613,@Mythic Dungeon@,183607
+13376,Royal Tribunal Cloak,Normal,13376,57,54,3,4,1,16,18811,,11470
+220720,Royal Tribunal Cloak,Heroic,13376,61,60,4,4,1,16,18811,@Heroic Dungeon@,183618
+220721,Royal Tribunal Cloak,Mythic,13376,64,60,4,4,1,16,18811,@Mythic Dungeon@,183619
+13378,Songbird Blouse,Normal,13378,57,53,3,4,2,5,18812,,11472
+220733,Songbird Blouse,Heroic,13378,61,60,4,4,2,5,18812,@Heroic Dungeon@,183631
+220734,Songbird Blouse,Mythic,13378,64,60,4,4,2,5,18812,@Mythic Dungeon@,183632
+13379,Piccolo of the Flaming Fire,Normal,13379,57,53,3,4,0,12,822,,11473
+220745,Piccolo of the Flaming Fire,Heroic,13379,61,60,4,4,0,12,822,@Heroic Dungeon@,183643
+220746,Piccolo of the Flaming Fire,Mythic,13379,64,60,4,4,0,12,822,@Mythic Dungeon@,183644
+13380,Willey's Portable Howitzer,Normal,13380,57,56,3,2,3,26,14328,,11474
+220757,Willey's Portable Howitzer,Heroic,13380,61,60,4,2,3,26,14328,@Heroic Dungeon@,183655
+220758,Willey's Portable Howitzer,Mythic,13380,64,60,4,2,3,26,14328,@Mythic Dungeon@,183656
+13381,Master Cannoneer Boots,Normal,13381,57,56,3,4,4,8,18814,,11475
+220769,Master Cannoneer Boots,Heroic,13381,61,60,4,4,4,8,18814,@Heroic Dungeon@,183667
+220770,Master Cannoneer Boots,Mythic,13381,64,60,4,4,4,8,18814,@Mythic Dungeon@,183668
+13382,Cannonball Runner,Normal,13382,57,56,3,4,0,12,5243,,11476
+220781,Cannonball Runner,Heroic,13382,61,60,4,4,0,12,5243,@Heroic Dungeon@,183679
+220782,Cannonball Runner,Mythic,13382,64,60,4,4,0,12,5243,@Mythic Dungeon@,183680
+13383,Woollies of the Prancing Minstrel,Normal,13383,57,53,3,4,3,7,18816,,11477
+220793,Woollies of the Prancing Minstrel,Heroic,13383,61,60,4,4,3,7,18816,@Heroic Dungeon@,183691
+220794,Woollies of the Prancing Minstrel,Mythic,13383,64,60,4,4,3,7,18816,@Mythic Dungeon@,183692
+13384,Rainbow Girdle,Normal,13384,57,53,3,4,4,6,18817,,11478
+220805,Rainbow Girdle,Heroic,13384,61,60,4,4,4,6,18817,@Heroic Dungeon@,183703
+220806,Rainbow Girdle,Mythic,13384,64,60,4,4,4,6,18817,@Mythic Dungeon@,183704
+13385,Tome of Knowledge,Normal,13385,57,56,3,4,0,23,18818,,11479
+220817,Tome of Knowledge,Heroic,13385,61,60,4,4,0,23,18818,@Heroic Dungeon@,183715
+220818,Tome of Knowledge,Mythic,13385,64,60,4,4,0,23,18818,@Mythic Dungeon@,183716
+13386,Archivist Cape,Normal,13386,57,56,3,4,1,16,18819,,11480
+220829,Archivist Cape,Heroic,13386,61,60,4,4,1,16,18819,@Heroic Dungeon@,183727
+220830,Archivist Cape,Mythic,13386,64,60,4,4,1,16,18819,@Mythic Dungeon@,183728
+13394,Skul's Cold Embrace,Normal,13394,57,54,3,4,4,5,18848,,11488
+220949,Skul's Cold Embrace,Heroic,13394,61,60,4,4,4,5,18848,@Heroic Dungeon@,183784
+220950,Skul's Cold Embrace,Mythic,13394,64,60,4,4,4,5,18848,@Mythic Dungeon@,183785
+13395,Skul's Fingerbone Claws,Normal,13395,57,54,3,4,2,10,23124,,11489
+220961,Skul's Fingerbone Claws,Heroic,13395,61,60,4,4,2,10,23124,@Heroic Dungeon@,183796
+220962,Skul's Fingerbone Claws,Mythic,13395,64,60,4,4,2,10,23124,@Mythic Dungeon@,183797
+13396,Skul's Ghastly Touch,Normal,13396,57,52,3,2,19,26,18852,,11490
+220973,Skul's Ghastly Touch,Heroic,13396,61,60,4,2,19,26,18852,@Heroic Dungeon@,183808
+220974,Skul's Ghastly Touch,Mythic,13396,64,60,4,2,19,26,18852,@Mythic Dungeon@,183809
+13397,Stoneskin Gargoyle Cape,Normal,13397,57,56,3,4,1,16,18854,It's white and looks longer than your average cloak or cape.,11491
+220985,Stoneskin Gargoyle Cape,Heroic,13397,61,60,4,4,1,16,18854,@Heroic Dungeon@,183820
+220986,Stoneskin Gargoyle Cape,Mythic,13397,64,60,4,4,1,16,18854,@Mythic Dungeon@,183821
+13398,Boots of the Shrieker,Normal,13398,57,57,3,4,2,8,6749,,11492
+220997,Boots of the Shrieker,Heroic,13398,61,60,4,4,2,8,6749,@Heroic Dungeon@,183832
+220998,Boots of the Shrieker,Mythic,13398,64,60,4,4,2,8,6749,@Mythic Dungeon@,183833
+13399,Gargoyle Shredder Talons,Normal,13399,57,54,3,2,13,22,18855,,11493
+221009,Gargoyle Shredder Talons,Heroic,13399,61,60,4,2,13,22,18855,@Heroic Dungeon@,183844
+221010,Gargoyle Shredder Talons,Mythic,13399,64,60,4,2,13,22,18855,@Mythic Dungeon@,183845
+13400,Vambraces of the Sadist,Normal,13400,57,54,3,4,4,9,18856,,11494
+221021,Vambraces of the Sadist,Heroic,13400,61,60,4,4,4,9,18856,@Heroic Dungeon@,183856
+221022,Vambraces of the Sadist,Mythic,13400,64,60,4,4,4,9,18856,@Mythic Dungeon@,183857
+13401,The Cruel Hand of Timmy,Normal,13401,57,56,3,2,4,13,18857,,11495
+221033,The Cruel Hand of Timmy,Heroic,13401,61,60,4,2,4,13,18857,@Heroic Dungeon@,183868
+221034,The Cruel Hand of Timmy,Mythic,13401,64,60,4,2,4,13,18857,@Mythic Dungeon@,183869
+13402,Timmy's Galoshes,Normal,13402,57,54,3,4,3,8,26428,,11496
+221045,Timmy's Galoshes,Heroic,13402,61,60,4,4,3,8,26428,@Heroic Dungeon@,183880
+221046,Timmy's Galoshes,Mythic,13402,64,60,4,4,3,8,26428,@Mythic Dungeon@,183881
+13403,Grimgore Noose,Normal,13403,57,54,3,4,1,6,18859,,11497
+221057,Grimgore Noose,Heroic,13403,61,60,4,4,1,6,18859,@Heroic Dungeon@,183892
+221058,Grimgore Noose,Mythic,13403,64,60,4,4,1,6,18859,@Mythic Dungeon@,183893
+13404,Mask of the Unforgiven,Normal,13404,57,52,3,4,2,1,34850,,11498
+221069,Mask of the Unforgiven,Heroic,13404,61,60,4,4,2,1,34850,@Heroic Dungeon@,183904
+221070,Mask of the Unforgiven,Mythic,13404,64,60,4,4,2,1,34850,@Mythic Dungeon@,183905
+13405,Wailing Nightbane Pauldrons,Normal,13405,57,52,3,4,4,3,18861,,11499
+221081,Wailing Nightbane Pauldrons,Heroic,13405,61,60,4,4,4,3,18861,@Heroic Dungeon@,183916
+221082,Wailing Nightbane Pauldrons,Mythic,13405,64,60,4,4,4,3,18861,@Mythic Dungeon@,183917
+13408,Soul Breaker,Normal,13408,57,52,3,2,0,13,18865,,11502
+221093,Soul Breaker,Heroic,13408,61,60,4,2,0,13,18865,@Heroic Dungeon@,183928
+221094,Soul Breaker,Mythic,13408,64,60,4,2,0,13,18865,@Mythic Dungeon@,183929
+13498,Handcrafted Mastersmith Leggings,Normal,13498,57,55,3,4,4,7,18882,,11571
+120455,Handcrafted Mastersmith Leggings,Heroic,13498,61,60,4,4,4,7,18882,@Heroic Dungeon@,113793
+213498,Handcrafted Mastersmith Leggings,Mythic,13498,64,60,4,4,4,7,18882,@Mythic Dungeon@,180436
+13502,Handcrafted Mastersmith Girdle,Normal,13502,57,58,3,4,4,6,18884,,11575
+120454,Handcrafted Mastersmith Girdle,Heroic,13502,61,60,4,4,4,6,18884,@Heroic Dungeon@,113792
+213502,Handcrafted Mastersmith Girdle,Mythic,13502,64,60,4,4,4,6,18884,@Mythic Dungeon@,180437
+13505,Runeblade of Baron Rivendare,Normal,13505,57,58,4,2,8,17,18885,,11578
+221173,Runeblade of Baron Rivendare,Heroic,13505,61,60,4,2,8,17,18885,@Heroic Dungeon@,183975
+221174,Runeblade of Baron Rivendare,Mythic,13505,64,60,4,2,8,17,18885,@Mythic Dungeon@,183976
+13515,Ramstein's Lightning Bolts,Normal,13515,57,55,3,4,0,12,271,,11588
+221185,Ramstein's Lightning Bolts,Heroic,13515,61,60,4,4,0,12,271,@Heroic Dungeon@,183987
+221186,Ramstein's Lightning Bolts,Mythic,13515,64,60,4,4,0,12,271,@Mythic Dungeon@,183988
+13524,Skull of Burning Shadows,Normal,13524,57,57,3,4,0,23,18895,,11597
+221197,Skull of Burning Shadows,Heroic,13524,61,60,4,4,0,23,18895,@Heroic Dungeon@,183999
+221198,Skull of Burning Shadows,Mythic,13524,64,60,4,4,0,23,18895,@Mythic Dungeon@,184000
+13529,Husk of Nerub'enkan,Normal,13529,57,56,3,4,6,14,1852,,11602
+221265,Husk of Nerub'enkan,Heroic,13529,61,60,4,4,6,14,1852,@Heroic Dungeon@,184024
+221266,Husk of Nerub'enkan,Mythic,13529,64,60,4,4,6,14,1852,@Mythic Dungeon@,184025
+13534,Banshee Finger,Normal,13534,57,55,3,2,19,26,18905,,11607
+221363,Banshee Finger,Heroic,13534,61,60,4,2,19,26,18905,@Heroic Dungeon@,184081
+221369,Banshee Finger,Mythic,13534,64,60,4,2,19,26,18905,@Mythic Dungeon@,184087
+13937,Headmaster's Charge,Normal,13937,57,57,4,2,10,17,38911,,11940
+221835,Headmaster's Charge,Heroic,13937,61,60,4,2,10,17,38911,@Heroic Dungeon@,184335
+221840,Headmaster's Charge,Mythic,13937,64,60,4,2,10,17,38911,@Mythic Dungeon@,184340
+13938,Bonecreeper Stylus,Normal,13938,57,57,3,2,19,26,19364,,11941
+221851,Bonecreeper Stylus,Heroic,13938,61,60,4,2,19,26,19364,@Heroic Dungeon@,184351
+221852,Bonecreeper Stylus,Mythic,13938,64,60,4,2,19,26,19364,@Mythic Dungeon@,184352
+13944,Tombstone Breastplate,Normal,13944,57,57,3,4,2,5,22831,,11947
+221864,Tombstone Breastplate,Heroic,13944,61,60,4,4,2,5,22831,@Heroic Dungeon@,184364
+221865,Tombstone Breastplate,Mythic,13944,64,60,4,4,2,5,22831,@Mythic Dungeon@,184365
+13950,Detention Strap,Normal,13950,57,57,3,4,3,6,19369,,11953
+221876,Detention Strap,Heroic,13950,61,60,4,4,3,6,19369,@Heroic Dungeon@,184376
+221877,Detention Strap,Mythic,13950,64,60,4,4,3,6,19369,@Mythic Dungeon@,184377
+13951,Vigorsteel Vambraces,Normal,13951,57,57,3,4,4,9,19370,,11954
+221890,Vigorsteel Vambraces,Heroic,13951,61,60,4,4,4,9,19370,@Heroic Dungeon@,184390
+221892,Vigorsteel Vambraces,Mythic,13951,64,60,4,4,4,9,19370,@Mythic Dungeon@,184392
+13952,Iceblade Hacker,Normal,13952,57,57,3,2,0,13,22981,,11955
+221903,Iceblade Hacker,Heroic,13952,61,60,4,2,0,13,22981,@Heroic Dungeon@,184403
+221904,Iceblade Hacker,Mythic,13952,64,60,4,2,0,13,22981,@Mythic Dungeon@,184404
+13953,Silent Fang,Normal,13953,57,57,3,2,7,13,19377,,11956
+221915,Silent Fang,Heroic,13953,61,60,4,2,7,13,19377,@Heroic Dungeon@,184415
+221916,Silent Fang,Mythic,13953,64,60,4,2,7,13,19377,@Mythic Dungeon@,184416
+13954,Verdant Footpads,Normal,13954,57,56,3,4,2,8,22826,,11957
+221927,Verdant Footpads,Heroic,13954,61,60,4,4,2,8,22826,@Heroic Dungeon@,184427
+221928,Verdant Footpads,Mythic,13954,64,60,4,4,2,8,22826,@Mythic Dungeon@,184428
+13955,Stoneform Shoulders,Normal,13955,57,56,3,4,4,3,19398,,11958
+221939,Stoneform Shoulders,Heroic,13955,61,60,4,4,4,3,19398,@Heroic Dungeon@,184439
+221940,Stoneform Shoulders,Mythic,13955,64,60,4,4,4,3,19398,@Mythic Dungeon@,184440
+13956,Clutch of Andros,Normal,13956,57,56,3,4,1,6,19383,,11959
+221951,Clutch of Andros,Heroic,13956,61,60,4,4,1,6,19383,@Heroic Dungeon@,184451
+221952,Clutch of Andros,Mythic,13956,64,60,4,4,1,6,19383,@Mythic Dungeon@,184452
+13957,Gargoyle Slashers,Normal,13957,57,56,3,4,2,10,19389,,11960
+221963,Gargoyle Slashers,Heroic,13957,61,60,4,4,2,10,19389,@Heroic Dungeon@,184463
+221964,Gargoyle Slashers,Mythic,13957,64,60,4,4,2,10,19389,@Mythic Dungeon@,184464
+13960,Heart of the Fiend,Normal,13960,57,56,3,4,0,2,15509,,11963
+222000,Heart of the Fiend,Heroic,13960,61,60,4,4,0,2,15509,@Heroic Dungeon@,184476
+222001,Heart of the Fiend,Mythic,13960,64,60,4,4,0,2,15509,@Mythic Dungeon@,184477
+13964,Witchblade,Normal,13964,57,57,3,2,15,21,19396,,11967
+222048,Witchblade,Heroic,13964,61,60,4,2,15,21,19396,@Heroic Dungeon@,184488
+222049,Witchblade,Mythic,13964,64,60,4,2,15,21,19396,@Mythic Dungeon@,184489
+13967,Windreaver Greaves,Normal,13967,57,56,3,4,3,8,22803,,11970
+222084,Windreaver Greaves,Heroic,13967,61,60,4,4,3,8,22803,@Heroic Dungeon@,184500
+222085,Windreaver Greaves,Mythic,13967,64,60,4,4,3,8,22803,@Mythic Dungeon@,184501
+13969,Loomguard Armbraces,Normal,13969,57,56,3,4,3,9,19414,,11972
+222108,Loomguard Armbraces,Heroic,13969,61,60,4,4,3,9,19414,@Heroic Dungeon@,184512
+222109,Loomguard Armbraces,Mythic,13969,64,60,4,4,3,9,19414,@Mythic Dungeon@,184513
+13983,Gravestone War Axe,Normal,13983,57,57,3,2,1,17,19426,,11974
+222132,Gravestone War Axe,Heroic,13983,61,60,4,2,1,17,19426,@Heroic Dungeon@,184525
+222133,Gravestone War Axe,Mythic,13983,64,60,4,2,1,17,19426,@Mythic Dungeon@,184526
+14024,Frightalon,Normal,14024,57,56,3,2,15,13,16081,,11999
+222204,Frightalon,Heroic,14024,61,60,4,2,15,13,16081,@Heroic Dungeon@,184584
+222205,Frightalon,Mythic,14024,64,60,4,2,15,13,16081,@Mythic Dungeon@,184585
+14340,Freezing Lich Robes,Normal,14340,57,57,3,4,1,20,19574,,12275
+225496,Freezing Lich Robes,Heroic,14340,61,60,4,4,1,20,19574,@Heroic Dungeon@,185518
+225497,Freezing Lich Robes,Mythic,14340,64,60,4,4,1,20,19574,@Mythic Dungeon@,185519
+14487,Bonechill Hammer,Normal,14487,57,57,3,2,4,13,19614,,12422
+226628,Bonechill Hammer,Heroic,14487,61,60,4,2,4,13,19614,@Heroic Dungeon@,185719
+226629,Bonechill Hammer,Mythic,14487,64,60,4,2,4,13,19614,@Mythic Dungeon@,185720
+14502,Frostbite Girdle,Normal,14502,57,57,3,4,2,6,22956,,12437
+226640,Frostbite Girdle,Heroic,14502,61,60,4,4,2,6,22956,@Heroic Dungeon@,185731
+226641,Frostbite Girdle,Mythic,14502,64,60,4,4,2,6,22956,@Mythic Dungeon@,185732
+14503,Death's Clutch,Normal,14503,57,57,3,4,2,3,19622,,12438
+226652,Death's Clutch,Heroic,14503,61,60,4,4,2,3,19622,@Heroic Dungeon@,185743
+226653,Death's Clutch,Mythic,14503,64,60,4,4,2,3,19622,@Mythic Dungeon@,185744
+14522,Maelstrom Leggings,Normal,14522,57,57,3,4,3,7,19625,,12451
+226664,Maelstrom Leggings,Heroic,14522,61,60,4,4,3,7,19625,@Heroic Dungeon@,185755
+226665,Maelstrom Leggings,Mythic,14522,64,60,4,4,3,7,19625,@Mythic Dungeon@,185756
+14525,Boneclenched Gauntlets,Normal,14525,57,57,3,4,4,10,19630,,12454
+226676,Boneclenched Gauntlets,Heroic,14525,61,60,4,4,4,10,19630,@Heroic Dungeon@,185767
+226677,Boneclenched Gauntlets,Mythic,14525,64,60,4,4,4,10,19630,@Mythic Dungeon@,185768
+14528,Rattlecage Buckler,Normal,14528,57,57,3,4,6,14,19652,,12457
+226688,Rattlecage Buckler,Heroic,14528,61,60,4,4,6,14,19652,@Heroic Dungeon@,185779
+226689,Rattlecage Buckler,Mythic,14528,64,60,4,4,6,14,19652,@Mythic Dungeon@,185780
+14531,Frightskull Shaft,Normal,14531,57,54,3,2,5,17,19662,,12460
+226700,Frightskull Shaft,Heroic,14531,61,60,4,2,5,17,19662,@Heroic Dungeon@,185791
+226701,Frightskull Shaft,Mythic,14531,64,60,4,2,5,17,19662,@Mythic Dungeon@,185792
+14536,Bonebrace Hauberk,Normal,14536,57,56,3,4,3,5,19671,,12465
+226712,Bonebrace Hauberk,Heroic,14536,61,60,4,4,3,5,19671,@Heroic Dungeon@,185803
+226713,Bonebrace Hauberk,Mythic,14536,64,60,4,4,3,5,19671,@Mythic Dungeon@,185804
+14537,Corpselight Greaves,Normal,14537,57,57,3,4,4,8,19674,,12466
+226724,Corpselight Greaves,Heroic,14537,61,60,4,4,4,8,19674,@Heroic Dungeon@,185815
+226725,Corpselight Greaves,Mythic,14537,64,60,4,4,4,8,19674,@Mythic Dungeon@,185816
+14538,Deadwalker Mantle,Normal,14538,57,57,3,4,1,3,22904,,12467
+226736,Deadwalker Mantle,Heroic,14538,61,60,4,4,1,3,22904,@Heroic Dungeon@,185827
+226737,Deadwalker Mantle,Mythic,14538,64,60,4,4,1,3,22904,@Mythic Dungeon@,185828
+14539,Bone Ring Helm,Normal,14539,57,57,3,4,2,1,19680,,12468
+226748,Bone Ring Helm,Heroic,14539,61,60,4,4,2,1,19680,@Heroic Dungeon@,185839
+226749,Bone Ring Helm,Mythic,14539,64,60,4,4,2,1,19680,@Mythic Dungeon@,185840
+14541,Barovian Family Sword,Normal,14541,57,56,3,2,8,17,20118,,12470
+226760,Barovian Family Sword,Heroic,14541,61,60,4,2,8,17,20118,@Heroic Dungeon@,185851
+226761,Barovian Family Sword,Mythic,14541,64,60,4,2,8,17,20118,@Mythic Dungeon@,185852
+14543,Darkshade Gloves,Normal,14543,57,57,3,4,1,10,22902,,12472
+226772,Darkshade Gloves,Heroic,14543,61,60,4,4,1,10,22902,@Heroic Dungeon@,185863
+226773,Darkshade Gloves,Mythic,14543,64,60,4,4,1,10,22902,@Mythic Dungeon@,185864
+14545,Ghostloom Leggings,Normal,14545,57,57,3,4,2,7,19683,,12474
+226784,Ghostloom Leggings,Heroic,14545,61,60,4,4,2,7,19683,@Heroic Dungeon@,185875
+226785,Ghostloom Leggings,Mythic,14545,64,60,4,4,2,7,19683,@Mythic Dungeon@,185876
+14548,Royal Cap Spaulders,Normal,14548,57,57,3,4,3,3,23016,,12477
+226796,Royal Cap Spaulders,Heroic,14548,61,60,4,4,3,3,23016,@Heroic Dungeon@,185887
+226797,Royal Cap Spaulders,Mythic,14548,64,60,4,4,3,3,23016,@Mythic Dungeon@,185888
+14576,Ebon Hilt of Marduk,Normal,14576,57,54,3,2,7,13,19686,,12505
+227052,Ebon Hilt of Marduk,Heroic,14576,61,60,4,2,7,13,19686,@Heroic Dungeon@,185931
+227053,Ebon Hilt of Marduk,Mythic,14576,64,60,4,2,7,13,19686,@Mythic Dungeon@,185932
+14577,Skullsmoke Pants,Normal,14577,57,56,3,4,1,7,22914,,12506
+227064,Skullsmoke Pants,Heroic,14577,61,60,4,4,1,7,22914,@Heroic Dungeon@,185943
+227065,Skullsmoke Pants,Mythic,14577,64,60,4,4,1,7,22914,@Mythic Dungeon@,185944
+14611,Bloodmail Hauberk,Normal,14611,57,56,3,4,3,5,19735,,12540
+227453,Bloodmail Hauberk,Heroic,14611,61,60,4,4,3,5,19735,@Heroic Dungeon@,186016
+227454,Bloodmail Hauberk,Mythic,14611,64,60,4,4,3,5,19735,@Mythic Dungeon@,186017
+14612,Bloodmail Legguards,Normal,14612,57,56,3,4,3,7,19736,,12541
+227465,Bloodmail Legguards,Heroic,14612,61,60,4,4,3,7,19736,@Heroic Dungeon@,186028
+227466,Bloodmail Legguards,Mythic,14612,64,60,4,4,3,7,19736,@Mythic Dungeon@,186029
+14614,Bloodmail Belt,Normal,14614,57,56,3,4,3,6,19732,,12543
+227482,Bloodmail Belt,Heroic,14614,61,60,4,4,3,6,19732,@Heroic Dungeon@,186045
+227483,Bloodmail Belt,Mythic,14614,64,60,4,4,3,6,19732,@Mythic Dungeon@,186046
+14615,Bloodmail Gauntlets,Normal,14615,57,56,3,4,3,10,19734,,12544
+227494,Bloodmail Gauntlets,Heroic,14615,61,60,4,4,3,10,19734,@Heroic Dungeon@,186057
+227495,Bloodmail Gauntlets,Mythic,14615,64,60,4,4,3,10,19734,@Mythic Dungeon@,186058
+14616,Bloodmail Boots,Normal,14616,57,56,3,4,3,8,19733,,12545
+227506,Bloodmail Boots,Heroic,14616,61,60,4,4,3,8,19733,@Heroic Dungeon@,186069
+227507,Bloodmail Boots,Mythic,14616,64,60,4,4,3,8,19733,@Mythic Dungeon@,186070
+14620,Deathbone Girdle,Normal,14620,57,56,3,4,4,6,12,,12549
+227518,Deathbone Girdle,Heroic,14620,61,60,4,4,4,6,12,@Heroic Dungeon@,186081
+227519,Deathbone Girdle,Mythic,14620,64,60,4,4,4,6,12,@Mythic Dungeon@,186082
+14621,Deathbone Sabatons,Normal,14621,57,56,3,4,4,8,14,,12550
+227530,Deathbone Sabatons,Heroic,14621,61,60,4,4,4,8,14,@Heroic Dungeon@,186093
+227531,Deathbone Sabatons,Mythic,14621,64,60,4,4,4,8,14,@Mythic Dungeon@,186094
+14622,Deathbone Gauntlets,Normal,14622,57,56,3,4,4,10,11,,12551
+227542,Deathbone Gauntlets,Heroic,14622,61,60,4,4,4,10,11,@Heroic Dungeon@,186105
+227543,Deathbone Gauntlets,Mythic,14622,64,60,4,4,4,10,11,@Mythic Dungeon@,186106
+14623,Deathbone Legguards,Normal,14623,57,56,3,4,4,7,13,,12552
+227554,Deathbone Legguards,Heroic,14623,61,60,4,4,4,7,13,@Heroic Dungeon@,186117
+227555,Deathbone Legguards,Mythic,14623,64,60,4,4,4,7,13,@Mythic Dungeon@,186118
+14624,Deathbone Chestplate,Normal,14624,57,56,3,4,4,5,9,,12553
+227566,Deathbone Chestplate,Heroic,14624,61,60,4,4,4,5,9,@Heroic Dungeon@,186129
+227567,Deathbone Chestplate,Mythic,14624,64,60,4,4,4,5,9,@Mythic Dungeon@,186130
+14626,Necropile Robe,Normal,14626,57,56,3,4,1,20,19758,,12555
+227578,Necropile Robe,Heroic,14626,61,60,4,4,1,20,19758,@Heroic Dungeon@,186141
+227579,Necropile Robe,Mythic,14626,64,60,4,4,1,20,19758,@Mythic Dungeon@,186142
+14633,Necropile Mantle,Normal,14633,57,56,3,4,1,3,19760,,12562
+227626,Necropile Mantle,Heroic,14633,61,60,4,4,1,3,19760,@Heroic Dungeon@,186189
+227627,Necropile Mantle,Mythic,14633,64,60,4,4,1,3,19760,@Mythic Dungeon@,186190
+14636,Cadaverous Belt,Normal,14636,57,56,3,4,2,6,19761,,12565
+227638,Cadaverous Belt,Heroic,14636,61,60,4,4,2,6,19761,@Heroic Dungeon@,186201
+227639,Cadaverous Belt,Mythic,14636,64,60,4,4,2,6,19761,@Mythic Dungeon@,186202
+14637,Cadaverous Armor,Normal,14637,57,56,3,4,2,5,19762,,12566
+227650,Cadaverous Armor,Heroic,14637,61,60,4,4,2,5,19762,@Heroic Dungeon@,186213
+227651,Cadaverous Armor,Mythic,14637,64,60,4,4,2,5,19762,@Mythic Dungeon@,186214
+14638,Cadaverous Leggings,Normal,14638,57,56,3,4,2,7,21232,,12567
+227662,Cadaverous Leggings,Heroic,14638,61,60,4,4,2,7,21232,@Heroic Dungeon@,186225
+227663,Cadaverous Leggings,Mythic,14638,64,60,4,4,2,7,21232,@Mythic Dungeon@,186226
+14640,Cadaverous Gloves,Normal,14640,57,56,3,4,2,10,19766,,12569
+227674,Cadaverous Gloves,Heroic,14640,61,60,4,4,2,10,19766,@Heroic Dungeon@,186237
+227675,Cadaverous Gloves,Mythic,14640,64,60,4,4,2,10,19766,@Mythic Dungeon@,186238
+14641,Cadaverous Walkers,Normal,14641,57,56,3,4,2,8,8603,,12570
+227686,Cadaverous Walkers,Heroic,14641,61,60,4,4,2,8,8603,@Heroic Dungeon@,186249
+227687,Cadaverous Walkers,Mythic,14641,64,60,4,4,2,8,8603,@Mythic Dungeon@,186250
+16666,Vest of Elements,Normal,16666,57,58,3,4,3,5,24848,,14434
+130619,Vest of Elements,Heroic,16666,61,60,4,4,3,5,24848,@Heroic Dungeon@,123819
+216666,Vest of Elements,Mythic,16666,64,60,4,4,3,5,24848,@Mythic Dungeon@,181855
+16667,Coif of Elements,Normal,16667,57,57,3,4,3,1,38144,,14435
+243527,Coif of Elements,Heroic,16667,61,60,4,4,3,1,38144,@Heroic Dungeon@,191030
+243528,Coif of Elements,Mythic,16667,64,60,4,4,3,1,38144,@Mythic Dungeon@,191031
+16668,Kilt of Elements,Normal,16668,57,56,3,4,3,7,24847,,14436
+243539,Kilt of Elements,Heroic,16668,61,60,4,4,3,7,24847,@Heroic Dungeon@,191042
+243540,Kilt of Elements,Mythic,16668,64,60,4,4,3,7,24847,@Mythic Dungeon@,191043
+16669,Pauldrons of Elements,Normal,16669,57,55,3,4,3,3,24405,,14437
+123194,Pauldrons of Elements,Heroic,16669,61,60,4,4,3,3,24405,@Heroic Dungeon@,116495
+216669,Pauldrons of Elements,Mythic,16669,64,60,4,4,3,3,24405,@Mythic Dungeon@,181857
+16670,Boots of Elements,Normal,16670,57,54,3,4,3,8,24844,,14438
+100453,Boots of Elements,Heroic,16670,61,60,4,4,3,8,24844,@Heroic Dungeon@,93791
+216670,Boots of Elements,Mythic,16670,64,60,4,4,3,8,24844,@Mythic Dungeon@,181858
+16671,Bindings of Elements,Normal,16671,57,52,3,4,3,9,24843,,14439
+243551,Bindings of Elements,Heroic,16671,61,60,4,4,3,9,24843,@Heroic Dungeon@,191054
+243552,Bindings of Elements,Mythic,16671,64,60,4,4,3,9,24843,@Mythic Dungeon@,191055
+16672,Gauntlets of Elements,Normal,16672,57,54,3,4,3,10,24846,,14440
+116900,Gauntlets of Elements,Heroic,16672,61,60,4,4,3,10,24846,@Heroic Dungeon@,110238
+216672,Gauntlets of Elements,Mythic,16672,64,60,4,4,3,10,24846,@Mythic Dungeon@,181860
+16673,Cord of Elements,Normal,16673,57,53,3,4,3,6,24845,,14441
+100894,Cord of Elements,Heroic,16673,61,60,4,4,3,6,24845,@Heroic Dungeon@,94232
+216673,Cord of Elements,Mythic,16673,64,60,4,4,3,6,24845,@Mythic Dungeon@,181861
+16674,Beaststalker's Tunic,Normal,16674,57,58,3,4,3,5,24834,,14442
+100252,Beaststalker's Tunic,Heroic,16674,61,60,4,4,3,5,24834,@Heroic Dungeon@,93590
+216674,Beaststalker's Tunic,Mythic,16674,64,60,4,4,3,5,24834,@Mythic Dungeon@,181862
+16675,Beaststalker's Boots,Normal,16675,57,54,3,4,3,8,24840,,14443
+243563,Beaststalker's Boots,Heroic,16675,61,60,4,4,3,8,24840,@Heroic Dungeon@,191066
+243564,Beaststalker's Boots,Mythic,16675,64,60,4,4,3,8,24840,@Mythic Dungeon@,191067
+16676,Beaststalker's Gloves,Normal,16676,57,54,3,4,3,10,24838,,14444
+100250,Beaststalker's Gloves,Heroic,16676,61,60,4,4,3,10,24838,@Heroic Dungeon@,93588
+216676,Beaststalker's Gloves,Mythic,16676,64,60,4,4,3,10,24838,@Mythic Dungeon@,181863
+16677,Beaststalker's Cap,Normal,16677,57,57,3,4,3,1,24842,,14445
+243575,Beaststalker's Cap,Heroic,16677,61,60,4,4,3,1,24842,@Heroic Dungeon@,191078
+243576,Beaststalker's Cap,Mythic,16677,64,60,4,4,3,1,24842,@Mythic Dungeon@,191079
+16678,Beaststalker's Pants,Normal,16678,57,56,3,4,3,7,24835,,14446
+243587,Beaststalker's Pants,Heroic,16678,61,60,4,4,3,7,24835,@Heroic Dungeon@,191090
+243588,Beaststalker's Pants,Mythic,16678,64,60,4,4,3,7,24835,@Mythic Dungeon@,191091
+16679,Beaststalker's Mantle,Normal,16679,57,55,3,4,3,3,24841,,14447
+100251,Beaststalker's Mantle,Heroic,16679,61,60,4,4,3,3,24841,@Heroic Dungeon@,93589
+216679,Beaststalker's Mantle,Mythic,16679,64,60,4,4,3,3,24841,@Mythic Dungeon@,181864
+16680,Beaststalker's Belt,Normal,16680,57,53,3,4,3,6,24836,,14448
+100248,Beaststalker's Belt,Heroic,16680,61,60,4,4,3,6,24836,@Heroic Dungeon@,93586
+216680,Beaststalker's Belt,Mythic,16680,64,60,4,4,3,6,24836,@Mythic Dungeon@,181865
+16681,Beaststalker's Bindings,Normal,16681,57,52,3,4,3,9,24837,,14449
+100249,Beaststalker's Bindings,Heroic,16681,61,60,4,4,3,9,24837,@Heroic Dungeon@,93587
+216681,Beaststalker's Bindings,Mythic,16681,64,60,4,4,3,9,24837,@Mythic Dungeon@,181866
+16682,Magister's Boots,Normal,16682,57,54,3,4,1,8,23476,,14450
+243599,Magister's Boots,Heroic,16682,61,60,4,4,1,8,23476,@Heroic Dungeon@,191102
+243600,Magister's Boots,Mythic,16682,64,60,4,4,1,8,23476,@Mythic Dungeon@,191103
+16683,Magister's Bindings,Normal,16683,57,52,3,4,1,9,23479,,14451
+122465,Magister's Bindings,Heroic,16683,61,60,4,4,1,9,23479,@Heroic Dungeon@,115790
+216683,Magister's Bindings,Mythic,16683,64,60,4,4,1,9,23479,@Mythic Dungeon@,181867
+16684,Magister's Gloves,Normal,16684,57,54,3,4,1,10,23475,,14452
+243611,Magister's Gloves,Heroic,16684,61,60,4,4,1,10,23475,@Heroic Dungeon@,191114
+243612,Magister's Gloves,Mythic,16684,64,60,4,4,1,10,23475,@Mythic Dungeon@,191115
+16685,Magister's Belt,Normal,16685,57,53,3,4,1,6,23478,,14453
+122464,Magister's Belt,Heroic,16685,61,60,4,4,1,6,23478,@Heroic Dungeon@,115789
+216685,Magister's Belt,Mythic,16685,64,60,4,4,1,6,23478,@Mythic Dungeon@,181868
+16686,Magister's Crown,Normal,16686,57,57,3,4,1,1,24532,,14454
+243623,Magister's Crown,Heroic,16686,61,60,4,4,1,1,24532,@Heroic Dungeon@,191126
+243624,Magister's Crown,Mythic,16686,64,60,4,4,1,1,24532,@Mythic Dungeon@,191127
+16687,Magister's Leggings,Normal,16687,57,56,3,4,1,7,23309,,14455
+243635,Magister's Leggings,Heroic,16687,61,60,4,4,1,7,23309,@Heroic Dungeon@,191138
+243636,Magister's Leggings,Mythic,16687,64,60,4,4,1,7,23309,@Mythic Dungeon@,191139
+16688,Magister's Robes,Normal,16688,57,58,3,4,1,20,23473,,14456
+122471,Magister's Robes,Heroic,16688,61,60,4,4,1,20,23473,@Heroic Dungeon@,115796
+216688,Magister's Robes,Mythic,16688,64,60,4,4,1,20,23473,@Mythic Dungeon@,181869
+16689,Magister's Mantle,Normal,16689,57,55,3,4,1,3,23887,,14457
+243647,Magister's Mantle,Heroic,16689,61,60,4,4,1,3,23887,@Heroic Dungeon@,191150
+243648,Magister's Mantle,Mythic,16689,64,60,4,4,1,3,23887,@Mythic Dungeon@,191151
+16690,Devout Robe,Normal,16690,57,58,3,4,1,20,24003,,14458
+102311,Devout Robe,Heroic,16690,61,60,4,4,1,20,24003,@Heroic Dungeon@,95649
+216690,Devout Robe,Mythic,16690,64,60,4,4,1,20,24003,@Mythic Dungeon@,181870
+16691,Devout Sandals,Normal,16691,57,54,3,4,1,8,24011,,14459
+243659,Devout Sandals,Heroic,16691,61,60,4,4,1,8,24011,@Heroic Dungeon@,191162
+243660,Devout Sandals,Mythic,16691,64,60,4,4,1,8,24011,@Mythic Dungeon@,191163
+16692,Devout Gloves,Normal,16692,57,54,3,4,1,10,24008,,14460
+243671,Devout Gloves,Heroic,16692,61,60,4,4,1,10,24008,@Heroic Dungeon@,191174
+243672,Devout Gloves,Mythic,16692,64,60,4,4,1,10,24008,@Mythic Dungeon@,191175
+16693,Devout Crown,Normal,16693,57,57,3,4,1,1,24549,,14461
+243683,Devout Crown,Heroic,16693,61,60,4,4,1,1,24549,@Heroic Dungeon@,191186
+243684,Devout Crown,Mythic,16693,64,60,4,4,1,1,24549,@Mythic Dungeon@,191187
+16694,Devout Skirt,Normal,16694,57,56,3,4,1,7,24005,,14462
+243695,Devout Skirt,Heroic,16694,61,60,4,4,1,7,24005,@Heroic Dungeon@,191198
+243696,Devout Skirt,Mythic,16694,64,60,4,4,1,7,24005,@Mythic Dungeon@,191199
+16695,Devout Mantle,Normal,16695,57,55,3,4,1,3,24548,,14463
+102310,Devout Mantle,Heroic,16695,61,60,4,4,1,3,24548,@Heroic Dungeon@,95648
+216695,Devout Mantle,Mythic,16695,64,60,4,4,1,3,24548,@Mythic Dungeon@,181872
+16696,Devout Belt,Normal,16696,57,53,3,4,1,6,24006,,14464
+102309,Devout Belt,Heroic,16696,61,60,4,4,1,6,24006,@Heroic Dungeon@,95647
+216696,Devout Belt,Mythic,16696,64,60,4,4,1,6,24006,@Mythic Dungeon@,181873
+16697,Devout Bracers,Normal,16697,57,52,3,4,1,9,24007,,14465
+243707,Devout Bracers,Heroic,16697,61,60,4,4,1,9,24007,@Heroic Dungeon@,191210
+243708,Devout Bracers,Mythic,16697,64,60,4,4,1,9,24007,@Mythic Dungeon@,191211
+16698,Dreadmist Mask,Normal,16698,57,57,3,4,1,1,24704,,14466
+243719,Dreadmist Mask,Heroic,16698,61,60,4,4,1,1,24704,@Heroic Dungeon@,191222
+243720,Dreadmist Mask,Mythic,16698,64,60,4,4,1,1,24704,@Mythic Dungeon@,191223
+16699,Dreadmist Leggings,Normal,16699,57,56,3,4,1,7,23638,,14467
+243731,Dreadmist Leggings,Heroic,16699,61,60,4,4,1,7,23638,@Heroic Dungeon@,191234
+243732,Dreadmist Leggings,Mythic,16699,64,60,4,4,1,7,23638,@Mythic Dungeon@,191235
+16700,Dreadmist Robe,Normal,16700,57,58,3,4,1,20,23633,,14468
+102387,Dreadmist Robe,Heroic,16700,61,60,4,4,1,20,23633,@Heroic Dungeon@,95725
+216700,Dreadmist Robe,Mythic,16700,64,60,4,4,1,20,23633,@Mythic Dungeon@,181875
+16701,Dreadmist Mantle,Normal,16701,57,55,3,4,1,3,23639,,14469
+243743,Dreadmist Mantle,Heroic,16701,61,60,4,4,1,3,23639,@Heroic Dungeon@,191246
+243744,Dreadmist Mantle,Mythic,16701,64,60,4,4,1,3,23639,@Mythic Dungeon@,191247
+16702,Dreadmist Belt,Normal,16702,57,53,3,4,1,6,23634,,14470
+243755,Dreadmist Belt,Heroic,16702,61,60,4,4,1,6,23634,@Heroic Dungeon@,191258
+243756,Dreadmist Belt,Mythic,16702,64,60,4,4,1,6,23634,@Mythic Dungeon@,191259
+16703,Dreadmist Bracers,Normal,16703,57,52,3,4,1,9,23636,,14471
+102386,Dreadmist Bracers,Heroic,16703,61,60,4,4,1,9,23636,@Heroic Dungeon@,95724
+216703,Dreadmist Bracers,Mythic,16703,64,60,4,4,1,9,23636,@Mythic Dungeon@,181876
+16704,Dreadmist Sandals,Normal,16704,57,54,3,4,1,8,23640,,14472
+243767,Dreadmist Sandals,Heroic,16704,61,60,4,4,1,8,23640,@Heroic Dungeon@,191270
+243768,Dreadmist Sandals,Mythic,16704,64,60,4,4,1,8,23640,@Mythic Dungeon@,191271
+16705,Dreadmist Wraps,Normal,16705,57,54,3,4,1,10,23641,,14473
+243779,Dreadmist Wraps,Heroic,16705,61,60,4,4,1,10,23641,@Heroic Dungeon@,191282
+243780,Dreadmist Wraps,Mythic,16705,64,60,4,4,1,10,23641,@Mythic Dungeon@,191283
+16706,Wildheart Vest,Normal,16706,57,58,3,4,2,5,23814,,14474
+130845,Wildheart Vest,Heroic,16706,61,60,4,4,2,5,23814,@Heroic Dungeon@,124039
+216706,Wildheart Vest,Mythic,16706,64,60,4,4,2,5,23814,@Mythic Dungeon@,181877
+16707,Shadowcraft Cap,Normal,16707,57,57,3,4,2,1,22380,,14475
+243791,Shadowcraft Cap,Heroic,16707,61,60,4,4,2,1,22380,@Heroic Dungeon@,191294
+243792,Shadowcraft Cap,Mythic,16707,64,60,4,4,2,1,22380,@Mythic Dungeon@,191295
+16708,Shadowcraft Spaulders,Normal,16708,57,55,3,4,2,3,22379,,14476
+243803,Shadowcraft Spaulders,Heroic,16708,61,60,4,4,2,3,22379,@Heroic Dungeon@,191306
+243804,Shadowcraft Spaulders,Mythic,16708,64,60,4,4,2,3,22379,@Mythic Dungeon@,191307
+16709,Shadowcraft Pants,Normal,16709,57,56,3,4,2,7,22361,,14477
+243815,Shadowcraft Pants,Heroic,16709,61,60,4,4,2,7,22361,@Heroic Dungeon@,191318
+243816,Shadowcraft Pants,Mythic,16709,64,60,4,4,2,7,22361,@Mythic Dungeon@,191319
+16710,Shadowcraft Bracers,Normal,16710,57,52,3,4,2,9,18909,,14478
+123783,Shadowcraft Bracers,Heroic,16710,61,60,4,4,2,9,18909,@Heroic Dungeon@,117064
+216710,Shadowcraft Bracers,Mythic,16710,64,60,4,4,2,9,18909,@Mythic Dungeon@,181878
+16711,Shadowcraft Boots,Normal,16711,57,54,3,4,2,8,22362,,14479
+243827,Shadowcraft Boots,Heroic,16711,61,60,4,4,2,8,22362,@Heroic Dungeon@,191330
+243828,Shadowcraft Boots,Mythic,16711,64,60,4,4,2,8,22362,@Mythic Dungeon@,191331
+16712,Shadowcraft Gloves,Normal,16712,57,54,3,4,2,10,22366,,14480
+123784,Shadowcraft Gloves,Heroic,16712,61,60,4,4,2,10,22366,@Heroic Dungeon@,117065
+216712,Shadowcraft Gloves,Mythic,16712,64,60,4,4,2,10,22366,@Mythic Dungeon@,181879
+16713,Shadowcraft Belt,Normal,16713,57,53,3,4,2,6,22377,,14481
+123782,Shadowcraft Belt,Heroic,16713,61,60,4,4,2,6,22377,@Heroic Dungeon@,117063
+216713,Shadowcraft Belt,Mythic,16713,64,60,4,4,2,6,22377,@Mythic Dungeon@,181880
+16714,Wildheart Bracers,Normal,16714,57,52,3,4,2,9,23817,,14482
+243839,Wildheart Bracers,Heroic,16714,61,60,4,4,2,9,23817,@Heroic Dungeon@,191342
+243840,Wildheart Bracers,Mythic,16714,64,60,4,4,2,9,23817,@Mythic Dungeon@,191343
+16715,Wildheart Boots,Normal,16715,57,54,3,4,2,8,23821,,14483
+130842,Wildheart Boots,Heroic,16715,61,60,4,4,2,8,23821,@Heroic Dungeon@,124036
+216715,Wildheart Boots,Mythic,16715,64,60,4,4,2,8,23821,@Mythic Dungeon@,181881
+16716,Wildheart Belt,Normal,16716,57,53,3,4,2,6,23816,,14484
+130841,Wildheart Belt,Heroic,16716,61,60,4,4,2,6,23816,@Heroic Dungeon@,124035
+216716,Wildheart Belt,Mythic,16716,64,60,4,4,2,6,23816,@Mythic Dungeon@,181882
+16717,Wildheart Gloves,Normal,16717,57,54,3,4,2,10,23819,,14485
+130843,Wildheart Gloves,Heroic,16717,61,60,4,4,2,10,23819,@Heroic Dungeon@,124037
+216717,Wildheart Gloves,Mythic,16717,64,60,4,4,2,10,23819,@Mythic Dungeon@,181883
+16718,Wildheart Spaulders,Normal,16718,57,55,3,4,2,3,23993,,14486
+130844,Wildheart Spaulders,Heroic,16718,61,60,4,4,2,3,23993,@Heroic Dungeon@,124038
+216718,Wildheart Spaulders,Mythic,16718,64,60,4,4,2,3,23993,@Mythic Dungeon@,181884
+16719,Wildheart Kilt,Normal,16719,57,56,3,4,2,7,23815,,14487
+243851,Wildheart Kilt,Heroic,16719,61,60,4,4,2,7,23815,@Heroic Dungeon@,191354
+243852,Wildheart Kilt,Mythic,16719,64,60,4,4,2,7,23815,@Mythic Dungeon@,191355
+16720,Wildheart Cowl,Normal,16720,57,57,3,4,2,1,24669,,14488
+243863,Wildheart Cowl,Heroic,16720,61,60,4,4,2,1,24669,@Heroic Dungeon@,191366
+243864,Wildheart Cowl,Mythic,16720,64,60,4,4,2,1,24669,@Mythic Dungeon@,191367
+16721,Shadowcraft Tunic,Normal,16721,57,58,3,4,2,5,22360,,14489
+123785,Shadowcraft Tunic,Heroic,16721,61,60,4,4,2,5,22360,@Heroic Dungeon@,117066
+216721,Shadowcraft Tunic,Mythic,16721,64,60,4,4,2,5,22360,@Mythic Dungeon@,181885
+16722,Lightforge Bracers,Normal,16722,57,52,3,4,4,9,23808,,14490
+243875,Lightforge Bracers,Heroic,16722,61,60,4,4,4,9,23808,@Heroic Dungeon@,191378
+243876,Lightforge Bracers,Mythic,16722,64,60,4,4,4,9,23808,@Mythic Dungeon@,191379
+16723,Lightforge Belt,Normal,16723,57,53,3,4,4,6,23806,,14491
+243887,Lightforge Belt,Heroic,16723,61,60,4,4,4,6,23806,@Heroic Dungeon@,191390
+243888,Lightforge Belt,Mythic,16723,64,60,4,4,4,6,23806,@Mythic Dungeon@,191391
+16724,Lightforge Gauntlets,Normal,16724,57,54,3,4,4,10,23810,,14492
+243899,Lightforge Gauntlets,Heroic,16724,61,60,4,4,4,10,23810,@Heroic Dungeon@,191402
+243900,Lightforge Gauntlets,Mythic,16724,64,60,4,4,4,10,23810,@Mythic Dungeon@,191403
+16725,Lightforge Boots,Normal,16725,57,54,3,4,4,8,23807,,14493
+243911,Lightforge Boots,Heroic,16725,61,60,4,4,4,8,23807,@Heroic Dungeon@,191414
+243912,Lightforge Boots,Mythic,16725,64,60,4,4,4,8,23807,@Mythic Dungeon@,191415
+16726,Lightforge Breastplate,Normal,16726,57,58,3,4,4,5,23809,,14494
+122143,Lightforge Breastplate,Heroic,16726,61,60,4,4,4,5,23809,@Heroic Dungeon@,115471
+216726,Lightforge Breastplate,Mythic,16726,64,60,4,4,4,5,23809,@Mythic Dungeon@,181886
+16727,Lightforge Helm,Normal,16727,57,57,3,4,4,1,24649,,14495
+243923,Lightforge Helm,Heroic,16727,61,60,4,4,4,1,24649,@Heroic Dungeon@,191426
+243924,Lightforge Helm,Mythic,16727,64,60,4,4,4,1,24649,@Mythic Dungeon@,191427
+16728,Lightforge Legplates,Normal,16728,57,56,3,4,4,7,23812,,14496
+243935,Lightforge Legplates,Heroic,16728,61,60,4,4,4,7,23812,@Heroic Dungeon@,191438
+243936,Lightforge Legplates,Mythic,16728,64,60,4,4,4,7,23812,@Mythic Dungeon@,191439
+16729,Lightforge Spaulders,Normal,16729,57,55,3,4,4,3,23811,,14497
+122148,Lightforge Spaulders,Heroic,16729,61,60,4,4,4,3,23811,@Heroic Dungeon@,115476
+216729,Lightforge Spaulders,Mythic,16729,64,60,4,4,4,3,23811,@Mythic Dungeon@,181887
+16730,Breastplate of Valor,Normal,16730,57,58,3,4,4,5,23798,,14498
+100684,Breastplate of Valor,Heroic,16730,61,60,4,4,4,5,23798,@Heroic Dungeon@,94022
+216730,Breastplate of Valor,Mythic,16730,64,60,4,4,4,5,23798,@Mythic Dungeon@,181888
+16731,Helm of Valor,Normal,16731,57,57,3,4,4,1,35244,,14499
+243947,Helm of Valor,Heroic,16731,61,60,4,4,4,1,35244,@Heroic Dungeon@,191450
+243948,Helm of Valor,Mythic,16731,64,60,4,4,4,1,35244,@Mythic Dungeon@,191451
+16732,Legplates of Valor,Normal,16732,57,56,3,4,4,7,23803,,14500
+243959,Legplates of Valor,Heroic,16732,61,60,4,4,4,7,23803,@Heroic Dungeon@,191462
+243960,Legplates of Valor,Mythic,16732,64,60,4,4,4,7,23803,@Mythic Dungeon@,191463
+16733,Spaulders of Valor,Normal,16733,57,55,3,4,4,3,23804,,14501
+128157,Spaulders of Valor,Heroic,16733,61,60,4,4,4,3,23804,@Heroic Dungeon@,121404
+216733,Spaulders of Valor,Mythic,16733,64,60,4,4,4,3,23804,@Mythic Dungeon@,181889
+16734,Boots of Valor,Normal,16734,57,54,3,4,4,8,23800,,14502
+243971,Boots of Valor,Heroic,16734,61,60,4,4,4,8,23800,@Heroic Dungeon@,191474
+243972,Boots of Valor,Mythic,16734,64,60,4,4,4,8,23800,@Mythic Dungeon@,191475
+16735,Bracers of Valor,Normal,16735,57,52,3,4,4,9,23801,,14503
+100665,Bracers of Valor,Heroic,16735,61,60,4,4,4,9,23801,@Heroic Dungeon@,94003
+216735,Bracers of Valor,Mythic,16735,64,60,4,4,4,9,23801,@Mythic Dungeon@,181890
+16736,Belt of Valor,Normal,16736,57,53,3,4,4,6,23799,,14504
+100284,Belt of Valor,Heroic,16736,61,60,4,4,4,6,23799,@Heroic Dungeon@,93622
+216736,Belt of Valor,Mythic,16736,64,60,4,4,4,6,23799,@Mythic Dungeon@,181891
+16737,Gauntlets of Valor,Normal,16737,57,54,3,4,4,10,23802,,14505
+243983,Gauntlets of Valor,Heroic,16737,61,60,4,4,4,10,23802,@Heroic Dungeon@,191486
+243984,Gauntlets of Valor,Mythic,16737,64,60,4,4,4,10,23802,@Mythic Dungeon@,191487
+17061,Juno's Shadow,Normal,17061,57,53,3,4,1,16,23074,,14801
+244759,Juno's Shadow,Heroic,17061,61,60,4,4,1,16,23074,@Heroic Dungeon@,191650
+244760,Juno's Shadow,Mythic,17061,64,60,4,4,1,16,23074,@Mythic Dungeon@,191651
+18043,Coal Miner Boots,Normal,18043,57,52,3,4,2,8,680,,15269
+246385,Coal Miner Boots,Heroic,18043,61,60,4,4,2,8,680,@Heroic Dungeon@,192258
+246386,Coal Miner Boots,Mythic,18043,64,60,4,4,2,8,680,@Mythic Dungeon@,192259
+18044,Hurley's Tankard,Normal,18044,57,52,3,2,4,13,24017,,15270
+246397,Hurley's Tankard,Heroic,18044,61,60,4,2,4,13,24017,@Heroic Dungeon@,192270
+246398,Hurley's Tankard,Mythic,18044,64,60,4,2,4,13,24017,@Mythic Dungeon@,192271
+18047,Flame Walkers,Normal,18047,57,57,3,4,3,8,24020,,15273
+115457,Flame Walkers,Heroic,18047,61,60,4,4,3,8,24020,@Heroic Dungeon@,108795
+218047,Flame Walkers,Mythic,18047,64,60,4,4,3,8,24020,@Mythic Dungeon@,182526
+18048,Mastersmith's Hammer,Normal,18048,57,55,3,2,4,21,24021,,15274
+122775,Mastersmith's Hammer,Heroic,18048,61,60,4,2,4,21,24021,@Heroic Dungeon@,116094
+218048,Mastersmith's Hammer,Mythic,18048,64,60,4,2,4,21,24021,@Mythic Dungeon@,182527
+18102,Dragonrider Boots,Normal,18102,57,58,3,4,1,8,11333,,15286
+102373,Dragonrider Boots,Heroic,18102,61,60,4,4,1,8,11333,@Heroic Dungeon@,95711
+218102,Dragonrider Boots,Mythic,18102,64,60,4,4,1,8,11333,@Mythic Dungeon@,182551
+18103,Band of Rumination,Normal,18103,57,58,3,4,0,11,18771,,15287
+100209,Band of Rumination,Heroic,18103,61,60,4,4,0,11,18771,@Heroic Dungeon@,93547
+218103,Band of Rumination,Mythic,18103,64,60,4,4,0,11,18771,@Mythic Dungeon@,182552
+18104,Feralsurge Girdle,Normal,18104,57,58,3,4,3,6,24036,,15288
+114651,Feralsurge Girdle,Heroic,18104,61,60,4,4,3,6,24036,@Heroic Dungeon@,107989
+218104,Feralsurge Girdle,Mythic,18104,64,60,4,4,3,6,24036,@Mythic Dungeon@,182553
+18289,Barbed Thorn Necklace,Normal,18289,57,51,3,4,0,2,6948,,15404
+246519,Barbed Thorn Necklace,Heroic,18289,61,60,4,4,0,2,6948,@Heroic Dungeon@,192297
+246520,Barbed Thorn Necklace,Mythic,18289,64,60,4,4,0,2,6948,@Mythic Dungeon@,192298
+18296,Marksman Bands,Normal,18296,57,51,3,4,3,9,24149,,15411
+246543,Marksman Bands,Heroic,18296,61,60,4,4,3,9,24149,@Heroic Dungeon@,192321
+246544,Marksman Bands,Mythic,18296,64,60,4,4,3,9,24149,@Mythic Dungeon@,192322
+18298,Unbridled Leggings,Normal,18298,57,51,3,4,2,7,24160,,15413
+246555,Unbridled Leggings,Heroic,18298,61,60,4,4,2,7,24160,@Heroic Dungeon@,192333
+246556,Unbridled Leggings,Mythic,18298,64,60,4,4,2,7,24160,@Mythic Dungeon@,192334
+18301,Lethtendris's Wand,Normal,18301,57,53,3,2,19,26,24166,,15416
+246567,Lethtendris's Wand,Heroic,18301,61,60,4,2,19,26,24166,@Heroic Dungeon@,192345
+246569,Lethtendris's Wand,Mythic,18301,64,60,4,2,19,26,24166,@Mythic Dungeon@,192347
+18302,Band of Vigor,Normal,18302,57,53,3,4,0,11,24167,,15417
+246580,Band of Vigor,Heroic,18302,61,60,4,4,0,11,24167,@Heroic Dungeon@,192358
+246582,Band of Vigor,Mythic,18302,64,60,4,4,0,11,24167,@Mythic Dungeon@,192360
+18305,Breakwater Legguards,Normal,18305,57,53,3,4,4,7,24177,,15420
+246617,Breakwater Legguards,Heroic,18305,61,60,4,4,4,7,24177,@Heroic Dungeon@,192371
+246619,Breakwater Legguards,Mythic,18305,64,60,4,4,4,7,24177,@Mythic Dungeon@,192372
+18306,Gloves of Shadowy Mist,Normal,18306,57,53,3,4,1,10,24175,,15421
+246630,Gloves of Shadowy Mist,Heroic,18306,61,60,4,4,1,10,24175,@Heroic Dungeon@,192383
+246632,Gloves of Shadowy Mist,Mythic,18306,64,60,4,4,1,10,24175,@Mythic Dungeon@,192384
+18307,Riptide Shoes,Normal,18307,57,53,3,4,1,8,24173,,15422
+246643,Riptide Shoes,Heroic,18307,61,60,4,4,1,8,24173,@Heroic Dungeon@,192395
+246645,Riptide Shoes,Mythic,18307,64,60,4,4,1,8,24173,@Mythic Dungeon@,192396
+18308,Clever Hat,Normal,18308,57,53,3,4,2,1,24176,,15423
+246656,Clever Hat,Heroic,18308,61,60,4,4,2,1,24176,@Heroic Dungeon@,192407
+246658,Clever Hat,Mythic,18308,64,60,4,4,2,1,24176,@Mythic Dungeon@,192408
+18309,Gloves of Restoration,Normal,18309,57,54,3,4,2,10,24178,,15424
+246669,Gloves of Restoration,Heroic,18309,61,60,4,4,2,10,24178,@Heroic Dungeon@,192419
+246670,Gloves of Restoration,Mythic,18309,64,60,4,4,2,10,24178,@Mythic Dungeon@,192420
+18310,Fiendish Machete,Normal,18310,57,54,3,2,7,13,24179,,15425
+246681,Fiendish Machete,Heroic,18310,61,60,4,2,7,13,24179,@Heroic Dungeon@,192431
+246682,Fiendish Machete,Mythic,18310,64,60,4,2,7,13,24179,@Mythic Dungeon@,192432
+18311,Quel'dorei Channeling Rod,Normal,18311,57,53,3,2,10,17,22710,,15426
+246693,Quel'dorei Channeling Rod,Heroic,18311,61,60,4,2,10,17,22710,@Heroic Dungeon@,192443
+246694,Quel'dorei Channeling Rod,Mythic,18311,64,60,4,2,10,17,22710,@Mythic Dungeon@,192444
+18312,Energized Chestplate,Normal,18312,57,54,3,4,4,5,24181,,15427
+246705,Energized Chestplate,Heroic,18312,61,60,4,4,4,5,24181,@Heroic Dungeon@,192455
+246706,Energized Chestplate,Mythic,18312,64,60,4,4,4,5,24181,@Mythic Dungeon@,192456
+18313,Helm of Awareness,Normal,18313,57,53,3,4,4,1,34383,,15428
+246717,Helm of Awareness,Heroic,18313,61,60,4,4,4,1,34383,@Heroic Dungeon@,192467
+246718,Helm of Awareness,Mythic,18313,64,60,4,4,4,1,34383,@Mythic Dungeon@,192468
+18314,Ring of Demonic Guile,Normal,18314,57,54,3,4,0,11,19268,,15429
+246729,Ring of Demonic Guile,Heroic,18314,61,60,4,4,0,11,19268,@Heroic Dungeon@,192479
+246730,Ring of Demonic Guile,Mythic,18314,64,60,4,4,0,11,19268,@Mythic Dungeon@,192480
+18315,Ring of Demonic Potency,Normal,18315,57,54,3,4,0,11,23011,,15430
+246741,Ring of Demonic Potency,Heroic,18315,61,60,4,4,0,11,23011,@Heroic Dungeon@,192491
+246742,Ring of Demonic Potency,Mythic,18315,64,60,4,4,0,11,23011,@Mythic Dungeon@,192492
+18317,Tempest Talisman,Normal,18317,57,53,3,4,0,2,6941,,15432
+246753,Tempest Talisman,Heroic,18317,61,60,4,4,0,2,6941,@Heroic Dungeon@,192503
+246754,Tempest Talisman,Mythic,18317,64,60,4,4,0,2,6941,@Mythic Dungeon@,192504
+18318,Merciful Greaves,Normal,18318,57,54,3,4,3,8,24185,,15433
+246765,Merciful Greaves,Heroic,18318,61,60,4,4,3,8,24185,@Heroic Dungeon@,192515
+246766,Merciful Greaves,Mythic,18318,64,60,4,4,3,8,24185,@Mythic Dungeon@,192516
+18321,Energetic Rod,Normal,18321,57,54,3,2,4,21,24395,,15436
+246801,Energetic Rod,Heroic,18321,61,60,4,2,4,21,24395,@Heroic Dungeon@,192529
+246802,Energetic Rod,Mythic,18321,64,60,4,2,4,21,24395,@Mythic Dungeon@,192530
+18322,Waterspout Boots,Normal,18322,57,53,3,4,2,8,4213,,15437
+246813,Waterspout Boots,Heroic,18322,61,60,4,4,2,8,4213,@Heroic Dungeon@,192541
+246814,Waterspout Boots,Mythic,18322,64,60,4,4,2,8,4213,@Mythic Dungeon@,192542
+18323,Satyr's Bow,Normal,18323,57,53,3,2,2,15,24189,,15438
+246825,Satyr's Bow,Heroic,18323,61,60,4,2,2,15,24189,@Heroic Dungeon@,192553
+246826,Satyr's Bow,Mythic,18323,64,60,4,2,2,15,24189,@Mythic Dungeon@,192554
+18324,Waveslicer,Normal,18324,57,53,3,2,1,17,10319,,15439
+246837,Waveslicer,Heroic,18324,61,60,4,2,1,17,10319,@Heroic Dungeon@,192565
+246838,Waveslicer,Mythic,18324,64,60,4,2,1,17,10319,@Mythic Dungeon@,192566
+18325,Felhide Cap,Normal,18325,57,53,3,4,2,1,24191,,15440
+246849,Felhide Cap,Heroic,18325,61,60,4,4,2,1,24191,@Heroic Dungeon@,192577
+246850,Felhide Cap,Mythic,18325,64,60,4,4,2,1,24191,@Mythic Dungeon@,192578
+18326,Razor Gauntlets,Normal,18326,57,54,3,4,4,10,24192,,15441
+246861,Razor Gauntlets,Heroic,18326,61,60,4,4,4,10,24192,@Heroic Dungeon@,192589
+246862,Razor Gauntlets,Mythic,18326,64,60,4,4,4,10,24192,@Mythic Dungeon@,192590
+18327,Whipvine Cord,Normal,18327,57,54,3,4,1,6,24194,,15442
+246873,Whipvine Cord,Heroic,18327,61,60,4,4,1,6,24194,@Heroic Dungeon@,192601
+246874,Whipvine Cord,Mythic,18327,64,60,4,4,1,6,24194,@Mythic Dungeon@,192602
+18328,Shadewood Cloak,Normal,18328,57,54,3,4,1,16,24195,,15443
+246885,Shadewood Cloak,Heroic,18328,61,60,4,4,1,16,24195,@Heroic Dungeon@,192613
+246886,Shadewood Cloak,Mythic,18328,64,60,4,4,1,16,24195,@Mythic Dungeon@,192614
+18338,Wand of Arcane Potency,Normal,18338,57,54,3,2,19,26,16401,,15453
+246910,Wand of Arcane Potency,Heroic,18338,61,60,4,2,19,26,16401,@Heroic Dungeon@,192627
+246911,Wand of Arcane Potency,Mythic,18338,64,60,4,2,19,26,16401,@Mythic Dungeon@,192628
+18340,Eidolon Talisman,Normal,18340,57,54,3,4,0,2,24202,,15455
+246935,Eidolon Talisman,Heroic,18340,61,60,4,4,0,2,24202,@Heroic Dungeon@,192641
+246936,Eidolon Talisman,Mythic,18340,64,60,4,4,0,2,24202,@Mythic Dungeon@,192642
+18344,Stonebark Gauntlets,Normal,18344,57,54,3,4,2,10,20175,,15459
+246984,Stonebark Gauntlets,Heroic,18344,61,60,4,4,2,10,20175,@Heroic Dungeon@,192655
+246985,Stonebark Gauntlets,Mythic,18344,64,60,4,4,2,10,20175,@Mythic Dungeon@,192656
+18345,Murmuring Ring,Normal,18345,57,55,3,4,0,11,6928,,15460
+246996,Murmuring Ring,Heroic,18345,61,60,4,4,0,11,6928,@Heroic Dungeon@,192667
+246998,Murmuring Ring,Mythic,18345,64,60,4,4,0,11,6928,@Mythic Dungeon@,192668
+18346,Threadbare Trousers,Normal,18346,57,55,3,4,1,7,24204,,15461
+247009,Threadbare Trousers,Heroic,18346,61,60,4,4,1,7,24204,@Heroic Dungeon@,192679
+247011,Threadbare Trousers,Mythic,18346,64,60,4,4,1,7,24204,@Mythic Dungeon@,192681
+18347,Well Balanced Axe,Normal,18347,57,56,3,2,0,13,24205,,15462
+247022,Well Balanced Axe,Heroic,18347,61,60,4,2,0,13,24205,@Heroic Dungeon@,192692
+247024,Well Balanced Axe,Mythic,18347,64,60,4,2,0,13,24205,@Mythic Dungeon@,192694
+18349,Gauntlets of Accuracy,Normal,18349,57,56,3,4,3,10,24208,,15464
+247047,Gauntlets of Accuracy,Heroic,18349,61,60,4,4,3,10,24208,@Heroic Dungeon@,192717
+247049,Gauntlets of Accuracy,Mythic,18349,64,60,4,4,3,10,24208,@Mythic Dungeon@,192719
+18350,Amplifying Cloak,Normal,18350,57,56,3,4,1,16,11890,,15465
+247060,Amplifying Cloak,Heroic,18350,61,60,4,4,1,16,11890,@Heroic Dungeon@,192730
+247062,Amplifying Cloak,Mythic,18350,64,60,4,4,1,16,11890,@Mythic Dungeon@,192732
+18351,Magically Sealed Bracers,Normal,18351,57,56,3,4,4,9,24210,,15466
+247073,Magically Sealed Bracers,Heroic,18351,61,60,4,4,4,9,24210,@Heroic Dungeon@,192743
+247075,Magically Sealed Bracers,Mythic,18351,64,60,4,4,4,9,24210,@Mythic Dungeon@,192744
+18352,Petrified Bark Shield,Normal,18352,57,56,3,4,6,14,24212,,15467
+247086,Petrified Bark Shield,Heroic,18352,61,60,4,4,6,14,24212,@Heroic Dungeon@,192755
+247088,Petrified Bark Shield,Mythic,18352,64,60,4,4,6,14,24212,@Mythic Dungeon@,192757
+18353,Stoneflower Staff,Normal,18353,57,56,3,2,10,17,24216,,15468
+247099,Stoneflower Staff,Heroic,18353,61,60,4,2,10,17,24216,@Heroic Dungeon@,192768
+247101,Stoneflower Staff,Mythic,18353,64,60,4,2,10,17,24216,@Mythic Dungeon@,192769
+18354,Pimgib's Collar,Normal,18354,57,55,3,4,0,12,329,,15469
+247112,Pimgib's Collar,Heroic,18354,61,60,4,4,0,12,329,@Heroic Dungeon@,192780
+247113,Pimgib's Collar,Mythic,18354,64,60,4,4,0,12,329,@Mythic Dungeon@,192781
+18370,Vigilance Charm,Normal,18370,57,57,3,4,0,12,24227,,15485
+247172,Vigilance Charm,Heroic,18370,61,60,4,4,0,12,24227,@Heroic Dungeon@,192793
+247173,Vigilance Charm,Mythic,18370,64,60,4,4,0,12,24227,@Mythic Dungeon@,192794
+18371,Mindtap Talisman,Normal,18371,57,56,3,4,0,12,24228,,15486
+247184,Mindtap Talisman,Heroic,18371,61,60,4,4,0,12,24228,@Heroic Dungeon@,192805
+247185,Mindtap Talisman,Mythic,18371,64,60,4,4,0,12,24228,@Mythic Dungeon@,192806
+18372,Blade of the New Moon,Normal,18372,57,57,3,2,15,21,24229,,15487
+247196,Blade of the New Moon,Heroic,18372,61,60,4,2,15,21,24229,@Heroic Dungeon@,192817
+247197,Blade of the New Moon,Mythic,18372,64,60,4,2,15,21,24229,@Mythic Dungeon@,192818
+18373,Chestplate of Tranquility,Normal,18373,57,57,3,4,2,5,13408,,15488
+247208,Chestplate of Tranquility,Heroic,18373,61,60,4,4,2,5,13408,@Heroic Dungeon@,192829
+247209,Chestplate of Tranquility,Mythic,18373,64,60,4,4,2,5,13408,@Mythic Dungeon@,192830
+18374,Flamescarred Shoulders,Normal,18374,57,57,3,4,2,3,14855,,15489
+247220,Flamescarred Shoulders,Heroic,18374,61,60,4,4,2,3,14855,@Heroic Dungeon@,192841
+247221,Flamescarred Shoulders,Mythic,18374,64,60,4,4,2,3,14855,@Mythic Dungeon@,192842
+18375,Bracers of the Eclipse,Normal,18375,57,57,3,4,2,9,24232,,15490
+247232,Bracers of the Eclipse,Heroic,18375,61,60,4,4,2,9,24232,@Heroic Dungeon@,192853
+247233,Bracers of the Eclipse,Mythic,18375,64,60,4,4,2,9,24232,@Mythic Dungeon@,192854
+18376,Timeworn Mace,Normal,18376,57,57,3,2,4,13,24233,,15491
+247244,Timeworn Mace,Heroic,18376,61,60,4,2,4,13,24233,@Heroic Dungeon@,192865
+247245,Timeworn Mace,Mythic,18376,64,60,4,2,4,13,24233,@Mythic Dungeon@,192866
+18377,Quickdraw Gloves,Normal,18377,57,57,3,4,2,10,24234,,15492
+247256,Quickdraw Gloves,Heroic,18377,61,60,4,4,2,10,24234,@Heroic Dungeon@,192877
+247257,Quickdraw Gloves,Mythic,18377,64,60,4,4,2,10,24234,@Mythic Dungeon@,192878
+18378,Silvermoon Leggings,Normal,18378,57,57,3,4,3,7,24235,,15493
+247268,Silvermoon Leggings,Heroic,18378,61,60,4,4,3,7,24235,@Heroic Dungeon@,192889
+247269,Silvermoon Leggings,Mythic,18378,64,60,4,4,3,7,24235,@Mythic Dungeon@,192890
+18379,Odious Greaves,Normal,18379,57,57,3,4,3,8,24240,,15494
+247280,Odious Greaves,Heroic,18379,61,60,4,4,3,8,24240,@Heroic Dungeon@,192901
+247281,Odious Greaves,Mythic,18379,64,60,4,4,3,8,24240,@Mythic Dungeon@,192902
+18380,Eldritch Reinforced Legplates,Normal,18380,57,57,3,4,4,7,24241,,15495
+247292,Eldritch Reinforced Legplates,Heroic,18380,61,60,4,4,4,7,24241,@Heroic Dungeon@,192913
+247293,Eldritch Reinforced Legplates,Mythic,18380,64,60,4,4,4,7,24241,@Mythic Dungeon@,192914
+18381,Evil Eye Pendant,Normal,18381,57,57,3,4,0,2,24242,,15496
+247304,Evil Eye Pendant,Heroic,18381,61,60,4,4,0,2,24242,@Heroic Dungeon@,192925
+247305,Evil Eye Pendant,Mythic,18381,64,60,4,4,0,2,24242,@Mythic Dungeon@,192926
+18383,Force Imbued Gauntlets,Normal,18383,57,56,3,4,4,10,24244,,15498
+247328,Force Imbued Gauntlets,Heroic,18383,61,60,4,4,4,10,24244,@Heroic Dungeon@,192949
+247329,Force Imbued Gauntlets,Mythic,18383,64,60,4,4,4,10,24244,@Mythic Dungeon@,192950
+18384,Bile-etched Spaulders,Normal,18384,57,57,3,4,4,3,24245,,15499
+247340,Bile-etched Spaulders,Heroic,18384,61,60,4,4,4,3,24245,@Heroic Dungeon@,192961
+247341,Bile-etched Spaulders,Mythic,18384,64,60,4,4,4,3,24245,@Mythic Dungeon@,192962
+18385,Robe of Everlasting Night,Normal,18385,57,57,3,4,1,20,24246,,15500
+247352,Robe of Everlasting Night,Heroic,18385,61,60,4,4,1,20,24246,@Heroic Dungeon@,192973
+247353,Robe of Everlasting Night,Mythic,18385,64,60,4,4,1,20,24246,@Mythic Dungeon@,192974
+18386,Padre's Trousers,Normal,18386,57,56,3,4,1,7,17043,,15501
+247364,Padre's Trousers,Heroic,18386,61,60,4,4,1,7,17043,@Heroic Dungeon@,192985
+247365,Padre's Trousers,Mythic,18386,64,60,4,4,1,7,17043,@Mythic Dungeon@,192986
+18387,Brightspark Gloves,Normal,18387,57,55,3,4,1,10,10543,,15502
+247376,Brightspark Gloves,Heroic,18387,61,60,4,4,1,10,10543,@Heroic Dungeon@,192997
+247377,Brightspark Gloves,Mythic,18387,64,60,4,4,1,10,10543,@Mythic Dungeon@,192998
+18388,Stoneshatter,Normal,18388,57,57,3,2,18,26,24247,,15503
+247388,Stoneshatter,Heroic,18388,61,60,4,2,18,26,24247,@Heroic Dungeon@,193009
+247389,Stoneshatter,Mythic,18388,64,60,4,2,18,26,24247,@Mythic Dungeon@,193010
+18389,Cloak of the Cosmos,Normal,18389,57,57,3,4,1,16,11920,,15504
+247400,Cloak of the Cosmos,Heroic,18389,61,60,4,4,1,16,11920,@Heroic Dungeon@,193021
+247401,Cloak of the Cosmos,Mythic,18389,64,60,4,4,1,16,11920,@Mythic Dungeon@,193022
+18390,Tanglemoss Leggings,Normal,18390,57,57,3,4,2,7,14819,,15505
+247412,Tanglemoss Leggings,Heroic,18390,61,60,4,4,2,7,14819,@Heroic Dungeon@,193033
+247413,Tanglemoss Leggings,Mythic,18390,64,60,4,4,2,7,14819,@Mythic Dungeon@,193034
+18391,Eyestalk Cord,Normal,18391,57,57,3,4,2,6,24248,,15506
+247424,Eyestalk Cord,Heroic,18391,61,60,4,4,2,6,24248,@Heroic Dungeon@,193045
+247425,Eyestalk Cord,Mythic,18391,64,60,4,4,2,6,24248,@Mythic Dungeon@,193046
+18392,Distracting Dagger,Normal,18392,57,57,3,2,15,22,3901,,15507
+247436,Distracting Dagger,Heroic,18392,61,60,4,2,15,22,3901,@Heroic Dungeon@,193057
+247437,Distracting Dagger,Mythic,18392,64,60,4,2,15,22,3901,@Mythic Dungeon@,193058
+18393,Warpwood Binding,Normal,18393,57,56,3,4,3,6,24250,,15508
+247448,Warpwood Binding,Heroic,18393,61,60,4,4,3,6,24250,@Heroic Dungeon@,193069
+247449,Warpwood Binding,Mythic,18393,64,60,4,4,3,6,24250,@Mythic Dungeon@,193070
+18394,Demon Howl Wristguards,Normal,18394,57,57,3,4,3,9,24252,,15509
+247460,Demon Howl Wristguards,Heroic,18394,61,60,4,4,3,9,24252,@Heroic Dungeon@,193081
+247461,Demon Howl Wristguards,Mythic,18394,64,60,4,4,3,9,24252,@Mythic Dungeon@,193082
+18395,Emerald Flame Ring,Normal,18395,57,57,3,4,0,11,6930,,15510
+247472,Emerald Flame Ring,Heroic,18395,61,60,4,4,0,11,6930,@Heroic Dungeon@,193093
+247473,Emerald Flame Ring,Mythic,18395,64,60,4,4,0,11,6930,@Mythic Dungeon@,193094
+18396,Mind Carver,Normal,18396,57,57,3,2,7,21,24253,,15511
+247484,Mind Carver,Heroic,18396,61,60,4,2,7,21,24253,@Heroic Dungeon@,193105
+247485,Mind Carver,Mythic,18396,64,60,4,2,7,21,24253,@Mythic Dungeon@,193106
+18397,Elder Magus Pendant,Normal,18397,57,56,3,4,0,2,6947,,15512
+247496,Elder Magus Pendant,Heroic,18397,61,60,4,4,0,2,6947,@Heroic Dungeon@,193117
+247497,Elder Magus Pendant,Mythic,18397,64,60,4,4,0,2,6947,@Mythic Dungeon@,193118
+18425,Kreeg's Mug,Normal,18425,57,55,3,4,0,23,24294,,15540
+247680,Kreeg's Mug,Heroic,18425,61,60,4,4,0,23,24294,@Heroic Dungeon@,193181
+247682,Kreeg's Mug,Mythic,18425,64,60,4,4,0,23,24294,@Mythic Dungeon@,193183
+18450,Robe of Combustion,Normal,18450,57,55,3,4,1,20,24300,,15565
+247910,Robe of Combustion,Heroic,18450,61,60,4,4,1,20,24300,@Heroic Dungeon@,193379
+247912,Robe of Combustion,Mythic,18450,64,60,4,4,1,20,24300,@Mythic Dungeon@,193381
+18451,Hyena Hide Belt,Normal,18451,57,55,3,4,2,6,24301,,15566
+247923,Hyena Hide Belt,Heroic,18451,61,60,4,4,2,6,24301,@Heroic Dungeon@,193392
+247925,Hyena Hide Belt,Mythic,18451,64,60,4,4,2,6,24301,@Mythic Dungeon@,193393
+18458,Modest Armguards,Normal,18458,57,55,3,4,3,9,20570,,15573
+248008,Modest Armguards,Heroic,18458,61,60,4,4,3,9,20570,@Heroic Dungeon@,193447
+248010,Modest Armguards,Mythic,18458,64,60,4,4,3,9,20570,@Mythic Dungeon@,193449
+18459,Gallant's Wristguards,Normal,18459,57,55,3,4,4,9,24305,,15574
+248021,Gallant's Wristguards,Heroic,18459,61,60,4,4,4,9,24305,@Heroic Dungeon@,193460
+248023,Gallant's Wristguards,Mythic,18459,64,60,4,4,4,9,24305,@Mythic Dungeon@,193462
+18460,Unsophisticated Hand Cannon,Normal,18460,57,55,3,2,3,26,24307,,15575
+248034,Unsophisticated Hand Cannon,Heroic,18460,61,60,4,2,3,26,24307,@Heroic Dungeon@,193473
+248036,Unsophisticated Hand Cannon,Mythic,18460,64,60,4,2,3,26,24307,@Mythic Dungeon@,193474
+18462,Jagged Bone Fist,Normal,18462,57,55,3,2,13,13,24311,,15577
+248059,Jagged Bone Fist,Heroic,18462,61,60,4,2,13,13,24311,@Heroic Dungeon@,193485
+248061,Jagged Bone Fist,Mythic,18462,64,60,4,2,13,13,24311,@Mythic Dungeon@,193486
+18463,Ogre Pocket Knife,Normal,18463,57,55,3,2,7,13,24312,,15578
+248072,Ogre Pocket Knife,Heroic,18463,61,60,4,2,7,13,24312,@Heroic Dungeon@,193497
+248074,Ogre Pocket Knife,Mythic,18463,64,60,4,2,7,13,24312,@Mythic Dungeon@,193499
+18464,Gordok Nose Ring,Normal,18464,57,55,3,4,0,11,6937,,15579
+248085,Gordok Nose Ring,Heroic,18464,61,60,4,4,0,11,6937,@Heroic Dungeon@,193510
+248087,Gordok Nose Ring,Mythic,18464,64,60,4,4,0,11,6937,@Mythic Dungeon@,193512
+18475,Oddly Magical Belt,Normal,18475,57,55,3,4,1,6,12070,,15590
+248206,Oddly Magical Belt,Heroic,18475,61,60,4,4,1,6,12070,@Heroic Dungeon@,193532
+248208,Oddly Magical Belt,Mythic,18475,64,60,4,4,1,6,12070,@Mythic Dungeon@,193533
+18476,Mud Stained Boots,Normal,18476,57,55,3,4,2,8,24315,,15591
+248219,Mud Stained Boots,Heroic,18476,61,60,4,4,2,8,24315,@Heroic Dungeon@,193544
+248221,Mud Stained Boots,Mythic,18476,64,60,4,4,2,8,24315,@Mythic Dungeon@,193545
+18477,Shaggy Leggings,Normal,18477,57,55,3,4,2,7,13446,,15592
+248232,Shaggy Leggings,Heroic,18477,61,60,4,4,2,7,13446,@Heroic Dungeon@,193556
+248234,Shaggy Leggings,Mythic,18477,64,60,4,4,2,7,13446,@Mythic Dungeon@,193557
+18478,Hyena Hide Jerkin,Normal,18478,57,55,3,4,2,5,24316,,15593
+248245,Hyena Hide Jerkin,Heroic,18478,61,60,4,4,2,5,24316,@Heroic Dungeon@,193568
+248247,Hyena Hide Jerkin,Mythic,18478,64,60,4,4,2,5,24316,@Mythic Dungeon@,193569
+18479,Carrion Scorpid Helm,Normal,18479,57,55,3,4,3,1,24317,,15594
+248258,Carrion Scorpid Helm,Heroic,18479,61,60,4,4,3,1,24317,@Heroic Dungeon@,193580
+248260,Carrion Scorpid Helm,Mythic,18479,64,60,4,4,3,1,24317,@Mythic Dungeon@,193581
+18480,Scarab Plate Helm,Normal,18480,57,55,3,4,4,1,24318,,15595
+248271,Scarab Plate Helm,Heroic,18480,61,60,4,4,4,1,24318,@Heroic Dungeon@,193592
+248273,Scarab Plate Helm,Mythic,18480,64,60,4,4,4,1,24318,@Mythic Dungeon@,193593
+18481,Skullcracking Mace,Normal,18481,57,55,3,2,5,17,2796,,15596
+248284,Skullcracking Mace,Heroic,18481,61,60,4,2,5,17,2796,@Heroic Dungeon@,193604
+248286,Skullcracking Mace,Mythic,18481,64,60,4,2,5,17,2796,@Mythic Dungeon@,193605
+18482,Ogre Toothpick Shooter,Normal,18482,57,55,3,2,2,15,5431,,15597
+248297,Ogre Toothpick Shooter,Heroic,18482,61,60,4,2,2,15,5431,@Heroic Dungeon@,193616
+248299,Ogre Toothpick Shooter,Mythic,18482,64,60,4,2,2,15,5431,@Mythic Dungeon@,193617
+18483,Mana Channeling Wand,Normal,18483,57,56,3,2,19,26,19594,,15598
+248310,Mana Channeling Wand,Heroic,18483,61,60,4,2,19,26,19594,@Heroic Dungeon@,193628
+248311,Mana Channeling Wand,Mythic,18483,64,60,4,2,19,26,19594,@Mythic Dungeon@,193629
+18484,Cho'Rush's Blade,Normal,18484,57,56,3,2,7,13,24319,,15599
+248322,Cho'Rush's Blade,Heroic,18484,61,60,4,2,7,13,24319,@Heroic Dungeon@,193640
+248323,Cho'Rush's Blade,Mythic,18484,64,60,4,2,7,13,24319,@Mythic Dungeon@,193641
+18485,Observer's Shield,Normal,18485,57,56,3,4,6,14,16325,,15600
+248334,Observer's Shield,Heroic,18485,61,60,4,4,6,14,16325,@Heroic Dungeon@,193652
+248335,Observer's Shield,Mythic,18485,64,60,4,4,6,14,16325,@Mythic Dungeon@,193653
+18490,Insightful Hood,Normal,18490,57,56,3,4,2,1,26596,,15605
+248358,Insightful Hood,Heroic,18490,61,60,4,4,2,1,26596,@Heroic Dungeon@,193670
+248359,Insightful Hood,Mythic,18490,64,60,4,4,2,1,26596,@Mythic Dungeon@,193671
+18493,Bulky Iron Spaulders,Normal,18493,57,55,3,4,4,3,24326,,15608
+248382,Bulky Iron Spaulders,Heroic,18493,61,60,4,4,4,3,24326,@Heroic Dungeon@,193683
+248383,Bulky Iron Spaulders,Mythic,18493,64,60,4,4,4,3,24326,@Mythic Dungeon@,193684
+18494,Denwatcher's Shoulders,Normal,18494,57,55,3,4,3,3,24327,,15609
+248394,Denwatcher's Shoulders,Heroic,18494,61,60,4,4,3,3,24327,@Heroic Dungeon@,193695
+248395,Denwatcher's Shoulders,Mythic,18494,64,60,4,4,3,3,24327,@Mythic Dungeon@,193696
+18495,Redoubt Cloak,Normal,18495,57,58,3,4,1,16,24328,,15610
+248406,Redoubt Cloak,Heroic,18495,61,60,4,4,1,16,24328,@Heroic Dungeon@,193707
+248407,Redoubt Cloak,Mythic,18495,64,60,4,4,1,16,24328,@Mythic Dungeon@,193708
+18496,Heliotrope Cloak,Normal,18496,57,55,3,4,1,16,24329,,15611
+248418,Heliotrope Cloak,Heroic,18496,61,60,4,4,1,16,24329,@Heroic Dungeon@,193719
+248419,Heliotrope Cloak,Mythic,18496,64,60,4,4,1,16,24329,@Mythic Dungeon@,193720
+18497,Sublime Wristguards,Normal,18497,57,55,3,4,1,9,24330,,15612
+248430,Sublime Wristguards,Heroic,18497,61,60,4,4,1,9,24330,@Heroic Dungeon@,193731
+248431,Sublime Wristguards,Mythic,18497,64,60,4,4,1,9,24330,@Mythic Dungeon@,193732
+18498,Hedgecutter,Normal,18498,57,55,3,2,0,13,24331,,15613
+248442,Hedgecutter,Heroic,18498,61,60,4,2,0,13,24331,@Heroic Dungeon@,193743
+248443,Hedgecutter,Mythic,18498,64,60,4,2,0,13,24331,@Mythic Dungeon@,193744
+18499,Barrier Shield,Normal,18499,57,57,3,4,6,14,24332,,15614
+248454,Barrier Shield,Heroic,18499,61,60,4,4,6,14,24332,@Heroic Dungeon@,193755
+248455,Barrier Shield,Mythic,18499,64,60,4,4,6,14,24332,@Mythic Dungeon@,193756
+18500,Tarnished Elven Ring,Normal,18500,57,56,3,4,0,11,6912,,15615
+248466,Tarnished Elven Ring,Heroic,18500,61,60,4,4,0,11,6912,@Heroic Dungeon@,193767
+248467,Tarnished Elven Ring,Mythic,18500,64,60,4,4,0,11,6912,@Mythic Dungeon@,193768
+18502,Monstrous Glaive,Normal,18502,57,57,3,2,6,17,24333,,15617
+248478,Monstrous Glaive,Heroic,18502,61,60,4,2,6,17,24333,@Heroic Dungeon@,193779
+248479,Monstrous Glaive,Mythic,18502,64,60,4,2,6,17,24333,@Mythic Dungeon@,193780
+18503,Kromcrush's Chestplate,Normal,18503,57,57,3,4,4,5,24334,,15618
+248490,Kromcrush's Chestplate,Heroic,18503,61,60,4,4,4,5,24334,@Heroic Dungeon@,193791
+248491,Kromcrush's Chestplate,Mythic,18503,64,60,4,4,4,5,24334,@Mythic Dungeon@,193792
+18505,Mugger's Belt,Normal,18505,57,57,3,4,2,6,24335,,15620
+248514,Mugger's Belt,Heroic,18505,61,60,4,4,2,6,24335,@Heroic Dungeon@,193803
+248515,Mugger's Belt,Mythic,18505,64,60,4,4,2,6,24335,@Mythic Dungeon@,193804
+18507,Boots of the Full Moon,Normal,18507,57,57,3,4,1,8,15590,,15622
+248538,Boots of the Full Moon,Heroic,18507,61,60,4,4,1,8,15590,@Heroic Dungeon@,193821
+248539,Boots of the Full Moon,Mythic,18507,64,60,4,4,1,8,15590,@Mythic Dungeon@,193822
+18520,Barbarous Blade,Normal,18520,57,58,3,2,8,17,24350,,15635
+248598,Barbarous Blade,Heroic,18520,61,60,4,2,8,17,24350,@Heroic Dungeon@,193879
+248599,Barbarous Blade,Mythic,18520,64,60,4,2,8,17,24350,@Mythic Dungeon@,193880
+18521,Grimy Metal Boots,Normal,18521,57,58,3,4,4,8,24351,,15636
+248610,Grimy Metal Boots,Heroic,18521,61,60,4,4,4,8,24351,@Heroic Dungeon@,193891
+248611,Grimy Metal Boots,Mythic,18521,64,60,4,4,4,8,24351,@Mythic Dungeon@,193892
+18522,Band of the Ogre King,Normal,18522,57,58,3,4,0,11,18674,,15637
+248622,Band of the Ogre King,Heroic,18522,61,60,4,4,0,11,18674,@Heroic Dungeon@,193903
+248623,Band of the Ogre King,Mythic,18522,64,60,4,4,0,11,18674,@Mythic Dungeon@,193904
+18523,Brightly Glowing Stone,Normal,18523,57,58,3,4,0,23,24352,,15638
+248634,Brightly Glowing Stone,Heroic,18523,61,60,4,4,0,23,24352,@Heroic Dungeon@,193915
+248635,Brightly Glowing Stone,Mythic,18523,64,60,4,4,0,23,24352,@Mythic Dungeon@,193916
+18524,Leggings of Destruction,Normal,18524,57,58,3,4,3,7,24354,,15639
+248646,Leggings of Destruction,Heroic,18524,61,60,4,4,3,7,24354,@Heroic Dungeon@,193927
+248647,Leggings of Destruction,Mythic,18524,64,60,4,4,3,7,24354,@Mythic Dungeon@,193928
+18525,Bracers of Prosperity,Normal,18525,57,58,3,4,2,9,24356,,15640
+248658,Bracers of Prosperity,Heroic,18525,61,60,4,4,2,9,24356,@Heroic Dungeon@,193939
+248659,Bracers of Prosperity,Mythic,18525,64,60,4,4,2,9,24356,@Mythic Dungeon@,193940
+18526,Crown of the Ogre King,Normal,18526,57,58,3,4,1,1,24357,,15641
+248670,Crown of the Ogre King,Heroic,18526,61,60,4,4,1,1,24357,@Heroic Dungeon@,193951
+248671,Crown of the Ogre King,Mythic,18526,64,60,4,4,1,1,24357,@Mythic Dungeon@,193952
+18527,Harmonious Gauntlets,Normal,18527,57,58,3,4,3,10,24359,,15642
+248682,Harmonious Gauntlets,Heroic,18527,61,60,4,4,3,10,24359,@Heroic Dungeon@,193963
+248683,Harmonious Gauntlets,Mythic,18527,64,60,4,4,3,10,24359,@Mythic Dungeon@,193964
+18528,Cyclone Spaulders,Normal,18528,57,56,3,4,2,3,24361,,15643
+248694,Cyclone Spaulders,Heroic,18528,61,60,4,4,2,3,24361,@Heroic Dungeon@,193975
+248695,Cyclone Spaulders,Mythic,18528,64,60,4,4,2,3,24361,@Mythic Dungeon@,193976
+18530,Ogre Forged Hauberk,Normal,18530,57,57,3,4,3,5,24363,,15645
+248718,Ogre Forged Hauberk,Heroic,18530,61,60,4,4,3,5,24363,@Heroic Dungeon@,193999
+248719,Ogre Forged Hauberk,Mythic,18530,64,60,4,4,3,5,24363,@Mythic Dungeon@,194000
+18531,Unyielding Maul,Normal,18531,57,57,3,2,5,17,24364,,15646
+248730,Unyielding Maul,Heroic,18531,61,60,4,2,5,17,24364,@Heroic Dungeon@,194011
+248731,Unyielding Maul,Mythic,18531,64,60,4,2,5,17,24364,@Mythic Dungeon@,194012
+18532,Mindsurge Robe,Normal,18532,57,57,3,4,1,20,24365,,15647
+248742,Mindsurge Robe,Heroic,18532,61,60,4,4,1,20,24365,@Heroic Dungeon@,194023
+248743,Mindsurge Robe,Mythic,18532,64,60,4,4,1,20,24365,@Mythic Dungeon@,194024
+18533,Gordok Bracers of Power,Normal,18533,57,58,3,4,4,9,24366,,15648
+248754,Gordok Bracers of Power,Heroic,18533,61,60,4,4,4,9,24366,@Heroic Dungeon@,194035
+248755,Gordok Bracers of Power,Mythic,18533,64,60,4,4,4,9,24366,@Mythic Dungeon@,194036
+18534,Rod of the Ogre Magi,Normal,18534,57,58,3,2,10,17,24367,,15649
+248766,Rod of the Ogre Magi,Heroic,18534,61,60,4,2,10,17,24367,@Heroic Dungeon@,194047
+248767,Rod of the Ogre Magi,Mythic,18534,64,60,4,2,10,17,24367,@Mythic Dungeon@,194048
+18537,Counterattack Lodestone,Normal,18537,57,58,3,4,0,12,16435,,15652
+248802,Counterattack Lodestone,Heroic,18537,61,60,4,4,0,12,16435,@Heroic Dungeon@,194065
+248803,Counterattack Lodestone,Mythic,18537,64,60,4,4,0,12,16435,@Mythic Dungeon@,194066
+18538,Treant's Bane,Normal,18538,57,58,4,2,1,17,24378,,15653
+248814,Treant's Bane,Heroic,18538,61,60,4,2,1,17,24378,@Heroic Dungeon@,194077
+248815,Treant's Bane,Mythic,18538,64,60,4,2,1,17,24378,@Mythic Dungeon@,194078
+18680,Ancient Bone Bow,Normal,18680,57,56,3,2,2,15,24406,,15774
+249148,Ancient Bone Bow,Heroic,18680,61,60,4,2,2,15,24406,@Heroic Dungeon@,194125
+249149,Ancient Bone Bow,Mythic,18680,64,60,4,2,2,15,24406,@Mythic Dungeon@,194126
+18681,Burial Shawl,Normal,18681,57,56,3,4,1,3,7263,,15775
+249160,Burial Shawl,Heroic,18681,61,60,4,4,1,3,7263,@Heroic Dungeon@,194137
+249161,Burial Shawl,Mythic,18681,64,60,4,4,1,3,7263,@Mythic Dungeon@,194138
+18682,Ghoul Skin Leggings,Normal,18682,57,56,3,4,2,7,7094,,15776
+249172,Ghoul Skin Leggings,Heroic,18682,61,60,4,4,2,7,7094,@Heroic Dungeon@,194149
+249173,Ghoul Skin Leggings,Mythic,18682,64,60,4,4,2,7,7094,@Mythic Dungeon@,194150
+18683,Hammer of the Vesper,Normal,18683,57,56,3,2,4,13,24571,,15777
+249184,Hammer of the Vesper,Heroic,18683,61,60,4,2,4,13,24571,@Heroic Dungeon@,194161
+249185,Hammer of the Vesper,Mythic,18683,64,60,4,2,4,13,24571,@Mythic Dungeon@,194162
+18686,Bone Golem Shoulders,Normal,18686,57,57,3,4,3,3,24574,,15780
+249208,Bone Golem Shoulders,Heroic,18686,61,60,4,4,3,3,24574,@Heroic Dungeon@,194185
+249209,Bone Golem Shoulders,Mythic,18686,64,60,4,4,3,3,24574,@Mythic Dungeon@,194186
+18689,Phantasmal Cloak,Normal,18689,57,57,3,4,1,16,24575,,15783
+249220,Phantasmal Cloak,Heroic,18689,61,60,4,4,1,16,24575,@Heroic Dungeon@,194197
+249221,Phantasmal Cloak,Mythic,18689,64,60,4,4,1,16,24575,@Mythic Dungeon@,194198
+18690,Wraithplate Leggings,Normal,18690,57,57,3,4,4,7,19739,,15784
+249232,Wraithplate Leggings,Heroic,18690,61,60,4,4,4,7,19739,@Heroic Dungeon@,194209
+249233,Wraithplate Leggings,Mythic,18690,64,60,4,4,4,7,19739,@Mythic Dungeon@,194210
+18691,Dark Advisor's Pendant,Normal,18691,57,56,3,4,0,2,12091,,15785
+249244,Dark Advisor's Pendant,Heroic,18691,61,60,4,4,0,2,12091,@Heroic Dungeon@,194221
+249245,Dark Advisor's Pendant,Mythic,18691,64,60,4,4,0,2,12091,@Mythic Dungeon@,194222
+18692,Death Knight Sabatons,Normal,18692,57,54,3,4,4,8,24577,,15786
+249256,Death Knight Sabatons,Heroic,18692,61,60,4,4,4,8,24577,@Heroic Dungeon@,194233
+249257,Death Knight Sabatons,Mythic,18692,64,60,4,4,4,8,24577,@Mythic Dungeon@,194234
+18693,Shivery Handwraps,Normal,18693,57,57,3,4,1,10,24580,,15787
+249268,Shivery Handwraps,Heroic,18693,61,60,4,4,1,10,24580,@Heroic Dungeon@,194245
+249269,Shivery Handwraps,Mythic,18693,64,60,4,4,1,10,24580,@Mythic Dungeon@,194246
+18694,Shadowy Mail Greaves,Normal,18694,57,57,3,4,3,8,4431,,15788
+249280,Shadowy Mail Greaves,Heroic,18694,61,60,4,4,3,8,4431,@Heroic Dungeon@,194257
+249281,Shadowy Mail Greaves,Mythic,18694,64,60,4,4,3,8,4431,@Mythic Dungeon@,194258
+18695,Spellbound Tome,Normal,18695,57,57,3,4,0,23,24582,,15789
+249292,Spellbound Tome,Heroic,18695,61,60,4,4,0,23,24582,@Heroic Dungeon@,194269
+249293,Spellbound Tome,Mythic,18695,64,60,4,4,0,23,24582,@Mythic Dungeon@,194270
+18696,Intricately Runed Shield,Normal,18696,57,57,3,4,6,14,14700,,15790
+249304,Intricately Runed Shield,Heroic,18696,61,60,4,4,6,14,14700,@Heroic Dungeon@,194281
+249305,Intricately Runed Shield,Mythic,18696,64,60,4,4,6,14,14700,@Mythic Dungeon@,194282
+18697,Coldstone Slippers,Normal,18697,57,50,3,4,1,8,24583,,15791
+249316,Coldstone Slippers,Heroic,18697,61,60,4,4,1,8,24583,@Heroic Dungeon@,194293
+249317,Coldstone Slippers,Mythic,18697,64,60,4,4,1,8,24583,@Mythic Dungeon@,194294
+18698,Tattered Leather Hood,Normal,18698,57,51,3,4,2,1,17037,,15792
+249328,Tattered Leather Hood,Heroic,18698,61,60,4,4,2,1,17037,@Heroic Dungeon@,194305
+249329,Tattered Leather Hood,Mythic,18698,64,60,4,4,2,1,17037,@Mythic Dungeon@,194306
+18699,Icy Tomb Spaulders,Normal,18699,57,52,3,4,2,3,24586,,15793
+249340,Icy Tomb Spaulders,Heroic,18699,61,60,4,4,2,3,24586,@Heroic Dungeon@,194317
+249341,Icy Tomb Spaulders,Mythic,18699,64,60,4,4,2,3,24586,@Mythic Dungeon@,194318
+18700,Malefic Bracers,Normal,18700,57,53,3,4,2,9,21314,,15794
+249352,Malefic Bracers,Heroic,18700,61,60,4,4,2,9,21314,@Heroic Dungeon@,194329
+249353,Malefic Bracers,Mythic,18700,64,60,4,4,2,9,21314,@Mythic Dungeon@,194330
+18701,Innervating Band,Normal,18701,57,54,3,4,0,11,22932,,15795
+249364,Innervating Band,Heroic,18701,61,60,4,4,0,11,22932,@Heroic Dungeon@,194341
+249365,Innervating Band,Mythic,18701,64,60,4,4,0,11,22932,@Mythic Dungeon@,194342
+18702,Belt of the Ordained,Normal,18702,57,55,3,4,4,6,24587,,15796
+249376,Belt of the Ordained,Heroic,18702,61,60,4,4,4,6,24587,@Heroic Dungeon@,194353
+249377,Belt of the Ordained,Mythic,18702,64,60,4,4,4,6,24587,@Mythic Dungeon@,194354
+18716,Ash Covered Boots,Normal,18716,57,56,3,4,2,8,24609,,15810
+249449,Ash Covered Boots,Heroic,18716,61,60,4,4,2,8,24609,@Heroic Dungeon@,194411
+249450,Ash Covered Boots,Mythic,18716,64,60,4,4,2,8,24609,@Mythic Dungeon@,194412
+18717,Hammer of the Grand Crusader,Normal,18717,57,58,3,2,5,17,18083,,15811
+249461,Hammer of the Grand Crusader,Heroic,18717,61,60,4,2,5,17,18083,@Heroic Dungeon@,194423
+249462,Hammer of the Grand Crusader,Mythic,18717,64,60,4,2,5,17,18083,@Mythic Dungeon@,194424
+18718,Grand Crusader's Helm,Normal,18718,57,58,3,4,4,1,24610,,15812
+249507,Grand Crusader's Helm,Heroic,18718,61,60,4,4,4,1,24610,@Heroic Dungeon@,194469
+249508,Grand Crusader's Helm,Mythic,18718,64,60,4,4,4,1,24610,@Mythic Dungeon@,194470
+18720,Shroud of the Nathrezim,Normal,18720,57,58,3,4,1,3,10558,,15814
+249519,Shroud of the Nathrezim,Heroic,18720,61,60,4,4,1,3,10558,@Heroic Dungeon@,194481
+249520,Shroud of the Nathrezim,Mythic,18720,64,60,4,4,1,3,10558,@Mythic Dungeon@,194482
+18721,Barrage Girdle,Normal,18721,57,56,3,4,3,6,24614,,15815
+249531,Barrage Girdle,Heroic,18721,61,60,4,4,3,6,24614,@Heroic Dungeon@,194493
+249532,Barrage Girdle,Mythic,18721,64,60,4,4,3,6,24614,@Mythic Dungeon@,194494
+18722,Death Grips,Normal,18722,57,57,3,4,4,10,24616,,15816
+249543,Death Grips,Heroic,18722,61,60,4,4,4,10,24616,@Heroic Dungeon@,194505
+249544,Death Grips,Mythic,18722,64,60,4,4,4,10,24616,@Mythic Dungeon@,194506
+18723,Animated Chain Necklace,Normal,18723,57,57,3,4,0,2,3992,,15817
+249555,Animated Chain Necklace,Heroic,18723,61,60,4,4,0,2,3992,@Heroic Dungeon@,194517
+249556,Animated Chain Necklace,Mythic,18723,64,60,4,4,0,2,3992,@Mythic Dungeon@,194518
+18725,Peacemaker,Normal,18725,57,54,3,2,6,17,24617,,15819
+249567,Peacemaker,Heroic,18725,61,60,4,2,6,17,24617,@Heroic Dungeon@,194529
+249568,Peacemaker,Mythic,18725,64,60,4,2,6,17,24617,@Mythic Dungeon@,194530
+18726,Magistrate's Cuffs,Normal,18726,57,54,3,4,2,9,24618,,15820
+249579,Magistrate's Cuffs,Heroic,18726,61,60,4,4,2,9,24618,@Heroic Dungeon@,194541
+249580,Magistrate's Cuffs,Mythic,18726,64,60,4,4,2,9,24618,@Mythic Dungeon@,194542
+18727,Crimson Felt Hat,Normal,18727,57,54,3,4,1,1,24620,,15821
+249591,Crimson Felt Hat,Heroic,18727,61,60,4,4,1,1,24620,@Heroic Dungeon@,194553
+249592,Crimson Felt Hat,Mythic,18727,64,60,4,4,1,1,24620,@Mythic Dungeon@,194554
+18728,Anastari Heirloom,Normal,18728,57,55,3,4,0,2,6753,,15822
+249603,Anastari Heirloom,Heroic,18728,61,60,4,4,0,2,6753,@Heroic Dungeon@,194565
+249604,Anastari Heirloom,Mythic,18728,64,60,4,4,0,2,6753,@Mythic Dungeon@,194566
+18729,Screeching Bow,Normal,18729,57,55,3,2,2,15,24681,,15823
+249615,Screeching Bow,Heroic,18729,61,60,4,2,2,15,24681,@Heroic Dungeon@,194577
+249616,Screeching Bow,Mythic,18729,64,60,4,2,2,15,24681,@Mythic Dungeon@,194578
+18730,Shadowy Laced Handwraps,Normal,18730,57,55,3,4,1,10,24623,,15824
+249627,Shadowy Laced Handwraps,Heroic,18730,61,60,4,4,1,10,24623,@Heroic Dungeon@,194589
+249628,Shadowy Laced Handwraps,Mythic,18730,64,60,4,4,1,10,24623,@Mythic Dungeon@,194590
+18734,Pale Moon Cloak,Normal,18734,57,57,3,4,1,16,24783,,15828
+249639,Pale Moon Cloak,Heroic,18734,61,60,4,4,1,16,24783,@Heroic Dungeon@,194601
+249640,Pale Moon Cloak,Mythic,18734,64,60,4,4,1,16,24783,@Mythic Dungeon@,194602
+18735,Maleki's Footwraps,Normal,18735,57,57,3,4,1,8,24631,,15829
+249651,Maleki's Footwraps,Heroic,18735,61,60,4,4,1,8,24631,@Heroic Dungeon@,194613
+249652,Maleki's Footwraps,Mythic,18735,64,60,4,4,1,8,24631,@Mythic Dungeon@,194614
+18736,Plaguehound Leggings,Normal,18736,57,57,3,4,2,7,12646,,15830
+249663,Plaguehound Leggings,Heroic,18736,61,60,4,4,2,7,12646,@Heroic Dungeon@,194625
+249664,Plaguehound Leggings,Mythic,18736,64,60,4,4,2,7,12646,@Mythic Dungeon@,194626
+18737,Bone Slicing Hatchet,Normal,18737,57,57,3,2,0,13,24632,,15831
+249675,Bone Slicing Hatchet,Heroic,18737,61,60,4,2,0,13,24632,@Heroic Dungeon@,194637
+249676,Bone Slicing Hatchet,Mythic,18737,64,60,4,2,0,13,24632,@Mythic Dungeon@,194638
+18738,Carapace Spine Crossbow,Normal,18738,57,56,3,2,18,26,24680,,15832
+249687,Carapace Spine Crossbow,Heroic,18738,61,60,4,2,18,26,24680,@Heroic Dungeon@,194649
+249688,Carapace Spine Crossbow,Mythic,18738,64,60,4,2,18,26,24680,@Mythic Dungeon@,194650
+18739,Chitinous Plate Legguards,Normal,18739,57,56,3,4,4,7,24634,,15833
+249699,Chitinous Plate Legguards,Heroic,18739,61,60,4,4,4,7,24634,@Heroic Dungeon@,194661
+249700,Chitinous Plate Legguards,Mythic,18739,64,60,4,4,4,7,24634,@Mythic Dungeon@,194662
+18740,Thuzadin Sash,Normal,18740,57,56,3,4,1,6,24635,,15834
+249711,Thuzadin Sash,Heroic,18740,61,60,4,4,1,6,24635,@Heroic Dungeon@,194673
+249712,Thuzadin Sash,Mythic,18740,64,60,4,4,1,6,24635,@Mythic Dungeon@,194674
+18741,Morlune's Bracer,Normal,18741,57,56,3,4,4,9,24636,,15835
+249723,Morlune's Bracer,Heroic,18741,61,60,4,4,4,9,24636,@Heroic Dungeon@,194685
+249724,Morlune's Bracer,Mythic,18741,64,60,4,4,4,9,24636,@Mythic Dungeon@,194686
+18742,Stratholme Militia Shoulderguard,Normal,18742,57,55,3,4,3,3,24637,,15836
+249735,Stratholme Militia Shoulderguard,Heroic,18742,61,60,4,4,3,3,24637,@Heroic Dungeon@,194697
+249736,Stratholme Militia Shoulderguard,Mythic,18742,64,60,4,4,3,3,24637,@Mythic Dungeon@,194698
+18743,Gracious Cape,Normal,18743,57,54,3,4,1,16,11836,,15837
+249747,Gracious Cape,Heroic,18743,61,60,4,4,1,16,11836,@Heroic Dungeon@,194709
+249748,Gracious Cape,Mythic,18743,64,60,4,4,1,16,11836,@Mythic Dungeon@,194710
+18744,Plaguebat Fur Gloves,Normal,18744,57,53,3,4,2,10,24639,,15838
+249759,Plaguebat Fur Gloves,Heroic,18744,61,60,4,4,2,10,24639,@Heroic Dungeon@,194721
+249760,Plaguebat Fur Gloves,Mythic,18744,64,60,4,4,2,10,24639,@Mythic Dungeon@,194722
+18745,Sacred Cloth Leggings,Normal,18745,57,52,3,4,1,7,643,,15839
+249771,Sacred Cloth Leggings,Heroic,18745,61,60,4,4,1,7,643,@Heroic Dungeon@,194733
+249772,Sacred Cloth Leggings,Mythic,18745,64,60,4,4,1,7,643,@Mythic Dungeon@,194734
+18754,Fel Hardened Bracers,Normal,18754,57,57,3,4,4,9,24655,,15848
+249783,Fel Hardened Bracers,Heroic,18754,61,60,4,4,4,9,24655,@Heroic Dungeon@,194745
+249784,Fel Hardened Bracers,Mythic,18754,64,60,4,4,4,9,24655,@Mythic Dungeon@,194746
+18755,Xorothian Firestick,Normal,18755,57,57,3,2,3,26,24678,,15849
+249795,Xorothian Firestick,Heroic,18755,61,60,4,2,3,26,24678,@Heroic Dungeon@,194757
+249796,Xorothian Firestick,Mythic,18755,64,60,4,2,3,26,24678,@Mythic Dungeon@,194758
+18756,Dreadguard's Protector,Normal,18756,57,57,3,4,6,14,24658,,15850
+249807,Dreadguard's Protector,Heroic,18756,61,60,4,4,6,14,24658,@Heroic Dungeon@,194769
+249808,Dreadguard's Protector,Mythic,18756,64,60,4,4,6,14,24658,@Mythic Dungeon@,194770
+18757,Diabolic Mantle,Normal,18757,57,57,3,4,1,3,24659,,15851
+249819,Diabolic Mantle,Heroic,18757,61,60,4,4,1,3,24659,@Heroic Dungeon@,194781
+249820,Diabolic Mantle,Mythic,18757,64,60,4,4,1,3,24659,@Mythic Dungeon@,194782
+18758,Specter's Blade,Normal,18758,57,57,3,2,15,13,16065,,15852
+249831,Specter's Blade,Heroic,18758,61,60,4,2,15,13,16065,@Heroic Dungeon@,194793
+249832,Specter's Blade,Mythic,18758,64,60,4,2,15,13,16065,@Mythic Dungeon@,194794
+18759,Malicious Axe,Normal,18759,57,57,3,2,1,17,24661,,15853
+249843,Malicious Axe,Heroic,18759,61,60,4,2,1,17,24661,@Heroic Dungeon@,194805
+249844,Malicious Axe,Mythic,18759,64,60,4,2,1,17,24661,@Mythic Dungeon@,194806
+18760,Necromantic Band,Normal,18760,57,57,3,4,0,11,6927,,15854
+249855,Necromantic Band,Heroic,18760,61,60,4,4,0,11,6927,@Heroic Dungeon@,194817
+249856,Necromantic Band,Mythic,18760,64,60,4,4,0,11,6927,@Mythic Dungeon@,194818
+18761,Oblivion's Touch,Normal,18761,57,57,3,2,19,26,25073,,15855
+249867,Oblivion's Touch,Heroic,18761,61,60,4,2,19,26,25073,@Heroic Dungeon@,194829
+249868,Oblivion's Touch,Mythic,18761,64,60,4,2,19,26,25073,@Mythic Dungeon@,194830
+22204,Wristguards of Renown,Normal,22204,57,55,3,4,2,9,27801,,19114
+260225,Wristguards of Renown,Heroic,22204,61,60,4,4,2,9,27801,@Heroic Dungeon@,200488
+260226,Wristguards of Renown,Mythic,22204,64,60,4,4,2,9,27801,@Mythic Dungeon@,200489
+22205,Black Steel Bindings,Normal,22205,57,52,3,4,4,9,27802,,19115
+260237,Black Steel Bindings,Heroic,22205,61,60,4,4,4,9,27802,@Heroic Dungeon@,200500
+260238,Black Steel Bindings,Mythic,22205,64,60,4,4,4,9,27802,@Mythic Dungeon@,200501
+22207,Sash of the Grand Hunt,Normal,22207,57,55,3,4,3,6,27807,,19117
+260262,Sash of the Grand Hunt,Heroic,22207,61,60,4,4,3,6,27807,@Heroic Dungeon@,200514
+260263,Sash of the Grand Hunt,Mythic,22207,64,60,4,4,3,6,27807,@Mythic Dungeon@,200515
+22208,Lavastone Hammer,Normal,22208,57,53,3,2,5,17,27808,,19118
+260274,Lavastone Hammer,Heroic,22208,61,60,4,2,5,17,27808,@Heroic Dungeon@,200526
+260275,Lavastone Hammer,Mythic,22208,64,60,4,2,5,17,27808,@Mythic Dungeon@,200527
+22212,Golem Fitted Pauldrons,Normal,22212,57,51,3,4,3,3,27810,,19122
+260286,Golem Fitted Pauldrons,Heroic,22212,61,60,4,4,3,3,27810,@Heroic Dungeon@,200538
+260287,Golem Fitted Pauldrons,Mythic,22212,64,60,4,4,3,3,27810,@Mythic Dungeon@,200539
+22223,Foreman's Head Protector,Normal,22223,57,50,3,4,4,1,27815,,19133
+260298,Foreman's Head Protector,Heroic,22223,61,60,4,4,4,1,27815,@Heroic Dungeon@,200550
+260299,Foreman's Head Protector,Mythic,22223,64,60,4,4,4,1,27815,@Mythic Dungeon@,200551
+22231,Kayser's Boots of Precision,Normal,22231,57,56,3,4,1,8,27842,,19141
+120731,Kayser's Boots of Precision,Heroic,22231,61,60,4,4,1,8,27842,@Heroic Dungeon@,114069
+222231,Kayser's Boots of Precision,Mythic,22231,64,60,4,4,1,8,27842,@Mythic Dungeon@,184599
+22232,Marksman's Girdle,Normal,22232,57,56,3,4,3,6,27828,,19142
+122748,Marksman's Girdle,Heroic,22232,61,60,4,4,3,6,27828,@Heroic Dungeon@,116069
+222232,Marksman's Girdle,Mythic,22232,64,60,4,4,3,6,27828,@Mythic Dungeon@,184600
+22234,Mantle of Lost Hope,Normal,22234,57,48,3,4,1,3,27829,,19144
+260322,Mantle of Lost Hope,Heroic,22234,61,60,4,4,1,3,27829,@Heroic Dungeon@,200562
+260323,Mantle of Lost Hope,Mythic,22234,64,60,4,4,1,3,27829,@Mythic Dungeon@,200563
+22240,Greaves of Withering Despair,Normal,22240,57,48,3,4,3,8,27835,,19150
+260334,Greaves of Withering Despair,Heroic,22240,61,60,4,4,3,8,27835,@Heroic Dungeon@,200574
+260335,Greaves of Withering Despair,Mythic,22240,64,60,4,4,3,8,27835,@Mythic Dungeon@,200575
+22241,Dark Warder's Pauldrons,Normal,22241,57,52,3,4,2,3,27839,,19151
+260346,Dark Warder's Pauldrons,Heroic,22241,61,60,4,4,2,3,27839,@Heroic Dungeon@,200586
+260347,Dark Warder's Pauldrons,Mythic,22241,64,60,4,4,2,3,27839,@Mythic Dungeon@,200587
+22242,Verek's Leash,Normal,22242,57,51,3,4,3,6,27843,,19152
+260358,Verek's Leash,Heroic,22242,61,60,4,4,3,6,27843,@Heroic Dungeon@,200598
+260359,Verek's Leash,Mythic,22242,64,60,4,4,3,6,27843,@Mythic Dungeon@,200599
+22245,Soot Encrusted Footwear,Normal,22245,57,51,3,4,1,8,27844,,19155
+260370,Soot Encrusted Footwear,Heroic,22245,61,60,4,4,1,8,27844,@Heroic Dungeon@,200610
+260371,Soot Encrusted Footwear,Mythic,22245,64,60,4,4,1,8,27844,@Mythic Dungeon@,200611
+22247,Faith Healer's Boots,Normal,22247,57,58,3,4,1,8,27854,,19157
+113537,Faith Healer's Boots,Heroic,22247,61,60,4,4,1,8,27854,@Heroic Dungeon@,106875
+222247,Faith Healer's Boots,Mythic,22247,64,60,4,4,1,8,27854,@Mythic Dungeon@,184604
+22253,Tome of the Lost,Normal,22253,57,58,3,4,0,23,24582,"The title reads ""The Brode to Nowhere""",19163
+130434,Tome of the Lost,Heroic,22253,61,60,4,4,0,23,24582,@Heroic Dungeon@,123648
+222253,Tome of the Lost,Mythic,22253,64,60,4,4,0,23,24582,@Mythic Dungeon@,184606
+22254,Wand of Eternal Light,Normal,22254,57,52,3,2,19,26,27885,,19164
+260382,Wand of Eternal Light,Heroic,22254,61,60,4,2,19,26,27885,@Heroic Dungeon@,200622
+260383,Wand of Eternal Light,Mythic,22254,64,60,4,2,19,26,27885,@Mythic Dungeon@,200623
+22255,Magma Forged Band,Normal,22255,57,52,3,4,0,11,6922,,19165
+260394,Magma Forged Band,Heroic,22255,61,60,4,4,0,11,6922,@Heroic Dungeon@,200634
+260395,Magma Forged Band,Mythic,22255,64,60,4,4,0,11,6922,@Mythic Dungeon@,200635
+22256,Mana Shaping Handwraps,Normal,22256,57,52,3,4,1,10,24273,,19166
+260406,Mana Shaping Handwraps,Heroic,22256,61,60,4,4,1,10,24273,@Heroic Dungeon@,200646
+260407,Mana Shaping Handwraps,Mythic,22256,64,60,4,4,1,10,24273,@Mythic Dungeon@,200647
+22257,Bloodclot Band,Normal,22257,57,52,3,4,0,11,25053,,19167
+260418,Bloodclot Band,Heroic,22257,61,60,4,4,0,11,25053,@Heroic Dungeon@,200658
+260419,Bloodclot Band,Mythic,22257,64,60,4,4,0,11,25053,@Mythic Dungeon@,200659
+22266,Flarethorn,Normal,22266,57,52,3,2,15,21,4006,,19176
+260430,Flarethorn,Heroic,22266,61,60,4,2,15,21,4006,@Heroic Dungeon@,200670
+260431,Flarethorn,Mythic,22266,64,60,4,2,15,21,4006,@Mythic Dungeon@,200671
+22267,Spellweaver's Turban,Normal,22267,57,60,3,4,1,1,27936,,19177
+128166,Spellweaver's Turban,Heroic,22267,61,60,4,4,1,1,27936,@Heroic Dungeon@,121413
+222267,Spellweaver's Turban,Mythic,22267,64,60,4,4,1,1,27936,@Mythic Dungeon@,184609
+22268,Draconic Infused Emblem,Normal,22268,57,58,3,4,0,12,18512,,19178
+102339,Draconic Infused Emblem,Heroic,22268,61,60,4,4,0,12,18512,@Heroic Dungeon@,95677
+222268,Draconic Infused Emblem,Mythic,22268,64,60,4,4,0,12,18512,@Mythic Dungeon@,184610
+22269,Shadow Prowler's Cloak,Normal,22269,57,58,3,4,1,16,18764,,19179
+123777,Shadow Prowler's Cloak,Heroic,22269,61,60,4,4,1,16,18764,@Heroic Dungeon@,117059
+222269,Shadow Prowler's Cloak,Mythic,22269,64,60,4,4,1,16,18764,@Mythic Dungeon@,184611
+22270,Entrenching Boots,Normal,22270,57,50,3,4,4,8,27954,,19180
+260442,Entrenching Boots,Heroic,22270,61,60,4,4,4,8,27954,@Heroic Dungeon@,200682
+260443,Entrenching Boots,Mythic,22270,64,60,4,4,4,8,27954,@Mythic Dungeon@,200683
+22271,Leggings of Frenzied Magic,Normal,22271,57,52,3,4,2,7,27956,,19181
+260454,Leggings of Frenzied Magic,Heroic,22271,61,60,4,4,2,7,27956,@Heroic Dungeon@,200694
+260455,Leggings of Frenzied Magic,Mythic,22271,64,60,4,4,2,7,27956,@Mythic Dungeon@,200695
+22275,Firemoss Boots,Normal,22275,57,52,3,4,2,8,4196,,19185
+260502,Firemoss Boots,Heroic,22275,61,60,4,4,2,8,4196,@Heroic Dungeon@,200706
+260503,Firemoss Boots,Mythic,22275,64,60,4,4,2,8,4196,@Mythic Dungeon@,200707
+22301,Ironweave Robe,Normal,22301,57,58,3,4,1,20,28043,,19211
+260514,Ironweave Robe,Heroic,22301,61,60,4,4,1,20,28043,@Heroic Dungeon@,200718
+260515,Ironweave Robe,Mythic,22301,64,60,4,4,1,20,28043,@Mythic Dungeon@,200719
+22302,Ironweave Cowl,Normal,22302,57,58,3,4,1,1,28025,,19212
+260526,Ironweave Cowl,Heroic,22302,61,60,4,4,1,1,28025,@Heroic Dungeon@,200730
+260527,Ironweave Cowl,Mythic,22302,64,60,4,4,1,1,28025,@Mythic Dungeon@,200731
+22303,Ironweave Pants,Normal,22303,57,57,3,4,1,7,28032,,19213
+260538,Ironweave Pants,Heroic,22303,61,60,4,4,1,7,28032,@Heroic Dungeon@,200742
+260539,Ironweave Pants,Mythic,22303,64,60,4,4,1,7,28032,@Mythic Dungeon@,200743
+22304,Ironweave Gloves,Normal,22304,57,56,3,4,1,10,28033,,19214
+260550,Ironweave Gloves,Heroic,22304,61,60,4,4,1,10,28033,@Heroic Dungeon@,200754
+260551,Ironweave Gloves,Mythic,22304,64,60,4,4,1,10,28033,@Mythic Dungeon@,200755
+22305,Ironweave Mantle,Normal,22305,57,56,3,4,1,3,28035,,19215
+260562,Ironweave Mantle,Heroic,22305,61,60,4,4,1,3,28035,@Heroic Dungeon@,200766
+260563,Ironweave Mantle,Mythic,22305,64,60,4,4,1,3,28035,@Mythic Dungeon@,200767
+22306,Ironweave Belt,Normal,22306,57,56,3,4,1,6,28034,,19216
+260574,Ironweave Belt,Heroic,22306,61,60,4,4,1,6,28034,@Heroic Dungeon@,200778
+260575,Ironweave Belt,Mythic,22306,64,60,4,4,1,6,28034,@Mythic Dungeon@,200779
+22311,Ironweave Boots,Normal,22311,57,56,3,4,1,8,28036,,19221
+120701,Ironweave Boots,Heroic,22311,61,60,4,4,1,8,28036,@Heroic Dungeon@,114039
+222311,Ironweave Boots,Mythic,22311,64,60,4,4,1,8,28036,@Mythic Dungeon@,184619
+22313,Ironweave Bracers,Normal,22313,57,56,3,4,1,9,28037,,19223
+120702,Ironweave Bracers,Heroic,22313,61,60,4,4,1,9,28037,@Heroic Dungeon@,114040
+222313,Ironweave Bracers,Mythic,22313,64,60,4,4,1,9,28037,@Mythic Dungeon@,184620
+22314,Huntsman's Harpoon,Normal,22314,57,56,3,2,6,17,28038,,19224
+260586,Huntsman's Harpoon,Heroic,22314,61,60,4,2,6,17,28038,@Heroic Dungeon@,200790
+260587,Huntsman's Harpoon,Mythic,22314,64,60,4,2,6,17,28038,@Mythic Dungeon@,200791
+22315,Hammer of Revitalization,Normal,22315,57,56,3,2,4,21,4232,,19225
+260598,Hammer of Revitalization,Heroic,22315,61,60,4,2,4,21,4232,@Heroic Dungeon@,200802
+260599,Hammer of Revitalization,Mythic,22315,64,60,4,2,4,21,4232,@Mythic Dungeon@,200803
+22317,Lefty's Brass Knuckle,Normal,22317,57,56,3,2,13,13,18538,,19227
+260610,Lefty's Brass Knuckle,Heroic,22317,61,60,4,2,13,13,18538,@Heroic Dungeon@,200814
+260611,Lefty's Brass Knuckle,Mythic,22317,64,60,4,2,13,13,18538,@Mythic Dungeon@,200815
+22318,Malgen's Long Bow,Normal,22318,57,56,3,2,2,15,28044,,19228
+260622,Malgen's Long Bow,Heroic,22318,61,60,4,2,2,15,28044,@Heroic Dungeon@,200826
+260623,Malgen's Long Bow,Mythic,22318,64,60,4,2,2,15,28044,@Mythic Dungeon@,200827
+22319,Tome of Divine Right,Normal,22319,57,56,3,4,0,23,28046,,19229
+260634,Tome of Divine Right,Heroic,22319,61,60,4,4,0,23,28046,@Heroic Dungeon@,200838
+260635,Tome of Divine Right,Mythic,22319,64,60,4,4,0,23,28046,@Mythic Dungeon@,200839
+22321,Heart of Wyrmthalak,Normal,22321,57,56,3,4,0,12,3490,,19231
+120504,Heart of Wyrmthalak,Heroic,22321,61,60,4,4,0,12,3490,@Heroic Dungeon@,113842
+222321,Heart of Wyrmthalak,Mythic,22321,64,60,4,4,0,12,3490,@Mythic Dungeon@,184623
+22322,The Jaw Breaker,Normal,22322,57,56,3,2,4,13,2762,Not edible,19232
+260646,The Jaw Breaker,Heroic,22322,61,60,4,2,4,13,2762,@Heroic Dungeon@,200850
+260647,The Jaw Breaker,Mythic,22322,64,60,4,2,4,13,2762,@Mythic Dungeon@,200851
+22325,Belt of the Trickster,Normal,22325,57,56,3,4,2,6,11107,,19235
+260658,Belt of the Trickster,Heroic,22325,61,60,4,4,2,6,11107,@Heroic Dungeon@,200862
+260659,Belt of the Trickster,Mythic,22325,64,60,4,4,2,6,11107,@Mythic Dungeon@,200863
+22326,Amalgam's Band,Normal,22326,57,58,3,4,0,11,20469,,19236
+260670,Amalgam's Band,Heroic,22326,61,60,4,4,0,11,20469,@Heroic Dungeon@,200874
+260671,Amalgam's Band,Mythic,22326,64,60,4,4,0,11,20469,@Mythic Dungeon@,200875
+22327,Amulet of the Redeemed,Normal,22327,57,58,3,4,0,2,6945,,19237
+260682,Amulet of the Redeemed,Heroic,22327,61,60,4,4,0,2,6945,@Heroic Dungeon@,200886
+260683,Amulet of the Redeemed,Mythic,22327,64,60,4,4,0,2,6945,@Mythic Dungeon@,200887
+22328,Legplates of Vigilance,Normal,22328,57,58,3,4,4,7,17040,,19238
+260694,Legplates of Vigilance,Heroic,22328,61,60,4,4,4,7,17040,@Heroic Dungeon@,200898
+260695,Legplates of Vigilance,Mythic,22328,64,60,4,4,4,7,17040,@Mythic Dungeon@,200899
+22329,Scepter of Interminable Focus,Normal,22329,57,58,3,4,0,23,28051,,19239
+260706,Scepter of Interminable Focus,Heroic,22329,61,60,4,4,0,23,28051,@Heroic Dungeon@,200910
+260707,Scepter of Interminable Focus,Mythic,22329,64,60,4,4,0,23,28051,@Mythic Dungeon@,200911
+22330,Shroud of Arcane Mastery,Normal,22330,57,56,3,4,1,16,28052,,19240
+260718,Shroud of Arcane Mastery,Heroic,22330,61,60,4,4,1,16,28052,@Heroic Dungeon@,200922
+260719,Shroud of Arcane Mastery,Mythic,22330,64,60,4,4,1,16,28052,@Mythic Dungeon@,200923
+22331,Band of the Steadfast Hero,Normal,22331,57,57,3,4,0,11,19210,,19241
+260730,Band of the Steadfast Hero,Heroic,22331,61,60,4,4,0,11,19210,@Heroic Dungeon@,200934
+260731,Band of the Steadfast Hero,Mythic,22331,64,60,4,4,0,11,19210,@Mythic Dungeon@,200935
+22332,Blade of Necromancy,Normal,22332,57,57,3,2,7,13,28054,,19242
+260742,Blade of Necromancy,Heroic,22332,61,60,4,2,7,13,28054,@Heroic Dungeon@,200946
+260743,Blade of Necromancy,Mythic,22332,64,60,4,2,7,13,28054,@Mythic Dungeon@,200947
+22333,Hammer of Divine Might,Normal,22333,57,57,3,2,5,17,731,,19243
+260754,Hammer of Divine Might,Heroic,22333,61,60,4,2,5,17,731,@Heroic Dungeon@,200958
+260755,Hammer of Divine Might,Mythic,22333,64,60,4,2,5,17,731,@Mythic Dungeon@,200959
+22334,Band of Mending,Normal,22334,57,57,3,4,0,11,6925,,19244
+260766,Band of Mending,Heroic,22334,61,60,4,4,0,11,6925,@Heroic Dungeon@,200970
+260767,Band of Mending,Mythic,22334,64,60,4,4,0,11,6925,@Mythic Dungeon@,200971
+22335,Lord Valthalak's Staff of Command,Normal,22335,57,58,3,2,10,17,28112,,19245
+260778,Lord Valthalak's Staff of Command,Heroic,22335,61,60,4,2,10,17,28112,@Heroic Dungeon@,200982
+260779,Lord Valthalak's Staff of Command,Mythic,22335,64,60,4,2,10,17,28112,@Mythic Dungeon@,200983
+22336,Draconian Aegis of the Legion,Normal,22336,57,58,3,4,6,14,14700,,19246
+260790,Draconian Aegis of the Legion,Heroic,22336,61,60,4,4,6,14,14700,@Heroic Dungeon@,200994
+260791,Draconian Aegis of the Legion,Mythic,22336,64,60,4,4,6,14,14700,@Mythic Dungeon@,200995
+22337,Shroud of Domination,Normal,22337,57,58,3,4,1,16,28056,,19247
+260802,Shroud of Domination,Heroic,22337,61,60,4,4,1,16,28056,@Heroic Dungeon@,201006
+260803,Shroud of Domination,Mythic,22337,64,60,4,4,1,16,28056,@Mythic Dungeon@,201007
+22339,Rune Band of Wizardry,Normal,22339,57,58,3,4,0,11,25015,,19249
+260814,Rune Band of Wizardry,Heroic,22339,61,60,4,4,0,11,25015,@Heroic Dungeon@,201018
+260815,Rune Band of Wizardry,Mythic,22339,64,60,4,4,0,11,25015,@Mythic Dungeon@,201019
+22340,Pendant of Celerity,Normal,22340,57,58,3,4,0,2,6940,,19250
+260826,Pendant of Celerity,Heroic,22340,61,60,4,4,0,2,6940,@Heroic Dungeon@,201030
+260827,Pendant of Celerity,Mythic,22340,64,60,4,4,0,2,6940,@Mythic Dungeon@,201031
+22342,Leggings of Torment,Normal,22342,57,58,3,4,1,7,19010,,19252
+260838,Leggings of Torment,Heroic,22342,61,60,4,4,1,7,19010,@Heroic Dungeon@,201042
+260839,Leggings of Torment,Mythic,22342,64,60,4,4,1,7,19010,@Mythic Dungeon@,201043
+22343,Handguards of Savagery,Normal,22343,57,58,3,4,3,10,26467,,19253
+260850,Handguards of Savagery,Heroic,22343,61,60,4,4,3,10,26467,@Heroic Dungeon@,201054
+260851,Handguards of Savagery,Mythic,22343,64,60,4,4,3,10,26467,@Mythic Dungeon@,201055
+22345,Totem of Rebirth,Normal,22345,57,57,3,4,9,28,28177,,19255
+260862,Totem of Rebirth,Heroic,22345,61,60,4,4,9,28,28177,@Heroic Dungeon@,201066
+260863,Totem of Rebirth,Mythic,22345,64,60,4,4,9,28,28177,@Mythic Dungeon@,201067
+22394,Staff of Metanoia,Normal,22394,57,57,3,2,10,17,28115,,19304
+260982,Staff of Metanoia,Heroic,22394,61,60,4,2,10,17,28115,@Heroic Dungeon@,201132
+260983,Staff of Metanoia,Mythic,22394,64,60,4,2,10,17,28115,@Mythic Dungeon@,201133
+22395,Totem of Rage,Normal,22395,57,52,3,4,9,28,28176,,19305
+260994,Totem of Rage,Heroic,22395,61,60,4,4,9,28,28176,@Heroic Dungeon@,201144
+260995,Totem of Rage,Mythic,22395,64,60,4,4,9,28,28176,@Mythic Dungeon@,201145
+22397,Idol of Ferocity,Normal,22397,57,52,3,4,8,28,28174,,19307
+261006,Idol of Ferocity,Heroic,22397,61,60,4,4,8,28,28174,@Heroic Dungeon@,201156
+261007,Idol of Ferocity,Mythic,22397,64,60,4,4,8,28,28174,@Mythic Dungeon@,201157
+22398,Idol of Rejuvenation,Normal,22398,57,57,3,4,8,28,28173,,19308
+261018,Idol of Rejuvenation,Heroic,22398,61,60,4,4,8,28,28173,@Heroic Dungeon@,201168
+261019,Idol of Rejuvenation,Mythic,22398,64,60,4,4,8,28,28173,@Mythic Dungeon@,201169
+22400,Libram of Truth,Normal,22400,57,52,3,4,7,28,28180,,19310
+261030,Libram of Truth,Heroic,22400,61,60,4,4,7,28,28180,@Heroic Dungeon@,201180
+261031,Libram of Truth,Mythic,22400,64,60,4,4,7,28,28180,@Mythic Dungeon@,201181
+22401,Libram of Hope,Normal,22401,57,57,3,4,7,28,28179,,19311
+261042,Libram of Hope,Heroic,22401,61,60,4,4,7,28,28179,@Heroic Dungeon@,201192
+261043,Libram of Hope,Mythic,22401,64,60,4,4,7,28,28179,@Mythic Dungeon@,201193
+22403,Diana's Pearl Necklace,Normal,22403,57,56,3,4,0,2,6946,,19313
+261054,Diana's Pearl Necklace,Heroic,22403,61,60,4,4,0,2,6946,@Heroic Dungeon@,201204
+261055,Diana's Pearl Necklace,Mythic,22403,64,60,4,4,0,2,6946,@Mythic Dungeon@,201205
+22404,Willey's Back Scratcher,Normal,22404,57,56,3,2,13,21,28116,,19314
+261066,Willey's Back Scratcher,Heroic,22404,61,60,4,2,13,21,28116,@Heroic Dungeon@,201216
+261067,Willey's Back Scratcher,Mythic,22404,64,60,4,2,13,21,28116,@Mythic Dungeon@,201217
+22405,Mantle of the Scarlet Crusade,Normal,22405,57,56,3,4,1,3,28117,,19315
+261078,Mantle of the Scarlet Crusade,Heroic,22405,61,60,4,4,1,3,28117,@Heroic Dungeon@,201228
+261079,Mantle of the Scarlet Crusade,Mythic,22405,64,60,4,4,1,3,28117,@Mythic Dungeon@,201229
+22406,Redemption,Normal,22406,57,56,3,2,10,17,15910,,19316
+261090,Redemption,Heroic,22406,61,60,4,2,10,17,15910,@Heroic Dungeon@,201240
+261091,Redemption,Mythic,22406,64,60,4,2,10,17,15910,@Mythic Dungeon@,201241
+22407,Helm of the New Moon,Normal,22407,57,56,3,4,2,1,35211,,19317
+261102,Helm of the New Moon,Heroic,22407,61,60,4,4,2,1,35211,@Heroic Dungeon@,201252
+261103,Helm of the New Moon,Mythic,22407,64,60,4,4,2,1,35211,@Mythic Dungeon@,201253
+22408,Ritssyn's Wand of Bad Mojo,Normal,22408,57,58,3,2,19,26,28119,,19318
+261114,Ritssyn's Wand of Bad Mojo,Heroic,22408,61,60,4,2,19,26,28119,@Heroic Dungeon@,201264
+261115,Ritssyn's Wand of Bad Mojo,Mythic,22408,64,60,4,2,19,26,28119,@Mythic Dungeon@,201265
+22409,Tunic of the Crescent Moon,Normal,22409,57,58,3,4,2,5,28120,,19319
+261126,Tunic of the Crescent Moon,Heroic,22409,61,60,4,4,2,5,28120,@Heroic Dungeon@,201276
+261127,Tunic of the Crescent Moon,Mythic,22409,64,60,4,4,2,5,28120,@Mythic Dungeon@,201277
+22410,Gauntlets of Deftness,Normal,22410,57,58,3,4,3,10,28121,,19320
+261138,Gauntlets of Deftness,Heroic,22410,61,60,4,4,3,10,28121,@Heroic Dungeon@,201288
+261139,Gauntlets of Deftness,Mythic,22410,64,60,4,4,3,10,28121,@Mythic Dungeon@,201289
+22411,Helm of the Executioner,Normal,22411,57,58,3,4,4,1,28122,,19321
+261150,Helm of the Executioner,Heroic,22411,61,60,4,4,4,1,28122,@Heroic Dungeon@,201300
+261151,Helm of the Executioner,Mythic,22411,64,60,4,4,4,1,28122,@Mythic Dungeon@,201301
+22412,Thuzadin Mantle,Normal,22412,57,58,3,4,1,3,11701,,19322
+261162,Thuzadin Mantle,Heroic,22412,61,60,4,4,1,3,11701,@Heroic Dungeon@,201312
+261163,Thuzadin Mantle,Mythic,22412,64,60,4,4,1,3,11701,@Mythic Dungeon@,201313
+22433,Don Mauricio's Band of Domination,Normal,22433,57,58,3,4,0,11,18771,,19343
+261174,Don Mauricio's Band of Domination,Heroic,22433,61,60,4,4,0,11,18771,@Heroic Dungeon@,201324
+261175,Don Mauricio's Band of Domination,Mythic,22433,64,60,4,4,0,11,18771,@Mythic Dungeon@,201325
+22472,Boots of Ferocity,Normal,22472,57,56,3,4,2,8,6749,,19382
+261198,Boots of Ferocity,Heroic,22472,61,60,4,4,2,8,6749,@Heroic Dungeon@,201337
+261199,Boots of Ferocity,Mythic,22472,64,60,4,4,2,8,6749,@Mythic Dungeon@,201338
+23198,Idol of Brutality,Normal,23198,57,60,3,4,8,28,28174,,20108
+323198,Idol of Brutality,Heroic,23198,61,60,4,4,8,28,28174,@Heroic@,221008
+523198,Idol of Brutality,Mythic,23198,70,60,4,4,8,28,28174,@Mythic Dungeon@,298869
+23200,Totem of Sustaining,Normal,23200,57,60,3,4,9,28,28175,,20110
+262908,Totem of Sustaining,Heroic,23200,61,60,4,4,9,28,28175,@Heroic Dungeon@,201912
+262909,Totem of Sustaining,Mythic,23200,64,60,4,4,9,28,28175,@Mythic Dungeon@,201913
+23201,Libram of Divinity,Normal,23201,57,60,3,4,7,28,28179,,20111
+262920,Libram of Divinity,Heroic,23201,61,60,4,4,7,28,28179,@Heroic Dungeon@,201924
+262921,Libram of Divinity,Mythic,23201,64,60,4,4,7,28,28179,@Mythic Dungeon@,201925
+28972,Flightblade Throwing Axe,Normal,28972,57,55,3,2,16,25,7297,,25882
+116056,Flightblade Throwing Axe,Heroic,28972,61,60,4,2,16,25,7297,@Heroic Dungeon@,109394
+228972,Flightblade Throwing Axe,Mythic,28972,64,60,4,2,16,25,7297,@Mythic Dungeon@,186647

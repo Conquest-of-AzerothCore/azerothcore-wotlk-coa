@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "name": "A held quest keeps its turn-in marker outside its start area (#8050)",
+  "contract": "Fire Brigade Practice 11360 is offered and turned in by the Costumed Orphan Matron 24519, but the fires are put out in another area than Goldshire (area 87), the only area its QUEST_AVAILABLE condition (19, 11360, type 23) accepts. GetQuestDialogStatus applied that condition to the quests a giver ends as well, so a player holding the quest saw the giver at status 0 for as long as they stood outside area 87, and the client, which asks for the marker only from its own events, showed no yellow question mark and did not open the giver on a click. Expected: a completed quest the player holds shows the giver as DIALOG_STATUS_REWARD (10) wherever the player stands.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -9320.0, "y": 56.0, "z": 63.0, "o": 3.0 },
+  "players": [
+    { "id": "ing", "race": 1, "class": 28, "level": 42, "ascension_client": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "summon", "label": "The Matron stands beside the player at the fires", "actor": "ing", "entry": 24519, "as": "matron", "distance": 3 },
+    { "action": "prepare_quest", "label": "Take and finish Fire Brigade Practice", "actor": "ing", "quest": 11360 },
+    {
+      "action": "assert", "label": "The giver offers the turn-in marker", "actor": "ing",
+      "metric": "dialog_status", "entry": 24519, "equals": 10
+    }
+  ]
+}

@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Venoshroom mushrooms wear their model at 0.55 scale, cannot be attacked and Mycelial Ring grows 12 near the caster",
+  "contract": [
+    "Mushroom summon 680764 creates creature 506018. Every live client creature-cache capture in AscensionDB",
+    "(2026-08-06 to 2026-09-10), the Exiles DB and the db.exil.es dump (2026-10-04) give it display 128263,",
+    "spells\\Druid_Wild_Mushroom_03Hostile.M2 in both the server and client CreatureDisplayInfo/CreatureModelData,",
+    "shipped in the client's patch-N.MPQ. The previous template used 26981, the invisible stalker.",
+    "The template keeps its 0.55 display scale, which matches the small mushrooms in live footage of the ring.",
+    "Mycelial Ring 681056's tooltip in the installed client: \"immediately grows 12 Mushrooms in a circle around you\".",
+    "Live footage shows them scattered close around the caster, well inside the 8 yd ring: the Mushroom summon",
+    "680764 places its creature at a random point within radius index 26 (4 yd), so no Mushroom grows beyond 4.5 yd.",
+    "Each Mushroom explodes after 2 sec, so all twelve still stand 1.5 sec after the cast and are gone 4 sec later.",
+    "Spore 572869 drops one Mushroom below its target after 10 sec, which must also wear display 128263.",
+    "Mushrooms are an untargetable effect of the Venomancer's spells: no hostile unit may attack them."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "v",
+      "race": 1,
+      "class": 29,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "v",
+      "entry": 36,
+      "level": 60,
+      "health": 4000000,
+      "distance": 20
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 681056
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 572869
+    },
+    {
+      "action": "cast",
+      "label": "Cast Mycelial Ring",
+      "actor": "v",
+      "spell": 681056
+    },
+    {
+      "action": "assert",
+      "label": "Mycelial Ring grows twelve Mushrooms",
+      "actor": "v",
+      "metric": "owned_creature_count",
+      "entry": 506018,
+      "equals": 12,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Mushroom wears the Venoshroom display",
+      "actor": "v",
+      "metric": "owned_creature_display",
+      "entry": 506018,
+      "equals": 128263
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a hostile unit cannot attack a Mushroom",
+      "actor": "v",
+      "metric": "owned_creature_attackable",
+      "entry": 506018,
+      "target": "dummy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Mushroom keeps its small 0.55 scale",
+      "actor": "v",
+      "metric": "owned_creature_scale",
+      "entry": 506018,
+      "min": 0.549,
+      "max": 0.551
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: every Mushroom grows within 4 yd of the caster",
+      "actor": "v",
+      "metric": "owned_creature_count",
+      "entry": 506018,
+      "min_distance": 4.5,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The Mushrooms remain until they explode after 2 sec",
+      "actor": "v",
+      "metric": "owned_creature_count",
+      "entry": 506018,
+      "equals": 12
+    },
+    {
+      "action": "assert",
+      "label": "The Mushrooms are gone after exploding",
+      "actor": "v",
+      "metric": "owned_creature_count",
+      "entry": 506018,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "cast",
+      "label": "Cast Spore on the dummy",
+      "actor": "v",
+      "spell": 572869,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Spore drops a Mushroom after 10 sec",
+      "actor": "v",
+      "metric": "owned_creature_count",
+      "entry": 506018,
+      "equals": 1,
+      "within_ms": 14000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Spore Mushroom wears the Venoshroom display",
+      "actor": "v",
+      "metric": "owned_creature_display",
+      "entry": 506018,
+      "equals": 128263
+    }
+  ]
+}

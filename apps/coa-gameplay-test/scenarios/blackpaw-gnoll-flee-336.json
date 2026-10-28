@@ -1,0 +1,169 @@
+{
+  "schema": 1,
+  "name": "Blackpaw gnoll: low-health fleeing warns once and slows down (#336)",
+  "contract": [
+    "Blackpaw Gnolls and Scavengers flee below 15% health and should send the same native fear warning as the",
+    "neighboring Blackpaw Shaman. Full health is a negative control; at 14% health the normal creature penalty",
+    "truncates 1.66 * (30 - 14) to 26%, leaving 74% run speed. The active flee spline must use that reduced",
+    "speed. SMSG_MESSAGECHAT 150 starts with the one-byte MONSTER_EMOTE type 16 and universal language 0, so its",
+    "first uint32 is 16; the row selector records this packet header and the native warning text. This verifies",
+    "server packet delivery to the socketless session, not client chat rendering."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": 16226.2,
+    "y": 16257.0,
+    "z": 13.2022,
+    "o": 1.65007
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "blackpaw",
+      "owner": "hero",
+      "entry": 16334,
+      "faction": 14,
+      "level": 80,
+      "health": 100000,
+      "reaction": 2,
+      "distance": 6
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 10040,
+      "stacks": 20
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 100000
+    },
+    {
+      "action": "assert",
+      "actor": "blackpaw",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000,
+      "label": "The Blackpaw engages an idle player naturally"
+    },
+    {
+      "action": "assert",
+      "actor": "blackpaw",
+      "metric": "max_health",
+      "equals": 100000
+    },
+    {
+      "action": "assert",
+      "actor": "blackpaw",
+      "metric": "health_pct",
+      "equals": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "blackpaw",
+      "metric": "run_speed_rate",
+      "save_as": "healthy_run_rate"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 150,
+      "row": 16,
+      "save_as": "warnings_before_flee"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "server_packet_contains",
+      "opcode": 150,
+      "row": 16,
+      "text": "attempts to run away in fear!",
+      "equals": 0,
+      "label": "No flee warning at full health"
+    },
+    {
+      "action": "set_health",
+      "actor": "blackpaw",
+      "value": 14000
+    },
+    {
+      "action": "assert",
+      "actor": "blackpaw",
+      "metric": "health_pct",
+      "equals": 14
+    },
+    {
+      "action": "assert",
+      "actor": "blackpaw",
+      "metric": "run_speed_rate",
+      "ratio_to": "healthy_run_rate",
+      "min": 0.735,
+      "max": 0.745,
+      "label": "Low health reduces native run speed to 74%"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "server_packet_contains",
+      "opcode": 150,
+      "row": 16,
+      "text": "attempts to run away in fear!",
+      "equals": 1,
+      "within_ms": 6000,
+      "label": "The nearby player receives the native flee warning"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 150,
+      "row": 16,
+      "relative_to": "warnings_before_flee",
+      "equals": 1,
+      "label": "Exactly one warning was sent"
+    },
+    {
+      "action": "assert",
+      "actor": "blackpaw",
+      "metric": "spline_remaining_ms",
+      "min": 200,
+      "within_ms": 5000,
+      "label": "The fleeing creature starts a movement leg"
+    },
+    {
+      "action": "assert",
+      "actor": "blackpaw",
+      "metric": "spline_speed",
+      "ratio_to": "healthy_run_rate",
+      "min": 5.145,
+      "max": 5.215,
+      "label": "The flee spline uses 7 yards/second times the reduced run rate"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 150,
+      "row": 16,
+      "relative_to": "warnings_before_flee",
+      "equals": 1,
+      "label": "The warning does not repeat while the creature remains wounded"
+    }
+  ]
+}

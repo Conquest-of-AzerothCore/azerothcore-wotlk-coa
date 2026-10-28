@@ -3,6 +3,7 @@
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
+#include "SpellAuras.h"
 #include "SpellInfo.h"
 #include "SpellScript.h"
 #include <algorithm>
@@ -14,11 +15,14 @@ enum RunemasterTalentEffectSpells : uint32
 {
     SPELL_EARTH_WIND_AND_FIRE = 706531,
     SPELL_WILD_STEAM = 803737,
-    SPELL_FRACTURE = 803018
+    SPELL_FRACTURE = 803018,
+    SPELL_HARNESSED_LEYLINES = 804316
 };
 
 constexpr std::size_t WILD_STEAM_STRUCK_ENEMIES = 5;
 constexpr float FRACTURE_MANA_BURN_ATTACK_POWER = 0.35f;
+constexpr int32 HARNESSED_LEYLINES_DURATION = 15000;
+constexpr uint8 HARNESSED_LEYLINES_STACKS = 10;
 
 bool IsRunemaster(Unit const* unit)
 {
@@ -58,6 +62,48 @@ class spell_ascension_runemaster_earth_wind_and_fire : public SpellScript
     std::set<ObjectGuid> _struck;
 };
 
+class spell_ascension_runemaster_harnessed_leylines : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_runemaster_harnessed_leylines);
+
+    bool Validate(SpellInfo const* info) override
+    {
+        return info->Id == SPELL_HARNESSED_LEYLINES && info->SpellFamilyName == 38 &&
+            info->GetDuration() == HARNESSED_LEYLINES_DURATION && info->StackAmount == HARNESSED_LEYLINES_STACKS &&
+            info->Effects[EFFECT_0].IsAura(SPELL_AURA_ADD_PCT_MODIFIER) &&
+            info->Effects[EFFECT_0].MiscValue == SPELLMOD_DAMAGE;
+    }
+
+    bool Load() override { return IsRunemaster(GetCaster()); }
+
+    void SnapshotDuration()
+    {
+        Unit* caster = GetCaster();
+        if (Aura* aura = caster->GetAura(SPELL_HARNESSED_LEYLINES, caster->GetGUID()))
+        {
+            _remainingDuration = aura->GetDuration();
+            if (!_remainingDuration)
+                caster->RemoveAurasDueToSpell(SPELL_HARNESSED_LEYLINES, caster->GetGUID());
+        }
+    }
+
+    void RestoreDuration()
+    {
+        Aura* aura = GetHitAura();
+        if (_remainingDuration > 0 && GetHitUnit() == GetCaster() && aura &&
+            aura->GetCasterGUID() == GetCaster()->GetGUID())
+            aura->SetDuration(_remainingDuration);
+    }
+
+    void Register() override
+    {
+        BeforeCast += SpellCastFn(spell_ascension_runemaster_harnessed_leylines::SnapshotDuration);
+        AfterHit += SpellHitFn(spell_ascension_runemaster_harnessed_leylines::RestoreDuration);
+    }
+
+    int32 _remainingDuration = 0;
+};
+
 class runemaster_fracture_mana_burn : public UnitScript
 {
 public:
@@ -95,6 +141,7 @@ public:
 void AddSC_AscensionRunemasterTalentEffects()
 {
     RegisterSpellScript(spell_ascension_runemaster_earth_wind_and_fire);
+    RegisterSpellScript(spell_ascension_runemaster_harnessed_leylines);
     new runemaster_fracture_mana_burn();
     new runemaster_fracture_frozen_critical();
 }

@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Solar Concord is enabled by Sunrise or Sunset (#8639)",
+  "contract": "Solar Concord 301266 has CasterAuraSpell 500643, the hidden 'Sunrise or Sunset' dummy aura (AttributesEx 0x10000000 NO_AURA_ICON, aura 4 DUMMY, 30 sec). Spell.dbc lists no spell that applies 500643 and no source file casts it, so the client's own castability check greys Solar Concord out at every level. Sunrise 500477 and Sunset 500511 are the class stances and exclude each other. Applying either stance must add 500643, removing the last stance must remove it, and Solar Concord must then be castable in both stances.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 40 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "learn", "actor": "cleric", "spell": 500477 },
+    { "action": "learn", "actor": "cleric", "spell": 500511 },
+    { "action": "learn", "actor": "cleric", "spell": 301266 },
+    {
+      "action": "assert", "label": "SETUP: Solar Concord is known and no stance is active",
+      "actor": "cleric", "metric": "knows_spell", "spell": 301266, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: no Sunrise or Sunset checker before a stance",
+      "actor": "cleric", "metric": "aura", "spell": 500643, "equals": 0
+    },
+    { "action": "cast", "label": "Enter Sunrise", "actor": "cleric", "spell": 500477 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Sunrise adds the Sunrise-or-Sunset checker",
+      "actor": "cleric", "metric": "aura", "spell": 500643, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "cast", "label": "Solar Concord is castable in Sunrise",
+      "actor": "cleric", "spell": 301266
+    },
+    {
+      "action": "assert", "label": "Solar Concord applied in Sunrise",
+      "actor": "cleric", "metric": "aura", "spell": 301266, "equals": 1, "within_ms": 3000
+    },
+    { "action": "cancel_aura", "actor": "cleric", "spell": 301266 },
+    { "action": "cancel_aura", "actor": "cleric", "spell": 500477 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: leaving the last stance removes the checker",
+      "actor": "cleric", "metric": "aura", "spell": 500643, "equals": 0, "within_ms": 3000
+    },
+    { "action": "cast", "label": "Enter Sunset", "actor": "cleric", "spell": 500511 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Sunset adds the same checker",
+      "actor": "cleric", "metric": "aura", "spell": 500643, "equals": 1, "within_ms": 3000
+    },
+    { "action": "reset_cooldown", "actor": "cleric", "spell": 301266 },
+    {
+      "action": "cast", "label": "Solar Concord is castable in Sunset",
+      "actor": "cleric", "spell": 301266
+    },
+    {
+      "action": "assert", "label": "Solar Concord applied in Sunset",
+      "actor": "cleric", "metric": "aura", "spell": 301266, "equals": 1, "within_ms": 3000
+    }
+  ]
+}

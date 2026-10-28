@@ -44,6 +44,7 @@ enum AllBattlegroundHook
     ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_SETUP,
     ALLBATTLEGROUNDHOOK_CAN_ADD_GROUP_TO_MATCHING_POOL,
     ALLBATTLEGROUNDHOOK_GET_PLAYER_MATCHMAKING_RATING,
+    ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_UPDATE_PLAYER_SCORE,
     ALLBATTLEGROUNDHOOK_END
 };
 
@@ -146,6 +147,16 @@ public:
      * @param bg Contains information about the Battleground
      */
     virtual void OnBattlegroundSetup(Battleground* /*bg*/) { }
+
+    /**
+     * @brief This hook runs after a player's battleground score is updated
+     *
+     * @param bg Contains information about the Battleground
+     * @param player The player whose score changed
+     * @param type The ScoreType that changed
+     * @param value The amount added to the score
+     */
+    virtual void OnBattlegroundUpdatePlayerScore(Battleground* /*bg*/, Player* /*player*/, uint32 /*type*/, uint32 /*value*/) { }
 
     /**
      * @brief This hook runs before adding a group to the battleground matching pool

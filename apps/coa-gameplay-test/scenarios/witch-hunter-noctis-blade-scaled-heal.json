@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Noctis Blade heals for displayed damage against a level-scaled creature (#4713)",
-  "contract": "Requires DestinyWeaver.Enable=1, DestinyWeaver.LevelScaling=1, offset=3 and CoA.QuestLevelScaling=1. A level-60 Witch Hunter sees the level-1 hostile at level 57 with a 6,475,000 health pool. Noctis Blade's 100% healing must match the hit's post-mitigation damage packet; the shared real health pool loses only a scaled fraction of that displayed damage.",
+  "contract": "Requires DestinyWeaver.Enable=1, DestinyWeaver.LevelScaling=1, offset=4 and CoA.QuestLevelScaling=1. A level-59 Witch Hunter sees the level-1 hostile at level 55 with a 6,080,000 health pool. Noctis Blade's 100% healing must match the hit's post-mitigation damage packet; the shared real health pool loses only a scaled fraction of that displayed damage.",
   "timeout_ms": 180000,
   "location": {
     "map": 0,
@@ -15,7 +15,7 @@
       "id": "caster",
       "race": 1,
       "class": 15,
-      "level": 60,
+      "level": 59,
       "melee_hit_rating": 10000,
       "expertise_rating": 10000,
       "allow_regeneration": false
@@ -47,16 +47,16 @@
       "actor": "caster",
       "metric": "view_level",
       "target": "enemy",
-      "equals": 57,
+      "equals": 55,
       "within_ms": 3000
     },
     {
       "action": "assert",
-      "label": "The viewer receives the level-57 health pool",
+      "label": "The viewer receives the level-55 health pool",
       "actor": "caster",
       "metric": "sent_max_health",
       "target": "enemy",
-      "equals": 6475000,
+      "equals": 6080000,
       "within_ms": 3000
     },
     {

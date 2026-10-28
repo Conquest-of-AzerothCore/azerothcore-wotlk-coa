@@ -1,0 +1,114 @@
+{
+  "schema": 1,
+  "name": "Spellbound Champion uses melee attacks after Command: Undead (#6022)",
+  "contract": "807811 summons a Spellbound Champion, not a Skeletal Mage. Both Focus: Undead 500991 and Command: Undead 504868 issue native orders. The Champion must damage the passive enemy through auto attacks while never casting Skeletal Mage attack 801513. Only the Necromancer and its one summon can attack the fixture.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "n",
+      "race": 5,
+      "class": 23,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "n",
+      "entry": 36,
+      "level": 60,
+      "distance": 3,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "n",
+      "spell": 807811
+    },
+    {
+      "action": "learn",
+      "actor": "n",
+      "spell": 500991
+    },
+    {
+      "action": "learn",
+      "actor": "n",
+      "spell": 504868
+    },
+    {
+      "action": "cast",
+      "actor": "n",
+      "spell": 807811
+    },
+    {
+      "action": "assert",
+      "label": "One Champion is present",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 500483,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "health",
+      "save_as": "before_order",
+      "label": "enemy: health"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "n",
+      "spell": 500991,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "n",
+      "spell": 504868,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 9000
+    },
+    {
+      "action": "assert",
+      "label": "The ordered Champion deals actual attack damage",
+      "actor": "enemy",
+      "metric": "health",
+      "relative_to": "before_order",
+      "max": -1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Champion casts no Skeletal Mage attack",
+      "actor": "n",
+      "metric": "spell_go_count",
+      "entry": 500483,
+      "spell": 801513,
+      "equals": 0
+    }
+  ]
+}

@@ -225,6 +225,20 @@ uint32 PlayerTaxi::GetCurrentTaxiPath() const
     return path;
 }
 
+bool PlayerTaxi::RequestEarlyLanding()
+{
+    if (m_TaxiDestinations.size() < 3)
+        return false;
+
+    auto const landing = std::find_if(std::next(m_TaxiDestinations.begin()), m_TaxiDestinations.end(),
+        [this](uint32 node) { return IsTaximaskNodeKnown(node); });
+    if (landing == m_TaxiDestinations.end() || std::next(landing) == m_TaxiDestinations.end())
+        return false;
+
+    m_TaxiDestinations.erase(std::next(landing), m_TaxiDestinations.end());
+    return true;
+}
+
 std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi)
 {
     for (uint8 i = 0; i < TaxiMaskSize; ++i)

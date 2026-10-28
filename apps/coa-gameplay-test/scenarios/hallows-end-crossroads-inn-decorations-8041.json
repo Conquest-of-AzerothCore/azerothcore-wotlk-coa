@@ -1,0 +1,250 @@
+{
+  "schema": 1,
+  "name": "Hallow's End decorations stand on the patch-WB1 Crossroads inn",
+  "contract": "Hallow's End decorations at the Crossroads inn (map 1) must stand on the inn they decorate. patch-WB1 moves the inn WMO: its MODF placement in World\\Maps\\Kalimdor\\Kalimdor_36_32.adt is at (-403.24,-2644.13,94.94) with yaw 13.0 degrees in common-2.MPQ and at (-394.52,-2642.66,94.93) with yaw 9.76 degrees in patch-WB1.MPQ. Decorations that belong to the inn follow that rigid transform. Pumpkins whose patch-WB1 supports are gone (clan banners 364149 and 390055, tauren windbreaks 228091 and 364130, crates 343779 and 343780 in the common-2 MDDF, absent from patch-WB1) rest on the ground beneath them, and pumpkin 37328 follows orc crate doodad 350790, which patch-WB1 moves from (-489.26,-2679.09,97.26) to (-486.45,-2675.51,97.39). The floating ghosts 180411 and the bats are airborne by design and the skull lights 180471 hang under the eaves, so they are not asserted. Before the fix the roof pumpkins read 8.6 to 73.8 yd above the ground below them.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "auditor",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Pumpkin on the inn roof 36481 (entry 180405) stands within a yard of its surface",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 36481,
+      "spawn_type": "gameobject",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pumpkin on the inn roof 36482 (entry 180405) stands within a yard of its surface",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 36482,
+      "spawn_type": "gameobject",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pumpkin on the inn roof 36485 (entry 180405) stands within a yard of its surface",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 36485,
+      "spawn_type": "gameobject",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pumpkin on the inn roof 36486 (entry 180405) stands within a yard of its surface",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 36486,
+      "spawn_type": "gameobject",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pumpkin on the inn roof 36908 (entry 180406) stands within a yard of its surface",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 36908,
+      "spawn_type": "gameobject",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pumpkin on the inn roof 36912 (entry 180406) stands within a yard of its surface",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 36912,
+      "spawn_type": "gameobject",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pumpkin on the inn roof 36913 (entry 180406) stands within a yard of its surface",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 36913,
+      "spawn_type": "gameobject",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pumpkin on the inn roof 37329 (entry 180407) stands within a yard of its surface",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 37329,
+      "spawn_type": "gameobject",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pumpkin on the inn roof 37330 (entry 180407) stands within a yard of its surface",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 37330,
+      "spawn_type": "gameobject",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pumpkin by the inn 36911 (entry 180406) stands within a yard of its surface",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 36911,
+      "spawn_type": "gameobject",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pumpkin by the inn 37326 (entry 180407) stands within a yard of its surface",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 37326,
+      "spawn_type": "gameobject",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pumpkin by the inn 37327 (entry 180407) stands within a yard of its surface",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 37327,
+      "spawn_type": "gameobject",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Candy Bucket in the inn 37718 (entry 190076) stands within a yard of its surface",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 37718,
+      "spawn_type": "gameobject",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Apple bobbing tub in the inn 39894 (entry 180523) stands within a yard of its surface",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 39894,
+      "spawn_type": "gameobject",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Skull light 39746 (entry 180472) inside the inn rests within a yard of the surface below it",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 39746,
+      "spawn_type": "gameobject",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Skull light 39747 (entry 180472) inside the inn rests within a yard of the surface below it",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 39747,
+      "spawn_type": "gameobject",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Skull light 39750 (entry 180472) inside the inn rests within a yard of the surface below it",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 39750,
+      "spawn_type": "gameobject",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pumpkin whose patch-WB1 support was removed 36484 (entry 180405) stands within a yard of its surface",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 36484,
+      "spawn_type": "gameobject",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pumpkin whose patch-WB1 support was removed 36487 (entry 180405) stands within a yard of its surface",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 36487,
+      "spawn_type": "gameobject",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pumpkin whose patch-WB1 support was removed 36907 (entry 180406) stands within a yard of its surface",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 36907,
+      "spawn_type": "gameobject",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pumpkin whose patch-WB1 support was removed 36909 (entry 180406) stands within a yard of its surface",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 36909,
+      "spawn_type": "gameobject",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pumpkin whose patch-WB1 support was removed 37331 (entry 180407) stands within a yard of its surface",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 37331,
+      "spawn_type": "gameobject",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pumpkin on the moved orc crate 37328 (entry 180407) stands within a yard of its surface",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 37328,
+      "spawn_type": "gameobject",
+      "min": -1,
+      "max": 1
+    }
+  ]
+}

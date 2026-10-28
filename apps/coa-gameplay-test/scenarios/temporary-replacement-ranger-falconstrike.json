@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "A Falconstrike button is saved as Quick Shot (#5469)",
+  "contract": "With the Falconstrike talent 573060 and its ready buff 573338, SyncFalconstrike (AscensionRangerFalconstrike.cpp:29, run on every player update) learns the highest Falconstrike rank the level allows (806443 at level 80, SpellLevel 60) as a temporary spell (learnSpell(replacement, true), line 42) and replaces every known Quick Shot rank (500074, 572727-572732) with it through SetTemporarySpellReplacement (line 47). A temporary spell is never written to character_spell, and Player::_LoadActions runs before the next sync, so a saved Falconstrike button would be refused and deleted at login. persisted_action_button reads Player::GetSavedActionButtonSpell, the spell id _SaveActions writes: a button holding Falconstrike must be saved as Quick Shot 500074, and a button holding Quick Shot itself is saved unchanged.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "ranger", "race": 1, "class": 21, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login state settle", "ms": 3000},
+    {"action": "learn", "actor": "ranger", "spell": 500074},
+    {"action": "learn", "actor": "ranger", "spell": 573060},
+    {"action": "set_aura", "label": "Fixture: Falconstrike is ready", "actor": "ranger", "spell": 573338, "stacks": 1},
+    {
+      "action": "assert", "label": "The ready buff replaces Quick Shot with Falconstrike", "actor": "ranger",
+      "metric": "temporary_spell_replacement", "spell": 500074, "equals": 806443, "within_ms": 2000
+    },
+    {"action": "set_action_button", "actor": "ranger", "button": 2, "spell": 806443},
+    {"action": "set_action_button", "actor": "ranger", "button": 3, "spell": 500074},
+    {
+      "action": "assert", "label": "The bar holds Falconstrike", "actor": "ranger", "metric": "action_button",
+      "button": 2, "equals": 806443
+    },
+    {
+      "action": "assert", "label": "The Falconstrike button is saved as Quick Shot", "actor": "ranger",
+      "metric": "persisted_action_button", "button": 2, "equals": 500074
+    },
+    {
+      "action": "assert", "label": "Control: an ordinary known spell is saved unchanged", "actor": "ranger",
+      "metric": "persisted_action_button", "button": 3, "equals": 500074
+    }
+  ]
+}

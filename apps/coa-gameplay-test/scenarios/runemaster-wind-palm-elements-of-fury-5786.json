@@ -1,0 +1,202 @@
+{
+  "schema": 1,
+  "name": "Elements of Fury grants Wind Palm Sigil two independent uses (#5786)",
+  "contract": [
+    "Original 707413 grants Palm Sigils one additional instance of damage. 807013 has the authored family mask affected by its native SPELLMOD_CHARGES.",
+    "With the talent, two normal direct magic hits must each trigger the sigil. The first must leave one charge; the second must consume it. A copied hit must never recursively spend the extra charge."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "rm",
+      "entry": 36,
+      "level": 80,
+      "health": 10000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 807013
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 2136
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 30455
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 707413
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Elements of Fury passive is active",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 707413,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "label": "Runeshroud opens the Palm Sigil gate",
+      "actor": "rm",
+      "spell": 500288,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Palm Sigil gate is open",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 808089,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 807013
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Palm Sigil: Wind is active",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 807013,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "Leave Runeshroud before attacking",
+      "actor": "rm",
+      "spell": 500288,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Elements of Fury gives the sigil two instances",
+      "actor": "rm",
+      "metric": "aura_charges",
+      "spell": 807013,
+      "equals": 2
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807826,
+      "save_as": "sigil_dots"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 1200
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 2136,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Fire Blast hits the target",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "dummy",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the first hit triggers Palm Sigil: Wind",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807826,
+      "relative_to": "sigil_dots",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the sigil survives the first instance",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 807013,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 30455,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Ice Lance hits the target",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 30455,
+      "target": "dummy",
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the second hit triggers Palm Sigil: Wind again",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807826,
+      "relative_to": "sigil_dots",
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the second instance consumes the sigil",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 807013,
+      "equals": 0,
+      "within_ms": 1000
+    }
+  ]
+}

@@ -12,7 +12,9 @@ namespace AscensionWitchHunter
 {
 enum WitchHunterSharedSpells : uint32
 {
-    SPELL_BRAND_OF_THE_DAMNED_DAMAGE = 807683
+    SPELL_BRAND_OF_THE_DAMNED_DAMAGE = 807683,
+    SPELL_SILVER_BOLTS = 804026,
+    SPELL_SHADOW_TRAPPED = 681177
 };
 
 inline bool Family(SpellInfo const* info, uint8 word, uint32 mask)
@@ -56,6 +58,7 @@ inline bool MainBrand(SpellInfo const* info)
 }
 Player* Owner(Unit* unit);
 Unit* Hound(Player* player);
+uint32 GetShadowhoundDisplay(Player* player);
 std::list<Unit*> Nearby(Unit* center, float range);
 void Cast(Unit* caster, Unit* target, uint32 id);
 void Reset(Player* player, uint32 id);

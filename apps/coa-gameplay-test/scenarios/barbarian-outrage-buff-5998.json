@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "name": "Barbarian: Outrage 801759 is a buff, not a debuff (COA-5998)",
+  "contract": "Outrage raises the Barbarian's haste and critical strike chance at the cost of higher damage taken. Its damage-taken effect made the aura count as negative, so it showed among the debuffs. It is applied as a positive aura.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "barbarian", "race": 1, "class": 12, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_aura", "actor": "barbarian", "spell": 801759, "stacks": 1 },
+    { "action": "assert", "label": "SETUP: Outrage is on the Barbarian", "actor": "barbarian",
+      "metric": "aura", "spell": 801759, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "Outrage is applied as a buff", "actor": "barbarian",
+      "metric": "aura_positive", "spell": 801759, "equals": 1 }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "name": "Worldforged Patched Verdant Cloak rests on the ground in Teldrassil (#9102)",
+  "contract": "The Hanged Pelt pickup (entry 90551, guid 6942022, item 521001) stands at the realm-map marker XY in Teldrassil, 1.40 yd under the terrain there (gap -1.398), visible only as a glow under the textures. Restore its stored height to the terrain, 9.9 yd from the LootCollector pin for item 521001.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": 10032.2, "y": 301.2, "z": 1324.0, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the Hanged Pelt stands in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 90551, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: it rests on the ground, not sunk into it", "actor": "p", "metric": "spawn_ground_gap", "guid": 6942022, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 },
+    { "action": "assert", "label": "it is grounded", "actor": "p", "metric": "spawn_placement", "guid": 6942022, "spawn_type": "gameobject", "tolerance": 1, "equals": 0 }
+  ]
+}

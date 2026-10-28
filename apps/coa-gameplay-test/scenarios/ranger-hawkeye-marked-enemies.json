@@ -1,0 +1,207 @@
+{
+  "schema": 1,
+  "name": "Ranger Hawkeye only shoots enemies carrying the Ranger's Hunting Shot mark (#3179, #4829, #4928)",
+  "contract": [
+    "Hawkeye 800358 reads 'enemies within 30 yds affected by your Hunting Shot'. Effect 0 is",
+    "SPELL_EFFECT_APPLY_AREA_AURA_ENEMY carrying SPELL_AURA_PERIODIC_TRIGGER_SPELL 801192 (3 s tick, 30 yd",
+    "radius); effect 1 is SPELLMOD_DURATION +9999 ms on the Hunting Shot class mask, whose own records have",
+    "no duration. aura_ascension_ranger_hawkeye answers the area-target check: an enemy without the Ranger's",
+    "Hunting Shot aura (chain 801191) never receives effect 0, while the Ranger herself must still be",
+    "accepted or effect 1 never reaches her and the mark expires at once. Expected: with Hawkeye learned and",
+    "nothing marked, neither golem is hit by 801192 over two ticks; after Hunting Shot 801191 marks one",
+    "golem, that golem is hit by 801192 and carries the Hawkeye aura, while the unmarked golem 25 yd away is",
+    "never hit and carries no Hawkeye aura."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80,
+      "ranged_hit_rating": 10000,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "marked",
+      "owner": "ranger",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 10
+    },
+    {
+      "id": "unmarked",
+      "owner": "ranger",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 25
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Fixture stun, so neither golem fights back",
+      "actor": "ranger",
+      "spell": 23775
+    },
+    {
+      "action": "add_item",
+      "actor": "ranger",
+      "item": 2504
+    },
+    {
+      "action": "equip",
+      "actor": "ranger",
+      "item": 2504,
+      "slot": 17
+    },
+    {
+      "action": "add_item",
+      "actor": "ranger",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "ranger",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 23775,
+      "target": "marked"
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 23775,
+      "target": "unmarked"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the first golem is stunned",
+      "actor": "marked",
+      "metric": "aura",
+      "spell": 23775,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the second golem is stunned",
+      "actor": "unmarked",
+      "metric": "aura",
+      "spell": 23775,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 801191
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 800358
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Hawkeye is active on the Ranger",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 800358,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Two Hawkeye ticks with nothing marked",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "Nothing marked: the first golem is never hit",
+      "actor": "ranger",
+      "metric": "spell_damage_count",
+      "spell": 801192,
+      "target": "marked",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Nothing marked: the second golem is never hit",
+      "actor": "ranger",
+      "metric": "spell_damage_count",
+      "spell": 801192,
+      "target": "unmarked",
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "ranger",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 801191,
+      "target": "marked"
+    },
+    {
+      "action": "assert",
+      "label": "The marked golem carries the Hawkeye aura",
+      "actor": "marked",
+      "metric": "aura",
+      "spell": 800358,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The marked golem is hit by Hawkeye's arrow",
+      "actor": "ranger",
+      "metric": "spell_damage_count",
+      "spell": 801192,
+      "target": "marked",
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "The unmarked golem carries no Hawkeye aura",
+      "actor": "unmarked",
+      "metric": "aura",
+      "spell": 800358,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The unmarked golem is never hit",
+      "actor": "ranger",
+      "metric": "spell_damage_count",
+      "spell": 801192,
+      "target": "unmarked",
+      "equals": 0
+    }
+  ]
+}

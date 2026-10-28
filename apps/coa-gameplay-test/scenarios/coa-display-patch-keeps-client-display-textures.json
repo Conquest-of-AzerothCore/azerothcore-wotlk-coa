@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "CoA display patch stream leaves the client's own textured displays alone (#6729, #6899, #6985, #7099)",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1 and no DataDir/dbc_clientset copy, the default setup.",
+    "SMSG_PATCH_CREATURE_DISPLAY_INFO (0x0976) rows carry no texture names, so a row that replaces one the client",
+    "already has draws the model untextured (paper white). Without the client copy the server sent every display id",
+    "at or above 652000, all of which the client already holds, blanking 323 textured mounts, pets and summons. The",
+    "server's DataDir/dbc is the client's own table, so it now decides which rows the client lacks. Expected after",
+    "the 5 s login fallback: the Gold Slyvern 945298, Build: Mechsuit 916645, Yellow Skitterfly 945352, Hammy 945545",
+    "and Undying Darkhound (Viridescent) 945523 rows are not sent, while the creaturedisplayinfo_dbc-only row 652000",
+    "the client lacks is still sent. Socketless packet construction does not establish client rendering."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -9465, "y": 64, "z": 56, "o": 0},
+  "players": [
+    {"id": "client", "race": 1, "class": 1, "level": 32}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the login fallback stream run", "ms": 6000},
+    {"action": "assert", "label": "SETUP: the login stream ran once", "actor": "client", "metric": "server_packets",
+     "opcode": 1528, "equals": 1},
+    {"action": "assert", "label": "A database-only display the client lacks is still sent", "actor": "client",
+     "metric": "server_packets", "opcode": 2422, "row": 652000, "equals": 1},
+    {"action": "assert", "label": "#6729: the Gold Slyvern display is not overwritten", "actor": "client",
+     "metric": "server_packets", "opcode": 2422, "row": 945298, "equals": 0},
+    {"action": "assert", "label": "#6899: the Build: Mechsuit display is not overwritten", "actor": "client",
+     "metric": "server_packets", "opcode": 2422, "row": 916645, "equals": 0},
+    {"action": "assert", "label": "#6985: the Yellow Skitterfly display is not overwritten", "actor": "client",
+     "metric": "server_packets", "opcode": 2422, "row": 945352, "equals": 0},
+    {"action": "assert", "label": "#7099: the Hammy display is not overwritten", "actor": "client",
+     "metric": "server_packets", "opcode": 2422, "row": 945545, "equals": 0},
+    {"action": "assert", "label": "The Undying Darkhound (Viridescent) display is not overwritten", "actor": "client",
+     "metric": "server_packets", "opcode": 2422, "row": 945523, "equals": 0}
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "name": "cultist-hallucination-owner-display",
+  "contract": [
+    "Hallucination 560301 promises three copies of its caster. The actual summon entry is 840025; the server uses",
+    "mirror-image aura 49889 to copy the caster display. Check the summons rather than the player display. This",
+    "validates server appearance data; client rendering of transparency requires the original client."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "c",
+      "race": 5,
+      "class": 25,
+      "level": 40
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "c",
+      "spell": 560301
+    },
+    {
+      "action": "snapshot",
+      "actor": "c",
+      "metric": "display_id",
+      "save_as": "owner_display_before"
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 560301
+    },
+    {
+      "action": "assert",
+      "label": "Hallucination preserves the owner appearance",
+      "actor": "c",
+      "metric": "display_id",
+      "relative_to": "owner_display_before",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "owned_creature_count",
+      "label": "Three Hallucination copies spawn",
+      "entry": 840025,
+      "equals": 3,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "owned_creature_count",
+      "label": "All three copies have the owner display",
+      "entry": 840025,
+      "owner_display": true,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "owned_creature_count",
+      "label": "All three copies have the mirror-image aura",
+      "entry": 840025,
+      "spell": 49889,
+      "caster": "c",
+      "equals": 3
+    }
+  ]
+}

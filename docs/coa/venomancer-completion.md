@@ -41,7 +41,8 @@ only `rev_20260910_14_venomancer_completion.sql` with matching source.
   events are not predicted. The release retains target mitigation and cannot receive caster scaling
   twice. Only the owner's Venomancer poison auras are removed. Dispel/death do not release the budget.
 - Venoxis follows its active thirty-percent damage/attack-haste description. The Fungarian performs
-  one authored Nature spell pulse at its attack interval, without an additional auto-attack hit.
+  one authored Nature spell pulse at its attack interval, without an additional auto-attack hit. It
+  turns to the owner's current enemy: the owner's attack victim, or a selected unit the owner fights.
 - Unspecified summon survival/attack values are local: health 20% and armor 50% of owner; small-pet
   weapon damage uses the 0.05–0.075 AP interval. All authoritative spell coefficients remain separate.
 
@@ -71,17 +72,16 @@ window expiry. These geometry decisions require validation against actual maps a
 
 ## Native assets and legacy identities
 
-Five guarded definitions: Fungarian 45896/display 49116 (Elemental); Mushroom 506018/display 26981; Brood Trap
+Five guarded definitions: Fungarian 45896/display 49116 (Elemental); Mushroom 506018/display 128263; Brood Trap
 52121/display 23058; Spiderling 999298/display 955; Scarab 999299/display 10005. Their native display,
-model and model-info dependencies resolve. The mushroom display is an invisible carrier; native
-Putrid Mushroom spell 31690 supplies visual 7863, state kit 6739, effect 3060 and
-`world\goober\g_sporemushroom.mdx`. It is not a visible mushroom solely because of display 26981.
-No DBC or client archive edit is needed; actual rendering/scale is unverified.
+model and model-info dependencies resolve. The mushroom wears the live Venoshroom display 128263,
+`spells\Druid_Wild_Mushroom_03Hostile.M2`, shipped in the client's patch-N.MPQ, at 0.55 scale.
+No DBC or client archive edit is needed.
 
-Primary Mycelial Ring uses twelve regular mushrooms and its ten-second field. The stale child says
-eight mushrooms plus one large mushroom; that is not used for the active layout. Large-mushroom
-data is retained only for a legacy explicit caller. Active Coil is 707234; obsolete summon identity
-712357 routes to its mushroom behavior instead of reintroducing the unrelated archived channel.
+Primary Mycelial Ring follows its client tooltip: twelve mushrooms at random points within the 4 yd radius
+of the Mushroom summon 680764, inside its 8 yd ten-second field. Mushrooms are not attackable. Active Coil is 707234;
+obsolete summon identity 712357 routes to its mushroom behavior instead of reintroducing the unrelated
+archived channel.
 
 Cunning uses existing 800389 for damage/extra Sting stacks instead of missing 804549. Its raw visual
 values are unsuitable: 25622 resolves to BloodElfFemale and 29216 is absent. Serpent Lord, Spider Lord,

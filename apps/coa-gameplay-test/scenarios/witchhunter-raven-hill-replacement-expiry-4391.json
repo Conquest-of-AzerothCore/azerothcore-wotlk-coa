@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "name": "witchhunter-raven-hill-replacement-expiry-4391",
+  "contract": [
+    "Secret of Raven Hill 680513 promises drinking a tonic transforms Dawn Blade for the duration of 681499",
+    "(SpellDuration 9, 30 seconds). Vampiric Tonic 802276 maps the replacement to 686020. The native replacement",
+    "must exist while the temporary aura is active and clear after its natural expiry, without relogging or",
+    "action-bar replacement. Capture exactly one native superseded-spell packet announcing the restored Dawn",
+    "Blade after expiry, with none before it."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "w",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "w",
+      "spell": 680513
+    },
+    {
+      "action": "learn",
+      "actor": "w",
+      "spell": 802276
+    },
+    {
+      "action": "learn",
+      "actor": "w",
+      "spell": 802024
+    },
+    {
+      "action": "cast",
+      "actor": "w",
+      "spell": 802276
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "aura",
+      "spell": 681499,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "temporary_spell_replacement",
+      "spell": 802024,
+      "equals": 686020
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "spellbook_superseded_for",
+      "spell": 802024,
+      "equals": 0,
+      "label": "No restoration packet before tonic expiry"
+    },
+    {
+      "action": "wait",
+      "ms": 31000
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "aura",
+      "spell": 681499,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "temporary_spell_replacement",
+      "spell": 802024,
+      "equals": 802024,
+      "label": "Native replacement lookup returns Dawn Blade after expiry"
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "spellbook_superseded_for",
+      "spell": 802024,
+      "equals": 1,
+      "label": "Native packet restores Dawn Blade once after expiry"
+    }
+  ]
+}

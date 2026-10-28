@@ -1,0 +1,172 @@
+{
+  "schema": 1,
+  "name": "Whipvine Arrow selects exactly 2 targets with 1 Advantage stacks (#3630)",
+  "contract": [
+    "Whipvine Arrow 806342 requires Advantage 804329 and advertises one additional nearby target per stack. A clustered group of enemies exercises its native chain selection and stack-dependent cap.",
+    "Two stacks must deliver both effects to the original enemy and two nearby enemies. SpellRadius 13 supplies ten yards around the original target; the distant control remains unaffected. A normal cast exercises target selection rather than only reading MaxAffectedTargets."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80,
+      "ranged_hit_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "primary",
+      "owner": "ranger",
+      "entry": 16542,
+      "level": 80,
+      "distance": 15.0,
+      "health": 1000000,
+      "faction": 14
+    },
+    {
+      "id": "near1",
+      "owner": "ranger",
+      "entry": 16542,
+      "level": 80,
+      "distance": 15.5,
+      "health": 1000000,
+      "faction": 14
+    },
+    {
+      "id": "near2",
+      "owner": "ranger",
+      "entry": 16542,
+      "level": 80,
+      "distance": 16.0,
+      "health": 1000000,
+      "faction": 14
+    },
+    {
+      "id": "near3",
+      "owner": "ranger",
+      "entry": 16542,
+      "level": 80,
+      "distance": 16.5,
+      "health": 1000000,
+      "faction": 14
+    },
+    {
+      "id": "near4",
+      "owner": "ranger",
+      "entry": 16542,
+      "level": 80,
+      "distance": 17.0,
+      "health": 1000000,
+      "faction": 14
+    },
+    {
+      "id": "far",
+      "owner": "ranger",
+      "entry": 16542,
+      "level": 80,
+      "distance": 35,
+      "health": 1000000,
+      "faction": 14
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 806342
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "aura_stacks",
+      "spell": 804329,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "ranger",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 806342,
+      "target": "primary"
+    },
+    {
+      "action": "assert",
+      "actor": "primary",
+      "metric": "rooted",
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "Whipvine Arrow roots primary"
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "spell_damage_count",
+      "spell": 806342,
+      "target": "primary",
+      "min": 1,
+      "label": "Whipvine Arrow damages primary"
+    },
+    {
+      "action": "wait",
+      "ms": 2500,
+      "label": "Let every chain missile arrive before measuring the target cap"
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "spell_damage_count",
+      "spell": 806342,
+      "equals": 2,
+      "label": "1 stacks select exactly 2 targets"
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "owned_creature_count",
+      "entry": 16542,
+      "spell": 806342,
+      "caster": "ranger",
+      "equals": 2,
+      "label": "1 stacks select exactly 2 targets"
+    },
+    {
+      "action": "assert",
+      "actor": "far",
+      "metric": "rooted",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "spell_damage_count",
+      "spell": 806342,
+      "target": "far",
+      "equals": 0
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  }
+}

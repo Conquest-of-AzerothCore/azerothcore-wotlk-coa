@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "CoA super-track patch: the Hyena Spirit turn-in point follows its moved spawn",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1.",
+    "The client's SuperTrack.dbc places point 8705, the turn-in of 1660034, 1660035 and 1660043, at the old spawn.",
+    "The login patch stream sends coa_client_super_track rows as SMSG_PATCH_SUPER_TRACK (0x06BE) records.",
+    "Row 8705 carries map 1 and the Hyena Spirit's position (-3619.49, -959.45, 205.057) as float words.",
+    "Socketless packet construction does not establish how the client renders the waypoint."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -3619.49,
+    "y": -959.45,
+    "z": 205.057,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "client",
+      "race": 6,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "The login stream sends SuperTrack row 8705 once",
+      "actor": "client",
+      "metric": "server_packets",
+      "opcode": 1726,
+      "row": 8705,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Row 8705 is on Kalimdor",
+      "actor": "client",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 8705,
+      "index": 1,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Row 8705 x is the Hyena Spirit's -3619.49",
+      "actor": "client",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 8705,
+      "index": 2,
+      "equals": 3311548375
+    },
+    {
+      "action": "assert",
+      "label": "Row 8705 y is the Hyena Spirit's -959.45",
+      "actor": "client",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 8705,
+      "index": 3,
+      "equals": 3295665357
+    }
+  ]
+}

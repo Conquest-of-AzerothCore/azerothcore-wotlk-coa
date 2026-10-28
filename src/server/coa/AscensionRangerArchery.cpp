@@ -27,13 +27,16 @@ enum RangerArcherySpells : uint32
     SPELL_SKIRMISH_BRUTAL_SHOT_CRITICAL = 803335,
     SPELL_INCENDIARY_SHOT = 524870,
     SPELL_INCENDIARY_ARROWS = 524869,
-    SPELL_INCENDIARY_EXPLOSION = 570182
+    SPELL_INCENDIARY_EXPLOSION = 570182,
+    SPELL_HAWKEYE = 800358,
+    SPELL_HAWKEYE_ARROW = 801192
 };
 
 enum RangerArcheryChains : uint32
 {
     CHAIN_SKULLPIERCER = 802036,
-    CHAIN_PRECISION_SHOT = 500075
+    CHAIN_PRECISION_SHOT = 500075,
+    CHAIN_HUNTING_SHOT = 801191
 };
 
 constexpr uint32 RANGER_FAMILY = 27;
@@ -172,6 +175,34 @@ public:
     }
 };
 
+class aura_ascension_ranger_hawkeye : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_ranger_hawkeye);
+
+    bool Validate(SpellInfo const* spellInfo) override
+    {
+        SpellEffectInfo const& volley = spellInfo->Effects[EFFECT_0];
+        return spellInfo->Id == SPELL_HAWKEYE && IsRangerSpell(spellInfo) && spellInfo->IsPassive() &&
+            volley.Effect == SPELL_EFFECT_APPLY_AREA_AURA_ENEMY &&
+            volley.IsAura(SPELL_AURA_PERIODIC_TRIGGER_SPELL) &&
+            volley.TriggerSpell == SPELL_HAWKEYE_ARROW && ValidateSpellInfo({SPELL_HAWKEYE_ARROW});
+    }
+
+    bool IsMarkedEnemy(Unit* target)
+    {
+        Unit* ranger = GetUnitOwner();
+        if (!target || !ranger || !ranger->IsPlayer() || ranger->ToPlayer()->getClass() != CLASS_RANGER)
+            return false;
+        return target == ranger ||
+            (!ranger->IsFriendlyTo(target) && target->GetAuraOfRankedSpell(CHAIN_HUNTING_SHOT, ranger->GetGUID()));
+    }
+
+    void Register() override
+    {
+        DoCheckAreaTarget += AuraCheckAreaTargetFn(aura_ascension_ranger_hawkeye::IsMarkedEnemy);
+    }
+};
+
 bool IsPrecisionShotBuff(SpellInfo const* info, uint32 spellId, uint8 effect, uint32 stacks)
 {
     SpellEffectInfo const& modifier = info->Effects[effect];
@@ -248,6 +279,7 @@ public:
 void AddSC_AscensionRangerArchery()
 {
     RegisterSpellScript(aura_ascension_ranger_pierced_bleed);
+    RegisterSpellScript(aura_ascension_ranger_hawkeye);
     new ranger_archery_hits();
     new ranger_archery_contracts();
 }

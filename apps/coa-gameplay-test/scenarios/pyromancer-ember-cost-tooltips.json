@@ -1,0 +1,605 @@
+{
+  "schema": 1,
+  "name": "Every Ember-spending Pyromancer ability names the Ember in its tooltip (#6530)",
+  "contract": "#6530: Explode, Flames of Neltharion and Echo of Nozdormu spend an Ember like Blaze but their tooltips never say so, and the same is true of Ignis Ultimatus, Roaring Pyre, Phoenix Dive and Firestorm. AscensionCustomResourceData.h ResourceCostRules is the authority on the cost: every row for class 24 with ResourceSpellId 807533 (the Ember aura) and ResourceConsumption::Fixed makes the cast spend one stack, while ResourceConsumption::None rows (Ember Touch and friends) only require it, and AscensionCompat applies exactly that with ModifyAuraStacks(-Amount). Blaze's client DBC description already opens with the conditional $?a807533[|cffff7f7f][|cffff3232]Consumes 1 Ember|r line; the other spenders do not. The client's own Spell.dbc cannot be edited from this repository, so the fix publishes each rank's unchanged DBC text with Blaze's exact prefix in coa_client_spell_description, which AscensionCompat already streams to the client as SMSG_PATCH_SPELL (opcode 2346) at login. This scenario reads the streamed rows: each listed spell id must arrive with \"Consumes 1 Ember\" somewhere in its row payload, and the control row 500639 (Runeshroud, published by the same table) must still carry its own text and must not gain the Ember line. It then casts the three reported abilities with one Ember aura fixtured to show the text they now carry is true: each cast drops the 807533 stacks to zero. Expected before the SQL: no row for any of the 34 ids carries the cost line (row 500639 proves the stream itself is captured). Expected after: every row carries it and every cast spends the Ember.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "pyro",
+      "race": 1,
+      "class": 24,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "pyro",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI, level scaling and the 5 s login patch stream settle",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the shared description table still streams Runeshroud's own text as row 500639",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500639,
+      "text": "Requires Runeshroud",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: that streamed row carries no Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500639,
+      "text": "Consumes 1 Ember",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Explode Rank 1 (800792) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 800792,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Explode Rank 2 (502057) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 502057,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Explode Rank 3 (502058) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 502058,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Explode Rank 4 (502059) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 502059,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Explode Rank 5 (502060) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 502060,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Explode Rank 6 (502061) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 502061,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Explode Rank 7 (502062) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 502062,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Explode Rank 8 (502063) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 502063,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Explode Rank 9 (570750) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 570750,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Flames of Neltharion Rank 1 (801915) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 801915,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Flames of Neltharion Rank 2 (535509) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 535509,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Flames of Neltharion Rank 3 (535510) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 535510,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Flames of Neltharion Rank 4 (535511) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 535511,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Flames of Neltharion Rank 5 (535512) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 535512,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Flames of Neltharion Rank 6 (572618) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 572618,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Flames of Neltharion Rank 7 (572619) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 572619,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Flames of Neltharion Rank 8 (572620) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 572620,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Flames of Neltharion Rank 9 (572621) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 572621,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Flames of Neltharion Rank 10 (572622) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 572622,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Flames of Neltharion Rank 11 (572623) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 572623,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Echo of Nozdormu Rank 1 (802174) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 802174,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Echo of Nozdormu Rank 2 (803407) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803407,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Echo of Nozdormu Rank 3 (803408) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803408,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Echo of Nozdormu Rank 4 (803409) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803409,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Echo of Nozdormu Rank 5 (803410) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803410,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Echo of Nozdormu Rank 6 (578307) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 578307,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Echo of Nozdormu Rank 7 (578308) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 578308,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Echo of Nozdormu Rank 8 (578309) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 578309,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Echo of Nozdormu Rank 9 (567589) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 567589,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Echo of Nozdormu Rank 10 (567590) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 567590,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Ignis Ultimatus (680369) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 680369,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Roaring Pyre (704278) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 704278,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Phoenix Dive (706854) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 706854,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Firestorm (802791) reaches the client with the Ember cost line",
+      "actor": "pyro",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 802791,
+      "text": "Consumes 1 Ember",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "pyro",
+      "spell": 800792
+    },
+    {
+      "action": "learn",
+      "actor": "pyro",
+      "spell": 801915
+    },
+    {
+      "action": "learn",
+      "actor": "pyro",
+      "spell": 802174
+    },
+    {
+      "action": "set_aura",
+      "label": "One Ember for Explode",
+      "actor": "pyro",
+      "spell": 807533,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: one Ember is up (807533 stack)",
+      "actor": "pyro",
+      "metric": "aura_stacks",
+      "spell": 807533,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Explode spends the Ember the tooltip now names",
+      "actor": "pyro",
+      "spell": 800792,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "REALITY: the Explode cast reached the dummy (801915/802174 check)",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 800792,
+      "target": "dummy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "REALITY: the Explode cast spent the Ember (807533 stacks 0)",
+      "actor": "pyro",
+      "metric": "aura_stacks",
+      "spell": 807533,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "REALITY: the Explode cast hurt the dummy",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 800792,
+      "target": "dummy",
+      "min": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "One Ember for Flames of Neltharion",
+      "actor": "pyro",
+      "spell": 807533,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: one Ember is up (807533 stack)",
+      "actor": "pyro",
+      "metric": "aura_stacks",
+      "spell": 807533,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Flames of Neltharion spends the Ember the tooltip now names",
+      "actor": "pyro",
+      "spell": 801915,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "REALITY: the Flames of Neltharion cast reached the dummy (801915/802174 check)",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 801915,
+      "target": "dummy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "REALITY: the Flames of Neltharion cast spent the Ember (807533 stacks 0)",
+      "actor": "pyro",
+      "metric": "aura_stacks",
+      "spell": 807533,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "REALITY: the Flames of Neltharion cast hurt the dummy",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 801915,
+      "target": "dummy",
+      "min": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "One Ember for Echo of Nozdormu",
+      "actor": "pyro",
+      "spell": 807533,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: one Ember is up (807533 stack)",
+      "actor": "pyro",
+      "metric": "aura_stacks",
+      "spell": 807533,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Echo of Nozdormu spends the Ember the tooltip now names",
+      "actor": "pyro",
+      "spell": 802174,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "REALITY: the Echo of Nozdormu cast reached the dummy (801915/802174 check)",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 802174,
+      "target": "dummy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "REALITY: the Echo of Nozdormu cast spent the Ember (807533 stacks 0)",
+      "actor": "pyro",
+      "metric": "aura_stacks",
+      "spell": 807533,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "REALITY: the Echo of Nozdormu cast hurt the dummy",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 802174,
+      "target": "dummy",
+      "min": 1
+    }
+  ]
+}

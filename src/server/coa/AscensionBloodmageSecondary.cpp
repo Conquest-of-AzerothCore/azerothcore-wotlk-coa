@@ -11,6 +11,7 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <limits>
 #include <list>
@@ -39,6 +40,8 @@ enum BloodmageSecondarySpells : uint32
     SPELL_BLOOD_FEAST_RESTORE = 706608,
     SPELL_ROTCLAW = 804197,
     SPELL_ROTCLAW_ENERGIZE = 805352,
+    SPELL_LUNGE = 500126,
+    SPELL_LUNGE_ENERGIZE = 804864,
     SPELL_BLOOD_THIRST = 706613,
     SPELL_TORTURE = 504071,
     SPELL_TORTURE_DURATION = 561152,
@@ -55,14 +58,92 @@ enum BloodmageSecondarySpells : uint32
     SPELL_DARK_ESSENCE = 680732,
     SPELL_DARK_ESSENCE_HEAL = 681036,
     SPELL_BLOOD_RITUALS = 706623,
+    SPELL_BLOOD_RITUALS_HEAL = 704119,
     SPELL_CURSED_FORM_REQUIREMENT = 525031,
     SPELL_CURSED_FORM_REQUIREMENT_2 = 524861,
     SPELL_VAMPIRIC_FANG_SHARE = 572373,
-    SPELL_VAMPIRIC_FANG_HEAL = 572374
+    SPELL_VAMPIRIC_FANG_HEAL = 572374,
+    SPELL_RUNNING_WILD = 800175,
+    SPELL_RUNNING_WILD_JOURNEYMAN = 520575,
+    SPELL_BITE_WOUND = 706654,
+    SPELL_BITE_WOUND_PERCENT = 532612
 };
 
 constexpr uint32 TORTURE_MINIMUM_THIRST_STACKS = 9;
 constexpr uint32 VampiricFangRanks[] = {804726, 504093, 504094, 504095, 504096, 504097, 553271, 553272};
+constexpr std::array<uint32, 10> BLOODMOON_BLAST_RANKS = {
+    500125, 501607, 501608, 501609, 501610, 501611, 501612, 501613, 501614, 572332 };
+
+class spell_ascension_bloodmage_bloodfang_bite : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_bloodmage_bloodfang_bite);
+
+    bool Validate(SpellInfo const* info) override
+    {
+        return info->SpellFamilyName == 26 && info->Effects[EFFECT_0].Effect == SPELL_EFFECT_SCHOOL_DAMAGE &&
+            ValidateSpellInfo({SPELL_BITE_WOUND});
+    }
+
+    bool Load() override
+    {
+        return GetCaster()->IsPlayer() && GetCaster()->getClass() == CLASS_SON_OF_ARUGAL;
+    }
+
+    void ApplyWound()
+    {
+        Unit* target = GetHitUnit();
+        if (target && target->IsAlive() && GetCaster()->IsValidAttackTarget(target))
+            GetCaster()->CastSpell(target, SPELL_BITE_WOUND, TRIGGERED_FULL_MASK);
+    }
+
+    void Register() override
+    {
+        AfterHit += SpellHitFn(spell_ascension_bloodmage_bloodfang_bite::ApplyWound);
+    }
+};
+
+class aura_ascension_bloodmage_bite_wound : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_bloodmage_bite_wound);
+
+    bool Validate(SpellInfo const* info) override
+    {
+        return info->Id == SPELL_BITE_WOUND && info->Effects[EFFECT_0].IsAura(SPELL_AURA_DUMMY) &&
+            ValidateSpellInfo({SPELL_BITE_WOUND_PERCENT});
+    }
+
+    bool Check(ProcEventInfo& event)
+    {
+        Unit* caster = GetCaster();
+        DamageInfo const* damage = event.GetDamageInfo();
+        return caster && caster->IsPlayer() && caster->getClass() == CLASS_SON_OF_ARUGAL &&
+            caster->IsAlive() && caster->IsInWorld() && event.GetActor() == caster && damage &&
+            damage->GetVictim() == GetTarget() && damage->GetDamage() &&
+            (event.GetTypeMask() & (PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK | PROC_FLAG_TAKEN_RANGED_AUTO_ATTACK));
+    }
+
+    void HealCaster(AuraEffect const*, ProcEventInfo& event)
+    {
+        PreventDefaultAction();
+        Unit* caster = GetCaster();
+        SpellInfo const* scalar = sSpellMgr->AssertSpellInfo(SPELL_BITE_WOUND_PERCENT);
+        uint32 percent = uint32(std::clamp(scalar->Effects[EFFECT_0].CalcValue(caster), 0, 100));
+        uint32 heal = uint32(uint64(event.GetDamageInfo()->GetDamage()) * percent / 100);
+        if (heal)
+        {
+            heal = caster->SpellHealingBonusTaken(caster, GetSpellInfo(), heal, HEAL);
+            HealInfo healing(caster, caster, heal, GetSpellInfo(), GetSpellInfo()->GetSchoolMask());
+            caster->HealBySpell(healing);
+        }
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(aura_ascension_bloodmage_bite_wound::Check);
+        OnEffectProc += AuraEffectProcFn(aura_ascension_bloodmage_bite_wound::HealCaster,
+            EFFECT_0, SPELL_AURA_DUMMY);
+    }
+};
 
 class aura_ascension_bloodmage_sacrificial_rite : public AuraScript
 {
@@ -111,6 +192,12 @@ bool RankOf(uint32 id, uint32 root)
     return id == root || sSpellMgr->GetFirstSpellInChain(id) == root;
 }
 
+bool IsBloodmoonBlast(uint32 id)
+{
+    return std::find(BLOODMOON_BLAST_RANKS.begin(), BLOODMOON_BLAST_RANKS.end(), id) !=
+        BLOODMOON_BLAST_RANKS.end();
+}
+
 Player* Bloodmage(Spell* spell)
 {
     Player* player = spell->GetCaster()->ToPlayer();
@@ -151,6 +238,8 @@ public:
         if (player->HasAura(SPELL_DARK_ESSENCE) && (IsCursedFormAbility(info) ||
             AscensionBloodmage::GetEmpowerment(info->Id) == AscensionBloodmage::Bloodbolt))
             player->CastSpell(player, SPELL_DARK_ESSENCE_HEAL, true);
+        if (IsBloodmoonBlast(info->Id))
+            player->CastSpell(player, SPELL_BLOOD_RITUALS_HEAL, true);
         if (!player->HasAura(SPELL_NIGHT_HUNTER))
             return;
         if (RankOf(info->Id, SPELL_VEINBURST))
@@ -237,6 +326,11 @@ public:
         {
             spell->SetScriptValue(SPELL_ROTCLAW_ENERGIZE, 1);
             player->CastSpell(player, SPELL_ROTCLAW_ENERGIZE, true);
+        }
+        if (RankOf(id, SPELL_LUNGE) && !spell->GetScriptValue(SPELL_LUNGE_ENERGIZE))
+        {
+            spell->SetScriptValue(SPELL_LUNGE_ENERGIZE, 1);
+            player->CastSpell(player, SPELL_LUNGE_ENERGIZE, true);
         }
         if (IsVampiricFang(id) && !spell->GetScriptValue(SPELL_VAMPIRIC_FANG))
         {
@@ -384,6 +478,26 @@ class spell_ascension_dark_essence : public SpellScript
     void Register() override
     {
         OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ascension_dark_essence::Select,
+            EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
+    }
+};
+
+class spell_ascension_blood_rituals_heal : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_blood_rituals_heal);
+
+    void Select(std::list<WorldObject*>& targets)
+    {
+        targets.remove_if([](WorldObject* object)
+        {
+            Unit* target = object ? object->ToUnit() : nullptr;
+            return !target || !target->HasAura(SPELL_BLOOD_RITUALS);
+        });
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ascension_blood_rituals_heal::Select,
             EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
     }
 };
@@ -632,14 +746,85 @@ class spell_ascension_bloodmage_excision : public SpellScript
             EFFECT_0, SPELL_EFFECT_DUMMY);
     }
 };
+
+void SyncRunningWildJourneyman(Player* player)
+{
+    bool const runningWild = player->HasSpell(SPELL_RUNNING_WILD);
+    bool const journeyman = player->HasSpell(SPELL_RUNNING_WILD_JOURNEYMAN);
+    if (runningWild && !journeyman)
+        player->learnSpell(SPELL_RUNNING_WILD_JOURNEYMAN);
+    else if (!runningWild && journeyman)
+        player->removeSpell(SPELL_RUNNING_WILD_JOURNEYMAN, SPEC_MASK_ALL, false);
+}
+
+class bloodmage_running_wild_journeyman : public PlayerScript
+{
+public:
+    bloodmage_running_wild_journeyman() : PlayerScript("bloodmage_running_wild_journeyman",
+        {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LEARN_SPELL, PLAYERHOOK_ON_FORGOT_SPELL}) { }
+
+    void OnPlayerLogin(Player* player) override { SyncRunningWildJourneyman(player); }
+
+    void OnPlayerLearnSpell(Player* player, uint32 spell) override
+    {
+        if (spell == SPELL_RUNNING_WILD)
+            SyncRunningWildJourneyman(player);
+    }
+
+    void OnPlayerForgotSpell(Player* player, uint32 spell) override
+    {
+        if (spell == SPELL_RUNNING_WILD)
+            SyncRunningWildJourneyman(player);
+    }
+};
+
+class aura_ascension_bloodmage_female_worgen : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_bloodmage_female_worgen);
+
+    static constexpr uint32 FemaleWorgenDisplay = 142818;
+
+    void Apply(AuraEffect const*, AuraEffectHandleModes)
+    {
+        Unit* target = GetTarget();
+        if (target->IsPlayer() && target->getGender() == GENDER_FEMALE && target->getTransForm() == GetId())
+            target->SetDisplayId(FemaleWorgenDisplay);
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(aura_ascension_bloodmage_female_worgen::Apply, EFFECT_ALL,
+            SPELL_AURA_TRANSFORM, AURA_EFFECT_HANDLE_SEND_FOR_CLIENT_MASK);
+    }
+};
+
+class aura_ascension_bloodmage_shadow_colony : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_bloodmage_shadow_colony);
+
+    bool Check(Unit* target)
+    {
+        return target && target->IsPlayer();
+    }
+
+    void Register() override
+    {
+        DoCheckAreaTarget += AuraCheckAreaTargetFn(aura_ascension_bloodmage_shadow_colony::Check);
+    }
+};
 }
 
 void AddSC_AscensionBloodmageSecondary()
 {
+    RegisterSpellScript(aura_ascension_bloodmage_shadow_colony);
+    RegisterSpellScript(aura_ascension_bloodmage_female_worgen);
+    RegisterSpellScript(spell_ascension_bloodmage_bloodfang_bite);
+    RegisterSpellScript(aura_ascension_bloodmage_bite_wound);
     RegisterSpellScript(aura_ascension_bloodmage_sacrificial_rite);
     new bloodmage_secondary_casts();
     new bloodmage_kiss_periodic();
     new bloodmage_secondary_contracts();
+    RegisterSpellScript(spell_ascension_blood_rituals_heal);
     RegisterSpellScript(spell_ascension_blood_feast_corpses);
     RegisterSpellScript(spell_ascension_blood_feast_drain);
     RegisterSpellScript(spell_ascension_bloodmage_blood_craving);
@@ -649,4 +834,5 @@ void AddSC_AscensionBloodmageSecondary()
     RegisterSpellScript(spell_ascension_bloodmage_hemal_excision);
     RegisterSpellScript(aura_ascension_bloodmage_hemal_excision);
     RegisterSpellScript(spell_ascension_bloodmage_excision);
+    new bloodmage_running_wild_journeyman();
 }

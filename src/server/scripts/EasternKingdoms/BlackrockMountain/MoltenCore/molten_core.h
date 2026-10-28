@@ -56,6 +56,7 @@ enum MCCreatures
 {
     NPC_MAGMADAR                    = 11982,
     NPC_SHAZZRAH                    = 12264,
+    NPC_REFLECTION_OF_SHAZZRAH      = 11504,
     NPC_BARON_GEDDON                = 12056,
     NPC_RAGNAROS                    = 11502,
     NPC_FLAMEWAKER_HEALER           = 11663,
@@ -111,6 +112,9 @@ enum MCGameObjects
     GO_LAVA_STEAM                   = 178107,
     GO_LAVA_SPLASH                  = 178108,
     GO_LAVA_BURST                   = 178088,
+
+    // CoA addition: portal to Ragnaros' lair after Majordomo's defeat
+    GO_RAGNAROS_PORTAL_COA           = 181623,
 };
 
 enum MCSpells
@@ -120,6 +124,7 @@ enum MCSpells
 
 extern Position const MajordomoRagnaros;        // Teleport location to Ragnaros summons area
 extern Position const MajordomoSummonPos;       // Majordomo summon position (battle)
+extern Position const RagnarosLairEntranceCoa;  // CoA addition: portal destination, in front of the Ragnaros summon area
 
 template <class AI, class T>
 inline AI* GetMoltenCoreAI(T* obj)

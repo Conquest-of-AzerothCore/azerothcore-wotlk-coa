@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "name": "Molten Core: Magmadar's body uses Fierce Blow on his tank inside its random windows",
+  "contract": [
+    "WoWCombatLog evidence (8 Magmadar pulls, 230 casts): the body casts Fierce Blow 975011 on his tank, first cast median 8.5s",
+    "after the pull, then a repeat median of 7.7s with 82% of 222 repeats between 6s and 10s. The server draws the first cast and",
+    "every repeat from 6-10s, so no repeat may land within 6s of the previous cast and the next one must",
+    "land within 10s. Configure the survival health before the settling wait; boss damage, aggression and the rest of his kit",
+    "stay unchanged."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 409,
+    "x": 1144.6,
+    "y": -1020.5,
+    "z": -185.6,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "hero",
+      "entry": 11982,
+      "health": 4000000,
+      "reaction": 2,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000,
+      "maximum": 2000000,
+      "label": "Configure the survival health before aggressive creatures can attack"
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Molten Core",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 409
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero survives the settling",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "attack",
+      "label": "Engage Magmadar",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Magmadar fights the hero",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Magmadar uses Fierce Blow inside the first-cast window",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11982,
+      "spell": 975011,
+      "equals": 1,
+      "within_ms": 12000
+    },
+    {
+      "action": "wait",
+      "label": "Stay inside the 6s repeat floor",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "No second Fierce Blow before the 6s repeat floor",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11982,
+      "spell": 975011,
+      "equals": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000,
+      "maximum": 2000000
+    },
+    {
+      "action": "assert",
+      "label": "Magmadar repeats Fierce Blow inside the repeat window",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11982,
+      "spell": 975011,
+      "min": 2,
+      "within_ms": 9000
+    }
+  ]
+}

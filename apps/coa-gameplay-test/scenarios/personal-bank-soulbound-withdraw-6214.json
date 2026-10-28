@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Personal Bank: a soulbound item deposited this session can be withdrawn again",
+  "contract": "The Personal Bank item 134985 says soulbound items can be put into the bank. A character bank belongs to that character, so an item it deposits keeps the character as owner while the bank stays open: withdrawing it in the same session returns it to the bags instead of answering \"You don't own that item\".",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "banker", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "add_item", "label": "Acquire the Personal Bank", "actor": "banker", "item": 134985, "count": 1 },
+    { "action": "use_item", "label": "Place the Personal Bank vault", "actor": "banker", "item": 134985, "spell": 100702 },
+    { "action": "wait", "label": "Let the vault summon land in the world", "ms": 3000 },
+    { "action": "add_item", "label": "Carry a soulbound item", "actor": "banker", "item": 23323, "count": 1 },
+    {
+      "action": "assert",
+      "label": "The soulbound item is in the bags",
+      "actor": "banker", "metric": "item_count", "item": 23323, "equals": 1
+    },
+    { "action": "personal_bank_open", "label": "Open the Personal Bank", "actor": "banker", "entry": 475001 },
+    {
+      "action": "personal_bank_swap", "label": "Deposit the soulbound item in the first bank slot",
+      "actor": "banker", "entry": 475001, "direction": "deposit", "item": 23323, "slot": 0
+    },
+    {
+      "action": "assert",
+      "label": "The deposit leaves the bags",
+      "actor": "banker", "metric": "item_count", "item": 23323, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "personal_bank_swap", "label": "Withdraw it again without closing the bank",
+      "actor": "banker", "entry": 475001, "direction": "withdraw", "slot": 0
+    },
+    {
+      "action": "assert",
+      "label": "The withdrawn soulbound item is back in the bags",
+      "actor": "banker", "metric": "item_count", "item": 23323, "equals": 1, "within_ms": 2000
+    }
+  ]
+}

@@ -1,10 +1,24 @@
 {
   "schema": 1,
   "name": "Bloodmage: Purify Blood makes grouped allies deal extra Shadow damage on direct hits",
-  "contract": "Purify Blood 680679: 'causing allied players to deal ${$sps*.6} additional damage as Shadow damage when they deal direct damage ... Applies Exhaustion, preventing you from benefiting from similar effects.' The ability hands 520839 to party and raid members in range; it is a proc aura (231) whose amount is 60% of the Bloodmage's Shadow spell power and which makes the ally cast 573273 on its direct melee and spell hits. An ally who already has Exhaustion 573255 does not receive 520839.",
+  "contract": [
+    "Purify Blood 680679: 'causing allied players to deal ${$sps*.6} additional damage as Shadow damage when",
+    "they deal direct damage ... Applies Exhaustion, preventing you from benefiting from similar effects.' The",
+    "ability hands 520839 to party and raid members in range; it is a proc aura (231) whose amount is 60% of",
+    "the Bloodmage's Shadow spell power and which makes the ally cast 573273 on its direct melee and spell",
+    "hits. An ally who already has Exhaustion 573255 does not receive 520839. The ally also has asserted native",
+    "melee hit and expertise prerequisites for the short white-attack damage check; its spell hit fixture alone",
+    "does not make those auto attacks land. Retain the original damaging-helper, scaling, source-attribution",
+    "and exhausted-recipient controls."
+  ],
   "timeout_ms": 90000,
   "players": [
-    {"id": "c", "race": 1, "class": 20, "level": 80},
+    {
+      "id": "c",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    },
     {
       "id": "ally",
       "race": 1,
@@ -16,14 +30,48 @@
     }
   ],
   "creatures": [
-    {"id": "d", "owner": "ally", "entry": 299, "level": 80, "distance": 2, "health": 1000000}
+    {
+      "id": "d",
+      "owner": "ally",
+      "entry": 299,
+      "level": 80,
+      "distance": 2,
+      "health": 1000000
+    }
   ],
-  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
   "steps": [
-    {"action": "wait", "ms": 4000},
-    {"action": "learn", "actor": "c", "spell": 680679},
-    {"action": "learn", "actor": "ally", "spell": 2136},
-    {"action": "group", "actor": "c", "target": "ally"},
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "melee_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "learn",
+      "actor": "c",
+      "spell": 680679
+    },
+    {
+      "action": "learn",
+      "actor": "ally",
+      "spell": 2136
+    },
+    {
+      "action": "group",
+      "actor": "c",
+      "target": "ally"
+    },
     {
       "action": "set_aura",
       "label": "Give the caster a stat lead over the ally",
@@ -31,9 +79,24 @@
       "spell": 42062,
       "stacks": 1
     },
-    {"action": "set_power", "actor": "ally", "power": 0, "value": 2000},
-    {"action": "snapshot", "actor": "c", "metric": "spell_power", "school": 5, "save_as": "caster_stat"},
-    {"action": "cast", "actor": "c", "spell": 680679},
+    {
+      "action": "set_power",
+      "actor": "ally",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "c",
+      "metric": "spell_power",
+      "school": 5,
+      "save_as": "caster_stat"
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 680679
+    },
     {
       "action": "assert",
       "label": "Aura cast accepted",
@@ -78,7 +141,12 @@
       "target": "d",
       "save_as": "before_spell"
     },
-    {"action": "cast", "actor": "ally", "spell": 2136, "target": "d"},
+    {
+      "action": "cast",
+      "actor": "ally",
+      "spell": 2136,
+      "target": "d"
+    },
     {
       "action": "assert",
       "label": "The ally's direct spell hit deals the extra damage",
@@ -98,7 +166,11 @@
       "target": "d",
       "save_as": "before_melee"
     },
-    {"action": "attack", "actor": "ally", "target": "d"},
+    {
+      "action": "attack",
+      "actor": "ally",
+      "target": "d"
+    },
     {
       "action": "assert",
       "label": "The ally's melee hits deal the extra damage",
@@ -110,7 +182,10 @@
       "min": 1,
       "within_ms": 6000
     },
-    {"action": "stop_attack", "actor": "ally"},
+    {
+      "action": "stop_attack",
+      "actor": "ally"
+    },
     {
       "action": "set_aura",
       "label": "Drop both raid auras and the caster's Exhaustion before recasting",
@@ -118,11 +193,33 @@
       "spell": 520839,
       "stacks": 0
     },
-    {"action": "set_aura", "actor": "c", "spell": 520839, "stacks": 0},
-    {"action": "set_aura", "actor": "c", "spell": 573255, "stacks": 0},
-    {"action": "wait", "ms": 1600, "label": "Let the first cast's global cooldown expire"},
-    {"action": "reset_cooldown", "actor": "c", "spell": 680679},
-    {"action": "cast", "actor": "c", "spell": 680679},
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 520839,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 573255,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Let the first cast's global cooldown expire"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "c",
+      "spell": 680679
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 680679
+    },
     {
       "action": "assert",
       "label": "Recast accepted",

@@ -1,0 +1,454 @@
+{
+  "schema": 1,
+  "name": "Mail to another character on the same account has no postage (#5575)",
+  "contract": "An ordinary level-one sender can send an item to another character on its account with zero copper and is not charged the client-displayed 30 copper postage when funded. Different-account mail keeps its postage and affordability checks. Same-account money transfers still require and charge the amount sent. All sends use CMSG_SEND_MAIL with an owned fixture mailbox and real inventory GUIDs; receipt is checked after native relog.",
+  "players": [
+    {
+      "id": "sender",
+      "name": "Coamailsend",
+      "race": 1,
+      "class": 1,
+      "level": 1
+    },
+    {
+      "id": "alt",
+      "name": "Coamailalt",
+      "race": 1,
+      "class": 1,
+      "level": 1,
+      "account_of": "sender"
+    },
+    {
+      "id": "other",
+      "name": "Coamailother",
+      "race": 1,
+      "class": 1,
+      "level": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "sender",
+      "entry": 142119
+    },
+    {
+      "action": "assert",
+      "actor": "sender",
+      "metric": "carried_money",
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "sender",
+      "item": 2447
+    },
+    {
+      "action": "client_packet",
+      "actor": "sender",
+      "opcode": 568,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "string": "Coamailother"
+        },
+        {
+          "string": "CoA same-account postage regression"
+        },
+        {
+          "string": "Native mail request"
+        },
+        {
+          "u32": 41
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 1
+        },
+        {
+          "u8": 0
+        },
+        {
+          "item_guid": 2447
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u64": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "sender",
+      "metric": "server_packet_u32",
+      "opcode": 569,
+      "index": 2,
+      "equals": 3,
+      "label": "A different account still requires postage"
+    },
+    {
+      "action": "assert",
+      "actor": "sender",
+      "metric": "item_count",
+      "item": 2447,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "sender",
+      "metric": "carried_money",
+      "equals": 0
+    },
+    {
+      "action": "client_packet",
+      "actor": "sender",
+      "opcode": 568,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "string": "Coamailalt"
+        },
+        {
+          "string": "CoA same-account postage regression"
+        },
+        {
+          "string": "Native mail request"
+        },
+        {
+          "u32": 41
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 1
+        },
+        {
+          "u8": 0
+        },
+        {
+          "item_guid": 2447
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u64": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "sender",
+      "metric": "server_packet_u32",
+      "opcode": 569,
+      "index": 2,
+      "equals": 0,
+      "label": "A level-one sender with no money can mail its own account"
+    },
+    {
+      "action": "assert",
+      "actor": "sender",
+      "metric": "item_count",
+      "item": 2447,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "sender",
+      "metric": "carried_money",
+      "equals": 0
+    },
+    {
+      "action": "relog",
+      "actor": "alt"
+    },
+    {
+      "action": "assert",
+      "actor": "alt",
+      "metric": "mail_has_item",
+      "item": 2447,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "money",
+      "actor": "sender",
+      "copper": 60
+    },
+    {
+      "action": "add_item",
+      "actor": "sender",
+      "item": 765
+    },
+    {
+      "action": "client_packet",
+      "actor": "sender",
+      "opcode": 568,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "string": "Coamailalt"
+        },
+        {
+          "string": "CoA same-account postage regression"
+        },
+        {
+          "string": "Native mail request"
+        },
+        {
+          "u32": 41
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 1
+        },
+        {
+          "u8": 0
+        },
+        {
+          "item_guid": 765
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u64": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "sender",
+      "metric": "server_packet_u32",
+      "opcode": 569,
+      "index": 2,
+      "equals": 0,
+      "label": "Same-account item mail is accepted"
+    },
+    {
+      "action": "assert",
+      "actor": "sender",
+      "metric": "carried_money",
+      "equals": 60,
+      "label": "Same-account item mail does not charge the displayed postage"
+    },
+    {
+      "action": "add_item",
+      "actor": "sender",
+      "item": 2449
+    },
+    {
+      "action": "client_packet",
+      "actor": "sender",
+      "opcode": 568,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "string": "Coamailother"
+        },
+        {
+          "string": "CoA same-account postage regression"
+        },
+        {
+          "string": "Native mail request"
+        },
+        {
+          "u32": 41
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 1
+        },
+        {
+          "u8": 0
+        },
+        {
+          "item_guid": 2449
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u64": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "sender",
+      "metric": "server_packet_u32",
+      "opcode": 569,
+      "index": 2,
+      "equals": 0,
+      "label": "A funded sender can still mail a different account"
+    },
+    {
+      "action": "assert",
+      "actor": "sender",
+      "metric": "carried_money",
+      "equals": 30,
+      "label": "Different-account postage remains 30 copper per attachment"
+    },
+    {
+      "action": "client_packet",
+      "actor": "sender",
+      "opcode": 568,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "string": "Coamailalt"
+        },
+        {
+          "string": "CoA same-account postage regression"
+        },
+        {
+          "string": "Native mail request"
+        },
+        {
+          "u32": 41
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u32": 31
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u64": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "sender",
+      "metric": "server_packet_u32",
+      "opcode": 569,
+      "index": 2,
+      "equals": 3,
+      "label": "An account postage exemption does not waive sent money"
+    },
+    {
+      "action": "assert",
+      "actor": "sender",
+      "metric": "carried_money",
+      "equals": 30
+    },
+    {
+      "action": "client_packet",
+      "actor": "sender",
+      "opcode": 568,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "string": "Coamailalt"
+        },
+        {
+          "string": "CoA same-account postage regression"
+        },
+        {
+          "string": "Native mail request"
+        },
+        {
+          "u32": 41
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u32": 30
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u64": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "sender",
+      "metric": "server_packet_u32",
+      "opcode": 569,
+      "index": 2,
+      "equals": 0,
+      "label": "Only the transferred money is charged for same-account mail"
+    },
+    {
+      "action": "assert",
+      "actor": "sender",
+      "metric": "carried_money",
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,212 @@
+{
+  "schema": 1,
+  "name": "Challenge rules switch level scaling off for the character holding them",
+  "contract": "ChallengeRuleTypes.dbc names NO_CREATURE_LEVEL_SCALING and NO_QUEST_LEVEL_SCALING. Ironman - Overwhelming Odds (71) carries only the creature rule; Hardcore - Inn-Sane (76) carries both. Requires DestinyWeaver.Enable=1, DestinyWeaver.LevelScaling=1, offset 4 and CoA.QuestLevelScaling=1. Every character turns open world scaling on through the native request and is level 32. A level-1 creature is viewed at 28 (32 minus the offset) by a character without either rule, and at its authored level 1 while the creature rule is active. Kobold Camp Cleanup (7) is authored at level 2; its QuestTemplateScaling.dbc row (min 2, max 20, offset -4 from level 6) plays it at 20 for a level-32 character, and at its authored level 2 while the quest rule is active. Stopping the challenge gives the scaling back without a relog: the view returns to 28 and the creature's level is re-sent to the owner's session.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "ironman",
+      "race": 1,
+      "class": 1,
+      "level": 1
+    },
+    {
+      "id": "innsane",
+      "race": 1,
+      "class": 1,
+      "level": 1
+    },
+    {
+      "id": "control",
+      "race": 1,
+      "class": 1,
+      "level": 32
+    }
+  ],
+  "creatures": [
+    {
+      "id": "ironman_target",
+      "owner": "ironman",
+      "entry": 1501,
+      "level": 1,
+      "distance": 3
+    },
+    {
+      "id": "innsane_target",
+      "owner": "innsane",
+      "entry": 1501,
+      "level": 1,
+      "distance": 3
+    },
+    {
+      "id": "control_target",
+      "owner": "control",
+      "entry": 1501,
+      "level": 1,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "start_challenge",
+      "actor": "ironman",
+      "challenge": 71,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ironman",
+      "metric": "challenge_start_code",
+      "label": "Overwhelming Odds activates through its native request",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "start_challenge",
+      "actor": "innsane",
+      "challenge": 76,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "innsane",
+      "metric": "challenge_start_code",
+      "label": "Inn-Sane activates through its native request",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_level",
+      "actor": "ironman",
+      "value": 32
+    },
+    {
+      "action": "set_level",
+      "actor": "innsane",
+      "value": 32
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "ironman",
+      "value": 1
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "innsane",
+      "value": 1
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "control",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "view_level",
+      "target": "control_target",
+      "label": "without a rule the level-1 creature is viewed at 32 minus the offset",
+      "equals": 28,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "quest_level",
+      "quest": 7,
+      "label": "without a rule Kobold Camp Cleanup plays at its curve's maximum",
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "ironman",
+      "metric": "view_level",
+      "target": "ironman_target",
+      "label": "NO_CREATURE_LEVEL_SCALING keeps the creature at its authored level",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "ironman",
+      "metric": "quest_level",
+      "quest": 7,
+      "label": "Overwhelming Odds has no quest rule, so quests still scale",
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "innsane",
+      "metric": "view_level",
+      "target": "innsane_target",
+      "label": "Inn-Sane's creature rule keeps the creature at its authored level",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "innsane",
+      "metric": "quest_level",
+      "quest": 7,
+      "label": "NO_QUEST_LEVEL_SCALING keeps the quest at its authored level",
+      "equals": 2
+    },
+    {
+      "action": "stop_challenge",
+      "actor": "ironman",
+      "challenge": 71
+    },
+    {
+      "action": "assert",
+      "actor": "ironman",
+      "metric": "view_level",
+      "target": "ironman_target",
+      "label": "stopping the challenge gives the creature view back",
+      "equals": 28,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "ironman",
+      "metric": "sent_level",
+      "target": "ironman_target",
+      "label": "the restored level is re-sent without a relog",
+      "equals": 28,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_challenge",
+      "actor": "innsane",
+      "challenge": 76
+    },
+    {
+      "action": "assert",
+      "actor": "innsane",
+      "metric": "quest_level",
+      "quest": 7,
+      "label": "stopping the challenge gives quest scaling back",
+      "equals": 20,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "innsane",
+      "metric": "sent_level",
+      "target": "innsane_target",
+      "label": "the restored creature level is re-sent without a relog",
+      "equals": 28,
+      "within_ms": 3000
+    }
+  ]
+}

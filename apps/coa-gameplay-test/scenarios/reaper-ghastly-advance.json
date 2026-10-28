@@ -8,6 +8,7 @@
     { "id": "first", "race": 10, "class": 30, "level": 80, "spell_hit_rating": 10000, "melee_hit_rating": 10000, "expertise_rating": 10000, "allow_regeneration": false },
     { "id": "second", "race": 10, "class": 30, "level": 80, "spell_hit_rating": 10000, "melee_hit_rating": 10000, "expertise_rating": 10000, "allow_regeneration": false }
   ],
+  "location": { "map": 530, "x": 10349.6, "y": -6357.29, "z": 33.4026, "o": 5.31605 },
   "creatures": [
     { "id": "control_enemy", "owner": "control", "entry": 36, "level": 80, "distance": 3, "health": 1000000 },
     { "id": "first_enemy", "owner": "first", "entry": 36, "level": 80, "distance": 3, "health": 1000000 },

@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "name": "A level-10 Sun Cleric ally accepts Revivify through the native session (#5744)",
+  "contract": [
+    "Original 801790 is RESURRECT_NEW, returning a dead ally with positive health and mana out of combat.",
+    "A real player death is followed by a normal Revivify cast, caster-bound resurrection-request data and the core CMSG_RESURRECT_RESPONSE handler with the correct caster GUID.",
+    "This proves server consent and resurrection; rendered prompt/input and network delivery are outside the socketless harness."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 10
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 8,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 801790
+    },
+    {
+      "action": "die",
+      "actor": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 801790,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_cast_count",
+      "spell": 801790,
+      "equals": 1,
+      "within_ms": 12000
+    },
+    {
+      "action": "client_packet",
+      "actor": "ally",
+      "opcode": 348,
+      "fields": [
+        {
+          "actor_guid": "cleric"
+        },
+        {
+          "u8": 1
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "alive",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "health",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "combat",
+      "equals": 0
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  }
+}

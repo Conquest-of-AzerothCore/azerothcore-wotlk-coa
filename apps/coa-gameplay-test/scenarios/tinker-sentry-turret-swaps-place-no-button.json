@@ -1,0 +1,217 @@
+{
+  "schema": 1,
+  "name": "Sentry Turret's Build/Deconstruct swap places no new button at level 10",
+  "contract": [
+    "Building a Sentry Turret swaps Build: Sentry Turret 500239 for Deconstruct 500470 through SMSG_SUPERCEDED_SPELL",
+    "and tearing it down swaps back. Up to level 10 the client also places the spell a swap adds on an empty action",
+    "button unless its Spell row's Rank text reads a rank above 1 (0x542D6E in the 3.3.5 client), so every swap",
+    "added another Build or Deconstruct button (#6489). The server now sends the added spell's row with the Rank",
+    "text 'Rank 2' just before the swap and its unchanged row right after. Expected over two cycles at level 10: both",
+    "swaps reach the client, neither places a button, no line is printed, and each row reads its own rank again."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the spawn and level scaling settle",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Build: Sentry Turret",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "client_chat_lines_for",
+      "spell": 500239,
+      "save_as": "build_lines"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "cast",
+      "label": "First build",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the button reads Deconstruct",
+      "actor": "tinker",
+      "metric": "temporary_spell_replacement",
+      "spell": 500239,
+      "equals": 500470,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The swap reaches the client",
+      "actor": "tinker",
+      "metric": "spellbook_superseded_for",
+      "spell": 500470,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Swapping in Deconstruct places no button",
+      "actor": "tinker",
+      "metric": "client_placing_supersedes_for",
+      "spell": 500470,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500470
+    },
+    {
+      "action": "cast",
+      "label": "First deconstruct",
+      "actor": "tinker",
+      "spell": 500470
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the button reads Build again",
+      "actor": "tinker",
+      "metric": "temporary_spell_replacement",
+      "spell": 500239,
+      "equals": 500239,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Swapping Build back places no button",
+      "actor": "tinker",
+      "metric": "client_placing_supersedes_for",
+      "spell": 500239,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "cast",
+      "label": "Second build",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the button reads Deconstruct again",
+      "actor": "tinker",
+      "metric": "temporary_spell_replacement",
+      "spell": 500239,
+      "equals": 500470,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500470
+    },
+    {
+      "action": "cast",
+      "label": "Second deconstruct",
+      "actor": "tinker",
+      "spell": 500470
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the button reads Build after the second cycle",
+      "actor": "tinker",
+      "metric": "temporary_spell_replacement",
+      "spell": 500239,
+      "equals": 500239,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "No placement over both cycles: Deconstruct",
+      "actor": "tinker",
+      "metric": "client_placing_supersedes_for",
+      "spell": 500470,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No placement over both cycles: Build",
+      "actor": "tinker",
+      "metric": "client_placing_supersedes_for",
+      "spell": 500239,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Build's row reads its own rank again",
+      "actor": "tinker",
+      "metric": "client_spell_rank_for",
+      "spell": 500239,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Deconstruct's row reads its own rank again",
+      "actor": "tinker",
+      "metric": "client_spell_rank_for",
+      "spell": 500470,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "No line for Build coming back",
+      "actor": "tinker",
+      "metric": "client_chat_lines_for",
+      "spell": 500239,
+      "relative_to": "build_lines",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No line for Deconstruct",
+      "actor": "tinker",
+      "metric": "client_chat_lines_for",
+      "spell": 500470,
+      "equals": 0
+    }
+  ]
+}

@@ -185,7 +185,7 @@ public:
 
         Player* playerTarget = target->GetConnectedPlayer();
 
-        if (target)
+        if (playerTarget)
         {
             playerTarget->resetSpells(/* bool myClassOnly */);
 
@@ -197,7 +197,7 @@ public:
         {
             CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_ADD_AT_LOGIN_FLAG);
             stmt->SetData(0, uint16(AT_LOGIN_RESET_SPELLS));
-            stmt->SetData(1, playerTarget->GetGUID().GetCounter());
+            stmt->SetData(1, target->GetGUID().GetCounter());
             CharacterDatabase.Execute(stmt);
 
             handler->PSendSysMessage(LANG_RESET_SPELLS_OFFLINE, target->GetName());

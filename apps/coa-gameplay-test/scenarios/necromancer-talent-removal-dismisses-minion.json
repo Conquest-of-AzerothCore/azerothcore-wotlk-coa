@@ -1,0 +1,148 @@
+{
+  "schema": 1,
+  "name": "necromancer-talent-removal-dismisses-minion",
+  "contract": "Raise: Ghoul is specialization Animation entry 33775, spell 500971, costing one talent essence. Removing\nthe owning talent through the native character-advancement upload must dismiss its raised Ghoul 50073,\nrelease occupied Life Force, and preserve the active specialization. The spell and summon are acquired\nthrough ordinary talent and cast paths. An independently known Lesser Skeletal Warrior must remain, while\nfree Life Force increases by one. Native removals and resets retain their original prices; fixture actors\nhave 100 gold to pay them.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "n",
+      "race": 5,
+      "class": 23,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_money",
+      "label": "Fund the original native removal and purge prices",
+      "actor": "n",
+      "value": 1000000
+    },
+    {
+      "action": "specialization",
+      "actor": "n",
+      "id": 35
+    },
+    {
+      "action": "learn",
+      "actor": "n",
+      "spell": 500970
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "n",
+      "entry": 33775,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "knows_spell",
+      "label": "Ghoul talent purchase succeeded",
+      "spell": 500971,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "n",
+      "power": 0,
+      "value": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "n",
+      "spell": 500971
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "label": "One Ghoul is raised",
+      "entry": 50073,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_power",
+      "actor": "n",
+      "power": 0,
+      "value": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "n",
+      "spell": 500970
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 50065,
+      "equals": 1,
+      "within_ms": 5000,
+      "label": "An independently known raised warrior is present"
+    },
+    {
+      "action": "snapshot",
+      "actor": "n",
+      "metric": "aura_stacks",
+      "spell": 525004,
+      "save_as": "free_before_removal",
+      "label": "Record free Life Force after raising both minions"
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "n",
+      "entry": 33775,
+      "rank": 0
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "knows_spell",
+      "label": "Native talent removal unlearns Raise: Ghoul",
+      "spell": 500971,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "label": "Removing the talent dismisses the Ghoul",
+      "entry": 50073,
+      "equals": 0,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "player_setting",
+      "label": "Removing the talent preserves Animation",
+      "source": "core.ascension_active_spec",
+      "index": 0,
+      "equals": 35
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 50065,
+      "equals": 1,
+      "label": "Removing Ghoul leaves the independently known warrior alive"
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "aura_stacks",
+      "spell": 525004,
+      "within_ms": 1500,
+      "label": "The dismissed Ghoul releases its occupied Life Force",
+      "relative_to": "free_before_removal",
+      "equals": 1
+    }
+  ]
+}

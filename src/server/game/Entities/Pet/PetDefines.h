@@ -132,6 +132,16 @@ enum NPCEntries
     NPC_GENERIC_VOIDWALKER      = 8996
 };
 
+// Ascension's Warcraft Reborn class spells summon copies of the stock creatures at this offset
+constexpr uint32 REBORN_CREATURE_OFFSET = 1100000;
+
+/// The stock class summon a creature entry stands for: its Warcraft Reborn copy behaves as the stock entry does.
+inline uint32 GetStockPetEntry(uint32 entry)
+{
+    return entry > REBORN_CREATURE_OFFSET && entry - REBORN_CREATURE_OFFSET < REBORN_CREATURE_OFFSET
+        ? entry - REBORN_CREATURE_OFFSET : entry;
+}
+
 enum PetScalingSpells
 {
     SPELL_PET_AVOIDANCE                 = 32233,

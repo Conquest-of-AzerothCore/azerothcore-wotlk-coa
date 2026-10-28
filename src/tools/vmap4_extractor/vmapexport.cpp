@@ -16,11 +16,17 @@
  */
 
 #define _CRT_SECURE_NO_DEPRECATE
+#include <algorithm>
+#include <cctype>
 #include <cerrno>
 #include <cstdio>
+#include <filesystem>
 #include <list>
 #include <map>
+#include <string>
 #include <sys/stat.h>
+#include <system_error>
+#include <utility>
 #include <vector>
 
 #if defined(WIN32) || defined(_WIN32)
@@ -241,6 +247,42 @@ void getGamePath()
 #endif
 }
 
+static bool IsNumericPatchSuffix(std::string const& suffix)
+{
+    return !suffix.empty() && suffix.find_first_not_of("0123456789") == std::string::npos;
+}
+
+// Archives matching patch-<letters>.MPQ in the client Data directory, sorted by suffix.
+// They come after every stock archive because the last archive opened wins a file name collision.
+static void scan_lettered_patches(std::string const& dataDir, std::vector<std::string>& pArchiveNames)
+{
+    std::vector<std::pair<std::string, std::string>> found;
+    std::error_code error;
+    for (std::filesystem::directory_iterator it(dataDir, error), end; !error && it != end; it.increment(error))
+    {
+        if (!it->is_regular_file(error))
+            continue;
+
+        std::string const name = it->path().filename().string();
+        std::string upper = name;
+        for (char& c : upper)
+            c = static_cast<char>(toupper(static_cast<unsigned char>(c)));
+
+        if (upper.size() < 11 || upper.compare(0, 6, "PATCH-") != 0 || upper.compare(upper.size() - 4, 4, ".MPQ") != 0)
+            continue;
+
+        std::string const suffix = upper.substr(6, upper.size() - 10);
+        if (IsNumericPatchSuffix(suffix))
+            continue;
+
+        found.emplace_back(suffix, name);
+    }
+
+    std::sort(found.begin(), found.end());
+    for (auto const& entry : found)
+        pArchiveNames.push_back(dataDir + entry.second);
+}
+
 bool scan_patches(char* scanmatch, std::vector<std::string>& pArchiveNames)
 {
     int i;
@@ -350,6 +392,9 @@ bool fillArchiveNameVector(std::vector<std::string>& pArchiveNames)
         if (scan_patches(path, pArchiveNames))
             foundOne = true;
     }
+
+    printf("Scanning lettered patch archives from data directory.\n");
+    scan_lettered_patches(in_path, pArchiveNames);
 
     printf("\n");
 

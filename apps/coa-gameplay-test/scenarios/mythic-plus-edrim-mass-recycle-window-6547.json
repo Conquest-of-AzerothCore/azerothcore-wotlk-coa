@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Edrim Skysong's mass recycle option opens his merchant window (COA-6547)",
+  "contract": "Edrim's recycle menu says \"You can MASS recycle items by selling them to me.\" Selling a Mythic item to Edrim recycles it (coa_mythic_plus_recycle), which needs a merchant window. The option used to reload the recycle menu, so the window never opened. It now opens Edrim's merchant window, and selling a Mythic 1 robe through it recycles that robe.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [ { "id": "hero", "race": 1, "class": 1, "level": 60 } ],
+  "steps": [
+    { "action": "summon", "actor": "hero", "entry": 416000, "as": "edrim", "distance": 3 },
+    { "action": "add_item", "actor": "hero", "item": 400168, "count": 2 },
+    { "action": "assert", "label": "SETUP: two Mythic 1 robes", "actor": "hero", "metric": "item_count", "item": 400168, "equals": 2 },
+    { "action": "gossip_hello", "actor": "hero", "target": "edrim" },
+    { "action": "gossip_select", "label": "Open the recycle menu", "actor": "hero", "option": 7 },
+    { "action": "assert", "label": "SETUP: no merchant window yet", "actor": "hero", "metric": "vendor_list_packets", "equals": 0 },
+    { "action": "gossip_select", "label": "You can MASS recycle items by selling them to me.", "actor": "hero", "option": 3 },
+    { "action": "assert", "label": "DISCRIMINATING: Edrim's merchant window opens", "actor": "hero", "metric": "vendor_list_packets", "min": 1, "within_ms": 2000 },
+    { "action": "client_packet", "label": "Sell one robe to Edrim", "actor": "hero", "opcode": 416, "consumed": false,
+      "fields": [ { "actor_guid": "edrim" }, { "item_guid": 400168 }, { "u32": 1 } ] },
+    { "action": "assert", "label": "Selling recycles the robe", "actor": "hero", "metric": "item_count", "item": 400168, "equals": 1, "within_ms": 2000 }
+  ]
+}

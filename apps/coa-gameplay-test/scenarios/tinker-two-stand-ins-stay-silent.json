@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "name": "Two different stand-ins in one session both swap silently",
+  "contract": [
+    "A Tinker's Build: Sentry Turret 500239 is swapped for Deconstruct 500470 while a turret stands, and Makeshift",
+    "Dynamite 504527 for Gear Grind 504594 while Grinding Gears 681245 is active. Each stand-in is listed by a hidden",
+    "CharacterAdvancement row, which Extensions.dll uses to silence SMSG_SUPERCEDED_SPELL; a new row's insertion",
+    "rebuilds that index without hidden rows, so the server must resend every listed row after adding one. Expected:",
+    "after Gear Grind's row is added while Deconstruct's is already listed, both swaps back print nothing."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the spawn and level scaling settle",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 504527
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "client_chat_lines_for",
+      "spell": 500239,
+      "save_as": "build_lines"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "client_chat_lines_for",
+      "spell": 504527,
+      "save_as": "dynamite_lines"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "cast",
+      "label": "Build a turret",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Build is swapped for Deconstruct",
+      "actor": "tinker",
+      "metric": "temporary_spell_replacement",
+      "spell": 500239,
+      "equals": 500470,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "Grinding Gears is active",
+      "actor": "tinker",
+      "spell": 681245,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Makeshift Dynamite is swapped for Gear Grind",
+      "actor": "tinker",
+      "metric": "temporary_spell_replacement",
+      "spell": 504527,
+      "equals": 504594,
+      "within_ms": 2000
+    },
+    {
+      "action": "cancel_aura",
+      "label": "Grinding Gears ends",
+      "actor": "tinker",
+      "spell": 681245
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Makeshift Dynamite is back",
+      "actor": "tinker",
+      "metric": "temporary_spell_replacement",
+      "spell": 504527,
+      "equals": 504527,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500470
+    },
+    {
+      "action": "cast",
+      "label": "Deconstruct the turret",
+      "actor": "tinker",
+      "spell": 500470
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Build is back",
+      "actor": "tinker",
+      "metric": "temporary_spell_replacement",
+      "spell": 500239,
+      "equals": 500239,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "No line for Deconstruct",
+      "actor": "tinker",
+      "metric": "client_chat_lines_for",
+      "spell": 500470,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No line for Gear Grind",
+      "actor": "tinker",
+      "metric": "client_chat_lines_for",
+      "spell": 504594,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No line for Makeshift Dynamite coming back",
+      "actor": "tinker",
+      "metric": "client_chat_lines_for",
+      "spell": 504527,
+      "relative_to": "dynamite_lines",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No line for Build coming back after a second row was added",
+      "actor": "tinker",
+      "metric": "client_chat_lines_for",
+      "spell": 500239,
+      "relative_to": "build_lines",
+      "equals": 0
+    }
+  ]
+}

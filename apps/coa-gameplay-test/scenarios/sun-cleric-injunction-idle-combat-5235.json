@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Injunction engages an idle enemy in combat (#5235)",
+  "contract": "Injunction 800624 is an enemy taunt, with ATTACK_ME and MOD_TAUNT effects. A normal cast against an alive hostile creature outside combat must put both units in combat and apply the taunt without requiring prior damage. Creature combat state is asserted separately from its passive fixture AI reaction.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 14,
+      "spell_hit_rating": 100000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 800624
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 800624,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 800624,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "combat",
+      "equals": 1
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "cleric",
+      "entry": 36,
+      "level": 14,
+      "health": 100000,
+      "distance": 5
+    }
+  ]
+}

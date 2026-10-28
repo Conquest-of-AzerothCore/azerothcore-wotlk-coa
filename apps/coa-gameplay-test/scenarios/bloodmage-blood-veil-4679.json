@@ -1,0 +1,284 @@
+{
+  "schema": 1,
+  "name": "Blood Veil absorbs 50% of each hit from a real capacity (#4679)",
+  "contract": "Blood Veil 504263 (ranks 572277-572279) carries two SPELL_AURA_SCHOOL_ABSORB effects: effect 0's BasePoints 49 -> 50 is the 'absorbing $s1% of incoming damage' marker and effect 1 is the veil's total capacity (rank 4: 1078 + 3.87 per level and $SPI*1.5 + $AP*.75). Unit::CalcAbsorbResist treats every SCHOOL_ABSORB effect as a flat pool and removes the whole aura as soon as any of its effects is drained to 0, so one hit bigger than 50 drained effect 0 and popped the veil - it never soaked 50% of a hit and never reached its advertised capacity. The fix converts effect 0 to SPELL_AURA_DUMMY on load and binds aura_ascension_blood_veil, which adds the caster scaling to effect 1's capacity and caps every absorb at effect 0's percent of the incoming damage; effect 1 stays a native absorb, so the capacity drains and the aura falls off once it is spent. The scenario lands a Frostbolt on the Bloodmage with no veil to size a control hit, casts the veil, then lands the same Frostbolt again and proves the split three ways: health lost is about half the control, the effect-1 capacity drained by exactly the amount the health lost, and the aura survived the hit. It then spends the veil and checks that the next hit is no longer reduced. NOT asserted: the exact tooltip number, the party-wide Aortic Aegis spread (#602, covered by its own scenario) and recast refresh behavior.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "attacker",
+      "race": 5,
+      "class": 8,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "pvp",
+      "actor": "bloodmage",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "attacker",
+      "enabled": true
+    },
+    {
+      "action": "set_health",
+      "label": "Room for the control hits and the drain-out",
+      "actor": "bloodmage",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 572279
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "attacker",
+      "spell": 42842
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the attacker owns Frostbolt rank 16",
+      "actor": "attacker",
+      "metric": "knows_spell",
+      "spell": 42842,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Health before the control hit",
+      "actor": "bloodmage",
+      "metric": "health",
+      "save_as": "hp_control_before"
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: bare Frostbolt with no veil",
+      "actor": "attacker",
+      "spell": 42842,
+      "target": "bloodmage"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Frostbolt lands for real damage",
+      "actor": "bloodmage",
+      "metric": "health",
+      "relative_to": "hp_control_before",
+      "min": -2500,
+      "max": -100,
+      "within_ms": 10000
+    },
+    {
+      "action": "snapshot",
+      "label": "Size of an unmitigated Frostbolt",
+      "actor": "bloodmage",
+      "metric": "health",
+      "relative_to": "hp_control_before",
+      "save_as": "control_taken"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Blood Veil rank 4 on the Bloodmage",
+      "actor": "bloodmage",
+      "spell": 572279
+    },
+    {
+      "action": "assert",
+      "label": "The veil is up",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 572279,
+      "caster": "bloodmage",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Effect 0 still carries the 50% marker after the dummy conversion",
+      "actor": "bloodmage",
+      "metric": "aura_amount",
+      "spell": 572279,
+      "effect": 0,
+      "equals": 50
+    },
+    {
+      "action": "assert",
+      "label": "Effect 1 starts from a real capacity, not the old 50-point pool",
+      "actor": "bloodmage",
+      "metric": "aura_amount",
+      "spell": 572279,
+      "effect": 1,
+      "min": 1300
+    },
+    {
+      "action": "snapshot",
+      "label": "Capacity before the veiled hit",
+      "actor": "bloodmage",
+      "metric": "aura_amount",
+      "spell": 572279,
+      "effect": 1,
+      "save_as": "pool_before"
+    },
+    {
+      "action": "snapshot",
+      "label": "Health before the veiled hit",
+      "actor": "bloodmage",
+      "metric": "health",
+      "save_as": "hp_veil_before"
+    },
+    {
+      "action": "cast",
+      "label": "Same Frostbolt into the veil",
+      "actor": "attacker",
+      "spell": 42842,
+      "target": "bloodmage"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the veiled hit costs about half the control hit",
+      "actor": "bloodmage",
+      "metric": "health",
+      "relative_to": "hp_veil_before",
+      "ratio_to": "control_taken",
+      "min": 0.2,
+      "max": 0.85,
+      "within_ms": 10000
+    },
+    {
+      "action": "snapshot",
+      "label": "Health spent by the veiled hit",
+      "actor": "bloodmage",
+      "metric": "health",
+      "relative_to": "hp_veil_before",
+      "save_as": "veil_taken"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the capacity drained by exactly the absorbed share (absorbed == taken)",
+      "actor": "bloodmage",
+      "metric": "aura_amount",
+      "spell": 572279,
+      "effect": 1,
+      "relative_to": "pool_before",
+      "ratio_to": "veil_taken",
+      "min": 0.8,
+      "max": 1.2
+    },
+    {
+      "action": "assert",
+      "label": "REGRESSION: the veil survives the hit instead of popping on the first one",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 572279,
+      "caster": "bloodmage",
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Spend more of the capacity",
+      "actor": "attacker",
+      "spell": 42842,
+      "target": "bloodmage"
+    },
+    {
+      "action": "wait",
+      "label": "Let the cast land",
+      "ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "Spend more of the capacity",
+      "actor": "attacker",
+      "spell": 42842,
+      "target": "bloodmage"
+    },
+    {
+      "action": "wait",
+      "label": "Let the cast land",
+      "ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "Spend more of the capacity",
+      "actor": "attacker",
+      "spell": 42842,
+      "target": "bloodmage"
+    },
+    {
+      "action": "wait",
+      "label": "Let the cast land",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The veil is spent (or has run its 15 s) and is gone",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 572279,
+      "caster": "bloodmage",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "snapshot",
+      "label": "Health after the veil is gone",
+      "actor": "bloodmage",
+      "metric": "health",
+      "save_as": "hp_post_veil"
+    },
+    {
+      "action": "cast",
+      "label": "One more Frostbolt with no veil",
+      "actor": "attacker",
+      "spell": 42842,
+      "target": "bloodmage"
+    },
+    {
+      "action": "assert",
+      "label": "Once the veil is gone hits are no longer reduced",
+      "actor": "bloodmage",
+      "metric": "health",
+      "relative_to": "hp_post_veil",
+      "ratio_to": "control_taken",
+      "min": 0.7,
+      "max": 1.5,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The Bloodmage survived the exchange",
+      "actor": "bloodmage",
+      "metric": "health",
+      "min": 1
+    }
+  ]
+}

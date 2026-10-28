@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "name": "Mobs that drop a CoA quest item advertise it in their creature query",
+  "contract": "Issues #7291, #7292 and #7324: the client marks a mob as a quest objective (highlight and tooltip line) only when SMSG_CREATURE_QUERY_RESPONSE lists the item among the creature's six quest items, which the server reads from creature_questitem. 58 creature/item pairs whose item a CoA quest asks for and whose drop requires that quest had no row, among them Finding the Rhythm (255079: Hecklefang Hyena 4127 Hyena Skin 355119, Barrens Giraffe 3248 Giraffe Leather 355120) and Understanding the Scriptures (255081: Burning Blade Bruiser 3379 and Acolyte 3380, Demonic Scripture 355123). The case sends the native creature query for each and expects the item listed. Kolkar Wrangler (3272) keeps its stock Centaur Bracers (5030) and gains its CoA Centaur Windflute (355118) beside it.",
+  "timeout_ms": 30000,
+  "location": {
+    "map": 1,
+    "x": -442.9,
+    "y": -3393.8,
+    "z": 92.9,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 2,
+      "class": 1,
+      "level": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "client_packet",
+      "label": "Query Kolkar Wrangler",
+      "actor": "p",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 3272
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the stock quest item stays listed",
+      "actor": "p",
+      "metric": "creature_query_quest_item",
+      "entry": 3272,
+      "item": 5030,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the CoA Centaur Windflute is listed beside it",
+      "actor": "p",
+      "metric": "creature_query_quest_item",
+      "entry": 3272,
+      "item": 355118,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Hecklefang Hyena",
+      "actor": "p",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 4127
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Hecklefang Hyena advertises Hyena Skin",
+      "actor": "p",
+      "metric": "creature_query_quest_item",
+      "entry": 4127,
+      "item": 355119,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Barrens Giraffe",
+      "actor": "p",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 3248
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Barrens Giraffe advertises Giraffe Leather",
+      "actor": "p",
+      "metric": "creature_query_quest_item",
+      "entry": 3248,
+      "item": 355120,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Burning Blade Bruiser",
+      "actor": "p",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 3379
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Burning Blade Bruiser advertises Demonic Scripture",
+      "actor": "p",
+      "metric": "creature_query_quest_item",
+      "entry": 3379,
+      "item": 355123,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Burning Blade Acolyte",
+      "actor": "p",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 3380
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Burning Blade Acolyte advertises Demonic Scripture",
+      "actor": "p",
+      "metric": "creature_query_quest_item",
+      "entry": 3380,
+      "item": 355123,
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}

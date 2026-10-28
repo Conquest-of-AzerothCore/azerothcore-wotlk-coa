@@ -7,7 +7,8 @@ import tokenize
 
 
 OWNED_ROOTS = ('src/server/coa/', 'apps/coa-tests/', 'apps/coa-bugreport/', 'apps/coa-dbc/', 'apps/coa-gameplay-test/',
-               'apps/coa-mechanics/', 'tools/', '.github/scripts/')
+               'apps/coa-mechanics/', 'apps/coa-world-content/',
+               'tools/', '.github/scripts/')
 CPP_SUFFIXES = {'.c', '.cc', '.cpp', '.h', '.hpp'}
 CPP_PARTS = re.compile(
     r'(?P<raw>(?:u8|u|U|L)?R"(?P<delimiter>[^ ()\\\t\r\n]{0,16})\([\s\S]*?\)(?P=delimiter)")'

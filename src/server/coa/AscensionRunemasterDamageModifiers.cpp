@@ -8,7 +8,9 @@ namespace
 {
 constexpr uint32 SPELL_ELEMENTAL_ACUITY = 706671;
 constexpr uint32 SPELL_AIR_ENGRAVING = 653223;
+constexpr uint32 SPELL_AIR_ENGRAVING_COPY = 653226;
 constexpr int32 PRIVATE_ATTACK_POWER_COEFFICIENT = 32;
+constexpr AuraType PRIVATE_CASTING_SPEED_AURA = AuraType(349);
 
 void ApplyElementalAcuityRunebladeScaling(SpellInfo* info)
 {
@@ -34,6 +36,28 @@ void ApplyAirEngravingHurricaneScope(SpellInfo* info)
 
     hurricane.SpellClassMask = hurricaneStrikeFamilyFlags;
 }
+
+void ApplyAirEngravingHaste(SpellInfo* info)
+{
+    SpellEffectInfo& haste = info->Effects[EFFECT_2];
+    if (info->Id == SPELL_AIR_ENGRAVING && haste.IsAura(PRIVATE_CASTING_SPEED_AURA) &&
+        haste.BasePoints == 9 && haste.DieSides == 1 && haste.MiscValue == 127 &&
+        haste.TargetA.GetTarget() == TARGET_UNIT_CASTER)
+        haste.ApplyAuraName = SPELL_AURA_MOD_MELEE_RANGED_HASTE;
+}
+
+void ApplyAirEngravingDamageCopy(SpellInfo* info)
+{
+    SpellEffectInfo const& damage = info->Effects[EFFECT_0];
+    if (info->Id != SPELL_AIR_ENGRAVING_COPY || damage.Effect != SPELL_EFFECT_SCHOOL_DAMAGE ||
+        damage.BasePoints != 0 || damage.DieSides != 1 || damage.TargetA.GetTarget() != TARGET_UNIT_TARGET_ENEMY)
+        return;
+
+    info->AscensionInheritsResolvedAmount = true;
+    info->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT;
+    info->AttributesEx3 |= SPELL_ATTR3_IGNORE_CASTER_MODIFIERS;
+    info->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
+}
 }
 
 void ApplyAscensionRunemasterDamageModifierContracts(SpellInfo* info)
@@ -42,6 +66,8 @@ void ApplyAscensionRunemasterDamageModifierContracts(SpellInfo* info)
     {
         ApplyElementalAcuityRunebladeScaling(info);
         ApplyAirEngravingHurricaneScope(info);
+        ApplyAirEngravingHaste(info);
+        ApplyAirEngravingDamageCopy(info);
     }
 
     if (!info || info->SpellFamilyName != uint32(CLASS_SPIRIT_MAGE) + 6 ||

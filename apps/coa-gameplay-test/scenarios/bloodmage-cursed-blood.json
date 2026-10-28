@@ -1,8 +1,26 @@
 {
   "schema": 1,
   "name": "Cursed Blood ruptures Taldaram's Torment onto nearby enemies (#3131)",
-  "contract": "Cursed Blood 707435 has a single effect in Spell.dbc: SPELL_EFFECT_APPLY_AURA with aura 354, BasePoints 99 + DieSides 1 = 100 (the whole hit, \"an additional time\"), TriggerSpell Cursed Blood 707708 and the record's own ProcChance 20, which is the $h the description renders. 707708 is SPELL_EFFECT_SCHOOL_DAMAGE with BasePoints 0, TargetA 6 plus TargetB 16 over radius index 8 (5 yards), i.e. the target and everything hostile around it. Aura 354 has no AuraEffectHandler entry, no AuraEffect::HandleProc case and is not an isTriggerAura, and 707435's own ProcFlags are 0, so SpellMgr generated no SpellProcEntry and the talent did nothing. Every Taldaram's Torment rank (800772, 802568-802573, 802580 - the only family-26 records with SpellFamilyFlags (0, 0, 2097152)) is a bleed: effect 0 is aura 3 SPELL_AURA_PERIODIC_DAMAGE at a 3000 ms amplitude over duration index 8 (15000 ms), so five ticks per application, and none of the eight ranks has a direct damage effect. \"Damage dealt by Taldaram's Torment\" is therefore periodic damage and the proc belongs on PROC_FLAG_DONE_PERIODIC. 802580 is the rank a level-80 character owns. The harness provides no statistical test, so the assertion is \"at least once in N trials\": four victims times five ticks times two applications is 40 independent 20% rolls, and 0.8^40 is 1.3e-4, i.e. a false failure under 0.1%. The bystander is never targeted and the caster deals it no other damage, so any drop in its health is the rupture splashing off a neighbour; all five creatures converge into melee contact with the caster, which keeps them inside 707708's five-yard radius.",
-  "timeout_ms": 120000,
+  "contract": [
+    "Cursed Blood 707435 has a single effect in Spell.dbc: SPELL_EFFECT_APPLY_AURA with aura 354, BasePoints 99",
+    "+ DieSides 1 = 100 (the whole hit, \"an additional time\"), TriggerSpell Cursed Blood 707708 and the",
+    "record's own ProcChance 20, which is the $h the description renders. 707708 is SPELL_EFFECT_SCHOOL_DAMAGE",
+    "with BasePoints 0, TargetA 6 plus TargetB 16 over radius index 8 (5 yards), i.e. the target and everything",
+    "hostile around it. Aura 354 has no AuraEffectHandler entry, no AuraEffect::HandleProc case and is not an",
+    "isTriggerAura, and 707435's own ProcFlags are 0, so SpellMgr generated no SpellProcEntry and the talent",
+    "did nothing. Every Taldaram's Torment rank (800772, 802568-802573, 802580 - the only family-26 records",
+    "with SpellFamilyFlags (0, 0, 2097152)) is a bleed: effect 0 is aura 3 SPELL_AURA_PERIODIC_DAMAGE at a 3000",
+    "ms amplitude over duration index 8 (15000 ms), so five ticks per application, and none of the eight ranks",
+    "has a direct damage effect. \"Damage dealt by Taldaram's Torment\" is therefore periodic damage and the proc",
+    "belongs on PROC_FLAG_DONE_PERIODIC. 802580 is the rank a level-80 character owns. The harness provides no",
+    "statistical test, so the assertion is \"at least once in N trials\": four victims times five ticks times",
+    "four applications provide at least 80 observed native 20% proc opportunities, and 0.8^80 is 1.8e-8. Each",
+    "application is funded with health, because the spell uses POWER_HEALTH; restoring Rage never funded the",
+    "later casts in the old fixture. The bystander is never targeted and the caster deals it no other damage,",
+    "so any drop in its health is the rupture splashing off a neighbour; all five creatures converge into melee",
+    "contact with the caster, which keeps them inside 707708's five-yard radius."
+  ],
+  "timeout_ms": 150000,
   "players": [
     {
       "id": "caster",
@@ -13,48 +31,664 @@
     }
   ],
   "creatures": [
-    { "id": "victim1", "owner": "caster", "entry": 36, "level": 1, "health": 1000000, "distance": 3 },
-    { "id": "victim2", "owner": "caster", "entry": 36, "level": 1, "health": 1000000, "distance": 3 },
-    { "id": "victim3", "owner": "caster", "entry": 36, "level": 1, "health": 1000000, "distance": 3 },
-    { "id": "victim4", "owner": "caster", "entry": 36, "level": 1, "health": 1000000, "distance": 3 },
-    { "id": "bystander", "owner": "caster", "entry": 36, "level": 1, "health": 1000000, "distance": 4 }
+    {
+      "id": "victim1",
+      "owner": "caster",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "victim2",
+      "owner": "caster",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "victim3",
+      "owner": "caster",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "victim4",
+      "owner": "caster",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "bystander",
+      "owner": "caster",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 4
+    }
   ],
   "steps": [
-    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
-    { "action": "learn", "actor": "caster", "spell": 802580 },
-    { "action": "learn", "actor": "caster", "spell": 707435 },
-    { "action": "snapshot", "actor": "bystander", "metric": "health", "save_as": "bystander_before" },
-    { "action": "set_power", "actor": "caster", "power": 1, "value": 1000 },
-    { "action": "cast", "actor": "caster", "spell": 802580, "target": "victim1" },
-    { "action": "wait", "ms": 2000 },
-    { "action": "set_power", "actor": "caster", "power": 1, "value": 1000 },
-    { "action": "cast", "actor": "caster", "spell": 802580, "target": "victim2" },
-    { "action": "wait", "ms": 2000 },
-    { "action": "set_power", "actor": "caster", "power": 1, "value": 1000 },
-    { "action": "cast", "actor": "caster", "spell": 802580, "target": "victim3" },
-    { "action": "wait", "ms": 2000 },
-    { "action": "set_power", "actor": "caster", "power": 1, "value": 1000 },
-    { "action": "cast", "actor": "caster", "spell": 802580, "target": "victim4" },
     {
-      "action": "assert", "label": "The bleed is running on the first victim",
-      "actor": "victim1", "metric": "aura", "spell": 802580, "caster": "caster", "equals": 1, "within_ms": 3000
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
     },
-    { "action": "wait", "label": "First application: twenty ticks", "ms": 16000 },
-    { "action": "set_power", "actor": "caster", "power": 1, "value": 1000 },
-    { "action": "cast", "actor": "caster", "spell": 802580, "target": "victim1" },
-    { "action": "wait", "ms": 2000 },
-    { "action": "set_power", "actor": "caster", "power": 1, "value": 1000 },
-    { "action": "cast", "actor": "caster", "spell": 802580, "target": "victim2" },
-    { "action": "wait", "ms": 2000 },
-    { "action": "set_power", "actor": "caster", "power": 1, "value": 1000 },
-    { "action": "cast", "actor": "caster", "spell": 802580, "target": "victim3" },
-    { "action": "wait", "ms": 2000 },
-    { "action": "set_power", "actor": "caster", "power": 1, "value": 1000 },
-    { "action": "cast", "actor": "caster", "spell": 802580, "target": "victim4" },
-    { "action": "wait", "label": "Second application: twenty more ticks", "ms": 16000 },
     {
-      "action": "assert", "label": "The untargeted neighbour took rupture damage",
-      "actor": "bystander", "metric": "health", "relative_to": "bystander_before", "max": -1
+      "action": "learn",
+      "actor": "caster",
+      "spell": 802580
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707435
+    },
+    {
+      "action": "snapshot",
+      "actor": "bystander",
+      "metric": "health",
+      "save_as": "bystander_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 60000,
+      "maximum": 60000,
+      "label": "Fund the normal health cost before each independent bleed application"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 802580,
+      "target": "victim1"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 802580,
+      "equals": 0,
+      "label": "The normal health-cost spell was accepted"
+    },
+    {
+      "action": "assert",
+      "actor": "victim1",
+      "metric": "aura",
+      "spell": 802580,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Each proc sample has an active native bleed"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 60000,
+      "maximum": 60000,
+      "label": "Fund the normal health cost before each independent bleed application"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 802580,
+      "target": "victim2"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 802580,
+      "equals": 0,
+      "label": "The normal health-cost spell was accepted"
+    },
+    {
+      "action": "assert",
+      "actor": "victim2",
+      "metric": "aura",
+      "spell": 802580,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Each proc sample has an active native bleed"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 60000,
+      "maximum": 60000,
+      "label": "Fund the normal health cost before each independent bleed application"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 802580,
+      "target": "victim3"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 802580,
+      "equals": 0,
+      "label": "The normal health-cost spell was accepted"
+    },
+    {
+      "action": "assert",
+      "actor": "victim3",
+      "metric": "aura",
+      "spell": 802580,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Each proc sample has an active native bleed"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 60000,
+      "maximum": 60000,
+      "label": "Fund the normal health cost before each independent bleed application"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 802580,
+      "target": "victim4"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 802580,
+      "equals": 0,
+      "label": "The normal health-cost spell was accepted"
+    },
+    {
+      "action": "assert",
+      "actor": "victim4",
+      "metric": "aura",
+      "spell": 802580,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Each proc sample has an active native bleed"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 16000,
+      "label": "Let all twenty native bleed ticks finish before the next application"
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 60000,
+      "maximum": 60000,
+      "label": "Fund the normal health cost before each independent bleed application"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 802580,
+      "target": "victim1"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 802580,
+      "equals": 0,
+      "label": "The normal health-cost spell was accepted"
+    },
+    {
+      "action": "assert",
+      "actor": "victim1",
+      "metric": "aura",
+      "spell": 802580,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Each proc sample has an active native bleed"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 60000,
+      "maximum": 60000,
+      "label": "Fund the normal health cost before each independent bleed application"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 802580,
+      "target": "victim2"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 802580,
+      "equals": 0,
+      "label": "The normal health-cost spell was accepted"
+    },
+    {
+      "action": "assert",
+      "actor": "victim2",
+      "metric": "aura",
+      "spell": 802580,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Each proc sample has an active native bleed"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 60000,
+      "maximum": 60000,
+      "label": "Fund the normal health cost before each independent bleed application"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 802580,
+      "target": "victim3"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 802580,
+      "equals": 0,
+      "label": "The normal health-cost spell was accepted"
+    },
+    {
+      "action": "assert",
+      "actor": "victim3",
+      "metric": "aura",
+      "spell": 802580,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Each proc sample has an active native bleed"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 60000,
+      "maximum": 60000,
+      "label": "Fund the normal health cost before each independent bleed application"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 802580,
+      "target": "victim4"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 802580,
+      "equals": 0,
+      "label": "The normal health-cost spell was accepted"
+    },
+    {
+      "action": "assert",
+      "actor": "victim4",
+      "metric": "aura",
+      "spell": 802580,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Each proc sample has an active native bleed"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 16000,
+      "label": "Let all twenty native bleed ticks finish before the next application"
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 60000,
+      "maximum": 60000,
+      "label": "Fund the normal health cost before each independent bleed application"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 802580,
+      "target": "victim1"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 802580,
+      "equals": 0,
+      "label": "The normal health-cost spell was accepted"
+    },
+    {
+      "action": "assert",
+      "actor": "victim1",
+      "metric": "aura",
+      "spell": 802580,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Each proc sample has an active native bleed"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 60000,
+      "maximum": 60000,
+      "label": "Fund the normal health cost before each independent bleed application"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 802580,
+      "target": "victim2"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 802580,
+      "equals": 0,
+      "label": "The normal health-cost spell was accepted"
+    },
+    {
+      "action": "assert",
+      "actor": "victim2",
+      "metric": "aura",
+      "spell": 802580,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Each proc sample has an active native bleed"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 60000,
+      "maximum": 60000,
+      "label": "Fund the normal health cost before each independent bleed application"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 802580,
+      "target": "victim3"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 802580,
+      "equals": 0,
+      "label": "The normal health-cost spell was accepted"
+    },
+    {
+      "action": "assert",
+      "actor": "victim3",
+      "metric": "aura",
+      "spell": 802580,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Each proc sample has an active native bleed"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 60000,
+      "maximum": 60000,
+      "label": "Fund the normal health cost before each independent bleed application"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 802580,
+      "target": "victim4"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 802580,
+      "equals": 0,
+      "label": "The normal health-cost spell was accepted"
+    },
+    {
+      "action": "assert",
+      "actor": "victim4",
+      "metric": "aura",
+      "spell": 802580,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Each proc sample has an active native bleed"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 16000,
+      "label": "Let all twenty native bleed ticks finish before the next application"
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 60000,
+      "maximum": 60000,
+      "label": "Fund the normal health cost before each independent bleed application"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 802580,
+      "target": "victim1"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 802580,
+      "equals": 0,
+      "label": "The normal health-cost spell was accepted"
+    },
+    {
+      "action": "assert",
+      "actor": "victim1",
+      "metric": "aura",
+      "spell": 802580,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Each proc sample has an active native bleed"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 60000,
+      "maximum": 60000,
+      "label": "Fund the normal health cost before each independent bleed application"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 802580,
+      "target": "victim2"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 802580,
+      "equals": 0,
+      "label": "The normal health-cost spell was accepted"
+    },
+    {
+      "action": "assert",
+      "actor": "victim2",
+      "metric": "aura",
+      "spell": 802580,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Each proc sample has an active native bleed"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 60000,
+      "maximum": 60000,
+      "label": "Fund the normal health cost before each independent bleed application"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 802580,
+      "target": "victim3"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 802580,
+      "equals": 0,
+      "label": "The normal health-cost spell was accepted"
+    },
+    {
+      "action": "assert",
+      "actor": "victim3",
+      "metric": "aura",
+      "spell": 802580,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Each proc sample has an active native bleed"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 60000,
+      "maximum": 60000,
+      "label": "Fund the normal health cost before each independent bleed application"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 802580,
+      "target": "victim4"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 802580,
+      "equals": 0,
+      "label": "The normal health-cost spell was accepted"
+    },
+    {
+      "action": "assert",
+      "actor": "victim4",
+      "metric": "aura",
+      "spell": 802580,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Each proc sample has an active native bleed"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 16000,
+      "label": "Let all twenty native bleed ticks finish before the next application"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 802580,
+      "min": 80,
+      "label": "At least eighty real bleed ticks fund the unchanged twenty-percent proc sample"
+    },
+    {
+      "action": "assert",
+      "label": "The untargeted neighbour took rupture damage",
+      "actor": "bystander",
+      "metric": "health",
+      "relative_to": "bystander_before",
+      "max": -1
     }
   ]
 }

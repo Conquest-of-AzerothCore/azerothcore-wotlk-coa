@@ -1,0 +1,243 @@
+{
+  "schema": 1,
+  "name": "Redridge rare elites award elite kill experience",
+  "contract": "The Ascension creaturecache.wdb captures (up to 2026-09-05) give the Redridge rares Thuros Lightfingers 61, Rohh the Silent 947, Lost One Cook 1106, Seeker Aqualon 14269, Squiddic 14270, Ribchaser 14271, Snarlflare 14272 and Boulderheart 14273 rank 2 (rare elite); the server carried rank 4 (rare), which Creature::isElite excludes. An elite kill multiplies the base gain by Rate.XP.Elite 1.44 (Formulas.cpp), so it awards about 1.44 times a normal kill of the same level whatever Rate.XP.Kill and Rate.XP.Global are (truncation keeps the ratio within 1.41-1.46), and a rank-4 rare awards the same as a normal kill. Redridge Alpha 445, Boulderheart, Ribchaser and Rohh the Silent are pinned to level 20 so all share one base gain; none has a per-creature experience modifier. The warrior carries melee_hit_rating, expertise_rating and melee_crit_rating 10000 for the reason given in xp-ascension-rates.json: none of them enters the XP calculation.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9480.0,
+    "y": -2120.0,
+    "z": 87.66,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 1,
+      "level": 20,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "melee_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "normal",
+      "owner": "hunter",
+      "entry": 445,
+      "level": 20,
+      "health": 20,
+      "distance": 2
+    },
+    {
+      "id": "boulderheart",
+      "owner": "hunter",
+      "entry": 14273,
+      "level": 20,
+      "health": 20,
+      "distance": 2
+    },
+    {
+      "id": "ribchaser",
+      "owner": "hunter",
+      "entry": 14271,
+      "level": 20,
+      "health": 20,
+      "distance": 2
+    },
+    {
+      "id": "rohh",
+      "owner": "hunter",
+      "entry": 947,
+      "level": 20,
+      "health": 20,
+      "distance": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "command",
+      "actor": "hunter",
+      "command": ".xp 1"
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "level",
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "level",
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "boulderheart",
+      "metric": "level",
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "ribchaser",
+      "metric": "level",
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "rohh",
+      "metric": "level",
+      "equals": 20
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "xp",
+      "save_as": "normal_before"
+    },
+    {
+      "action": "attack",
+      "actor": "hunter",
+      "target": "normal"
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Normal kill awards experience",
+      "actor": "hunter",
+      "metric": "xp",
+      "relative_to": "normal_before",
+      "min": 100,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "xp",
+      "relative_to": "normal_before",
+      "save_as": "normal_gain"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hunter"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "xp",
+      "save_as": "boulderheart_before"
+    },
+    {
+      "action": "attack",
+      "actor": "hunter",
+      "target": "boulderheart"
+    },
+    {
+      "action": "assert",
+      "actor": "boulderheart",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Boulderheart is a rare elite and awards elite kill experience",
+      "actor": "hunter",
+      "metric": "xp",
+      "relative_to": "boulderheart_before",
+      "ratio_to": "normal_gain",
+      "min": 1.41,
+      "max": 1.46,
+      "within_ms": 5000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hunter"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "xp",
+      "save_as": "ribchaser_before"
+    },
+    {
+      "action": "attack",
+      "actor": "hunter",
+      "target": "ribchaser"
+    },
+    {
+      "action": "assert",
+      "actor": "ribchaser",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Ribchaser is a rare elite and awards elite kill experience",
+      "actor": "hunter",
+      "metric": "xp",
+      "relative_to": "ribchaser_before",
+      "ratio_to": "normal_gain",
+      "min": 1.41,
+      "max": 1.46,
+      "within_ms": 5000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hunter"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "xp",
+      "save_as": "rohh_before"
+    },
+    {
+      "action": "attack",
+      "actor": "hunter",
+      "target": "rohh"
+    },
+    {
+      "action": "assert",
+      "actor": "rohh",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Rohh the Silent is a rare elite and awards elite kill experience",
+      "actor": "hunter",
+      "metric": "xp",
+      "relative_to": "rohh_before",
+      "ratio_to": "normal_gain",
+      "min": 1.41,
+      "max": 1.46,
+      "within_ms": 5000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hunter"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "level",
+      "equals": 20
+    }
+  ]
+}

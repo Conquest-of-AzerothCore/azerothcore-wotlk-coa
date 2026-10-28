@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "name": "chronomancer-chromatic-shard-level-sixty-6249",
+  "contract": [
+    "Chromatic Shard 567544 is the authored level-60 ninth rank after 567543 at level 56. A normal bot session at",
+    "59 receives rank eight through class progression; native GiveLevel to 60 must grant rank nine, which must",
+    "cast normally and deal damage."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 22,
+      "level": 59,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "ranged_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false,
+      "bot": true
+    }
+  ],
+  "creatures": [
+    {
+      "id": "t",
+      "owner": "p",
+      "entry": 299,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 801292
+    },
+    {
+      "action": "login_hooks",
+      "actor": "p"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 567543,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "p",
+      "value": 60
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 567544,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 567544,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 567544,
+      "target": "t",
+      "equals": 1
+    }
+  ]
+}

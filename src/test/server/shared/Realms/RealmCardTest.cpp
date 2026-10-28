@@ -34,7 +34,14 @@ TEST(RealmCardTest, FillsTheFirstPageThenTheNextOnes)
 
 TEST(RealmCardTest, NamesTheRealmThenItsCardFields)
 {
-    RealmCardStyle const style{ 2, 11, "Default" };
+    RealmCardStyle const style{ 2, 11, "Default", 0 };
     EXPECT_EQ(BuildRealmCardName("AzerothCore", style, GetRealmCardSlot(0)), "AzerothCore!2!11!Default!1!1!1!0");
     EXPECT_EQ(BuildRealmCardName("Second", style, GetRealmCardSlot(7)), "Second!2!11!Default!1!2!2!0");
+}
+
+TEST(RealmCardTest, EndsWithTheDescriptionSpellAndUsesTheRealmImage)
+{
+    RealmCardStyle const style{ 0, 12, "Bronzebeard", 1397607 };
+    EXPECT_EQ(BuildRealmCardName("Bronzebeard - Warcraft Reborn", style, GetRealmCardSlot(2)),
+        "Bronzebeard - Warcraft Reborn!0!12!Bronzebeard!1!1!3!1397607");
 }

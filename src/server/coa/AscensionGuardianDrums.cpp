@@ -4,6 +4,7 @@
 #include "EventMap.h"
 #include "GameObject.h"
 #include "GameObjectAI.h"
+#include "GameTime.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "Player.h"
@@ -12,14 +13,17 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 #include <cmath>
+#include <map>
 #include <memory>
-#include <set>
 
 namespace
 {
+constexpr uint32 DrumBuffRefreshBelowMs = 15000;
+constexpr uint32 DrumBuffRefreshCooldownMs = 1000;
+
 struct DrumPlacement
 {
-    std::set<ObjectGuid> recipients;
+    std::map<ObjectGuid, uint32> nextRefreshMs;
 };
 
 struct go_ascension_guardian_drum : GameObjectAI
@@ -51,11 +55,20 @@ struct go_ascension_guardian_drum : GameObjectAI
         Acore::AnyUnitInObjectRangeCheck check(me, range);
         Acore::UnitListSearcher<Acore::AnyUnitInObjectRangeCheck> searcher(me, players, check);
         Cell::VisitObjects(me, searcher, range);
+        uint32 now = uint32(GameTime::GetGameTimeMS().count());
         for (Unit* player : players)
-            if (player->IsAlive() && player->IsControlledByPlayer() && owner->IsFriendlyTo(player) &&
-                !placement->recipients.count(player->GetGUID()))
-                if (owner->CastSpell(player, 570759, true) == SPELL_CAST_OK)
-                    placement->recipients.insert(player->GetGUID());
+        {
+            if (!player->IsAlive() || !player->IsControlledByPlayer() || !owner->IsFriendlyTo(player))
+                continue;
+            auto scheduled = placement->nextRefreshMs.find(player->GetGUID());
+            if (scheduled != placement->nextRefreshMs.end() && scheduled->second > now)
+                continue;
+            Aura const* aura = player->GetAura(570759, owner->GetGUID());
+            if (aura && aura->GetDuration() > int32(DrumBuffRefreshBelowMs))
+                continue;
+            if (owner->CastSpell(player, 570759, true) == SPELL_CAST_OK)
+                placement->nextRefreshMs[player->GetGUID()] = now + DrumBuffRefreshCooldownMs;
+        }
         events.ScheduleEvent(1, Milliseconds(250));
     }
 };

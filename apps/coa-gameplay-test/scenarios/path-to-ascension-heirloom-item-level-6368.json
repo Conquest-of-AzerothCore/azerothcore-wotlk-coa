@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Path to Ascension item level tutorials give heirlooms no item level (#6368)",
+  "contract": "The Path to Ascension item level tutorials (10 at 40, then 200 to 218) compare their thresholds with the equipped average item level the character sheet shows, where an heirloom counts as item level 0. A level 44 character wearing six heirlooms over its item level 1 starter pants and boots averages (6 x 0 + 2) / 17 = 0.12, so it has not reached the item level 40 tutorial; counting each heirloom as 2.33 times the level gave 41 and completed it.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8828.19,
+    "y": 627.502,
+    "z": 94.0287
+  },
+  "players": [
+    { "id": "necromancer", "race": 1, "class": 1, "level": 44, "ascension_client": true }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "add_item", "actor": "necromancer", "item": 42950 },
+    { "action": "equip", "label": "Champion Herod's Shoulder", "actor": "necromancer", "item": 42950, "slot": 2 },
+    { "action": "add_item", "actor": "necromancer", "item": 48677 },
+    { "action": "equip", "label": "Champion's Deathdealer Breastplate", "actor": "necromancer", "item": 48677, "slot": 4 },
+    { "action": "add_item", "actor": "necromancer", "item": 50255 },
+    { "action": "equip", "label": "Dread Pirate Ring", "actor": "necromancer", "item": 50255, "slot": 10 },
+    { "action": "add_item", "actor": "necromancer", "item": 42991 },
+    { "action": "equip", "label": "Swift Hand of Justice", "actor": "necromancer", "item": 42991, "slot": 12 },
+    { "action": "add_item", "actor": "necromancer", "item": 42992 },
+    { "action": "equip", "label": "Discerning Eye of the Beast", "actor": "necromancer", "item": 42992, "slot": 13 },
+    { "action": "add_item", "actor": "necromancer", "item": 42945 },
+    { "action": "equip", "label": "Venerable Dal'Rend's Sacred Charge", "actor": "necromancer", "item": 42945, "slot": 15 },
+    { "action": "wait", "label": "Let the once-a-second tutorial check run a few times", "ms": 3000 },
+    {
+      "action": "assert",
+      "label": "The character sheet shows six heirlooms and the item level 1 starter pants and boots as 0.12",
+      "actor": "necromancer",
+      "metric": "sent_average_item_level",
+      "min": 0.11,
+      "max": 0.125
+    },
+    {
+      "action": "assert",
+      "label": "The item level 40 tutorial is not verified",
+      "actor": "necromancer",
+      "metric": "player_setting",
+      "source": "core.ascension.tutorial_verified",
+      "index": 10,
+      "equals": 0
+    }
+  ]
+}

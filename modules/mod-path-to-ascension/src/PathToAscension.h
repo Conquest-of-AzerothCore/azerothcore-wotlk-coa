@@ -104,8 +104,8 @@ namespace PathToAscension
         bool rewards = false;
         bool tracking = false;
         bool legacyContent = false;
-        bool starterMountBridge = false;
-        uint32 expansion = 2;
+        uint32 expansion = 0;
+        uint32 clientExpansion = 2;
         RealmProfile realm = RealmProfile::Live;
         RealmProfile client = RealmProfile::Live;
     };
@@ -120,15 +120,18 @@ namespace PathToAscension
     constexpr char TrackingSetting[] = "core.ascension.tutorial_tracking";
     constexpr char RidingSetting[] = "core.ascension.tutorial_riding";
     constexpr char AppearanceSetting[] = "core.ascension.tutorial_appearances";
+    constexpr char CountSetting[] = "core.ascension.tutorial_counts";
 
     uint32 SettingValue(Player const* player, char const* source, uint32 index);
     bool MatchesRaceAndClass(Player const* player, Tutorial const& tutorial);
-    std::optional<uint32> GameModeMask(Player const* player);
+    bool MatchesGameModes(Player const* player, Tutorial const& tutorial);
 
     void CompleteVerifiedTutorial(Player* player, uint32 tutorialId);
     void RecordTutorialEvent(Player* player, uint32 tutorialId, uint32 bit);
     bool IsLegacyAvailable(uint32 tutorialId);
+    bool IsExpansionOffered(Tutorial const& tutorial);
     bool IsCallbackImplemented(uint32 tutorialId);
+    bool IsStarterMountQuest(uint32 questId);
     bool IsCallBoard(uint32 entry);
 
     void ConfigureRewards();
@@ -140,6 +143,7 @@ namespace PathToAscension
     void Claim(Player* player, uint32 tutorialId);
     bool QueueClientRequest(WorldSession* session, WorldPacket const& packet);
     void LoginRewards(Player* player);
+    void PrestigeRewards(Player* player);
     void LogoutRewards(Player* player);
     void UpdateRewards(Player* player);
 }

@@ -133,7 +133,7 @@ static uint32 AddEntrySets[4][2] =
 enum Misc
 {
     MAX_ADD_COUNT               = 4,
-    ADDITIONAL_CLASS_SPRIEST    = 11,
+    ADDITIONAL_CLASS_SPRIEST    = 12,
     AURA_SHADOW_FORM            = 15473,
     GROUP_CLASS_ABILITY         = 1,
     GROUP_DRAIN_POWER           = 2
@@ -302,7 +302,8 @@ struct boss_hexlord_malacrass : public BossAI
                         siphonTrigger->AI()->DoCast(target, SPELL_SIPHON_SOUL, true);
                         siphonTrigger->GetMotionMaster()->MoveFollow(me, 0.0f, 0.0f);
                         if (Player* player = target->ToPlayer())
-                            _currentClass = player->HasAura(AURA_SHADOW_FORM) ? uint8(ADDITIONAL_CLASS_SPRIEST) : player->getClass();
+                            _currentClass = player->HasAura(AURA_SHADOW_FORM) ? uint8(ADDITIONAL_CLASS_SPRIEST) :
+                                uint8(GetLegacyClassForCustomClass(Classes(player->getClass())));
 
                         ScheduleClassAbility();
                     }

@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Brother Neals stays at the Northshire bell tower front and takes Grape Manifest (#7798)",
+  "contract": [
+    "Brother Neals 952 (guid 79968) ends Grape Manifest 3905. #5833 moved him to the front of the bell tower",
+    "room (-8892.94,-172.944,113.158) for an easier turn-in; rev_20260930_99 (#5764), a later broad Northshire",
+    "restore, silently reset him to the stock back-of-room spot (-8902.13,-181.646,113.24), reintroducing #7798.",
+    "GetGiver's native search only looks 30 yards around the player. Expected: a hero 20 yards from the front",
+    "placement and 32.7 yards from the stock spot (beyond that 30-yard search) sees Brother Neals' turn-in",
+    "marker and hands in Grape Manifest; at the stock spot he would not be found there at all."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8876.968, "y": -157.81, "z": 113.2, "o": 3.902},
+  "players": [{"id": "courier", "race": 1, "class": 12, "level": 10}],
+  "steps": [
+    {"action": "wait", "label": "Let login settle", "ms": 3000},
+    {"action": "set_phase", "actor": "courier", "value": 1},
+    {"action": "assert", "label": "Brother Neals stands near the bell tower front", "actor": "courier",
+     "metric": "nearby_creature_count", "entry": 952, "equals": 1, "within_ms": 10000},
+    {"action": "prepare_quest", "label": "Fixture: Grape Manifest is ready to hand in", "actor": "courier",
+     "quest": 3905},
+    {"action": "assert", "label": "Brother Neals at the front placement shows the turn-in marker",
+     "actor": "courier", "metric": "dialog_status", "entry": 952, "equals": 10, "within_ms": 5000},
+    {"action": "reward_quest", "label": "Grape Manifest", "actor": "courier", "quest": 3905},
+    {"action": "assert", "label": "Grape Manifest is rewarded", "actor": "courier", "metric": "quest_rewarded",
+     "quest": 3905, "equals": 1}
+  ]
+}

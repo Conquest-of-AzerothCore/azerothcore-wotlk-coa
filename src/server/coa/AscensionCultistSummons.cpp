@@ -13,6 +13,7 @@
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
 #include <algorithm>
+#include <cmath>
 namespace AscensionCultist
 {
 namespace
@@ -29,7 +30,7 @@ void Wander(Creature* creature)
     creature->GetMotionMaster()->MovePoint(1, creature->GetNearPosition(20, frand(0, 6.2831853f)), FORCED_MOVEMENT_RUN);
 }
 }
-void Summon(Player* player, uint32 entry, Position const& position, uint32 duration, Unit* target)
+void Summon(Player* player, uint32 entry, Position const& position, uint32 duration, Unit* target, uint32 spellId)
 {
     if (!player || !player->IsAlive())
         return;
@@ -41,7 +42,7 @@ void Summon(Player* player, uint32 entry, Position const& position, uint32 durat
         return;
     TempSummon* summon = player->GetMap()->SummonCreature(entry, position,
         entry == 50263 ? nullptr : sSummonPropertiesStore.LookupEntry(oldGod ? 63 : 61), duration,
-        entry == 50263 ? nullptr : player);
+        entry == 50263 ? nullptr : player, spellId);
     if (!summon)
         return;
     summon->SetTempSummonType(TEMPSUMMON_TIMED_DESPAWN);
@@ -135,7 +136,7 @@ struct npc_ascension_cultist_summon : public ScriptedAI
         if (me->GetEntry() == 500465)
             Cast(me, me, 802045);
         if (me->GetEntry() == HallucinationEntry)
-            player->CastSpell(me, 49889, true);
+            player->AddAura(49889, me);
         if (me->GetEntry() == 397771)
         {
             me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, player->GetFloatValue(UNIT_FIELD_MINDAMAGE) * .3f);
@@ -145,6 +146,13 @@ struct npc_ascension_cultist_summon : public ScriptedAI
         }
         if (me->GetEntry() == 50298)
             me->SetNpcFlag(UNIT_NPC_FLAG_GOSSIP);
+        if (me->GetEntry() == 500464 && me->GetUInt32Value(UNIT_CREATED_BY_SPELL) == PresenceOfNzoth)
+        {
+            me->SetDisplayId(11686);
+            me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
+            me->SetVisible(false);
+        }
+        me->SetFaction(35);
         timers.ScheduleEvent(Pulse, 100ms);
     }
     void SetGUID(ObjectGuid const& guid, int32 = 0) override { command = guid; }
@@ -152,7 +160,7 @@ struct npc_ascension_cultist_summon : public ScriptedAI
     {
         for (ObjectGuid guid : afflicted)
             if (Unit* target = ObjectAccessor::GetUnit(*me, guid))
-                target->RemoveAurasDueToSpell(806596, me->GetGUID());
+                target->RemoveAurasDueToSpell(Thoughtseize, owner);
         afflicted.clear();
     }
     void JustDied(Unit*) override
@@ -164,7 +172,7 @@ struct npc_ascension_cultist_summon : public ScriptedAI
         auto valid = [this, player](Unit* unit, bool commanded = false)
         {
             return unit && unit->IsAlive() && player->IsValidAttackTarget(unit) &&
-                (commanded || player->IsInCombatWith(unit) || player->IsHostileTo(unit)) &&
+                (commanded || player->IsInCombatWith(unit)) &&
                 me->IsWithinDistInMap(unit, 40) && me->IsWithinLOSInMap(unit);
         };
         Unit* target = ObjectAccessor::GetUnit(*me, command);
@@ -222,7 +230,7 @@ struct npc_ascension_cultist_summon : public ScriptedAI
         }
         if (active.size() >= 10)
         {
-            Summon(player, 50263, me->GetPosition(), sSpellMgr->GetSpellInfo(804779)->GetDuration());
+            Summon(player, 50263, me->GetPosition(), sSpellMgr->GetSpellInfo(804779)->GetDuration(), nullptr, 804779);
             for (Player* member : active)
                 member->InterruptSpell(CURRENT_CHANNELED_SPELL);
             me->DespawnOrUnsummon();
@@ -245,12 +253,18 @@ struct npc_ascension_cultist_summon : public ScriptedAI
             me->DespawnOrUnsummon();
             return;
         }
+        if (me->GetFaction() != player->GetFaction())
+            me->SetFaction(player->GetFaction());
+        uint8 pvp = player->GetByteValue(UNIT_FIELD_BYTES_2, 1);
+        if (me->GetByteValue(UNIT_FIELD_BYTES_2, 1) != pvp)
+            me->SetByteValue(UNIT_FIELD_BYTES_2, 1, pvp);
         timers.Update(diff);
         if (!timers.ExecuteEvent())
             return;
         uint32 entry = me->GetEntry();
+        bool presence = entry == 500464 && me->GetUInt32Value(UNIT_CREATED_BY_SPELL) == PresenceOfNzoth;
         timers.ScheduleEvent(Pulse, entry == CthunTentacle ? 1500ms :
-            (entry == 501464 || entry == 500464) ? 6000ms : 1000ms);
+            presence ? 2000ms : (entry == 501464 || entry == 500464) ? 6000ms : 1000ms);
         if (entry == 50298)
         {
             Ritual(player);
@@ -280,8 +294,12 @@ struct npc_ascension_cultist_summon : public ScriptedAI
             me->CastSpell(target, MentalAssault, false);
         else if (entry == 501464 || entry == 500464)
         {
-            Cast(me, target, 806596);
-            afflicted.insert(target->GetGUID());
+            if (!target->HasAura(Thoughtseize, owner))
+            {
+                OverrideSpellVisual(target, Thoughtseize, PresenceTentacleVisual);
+                player->AddAura(Thoughtseize, target);
+                afflicted.insert(target->GetGUID());
+            }
         }
         else if (entry == 397771)
         {

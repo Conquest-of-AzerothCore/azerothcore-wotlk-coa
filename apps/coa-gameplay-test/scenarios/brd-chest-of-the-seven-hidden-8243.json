@@ -1,0 +1,241 @@
+{
+  "schema": 1,
+  "name": "Blackrock Depths: the Chest of The Seven is not there before the Seven die (#8243)",
+  "contract": [
+    "#8243: the Chest of The Seven (gameobject 169243, guid 67872) was reported lootable without killing the",
+    "Seven. Its spawn has spawntimesecs -300, so it stays despawned until the seventh dwarf dies and sets the",
+    "Tomb of Seven event DONE. On Normal, Heroic and Mythic a player on the chest spawn sees the world-spawned",
+    "tomb exit door beside it, but not the chest."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "normal",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "heroic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "normal",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_phase",
+      "actor": "normal",
+      "value": 1
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "set_health",
+      "actor": "heroic",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_phase",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "set_health",
+      "actor": "mythic",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_phase",
+      "actor": "mythic",
+      "value": 1
+    },
+    {
+      "action": "teleport",
+      "label": "normal stands on the Chest of The Seven spawn (guid 67872)",
+      "actor": "normal",
+      "map": 230,
+      "x": 1265.55,
+      "y": -284.421,
+      "z": -78.2193
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: normal is in a Normal Blackrock Depths",
+      "actor": "normal",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the tomb exit door 170577 (guid 15334) beside the chest is at the Normal client",
+      "actor": "normal",
+      "metric": "nearby_gameobject_at_client",
+      "entry": 170577,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "the Chest of The Seven is not at the Normal client before the Seven die",
+      "actor": "normal",
+      "metric": "nearby_gameobject_at_client",
+      "entry": 169243,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the Chest of The Seven stays away from the Normal client",
+      "actor": "normal",
+      "metric": "nearby_gameobject_at_client",
+      "entry": 169243,
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "label": "heroic stands on the Chest of The Seven spawn (guid 67872)",
+      "actor": "heroic",
+      "map": 230,
+      "x": 1265.55,
+      "y": -284.421,
+      "z": -78.2193
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: heroic is in a Heroic Blackrock Depths",
+      "actor": "heroic",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the tomb exit door 170577 (guid 15334) beside the chest is at the Heroic client",
+      "actor": "heroic",
+      "metric": "nearby_gameobject_at_client",
+      "entry": 170577,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "the Chest of The Seven is not at the Heroic client before the Seven die",
+      "actor": "heroic",
+      "metric": "nearby_gameobject_at_client",
+      "entry": 169243,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the Chest of The Seven stays away from the Heroic client",
+      "actor": "heroic",
+      "metric": "nearby_gameobject_at_client",
+      "entry": 169243,
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "label": "mythic stands on the Chest of The Seven spawn (guid 67872)",
+      "actor": "mythic",
+      "map": 230,
+      "x": 1265.55,
+      "y": -284.421,
+      "z": -78.2193
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: mythic is in a Mythic Blackrock Depths",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the tomb exit door 170577 (guid 15334) beside the chest is at the Mythic client",
+      "actor": "mythic",
+      "metric": "nearby_gameobject_at_client",
+      "entry": 170577,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "the Chest of The Seven is not at the Mythic client before the Seven die",
+      "actor": "mythic",
+      "metric": "nearby_gameobject_at_client",
+      "entry": 169243,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the Chest of The Seven stays away from the Mythic client",
+      "actor": "mythic",
+      "metric": "nearby_gameobject_at_client",
+      "entry": 169243,
+      "equals": 0
+    }
+  ]
+}

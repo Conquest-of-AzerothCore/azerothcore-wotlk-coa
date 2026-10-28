@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "name": "tinker-beacons-friendly-targets-4102",
+  "contract": [
+    "Shield and Replenishment Beacons promise nearby allied targets. Native Shield Beacon gives armor to its",
+    "Tinker and grouped ally while refusing a nearby hostile player. Replenishment energizes the Tinker and",
+    "grouped ally, never that hostile player. All three have valid mana pools, and the enemy is inside the same",
+    "beacon radius."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 24
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 8,
+      "level": 24
+    },
+    {
+      "id": "enemy",
+      "race": 5,
+      "class": 8,
+      "level": 24
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "t",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 801799
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 560750
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 801799
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "owned_creature_count",
+      "entry": 50036,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 801256,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 801256,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 801256,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 0,
+      "value": 250
+    },
+    {
+      "action": "set_power",
+      "actor": "ally",
+      "power": 0,
+      "value": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "enemy",
+      "power": 0,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 560750
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "owned_creature_count",
+      "entry": 500360,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 0,
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "spell_energize_count",
+      "spell": 561267,
+      "target": "t",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "spell_energize_count",
+      "spell": 561267,
+      "target": "ally",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "spell_energize_count",
+      "spell": 561267,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 801256,
+      "equals": 0
+    }
+  ]
+}

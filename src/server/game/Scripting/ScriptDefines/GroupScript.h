@@ -31,10 +31,14 @@ enum GroupHook
     GROUPHOOK_ON_DISBAND,
     GROUPHOOK_CAN_GROUP_JOIN_BATTLEGROUND_QUEUE,
     GROUPHOOK_ON_CREATE,
+    GROUPHOOK_ON_LOOT_ROLL_START,
     GROUPHOOK_END
 };
 
 enum RemoveMethod : uint8;
+class Roll;
+struct Loot;
+struct LootItem;
 
 class GroupScript : public ScriptObject
 {
@@ -62,6 +66,9 @@ public:
     [[nodiscard]] virtual bool CanGroupJoinBattlegroundQueue(Group const* /*group*/, Player* /*member*/, Battleground const* /*bgTemplate*/, uint32 /*MinPlayerCount*/, bool /*isRated*/, uint32 /*arenaSlot*/) { return true; }
 
     virtual void OnCreate(Group* /*group*/, Player* /*leader*/) { }
+
+    virtual void OnLootRollStart(Group* /*group*/, Roll const& /*roll*/, Loot const& /*loot*/,
+        LootItem const& /*item*/) { }
 };
 
 #endif

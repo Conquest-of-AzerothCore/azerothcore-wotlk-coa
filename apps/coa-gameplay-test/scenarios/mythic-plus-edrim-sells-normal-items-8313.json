@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "Edrim Skysong buys normal and Mythic Dungeon items for gold and recycles only Mythic 1+ items (#8313)",
+  "contract": [
+    "#8313: on Ascension, selling to Edrim Skysong paid gold for normal items and for plain Mythic Dungeon items, and",
+    "only Mythic+ items (level 1 and higher) were recycled into Mythic Coins. Edrim used to refuse every item outside",
+    "the Mythic chain and every Mythic Dungeon item. Robes of Arugal (6324, sells for 2366 copper) and its Mythic",
+    "Dungeon version (1656324, 1577 copper) now sell for their vendor price, while the Mythic 1 robes (400168) are",
+    "still recycled for 46 Mythic Coins and no gold."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [ { "id": "hero", "race": 1, "class": 1, "level": 60 } ],
+  "steps": [
+    { "action": "summon", "actor": "hero", "entry": 416000, "as": "edrim", "distance": 3 },
+    { "action": "add_item", "actor": "hero", "item": 6324, "count": 1 },
+    { "action": "add_item", "actor": "hero", "item": 1656324, "count": 1 },
+    { "action": "add_item", "actor": "hero", "item": 400168, "count": 1 },
+    { "action": "gossip_hello", "actor": "hero", "target": "edrim" },
+    { "action": "gossip_select", "label": "Open the recycle menu", "actor": "hero", "option": 7 },
+    { "action": "gossip_select", "label": "You can MASS recycle items by selling them to me.", "actor": "hero", "option": 3 },
+    { "action": "assert", "label": "SETUP: Edrim's merchant window opens", "actor": "hero", "metric": "vendor_list_packets", "min": 1, "within_ms": 2000 },
+    { "action": "snapshot", "actor": "hero", "metric": "carried_money", "save_as": "money_start" },
+    { "action": "client_packet", "label": "Sell the normal robes", "actor": "hero", "opcode": 416, "consumed": false,
+      "fields": [ { "actor_guid": "edrim" }, { "item_guid": 6324 }, { "u32": 1 } ] },
+    { "action": "assert", "label": "the normal robes are sold", "actor": "hero", "metric": "item_count", "item": 6324, "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "label": "the normal robes pay their vendor price", "actor": "hero", "metric": "carried_money", "relative_to": "money_start", "equals": 2366 },
+    { "action": "client_packet", "label": "Sell the Mythic Dungeon robes", "actor": "hero", "opcode": 416, "consumed": false,
+      "fields": [ { "actor_guid": "edrim" }, { "item_guid": 1656324 }, { "u32": 1 } ] },
+    { "action": "assert", "label": "the Mythic Dungeon robes are sold", "actor": "hero", "metric": "item_count", "item": 1656324, "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "label": "the Mythic Dungeon robes pay their vendor price", "actor": "hero", "metric": "carried_money", "relative_to": "money_start", "equals": 3943 },
+    { "action": "assert", "label": "CONTROL: no Mythic Coins for items below Mythic 1", "actor": "hero", "metric": "item_count", "item": 1414500, "equals": 0 },
+    { "action": "client_packet", "label": "Sell the Mythic 1 robes", "actor": "hero", "opcode": 416, "consumed": false,
+      "fields": [ { "actor_guid": "edrim" }, { "item_guid": 400168 }, { "u32": 1 } ] },
+    { "action": "assert", "label": "the Mythic 1 robes are recycled", "actor": "hero", "metric": "item_count", "item": 400168, "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "label": "46 Mythic Coins for the Mythic 1 robes", "actor": "hero", "metric": "item_count", "item": 1414500, "equals": 46 },
+    { "action": "assert", "label": "no gold for a recycled item", "actor": "hero", "metric": "carried_money", "relative_to": "money_start", "equals": 3943 }
+  ]
+}

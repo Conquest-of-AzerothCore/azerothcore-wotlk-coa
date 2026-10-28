@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "name": "Xoroth Flay preserves NPC loot and rejects a second harvest (#6537)",
+  "contract": "Flay801042 uses each corpse once and restores20 Rage without removing the corpse or its loot.",
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 19
+    }
+  ],
+  "creatures": [
+    {
+      "id": "kobold",
+      "owner": "knight",
+      "entry": 6,
+      "level": 18,
+      "health": 1,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "knight",
+      "spell": 801042
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "knight",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 801042,
+      "target": "kobold"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 801042,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_energize_total",
+      "spell": 801042,
+      "equals": 200
+    },
+    {
+      "action": "loot_creature",
+      "actor": "knight",
+      "target": "kobold"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "loot_gold",
+      "min": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "knight",
+      "spell": 801042
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 801042,
+      "target": "kobold"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 801042,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_energize_total",
+      "spell": 801042,
+      "equals": 200
+    }
+  ]
+}

@@ -1,0 +1,495 @@
+{
+  "schema": 1,
+  "name": "Upper Blackrock Spire: Gyth resets and can be killed again after Rend died and Gyth wiped the group",
+  "contract": "Once Warchief Rend Blackhand is dead, a wipe against Gyth does not undo Rend's kill. Gyth evades home and stays in the stadium, Rend does not return, and Gyth's health no longer calls out a second Rend, so the group can come back and kill Gyth.",
+  "timeout_ms": 600000,
+  "location": {
+    "map": 229,
+    "x": 153.763,
+    "y": -419.833,
+    "z": 110.472,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Upper Blackrock Spire",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 229
+    },
+    {
+      "action": "set_phase",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Rend waits on the balcony above the stadium",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10429,
+      "equals": 1
+    },
+    {
+      "action": "area_trigger",
+      "label": "Enter Blackrock Stadium",
+      "actor": "hero",
+      "id": 2026
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 229,
+      "x": 195.0,
+      "y": -420.0,
+      "z": 110.6
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10447,
+      "kill": true,
+      "label": "Clear the arena's standing guard"
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000,
+      "maximum": 2000000
+    },
+    {
+      "action": "assert",
+      "label": "Wave 1 enters the arena",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10442,
+      "min": 1,
+      "within_ms": 40000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10447,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Wave 2 enters the arena",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10447,
+      "min": 1,
+      "within_ms": 40000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10447,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Wave 3 enters the arena",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10742,
+      "min": 1,
+      "within_ms": 40000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10742,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10447,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Wave 4 enters the arena",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10742,
+      "min": 1,
+      "within_ms": 40000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10742,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10447,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Wave 5 enters the arena",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10742,
+      "min": 1,
+      "within_ms": 40000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10742,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10447,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Wave 6 enters the arena",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10742,
+      "min": 1,
+      "within_ms": 40000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10742,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10447,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10447,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Gyth enters the arena after the sixth wave",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10339,
+      "min": 1,
+      "within_ms": 150000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000,
+      "maximum": 2000000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Engage Gyth",
+      "actor": "hero",
+      "entry": 10339
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is fighting Gyth",
+      "actor": "hero",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Rend is still mounted, not on the arena floor",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10429,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Bring Gyth below a quarter of his health",
+      "actor": "hero",
+      "entry": 10339,
+      "damage_pct": 80
+    },
+    {
+      "action": "assert",
+      "label": "Rend is knocked off Gyth and joins the fight",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10429,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000,
+      "maximum": 2000000
+    },
+    {
+      "action": "assert",
+      "label": "Rend opens with his Rend bleed",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 2102842,
+      "min": 1,
+      "within_ms": 45000
+    },
+    {
+      "action": "assert",
+      "label": "Rend fights with Mortal Strike",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 2102846,
+      "min": 1,
+      "within_ms": 45000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10429,
+      "kill": true,
+      "label": "Rend can be killed"
+    },
+    {
+      "action": "die",
+      "label": "The group wipes",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is dead",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the arena reset after the wipe",
+      "ms": 5000
+    },
+    {
+      "action": "release_spirit",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is back on their feet",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000,
+      "maximum": 2000000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 229,
+      "x": 195.0,
+      "y": -420.0,
+      "z": 110.6,
+      "label": "Return to the arena after the wipe"
+    },
+    {
+      "action": "assert",
+      "label": "Gyth is still in the arena after his evade",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10339,
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Rend stays dead",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10429,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let Gyth finish walking home",
+      "ms": 5000
+    },
+    {
+      "action": "teleport",
+      "label": "Follow Gyth to the end of his path, where he evades to",
+      "actor": "hero",
+      "map": 229,
+      "x": 140.0,
+      "y": -420.5,
+      "z": 110.6
+    },
+    {
+      "action": "assert",
+      "label": "Gyth waits at the end of his path",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10339,
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Bring the reset Gyth below a quarter of his health again",
+      "actor": "hero",
+      "entry": 10339,
+      "damage_pct": 80
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Gyth does not call out a second Rend",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10429,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Gyth can be killed on the second attempt",
+      "actor": "hero",
+      "entry": 10339,
+      "kill": true
+    }
+  ]
+}

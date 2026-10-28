@@ -113,10 +113,10 @@ class aura_ascension_templar_lifecycle : public AuraScript
         }
         if (GetTarget() != player)
             return;
-        for (uint32 selected : {806354, 807004, 561156, 681136, 712378, 524766, 806523, 524617})
+        for (uint32 selected : {806354, 807004, 561156, 681136, 712378, 524766, 806523, 524617, 300514})
             if (id == selected)
             {
-                GetAura()->SetCharges(id == 806523 ? 2 : 1);
+                GetAura()->SetCharges(id == 300514 ? 3 : (id == 806523 ? 2 : 1));
                 GetAura()->SetScriptValue(704576, ++State(player).sequence);
             }
         if (id == 805422)

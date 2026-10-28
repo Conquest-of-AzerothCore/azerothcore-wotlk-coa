@@ -30,6 +30,17 @@ PathToAscension.Enable = 1
 #        Default:     3 - (PTR)
 PathToAscension.RealmProfile = 3
 
+#    PathToAscension.Expansion
+#        Description: The expansion whose tutorial variants this realm offers. Tutorials of other expansions
+#                     are hidden from the client, those of this expansion are shown whatever expansion the
+#                     client derives from MaxPlayerLevel. The Onyxia's Lair and Naxxramas tutorials of the
+#                     original game stay hidden while those raids run as Wrath of the Lich King content,
+#                     and the Mythic+ Dungeons tutorial while the server has no Mythic+ dungeons.
+#                     -1 - Follow the worldserver Expansion option
+#                      0 - Vanilla, 1 - The Burning Crusade, 2 - Wrath of the Lich King
+#        Default:     0 - (Vanilla)
+PathToAscension.Expansion = 0
+
 #    PathToAscension.VerifiedProgress.Enable
 #        Description: Record objective progress from the server events the module observes.
 #        Default:     1 - (Enabled)
@@ -47,13 +58,7 @@ PathToAscension.Rewards.Enable = 1
 PathToAscension.Tracking.Enable = 1
 
 #    PathToAscension.LegacyContent.Enable
-#        Description: Also offer the restored Vanilla and Burning Crusade raid and gear tutorials that have
-#                     no Wrath of the Lich King variant. Their objectives and rewards are unchanged.
+#        Description: Also offer the restored raid and gear tutorials of expansions older than
+#                     PathToAscension.Expansion. Their objectives and rewards are unchanged.
 #        Default:     0 - (Disabled)
 PathToAscension.LegacyContent.Enable = 0
-
-#    PathToAscension.StarterMountBridge.Enable
-#        Description: Riding trainers hand a character its race's starter mount once, after it learned
-#                     Apprentice Riding, so the starter mount tutorials can be completed.
-#        Default:     0 - (Disabled)
-PathToAscension.StarterMountBridge.Enable = 0

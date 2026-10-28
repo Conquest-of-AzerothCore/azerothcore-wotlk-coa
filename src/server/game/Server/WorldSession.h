@@ -454,6 +454,7 @@ public:
 
     void ReadAddonsInfo(ByteBuffer& data);
     void SendAddonsInfo();
+    std::vector<std::string> const& GetClientAddonNames() const { return m_clientAddonNames; }
 
     void ReadMovementInfo(WorldPacket& data, MovementInfo* mi);
     void WriteMovementInfo(WorldPacket* data, MovementInfo* mi);
@@ -690,6 +691,18 @@ public:
     // Recruit-A-Friend Handling
     uint32 GetRecruiterId() const { return recruiterId; }
     bool IsARecruiter() const { return isRecruiter; }
+    bool InviteRecruitAFriend(Player* target);
+    bool HandleRecruitAFriendInviteResponse(uint32 menuId, uint32 action);
+    void RefreshRecruitAFriendFlags();
+    SpellCastResult CheckRecruitAFriendSummon(Player const* target) const;
+    void SetRecruitAFriendSummoner(ObjectGuid guid) { _rafSummoner = guid; }
+    bool ValidateRecruitAFriendSummon(ObjectGuid guid, bool agree);
+    void ClearRecruitAFriendRequests();
+    void UpdateRecruitAFriendRewards(bool force = false);
+    bool HandleRecruitAFriendRewardsCommand(std::string const& command);
+    void UpdateRecruitMilestoneRewards();
+    void RecoverRecruitAFriendRewards(bool recruit = false);
+    void DeliverRecruitAFriendRewards(PreparedQueryResult rows, bool recruit);
 
     // Packets cooldown
     time_t GetCalendarEventCreationCooldown() const { return _calendarEventCreationCooldown; }
@@ -889,6 +902,7 @@ public:                                                 // opcodes handlers
     void HandleTaxiQueryAvailableNodes(WorldPacket& recvPacket);
     void HandleActivateTaxiOpcode(WorldPacket& recvPacket);
     void HandleActivateTaxiExpressOpcode(WorldPacket& recvPacket);
+    void HandleTaxiRequestEarlyLandingOpcode(WorldPacket& recvPacket);
     void HandleMoveSplineDoneOpcode(WorldPacket& recvPacket);
     void SendActivateTaxiReply(ActivateTaxiReply reply);
 
@@ -904,6 +918,7 @@ public:                                                 // opcodes handlers
     void HandleListStabledPetsOpcode(WorldPacket& recvPacket);
     void HandleStablePet(WorldPacket& recvPacket);
     void HandleUnstablePet(WorldPacket& recvPacket);
+    void HandleStableDeletePet(WorldPacket& recvPacket);
     void HandleBuyStableSlot(WorldPacket& recvPacket);
     void HandleStableRevivePet(WorldPacket& recvPacket);
     void HandleStableSwapPet(WorldPacket& recvPacket);
@@ -1096,6 +1111,9 @@ public:                                                 // opcodes handlers
     void HandleResetInstancesOpcode(WorldPackets::Instance::ResetInstances& packet);
     void HandleResetDungeonsOpcode(WorldPacket& recvData);
     void ResetAllDungeons();
+    void HandlePortGraveyardOpcode(WorldPacket& recvData);
+    void HandleQueryInstanceBindsOpcode(WorldPacket& recvData);
+    void HandleResetInstanceOpcode(WorldPacket& recvData);
     void HandleHearthAndResurrect(WorldPacket& recvData);
     void HandleInstanceLockResponse(WorldPackets::Instance::InstanceLockResponse& packet);
     void HandleUpdateMissileTrajectory(WorldPacket& recvPacket);
@@ -1268,6 +1286,11 @@ public:                                                 // opcodes handlers
         return _isBot;
     }
 
+    [[nodiscard]] bool IsHeadlessBot() const
+    {
+        return _isBot && !m_Socket && !_socketlessPacketObserver;
+    }
+
 private:
     void ProcessQueryCallbacks();
 
@@ -1365,8 +1388,20 @@ private:
     uint32 m_Tutorials[MAX_ACCOUNT_TUTORIAL_VALUES];
     bool   m_TutorialsChanged;
     AddonsList m_addonsList;
+    std::vector<std::string> m_clientAddonNames;
     uint32 recruiterId;
     bool isRecruiter;
+    ObjectGuid _rafGrantFrom;
+    ObjectGuid _rafGrantRecipient;
+    uint8 _rafGrantLevel = 0;
+    uint8 _rafGrantDonorLevel = 0;
+    time_t _rafGrantExpiry = 0;
+    ObjectGuid _rafInviter;
+    time_t _rafInviteExpiry = 0;
+    time_t _rafInviteCooldown = 0;
+    time_t _rafRewardsNextUpdate = 0;
+    uint64 _rafRewardSession = 0;
+    ObjectGuid _rafSummoner;
     LockedQueue<WorldPacket*> _recvQueue;
     std::atomic<uint64> _scriptPacketToken{0};
     uint32 m_currentVendorEntry;

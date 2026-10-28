@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Knight of Xoroth: the Greater Imp keeps its lesser Pestilence after a relog (#4286)",
+  "contract": "Pestilence of Apocalypse 804786 marks the caster with a permanent self aura and, while Impish Pestilence 300398 is active, applies the matching lesser Pestilence 806962 onto the already-summoned Greater Imp 510100. That pet aura must survive a relog exactly like the player's own Pestilence stance does, so the imp does not come back without its buff.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "knight", "spell": 300398 },
+    { "action": "learn", "actor": "knight", "spell": 804786 },
+    { "action": "learn", "actor": "knight", "spell": 520661 },
+    { "action": "cast", "label": "Summon the Greater Imp", "actor": "knight", "spell": 520661 },
+    {
+      "action": "assert", "label": "SETUP: the Greater Imp is out",
+      "actor": "knight", "metric": "pet_entry", "equals": 510100, "within_ms": 24000
+    },
+    { "action": "cast", "label": "Enter Pestilence of Apocalypse", "actor": "knight", "spell": 804786 },
+    {
+      "action": "assert", "label": "SETUP: the Pestilence of Apocalypse stance is active",
+      "actor": "knight", "metric": "aura", "spell": 804786, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: the imp carries the lesser Pestilence",
+      "actor": "knight", "metric": "pet_aura_stacks", "spell": 806962, "equals": 1, "within_ms": 3000
+    },
+    { "action": "relog", "actor": "knight" },
+    {
+      "action": "assert", "label": "SETUP: the Greater Imp is retained across the relog",
+      "actor": "knight", "metric": "pet_entry", "equals": 510100, "within_ms": 10000
+    },
+    {
+      "action": "assert", "label": "SETUP: the Pestilence of Apocalypse stance is restored at login",
+      "actor": "knight", "metric": "aura", "spell": 804786, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "The imp still carries the lesser Pestilence after the relog",
+      "actor": "knight", "metric": "pet_aura_stacks", "spell": 806962, "equals": 1, "within_ms": 5000
+    }
+  ]
+}

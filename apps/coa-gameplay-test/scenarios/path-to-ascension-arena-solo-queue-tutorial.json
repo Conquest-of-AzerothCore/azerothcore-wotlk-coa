@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Path to Ascension: joining the rated 2v2 solo queue verifies Arena Solo Queue",
+  "contract": "Arena Solo Queue (23), any class and game mode, reads 'Join a 2v2 Arena Game using the Solo Queue function.'. The Ascension PvP window's Rated SoloQ buttons send 0x05C1 {u32 bracket, u32 role}: bracket 2 is the 2v2 solo queue and bracket 5 the 1v1 solo queue. A successful join gives the player a personal one-member arena team (slot 0 for 2v2, slot 2 for 1v1) and SMSG_BATTLEFIELD_STATUS (0x02D4) for queue slot 0 with the arena type (2 or 1), the rated flag and STATUS_WAIT_QUEUE (1). CMSG_BATTLEFIELD_PORT (0x02D5) with action 0 leaves the queue, answered by an empty status for that slot. Joining the 2v2 solo queue verifies Arena Solo Queue; joining the 1v1 solo queue does not, as it is not a 2v2 game.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "duo", "race": 1, "class": 1, "level": 80 },
+    { "id": "solo", "race": 1, "class": 1, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8809.6, "y": 625.0, "z": 94.979, "o": 2.1 },
+  "steps": [
+    { "action": "wait", "label": "Let the characters settle", "ms": 3000 },
+
+    { "action": "assert", "label": "Arena Solo Queue is not verified before queueing", "actor": "duo", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 23, "equals": 0 },
+    {
+      "action": "client_packet", "label": "Join the rated 2v2 solo queue as a damage dealer", "actor": "duo", "opcode": 1473,
+      "fields": [ { "u32": 2 }, { "u32": 8 } ]
+    },
+    { "action": "assert", "label": "The player queues with a personal one-member 2v2 team", "actor": "duo", "metric": "arena_team_members", "slot": 0, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "and is told it waits in the queue", "actor": "duo", "metric": "server_packet_u8", "opcode": 724, "row": 0, "index": 19, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "for a 2v2 arena", "actor": "duo", "metric": "server_packet_u8", "opcode": 724, "row": 0, "index": 4, "equals": 2 },
+    { "action": "assert", "label": "that is rated", "actor": "duo", "metric": "server_packet_u8", "opcode": 724, "row": 0, "index": 18, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: joining the 2v2 solo queue verifies Arena Solo Queue", "actor": "duo", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 23, "equals": 1, "within_ms": 3000 },
+    {
+      "action": "client_packet", "label": "Leave the 2v2 queue so no other case's solo player is matched with this one", "actor": "duo", "opcode": 725, "consumed": false,
+      "fields": [ { "u8": 2 }, { "u8": 14 }, { "u32": 6 }, { "u8": 144 }, { "u8": 31 }, { "u8": 0 } ]
+    },
+    { "action": "assert", "label": "The queue slot is cleared", "actor": "duo", "metric": "server_packet_u32", "opcode": 724, "row": 0, "index": 1, "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "label": "and the tutorial stays verified", "actor": "duo", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 23, "equals": 1 },
+
+    {
+      "action": "client_packet", "label": "Another player joins the rated 1v1 solo queue", "actor": "solo", "opcode": 1473,
+      "fields": [ { "u32": 5 }, { "u32": 8 } ]
+    },
+    { "action": "assert", "label": "The player queues with a personal one-member team in the third slot", "actor": "solo", "metric": "arena_team_members", "slot": 2, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "and is told it waits in the queue", "actor": "solo", "metric": "server_packet_u8", "opcode": 724, "row": 0, "index": 19, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "for a 1v1 arena", "actor": "solo", "metric": "server_packet_u8", "opcode": 724, "row": 0, "index": 4, "equals": 1 },
+    {
+      "action": "client_packet", "label": "Leave the 1v1 queue so no other case's solo player is matched with this one", "actor": "solo", "opcode": 725, "consumed": false,
+      "fields": [ { "u8": 1 }, { "u8": 14 }, { "u32": 6 }, { "u8": 144 }, { "u8": 31 }, { "u8": 0 } ]
+    },
+    { "action": "assert", "label": "The 1v1 queue slot is cleared", "actor": "solo", "metric": "server_packet_u32", "opcode": 724, "row": 0, "index": 1, "equals": 0, "within_ms": 2000 },
+    { "action": "wait", "label": "Give the tutorial a state check", "ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: the 1v1 solo queue does not verify Arena Solo Queue", "actor": "solo", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 23, "equals": 0 }
+  ]
+}

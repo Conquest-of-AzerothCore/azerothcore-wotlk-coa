@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "name": "Apparition improves Underwalk concealment and Spectre Stride damage (#1372)",
+  "contract": [
+    "Apparition promises 30% Spectre Stride damage and reduced detection while in Underwalk. Its encoded",
+    "100% effect modifier must select Underwalk stealth effect 1, whose level-scaled untalented amount is",
+    "snapshotted, rather than the shapeshift effect 0. A normal Underwalk cast must resolve twice the",
+    "baseline stealth points with the talent and return to the baseline without it. This checks server",
+    "aura amounts and spell modifiers; client perception is not observed."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "r",
+      "race": 1,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 800797
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 800797
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "aura_amount",
+      "spell": 800797,
+      "effect": 1,
+      "save_as": "stealth_before"
+    },
+    {
+      "action": "set_aura",
+      "actor": "r",
+      "spell": 800797,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 705389
+    },
+    {
+      "action": "assert",
+      "label": "Spectre Stride receives 30% damage",
+      "actor": "r",
+      "metric": "spell_modifier",
+      "spell": 802422,
+      "op": 0,
+      "base": 1000,
+      "min": 1299,
+      "max": 1301
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "r",
+      "spell": 800797
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 800797
+    },
+    {
+      "action": "assert",
+      "label": "Apparition doubles Underwalk stealth points",
+      "actor": "r",
+      "metric": "aura_amount",
+      "spell": 800797,
+      "effect": 1,
+      "within_ms": 1000,
+      "ratio_to": "stealth_before",
+      "min": 1.99,
+      "max": 2.01
+    },
+    {
+      "action": "set_aura",
+      "actor": "r",
+      "spell": 800797,
+      "stacks": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "r",
+      "spell": 705389
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "r",
+      "spell": 800797
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 800797
+    },
+    {
+      "action": "assert",
+      "label": "Removing Apparition restores concealment",
+      "actor": "r",
+      "metric": "aura_amount",
+      "spell": 800797,
+      "effect": 1,
+      "within_ms": 1000,
+      "relative_to": "stealth_before",
+      "equals": 0
+    }
+  ]
+}

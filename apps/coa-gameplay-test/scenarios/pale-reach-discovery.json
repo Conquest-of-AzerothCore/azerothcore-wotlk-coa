@@ -1,0 +1,333 @@
+{
+  "schema": 1,
+  "name": "Pale Reach is discovered at Alliance level 18 and accepted through the quest popup",
+  "contract": "Quest 175207 Pale Reach has minimum level 18 in the captured realm quest cache. Offer it to Alliance characters reaching that level and on login if still eligible. The captured client auto quest protocol uses SMSG 0x927 with quest id then type 0; acceptance is CMSG 0x189 with an empty giver GUID. Offer once per session, without accepting automatically; suppress for Horde, lower levels, active or rewarded introductions and an already started introductory chain. Sir Dharil Cohen (164000) completes the introduction.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "alliance",
+      "race": 1,
+      "class": 1,
+      "level": 17
+    },
+    {
+      "id": "horde",
+      "race": 2,
+      "class": 1,
+      "level": 17
+    },
+    {
+      "id": "veteran",
+      "race": 1,
+      "class": 1,
+      "level": 17
+    }
+  ],
+  "steps": [
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "equals": 0,
+      "opcode": 2343,
+      "row": 175207,
+      "label": "No Pale Reach offer below level 18"
+    },
+    {
+      "action": "client_packet",
+      "actor": "alliance",
+      "opcode": 393,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 175207
+        },
+        {
+          "u32": 0
+        }
+      ],
+      "early": false,
+      "consumed": false,
+      "label": "Reject a level 17 popup acceptance"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "quest_status",
+      "equals": 0,
+      "quest": 175207
+    },
+    {
+      "action": "set_level",
+      "actor": "horde",
+      "value": 18,
+      "label": "Horde reaches level 18"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "server_packets",
+      "equals": 0,
+      "opcode": 2343,
+      "row": 175207,
+      "label": "No Pale Reach offer for Horde"
+    },
+    {
+      "action": "client_packet",
+      "actor": "horde",
+      "opcode": 393,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 175207
+        },
+        {
+          "u32": 0
+        }
+      ],
+      "early": false,
+      "consumed": false,
+      "label": "Reject a Horde popup acceptance"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "quest_status",
+      "equals": 0,
+      "quest": 175207
+    },
+    {
+      "action": "set_level",
+      "actor": "alliance",
+      "value": 18,
+      "label": "Alliance reaches level 18"
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "equals": 1,
+      "opcode": 2343,
+      "within_ms": 1000,
+      "row": 175207,
+      "label": "Offer Pale Reach at level 18"
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packet_u32",
+      "equals": 175207,
+      "opcode": 2343,
+      "index": 0,
+      "row": 175207,
+      "label": "The popup names Pale Reach"
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packet_u32",
+      "equals": 0,
+      "opcode": 2343,
+      "index": 1,
+      "row": 175207,
+      "label": "The popup is an offer"
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "quest_status",
+      "equals": 0,
+      "quest": 175207,
+      "label": "Discovery does not automatically accept the quest"
+    },
+    {
+      "action": "set_level",
+      "actor": "alliance",
+      "value": 19,
+      "label": "Alliance reaches level 19"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "equals": 1,
+      "opcode": 2343,
+      "row": 175207,
+      "label": "Later level-ups do not repeat the offer"
+    },
+    {
+      "action": "relog",
+      "actor": "alliance",
+      "label": "Relog with the introduction still unaccepted"
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "equals": 2,
+      "opcode": 2343,
+      "within_ms": 1000,
+      "row": 175207,
+      "label": "Restore the unaccepted offer on login"
+    },
+    {
+      "action": "client_packet",
+      "actor": "alliance",
+      "opcode": 390,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 175207
+        },
+        {
+          "u8": 0
+        }
+      ],
+      "early": false,
+      "consumed": true,
+      "label": "Open the introduction from the popup"
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packet_u32",
+      "equals": 175207,
+      "opcode": 392,
+      "within_ms": 1000,
+      "row": 0,
+      "index": 4,
+      "label": "The details window names Pale Reach"
+    },
+    {
+      "action": "client_packet",
+      "actor": "alliance",
+      "opcode": 393,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 175207
+        },
+        {
+          "u32": 0
+        }
+      ],
+      "early": false,
+      "consumed": true,
+      "label": "Accept Pale Reach from the popup"
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "quest_status",
+      "equals": 1,
+      "quest": 175207,
+      "within_ms": 1000,
+      "label": "The report quest is complete after acceptance"
+    },
+    {
+      "action": "relog",
+      "actor": "alliance",
+      "label": "Relog with the introduction active"
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "equals": 2,
+      "opcode": 2343,
+      "row": 175207,
+      "label": "Do not offer an active introduction again"
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "alliance",
+      "quest": 175207,
+      "entry": 164000,
+      "label": "Turn in the introduction to Sir Dharil Cohen"
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "quest_rewarded",
+      "equals": 1,
+      "quest": 175207,
+      "within_ms": 1000,
+      "label": "Dharil rewards the introduction"
+    },
+    {
+      "action": "relog",
+      "actor": "alliance",
+      "label": "Relog after the introduction was rewarded"
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "equals": 2,
+      "opcode": 2343,
+      "row": 175207,
+      "label": "Do not offer a rewarded introduction"
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "veteran",
+      "quest": 175000,
+      "complete": false,
+      "label": "Prepare an already started opening chain"
+    },
+    {
+      "action": "set_level",
+      "actor": "veteran",
+      "value": 18,
+      "label": "An existing visitor reaches level 18"
+    },
+    {
+      "action": "relog",
+      "actor": "veteran",
+      "label": "Relog the existing visitor"
+    },
+    {
+      "action": "assert",
+      "actor": "veteran",
+      "metric": "server_packets",
+      "equals": 0,
+      "opcode": 2343,
+      "row": 175207,
+      "label": "Do not offer the introduction after the opening chain started"
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dharil",
+      "owner": "alliance",
+      "entry": 164000,
+      "distance": 4,
+      "faction": 35,
+      "level": 18
+    }
+  ]
+}

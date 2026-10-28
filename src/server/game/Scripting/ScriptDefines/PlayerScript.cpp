@@ -169,6 +169,11 @@ bool ScriptMgr::OnPlayerHasNoBonusExperience(Player* player)
     return suppress;
 }
 
+void ScriptMgr::OnPlayerHonorableKillingBlow(Player* killer, Player* victim)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_HONORABLE_KILLING_BLOW, script->OnPlayerHonorableKillingBlow(killer, victim));
+}
+
 bool ScriptMgr::OnPlayerReputationChange(Player* player, uint32 factionID, int32& standing, bool incremental)
 {
     CALL_ENABLED_BOOLEAN_HOOKS(PlayerScript, PLAYERHOOK_ON_REPUTATION_CHANGE, !script->OnPlayerReputationChange(player, factionID, standing, incremental));
@@ -684,6 +689,12 @@ void ScriptMgr::OnPlayerApplyItemModsBefore(Player* player, uint8 slot, bool app
     CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_APPLY_ITEM_MODS_BEFORE, script->OnPlayerApplyItemModsBefore(player, slot, apply, itemProtoStatNumber, statType, val));
 }
 
+void ScriptMgr::OnPlayerAfterApplyItemMods(Player* player, Item* item, uint8 slot, bool apply)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_AFTER_APPLY_ITEM_MODS,
+        script->OnPlayerAfterApplyItemMods(player, item, slot, apply));
+}
+
 void ScriptMgr::OnPlayerApplyEnchantmentItemModsBefore(Player* player, Item* item, EnchantmentSlot slot, bool apply, uint32 enchant_spell_id, uint32& enchant_amount)
 {
     CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_APPLY_ENCHANTMENT_ITEM_MODS_BEFORE, script->OnPlayerApplyEnchantmentItemModsBefore(player, item, slot, apply, enchant_spell_id, enchant_amount));
@@ -1038,9 +1049,45 @@ void ScriptMgr::OnPlayerGetAmmoDisplay(Player* player, SpellInfo const* spellInf
         script->OnPlayerGetAmmoDisplay(player, spellInfo, displayId, inventoryType));
 }
 
+void ScriptMgr::OnPlayerGetShapeshiftModel(Player* player, uint8 form, uint32 spellId, uint32& modelId)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_GET_SHAPESHIFT_MODEL,
+        script->OnPlayerGetShapeshiftModel(player, form, spellId, modelId));
+}
+
+void ScriptMgr::OnPlayerGetNameQueryRace(Player* player, uint8& race)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_GET_NAME_QUERY_RACE, script->OnPlayerGetNameQueryRace(player, race));
+}
+
 void ScriptMgr::OnPlayerNormalizeActionButtonSpell(Player* player, uint32& action, bool loading)
 {
     CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_NORMALIZE_ACTION_BUTTON_SPELL, script->OnPlayerNormalizeActionButtonSpell(player, action, loading));
+}
+
+void ScriptMgr::OnPlayerSendSpellChargeStates(Player const* player)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_SEND_SPELL_CHARGE_STATES,
+        script->OnPlayerSendSpellChargeStates(player));
+}
+
+void ScriptMgr::OnPlayerTemporarySpellReplacementNotice(Player* player, uint32 previous, uint32 replacement,
+    bool sent)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_TEMPORARY_SPELL_REPLACEMENT_NOTICE,
+        script->OnPlayerTemporarySpellReplacementNotice(player, previous, replacement, sent));
+}
+
+void ScriptMgr::OnPlayerTemporarySpellLearnNotice(Player* player, uint32 spellId, bool sent)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_TEMPORARY_SPELL_LEARN_NOTICE,
+        script->OnPlayerTemporarySpellLearnNotice(player, spellId, sent));
+}
+
+void ScriptMgr::OnPlayerTemporarySpellRemoveNotice(Player* player, uint32 spellId, bool sent)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_TEMPORARY_SPELL_REMOVE_NOTICE,
+        script->OnPlayerTemporarySpellRemoveNotice(player, spellId, sent));
 }
 
 void ScriptMgr::OnPlayerSpellChargeConsumed(Player* player, SpellInfo const* spellInfo, Spell* spell, uint32 recoveryMs, uint64 nowEpochMs)
@@ -1091,6 +1138,21 @@ bool ScriptMgr::OnPlayerRefreshQuestGiver(Player* player, Object* questGiver, Qu
 void ScriptMgr::OnPlayerCoAProgress(Player* player, CoAProgressEvent event, uint32 value)
 {
     CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_COA_PROGRESS, script->OnPlayerCoAProgress(player, event, value));
+}
+
+void ScriptMgr::OnPlayerCoAPrestige(Player* player, CharacterDatabaseTransaction trans)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_COA_PRESTIGE, script->OnPlayerCoAPrestige(player, trans));
+}
+
+void ScriptMgr::OnPlayerCoAPrestigeSaved(Player* player)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_COA_PRESTIGE_SAVED, script->OnPlayerCoAPrestigeSaved(player));
+}
+
+void ScriptMgr::OnPlayerMasterLootItem(Player* player, Item* item, uint32 count, ObjectGuid lootguid)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_MASTER_LOOT_ITEM, script->OnPlayerMasterLootItem(player, item, count, lootguid));
 }
 
 std::optional<uint32> ScriptMgr::OnPlayerGetGameModeMask(Player const* player)

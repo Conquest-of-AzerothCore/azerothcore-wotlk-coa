@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Frost Wyrm blasts enemies you fight every 2 seconds (#6667)",
+  "contract": "Animate: Frost Wyrm 805428 reads 'flies behind the Necromancer that blasts nearby enemies every 2 sec ..., dealing ${$807339m1+(($spfr*0.702)+($INT*0.702))*0.212} Frost damage'. Without any command, once the Necromancer is in combat with an enemy, the wyrm 50177 must breathe on it about every 2 seconds: the stock Frost Breath missile 45200 shows the breath, since 807339 has no visual, and Frost Wyrm Breath 807339 (1500 base) lands as health loss. It still never casts Skeletal Mage's Command spell (#4536).",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 60, "allow_regeneration": false, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "n", "entry": 36, "level": 60, "health": 1000000, "distance": 15 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 805428 },
+    { "action": "learn", "actor": "n", "spell": 770 },
+    { "action": "cast", "label": "Animate: Frost Wyrm", "actor": "n", "spell": 805428 },
+    {
+      "action": "assert", "label": "SETUP: the Frost Wyrm is out", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50177, "min": 1, "within_ms": 8000
+    },
+    { "action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "enemy_health" },
+    { "action": "wait", "ms": 3000 },
+    {
+      "action": "assert", "label": "CONTROL: no breath out of combat", "actor": "enemy",
+      "metric": "health", "relative_to": "enemy_health", "equals": 0
+    },
+    { "action": "cast", "label": "Faerie Fire starts the fight without commanding the wyrm", "actor": "n", "spell": 770, "target": "enemy" },
+    {
+      "action": "assert", "label": "SETUP: the Necromancer is in combat", "actor": "n",
+      "metric": "combat", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The wyrm breathes on the enemy about every 2 seconds (4+ breaths of 1500+)",
+      "actor": "enemy", "metric": "health", "relative_to": "enemy_health", "max": -5500, "within_ms": 12000
+    },
+    {
+      "action": "assert", "label": "Each breath shows the Frost Breath missile", "actor": "n",
+      "metric": "spell_go_count", "spell": 45200, "entry": 50177, "min": 4
+    },
+    {
+      "action": "assert", "label": "Still no Skeletal Mage Command spell (#4536)", "actor": "n",
+      "metric": "spell_go_count", "spell": 801513, "entry": 50177, "equals": 0
+    }
+  ]
+}

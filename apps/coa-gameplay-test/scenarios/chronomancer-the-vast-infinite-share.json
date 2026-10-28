@@ -1,75 +1,233 @@
 {
   "schema": 1,
-  "name": "Chronomancer: The Vast Infinite shares 25% of a group member's damage evenly and heals it back at the end (#1106)",
-  "contract": "The Vast Infinite 706083 (Spell.dbc, family 28) reads 'All party and raid members become one, equally sharing 25% of all damage dealt to them for $d, up to a maximum of 100% of their total health. At the end of the duration, all affected allies are healed equal to the total damage shared split evenly amongst all allies.' Both effects target TARGET_UNIT_CASTER_AREA_RAID (100 yd, SPELL_ATTR3_ONLY_ON_PLAYER) for DurationIndex 1 (10000 ms). Effect 0 is aura 69 with EffectBasePoints 25 (DieSides 0) and EffectMiscValueB 100: the 25% share and the 100%-of-maximum-health cap. The client ships the two payloads: 707600 'The Vast Infinite [Damage]' ('Share damage.', SPELL_EFFECT_SCHOOL_DAMAGE) and 707601 'The Vast Infinite [Heal]' ('Share heal.', SPELL_EFFECT_HEAL), both resolved-value helpers with SPELL_ATTR3_IGNORE_CASTER_MODIFIERS and SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS. Before the fix the absorb was a flat 25-point shield and nothing cast 707600 or 707601. Expected with two grouped players A (caster) and B: a fixed non-critical Holy hit D on B (QA spell 45648 cast by a fixture) loses 25% of D to the shared pool, which is split evenly, so A and B each take D/8 through 707600 (B also takes any odd remainder). A therefore loses exactly its share, B loses 0.75 D + D/8 = 7 times A's share, B's own aura records the 0.25 D it absorbed (twice A's share), and when the 10 sec expire each player is healed through 707601 for the shared damage it took. The 100%-of-maximum-health cap is not exercised here.",
+  "name": "Chronomancer: The Vast Infinite shares 25% damage and heals it back at expiry (#1106)",
+  "contract": [
+    "The Vast Infinite 706083 (Spell.dbc, family 28) reads 'All party and raid members become one, equally",
+    "sharing 25% of all damage dealt to them for $d, up to a maximum of 100% of their total health. At the",
+    "end of the duration, all affected allies are healed equal to the total damage shared split evenly",
+    "amongst all allies.' Both effects target TARGET_UNIT_CASTER_AREA_RAID (100 yd,",
+    "SPELL_ATTR3_ONLY_ON_PLAYER) for DurationIndex 1 (10000 ms). Effect 0 is aura 69 with EffectBasePoints 25",
+    "(DieSides 0) and EffectMiscValueB 100: the 25% share and the 100%-of-maximum-health cap. The client",
+    "ships the two payloads: 707600 'The Vast Infinite [Damage]' ('Share damage.',",
+    "SPELL_EFFECT_SCHOOL_DAMAGE) and 707601 'The Vast Infinite [Heal]' ('Share heal.', SPELL_EFFECT_HEAL),",
+    "both resolved-value helpers with SPELL_ATTR3_IGNORE_CASTER_MODIFIERS and",
+    "SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS. Before the fix the absorb was a flat 25-point shield and",
+    "nothing cast 707600 or 707601. Expected with two grouped players A (caster) and B: a fixed non-critical",
+    "Holy hit D on B (QA spell 45648 cast by a fixture) loses 25% of D to the shared pool, which is split",
+    "evenly, so A and B each take D/8 through 707600 (B also takes any odd remainder). A therefore loses",
+    "exactly its share, B loses 0.75 D + D/8 = 7 times A's share, B's own aura records the 0.25 D it absorbed",
+    "(twice A's share), and when the 10 sec expire each player is healed through 707601 for the shared damage",
+    "it took. The 100%-of-maximum-health cap is not exercised here. The original single NPC QA hit retained",
+    "its ordinary same-level Magic miss chance. Configure and assert the fixture NPC native spell hit bonus",
+    "at 100 percentage points. The original noncritical QA damage, two grouped holders and all quarter-share,",
+    "health-loss, absorbed-pool, no-early-healing and expiry-healing assertions remain. Unconfigured NPCs",
+    "retain their original hit modifier."
+  ],
   "timeout_ms": 60000,
   "players": [
-    { "id": "chrono", "race": 1, "class": 22, "level": 80, "allow_regeneration": false },
-    { "id": "ally", "race": 1, "class": 1, "level": 80, "allow_regeneration": false }
+    {
+      "id": "chrono",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 80,
+      "allow_regeneration": false
+    }
   ],
   "creatures": [
-    { "id": "striker", "owner": "ally", "entry": 36, "faction": 14, "level": 80, "health": 1000000, "distance": 5 }
+    {
+      "id": "striker",
+      "owner": "ally",
+      "entry": 36,
+      "faction": 14,
+      "level": 80,
+      "health": 1000000,
+      "distance": 5,
+      "spell_hit_bonus": 100
+    }
   ],
   "steps": [
-    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
-    { "action": "group", "actor": "chrono", "target": "ally" },
-    { "action": "learn", "actor": "chrono", "spell": 706083 },
-    { "action": "cast", "actor": "chrono", "spell": 706083 },
     {
-      "action": "assert", "label": "The caster is linked",
-      "actor": "chrono", "metric": "aura", "spell": 706083, "caster": "chrono", "equals": 1, "within_ms": 2000
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
     },
     {
-      "action": "assert", "label": "The grouped ally is linked by the same cast",
-      "actor": "ally", "metric": "aura", "spell": 706083, "caster": "chrono", "equals": 1, "within_ms": 2000
-    },
-    { "action": "snapshot", "actor": "chrono", "metric": "health", "save_as": "chrono_health" },
-    { "action": "snapshot", "actor": "ally", "metric": "health", "save_as": "ally_health" },
-    { "action": "cast", "label": "One fixed, non-critical Holy hit on the ally", "actor": "striker", "spell": 45648, "target": "ally" },
-    {
-      "action": "assert", "label": "DISCRIMINATING: the caster takes a share of the ally's damage through 707600",
-      "actor": "chrono", "metric": "spell_damage_total", "spell": 707600, "min": 1, "within_ms": 2000
-    },
-    { "action": "wait", "label": "Let every deferred share land", "ms": 500 },
-    { "action": "snapshot", "actor": "chrono", "metric": "spell_damage_total", "spell": 707600, "save_as": "chrono_share" },
-    {
-      "action": "assert", "label": "The ally takes the same share (plus at most the odd remainder)",
-      "actor": "ally", "metric": "spell_damage_total", "spell": 707600, "ratio_to": "chrono_share", "min": 0.99, "max": 1.02
+      "action": "assert",
+      "actor": "striker",
+      "metric": "spell_hit_chance",
+      "equals": 100
     },
     {
-      "action": "assert", "label": "The ally's link recorded the 25% it absorbed: twice the caster's share",
-      "actor": "ally", "metric": "aura_script_value", "spell": 706083, "caster": "chrono", "key": 706083,
-      "ratio_to": "chrono_share", "min": 1.98, "max": 2.02
+      "action": "group",
+      "actor": "chrono",
+      "target": "ally"
     },
     {
-      "action": "assert", "label": "The caster lost exactly its share",
-      "actor": "chrono", "metric": "health", "relative_to": "chrono_health", "ratio_to": "chrono_share", "min": -1.01, "max": -0.99
+      "action": "learn",
+      "actor": "chrono",
+      "spell": 706083
     },
     {
-      "action": "assert", "label": "The ally lost 75% of the hit plus its share, 7 times the caster's share",
-      "actor": "ally", "metric": "health", "relative_to": "ally_health", "ratio_to": "chrono_share", "min": -7.2, "max": -6.8
+      "action": "cast",
+      "actor": "chrono",
+      "spell": 706083
     },
     {
-      "action": "assert", "label": "Nothing is healed back before the duration ends",
-      "actor": "chrono", "metric": "spell_heal_count", "spell": 707601, "equals": 0
-    },
-    {
-      "action": "assert", "label": "At the end the caster is healed for the shared damage it took",
-      "actor": "chrono", "metric": "spell_heal_total", "spell": 707601, "ratio_to": "chrono_share", "min": 0.99, "max": 1.01,
-      "within_ms": 12000
-    },
-    {
-      "action": "assert", "label": "At the end the ally is healed for the shared damage it took",
-      "actor": "ally", "metric": "spell_heal_total", "spell": 707601, "ratio_to": "chrono_share", "min": 0.99, "max": 1.02,
+      "action": "assert",
+      "label": "The caster is linked",
+      "actor": "chrono",
+      "metric": "aura",
+      "spell": 706083,
+      "caster": "chrono",
+      "equals": 1,
       "within_ms": 2000
     },
     {
-      "action": "assert", "label": "The caster ends back at its starting health",
-      "actor": "chrono", "metric": "health", "relative_to": "chrono_health", "min": -1, "max": 1
+      "action": "assert",
+      "label": "The grouped ally is linked by the same cast",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 706083,
+      "caster": "chrono",
+      "equals": 1,
+      "within_ms": 2000
     },
     {
-      "action": "assert", "label": "The link expired on the ally",
-      "actor": "ally", "metric": "aura", "spell": 706083, "caster": "chrono", "equals": 0
+      "action": "snapshot",
+      "actor": "chrono",
+      "metric": "health",
+      "save_as": "chrono_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "health",
+      "save_as": "ally_health"
+    },
+    {
+      "action": "cast",
+      "label": "One fixed, non-critical Holy hit on the ally",
+      "actor": "striker",
+      "spell": 45648,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the caster takes a share of the ally's damage through 707600",
+      "actor": "chrono",
+      "metric": "spell_damage_total",
+      "spell": 707600,
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let every deferred share land",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono",
+      "metric": "spell_damage_total",
+      "spell": 707600,
+      "save_as": "chrono_share"
+    },
+    {
+      "action": "assert",
+      "label": "The ally takes the same share (plus at most the odd remainder)",
+      "actor": "ally",
+      "metric": "spell_damage_total",
+      "spell": 707600,
+      "ratio_to": "chrono_share",
+      "min": 0.99,
+      "max": 1.02
+    },
+    {
+      "action": "assert",
+      "label": "The ally's link recorded the 25% it absorbed: twice the caster's share",
+      "actor": "ally",
+      "metric": "aura_script_value",
+      "spell": 706083,
+      "caster": "chrono",
+      "key": 706083,
+      "ratio_to": "chrono_share",
+      "min": 1.98,
+      "max": 2.02
+    },
+    {
+      "action": "assert",
+      "label": "The caster lost exactly its share",
+      "actor": "chrono",
+      "metric": "health",
+      "relative_to": "chrono_health",
+      "ratio_to": "chrono_share",
+      "min": -1.01,
+      "max": -0.99
+    },
+    {
+      "action": "assert",
+      "label": "The ally lost 75% of the hit plus its share, 7 times the caster's share",
+      "actor": "ally",
+      "metric": "health",
+      "relative_to": "ally_health",
+      "ratio_to": "chrono_share",
+      "min": -7.2,
+      "max": -6.8
+    },
+    {
+      "action": "assert",
+      "label": "Nothing is healed back before the duration ends",
+      "actor": "chrono",
+      "metric": "spell_heal_count",
+      "spell": 707601,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "At the end the caster is healed for the shared damage it took",
+      "actor": "chrono",
+      "metric": "spell_heal_total",
+      "spell": 707601,
+      "ratio_to": "chrono_share",
+      "min": 0.99,
+      "max": 1.01,
+      "within_ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "At the end the ally is healed for the shared damage it took",
+      "actor": "ally",
+      "metric": "spell_heal_total",
+      "spell": 707601,
+      "ratio_to": "chrono_share",
+      "min": 0.99,
+      "max": 1.02,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The caster ends back at its starting health",
+      "actor": "chrono",
+      "metric": "health",
+      "relative_to": "chrono_health",
+      "min": -1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "The link expired on the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 706083,
+      "caster": "chrono",
+      "equals": 0
     }
   ]
 }

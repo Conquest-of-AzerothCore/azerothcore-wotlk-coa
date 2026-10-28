@@ -1004,7 +1004,7 @@ enum PlayerCommandStates
     CHEAT_SPELLCHARGES = 0x20
 };
 
-// Used for OnGiveXP PlayerScript hook
+// Used for XP awards and the OnGiveXP PlayerScript hook
 enum PlayerXPSource
 {
     XPSOURCE_KILL = 0,
@@ -1193,10 +1193,12 @@ public:
     [[nodiscard]] bool isGMVisible() const { return !(m_ExtraFlags & PLAYER_EXTRA_GM_INVISIBLE); }
     void SetGMVisible(bool on);
     bool Has310Flyer(bool checkAllSpells, uint32 excludeSpellId = 0);
+    void CastRidingMount(uint32 spellId);
     void SetHas310Flyer(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_HAS_310_FLYER; else m_ExtraFlags &= ~PLAYER_EXTRA_HAS_310_FLYER; }
     void SetPvPDeath(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_PVP_DEATH; else m_ExtraFlags &= ~PLAYER_EXTRA_PVP_DEATH; }
 
-    void GiveXP(uint32 xp, Unit* victim, float group_rate = 1.0f, bool isLFGReward = false);
+    void GiveXP(uint32 xp, Unit* victim, float group_rate = 1.0f, bool isLFGReward = false,
+        PlayerXPSource xpSource = XPSOURCE_KILL);
     void GiveLevel(uint8 level);
 
     void InitStatsForLevel(bool reapplyMods = false);
@@ -1507,7 +1509,7 @@ public:
     void RemoveActiveQuest(uint32 questId, bool update = true);
     void RemoveRewardedQuest(uint32 questId, bool update = true);
     void SendQuestUpdate(uint32 questId);
-    QuestGiverStatus GetQuestDialogStatus(Object* questGiver);
+    QuestGiverStatus GetQuestDialogStatus(Object* questGiver, uint32 questFilter = 0);
     float GetQuestRate(bool isDFQuest = false, int32 questLevel = 0);
     void SetDailyQuestStatus(uint32 quest_id);
     bool IsDailyQuestDone(uint32 quest_id);
@@ -1734,10 +1736,18 @@ public:
 
     void SendProficiency(ItemClass itemClass, uint32 itemSubclassMask);
     void SendInitialSpells();
-    void SendLearnPacket(uint32 spellId, bool learn);
+    void SendLearnPacket(uint32 spellId, bool learn, bool keepActionButtons = false);
     bool addSpell(uint32 spellId, uint8 addSpecMask, bool updateActive, bool temporary = false, bool learnFromSkill = false);
     bool _addSpell(uint32 spellId, uint8 addSpecMask, bool temporary, bool learnFromSkill = false);
+    void _learnSpell(uint32 spellId, bool temporary, bool learnFromSkill, bool announce);
     void learnSpell(uint32 spellId, bool temporary = false, bool learnFromSkill = false);
+    /// Learns a spell without telling the client about it, for a caller whose own packet delivers the
+    /// knowledge: AscensionCompat's temporary replacements announce the replacement through the
+    /// SMSG_SUPERCEDED_SPELL that stands it in for the spell it replaces, and a learned-spell packet
+    /// beside that one left the client a second copy of an unranked form in its spellbook (#6721).
+    /// Everything else - the spec mask, the script hook, next rank and required spells - matches
+    /// Player::learnSpell.
+    void learnSpellWithoutAnnouncement(uint32 spellId, bool temporary = true);
     void removeSpell(uint32 spellId, uint8 removeSpecMask, bool onlyTemporary);
     void MarkSpellForSave(uint32 spellId);
     void resetSpells();
@@ -1783,7 +1793,7 @@ public:
     [[nodiscard]] uint8 GetSpecsCount() const { return m_specsCount; }
     void SetSpecsCount(uint8 count) { m_specsCount = count; }
     void ActivateSpec(uint8 spec);
-    void LoadActions(PreparedQueryResult result);
+    void LoadActions(PreparedQueryResult result, bool send = true);
     void GetTalentTreePoints(uint8 (&specPoints)[3]) const;
     [[nodiscard]] uint8 GetMostPointsTalentTree() const;
     bool HasTankSpec();
@@ -1812,8 +1822,13 @@ public:
     [[nodiscard]] PlayerSpellMap const& GetSpellMap() const { return m_spells; }
     PlayerSpellMap&       GetSpellMap()       { return m_spells; }
     // Transient action replacements; never written to character spell ownership.
-    void SetTemporarySpellReplacement(uint32 original, uint32 replacement);
+    void SetTemporarySpellReplacement(uint32 original, uint32 replacement, bool redirect = true);
     [[nodiscard]] uint32 GetTemporarySpellReplacement(uint32 original) const;
+    // Replacement the server casts in place of a client request. Aliases published with `redirect = false`
+    // keep the client-side swap but leave a request for the original spell alone (#6972).
+    [[nodiscard]] uint32 GetCastReplacement(uint32 original) const;
+    [[nodiscard]] uint32 GetSavedActionButtonSpell(uint32 action);
+    [[nodiscard]] bool IsTemporarySpellReplacementStandIn(uint32 spellId) const;
     [[nodiscard]] bool CanUseTwoHandWithShield(ItemTemplate const* main, ItemTemplate const* off) const;
     [[nodiscard]] float GetMeleeAbilityRangeBonus() const;
 
@@ -1855,6 +1870,7 @@ public:
     void RemoveCategoryCooldown(uint32 cat);
     void RemoveArenaSpellCooldowns(bool removeActivePetCooldowns = false);
     void RemoveAllSpellCooldown();
+    void RemoveActivePetSpellCooldowns();
     void _LoadSpellCooldowns(PreparedQueryResult result);
     void _SaveSpellCooldowns(CharacterDatabaseTransaction trans, bool logout);
     [[nodiscard]] SpellChargeState GetSpellCharges(SpellInfo const* spellInfo) const;
@@ -1987,7 +2003,7 @@ public:
     bool UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step);
 
     void RewardProfessionXP(uint32 skillId, uint32 current, uint32 gray, uint32 green, uint32 yellow,
-        bool disenchanting = false);
+        bool disenchanting = false, bool crafted = false);
     bool UpdateCraftSkill(uint32 spellid);
     bool UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLevel, uint32 Multiplicator = 1);
     bool UpdateFishingSkill();
@@ -2161,8 +2177,15 @@ public:
 
     // Ephemeral instances never replace ordinary dungeon bindings or saved login positions.
     void PrepareScriptedPrivateInstance(uint32 mapId, WorldLocation const& returnLocation,
-        ObjectGuid owner = ObjectGuid::Empty, std::set<ObjectGuid> const& members = {})
+        ObjectGuid owner = ObjectGuid::Empty, std::set<ObjectGuid> const& members = {}, bool databaseSpawns = false)
     {
+        if (_scriptedPrivateMapId == MAPID_INVALID)
+        {
+            _scriptedPrivateReturnDungeonDifficulty = GetDungeonDifficulty();
+            _scriptedPrivateReturnRaidDifficulty = GetRaidDifficulty();
+        }
+
+        _scriptedPrivateDatabaseSpawns = databaseSpawns;
         _scriptedPrivateMapId = mapId;
         _scriptedPrivateInstanceId = 0;
         _scriptedPrivateReturn = returnLocation;
@@ -2171,6 +2194,7 @@ public:
         _scriptedPrivateMembers.insert(GetGUID());
     }
     void SetScriptedPrivateInstanceId(uint32 id) { _scriptedPrivateInstanceId = id; }
+    bool LoadsScriptedPrivateDatabaseSpawns() const { return _scriptedPrivateDatabaseSpawns; }
     uint32 GetScriptedPrivateMapId() const { return _scriptedPrivateMapId; }
     uint32 GetScriptedPrivateInstanceId() const { return _scriptedPrivateInstanceId; }
     ObjectGuid GetScriptedPrivateOwner() const { return _scriptedPrivateOwner; }
@@ -2178,7 +2202,9 @@ public:
     WorldLocation const& GetScriptedPrivateReturn() const { return _scriptedPrivateReturn; }
     void ClearScriptedPrivateInstance()
     {
-        _scriptedPrivateMapId = _scriptedPrivateInstanceId = 0;
+        _scriptedPrivateDatabaseSpawns = false;
+        _scriptedPrivateMapId = MAPID_INVALID;
+        _scriptedPrivateInstanceId = 0;
         _scriptedPrivateOwner.Clear();
         _scriptedPrivateMembers.clear();
     }
@@ -2208,14 +2234,14 @@ public:
 
     bool IsAtGroupRewardDistance(WorldObject const* pRewardSource) const;
     bool IsAtLootRewardDistance(WorldObject const* pRewardSource) const;
-    bool IsAtRecruitAFriendDistance(WorldObject const* pOther) const;
+    bool IsAtRecruitAFriendDistance(WorldObject const* pOther, bool forXP = false) const;
     void RewardPlayerAndGroupAtKill(Unit* victim, bool isBattleGround);
     void RewardPlayerAndGroupAtEvent(uint32 creature_id, WorldObject* pRewardSource);
     bool isHonorOrXPTarget(Unit* victim) const;
 
     bool GetsRecruitAFriendBonus(bool forXP);
-    uint8 GetGrantableLevels() { return m_grantableLevels; }
-    void SetGrantableLevels(uint8 val) { m_grantableLevels = val; }
+    uint8 GetGrantableLevels() const { return m_grantableLevels; }
+    void SetGrantableLevels(uint8 val);
 
     ReputationMgr&       GetReputationMgr()       { return *m_reputationMgr; }
     [[nodiscard]] ReputationMgr const& GetReputationMgr() const { return *m_reputationMgr; }
@@ -2895,9 +2921,15 @@ protected:
     void _SaveStats(CharacterDatabaseTransaction trans);
     void _SaveCharacter(bool create, CharacterDatabaseTransaction trans);
 
-    uint32 _scriptedPrivateMapId = 0;
+    bool _scriptedPrivateDatabaseSpawns = false;
+
+    // Map 0 is Eastern Kingdoms, so zero cannot represent "no private map".
+    // MAPID_INVALID preserves Map 0 as a valid scripted-private destination.
+    uint32 _scriptedPrivateMapId = MAPID_INVALID;
     uint32 _scriptedPrivateInstanceId = 0;
     WorldLocation _scriptedPrivateReturn;
+    Difficulty _scriptedPrivateReturnDungeonDifficulty = DUNGEON_DIFFICULTY_NORMAL;
+    Difficulty _scriptedPrivateReturnRaidDifficulty = RAID_DIFFICULTY_10MAN_NORMAL;
     ObjectGuid _scriptedPrivateOwner;
     std::set<ObjectGuid> _scriptedPrivateMembers;
     void _SaveInstanceTimeRestrictions(CharacterDatabaseTransaction trans);
@@ -2957,6 +2989,8 @@ protected:
     PlayerMails m_mail;
     PlayerSpellMap m_spells;
     std::map<uint32, uint32> m_temporarySpellReplacements;
+    std::map<uint32, uint32> m_temporarySpellReplacementOrigins;
+    std::map<uint32, uint8> m_temporarySpellReplacementKeepsCast; // aliases whose cast stays the original
     PlayerTalentMap m_talents;
     uint32 m_lastPotionId;                              // last used health/mana potion in combat, that block next potion use
 

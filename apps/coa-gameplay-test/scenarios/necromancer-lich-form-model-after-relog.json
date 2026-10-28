@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Lich Form keeps the Lich model after a relog",
+  "contract": "Lich Form 500981 is saved and restored at login, and its apply hook casts the Lich model 504691 (MOD_SHAPESHIFT form 50). 504691 is passive, so it is never saved, and the hook runs while the character is still loading, where the cast is refused. A Necromancer who logs out in Lich Form therefore came back with Lich Form and its buffs 504747 but the normal model. After a relog the model aura and the Lich display must return, and cancelling Lich Form must still restore the normal display.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "snapshot", "actor": "n", "metric": "display_id", "save_as": "normal_display" },
+    { "action": "learn", "actor": "n", "spell": 500981 },
+    { "action": "cast", "label": "Lich Form", "actor": "n", "spell": 500981 },
+    {
+      "action": "assert", "label": "SETUP: the Lich model is applied", "actor": "n",
+      "metric": "aura", "spell": 504691, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: the display changes to the Lich", "actor": "n",
+      "metric": "display_id", "relative_to": "normal_display", "min": 1
+    },
+    { "action": "snapshot", "actor": "n", "metric": "display_id", "save_as": "lich_display" },
+    { "action": "relog", "actor": "n" },
+    {
+      "action": "assert", "label": "SETUP: Lich Form is restored at login", "actor": "n",
+      "metric": "aura", "spell": 500981, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The Lich model aura is restored at login", "actor": "n",
+      "metric": "aura", "spell": 504691, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The Lich display is restored at login", "actor": "n",
+      "metric": "display_id", "relative_to": "lich_display", "equals": 0
+    },
+    { "action": "cancel_aura", "label": "Leave Lich Form", "actor": "n", "spell": 500981 },
+    {
+      "action": "assert", "label": "Leaving Lich Form removes the model", "actor": "n",
+      "metric": "aura", "spell": 504691, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The normal display returns", "actor": "n",
+      "metric": "display_id", "relative_to": "normal_display", "equals": 0
+    }
+  ]
+}

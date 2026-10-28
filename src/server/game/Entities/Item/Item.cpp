@@ -711,7 +711,7 @@ void Item::SetItemRandomProperties(int32 randomPropId)
 
 void Item::UpdateItemSuffixFactor()
 {
-    uint32 suffixFactor = GenerateEnchSuffixFactor(GetEntry());
+    uint32 suffixFactor = GenerateEnchSuffixFactor(GetEntry(), GetItemRandomPropertyId() < 0);
     if (GetItemSuffixFactor() == suffixFactor)
         return;
     SetUInt32Value(ITEM_FIELD_PROPERTY_SEED, suffixFactor);
@@ -915,6 +915,11 @@ bool Item::IsFitToSpellRequirements(SpellInfo const* spellInfo) const
         if (proto->InventoryType == INVTYPE_WEAPON &&
                 (spellInfo->EquippedItemInventoryTypeMask & (1 << INVTYPE_WEAPONMAINHAND) ||
                  spellInfo->EquippedItemInventoryTypeMask & (1 << INVTYPE_WEAPONOFFHAND)))
+            return true;
+        // Special case - a dual-wielded two-hander (Titan's Grip style) sits in the off-hand slot
+        else if (proto->InventoryType == INVTYPE_2HWEAPON && GetBagSlot() == INVENTORY_SLOT_BAG_0 &&
+                 GetSlot() == EQUIPMENT_SLOT_OFFHAND &&
+                 (spellInfo->EquippedItemInventoryTypeMask & (1 << INVTYPE_WEAPONOFFHAND)))
             return true;
         else if ((spellInfo->EquippedItemInventoryTypeMask & (1 << proto->InventoryType)) == 0)
             return false;                                   // inventory type not present in mask

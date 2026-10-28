@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "name": "Mathrengyl Bearwalker trains Seismic Smash rank 1 (#7555)",
+  "contract": [
+    "Mathrengyl Bearwalker (creature 4217) is the one CoA class trainer that is a live NPC rather than a",
+    "summoned book (rev_20260923_05_coa_class_trainer_core.sql); his gossip option 'I seek training as a",
+    "Primalist.' opens the native trainer_spell-backed window for trainer 900031, bypassing mod-spellbook's",
+    "BuildRows entirely. Seismic Smash rank 1 (300693, Spell.dbc BaseLevel 59) had no trainer_spell row of its",
+    "own even though ranks 2-4 (301276-301279) already required it as ReqAbility1 and no",
+    "AscensionCompatData::ClassSpells entry either, so a Primalist could see rank 2 gated behind a prerequisite",
+    "they could never buy and never saw rank 1 at all. The fix adds the missing ClassSpells entry at level 59",
+    "(matching the DBC BaseLevel, the same convention every other rank-1 row in this trainer follows) and the",
+    "matching trainer_spell row. This proves rank 1 is absent below level 59, offered and buyable at 59, and",
+    "that buying it unlocks rank 2 once level 62 is also reached - independent of PR #7828's unrelated AP/",
+    "Stamina scaling and buff-on-cast changes to the same spell."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 3,
+      "class": 31,
+      "level": 58
+    }
+  ],
+  "creatures": [
+    {
+      "id": "trainer",
+      "owner": "primalist",
+      "entry": 4217,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 4000 },
+    { "action": "money", "actor": "primalist", "copper": 1000000, "label": "FIXTURE: a purse for the lesson" },
+
+    { "action": "gossip_hello", "actor": "primalist", "target": "trainer", "label": "right-click Mathrengyl Bearwalker below level 59" },
+    { "action": "gossip_select", "actor": "primalist", "option": 0, "label": "I seek training as a Primalist" },
+    { "action": "assert", "label": "SETUP: the trainer window opened", "actor": "primalist", "metric": "trainer_list_packets", "equals": 1 },
+    { "action": "assert", "label": "CONTROL: rank 1's row is unavailable below its level 59 gate", "actor": "primalist", "metric": "trainer_window_state", "spell": 300693, "equals": 1 },
+
+    { "action": "set_level", "actor": "primalist", "value": 59 },
+    { "action": "gossip_hello", "actor": "primalist", "target": "trainer", "label": "right-click again at level 59" },
+    { "action": "gossip_select", "actor": "primalist", "option": 0, "label": "I seek training as a Primalist" },
+    { "action": "assert", "label": "THE FIX: rank 1 is now offered and available", "actor": "primalist", "metric": "trainer_window_state", "spell": 300693, "equals": 0 },
+    { "action": "assert", "label": "CONTROL: rank 2's row is unavailable below its own level 62 gate", "actor": "primalist", "metric": "trainer_window_state", "spell": 301276, "equals": 1 },
+
+    { "action": "trainer_buy", "actor": "primalist", "spell": 300693, "target": "trainer" },
+    { "action": "assert", "label": "THE FIX: the purchase is granted", "actor": "primalist", "metric": "spellbook_buy_succeeded", "spell": 300693, "equals": 1 },
+    { "action": "assert", "label": "Rank 1 is now known", "actor": "primalist", "metric": "knows_spell", "spell": 300693, "equals": 1 },
+
+    { "action": "set_level", "actor": "primalist", "value": 62 },
+    { "action": "gossip_hello", "actor": "primalist", "target": "trainer", "label": "right-click at level 62, rank 1 known" },
+    { "action": "gossip_select", "actor": "primalist", "option": 0, "label": "I seek training as a Primalist" },
+    { "action": "assert", "label": "Rank 2 is now offered once its prerequisite is known and its level is reached", "actor": "primalist", "metric": "trainer_window_state", "spell": 301276, "equals": 0 },
+
+    { "action": "trainer_buy", "actor": "primalist", "spell": 301276, "target": "trainer" },
+    { "action": "assert", "label": "Rank 2 is granted", "actor": "primalist", "metric": "spellbook_buy_succeeded", "spell": 301276, "equals": 1 },
+    { "action": "assert", "label": "Rank 2 is known", "actor": "primalist", "metric": "knows_spell", "spell": 301276, "equals": 1 }
+  ]
+}

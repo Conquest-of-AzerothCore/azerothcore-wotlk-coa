@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "name": "Temporal Resilience applies Temporally Warped to an enemy that strikes the Chronomancer (#6968)",
+  "contract": "Temporal Resilience 680389 reads 'While active, if an enemy strikes you, they will have their time between their attacks increased by 536265s1% for 536265d.' Rank 1 carries aura 42 on 536265 with DBC ProcChance 100 but ProcFlags 0, and no spell_proc row existed, so the trigger was unreachable and no icon or log line ever appeared. A landed melee strike against the buffed Chronomancer must produce a 680389 proc and apply Temporally Warped 536265 to the striker; a control without the buff must produce neither.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "chrono",
+      "race": 1,
+      "class": 22,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "striker",
+      "owner": "chrono",
+      "entry": 11582,
+      "faction": 14,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 1
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 5000 },
+    { "action": "set_aura", "actor": "chrono", "spell": 10040, "stacks": 20 },
+    { "action": "assert", "actor": "chrono", "metric": "max_health", "label": "The Chronomancer survives the combat window", "min": 200000 },
+    {
+      "action": "assert",
+      "label": "CONTROL: Temporal Resilience is not active yet",
+      "actor": "chrono",
+      "metric": "aura",
+      "spell": 680389,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the striker starts without Temporally Warped",
+      "actor": "striker",
+      "metric": "aura",
+      "spell": 536265,
+      "equals": 0
+    },
+    { "action": "attack", "actor": "chrono", "target": "striker" },
+    {
+      "action": "assert",
+      "actor": "striker",
+      "metric": "victim",
+      "label": "The defensive NPC selects the Chronomancer",
+      "target": "chrono",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    { "action": "set_aura", "actor": "chrono", "spell": 680389, "stacks": 1 },
+    {
+      "action": "assert",
+      "label": "SETUP: Temporal Resilience is active",
+      "actor": "chrono",
+      "metric": "aura",
+      "spell": 680389,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono",
+      "metric": "health",
+      "save_as": "chrono_before_strike"
+    },
+    {
+      "action": "assert",
+      "label": "The striker lands a real melee hit",
+      "actor": "chrono",
+      "metric": "health",
+      "relative_to": "chrono_before_strike",
+      "max": -1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the strike procs Temporal Resilience",
+      "actor": "chrono",
+      "metric": "spell_proc_count",
+      "spell": 680389,
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Temporally Warped lands on the striker",
+      "actor": "striker",
+      "metric": "aura",
+      "spell": 536265,
+      "equals": 1,
+      "within_ms": 20000
+    }
+  ]
+}

@@ -1,0 +1,185 @@
+{
+  "schema": 1,
+  "name": "Explosive Charges selects Lava Lash and rejects unrelated magic hits",
+  "contract": [
+    "Spell274473 restricts its charge274477 to Lava Lash60103. Lava Lash uses Shaman family11 word2 bit4",
+    "and an offhand melee weapon. Charges burn at3000ms and trigger Shrapnel274478. Fireball including",
+    "its periodic damage must produce no charge while the toggle is active. Real costs, cooldowns and",
+    "offhand requirements remain enabled."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 201
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 1180
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 674
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 60103
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 133
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 274473
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 2092
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 2092,
+      "slot": 16
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 274473,
+      "target": "hero"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 274473,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 133,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 274477,
+      "caster": "hero",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 274477,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 60103,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 60103,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 274477,
+      "caster": "hero",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 274477,
+      "target": "enemy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 274478,
+      "target": "enemy",
+      "min": 1
+    }
+  ]
+}

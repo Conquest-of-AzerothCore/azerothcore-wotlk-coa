@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "name": "Voodoo Cauldron uses its recorded visible cauldron (#4457)",
+  "contract": "The original CoA alpha gameobject cache records Voodoo Cauldron entry 9000003 with display 7410 and size 2. Normal cast 804684 must summon that object and its healing helper 506011. The Hexing Effigy size has no independent scale capture and is outside this assertion. The hidden periodic helper must remain absent from player visibility while the cauldron remains visible and healing continues.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "doctor",
+      "spell": 804684
+    },
+    {
+      "action": "set_health",
+      "actor": "doctor",
+      "maximum": 3000,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "doctor",
+      "metric": "health",
+      "save_as": "injured_health"
+    },
+    {
+      "action": "cast",
+      "actor": "doctor",
+      "spell": 804684
+    },
+    {
+      "action": "assert",
+      "actor": "doctor",
+      "metric": "owned_gameobject_count",
+      "entry": 9000003,
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "doctor",
+      "metric": "gameobject_display",
+      "entry": 9000003,
+      "equals": 7410
+    },
+    {
+      "action": "assert",
+      "actor": "doctor",
+      "metric": "gameobject_scale",
+      "entry": 9000003,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "doctor",
+      "metric": "owned_creature_count",
+      "entry": 506011,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The hidden helper draws nothing: it must not wear the shared caltrop doodad display that rendered over the player (#7675)",
+      "actor": "doctor",
+      "metric": "owned_creature_display",
+      "entry": 506011,
+      "equals": 11686
+    },
+    {
+      "action": "assert",
+      "actor": "doctor",
+      "metric": "owned_creature_visible",
+      "entry": 506011,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "doctor",
+      "metric": "health",
+      "relative_to": "injured_health",
+      "min": 300,
+      "within_ms": 2500
+    }
+  ]
+}

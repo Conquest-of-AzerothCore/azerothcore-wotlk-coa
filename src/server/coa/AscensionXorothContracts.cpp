@@ -1,4 +1,5 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+#include "AscensionClientSpellPatches.h"
 #include "AscensionXoroth.h"
 #include "AscensionXorothData.h"
 #include "DBCStores.h"
@@ -15,7 +16,9 @@ namespace
 enum FleshHook : uint32
 {
     SPELL_FLESH_HOOK_PULL = 800605,
-    SPELL_RANGE_THIRTY_YARDS = 4
+    SPELL_RANGE_THIRTY_YARDS = 4,
+    SPELL_DRAG_THROUGH_HELL = 804773,
+    SPELL_RANGE_ANYWHERE = 13
 };
 }
 
@@ -31,6 +34,8 @@ void ApplyContracts(SpellInfo* info)
         info->DmgClass = SPELL_DAMAGE_CLASS_NONE;
         info->RangeEntry = sSpellRangeStore.LookupEntry(SPELL_RANGE_THIRTY_YARDS);
     }
+    if (id == SPELL_DRAG_THROUGH_HELL)
+        info->RangeEntry = sSpellRangeStore.LookupEntry(SPELL_RANGE_ANYWHERE);
     if (id == 520440 || id == 520441)
         for (auto& effect : info->Effects)
             effect.Effect = 0;
@@ -60,6 +65,8 @@ void ApplyContracts(SpellInfo* info)
             info->Effects[0].TargetA =
                 SpellImplicitTargetInfo(id == 681206 ? TARGET_UNIT_CASTER : TARGET_UNIT_TARGET_ENEMY);
             info->Effects[0].TargetB = SpellImplicitTargetInfo();
+            if (id == 681206)
+                info->DurationEntry = sSpellDurationStore.LookupEntry(27);
             if (id == 680204)
                 info->Effects[0].ValueMultiplier = 1;
         }
@@ -145,10 +152,20 @@ void ApplyContracts(SpellInfo* info)
                 e.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ALLY);
                 e.TargetB = SpellImplicitTargetInfo();
             }
-    if (id == 807671 || id == 707515 || id == 704988 || id == 560828 || id == 300375)
+    if (id == 807671 || id == 704988 || id == 560828 || id == 300375)
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             if (info->Effects[i].Effect)
                 dummy(i);
+    if (id == 707515)
+    {
+        SpellEffectInfo& cooldown = info->Effects[EFFECT_0];
+        cooldown.ApplyAuraName = SPELL_AURA_ADD_PCT_MODIFIER;
+        cooldown.MiscValue = SPELLMOD_COOLDOWN;
+        cooldown.BasePoints = -100;
+        cooldown.DieSides = 0;
+        cooldown.SpellClassMask = flag96(0, 32, 0);
+        dummy(1);
+    }
     if (id == 500003)
         info->Effects[0].MiscValue = ASCENSION_CREATURE_GLOBAL_CRIT, info->Effects[0].MiscValueB = 4;
     if (id == 805697 || id == 807899)
@@ -168,8 +185,11 @@ void ApplyContracts(SpellInfo* info)
         dummy(1);
         dummy(2);
     }
-    if (id == 805677)
+    if (id == SPELL_SACRIFICIAL_CIRCLE)
+    {
         info->CasterAuraSpell = 0;
+        Ascension::ClientSpellPatches::Instance().Register(id);
+    }
     if (id == 805965)
     {
         auto& e = info->Effects[0];
@@ -235,7 +255,8 @@ void ApplyContracts(SpellInfo* info)
     {
         info->AttributesEx2 |= SPELL_ATTR2_ALLOW_DEAD_TARGET;
         info->Effects[0].Effect = SPELL_EFFECT_DUMMY;
-        info->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
+        info->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+        info->Effects[0].TargetB = SpellImplicitTargetInfo();
         for (uint8 i = 1; i < MAX_SPELL_EFFECTS; ++i)
             if (info->Effects[i].Effect)
                 info->Effects[i].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
@@ -476,6 +497,41 @@ void ApplyContracts(SpellInfo* info)
 namespace
 {
 using namespace AscensionXoroth;
+constexpr uint32 SPELL_GROTESQUE = 707515;
+constexpr uint32 SPELL_HELLFIRE_FORM = 805696;
+class xoroth_grotesque : public UnitScript
+{
+  public:
+    xoroth_grotesque()
+        : UnitScript("xoroth_grotesque", true,
+                     {UNITHOOK_ON_AURA_APPLY, UNITHOOK_ON_AURA_REMOVE, UNITHOOK_ON_AFTER_AURA_EFFECT_CALCULATE_AMOUNT})
+    {
+    }
+    void OnAfterAuraEffectCalculateAmount(AuraEffect const* effect, Unit*, int32& amount) override
+    {
+        if (effect->GetId() == SPELL_GROTESQUE && effect->GetEffIndex() == EFFECT_0 &&
+            effect->GetBase()->GetType() == UNIT_AURA_TYPE &&
+            !effect->GetBase()->GetUnitOwner()->HasAura(SPELL_HELLFIRE_FORM))
+            amount = 0;
+    }
+    void OnAuraApply(Unit* unit, Aura* aura) override
+    {
+        if (aura && aura->GetId() == SPELL_HELLFIRE_FORM)
+            Synchronize(unit);
+    }
+    void OnAuraRemove(Unit* unit, AuraApplication* application, AuraRemoveMode) override
+    {
+        if (application && application->GetBase()->GetId() == SPELL_HELLFIRE_FORM)
+            Synchronize(unit);
+    }
+
+  private:
+    static void Synchronize(Unit* unit)
+    {
+        if (AuraEffect* cooldown = unit->GetAuraEffect(SPELL_GROTESQUE, EFFECT_0))
+            cooldown->RecalculateAmount(unit);
+    }
+};
 class xoroth_scaling : public UnitScript
 {
   public:
@@ -511,7 +567,7 @@ class xoroth_scaling : public UnitScript
             }
         if (Named(info, 801016) && index == 1 && player->HasAura(92100))
             value *= 2;
-        if (info->Id == 804353 && index == 1)
+        if (Named(info, 804353) && index == 1)
             value += player->GetShieldBlockValue();
         if (info->Id == 801064 && index == 0)
             value += player->GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_DEFENSE_SKILL) * .20f;
@@ -523,8 +579,6 @@ class xoroth_scaling : public UnitScript
             value = player->GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_BLOCK) * .5f;
         if (info->Id == 573066 && index == 0)
             value += State(player).imps.size() * Amount(805916, 2);
-        if (info->Id == 804788 && index == 0)
-            value *= 1 + .2f * Count(player, 804787);
         if (info->Id == 800999 && index == 1)
             value = player->HasAura(302581) ? float(Amount(302581)) : 0;
         if (info->Id == 803334 && index == 1)
@@ -613,4 +667,5 @@ class xoroth_scaling : public UnitScript
 void AddSC_AscensionXorothContracts()
 {
     new xoroth_scaling();
+    new xoroth_grotesque();
 }

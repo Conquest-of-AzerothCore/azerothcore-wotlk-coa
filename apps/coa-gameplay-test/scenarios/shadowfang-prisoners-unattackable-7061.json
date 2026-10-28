@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "name": "Shadowfang Keep prisoners: opposite-faction players cannot kill the door openers (#7061)",
+  "contract": "Sorcerer Ashcrombe and Deathstalker Adamant keep their faction but take no damage and start no combat when a player of the opposite faction casts a damage spell on them, and they do not aggro on that player.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "horde", "race": 5, "class": 8, "level": 60, "spell_hit_rating": 10000 },
+    { "id": "alliance", "race": 1, "class": 8, "level": 60, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    {
+      "id": "ashcrombe", "owner": "horde", "entry": 3850, "faction": 12, "level": 18, "health": 100000,
+      "reaction": 2, "distance": 3
+    },
+    {
+      "id": "adamant", "owner": "alliance", "entry": 3849, "faction": 68, "level": 18, "health": 100000,
+      "reaction": 2, "distance": 3
+    },
+    { "id": "control", "owner": "horde", "entry": 36, "level": 18, "health": 100000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "Aggressive Ashcrombe starts no combat beside hostile units", "actor": "ashcrombe",
+      "metric": "combat", "equals": 0
+    },
+    {
+      "action": "assert", "label": "Aggressive Adamant starts no combat beside hostile units", "actor": "adamant",
+      "metric": "combat", "equals": 0
+    },
+    { "action": "snapshot", "actor": "ashcrombe", "metric": "health", "save_as": "ashcrombe_health" },
+    { "action": "snapshot", "actor": "adamant", "metric": "health", "save_as": "adamant_health" },
+    { "action": "learn", "actor": "horde", "spell": 2136 },
+    { "action": "learn", "actor": "alliance", "spell": 2136 },
+    { "action": "snapshot", "actor": "control", "metric": "health", "save_as": "control_health" },
+    { "action": "cast", "actor": "horde", "spell": 2136, "target": "control" },
+    {
+      "action": "assert", "label": "Fire Blast damages an ordinary hostile creature", "actor": "control",
+      "metric": "health", "relative_to": "control_health", "max": -1, "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let the Fire Blast cooldown expire", "ms": 9000 },
+    { "action": "cast", "actor": "horde", "spell": 2136, "target": "ashcrombe" },
+    { "action": "cast", "actor": "alliance", "spell": 2136, "target": "adamant" },
+    { "action": "wait", "label": "Allow the Fire Blasts to land", "ms": 3000 },
+    {
+      "action": "assert", "label": "Horde Fire Blast does not damage Ashcrombe", "actor": "ashcrombe",
+      "metric": "health", "relative_to": "ashcrombe_health", "equals": 0
+    },
+    {
+      "action": "assert", "label": "Horde Fire Blast does not put Ashcrombe in combat", "actor": "ashcrombe",
+      "metric": "combat", "equals": 0
+    },
+    {
+      "action": "assert", "label": "Alliance Fire Blast does not damage Adamant", "actor": "adamant",
+      "metric": "health", "relative_to": "adamant_health", "equals": 0
+    },
+    {
+      "action": "assert", "label": "Alliance Fire Blast does not put Adamant in combat", "actor": "adamant",
+      "metric": "combat", "equals": 0
+    },
+    { "action": "assert", "actor": "ashcrombe", "metric": "alive", "equals": 1 },
+    { "action": "assert", "actor": "adamant", "metric": "alive", "equals": 1 }
+  ]
+}

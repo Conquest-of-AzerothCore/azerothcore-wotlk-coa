@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Bone Construct moves slowly and its hits deal Bone Deconstruct (#6693)",
+  "contract": "Animate: Bone Construct 531130 reads 'moves at a slow speed, but upon reaching an enemy, deals ${$531132m1+$SP*2+$AP*.5} Shadow damage' for 20 seconds. The construct 503200 carries Bone Construct Hidden 531133: a 50% slow plus a 100% proc trigger of Bone Deconstruct 531132. Once it reaches its target, every melee hit must deal Bone Deconstruct (1500 base), and the construct stays out for its duration rather than being spent on the first hit. Bone Deconstruct pierces invulnerability (Spell.dbc) and cannot be resisted but keeps its hit roll; the construct inherits the Necromancer's spell hit, which the fixture maximizes.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "players": [
+    {
+      "id": "n", "race": 5, "class": 23, "level": 60, "allow_regeneration": false,
+      "melee_hit_rating": 10000, "expertise_rating": 10000, "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "n", "entry": 36, "level": 60, "health": 1000000, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 531130 },
+    { "action": "learn", "actor": "n", "spell": 500991 },
+    { "action": "cast", "label": "Animate: Bone Construct", "actor": "n", "spell": 531130 },
+    {
+      "action": "assert", "label": "SETUP: the construct is out", "actor": "n",
+      "metric": "owned_creature_count", "entry": 503200, "equals": 1, "within_ms": 8000
+    },
+    {
+      "action": "assert", "label": "The construct carries its slow", "actor": "n",
+      "metric": "owned_creature_count", "entry": 503200, "spell": 531133, "equals": 1, "within_ms": 2000
+    },
+    { "action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "enemy_health" },
+    { "action": "cast", "label": "Grave March", "actor": "n", "spell": 500991, "target": "enemy" },
+    {
+      "action": "assert", "label": "Repeated hits each cast Bone Deconstruct", "actor": "n",
+      "metric": "spell_go_count", "spell": 531132, "entry": 503200, "min": 3, "within_ms": 15000
+    },
+    {
+      "action": "assert", "label": "Three Bone Deconstructs deal 1500+ each", "actor": "enemy",
+      "metric": "health", "relative_to": "enemy_health", "max": -4500
+    },
+    {
+      "action": "assert", "label": "The construct is still fighting, not spent", "actor": "n",
+      "metric": "owned_creature_count", "entry": 503200, "equals": 1
+    }
+  ]
+}

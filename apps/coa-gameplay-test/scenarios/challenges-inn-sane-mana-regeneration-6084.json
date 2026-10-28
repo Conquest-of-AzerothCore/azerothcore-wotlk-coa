@@ -1,0 +1,713 @@
+{
+  "schema": 1,
+  "name": "Inn-Sane mana regeneration rates follow native challenge and rest transitions",
+  "contract": "Issue #6084. Inn-Sane's authored NO_MANA_REGENERATION_UNLESS_RESTED rule blocks actual passive mana outdoors and permits it in a rest area. Both owner-visible mana regeneration fields must describe that same permission, including the interrupted rate. Inn-Sane starts at level 1 as required, then the fixture advances that Cultist to level 60 below the realm's level-80 cap. Cultists activate and cancel challenges through native client requests, enter Goldshire inn through its real area-trigger packet, and leave through a normal teleport plus zone update. Recalculation after an intellect buff and a real relog must preserve the restriction. Magical Stopper's unconditional rule remains blocked inside the inn, while an ordinary control regenerates normally. Mage Armor and Arcane Intellect are fixture-granted observation aids, cast normally; their acquisition is outside this contract. Assertions read native owner fields, decode values-update packets received by the owner's session, and read actual power, without asserting client rendering. Values-update assertions follow an observed field change; an already-zero interrupted field need not be resent before the first inn visit. Login assertions read rebuilt native fields, without reusing a previous session's observed packet values.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053
+  },
+  "players": [
+    {
+      "id": "trial",
+      "race": 1,
+      "class": 25,
+      "level": 1
+    },
+    {
+      "id": "stopper",
+      "race": 1,
+      "class": 25,
+      "level": 60
+    },
+    {
+      "id": "control",
+      "race": 1,
+      "class": 25,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "start_challenge",
+      "actor": "trial",
+      "challenge": 76,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "challenge_start_code",
+      "label": "Inn-Sane activates through its native request",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "aura",
+      "label": "Inn-Sane challenge aura is active",
+      "spell": 93149,
+      "equals": 1
+    },
+    {
+      "action": "set_level",
+      "actor": "trial",
+      "value": 60
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "aura",
+      "spell": 93149,
+      "equals": 1,
+      "label": "Inn-Sane remains active below the realm level cap"
+    },
+    {
+      "action": "set_power",
+      "actor": "trial",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "trial",
+      "spell": 6117
+    },
+    {
+      "action": "cast",
+      "actor": "trial",
+      "spell": 6117,
+      "target": "trial"
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "aura",
+      "label": "native Mage Armor enables interrupted mana regeneration",
+      "spell": 6117,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "resting",
+      "label": "all actors start outdoors",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "stopper",
+      "spell": 6117
+    },
+    {
+      "action": "cast",
+      "actor": "stopper",
+      "spell": 6117,
+      "target": "stopper"
+    },
+    {
+      "action": "assert",
+      "actor": "stopper",
+      "metric": "aura",
+      "label": "native Mage Armor enables interrupted mana regeneration",
+      "spell": 6117,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "stopper",
+      "metric": "resting",
+      "label": "all actors start outdoors",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "stopper",
+      "metric": "mana_regen",
+      "label": "ordinary mana rate is positive",
+      "min": 0.01
+    },
+    {
+      "action": "assert",
+      "actor": "stopper",
+      "metric": "sent_mana_regen",
+      "label": "owner receives the matching mana-rate field: ordinary mana rate is positive",
+      "min": 0.01,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "stopper",
+      "metric": "mana_regen_interrupted",
+      "label": "interrupted mana rate is positive",
+      "min": 0.01
+    },
+    {
+      "action": "assert",
+      "actor": "stopper",
+      "metric": "sent_mana_regen_interrupted",
+      "label": "owner receives the matching mana-rate field: interrupted mana rate is positive",
+      "min": 0.01,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 6117
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 6117,
+      "target": "control"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "aura",
+      "label": "native Mage Armor enables interrupted mana regeneration",
+      "spell": 6117,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "resting",
+      "label": "all actors start outdoors",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "mana_regen",
+      "label": "ordinary mana rate is positive",
+      "min": 0.01
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "sent_mana_regen",
+      "label": "owner receives the matching mana-rate field: ordinary mana rate is positive",
+      "min": 0.01,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "mana_regen_interrupted",
+      "label": "interrupted mana rate is positive",
+      "min": 0.01
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "sent_mana_regen_interrupted",
+      "label": "owner receives the matching mana-rate field: interrupted mana rate is positive",
+      "min": 0.01,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_power",
+      "actor": "trial",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 4100
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "power",
+      "label": "Inn-Sane blocks actual mana outdoors",
+      "power": 0,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "power",
+      "label": "control still regenerates actual mana",
+      "power": 0,
+      "min": 1001
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "mana_regen",
+      "label": "Inn-Sane advertises no outdoor mana regeneration",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "sent_mana_regen",
+      "label": "owner receives the matching mana-rate field: Inn-Sane advertises no outdoor mana regeneration",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "mana_regen_interrupted",
+      "label": "Inn-Sane advertises no interrupted mana regeneration",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "trial",
+      "spell": 1459
+    },
+    {
+      "action": "cast",
+      "actor": "trial",
+      "spell": 1459,
+      "target": "trial"
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "aura",
+      "label": "a normal intellect buff recalculates mana rates",
+      "spell": 1459,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "mana_regen",
+      "label": "stat changes preserve the outdoor regeneration gate",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "sent_mana_regen",
+      "label": "owner receives the matching mana-rate field: stat changes preserve the outdoor regeneration gate",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "mana_regen_interrupted",
+      "label": "stat changes preserve the interrupted gate",
+      "equals": 0
+    },
+    {
+      "action": "relog",
+      "actor": "trial"
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "aura",
+      "label": "Inn-Sane survives a real logout and login",
+      "spell": 93149,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "mana_regen",
+      "label": "login restores the blocked advertised rate",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "mana_regen_interrupted",
+      "label": "login restores the blocked interrupted rate",
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "trial",
+      "map": 0,
+      "x": -9483.25,
+      "y": -17.9883,
+      "z": 56.9634
+    },
+    {
+      "action": "area_trigger",
+      "actor": "trial",
+      "id": 562
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "resting",
+      "label": "native Goldshire inn trigger grants rest",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "mana_regen",
+      "label": "entering the inn restores advertised regeneration",
+      "min": 0.01
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "sent_mana_regen",
+      "label": "owner receives the matching mana-rate field: entering the inn restores advertised regeneration",
+      "min": 0.01,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "mana_regen_interrupted",
+      "label": "entering the inn restores interrupted regeneration",
+      "min": 0.01
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "sent_mana_regen_interrupted",
+      "label": "owner receives the matching mana-rate field: entering the inn restores interrupted regeneration",
+      "min": 0.01,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_power",
+      "actor": "trial",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 4100
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "power",
+      "label": "actual mana regenerates inside the inn",
+      "power": 0,
+      "min": 1001
+    },
+    {
+      "action": "teleport",
+      "actor": "trial",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "resting",
+      "label": "native zone update removes rest after leaving the inn",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "mana_regen",
+      "label": "leaving the inn immediately clears advertised regeneration",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "sent_mana_regen",
+      "label": "owner receives the matching mana-rate field: leaving the inn immediately clears advertised regeneration",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "mana_regen_interrupted",
+      "label": "leaving the inn clears interrupted regeneration",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "sent_mana_regen_interrupted",
+      "label": "owner receives the matching mana-rate field: leaving the inn clears interrupted regeneration",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_power",
+      "actor": "trial",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 4100
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "power",
+      "label": "actual mana stops regenerating outdoors again",
+      "power": 0,
+      "equals": 1000
+    },
+    {
+      "action": "stop_challenge",
+      "actor": "trial",
+      "challenge": 76
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "aura",
+      "label": "native cancellation removes the challenge aura",
+      "spell": 93149,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "mana_regen",
+      "label": "cancellation restores ordinary mana rates",
+      "min": 0.01
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "sent_mana_regen",
+      "label": "owner receives the matching mana-rate field: cancellation restores ordinary mana rates",
+      "min": 0.01,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "mana_regen_interrupted",
+      "label": "cancellation restores interrupted mana rates",
+      "min": 0.01
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "sent_mana_regen_interrupted",
+      "label": "owner receives the matching mana-rate field: cancellation restores interrupted mana rates",
+      "min": 0.01,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_power",
+      "actor": "trial",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 4100
+    },
+    {
+      "action": "assert",
+      "actor": "trial",
+      "metric": "power",
+      "label": "cancellation restores actual outdoor regeneration",
+      "power": 0,
+      "min": 1001
+    },
+    {
+      "action": "start_challenge",
+      "actor": "stopper",
+      "challenge": 90,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "stopper",
+      "metric": "challenge_start_code",
+      "label": "unconditional Magical Stopper activates normally",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "stopper",
+      "metric": "mana_regen",
+      "label": "unconditional mana restriction advertises zero",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "stopper",
+      "metric": "sent_mana_regen",
+      "label": "owner receives the matching mana-rate field: unconditional mana restriction advertises zero",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "stopper",
+      "metric": "mana_regen_interrupted",
+      "label": "unconditional restriction advertises zero while casting",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "stopper",
+      "metric": "sent_mana_regen_interrupted",
+      "label": "owner receives the matching mana-rate field: unconditional restriction advertises zero while casting",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "stopper",
+      "map": 0,
+      "x": -9483.25,
+      "y": -17.9883,
+      "z": 56.9634
+    },
+    {
+      "action": "area_trigger",
+      "actor": "stopper",
+      "id": 562
+    },
+    {
+      "action": "assert",
+      "actor": "stopper",
+      "metric": "resting",
+      "label": "unconditional restriction control enters the real inn",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "stopper",
+      "metric": "mana_regen",
+      "label": "rest does not bypass an unconditional mana restriction",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "stopper",
+      "metric": "sent_mana_regen",
+      "label": "owner receives the matching mana-rate field: rest does not bypass an unconditional mana restriction",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "stopper",
+      "metric": "mana_regen_interrupted",
+      "label": "rest does not bypass its interrupted restriction",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "stopper",
+      "metric": "sent_mana_regen_interrupted",
+      "label": "owner receives the matching mana-rate field: rest does not bypass its interrupted restriction",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_power",
+      "actor": "stopper",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 4100
+    },
+    {
+      "action": "assert",
+      "actor": "stopper",
+      "metric": "power",
+      "label": "Magical Stopper still blocks actual mana in the inn",
+      "power": 0,
+      "equals": 1000
+    },
+    {
+      "action": "stop_challenge",
+      "actor": "stopper",
+      "challenge": 90
+    },
+    {
+      "action": "assert",
+      "actor": "stopper",
+      "metric": "mana_regen",
+      "label": "removing an unconditional restriction restores mana rates",
+      "min": 0.01,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "stopper",
+      "metric": "sent_mana_regen",
+      "label": "owner receives the matching mana-rate field: removing an unconditional restriction restores mana rates",
+      "min": 0.01,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "stopper",
+      "metric": "mana_regen_interrupted",
+      "label": "removing it restores interrupted rates",
+      "min": 0.01
+    },
+    {
+      "action": "assert",
+      "actor": "stopper",
+      "metric": "sent_mana_regen_interrupted",
+      "label": "owner receives the matching mana-rate field: removing it restores interrupted rates",
+      "min": 0.01,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "mana_regen",
+      "label": "untouched control retains ordinary advertised regeneration",
+      "min": 0.01
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "sent_mana_regen",
+      "label": "owner receives the matching mana-rate field: untouched control retains ordinary advertised regeneration",
+      "min": 0.01,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "mana_regen_interrupted",
+      "label": "untouched control retains interrupted regeneration",
+      "min": 0.01
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "sent_mana_regen_interrupted",
+      "label": "owner receives the matching mana-rate field: untouched control retains interrupted regeneration",
+      "min": 0.01,
+      "within_ms": 5000
+    }
+  ]
+}

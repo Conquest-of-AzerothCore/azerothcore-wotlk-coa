@@ -82,7 +82,11 @@ void HandleAscensionBarbarianAura(Player* player, uint32 spellId, bool apply)
         case FILL_LEVEL:
             helper = FILL_LEVEL_EFFECTS;
             if (!apply)
+            {
                 player->RemoveAurasDueToSpell(TANKARD);
+                player->RemoveAurasDueToSpell(AscensionBarbarian::SPELL_FULL_TANKARD);
+                player->RemoveAurasDueToSpell(AscensionBarbarian::SPELL_EMPTY_TANKARD);
+            }
             break;
         case BODY_BUILDER:
             helper = BODY_BUILDER_SIZE;
@@ -126,7 +130,10 @@ void HandleAscensionBarbarianCast(Spell* spell)
         SpellInfo const* resource = tankard->GetSpellInfo();
         if (!preserveTankard && resource->SpellFamilyName == info->SpellFamilyName &&
             (resource->Effects[EFFECT_0].SpellClassMask & info->SpellFamilyFlags))
+        {
             player->RemoveAurasDueToSpell(TANKARD);
+            player->AddAura(AscensionBarbarian::SPELL_EMPTY_TANKARD, player);
+        }
     }
 
     if (info->SpellFamilyName != 18 || !(info->SpellFamilyFlags[1] & 0x00040000) ||

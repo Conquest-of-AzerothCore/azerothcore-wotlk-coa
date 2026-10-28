@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Dar'Khan's Lieutenants: Masophet the Black is marked at both pooled spawns (#348)",
+  "contract": "Quest 9170 asks for Masophet the Black 16249 as objective 3. Pool 373 (max_limit 1) spawns him at guid 82907 (6305.88, -6463.66, south-eastern ziggurat) or guid 152293 (6311.32, -6250.12, western ziggurat). The quest map POI for objective 3 only covered the first spawn, so when the pool picked the second one the marker pointed to an empty ziggurat. Each spawn point now has its own objective 3 POI. Expected: with the quest in the log, CMSG_QUEST_POI_QUERY (0x1E3) for 9170 answers SMSG_QUEST_POI_QUERY_RESPONSE (0x1E4) carrying quest 9170 with six POIs: four lieutenants, Masophet's second spawn and the turn-in.",
+  "timeout_ms": 30000,
+  "location": { "map": 530, "x": 6311.32, "y": -6250.12, "z": 80.91, "o": 0 },
+  "players": [
+    { "id": "magister", "race": 10, "class": 8, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "prepare_quest", "label": "Take Dar'Khan's Lieutenants", "actor": "magister", "quest": 9170, "complete": false },
+    {
+      "action": "client_packet", "label": "Query the quest map POIs", "actor": "magister", "opcode": 483, "consumed": false,
+      "fields": [{ "u32": 1 }, { "u32": 9170 }]
+    },
+    {
+      "action": "assert", "label": "The POI response names quest 9170", "actor": "magister",
+      "metric": "server_packet_u32", "opcode": 484, "row": 1, "index": 1, "equals": 9170, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Both Masophet spawn points are marked", "actor": "magister",
+      "metric": "server_packet_u32", "opcode": 484, "row": 1, "index": 2, "equals": 6, "within_ms": 3000
+    }
+  ]
+}

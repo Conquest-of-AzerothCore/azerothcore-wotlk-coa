@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "name": "Shadewell Spring has one Worldforged Shadewell Stabber pickup (COA-6829)",
+  "contract": "The Worldforged Shadewell Stabber (item 824384) at Shadewell Spring, Elwynn Forest, is the Murloc Tool pickup (520066, guid 6900733). rev_20260930_99_ASC_northshire_revamp.sql added a second Murloc Tool (guid 7500149) at the same spot, and rev_20261014_95_worldforged_lootcollector_alignment.sql added a third pickup of the same item, Brambleblade Blade (9900025, guid 6970024), 10 yd away. Only the original remains: one Murloc Tool and no Brambleblade Blade near the spring.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8545.0, "y": -519.0, "z": 145.5, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 1, "level": 5 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: one Murloc Tool pickup", "actor": "p", "metric": "nearby_gameobject_count", "entry": 520066, "equals": 1 },
+    { "action": "assert", "label": "no second Shadewell Stabber pickup", "actor": "p", "metric": "nearby_gameobject_count", "entry": 9900025, "equals": 0 }
+  ]
+}

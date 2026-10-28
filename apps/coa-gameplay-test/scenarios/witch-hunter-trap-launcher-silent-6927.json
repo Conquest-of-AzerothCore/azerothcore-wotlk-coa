@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Trap Launcher swaps the traps without learn or unlearn lines in chat (#6927)",
+  "contract": [
+    "Trap Launcher 802272 swaps each known trap for its launcher variant for 10 seconds and swaps it back when the aura",
+    "ends; the report saw 'You have learned' and 'You have unlearned' lines for every trap on each use. The swaps run",
+    "through the silent replacement path (hidden rows and quiet learns), so the client gets the spellbook swaps but",
+    "prints no notice. Expected: Explosive Trap 680238 becomes 680376 and Frost Trap 681445 becomes 681562 while the",
+    "aura lasts, both come back afterwards, the swaps reach the client, and over two uses no chat line names a launcher",
+    "variant or a trap coming back."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "wh", "race": 1, "class": 15, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login state settle", "ms": 3000},
+    {"action": "learn", "actor": "wh", "spell": 680238},
+    {"action": "learn", "actor": "wh", "spell": 681445},
+    {"action": "learn", "actor": "wh", "spell": 802272},
+    {"action": "set_power", "actor": "wh", "power": 1, "value": 1000},
+    {"action": "wait", "ms": 1000},
+    {"action": "snapshot", "actor": "wh", "metric": "client_chat_lines_for", "spell": 680238,
+     "save_as": "explosive_lines"},
+    {"action": "snapshot", "actor": "wh", "metric": "client_chat_lines_for", "spell": 681445, "save_as": "frost_lines"},
+    {"action": "cast", "label": "Trap Launcher", "actor": "wh", "spell": 802272},
+    {"action": "assert", "label": "SETUP: Explosive Trap becomes its launcher variant", "actor": "wh",
+     "metric": "temporary_spell_replacement", "spell": 680238, "equals": 680376, "within_ms": 2000},
+    {"action": "assert", "label": "SETUP: Frost Trap becomes its launcher variant", "actor": "wh",
+     "metric": "temporary_spell_replacement", "spell": 681445, "equals": 681562, "within_ms": 2000},
+    {"action": "assert", "label": "The swap reaches the client", "actor": "wh", "metric": "spellbook_superseded_for",
+     "spell": 680376, "min": 1},
+    {"action": "assert", "label": "SETUP: the traps come back when the launcher ends", "actor": "wh",
+     "metric": "temporary_spell_replacement", "spell": 680238, "equals": 680238, "within_ms": 13000},
+    {"action": "reset_cooldown", "actor": "wh", "spell": 802272},
+    {"action": "set_power", "actor": "wh", "power": 1, "value": 1000},
+    {"action": "wait", "ms": 1600},
+    {"action": "cast", "label": "Trap Launcher a second time", "actor": "wh", "spell": 802272},
+    {"action": "assert", "label": "SETUP: the second use swaps the traps again", "actor": "wh",
+     "metric": "temporary_spell_replacement", "spell": 680238, "equals": 680376, "within_ms": 2000},
+    {"action": "assert", "label": "SETUP: the second use ends", "actor": "wh", "metric": "temporary_spell_replacement",
+     "spell": 680238, "equals": 680238, "within_ms": 13000},
+    {"action": "assert", "label": "No line for the Explosive Trap launcher variant", "actor": "wh",
+     "metric": "client_chat_lines_for", "spell": 680376, "equals": 0, "within_ms": 2000},
+    {"action": "assert", "label": "No line for the Frost Trap launcher variant", "actor": "wh",
+     "metric": "client_chat_lines_for", "spell": 681562, "equals": 0},
+    {"action": "assert", "label": "No line for Explosive Trap coming back", "actor": "wh",
+     "metric": "client_chat_lines_for", "spell": 680238, "relative_to": "explosive_lines", "equals": 0},
+    {"action": "assert", "label": "No line for Frost Trap coming back", "actor": "wh",
+     "metric": "client_chat_lines_for", "spell": 681445, "relative_to": "frost_lines", "equals": 0}
+  ]
+}

@@ -466,7 +466,7 @@ REPLACE INTO `spell_target_position` (`ID`, `EffectIndex`, `MapID`, `PositionX`,
 REPLACE INTO `spell_target_position` (`ID`, `EffectIndex`, `MapID`, `PositionX`, `PositionY`, `PositionZ`, `Orientation`, `VerifiedBuild`) VALUES (1777082, 0, 0, -34.1467, -923.3660, 54.5576, 0.00, 0);
 
 -- ON-FLOOR           Stone of Retreat: The Sepulcher
-REPLACE INTO `spell_target_position` (`ID`, `EffectIndex`, `MapID`, `PositionX`, `PositionY`, `PositionZ`, `Orientation`, `VerifiedBuild`) VALUES (1777083, 0, 0, 504.5340, 1539.0800, 129.5020, 0.00, 0);
+REPLACE INTO `spell_target_position` (`ID`, `EffectIndex`, `MapID`, `PositionX`, `PositionY`, `PositionZ`, `Orientation`, `VerifiedBuild`) VALUES (1777083, 0, 0, 533.8798, 1536.8212, 134.68832, 1.8692487, 0);
 
 -- ON-FLOOR           Stone of Retreat: Kharanos
 REPLACE INTO `spell_target_position` (`ID`, `EffectIndex`, `MapID`, `PositionX`, `PositionY`, `PositionZ`, `Orientation`, `VerifiedBuild`) VALUES (1777084, 0, 0, -5597.3100, -483.3980, 396.9810, 0.00, 0);

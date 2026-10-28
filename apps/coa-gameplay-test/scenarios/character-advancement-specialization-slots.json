@@ -1,0 +1,394 @@
+{
+  "schema": 1,
+  "name": "Native specialization slots retain independent archetypes, purchases and full action bars",
+  "contract": "The original DLL supports twenty specialization slots. The original slot swap spells select slots through\neffect 162, with a five-second interruptible cast. A Tome unlocks a slot by teaching its swap spell. A\nslot is an independent preset, separate from ChrSpecs archetype identity: a fresh slot has no chosen\narchetype or purchased talents, and returning to a slot restores its own build and action bar. Source:\noriginal AscCAMgr Player::Ensure/Get and OnActiveSpec, Spell.dbc 979993/979994 and ItemSpells.dbc 106954.\nNative removals and resets retain their original prices; fixture actors have 100 gold to pay them.\nArchetype-only uploads inside a slot remove omitted purchases and require explicit repurchase; slot casts\nstill restore saved presets and packed action bars.\nThe original client talent-purge payment token is 0xE06FB (919291), consumed once by the native reset.\nUse that token at level 11, whose original gold polynomial wraps a negative result; preserve client pricing.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 11
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "set_money",
+      "label": "Fund the original native removal and purge prices",
+      "actor": "bloodmage",
+      "value": 1000000
+    },
+    {
+      "action": "client_packet",
+      "actor": "bloodmage",
+      "opcode": 618,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "bloodmage"
+        }
+      ],
+      "label": "Initialize native advancement after the local player is ready"
+    },
+    {
+      "action": "specialization",
+      "actor": "bloodmage",
+      "id": 99
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "bloodmage",
+      "entry": 30191,
+      "rank": 1
+    },
+    {
+      "action": "set_action_button",
+      "actor": "bloodmage",
+      "button": 11,
+      "spell": 804197
+    },
+    {
+      "action": "client_packet",
+      "actor": "bloodmage",
+      "opcode": 296,
+      "early": true,
+      "fields": [
+        {
+          "u8": 143
+        },
+        {
+          "u32": 1073741825
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 979994
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 979994
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "A new slot has no archetype",
+      "actor": "bloodmage",
+      "metric": "player_setting",
+      "source": "core.ascension_active_spec",
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Slot II is active independently of the archetype",
+      "actor": "bloodmage",
+      "metric": "player_setting",
+      "source": "core.ascension_slot.active",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The old slot purchase is inactive",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 804197,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The old slot action bar is inactive",
+      "actor": "bloodmage",
+      "metric": "action_button",
+      "button": 11,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "server_packet_u32",
+      "opcode": 1829,
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "server_packet_u32",
+      "opcode": 1829,
+      "index": 1,
+      "equals": 20
+    },
+    {
+      "action": "specialization",
+      "actor": "bloodmage",
+      "id": 99
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 804197,
+      "equals": 0
+    },
+    {
+      "action": "set_action_button",
+      "actor": "bloodmage",
+      "button": 11,
+      "spell": 801955
+    },
+    {
+      "action": "client_packet",
+      "actor": "bloodmage",
+      "opcode": 296,
+      "early": true,
+      "fields": [
+        {
+          "u8": 143
+        },
+        {
+          "u32": 1073741826
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 979993
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 804197,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "action_button",
+      "button": 11,
+      "equals": 804197
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "action_button_packed",
+      "button": 143,
+      "equals": 1073741825
+    },
+    {
+      "action": "specialization",
+      "actor": "bloodmage",
+      "id": 26
+    },
+    {
+      "action": "specialization",
+      "actor": "bloodmage",
+      "id": 99
+    },
+    {
+      "action": "assert",
+      "label": "An archetype-only return omits the old purchase",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "equals": 0,
+      "spell": 804197
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Repurchase through the complete native upload",
+      "actor": "bloodmage",
+      "entry": 30191,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "label": "Restore the slot purchase explicitly",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "equals": 1,
+      "spell": 804197
+    },
+    {
+      "action": "set_action_button",
+      "actor": "bloodmage",
+      "button": 11,
+      "spell": 804197
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 979994
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 804197,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "action_button",
+      "button": 11,
+      "equals": 801955
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "action_button_packed",
+      "button": 143,
+      "equals": 1073741826
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "carried_money",
+      "save_as": "money_before_relog"
+    },
+    {
+      "action": "relog",
+      "actor": "bloodmage"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Relog retains the normal native level",
+      "actor": "bloodmage",
+      "metric": "level",
+      "equals": 11
+    },
+    {
+      "action": "assert",
+      "label": "Relog retains the funded balance after the paid archetype switch",
+      "actor": "bloodmage",
+      "metric": "carried_money",
+      "relative_to": "money_before_relog",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "player_setting",
+      "source": "core.ascension_slot.active",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "action_button_packed",
+      "button": 143,
+      "equals": 1073741826
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 979993
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "add_item",
+      "label": "Supply the original native talent-purge payment token",
+      "actor": "bloodmage",
+      "item": 919291,
+      "count": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "item_count",
+      "item": 919291,
+      "equals": 1
+    },
+    {
+      "action": "client_packet",
+      "actor": "bloodmage",
+      "opcode": 531
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The paid native purge succeeds",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 1835,
+      "text": "CA_PURGE_TALENTS_OK",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The native purge consumes its original token",
+      "actor": "bloodmage",
+      "metric": "item_count",
+      "item": 919291,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 804197,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 979994
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 979993
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 804197,
+      "equals": 0,
+      "label": "Reset ranks do not return from an older slot snapshot"
+    }
+  ]
+}

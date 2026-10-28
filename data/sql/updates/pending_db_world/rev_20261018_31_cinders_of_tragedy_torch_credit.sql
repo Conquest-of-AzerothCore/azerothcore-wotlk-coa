@@ -1,0 +1,25 @@
+-- [Quest] Cinders of Tragedy (#8074): tossing the Torch on the dead bodies
+-- played the throw animation but the corpse never caught fire and no credit
+-- was awarded.
+--
+-- Root cause: the corpse NPCs (Graysky Soldier 164072, Frostmane Ambusher
+-- 164073) carry unit_flags 768 = UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC.
+-- The Torch (item 559886) casts Thrown Torch (spell 365019), which targets
+-- TARGET_UNIT_TARGET_ENEMY. CheckExplicitTarget funnels enemy-target validation
+-- through Unit::_IsValidAttackTarget, which rejects player casters whenever the
+-- target has UNIT_FLAG_IMMUNE_TO_PC (Unit.cpp). The cast is rejected with
+-- SPELL_FAILED_BAD_TARGETS, so SMART_EVENT_SPELLHIT never fires and the
+-- SmartAI chain (cast Flickering Fire Aura 365035, CALL_KILLEDMONSTER credit
+-- for 164072, despawn) never runs.
+--
+-- Contrast with the sibling quest in the same batch, "Blood and Duty" (175049):
+-- its bandage-spell targets (Wounded Graysky Soldier 164055/164056) use
+-- unit_flags 0, as does every other SPELLHIT quest-item target in the Pale
+-- Reach content. Only the two Cinders corpses carry the immunity flags.
+--
+-- Fix: drop UNIT_FLAG_IMMUNE_TO_PC but keep UNIT_FLAG_IMMUNE_TO_NPC (768 -> 512)
+-- so the torch can hit while nearby guards and creatures still cannot engage
+-- the lying corpses. Factions (12/37), corpse pose (addon bytes1 7, dynamic
+-- flag DEAD) and the SmartAI chain are untouched.
+
+UPDATE `creature_template` SET `unit_flags` = 512 WHERE `entry` IN (164072, 164073);

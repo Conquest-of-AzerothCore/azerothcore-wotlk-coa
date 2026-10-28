@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "A Purified Bola Throw button is saved as Bola Throw (#5469)",
+  "contract": "Purified Bola 707230 ('Your Bola Throw now has 2 charges ... @s:803333') is a passive bound to aura_ascension_witch_hunter_lifecycle. Its apply (AscensionWitchHunterDefenses.cpp:215-216) calls AscensionWitchHunter::Replacement(player, 1, 0x20000000, 803333) (AscensionWitchHunterCompletion.cpp:65-72), which learns Purified Bola Throw 803333 with learnSpell(..., true) (line 68) and replaces every known family-21 spell with SpellFamilyFlags[1] 0x20000000, here Bola Throw rank 1 500093, through SetTemporarySpellReplacement (line 71). 803333 is never written to character_spell, so a button holding it must be saved as Bola Throw 500093, the spell persisted_action_button reads from Player::GetSavedActionButtonSpell; a button holding Bola Throw itself is saved unchanged.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "wh", "race": 1, "class": 15, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login state settle", "ms": 3000 },
+    { "action": "learn", "actor": "wh", "spell": 500093 },
+    { "action": "learn", "actor": "wh", "spell": 707230 },
+    {
+      "action": "assert",
+      "label": "Purified Bola replaces Bola Throw with Purified Bola Throw",
+      "actor": "wh",
+      "metric": "temporary_spell_replacement",
+      "spell": 500093,
+      "equals": 803333,
+      "within_ms": 3000
+    },
+    { "action": "set_action_button", "actor": "wh", "button": 2, "spell": 803333 },
+    { "action": "set_action_button", "actor": "wh", "button": 3, "spell": 500093 },
+    {
+      "action": "assert",
+      "label": "The bar holds Purified Bola Throw",
+      "actor": "wh",
+      "metric": "action_button",
+      "button": 2,
+      "equals": 803333
+    },
+    {
+      "action": "assert",
+      "label": "The Purified Bola Throw button is saved as Bola Throw",
+      "actor": "wh",
+      "metric": "persisted_action_button",
+      "button": 2,
+      "equals": 500093
+    },
+    {
+      "action": "assert",
+      "label": "Control: the Bola Throw button is saved unchanged",
+      "actor": "wh",
+      "metric": "persisted_action_button",
+      "button": 3,
+      "equals": 500093
+    }
+  ]
+}

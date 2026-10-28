@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "name": "Grey Stallion from the Pale Reach quest shows its horse model when mounted (#9288)",
+  "contract": [
+    "Quest 175007 rewards item 560260 Grey Stallion, whose use teaches 365260 through 55884. Spell 365260 applies",
+    "SPELL_AURA_MOUNTED with creature 379995 and a mounted speed aura. The creature cache capture (2026-09-04) gives",
+    "379995 display 141902, which CreatureDisplayInfo.dbc maps to model ridinghorsescadeald.m2.",
+    "Mounting must keep the speed aura and set the rider's mount display to 141902; display 0 is the reported",
+    "invisible mount. This reads the server's mount display, not the rendered client model."
+  ],
+  "timeout_ms": 45000,
+  "location": {
+    "map": 0,
+    "x": -9377.45,
+    "y": -1295.63,
+    "z": 56.7373,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "rider",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_skill",
+      "actor": "rider",
+      "skill": 762,
+      "value": 75,
+      "maximum": 75
+    },
+    {
+      "action": "add_item",
+      "actor": "rider",
+      "item": 560260
+    },
+    {
+      "action": "use_item",
+      "actor": "rider",
+      "item": 560260,
+      "spell": 55884
+    },
+    {
+      "action": "assert",
+      "label": "Using the Grey Stallion item teaches the mount",
+      "actor": "rider",
+      "metric": "knows_spell",
+      "spell": 365260,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 365260
+    },
+    {
+      "action": "assert",
+      "label": "The Grey Stallion aura is applied",
+      "actor": "rider",
+      "metric": "aura",
+      "spell": 365260,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The rider sits on the Grey Stallion model",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 141902,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}

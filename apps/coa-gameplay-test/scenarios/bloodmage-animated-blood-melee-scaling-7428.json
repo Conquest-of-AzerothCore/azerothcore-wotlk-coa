@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "name": "Animated Blood amalgam deals owner-level damage with Blood Strikes (#7428)",
+  "contract": "#7428: the Animated Blood amalgam (315301) hits for ~3 at level 41, expected ~60-70. Cause: the template is level 1 and nothing ever scales the summon - TempSummon::InitStats sets owner level only for triggers, and no CoA code touched these entries, so the pet swings with level-1 weapon damage. Fix: bloodmage_blood_constructor scales the brood on summon (owner level, weapon min level x1.0 / max x1.5, attack power from intellect and shadow spell power x0.4, owner hit chances), the Necromancer-minion pattern. The level-1 dummy makes every swing land deterministically (no ratings needed) while keeping pre/post totals an order apart: pre-fix ~15 player + ~15 pet, post-fix ~15 player + ~250 melee + ~280 Blood Strikes. The player stops attacking right after engaging so only the pet damages during the window; owner-in-combat at summon time is what makes the pet engage its victim. Fails pre-fix (drop under 120).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "mage",
+      "race": 1,
+      "class": 20,
+      "level": 42
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "mage",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "mage",
+      "label": "Learn Animated Blood",
+      "spell": 573357
+    },
+    {
+      "action": "assert",
+      "label": "The mana fixture below stays inside the character's own pool",
+      "actor": "mage",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1500
+    },
+    {
+      "action": "set_power",
+      "label": "Keep mana out of the experiment",
+      "actor": "mage",
+      "power": 0,
+      "value": 1500
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy",
+      "label": "Baseline dummy health",
+      "metric": "health",
+      "save_as": "h0"
+    },
+    {
+      "action": "attack",
+      "actor": "mage",
+      "target": "dummy",
+      "label": "Engage so the owner is in combat"
+    },
+    {
+      "action": "wait",
+      "label": "Let combat start",
+      "ms": 500
+    },
+    {
+      "action": "set_power",
+      "label": "Rage for the 25-Rage summon",
+      "actor": "mage",
+      "power": 1,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "mage",
+      "label": "Summon the amalgam",
+      "spell": 573357
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "equals": 0,
+      "label": "SETUP: summon cast accepted",
+      "metric": "cast_failure",
+      "spell": 573357
+    },
+    {
+      "action": "stop_attack",
+      "actor": "mage",
+      "label": "Stop swinging so only the pet damages during the window"
+    },
+    {
+      "action": "wait",
+      "label": "Let the pet work the dummy",
+      "ms": 12000
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "label": "DISCRIMINATING: pet damage at owner level, not level-1 chip",
+      "metric": "health",
+      "relative_to": "h0",
+      "max": -120
+    }
+  ]
+}

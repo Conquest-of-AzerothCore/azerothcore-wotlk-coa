@@ -23,15 +23,25 @@ SPEC_ROOTS = {
     31183: 4033, 31202: 4054, 66733: 4061,
 }
 OTHER_ROOTS = {12166: 4016, 17414: 4011, 29485: 4026, 30229: 4018, 31164: 4014, 31194: 4046}
+INSPIRATION_CHOICES = [(13616, 29216), (11214, 29214), (7836, 10836), (11836, 11837)]
 
 
-def read_header():
+def read_catalog():
     global CATALOG
     if DBC_DIR is None:
         raise unittest.SkipTest("Pass --dbc-dir to read the talent catalog from the client DBCs.")
     if CATALOG is None:
         CATALOG = catalog_text(DBC_DIR)
-    text = CATALOG
+    return CATALOG
+
+
+def read_free_choice_groups():
+    block = read_catalog().split("CoASelectableFreeEntries =", 1)[1].split("CoAAutomaticDependencies =", 1)[0]
+    return {int(entry): int(group) for entry, group in re.findall(r"\{(\d+), (\d+)\}", block)}
+
+
+def read_header():
+    text = read_catalog()
     fields = "class_id spec_id spell_count ae_cost te_cost level spell1 spell2 spell3".split()
     entries = {}
     for line in text.splitlines():
@@ -70,6 +80,32 @@ class AutomaticDependencies(unittest.TestCase):
                     self.assertEqual(required["class_id"], entry["class_id"])
                     self.assertFalse(entry["spec_id"] and required["spec_id"] == 0
                                      and (required["ae_cost"] or required["te_cost"]))
+
+
+class FreeChoiceGroups(unittest.TestCase):
+    def test_inspiration_level_choices_are_selectable_pairs(self):
+        groups = read_free_choice_groups()
+        for first, second in INSPIRATION_CHOICES:
+            with self.subTest(entries=(first, second)):
+                self.assertIn(first, groups)
+                self.assertIn(second, groups)
+                self.assertEqual(groups[first], groups[second])
+
+    def test_every_free_choice_group_pairs_two_free_entries_of_one_tree_and_level(self):
+        entries, dependencies = read_header()
+        members = {}
+        for entry_id, group in read_free_choice_groups().items():
+            members.setdefault(group, []).append(entry_id)
+        self.assertEqual(len(members), 24)
+        for group, entry_ids in members.items():
+            with self.subTest(group=group):
+                self.assertEqual(len(entry_ids), 2)
+                first, second = (entries[entry_id] for entry_id in entry_ids)
+                for key in ("class_id", "spec_id", "level"):
+                    self.assertEqual(first[key], second[key])
+                for entry_id in entry_ids:
+                    self.assertEqual((entries[entry_id]["ae_cost"], entries[entry_id]["te_cost"]), (0, 0))
+                    self.assertNotIn(entry_id, dependencies)
 
 
 class ClientAutomaticRanks(unittest.TestCase):

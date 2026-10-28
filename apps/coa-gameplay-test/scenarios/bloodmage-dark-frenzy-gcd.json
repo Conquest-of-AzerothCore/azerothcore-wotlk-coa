@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Dark Frenzy reduces the global cooldown by 25% while a Cursed Form is active (#1328)",
+  "contract": "Dark Frenzy 704644's second clause is 'while a Cursed Form is active, your global cooldowns are reduced by $804845s3%'. 804845 carries a stock aura 108 (SPELL_AURA_ADD_PCT_MODIFIER) effect, MiscValue 21 (SPELLMOD_GLOBAL_COOLDOWN) and BasePoints -26 (GetAmount -25), applied to the caster; Spell::TriggerGlobalCooldown consumes it through Player::ApplySpellMod. The talent aura itself only ships the raid spell-haste effect and a dummy, so the form gate lives in AscensionBloodmageTalents.cpp: SyncDarkFrenzy keeps 804845 applied while any Cursed Form is up and removes it when the last one falls. Bloodbolt 578305 is instant with StartRecoveryCategory 133 and StartRecoveryTime 1500, so its category-133 global cooldown is the measurable 1500 ms default; with the helper up it must read 1500 * 0.75 = 1125 ms. The engine's xinef guard in Player::ApplySpellMod ('backdraft gcd reduce ... dont affect gcd if cast time was not applied') only makes sense for auras that also modify casting time; a helper whose only modifier is the gcd reduction must not be swallowed by it.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "bm", "race": 1, "class": 20, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "bm", "entry": 36, "level": 1, "health": 1000000, "distance": 12 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 4000 },
+    { "action": "learn", "actor": "bm", "spell": 578305 },
+    { "action": "cast", "label": "Baseline Bloodbolt starts the native category-133 global cooldown", "actor": "bm", "spell": 578305, "target": "dummy" },
+    { "action": "assert", "label": "Without the helper the global cooldown is 1500 ms", "actor": "bm", "metric": "global_cooldown_ms", "spell": 578305, "min": 1300, "max": 1500 },
+    { "action": "reset_cooldown", "actor": "bm", "spell": 578305 },
+    { "action": "wait", "label": "Let the baseline global cooldown clear", "ms": 2000 },
+    { "action": "set_aura", "label": "The helper Dark Frenzy keeps up while a Cursed Form is active", "actor": "bm", "spell": 804845, "stacks": 1 },
+    { "action": "cast", "actor": "bm", "spell": 578305, "target": "dummy" },
+    { "action": "assert", "label": "The helper aura reduces the global cooldown to 1125 ms", "actor": "bm", "metric": "global_cooldown_ms", "spell": 578305, "min": 1050, "max": 1250 },
+    { "action": "set_aura", "label": "Drop the helper again", "actor": "bm", "spell": 804845, "stacks": 0 },
+    { "action": "reset_cooldown", "actor": "bm", "spell": 578305 },
+    { "action": "wait", "label": "Let the global cooldown clear", "ms": 2000 },
+    { "action": "learn", "label": "The Dark Frenzy talent aura", "actor": "bm", "spell": 704644 },
+    { "action": "learn", "actor": "bm", "spell": 562572 },
+    { "action": "cast", "label": "Entering Accursed Form must apply the helper through SyncDarkFrenzy", "actor": "bm", "spell": 562572 },
+    { "action": "assert", "label": "The form is up", "actor": "bm", "metric": "aura", "spell": 562572, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "SyncDarkFrenzy applied the helper", "actor": "bm", "metric": "aura", "spell": 804845, "equals": 1, "within_ms": 3000 },
+    { "action": "cast", "actor": "bm", "spell": 578305, "target": "dummy" },
+    { "action": "assert", "label": "In form the global cooldown is still reduced", "actor": "bm", "metric": "global_cooldown_ms", "spell": 578305, "min": 1050, "max": 1250 },
+    { "action": "cancel_aura", "label": "Leaving the form must remove the helper", "actor": "bm", "spell": 562572 },
+    { "action": "assert", "label": "The helper is gone once the last Cursed Form falls", "actor": "bm", "metric": "aura", "spell": 804845, "equals": 0, "within_ms": 3000 },
+    { "action": "unlearn", "label": "Control: without the talent", "actor": "bm", "spell": 704644 },
+    { "action": "cast", "actor": "bm", "spell": 562572 },
+    { "action": "assert", "label": "No helper without the talent", "actor": "bm", "metric": "aura", "spell": 804845, "equals": 0, "within_ms": 3000 }
+  ]
+}

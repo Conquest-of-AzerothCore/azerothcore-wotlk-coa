@@ -18,6 +18,7 @@
       "expertise_rating": 10000
     }
   ],
+  "location": { "map": 530, "x": 10349.6, "y": -6357.29, "z": 33.4026, "o": 5.31605 },
   "creatures": [
     {
       "id": "clawed",
@@ -89,6 +90,12 @@
       "metric": "cooldown_ms",
       "spell": 803985,
       "min": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "victim",
+      "value": 1,
+      "label": "Prepare a separate enemy that dies to one normal auto attack"
     },
     {
       "action": "attack",

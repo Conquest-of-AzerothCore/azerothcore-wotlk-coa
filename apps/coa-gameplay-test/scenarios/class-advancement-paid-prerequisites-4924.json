@@ -1,0 +1,176 @@
+{
+  "schema": 1,
+  "name": "class-advancement-paid-prerequisites-4924",
+  "contract": [
+    "Issue #4924 describes removing a talent-tree prerequisite while retaining dependent talents. This case",
+    "covers the explicit paid dependency in the original CharacterAdvancement data: Crusader Righteous Tempest",
+    "entry 34372 (805409) requires Scourgebane entry 4024 and Divine Force entry 31314 (806153). The archived",
+    "Exiles page independently lists Requires Scourgebane -> Divine Force, SHA256",
+    "6832bbe937ebfcfc7fdabfc6d57b7a853c6f87450a35decd7bbe4355402bb695.",
+    "Use native complete-build uploads to buy both, reject parent-only removal without billing or mutation,",
+    "allow child-then-parent removal, reject a child purchase with the parent missing, and restore both.",
+    "Keep the effective loader rule that grants ordinary identity passives at level ten without their old",
+    "class-entry prerequisite. This case does not infer additional dependencies from client visual tree arrows."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "templar",
+      "race": 1,
+      "class": 19,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "money",
+      "actor": "templar",
+      "copper": 1000000
+    },
+    {
+      "action": "specialization",
+      "actor": "templar",
+      "id": 24
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "templar",
+      "entry": 31314,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "knows_spell",
+      "spell": 806153,
+      "equals": 1,
+      "label": "Purchase the explicit paid class prerequisite normally"
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "templar",
+      "entry": 34372,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "knows_spell",
+      "spell": 805409,
+      "equals": 1,
+      "label": "Purchase Righteous Tempest with Divine Force present"
+    },
+    {
+      "action": "snapshot",
+      "actor": "templar",
+      "metric": "carried_money",
+      "save_as": "before_invalid_removal"
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "templar",
+      "entry": 31314,
+      "rank": 0,
+      "refused": true
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "knows_spell",
+      "spell": 806153,
+      "equals": 1,
+      "label": "Removing the prerequisite while retaining its paid child is refused atomically"
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "knows_spell",
+      "spell": 805409,
+      "equals": 1,
+      "label": "The refused upload preserves the dependent ability"
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "carried_money",
+      "relative_to": "before_invalid_removal",
+      "equals": 0,
+      "label": "Refusing an invalid tree does not bill the removal"
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "templar",
+      "entry": 34372,
+      "rank": 0
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "knows_spell",
+      "spell": 805409,
+      "equals": 0,
+      "label": "A normal paid child removal remains allowed"
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "templar",
+      "entry": 31314,
+      "rank": 0
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "knows_spell",
+      "spell": 806153,
+      "equals": 0,
+      "label": "The parent can be removed after the dependent is removed"
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "knows_spell",
+      "spell": 92111,
+      "equals": 1,
+      "label": "Crusader identity preserves its effective automatic level-ten grant"
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "templar",
+      "entry": 34372,
+      "rank": 1,
+      "refused": true
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "knows_spell",
+      "spell": 805409,
+      "equals": 0,
+      "label": "A paid child cannot be purchased without its explicit prerequisite"
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "templar",
+      "entry": 31314,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "templar",
+      "entry": 34372,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "knows_spell",
+      "spell": 805409,
+      "equals": 1,
+      "label": "Repurchasing the prerequisite restores a valid native purchase path"
+    }
+  ]
+}

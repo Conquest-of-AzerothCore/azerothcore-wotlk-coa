@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Using the placed Ancestral Keg applies its heal and mana aura (#5802)",
+  "contract": "Ancestral Keg 804748 places gameobject 9000118 (type 22, GAMEOBJECT_TYPE_SPELLCASTER). A spellcaster object casts its Data0 spell on the user; the DBC names exactly one aura spell for the keg, 570762 'Ancestral Keg' (SPELL_AURA_PERIODIC_TRIGGER_SPELL every 2000 ms), which triggers 572066 'Ancestral Keg' (SPELL_EFFECT_HEAL_PCT 4 and SPELL_EFFECT_ENERGIZE_PCT 4). With Data0 unset, using the placed keg does nothing; with Data0 570762 the user receives the aura.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "b", "race": 1, "class": 12, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "b", "spell": 804748 },
+    { "action": "cast", "actor": "b", "spell": 804748, "target": "b" },
+    { "action": "assert", "label": "The Ancestral Keg gameobject is placed near the caster", "actor": "b", "metric": "owned_gameobject_count", "entry": 9000118, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "No keg aura before using the keg", "actor": "b", "metric": "aura", "spell": 570762, "equals": 0 },
+    { "action": "use_nearby_gameobject", "label": "Use the placed keg", "actor": "b", "entry": 9000118 },
+    { "action": "assert", "label": "Using the keg applies the Ancestral Keg aura", "actor": "b", "metric": "aura", "spell": 570762, "equals": 1, "within_ms": 5000 }
+  ]
+}

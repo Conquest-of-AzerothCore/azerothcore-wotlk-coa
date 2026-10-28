@@ -72,6 +72,7 @@ public:
         return GetTaxiDestination();
     }
 
+    bool RequestEarlyLanding();
     [[nodiscard]] std::deque<uint32> const& GetPath() const { return m_TaxiDestinations; }
     [[nodiscard]] bool empty() const { return m_TaxiDestinations.empty(); }
     [[nodiscard]] FactionTemplateEntry const* GetFlightMasterFactionTemplate() const;

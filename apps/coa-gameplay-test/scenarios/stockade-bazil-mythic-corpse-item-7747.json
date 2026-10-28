@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Mythic Bazil Thredd leaves one Mythic dungeon item on his corpse (#7747)",
+  "contract": [
+    "#7747: Bazil Thredd on Mythic (201716) dropped only his quest items and gold. On Ascension each Mythic kill also",
+    "left one random Mythic dungeon item (db.exil.es archive: 883 items at 0.113 % each). The corpse now rolls the",
+    "Dungeon Spoils (Mythic) item pool (reference 1027965) once, so nearly every fill holds a rare or better item,",
+    "and a Mythic kill leaves one Mythic gear item of item level 60-70 on the corpse."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8914.0, "y": -133.0, "z": 80.6},
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "label": "Mythic Bazil's loot list holds a rare or better item in nearly every fill",
+     "actor": "hero", "metric": "creature_loot_quality_rate", "entry": 201716, "min": 95, "max": 100},
+    {"action": "set_health", "actor": "hero", "value": 5000000, "maximum": 5000000},
+    {"action": "ascension_dungeon_difficulty_packet", "actor": "hero", "value": 2},
+    {"action": "wait", "ms": 250},
+    {"action": "teleport", "actor": "hero", "map": 34, "x": 54.23, "y": 0.28, "z": -18.34},
+    {"action": "wait", "ms": 1500},
+    {"action": "assert", "label": "CONTROL: The Stockade on Mythic", "actor": "hero", "metric": "map_difficulty",
+     "equals": 2},
+    {"action": "summon", "actor": "hero", "entry": 1716, "as": "bazil", "distance": 4},
+    {"action": "wait", "ms": 300},
+    {"action": "assert", "label": "CONTROL: the Mythic template", "actor": "hero",
+     "metric": "nearby_creature_template", "entry": 1716, "equals": 201716},
+    {"action": "attack_nearby", "actor": "hero", "entry": 1716, "kill": true},
+    {"action": "assert", "actor": "bazil", "metric": "alive", "equals": 0, "within_ms": 10000},
+    {"action": "loot_creature", "actor": "hero", "target": "bazil"},
+    {"action": "assert", "label": "One Mythic dungeon gear item on the corpse", "actor": "hero",
+     "metric": "loot_gear_item_level", "min": 60, "max": 70},
+    {"action": "close_loot", "actor": "hero"}
+  ]
+}

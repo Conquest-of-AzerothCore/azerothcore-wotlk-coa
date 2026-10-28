@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "Prestige Mode: activation takes the character out of the Dungeon Finder queue (#6445)",
+  "contract": "A level 60 character queued alone for Random Classic Dungeon (258) is in the native LFG queued state (2). Choosing 'I would like to prestige!' at Chromie 178081 returns it to level 1, where it no longer meets that queue's level range, so activation removes it from the queue: its Dungeon Finder state returns to none (0).",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": 1583.18,
+    "y": -4417.3,
+    "z": 8.35,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "prestiger",
+      "race": 2,
+      "class": 20,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "chromie",
+      "owner": "prestiger",
+      "entry": 178081,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "prestiger",
+      "id": 25
+    },
+    {
+      "action": "lfg_join",
+      "label": "Queue alone for Random Classic Dungeon",
+      "actor": "prestiger",
+      "dungeons": [
+        258
+      ],
+      "roles": 8
+    },
+    {
+      "action": "assert",
+      "label": "The character is queued",
+      "actor": "prestiger",
+      "metric": "lfg_state",
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "prestiger",
+      "target": "chromie",
+      "label": "Speak to Chromie"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "prestiger",
+      "option": 0,
+      "label": "I would like to prestige!"
+    },
+    {
+      "action": "assert",
+      "label": "Back to level 1",
+      "actor": "prestiger",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The prestige leaves the Dungeon Finder queue",
+      "actor": "prestiger",
+      "metric": "lfg_state",
+      "equals": 0,
+      "within_ms": 3000
+    }
+  ]
+}

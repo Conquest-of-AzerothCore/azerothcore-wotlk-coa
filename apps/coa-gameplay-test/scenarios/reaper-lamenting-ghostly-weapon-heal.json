@@ -17,6 +17,7 @@
       "allow_regeneration": false
     }
   ],
+  "location": { "map": 530, "x": 10349.6, "y": -6357.29, "z": 33.4026, "o": 5.31605 },
   "creatures": [
     {
       "id": "enemy",

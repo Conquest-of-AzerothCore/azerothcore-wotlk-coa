@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "A specialization switch from the talent window hands the action bars back to the client",
+  "contract": [
+    "Switching specialization through a known-entries upload (CMSG 0x727) runs SwitchSpecialization without restoring a stored build. It sends SMSG_ACTION_BUTTONS state 2, which clears the client's bars, and the client accepts no bar changes until a state-1 list follows; without one, nothing can be placed on the bars until the next login.",
+    "Button 0 holds Attack (6603), so a state-1 list starts with the dword 0x0019CB01 (1690369) and is counted as that packet row; the 1-byte state-2 packet is not. The switch from Fleshweaver (25) to Sanguine (26) must be followed by at least one state-1 list, and Attack stays on button 0."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "bloodmage", "race": 1, "class": 20, "level": 12 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Settle login", "ms": 5000 },
+    { "action": "specialization", "label": "Enter Fleshweaver", "actor": "bloodmage", "id": 25 },
+    { "action": "learn", "actor": "bloodmage", "spell": 6603 },
+    { "action": "set_action_button", "label": "Put Attack on button 0", "actor": "bloodmage", "button": 0, "spell": 6603 },
+    {
+      "action": "snapshot", "label": "State-1 button lists sent before the switch",
+      "actor": "bloodmage", "metric": "server_packets", "opcode": 297, "row": 1690369,
+      "save_as": "button_lists_before_switch"
+    },
+    { "action": "specialization", "label": "Switch to Sanguine through a talent upload", "actor": "bloodmage", "id": 26 },
+    {
+      "action": "assert", "label": "A state-1 button list follows the switch that cleared the bars",
+      "actor": "bloodmage", "metric": "server_packets", "opcode": 297, "row": 1690369,
+      "relative_to": "button_lists_before_switch", "min": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Attack stays on button 0",
+      "actor": "bloodmage", "metric": "action_button", "button": 0, "equals": 6603
+    }
+  ]
+}

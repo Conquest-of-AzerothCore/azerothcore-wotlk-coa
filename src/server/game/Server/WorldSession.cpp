@@ -421,7 +421,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
 
     constexpr uint32 MAX_PROCESSED_PACKETS_IN_SAME_WORLDSESSION_UPDATE = 150;
 
-    while (m_Socket && _recvQueue.next(packet, updater))
+    while ((m_Socket || _socketlessPacketObserver) && _recvQueue.next(packet, updater))
     {
         OpcodeClient opcode = static_cast<OpcodeClient>(packet->GetOpcode());
         ClientOpcodeHandler const* opHandle = opcodeTable[opcode];
@@ -707,6 +707,8 @@ void WorldSession::SendPlayTimeWarning(PlayTimeFlag flag, int32 playTimeRemainin
 /// %Log the player out
 void WorldSession::LogoutPlayer(bool save, bool redirecting)
 {
+    UpdateRecruitAFriendRewards(true);
+    ClearRecruitAFriendRequests();
     // finish pending transfers before starting the logout
     while (_player && _player->IsBeingTeleportedFar())
         HandleMoveWorldportAck();
@@ -1335,6 +1337,7 @@ void WorldSession::ReadAddonsInfo(ByteBuffer& data)
 
                 /// @todo: Find out when to not use CRC/pubkey, and other possible states.
                 m_addonsList.push_back(addon);
+                m_clientAddonNames.push_back(addon.Name);
             }
 
             uint32 currentTime;

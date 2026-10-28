@@ -1,0 +1,258 @@
+{
+  "schema": 1,
+  "name": "A level 60 group queued for Random Classic Dungeon is rewarded on completion (#6326)",
+  "contract": "At level 60 the client queues Random Classic Dungeon (258) itself instead of a list of specific dungeons. A level 60 group that queues for it, accepts the proposal and finishes the final boss of the dungeon it was given receives the Classic Random 56-60 completion quest and its Adventurer's Cache.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p1",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "p2",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "p3",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "p4",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "p5",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p2"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p3"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p4"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p5"
+    },
+    {
+      "action": "lfg_join",
+      "label": "The leader queues the group for Random Classic Dungeon, as the level 60 client does",
+      "actor": "p1",
+      "dungeons": [
+        258
+      ],
+      "roles": 3
+    },
+    {
+      "action": "lfg_set_roles",
+      "actor": "p2",
+      "roles": 4
+    },
+    {
+      "action": "lfg_set_roles",
+      "actor": "p3",
+      "roles": 8
+    },
+    {
+      "action": "lfg_set_roles",
+      "actor": "p4",
+      "roles": 8
+    },
+    {
+      "action": "lfg_set_roles",
+      "actor": "p5",
+      "roles": 8
+    },
+    {
+      "action": "wait",
+      "ms": 20000
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p1"
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p2"
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p3"
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p4"
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p5"
+    },
+    {
+      "action": "assert",
+      "label": "p1 enters the dungeon the proposal chose",
+      "actor": "p1",
+      "metric": "map_id",
+      "min": 229,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "p2 enters the dungeon the proposal chose",
+      "actor": "p2",
+      "metric": "map_id",
+      "min": 229,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "p3 enters the dungeon the proposal chose",
+      "actor": "p3",
+      "metric": "map_id",
+      "min": 229,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "p4 enters the dungeon the proposal chose",
+      "actor": "p4",
+      "metric": "map_id",
+      "min": 229,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "p5 enters the dungeon the proposal chose",
+      "actor": "p5",
+      "metric": "map_id",
+      "min": 229,
+      "within_ms": 20000
+    },
+    {
+      "action": "lfg_final_credit",
+      "label": "The final boss of the chosen dungeon is credited",
+      "actor": "p1"
+    },
+    {
+      "action": "assert",
+      "label": "p1 is rewarded the Classic Random 56-60 quest",
+      "actor": "p1",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p2 is rewarded the Classic Random 56-60 quest",
+      "actor": "p2",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p3 is rewarded the Classic Random 56-60 quest",
+      "actor": "p3",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p4 is rewarded the Classic Random 56-60 quest",
+      "actor": "p4",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p5 is rewarded the Classic Random 56-60 quest",
+      "actor": "p5",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p1 holds the Adventurer's Cache from the completion",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 1397886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p2 holds the Adventurer's Cache from the completion",
+      "actor": "p2",
+      "metric": "item_count",
+      "item": 1397886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p3 holds the Adventurer's Cache from the completion",
+      "actor": "p3",
+      "metric": "item_count",
+      "item": 1397886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p4 holds the Adventurer's Cache from the completion",
+      "actor": "p4",
+      "metric": "item_count",
+      "item": 1397886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p5 holds the Adventurer's Cache from the completion",
+      "actor": "p5",
+      "metric": "item_count",
+      "item": 1397886,
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

@@ -1,0 +1,855 @@
+{
+  "schema": 1,
+  "name": "Scadeald stallions from Remount Master Edward show their horse models when mounted",
+  "contract": [
+    "Remount Master Edward (164592) sells the Scadeald stallions. Spells 365257-365267 (except Grey 365260) and",
+    "365200-365210 apply SPELL_AURA_MOUNTED with creatures 379992-380002 and 267700-267710 and a mounted speed aura.",
+    "CreatureDisplayInfo.dbc gives each spell's coat: 141899-141909 on ridinghorsescadeald.m2 and 141910-141920 on",
+    "pvpridinghorsescadeald.m2; creature cache captures confirm 141904, 141909 and 141918-141920.",
+    "Each mount must set the rider's mount display to its coat; display 0 is the reported invisible mount. Item 560267",
+    "proves the vendor item path once; the other mounts are learned as fixtures. This reads the server's mount display,",
+    "not the rendered client model."
+  ],
+  "timeout_ms": 150000,
+  "location": {
+    "map": 0,
+    "x": -9377.45,
+    "y": -1295.63,
+    "z": 56.7373,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "rider",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_skill",
+      "actor": "rider",
+      "skill": 762,
+      "value": 75,
+      "maximum": 75
+    },
+    {
+      "action": "add_item",
+      "actor": "rider",
+      "item": 560267
+    },
+    {
+      "action": "use_item",
+      "actor": "rider",
+      "item": 560267,
+      "spell": 55884
+    },
+    {
+      "action": "assert",
+      "label": "Buying and using the Undead Stallion item teaches the mount",
+      "actor": "rider",
+      "metric": "knows_spell",
+      "spell": 365267,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "rider",
+      "spell": 365257
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 365257
+    },
+    {
+      "action": "assert",
+      "label": "The Midnight Black Stallion aura is applied",
+      "actor": "rider",
+      "metric": "aura",
+      "spell": 365257,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The rider sits on the Midnight Black Stallion model",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 141899,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "rider",
+      "spell": 365258
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 365258
+    },
+    {
+      "action": "assert",
+      "label": "The Bay Stallion aura is applied",
+      "actor": "rider",
+      "metric": "aura",
+      "spell": 365258,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The rider sits on the Bay Stallion model",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 141900,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "rider",
+      "spell": 365259
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 365259
+    },
+    {
+      "action": "assert",
+      "label": "The Chestnut Stallion aura is applied",
+      "actor": "rider",
+      "metric": "aura",
+      "spell": 365259,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The rider sits on the Chestnut Stallion model",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 141901,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "rider",
+      "spell": 365261
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 365261
+    },
+    {
+      "action": "assert",
+      "label": "The Palomino Stallion aura is applied",
+      "actor": "rider",
+      "metric": "aura",
+      "spell": 365261,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The rider sits on the Palomino Stallion model",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 141903,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "rider",
+      "spell": 365262
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 365262
+    },
+    {
+      "action": "assert",
+      "label": "The Pale Stallion aura is applied",
+      "actor": "rider",
+      "metric": "aura",
+      "spell": 365262,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The rider sits on the Pale Stallion model",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 141904,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "rider",
+      "spell": 365263
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 365263
+    },
+    {
+      "action": "assert",
+      "label": "The Piebald Stallion aura is applied",
+      "actor": "rider",
+      "metric": "aura",
+      "spell": 365263,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The rider sits on the Piebald Stallion model",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 141905,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "rider",
+      "spell": 365264
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 365264
+    },
+    {
+      "action": "assert",
+      "label": "The Pinto Stallion aura is applied",
+      "actor": "rider",
+      "metric": "aura",
+      "spell": 365264,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The rider sits on the Pinto Stallion model",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 141906,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "rider",
+      "spell": 365265
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 365265
+    },
+    {
+      "action": "assert",
+      "label": "The Dark Bay Stallion aura is applied",
+      "actor": "rider",
+      "metric": "aura",
+      "spell": 365265,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The rider sits on the Dark Bay Stallion model",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 141907,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "rider",
+      "spell": 365266
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 365266
+    },
+    {
+      "action": "assert",
+      "label": "The White Stallion aura is applied",
+      "actor": "rider",
+      "metric": "aura",
+      "spell": 365266,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The rider sits on the White Stallion model",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 141908,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 365267
+    },
+    {
+      "action": "assert",
+      "label": "The Undead Stallion aura is applied",
+      "actor": "rider",
+      "metric": "aura",
+      "spell": 365267,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The rider sits on the Undead Stallion model",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 141909,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "rider",
+      "spell": 365200
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 365200
+    },
+    {
+      "action": "assert",
+      "label": "The Adorned Black Stallion aura is applied",
+      "actor": "rider",
+      "metric": "aura",
+      "spell": 365200,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The rider sits on the Adorned Black Stallion model",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 141910,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "rider",
+      "spell": 365201
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 365201
+    },
+    {
+      "action": "assert",
+      "label": "The Adorned Bay Stallion aura is applied",
+      "actor": "rider",
+      "metric": "aura",
+      "spell": 365201,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The rider sits on the Adorned Bay Stallion model",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 141911,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "rider",
+      "spell": 365202
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 365202
+    },
+    {
+      "action": "assert",
+      "label": "The Adorned Chestnut Stallion aura is applied",
+      "actor": "rider",
+      "metric": "aura",
+      "spell": 365202,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The rider sits on the Adorned Chestnut Stallion model",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 141912,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "rider",
+      "spell": 365203
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 365203
+    },
+    {
+      "action": "assert",
+      "label": "The Adorned Grey Stallion aura is applied",
+      "actor": "rider",
+      "metric": "aura",
+      "spell": 365203,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The rider sits on the Adorned Grey Stallion model",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 141913,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "rider",
+      "spell": 365204
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 365204
+    },
+    {
+      "action": "assert",
+      "label": "The Adorned Palomino Stallion aura is applied",
+      "actor": "rider",
+      "metric": "aura",
+      "spell": 365204,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The rider sits on the Adorned Palomino Stallion model",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 141914,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "rider",
+      "spell": 365205
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 365205
+    },
+    {
+      "action": "assert",
+      "label": "The Adorned Pale Stallion aura is applied",
+      "actor": "rider",
+      "metric": "aura",
+      "spell": 365205,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The rider sits on the Adorned Pale Stallion model",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 141915,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "rider",
+      "spell": 365206
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 365206
+    },
+    {
+      "action": "assert",
+      "label": "The Adorned Piebald Stallion aura is applied",
+      "actor": "rider",
+      "metric": "aura",
+      "spell": 365206,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The rider sits on the Adorned Piebald Stallion model",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 141916,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "rider",
+      "spell": 365207
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 365207
+    },
+    {
+      "action": "assert",
+      "label": "The Adorned Pinto Stallion aura is applied",
+      "actor": "rider",
+      "metric": "aura",
+      "spell": 365207,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The rider sits on the Adorned Pinto Stallion model",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 141917,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "rider",
+      "spell": 365208
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 365208
+    },
+    {
+      "action": "assert",
+      "label": "The Adorned Dark Bay Stallion aura is applied",
+      "actor": "rider",
+      "metric": "aura",
+      "spell": 365208,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The rider sits on the Adorned Dark Bay Stallion model",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 141918,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "rider",
+      "spell": 365209
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 365209
+    },
+    {
+      "action": "assert",
+      "label": "The Adorned White Stallion aura is applied",
+      "actor": "rider",
+      "metric": "aura",
+      "spell": 365209,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The rider sits on the Adorned White Stallion model",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 141919,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "rider",
+      "spell": 365210
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 365210
+    },
+    {
+      "action": "assert",
+      "label": "The Adorned Undead Stallion aura is applied",
+      "actor": "rider",
+      "metric": "aura",
+      "spell": 365210,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The rider sits on the Adorned Undead Stallion model",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 141920,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}

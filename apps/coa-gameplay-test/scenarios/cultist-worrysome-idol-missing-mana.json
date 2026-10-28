@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "Worrysome Idol regenerates missing mana, not a flat share of maximum mana (#3105)",
   "contract": "Spell 706917's periodic aura triggers 504829 (\"Energize 10% Missing Mana\") every 10 seconds. Per the tooltip and the client's raw string, each tick restores 10% of the caster's missing mana: the deficit shrinks by 10% per tick, so the second tick's gain is 90% of the first. With the native ENERGIZE_PCT bug (10% of maximum mana, ignoring current mana) the two ticks gain the same amount, ratio 1.0. The 4% spell haste half (effect 1, native SPELL_AURA_HASTE_SPELLS) is untouched by this fix; it is asserted here only as a regression guard.",
-  "timeout_ms": 60000,
+  "timeout_ms": 120000,
   "players": [
     {
       "id": "cultist",

@@ -2,46 +2,121 @@
   "schema": 1,
   "name": "Broad Sweep hits a stunned target (#3966, #4453)",
   "contract": [
-    "Broad Sweep's player-learnable ranks (504177-504182, 805150 and 355781, SpellFamilyName 24) carry Spell.dbc",
-    "AttributesEx6 256 (SPELL_ATTR6_DO_NOT_CHAIN_TO_CROWD_CONTROLLED_TARGETS). SpellInfo::CheckTarget silently",
-    "drops any UNIT_STATE_CONTROLLED unit (stunned, confused or fleeing) from an implicit target selection that",
-    "carries this flag, so a stunned mob was excluded from Broad Sweep's cone even though the tooltip promises",
-    "'up to $i enemies in front of you' with no crowd-control exclusion. ApplyAscensionGuardianResourceContracts",
-    "clears the flag on every player-learnable rank so a stunned target is hit like any other."
+    "Broad Sweep's player-learnable ranks (504177-504182, 805150 and 355781, SpellFamilyName 24) carry",
+    "Spell.dbc",
+    "AttributesEx6 256 (SPELL_ATTR6_DO_NOT_CHAIN_TO_CROWD_CONTROLLED_TARGETS). SpellInfo::CheckTarget",
+    "silently",
+    "drops any UNIT_STATE_CONTROLLED unit (stunned, confused or fleeing) from an implicit target selection",
+    "that",
+    "carries this flag, so a stunned mob was excluded from Broad Sweep's cone even though the tooltip",
+    "promises",
+    "'up to $i enemies in front of you' with no crowd-control exclusion.",
+    "ApplyAscensionGuardianResourceContracts",
+    "clears the flag on every player-learnable rank so a stunned target is hit like any other.",
+    "Fixture: stun enemy with Hammer of Justice (enemy self-casting a hostile-target spell fails BAD_TARGETS)"
   ],
   "timeout_ms": 60000,
   "players": [
-    { "id": "guardian", "race": 1, "class": 18, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+    {
+      "id": "guardian",
+      "race": 1,
+      "class": 18,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
   ],
   "creatures": [
-    { "id": "enemy", "owner": "guardian", "entry": 36, "faction": 14, "distance": 3 }
+    {
+      "id": "enemy",
+      "owner": "guardian",
+      "entry": 36,
+      "faction": 14,
+      "distance": 3
+    }
   ],
   "steps": [
-    { "action": "wait", "label": "Let spawn AI settle", "ms": 5000 },
-    { "action": "learn", "actor": "guardian", "spell": 504182 },
-    { "action": "learn", "actor": "guardian", "spell": 853 },
-    { "action": "add_item", "actor": "guardian", "item": 25 },
-    { "action": "equip", "actor": "guardian", "item": 25, "slot": 15 },
-    { "action": "wait", "ms": 1000 },
     {
-      "action": "cast", "label": "Fixture: stun enemy with Hammer of Justice (enemy self-casting a hostile-target spell fails BAD_TARGETS)",
-      "actor": "guardian", "spell": 853, "target": "enemy"
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 5000
     },
     {
-      "action": "assert", "label": "SETUP: the target is stunned", "actor": "enemy",
-      "metric": "aura", "spell": 853, "equals": 1, "within_ms": 1000
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 504182
     },
     {
-      "action": "assert", "label": "SETUP: no Broad Sweep damage before the cast", "actor": "guardian",
-      "metric": "spell_damage_count", "spell": 504182, "target": "enemy", "equals": 0
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 853
     },
-    { "action": "wait", "label": "Clear the GCD from Hammer of Justice", "ms": 1500 },
-    { "action": "cast", "actor": "guardian", "spell": 504182 },
     {
-      "action": "assert", "label": "DISCRIMINATING: Broad Sweep still hits the stunned target",
-      "actor": "guardian", "metric": "spell_damage_count", "spell": 504182, "target": "enemy", "min": 1,
+      "action": "add_item",
+      "actor": "guardian",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Fixture: stun enemy with Hammer of Justice (enemy self-casting a hostile-target spell fails…",
+      "actor": "guardian",
+      "spell": 853,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the target is stunned",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 853,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Broad Sweep damage before the cast",
+      "actor": "guardian",
+      "metric": "spell_damage_count",
+      "spell": 504182,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Clear the GCD from Hammer of Justice",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "guardian",
+      "spell": 504182
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Broad Sweep still hits the stunned target",
+      "actor": "guardian",
+      "metric": "spell_damage_count",
+      "spell": 504182,
+      "target": "enemy",
+      "min": 1,
       "within_ms": 2000
     },
-    { "action": "assert", "actor": "guardian", "metric": "alive", "equals": 1 }
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "alive",
+      "equals": 1
+    }
   ]
 }

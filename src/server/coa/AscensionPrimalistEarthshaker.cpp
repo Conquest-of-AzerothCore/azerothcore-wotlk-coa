@@ -11,6 +11,7 @@
 namespace
 {
 constexpr uint32 Earthshaker = 300698;
+constexpr uint32 TherazanesBlessing = 560156;
 
 class aura_ascension_earthshaker_periodic : public AuraScript
 {
@@ -26,7 +27,7 @@ class aura_ascension_earthshaker_periodic : public AuraScript
     void Snapshot(AuraEffect const* effect, AuraEffectHandleModes)
     {
         Unit* caster = GetCaster();
-        if (!caster || !caster->HasAura(Earthshaker))
+        if (!caster || (!caster->HasAura(Earthshaker) && !caster->HasAura(TherazanesBlessing)))
             return;
 
         SpellInfo const* info = GetSpellInfo();

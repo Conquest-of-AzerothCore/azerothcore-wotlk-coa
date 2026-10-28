@@ -1,0 +1,207 @@
+{
+  "schema": 1,
+  "name": "Diabolical grants the caster a Crypt Swarm buff that Crypt Swarm damage consumes (#4167)",
+  "contract": "Diabolical 704723 (CharacterAdvancement 4235, Animation tab, RequiredLevel 40) reads \"Casting spells now grants you 1 stack of Diabolical, stacking up to $706504u times, for $706504d. Damage dealt by your Crypt Swarm will consume a stack to deal $707133s1% increased damage per stack.\" Its DBC trigger is 707133 (Rank 'Buff', TargetA caster, StackAmount 15, ToolTip 'Increases the damage of each tick of Crypt Swarm per remaining stack', effect 0 BasePoints 9 + 1 = 10), a beneficial aura. 706504 (Rank 'Stacks', TargetA enemy, ToolTip 'The Animation Necromancer's Crypt Fiend will deal additional Shadow Damage on hit to this target') is a harmful marker of an older enemy-debuff design. AscensionNecromancerAbilities.cpp casts the buff on the caster for every non-triggered spell, the damage-taken hook multiplies Crypt Swarm damage 800343 by 1 + 0.1 per stack, and each Crypt Swarm damage event removes one stack. Expected: casting spells with the talent gives the Necromancer the beneficial Diabolical buff 707133, not 706504; three casts give three stacks and Crypt Swarm is taken at 1300; channelling Crypt Swarm adds one stack and its ticks consume stacks. The stated 20 sec duration ($706504d) differs from the buff's native 30 sec and is not asserted. The damage-taken hook is probed on an opposing PvP-flagged player; spells and Crypt Swarm are cast on the golem.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "necro",
+      "race": 5,
+      "class": 23,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "victim",
+      "race": 1,
+      "class": 1,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "golem",
+      "owner": "necro",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "pvp",
+      "actor": "necro",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "victim",
+      "enabled": true
+    },
+    {
+      "action": "set_health",
+      "actor": "victim",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 570132
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 500965
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 704723
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Diabolical talent is active",
+      "actor": "necro",
+      "metric": "aura",
+      "spell": 704723,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Crypt Swarm bonus before any cast",
+      "actor": "victim",
+      "metric": "script_spell_damage_taken",
+      "target": "necro",
+      "spell": 800343,
+      "equals": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Cast a spell",
+      "actor": "necro",
+      "spell": 570132,
+      "target": "golem"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: casting grants the Diabolical buff",
+      "actor": "necro",
+      "metric": "aura_stacks",
+      "spell": 707133,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Diabolical is a beneficial aura",
+      "actor": "necro",
+      "metric": "aura_positive",
+      "spell": 707133,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Crypt Fiend debuff marker is not applied",
+      "actor": "necro",
+      "metric": "aura",
+      "spell": 706504,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 570132,
+      "target": "golem"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 570132,
+      "target": "golem"
+    },
+    {
+      "action": "assert",
+      "label": "Each cast adds a stack",
+      "actor": "necro",
+      "metric": "aura_stacks",
+      "spell": 707133,
+      "equals": 3,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Three stacks raise Crypt Swarm damage by 30%",
+      "actor": "victim",
+      "metric": "script_spell_damage_taken",
+      "target": "necro",
+      "spell": 800343,
+      "min": 1299,
+      "max": 1301
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 6,
+      "value": 500
+    },
+    {
+      "action": "cast",
+      "label": "Channel Crypt Swarm",
+      "actor": "necro",
+      "spell": 500965,
+      "target": "golem"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Crypt Swarm channel starts",
+      "actor": "necro",
+      "metric": "cast_remaining_ms",
+      "spell": 500965,
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Crypt Swarm damage lands on the golem",
+      "actor": "necro",
+      "metric": "spell_damage_count",
+      "spell": 800343,
+      "target": "golem",
+      "min": 2,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "Crypt Swarm damage consumes Diabolical stacks",
+      "actor": "necro",
+      "metric": "aura_stacks",
+      "spell": 707133,
+      "max": 2,
+      "within_ms": 6000
+    }
+  ]
+}

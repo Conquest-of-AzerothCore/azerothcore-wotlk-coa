@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "name": "Sunken Temple: Jammal'an's forcefield stays closed until the Hakkar event, the hallway is clear (#7689)",
+  "contract": [
+    "#7689: on Ascension the Dungeon Finder start in the north hallway (#8527) had no enemies, and killing",
+    "the Avatar of Hakkar (8443) opened the way to the troll boss Jammal'an. The forcefield (149431) no longer opens",
+    "when it spawns: it stays closed in a new instance until the Avatar's death sets the Hakkar event (instance data 2)",
+    "to DONE. The nine Nightmare dragonkin of that hallway (spawns 33714-33719, 33721-33723) are gone: none of the four",
+    "entries is within 60 yd of the start, and at the hallway's west end only the main hall's whelps 37-60 yd away remain."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000,
+      "maximum": 2000000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 109,
+      "x": -515.0,
+      "y": -88.0,
+      "z": -91.0,
+      "o": 0.0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Sunken Temple",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 109
+    },
+    {
+      "action": "set_phase",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Jammal'an's forcefield is closed before the Avatar of Hakkar dies",
+      "actor": "hero",
+      "metric": "nearby_gameobject_state",
+      "entry": 149431,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let instance scripts and spawns settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Jammal'an's forcefield is still closed with the Hakkar event not done",
+      "actor": "hero",
+      "metric": "nearby_gameobject_state",
+      "entry": 149431,
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 109,
+      "x": -323.8665,
+      "y": 95.221275,
+      "z": -91.13821,
+      "o": 3.1586
+    },
+    {
+      "action": "wait",
+      "label": "Let the hallway grid load",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "No Nightmare Wyrmkin in the hallway at the Dungeon Finder start",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 5280,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No Nightmare Scalebane in the hallway at the Dungeon Finder start",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 5277,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No Nightmare Wanderer in the hallway at the Dungeon Finder start",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 5283,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No Nightmare Whelp in the hallway at the Dungeon Finder start",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 8319,
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 109,
+      "x": -397.0,
+      "y": 93.0,
+      "z": -91.0,
+      "o": 3.1586
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Only the main-hall whelps 37-60 yd west remain; the five hallway whelps are gone",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 8319,
+      "min": 4,
+      "max": 6
+    }
+  ]
+}

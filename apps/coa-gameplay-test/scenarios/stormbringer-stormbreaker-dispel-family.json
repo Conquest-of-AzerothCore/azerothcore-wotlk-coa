@@ -1,42 +1,299 @@
 {
   "schema": 1,
   "name": "Stormbringer: Magic Elimination and Piercing Lightning modify Stormbreaker natively (#907, #1302)",
-  "contract": "#907: Magic Elimination (705668) promises 'Increases the amount of beneficial magic effects purged by your Stormbreaker by 1 and its range by 10 yds.' Its DBC record is two SPELL_AURA_ADD_FLAT_MODIFIER (107) effects on the caster with EffectMiscValue 3 (SPELLMOD_EFFECT1, +1) and 5 (SPELLMOD_RANGE, +10), both under EffectSpellClassMask flag96(0,4,0) against SpellFamilyName 22 - an exact match for Stormbreaker's (705669) own SpellFamilyFlags[1]=4. The engine's own spell-modifier system (AuraEffect::CalculateSpellMod, SpellInfo::IsAffectedBySpellMod, Unit::ApplyEffectModifiers, SpellInfo::GetMaxRange) delivers both halves with no module code or SQL involved, so the modified effect value and range are asserted directly, and a live cast at 25 yd (out of the unmodified 20 yd range, inside the modified 30 yd range) proves the range clause reaches the actual cast pipeline while clearing two fixture beneficial DISPEL_MAGIC auras proves the +1 dispel count reaches Spell::EffectDispel's 'damage' loop. #1302: Piercing Lightning (578302) promises Nature spell penetration scaling with level plus the same +1 Stormbreaker dispel effect via an identical SPELLMOD_EFFECT1 modifier. Its penetration half is SPELL_AURA_MOD_TARGET_RESISTANCE (aura 123) with EffectBasePoints -21, EffectDieSides 1, EffectRealPointsPerLevel -1.0, BaseLevel/SpellLevel 20, which SpellEffectInfo::CalcValue resolves to -(casterLevel) for a player caster at or above level 20 - i.e. -80 at level 80 - and AuraEffect::HandleModTargetResistance is a native handler; the amount is asserted with aura_amount. Piercing Lightning contributes no range change, which is asserted by learning it alone (after unlearning Magic Elimination) and confirming spell_max_range returns to 20 while the dispel count still reads 2. Both talents stack to a dispel count of 3. No code exists to fix for either issue; every literal here is derived from the DBC record and the SpellInfo formula, not estimated. The target 'e' is race 5 (Undead) so it is a different faction from 's' (race 1, Human): Stormbreaker's implicit target is TARGET_UNIT_TARGET_ENEMY, and two same-faction players with only the pvp flag set are not mutual enemies (Spell::CheckCast rejects the cast with SPELL_FAILED_BAD_TARGETS before the range check ever runs), as confirmed by the first native run of this file. Race 5 / class 2 has a playercreateinfo row (data/sql/updates/pending_db_world/rev_20260917_02_coa_race_class_starts.sql) and is the same cross-faction pattern used by scenarios/primalist-boulder-control.json. The fixture point is also moved from the shared non-hostile spawn (-8917.41, -115.853, 82.3711) to the repo's established non-sanctuary PvP fixture (-9617.06, -288.949, 57.3053, matching primalist-boulder-control.json and the stormbringer-spell-power-scaling-passives-tome-of-lightning fixup): Unit::_IsValidAttackTarget (Unit.cpp:11428-11431) rejects any PvP attack when either participant IsInSanctuary(), independent of faction, and the original spawn sits inside a sanctuary zone.",
+  "contract": [
+    "#907: Magic Elimination (705668) promises 'Increases the amount of beneficial magic effects purged by",
+    "your Stormbreaker by 1 and its range by 10 yds.' Its DBC record is two SPELL_AURA_ADD_FLAT_MODIFIER",
+    "(107) effects on the caster with EffectMiscValue 3 (SPELLMOD_EFFECT1, +1) and 5 (SPELLMOD_RANGE, +10),",
+    "both under EffectSpellClassMask flag96(0,4,0) against SpellFamilyName 22 - an exact match for",
+    "Stormbreaker's (705669) own SpellFamilyFlags[1]=4. The engine's own spell-modifier system",
+    "(AuraEffect::CalculateSpellMod, SpellInfo::IsAffectedBySpellMod, Unit::ApplyEffectModifiers,",
+    "SpellInfo::GetMaxRange) delivers both halves with no module code or SQL involved, so the modified effect",
+    "value and range are asserted directly, and a live cast at 25 yd (out of the unmodified 20 yd range,",
+    "inside the modified 30 yd range) proves the range clause reaches the actual cast pipeline while clearing",
+    "two fixture beneficial DISPEL_MAGIC auras proves the +1 dispel count reaches Spell::EffectDispel's",
+    "'damage' loop. #1302: Piercing Lightning (578302) promises Nature spell penetration scaling with level",
+    "plus the same +1 Stormbreaker dispel effect via an identical SPELLMOD_EFFECT1 modifier. Its penetration",
+    "half is SPELL_AURA_MOD_TARGET_RESISTANCE (aura 123) with EffectBasePoints -21, EffectDieSides 1,",
+    "EffectRealPointsPerLevel -1.0, BaseLevel/SpellLevel 20, which SpellEffectInfo::CalcValue resolves to",
+    "-(casterLevel) for a player caster at or above level 20 - i.e. -80 at level 80 - and",
+    "AuraEffect::HandleModTargetResistance is a native handler; the amount is asserted with aura_amount.",
+    "Piercing Lightning contributes no range change, which is asserted by learning it alone (after unlearning",
+    "Magic Elimination) and confirming spell_max_range returns to 20 while the dispel count still reads 2.",
+    "Both talents stack to a dispel count of 3. No code exists to fix for either issue; every literal here is",
+    "derived from the DBC record and the SpellInfo formula, not estimated. The target 'e' is race 5 (Undead)",
+    "so it is a different faction from 's' (race 1, Human): Stormbreaker's implicit target is",
+    "TARGET_UNIT_TARGET_ENEMY, and two same-faction players with only the pvp flag set are not mutual enemies",
+    "(Spell::CheckCast rejects the cast with SPELL_FAILED_BAD_TARGETS before the range check ever runs), as",
+    "confirmed by the first native run of this file. Race 5 / class 2 has a playercreateinfo row",
+    "(data/sql/updates/pending_db_world/rev_20260917_02_coa_race_class_starts.sql) and is the same",
+    "cross-faction pattern used by scenarios/primalist-boulder-control.json. The fixture point is also moved",
+    "from the shared non-hostile spawn (-8917.41, -115.853, 82.3711) to the repo's established non-sanctuary",
+    "PvP fixture (-9617.06, -288.949, 57.3053, matching primalist-boulder-control.json and the",
+    "stormbringer-spell-power-scaling-passives-tome-of-lightning fixup): Unit::_IsValidAttackTarget",
+    "(Unit.cpp:11428-11431) rejects any PvP attack when either participant IsInSanctuary(), independent of",
+    "faction, and the original spawn sits inside a sanctuary zone. Original Stormbreaker 705669 is a Nature",
+    "Magic spell with no always-hit/no-miss attribute. Supply and assert native spell hit before its normal",
+    "range and dispel casts so an independent Magic miss cannot invalidate the deterministic two-buff dispel",
+    "contract. Preserve the original out-of-range refusal, one/two/three dispel amounts, range changes and",
+    "level-scaled penetration controls."
+  ],
   "timeout_ms": 60000,
   "players": [
-    { "id": "s", "race": 1, "class": 16, "level": 80 },
-    { "id": "e", "race": 5, "class": 2, "level": 80 }
+    {
+      "id": "s",
+      "race": 1,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "e",
+      "race": 5,
+      "class": 2,
+      "level": 80
+    }
   ],
-  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
   "steps": [
-    { "action": "wait", "label": "Let spawn and level scaling settle", "ms": 3000 },
-    { "action": "pvp", "actor": "s", "enabled": true },
-    { "action": "pvp", "actor": "e", "enabled": true },
-    { "action": "teleport", "label": "Place the target 25 yd away, out of Stormbreaker's unmodified 20 yd range", "actor": "e", "map": 0, "x": -9592.06, "y": -288.949, "z": 57.3053, "o": 3.14159265 },
-    { "action": "learn", "actor": "s", "spell": 705669 },
-    { "action": "set_aura", "label": "Fixture Arcane Intellect on the target (Dispel=1 DISPEL_MAGIC, beneficial)", "actor": "e", "spell": 1459, "stacks": 1 },
-    { "action": "set_aura", "label": "Fixture Power Word: Fortitude on the target (Dispel=1 DISPEL_MAGIC, beneficial)", "actor": "e", "spell": 1243, "stacks": 1 },
-    { "action": "assert", "label": "SETUP: Arcane Intellect fixture is present", "actor": "e", "metric": "aura", "spell": 1459, "equals": 1 },
-    { "action": "assert", "label": "SETUP: Power Word: Fortitude fixture is present", "actor": "e", "metric": "aura", "spell": 1243, "equals": 1 },
-    { "action": "assert", "label": "BASELINE: Stormbreaker dispels 1 effect with neither talent learned", "actor": "s", "metric": "spell_effect_value", "spell": 705669, "effect": 0, "equals": 1 },
-    { "action": "assert", "label": "BASELINE: Stormbreaker's range is the DBC 20 yd with neither talent learned", "actor": "s", "metric": "spell_max_range", "spell": 705669, "equals": 20 },
-    { "action": "cast", "actor": "s", "spell": 705669, "target": "e" },
-    { "action": "assert", "label": "BASELINE: Stormbreaker fails out of range at 25 yd without Magic Elimination", "actor": "s", "metric": "cast_failure", "spell": 705669, "equals": 97 },
-    { "action": "learn", "actor": "s", "spell": 705668 },
-    { "action": "assert", "label": "DISCRIMINATING: Magic Elimination raises the dispel count to 2", "actor": "s", "metric": "spell_effect_value", "spell": 705669, "effect": 0, "equals": 2 },
-    { "action": "assert", "label": "DISCRIMINATING: Magic Elimination raises Stormbreaker's range to 30 yd", "actor": "s", "metric": "spell_max_range", "spell": 705669, "equals": 30 },
-    { "action": "cast", "actor": "s", "spell": 705669, "target": "e" },
-    { "action": "assert", "label": "DISCRIMINATING: the 30 yd range lets the cast reach the target at 25 yd", "actor": "s", "metric": "cast_failure", "spell": 705669, "equals": 0 },
-    { "action": "assert", "label": "DISCRIMINATING: the dispel count of 2 removes both fixture beneficial auras", "actor": "e", "metric": "aura", "spell": 1459, "equals": 0, "within_ms": 3000 },
-    { "action": "assert", "label": "DISCRIMINATING: the dispel count of 2 removes both fixture beneficial auras", "actor": "e", "metric": "aura", "spell": 1243, "equals": 0, "within_ms": 3000 },
-    { "action": "wait", "label": "Global cooldown", "ms": 2000 },
-    { "action": "unlearn", "actor": "s", "spell": 705668 },
-    { "action": "learn", "actor": "s", "spell": 578302 },
-    { "action": "assert", "label": "DISCRIMINATING: Piercing Lightning alone also raises the dispel count to 2", "actor": "s", "metric": "spell_effect_value", "spell": 705669, "effect": 0, "equals": 2 },
-    { "action": "assert", "label": "DISCRIMINATING: Piercing Lightning does not change Stormbreaker's range", "actor": "s", "metric": "spell_max_range", "spell": 705669, "equals": 20 },
-    { "action": "assert", "label": "DISCRIMINATING: Piercing Lightning's spell penetration is -(caster level) = -80 at level 80", "actor": "s", "metric": "aura_amount", "spell": 578302, "effect": 0, "equals": -80 },
-    { "action": "learn", "actor": "s", "spell": 705668 },
-    { "action": "assert", "label": "DISCRIMINATING: both talents together raise the dispel count to 3", "actor": "s", "metric": "spell_effect_value", "spell": 705669, "effect": 0, "equals": 3 },
-    { "action": "assert", "label": "DISCRIMINATING: Magic Elimination's range bonus still applies with both talents learned", "actor": "s", "metric": "spell_max_range", "spell": 705669, "equals": 30 }
+    {
+      "action": "wait",
+      "label": "Let spawn and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "pvp",
+      "actor": "s",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "e",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "label": "Place the target 25 yd away, out of Stormbreaker's unmodified 20 yd range",
+      "actor": "e",
+      "map": 0,
+      "x": -9592.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.14159265
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 705669
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture Arcane Intellect on the target (Dispel=1 DISPEL_MAGIC, beneficial)",
+      "actor": "e",
+      "spell": 1459,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture Power Word: Fortitude on the target (Dispel=1 DISPEL_MAGIC, beneficial)",
+      "actor": "e",
+      "spell": 1243,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Arcane Intellect fixture is present",
+      "actor": "e",
+      "metric": "aura",
+      "spell": 1459,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Power Word: Fortitude fixture is present",
+      "actor": "e",
+      "metric": "aura",
+      "spell": 1243,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Stormbreaker dispels 1 effect with neither talent learned",
+      "actor": "s",
+      "metric": "spell_effect_value",
+      "spell": 705669,
+      "effect": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Stormbreaker's range is the DBC 20 yd with neither talent learned",
+      "actor": "s",
+      "metric": "spell_max_range",
+      "spell": 705669,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "spell_hit_chance",
+      "min": 100,
+      "label": "Stormbreaker uses its original native Magic accuracy"
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 705669,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Stormbreaker fails out of range at 25 yd without Magic Elimination",
+      "actor": "s",
+      "metric": "cast_failure",
+      "spell": 705669,
+      "equals": 97
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "spell_cast_count",
+      "spell": 705669,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Native cast count preserves the refusal and accepted-range controls"
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 705668
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Magic Elimination raises the dispel count to 2",
+      "actor": "s",
+      "metric": "spell_effect_value",
+      "spell": 705669,
+      "effect": 0,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Magic Elimination raises Stormbreaker's range to 30 yd",
+      "actor": "s",
+      "metric": "spell_max_range",
+      "spell": 705669,
+      "equals": 30
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 705669,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the 30 yd range lets the cast reach the target at 25 yd",
+      "actor": "s",
+      "metric": "cast_failure",
+      "spell": 705669,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "spell_cast_count",
+      "spell": 705669,
+      "equals": 1,
+      "within_ms": 500,
+      "label": "Native cast count preserves the refusal and accepted-range controls"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the dispel count of 2 removes both fixture beneficial auras",
+      "actor": "e",
+      "metric": "aura",
+      "spell": 1459,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the dispel count of 2 removes both fixture beneficial auras",
+      "actor": "e",
+      "metric": "aura",
+      "spell": 1243,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 2000
+    },
+    {
+      "action": "unlearn",
+      "actor": "s",
+      "spell": 705668
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 578302
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Piercing Lightning alone also raises the dispel count to 2",
+      "actor": "s",
+      "metric": "spell_effect_value",
+      "spell": 705669,
+      "effect": 0,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Piercing Lightning does not change Stormbreaker's range",
+      "actor": "s",
+      "metric": "spell_max_range",
+      "spell": 705669,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Piercing Lightning's spell penetration is -(caster level) = -80 at level 80",
+      "actor": "s",
+      "metric": "aura_amount",
+      "spell": 578302,
+      "effect": 0,
+      "equals": -80
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 705668
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: both talents together raise the dispel count to 3",
+      "actor": "s",
+      "metric": "spell_effect_value",
+      "spell": 705669,
+      "effect": 0,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Magic Elimination's range bonus still applies with both talents learned",
+      "actor": "s",
+      "metric": "spell_max_range",
+      "spell": 705669,
+      "equals": 30
+    }
   ]
 }

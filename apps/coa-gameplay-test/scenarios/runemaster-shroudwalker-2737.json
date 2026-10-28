@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Runemaster Shroudwalker removes the Warpdagger cooldown while Runeshroud is active (#2737)",
+  "contract": [
+    "Shroudwalker 705563 reads 'Your Warpdagger now incurs no cooldown if used while your Runeshroud is active.' and",
+    "Runeshroud 500288 adds 'While active, Warpdagger has no cooldown.' when 705563 is known. Its only DBC mechanism is",
+    "a -25000 SPELLMOD_EFFECT1 on Runeshroud SLS 500510, a separate aura that nothing applies during Runeshroud, so",
+    "Warpdagger 500287 kept its full 30000 ms RecoveryTime. Warpdagger has SPELL_ATTR1_ALLOW_WHILE_STEALTHED, so the",
+    "cast keeps Runeshroud. Expected: with Shroudwalker and Runeshroud, Warpdagger's cooldown is at most 5 s (the",
+    "description says none; the -25000 ms modifier would leave 5 s); a control without Shroudwalker keeps about 30 s.",
+    "Fails before the fix (30 s); passes after."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "control", "race": 1, "class": 32, "level": 60},
+    {"id": "talent", "race": 1, "class": 32, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the characters settle", "ms": 3000},
+    {"action": "learn", "actor": "control", "spell": 500287},
+    {"action": "learn", "actor": "talent", "spell": 500287},
+    {"action": "learn", "actor": "control", "spell": 500288},
+    {"action": "learn", "actor": "talent", "spell": 500288},
+    {"action": "learn", "actor": "talent", "spell": 705563},
+    {"action": "set_aura", "actor": "control", "spell": 500288, "stacks": 1},
+    {"action": "set_aura", "actor": "talent", "spell": 500288, "stacks": 1},
+    {"action": "assert", "label": "SETUP: the control is in Runeshroud", "actor": "control", "metric": "aura",
+      "spell": 500288, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "SETUP: the talented Runemaster is in Runeshroud", "actor": "talent",
+      "metric": "aura", "spell": 500288, "equals": 1, "within_ms": 1000},
+    {"action": "cast", "actor": "control", "spell": 500287},
+    {"action": "cast", "actor": "talent", "spell": 500287},
+    {"action": "assert", "label": "SETUP: Warpdagger keeps the talented Runemaster in Runeshroud", "actor": "talent",
+      "metric": "aura", "spell": 500288, "equals": 1},
+    {"action": "assert", "label": "Without Shroudwalker Warpdagger keeps its 30 s cooldown", "actor": "control",
+      "metric": "cooldown_ms", "spell": 500287, "min": 25000},
+    {"action": "assert", "label": "CONTRACT: Shroudwalker leaves Warpdagger at most 5 s in Runeshroud",
+      "actor": "talent", "metric": "cooldown_ms", "spell": 500287, "max": 5000}
+  ]
+}

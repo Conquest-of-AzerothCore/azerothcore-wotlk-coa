@@ -1,0 +1,155 @@
+{
+  "schema": 1,
+  "name": "Heavy Spider Bomb pursues the Tinker combat victim and deals damage (#5787)",
+  "contract": [
+    "Original Explosive Inventor creates a slow Heavy Spider Bomb with Spider Bomb Factory. The report says it",
+    "deals no damage. Establish a normal player attack victim twenty yards away, outside melee reach, and cast",
+    "the factory normally. Observe the native Heavy Spider Bomb explosion separately from owner attacks. No",
+    "device movement is injected.",
+    "Original Heavy Spider Bomb Explosion 802477 is magic damage and allows a native hit roll. Owner ratings",
+    "do not give this device spell accuracy. Apply original Krosh Hit Buff 2132158 only after its real summon",
+    "exists, and require its exact native +100 modifier increase. Observe explosion dispatch before requiring",
+    "target damage; keep ordinary victim selection, twenty-yard pursuit, damage and removal assertions."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 802052
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 801005
+    },
+    {
+      "action": "client_packet",
+      "actor": "tinker",
+      "opcode": 317,
+      "fields": [
+        {
+          "actor_guid": "dummy"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 300636
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 300636,
+      "equals": 1
+    },
+    {
+      "action": "attack",
+      "actor": "tinker",
+      "target": "dummy",
+      "label": "Establish the ordinary combat victim outside melee reach"
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy",
+      "metric": "health",
+      "save_as": "before_build"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 802052
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 840028,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "owned_creature_spell_hit_chance",
+      "entry": 840028,
+      "save_as": "heavy_hit_before"
+    },
+    {
+      "action": "set_aura",
+      "actor": "tinker",
+      "owned_entry": 840028,
+      "spell": 2132158,
+      "stacks": 1,
+      "label": "Give the actual heavy device the original native spell accuracy buff"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_spell_hit_chance",
+      "entry": 840028,
+      "relative_to": "heavy_hit_before",
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "The explosion is observed separately from Bomb Toss damage",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 802477,
+      "entry": 840028,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The heavy bomb travels to the ordinary combat victim and detonates",
+      "actor": "dummy",
+      "metric": "health",
+      "relative_to": "before_build",
+      "max": -1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 840028,
+      "equals": 0,
+      "within_ms": 3000
+    }
+  ]
+}

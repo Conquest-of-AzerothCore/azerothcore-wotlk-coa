@@ -1,0 +1,155 @@
+{
+  "schema": 1,
+  "name": "Crash Site: Proximity Bombs cover the route between the 1660006 objectives (#8727)",
+  "contract": "Quest 1660006 'Smoke on the Wind' has four objectives on the Dun Morogh Crash Site crater floor: plating 7914001, crate 7914002, crystal shards 7914003 and banner 7914004. CoA placed Proximity Bombs 2300506 between them so a precise player can walk the direct line without triggering one (#8727; CoA footage at 23:37). 7914005 is the one preserved sighting (SOURCED-ATLAS, rev_20260925_10); 7914100-7914105 are inferred from that footage and were then refined in the world editor, which also added 9999495 and 9999496 on the eastern floor, nine bombs in all, each seated on the client ADT ground and 1.4-1.8 yards off the direct line between its bracketing objectives. Entry 2300506 is a type 6 trap: spell 256480 Explosive Trap, activation diameter 2 (a 1-yard sphere), despawns after cast, 30 s cooldown, 180 s respawn. Standing 5 yards west of a bomb, this case requires that bomb to exist within 20 yards and, at the eastern end where the lone preserved bomb is more than 20 yards away, requires several inferred bombs to be present and the nearest one to reach the client. Before this change the western points count 1 and the eastern points count 0.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -6212.23,
+    "y": 739.62,
+    "z": 380.72,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where the Crash Site spawns live",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the preserved bomb and its two western neighbours stand within 20 yd (1 before this change)",
+      "actor": "hero",
+      "metric": "nearby_gameobject_count",
+      "entry": 2300506,
+      "min": 3,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "Walk 5 yd west of the first plating-to-crate bomb",
+      "actor": "hero",
+      "map": 0,
+      "x": -6215.26,
+      "y": 727.65,
+      "z": 385.50
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: three bombs cover the plating-to-crate approach",
+      "actor": "hero",
+      "metric": "nearby_gameobject_count",
+      "entry": 2300506,
+      "min": 3,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "Walk 5 yd west of the second plating-to-crate bomb",
+      "actor": "hero",
+      "map": 0,
+      "x": -6207.71,
+      "y": 728.60,
+      "z": 381.51
+    },
+    {
+      "action": "assert",
+      "label": "the second plating-to-crate bomb stands with its neighbours",
+      "actor": "hero",
+      "metric": "nearby_gameobject_count",
+      "entry": 2300506,
+      "min": 4,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "Walk 5 yd west of the first crate-to-crystal bomb",
+      "actor": "hero",
+      "map": 0,
+      "x": -6196.40,
+      "y": 739.91,
+      "z": 379.81
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: six bombs cover the crate-to-crystal approach",
+      "actor": "hero",
+      "metric": "nearby_gameobject_count",
+      "entry": 2300506,
+      "min": 6,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "Walk 5 yd west of the second crate-to-crystal bomb",
+      "actor": "hero",
+      "map": 0,
+      "x": -6186.20,
+      "y": 739.53,
+      "z": 378.95
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: at least three bombs cover the eastern crater floor (0 before this change)",
+      "actor": "hero",
+      "metric": "nearby_gameobject_count",
+      "entry": 2300506,
+      "min": 3,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "Walk 5 yd west of the first crystal-to-banner bomb",
+      "actor": "hero",
+      "map": 0,
+      "x": -6176.20,
+      "y": 749.48,
+      "z": 378.77
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: at least three bombs cover the crystal-to-banner approach (0 before this change)",
+      "actor": "hero",
+      "metric": "nearby_gameobject_count",
+      "entry": 2300506,
+      "min": 3,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "Walk 5 yd west of the second crystal-to-banner bomb",
+      "actor": "hero",
+      "map": 0,
+      "x": -6171.56,
+      "y": 749.06,
+      "z": 378.90
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: three bombs cover the eastern approach to the banner (0 before this change)",
+      "actor": "hero",
+      "metric": "nearby_gameobject_count",
+      "entry": 2300506,
+      "min": 3,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the nearest eastern bomb reaches the client",
+      "actor": "hero",
+      "metric": "nearby_gameobject_at_client",
+      "entry": 2300506,
+      "equals": 1,
+      "within_ms": 10000
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Pale Reach keep corridor has doorway guards and a pacing Lyrielle",
+  "contract": [
+    "0MqPfOJqF8w at 06:45 shows two Stormwind guards flanking the lower keep doorway and Lyrielle walking along",
+    "the corridor. Both guard spawns must load, and Lyrielle must change position through native world updates",
+    "rather than remain at her captured spawn point. This checks native presence and displacement,",
+    "not rendered placement or animation."
+  ],
+  "timeout_ms": 30000,
+  "location": {"map": 0, "x": -8286.36, "y": 301.786, "z": 126.932, "o": 2.2481},
+  "players": [
+    {"id": "anchor", "race": 1, "class": 1, "level": 80},
+    {"id": "observer", "race": 1, "class": 1, "level": 80}
+  ],
+  "steps": [
+    {"action": "set_phase", "actor": "anchor", "value": 1},
+    {"action": "set_phase", "actor": "observer", "value": 1},
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "actor": "observer", "metric": "nearby_creature_count", "entry": 164103,
+     "equals": 1, "within_ms": 3000},
+    {"action": "teleport_to_spawn", "actor": "anchor", "guid": 9960208},
+    {"action": "teleport_to_spawn", "actor": "observer", "guid": 9960208},
+    {"action": "wait", "ms": 1500},
+    {"action": "teleport_to_spawn", "actor": "observer", "guid": 9960208},
+    {"action": "assert", "label": "Lyrielle walks away from her earlier position", "actor": "observer",
+     "metric": "distance", "target": "anchor", "min": 1, "max": 8},
+    {"action": "assert", "label": "Lyrielle stays on the corridor floor", "actor": "observer",
+     "metric": "position_z", "min": 126.8, "max": 127.1},
+    {"action": "teleport_to_spawn", "actor": "observer", "guid": 9999201},
+    {"action": "assert", "actor": "observer", "metric": "position_x", "min": -8280.6, "max": -8280.5},
+    {"action": "assert", "actor": "observer", "metric": "position_z", "min": 126.7, "max": 127},
+    {"action": "teleport_to_spawn", "actor": "observer", "guid": 9999202},
+    {"action": "assert", "actor": "observer", "metric": "position_x", "min": -8274.5, "max": -8274.4},
+    {"action": "assert", "actor": "observer", "metric": "position_z", "min": 126.7, "max": 127}
+  ]
+}

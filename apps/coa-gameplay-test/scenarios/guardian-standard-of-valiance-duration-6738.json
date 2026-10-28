@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "name": "Standard of Valiance expires with its own 20 second duration (#6738)",
+  "contract": "#6738: 'Skill states the Standard lasts 20 seconds, was still standing and pulsing damage after well over 5 Minutes.' The Standard of Valiance cast spell 803936 has DurationIndex 18, SpellDuration 20000 ms, so its own tooltip line 'Throw down a Standard of Valiance for $d' renders 20 seconds and the summon is supposed to last that long: spell_ascension_guardian_standard::Summon reads GetSpellInfo()->GetDuration() (AscensionGuardianStandards.cpp line 190), applies SPELLMOD_DURATION, and passes it as the despawn time to SummonCreature. It passed TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, and core resets that type's timer to full whenever the summon is in combat or not alive (TemporarySummon.cpp, case TEMPSUMMON_TIMED_OR_DEAD_DESPAWN: 'else if (m_timer != m_lifetime) m_timer = m_lifetime;'). A Valiance standard damages nearby enemies every 2 s through field aura 501543, so it is permanently in combat with whatever it pulses on and its timer never runs down - which is why it stood and pulsed for minutes on end. This scenario places the standard within reach of a training dummy so the pulse puts it in combat, then checks the summoned creature 60062 is gone after the 20 s the spell promises. Expected before the fix: still standing 25 s after the cast. Expected after: unsummoned.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "g",
+      "race": 1,
+      "class": 18,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "g",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 8
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "g",
+      "spell": 803936
+    },
+    {
+      "action": "set_power",
+      "actor": "g",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_health",
+      "actor": "g",
+      "value": 500000,
+      "maximum": 500000,
+      "label": "Keep the owner alive so the standard cannot be cleaned up by the 500 ms owner check"
+    },
+    {
+      "action": "cast",
+      "label": "Place the Standard of Valiance inside the dummy's reach so its 2 s damage pulse keeps it in combat",
+      "actor": "g",
+      "spell": 803936,
+      "destination": {
+        "x": -8946.95,
+        "y": -132.493,
+        "z": 83.5312
+      }
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Valiance standard creature 60062 is standing",
+      "actor": "g",
+      "metric": "owned_creature_count",
+      "entry": 60062,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "label": "Wait 5 s past the 20 s the spell's own tooltip promises",
+      "ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "#6738: the standard is gone once the 20 s duration it advertises has passed",
+      "actor": "g",
+      "metric": "owned_creature_count",
+      "entry": 60062,
+      "equals": 0
+    }
+  ]
+}

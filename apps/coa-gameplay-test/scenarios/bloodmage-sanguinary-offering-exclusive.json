@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Sanguinary Offering and its Greater form are exclusive on the buffed target (#6448)",
+  "contract": "Sanguinary Offering is one stamina buff in a single-target rank chain (first spell 706630, ranks 706630-707339, plus Rank 6 707340 which has no spell_ranks row) and a raid-wide Greater form (680299) that grants the same buff. All are spell family 26, effect 0 SPELL_EFFECT_APPLY_AURA with aura 29 (MOD_STAT), MiscValue 2 (stamina) and DurationIndex 30, and none carries a stack rule, so a target that receives both the single-target and the raid-wide version holds both auras and their stamina stacks. #6448 reports exactly that at level 60. Expected: one Sanguinary Offering buff per target -- a weaker cast is refused while an equal or stronger offering is present, and an equal or stronger cast replaces the weaker one. Expected before the fix: the second cast stacks (both auras present). Expected after the fix: only the higher offering remains, in both directions.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 20, "level": 80 },
+    { "id": "marked", "race": 1, "class": 20, "level": 80 },
+    { "id": "fresh", "race": 1, "class": 20, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+
+    { "action": "learn", "actor": "caster", "spell": 706630 },
+    { "action": "learn", "actor": "caster", "spell": 680299 },
+
+    { "action": "cast", "actor": "caster", "spell": 680299 },
+    { "action": "assert", "label": "The Greater offering reaches the nearby ally", "actor": "marked", "metric": "aura", "spell": 680299, "equals": 1, "within_ms": 5000 },
+
+    { "action": "wait", "label": "Wait out the 1.5 s global cooldown (StartRecoveryCategory 133)", "ms": 2500 },
+    { "action": "cast", "actor": "caster", "spell": 706630, "target": "marked" },
+    { "action": "assert", "label": "The weaker rank is refused while the Greater buff is on the target", "actor": "marked", "metric": "aura", "spell": 706630, "equals": 0, "within_ms": 3000 },
+    { "action": "assert", "label": "The Greater buff remains", "actor": "marked", "metric": "aura", "spell": 680299, "equals": 1 },
+
+    { "action": "set_aura", "actor": "fresh", "spell": 680299, "stacks": 0 },
+    { "action": "assert", "label": "The second ally starts with no offering at all", "actor": "fresh", "metric": "aura", "spell": 680299, "equals": 0 },
+    { "action": "assert", "label": "The second ally starts with no plain offering", "actor": "fresh", "metric": "aura", "spell": 706630, "equals": 0 },
+
+    { "action": "wait", "ms": 2500 },
+    { "action": "cast", "actor": "caster", "spell": 706630, "target": "fresh" },
+    { "action": "assert", "label": "The plain offering lands on the second ally", "actor": "fresh", "metric": "aura", "spell": 706630, "equals": 1, "within_ms": 5000 },
+
+    { "action": "wait", "ms": 2500 },
+    { "action": "cast", "actor": "caster", "spell": 680299 },
+    { "action": "assert", "label": "The Greater offering replaces the weaker one", "actor": "fresh", "metric": "aura", "spell": 680299, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "The weaker offering is removed: one Sanguinary Offering buff stays", "actor": "fresh", "metric": "aura", "spell": 706630, "equals": 0 }
+  ]
+}

@@ -326,6 +326,7 @@ void AppendClientConfig(AscensionClientConfig& config);
 GameModeDef const* FindGameMode(std::string const& name);
 char const* GameModeNameForBit(uint32 bit);
 bool GameModesEnabled();
+uint32 RealmGameModeMask();
 void BuildGameModeBaseMap();
 uint32 GameModeBaseForBit(uint32 bit);
 std::unordered_map<uint32, uint32> GameModeBaseSnapshot();
@@ -368,7 +369,8 @@ char const* ChallengeResponseString(uint32 code);
     void ReapplyActiveSpells(Player* player, std::vector<ActiveChallengeRow> const& rows);
     void StripOrphanChallengeAuras(Player* player);
     std::vector<RewardDef> GetChallengeRewards(uint32 challengeID, uint32 level);
-    void GrantChallengeRewards(Player* player, uint32 challengeID, uint32 level, bool firstTime);
+    void GrantChallengeRewards(Player* player, uint32 challengeID, uint32 level, bool firstItemReward,
+        bool firstAchievement);
 uint32 HungerFoodSpell();
 uint32 HungerDrinkSpell();
 void SetMeterAura(Player* player, uint32 spell, int32 value);
@@ -410,6 +412,12 @@ void RefreshInvertedBreathTracking(Player* player);
     void RefreshHighRiskTracking(Player* player);
     void UntrackHighRisk(Player* player);
     bool HighRiskTracked(uint32 guid);
+    // NO_CREATURE_LEVEL_SCALING / NO_QUEST_LEVEL_SCALING: the parts of level
+    // scaling the active challenges switch off, as LocalLevelScaling's
+    // ChallengeBlocks* mask (refreshed on login/activate/deactivate/complete/fail).
+    void RefreshLevelScalingTracking(Player* player);
+    void UntrackLevelScaling(Player* player);
+    uint8 LevelScalingBlocks(Player const* player);
     // NO_NON_LOOTED_ITEMS ("Scavenger"): item-instance looted tracking.
     void RefreshLootedTracking(Player* player);
     void UntrackLootedItems(uint32 guid);
@@ -501,6 +509,7 @@ bool HasPermaDeathFailure(Player* player);
 uint32 ValidateChallenge(Player* player, uint32 challengeID, uint32 level);
 void DoActivateChallenge(Player* player, uint32 challengeID, uint32 level);
 uint32 ActivateChallenge(Player* player, uint32 challengeID, uint32 level);
+bool AdventureModeChangeBlocked(Player* player);
 void DeactivateChallenge(Player* player, uint32 challengeID);
 bool RuleListContains(std::string const& list, std::string const& rule);
 bool PlayerHasRule(Player* player, char const* rule);

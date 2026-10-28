@@ -1,7 +1,11 @@
 {
   "schema": 1,
   "name": "Primalist Bestial Wrath: critical owner and pet resource procs",
-  "contract": "Owner critical damage grants exactly 10 pet Focus. Pet critical damage restores 2% maximum owner Mana and increases target physical damage taken by 4% for 10 seconds. Learning/removal controls the native pet listener.",
+  "contract": [
+    "Owner critical damage grants exactly 10 pet Focus. Pet critical damage restores 2% maximum owner Mana",
+    "and increases target physical damage taken by 4% for 10 seconds. Learning/removal controls the native",
+    "pet listener."
+  ],
   "timeout_ms": 180000,
   "players": [
     {
@@ -71,6 +75,26 @@
       "metric": "pet_entry",
       "equals": 1188,
       "within_ms": 24000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 61017,
+      "effect": 0,
+      "min": 100,
+      "within_ms": 4000,
+      "label": "Native pet hit scaling has settled"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 61017,
+      "effect": 2,
+      "min": 100,
+      "within_ms": 4000,
+      "label": "Native pet expertise scaling has settled"
     },
     {
       "action": "set_aura",

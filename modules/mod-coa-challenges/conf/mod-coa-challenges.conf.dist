@@ -78,6 +78,11 @@ CoAChallenges.GameModes.PlayerToggle = 0
 # Default: Draft,Resolute,WildCard,Felforged,BuildDraft,Crusader
 CoAChallenges.GameModes.Hidden = Draft,Resolute,WildCard,Felforged,BuildDraft,Crusader
 
+# Modes every character on this realm plays, e.g. WildCard on a Wildcard realm.
+# Comma-separated wire names as above. They are part of every login's mask,
+# whatever the character's trials or toggles. Empty = none.
+CoAChallenges.GameModes.Realm =
+
 
 ############################################################################
 # Completion, failure & lifecycle

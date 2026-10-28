@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Duskwood: turning in 'Addle's Stead' to Julie Addle plays the reunion and credits 'May We Be Reunited'",
+  "contract": "When the second 'Addle's Stead' (254089) is turned in to Julie Addle 254906, the caged worgen and Julie hold their recorded talk (MatodanDLC jLBZUj7KUhw, 2026-07-20, 1:51:37-1:52:24) and Julie then casts 'Arvis Reunion Credit' 355229, which gives the 254905 credit of 254091 'May We Be Reunited' to every player within 30 yards. A player who takes 254091 from Julie right after the turn-in and never talks to the worgen again must get the credit once the talk ends, about 51 seconds later.",
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -10560.0, "y": -1150.0, "z": 28.0, "o": 0},
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 30}
+  ],
+  "creatures": [
+    {"id": "julie", "owner": "hero", "entry": 254906, "distance": 3, "faction": 12, "level": 20},
+    {"id": "worgen", "owner": "hero", "entry": 764561, "distance": 5, "faction": 35, "level": 24}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 1000},
+    {"label": "SETUP: the hero carries 254089 complete, with the book and the nectar", "action": "prepare_quest",
+     "actor": "hero", "quest": 254089},
+    {"label": "SETUP: 254089 is ready to turn in", "action": "assert", "actor": "hero", "metric": "quest_status",
+     "quest": 254089, "equals": 1},
+    {"label": "SETUP: the worgen stands within Julie's 20-yard reach", "action": "assert", "actor": "hero",
+     "metric": "distance", "target": "worgen", "max": 10},
+    {"label": "the hero turns in 254089 to Julie Addle", "action": "client_packet", "actor": "hero", "opcode": 398,
+     "consumed": false, "fields": [{"actor_guid": "julie"}, {"u32": 254089}, {"u32": 0}]},
+    {"label": "254089 is rewarded", "action": "assert", "actor": "hero", "metric": "quest_rewarded",
+     "quest": 254089, "equals": 1, "within_ms": 3000},
+    {"label": "SETUP: the hero takes 254091 from Julie", "action": "prepare_quest", "actor": "hero",
+     "quest": 254091, "complete": false},
+    {"label": "the hero has no 254905 credit while the talk plays", "action": "assert", "actor": "hero",
+     "metric": "quest_objective_count", "quest": 254091, "equals": 0},
+    {"label": "DISCRIMINATING: Julie's cast after the talk credits 254091", "action": "assert", "actor": "hero",
+     "metric": "quest_objective_count", "quest": 254091, "equals": 1, "within_ms": 70000},
+    {"label": "254091 is complete", "action": "assert", "actor": "hero", "metric": "quest_status", "quest": 254091,
+     "equals": 1, "within_ms": 3000}
+  ]
+}

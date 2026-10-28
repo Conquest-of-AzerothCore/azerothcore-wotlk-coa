@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Primalist Geode Barrage: physical damage with Nature spell power",
-  "contract": "Three physical stones each add 36% Nature spell power and 9% attack power before armor mitigation. 502771 rolls its stone damage once per cast (EffectBasePoints 64, DieSides 5: 65-69 at the caster's level 22 = SpellLevel), so a cast's three stones match. With 72 Nature spell power and 62 attack power a stone is (65..69 + 25.92 + 5.58) x 0.974 (the PvE tuning that spell_damage_done reads as 974 of 1000) x 0.783..0.793 (armor_reduced_damage 783-793 of 1000 for the bear's recorded armor of 596-630), 73.6..77.6, recorded as 73-77; without the spell power it is 54-57, so a 70-80 bound on the mean noncritical stone still needs the 36% coefficient. A total bound of 185-225 over the three stones rejected the high rolls (228, 231) and a single critical stone (262, 291). Regression: SpellMgr stored hit and aura spell_linked_spell entries under trigger + 200000 x type, so the Adventure Mode 63 link from 302771 (type 2, key 702771) also answered the hit lookup of 502771 (502771 + 200000). Every stone then applied 302772 and 302773 (+669% physical, +546% magic damage taken) to its target and a bare stone dealt about 420 instead of 54-57, killing the 400-health bear with the first stone. After the settling cast the bear must carry neither aura and take stone damage unmodified (1000 of 1000).",
+  "contract": "Three physical stones each add 36% Nature spell power and 9% attack power before armor mitigation. 502771 rolls its stone damage once per cast (EffectBasePoints 64, DieSides 5: 65-69 at the caster's level 22 = SpellLevel), so a cast's three stones match. With 72 Nature spell power and 62 attack power a stone is (65..69 + 25.92 + 5.58) x 0.974 (the PvE tuning that spell_damage_done reads as 974 of 1000) x 0.783..0.793 (armor_reduced_damage 783-793 of 1000 for the bear's recorded armor of 596-630), 73.6..77.6, recorded as 73-77; without the spell power it is 54-57, so a 70-80 bound on the mean noncritical stone still needs the 36% coefficient. A total bound of 185-225 over the three stones rejected the high rolls (228, 231) and a single critical stone (262, 291). Regression: SpellMgr stored hit and aura spell_linked_spell entries under trigger + 200000 x type, so the Adventure Mode 63 link from 302771 (type 2, key 702771) also answered the hit lookup of 502771 (502771 + 200000). Every stone then applied 302772 and 302773 (+669% physical, +546% magic damage taken) to its target and a bare stone dealt about 420 instead of 54-57, killing the 400-health bear with the first stone. After the settling cast the bear must carry neither aura and take stone damage unmodified (1000 of 1000). Resource control for #5126: each landed stone triggers802885, whose native Rage ENERGIZE effect1 rolls30..80 internal units (BasePoints29, DieSides51). Before the bare three-stone cast, clear Rage and snapshot both energize count and total. Require one802885 event per stone and an average30..80 internal Rage per stone; these triggered direct hits are separate from Rips and Tears periodic-damage procs.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -160,6 +160,28 @@
       "save_as": "bare_total"
     },
     {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_count",
+      "spell": 802885,
+      "power": 1,
+      "save_as": "bare_rage_count"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 802885,
+      "power": 1,
+      "save_as": "bare_rage_total"
+    },
+    {
       "action": "cast",
       "actor": "primalist",
       "spell": 502771,
@@ -178,6 +200,35 @@
       "target": "bear",
       "relative_to": "bare_count",
       "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Each landed stone generates its own native Rage event",
+      "actor": "primalist",
+      "metric": "spell_energize_count",
+      "spell": 802885,
+      "power": 1,
+      "relative_to": "bare_rage_count",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Three native Rage rolls follow the DBC30..80 internal-unit range",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 802885,
+      "power": 1,
+      "relative_to": "bare_rage_total",
+      "min": 90,
+      "max": 240
+    },
+    {
+      "action": "assert",
+      "label": "The Rage bar receives resources after the cleared-bar cast",
+      "actor": "primalist",
+      "metric": "power",
+      "power": 1,
+      "min": 1
     },
     {
       "action": "snapshot",

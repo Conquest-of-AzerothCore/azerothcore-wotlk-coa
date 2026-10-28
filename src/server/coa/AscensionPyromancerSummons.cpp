@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionPyromancer.h"
+#include "CharmInfo.h"
 #include "DBCStores.h"
 #include "Map.h"
 #include "MotionMaster.h"
@@ -13,9 +14,9 @@
 #include <set>
 namespace AscensionPyromancer
 {
-void Summon(Player* player, uint32 entry, Position const& position, uint32 duration)
+void Summon(Player* player, uint32 entry, uint32 propertiesId, Position const& position, uint32 duration)
 {
-    auto properties = sSummonPropertiesStore.LookupEntry(61);
+    auto properties = sSummonPropertiesStore.LookupEntry(propertiesId);
     if (!player || !player->IsAlive() || !properties || (entry != 50258 && entry != 50359 && entry != 52258))
         return;
     if (TempSummon* summon = player->GetMap()->SummonCreature(entry, position, properties, duration, player))
@@ -87,7 +88,18 @@ struct npc_ascension_pyromancer_summon : public ScriptedAI
         if (me->GetEntry() == 50359)
             me->CastSpell(me, 704279, true);
         timers.ScheduleEvent(1, me->GetEntry() == 50258 ? PhoenixPeriod(player) : 200ms);
+        FollowOwner(player);
     }
+    void FollowOwner(Player* player)
+    {
+        if (me->GetEntry() != 50258 || diveTime || dormant ||
+            me->GetMotionMaster()->GetCurrentMovementGeneratorType() != IDLE_MOTION_TYPE)
+            return;
+        if (CharmInfo* charm = me->GetCharmInfo(); charm && !charm->HasCommandState(COMMAND_FOLLOW))
+            return;
+        me->GetMotionMaster()->MoveFollow(player, PET_FOLLOW_DIST, me->GetFollowAngle());
+    }
+    void ShowNativeModel() { me->SetDisplayId(me->GetNativeDisplayId(), me->GetNativeObjectScale()); }
     void SetGUID(ObjectGuid const& guid, int32 = 0) override { command = guid; }
     void DoAction(int32 action) override
     {
@@ -103,7 +115,8 @@ struct npc_ascension_pyromancer_summon : public ScriptedAI
                 shielded.clear();
                 firstShield = true;
                 diveTime = 4000;
-                me->SetDisplayId(17765);
+                ShowNativeModel();
+                me->GetMotionMaster()->Clear(false);
                 me->GetMotionMaster()->MoveCharge(target->GetPositionX(), target->GetPositionY(),
                                                   target->GetPositionZ(), 25);
             }
@@ -111,6 +124,8 @@ struct npc_ascension_pyromancer_summon : public ScriptedAI
         if (action == 2)
         {
             dormant = std::max(1, sSpellMgr->GetSpellInfo(707060)->GetDuration());
+            diveTime = 0;
+            me->GetMotionMaster()->Clear(false);
             me->GetMotionMaster()->MoveIdle();
             me->SetDisplayId(20245);
             timers.RescheduleEvent(1, 2s);
@@ -162,9 +177,15 @@ struct npc_ascension_pyromancer_summon : public ScriptedAI
             Shields(player);
             diveTime = diveTime > diff ? diveTime - diff : 0;
             if (!diveTime)
-                me->SetDisplayId(20245);
+                ShowNativeModel();
         }
-        dormant = dormant > diff ? dormant - diff : 0;
+        if (dormant)
+        {
+            dormant = dormant > diff ? dormant - diff : 0;
+            if (!dormant)
+                ShowNativeModel();
+        }
+        FollowOwner(player);
         timers.Update(diff);
         if (timers.ExecuteEvent() != 1)
             return;

@@ -1,0 +1,362 @@
+{
+  "schema": 1,
+  "name": "Ranger Plumes of War adds Falconstrike crit chance and stacks damage on Falconstrike crits (#5421)",
+  "contract": [
+    "Plumes of War 705071 reads 'Increases the critical strike chance of Falconstrike and Emerald Arrow by",
+    "15%. In addition, critical strikes with Falconstrike now increase the damage of subsequent Falconstrikes",
+    "by 5% for 15 seconds, stacking 5 times.' Effect 1 (aura 107, misc 7) is the native flat crit modifier.",
+    "Effect 3 (aura 42) names buff 705078, an Add % Modifier of 5 for 15 sec that stacks 5 times; nothing",
+    "fired it until the spell_proc row, which is Forest Fighter 706282's event: family 27, SpellFamilyMask1",
+    "4194304 (Falconstrike only), ProcFlags 256, SpellPhaseMask 2, HitMask 2 (critical). Falconstrike has",
+    "damage class 3 but its original weapon mask 41105 permits melee weapons, its family is Ranger and it",
+    "does not use the ranged slot. Native IsRangedWeaponSpell therefore chooses the main-hand attack;",
+    "melee_crit_rating 100000 controls its actual crit chance. The ranged rating remains a separate slot",
+    "control. Expected: before the talent, a critical Falconstrike 806443 leaves no 705078 aura; with it, the",
+    "crit chance rises by exactly 15 points, the first critical Falconstrike gives one stack, the second",
+    "gives two, and Falconstrike's computed damage grows 5% per stack. Native Falconstrike requires talent",
+    "573060 and its own ready aura 573338. Readiness generation is tested separately; this fixture supplies",
+    "it before each ordinary, funded cast while preserving native readiness consumption, critical hits and",
+    "Plumes procs."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80,
+      "ranged_hit_rating": 10000,
+      "ranged_crit_rating": 100000,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000,
+      "melee_crit_rating": 100000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "golem",
+      "owner": "ranger",
+      "entry": 36,
+      "level": 80,
+      "health": 100000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Fixture stun, so the golem does not fight back",
+      "actor": "ranger",
+      "spell": 23775
+    },
+    {
+      "action": "add_item",
+      "actor": "ranger",
+      "item": 2504
+    },
+    {
+      "action": "equip",
+      "actor": "ranger",
+      "item": 2504,
+      "slot": 17
+    },
+    {
+      "action": "add_item",
+      "actor": "ranger",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "ranger",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 23775,
+      "target": "golem"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the golem is stunned",
+      "actor": "golem",
+      "metric": "aura",
+      "spell": 23775,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 573060,
+      "label": "Learn the authored Falconstrike talent prerequisite"
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 806443
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "spell_done_crit_chance",
+      "spell": 806443,
+      "target": "golem",
+      "min": 100,
+      "label": "The actual Falconstrike attack slot has guaranteed fixture crit chance"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ranger",
+      "metric": "spell_done_crit_chance",
+      "spell": 806443,
+      "target": "golem",
+      "save_as": "crit_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ranger",
+      "metric": "spell_damage_done",
+      "spell": 806443,
+      "target": "golem",
+      "save_as": "damage_before"
+    },
+    {
+      "action": "set_power",
+      "actor": "ranger",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the prior normal global cooldown"
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 573338,
+      "stacks": 1,
+      "label": "Supply the authored one-cast Falconstrike readiness fixture"
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 806443
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ranger",
+      "spell": 806443
+    },
+    {
+      "action": "cast",
+      "label": "Falconstrike without Plumes of War",
+      "actor": "ranger",
+      "spell": 806443,
+      "target": "golem"
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 806443,
+      "equals": 0,
+      "label": "The ordinary Falconstrike cast was accepted"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Falconstrike landed as a critical hit",
+      "actor": "ranger",
+      "metric": "spell_damage_count",
+      "spell": 806443,
+      "target": "golem",
+      "critical": true,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Without the talent a critical Falconstrike grants no Plumes of War buff",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 705078,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 705071
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Plumes of War is learned",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 705071,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Plumes of War adds 15% critical strike chance to Falconstrike",
+      "actor": "ranger",
+      "metric": "spell_done_crit_chance",
+      "spell": 806443,
+      "target": "golem",
+      "relative_to": "crit_before",
+      "min": 14.99,
+      "max": 15.01
+    },
+    {
+      "action": "wait",
+      "label": "Falconstrike's 6 second cooldown",
+      "ms": 7000
+    },
+    {
+      "action": "set_power",
+      "actor": "ranger",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the prior normal global cooldown"
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 573338,
+      "stacks": 1,
+      "label": "Supply the authored one-cast Falconstrike readiness fixture"
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 806443
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ranger",
+      "spell": 806443
+    },
+    {
+      "action": "cast",
+      "label": "Critical Falconstrike with Plumes of War",
+      "actor": "ranger",
+      "spell": 806443,
+      "target": "golem"
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 806443,
+      "equals": 0,
+      "label": "The ordinary Falconstrike cast was accepted"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the critical Falconstrike starts the Plumes of War buff",
+      "actor": "ranger",
+      "metric": "aura_stacks",
+      "spell": 705078,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The buff makes the next Falconstrike hit 5% harder",
+      "actor": "ranger",
+      "metric": "spell_damage_done",
+      "spell": 806443,
+      "target": "golem",
+      "ratio_to": "damage_before",
+      "min": 1.04,
+      "max": 1.06
+    },
+    {
+      "action": "wait",
+      "label": "Falconstrike's 6 second cooldown",
+      "ms": 7000
+    },
+    {
+      "action": "set_power",
+      "actor": "ranger",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the prior normal global cooldown"
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 573338,
+      "stacks": 1,
+      "label": "Supply the authored one-cast Falconstrike readiness fixture"
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 806443
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ranger",
+      "spell": 806443
+    },
+    {
+      "action": "cast",
+      "label": "Second critical Falconstrike",
+      "actor": "ranger",
+      "spell": 806443,
+      "target": "golem"
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 806443,
+      "equals": 0,
+      "label": "The ordinary Falconstrike cast was accepted"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the second critical Falconstrike stacks the buff",
+      "actor": "ranger",
+      "metric": "aura_stacks",
+      "spell": 705078,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Two stacks make the next Falconstrike hit 10% harder",
+      "actor": "ranger",
+      "metric": "spell_damage_done",
+      "spell": 806443,
+      "target": "golem",
+      "ratio_to": "damage_before",
+      "min": 1.09,
+      "max": 1.11
+    }
+  ]
+}

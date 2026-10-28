@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "name": "CoA item stream: a quest reward under native item scaling is neither copied nor patched",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1, CoA.ItemScaling=1, CoA.ItemScaling.Native=1, DestinyWeaver.Enable=1 and CoA.QuestLevelScaling=1.",
+    "A level-32 viewer plays quest 9146 (authored at 12) at 28 on its QuestTemplateScaling.dbc row and receives Farstrider's Tunic 23405, which has no ItemStat.dbc ladder. The old copy lift would have replaced it with a copy at item level 27.",
+    "While native item scaling is active the copy path makes no new copies, so the viewer carries the authored tunic at item level 12 and storing it sends no item patch.",
+    "Repeating the world-entry notice must not send any item row either."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "viewer",
+      "race": 1,
+      "class": 12,
+      "level": 32
+    }
+  ],
+  "steps": [
+    {
+      "action": "client_packet",
+      "actor": "viewer",
+      "opcode": 1377
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "viewer",
+      "value": 1
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "viewer",
+      "quest": 9146
+    },
+    {
+      "action": "snapshot",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2354,
+      "save_as": "before_reward"
+    },
+    {
+      "action": "reward_quest",
+      "actor": "viewer",
+      "quest": 9146,
+      "choice": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "carried_item_level",
+      "item": 23405,
+      "equals": 12
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2354,
+      "relative_to": "before_reward",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2354,
+      "save_as": "before_world_entry"
+    },
+    {
+      "action": "client_packet",
+      "actor": "viewer",
+      "opcode": 1377
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2354,
+      "relative_to": "before_world_entry",
+      "equals": 0
+    }
+  ]
+}

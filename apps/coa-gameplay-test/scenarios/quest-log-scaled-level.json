@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Quest log: each quest's level, reward XP and scaled mark reach the client",
+  "contract": "Requires DestinyWeaver.Enable=1, CoA.QuestLevelScaling=1 and CoA.QuestLevelScaling.ClientFlag=0 (the default). The Ascension client's Extensions.dll answers GetQuestLogTitle's level and the quest log's reward XP for a quest in the log from the player's SMSG_UPDATE_OBJECT_ADDON (0x0578) table, field 61 + quest log slot for the level and field 36 + slot for the XP, instead of the quest cache. Without them the log shows every quest as level 0 in grey. Its GetQuestScaling reads quest flag 0x01000000 from the quest query response and then computes the level from its own copy of the curve; with ClientFlag off the server never sets it and the slot level is what the log shows. Quest 7 (Kobold Camp Cleanup) is authored at level 2 and its QuestTemplateScaling.dbc row is min 2, max 20, offset -4 from player level 6. With open-world scaling on, a level 20 character plays it at 16 and the slot must carry 16 and a positive XP reward; with scaling off it carries the authored level 2; a level up to 21 re-sends 17. Client rendering is not tested.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the fixture settle", "ms": 2000 },
+    { "action": "level_scaling_packet", "actor": "hero", "value": 1 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "prepare_quest", "actor": "hero", "quest": 7, "complete": false },
+    { "action": "assert", "label": "The server plays the quest on its curve", "actor": "hero", "metric": "quest_level", "quest": 7, "equals": 16 },
+    { "action": "assert", "label": "Accepting the quest sends its scaled level to its slot", "actor": "hero", "metric": "quest_log_sent_level", "quest": 7, "equals": 16, "within_ms": 1000 },
+    { "action": "assert", "label": "Accepting the quest sends a positive reward XP to its slot", "actor": "hero", "metric": "quest_log_sent_xp", "quest": 7, "min": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "Without ClientFlag the quest is not marked as scaled", "actor": "hero", "metric": "quest_query_scaled", "quest": 7, "equals": 0, "within_ms": 1000 },
+
+    { "action": "level_scaling_packet", "actor": "hero", "value": 0 },
+    { "action": "assert", "label": "Without scaling the server uses the authored level", "actor": "hero", "metric": "quest_level", "quest": 7, "equals": 2, "within_ms": 2000 },
+    { "action": "assert", "label": "Turning scaling off sends the authored level", "actor": "hero", "metric": "quest_log_sent_level", "quest": 7, "equals": 2, "within_ms": 2000 },
+
+    { "action": "level_scaling_packet", "actor": "hero", "value": 1 },
+    { "action": "assert", "label": "Turning scaling on sends the scaled level again", "actor": "hero", "metric": "quest_log_sent_level", "quest": 7, "equals": 16, "within_ms": 2000 },
+    { "action": "set_level", "actor": "hero", "value": 21 },
+    { "action": "assert", "label": "A level up sends the new scaled level", "actor": "hero", "metric": "quest_log_sent_level", "quest": 7, "equals": 17, "within_ms": 1000 }
+  ]
+}

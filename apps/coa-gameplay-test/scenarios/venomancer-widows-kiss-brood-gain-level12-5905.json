@@ -1,0 +1,435 @@
+{
+  "schema": 1,
+  "name": "Level-12 Widow's Kiss adds one Brood Mark and preserves existing marks (#5905)",
+  "contract": [
+    "Original spell 504705 explicitly applies one Brood Mark. Talent 807600 turns every third Venom Fang into",
+    "this attack. Brood Mark 804972 caps at five; 807244 is a separate two-cast gate.",
+    "Two normal Venom Fang casts followed by Widow's Kiss must produce 1, 2 and 3 marks, then 4, 5 and 5 on the",
+    "next cycle. Every attack must damage its victim and succeed; the gate resets independently of Brood Marks.",
+    "No Brood Mark stacks are injected."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "v",
+      "race": 1,
+      "class": 29,
+      "level": 12,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "v",
+      "entry": 36,
+      "level": 12,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 807600
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 92143
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 800880
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 504705
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 800841
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800841
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 800841,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "aura_stacks",
+      "spell": 804972,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "v",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800880,
+      "target": "dummy",
+      "save_as": "hits1"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800880,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800880,
+      "target": "dummy",
+      "relative_to": "hits1",
+      "equals": 1,
+      "within_ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "cast_failure",
+      "spell": 800880,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "aura_stacks",
+      "label": "Attack 1 retains the previous marks and adds one up to the cap",
+      "spell": 804972,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "aura_stacks",
+      "spell": 807244,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_power",
+      "actor": "v",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800880,
+      "target": "dummy",
+      "save_as": "hits2"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800880,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800880,
+      "target": "dummy",
+      "relative_to": "hits2",
+      "equals": 1,
+      "within_ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "cast_failure",
+      "spell": 800880,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "aura_stacks",
+      "label": "Attack 2 retains the previous marks and adds one up to the cap",
+      "spell": 804972,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "aura_stacks",
+      "spell": 807244,
+      "equals": 2
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_power",
+      "actor": "v",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 504705,
+      "target": "dummy",
+      "save_as": "hits3"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 504705,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 504705,
+      "target": "dummy",
+      "relative_to": "hits3",
+      "equals": 1,
+      "within_ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "cast_failure",
+      "spell": 504705,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "aura_stacks",
+      "label": "Attack 3 retains the previous marks and adds one up to the cap",
+      "spell": 804972,
+      "equals": 3,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "aura_stacks",
+      "spell": 807244,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_power",
+      "actor": "v",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800880,
+      "target": "dummy",
+      "save_as": "hits4"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800880,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800880,
+      "target": "dummy",
+      "relative_to": "hits4",
+      "equals": 1,
+      "within_ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "cast_failure",
+      "spell": 800880,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "aura_stacks",
+      "label": "Attack 4 retains the previous marks and adds one up to the cap",
+      "spell": 804972,
+      "equals": 4,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "aura_stacks",
+      "spell": 807244,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_power",
+      "actor": "v",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800880,
+      "target": "dummy",
+      "save_as": "hits5"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800880,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800880,
+      "target": "dummy",
+      "relative_to": "hits5",
+      "equals": 1,
+      "within_ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "cast_failure",
+      "spell": 800880,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "aura_stacks",
+      "label": "Attack 5 retains the previous marks and adds one up to the cap",
+      "spell": 804972,
+      "equals": 5,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "aura_stacks",
+      "spell": 807244,
+      "equals": 2
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_power",
+      "actor": "v",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 504705,
+      "target": "dummy",
+      "save_as": "hits6"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 504705,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 504705,
+      "target": "dummy",
+      "relative_to": "hits6",
+      "equals": 1,
+      "within_ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "cast_failure",
+      "spell": 504705,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "aura_stacks",
+      "label": "Attack 6 retains the previous marks and adds one up to the cap",
+      "spell": 804972,
+      "equals": 5,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "aura_stacks",
+      "spell": 807244,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    }
+  ]
+}

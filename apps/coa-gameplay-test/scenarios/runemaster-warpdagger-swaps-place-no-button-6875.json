@@ -1,0 +1,213 @@
+{
+  "schema": 1,
+  "name": "Runemaster Warpdagger swaps without placing buttons or printing at level 10 (#6875)",
+  "contract": [
+    "Throwing Warpdagger 500287 teaches Warp 500587 as a temporary spell and swaps it in through",
+    "SMSG_SUPERCEDED_SPELL; warping back swaps Warpdagger back and removes Warp. Up to level 10 the client placed each",
+    "spell a learn or swap added on an empty action button, so every throw left another Warpdagger or Warp button",
+    "(#6875), and every learn, swap and removal printed a line. Expected over two throws at level 10: both swaps reach",
+    "the client, no learn or swap places a button, no line is printed for either spell, and each row reads its own",
+    "rank again afterwards."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login state settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 1180
+    },
+    {
+      "action": "add_item",
+      "actor": "rm",
+      "item": 2092
+    },
+    {
+      "action": "equip",
+      "actor": "rm",
+      "item": 2092,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 500287
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "client_chat_lines_for",
+      "spell": 500287,
+      "save_as": "dagger_lines"
+    },
+    {
+      "action": "cast",
+      "label": "Throw Warpdagger",
+      "actor": "rm",
+      "spell": 500287
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Warpdagger is swapped for Warp",
+      "actor": "rm",
+      "metric": "temporary_spell_replacement",
+      "spell": 500287,
+      "equals": 500587,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The swap reaches the client",
+      "actor": "rm",
+      "metric": "spellbook_superseded_for",
+      "spell": 500587,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Warp back to the dagger",
+      "actor": "rm",
+      "spell": 500587
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: warping hands Warpdagger back",
+      "actor": "rm",
+      "metric": "temporary_spell_replacement",
+      "spell": 500287,
+      "equals": 500287,
+      "within_ms": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rm",
+      "spell": 500287
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Throw Warpdagger a second time",
+      "actor": "rm",
+      "spell": 500287
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the second throw swaps in Warp again",
+      "actor": "rm",
+      "metric": "temporary_spell_replacement",
+      "spell": 500287,
+      "equals": 500587,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Warp back a second time",
+      "actor": "rm",
+      "spell": 500587
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the second warp hands Warpdagger back",
+      "actor": "rm",
+      "metric": "temporary_spell_replacement",
+      "spell": 500287,
+      "equals": 500287,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "No learn of Warp placed a button",
+      "actor": "rm",
+      "metric": "client_placing_learns_for",
+      "spell": 500587,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No swap placed Warp on a button",
+      "actor": "rm",
+      "metric": "client_placing_supersedes_for",
+      "spell": 500587,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No swap placed Warpdagger on a button",
+      "actor": "rm",
+      "metric": "client_placing_supersedes_for",
+      "spell": 500287,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Warpdagger's row reads its own rank again",
+      "actor": "rm",
+      "metric": "client_spell_rank_for",
+      "spell": 500287,
+      "max": 1,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Warp's row reads its own rank again",
+      "actor": "rm",
+      "metric": "client_spell_rank_for",
+      "spell": 500587,
+      "min": 0,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "No line for Warp",
+      "actor": "rm",
+      "metric": "client_chat_lines_for",
+      "spell": 500587,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No line for Warpdagger coming back",
+      "actor": "rm",
+      "metric": "client_chat_lines_for",
+      "spell": 500287,
+      "relative_to": "dagger_lines",
+      "equals": 0
+    }
+  ]
+}

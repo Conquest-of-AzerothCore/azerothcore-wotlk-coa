@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "name": "Greater Skeletal Warrior command applies Pierced only after its native weapon strike (#6672)",
+  "contract": "Raise Greater Skeletal Warrior504901 promises armor reduction from its weapon strike570042. Commanding an enemy outside the strike cone must not apply570216 before that strike hits.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "necro",
+      "race": 1,
+      "class": 23,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 504901
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 504868
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 504901
+    },
+    {
+      "action": "assert",
+      "actor": "necro",
+      "metric": "owned_creature_count",
+      "entry": 51065,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 570216,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "health",
+      "save_as": "before"
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 504868,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 570216,
+      "equals": 0
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "necro",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 30
+    }
+  ]
+}

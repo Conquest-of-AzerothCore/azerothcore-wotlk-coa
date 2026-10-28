@@ -47,6 +47,7 @@ enum GlobalHook
     GLOBALHOOK_ON_INSTANCEID_REMOVED,
     GLOBALHOOK_ON_BEFORE_SET_BOSS_STATE,
     GLOBALHOOK_AFTER_INSTANCE_GAME_OBJECT_CREATE,
+    GLOBALHOOK_ON_SPELL_MOD_FAMILY_MASK,
     GLOBALHOOK_END
 };
 
@@ -81,6 +82,9 @@ public:
 
     // Called when checking if an aura spell is affected by a mod
     virtual bool OnIsAffectedBySpellModCheck(SpellInfo const* /*affectSpell*/, SpellInfo const* /*checkSpell*/, SpellModifier const* /*mod*/) { return true; };
+
+    virtual void OnSpellModFamilyMask(SpellInfo const* /*affectSpell*/, SpellInfo const* /*checkSpell*/,
+        SpellModifier const* /*mod*/, bool& /*affected*/) { }
 
     // Called when checking for spell negative healing modifiers
     virtual bool OnSpellHealingBonusTakenNegativeModifiers(Unit const* /*target*/, Unit const* /*caster*/, SpellInfo const* /*spellInfo*/, float& /*val*/) { return false; };

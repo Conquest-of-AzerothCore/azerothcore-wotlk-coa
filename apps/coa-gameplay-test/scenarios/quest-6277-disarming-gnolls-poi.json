@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Disarming the Gnolls: the map marks the Riverpaw camps beside the turn-in (#6277)",
+  "contract": "Quest 17004 'Disarming the Gnolls' wants 6 Gnoll Blades 157007 and 10 Gnoll Axes 157008 from the Riverpaw gnolls in Elwynn Forest. The report saw only the turn-in pin on Guard Thomas (rev_20260924_60, id 0). rev_20261009_30_coa_quest_poi_restore.sql (#7024) added twelve objective areas, six for each item objective (ObjectiveIndex 4 and 5). Expected: with the quest in the log, CMSG_QUEST_POI_QUERY (0x1E3) for 17004 answers SMSG_QUEST_POI_QUERY_RESPONSE (0x1E4) naming 17004 with thirteen POIs; the reported state answers one.",
+  "timeout_ms": 30000,
+  "location": { "map": 0, "x": -9610.23, "y": -1032.05, "z": 41.3058, "o": 3.14159 },
+  "players": [
+    { "id": "c", "race": 1, "class": 1, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "prepare_quest", "label": "Take Disarming the Gnolls", "actor": "c", "quest": 17004, "complete": false },
+    {
+      "action": "client_packet", "label": "Query the quest map POIs", "actor": "c", "opcode": 483, "consumed": false,
+      "fields": [{ "u32": 1 }, { "u32": 17004 }]
+    },
+    {
+      "action": "assert", "label": "The POI response names quest 17004", "actor": "c",
+      "metric": "server_packet_u32", "opcode": 484, "row": 1, "index": 1, "equals": 17004, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the gnoll camp areas are marked beside the turn-in pin", "actor": "c",
+      "metric": "server_packet_u32", "opcode": 484, "row": 1, "index": 2, "equals": 13, "within_ms": 3000
+    }
+  ]
+}

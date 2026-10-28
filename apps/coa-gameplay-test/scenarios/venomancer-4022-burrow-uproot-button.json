@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Burrow puts Uproot on the override bar (#4022)",
+  "contract": "Burrow (806154) roots the Venomancer under the ground for 8 seconds; its tooltip says that while burrowed a new location within 30 yards can be chosen to unburrow. That choice is Uproot (806217, Teleport Units to a ground destination, castable while stunned). The client offers it on the override action bar: Burrow (806164) applies Override Spells 316, whose first button is Uproot, as shown by Ascension's live client. Burrow therefore applies 806164 for its duration. Casting Uproot at a ground point moves the player there and ends Burrow, the override bar goes away and Uproot is unlearned.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9458.0,
+    "y": 42.0,
+    "z": 55.5
+  },
+  "players": [
+    { "id": "v", "race": 1, "class": 29, "level": 56 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn settle", "ms": 3000 },
+    { "action": "learn", "actor": "v", "spell": 800841 },
+    { "action": "learn", "actor": "v", "spell": 806154 },
+    { "action": "cast", "actor": "v", "spell": 800841 },
+    { "action": "assert", "label": "SETUP: Spider Form is active", "actor": "v", "metric": "aura", "spell": 800841, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "label": "GCD", "ms": 1600 },
+    { "action": "cast", "actor": "v", "spell": 806154 },
+    { "action": "assert", "label": "SETUP: Burrow is active", "actor": "v", "metric": "aura", "spell": 806154, "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "Uproot is learned while burrowed", "actor": "v", "metric": "knows_spell", "spell": 806217, "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "Burrow shows the Uproot override bar", "actor": "v", "metric": "aura", "spell": 806164, "equals": 1, "within_ms": 1500 },
+    { "action": "cast", "actor": "v", "spell": 806217, "destination": { "x": -9446.0, "y": 42.0, "z": 55.5 } },
+    { "action": "assert", "label": "SETUP: Uproot was accepted", "actor": "v", "metric": "cast_failure", "spell": 806217, "equals": 0 },
+    { "action": "assert", "label": "Uproot ends Burrow", "actor": "v", "metric": "aura", "spell": 806154, "equals": 0, "within_ms": 1500 },
+    { "action": "assert", "label": "Uproot surfaces at the chosen point", "actor": "v", "metric": "point_distance_2d", "x": -9446.0, "y": 42.0, "max": 1.5, "within_ms": 1500 },
+    { "action": "assert", "label": "The override bar goes away after surfacing", "actor": "v", "metric": "aura", "spell": 806164, "equals": 0, "within_ms": 1500 },
+    { "action": "assert", "label": "Uproot is unlearned after surfacing", "actor": "v", "metric": "knows_spell", "spell": 806217, "equals": 0 }
+  ]
+}

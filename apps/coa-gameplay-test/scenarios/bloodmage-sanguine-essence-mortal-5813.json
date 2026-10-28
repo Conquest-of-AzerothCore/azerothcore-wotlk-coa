@@ -1,0 +1,164 @@
+{
+  "schema": 1,
+  "name": "Sanguine Essence keeps Bloodmoon Blast usable (#5813, #5737)",
+  "contract": [
+    "Sanguine Essence 680692 (Rank 'Cursed Form') reads: 'Enter a unique Cursed Form that does not disable",
+    "Mortal Form abilties ... While active, you replicate $s1% of healing or damage done by Sanguine Mend and",
+    "Bloodmoon Blast'. Every Bloodmoon Blast rank (500125, 501607-501614, 572332) carries",
+    "ExcludeCasterAuraSpell 524861, the Mortal Form lockout marker that ordinary Cursed Forms set and that",
+    "Spell.cpp:5865 turns into SPELL_FAILED_CASTER_AURASTATE (22). Sanguine Essence replaces Blood Curse for",
+    "the Fleshweaver spec, so it keeps both Cursed Form markers 525031 and 524861; 53 Cursed ability records",
+    "(Rotclaw 12 ranks among them) require 524861. Under Sanguine Essence Bloodmoon Blast rank 10 must cast",
+    "without a failure and damage its target, and Rotclaw 503486 must still ravage a nearby enemy. Rotclaw uses",
+    "original MELEE hit resolution; the fixture supplies native melee hit and expertise as well as the spell",
+    "hit needed by Bloodmoon Blast."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "essence",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "essence",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 15
+    },
+    {
+      "id": "near",
+      "owner": "essence",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 999999
+    },
+    {
+      "action": "wait",
+      "label": "Injured fixture avoids full-health level rescaling",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "essence",
+      "spell": 572332
+    },
+    {
+      "action": "learn",
+      "actor": "essence",
+      "spell": 503486
+    },
+    {
+      "action": "set_aura",
+      "actor": "essence",
+      "spell": 680692,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Sanguine Essence is active",
+      "actor": "essence",
+      "metric": "aura",
+      "spell": 680692,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Sanguine Essence keeps the shared Cursed Form marker",
+      "actor": "essence",
+      "metric": "aura",
+      "spell": 525031,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Sanguine Essence keeps the Cursed ability marker",
+      "actor": "essence",
+      "metric": "aura",
+      "spell": 524861,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "save_as": "target_health"
+    },
+    {
+      "action": "assert",
+      "actor": "essence",
+      "metric": "melee_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "cast",
+      "actor": "essence",
+      "spell": 572332,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Bloodmoon Blast damages its target in Sanguine Essence",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "target_health",
+      "max": -1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "The cast is not refused",
+      "actor": "essence",
+      "metric": "cast_failure",
+      "spell": 572332,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "essence",
+      "spell": 503486
+    },
+    {
+      "action": "assert",
+      "label": "Guard: Rotclaw still bleeds a nearby enemy in Sanguine Essence",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 503486,
+      "caster": "essence",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Guard: Rotclaw is not refused",
+      "actor": "essence",
+      "metric": "cast_failure",
+      "spell": 503486,
+      "equals": 0
+    }
+  ]
+}

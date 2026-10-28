@@ -1,0 +1,324 @@
+{
+  "schema": 1,
+  "name": "Splash Potion gives the selected Shrooms heal or Fish Oil movement buff (#6294)",
+  "contract": "Effective DBC803698 is SplashPotion:JungleShrooms periodic healing,803273 is SplashPotion:FishOil movement/swim/haste. Normal ingredient selectors and real PotionToss/Splash must route Shrooms to healing on both injured raid allies, then Fish to its movement buff and no Shrooms aura. PotionToss802973 is an unchanged positive control.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 13,
+      "level": 32,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 18,
+      "level": 32,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "p",
+      "target": "ally"
+    },
+    {
+      "action": "specialization",
+      "actor": "p",
+      "id": 6
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 92085,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 801660
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 801662
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 801661
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 802710
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 10040,
+      "stacks": 3
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "max_power",
+      "power": 0,
+      "min": 20000,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "value": 1000,
+      "maximum": 1000000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 1000,
+      "maximum": 1000000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 801660
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 801660,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 801702,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 801661,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 802973,
+      "caster": "p",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_heal_count",
+      "spell": 802973,
+      "target": "ally",
+      "min": 1,
+      "within_ms": 7000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "p",
+      "spell": 802710
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 802710,
+      "target": "p"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 803698,
+      "caster": "p",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 803273,
+      "caster": "p",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_heal_count",
+      "spell": 803698,
+      "target": "p",
+      "min": 1,
+      "within_ms": 7000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 803698,
+      "caster": "p",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 803273,
+      "caster": "p",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_heal_count",
+      "spell": 803698,
+      "target": "ally",
+      "min": 1,
+      "within_ms": 7000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 801662
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 801662,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 801660,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 803698,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 803698,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "p",
+      "spell": 802710
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 802710,
+      "target": "p"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 803273,
+      "caster": "p",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 803698,
+      "caster": "p",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 803273,
+      "caster": "p",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 803698,
+      "caster": "p",
+      "equals": 0
+    }
+  ]
+}

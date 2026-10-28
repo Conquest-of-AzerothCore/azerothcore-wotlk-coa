@@ -6,7 +6,9 @@
     "Soul active.' Buff 500481: 'Reduces all direct damage you take by 10% and heals you for 90, removing 1 stack.",
     "Each direct attack made against you removes 1 stack.' The heal 500482 is 50 + 0.5 per level (90 at level 80)",
     "plus attack power and Stamina terms. Soulfused Constitution 561100 doubles the stacks and, through 561234,",
-    "reduces damage taken by a further 10% while Tormented Souls is active."
+    "reduces damage taken by a further 10% while Tormented Souls is active.",
+    "The original ward 561234 has DurationIndex 0, so its runtime lifetime must follow Tormented Souls,",
+    "including ordinary parent refreshes and removal. Presence and remaining durations are observed natively."
   ],
   "timeout_ms": 120000,
   "players": [
@@ -94,12 +96,101 @@
       "equals": 1
     },
     {
+      "action": "snapshot",
+      "actor": "fused",
+      "metric": "aura_duration_ms",
+      "spell": 500481,
+      "save_as": "souls_duration"
+    },
+    {
+      "action": "assert",
+      "actor": "fused",
+      "metric": "aura_duration_ms",
+      "spell": 561234,
+      "relative_to": "souls_duration",
+      "min": -50,
+      "max": 50,
+      "label": "The ward shares the active Tormented Souls lifetime"
+    },
+    {
+      "action": "wait",
+      "ms": 1000,
+      "label": "Advance beyond the zero-duration helper failure"
+    },
+    {
+      "action": "assert",
+      "actor": "fused",
+      "metric": "aura",
+      "spell": 561234,
+      "equals": 1,
+      "label": "The Soulfused ward survives subsequent world updates"
+    },
+    {
       "action": "assert",
       "label": "Tormented Souls consumed the Reaped Souls",
       "actor": "fused",
       "metric": "aura",
       "spell": 500363,
       "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Finish the first Tormented Souls global cooldown"
+    },
+    {
+      "action": "set_aura",
+      "actor": "fused",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "fused",
+      "spell": 500483
+    },
+    {
+      "action": "cast",
+      "actor": "fused",
+      "spell": 500483,
+      "label": "Refresh Tormented Souls through another funded normal cast"
+    },
+    {
+      "action": "assert",
+      "actor": "fused",
+      "metric": "aura_stacks",
+      "spell": 500481,
+      "equals": 6,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "fused",
+      "metric": "aura_duration_ms",
+      "spell": 500481,
+      "save_as": "refreshed_souls_duration"
+    },
+    {
+      "action": "assert",
+      "actor": "fused",
+      "metric": "aura_duration_ms",
+      "spell": 561234,
+      "relative_to": "refreshed_souls_duration",
+      "min": -50,
+      "max": 50,
+      "label": "Refreshing the parent also refreshes the ward lifetime"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "fused",
+      "metric": "aura",
+      "spell": 561234,
+      "equals": 1,
+      "label": "The refreshed ward survives a subsequent world update"
     },
     {
       "action": "set_aura",
@@ -194,6 +285,23 @@
       "metric": "spell_heal_count",
       "spell": 500482,
       "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "fused",
+      "metric": "aura",
+      "spell": 500481,
+      "equals": 0,
+      "within_ms": 30000,
+      "label": "Unused Tormented Souls eventually expire"
+    },
+    {
+      "action": "assert",
+      "actor": "fused",
+      "metric": "aura",
+      "spell": 561234,
+      "equals": 0,
+      "label": "The ward expires together with its Tormented Souls"
     }
   ]
 }

@@ -1,0 +1,221 @@
+{
+  "schema": 1,
+  "name": "Frost Palm Sigil copies 30% of one direct magic hit and slows its target (#5786)",
+  "contract": [
+    "Original 805381 explicitly applies 30% of the next direct Magic hit as Frost and the 808022 slow. Its helper 807825 already triggers that slow.",
+    "Normal casts must produce one copied hit, one slow, consume the base one-use sigil, and leave the following direct spell unempowered."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 502838
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 805381
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 807825,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 502838,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 502838,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 807825,
+      "equals": 0,
+      "label": "Without a sigil there is no extra Frost hit"
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 500469,
+      "stacks": 1,
+      "label": "Fixture: the alternative Waveforged window"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 808089,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 805381
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 805381,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura_amount",
+      "spell": 805381,
+      "effect": 0,
+      "equals": 30
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 502838,
+      "target": "dummy",
+      "save_as": "before_hit"
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 502838,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 502838,
+      "target": "dummy",
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 807825,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 1500,
+      "label": "The next direct spell produces one Frost hit"
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 502838,
+      "target": "dummy",
+      "relative_to": "before_hit",
+      "save_as": "trigger_hit"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 807825,
+      "target": "dummy",
+      "ratio_to": "trigger_hit",
+      "min": 0.297,
+      "max": 0.3001,
+      "label": "The Frost hit copies 30% of the actual triggering damage"
+    },
+    {
+      "action": "assert",
+      "label": "The copied Frost hit applies its authored slow",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 808022,
+      "caster": "rm",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 805381,
+      "equals": 0,
+      "label": "The one-use sigil is consumed"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 502838,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 502838,
+      "target": "dummy",
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 807825,
+      "equals": 1,
+      "label": "The following direct spell cannot reuse the consumed sigil"
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "rm",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  }
+}

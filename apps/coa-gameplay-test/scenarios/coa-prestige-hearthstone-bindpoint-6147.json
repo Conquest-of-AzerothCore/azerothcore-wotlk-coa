@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "name": "Prestige tells the client the hearthstone was rebound to the starting location (COA-6147)",
+  "contract": [
+    "Prestige rebinds the hearthstone to the racial starting location with Player::SetHomebind, which only saved it:",
+    "SMSG_BINDPOINTUPDATE (0x155) was sent by the Bind spell effect alone, so the hearthstone tooltip kept the old home",
+    "until the next login. SetHomebind now sends the packet itself. A human bound in Stormwind (x -8816) who prestiges",
+    "is sent a bind point at Northshire (x -8949.95)."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8816.5,
+    "y": 627.0,
+    "z": 94.1,
+    "o": 3.8
+  },
+  "players": [
+    {
+      "id": "prestiger",
+      "race": 1,
+      "class": 20,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "chromie",
+      "owner": "prestiger",
+      "entry": 178081,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "prestiger",
+      "id": 25
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "prestiger",
+      "spell": 3286
+    },
+    {
+      "action": "cast",
+      "actor": "prestiger",
+      "spell": 3286,
+      "label": "Bind the hearthstone in Stormwind"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the bind is sent at Stormwind",
+      "actor": "prestiger",
+      "metric": "server_packet_float",
+      "opcode": 341,
+      "offset": 0,
+      "min": -8830,
+      "max": -8800,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "prestiger",
+      "metric": "server_packets",
+      "opcode": 341,
+      "save_as": "binds"
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "prestiger",
+      "target": "chromie"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "prestiger",
+      "option": 0,
+      "label": "I would like to prestige!"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: back to level 1",
+      "actor": "prestiger",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: prestige sends a new bind point",
+      "actor": "prestiger",
+      "metric": "server_packets",
+      "opcode": 341,
+      "relative_to": "binds",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The bind point sent is Northshire",
+      "actor": "prestiger",
+      "metric": "server_packet_float",
+      "opcode": 341,
+      "offset": 0,
+      "min": -8960,
+      "max": -8940
+    }
+  ]
+}

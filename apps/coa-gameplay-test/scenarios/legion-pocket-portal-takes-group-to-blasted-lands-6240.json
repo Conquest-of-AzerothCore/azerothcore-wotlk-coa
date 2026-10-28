@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Legion Pocket Portal: the opened portal takes group members, and only them, to the Blasted Lands (#6240)",
+  "contract": [
+    "Report #6240: using the Legion Pocket Portal (100576) does nothing.",
+    "Item 100576 casts Portal: Blasted Lands 966370, a 10 second cast whose portals last 30 seconds and whose two TRANS_DOOR effects place gameobjects 100576 and 100575; its description says it creates a portal teleporting group members who use it to the Dark Portal in Blasted Lands.",
+    "Neither object had a gameobject_template row, so nothing was placed.",
+    "The stock portals that do this job, 195141 and 195142, are party-only spellcasters that teleport to -11708.4, -3168, -5.07 on map 0 (their spells carry a level 58 condition); the client spell 966369 Portal Effect: Blasted Lands is the CoA counterpart, a TELEPORT_UNITS to TARGET_DEST_DB with no destination row.",
+    "After the item is used, both objects must stand in the world, a group member who uses one must arrive there, and a player outside the group must not."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "owner", "race": 1, "class": 1, "level": 20 },
+    { "id": "member", "race": 2, "class": 1, "level": 20 },
+    { "id": "outsider", "race": 8, "class": 1, "level": 20 }
+  ],
+  "location": { "map": 1, "x": 1629.36, "y": -4373.39, "z": 31.2, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "group", "label": "The owner invites the member into a group", "actor": "owner", "target": "member" },
+    { "action": "assert", "label": "Everyone starts on Kalimdor", "actor": "member", "metric": "map_id", "equals": 1 },
+    { "action": "add_item", "label": "The owner receives the Legion Pocket Portal", "actor": "owner", "item": 100576, "count": 1 },
+    { "action": "use_item", "label": "The owner opens the portal", "actor": "owner", "item": 100576, "spell": 966370 },
+    { "action": "wait", "label": "Let the 10 second cast finish and the portal appear", "ms": 11000 },
+    { "action": "assert", "label": "A portal object stands within reach", "actor": "member", "metric": "nearby_gameobject_count", "entry": 100575, "equals": 1 },
+    { "action": "assert", "label": "And its twin", "actor": "member", "metric": "nearby_gameobject_count", "entry": 100576, "equals": 1 },
+    { "action": "use_nearby_gameobject", "label": "A player outside the group tries the portal", "actor": "outsider", "entry": 100575 },
+    { "action": "wait", "label": "Give a wrongful teleport time to start", "ms": 5000 },
+    { "action": "assert", "label": "The outsider is refused and stays on Kalimdor", "actor": "outsider", "metric": "map_id", "equals": 1 },
+    { "action": "use_nearby_gameobject", "label": "The group member steps through", "actor": "member", "entry": 100575 },
+    { "action": "wait", "label": "Let the transfer finish", "ms": 5000 },
+    { "action": "assert", "label": "The member arrives in the Eastern Kingdoms", "actor": "member", "metric": "map_id", "equals": 0, "within_ms": 10000 },
+    { "action": "assert", "label": "At the Blasted Lands portal, x", "actor": "member", "metric": "position_x", "min": -11712, "max": -11704 },
+    { "action": "assert", "label": "At the Blasted Lands portal, y", "actor": "member", "metric": "position_y", "min": -3172, "max": -3164 },
+    { "action": "assert", "label": "The owner is still on Kalimdor", "actor": "owner", "metric": "map_id", "equals": 1 }
+  ]
+}

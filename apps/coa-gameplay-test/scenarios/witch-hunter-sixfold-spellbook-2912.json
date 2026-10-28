@@ -1,0 +1,673 @@
+{
+  "schema": 1,
+  "name": "Sixfold Shot replaces Quickdraw without learned-spell alerts or duplicate spellbook entries (#2912)",
+  "contract": [
+    "The level-50 passive 500567 says every fifth Darkslayer or Shadowblast transforms Quickdraw into Sixfold",
+    "Shot. This is a temporary replacement of one spellbook slot, not another learned ability: a superseded-spell",
+    "packet delivers the transformed spell, and no learned-spell alert should accompany it. Quickdraw remains",
+    "known on the server throughout, returns on consumption or expiry, and an eligible normal Quickdraw can",
+    "interrupt Sixfold Shot. This scenario earns five stacks with normal critical Shadowblasts, checks exactly",
+    "one client spellbook copy and no learned-spell alerts, then interrupts the earned Sixfold channel with a",
+    "normally proc-enabled Quickdraw. A second transformation is earned normally and left to expire, proving",
+    "restoration and the same single-slot/no-alert contract across repeated cycles. Shadowblast has DmgClass3",
+    "(ranged) and projectile speed40 in Spell.dbc, so ranged critical rating is fixture-maxed and its naturally",
+    "earned Quickdraw proc is observed after the projectile impact."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000,
+      "ranged_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "golem",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 60,
+      "distance": 12,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Crossbows skill",
+      "actor": "hunter",
+      "spell": 5011
+    },
+    {
+      "action": "add_item",
+      "actor": "hunter",
+      "item": 15807
+    },
+    {
+      "action": "equip",
+      "actor": "hunter",
+      "item": 15807,
+      "slot": 17
+    },
+    {
+      "action": "wait",
+      "label": "Let the weapon swap cooldown expire",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "label": "Shadowblast",
+      "actor": "hunter",
+      "spell": 680264
+    },
+    {
+      "action": "learn",
+      "label": "Quickdraw",
+      "actor": "hunter",
+      "spell": 804193
+    },
+    {
+      "action": "learn",
+      "label": "Sixfold Shot passive",
+      "actor": "hunter",
+      "spell": 500567
+    },
+    {
+      "action": "assert",
+      "label": "The passive is active",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 500567,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Sixfold Shot is not known before the stacks",
+      "actor": "hunter",
+      "metric": "knows_spell",
+      "spell": 807364,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "spellbook_learned_alerts",
+      "spell": 807364,
+      "save_as": "sixfold_alerts_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "spellbook_learned_alerts",
+      "spell": 804193,
+      "save_as": "quickdraw_alerts_before"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "client_spellbook_copies",
+      "spell": 804193,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Shadowblast 1",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "golem"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "aura_stacks",
+      "spell": 500569,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Shadowblast 2",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "golem"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "aura_stacks",
+      "spell": 500569,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Shadowblast 3",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "golem"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "aura_stacks",
+      "spell": 500569,
+      "equals": 3,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Shadowblast 4",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "golem"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "aura_stacks",
+      "spell": 500569,
+      "equals": 4,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "No Transform buff below five stacks",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 500604,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Shadowblast 5",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "golem"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "aura_stacks",
+      "spell": 500569,
+      "equals": 5,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "#1453: the fifth bolt applies the Transform buff that lights the button",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 500604,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Quickdraw is transformed into Sixfold Shot",
+      "actor": "hunter",
+      "metric": "temporary_spell_replacement",
+      "spell": 804193,
+      "equals": 807364
+    },
+    {
+      "action": "assert",
+      "label": "Quickdraw stays known while its button is transformed",
+      "actor": "hunter",
+      "metric": "knows_spell",
+      "spell": 804193,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "One transformed client spellbook slot",
+      "actor": "hunter",
+      "metric": "client_spellbook_copies",
+      "spell": 807364,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Transformation sends no learned-spell alert",
+      "actor": "hunter",
+      "metric": "spellbook_learned_alerts",
+      "spell": 807364,
+      "relative_to": "sixfold_alerts_before",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 680244,
+      "equals": 1,
+      "label": "The fifth ranged-critical Shadowblast grants normal Quickdraw readiness",
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 807527,
+      "target": "golem",
+      "save_as": "shots_before"
+    },
+    {
+      "action": "cast",
+      "label": "Sixfold Shot",
+      "actor": "hunter",
+      "spell": 807364,
+      "target": "golem"
+    },
+    {
+      "action": "assert",
+      "label": "The earned Sixfold channel starts",
+      "actor": "hunter",
+      "metric": "cast_remaining_ms",
+      "spell": 807364,
+      "min": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Sixfold Shot fires before interruption",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 807527,
+      "target": "golem",
+      "relative_to": "shots_before",
+      "min": 1,
+      "within_ms": 200
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 804193,
+      "target": "golem",
+      "save_as": "quickdraw_before"
+    },
+    {
+      "action": "cast",
+      "label": "Normally proc-enabled Quickdraw interrupts Sixfold Shot",
+      "actor": "hunter",
+      "spell": 804193,
+      "target": "golem"
+    },
+    {
+      "action": "assert",
+      "label": "Quickdraw ends the channel",
+      "actor": "hunter",
+      "metric": "cast_remaining_ms",
+      "spell": 807364,
+      "equals": 0,
+      "within_ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Quickdraw deals its ordinary damage",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 804193,
+      "target": "golem",
+      "relative_to": "quickdraw_before",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "#1453: the cast spends the five stacks",
+      "actor": "hunter",
+      "metric": "aura_stacks",
+      "spell": 500569,
+      "equals": 0,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "#1453: the cast spends the Transform buff",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 500604,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "#1453: Quickdraw is back on its button",
+      "actor": "hunter",
+      "metric": "temporary_spell_replacement",
+      "spell": 804193,
+      "equals": 804193
+    },
+    {
+      "action": "wait",
+      "label": "Let the channel and its global cooldown end",
+      "ms": 2500
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 807527,
+      "target": "golem",
+      "save_as": "shots_after_first"
+    },
+    {
+      "action": "cast",
+      "label": "Try a second Sixfold Shot without stacks",
+      "actor": "hunter",
+      "spell": 807364,
+      "target": "golem"
+    },
+    {
+      "action": "assert",
+      "label": "#1453: the second Sixfold Shot is refused",
+      "actor": "hunter",
+      "metric": "cast_failure",
+      "spell": 807364,
+      "equals": 22,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Wait through a whole channel",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "#1453: no second volley lands",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 807527,
+      "target": "golem",
+      "relative_to": "shots_after_first",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "client_spellbook_copies",
+      "spell": 804193,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Restoration sends no learned-spell alert",
+      "actor": "hunter",
+      "metric": "spellbook_learned_alerts",
+      "spell": 804193,
+      "relative_to": "quickdraw_alerts_before",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Allow the shared bolt global cooldown to settle"
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Earn a second transformation with Shadowblast 1",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "golem"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "aura_stacks",
+      "spell": 500569,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Earn a second transformation with Shadowblast 2",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "golem"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "aura_stacks",
+      "spell": 500569,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Earn a second transformation with Shadowblast 3",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "golem"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "aura_stacks",
+      "spell": 500569,
+      "equals": 3,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Earn a second transformation with Shadowblast 4",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "golem"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "aura_stacks",
+      "spell": 500569,
+      "equals": 4,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Earn a second transformation with Shadowblast 5",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "golem"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "aura_stacks",
+      "spell": 500569,
+      "equals": 5,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "client_spellbook_copies",
+      "spell": 807364,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spellbook_learned_alerts",
+      "spell": 807364,
+      "relative_to": "sixfold_alerts_before",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the unused earned transformation expire",
+      "ms": 16000
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "aura_stacks",
+      "spell": 500569,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 500604,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "temporary_spell_replacement",
+      "spell": 804193,
+      "equals": 804193
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "client_spellbook_copies",
+      "spell": 804193,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "client_knows_spell",
+      "spell": 807364,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "knows_spell",
+      "spell": 804193,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spellbook_learned_alerts",
+      "spell": 804193,
+      "relative_to": "quickdraw_alerts_before",
+      "equals": 0
+    }
+  ]
+}

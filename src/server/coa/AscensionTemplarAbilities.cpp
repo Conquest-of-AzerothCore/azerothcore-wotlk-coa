@@ -41,6 +41,7 @@ bool Selected(SpellInfo const* info, uint32 aura)
 }
 constexpr uint32 SPELL_VISUAL_KIT_BENEDICTION_CAST = 4565;
 constexpr uint32 SPELL_VISUAL_KIT_BENEDICTION_IMPACT = 4566;
+constexpr uint32 SPELL_RECENTLY_PARRIED_OR_DODGED = 681170;
 constexpr uint32 selected[] = {806354, 807004, 561156, 681136, 712378, 524766, 806523, 524617};
 void ConsumeSelected(Player* player, Spell* spell)
 {
@@ -127,6 +128,8 @@ class templar_casts : public AllSpellScript
         Player* player = Owner(caster);
         if (!player || info->SpellFamilyName != 25)
             return;
+        if (info->Id == 801450 && player->HasAura(704576))
+            Cast(player, player, 807764);
         if (info->Id == 801832)
         {
             ConsumeSelected(player, spell);
@@ -213,6 +216,7 @@ class templar_casts : public AllSpellScript
         }
         if (Named(info, 705293))
         {
+            player->RemoveAurasDueToSpell(SPELL_RECENTLY_PARRIED_OR_DODGED);
             talent(705295, 706583);
             talent(712677, 712679);
         }
@@ -253,12 +257,16 @@ class templar_casts : public AllSpellScript
             Copy(player, player, 807414, damage);
         if (Named(info, 804929) && spell->GetScriptValue(801832))
             Cast(player, target, 801832);
+        if (info->Id == 801832)
+        {
+            if (hit && player->HasAura(705255) && player->IsValidAttackTarget(target))
+                player->AddAura(803372, target);
+            return;
+        }
         if (!hit || !damage || !player->IsValidAttackTarget(target))
             return;
         if (info->Id == 801450)
         {
-            if (player->HasAura(704576))
-                Cast(player, player, 807764);
             if (player->HasAura(504107) && !player->HasAura(563269))
                 Cast(player, player, 563270);
             if (player->HasAura(504561))
@@ -267,12 +275,6 @@ class templar_casts : public AllSpellScript
                 Cast(player, target, 523713);
             if (Chance(player, 504808))
                 Copy(player, player, 505206, 1);
-            return;
-        }
-        if (info->Id == 801832)
-        {
-            if (player->HasAura(705255))
-                player->AddAura(803372, player);
             return;
         }
         if (info->Id == 707111 && player->HasAura(573452) && !spell->GetScriptValue(806106))

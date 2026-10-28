@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Wildcard Flame Throwing adds range to damaging spells generally, not just one family (#6955)",
+  "contract": "Flame Throwing rank 1 (11100) is SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[1]=5 (SPELLMOD_RANGE), EffectBasePoints[1]=1 (real +2 yards), on a zero SpellFamilyFlags mask with no SpellAffect.dbc row for 11100/12353, so SpellInfo::IsAffectedBySpellMod's generic lookups matched nothing before this fix and the range bonus never reached any spell. The tooltip promises every damaging spell the owner casts, not one family, so SpellInfo.cpp now special-cases these two spellIds under mod->op == SPELLMOD_RANGE, matching any spell whose DmgClass != SPELL_DAMAGE_CLASS_NONE. Frostbolt (116, Mage, damaging) proves the generic match across an unrelated family; a Priest heal (2050, DmgClass none) proves the fix stays scoped to damaging spells, as the tooltip and SPELLMOD_RANGE op require.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "caster", "name": "Flamethrow", "race": 1, "class": 10, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks and level scaling settle", "ms": 5000 },
+    { "action": "console", "command": "coa gamemode WildCard on Flamethrow" },
+    {
+      "action": "snapshot", "label": "Frostbolt max range before the talent",
+      "actor": "caster", "metric": "spell_max_range", "spell": 116, "save_as": "frostbolt_before"
+    },
+    {
+      "action": "snapshot", "label": "Greater Heal max range before the talent",
+      "actor": "caster", "metric": "spell_max_range", "spell": 2050, "save_as": "heal_before"
+    },
+    { "action": "learn", "actor": "caster", "spell": 11100 },
+    {
+      "action": "assert", "label": "Flame Throwing rank 1 is present",
+      "actor": "caster", "metric": "aura", "spell": 11100, "caster": "caster", "equals": 1
+    },
+    {
+      "action": "assert", "label": "Frostbolt's range (a damaging spell outside the talent's own family) rises by 2 yards",
+      "actor": "caster", "metric": "spell_max_range", "spell": 116, "relative_to": "frostbolt_before", "equals": 2
+    },
+    {
+      "action": "assert", "label": "Greater Heal's range (not a damaging spell) is unaffected",
+      "actor": "caster", "metric": "spell_max_range", "spell": 2050, "relative_to": "heal_before", "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,284 @@
+{
+  "schema": 1,
+  "name": "Path to Ascension: a vanilla realm offers the vanilla tutorial variants and hides the Wrath ones",
+  "contract": "PathToAscension.Expansion defaults to 0 (Vanilla). The client shows a Tutorial.dbc row whose expansion (field 33) is 3 or equals the expansion it derives from MaxPlayerLevel; the test config's MaxPlayerLevel 80 makes that Wrath (2). At login the server therefore patches (SMSG_TUTORIAL_PATCH 0x6A5) the vanilla rows PvP Power 9 and Normal: Molten Core 122 to expansion 3, and the Wrath rows PvP Power 259 and Heroic Dungeons 261 to expansion 0 so the client hides them. Normal: Naxxramas 127 is not made visible because Naxxramas is still a level 80 Wrath raid here, and the Burning Crusade row Normal: Karazhan 149 already stays hidden. 270 equipped PvP Power (eight soulbound level 60 PvP pieces) verifies tutorials 9 and 259, which share quest 580140. A claim of 259 is refused as unavailable and records nothing; a claim of 9 is answered CLAIM_TUTORIAL_OK and recorded.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "pvper",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8833.38,
+    "y": 628.628,
+    "z": 94.0066,
+    "o": 1.06535
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and the tutorial patches settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Vanilla PvP Power (9) is patched to any expansion for the Wrath client",
+      "actor": "pvper",
+      "metric": "server_packet_u32",
+      "opcode": 1701,
+      "row": 9,
+      "index": 33,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Vanilla Normal: Molten Core (122) is patched to any expansion",
+      "actor": "pvper",
+      "metric": "server_packet_u32",
+      "opcode": 1701,
+      "row": 122,
+      "index": 33,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Wrath PvP Power (259) is patched away from the client's expansion",
+      "actor": "pvper",
+      "metric": "server_packet_u32",
+      "opcode": 1701,
+      "row": 259,
+      "index": 33,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Wrath Heroic Dungeons (261) is patched away from the client's expansion",
+      "actor": "pvper",
+      "metric": "server_packet_u32",
+      "opcode": 1701,
+      "row": 261,
+      "index": 33,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Vanilla Normal: Naxxramas (127) is not made visible while Naxxramas is a Wrath raid",
+      "actor": "pvper",
+      "metric": "server_packets",
+      "opcode": 1701,
+      "row": 127,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Burning Crusade Normal: Karazhan (149) stays hidden without a patch",
+      "actor": "pvper",
+      "metric": "server_packets",
+      "opcode": 1701,
+      "row": 149,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mythic+ Dungeons (17) stays hidden while the server has no Mythic+",
+      "actor": "pvper",
+      "metric": "server_packets",
+      "opcode": 1701,
+      "row": 17,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "label": "Fixture: Plate Mail proficiency",
+      "actor": "pvper",
+      "spell": 750
+    },
+    {
+      "action": "add_item",
+      "label": "Fixture: Grand Marshal's Plate Headpiece, PvP Power +42",
+      "actor": "pvper",
+      "item": 860438
+    },
+    {
+      "action": "equip",
+      "label": "Equip Grand Marshal's Plate Headpiece",
+      "actor": "pvper",
+      "item": 860438,
+      "slot": 0
+    },
+    {
+      "action": "add_item",
+      "label": "Fixture: Combatant's Amulet of Dominance, +18",
+      "actor": "pvper",
+      "item": 946054
+    },
+    {
+      "action": "equip",
+      "label": "Equip Combatant's Amulet of Dominance",
+      "actor": "pvper",
+      "item": 946054,
+      "slot": 1
+    },
+    {
+      "action": "add_item",
+      "label": "Fixture: Lieutenant's Plate Shoulders, +36",
+      "actor": "pvper",
+      "item": 860454
+    },
+    {
+      "action": "equip",
+      "label": "Equip Lieutenant's Plate Shoulders",
+      "actor": "pvper",
+      "item": 860454,
+      "slot": 2
+    },
+    {
+      "action": "add_item",
+      "label": "Fixture: Captain's Plate Hauberk, +42",
+      "actor": "pvper",
+      "item": 862274
+    },
+    {
+      "action": "equip",
+      "label": "Equip Captain's Plate Hauberk",
+      "actor": "pvper",
+      "item": 862274,
+      "slot": 4
+    },
+    {
+      "action": "add_item",
+      "label": "Fixture: Combatant's Plate Waistband, +36",
+      "actor": "pvper",
+      "item": 565844
+    },
+    {
+      "action": "equip",
+      "label": "Equip Combatant's Plate Waistband",
+      "actor": "pvper",
+      "item": 565844,
+      "slot": 5
+    },
+    {
+      "action": "add_item",
+      "label": "Fixture: Captain's Plate Leggings, +42",
+      "actor": "pvper",
+      "item": 862276
+    },
+    {
+      "action": "equip",
+      "label": "Equip Captain's Plate Leggings",
+      "actor": "pvper",
+      "item": 862276,
+      "slot": 6
+    },
+    {
+      "action": "add_item",
+      "label": "Fixture: Combatant's Plate Bracers, +18",
+      "actor": "pvper",
+      "item": 564823
+    },
+    {
+      "action": "equip",
+      "label": "Equip Combatant's Plate Bracers",
+      "actor": "pvper",
+      "item": 564823,
+      "slot": 8
+    },
+    {
+      "action": "add_item",
+      "label": "Fixture: Captain's Plate Gauntlets, +36",
+      "actor": "pvper",
+      "item": 862270
+    },
+    {
+      "action": "equip",
+      "label": "Equip Captain's Plate Gauntlets",
+      "actor": "pvper",
+      "item": 862270,
+      "slot": 9
+    },
+    {
+      "action": "assert",
+      "label": "270 equipped PvP Power verifies vanilla PvP Power",
+      "actor": "pvper",
+      "metric": "player_setting",
+      "source": "core.ascension.tutorial_verified",
+      "index": 9,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "and its Wrath variant, which shares the quest",
+      "actor": "pvper",
+      "metric": "player_setting",
+      "source": "core.ascension.tutorial_verified",
+      "index": 259,
+      "equals": 1
+    },
+    {
+      "action": "client_packet",
+      "label": "Claim the Wrath variant",
+      "actor": "pvper",
+      "opcode": 1704,
+      "fields": [
+        {
+          "u32": 259
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Wrath variant is not offered on a vanilla realm",
+      "actor": "pvper",
+      "metric": "server_packet_contains",
+      "opcode": 1711,
+      "text": "not available for your character",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and records no claim",
+      "actor": "pvper",
+      "metric": "player_setting",
+      "source": "core.ascension.tutorial_rewards",
+      "index": 259,
+      "equals": 0
+    },
+    {
+      "action": "client_packet",
+      "label": "Claim the vanilla variant",
+      "actor": "pvper",
+      "opcode": 1704,
+      "fields": [
+        {
+          "u32": 9
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the vanilla variant pays its reward",
+      "actor": "pvper",
+      "metric": "server_packet_contains",
+      "opcode": 1711,
+      "text": "CLAIM_TUTORIAL_OK",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and records the claim",
+      "actor": "pvper",
+      "metric": "player_setting",
+      "source": "core.ascension.tutorial_rewards",
+      "index": 9,
+      "equals": 1
+    }
+  ]
+}

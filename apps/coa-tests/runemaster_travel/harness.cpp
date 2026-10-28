@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <chrono>
@@ -178,6 +179,7 @@ struct Player : Unit
     Position teleportDestination, damageDestination, collisionDestination{30, 0, 0, 0};
     std::map<uint32, int> spells;
     std::map<uint32, uint32> m_temporarySpellReplacements;
+    std::map<uint32, uint32> m_temporarySpellReplacementOrigins;
     std::vector<std::unique_ptr<TempSummon>> creatures;
     Session session;
     Player* ToPlayer() override { return this; }
@@ -202,6 +204,7 @@ struct Player : Unit
     void SetTemporarySpellReplacement(uint32 original, uint32 replacement);
     uint32 GetTemporarySpellReplacement(uint32 original) const;
     Session* GetSession() { return &session; }
+    void SendLearnPacket(uint32, bool, bool = false) { }
     void ApplySpellMod(uint32, uint32 op, int32&) { assert(op == SPELLMOD_DURATION); }
     TempSummon* SummonCreature(uint32 entry, Position const& pos, TempSummonType type, uint32 duration = 0);
     Position GetFirstCollisionPosition(float distance, float angle)
@@ -224,6 +227,12 @@ struct Player : Unit
         damageDestination = {x, y, z, 0};
     }
 };
+struct ScriptMgr
+{
+    void OnPlayerTemporarySpellRemoveNotice(Player*, uint32, bool) { }
+    void OnPlayerTemporarySpellReplacementNotice(Player*, uint32, uint32, bool) { }
+} scripts;
+auto sScriptMgr = &scripts;
 // NATIVE_REPLACEMENTS
 struct SpellMgr
 {
@@ -377,10 +386,9 @@ int main()
     dagger->position = {17, 0, 0, 1};
     recall.info.Id = 500587;
     player.los = false;
-    assert(recall.CheckReturn() != SPELL_CAST_OK);
+    assert(recall.CheckReturn() == SPELL_CAST_OK);
     lifecycle.OnPlayerUpdate(&player, 1);
     assert(FindMarker(&player, 500287) == dagger);
-    player.los = true;
     assert(recall.CheckReturn() == SPELL_CAST_OK);
     recall.Warp(0);
     assert(player.teleportDestination == Position(17, 0, 0, 1));

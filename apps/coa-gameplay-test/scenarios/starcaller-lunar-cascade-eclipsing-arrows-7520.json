@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "name": "Lunar Cascade marks allies critically healed by Moonflow, even at full health (#7520)",
+  "contract": "#7520: Lunar Cascade 704725 reads 'Critical strikes with Moonflow and Prayer of Elune now apply Eclipsing Arrows to the target'. AscensionStarcallerAbilities OnSpellHitResult casts Eclipsing Arrows 574154 on the healed target when Moonflow (575030 chain) or Prayer of Elune (801987 chain) crits and the caster holds 704725. The talent does not require the heal to restore health, so a critical Moonflow on an ally at full health must mark that ally just like one on a wounded ally. Each caster is grouped with one ally (Moonflow heals the caster's party and raid) and carries enough spell critical strike rating to crit every heal; the critical heal count pins that the crit happened. The wounded leg is the control.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "star",
+      "race": 1,
+      "class": 26,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 100000
+    },
+    {
+      "id": "full",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "star2",
+      "race": 1,
+      "class": 26,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 100000
+    },
+    {
+      "id": "hurt",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI, level scaling and the login patch stream settle",
+      "ms": 7000
+    },
+    {
+      "action": "group",
+      "actor": "star",
+      "target": "full"
+    },
+    {
+      "action": "group",
+      "actor": "star2",
+      "target": "hurt"
+    },
+    {
+      "action": "learn",
+      "actor": "star",
+      "label": "Learn Lunar Cascade",
+      "spell": 704725
+    },
+    {
+      "action": "learn",
+      "actor": "star",
+      "label": "Learn Moonflow",
+      "spell": 575030
+    },
+    {
+      "action": "learn",
+      "actor": "star2",
+      "label": "Learn Lunar Cascade",
+      "spell": 704725
+    },
+    {
+      "action": "learn",
+      "actor": "star2",
+      "label": "Learn Moonflow",
+      "spell": 575030
+    },
+    {
+      "action": "assert",
+      "actor": "star",
+      "label": "SETUP: the talent aura is present",
+      "metric": "aura",
+      "spell": 704725,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "label": "Moonflow with the ally at full health",
+      "spell": 575030
+    },
+    {
+      "action": "assert",
+      "actor": "star",
+      "label": "SETUP: Moonflow cast accepted",
+      "metric": "cast_failure",
+      "spell": 575030,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "star",
+      "label": "SETUP: the heal on the full-health ally was a critical strike",
+      "metric": "spell_heal_count",
+      "spell": 575030,
+      "target": "full",
+      "critical": true,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "full",
+      "label": "DISCRIMINATING: the full-health ally carries the Eclipsing Arrows mark",
+      "metric": "aura",
+      "spell": 574154,
+      "caster": "star",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "hurt",
+      "label": "Wound the control ally so the heal restores health",
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "star2",
+      "label": "Moonflow with the ally wounded",
+      "spell": 575030
+    },
+    {
+      "action": "assert",
+      "actor": "star2",
+      "label": "SETUP: the heal on the wounded ally was a critical strike",
+      "metric": "spell_heal_count",
+      "spell": 575030,
+      "target": "hurt",
+      "critical": true,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "hurt",
+      "label": "CONTROL: the wounded ally carries the Eclipsing Arrows mark",
+      "metric": "aura",
+      "spell": 574154,
+      "caster": "star2",
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

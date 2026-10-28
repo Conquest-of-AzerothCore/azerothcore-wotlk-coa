@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "name": "Unbridled Flow boosts Shock and Brine only during Stormflow (#1195)",
+  "contract": [
+    "Current Unbridled Flow and Stormflow descriptions promise 15% Shock damage while channeling, with",
+    "Brine inheriting Shock modifiers. Normal Stormflow casting must enable a 1150 damage result from a",
+    "base of 1000 for both variants, leave Electrocute unchanged, permit a real Shock hit without",
+    "interrupting the channel, and remove the bonus when the channel ends. The opposing player receives",
+    "calculation probes; the hostile creature receives normal casts."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "s",
+      "race": 1,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "victim",
+      "race": 2,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "s",
+      "entry": 36,
+      "level": 80,
+      "distance": 10,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 572867
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 804020
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 578299
+    },
+    {
+      "action": "assert",
+      "label": "Shock has no bonus outside Stormflow",
+      "actor": "victim",
+      "metric": "script_spell_damage_taken",
+      "spell": 804020,
+      "target": "s",
+      "equals": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 572867,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "A normal Stormflow channel is running",
+      "actor": "s",
+      "metric": "cast_remaining_ms",
+      "spell": 572867,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Shock gains fifteen percent during Stormflow",
+      "actor": "victim",
+      "metric": "script_spell_damage_taken",
+      "spell": 804020,
+      "target": "s",
+      "equals": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Brine inherits the same Shock bonus",
+      "actor": "victim",
+      "metric": "script_spell_damage_taken",
+      "spell": 807105,
+      "target": "s",
+      "equals": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Electrocute gets no Shock bonus",
+      "actor": "victim",
+      "metric": "script_spell_damage_taken",
+      "spell": 501432,
+      "target": "s",
+      "equals": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Shock can land during Stormflow",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 804020,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Shock leaves Stormflow channeling",
+      "actor": "s",
+      "metric": "cast_remaining_ms",
+      "spell": 572867,
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "s",
+      "metric": "cast_remaining_ms",
+      "spell": 572867,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The bonus ends with the channel",
+      "actor": "victim",
+      "metric": "script_spell_damage_taken",
+      "spell": 804020,
+      "target": "s",
+      "equals": 1000
+    }
+  ]
+}

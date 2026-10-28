@@ -39,6 +39,7 @@
 #include "LFGMgr.h"
 #include "Language.h"
 #include "Log.h"
+#include "LocalLevelScaling.h"
 #include "LootItemStorage.h"
 #include "MailMgr.h"
 #include "MapMgr.h"
@@ -265,6 +266,21 @@ uint8 Player::FindEquipSlot(ItemTemplate const* proto, uint32 slot, bool swap) c
                     (GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND) &&
                      CanUseTwoHandWithShield(GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND)->GetTemplate(), proto)))
                     return slots[i];
+
+        // CoA dual two-handed builds (Burning Commander / Valkyr Grip) work the second slot through right-click
+        // while the main hand holds a gripped two-hander: a two-hander joins an offhand that does not hold one
+        // yet, and any other fitting weapon takes the offhand without disturbing the main hand.
+        if (swap && slots[1] == EQUIPMENT_SLOT_OFFHAND && (HasBurningCommander() || HasValkyrGrip()))
+            if (Item* mhWeapon = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
+                if (ItemTemplate const* mhWeaponProto = mhWeapon->GetTemplate())
+                    if (mhWeaponProto->InventoryType == INVTYPE_2HWEAPON && CanTitanGrip(mhWeaponProto))
+                        if (Item* offWeapon = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
+                            if ((proto->InventoryType == INVTYPE_2HWEAPON &&
+                                 offWeapon->GetTemplate()->InventoryType != INVTYPE_2HWEAPON) ||
+                                (proto->InventoryType == INVTYPE_WEAPON &&
+                                 proto->SubClass != ITEM_SUBCLASS_WEAPON_POLEARM &&
+                                 proto->SubClass != ITEM_SUBCLASS_WEAPON_FISHING_POLE))
+                                return EQUIPMENT_SLOT_OFFHAND;
 
         // if not found free and can swap return first appropriate from used
         for (uint8 i = 0; i < 4; ++i)
@@ -2338,7 +2354,7 @@ InventoryResult Player::CanUseItem(Item* pItem, bool not_loading) const
         //if (isStunned())
         //    return EQUIP_ERR_YOU_ARE_STUNNED;
 
-        ItemTemplate const* pProto = pItem->GetTemplate();
+        ItemTemplate const* pProto = LocalLevelScaling::InstanceTemplateFor(pItem, pItem->GetTemplate());
         if (pProto)
         {
             if (pItem->IsBindedNotWith(this))
@@ -2494,7 +2510,8 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
         if (proto->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD && !(
             IsClass(CLASS_PALADIN, CLASS_CONTEXT_EQUIP_SHIELDS)
             || IsClass(CLASS_WARRIOR, CLASS_CONTEXT_EQUIP_SHIELDS)
-            || IsClass(CLASS_SHAMAN, CLASS_CONTEXT_EQUIP_SHIELDS)))
+            || IsClass(CLASS_SHAMAN, CLASS_CONTEXT_EQUIP_SHIELDS)
+            || (IsAscensionClass(getClass()) && HasSkill(SKILL_SHIELD))))
         {
             return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
         }
@@ -2555,6 +2572,19 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
                 return EQUIP_ERR_CANT_DO_RIGHT_NOW;
             }
             subclassToCompare = ITEM_SUBCLASS_ARMOR_LEATHER;
+        }
+
+        // Ascension classes borrow stock-class formulas, not armor: their best armor skill is their main type.
+        if (IsAscensionClass(getClass()))
+        {
+            if (HasSkill(SKILL_PLATE_MAIL))
+                subclassToCompare = ITEM_SUBCLASS_ARMOR_PLATE;
+            else if (HasSkill(SKILL_MAIL))
+                subclassToCompare = ITEM_SUBCLASS_ARMOR_MAIL;
+            else if (HasSkill(SKILL_LEATHER))
+                subclassToCompare = ITEM_SUBCLASS_ARMOR_LEATHER;
+            else
+                subclassToCompare = ITEM_SUBCLASS_ARMOR_CLOTH;
         }
 
         if (proto->SubClass > subclassToCompare)
@@ -3125,6 +3155,8 @@ void Player::MoveItemToInventory(ItemPosCountVec const& dest, Item* pItem, bool 
 
         if (pLastItem->IsBOPTradable())
             AddTradeableItem(pLastItem);
+
+        LocalLevelScaling::NotifyItemArrival(this, pLastItem);
     }
 }
 
@@ -4144,7 +4176,9 @@ void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint
             case EQUIP_ERR_CANT_EQUIP_LEVEL_I:
             case EQUIP_ERR_PURCHASE_LEVEL_TOO_LOW:
             {
-                ItemTemplate const* proto = pItem ? pItem->GetTemplate() : sObjectMgr->GetItemTemplate(itemid);
+                ItemTemplate const* proto = pItem ?
+                    LocalLevelScaling::InstanceTemplateFor(pItem, pItem->GetTemplate()) :
+                    sObjectMgr->GetItemTemplate(itemid);
                 data << uint32(proto ? proto->RequiredLevel : 0);
                 break;
             }
@@ -5012,6 +5046,12 @@ void Player::SetHomebind(WorldLocation const& loc, uint32 areaId)
     stmt->SetData (4, m_homebindZ);
     stmt->SetData(5, GetGUID().GetRawValue());
     CharacterDatabase.Execute(stmt);
+
+    WorldPacket data(SMSG_BINDPOINTUPDATE, 4 + 4 + 4 + 4 + 4);
+    data << m_homebindX << m_homebindY << m_homebindZ;
+    data << uint32(m_homebindMapId);
+    data << uint32(m_homebindAreaId);
+    SendDirectMessage(&data);
 }
 
 bool Player::isBeingLoaded() const
@@ -5691,12 +5731,9 @@ bool Player::LoadFromDB(ObjectGuid playerGuid, CharacterDatabaseQueryHolder cons
     }
 
     // RaF stuff.
-    m_grantableLevels = fields[71].Get<uint8>();
+    SetGrantableLevels(fields[71].Get<uint8>());
     if (GetSession()->IsARecruiter() || (GetSession()->GetRecruiterId() != 0))
         SetDynamicFlag(UNIT_DYNFLAG_REFER_A_FRIEND);
-
-    if (m_grantableLevels > 0)
-        SetByteValue(PLAYER_FIELD_BYTES, 1, 0x01);
 
     _LoadDeclinedNames(holder.GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_DECLINED_NAMES));
 
@@ -5759,6 +5796,9 @@ bool Player::isAllowedToLoot(Creature const* creature)
 
     if (loot->loot_type == LOOT_SKINNING)
         return creature->GetLootRecipientGUID() == GetGUID();
+
+    if (creature->IsSharedQuestParticipant(this) && loot->hasItemFor(this))
+        return true;
 
     Group* thisGroup = GetGroup();
     if (!thisGroup)
@@ -7026,7 +7066,9 @@ bool Player::Satisfy(DungeonProgressionRequirements const* ar, uint32 target_map
                     {
                         ChatHandler(GetSession()).PSendSysMessage("{}", missingLeaderQuests[0]->note);
                     }
-                    else if (mapDiff->hasErrorMessage)
+                    // CoA's MapDifficulty.dbc gives every raid's difficulty 0 the text "This difficulty is not available.", so a
+                    // level shortfall goes on to the level message below rather than that text.
+                    else if (mapDiff->hasErrorMessage && !LevelMin)
                     {
                         // if (missingAchievement) covered by this case
                         SendTransferAborted(target_map, TRANSFER_ABORT_DIFFICULTY, target_difficulty);
@@ -7258,6 +7300,9 @@ void Player::SaveToDB(CharacterDatabaseTransaction trans, bool create, bool logo
     if (!create)
         sScriptMgr->OnPlayerSave(this);
 
+    if (!create)
+        GetSession()->UpdateRecruitAFriendRewards(true);
+
     _SaveCharacter(create, trans);
 
     if (m_mailsUpdated)                                     //save mails only when needed
@@ -7329,7 +7374,7 @@ void Player::_SaveActions(CharacterDatabaseTransaction trans)
     {
         uint32 action = itr->second.GetAction();
         if (itr->second.GetType() == ACTION_BUTTON_SPELL)
-            sScriptMgr->OnPlayerNormalizeActionButtonSpell(this, action, false);
+            action = GetSavedActionButtonSpell(action);
 
         switch (itr->second.uState)
         {
@@ -7891,6 +7936,20 @@ void Player::_SaveSpells(CharacterDatabaseTransaction trans)
 {
     CharacterDatabasePreparedStatement* stmt = nullptr;
 
+    constexpr uint32 SPELLS_PER_INSERT = 200;
+    std::string newSpellRows;
+    uint32 newSpellCount = 0;
+    auto flushNewSpells = [&]()
+    {
+        if (!newSpellCount)
+            return;
+        newSpellRows.pop_back();
+        trans->Append("INSERT INTO character_spell (guid, spell, specMask) VALUES " + newSpellRows +
+            " ON DUPLICATE KEY UPDATE specMask = VALUES(specMask)");
+        newSpellRows.clear();
+        newSpellCount = 0;
+    };
+
     for (PlayerSpellMap::iterator itr = m_spells.begin(); itr != m_spells.end();)
     {
         // xinef: skip temporary spells
@@ -7910,7 +7969,13 @@ void Player::_SaveSpells(CharacterDatabaseTransaction trans)
         }
 
         // xinef: insert statement for new / updated spell
-        if (itr->second->State == PLAYERSPELL_NEW || itr->second->State == PLAYERSPELL_CHANGED)
+        if (itr->second->State == PLAYERSPELL_NEW)
+        {
+            newSpellRows += Acore::StringFormat("({},{},{}),", GetGUID().GetRawValue(), uint32(itr->first), uint32(itr->second->specMask));
+            if (++newSpellCount >= SPELLS_PER_INSERT)
+                flushNewSpells();
+        }
+        else if (itr->second->State == PLAYERSPELL_CHANGED)
         {
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHAR_SPELL);
             stmt->SetData(0, GetGUID().GetRawValue());
@@ -7930,6 +7995,7 @@ void Player::_SaveSpells(CharacterDatabaseTransaction trans)
             ++itr;
         }
     }
+    flushNewSpells();
 }
 
 // save player stats -- only for external usage

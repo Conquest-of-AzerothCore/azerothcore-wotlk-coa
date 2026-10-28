@@ -24,6 +24,7 @@
 #include "GameTime.h"
 #include "Item.h"
 #include "Language.h"
+#include "LocalLevelScaling.h"
 #include "Log.h"
 #include "Mail.h"
 #include "MailMgr.h"
@@ -160,7 +161,10 @@ void WorldSession::HandleSendMail(WorldPacket& recvData)
         return;
     }
 
-    uint32 cost = items_count ? 30 * items_count : 30; // price hardcoded in client
+    Player* receive = ObjectAccessor::FindConnectedPlayer(receiverGuid);
+    uint32 const rc_account = receive ? receive->GetSession()->GetAccountId()
+        : sCharacterCache->GetCharacterAccountIdByGuid(receiverGuid);
+    uint32 const cost = GetAccountId() == rc_account ? 0 : (items_count ? 30 * items_count : 30);
 
     uint32 reqmoney = cost + money;
 
@@ -176,8 +180,6 @@ void WorldSession::HandleSendMail(WorldPacket& recvData)
         player->SendMailResult(0, MAIL_SEND, MAIL_ERR_NOT_ENOUGH_MONEY);
         return;
     }
-
-    Player* receive = ObjectAccessor::FindConnectedPlayer(receiverGuid);
 
     uint32 rc_teamId = TEAM_NEUTRAL;
     uint16 mails_count = 0;                                  //do not allow to send to one player more than 100 mails
@@ -219,9 +221,7 @@ void WorldSession::HandleSendMail(WorldPacket& recvData)
         }
     }*/
 
-    uint32 rc_account = receive ? receive->GetSession()->GetAccountId() : sCharacterCache->GetCharacterAccountIdByGuid(receiverGuid);
-
-    if (/*!accountBound*/ GetAccountId() != rc_account && player->GetTeamId() != rc_teamId && !HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_MAIL))
+    if (/*!accountBound*/ GetAccountId() != rc_account && !sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_MAIL) && player->GetTeamId() != rc_teamId && !HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_MAIL))
     {
         player->SendMailResult(0, MAIL_SEND, MAIL_ERR_NOT_YOUR_TEAM);
         return;
@@ -684,6 +684,8 @@ void WorldSession::HandleGetMailList(WorldPacket& recvData)
         return;
 
     Player* player = _player;
+
+    LocalLevelScaling::NotifyMailListed(player);
 
     uint8 mailsCount = 0;
     uint32 realCount = 0;

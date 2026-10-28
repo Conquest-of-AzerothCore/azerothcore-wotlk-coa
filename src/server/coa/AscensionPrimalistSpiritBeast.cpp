@@ -15,6 +15,7 @@ namespace
 {
 constexpr uint32 SPELL_HARNESS_ANIMAL_SPIRIT = 574301;
 constexpr uint32 SPELL_HARNESS_TAME_HELPER = 574304;
+constexpr uint32 SPELL_ANIMAL_SPIRIT_VISUAL = 574306;
 constexpr uint32 PRIMALIST_SPELL_FAMILY = 37;
 constexpr uint32 HARNESS_DURATION = 20000;
 constexpr uint32 HARNESS_OLD_PERIOD = 19000;
@@ -44,6 +45,15 @@ bool IsTameHelperLayout(SpellInfo const* info)
         info->Effects[EFFECT_0].TargetA.GetTarget() == TARGET_UNIT_CHANNEL_TARGET &&
         !info->Effects[EFFECT_0].TargetB.GetTarget() &&
         !info->Effects[EFFECT_1].Effect && !info->Effects[EFFECT_2].Effect;
+}
+
+bool IsAnimalSpiritVisualLayout(SpellInfo const* info)
+{
+    return info && info->Id == SPELL_ANIMAL_SPIRIT_VISUAL && info->SpellFamilyName == PRIMALIST_SPELL_FAMILY &&
+        info->IsPassive() && info->TargetCreatureType == 1 &&
+        info->Effects[EFFECT_0].Effect == SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS &&
+        info->Effects[EFFECT_1].Effect == SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS &&
+        !info->Effects[EFFECT_2].Effect;
 }
 
 bool HasHarnessContract()
@@ -155,6 +165,21 @@ class spell_ascension_primalist_harness_tame : public SpellScript
             EFFECT_0, SPELL_EFFECT_TAMECREATURE);
     }
 };
+
+class aura_ascension_primalist_animal_spirit_visual : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_primalist_animal_spirit_visual);
+
+    bool CheckTarget(Unit* target)
+    {
+        return target->GetCreatureType() == CREATURE_TYPE_BEAST;
+    }
+
+    void Register() override
+    {
+        DoCheckAreaTarget += AuraCheckAreaTargetFn(aura_ascension_primalist_animal_spirit_visual::CheckTarget);
+    }
+};
 }
 
 bool HasAscensionPrimalistHunterPetContext(Player const* player)
@@ -180,10 +205,13 @@ void ApplyAscensionPrimalistSpiritBeastContract(SpellInfo* spellInfo)
 {
     if (IsHarnessLayout(spellInfo))
         spellInfo->Effects[EFFECT_1].Amplitude = HARNESS_DURATION;
+    if (IsAnimalSpiritVisualLayout(spellInfo))
+        spellInfo->TargetCreatureType = 0;
 }
 
 void AddSC_AscensionPrimalistSpiritBeast()
 {
     RegisterSpellScript(spell_ascension_primalist_harness);
     RegisterSpellScript(spell_ascension_primalist_harness_tame);
+    RegisterSpellScript(aura_ascension_primalist_animal_spirit_visual);
 }

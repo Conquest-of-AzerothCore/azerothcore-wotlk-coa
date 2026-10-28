@@ -1,0 +1,326 @@
+{
+  "schema": 1,
+  "name": "necromancer-transfer-life-single-upkeep-and-no-combat-6427",
+  "contract": [
+    "Transfer Life channels healing to Raised minions for ten seconds. Its native health cost is five percent of",
+    "base health up front and 5 + player level each second, charged once for the channel regardless of minion",
+    "count. Two Raised minions must both be healed without multiplying the caster upkeep or putting an",
+    "out-of-combat caster in combat. A second channel is cancelled through native CMSG_CANCEL_CHANNELLING; every",
+    "minion aura and all further upkeep must stop immediately."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "n",
+      "race": 5,
+      "class": 23,
+      "level": 23,
+      "allow_regeneration": false
+    },
+    {
+      "id": "ally",
+      "race": 5,
+      "class": 8,
+      "level": 23,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and the Life Force aura settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "n",
+      "spell": 500970
+    },
+    {
+      "action": "learn",
+      "actor": "n",
+      "spell": 801530
+    },
+    {
+      "action": "group",
+      "label": "Put a second player in the caster's party",
+      "actor": "n",
+      "target": "ally"
+    },
+    {
+      "action": "cast",
+      "label": "Raise the first Lesser Skeletal Warrior",
+      "actor": "n",
+      "spell": 500970
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: one Lesser Skeletal Warrior is raised",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 50065,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "label": "Raise the second Lesser Skeletal Warrior",
+      "actor": "n",
+      "spell": 500970
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: two Lesser Skeletal Warriors are raised",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 50065,
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Let the minions take their formation places",
+      "ms": 1500
+    },
+    {
+      "action": "set_health",
+      "label": "Wound the party member so a heal would show",
+      "actor": "ally",
+      "value": 100
+    },
+    {
+      "action": "set_health",
+      "actor": "n",
+      "maximum": 5000,
+      "value": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "n",
+      "metric": "health",
+      "save_as": "channel_start"
+    },
+    {
+      "action": "snapshot",
+      "actor": "n",
+      "metric": "spell_power_cost",
+      "save_as": "channel_cost",
+      "spell": 801530
+    },
+    {
+      "action": "cast",
+      "label": "Channel Transfer Life",
+      "actor": "n",
+      "spell": 801530
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "health",
+      "relative_to": "channel_start",
+      "ratio_to": "channel_cost",
+      "equals": -1
+    },
+    {
+      "action": "snapshot",
+      "actor": "n",
+      "metric": "health",
+      "save_as": "upkeep_start"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Transfer Life channel starts",
+      "actor": "n",
+      "metric": "cast_remaining_ms",
+      "spell": 801530,
+      "min": 9000,
+      "within_ms": 500
+    },
+    {
+      "action": "wait",
+      "label": "Let three 1 s ticks pass",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "The channel is still running 3.5 s into its 10 s duration",
+      "actor": "n",
+      "metric": "cast_remaining_ms",
+      "spell": 801530,
+      "min": 5000,
+      "max": 7000
+    },
+    {
+      "action": "assert",
+      "label": "Both Raised minions still carry the caster's Transfer Life aura",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 50065,
+      "spell": 801530,
+      "caster": "n",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Every tick heals the Raised minions (2 minions x 3 ticks)",
+      "actor": "n",
+      "metric": "spell_heal_count",
+      "spell": 801545,
+      "min": 4
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the party member is not a Transfer Life target",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 801530,
+      "caster": "n",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the party member is never healed by Transfer Life",
+      "actor": "n",
+      "metric": "spell_heal_count",
+      "spell": 801545,
+      "target": "ally",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "health",
+      "relative_to": "upkeep_start",
+      "equals": -84
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "health",
+      "relative_to": "upkeep_start",
+      "equals": -280
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "cast_remaining_ms",
+      "spell": 801530,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 50065,
+      "spell": 801530,
+      "caster": "n",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "n",
+      "metric": "health",
+      "save_as": "after_channel"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "health",
+      "relative_to": "after_channel",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "n",
+      "spell": 801530
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "cast_remaining_ms",
+      "spell": 801530,
+      "min": 9000,
+      "within_ms": 500
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "client_packet",
+      "actor": "n",
+      "opcode": 315,
+      "fields": [
+        {
+          "u32": 801530
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "cast_remaining_ms",
+      "spell": 801530,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 50065,
+      "spell": 801530,
+      "caster": "n",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "n",
+      "metric": "health",
+      "save_as": "after_cancel"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "health",
+      "relative_to": "after_cancel",
+      "equals": 0
+    }
+  ]
+}

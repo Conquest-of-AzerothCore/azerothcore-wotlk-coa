@@ -1,0 +1,146 @@
+{
+  "schema": 1,
+  "name": "Groot Coin exchange spends nothing when the coins are gone before OK (needs GrootCoin.ExchangeEnable = 1)",
+  "contract": "The submenu is built for 5 carried coins. If the coins leave the bags before the player accepts the pop-up (here: destroyed), accepting 'Exchange 5' or 'Exchange all 5' is refused on the server: no coin is taken, no token is given, and after a relog the character still holds no tokens. A later exchange with fresh coins works normally.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8816.5,
+    "y": 627.0,
+    "z": 94.1,
+    "o": 3.8
+  },
+  "players": [
+    {
+      "id": "player",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "tiraxis",
+      "owner": "player",
+      "entry": 900007,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "player",
+      "item": 910001,
+      "count": 5
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "player",
+      "target": "tiraxis"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "player",
+      "option": 5
+    },
+    {
+      "action": "assert",
+      "label": "1, 5, all, Back",
+      "actor": "player",
+      "metric": "gossip_options",
+      "equals": 4
+    },
+    {
+      "action": "destroy_item",
+      "actor": "player",
+      "item": 910001,
+      "label": "Coins leave the bags while the menu is open"
+    },
+    {
+      "action": "assert",
+      "label": "Coins gone",
+      "actor": "player",
+      "metric": "item_count",
+      "equals": 0,
+      "item": 910001
+    },
+    {
+      "action": "gossip_select",
+      "actor": "player",
+      "option": 1,
+      "label": "Accept 'Exchange 5'"
+    },
+    {
+      "action": "assert",
+      "label": "No tokens for missing coins",
+      "actor": "player",
+      "metric": "item_count",
+      "equals": 0,
+      "item": 975001
+    },
+    {
+      "action": "relog",
+      "actor": "player"
+    },
+    {
+      "action": "assert",
+      "label": "Still no tokens after relog",
+      "actor": "player",
+      "metric": "item_count",
+      "equals": 0,
+      "item": 975001
+    },
+    {
+      "action": "assert",
+      "label": "No coins reappeared",
+      "actor": "player",
+      "metric": "item_count",
+      "equals": 0,
+      "item": 910001
+    },
+    {
+      "action": "add_item",
+      "actor": "player",
+      "item": 910001,
+      "count": 1
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "player",
+      "target": "tiraxis"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "player",
+      "option": 5
+    },
+    {
+      "action": "gossip_select",
+      "actor": "player",
+      "option": 0,
+      "label": "Exchange 1"
+    },
+    {
+      "action": "assert",
+      "label": "The fresh coin spent",
+      "actor": "player",
+      "metric": "item_count",
+      "equals": 0,
+      "item": 910001
+    },
+    {
+      "action": "assert",
+      "label": "Exactly 100 tokens",
+      "actor": "player",
+      "metric": "item_count",
+      "equals": 100,
+      "item": 975001
+    }
+  ]
+}

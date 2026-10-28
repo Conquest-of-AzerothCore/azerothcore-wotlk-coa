@@ -1,7 +1,12 @@
 {
   "schema": 1,
   "name": "Annihilan Strike generates 2 Felfury on hit (#4665)",
-  "contract": "Annihilan Strike's DBC description (560762 and every other rank in the 801903 chain, confirmed via coa-dbc-viewer) reads 'Generates 2 Felfury / Unleash a devastating attack, dealing X% Weapon Damage to your target with both weapons.' No mention of a kill condition anywhere in the tooltip. The ability's own effects are two SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE triggers (801913 main hand, 801914 off hand), both plain SPELL_EFFECT_WEAPON_PERCENT_DAMAGE with no third/energize/Felfury effect on any of the 7 ranks, and no CoA script cast anything toward Felfury (800058) for this ability before this fix - an exhaustive grep of AscensionFelsworn*.cpp found zero hits for a baseline Annihilan Strike Felfury grant (the only Felfury-adjacent code touching it, the Twin Fury crit bonus, is itself the separate #4720 bug and contributes nothing on its own). The fix grants 1 Felfury per landed weapon hit (felsworn_casts::OnSpellHitResult, gated on info->Id being 801913 or 801914, the same successful-hostile-hit gate every other hit-result branch in that function uses), matching the DBC's explicit '2' with the ability's own two-weapon design - unconditional on a crit or a kill, since neither is stated in the tooltip.",
+  "contract": [
+    "Annihilan Strike 801903 promises two Felfury on a landed two-weapon attack. The active DBC classifies the",
+    "parent and both weapon children as melee damage; melee hit and expertise ratings guarantee a successful",
+    "hostile hit. Spell hit rating alone leaves dodge, parry and melee misses uncontrolled. No Twin Fury talent",
+    "is learned, so critical strikes do not add talent resource grants. The native cast must generate two Felfury."
+  ],
   "timeout_ms": 90000,
   "players": [
     {
@@ -9,7 +14,9 @@
       "race": 1,
       "class": 14,
       "level": 80,
-      "spell_hit_rating": 10000
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 100000,
+      "expertise_rating": 100000
     }
   ],
   "creatures": [

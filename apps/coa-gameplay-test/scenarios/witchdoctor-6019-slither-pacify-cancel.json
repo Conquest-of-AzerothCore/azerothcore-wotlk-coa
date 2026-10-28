@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Slither stops attacks and casts, and can be cancelled (#6019)",
+  "contract": "Slither 500947's tooltip: 'Transform into a serpent ... You cannot attack or cast spells'. Its effects are SPELL_AURA_MOD_INCREASE_SPEED (31), SPELL_AURA_TRANSFORM (56, creature 2914) and SPELL_AURA_MOD_PACIFY_SILENCE (60), which sets UNIT_FLAG_PACIFIED and UNIT_FLAG_SILENCED. #4092 and its reopening #6019 report the opposite in game: attacks and casts go through, and the buff cannot be cancelled. Cause: SpellMgr::LoadSpellInfoCustomAttributes marks effect 2 negative (SpellInfo::_IsPositiveEffect returns false for aura 60), and only afterwards the OnLoadSpellCustomAttr hook in AscensionWitchDoctorCompletion removed that effect. The aura lost its pacify and silence but kept SPELL_ATTR0_CU_NEGATIVE_EFF2, so SpellInfo::IsPositive is false and WorldSession::HandleCancelAuraOpcode refuses CMSG_CANCEL_AURA. Shadow Bolt 686 (PreventionType silence) is the probe cast: accepted before Slither, refused with SPELL_FAILED_SILENCED (104) during it. Melee is probed with melee_attack_count, which counts swings including misses, so a zero count during Slither means no swing was attempted; the same attack after the cancel must swing again, which shows the pacify, not range or facing, stopped it. The probe cast waits out the 1.5 s global cooldown Slither starts, and every Slither check finishes inside its 5 s duration.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "wd", "race": 8, "class": 13, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "wd", "entry": 299, "level": 60, "health": 1000000, "distance": 2 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "wd", "spell": 500947 },
+    { "action": "learn", "actor": "wd", "spell": 686 },
+    { "action": "cast", "label": "Control: Shadow Bolt before Slither", "actor": "wd", "spell": 686, "target": "enemy" },
+    {
+      "action": "assert",
+      "label": "Control: Shadow Bolt is accepted without Slither",
+      "actor": "wd",
+      "metric": "cast_failure",
+      "spell": 686,
+      "equals": 0
+    },
+    { "action": "wait", "label": "Let the Shadow Bolt cast finish", "ms": 2500 },
+    { "action": "cast", "actor": "wd", "spell": 500947, "target": "wd" },
+    {
+      "action": "assert",
+      "label": "Slither is up",
+      "actor": "wd",
+      "metric": "aura",
+      "spell": 500947,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    { "action": "wait", "label": "Wait out the global cooldown Slither started", "ms": 1600 },
+    { "action": "cast", "label": "Shadow Bolt during Slither", "actor": "wd", "spell": 686, "target": "enemy" },
+    {
+      "action": "assert",
+      "label": "Slither refuses spells: SPELL_FAILED_SILENCED",
+      "actor": "wd",
+      "metric": "cast_failure",
+      "spell": 686,
+      "equals": 104
+    },
+    { "action": "snapshot", "actor": "wd", "metric": "melee_attack_count", "save_as": "swings_during" },
+    { "action": "attack", "actor": "wd", "target": "enemy" },
+    { "action": "wait", "label": "A level-60 swing timer fires within 2 s", "ms": 2000 },
+    {
+      "action": "assert",
+      "label": "Slither refuses attacks: no melee swing",
+      "actor": "wd",
+      "metric": "melee_attack_count",
+      "relative_to": "swings_during",
+      "equals": 0
+    },
+    { "action": "cancel_aura", "actor": "wd", "spell": 500947 },
+    {
+      "action": "assert",
+      "label": "Slither can be cancelled",
+      "actor": "wd",
+      "metric": "aura",
+      "spell": 500947,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    { "action": "snapshot", "actor": "wd", "metric": "melee_attack_count", "save_as": "swings_after" },
+    { "action": "attack", "actor": "wd", "target": "enemy" },
+    { "action": "wait", "label": "Let the swing timer run again", "ms": 4000 },
+    {
+      "action": "assert",
+      "label": "Control: after the cancel the same attack swings",
+      "actor": "wd",
+      "metric": "melee_attack_count",
+      "relative_to": "swings_after",
+      "min": 1
+    }
+  ]
+}

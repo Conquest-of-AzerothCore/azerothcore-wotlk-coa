@@ -1,7 +1,15 @@
 {
   "schema": 1,
   "name": "Witch Doctor: Spirit Volley",
-  "contract": "Spirit Volley consumes its proc buff and a cast in progress completes even if the buff runs out.",
+  "contract": [
+    "Spirit Volley 504582 is a ranged-class Shadow attack in original Spell.dbc (DmgClass 3, SchoolMask 32).",
+    "Its raw 1800 ms cast-time entry 23 gains the normal 500 ms ranged preparation before haste. The fixture",
+    "supplies and observes ranged hit rating because spell-hit rating does not remove its native ranged miss",
+    "roll. Removing ready buff 505158 after 100 ms must leave the actual Volley cast in progress; it then",
+    "dispatches without a cast failure and damages the enemy. A second ordinary cast consumes its ready buff",
+    "and also deals damage. Reclamation 572345 stays known. Preserve the original six-second damage deadline",
+    "and ordinary cast/buff handling."
+  ],
   "timeout_ms": 90000,
   "players": [
     {
@@ -9,7 +17,8 @@
       "race": 1,
       "class": 13,
       "level": 60,
-      "spell_hit_rating": 10000
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
     }
   ],
   "creatures": [
@@ -57,6 +66,14 @@
       "within_ms": 2000
     },
     {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "combat_rating",
+      "rating": 6,
+      "equals": 10000,
+      "label": "Actual ranged hit rating is present"
+    },
+    {
       "action": "snapshot",
       "actor": "enemy0",
       "metric": "health",
@@ -67,6 +84,14 @@
       "actor": "caster",
       "spell": 504582,
       "target": "enemy0"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_remaining_ms",
+      "spell": 504582,
+      "min": 1,
+      "label": "The ordinary Volley cast has started"
     },
     {
       "action": "wait",
@@ -80,12 +105,44 @@
     },
     {
       "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 505158,
+      "equals": 0,
+      "label": "The ready buff was removed during the cast"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_remaining_ms",
+      "spell": 504582,
+      "min": 1,
+      "label": "Volley is still in progress after buff removal"
+    },
+    {
+      "action": "assert",
       "actor": "enemy0",
       "metric": "health",
       "relative_to": "hp0",
       "max": -1,
       "within_ms": 6000,
       "label": "Volley completes after the buff ran out"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_go_count",
+      "spell": 504582,
+      "equals": 1,
+      "label": "The original Volley actually dispatches after buff removal"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 504582,
+      "equals": 0,
+      "label": "The cast completes without a failed cast result"
     },
     {
       "action": "wait",
@@ -96,6 +153,12 @@
       "actor": "caster",
       "spell": 505158,
       "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy0",
+      "metric": "health",
+      "save_as": "hp_second"
     },
     {
       "action": "cast",
@@ -111,6 +174,32 @@
       "equals": 0,
       "within_ms": 4000,
       "label": "The cast consumes the buff"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_go_count",
+      "spell": 504582,
+      "equals": 2,
+      "within_ms": 6000,
+      "label": "The buff-consuming second Volley also dispatches"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy0",
+      "metric": "health",
+      "relative_to": "hp_second",
+      "max": -1,
+      "within_ms": 6000,
+      "label": "The buff-consuming second Volley also deals damage"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 504582,
+      "equals": 0,
+      "label": "The second cast completes without a failed cast result"
     },
     {
       "action": "assert",

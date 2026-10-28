@@ -1,0 +1,177 @@
+{
+  "schema": 1,
+  "name": "A Wildcard Hero only turns victorious when it knows Victory Rush",
+  "contract": [
+    "Every Hero learns Victorious State (32215) with its Defense skill (SkillLineAbility 9577, class mask",
+    "512). Its Victorious buff (32216) only enables Victory Rush (34428, 634428, 1134428), so a Hero that",
+    "kills without knowing any of them gains nothing, and once it knows Victory Rush a kill makes it",
+    "victorious. The explicit flat spawn faces the +X victims. Train sword skill to the level-20 cap and",
+    "equip the level-10 Cutlass (851, original 12.705-21.175 damage) so glancing blows against these level-20",
+    "enemies still deal damage; the original level-one Worn Shortsword and skill 1 could produce consecutive",
+    "zero-damage swings despite high hit and expertise."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "wild",
+      "race": 1,
+      "class": 10,
+      "level": 20,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "first",
+      "owner": "wild",
+      "entry": 36,
+      "level": 20,
+      "distance": 2
+    },
+    {
+      "id": "second",
+      "owner": "wild",
+      "entry": 36,
+      "level": 20,
+      "distance": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "assert",
+      "label": "The Hero has Victorious State",
+      "actor": "wild",
+      "metric": "aura",
+      "spell": 32215,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "wild",
+      "spell": 201,
+      "label": "Prepare the weapon proficiency required by the equipped test weapon"
+    },
+    {
+      "action": "set_skill",
+      "actor": "wild",
+      "skill": 43,
+      "value": 100,
+      "maximum": 100,
+      "label": "Prepare level-appropriate native sword skill"
+    },
+    {
+      "action": "assert",
+      "actor": "wild",
+      "metric": "skill_value",
+      "skill": 43,
+      "equals": 100
+    },
+    {
+      "action": "add_item",
+      "actor": "wild",
+      "item": 851
+    },
+    {
+      "action": "equip",
+      "actor": "wild",
+      "item": 851,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "actor": "wild",
+      "metric": "melee_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "wild",
+      "metric": "weapon_damage_min",
+      "min": 12
+    },
+    {
+      "action": "assert",
+      "actor": "wild",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "first",
+      "value": 1
+    },
+    {
+      "action": "attack",
+      "label": "Kill without Victory Rush",
+      "actor": "wild",
+      "target": "first"
+    },
+    {
+      "action": "assert",
+      "label": "The first enemy died",
+      "actor": "first",
+      "metric": "health",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "No Victorious without Victory Rush",
+      "actor": "wild",
+      "metric": "aura",
+      "spell": 32216,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "label": "A rolled Victory Rush",
+      "actor": "wild",
+      "spell": 34428
+    },
+    {
+      "action": "set_health",
+      "actor": "second",
+      "value": 1
+    },
+    {
+      "action": "attack",
+      "label": "Kill with Victory Rush",
+      "actor": "wild",
+      "target": "second"
+    },
+    {
+      "action": "assert",
+      "label": "The second enemy died",
+      "actor": "second",
+      "metric": "health",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Victorious with Victory Rush",
+      "actor": "wild",
+      "metric": "aura",
+      "spell": 32216,
+      "equals": 1,
+      "within_ms": 1000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  }
+}

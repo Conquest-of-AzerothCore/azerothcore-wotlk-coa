@@ -1,0 +1,225 @@
+{
+  "schema": 1,
+  "name": "Xoroth Shieldgore hides Infernal trainer ranks and preserves client replacement (#6719)",
+  "contract": "Shieldgore301302 replaces Infernal Strike in Defiance. Book offers no Infernal ranks; level/helper and inactive-parent updates retain Shieldgore in the client.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 17
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks and class synchronisation settle",
+      "ms": 5000
+    },
+    {
+      "action": "specialization",
+      "label": "Choose Defiance",
+      "actor": "knight",
+      "id": 17
+    },
+    {
+      "action": "learn",
+      "actor": "knight",
+      "spell": 801016
+    },
+    {
+      "action": "learn",
+      "label": "Pick the Shieldgore talent",
+      "actor": "knight",
+      "spell": 301302
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Shieldgore talent is active",
+      "actor": "knight",
+      "metric": "aura",
+      "spell": 301302,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Shieldgore Rank 1 is in the spellbook",
+      "actor": "knight",
+      "metric": "knows_spell",
+      "spell": 804353,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Infernal Strike shows as Shieldgore Rank 1",
+      "actor": "knight",
+      "metric": "temporary_spell_replacement",
+      "spell": 801016,
+      "equals": 804353
+    },
+    {
+      "action": "money",
+      "actor": "knight",
+      "copper": 1000000
+    },
+    {
+      "action": "learn",
+      "actor": "knight",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "knight"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spellbook_offers_spell",
+      "spell": 501511,
+      "equals": 0
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "knight",
+      "spell": 501511
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spellbook_buy_succeeded",
+      "spell": 501511,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "client_knows_spell",
+      "spell": 801016,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "client_knows_spell",
+      "spell": 804353,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "knight",
+      "spell": 501511,
+      "label": "Simulate an existing higher parent rank from a saved character"
+    },
+    {
+      "action": "set_level",
+      "actor": "knight",
+      "value": 18
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "temporary_spell_replacement",
+      "spell": 501511,
+      "equals": 806869
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "client_knows_spell",
+      "spell": 801016,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "client_knows_spell",
+      "spell": 501511,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "client_knows_spell",
+      "spell": 806869,
+      "equals": 1
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "knight"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spellbook_offers_spell",
+      "spell": 501512,
+      "equals": 0
+    },
+    {
+      "action": "specialization",
+      "actor": "knight",
+      "id": 16,
+      "label": "Change away from Defiance to restore Infernal training"
+    },
+    {
+      "action": "unlearn",
+      "actor": "knight",
+      "spell": 301302
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "temporary_spell_replacement",
+      "spell": 501511,
+      "equals": 501511
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "client_knows_spell",
+      "spell": 501511,
+      "equals": 1
+    },
+    {
+      "action": "set_level",
+      "actor": "knight",
+      "value": 24
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "knight"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spellbook_offers_spell",
+      "spell": 501512,
+      "equals": 1
+    }
+  ]
+}

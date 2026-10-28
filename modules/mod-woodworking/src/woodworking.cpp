@@ -394,7 +394,7 @@ public:
 private:
     static void GiveLumberAxe(Player* player)
     {
-        if (player->HasItemCount(ITEM_LUMBER_AXE, 1, true))
+        if (!player->IsInWorld() || player->HasItemCount(ITEM_LUMBER_AXE, 1, true))
             return;
 
         player->AddItem(ITEM_LUMBER_AXE, 1);

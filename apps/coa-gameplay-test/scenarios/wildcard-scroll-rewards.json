@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "name": "Silas Darkmoon hands a Wildcard Hero its leveling Scrolls of Fortune every ten levels",
+  "contract": "On Darkmoon - Season 10 Wildcard Silas Darkmoon offered Scrolls of Fortune while leveling: at levels 10, 20, 30, 40, 50 and 60 a Hero could claim level/5 Scrolls of Fortune I (1101244) and level/5 + 4 Scrolls of Fortune I: Talents (97933), two per milestone in Silas' leveling track (S10 gameplay video, levels 10 to 50: 2 + 6, 4 + 8, 6 + 10, 8 + 12, 10 + 14; the older tutorial image shows half). The client claims with CMSG 0x6B5 {u32 tier (spec - 1), u32 count, u8 leveling} and the server answers SMSG 0x6B6 with COLLECT_SCROLL_OF_FORTUNE_REWARDS_OK or the reason: TOO_LOW_LEVEL before the milestone, INVALID_COUNT past the last one, SPECIALIZATION_OUT_OF_RANGE for a spec without rewards. At the level cap every specialization has its own track of 458 further claims paid in Runes of Ascension (375250; claim k costs 240 + 10k up to claim 21, then 50k - 650: 7 claims 1960, 11 claims 3300, 78 claims 112800) that each give 1 Scroll of Fortune, 2 talent scrolls, an Ability and a Talent Sealed Card Pack; the client claims them with the leveling byte 0 and is refused with NOT_ENOUGH_MARKS_OF_ASCENSION or TOO_LOW_LEVEL. The client knows no result for full bags, so a claim is never refused for them: what the bags cannot hold is mailed and the milestone counts as claimed.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "wild", "race": 1, "class": 10, "level": 1},
+    {"id": "plain", "race": 1, "class": 10, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 3000},
+    {"action": "console", "command": "coa gamemode WildCard on Harnessa"},
+    {"action": "console", "command": "coa gamemode WildCard off Harnessb"},
+
+    {"action": "client_packet", "label": "Claim before level 10", "actor": "wild", "opcode": 1717, "fields": [{"u32": 0}, {"u32": 1}, {"u8": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The first milestone is level 10", "actor": "wild", "metric": "server_packet_contains", "opcode": 1718, "text": "COLLECT_SCROLL_OF_FORTUNE_REWARDS_TOO_LOW_LEVEL", "equals": 1},
+
+    {"action": "set_level", "actor": "wild", "value": 10},
+    {"action": "client_packet", "label": "Claim the level-10 scrolls", "actor": "wild", "opcode": 1717, "fields": [{"u32": 0}, {"u32": 1}, {"u8": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The claim is accepted", "actor": "wild", "metric": "server_packet_contains", "opcode": 1718, "text": "COLLECT_SCROLL_OF_FORTUNE_REWARDS_OK", "equals": 1},
+    {"action": "assert", "label": "Two Scrolls of Fortune I", "actor": "wild", "metric": "item_count", "item": 1101244, "equals": 2},
+    {"action": "assert", "label": "and six talent scrolls", "actor": "wild", "metric": "item_count", "item": 97933, "equals": 6},
+    {"action": "assert", "label": "The milestone is claimed", "actor": "wild", "metric": "player_setting", "source": "core.wildcard.rewards", "index": 0, "equals": 1},
+
+    {"action": "client_packet", "label": "Claim again at level 10", "actor": "wild", "opcode": 1717, "fields": [{"u32": 0}, {"u32": 1}, {"u8": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The claim is answered", "actor": "wild", "metric": "server_packets", "opcode": 1718, "equals": 3},
+    {"action": "assert", "label": "but hands out nothing more", "actor": "wild", "metric": "item_count", "item": 1101244, "equals": 2},
+
+    {"action": "set_level", "actor": "wild", "value": 60},
+    {"action": "client_packet", "label": "Claim the other five milestones at once", "actor": "wild", "opcode": 1717, "fields": [{"u32": 0}, {"u32": 5}, {"u8": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "Six milestones give 42 Scrolls of Fortune I", "actor": "wild", "metric": "item_count", "item": 1101244, "equals": 42},
+    {"action": "assert", "label": "and 66 talent scrolls", "actor": "wild", "metric": "item_count", "item": 97933, "equals": 66},
+    {"action": "assert", "label": "All milestones are claimed", "actor": "wild", "metric": "player_setting", "source": "core.wildcard.rewards", "index": 0, "equals": 6},
+
+    {"action": "client_packet", "label": "Claim seven endgame rewards without runes", "actor": "wild", "opcode": 1717, "fields": [{"u32": 0}, {"u32": 7}, {"u8": 0}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "Endgame rewards cost Runes of Ascension", "actor": "wild", "metric": "server_packet_contains", "opcode": 1718, "text": "COLLECT_SCROLL_OF_FORTUNE_REWARDS_NOT_ENOUGH_MARKS_OF_ASCENSION", "equals": 1},
+    {"action": "add_item", "actor": "wild", "item": 375250, "count": 1960},
+    {"action": "client_packet", "label": "Claim them below the level cap", "actor": "wild", "opcode": 1717, "fields": [{"u32": 0}, {"u32": 7}, {"u8": 0}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The endgame track waits for the level cap", "actor": "wild", "metric": "item_count", "item": 375250, "equals": 1960},
+    {"action": "set_level", "actor": "wild", "value": 80},
+    {"action": "client_packet", "label": "Claim seven endgame rewards at the level cap", "actor": "wild", "opcode": 1717, "fields": [{"u32": 0}, {"u32": 7}, {"u8": 0}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "Seven claims cost 1960 runes", "actor": "wild", "metric": "item_count", "item": 375250, "equals": 0},
+    {"action": "assert", "label": "and give seven Scrolls of Fortune I", "actor": "wild", "metric": "item_count", "item": 1101244, "equals": 49},
+    {"action": "assert", "label": "fourteen talent scrolls", "actor": "wild", "metric": "item_count", "item": 97933, "equals": 80},
+    {"action": "assert", "label": "seven Ability Sealed Card Packs", "actor": "wild", "metric": "item_count", "item": 97885, "equals": 7},
+    {"action": "assert", "label": "and seven Talent Sealed Card Packs", "actor": "wild", "metric": "item_count", "item": 97886, "equals": 7},
+    {"action": "assert", "label": "The endgame claims are counted apart from the milestones", "actor": "wild", "metric": "player_setting", "source": "core.wildcard.rewards", "index": 1, "equals": 7},
+
+    {"action": "client_packet", "label": "Claim past the last milestone", "actor": "wild", "opcode": 1717, "fields": [{"u32": 0}, {"u32": 1}, {"u8": 1}]},
+    {"action": "client_packet", "label": "Claim for a second spec", "actor": "wild", "opcode": 1717, "fields": [{"u32": 1}, {"u32": 1}, {"u8": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "Nothing is left", "actor": "wild", "metric": "server_packet_contains", "opcode": 1718, "text": "COLLECT_SCROLL_OF_FORTUNE_REWARDS_INVALID_COUNT", "equals": 1},
+    {"action": "assert", "label": "Only the first spec has rewards", "actor": "wild", "metric": "server_packet_contains", "opcode": 1718, "text": "COLLECT_SCROLL_OF_FORTUNE_REWARDS_SPECIALIZATION_OUT_OF_RANGE", "equals": 1},
+
+    {"action": "learn", "label": "Unlock a second spec", "actor": "wild", "spell": 979994},
+    {"action": "fill_bags", "label": "Leave a single free bag slot", "actor": "wild", "slots": 1},
+    {"action": "client_packet", "label": "Claim its level-10 scrolls with nearly full bags", "actor": "wild", "opcode": 1717, "fields": [{"u32": 1}, {"u32": 1}, {"u8": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "Full bags do not fail the claim", "actor": "wild", "metric": "server_packet_contains", "opcode": 1718, "text": "COLLECT_SCROLL_OF_FORTUNE_REWARDS_UNKNOWN", "equals": 0},
+    {"action": "assert", "label": "The milestone is claimed", "actor": "wild", "metric": "player_setting", "source": "core.wildcard.rewards.spec2", "index": 0, "equals": 1},
+    {"action": "assert", "label": "Scrolls of Fortune II fill the free slot", "actor": "wild", "metric": "item_count", "item": 1111244, "equals": 2},
+    {"action": "assert", "label": "and the talent scrolls do not fit", "actor": "wild", "metric": "item_count", "item": 97934, "equals": 0},
+    {"action": "assert", "label": "so they are mailed", "actor": "wild", "metric": "mail_has_item", "item": 97934, "equals": 1},
+
+    {"action": "client_packet", "label": "A Hero outside Wildcard claims", "actor": "plain", "opcode": 1717, "fields": [{"u32": 0}, {"u32": 1}, {"u8": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "Silas has nothing for it", "actor": "plain", "metric": "server_packet_contains", "opcode": 1718, "text": "COLLECT_SCROLL_OF_FORTUNE_REWARDS_UNKNOWN", "equals": 1},
+    {"action": "assert", "label": "and it gets no scrolls", "actor": "plain", "metric": "item_count", "item": 1101244, "equals": 0}
+  ]
+}

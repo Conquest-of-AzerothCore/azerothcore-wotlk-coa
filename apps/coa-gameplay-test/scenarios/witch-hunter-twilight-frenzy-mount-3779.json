@@ -1,0 +1,163 @@
+{
+  "schema": 1,
+  "name": "Mounting stops Twilight Frenzy rather than preserving a mounted channel (#3779)",
+  "contract": [
+    "Original Twilight Frenzy805751 allows movement, dodge and parry while channeling, but does not permit",
+    "mounting or another ordinary cast. Original Timber Wolf580 is a normal mount cast without",
+    "cast-while-casting attributes. In an out-of-combat setup, a normal mount request during a working",
+    "Twilight Frenzy channel must end the channel before its natural five-second expiry. Successful mounting",
+    "must not preserve subsequent channel pulses. A hostile target would put the hunter in combat and make",
+    "the mount itself ineligible, so this tests the reported out-of-combat case."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 2,
+      "class": 15,
+      "level": 58,
+      "ranged_hit_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 5011
+    },
+    {
+      "action": "add_item",
+      "actor": "hunter",
+      "item": 15807
+    },
+    {
+      "action": "equip",
+      "actor": "hunter",
+      "item": 15807,
+      "slot": 17
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 805751
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 33388
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 580
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 805751
+    },
+    {
+      "action": "assert",
+      "label": "A normal Twilight Frenzy channel starts",
+      "actor": "hunter",
+      "metric": "cast_remaining_ms",
+      "spell": 805751,
+      "min": 3500,
+      "within_ms": 500
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has not naturally expired before mounting",
+      "actor": "hunter",
+      "metric": "cast_remaining_ms",
+      "spell": 805751,
+      "min": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The active channel produces its periodic helper casts",
+      "actor": "hunter",
+      "metric": "spell_cast_count",
+      "spell": 805752,
+      "min": 1
+    },
+    {
+      "action": "cast",
+      "label": "Normal mount request during the channel",
+      "actor": "hunter",
+      "spell": 580
+    },
+    {
+      "action": "assert",
+      "label": "Mount preparation ends Twilight Frenzy immediately",
+      "actor": "hunter",
+      "metric": "cast_remaining_ms",
+      "spell": 805751,
+      "equals": 0,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "The mount cast succeeds",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 580,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "spell_cast_count",
+      "spell": 805752,
+      "save_as": "mounted_hits"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Mounted hunter produces no further Twilight Frenzy channel pulses",
+      "actor": "hunter",
+      "metric": "spell_cast_count",
+      "spell": 805752,
+      "relative_to": "mounted_hits",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mounting remains active after the old channel window",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 580,
+      "equals": 1
+    }
+  ]
+}

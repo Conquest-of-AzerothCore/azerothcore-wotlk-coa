@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "name": "Bloodmage Slaughterhouse Offering shows as a buff and can be cancelled (#8098)",
+  "contract": "#8098: Slaughterhouse Offering 1108493 lands on the ally as a debuff that cannot be right-clicked off. Cause: effect 0 is SPELL_AURA_MOD_DAMAGE_TAKEN (14, +damage taken from spells, the 'offering' cost) so SpellMgr::LoadSpellInfoCustomAttributes auto-marks SPELL_ATTR0_CU_NEGATIVE_EFF0; effect 1 is SPELL_AURA_MOD_HEALING (115, +healing taken, the payoff). Any marked effect makes SpellInfo::IsPositive false, so the client renders a debuff and WorldSession::HandleCancelAuraOpcode refuses CMSG_CANCEL_AURA. The description addresses 'the targeted party member', so the aura is an ally buff with a drawback, not a debuff. Fix: bloodmage_talent_contracts clears SPELL_ATTR0_CU_NEGATIVE for all three ranks (1108459/1108463/1108493), keeping both effects. Rank 1 is the probe: identical effect shape across ranks, max rank covered by in-game testing. Fails pre-fix at the cancel (aura stays 1).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "mage",
+      "race": 1,
+      "class": 20,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "mage",
+      "target": "ally",
+      "label": "Group caster and recipient for the raid-targeted offering"
+    },
+    {
+      "action": "learn",
+      "actor": "mage",
+      "label": "Learn Slaughterhouse Offering rank 1",
+      "spell": 1108459
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "equals": 1,
+      "label": "SETUP: the Bloodmage knows Slaughterhouse Offering",
+      "metric": "knows_spell",
+      "spell": 1108459
+    },
+    {
+      "action": "cast",
+      "actor": "mage",
+      "label": "Cast Slaughterhouse Offering on the ally",
+      "spell": 1108459,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "equals": 1,
+      "label": "SETUP: the offering aura applied to the ally",
+      "metric": "aura",
+      "spell": 1108459,
+      "within_ms": 5000
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "ally",
+      "label": "Ally right-clicks the offering off",
+      "spell": 1108459
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "equals": 0,
+      "label": "DISCRIMINATING: the offering can be cancelled",
+      "metric": "aura",
+      "spell": 1108459,
+      "within_ms": 1000
+    }
+  ]
+}

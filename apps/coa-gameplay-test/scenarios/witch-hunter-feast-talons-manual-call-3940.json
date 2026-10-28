@@ -1,0 +1,182 @@
+{
+  "schema": 1,
+  "name": "Feast of Talons follows a manual Houndmaster's Call (#3940)",
+  "contract": [
+    "Active Feast of Talons 500056 promises crows around enemies hit by a manually activated Houndmaster's Call. Helper 500564 supplies the periodic damage.",
+    "A normal Houndmaster's Whistle summons the native Shadowhound, then a normal 802273 call makes it leap and deal both strikes. The hit enemy and a close bystander receive crows; a distant enemy does not. Removing the talent prevents crows on a later manual call."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 801343
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 802273
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 500056
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 801343
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_entry",
+      "equals": 50124,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 802273,
+      "target": "primary"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 706332,
+      "target": "primary",
+      "min": 2,
+      "within_ms": 6000,
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "actor": "primary",
+      "metric": "aura",
+      "spell": 500564,
+      "caster": "hunter",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 500564,
+      "caster": "hunter",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "far",
+      "metric": "aura",
+      "spell": 500564,
+      "caster": "hunter",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 500564,
+      "target": "primary",
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 500056
+    },
+    {
+      "action": "assert",
+      "actor": "primary",
+      "metric": "aura",
+      "spell": 500564,
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hunter",
+      "spell": 802273
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 802273,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "actor": "primary",
+      "metric": "aura",
+      "spell": 500564,
+      "equals": 0
+    }
+  ],
+  "creatures": [
+    {
+      "id": "primary",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 60,
+      "distance": 10,
+      "health": 1000000
+    },
+    {
+      "id": "near",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 60,
+      "distance": 12,
+      "health": 1000000
+    },
+    {
+      "id": "far",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 60,
+      "distance": 30,
+      "health": 1000000
+    }
+  ]
+}

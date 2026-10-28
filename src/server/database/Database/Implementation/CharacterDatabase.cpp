@@ -16,12 +16,210 @@
  */
 
 #include "CharacterDatabase.h"
+#include "Config.h"
 #include "MySQLPreparedStatement.h"
 
 void CharacterDatabaseConnection::DoPrepareStatements()
 {
     if (!m_reconnecting)
         m_stmts.resize(MAX_CHARACTERDATABASE_STATEMENTS);
+
+    if (sConfigMgr->GetOption<bool>("CoAChallenges.AutoCreateSchema", false))
+        Execute(
+            "CREATE TABLE IF NOT EXISTS coa_account_challenge_completion ("
+            "account INT UNSIGNED NOT NULL, "
+            "challengeId INT UNSIGNED NOT NULL, "
+            "level INT UNSIGNED NOT NULL DEFAULT 1, "
+            "completeTime INT UNSIGNED NOT NULL DEFAULT 0, "
+            "startTime INT UNSIGNED NOT NULL DEFAULT 0, "
+            "PRIMARY KEY (account, challengeId, level)) "
+            "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    PrepareStatement(CHAR_SEL_RAF_DELIVERY, "SELECT mail_id FROM raf_reward_delivery WHERE claim_id = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_RAF_DELIVERY, "INSERT INTO raf_reward_delivery (claim_id, account_id, guid, mail_id) VALUES (?, ?, ?, ?)", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_RAF_RECRUIT_DELIVERY,
+        "SELECT mail_id FROM raf_recruit_reward_delivery WHERE claim_id = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_RAF_RECRUIT_DELIVERY,
+        "INSERT INTO raf_recruit_reward_delivery (claim_id, account_id, guid, mail_id) VALUES (?, ?, ?, ?)",
+        CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_RAF_RECIPIENT, "SELECT account FROM characters WHERE guid = ?", CONNECTION_SYNCH);
+
+    PrepareStatement(CHAR_SEL_COA_ACCOUNT_CHALLENGE_COMPLETION,
+        "SELECT 1 FROM coa_account_challenge_completion WHERE account = ? AND challengeId = ? AND level = ? LIMIT 1",
+        CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_COA_ACCOUNT_CHALLENGE_COMPLETIONS,
+        "SELECT challengeId, level, startTime, completeTime FROM coa_account_challenge_completion WHERE account = ?",
+        CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_COA_ACCOUNT_CHALLENGE_COMPLETION,
+        "INSERT IGNORE INTO coa_account_challenge_completion (account, challengeId, level, completeTime, startTime) "
+        "VALUES (?, ?, ?, UNIX_TIMESTAMP(), ?)", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_UPD_COA_ADVENTURE_LEVEL,
+        "UPDATE coa_character_challenge SET level = ? WHERE guid = ? AND challengeId = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_DEL_COA_ACCOUNT_CHALLENGE_COMPLETIONS,
+        "DELETE FROM coa_account_challenge_completion WHERE account = ?", CONNECTION_SYNCH);
+
+    PrepareStatement(CHAR_INS_ACCOUNT_VANITY_COLLECTION,
+        "INSERT IGNORE INTO account_vanity_collection (account_id, item_id) VALUES (?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_WORLDFORGED_LOOT,
+        "DELETE FROM character_worldforged_loot WHERE guid = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_LOTTERY_RECENT_WINNERS,
+        "SELECT winner_name, gold_copper, winner_tickets, house_win, complimentary_tickets, total_tickets "
+        "FROM coa_lottery_winner "
+        "ORDER BY drawn_at DESC, round_id DESC LIMIT 5", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_LOTTERY_WINNER_IDENTITY,
+        "SELECT name, account FROM characters WHERE guid = ? AND deleteDate IS NULL "
+        "AND account <> 0 AND name <> ''", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_LOTTERY_WINNER,
+        "INSERT INTO coa_lottery_winner (round_id, drawn_at, winner_guid, winner_account_id, winner_name, "
+        "gold_copper, bonus_item, bonus_item_name, winner_tickets, total_tickets, payout_mail_id, "
+        "house_win, destroyed_copper, "
+        "admin_forced, complimentary_tickets) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_LOTTERY_STORAGE,
+        "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() "
+        "AND table_name IN ('coa_lottery_round', 'coa_lottery_entry', 'coa_lottery_winner', 'coa_lottery_control')",
+        CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_LOTTERY_ROUND,
+        "SELECT id, ends_at, pot, seed, contribution_percent, duration_seconds, bonus_item, fake_tickets, "
+        "paused, paused_remaining FROM coa_lottery_round "
+        "WHERE active = 1", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_LOTTERY_ENTRIES,
+        "SELECT e.guid, e.tickets FROM (SELECT 1) AS sentinel LEFT JOIN "
+        "(SELECT le.guid, le.tickets FROM coa_lottery_entry le INNER JOIN characters c ON c.guid = le.guid "
+        "WHERE le.round_id = ? AND c.deleteDate IS NULL AND c.account <> 0 AND c.name <> '') "
+        "AS e ON 1 = 1 ORDER BY e.guid", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_LOTTERY_ROUND,
+        "INSERT INTO coa_lottery_round (id, active, ends_at, pot, seed, contribution_percent, "
+        "duration_seconds, bonus_item, fake_tickets) "
+        "VALUES (?, 1, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_UPD_LOTTERY_POT,
+        "UPDATE coa_lottery_round SET pot = ? WHERE id = ? AND active = 1", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_UPSERT_LOTTERY_ENTRY,
+        "INSERT INTO coa_lottery_entry (round_id, guid, tickets, spent_copper, pot_copper) VALUES (?, ?, ?, ?, ?) "
+        "ON DUPLICATE KEY UPDATE tickets = tickets + VALUES(tickets), "
+        "spent_copper = spent_copper + VALUES(spent_copper), pot_copper = pot_copper + VALUES(pot_copper)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_UPD_LOTTERY_END,
+        "UPDATE coa_lottery_round SET ends_at = ? WHERE id = ? AND active = 1", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_COMPLETE_LOTTERY_ROUND,
+        "UPDATE coa_lottery_round SET active = NULL, winner_guid = ?, payout_mail_id = ? "
+        "WHERE id = ? AND active = 1", CONNECTION_ASYNC);
+
+    PrepareStatement(CHAR_SEL_LOTTERY_CONTROL,
+        "SELECT enabled, auto_start FROM coa_lottery_control WHERE id = 1", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_UPD_LOTTERY_CONTROL,
+        "UPDATE coa_lottery_control SET enabled = ?, auto_start = ? WHERE id = 1", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_UPD_LOTTERY_PAUSE,
+        "UPDATE coa_lottery_round SET paused = ?, paused_remaining = ?, ends_at = ? "
+        "WHERE id = ? AND active = 1", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_LOTTERY_NEXT_ID,
+        "SELECT CAST(COALESCE(MAX(id), 0) + 1 AS UNSIGNED) FROM coa_lottery_round", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_LOTTERY_ADMIN_ENTRIES,
+        "SELECT e.guid, e.tickets, e.spent_copper, e.pot_copper, c.name, c.account, c.deleteDate "
+        "FROM (SELECT 1) AS sentinel LEFT JOIN coa_lottery_entry e ON e.round_id = ? "
+        "LEFT JOIN characters c ON c.guid = e.guid ORDER BY e.tickets DESC, e.guid ASC", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_DEL_LOTTERY_ENTRY,
+        "DELETE FROM coa_lottery_entry WHERE round_id = ? AND guid = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_CANCEL_LOTTERY_ROUND,
+        "UPDATE coa_lottery_round SET active = NULL WHERE id = ? AND active = 1", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_GROOTCOIN_SCHEMA,
+        "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name IN "
+        "('grootcoin_award', 'grootcoin_award_mail', 'grootcoin_exchange', 'groot_coin_award_queue')", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_GROOTCOIN_RECIPIENT,
+        "SELECT account FROM characters WHERE guid = ? AND deleteDate IS NULL AND account <> 0", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_GROOTCOIN_AWARD_BY_KEY,
+        "SELECT COUNT(*), MAX(award_id), MAX(recipient_character_guid), MAX(amount) FROM grootcoin_award "
+        "WHERE issue_number = ? AND recipient_account_id = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_GROOTCOIN_AWARD,
+        "SELECT a.award_id, a.issue_number, a.recipient_account_id, a.recipient_character_guid, a.actor_account_id, "
+        "a.actor_character_guid, a.amount, a.reason, a.attribution_ref, CAST(a.created_at AS CHAR), m.mail_id, "
+        "m.coin_item_guid, (SELECT COUNT(*) FROM mail WHERE id = m.mail_id), a.source, a.source_ref FROM grootcoin_award a "
+        "LEFT JOIN grootcoin_award_mail m ON m.award_id = a.award_id WHERE a.award_id = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_GROOTCOIN_AWARD_HISTORY,
+        "SELECT award_id, issue_number, amount, CAST(created_at AS CHAR), actor_account_id, source, source_ref FROM grootcoin_award "
+        "WHERE recipient_character_guid = ? ORDER BY created_at DESC, award_id LIMIT ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_GROOTCOIN_AWARD,
+        "INSERT INTO grootcoin_award (award_id, issue_number, recipient_account_id, recipient_character_guid, "
+        "actor_account_id, actor_character_guid, amount, reason, attribution_ref, source, source_ref) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        CONNECTION_ASYNC);
+    PrepareStatement(CHAR_INS_GROOTCOIN_AWARD_MAIL,
+        "INSERT INTO grootcoin_award_mail (award_id, mail_id, coin_item_guid, amount) VALUES (?, ?, ?, ?)",
+        CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_GROOTCOIN_EXCHANGE,
+        "SELECT exchange_id, account_id, character_guid, coins_spent, tokens_delivered, tokens_per_coin, source, "
+        "CAST(created_at AS CHAR) FROM grootcoin_exchange WHERE exchange_id = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_GROOTCOIN_EXCHANGE,
+        "INSERT INTO grootcoin_exchange (exchange_id, account_id, character_guid, coin_entry, token_entry, coins_spent, "
+        "tokens_delivered, tokens_per_coin, source) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_GROOTCOIN_AWARD_BY_REF,
+        "SELECT COUNT(*), MAX(award_id), MAX(recipient_character_guid), MAX(amount) FROM grootcoin_award "
+        "WHERE source = ? AND source_ref = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_GROOTCOIN_QUEUE_PENDING,
+        "SELECT id, source, source_ref, character_guid, amount, reason, requested_by_account FROM groot_coin_award_queue "
+        "WHERE status = 'pending' ORDER BY id LIMIT ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_UPD_GROOTCOIN_QUEUE_DONE,
+        "UPDATE groot_coin_award_queue SET status = 'done', award_id = ?, error = NULL, processed_at = CURRENT_TIMESTAMP "
+        "WHERE id = ? AND status = 'pending'", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_UPD_GROOTCOIN_QUEUE_FAILED,
+        "UPDATE groot_coin_award_queue SET status = 'failed', error = ?, processed_at = CURRENT_TIMESTAMP "
+        "WHERE id = ? AND status = 'pending'", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_CROWS_CACHE, "SELECT id,phase,carrier,item_guid,map,x,y,z,o,deadline,announcements FROM coa_crows_cache", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_REP_CROWS_CACHE, "REPLACE INTO coa_crows_cache (id,phase,carrier,item_guid,map,x,y,z,o,deadline,announcements) VALUES (?,?,?,?,?,?,?,?,?,?,?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_CROWS_CACHE, "DELETE FROM coa_crows_cache WHERE id=?", CONNECTION_ASYNC);
+
+    PrepareStatement(CHAR_SEL_COA_BUILD_CREATOR_BUILDS,
+        "SELECT entry, id, leveling_id, pve_id, pvp_id, class, owner_account, author, name, subtext, description, "
+        "icon, upvotes, created, updated, category, roles, primary_stat, needs_repairs, flags, difficulty "
+        "FROM coa_build_creator", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_COA_BUILD_CREATOR_SPELLS,
+        "SELECT entry, spell, level, core, optimal, empowering, synergistic, flags, comment "
+        "FROM coa_build_creator_spell ORDER BY entry, slot", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_COA_BUILD_CREATOR_ENCHANTS,
+        "SELECT entry, enchant, stacks, level, flags, comment FROM coa_build_creator_enchant ORDER BY entry, slot",
+        CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_COA_BUILD_CREATOR_ITEM_TYPES,
+        "SELECT entry, armor, type, comment FROM coa_build_creator_item_type ORDER BY entry, armor, slot",
+        CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_COA_BUILD_CREATOR_VOTES, "SELECT entry, account FROM coa_build_creator_vote",
+        CONNECTION_SYNCH);
+    PrepareStatement(CHAR_REP_COA_BUILD_CREATOR_BUILD,
+        "REPLACE INTO coa_build_creator (entry, id, leveling_id, pve_id, pvp_id, class, owner_account, author, name, "
+        "subtext, description, icon, upvotes, created, updated, category, roles, primary_stat, needs_repairs, flags, "
+        "difficulty) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_COA_BUILD_CREATOR_BUILD, "DELETE FROM coa_build_creator WHERE entry = ?",
+        CONNECTION_ASYNC);
+    PrepareStatement(CHAR_INS_COA_BUILD_CREATOR_SPELL,
+        "INSERT INTO coa_build_creator_spell (entry, slot, spell, level, core, optimal, empowering, synergistic, "
+        "flags, comment) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_COA_BUILD_CREATOR_SPELLS, "DELETE FROM coa_build_creator_spell WHERE entry = ?",
+        CONNECTION_ASYNC);
+    PrepareStatement(CHAR_INS_COA_BUILD_CREATOR_ENCHANT,
+        "INSERT INTO coa_build_creator_enchant (entry, slot, enchant, stacks, level, flags, comment) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_COA_BUILD_CREATOR_ENCHANTS, "DELETE FROM coa_build_creator_enchant WHERE entry = ?",
+        CONNECTION_ASYNC);
+    PrepareStatement(CHAR_INS_COA_BUILD_CREATOR_ITEM_TYPE,
+        "INSERT INTO coa_build_creator_item_type (entry, armor, slot, type, comment) VALUES (?, ?, ?, ?, ?)",
+        CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_COA_BUILD_CREATOR_ITEM_TYPES,
+        "DELETE FROM coa_build_creator_item_type WHERE entry = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_INS_COA_BUILD_CREATOR_VOTE,
+        "INSERT IGNORE INTO coa_build_creator_vote (entry, account) VALUES (?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_COA_BUILD_CREATOR_VOTE,
+        "DELETE FROM coa_build_creator_vote WHERE entry = ? AND account = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_COA_BUILD_CREATOR_VOTES, "DELETE FROM coa_build_creator_vote WHERE entry = ?",
+        CONNECTION_ASYNC);
+    PrepareStatement(CHAR_UPD_COA_BUILD_CREATOR_UPVOTES, "UPDATE coa_build_creator SET upvotes = ? WHERE entry = ?",
+        CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_COA_BUILD_CREATOR_ACTIVE,
+        "SELECT spec, build_id, flag_1, flag_2 FROM coa_build_creator_active WHERE guid = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_REP_COA_BUILD_CREATOR_ACTIVE,
+        "REPLACE INTO coa_build_creator_active (guid, spec, build_id, flag_1, flag_2) VALUES (?, ?, ?, ?, ?)",
+        CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_COA_BUILD_CREATOR_ACTIVE,
+        "DELETE FROM coa_build_creator_active WHERE guid = ? AND spec = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_COA_BUILD_CREATOR_ACTIVE_ALL, "DELETE FROM coa_build_creator_active WHERE guid = ?",
+        CONNECTION_ASYNC);
 
     // Read-only safety gate for the unregistered, never-saved Create probe.
     PrepareStatement(CHAR_SEL_FRESH_CHECK_GUID_COUNT, "SELECT COUNT(*) FROM characters WHERE guid BETWEEN ? AND ?", CONNECTION_SYNCH);
@@ -138,9 +336,9 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_INS_AUCTION, "INSERT INTO auctionhouse (id, houseid, itemguid, itemowner, buyoutprice, time, buyguid, lastbid, startbid, deposit) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_AUCTION, "DELETE FROM auctionhouse WHERE id = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_UPD_AUCTION_BID, "UPDATE auctionhouse SET buyguid = ?, lastbid = ? WHERE id = ?", CONNECTION_ASYNC);
-    PrepareStatement(CHAR_INS_MAIL, "INSERT INTO mail(id, messageType, stationery, mailTemplateId, sender, receiver, subject, body, has_items, expire_time, deliver_time, money, cod, checked) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_INS_MAIL, "INSERT INTO mail(id, messageType, stationery, mailTemplateId, sender, receiver, subject, body, has_items, expire_time, deliver_time, money, cod, checked) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_BOTH);
     PrepareStatement(CHAR_DEL_MAIL_BY_ID, "DELETE FROM mail WHERE id = ?", CONNECTION_ASYNC);
-    PrepareStatement(CHAR_INS_MAIL_ITEM, "INSERT INTO mail_items(mail_id, item_guid, receiver) VALUES (?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_INS_MAIL_ITEM, "INSERT INTO mail_items(mail_id, item_guid, receiver) VALUES (?, ?, ?)", CONNECTION_BOTH);
     PrepareStatement(CHAR_DEL_MAIL_ITEM, "DELETE FROM mail_items WHERE item_guid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_INVALID_MAIL_ITEM, "DELETE FROM mail_items WHERE item_guid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_EXPIRED_MAIL, "SELECT id, messageType, sender, receiver, has_items, expire_time, stationery, checked, mailTemplateId FROM mail WHERE expire_time < ?", CONNECTION_SYNCH);
@@ -154,7 +352,7 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_DEL_ITEM_BOP_TRADE, "DELETE FROM item_soulbound_trade_data WHERE itemGuid = ? LIMIT 1", CONNECTION_ASYNC);
     PrepareStatement(CHAR_INS_ITEM_BOP_TRADE, "INSERT INTO item_soulbound_trade_data VALUES (?, ?)", CONNECTION_ASYNC);
     PrepareStatement(CHAR_REP_INVENTORY_ITEM, "REPLACE INTO character_inventory (guid, bag, slot, item) VALUES (?, ?, ?, ?)", CONNECTION_ASYNC);
-    PrepareStatement(CHAR_REP_ITEM_INSTANCE, "REPLACE INTO item_instance (itemEntry, owner_guid, creatorGuid, giftCreatorGuid, count, duration, charges, flags, enchantments, randomPropertyId, durability, playedTime, text, guid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_REP_ITEM_INSTANCE, "REPLACE INTO item_instance (itemEntry, owner_guid, creatorGuid, giftCreatorGuid, count, duration, charges, flags, enchantments, randomPropertyId, durability, playedTime, text, guid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_BOTH);
     PrepareStatement(CHAR_UPD_ITEM_INSTANCE, "UPDATE item_instance SET itemEntry = ?, owner_guid = ?, creatorGuid = ?, giftCreatorGuid = ?, count = ?, duration = ?, charges = ?, flags = ?, enchantments = ?, randomPropertyId = ?, durability = ?, playedTime = ?, text = ? WHERE guid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_UPD_ITEM_INSTANCE_ON_LOAD, "UPDATE item_instance SET duration = ?, flags = ?, durability = ? WHERE guid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_UPD_ITEM_COUNT, "UPDATE item_instance SET count = ? WHERE guid = ?", CONNECTION_ASYNC);
@@ -444,7 +642,7 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_SEL_CHARACTER_AT_LOGIN, "SELECT at_login FROM characters WHERE guid = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_CHAR_CLASS_LVL_AT_LOGIN, "SELECT class, level, at_login, knownTitles FROM characters WHERE guid = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_CHAR_CUSTOMIZE_INFO, "SELECT name, race, class, gender, at_login FROM characters WHERE guid = ?", CONNECTION_ASYNC);
-    PrepareStatement(CHAR_SEL_CHAR_RACE_OR_FACTION_CHANGE_INFOS, "SELECT at_login, knownTitles, money FROM characters WHERE guid = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_CHAR_RACE_OR_FACTION_CHANGE_INFOS, "SELECT at_login, knownTitles, money, (SELECT COUNT(*) FROM mail WHERE receiver = ? AND deliver_time <= UNIX_TIMESTAMP() AND expire_time > UNIX_TIMESTAMP()) FROM characters WHERE guid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_CHAR_AT_LOGIN_TITLES_MONEY, "SELECT at_login, knownTitles, money FROM characters WHERE guid = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_CHAR_COD_ITEM_MAIL, "SELECT id, messageType, mailTemplateId, sender, subject, body, money, has_items FROM mail WHERE receiver = ? AND has_items <> 0 AND cod <> 0", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_CHAR_SOCIAL, "SELECT DISTINCT guid FROM character_social WHERE friend = ?", CONNECTION_SYNCH);
@@ -609,7 +807,7 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_UPD_CHAR_PET_NAME, "UPDATE character_pet SET name = ?, renamed = 1 WHERE owner = ? AND id = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_UPD_CHAR_PET_SLOT_BY_ID, "UPDATE character_pet SET slot = ? WHERE owner = ? AND id = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_CHAR_PET_BY_ID, "DELETE FROM character_pet WHERE id = ?", CONNECTION_ASYNC);
-    PrepareStatement(CHAR_DEL_CHAR_PET_BY_SLOT, "DELETE FROM character_pet WHERE owner = ? AND (slot = ? OR slot > ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_CHAR_PET_BY_SLOT, "DELETE FROM character_pet WHERE owner = ? AND (slot = ? OR slot > ?) AND PetType = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_REP_CHAR_PET, "REPLACE INTO character_pet (id, entry, owner, modelid, CreatedBySpell, PetType, level, exp, Reactstate, name, renamed, slot, curhealth, curmana, curhappiness, savetime, abdata) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
 
     // PvPstats
@@ -658,6 +856,11 @@ void CharacterDatabaseConnection::DoPrepareStatements()
         "SELECT s.data FROM character_settings s JOIN characters c ON c.guid = s.guid "
         "WHERE c.account = ? AND s.guid <> ? AND s.source = ?", CONNECTION_ASYNC);
 
+    PrepareStatement(CHAR_SEL_ACCOUNT_LEVEL_OR_PRESTIGE,
+        "SELECT c.level, COALESCE(s.data, '') FROM characters c "
+        "LEFT JOIN character_settings s ON s.guid = c.guid AND s.source = ? "
+        "WHERE c.account = ? AND c.guid <> ? AND c.deleteDate IS NULL", CONNECTION_SYNCH);
+
     // Instance saved data. Stores the states of gameobjects in instances to be loaded on server start
     PrepareStatement(CHAR_SELECT_INSTANCE_SAVED_DATA, "SELECT guid, state FROM instance_saved_go_state_data WHERE id = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_INSERT_INSTANCE_SAVED_DATA, "INSERT INTO instance_saved_go_state_data (id, guid, state) VALUES (?, ?, ?)"
@@ -701,7 +904,60 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_INS_MANASTORM_CACHE_INVENTORY, "INSERT INTO character_inventory (guid, bag, slot, item) VALUES (?, ?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_MANASTORM_INVENTORY_ITEM, "SELECT COUNT(*) FROM character_inventory ci INNER JOIN item_instance ii ON ii.guid = ci.item AND ii.owner_guid = ci.guid WHERE ci.guid = ? AND ci.item = ?", CONNECTION_SYNCH);
 
+#ifdef MOD_MANASTORM_ENDLESS
+    PrepareStatement(CHAR_SEL_MANASTORM_WEEKLY_CACHE,
+        "SELECT COALESCE(MAX(reset_at), 0), COALESCE(MAX(caches_received), 0) FROM manastorm_weekly_cache_lockout WHERE guid = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_MANASTORM_WEEKLY_CACHE,
+        "INSERT INTO manastorm_weekly_cache_lockout (guid, reset_at, caches_received) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE reset_at = IF(reset_at = ? AND caches_received = ?, VALUES(reset_at), 0), caches_received = VALUES(caches_received)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_INS_MANASTORM_STAGE_RECEIPT,
+        "INSERT INTO character_manastorm_stage_receipt (guid, run_seed, run_id, depth) VALUES (?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_MANASTORM_FIRST_CLEAR,
+        "SELECT COUNT(*) FROM character_manastorm_completed_depth WHERE guid = ? AND mode = ? AND track = ? AND depth = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_MANASTORM_COMPLETION_REWARD, "SELECT remainder_bp, earned FROM character_manastorm_completion_reward_state WHERE guid = ? AND mode = ? AND track = ? AND reward_key = ? LIMIT 1", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_REP_MANASTORM_COMPLETION_REWARD, "INSERT INTO character_manastorm_completion_reward_state (guid, mode, track, reward_key, remainder_bp, earned) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE remainder_bp = VALUES(remainder_bp), earned = VALUES(earned)", CONNECTION_ASYNC);
+#endif
+    PrepareStatement(CHAR_REP_APPEARANCE_OUTFIT,
+        "REPLACE INTO character_appearance_outfit (guid, name, appearances) VALUES (?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_APPEARANCE_OUTFIT,
+        "DELETE FROM character_appearance_outfit WHERE guid = ? AND name = ?", CONNECTION_ASYNC);
+
+    PrepareStatement(CHAR_SEL_ACCOUNT_FRIENDS,
+        "SELECT friend_account, original_guid, original_name, note FROM account_friend WHERE account = ? "
+        "UNION ALL SELECT 0, 0, '', ''", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_ACCOUNT_FRIEND,
+        "INSERT INTO account_friend (account, friend_account, original_guid, original_name, note) "
+        "VALUES (?, ?, ?, ?, ?)", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_DEL_ACCOUNT_FRIEND,
+        "DELETE FROM account_friend WHERE account = ? AND friend_account = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_UPD_ACCOUNT_FRIEND_NOTE,
+        "UPDATE account_friend SET note = ? WHERE account = ? AND friend_account = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_FRIEND_FALLBACK,
+        "SELECT guid FROM characters WHERE account = ? AND deleteinfos_name IS NULL ORDER BY guid LIMIT 1",
+        CONNECTION_SYNCH);
+
+    PrepareStatement(CHAR_SEL_ACCOUNT_FRIEND_MIGRATION,
+        "SELECT COUNT(*) FROM account_friend_migration WHERE account = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_ACCOUNT_FRIEND_MIGRATION,
+        "INSERT INTO account_friend_migration (account) VALUES (?)", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_ACCOUNT_FRIEND_LEGACY,
+        "SELECT t.account, t.guid AS original_guid, t.name, s.note, s.guid AS owner_guid, s.flags "
+        "FROM character_social s JOIN characters o ON o.guid=s.guid JOIN characters t ON t.guid=s.friend "
+        "WHERE o.account=? AND s.flags & 1 AND o.account<>t.account "
+        "AND o.deleteinfos_name IS NULL AND t.deleteinfos_name IS NULL "
+        "UNION ALL SELECT 0,0,'','',0,0 ORDER BY owner_guid,original_guid,flags", CONNECTION_SYNCH);
+
     PrepareStatement(CHAR_INS_PLAYER_ANTICHEAT_ALERT, "INSERT INTO player_anticheat_alert (account, guid, name, reason, details, size) VALUES (?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+#ifdef MOD_MANASTORM_ENDLESS
+    PrepareStatement(CHAR_SEL_MANASTORM_XP_LEVEL,
+        "SELECT level, playerFlags FROM characters WHERE guid = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_MANASTORM_FLOOR_XP,
+        "SELECT base_xp FROM character_manastorm_pending_experience WHERE guid = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_ADD_MANASTORM_FLOOR_XP,
+        "INSERT INTO character_manastorm_pending_experience (guid, base_xp) VALUES (?, ?) "
+        "ON DUPLICATE KEY UPDATE base_xp = base_xp + VALUES(base_xp)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_CLAIM_MANASTORM_FLOOR_XP,
+        "UPDATE character_manastorm_pending_experience SET base_xp = base_xp - ? WHERE guid = ?", CONNECTION_ASYNC);
+#endif
 }
 
 CharacterDatabaseConnection::CharacterDatabaseConnection(MySQLConnectionInfo& connInfo) : MySQLConnection(connInfo)

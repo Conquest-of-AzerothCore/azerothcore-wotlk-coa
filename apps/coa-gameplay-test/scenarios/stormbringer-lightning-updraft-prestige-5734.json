@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "name": "Lightning Stormbringer loses held high-rank Updraft on prestige (#5734)",
+  "contract": [
+    "ChrSpecs 15 is the STORMBRINGER/LIGHTNING specialization. Original Updraft 570166 is rank 6 and requires level 58.",
+    "The reported held spell is explicit fixture setup, not a claim that Lightning currently grants this Wind replacement.",
+    "Use normal Chromie gossip prestige and prove the held high rank is forgotten, inactive and absent again at level 10."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "prestiger",
+      "race": 1,
+      "class": 16,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "prestiger",
+      "id": 15
+    },
+    {
+      "action": "learn",
+      "actor": "prestiger",
+      "spell": 802354
+    },
+    {
+      "action": "learn",
+      "actor": "prestiger",
+      "spell": 570166
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "knows_spell",
+      "spell": 570166,
+      "equals": 1
+    },
+    {
+      "action": "set_action_button",
+      "actor": "prestiger",
+      "spell": 570166,
+      "button": 10
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "prestiger",
+      "target": "chromie"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "prestiger",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "knows_spell",
+      "spell": 570166,
+      "equals": 0,
+      "label": "The reported rank 6 cannot survive prestige"
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "spell_active",
+      "spell": 570166,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "prestiger",
+      "value": 10
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "knows_spell",
+      "spell": 570166,
+      "equals": 0
+    }
+  ],
+  "creatures": [
+    {
+      "id": "chromie",
+      "owner": "prestiger",
+      "entry": 178081,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8816.5,
+    "y": 627,
+    "z": 94.1,
+    "o": 3.8
+  }
+}

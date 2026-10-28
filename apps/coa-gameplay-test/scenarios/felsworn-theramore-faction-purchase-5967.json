@@ -1,0 +1,177 @@
+{
+  "schema": 1,
+  "name": "Book of Ascension sells only same-faction Theramore and Stonard rifts (#5967)",
+  "contract": "Original SkillLineAbility.dbc rows 23488 and 23489 restrict Theramore 535601 to Alliance race mask1101 and Stonard535602 to Horde race mask690. Both are level40 book offers. Normal companion casts open each player\u2019s trainer window. The Horde list must omit Theramore and a direct trainer purchase must be rejected, while Alliance can buy and learn it. Stonard offer visibility is the opposite-faction control. This tests native trainer packets, purchase acceptance and spellbook state, without claiming rendered client coverage or Stonard teleport coverage.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "alliance",
+      "race": 1,
+      "class": 14,
+      "level": 41
+    },
+    {
+      "id": "horde",
+      "race": 2,
+      "class": 14,
+      "level": 41
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000,
+      "label": "Let character login settle"
+    },
+    {
+      "action": "unlearn",
+      "actor": "alliance",
+      "spell": 535601
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "knows_spell",
+      "spell": 535601,
+      "equals": 0,
+      "label": "Fixture starts without the Theramore spell"
+    },
+    {
+      "action": "money",
+      "actor": "alliance",
+      "copper": 1000000
+    },
+    {
+      "action": "learn",
+      "actor": "alliance",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "alliance",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "alliance"
+    },
+    {
+      "action": "unlearn",
+      "actor": "horde",
+      "spell": 535601
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "knows_spell",
+      "spell": 535601,
+      "equals": 0,
+      "label": "Fixture starts without the Theramore spell"
+    },
+    {
+      "action": "money",
+      "actor": "horde",
+      "copper": 1000000
+    },
+    {
+      "action": "learn",
+      "actor": "horde",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "horde",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "horde"
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "spellbook_offers_spell",
+      "spell": 535601,
+      "equals": 0,
+      "label": "Horde book excludes the Alliance-only Theramore rift"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "horde",
+      "spell": 535601
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "spellbook_buy_failed",
+      "spell": 535601,
+      "equals": 1,
+      "label": "Direct purchase request for wrong-faction Theramore is rejected"
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "knows_spell",
+      "spell": 535601,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "spellbook_offers_spell",
+      "spell": 535601,
+      "equals": 1
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "alliance",
+      "spell": 535601
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "spellbook_buy_succeeded",
+      "spell": 535601,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "knows_spell",
+      "spell": 535601,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "spellbook_offers_spell",
+      "spell": 535602,
+      "equals": 1,
+      "label": "Horde retains its Stonard alternative"
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "spellbook_offers_spell",
+      "spell": 535602,
+      "equals": 0,
+      "label": "Alliance book excludes Horde-only Stonard"
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+ "schema": 1,
+ "name": "Glyph of Life Tap grants its spell power on Dark Pact",
+ "contract": [
+  "Glyph of Life Tap 63320: \"When you use Life Tap or Dark Pact, you gain 20% of your Spirit as spell power for 40 sec\" (63321). Its proc row listened only for no-damage-class helpful spells; Dark Pact is a magic-class helpful spell and never triggered it."
+ ],
+ "timeout_ms": 60000,
+ "players": [
+  {
+   "id": "w",
+   "race": 1,
+   "class": 9,
+   "level": 80
+  }
+ ],
+ "steps": [
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "set_aura",
+   "actor": "w",
+   "spell": 63320,
+   "stacks": 1
+  },
+  {
+   "action": "learn",
+   "actor": "w",
+   "spell": 1100688
+  },
+  {
+   "action": "learn",
+   "actor": "w",
+   "spell": 1159092
+  },
+  {
+   "action": "cast",
+   "actor": "w",
+   "spell": 1100688
+  },
+  {
+   "action": "wait",
+   "ms": 12000
+  },
+  {
+   "action": "assert",
+   "actor": "w",
+   "metric": "pet_entry",
+   "min": 1,
+   "label": "the Imp is out"
+  },
+  {
+   "action": "set_power",
+   "actor": "w",
+   "power": 0,
+   "value": 1
+  },
+  {
+   "action": "cast",
+   "actor": "w",
+   "spell": 1159092
+  },
+  {
+   "action": "wait",
+   "ms": 1500
+  },
+  {
+   "action": "assert",
+   "actor": "w",
+   "metric": "spell_cast_count",
+   "spell": 1159092,
+   "min": 1,
+   "label": "Dark Pact went off"
+  },
+  {
+   "action": "assert",
+   "actor": "w",
+   "metric": "aura",
+   "spell": 63321,
+   "equals": 1,
+   "label": "Dark Pact grants the Glyph of Life Tap spell power (63321)"
+  }
+ ]
+}

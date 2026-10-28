@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Cleansing Witch Hill: the Witchbane Torch draws out Zelfrax (#7360)",
+  "contract": "Quest 11183 requires one kill of Zelfrax 23864, who has no world spawn. Its source item Witchbane Torch 33113 casts Light Witchbane Torch 42521 at the Swamplight Dock spell focus 186424. In the CoA client data (patch-T.MPQ) that spell's SPELL_EFFECT_SEND_EVENT carries event 15453, where 3.3.5a carried 15452, and only 15452 had an event script. The event respawns the Witchbane Torch gameobject (guid 5448) on the dock, whose SmartAI sets data on 'Swamp Eye' Jarl 4792, who summons Zelfrax about fifteen seconds later; Zelfrax walks to the dock and attacks the nearest player. Expected: the torch cast lands, Zelfrax appears near the dock, engages the player, and his death credits the quest objective.",
+  "timeout_ms": 90000,
+  "location": { "map": 1, "x": -2964.3, "y": -3875.72, "z": 33.1948, "o": 2.25 },
+  "players": [
+    { "id": "torchbearer", "race": 1, "class": 1, "level": 43 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "set_phase", "label": "See the world-spawned dock, torch and Jarl", "actor": "torchbearer", "value": 1 },
+    { "action": "set_health", "label": "Survive Zelfrax while he walks in", "actor": "torchbearer", "maximum": 100000, "value": 100000 },
+    { "action": "prepare_quest", "label": "Take Cleansing Witch Hill", "actor": "torchbearer", "quest": 11183, "complete": false },
+    { "action": "add_item", "label": "Mordant hands over the torch", "actor": "torchbearer", "item": 33113, "count": 1 },
+    {
+      "action": "assert", "label": "SETUP: Zelfrax is not out yet", "actor": "torchbearer",
+      "metric": "nearby_creature_count", "entry": 23864, "equals": 0
+    },
+    {
+      "action": "snapshot", "label": "Count the torch casts before the use", "actor": "torchbearer",
+      "metric": "spell_go_count", "spell": 42521, "save_as": "torches"
+    },
+    { "action": "use_item", "label": "Plant the torch at the end of the dock", "actor": "torchbearer", "item": 33113, "spell": 42521 },
+    {
+      "action": "assert", "label": "The torch cast lands at the dock", "actor": "torchbearer",
+      "metric": "spell_go_count", "spell": 42521, "relative_to": "torches", "equals": 1, "within_ms": 6000
+    },
+    {
+      "action": "assert", "label": "The torch smoke draws out Zelfrax", "actor": "torchbearer",
+      "metric": "nearby_creature_count", "entry": 23864, "equals": 1, "within_ms": 25000
+    },
+    {
+      "action": "assert", "label": "Zelfrax reaches the dock and attacks", "actor": "torchbearer",
+      "metric": "combat", "equals": 1, "within_ms": 30000
+    },
+    { "action": "attack_nearby", "label": "Slay Zelfrax", "actor": "torchbearer", "entry": 23864, "kill": true },
+    {
+      "action": "assert", "label": "Zelfrax's death completes the objective", "actor": "torchbearer",
+      "metric": "quest_objective_count", "quest": 11183, "equals": 1, "within_ms": 3000
+    }
+  ]
+}

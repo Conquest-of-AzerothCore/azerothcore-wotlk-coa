@@ -1,0 +1,159 @@
+{
+  "schema": 1,
+  "name": "Manastorm Shadowfang Keep: solo Archmage Arugal does not full-heal when his Curse charms the only attacker (#8345)",
+  "contract": [
+    "#8345: in a solo Manastorm run of Shadowfang Keep, Archmage Arugal's Arugal's Curse charms the lone",
+    "player (spell 7621). With no other threat left in his list, generic evade logic used to reset him to",
+    "full health and drop combat the instant the charm landed, soft-locking a solo-advertised floor. The fix",
+    "suppresses that evade for the charm's duration so the fight continues once control returns; it never",
+    "changes the curse or the boss.",
+    "This scenario proves setup correctness (private run, phase match, combat engaged, Chaotic Link present,",
+    "player not pre-charmed), then forces the charm directly with '.cast back 7621 triggered' so Arugal",
+    "himself (the selected creature) casts it onto the invoking player, exactly as his own SmartAI In-Combat",
+    "timer eventually would, without waiting on that timer. Both '.cast back' and '.cast target' need a",
+    "native CMSG_SET_SELECTION first (ChatHandler::getSelectedCreature() reads Player::GetTarget());",
+    "attack_nearby only sends CMSG_ATTACKSWING and never selects. An earlier attempt at a forced cast skipped",
+    "that selection, failed with 'select character or creature', and was misread as an RBAC permission gap.",
+    "The new select_nearby harness action (apps/coa-gameplay-test) sends the missing selection. '.cast back'",
+    "(not '.cast target') is used because it targets the invoking player directly and does not depend on",
+    "Creature::GetVictim() already pointing at the player, which made an earlier attempt with '.cast target'",
+    "intermittently fail under batch load before the AuraScript's own gate (caster entry, instance, Solo",
+    "mode -- see ManastormShadowfangKeepCompat.cpp) ever got a say. The closing assertions confirm the",
+    "player is actually charmed and that Arugal neither evaded (his Chaotic Link encounter aura would be",
+    "stripped by Unit::RemoveEvadeAuras() on a real evade, and it survives here) nor dropped out of combat."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "n",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "security": 2,
+      "melee_hit_rating": 100000,
+      "melee_crit_rating": 100000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "n",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "n",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "command",
+      "actor": "n",
+      "command": ".manastorm segment test 49"
+    },
+    {
+      "action": "assert",
+      "label": "The player entered a private Manastorm instance",
+      "actor": "n",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "Match the native phase 1 Manastorm room so the boss is visible to this lane",
+      "actor": "n",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "n",
+      "guid": 16255
+    },
+    {
+      "action": "assert",
+      "label": "Leaving the preparation bubble at the boss clears its safety aura",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "n",
+      "entry": 4275
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the player is not charmed before Arugal's Curse is cast",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 7621,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Arugal's Chaotic Link encounter aura is present before the charm",
+      "actor": "n",
+      "metric": "nearby_creature_aura_count",
+      "entry": 4275,
+      "spell": 93459,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Arugal is engaged and attackable ahead of the charm (setup is otherwise correct)",
+      "actor": "n",
+      "metric": "nearby_creature_can_attack",
+      "entry": 4275,
+      "equals": 1
+    },
+    {
+      "action": "select_nearby",
+      "label": "Select Arugal so '.cast back' can resolve him as the caster",
+      "actor": "n",
+      "entry": 4275
+    },
+    {
+      "action": "wait",
+      "label": "Let a little real combat happen before forcing the cast",
+      "ms": 3000
+    },
+    {
+      "action": "command",
+      "actor": "n",
+      "command": ".cast back 7621 triggered"
+    },
+    {
+      "action": "assert",
+      "label": "The player is charmed by Arugal's Curse",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 7621,
+      "within_ms": 2000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Arugal did not evade: his Chaotic Link encounter aura survives the charm",
+      "actor": "n",
+      "metric": "nearby_creature_aura_count",
+      "entry": 4275,
+      "spell": 93459,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Arugal did not evade: he is still attackable, not reset out of combat",
+      "actor": "n",
+      "metric": "nearby_creature_can_attack",
+      "entry": 4275,
+      "equals": 1
+    }
+  ]
+}

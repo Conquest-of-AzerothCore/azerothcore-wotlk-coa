@@ -1,0 +1,149 @@
+{
+  "schema": 1,
+  "name": "CoA tank abilities generate the high threat their tooltips promise",
+  "contract": "Heavy Blow 503126 (High Threat Physical damage, client effect 63 value 100) now multiplies its damage threat by 2 through spell_threat, and Shieldgore 806874 (High Threat Fire damage, no threat data) by the Revenge multiplier 2.25. Without a tank aura, the threat each puts on a fresh target is at least that many times the damage it dealt.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "rogue",
+      "race": 1,
+      "class": 18,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "warrior",
+      "race": 1,
+      "class": 17,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "blow_target",
+      "owner": "rogue",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 3
+    },
+    {
+      "id": "gore_target",
+      "owner": "warrior",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "warrior",
+      "spell": 9116
+    },
+    {
+      "action": "add_item",
+      "actor": "warrior",
+      "item": 12584
+    },
+    {
+      "action": "equip",
+      "label": "warrior wields a one-hand sword",
+      "actor": "warrior",
+      "item": 12584,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "warrior",
+      "item": 876
+    },
+    {
+      "action": "equip",
+      "label": "warrior holds a shield",
+      "actor": "warrior",
+      "item": 876,
+      "slot": 16
+    },
+    {
+      "action": "learn",
+      "actor": "warrior",
+      "spell": 806874
+    },
+    {
+      "action": "set_power",
+      "actor": "warrior",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "warrior",
+      "spell": 806874,
+      "target": "gore_target"
+    },
+    {
+      "action": "assert",
+      "label": "Shieldgore is cast",
+      "actor": "warrior",
+      "metric": "cast_failure",
+      "spell": 806874,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Shieldgore: threat is at least 2.1x its damage",
+      "actor": "gore_target",
+      "metric": "threat_per_damage",
+      "target": "warrior",
+      "min": 2.1,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "rogue",
+      "spell": 503126
+    },
+    {
+      "action": "set_power",
+      "actor": "rogue",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "rogue",
+      "spell": 503126,
+      "target": "blow_target"
+    },
+    {
+      "action": "assert",
+      "label": "Heavy Blow is cast",
+      "actor": "rogue",
+      "metric": "cast_failure",
+      "spell": 503126,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Heavy Blow: threat is at least 1.9x its damage",
+      "actor": "blow_target",
+      "metric": "threat_per_damage",
+      "target": "rogue",
+      "min": 1.9,
+      "within_ms": 3000
+    }
+  ]
+}

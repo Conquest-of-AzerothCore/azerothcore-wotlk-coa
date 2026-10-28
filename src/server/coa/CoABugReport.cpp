@@ -149,6 +149,9 @@ namespace
 
         void OnPlayerLogout(Player* player) override
         {
+            if (player->GetSession()->IsBot())
+                return;
+
             std::lock_guard<std::mutex> lock(PendingLock);
             PendingReports.erase(player->GetSession()->GetAccountId());
             AnyPending = !PendingReports.empty();
@@ -156,7 +159,7 @@ namespace
 
         void OnPlayerUpdate(Player* player, uint32) override
         {
-            if (!AnyPending)
+            if (!AnyPending || player->GetSession()->IsBot())
                 return;
 
             std::deque<CoABugReport::Report> reports;

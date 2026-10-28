@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Mixed Reagents: Dawn Brightstar is a quest giver again and takes the reagents (#6133)",
+  "contract": "Quest 254098 Mixed Reagents is started by Theocritus 313 and ended by Dawn Brightstar 958 (rev_20260923_01 rows), at the top of the Tower of Azora where the client's turn-in point QuestSuperTrack 8501 is. rev_20260930_98 replaced her template with npcflag 2176 (no quest-giver bit), so the server prepared no quest menu and the reagents could not be handed in. rev_20261003_10 restored the bit (npcflag 2178). Expected: with the quest complete, talking to Dawn Brightstar lists 254098 in her quest menu.",
+  "timeout_ms": 30000,
+  "location": { "map": 0, "x": -9541.13, "y": -716.47, "z": 99.3, "o": 0 },
+  "players": [
+    { "id": "apprentice", "race": 1, "class": 1, "level": 10 }
+  ],
+  "creatures": [
+    { "id": "dawn", "owner": "apprentice", "entry": 958, "distance": 2, "faction": 12 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "prepare_quest", "label": "Finish Mixed Reagents", "actor": "apprentice", "quest": 254098 },
+    { "action": "gossip_hello", "label": "Talk to Dawn Brightstar", "actor": "apprentice", "target": "dawn" },
+    {
+      "action": "assert", "label": "Dawn Brightstar offers Mixed Reagents for turn-in", "actor": "apprentice",
+      "metric": "quest_menu_has", "quest": 254098, "equals": 1
+    }
+  ]
+}

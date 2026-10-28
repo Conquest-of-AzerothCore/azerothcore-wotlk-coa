@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Southshore: an Alliance ghost released at the Hillsbrad death point lands on the ground (#7848)",
+  "contract": "An Alliance player who dies in Hillsbrad Foothills near Southshore (-744.996, -539.087, 20.12) releases to graveyard 149. CoA rebuilt Southshore with a Westfall barracks at the stock graveyard's spot (-732.799, -592.502), where the stock z of 22.663 sat 1.09 yd under CoA's terrain (23.75), so the ghost spawned under the map and fell in a loop. The graveyard and its Spirit Healer now stand at the new burial ground by the tombstone monument (-639.143, -510.149, ground 33.06); the assertions bound the ghost's position to that ground and require the Spirit Healer beside it.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -744.996,
+    "y": -539.087,
+    "z": 20.12,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 34
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "die",
+      "actor": "cleric"
+    },
+    {
+      "action": "release_spirit",
+      "actor": "cleric"
+    },
+    {
+      "action": "assert",
+      "label": "The released player is a ghost",
+      "actor": "cleric",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The ghost lands at the moved Southshore graveyard",
+      "actor": "cleric",
+      "metric": "position_x",
+      "min": -640.5,
+      "max": -637.5,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "position_y",
+      "min": -511.5,
+      "max": -508.5
+    },
+    {
+      "action": "assert",
+      "label": "The ghost is not below the ground it was released onto",
+      "actor": "cleric",
+      "metric": "position_z",
+      "min": 32.8,
+      "max": 33.4
+    },
+    {
+      "action": "assert",
+      "label": "A Spirit Healer stands at the ghost's graveyard",
+      "actor": "cleric",
+      "metric": "nearby_creature_template",
+      "entry": 6491,
+      "equals": 6491
+    }
+  ]
+}

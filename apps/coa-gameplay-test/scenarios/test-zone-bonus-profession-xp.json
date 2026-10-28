@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Test zone bonus: profession experience keeps its normal rate in a test zone",
+  "contract": "Profession experience is not a test zone reward. At x1 dynamic experience an orange Mining skill-up (skill 1 of 75) awards a level-20 character at the human start in Northshire Valley (10138, its own zone in CoA's AreaTable) 190 experience at the default Rate.XP.Profession 0.2. That award stays 190 after '.testzone add 10138', while the same test zone at its default 200% experience doubles the Raven Hill (163) experience that an identical control character received before the zone became a test zone. '.testzone remove 10138' leaves the table empty again.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "players": [
+    { "id": "tester", "race": 1, "class": 1, "level": 20 },
+    { "id": "control", "race": 1, "class": 1, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the fixtures enter Northshire Valley", "ms": 3000 },
+    { "action": "command", "actor": "tester", "command": ".xp 1" },
+    { "action": "command", "actor": "control", "command": ".xp 1" },
+
+    { "action": "set_skill", "actor": "tester", "skill": 186, "value": 1, "maximum": 75 },
+    { "action": "snapshot", "actor": "tester", "metric": "xp", "save_as": "normal_mining_before" },
+    { "action": "gather_skill", "actor": "tester", "skill": 186, "required": 1 },
+    { "action": "assert", "label": "Mining XP outside a test zone", "actor": "tester", "metric": "xp", "relative_to": "normal_mining_before", "equals": 190 },
+
+    { "action": "prepare_quest", "actor": "control", "quest": 163 },
+    { "action": "snapshot", "actor": "control", "metric": "xp", "save_as": "normal_quest_before" },
+    { "action": "reward_quest", "actor": "control", "quest": 163 },
+    { "action": "snapshot", "actor": "control", "metric": "xp", "relative_to": "normal_quest_before", "save_as": "normal_quest_xp" },
+
+    { "action": "console", "command": "testzone add 10138" },
+    { "action": "set_skill", "actor": "tester", "skill": 186, "value": 1, "maximum": 75 },
+    { "action": "snapshot", "actor": "tester", "metric": "xp", "save_as": "test_zone_mining_before" },
+    { "action": "gather_skill", "actor": "tester", "skill": 186, "required": 1 },
+    { "action": "assert", "label": "Mining XP in Northshire Valley as a test zone", "actor": "tester", "metric": "xp", "relative_to": "test_zone_mining_before", "equals": 190 },
+
+    { "action": "prepare_quest", "actor": "tester", "quest": 163 },
+    { "action": "snapshot", "actor": "tester", "metric": "xp", "save_as": "test_zone_quest_before" },
+    { "action": "reward_quest", "actor": "tester", "quest": 163 },
+    { "action": "assert", "label": "The test zone doubles quest XP", "actor": "tester", "metric": "xp", "relative_to": "test_zone_quest_before", "ratio_to": "normal_quest_xp", "equals": 2, "within_ms": 5000 },
+    { "action": "console", "command": "testzone remove 10138" }
+  ]
+}

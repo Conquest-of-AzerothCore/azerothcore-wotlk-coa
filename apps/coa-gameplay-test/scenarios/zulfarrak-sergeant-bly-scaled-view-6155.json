@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "name": "Zul'Farrak: Sergeant Bly and Weegli Blastfuse scale with the rest of the crew (COA-6155)",
+  "contract": [
+    "Requires DestinyWeaver.Enable=1 and DestinyWeaver.LevelScaling=1 with the default DestinyWeaver.Scaling.DungeonIds.",
+    "Sergeant Bly (7604) and Weegli Blastfuse (7607) carry UNIT_NPC_FLAG_GOSSIP to start the pyramid event, and",
+    "ViewableCreature kept the authored level for any creature with an npcflag, so a level-39 character saw the rest of",
+    "the crew at 39 and Bly at 45. Gossip alone is not a service: a gossip creature that is hostile or neutral now scales",
+    "like its crew (Raven 7605 has no npcflag and is the control). Friendly gossip creatures keep their level through",
+    "the reaction check."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 209,
+    "x": 1883.82,
+    "y": 1200.83,
+    "z": 8.87,
+    "o": 1.32,
+    "ignore_access": true
+  },
+  "players": [
+    { "id": "pyro", "race": 1, "class": 1, "level": 39 }
+  ],
+  "creatures": [
+    { "id": "raven", "owner": "pyro", "entry": 7605, "level": 44, "distance": 6 },
+    { "id": "bly", "owner": "pyro", "entry": 7604, "level": 45, "distance": 8 },
+    { "id": "weegli", "owner": "pyro", "entry": 7607, "level": 43, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 2000 },
+    { "action": "level_scaling_packet", "actor": "pyro", "value": 1 },
+    {
+      "action": "assert",
+      "label": "SETUP: Raven, without an npcflag, is seen at the character's level",
+      "actor": "pyro",
+      "metric": "view_level",
+      "target": "raven",
+      "equals": 39,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: hostile Sergeant Bly is seen at the character's level",
+      "actor": "pyro",
+      "metric": "view_level",
+      "target": "bly",
+      "equals": 39,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Hostile Weegli Blastfuse is seen at the character's level",
+      "actor": "pyro",
+      "metric": "view_level",
+      "target": "weegli",
+      "equals": 39,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The client is sent Bly's scaled level",
+      "actor": "pyro",
+      "metric": "sent_level",
+      "target": "bly",
+      "equals": 39,
+      "within_ms": 3000
+    }
+  ]
+}

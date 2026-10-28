@@ -1,0 +1,118 @@
+{
+ "schema": 1,
+ "name": "Necromancer: Glacial Impact damages only its target (#7197)",
+ "contract": "Glacial Impact 704355 and its damage spell 707592 use TARGET_UNIT_TARGET_ENEMY with one affected target, so only the chosen enemy takes damage: an enemy two yards behind it and an enemy beyond the 30 yard range keep their health. Permafrost 801747 makes the unfrozen target valid, and spell hit rating removes miss rolls so a missed cast cannot pass as a correct one.",
+ "timeout_ms": 90000,
+ "players": [
+  {
+   "id": "n",
+   "race": 5,
+   "class": 23,
+   "level": 60,
+   "spell_hit_rating": 10000
+  }
+ ],
+ "creatures": [
+  {
+   "id": "d",
+   "owner": "n",
+   "entry": 299,
+   "level": 60,
+   "distance": 12,
+   "stationary": true
+  },
+  {
+   "id": "e",
+   "owner": "n",
+   "entry": 299,
+   "level": 60,
+   "distance": 14,
+   "stationary": true
+  },
+  {
+   "id": "f",
+   "owner": "n",
+   "entry": 299,
+   "level": 60,
+   "distance": 45,
+   "stationary": true
+  }
+ ],
+ "location": {
+  "map": 0,
+  "x": -8917.41,
+  "y": -115.853,
+  "z": 82.3711,
+  "o": 0
+ },
+ "steps": [
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "learn",
+   "spell": 704355,
+   "actor": "n"
+  },
+  {
+   "action": "set_aura",
+   "actor": "n",
+   "spell": 801747,
+   "stacks": 1
+  },
+  {
+   "action": "snapshot",
+   "actor": "d",
+   "metric": "health",
+   "save_as": "d0"
+  },
+  {
+   "action": "snapshot",
+   "actor": "e",
+   "metric": "health",
+   "save_as": "e0"
+  },
+  {
+   "action": "snapshot",
+   "actor": "f",
+   "metric": "health",
+   "save_as": "f0"
+  },
+  {
+   "action": "cast",
+   "spell": 704355,
+   "actor": "n",
+   "target": "d"
+  },
+  {
+   "action": "assert",
+   "label": "Glacial Impact damaged its target",
+   "actor": "d",
+   "metric": "health",
+   "relative_to": "d0",
+   "max": -1,
+   "within_ms": 8000
+  },
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "assert",
+   "label": "An enemy two yards behind the target took no Glacial Impact damage",
+   "actor": "e",
+   "metric": "health",
+   "relative_to": "e0",
+   "equals": 0
+  },
+  {
+   "action": "assert",
+   "label": "An enemy beyond Glacial Impact range took no damage",
+   "actor": "f",
+   "metric": "health",
+   "relative_to": "f0",
+   "equals": 0
+  }
+ ]
+}

@@ -1,0 +1,276 @@
+{
+  "schema": 1,
+  "name": "A Mythical Cache prefers items for the opener's specialization",
+  "contract": "A Mythical Cache (Mythic 1, 2093952) gives one random level 60 Mythic 1 item. The opener's active specialization names its primary stats in ChrSpecs.dbc fields 8-10, as Dungeon Spoils and Callboard Caches use them: Venomancer Venom (54) lists Intellect and Fortitude (52) Agility and Stamina. Among the Mythic 1 items the opener can use, the cache prefers one whose strongest of Strength, Agility, Intellect and Spirit is one of those stats, so after six opens no reward may have a different strongest attribute. 692 of the 1312 Mythic 1 items have an attribute stronger than Intellect, so an unfiltered cache fails the Venom check in about 99 of 100 runs. The Fortitude Venomancer may also receive gear without a primary attribute (attack power, defense or stamina).",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "venom",
+      "race": 1,
+      "class": 29,
+      "level": 60
+    },
+    {
+      "id": "fortitude",
+      "race": 1,
+      "class": 29,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "venom",
+      "id": 54,
+      "label": "venom picks Venom (ChrSpecs 54, primary stat Intellect)"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "add_item",
+      "actor": "venom",
+      "item": 2093952,
+      "count": 6
+    },
+    {
+      "action": "use_item",
+      "actor": "venom",
+      "item": 2093952,
+      "spell": 84284
+    },
+    {
+      "action": "assert",
+      "actor": "venom",
+      "metric": "item_count",
+      "item": 2093952,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "venom",
+      "item": 2093952,
+      "spell": 84284
+    },
+    {
+      "action": "assert",
+      "actor": "venom",
+      "metric": "item_count",
+      "item": 2093952,
+      "equals": 4,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "venom",
+      "item": 2093952,
+      "spell": 84284
+    },
+    {
+      "action": "assert",
+      "actor": "venom",
+      "metric": "item_count",
+      "item": 2093952,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "venom",
+      "item": 2093952,
+      "spell": 84284
+    },
+    {
+      "action": "assert",
+      "actor": "venom",
+      "metric": "item_count",
+      "item": 2093952,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "venom",
+      "item": 2093952,
+      "spell": 84284
+    },
+    {
+      "action": "assert",
+      "actor": "venom",
+      "metric": "item_count",
+      "item": 2093952,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "venom",
+      "item": 2093952,
+      "spell": 84284
+    },
+    {
+      "action": "assert",
+      "actor": "venom",
+      "metric": "item_count",
+      "item": 2093952,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "6 Mythical Caches put 6 level 60 rewards in the bags",
+      "actor": "venom",
+      "metric": "carried_item_count",
+      "min_required_level": 60,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "No reward has a primary attribute stronger than Intellect",
+      "actor": "venom",
+      "metric": "carried_item_count",
+      "min_required_level": 60,
+      "off_stat": 5,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The rewards include Intellect gear",
+      "actor": "venom",
+      "metric": "carried_item_count",
+      "min_required_level": 60,
+      "dominant_stat": 5,
+      "min": 1
+    },
+    {
+      "action": "specialization",
+      "actor": "fortitude",
+      "id": 52,
+      "label": "fortitude picks Fortitude (ChrSpecs 52, primary stats Agility and Stamina)"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "add_item",
+      "actor": "fortitude",
+      "item": 2093952,
+      "count": 6
+    },
+    {
+      "action": "use_item",
+      "actor": "fortitude",
+      "item": 2093952,
+      "spell": 84284
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude",
+      "metric": "item_count",
+      "item": 2093952,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "fortitude",
+      "item": 2093952,
+      "spell": 84284
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude",
+      "metric": "item_count",
+      "item": 2093952,
+      "equals": 4,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "fortitude",
+      "item": 2093952,
+      "spell": 84284
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude",
+      "metric": "item_count",
+      "item": 2093952,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "fortitude",
+      "item": 2093952,
+      "spell": 84284
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude",
+      "metric": "item_count",
+      "item": 2093952,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "fortitude",
+      "item": 2093952,
+      "spell": 84284
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude",
+      "metric": "item_count",
+      "item": 2093952,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "fortitude",
+      "item": 2093952,
+      "spell": 84284
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude",
+      "metric": "item_count",
+      "item": 2093952,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "6 Mythical Caches put 6 level 60 rewards in the bags",
+      "actor": "fortitude",
+      "metric": "carried_item_count",
+      "min_required_level": 60,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "No reward has a primary attribute stronger than Agility",
+      "actor": "fortitude",
+      "metric": "carried_item_count",
+      "min_required_level": 60,
+      "off_stat": 3,
+      "equals": 0
+    }
+  ]
+}

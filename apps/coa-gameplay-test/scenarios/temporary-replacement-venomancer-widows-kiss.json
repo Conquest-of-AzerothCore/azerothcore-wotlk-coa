@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "A Widow's Kiss button is saved as Venom Fang (#5469)",
+  "contract": "AscensionVenomancer::Refresh runs every 500 ms from venomancer_player::OnPlayerUpdate (AscensionVenomancer.cpp:444-448). With the Widow's Kiss talent 807600 ('Every 3rd Venom Fang becomes Widow's Kiss') and at least 2 stacks of its counter 807244, it learns Widow's Kiss 504705 with learnSpell(..., true) (line 407) and replaces every known Venom Fang rank (chain of 800880) with it through SetTemporarySpellReplacement (lines 402-410). The scenario fixtures the counter at 2 stacks; 807244 lasts 4 s, so the checks run without waits. 504705 is never written to character_spell, so a button holding it must be saved as Venom Fang 800880, the spell persisted_action_button reads from Player::GetSavedActionButtonSpell; a button holding Venom Fang itself is saved unchanged.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "v", "race": 1, "class": 29, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login state settle", "ms": 3000 },
+    { "action": "learn", "actor": "v", "spell": 800880 },
+    { "action": "learn", "actor": "v", "spell": 807600 },
+    { "action": "set_aura", "label": "The next Venom Fang becomes Widow's Kiss", "actor": "v", "spell": 807244, "stacks": 2 },
+    {
+      "action": "assert",
+      "label": "Venom Fang is replaced with Widow's Kiss",
+      "actor": "v",
+      "metric": "temporary_spell_replacement",
+      "spell": 800880,
+      "equals": 504705,
+      "within_ms": 2000
+    },
+    { "action": "set_action_button", "actor": "v", "button": 2, "spell": 504705 },
+    { "action": "set_action_button", "actor": "v", "button": 3, "spell": 800880 },
+    {
+      "action": "assert",
+      "label": "The bar holds Widow's Kiss",
+      "actor": "v",
+      "metric": "action_button",
+      "button": 2,
+      "equals": 504705
+    },
+    {
+      "action": "assert",
+      "label": "The Widow's Kiss button is saved as Venom Fang",
+      "actor": "v",
+      "metric": "persisted_action_button",
+      "button": 2,
+      "equals": 800880
+    },
+    {
+      "action": "assert",
+      "label": "Control: the Venom Fang button is saved unchanged",
+      "actor": "v",
+      "metric": "persisted_action_button",
+      "button": 3,
+      "equals": 800880
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+#include "AscensionWildcard.h"
 #include "DatabaseEnv.h"
 #include "DBCStores.h"
 #include "GameTime.h"
@@ -41,7 +42,7 @@ void ReleaseAccount(uint32 accountId)
 void GrantWarchest(Player* player)
 {
     WorldSession* session = player->GetSession();
-    if (session->IsBot())
+    if (session->IsBot() || AscensionWildcard::IsWildcardHero(player))
         return;
 
     uint32 const accountId = session->GetAccountId();

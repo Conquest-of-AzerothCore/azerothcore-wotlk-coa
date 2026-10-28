@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Guardian Advance's stomp reaches the client without its warrior stance requirement (#6475)",
+  "contract": [
+    "Advance 500170 swaps itself for its stomp 500673 so pressing it again stomps. 500673 still carries the warrior's",
+    "Battle and Defensive Stance requirement in Spell.dbc; AscensionGuardian::ApplyContracts clears it for the server",
+    "(info->Stances = 0), but the client kept its own row, greyed the stomp out with 'Requires Battle Stance, Defensive",
+    "Stance' and would not cast it, so Advance could not be recast. The login spell patch stream now carries the",
+    "server's Stances and StancesNot and includes 500673. Expected: the stomp's SMSG_PATCH_SPELL row (2346) is sent",
+    "with Stances (wire word 12) 0."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "guardian", "race": 1, "class": 18, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the login patch stream go out", "ms": 7000},
+    {
+      "action": "assert", "label": "The stomp's row reaches the client", "actor": "guardian",
+      "metric": "server_packets", "opcode": 2346, "row": 500673, "min": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "It carries no stance requirement", "actor": "guardian",
+      "metric": "server_packet_u32", "opcode": 2346, "row": 500673, "index": 12, "equals": 0
+    }
+  ]
+}

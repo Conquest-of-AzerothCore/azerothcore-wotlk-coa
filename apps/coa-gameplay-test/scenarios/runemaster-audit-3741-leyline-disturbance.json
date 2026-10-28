@@ -1,38 +1,154 @@
 {
   "schema": 1,
   "name": "Runemaster audit: Leyline Disturbance raid-hastes allies 10% and cuts stun duration on self 20% (#3741)",
-  "contract": "Leyline Disturbance 560540 effect 0 is SPELL_EFFECT_APPLY_AREA_AURA_RAID (65) carrying SPELL_AURA_MOD_MELEE_RANGED_HASTE (192), EffectBasePoints 9 + DieSides 1 = +10, RadiusIndex 287 (~100yd) - the same native raid-aura delivery proven for the Barbarian audit's raid passives. Effect 1 is a self-targeted SPELL_AURA_MECHANIC_DURATION_MOD (232), EffectMiscValue 12 (MECHANIC_STUN), EffectBasePoints -21 + 1 = -20%, implemented in Unit::CalculateSpellDuration. Cheap Shot (1833) has Mechanic 12 and a 4000ms base duration (SpellDuration 35), long enough to observe a clean 20% cut. Verification notes: (1) WorldSession::HandleCancelAuraOpcode (SpellHandler.cpp:605) refuses to remove a non-positive aura ('don't allow remove non positive spells') - Cheap Shot's stun is harmful, so the client-style cancel_aura action silently no-ops on it; this uses set_aura with stacks 0 (Unit::RemoveAurasDueToSpell, no positivity check) to clear the stun between the two casts instead. (2) Unit::ApplyDiminishingToDuration (Unit.cpp:12615) applies stun-category Diminishing Returns to any player target independently of Leyline Disturbance - Unit::GetDiminishing (Unit.cpp:12575) only resets the DR level to 1 (full duration) once the prior stack is gone AND more than 15000ms have passed since the last hit; recasting Cheap Shot right after clearing it would still land at DR level 2 (an extra native 50% cut on top of Leyline's own -20%), so this waits over 15s between the two casts to isolate Leyline's own mechanism. (3) aura_duration_ms reads the aura's live remaining duration, which decays every real millisecond, so the post-cast reading is taken as an immediate snapshot (no assert-with-within_ms polling window) to avoid comparing a stale, partially-decayed value.",
+  "contract": [
+    "Leyline Disturbance 560540 effect 0 is SPELL_EFFECT_APPLY_AREA_AURA_RAID (65) carrying",
+    "SPELL_AURA_MOD_MELEE_RANGED_HASTE (192), EffectBasePoints 9 + DieSides 1 = +10, RadiusIndex 287 (~100yd)",
+    "- the same native raid-aura delivery proven for the Barbarian audit's raid passives. Effect 1 is a",
+    "self-targeted SPELL_AURA_MECHANIC_DURATION_MOD (232), EffectMiscValue 12 (MECHANIC_STUN),",
+    "EffectBasePoints -21 + 1 = -20%, implemented in Unit::CalculateSpellDuration. Ravage (24213) has an",
+    "authored four-second stun (SpellDuration 35, effect mechanic 12) and SPELL_ATTR3_ALWAYS_HIT. It provides",
+    "a native NPC stun whose attack roll cannot randomly miss; the prior Cheap Shot NPC fixture could leave a",
+    "zero duration baseline after a dodge or parry. Verification notes: (1)",
+    "WorldSession::HandleCancelAuraOpcode (SpellHandler.cpp:605) refuses to remove a non-positive aura",
+    "('don't allow remove non positive spells') - Ravage's stun is harmful, so the client-style cancel_aura",
+    "action silently no-ops on it; this uses set_aura with stacks 0 (Unit::RemoveAurasDueToSpell, no",
+    "positivity check) to clear the stun between the two casts instead. (2) Unit::ApplyDiminishingToDuration",
+    "(Unit.cpp:12615) applies stun-category Diminishing Returns to any player target independently of Leyline",
+    "Disturbance - Unit::GetDiminishing (Unit.cpp:12575) only resets the DR level to 1 (full duration) once",
+    "the prior stack is gone AND more than 15000ms have passed since the last hit; recasting Ravage right",
+    "after clearing it would still land at DR level 2 (an extra native 50% cut on top of Leyline's own -20%),",
+    "so this waits over 15s between the two casts to isolate Leyline's own mechanism. (3) aura_duration_ms",
+    "reads the aura's live remaining duration, which decays with the native game clock, so the post-cast",
+    "reading is taken as an immediate snapshot (no assert-with-within_ms polling window) to avoid comparing a",
+    "stale, partially-decayed value."
+  ],
   "timeout_ms": 90000,
   "players": [
-    {"id": "rm", "race": 1, "class": 32, "level": 40},
-    {"id": "ally", "race": 1, "class": 32, "level": 40}
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 40
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 32,
+      "level": 40
+    }
   ],
   "creatures": [
-    {"id": "stunner", "owner": "rm", "entry": 36, "level": 40, "distance": 5}
+    {
+      "id": "stunner",
+      "owner": "rm",
+      "entry": 36,
+      "level": 40,
+      "distance": 5
+    }
   ],
   "steps": [
-    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
-    {"action": "group", "actor": "rm", "target": "ally"},
-
-    {"action": "snapshot", "label": "Baseline ally swing time", "actor": "ally",
-      "metric": "attack_time_ms", "hand": 0, "save_as": "ally_swing_before"},
-    {"action": "cast", "actor": "stunner", "spell": 1833, "target": "rm"},
-    {"action": "snapshot", "label": "Baseline Cheap Shot duration on self", "actor": "rm",
-      "metric": "aura_duration_ms", "spell": 1833, "save_as": "stun_before"},
-    {"action": "set_aura", "label": "Clear the stun (cancel_aura refuses non-positive auras)", "actor": "rm",
-      "spell": 1833, "stacks": 0},
-    {"action": "assert", "label": "SETUP: the stun is cleared", "actor": "rm", "metric": "aura", "spell": 1833,
-      "equals": 0, "within_ms": 1000},
-
-    {"action": "learn", "actor": "rm", "spell": 560540},
-    {"action": "assert", "label": "Leyline Disturbance reaches the party member", "actor": "ally",
-      "metric": "aura", "spell": 560540, "equals": 1, "within_ms": 15000},
-    {"action": "assert", "label": "Ally swings are 10% faster (1/1.10 = 0.909)", "actor": "ally",
-      "metric": "attack_time_ms", "hand": 0, "ratio_to": "ally_swing_before", "min": 0.895, "max": 0.925},
-
-    {"action": "wait", "label": "Let stun-category Diminishing Returns fully reset (>15s)", "ms": 16000},
-    {"action": "cast", "actor": "stunner", "spell": 1833, "target": "rm"},
-    {"action": "assert", "label": "Cheap Shot duration on self is cut ~20% (0.75-0.85)", "actor": "rm",
-      "metric": "aura_duration_ms", "spell": 1833, "ratio_to": "stun_before", "min": 0.75, "max": 0.85}
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "rm",
+      "target": "ally"
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline ally swing time",
+      "actor": "ally",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "save_as": "ally_swing_before"
+    },
+    {
+      "action": "cast",
+      "actor": "stunner",
+      "spell": 24213,
+      "target": "rm"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 24213,
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "The authored always-hit NPC stun supplies a nonzero native baseline"
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline Ravage duration on self",
+      "actor": "rm",
+      "metric": "aura_duration_ms",
+      "spell": 24213,
+      "save_as": "stun_before"
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the stun (cancel_aura refuses non-positive auras)",
+      "actor": "rm",
+      "spell": 24213,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the stun is cleared",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 24213,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 560540
+    },
+    {
+      "action": "assert",
+      "label": "Leyline Disturbance reaches the party member",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 560540,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Ally swings are 10% faster (1/1.10 = 0.909)",
+      "actor": "ally",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "ratio_to": "ally_swing_before",
+      "min": 0.895,
+      "max": 0.925
+    },
+    {
+      "action": "wait",
+      "label": "Let stun-category Diminishing Returns fully reset (>15s)",
+      "ms": 16000
+    },
+    {
+      "action": "cast",
+      "actor": "stunner",
+      "spell": 24213,
+      "target": "rm"
+    },
+    {
+      "action": "assert",
+      "label": "Ravage duration on self is cut ~20% (0.75-0.85)",
+      "actor": "rm",
+      "metric": "aura_duration_ms",
+      "spell": 24213,
+      "ratio_to": "stun_before",
+      "min": 0.75,
+      "max": 0.85
+    }
   ]
 }

@@ -1,0 +1,267 @@
+{
+  "schema": 1,
+  "name": "Cross-faction battleground: two Alliance players queue for Warsong Gulch and fight on opposite sides",
+  "contract": "Battlegrounds match players regardless of faction. Two Alliance players who queue for Warsong Gulch one after the other enter the same match on opposite sides: the first keeps the Alliance side, the second fights for the Horde and counts as Horde while inside, while keeping their own race and appearance; name queries answer with a Horde race so the client's scoreboard lists them as Horde. Leaving the battleground returns the second player to the Alliance.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "first",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "second",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8809.6,
+    "y": 625.0,
+    "z": 94.979,
+    "o": 2.1
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the characters settle",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Remember the second player's appearance",
+      "actor": "second",
+      "metric": "display_id",
+      "save_as": "second_display"
+    },
+    {
+      "action": "console",
+      "label": "Battleground test mode starts a match without the minimum player count",
+      "command": "debug bg"
+    },
+    {
+      "action": "client_packet",
+      "label": "The first player queues for Warsong Gulch",
+      "actor": "first",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The second player queues for Warsong Gulch",
+      "actor": "second",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "label": "Let the queue invite both players",
+      "ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "The first player enters the battleground",
+      "actor": "first",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "first"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The second player enters the battleground",
+      "actor": "second",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "second"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The first player is in Warsong Gulch",
+      "actor": "first",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "The second player is in Warsong Gulch",
+      "actor": "second",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "The first player fights for the Alliance",
+      "actor": "first",
+      "metric": "battleground_team",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The second player fights for the Horde",
+      "actor": "second",
+      "metric": "battleground_team",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The first player stays Alliance",
+      "actor": "first",
+      "metric": "team",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The second player counts as Horde inside the battleground",
+      "actor": "second",
+      "metric": "team",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The second player stays Human on the Horde side",
+      "actor": "second",
+      "metric": "race",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The second player keeps their own appearance",
+      "actor": "second",
+      "metric": "display_id",
+      "relative_to": "second_display",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Name queries answer with a Horde race so the scoreboard lists the second player as Horde",
+      "actor": "second",
+      "metric": "name_query_race",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Name queries for the first player keep their own race",
+      "actor": "first",
+      "metric": "name_query_race",
+      "equals": 1
+    },
+    {
+      "action": "client_packet",
+      "label": "The second player leaves the battleground",
+      "actor": "second",
+      "opcode": 737,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The second player is back outside",
+      "actor": "second",
+      "metric": "battleground_team",
+      "equals": -1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "and is Alliance again",
+      "actor": "second",
+      "metric": "team",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Name queries answer with the second player's own race again",
+      "actor": "second",
+      "metric": "name_query_race",
+      "equals": 1
+    }
+  ]
+}

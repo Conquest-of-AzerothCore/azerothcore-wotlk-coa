@@ -1,0 +1,140 @@
+{
+  "schema": 1,
+  "name": "Call of the Darkwing's Shadow Bat hits with its owner's level of weapon damage (#9158)",
+  "contract": [
+    "Shadow Bat 50069 (summoned by Call of the Darkwing 801958/802578, SPELL_EFFECT_SUMMON, SummonProperties 61",
+    "= ally guardian, type=12 CREATURE_TYPE_NON_COMBAT_PET, pinned 1/1 creature_template level band) relied on",
+    "Guardian::InitStatsForLevel re-deriving its stats from the owner, but that function only re-derives weapon",
+    "damage for a hardcoded stock-pet entry list; entry 50069 matched none of them, so the bat kept its level-1",
+    "white hit (the flat ~3 damage of #9158) regardless of the owner's actual level.",
+    "bloodmage_darkwing_bat mirrors ranger_wingman_companions: it re-derives base weapon damage and attack",
+    "power from creature_classlevelstats at the guardian's level in OnPlayerAfterGuardianInitStatsForLevel,",
+    "which runs after Guardian::InitStats has already raised the guardian to the owner's level.",
+    "Expected: a level-80 Bloodmage's Shadow Bat reports level-80 minimum weapon damage, several times a",
+    "level-20 Bloodmage's bat; before the fix both report the same level-1 value."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    },
+    {
+      "id": "novice",
+      "race": 1,
+      "class": 20,
+      "level": 20
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "novice_dummy",
+      "owner": "novice",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 801958
+    },
+    {
+      "action": "learn",
+      "actor": "novice",
+      "spell": 801958
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Level-80 Call of the Darkwing",
+      "actor": "bloodmage",
+      "spell": 801958,
+      "target": "dummy"
+    },
+    {
+      "action": "set_power",
+      "actor": "novice",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Level-20 Call of the Darkwing",
+      "actor": "novice",
+      "spell": 801958,
+      "target": "novice_dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the level-80 Bloodmage has a Shadow Bat",
+      "actor": "bloodmage",
+      "metric": "owned_creature_count",
+      "entry": 50069,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the level-20 Bloodmage has a Shadow Bat",
+      "actor": "novice",
+      "metric": "owned_creature_count",
+      "entry": 50069,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "novice",
+      "metric": "owned_creature_weapon_damage_min",
+      "entry": 50069,
+      "save_as": "novice_bat"
+    },
+    {
+      "action": "assert",
+      "label": "A level-20 bat hits harder than a level-1 one",
+      "actor": "novice",
+      "metric": "owned_creature_weapon_damage_min",
+      "entry": 50069,
+      "min": 5
+    },
+    {
+      "action": "assert",
+      "label": "A level-80 bat has level-80 weapon damage",
+      "actor": "bloodmage",
+      "metric": "owned_creature_weapon_damage_min",
+      "entry": 50069,
+      "min": 40
+    },
+    {
+      "action": "assert",
+      "label": "Shadow Bat weapon damage scales with the owner's level",
+      "actor": "bloodmage",
+      "metric": "owned_creature_weapon_damage_min",
+      "entry": 50069,
+      "ratio_to": "novice_bat",
+      "min": 3
+    }
+  ]
+}

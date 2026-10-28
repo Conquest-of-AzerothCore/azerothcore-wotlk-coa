@@ -1,0 +1,198 @@
+{
+  "schema": 1,
+  "name": "Issue 4429: Fists of Power adds an off-hand Runeblade strike in Runic",
+  "contract": [
+    "#4429 (level 16 Runemaster) reports Fists of Power 92153 'talent not working'. 92153 reads 'Level 10 Passive:",
+    "Runeblade now strikes your target an additional time for $500462s1% of the damage dealt with your offhand",
+    "weapon'. CharacterAdvancement 4062 is the Runic (ChrSpecs 61) identity entry. Like all 69 identity passives",
+    "its authored RequiredEntry (29521, the signature Zenith) is cleared by the loader, so Runic grants it at level 10.",
+    "500462 effect 0 is 49+1 = 50 with EffectTriggerSpell 712298 Runeblade (Off-Hand), a family 38 school-damage",
+    "spell that requires an off-hand weapon. Expected: in Runic the passive is owned and every",
+    "Runeblade hit adds one 712298 strike worth 50% of that hit."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 16,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "rm",
+      "entry": 36,
+      "level": 16,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks and class synchronisation settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 707141
+    },
+    {
+      "action": "add_item",
+      "actor": "rm",
+      "item": 2092,
+      "count": 2
+    },
+    {
+      "action": "equip",
+      "label": "Main-hand dagger",
+      "actor": "rm",
+      "item": 2092,
+      "slot": 15
+    },
+    {
+      "action": "equip",
+      "label": "Off-hand dagger",
+      "actor": "rm",
+      "item": 2092,
+      "slot": 16
+    },
+    {
+      "action": "specialization",
+      "label": "Choose Runic (Engravement)",
+      "actor": "rm",
+      "id": 61
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Runic owns the Fists of Power passive",
+      "actor": "rm",
+      "metric": "knows_spell",
+      "spell": 92153,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The passive aura is active",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 92153,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Runeblade global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "restore_charges",
+      "actor": "rm",
+      "spell": 707141
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 707141,
+      "save_as": "rb_n1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 707141,
+      "save_as": "rb_t1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 712298,
+      "save_as": "oh_n1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 712298,
+      "save_as": "oh_t1"
+    },
+    {
+      "action": "cast",
+      "label": "Runeblade 1 with Fists of Power",
+      "actor": "rm",
+      "spell": 707141,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Runeblade global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Runeblade 2 with Fists of Power",
+      "actor": "rm",
+      "spell": 707141,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: both Runeblade hits land",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 707141,
+      "relative_to": "rb_n1",
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: each Runeblade hit adds exactly one off-hand strike",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 712298,
+      "relative_to": "oh_n1",
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 707141,
+      "relative_to": "rb_t1",
+      "save_as": "rb_delta"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the off-hand strikes deal 50% of the Runeblade damage",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 712298,
+      "relative_to": "oh_t1",
+      "ratio_to": "rb_delta",
+      "min": 0.47,
+      "max": 0.53
+    }
+  ]
+}

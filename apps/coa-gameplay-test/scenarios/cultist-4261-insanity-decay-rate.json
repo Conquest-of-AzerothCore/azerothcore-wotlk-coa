@@ -8,7 +8,6 @@
   ],
   "steps": [
     { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
-    { "action": "learn", "actor": "cultist", "spell": 500706 },
     { "action": "set_aura", "actor": "cultist", "spell": 500706, "stacks": 40 },
     {
       "action": "wait", "label": "Let Refresh() apply the 500727 decay helper aura (polled every 500 ms)",

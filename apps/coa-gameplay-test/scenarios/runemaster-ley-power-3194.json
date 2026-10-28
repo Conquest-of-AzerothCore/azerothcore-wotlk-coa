@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "name": "Issue 3194: Ley Power stacks per nearby enemy and adds 10% per stack of damage dealt as Arcane damage",
+  "contract": [
+    "Ley Power 801096: 'Divert ley energy into your weapons, drawing power from enemies within $a1 yds of you. For",
+    "each enemy in the radius, your damage dealt deals an additional $803258s1% of the damage as Arcane damage, up to",
+    "100%, for $801096d.' Radius index 9 (20 yd), duration index 8 (15 s). Effect 0 is SPELL_EFFECT_SCRIPT_EFFECT on",
+    "TARGET_UNIT_SRC_AREA_ENEMY naming 802647, which force-casts Harvested Ley Energy 803258 on the caster: aura 354",
+    "(no core handler) of 9 + 1 = 10, StackAmount 10, naming 803282, the Arcane strike (SCHOOL_DAMAGE, CANT_CRIT,",
+    "IGNORE_CASTER_MODIFIERS, IGNORE_DAMAGE_TAKEN_MODIFIERS, IGNORE_CASTER_DAMAGE_MODIFIERS). Effect 2 is",
+    "SPELL_AURA_PROC_TRIGGER_SPELL 804316 ('Damage dealt now grants Harnessed Leylines') with ProcFlags 0 and no",
+    "spell_proc row. No script or SQL names 801096, 802647, 803258, 803282 or 804316, so casting grants no stacks,",
+    "adds no Arcane damage and grants no Harnessed Leylines. Expected: three enemies within 20 yd and one beyond it",
+    "give three stacks; the caster's melee damage then adds 30% of each hit as 803282 on the struck target, and",
+    "damage dealt grants Harnessed Leylines."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000,
+      "spell_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "near", "owner": "rm", "entry": 36, "level": 80, "health": 1000000, "distance": 3},
+    {"id": "middle", "owner": "rm", "entry": 36, "level": 80, "health": 1000000, "distance": 9},
+    {"id": "edge", "owner": "rm", "entry": 36, "level": 80, "health": 1000000, "distance": 15},
+    {"id": "far", "owner": "rm", "entry": 36, "level": 80, "health": 1000000, "distance": 35}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 197},
+    {"action": "add_item", "actor": "rm", "item": 12784},
+    {"action": "equip", "actor": "rm", "item": 12784, "slot": 15},
+    {"action": "learn", "actor": "rm", "spell": 801096},
+    {"action": "assert", "label": "SETUP: no Harnessed Leylines before Ley Power", "actor": "rm", "metric": "aura",
+      "spell": 804316, "equals": 0},
+
+    {"action": "cast", "label": "Ley Power draws from the enemies around the caster", "actor": "rm",
+      "spell": 801096},
+    {"action": "assert", "label": "Ley Power is active", "actor": "rm", "metric": "aura", "spell": 801096,
+      "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "One Harvested Ley Energy stack per enemy within 20 yd", "actor": "rm",
+      "metric": "aura_stacks", "spell": 803258, "equals": 3, "within_ms": 1500},
+    {"action": "assert", "label": "Harvested Ley Energy is worth 30% at three stacks", "actor": "rm",
+      "metric": "aura_amount", "spell": 803258, "equals": 30},
+
+    {"action": "snapshot", "actor": "rm", "metric": "melee_damage_total", "save_as": "melee_before"},
+    {"action": "snapshot", "actor": "rm", "metric": "spell_damage_total", "spell": 803282, "target": "near",
+      "save_as": "arcane_before"},
+    {"action": "attack", "actor": "rm", "target": "near"},
+    {"action": "wait", "ms": 4000},
+    {"action": "stop_attack", "actor": "rm"},
+    {"action": "wait", "ms": 500},
+    {"action": "snapshot", "actor": "rm", "metric": "melee_damage_total", "relative_to": "melee_before",
+      "save_as": "melee_dealt"},
+    {"action": "assert", "label": "SETUP: the caster's swings hit", "actor": "rm", "metric": "melee_damage_total",
+      "relative_to": "melee_before", "min": 100},
+    {"action": "assert", "label": "Each hit adds 30% of its damage as Arcane damage to the struck target",
+      "actor": "rm", "metric": "spell_damage_total", "spell": 803282, "target": "near",
+      "relative_to": "arcane_before", "ratio_to": "melee_dealt", "min": 0.29, "max": 0.3001},
+    {"action": "assert", "label": "Damage dealt under Ley Power grants Harnessed Leylines", "actor": "rm",
+      "metric": "aura_stacks", "spell": 804316, "min": 1},
+    {"action": "assert", "label": "Ley Power lasts 15 s", "actor": "rm", "metric": "aura", "spell": 801096,
+      "equals": 0, "within_ms": 12000},
+    {"action": "assert", "label": "Harvested Ley Energy ends with Ley Power", "actor": "rm", "metric": "aura",
+      "spell": 803258, "equals": 0, "within_ms": 1000}
+  ]
+}

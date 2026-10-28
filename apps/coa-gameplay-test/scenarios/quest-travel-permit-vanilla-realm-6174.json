@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "The Travel Permit hides Sunstrider Isle and Ammen Vale from a session that cannot enter Outland (#6174)",
+  "contract": [
+    "Report #6174: on a realm with Expansion = 0 every teleport into map 530 fails with 'Missing Burning Crusade'.",
+    "Player::TeleportTo refuses a map whose MapEntry::Expansion() is above the session's expansion, and Map.dbc gives",
+    "Outland (530) expansion 1, so a session with expansion 0 can never arrive at Sunstrider Isle or Ammen Vale.",
+    "Decision: map 530 stays closed on Expansion 0, so the Travel Permit 977028 (spell 1001088) offers only the",
+    "destinations its holder can enter. A level 1 Blood Elf and Draenei on expansion 0 see their faction's three",
+    "vanilla starts, while an Orc on expansion 2 still sees all four Horde starts with Sunstrider Isle last."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "bloodelf", "race": 10, "class": 20, "level": 1, "expansion": 0 },
+    { "id": "draenei", "race": 11, "class": 20, "level": 1, "expansion": 0 },
+    { "id": "orc", "race": 2, "class": 20, "level": 1 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 2000 },
+    { "action": "add_item", "label": "The Blood Elf receives a Travel Permit", "actor": "bloodelf", "item": 977028, "count": 1 },
+    { "action": "add_item", "label": "The Draenei receives a Travel Permit", "actor": "draenei", "item": 977028, "count": 1 },
+    { "action": "add_item", "label": "The Orc receives a Travel Permit", "actor": "orc", "item": 977028, "count": 1 },
+    { "action": "use_item", "label": "The Orc uses the permit", "actor": "orc", "item": 977028, "spell": 1001088 },
+    { "action": "wait", "label": "Let the Orc's destination menu open", "ms": 2000 },
+    { "action": "assert", "label": "Expansion 2: all four Horde starts are offered", "actor": "orc", "metric": "gossip_options", "equals": 4 },
+    { "action": "assert", "label": "Expansion 2: Sunstrider Isle is the fourth", "actor": "orc", "metric": "gossip_option_text", "index": 3, "text": "Sunstrider Isle", "equals": 1 },
+    { "action": "use_item", "label": "The Blood Elf uses the permit", "actor": "bloodelf", "item": 977028, "spell": 1001088 },
+    { "action": "wait", "label": "Let the Blood Elf's destination menu open", "ms": 2000 },
+    { "action": "assert", "label": "Expansion 0: only the three vanilla Horde starts are offered", "actor": "bloodelf", "metric": "gossip_options", "equals": 3 },
+    { "action": "assert", "label": "Tirisfal Glades first", "actor": "bloodelf", "metric": "gossip_option_text", "index": 0, "text": "Tirisfal Glades", "equals": 1 },
+    { "action": "assert", "label": "Durotar second", "actor": "bloodelf", "metric": "gossip_option_text", "index": 1, "text": "Durotar", "equals": 1 },
+    { "action": "assert", "label": "Mulgore third", "actor": "bloodelf", "metric": "gossip_option_text", "index": 2, "text": "Mulgore", "equals": 1 },
+    { "action": "use_item", "label": "The Draenei uses the permit", "actor": "draenei", "item": 977028, "spell": 1001088 },
+    { "action": "wait", "label": "Let the Draenei's destination menu open", "ms": 2000 },
+    { "action": "assert", "label": "Expansion 0: only the three vanilla Alliance starts are offered", "actor": "draenei", "metric": "gossip_options", "equals": 3 },
+    { "action": "assert", "label": "Elwynn Forest first", "actor": "draenei", "metric": "gossip_option_text", "index": 0, "text": "Elwynn Forest", "equals": 1 },
+    { "action": "assert", "label": "Dun Morogh second", "actor": "draenei", "metric": "gossip_option_text", "index": 1, "text": "Dun Morogh", "equals": 1 },
+    { "action": "assert", "label": "Teldrassil third", "actor": "draenei", "metric": "gossip_option_text", "index": 2, "text": "Teldrassil", "equals": 1 }
+  ]
+}

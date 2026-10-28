@@ -1,0 +1,555 @@
+{
+  "schema": 1,
+  "name": "sun-cleric-holy-knight-native-ally-healing-6029",
+  "contract": [
+    "Holy Knight 301011 promises Gavel of Light will additionally heal up to five nearby allies for 100% of its owner heal. Native helper 301012 supplies a twenty-yard radius. Drive normal Gavel damage and actual resolved 707522 self healing, then compare each selected ally effective heal with that self heal.",
+    "A raid fixture has six injured nearby allies plus an out-of-range ally; a friendly nonmember and the more injured owner must not take a target slot. Untalented and removed-talent casts still heal the owner and never create the additional heal."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally1",
+      "race": 1,
+      "class": 8,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "ally2",
+      "race": 1,
+      "class": 8,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "ally3",
+      "race": 1,
+      "class": 8,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "ally4",
+      "race": 1,
+      "class": 8,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "ally5",
+      "race": 1,
+      "class": 8,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "ally6",
+      "race": 1,
+      "class": 8,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "foreign",
+      "race": 1,
+      "class": 8,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 800611
+    },
+    {
+      "action": "group",
+      "actor": "cleric",
+      "target": "ally1"
+    },
+    {
+      "action": "group",
+      "actor": "cleric",
+      "target": "ally2"
+    },
+    {
+      "action": "group",
+      "actor": "cleric",
+      "target": "ally3"
+    },
+    {
+      "action": "group",
+      "actor": "cleric",
+      "target": "ally4"
+    },
+    {
+      "action": "group",
+      "actor": "cleric",
+      "target": "ally5"
+    },
+    {
+      "action": "group",
+      "actor": "cleric",
+      "target": "ally6"
+    },
+    {
+      "action": "set_health",
+      "actor": "cleric",
+      "maximum": 100000,
+      "value": 100
+    },
+    {
+      "action": "set_health",
+      "actor": "ally1",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally2",
+      "maximum": 100000,
+      "value": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally3",
+      "maximum": 100000,
+      "value": 3000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally4",
+      "maximum": 100000,
+      "value": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally5",
+      "maximum": 100000,
+      "value": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally6",
+      "maximum": 100000,
+      "value": 6000
+    },
+    {
+      "action": "set_health",
+      "actor": "foreign",
+      "maximum": 100000,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 800611,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "cast_failure",
+      "spell": 800611,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_damage_count",
+      "spell": 800611,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_damage_count",
+      "spell": 800611,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 3000,
+      "label": "cleric: spell_damage_count 800611 enemy 1"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 707522,
+      "target": "cleric",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "cleric: spell_heal_count 707522 cleric 1"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 301012,
+      "equals": 0,
+      "label": "cleric: spell_heal_count 301012 0"
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 301011
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 301011,
+      "equals": 1,
+      "label": "cleric: aura 301011 1"
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "snapshot",
+      "actor": "cleric",
+      "metric": "spell_effective_heal_total",
+      "save_as": "owner_before",
+      "spell": 707522,
+      "target": "cleric",
+      "label": "cleric: spell_effective_heal_total 707522 cleric"
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 800611,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "cast_failure",
+      "spell": 800611,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_damage_count",
+      "spell": 800611,
+      "target": "enemy",
+      "min": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 707522,
+      "target": "cleric",
+      "equals": 2,
+      "within_ms": 3000,
+      "label": "cleric: spell_heal_count 707522 cleric 2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "cleric",
+      "metric": "spell_effective_heal_total",
+      "save_as": "owner_after",
+      "spell": 707522,
+      "target": "cleric",
+      "relative_to": "owner_before",
+      "label": "cleric: spell_effective_heal_total 707522 cleric"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 301012,
+      "equals": 5,
+      "within_ms": 1000,
+      "label": "cleric: spell_heal_count 301012 5"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 301012,
+      "target": "ally1",
+      "equals": 1,
+      "label": "cleric: spell_heal_count 301012 ally1 1"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_effective_heal_total",
+      "spell": 301012,
+      "target": "ally1",
+      "relative_to": "owner_after",
+      "equals": 0,
+      "label": "cleric: spell_effective_heal_total 301012 ally1 0"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 301012,
+      "target": "ally2",
+      "equals": 1,
+      "label": "cleric: spell_heal_count 301012 ally2 1"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_effective_heal_total",
+      "spell": 301012,
+      "target": "ally2",
+      "relative_to": "owner_after",
+      "equals": 0,
+      "label": "cleric: spell_effective_heal_total 301012 ally2 0"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 301012,
+      "target": "ally3",
+      "equals": 1,
+      "label": "cleric: spell_heal_count 301012 ally3 1"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_effective_heal_total",
+      "spell": 301012,
+      "target": "ally3",
+      "relative_to": "owner_after",
+      "equals": 0,
+      "label": "cleric: spell_effective_heal_total 301012 ally3 0"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 301012,
+      "target": "ally4",
+      "equals": 1,
+      "label": "cleric: spell_heal_count 301012 ally4 1"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_effective_heal_total",
+      "spell": 301012,
+      "target": "ally4",
+      "relative_to": "owner_after",
+      "equals": 0,
+      "label": "cleric: spell_effective_heal_total 301012 ally4 0"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 301012,
+      "target": "ally5",
+      "equals": 1,
+      "label": "cleric: spell_heal_count 301012 ally5 1"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_effective_heal_total",
+      "spell": 301012,
+      "target": "ally5",
+      "relative_to": "owner_after",
+      "equals": 0,
+      "label": "cleric: spell_effective_heal_total 301012 ally5 0"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 301012,
+      "target": "cleric",
+      "equals": 0,
+      "label": "cleric: spell_heal_count 301012 cleric 0"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 301012,
+      "target": "ally6",
+      "equals": 0,
+      "label": "cleric: spell_heal_count 301012 ally6 0"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 301012,
+      "target": "foreign",
+      "equals": 0,
+      "label": "cleric: spell_heal_count 301012 foreign 0"
+    },
+    {
+      "action": "teleport",
+      "actor": "ally5",
+      "map": 0,
+      "x": -8889.41,
+      "y": -115.853,
+      "z": 82.3711,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 800611,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "cast_failure",
+      "spell": 800611,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_damage_count",
+      "spell": 800611,
+      "target": "enemy",
+      "min": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 707522,
+      "target": "cleric",
+      "equals": 3,
+      "within_ms": 3000,
+      "label": "cleric: spell_heal_count 707522 cleric 3"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 301012,
+      "equals": 10,
+      "within_ms": 1000,
+      "label": "cleric: spell_heal_count 301012 10"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 301012,
+      "target": "ally5",
+      "equals": 1,
+      "label": "cleric: spell_heal_count 301012 ally5 1"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 301012,
+      "target": "ally6",
+      "equals": 1,
+      "label": "cleric: spell_heal_count 301012 ally6 1"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 301012,
+      "target": "foreign",
+      "equals": 0,
+      "label": "cleric: spell_heal_count 301012 foreign 0"
+    },
+    {
+      "action": "unlearn",
+      "actor": "cleric",
+      "spell": 301011
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 800611,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "cast_failure",
+      "spell": 800611,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_damage_count",
+      "spell": 800611,
+      "target": "enemy",
+      "min": 4,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 707522,
+      "target": "cleric",
+      "equals": 4,
+      "within_ms": 3000,
+      "label": "cleric: spell_heal_count 707522 cleric 4"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 301012,
+      "equals": 10,
+      "label": "cleric: spell_heal_count 301012 10"
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "cleric",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 5
+    }
+  ]
+}

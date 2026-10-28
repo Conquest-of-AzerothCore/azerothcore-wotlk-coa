@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "name": "Path to Ascension: Novice Rider is a riding trainer quest that rewards the race's starter mount",
+  "contract": [
+    "Live CoA: the racial riding trainer offers 'Path to Ascension: Novice Rider' with the objective 'Learn how to ride and claim your first mount.' and the race's starter mount as its reward; the Path to Ascension book pays its own reward separately.",
+    "Quests 4420430-4420439 (Tutorial.dbc 110-119, Human 110 -> 4420430) are ordinary quests: Novice Riding (33379) gives their kill credit 445303 and the turn-in gives the race's starter mount (Human: item 5656, mount spell 458).",
+    "Tutorial 110 is verified once its quest is rewarded and the mount spell is known; its claim stays a separate reward.",
+    "Replaces the #6444 expectation that the quest is hidden: that held only while no trainer taught Novice Riding and the starter mount bridge was the tutorial's only mount source."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "rider", "race": 1, "class": 1, "level": 10 }
+  ],
+  "location": { "map": 0, "x": -8833.38, "y": 628.628, "z": 94.0066, "o": 1.06535 },
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Human Novice Rider quest can be taken",
+      "actor": "rider", "metric": "quest_takeable", "quest": 4420430, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The Orc variant is not offered to a Human",
+      "actor": "rider", "metric": "quest_takeable", "quest": 4420431, "equals": 0
+    },
+    { "action": "prepare_quest", "label": "Take the quest", "actor": "rider", "quest": 4420430, "complete": false },
+    {
+      "action": "assert", "label": "Its objective starts unmet",
+      "actor": "rider", "metric": "quest_objective_count", "quest": 4420430, "index": 0, "equals": 0
+    },
+    { "action": "learn", "label": "Learn Novice Riding", "actor": "rider", "spell": 33379 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: learning Novice Riding completes the objective",
+      "actor": "rider", "metric": "quest_objective_count", "quest": 4420430, "index": 0, "equals": 1,
+      "within_ms": 3000
+    },
+    { "action": "reward_quest", "label": "Turn the quest in", "actor": "rider", "quest": 4420430 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the turn-in gives the Human starter mount",
+      "actor": "rider", "metric": "item_count", "item": 5656, "equals": 1
+    },
+    {
+      "action": "assert", "label": "and records the quest as rewarded",
+      "actor": "rider", "metric": "quest_rewarded", "quest": 4420430, "equals": 1
+    },
+    { "action": "learn", "label": "Learn the starter mount", "actor": "rider", "spell": 458 },
+    {
+      "action": "assert", "label": "The Novice Rider tutorial is verified",
+      "actor": "rider", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 110,
+      "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "client_packet", "label": "Claim the tutorial reward", "actor": "rider", "opcode": 1704,
+      "fields": [ { "u32": 110 } ]
+    },
+    {
+      "action": "assert", "label": "The book pays its own reward",
+      "actor": "rider", "metric": "server_packet_contains", "opcode": 1711, "text": "CLAIM_TUTORIAL_OK",
+      "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "and records the claim",
+      "actor": "rider", "metric": "player_setting", "source": "core.ascension.tutorial_rewards", "index": 110,
+      "equals": 1
+    }
+  ]
+}

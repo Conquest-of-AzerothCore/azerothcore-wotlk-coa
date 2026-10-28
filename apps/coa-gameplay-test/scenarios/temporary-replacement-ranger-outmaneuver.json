@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "A Decoy Strike button is saved as Outmaneuver (#5469)",
+  "contract": "Outmaneuver 557325 cast on an enemy runs spell_ascension_outmaneuver::Begin (AscensionRangerOutmaneuver.cpp:159), which summons the decoy 50171, applies the 8 s window 557326, learns Decoy Strike! 557328 as a temporary spell (learnSpell(SPELL_DECOY_STRIKE, true), line 183) and replaces Outmaneuver with it through SetTemporarySpellReplacement (line 184). A temporary spell is never written to character_spell, and Player::_LoadActions runs before Outmaneuver is cast again, so a saved Decoy Strike! button would be refused and deleted at login. persisted_action_button reads Player::GetSavedActionButtonSpell, the spell id _SaveActions writes: a button holding Decoy Strike! must be saved as Outmaneuver, and a button holding Outmaneuver itself is saved unchanged.",
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "ranger", "race": 1, "class": 21, "level": 80, "spell_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "enemy", "owner": "ranger", "entry": 36, "level": 80, "health": 1000000, "distance": 8, "faction": 7}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "actor": "ranger", "spell": 557325},
+    {"action": "cast", "label": "Outmaneuver the enemy", "actor": "ranger", "spell": 557325, "target": "enemy"},
+    {
+      "action": "assert", "label": "Outmaneuver replaces itself with Decoy Strike!", "actor": "ranger",
+      "metric": "temporary_spell_replacement", "spell": 557325, "equals": 557328, "within_ms": 2000
+    },
+    {"action": "set_action_button", "actor": "ranger", "button": 2, "spell": 557328},
+    {"action": "set_action_button", "actor": "ranger", "button": 3, "spell": 557325},
+    {
+      "action": "assert", "label": "The bar holds Decoy Strike!", "actor": "ranger", "metric": "action_button",
+      "button": 2, "equals": 557328
+    },
+    {
+      "action": "assert", "label": "The Decoy Strike! button is saved as Outmaneuver", "actor": "ranger",
+      "metric": "persisted_action_button", "button": 2, "equals": 557325
+    },
+    {
+      "action": "assert", "label": "Control: an ordinary known spell is saved unchanged", "actor": "ranger",
+      "metric": "persisted_action_button", "button": 3, "equals": 557325
+    }
+  ]
+}

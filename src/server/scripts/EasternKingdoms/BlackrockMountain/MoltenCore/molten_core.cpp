@@ -45,19 +45,29 @@ enum Spells
     TALK_0                  = 0
 };
 
+// CoA addition: Fierce Blow is drawn from a window so it cannot be predicted. First cast: interquartile
+// range of 123 logged first casts (6.9-13.0s). Repeat: 6-10s holds 70% of 171 logged repeats.
+constexpr uint32 SPELL_FIERCE_BLOW_COA = 975011;
+constexpr uint32 FIERCE_BLOW_FIRST_MIN = 6900;
+constexpr uint32 FIERCE_BLOW_FIRST_MAX = 13000;
+constexpr uint32 FIERCE_BLOW_MIN = 6000;
+constexpr uint32 FIERCE_BLOW_MAX = 10000;
+
 // Serrated Bites timer may be wrong
 struct npc_mc_core_hound : public CreatureAI
 {
     npc_mc_core_hound(Creature* creature) :
         CreatureAI(creature),
         instance(creature->GetInstanceScript()),
-        serratedBiteTimer(3000)
+        serratedBiteTimer(3000),
+        fierceBlowTimer(urand(FIERCE_BLOW_FIRST_MIN, FIERCE_BLOW_FIRST_MAX))
     {
     }
 
     void Reset() override
     {
         serratedBiteTimer = 3000;
+        fierceBlowTimer = urand(FIERCE_BLOW_FIRST_MIN, FIERCE_BLOW_FIRST_MAX);
     }
 
     void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType /*damagetype*/, SpellSchoolMask /*damageSchoolMask*/) override
@@ -94,12 +104,23 @@ struct npc_mc_core_hound : public CreatureAI
             serratedBiteTimer -= diff;
         }
 
+        if (fierceBlowTimer <= diff)
+        {
+            DoCastVictim(SPELL_FIERCE_BLOW_COA);
+            fierceBlowTimer = urand(FIERCE_BLOW_MIN, FIERCE_BLOW_MAX);
+        }
+        else
+        {
+            fierceBlowTimer -= diff;
+        }
+
         DoMeleeAttackIfReady();
     }
 
 private:
     InstanceScript* instance;
     uint32 serratedBiteTimer;
+    uint32 fierceBlowTimer;
 };
 
 // 19822 Play Dead

@@ -1,0 +1,234 @@
+{
+  "schema": 1,
+  "name": "Sanguine Essence repeats Sanguine Mend healing for three seconds",
+  "contract": [
+    "Sanguine Essence 680692 explicitly replicates 20% of Sanguine Mend healing on its target every 680693 tick",
+    "(1000 ms) for 680693 duration (3000 ms). 680692 effect 0 is custom aura 354 with trigger 680693 but has no",
+    "proc flags or script binding. Each of three ticks must heal for floor(20% of the original resolved heal),",
+    "without applying spell power a second time. Control without the form must produce no echo, and the echo must",
+    "not heal the caster or recursively trigger itself. The ally is deeply injured so raw and effective original",
+    "healing agree. Overhealing semantics and Bloodmoon Blast replication are separate scope."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 802310
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 680692
+    },
+    {
+      "action": "set_aura",
+      "actor": "bloodmage",
+      "spell": 42062,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 1000000,
+      "value": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 802310,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "Control: Mend heals without Sanguine Essence",
+      "actor": "bloodmage",
+      "metric": "spell_heal_count",
+      "spell": 802310,
+      "target": "ally",
+      "equals": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Control: no replicated heals without the form",
+      "actor": "bloodmage",
+      "metric": "spell_heal_count",
+      "spell": 680693,
+      "target": "ally",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 680692
+    },
+    {
+      "action": "assert",
+      "label": "Sanguine Essence is active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 680692,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 1000000,
+      "value": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_heal_total",
+      "spell": 802310,
+      "target": "ally",
+      "save_as": "mend_before"
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 802310,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "Mend heals with the form active",
+      "actor": "bloodmage",
+      "metric": "spell_heal_count",
+      "spell": 802310,
+      "target": "ally",
+      "equals": 2,
+      "within_ms": 6000
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_heal_total",
+      "spell": 802310,
+      "target": "ally",
+      "relative_to": "mend_before",
+      "save_as": "mend_amount"
+    },
+    {
+      "action": "assert",
+      "label": "Replicated heal tick 1",
+      "actor": "bloodmage",
+      "metric": "spell_heal_count",
+      "spell": 680693,
+      "target": "ally",
+      "equals": 1,
+      "within_ms": 1200
+    },
+    {
+      "action": "snapshot",
+      "label": "Tick 1 cumulative healing is 20% per second",
+      "actor": "bloodmage",
+      "metric": "spell_heal_total",
+      "spell": 680693,
+      "target": "ally",
+      "save_as": "echo_1"
+    },
+    {
+      "action": "assert",
+      "label": "Replicated heal tick 2",
+      "actor": "bloodmage",
+      "metric": "spell_heal_count",
+      "spell": 680693,
+      "target": "ally",
+      "equals": 2,
+      "within_ms": 1200
+    },
+    {
+      "action": "snapshot",
+      "label": "Tick 2 cumulative healing is 20% per second",
+      "actor": "bloodmage",
+      "metric": "spell_heal_total",
+      "spell": 680693,
+      "target": "ally",
+      "save_as": "echo_2"
+    },
+    {
+      "action": "assert",
+      "label": "Replicated heal tick 3",
+      "actor": "bloodmage",
+      "metric": "spell_heal_count",
+      "spell": 680693,
+      "target": "ally",
+      "equals": 3,
+      "within_ms": 1200
+    },
+    {
+      "action": "snapshot",
+      "label": "Tick 3 cumulative healing is 20% per second",
+      "actor": "bloodmage",
+      "metric": "spell_heal_total",
+      "spell": 680693,
+      "target": "ally",
+      "save_as": "echo_3"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Exactly three ticks; no recursive replication",
+      "actor": "bloodmage",
+      "metric": "spell_heal_count",
+      "spell": 680693,
+      "target": "ally",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Replication heals the ally, not the caster",
+      "actor": "bloodmage",
+      "metric": "spell_heal_count",
+      "spell": 680693,
+      "target": "bloodmage",
+      "equals": 0
+    }
+  ]
+}

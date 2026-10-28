@@ -1,14 +1,15 @@
 {
   "schema": 1,
   "name": "Sparked and Ready! procs at its native 5 percent chance (#4643)",
-  "contract": "Sparked and Ready! (705815) is ProcFlags 0, ProcChance 5 in Spell.dbc, effect 0 SPELL_AURA_PROC_TRIGGER_SPELL to Rocket Launcher's crit-chance grant (537247). The pending spell_proc row for 705815 originally set Chance=100 so the aura's own script-side Chance(player,705815) roll (AscensionTinkerEvents.cpp) was the only 5 percent gate. rev_20260919_20_coa_proc_chance_parity.sql later zeroed spell_proc.Chance for 705815, which SpellMgr::LoadSpellProcs (SpellMgr.cpp:2127-2128) now correctly defers to the DBC's 5 percent at the engine level, but the still-present script roll compounded on top of it to about 0.0025 (5% * 5%), matching the reported 'never procs'. Grant() in AscensionTinkerEvents.cpp casts 537247 directly rather than through a native trigger, so spell_proc_count reads zero; spell_cast_count is the metric the harness documents for a script-driven trigger. Over 150 independent fire-damage events a true 5 percent chance clears 3 procs with over 98 percent probability, while the pre-fix compounded ~0.25 percent chance clears 3 procs in under 1 percent of runs, so this discriminates the fix. Rocket Launcher's ManaCostPercentage is 8 (of base mana, PowerType 0); without replenishing power the caster ran dry around the 23rd cast (SPELL_FAILED_NO_POWER) and only a handful of the 150 fire events ever landed, so a set_power fixture tops the caster's mana back up before every cast. Rocket Launcher carries SPELL_ATTR0_USES_RANGED_SLOT and is not an auto-repeat spell, so SpellInfo::CalcCastTime (SpellInfo.cpp:2972-2973) adds 500 ms to its SpellCastTimes id 14 base of 3000 ms for a deterministic 3500 ms cast; the loop waits 3700 ms between casts to clear that cast time before issuing the next one (a 3200 ms wait collided with the still-casting previous shot and failed SPELL_FAILED_SPELL_IN_PROGRESS on roughly a third of casts). 150 casts at 3700 ms each is 555 s of waits alone, so timeout_ms is raised to the harness's 600000 ms cap (run.py validate / CoAGameplayTest.cpp both reject a higher value) with a small margin. The SETUP hit-count floor accounts for Rocket Launcher's own spell-hit roll: caster and target are both level 80 (levelDiff 0, Mechanic 0 on 500220), so Unit::SpellHitResult (Unit.cpp:3782-3784) gives a 96 percent hit chance per cast with no additional mechanic-resist roll. Over 150 independent Bernoulli(0.96) trials the hit count is Binomial(150, 0.96), mean 144, stdev about 2.4; min 136 sits about 3.3 stdev below the mean (exact binomial P(X<136) is about 0.11 percent), so it passes essentially every real run while remaining far above the degenerate failure counts observed for the power (17/150) and cast-time (95/150) setup bugs this scenario already guards against.",
+  "contract": "Native 5% Sparked and Ready proc; ranged hit rating guarantees 150 eligible Rocket hits.",
   "timeout_ms": 599000,
   "players": [
     {
       "id": "t",
       "race": 1,
       "class": 28,
-      "level": 80
+      "level": 80,
+      "ranged_hit_rating": 1000
     }
   ],
   "creatures": [
@@ -2307,16 +2308,25 @@
     },
     {
       "action": "assert",
-      "label": "Rocket Launcher lands close to 150 fire hits",
+      "label": "Complete all 150 Rocket Launcher casts",
+      "actor": "t",
+      "metric": "spell_cast_count",
+      "spell": 500235,
+      "equals": 150
+    },
+    {
+      "action": "assert",
+      "label": "Every Rocket Launcher contributes a landed fire hit",
       "actor": "t",
       "metric": "spell_damage_count",
       "spell": 500220,
       "target": "d",
-      "min": 136
+      "equals": 150,
+      "within_ms": 3000
     },
     {
       "action": "assert",
-      "label": "Sparked and Ready procs near its 5 percent DBC chance, not the compounded ~0.25 percent",
+      "label": "Sparked and Ready procs at its native five percent chance",
       "actor": "t",
       "metric": "spell_cast_count",
       "spell": 537247,

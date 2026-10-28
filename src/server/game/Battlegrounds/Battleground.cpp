@@ -956,7 +956,14 @@ void Battleground::EndBattleground(PvPTeamId winnerTeamId)
 
         BlockMovement(player);
 
-        player->SendDirectMessage(&pvpLogData);
+        if (_arenaPersonalScores.contains(playerGuid))
+        {
+            WorldPacket personalPvpLogData;
+            BuildPvPLogDataPacket(personalPvpLogData, player);
+            player->SendDirectMessage(&personalPvpLogData);
+        }
+        else
+            player->SendDirectMessage(&pvpLogData);
 
         if (isBattleground() && sWorld->getBoolConfig(CONFIG_BATTLEGROUND_STORE_STATISTICS_ENABLE))
         {
@@ -1166,6 +1173,8 @@ void Battleground::Init()
     for (auto& itr : _arenaTeamScores)
         itr.Reset();
 
+    _arenaPersonalScores.clear();
+
     ResetBGSubclass();
 }
 
@@ -1373,7 +1382,13 @@ void Battleground::SpectatorsSendPacket(WorldPacket& data)
         (*itr)->SendDirectMessage(&data);
 }
 
-void Battleground::BuildPvPLogDataPacket(WorldPacket& data)
+void Battleground::SetArenaPersonalScore(ObjectGuid playerGuid, TeamId teamId, int32 ratingChange,
+    uint32 matchmakerRating)
+{
+    _arenaPersonalScores[playerGuid] = { GetPvPTeamId(teamId), ratingChange, matchmakerRating };
+}
+
+void Battleground::BuildPvPLogDataPacket(WorldPacket& data, Player const* receiver)
 {
     uint8 type = (isArena() ? 1 : 0);
 
@@ -1382,8 +1397,19 @@ void Battleground::BuildPvPLogDataPacket(WorldPacket& data)
 
     if (type) // arena
     {
+        auto personalScore = receiver ? _arenaPersonalScores.find(receiver->GetGUID()) : _arenaPersonalScores.end();
         for (uint8 i = 0; i < PVP_TEAMS_COUNT; ++i)
-            _arenaTeamScores[i].BuildRatingInfoBlock(data);
+        {
+            if (personalScore != _arenaPersonalScores.end() && personalScore->second.PvPTeam == i)
+            {
+                ArenaTeamScore receiverScore = _arenaTeamScores[i];
+                receiverScore.RatingChange = personalScore->second.RatingChange;
+                receiverScore.MatchmakerRating = personalScore->second.MatchmakerRating;
+                receiverScore.BuildRatingInfoBlock(data);
+            }
+            else
+                _arenaTeamScores[i].BuildRatingInfoBlock(data);
+        }
 
         for (uint8 i = 0; i < PVP_TEAMS_COUNT; ++i)
             _arenaTeamScores[i].BuildTeamInfoBlock(data);
@@ -1412,14 +1438,23 @@ bool Battleground::UpdatePlayerScore(Player* player, uint32 type, uint32 value, 
     if (type == SCORE_BONUS_HONOR && doAddHonor && isBattleground())
         player->RewardHonor(nullptr, 1, value); // RewardHonor calls UpdatePlayerScore with doAddHonor = false
     else
+    {
         itr->second->UpdateScore(type, value);
+        sScriptMgr->OnBattlegroundUpdatePlayerScore(this, player, type, value);
+    }
 
     return true;
 }
 
 void Battleground::AddPlayerToResurrectQueue(ObjectGuid npc_guid, ObjectGuid player_guid)
 {
-    m_ReviveQueue[npc_guid].push_back(player_guid);
+    for (auto& [guideGuid, queue] : m_ReviveQueue)
+        if (guideGuid != npc_guid)
+            std::erase(queue, player_guid);
+
+    GuidVector& queue = m_ReviveQueue[npc_guid];
+    if (std::find(queue.begin(), queue.end(), player_guid) == queue.end())
+        queue.push_back(player_guid);
 
     Player* player = ObjectAccessor::FindPlayer(player_guid);
     if (!player)
@@ -1824,7 +1859,7 @@ void Battleground::PlayerAddedToBGCheckIfBGIsRunning(Player* player)
     WorldPacket data;
     BlockMovement(player);
 
-    BuildPvPLogDataPacket(data);
+    BuildPvPLogDataPacket(data, player);
     player->SendDirectMessage(&data);
 
     sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, this, player->GetCurrentBattlegroundQueueSlot(), STATUS_IN_PROGRESS, GetEndTime(), GetStartTime(), GetArenaType(), player->GetBgTeamId());
@@ -1835,7 +1870,7 @@ uint32 Battleground::GetAlivePlayersCountByTeam(TeamId teamId) const
 {
     uint32 count = 0;
     for (BattlegroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
-        if (itr->second->IsAlive() && !itr->second->HasByteFlag(UNIT_FIELD_BYTES_2, 3, FORM_SPIRITOFREDEMPTION) && itr->second->GetBgTeamId() == teamId)
+        if (itr->second->IsAlive() && itr->second->GetShapeshiftForm() != FORM_SPIRITOFREDEMPTION && itr->second->GetBgTeamId() == teamId)
             ++count;
 
     return count;

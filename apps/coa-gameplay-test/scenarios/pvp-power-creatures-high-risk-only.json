@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "PvP Power applies against creatures only in the High-Risk open world",
+  "contract": "Requires PvpPower.Enable = 1. A chestpiece with PvP Power (+42) adds 42 x 0.05% = 2.1% to a level 60 High-Risk player's damage against a creature and removes 2.1% from the damage that creature deals, in the open world. Without the High-Risk aura it changes nothing.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "k", "race": 1, "class": 1, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "e", "owner": "k", "entry": 36, "level": 60, "health": 500000, "distance": 15 }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "k", "spell": 750 },
+    { "action": "learn", "actor": "k", "spell": 8737 },
+    { "action": "learn", "actor": "k", "spell": 9078 },
+    { "action": "add_item", "actor": "k", "item": 14948, "count": 1 },
+    { "action": "equip", "actor": "k", "item": 14948, "slot": 4 },
+    { "action": "assert", "label": "Without High Risk PvP Power deals base damage to a creature", "actor": "k", "metric": "script_melee_damage_dealt", "target": "e", "equals": 1000 },
+    { "action": "assert", "label": "Without High Risk PvP Power leaves creature damage unchanged", "actor": "k", "metric": "script_melee_damage_taken", "target": "e", "equals": 1000 },
+    { "action": "set_aura", "actor": "k", "spell": 1004019, "stacks": 1 },
+    { "action": "assert", "label": "In High Risk PvP Power +42 raises damage dealt to a creature by 2.1%", "actor": "k", "metric": "script_melee_damage_dealt", "target": "e", "equals": 1021 },
+    { "action": "assert", "label": "In High Risk PvP Power +42 lowers damage taken from a creature by 2.1%", "actor": "k", "metric": "script_melee_damage_taken", "target": "e", "equals": 979 }
+  ]
+}

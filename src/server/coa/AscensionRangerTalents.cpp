@@ -1,5 +1,10 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionRangerTalents.h"
+#include "CellImpl.h"
+#include "Creature.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "ObjectMgr.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
@@ -8,6 +13,7 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 #include "SpellScriptLoader.h"
+#include "TemporarySummon.h"
 #include <algorithm>
 #include <array>
 #include <limits>
@@ -21,6 +27,7 @@ enum RangerTalentSpells : uint32
     SPELL_KNOCKOUT_INCAPACITATE = 706762,
     SPELL_STONEMASONS_SECRET = 524654,
     SPELL_DIRTY_BLADES = 680276,
+    SPELL_DIRTY_BLADES_HIT = 520571,
     SPELL_ADVANTAGE = 804329,
     SPELL_EXTEND_DIRTY_BLADES = 524653,
     SPELL_SNATCH = 803115,
@@ -30,7 +37,16 @@ enum RangerTalentSpells : uint32
     SPELL_SWIFTSHOT = 705028,
     SPELL_SWIFTSHOT_VULNERABILITY = 800578,
     SPELL_WAR_FALCON_PRESENCE = 680278,
-    SPELL_DRAGONHAWK_PRESENCE = 681394
+    SPELL_DRAGONHAWK_PRESENCE = 681394,
+    SPELL_FRENZY = 520492,
+    SPELL_WORN_OUT = 804457,
+    SPELL_PILFERING = 705087,
+    SPELL_PILFERING_HEAL = 520880,
+    SPELL_GUIDANCE = 532261,
+    SPELL_BARBED_QUILLS = 800077,
+    SPELL_BARBED_QUILLS_BLEED = 801472,
+    SPELL_BARBED_QUILLS_SPREAD = 560965,
+    SPELL_BARBED_QUILLS_EXTEND = 561161
 };
 
 enum RangerTalentRankChains : uint32
@@ -62,6 +78,158 @@ constexpr std::array<WingmanCompanion, 3> WingmanCompanions =
 
 constexpr uint8 RANGER_ADVANTAGE_MAX_STACKS = 5;
 constexpr int32 WINGMAN_REFRESH_MS = 500;
+
+template <typename Visitor>
+void ForEachPresentCompanion(Unit* owner, Visitor&& visit)
+{
+    for (Unit* controlled : owner->m_Controlled)
+    {
+        if (!controlled || !controlled->IsAlive() || controlled->GetOwnerGUID() != owner->GetGUID())
+            continue;
+        for (WingmanCompanion const& companion : WingmanCompanions)
+        {
+            SpellInfo const* presence = sSpellMgr->GetSpellInfo(companion.Presence);
+            if (controlled->GetEntry() == companion.Entry && presence &&
+                owner->IsWithinDistInMap(controlled, presence->Effects[EFFECT_0].CalcRadius()))
+                visit(presence);
+        }
+    }
+}
+
+class aura_ascension_ranger_barbed_quills : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_ranger_barbed_quills);
+
+    bool Validate(SpellInfo const* info) override
+    {
+        return info->Id == SPELL_BARBED_QUILLS &&
+            ValidateSpellInfo({SPELL_BARBED_QUILLS_BLEED, SPELL_BARBED_QUILLS_SPREAD,
+                SPELL_BARBED_QUILLS_EXTEND});
+    }
+
+    bool Check(ProcEventInfo& event)
+    {
+        Unit* owner = GetTarget();
+        Unit* target = event.GetActionTarget();
+        SpellInfo const* info = event.GetSpellInfo();
+        DamageInfo const* hit = event.GetDamageInfo();
+        return owner->IsPlayer() && owner->getClass() == CLASS_RANGER && GetCaster() == owner &&
+            event.GetActor() == owner && target && owner->IsValidAttackTarget(target) && hit && hit->GetDamage() &&
+            info && info->SpellFamilyName == 27 && (info->SpellFamilyFlags[1] & (256 | 131072 | 4));
+    }
+
+    void Proc(AuraEffect const* effect, ProcEventInfo& event)
+    {
+        PreventDefaultAction();
+        if (effect->GetEffIndex() != EFFECT_0)
+            return;
+
+        Unit* owner = GetTarget();
+        Unit* source = event.GetActionTarget();
+        owner->CastSpell(source, SPELL_BARBED_QUILLS_BLEED, true, nullptr, effect);
+        if (!(event.GetSpellInfo()->SpellFamilyFlags[1] & 4))
+            return;
+
+        SpellInfo const* spread = sSpellMgr->GetSpellInfo(SPELL_BARBED_QUILLS_SPREAD);
+        SpellInfo const* extend = sSpellMgr->GetSpellInfo(SPELL_BARBED_QUILLS_EXTEND);
+        float const radius = spread->Effects[EFFECT_0].CalcRadius(owner);
+        std::list<Unit*> targets;
+        Acore::AnyUnitInObjectRangeCheck check(source, radius);
+        Acore::UnitListSearcher<Acore::AnyUnitInObjectRangeCheck> search(source, targets, check);
+        Cell::VisitObjects(source, search, radius);
+        targets.remove_if([owner, source](Unit* unit)
+        {
+            return unit == source || !unit->IsAlive() || !owner->IsValidAttackTarget(unit) ||
+                !source->InSamePhase(unit) || !source->IsWithinLOSInMap(unit);
+        });
+        targets.sort([source](Unit* first, Unit* second)
+        {
+            float const firstDistance = source->GetExactDist(first);
+            float const secondDistance = source->GetExactDist(second);
+            return firstDistance != secondDistance ? firstDistance < secondDistance :
+                first->GetGUID() < second->GetGUID();
+        });
+        if (targets.size() > spread->MaxAffectedTargets)
+            targets.resize(spread->MaxAffectedTargets);
+
+        for (auto const& [key, application] : source->GetAppliedAuras())
+        {
+            Aura* aura = application->GetBase();
+            if (aura->GetCasterGUID() != owner->GetGUID() || aura->GetSpellInfo()->SpellFamilyName != 27 ||
+                application->IsPositive() || aura->GetDuration() <= 0)
+                continue;
+            bool periodic = false;
+            for (uint8 index = 0; index < MAX_SPELL_EFFECTS; ++index)
+                if (AuraEffect const* original = aura->GetEffect(index); original && original->IsPeriodic())
+                    periodic = true;
+            if (periodic)
+            {
+                int32 const duration = int32(std::min<int64>(std::numeric_limits<int32>::max(),
+                    int64(aura->GetDuration()) + extend->Effects[EFFECT_0].CalcValue(owner)));
+                aura->SetMaxDuration(std::max(aura->GetMaxDuration(), duration));
+                aura->SetDuration(duration);
+                for (Unit* target : targets)
+                    if (Aura* copy = owner->AddAura(aura->GetId(), target))
+                    {
+                        copy->SetStackAmount(aura->GetStackAmount());
+                        copy->SetMaxDuration(aura->GetMaxDuration());
+                        copy->SetDuration(duration);
+                        for (uint8 index = 0; index < MAX_SPELL_EFFECTS; ++index)
+                            if (AuraEffect const* original = aura->GetEffect(index))
+                                if (AuraEffect* copied = copy->GetEffect(index))
+                                {
+                                    copied->ChangeAmount(original->GetAmount());
+                                    copied->SetPeriodicTimer(original->GetPeriodicTimer());
+                                    copied->SetCritChance(original->GetCritChance());
+                                }
+                    }
+            }
+        }
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(aura_ascension_ranger_barbed_quills::Check);
+        OnEffectProc += AuraEffectProcFn(aura_ascension_ranger_barbed_quills::Proc,
+            EFFECT_ALL, SPELL_AURA_PROC_TRIGGER_SPELL);
+    }
+};
+
+class ranger_wingman_companions : public PlayerScript
+{
+public:
+    ranger_wingman_companions() : PlayerScript("ranger_wingman_companions",
+        {PLAYERHOOK_ON_AFTER_GUARDIAN_INIT_STATS_FOR_LEVEL}) { }
+
+    void OnPlayerAfterGuardianInitStatsForLevel(Player* player, Guardian* guardian) override
+    {
+        if (!player || player->getClass() != CLASS_RANGER || !IsWingmanCompanion(guardian))
+            return;
+
+        CreatureTemplate const* info = guardian->GetCreatureTemplate();
+        CreatureBaseStats const* stats = sObjectMgr->GetCreatureBaseStats(guardian->GetLevel(), info->unit_class);
+        float const damage = stats->GenerateBaseDamage(info);
+        for (WeaponAttackType attack : {BASE_ATTACK, OFF_ATTACK, RANGED_ATTACK})
+        {
+            guardian->SetBaseWeaponDamage(attack, MINDAMAGE, damage);
+            guardian->SetBaseWeaponDamage(attack, MAXDAMAGE, damage * 1.5f);
+        }
+        guardian->SetStatFlatModifier(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(stats->AttackPower));
+        guardian->SetStatFlatModifier(UNIT_MOD_ATTACK_POWER_RANGED, BASE_VALUE, float(stats->RangedAttackPower));
+        guardian->UpdateAllStats();
+    }
+
+    static bool IsWingmanCompanion(Creature const* creature)
+    {
+        if (!creature)
+            return false;
+
+        for (WingmanCompanion const& companion : WingmanCompanions)
+            if (creature->GetEntry() == companion.Entry)
+                return true;
+        return false;
+    }
+};
 
 bool HasFullAdvantage(Player const* player)
 {
@@ -130,19 +298,10 @@ class aura_ascension_ranger_wingman : public AuraScript
     {
         recalculate = true;
         amount = 0;
-        Unit* owner = GetUnitOwner();
-        for (Unit* controlled : owner->m_Controlled)
+        ForEachPresentCompanion(GetUnitOwner(), [&amount](SpellInfo const* presence)
         {
-            if (!controlled || !controlled->IsAlive() || controlled->GetOwnerGUID() != owner->GetGUID())
-                continue;
-            for (WingmanCompanion const& companion : WingmanCompanions)
-            {
-                SpellInfo const* presence = sSpellMgr->GetSpellInfo(companion.Presence);
-                if (controlled->GetEntry() == companion.Entry && presence &&
-                    owner->IsWithinDistInMap(controlled, presence->Effects[EFFECT_0].CalcRadius()))
-                    amount += presence->Effects[EFFECT_2].CalcValue();
-            }
-        }
+            amount += presence->Effects[EFFECT_2].CalcValue();
+        });
     }
 
     void Period(AuraEffect const*, bool& periodic, int32& interval)
@@ -198,6 +357,164 @@ class aura_ascension_ranger_highwayman : public AuraScript
     }
 };
 
+class spell_ascension_ranger_frenzy : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_ranger_frenzy);
+
+    bool Validate(SpellInfo const* spellInfo) override
+    {
+        SpellEffectInfo const& wornOut = spellInfo->Effects[EFFECT_2];
+        return spellInfo->Id == SPELL_FRENZY && wornOut.Effect == SPELL_EFFECT_TRIGGER_SPELL &&
+            wornOut.TriggerSpell == SPELL_WORN_OUT && ValidateSpellInfo({SPELL_WORN_OUT});
+    }
+
+    void SkipWornOut(std::list<WorldObject*>& targets)
+    {
+        targets.remove_if([](WorldObject* target)
+        {
+            Unit* unit = target->ToUnit();
+            return !unit || unit->HasAura(SPELL_WORN_OUT);
+        });
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ascension_ranger_frenzy::SkipWornOut,
+            EFFECT_0, TARGET_UNIT_CASTER_AREA_RAID);
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ascension_ranger_frenzy::SkipWornOut,
+            EFFECT_1, TARGET_UNIT_CASTER_AREA_RAID);
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ascension_ranger_frenzy::SkipWornOut,
+            EFFECT_2, TARGET_UNIT_CASTER_AREA_RAID);
+    }
+};
+
+class aura_ascension_ranger_dirty_blades : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_ranger_dirty_blades);
+
+    bool Validate(SpellInfo const* spellInfo) override
+    {
+        return spellInfo->Id == SPELL_DIRTY_BLADES &&
+            spellInfo->Effects[EFFECT_0].IsAura(AuraType(354)) &&
+            spellInfo->Effects[EFFECT_0].TriggerSpell == SPELL_DIRTY_BLADES_HIT &&
+            ValidateSpellInfo({SPELL_DIRTY_BLADES_HIT});
+    }
+
+    bool Load() override
+    {
+        Unit* ranger = GetUnitOwner();
+        return ranger && ranger->IsPlayer() && ranger->getClass() == CLASS_RANGER && GetCaster() == ranger;
+    }
+
+    bool CheckProc(ProcEventInfo& event)
+    {
+        DamageInfo const* damage = event.GetDamageInfo();
+        Unit* victim = event.GetActionTarget();
+        return event.GetActor() == GetTarget() && victim && GetTarget()->IsValidAttackTarget(victim) &&
+            damage && damage->GetDamageType() == DIRECT_DAMAGE &&
+            (event.GetTypeMask() & PROC_FLAG_DONE_MELEE_AUTO_ATTACK) &&
+            (event.GetHitMask() & (PROC_HIT_NORMAL | PROC_HIT_CRITICAL | PROC_HIT_ABSORB));
+    }
+
+    void Strike(AuraEffect const* effect, ProcEventInfo& event)
+    {
+        PreventDefaultAction();
+        uint64 const amount = uint64(event.GetDamageInfo()->GetDamage()) *
+            uint64(std::max(effect->GetAmount(), 0)) / 100;
+        GetTarget()->CastCustomSpell(SPELL_DIRTY_BLADES_HIT, SPELLVALUE_BASE_POINT0,
+            int32(std::min<uint64>(amount, std::numeric_limits<int32>::max())), event.GetActionTarget(),
+            true, nullptr, effect);
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(aura_ascension_ranger_dirty_blades::CheckProc);
+        OnEffectProc += AuraEffectProcFn(aura_ascension_ranger_dirty_blades::Strike, EFFECT_0, AuraType(354));
+    }
+};
+
+class spell_ascension_ranger_dirty_blades : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_ranger_dirty_blades);
+
+    bool Validate(SpellInfo const* spellInfo) override
+    {
+        return spellInfo->Id == SPELL_DIRTY_BLADES_HIT &&
+            ValidateSpellInfo({SPELL_PILFERING, SPELL_PILFERING_HEAL});
+    }
+
+    bool Load() override
+    {
+        Unit* ranger = GetCaster();
+        return ranger && ranger->IsPlayer() && ranger->getClass() == CLASS_RANGER;
+    }
+
+    void Heal()
+    {
+        Unit* ranger = GetCaster();
+        Unit* victim = GetHitUnit();
+        AuraEffect const* pilfering = ranger->GetAuraEffect(SPELL_PILFERING, EFFECT_1);
+        if (!pilfering || !victim || ranger->IsFriendlyTo(victim) || GetHitDamage() <= 0)
+            return;
+
+        int32 const amount = int32(int64(GetHitDamage()) * std::clamp(pilfering->GetAmount(), 0, 100) / 100);
+        if (amount)
+            ranger->CastCustomSpell(SPELL_PILFERING_HEAL, SPELLVALUE_BASE_POINT0, amount, ranger,
+                true, nullptr, pilfering);
+    }
+
+    void Register() override
+    {
+        AfterHit += SpellHitFn(spell_ascension_ranger_dirty_blades::Heal);
+    }
+};
+
+class aura_ascension_ranger_guidance : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_ranger_guidance);
+
+    bool Validate(SpellInfo const* spellInfo) override
+    {
+        SpellEffectInfo const& damage = spellInfo->Effects[EFFECT_0];
+        return spellInfo->Id == SPELL_GUIDANCE && spellInfo->IsPassive() &&
+            damage.IsAura(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE) && damage.DieSides == 1 &&
+            ValidateSpellInfo({SPELL_WAR_FALCON_PRESENCE, SPELL_DRAGONHAWK_PRESENCE});
+    }
+
+    void Calculate(AuraEffect const*, int32& amount, bool& canBeRecalculated)
+    {
+        canBeRecalculated = true;
+        amount = 0;
+        Unit* owner = GetUnitOwner();
+        if (!owner)
+            return;
+
+        ForEachPresentCompanion(owner, [&amount](SpellInfo const*) { ++amount; });
+    }
+
+    void Period(AuraEffect const*, bool& isPeriodic, int32& timer)
+    {
+        isPeriodic = true;
+        timer = WINGMAN_REFRESH_MS;
+    }
+
+    void Refresh(AuraEffect const* effect)
+    {
+        PreventDefaultAction();
+        GetAura()->GetEffect(effect->GetEffIndex())->RecalculateAmount();
+    }
+
+    void Register() override
+    {
+        DoEffectCalcAmount += AuraEffectCalcAmountFn(aura_ascension_ranger_guidance::Calculate,
+            EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+        DoEffectCalcPeriodic += AuraEffectCalcPeriodicFn(aura_ascension_ranger_guidance::Period,
+            EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+        OnEffectPeriodic += AuraEffectPeriodicFn(aura_ascension_ranger_guidance::Refresh,
+            EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+    }
+};
+
 class ranger_swiftshot_hits : public AllSpellScript
 {
 public:
@@ -238,6 +555,11 @@ void HandleAscensionRangerPhoenixPlumes(Spell* spell, Player* player)
 
 void ApplyAscensionRangerTalentContracts(SpellInfo* info)
 {
+    if (info->Id == SPELL_DIRTY_BLADES_HIT && info->SpellFamilyName == 27)
+    {
+        info->AttributesEx3 |= SPELL_ATTR3_IGNORE_CASTER_MODIFIERS;
+        info->AscensionInheritsResolvedAmount = true;
+    }
     if (info->Id == SPELL_KNOCKOUT_INCAPACITATE && info->SpellFamilyName == 27)
         info->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
     if (info->Id == SPELL_SNATCH_DISARM && info->SpellFamilyName == 27)
@@ -251,5 +573,11 @@ void AddSC_AscensionRangerTalents()
     RegisterSpellScript(spell_ascension_ranger_knockout);
     RegisterSpellScript(aura_ascension_ranger_wingman);
     RegisterSpellScript(aura_ascension_ranger_highwayman);
+    RegisterSpellScript(spell_ascension_ranger_frenzy);
+    RegisterSpellScript(aura_ascension_ranger_dirty_blades);
+    RegisterSpellScript(spell_ascension_ranger_dirty_blades);
+    RegisterSpellScript(aura_ascension_ranger_guidance);
+    RegisterSpellScript(aura_ascension_ranger_barbed_quills);
+    new ranger_wingman_companions();
     new ranger_swiftshot_hits();
 }

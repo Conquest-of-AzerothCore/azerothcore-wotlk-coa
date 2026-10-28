@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "name": "Brine casts instantly during Stormflow and returns to its normal cast time afterward (#4238)",
+  "contract": [
+    "Stormflow 567555 promises Shock, or Brine with Tempest Sovereign 560020, can be instantly cast while",
+    "channeling. Its native E1 aura 353 class mask includes Shock word0 2048 and Brine word1 128. Neither",
+    "requires Storm Synergy, which separately enables Electrocute. Native casts must damage the target, have zero",
+    "cast time during Stormflow, and leave the channel running. Outside Stormflow Brine keeps its 2000 ms cast",
+    "time."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 567555
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 807105
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 560020
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "spell_cast_time_ms",
+      "label": "Brine has its normal cast time outside Stormflow",
+      "spell": 807105,
+      "equals": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 567555,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "cast_remaining_ms",
+      "label": "Stormflow is running before Brine",
+      "spell": 567555,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1800
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "spell_cast_time_ms",
+      "label": "Brine is instant while channeling Stormflow",
+      "spell": 807105,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 807105,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "cast_failure",
+      "label": "Brine is accepted",
+      "spell": 807105,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "label": "Brine lands immediately",
+      "spell": 807105,
+      "target": "target",
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "cast_remaining_ms",
+      "label": "Brine leaves Stormflow running",
+      "spell": 567555,
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "cast_remaining_ms",
+      "label": "Stormflow continues after Brine",
+      "spell": 567555,
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "spell_cast_time_ms",
+      "label": "Brine regains its normal cast time after Stormflow",
+      "spell": 807105,
+      "equals": 2000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "s",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 15
+    }
+  ]
+}

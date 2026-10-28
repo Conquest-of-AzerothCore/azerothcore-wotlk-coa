@@ -1,0 +1,167 @@
+{
+  "schema": 1,
+  "name": "Wildcard Bear Form preserves an already active rage pool (#6575)",
+  "contract": [
+    "Wildcard Heroes expose rage through OnPlayerHasActivePowerType before and after shapeshifting.",
+    "Bear Form 5487 changes the displayed primary power to rage; its effects do not spend that existing pool.",
+    "An already active Wildcard rage pool must survive entering and leaving the form without Furor talents.",
+    "An ordinary Druid must still start a new rage pool at zero when first entering Bear Form.",
+    "The fixture stores 500 and then 700 rage units, uses normal casts, and disables regeneration/decay."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "wild",
+      "name": "Wildrage",
+      "race": 1,
+      "class": 10,
+      "level": 20,
+      "allow_regeneration": false
+    },
+    {
+      "id": "druid",
+      "race": 4,
+      "class": 11,
+      "level": 20,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "druid",
+      "spell": 5487
+    },
+    {
+      "action": "learn",
+      "actor": "wild",
+      "spell": 5487
+    },
+    {
+      "action": "set_power",
+      "actor": "druid",
+      "power": 1,
+      "value": 500
+    },
+    {
+      "action": "cast",
+      "actor": "druid",
+      "spell": 5487
+    },
+    {
+      "action": "assert",
+      "actor": "druid",
+      "metric": "aura",
+      "spell": 5487,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Ordinary Druid still initializes its new rage pool",
+      "actor": "druid",
+      "metric": "power",
+      "power": 1,
+      "equals": 0
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Wildrage"
+    },
+    {
+      "action": "assert",
+      "actor": "wild",
+      "metric": "game_mode_mask",
+      "min": 64
+    },
+    {
+      "action": "set_power",
+      "actor": "wild",
+      "power": 1,
+      "value": 500
+    },
+    {
+      "action": "assert",
+      "actor": "wild",
+      "metric": "power",
+      "power": 1,
+      "equals": 500
+    },
+    {
+      "action": "cast",
+      "actor": "wild",
+      "spell": 5487
+    },
+    {
+      "action": "assert",
+      "actor": "wild",
+      "metric": "aura",
+      "spell": 5487,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Entering Bear Form preserves the already active Wildcard rage pool",
+      "actor": "wild",
+      "metric": "power",
+      "power": 1,
+      "equals": 500
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "wild",
+      "spell": 5487
+    },
+    {
+      "action": "assert",
+      "actor": "wild",
+      "metric": "aura",
+      "spell": 5487,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Leaving Bear Form retains the same rage",
+      "actor": "wild",
+      "metric": "power",
+      "power": 1,
+      "equals": 500
+    },
+    {
+      "action": "set_power",
+      "actor": "wild",
+      "power": 1,
+      "value": 700
+    },
+    {
+      "action": "cast",
+      "actor": "wild",
+      "spell": 5487
+    },
+    {
+      "action": "assert",
+      "actor": "wild",
+      "metric": "aura",
+      "spell": 5487,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "A later entry also preserves a different rage value",
+      "actor": "wild",
+      "metric": "power",
+      "power": 1,
+      "equals": 700
+    }
+  ]
+}

@@ -1,0 +1,140 @@
+{
+  "schema": 1,
+  "name": "Blood Bond preserves the original out-of-combat speed helper",
+  "contract": [
+    "The original 505169 effect is SPELL_AURA_MOD_INCREASE_SPEED, BasePoints29 plus DieSides1 = 30 percent.",
+    "Blood Bond504627 periodically grants this helper to its peaceful caster and ally. Both must retain it",
+    "out of combat.",
+    "A combat-only skip of the periodic helper must preserve its normal peaceful-target behavior."
+  ],
+  "timeout_ms": 30000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "bloodmage",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 504627
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 504627,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "cast_failure",
+      "spell": 504627,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 504627,
+      "caster": "bloodmage",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Original peaceful-target speed helper applies naturally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 505169,
+      "caster": "bloodmage",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 505169,
+      "caster": "bloodmage",
+      "effect": 0,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "The original helper also grants speed to the peaceful caster",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 505169,
+      "caster": "bloodmage",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "aura_amount",
+      "spell": 505169,
+      "caster": "bloodmage",
+      "effect": 0,
+      "equals": 30
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Periodic native refresh preserves the speed helper",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 505169,
+      "caster": "bloodmage",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_duration_ms",
+      "spell": 504627,
+      "caster": "bloodmage",
+      "min": 1780000
+    }
+  ]
+}

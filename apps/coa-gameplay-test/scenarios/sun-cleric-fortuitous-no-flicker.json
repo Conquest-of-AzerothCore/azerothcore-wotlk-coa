@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Fortuitous doesn't flicker on and off near the 80% health threshold (#5763, #5783)",
+  "contract": "AscensionSunCleric.cpp's Refresh(Player*) is driven every 500ms by sun_cleric_player::OnPlayerUpdate and computed `bool healthy = player->GetHealthPct() > 80` with no hysteresis, then called SetHelper(player, 561396, healthy && player->HasAura(561328)) for the Fortuitous talent 561328 / helper 561396. Any health value hovering near 80% in combat (healing ticks, DoTs) toggled the helper on and off every refresh (#5763 'blinks on and off', #5783's Glare action-button flashing is the same toggle). PR #1460 proposed fixing this with a new native AuraStateType 28 shared across five CoA spells and touching SharedDefines.h/Unit.cpp/Player.cpp/Pet.cpp; it was closed unmerged (no review comments) and was untested (no build, no scenario run) and out of scope for only these two Fortuitous reports. The fix instead adds a local hysteresis band to Refresh() alone: state.healthyAbove80 turns on above 80% and only turns back off at or below 75%, so a dip to 76-80% while already 'healthy' leaves Fortuitous applied. This scenario proves that a dip into the dead band (78%) keeps the helper applied, that a genuine drop out of the band (70%) clears it, and that climbing back above 80% re-applies it.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "set_health", "actor": "cleric", "maximum": 1000, "value": 1000 },
+    { "action": "learn", "actor": "cleric", "spell": 561328 },
+    { "action": "wait", "ms": 700 },
+    {
+      "action": "assert", "label": "SETUP: above 80% health, Fortuitous is applied",
+      "actor": "cleric", "metric": "aura", "spell": 561396, "equals": 1, "within_ms": 1000
+    },
+    { "action": "set_health", "actor": "cleric", "value": 780 },
+    { "action": "assert", "label": "SETUP: health is at 78%, inside the dead band", "actor": "cleric", "metric": "health_pct", "min": 77, "max": 79 },
+    { "action": "wait", "ms": 1200 },
+    { "action": "assert", "label": "Health is still inside the dead band when the helper is read", "actor": "cleric", "metric": "health_pct", "min": 77, "max": 79 },
+    {
+      "action": "assert", "label": "A dip to 78% (inside the 75-80% dead band) does not clear Fortuitous",
+      "actor": "cleric", "metric": "aura", "spell": 561396, "equals": 1
+    },
+    { "action": "set_health", "actor": "cleric", "value": 700 },
+    { "action": "wait", "ms": 700 },
+    {
+      "action": "assert", "label": "Dropping to 70% (outside the dead band) clears Fortuitous",
+      "actor": "cleric", "metric": "aura", "spell": 561396, "equals": 0
+    },
+    { "action": "set_health", "actor": "cleric", "value": 1000 },
+    { "action": "wait", "ms": 700 },
+    {
+      "action": "assert", "label": "Climbing back above 80% re-applies Fortuitous",
+      "actor": "cleric", "metric": "aura", "spell": 561396, "equals": 1
+    }
+  ]
+}

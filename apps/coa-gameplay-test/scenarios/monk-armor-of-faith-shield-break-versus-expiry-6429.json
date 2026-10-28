@@ -1,0 +1,209 @@
+{
+  "schema": 1,
+  "name": "monk-armor-of-faith-shield-break-versus-expiry-6429",
+  "contract": [
+    "Armor of Faith's authored tooltip triggers Holy damage when Staffguard breaks. It does not trigger on",
+    "natural expiry. Normally cast Sacred Swing with Staffguard and Armor of Faith learned; let the first",
+    "acquired absorb expire without a blast, then acquire another and deplete it with real enemy Frostbolt",
+    "damage. The depleted shield must blast a nearby enemy exactly once and leave an enemy outside the radius",
+    "untouched. Recently Parried or Dodged is supplied only as the unrelated Sacred Swing cast prerequisite.",
+    "Give the enemy spell hit for the one Frostbolt that must deplete Staffguard; a normal miss leaves the",
+    "absorb intact and does not exercise Armor of Faith's shield-break contract. Keep all native effect assertions."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 19,
+      "level": 80,
+      "allow_regeneration": false,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "t",
+      "owner": "p",
+      "entry": 299,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3,
+      "spell_hit_bonus": 100
+    },
+    {
+      "id": "far",
+      "owner": "p",
+      "entry": 299,
+      "level": 80,
+      "health": 1000000,
+      "distance": 25
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 227
+    },
+    {
+      "action": "set_skill",
+      "actor": "p",
+      "skill": 136,
+      "value": 400,
+      "maximum": 400
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 35
+    },
+    {
+      "action": "equip",
+      "actor": "p",
+      "item": 35,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 748502
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 705295
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 804930
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 681170,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 748502,
+      "target": "t"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 706583,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 706583,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_cast_count",
+      "spell": 801546,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 681170,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 748502,
+      "target": "t"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 706583,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 42842,
+      "target": "p"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 706583,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_cast_count",
+      "spell": 801546,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 801546,
+      "target": "t",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 801546,
+      "target": "far",
+      "equals": 0
+    }
+  ]
+}

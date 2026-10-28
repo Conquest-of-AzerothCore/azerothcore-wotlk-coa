@@ -1,30 +1,82 @@
 {
   "schema": 1,
   "name": "Whipvine Arrow deals Nature damage and roots its target natively (#3630)",
-  "contract": "806342 'Whipvine Arrow' reads 'Launch an arrow ... dealing ... Nature damage and rooting them ...'. Effect 0 is SPELL_AURA_MOD_ROOT (APPLY_AURA) and effect 1 is SPELL_EFFECT_SCHOOL_DAMAGE (SchoolMask 8 = Nature, BasePoints 77+1=78 flat), both native effect types dispatched by the generic engine (SpellEffects.cpp) with no script needed. CasterAuraSpell 804329 (SPELL_ADVANTAGE) gates the cast on having at least one stack of Advantage; EquippedItemClass is -1 (unrestricted), so no weapon is required despite SPELL_ATTR0_USES_RANGED_SLOT (that attribute only controls the projectile visual flag in Spell::SendSpellStart, not a CheckItems weapon gate). Separately, no delivery mechanism exists anywhere in this tree for the tooltip's 'additional target per stack of Advantage' clause: EffectChainTarget/MaxAffectedTargets are static DBC values (5/6), none of the four Advantage companion auras (704337, 801429, 801700, 802612) carry a class mask matching Whipvine Arrow's own SpellFamilyFlags (65536,0,0) word0 bit 16, and ApplyAdditionalTargetContracts (src/server/coa/AscensionClassMechanics.cpp) is a fixed 8-entry whitelist that does not name 806342. That clause is not exercised by this scenario and appears genuinely undelivered, not merely untested; only the literal damage+root behavior this issue reports is asserted here. 806342 has a 5-30 yd range (min range 5 yd); the fixture creature needs an explicit distance (default is 0, inside the minimum range, which fails the cast with SPELL_FAILED_TOO_CLOSE/128 before the root or damage is ever applied).",
+  "contract": [
+    "Original Whipvine Arrow 806342 deals Nature damage and roots its target. Advantage 804329 gates the",
+    "normal cast; its range is five to thirty yards. The original ranged damage class uses ranged hit despite",
+    "the Nature school, so this fixture supplies ranged hit and places the enemy fifteen yards away.",
+    "EquippedItemClass -1 does not require a weapon. The native root and damage effects must both land.",
+    "Separate ranger-whipvine-advantage-targets-3630 and one/five-stack boundary scenarios cover additional",
+    "targets; this case verifies one ordinary cast against one enemy."
+  ],
   "timeout_ms": 60000,
   "players": [
-    { "id": "ranger", "race": 1, "class": 21, "level": 80 }
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80,
+      "ranged_hit_rating": 10000
+    }
   ],
   "creatures": [
-    { "id": "dummy", "owner": "ranger", "entry": 16542, "level": 80, "health": 500000, "faction": 14, "distance": 15 }
+    {
+      "id": "dummy",
+      "owner": "ranger",
+      "entry": 16542,
+      "level": 80,
+      "health": 500000,
+      "faction": 14,
+      "distance": 15
+    }
   ],
   "steps": [
-    { "action": "wait", "label": "Let login and setup settle", "ms": 3000 },
-    { "action": "learn", "actor": "ranger", "spell": 806342 },
-    { "action": "set_aura", "label": "Grant one stack of Advantage so the cast is not rejected", "actor": "ranger", "spell": 804329, "stacks": 1 },
     {
-      "action": "assert", "label": "baseline: the target carries no root yet", "actor": "dummy",
-      "metric": "rooted", "equals": 0
-    },
-    { "action": "cast", "actor": "ranger", "spell": 806342, "target": "dummy" },
-    {
-      "action": "assert", "label": "CONTRACT: the target is rooted", "actor": "dummy",
-      "metric": "rooted", "equals": 1, "within_ms": 3000
+      "action": "wait",
+      "label": "Let login and setup settle",
+      "ms": 3000
     },
     {
-      "action": "assert", "label": "CONTRACT: the target took Nature damage from Whipvine Arrow", "actor": "ranger",
-      "metric": "spell_damage_count", "spell": 806342, "target": "dummy", "min": 1
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 806342
+    },
+    {
+      "action": "set_aura",
+      "label": "Grant one stack of Advantage so the cast is not rejected",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "baseline: the target carries no root yet",
+      "actor": "dummy",
+      "metric": "rooted",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 806342,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the target is rooted",
+      "actor": "dummy",
+      "metric": "rooted",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the target took Nature damage from Whipvine Arrow",
+      "actor": "ranger",
+      "metric": "spell_damage_count",
+      "spell": 806342,
+      "target": "dummy",
+      "min": 1
     }
   ]
 }

@@ -1,0 +1,166 @@
+{
+  "schema": 1,
+  "name": "Shadewell Murloc Oracles drop the Oracular Idol and, on the quest, the Prophet's Oracular Orb (#6324)",
+  "contract": [
+    "Report #6324: a Shadewell Murloc Oracle 161717 dropped no quest item.",
+    "creature_loot_template 161717 pays the Oracular Idol 559159 at 100% without a quest; the Idol starts Oracular Idol 1660036.",
+    "It also pays the Prophet's Oracular Orb 559160 at 100% to a player on 1660036, which wants three Orbs.",
+    "Expected: a player without the quest loots the Idol from one Oracle, and the same player on the quest loots an Orb from another."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 5
+    }
+  ],
+  "creatures": [
+    {
+      "id": "first_oracle",
+      "owner": "hero",
+      "entry": 161717,
+      "distance": 3,
+      "level": 4,
+      "health": 100
+    },
+    {
+      "id": "second_oracle",
+      "owner": "hero",
+      "entry": 161717,
+      "distance": 63,
+      "level": 4,
+      "health": 100
+    }
+  ],
+  "steps": [
+    {
+      "action": "assert",
+      "label": "The hero carries no Oracular Idol",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 559159,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The hero has not taken Oracular Idol",
+      "actor": "hero",
+      "metric": "quest_status",
+      "quest": 1660036,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill the first Oracle",
+      "actor": "hero",
+      "entry": 161717,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "first_oracle",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "loot_creature",
+      "actor": "hero",
+      "target": "first_oracle"
+    },
+    {
+      "action": "loot_slot",
+      "actor": "hero",
+      "item": 559159
+    },
+    {
+      "action": "assert",
+      "label": "The first Oracle dropped the Oracular Idol",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 559159,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "hero",
+      "quest": 1660036,
+      "complete": false
+    },
+    {
+      "action": "destroy_item",
+      "actor": "hero",
+      "item": 559160
+    },
+    {
+      "action": "assert",
+      "label": "Oracular Idol is in progress without an Orb",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 559160,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "quest_status",
+      "quest": 1660036,
+      "equals": 3
+    },
+    {
+      "action": "teleport",
+      "label": "Walk over to the second Oracle",
+      "actor": "hero",
+      "map": 0,
+      "x": -9557.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill the second Oracle",
+      "actor": "hero",
+      "entry": 161717,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "second_oracle",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "loot_creature",
+      "actor": "hero",
+      "target": "second_oracle"
+    },
+    {
+      "action": "loot_slot",
+      "actor": "hero",
+      "item": 559160
+    },
+    {
+      "action": "assert",
+      "label": "The second Oracle dropped a Prophet's Oracular Orb for the quest",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 559160,
+      "equals": 1,
+      "within_ms": 1000
+    }
+  ]
+}

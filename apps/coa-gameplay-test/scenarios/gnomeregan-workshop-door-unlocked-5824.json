@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "name": "Gnomeregan Workshop: the Workshop Door needs no Workshop Key (#5824)",
+  "contract": [
+    "#5824 (and #5562): a Dungeon Finder group for Gnomeregan reached the Workshop Door (map 90, -757.33 258.36",
+    "-273.08) from the Workshop entrance without the Workshop Key, which nothing in Dungeon Finder hands out. The",
+    "door there is the Workshop Door 90858 (guid 12003, displayId 907); stock data locks it with Lock.dbc 92",
+    "(Data1) plus GO_FLAG_LOCKED, which the client enforces. rev_20261003_10_dm_maraudon.sql clears Data1 and",
+    "GO_FLAG_LOCKED for it, as for Herod's Door. Expected: the server answers the client's gameobject query for",
+    "90858 with type 0, displayId 907 and Data1 0."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 90,
+    "x": -757.33,
+    "y": 258.36,
+    "z": -273.08,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where the Workshop Door is spawned",
+      "actor": "c",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the Workshop grid activate",
+      "ms": 2500
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the server about the Workshop Door the way the client does when the object comes into view",
+      "actor": "c",
+      "opcode": 94,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 90858
+        },
+        {
+          "u64": 12003
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: 90858 answers as a door (type 0)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 95,
+      "row": 90858,
+      "offset": 4,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: and as the Workshop Door model, displayId 907",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 95,
+      "row": 90858,
+      "offset": 8,
+      "index": 0,
+      "equals": 907,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Workshop Door carries no lock (stock Data1 is Lock.dbc 92)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 95,
+      "row": 90858,
+      "offset": 12,
+      "index": 1,
+      "equals": 0,
+      "within_ms": 4000,
+      "skip_strings": 7
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Workshop Door stands about 6 yd from where the report was filed",
+      "actor": "c",
+      "metric": "nearby_gameobject_count",
+      "entry": 90858,
+      "min": 1,
+      "within_ms": 8000
+    }
+  ]
+}

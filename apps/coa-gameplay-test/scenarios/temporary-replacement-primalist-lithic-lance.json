@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "A Lithic Lance button is saved as Geode Barrage (#5469)",
+  "contract": "With the Lithic Lance specialization passive 706159, Lithic Lance Ready 807048 runs aura_ascension_lithic_lance_ready::Apply (AscensionPrimalistLithicLance.cpp:38), which learns Lithic Lance 681251 as a temporary spell (learnSpell(LithicLance, true), line 44) and replaces the highest known Geode Barrage rank (chain 500402) with it through SetTemporarySpellReplacement (line 50). A temporary spell is never written to character_spell, and Player::_LoadActions runs before the buff is gained again, so a saved Lithic Lance button would be refused and deleted at login. persisted_action_button reads Player::GetSavedActionButtonSpell, the spell id _SaveActions writes: a button holding Lithic Lance must be saved as the replaced Geode Barrage rank 502770, and a button holding that rank itself is saved unchanged.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "primalist", "race": 1, "class": 31, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login state settle", "ms": 3000},
+    {"action": "learn", "actor": "primalist", "spell": 706159},
+    {"action": "learn", "actor": "primalist", "spell": 500402},
+    {"action": "learn", "actor": "primalist", "spell": 502769},
+    {"action": "learn", "actor": "primalist", "spell": 502770},
+    {"action": "set_aura", "label": "Fixture: Lithic Lance Ready", "actor": "primalist", "spell": 807048, "stacks": 1},
+    {
+      "action": "assert", "label": "Lithic Lance replaces the highest Geode Barrage rank", "actor": "primalist",
+      "metric": "temporary_spell_replacement", "spell": 502770, "equals": 681251, "within_ms": 1000
+    },
+    {"action": "set_action_button", "actor": "primalist", "button": 2, "spell": 681251},
+    {"action": "set_action_button", "actor": "primalist", "button": 3, "spell": 502770},
+    {
+      "action": "assert", "label": "The bar holds Lithic Lance", "actor": "primalist", "metric": "action_button",
+      "button": 2, "equals": 681251
+    },
+    {
+      "action": "assert", "label": "The Lithic Lance button is saved as Geode Barrage", "actor": "primalist",
+      "metric": "persisted_action_button", "button": 2, "equals": 502770
+    },
+    {
+      "action": "assert", "label": "Control: an ordinary known spell is saved unchanged", "actor": "primalist",
+      "metric": "persisted_action_button", "button": 3, "equals": 502770
+    }
+  ]
+}

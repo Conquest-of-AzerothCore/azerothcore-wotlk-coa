@@ -1,21 +1,31 @@
 {
   "schema": 1,
   "name": "Witch Doctor: Fool's Play clone fights with the target's own combat stats (#4103)",
-  "contract": "Fool's Play 681007 promises 'summon a copy of them ... that attacks them'. npc_ascension_witch_doctor::SetGUID (AscensionWitchDoctorSummons.cpp, NpcFool branch) previously copied only UNIT_FIELD_MINDAMAGE/MAXDAMAGE onto the clone -- update fields the client reads for tooltips/portraits -- while DoMeleeAttackIfReady's own CalculateDamage roll reads the separate m_weaponDamage array (Unit::GetWeaponDamageRange), which only SetBaseWeaponDamage writes; Unit::_UpdateSpells seeds that array with BASE_MINDAMAGE/BASE_MAXDAMAGE (Unit.h: 1.0f/2.0f), so the clone's actual melee rolls stayed pinned near 1-2 regardless of the copied target, matching the report's 'attacks for 1 dmg'. Max health used the generic per-summon formula (player level * 10) instead of the target's own health, so a clone of a high-level enemy still had a low-level-player-sized health pool. The fix adds SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE/MAXDAMAGE, target's own field) and SetMaxHealth/SetHealth from the target's own GetMaxHealth()/GetHealth(), both already known at SetGUID time (Summon() calls AI()->SetGUID(target->GetGUID(), DataTarget) synchronously right after SummonCreature). Neither the clone's own weapon-damage fields nor its health are directly readable through this harness: the clone is a dynamic summon, never a declared scenario actor, and melee_damage_total/melee_damage_count only track a declared player's own auto-attack. This scenario proves the weapon-damage half of the fix through the enemy's HP loss instead: entry 36 at level 80 has real weapon damage far above the fixed 1.0-2.0 BASE_MINDAMAGE/MAXDAMAGE ceiling, so even a handful of swings in the wait window push cumulative HP loss well past what 1-2 damage per swing could ever reach. The health-mirroring half (SetMaxHealth/SetHealth from the target) is applied for the same tooltip reason but is not independently observable through this harness and is not asserted here.",
+  "contract": [
+    "Fool's Play 681007 summons a copy of an enemy that attacks it. The clone must copy its target's weapon",
+    "damage and deal more than the one-to-two-damage placeholder. Onyxian Whelp 11262 has an actual level-80",
+    "creature_template level band; setting a level-11 Harvest Golem fixture to level 80 only changes its level",
+    "field, leaving its original weapon base stats. Both the Witch Doctor and the target are level 80 so an",
+    "unintended twenty-level attack-skill penalty cannot determine the verdict. Independent target weapon",
+    "metadata is compared with the owned clone, then normal native melee damage must exceed 24 in twelve",
+    "seconds. Unit::CalculateDamage uses the calculated weapon update fields for ordinary physical swings;",
+    "the former contract incorrectly asserted that these swings always read the raw m_weaponDamage array."
+  ],
   "timeout_ms": 90000,
   "players": [
     {
       "id": "witchdoctor",
       "race": 1,
       "class": 13,
-      "level": 60
+      "level": 80,
+      "spell_hit_rating": 10000
     }
   ],
   "creatures": [
     {
       "id": "enemy0",
       "owner": "witchdoctor",
-      "entry": 36,
+      "entry": 11262,
       "level": 80,
       "distance": 4,
       "health": 1000000
@@ -39,6 +49,19 @@
       "save_as": "hp0"
     },
     {
+      "action": "snapshot",
+      "actor": "enemy0",
+      "metric": "weapon_damage_min",
+      "save_as": "enemy_weapon_min"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy0",
+      "metric": "weapon_damage_min",
+      "min": 40,
+      "label": "The target template supplies actual level-80 weapon stats"
+    },
+    {
       "action": "cast",
       "actor": "witchdoctor",
       "spell": 681007,
@@ -53,6 +76,16 @@
       "equals": 1,
       "within_ms": 3000,
       "label": "SETUP: exactly one clone spawned"
+    },
+    {
+      "action": "assert",
+      "actor": "witchdoctor",
+      "metric": "owned_creature_weapon_damage_min",
+      "entry": 300660,
+      "ratio_to": "enemy_weapon_min",
+      "min": 0.99,
+      "max": 1.01,
+      "label": "Fool's Play copies the target's calculated minimum weapon damage"
     },
     {
       "action": "wait",
@@ -73,7 +106,14 @@
       "metric": "health",
       "relative_to": "hp0",
       "max": -30,
-      "label": "DISCRIMINATING: cumulative HP loss exceeds what a 1.0-2.0 BASE_MINDAMAGE/MAXDAMAGE clone could deal in the window (worst-case swing timer 1000 ms over 12000 ms wait caps the bug at 24 total, never mind normal ~2000 ms swing timers); only a clone using the target's own weapon damage via SetBaseWeaponDamage reaches this. Debugger batch 5 follow-up: two independent runs on the deployed (fixed) build landed -35 and -34 HP, consistently above the 24-cap the bugged clone could ever reach but below this assertion's original -40 floor -- -40 was miscalibrated against real swing timing, not a sign the fix is missing. Lowered to -30, which keeps clear separation above 24 while both observed runs (-35, -34) pass; not rerun a third time (proc-rate/variance rerun budget already spent on this scenario)."
+      "label": "Actual clone attacks exceed the 24-damage ceiling of twelve 1-to-2-damage swings"
     }
-  ]
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
 }

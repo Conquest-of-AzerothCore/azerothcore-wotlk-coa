@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Icebound Champion has its own model instead of the Bone Wraith's (#4140)",
+  "contract": "Icebound Champion 807813 summons creature 500484. Live CoA shows it with display 561888, but no installed client or server CreatureDisplayInfo carries that row, so rev_20260909_02 replaced it with 30810 (Creature/BoneGuard/BoneGuard.mdx) at display scale 0.4, exactly the model and size of Bone Wraith 50309, and the Champion looks like that minion. No archive records an earlier Icebound display. The maintainer approved a temporary stand-in until the live 561888 row is captured: Frostsworn General display 30300, the frost-armoured Character/NorthrendSkeleton/Male/NorthrendSkeletonMale.mdx with extra display 20109, present in both the client and the server DBC and the same skeleton model as the Gravebound Champion's 30616. Its CreatureDisplayInfo scale is 2, so display scale 0.5 draws it at the Gravebound Champion's size.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "ice", "race": 5, "class": 23, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and the Life Force aura settle", "ms": 3000 },
+    { "action": "learn", "actor": "ice", "spell": 807813 },
+    { "action": "cast", "label": "Summon the Icebound Champion", "actor": "ice", "spell": 807813 },
+    {
+      "action": "assert", "label": "SETUP: one Icebound Champion is summoned", "actor": "ice",
+      "metric": "owned_creature_count", "entry": 500484, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The Icebound Champion template uses the frost skeleton display 30300",
+      "actor": "ice", "metric": "creature_model_display", "entry": 500484, "equals": 30300
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the summoned Champion wears 30300, not the Bone Wraith's 30810",
+      "actor": "ice", "metric": "owned_creature_display", "entry": 500484, "equals": 30300
+    },
+    {
+      "action": "assert", "label": "The doubled frost skeleton is drawn at half scale", "actor": "ice",
+      "metric": "owned_creature_scale", "entry": 500484, "min": 0.499, "max": 0.501
+    }
+  ]
+}

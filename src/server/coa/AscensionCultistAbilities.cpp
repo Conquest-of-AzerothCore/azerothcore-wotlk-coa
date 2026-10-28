@@ -143,7 +143,7 @@ public:
         if (Named(info, 800413))
         {
             if (target && (player->HasAura(301200) || player->HasAura(301067)))
-                Summon(player, 533030, target->GetNearPosition(3, 0), 12000, target);
+                Summon(player, 533030, target->GetNearPosition(3, 0), 12000, target, id);
             if (player->HasAura(301068))
                 Cast(player, player, 301067);
         }
@@ -435,7 +435,7 @@ class spell_ascension_cultist_ability : public SpellScript
             player->GetThreatMgr().RemoveMeFromThreatLists();
             uint32 duration = sSpellMgr->GetSpellInfo(706932)->GetDuration();
             for (uint32 n = 0; n < 3; ++n)
-                Summon(player, 840000, player->GetNearPosition(2, float(n) * 2), duration, player->GetVictim());
+                Summon(player, 840000, player->GetNearPosition(2, float(n) * 2), duration, player->GetVictim(), id);
         }
         if (effect.Effect == SPELL_EFFECT_SUMMON)
         {
@@ -444,7 +444,8 @@ class spell_ascension_cultist_ability : public SpellScript
             {
                 done = true;
                 Position position = GetExplTargetDest() ? GetExplTargetDest()->GetPosition() : player->GetNearPosition(2, 0);
-                Summon(player, effect.MiscValue, position, std::max(1000, GetSpellInfo()->GetDuration()), GetExplTargetUnit());
+                Summon(player, effect.MiscValue, position, std::max(1000, GetSpellInfo()->GetDuration()),
+                    GetExplTargetUnit(), GetSpellInfo()->Id);
             }
         }
         if (id == 804779 && (effect.Effect == 174 || effect.Effect == 164))

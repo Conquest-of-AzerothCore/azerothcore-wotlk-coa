@@ -1,14 +1,23 @@
 {
   "schema": 1,
   "name": "Tinker Tank Buster ignores armor on burning targets (#3119)",
-  "contract": "Tank Buster 707254 is SPELL_AURA_OVERRIDE_CLASS_SCRIPTS with amount 25 (DBC EffectBasePoints 24, DieSides 1) and class mask 0x10, and it is implemented in core C++ in Unit::CalcArmorReducedDamage (src/server/game/Entities/Unit/Unit.cpp:2287-2297): a CLASS_TINKER attacker casting a SpellFamilyName 34 spell carrying flag96(16,0,256) against a victim holding a Fire periodic-damage aura adds 25 to ignoreArmorPct. Scrap Shot 500549 carries that mask; Rocket Launcher 500235 does not. Incendiary Rounds 800024 is the Fire periodic aura fixture: SpellFamilyName 34, SchoolMask 4, SPELL_AURA_PERIODIC_DAMAGE with amount 0 and an 8 s duration, so it marks the target burning without changing its health.",
+  "contract": [
+    "Tank Buster 707254 is SPELL_AURA_OVERRIDE_CLASS_SCRIPTS with amount 25 (DBC EffectBasePoints 24,",
+    "DieSides 1) and class mask 0x10, and it is implemented in core C++ in Unit::CalcArmorReducedDamage",
+    "(src/server/game/Entities/Unit/Unit.cpp:2287-2297): a CLASS_TINKER attacker casting a SpellFamilyName 34",
+    "spell carrying flag96(16,0,256) against a victim holding a Fire periodic-damage aura adds 25 to",
+    "ignoreArmorPct. Scrap Shot 500549 carries that mask; Rocket Launcher 500235 does not. Incendiary Rounds",
+    "800024 is the Fire periodic aura fixture: SpellFamilyName 34, SchoolMask 4, SPELL_AURA_PERIODIC_DAMAGE",
+    "with amount 0 and an 8 s duration, so it marks the target burning without changing its health."
+  ],
   "timeout_ms": 90000,
   "players": [
     {
       "id": "t",
       "race": 1,
       "class": 28,
-      "level": 80
+      "level": 80,
+      "ranged_hit_rating": 10000
     }
   ],
   "creatures": [

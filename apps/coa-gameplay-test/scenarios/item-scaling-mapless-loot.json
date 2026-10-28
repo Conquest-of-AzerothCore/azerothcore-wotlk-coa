@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Scaled loot callbacks safely ignore mapless loading and transfer states",
+  "contract": [
+    "Item scaling only changes creature and chest loot while the owner has a map.",
+    "Mail loot can run during achievement rewards in Player::LoadFromDB before SetMap.",
+    "Run the registered post-loot hooks with a native Player whose FindMap is null.",
+    "Mail and gameobject callbacks must return without asserting or adding items.",
+    "This callback fixture does not claim to reproduce a particular live character login."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "viewer",
+      "race": 1,
+      "class": 12,
+      "level": 32
+    }
+  ],
+  "steps": [
+    {
+      "action": "mapless_loot_hook",
+      "actor": "viewer",
+      "store": "mail"
+    },
+    {
+      "action": "mapless_loot_hook",
+      "actor": "viewer",
+      "store": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "player_class",
+      "equals": 12
+    }
+  ]
+}

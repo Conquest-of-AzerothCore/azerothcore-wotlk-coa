@@ -1,0 +1,148 @@
+{
+  "schema": 1,
+  "name": "Gehennas's Conjure Flame Orb spawns on him and walks a straight line to the target's cast-time spot",
+  "contract": "Conjure Flame Orb (2105417) cast but produced nothing: Spell.dbc EFFECT_1 only triggers 2180023 'Cosmetic - Camera Shake Big', a client-only visual with no SUMMON effect, so the orb creature has to be summoned by script on the dummy effect (EFFECT_0). The orb (entry 80644, db.exil.es export) now spawns on Gehennas, not at the target, and walks (MovePoint, not MoveFollow) to the position its target held when the 5000ms cast (SpellCastTimes.dbc index 6) completed, arriving as its measured 11000ms lifetime ends, self-casting the periodic pulse 2105418 the whole way. This case drives Conjure Flame Orb directly from the boss fixture (bypassing the schedule engine's own target selection, which a focused CoaBossAI.cpp unit/registration check would need to cover separately) and checks, through the orb's own position relative to its spawn point (`nearby_creature_count`'s `min_home_distance`, read from the hero, the only player in the case): it starts on Gehennas rather than already at the target, it travels roughly the cast-time distance toward the target, and it does not continue toward a position the target moved to afterward. A second player or a second owned creature fixture to stand at the destination and take the hit was tried and ruled out: Molten Core is instanced, so an independently placed second player lands in its own raid instance (confirmed even after grouping and re-teleporting); and Gehennas's own BossAI victim selection also reaches a hostile-faction owned fixture placed near him, landing unrelated Curse/Rain of Fire/Shadow Bolt damage on it and making a health-based assertion unreliable, as empirically observed (a stationary faction-1 fixture at the hero's position took thousands of damage within the 5.5s cast window, before the orb could have travelled anywhere).",
+  "timeout_ms": 30000,
+  "location": {
+    "map": 409,
+    "x": 1144.6,
+    "y": -1020.5,
+    "z": -185.6,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "hero",
+      "entry": 12259,
+      "health": 4000000,
+      "distance": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Molten Core",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 409
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: boss and hero start 30 yd apart, so the orb has somewhere to walk",
+      "actor": "boss",
+      "metric": "distance",
+      "target": "hero",
+      "min": 29,
+      "max": 31
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the orb does not exist before the cast",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 80644,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Gehennas casts Conjure Flame Orb at the hero",
+      "actor": "boss",
+      "spell": 2105417,
+      "target": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the cast went out",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 12259,
+      "spell": 2105417,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let the 5000ms cast complete and the orb spawn",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "The orb now exists",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 80644,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The orb is still carrying its periodic pulse aura, so it can deal Flame Orb damage once it arrives",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 80644,
+      "spell": 2105418,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The orb spawned on Gehennas and has not yet finished its 30 yd walk to the target",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 80644,
+      "min_home_distance": 25,
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "label": "The hero moves 25 yd past its cast-time spot, away from Gehennas; the orb must not follow it there",
+      "actor": "hero",
+      "map": 409,
+      "x": 1119.6,
+      "y": -1020.5,
+      "z": -185.6,
+      "o": 0.0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is still close enough (55 yd from Gehennas) for nearby_creature_count to see the orb",
+      "actor": "boss",
+      "metric": "distance",
+      "target": "hero",
+      "min": 54,
+      "max": 56
+    },
+    {
+      "action": "assert",
+      "label": "The orb moves well away from its spawn point toward the target, polled so this does not depend on exact travel timing",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 80644,
+      "min_home_distance": 10,
+      "min": 1,
+      "within_ms": 9500
+    },
+    {
+      "action": "assert",
+      "label": "The orb did not travel on toward the hero's new, farther position (which would put it past 45 yd from Gehennas, well beyond the 30 yd its fixed cast-time speed can cover in its 11000 ms lifetime)",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 80644,
+      "min_home_distance": 45,
+      "equals": 0
+    }
+  ]
+}

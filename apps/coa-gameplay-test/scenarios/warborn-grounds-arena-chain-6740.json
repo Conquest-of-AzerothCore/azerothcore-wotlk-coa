@@ -1,0 +1,273 @@
+{
+  "schema": 1,
+  "name": "Warborn Grounds arena chain: the world's Vince McOrc sends out each round and the ring crowns the champion",
+  "contract": "The Warborn Grounds arena chain (quests 254059-254063) is driven by Vince McOrc's gossip menu 932534: each option summons that round's challenger into the ring at (213.03, -3963.63, 37.104) and the challenger credits its quest on death, while the Orcamania Ring trigger (creature 9303637) crowns the final quest 254063 for any player who steps into the ring. #6740 reports that Lowfang never appears after taking the quest and #6755 that Vince offers no way to finish the last round. This case walks the chain as a real player does in world phase 1: the world's own Vince (991518), his assistant Gurgthock (255101) and the ring are spawned at their database spots, the player takes 254059 through the native accept request against that same world NPC, and only then stands in the ring and takes the round from Vince's menu. Killing Lowfang (254941) completes 254059, the second round stays locked until the first is handed in, and after the first four rounds are rewarded the player is crowned by stepping into the ring. The last round's menu has no summon option by design: its own text says to step into the ring.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 1,
+    "x": 178.3,
+    "y": -3969.2,
+    "z": 48.489,
+    "o": 0.12
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 2,
+      "class": 1,
+      "level": 12
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, the phase every Warborn Grounds spawn lives in",
+      "actor": "c",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the balcony's grid activate",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the world's Vince McOrc (991518) is spawned and alive at his balcony",
+      "actor": "c",
+      "metric": "nearby_creature_count",
+      "entry": 991518,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "and so is his assistant Gurgthock (255101), who hands the rounds in",
+      "actor": "c",
+      "metric": "nearby_creature_count",
+      "entry": 255101,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "and the Orcamania Ring trigger (9303637) is in the world 37 yd away",
+      "actor": "c",
+      "metric": "nearby_creature_count",
+      "entry": 9303637,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no challenger stands in the world, so the ring is what sends them out",
+      "actor": "c",
+      "metric": "nearby_creature_count",
+      "entry": 254941,
+      "max": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the first round is takeable from the world's Vince",
+      "actor": "c",
+      "metric": "quest_takeable",
+      "quest": 254059,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "quest_accept",
+      "label": "Accept Warborn Grounds: \"Lowfang\" from the world's Vince McOrc, as #6740 does",
+      "actor": "c",
+      "entry": 991518,
+      "quest": 254059
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the quest is in the log and incomplete, so a round can be sent out",
+      "actor": "c",
+      "metric": "quest_status",
+      "quest": 254059,
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the second round stays locked until the first is handed in",
+      "actor": "c",
+      "metric": "quest_takeable",
+      "quest": 254060,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "teleport",
+      "label": "Walk to the ring centre, where the challengers are sent out",
+      "actor": "c",
+      "map": 1,
+      "x": 213.03,
+      "y": -3963.63,
+      "z": 37.104,
+      "o": 3.22
+    },
+    {
+      "action": "wait",
+      "label": "Let the grid and the ring settle",
+      "ms": 3000
+    },
+    {
+      "action": "summon",
+      "label": "Vince steps to the ring's edge to call the round",
+      "actor": "c",
+      "as": "vince",
+      "entry": 991518,
+      "distance": 3
+    },
+    {
+      "action": "gossip_hello",
+      "label": "Talk to Vince with 254059 in progress",
+      "actor": "c",
+      "target": "vince"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Vince offers the round (this is where #6740's 'Lowfang never spawns' would fail)",
+      "actor": "c",
+      "metric": "gossip_options",
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "and the first option is the one that sends Lowfang out",
+      "actor": "c",
+      "metric": "gossip_option_text",
+      "index": 0,
+      "text": "Send out Lowfang. I'm ready.",
+      "equals": 1
+    },
+    {
+      "action": "gossip_select",
+      "label": "Send out Lowfang",
+      "actor": "c",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Lowfang (254941) stands in the ring (#6740)",
+      "actor": "c",
+      "metric": "nearby_creature_count",
+      "entry": 254941,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Defeat Lowfang the way a player does",
+      "actor": "c",
+      "entry": 254941,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "his death completes the first round, 254059",
+      "actor": "c",
+      "metric": "quest_status",
+      "quest": 254059,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "reward_quest",
+      "label": "Hand the first round in",
+      "actor": "c",
+      "quest": 254059
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Take the second round, 254060",
+      "actor": "c",
+      "quest": 254060
+    },
+    {
+      "action": "reward_quest",
+      "label": "Hand the second round in",
+      "actor": "c",
+      "quest": 254060
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Take the third round, 254061",
+      "actor": "c",
+      "quest": 254061
+    },
+    {
+      "action": "reward_quest",
+      "label": "Hand the third round in",
+      "actor": "c",
+      "quest": 254061
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Take the fourth round, 254062",
+      "actor": "c",
+      "quest": 254062
+    },
+    {
+      "action": "reward_quest",
+      "label": "Hand the fourth round in",
+      "actor": "c",
+      "quest": 254062
+    },
+    {
+      "action": "teleport",
+      "label": "Step back out of the ring, 25 yards away",
+      "actor": "c",
+      "map": 1,
+      "x": 213.03,
+      "y": -3988.63,
+      "z": 39.5,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the grid and the ring's line of sight settle",
+      "ms": 2500
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Take the last round, 254063 One Last Battle, out of the ring",
+      "actor": "c",
+      "quest": 254063,
+      "complete": false
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the crown is not handed out while the champion stands outside the ring (#6755's real gate)",
+      "actor": "c",
+      "metric": "quest_status",
+      "quest": 254063,
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "teleport",
+      "label": "Step into the ring to be crowned",
+      "actor": "c",
+      "map": 1,
+      "x": 213.03,
+      "y": -3963.63,
+      "z": 37.104,
+      "o": 3.22
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Orcamania Ring crowns the champion, so One Last Battle can be finished (#6755)",
+      "actor": "c",
+      "metric": "quest_status",
+      "quest": 254063,
+      "equals": 1,
+      "within_ms": 12000
+    }
+  ]
+}

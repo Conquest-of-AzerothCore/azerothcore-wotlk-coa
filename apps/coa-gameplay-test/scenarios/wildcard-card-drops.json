@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Creatures a Wildcard group kills roll a Skill Card drop for every member in reward range",
+  "contract": "On Darkmoon - Season 10 Wildcard Skill Cards dropped from creatures everywhere, at a low chance that came to about 2-4 cards per dungeon run (player report). The server rolls 3% per kill for each Wildcard Hero of the killer's group within reward distance, only for creatures that grant experience or honor (no gray levels, critters, totems or pets), and delivers one normal ability or talent card item to the bags or the mailbox. This smoke test runs the kill hook for a grouped killer and a second member; the drop chance itself is covered by the AscensionWildcard unit tests.",
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0},
+  "players": [
+    {"id": "wild", "race": 1, "class": 10, "level": 20},
+    {"id": "friend", "race": 1, "class": 10, "level": 20}
+  ],
+  "creatures": [
+    {"id": "first_target", "owner": "wild", "entry": 2158, "level": 20, "health": 20, "distance": 2},
+    {"id": "second_target", "owner": "wild", "entry": 2158, "level": 20, "health": 20, "distance": 2},
+    {"id": "third_target", "owner": "wild", "entry": 2158, "level": 20, "health": 20, "distance": 2}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "console", "command": "coa gamemode WildCard on Harnessa"},
+    {"action": "console", "command": "coa gamemode WildCard on Harnessb"},
+    {"action": "group", "actor": "wild", "target": "friend"},
+    {"action": "learn", "label": "Death Touch Copy kills outright", "actor": "wild", "spell": 24080},
+    {"action": "cast", "actor": "wild", "spell": 24080, "target": "first_target"},
+    {"action": "assert", "label": "The group kills the first creature", "actor": "first_target", "metric": "alive", "equals": 0, "within_ms": 45000},
+    {"action": "cast", "actor": "wild", "spell": 24080, "target": "second_target"},
+    {"action": "assert", "label": "the second", "actor": "second_target", "metric": "alive", "equals": 0, "within_ms": 45000},
+    {"action": "cast", "actor": "wild", "spell": 24080, "target": "third_target"},
+    {"action": "assert", "label": "and the third", "actor": "third_target", "metric": "alive", "equals": 0, "within_ms": 45000},
+    {"action": "assert", "label": "The killer is fine after the drop rolls", "actor": "wild", "metric": "alive", "equals": 1},
+    {"action": "assert", "label": "and so is the other member", "actor": "friend", "metric": "alive", "equals": 1}
+  ]
+}

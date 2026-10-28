@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Mythic+ start: no socket window for the group, Mythic+ Preparation during the countdown",
+  "contract": "Start Keystone sends no keystone socket window packet (2310): the client opens the socket frame on any window-5 packet. During the 10 s countdown every player carries Mythic+ Preparation (9931349: spells cost 100% less, rooted, unattackable), which ends with the countdown.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "set_health", "actor": "hero", "value": 5000000, "maximum": 5000000 },
+    { "action": "learn", "actor": "hero", "spell": 78 },
+    { "action": "ascension_dungeon_difficulty_packet", "actor": "hero", "value": 2 },
+    { "action": "wait", "ms": 250 },
+    { "action": "teleport", "actor": "hero", "map": 33, "x": -229.135, "y": 2109.18, "z": 76.8898 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "add_item", "actor": "hero", "item": 400313, "count": 1 },
+    { "action": "use_item", "actor": "hero", "item": 400313, "spell": 161 },
+    { "action": "assert", "label": "CONTROL: using the key opens the socket window", "actor": "hero", "metric": "server_packets", "opcode": 2310, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "CONTROL: Heroic Strike costs rage before the run", "actor": "hero", "metric": "spell_power_cost", "spell": 78, "min": 1 },
+    { "action": "snapshot", "actor": "hero", "metric": "server_packets", "opcode": 2310, "save_as": "window_before_start" },
+    { "action": "client_packet", "actor": "hero", "opcode": 1319 },
+    { "action": "assert", "label": "CONTROL: Start Keystone starts the countdown", "actor": "hero", "metric": "rooted", "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "Start Keystone sends no socket window packet", "actor": "hero", "metric": "server_packets", "opcode": 2310, "relative_to": "window_before_start", "equals": 0 },
+    { "action": "assert", "label": "the group carries Mythic+ Preparation during the countdown", "actor": "hero", "metric": "aura", "spell": 9931349, "equals": 1 },
+    { "action": "assert", "label": "Mythic+ Preparation lasts no longer than the countdown", "actor": "hero", "metric": "aura_duration_ms", "spell": 9931349, "min": 1, "max": 10000 },
+    { "action": "assert", "label": "spells cost nothing during the countdown", "actor": "hero", "metric": "spell_power_cost", "spell": 78, "equals": 0 },
+    { "action": "wait", "ms": 10500 },
+    { "action": "assert", "label": "Mythic+ Preparation ends with the countdown", "actor": "hero", "metric": "aura", "spell": 9931349, "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "label": "the player can move once the run starts", "actor": "hero", "metric": "rooted", "equals": 0 },
+    { "action": "assert", "label": "Heroic Strike costs rage again once the run starts", "actor": "hero", "metric": "spell_power_cost", "spell": 78, "min": 1 }
+  ]
+}

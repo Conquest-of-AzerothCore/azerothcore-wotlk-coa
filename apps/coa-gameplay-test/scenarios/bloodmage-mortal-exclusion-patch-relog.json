@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "name": "The cursed form exclusion patch reaches the client again after a relog (#5737, #6394)",
+  "contract": [
+    "The client keeps the server's SMSG_PATCH_SPELL rows only for the world entry that received them, so",
+    "every login and relog has to be answered with the patch stream again. The stream is sent from the",
+    "collection queue when the client's CMSG_EXTENSION_INITIALIZED (0x561) world-entry notice is handled.",
+    "That notice used to be dropped whenever an older notice was still queued, and the once-per-character",
+    "guard then stopped the resend, so a relogged client fell back to its own Spell.dbc where Bloodmoon",
+    "Blast 500125 and the other Mortal Form abilities carry ExcludeCasterAuraSpell 524861 and the tooltip",
+    "line $?a524861[...]Requires Mortal Form|r while every Cursed Form keeps 524861. This scenario asserts",
+    "the first world entry streams row 500125 with $?a802877, relogs, sends the world-entry notice again and",
+    "asserts that a second row 500125 arrived. Expected before: the row is streamed exactly once, so the",
+    "relogged client loses the fix. Expected after: the relog streams it again."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 12,
+      "level": 32
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the first world entry and its patch stream settle",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "The first session streams the Mortal Form row with the internal marker",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500125,
+      "text": "$?a802877",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "relog",
+      "actor": "bloodmage"
+    },
+    {
+      "action": "wait",
+      "label": "Let the second world entry settle",
+      "ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "actor": "bloodmage",
+      "opcode": 1377
+    },
+    {
+      "action": "wait",
+      "label": "Give the queue a tick to answer the world-entry notice",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the relog is answered with the row again",
+      "actor": "bloodmage",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 500125,
+      "min": 2,
+      "within_ms": 5000
+    }
+  ]
+}

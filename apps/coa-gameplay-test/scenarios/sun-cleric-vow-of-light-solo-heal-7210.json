@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Vow of Light heals the caster when solo, not only a grouped ally (#7210)",
+  "contract": "aura_ascension_sun_cleric_event's handler for Vow of Light (807547) builds allies = Allies(player, player, Radius(505197)), then called allies.remove(player) before sorting and casting the copied heal (505197) on allies.front(). Allies() already conditionally re-adds the center unit itself when it is alive and eligible, matching the convention every other Allies()-based heal-share talent in this file relies on (e.g. the line-303 call, which does not strip the player). Vow of Light was the only caller stripping the player right after. While solo (no group, matching this issue's report), Allies() returns exactly [player], so the explicit removal emptied the list and the copied heal never fired -- Vow of Light did nothing for a solo caster. The heal spell 505197 is itself one of SunClericCopies, and aura_ascension_sun_cleric_event::Check already rejects any proc caused by a SunClericCopies spell, so the removed line served no anti-loop purpose. The fix deletes that one line. This scenario is solo by construction (no group action, no other player) to cover exactly the gap the existing sun-cleric-vow-of-light-heal.json scenario documents as untested.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 5000 },
+    { "action": "learn", "actor": "caster", "spell": 807547 },
+    { "action": "learn", "actor": "caster", "spell": 2050 },
+    { "action": "cast", "actor": "caster", "spell": 807547 },
+    {
+      "action": "assert", "label": "Vow of Light is active on the caster", "actor": "caster",
+      "metric": "aura", "spell": 807547, "caster": "caster", "equals": 1, "within_ms": 2000
+    },
+    { "action": "set_health", "actor": "caster", "value": 1000 },
+    { "action": "wait", "label": "Let the global cooldown from casting Vow of Light clear", "ms": 1600 },
+    { "action": "cast", "actor": "caster", "spell": 2050, "target": "caster" },
+    {
+      "action": "assert", "label": "The caster's own heal lands", "actor": "caster",
+      "metric": "spell_heal_count", "spell": 2050, "target": "caster", "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Vow of Light copies a share of that received healing back onto the lone caster",
+      "actor": "caster", "metric": "spell_heal_count", "spell": 505197, "target": "caster", "min": 1, "within_ms": 5000
+    }
+  ]
+}

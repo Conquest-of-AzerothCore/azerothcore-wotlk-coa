@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Venomancer: the login stream hides weapons on the Burrow model",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1.",
+    "Burrow (806154) applies 806152, a transform to display 15435 on model 2206 (InvisibleMan.mdx).",
+    "The client's CreatureModelData row 2206 has flags 0x3; without flag 0x10 the client draws the weapons above the burrow, which Ascension's live client does not.",
+    "The login patch stream sends model rows whose server values differ from the client's copy as SMSG_PATCH_CREATURE_MODEL_DATA (0x0974): 28 dwords, then the sized model name.",
+    "Row 2206 is sent once with flags 0x13. Row 5860, which the server holds unchanged, is not sent.",
+    "Socketless packet construction does not establish how the client renders the model."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -9458.0, "y": 42.0, "z": 55.5 },
+  "players": [
+    { "id": "client", "race": 1, "class": 29, "level": 56 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 6000 },
+    { "action": "assert", "label": "The login stream sends model row 2206 once", "actor": "client", "metric": "server_packets", "opcode": 2420, "row": 2206, "equals": 1 },
+    { "action": "assert", "label": "Row 2206 hides attached weapons (flags 0x13)", "actor": "client", "metric": "server_packet_u32", "opcode": 2420, "row": 2206, "index": 1, "equals": 19 },
+    { "action": "assert", "label": "Row 2206 keeps the client's collision width 0.6111", "actor": "client", "metric": "server_packet_u32", "opcode": 2420, "row": 2206, "index": 14, "equals": 1058828557 },
+    { "action": "assert", "label": "Row 2206 carries the InvisibleMan model name", "actor": "client", "metric": "server_packet_contains", "opcode": 2420, "row": 2206, "text": "InvisibleMan.mdx", "equals": 1 },
+    { "action": "assert", "label": "An unchanged model row is not streamed", "actor": "client", "metric": "server_packets", "opcode": 2420, "row": 5860, "equals": 0 }
+  ]
+}

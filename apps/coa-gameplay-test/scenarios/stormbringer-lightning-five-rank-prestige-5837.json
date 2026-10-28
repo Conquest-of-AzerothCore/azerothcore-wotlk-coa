@@ -1,0 +1,267 @@
+{
+  "schema": 1,
+  "name": "Lightning prestige removes all five reported high ranks (#5837)",
+  "contract": [
+    "The report holds Storm Alert707906 rank3, Brine807111 rank7, Torrential Wrath503359 rank9, Updraft570166 (raw rank6), and Aeroblast501455 rank7 after Lightning prestige. All require level56 or58 in installed Spell.dbc and current trainer data.",
+    "Explicit fixture grants represent the reported legacy holdings; Lightning does not currently acquire Wind or Maelstrom replacements.",
+    "Normal Chromie prestige must forget and deactivate every high rank, with all five still absent at level10."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "prestiger",
+      "race": 1,
+      "class": 16,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "prestiger",
+      "id": 15
+    },
+    {
+      "action": "learn",
+      "actor": "prestiger",
+      "spell": 707906
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "knows_spell",
+      "spell": 707906,
+      "equals": 1
+    },
+    {
+      "action": "set_action_button",
+      "actor": "prestiger",
+      "spell": 707906,
+      "button": 10
+    },
+    {
+      "action": "learn",
+      "actor": "prestiger",
+      "spell": 807111
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "knows_spell",
+      "spell": 807111,
+      "equals": 1
+    },
+    {
+      "action": "set_action_button",
+      "actor": "prestiger",
+      "spell": 807111,
+      "button": 11
+    },
+    {
+      "action": "learn",
+      "actor": "prestiger",
+      "spell": 503359
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "knows_spell",
+      "spell": 503359,
+      "equals": 1
+    },
+    {
+      "action": "set_action_button",
+      "actor": "prestiger",
+      "spell": 503359,
+      "button": 12
+    },
+    {
+      "action": "learn",
+      "actor": "prestiger",
+      "spell": 570166
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "knows_spell",
+      "spell": 570166,
+      "equals": 1
+    },
+    {
+      "action": "set_action_button",
+      "actor": "prestiger",
+      "spell": 570166,
+      "button": 13
+    },
+    {
+      "action": "learn",
+      "actor": "prestiger",
+      "spell": 501455
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "knows_spell",
+      "spell": 501455,
+      "equals": 1
+    },
+    {
+      "action": "set_action_button",
+      "actor": "prestiger",
+      "spell": 501455,
+      "button": 14
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "prestiger",
+      "target": "chromie"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "prestiger",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Prestige forgets this reported high rank",
+      "actor": "prestiger",
+      "metric": "knows_spell",
+      "spell": 707906,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "spell_active",
+      "spell": 707906,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Prestige forgets this reported high rank",
+      "actor": "prestiger",
+      "metric": "knows_spell",
+      "spell": 807111,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "spell_active",
+      "spell": 807111,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Prestige forgets this reported high rank",
+      "actor": "prestiger",
+      "metric": "knows_spell",
+      "spell": 503359,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "spell_active",
+      "spell": 503359,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Prestige forgets this reported high rank",
+      "actor": "prestiger",
+      "metric": "knows_spell",
+      "spell": 570166,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "spell_active",
+      "spell": 570166,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Prestige forgets this reported high rank",
+      "actor": "prestiger",
+      "metric": "knows_spell",
+      "spell": 501455,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "spell_active",
+      "spell": 501455,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "prestiger",
+      "value": 10
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "knows_spell",
+      "spell": 707906,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "knows_spell",
+      "spell": 807111,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "knows_spell",
+      "spell": 503359,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "knows_spell",
+      "spell": 570166,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "knows_spell",
+      "spell": 501455,
+      "equals": 0
+    }
+  ],
+  "creatures": [
+    {
+      "id": "chromie",
+      "owner": "prestiger",
+      "entry": 178081,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8816.5,
+    "y": 627,
+    "z": 94.1,
+    "o": 3.8
+  }
+}

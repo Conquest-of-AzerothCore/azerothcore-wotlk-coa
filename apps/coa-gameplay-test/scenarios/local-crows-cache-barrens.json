@@ -1,0 +1,191 @@
+{
+  "schema": 1,
+  "name": "Barrens Crow cache spawning and delivery",
+  "contract": "Chest and crow spawn at the screenshot coordinates, High-Risk ten-second claiming works, and delivery removes the carry aura and grants five rewards plus materials. The map harness verifies screenshot projection; automatic selection chooses one of four locations.",
+  "players": [
+    {
+      "id": "owner",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "x": -763.6296,
+    "y": -3191.6892,
+    "z": 91.666626,
+    "o": 2.3004022,
+    "map": 1
+  },
+  "timeout_ms": 90000,
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "owner",
+      "value": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "owner",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "set_aura",
+      "actor": "owner",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "console",
+      "command": "crows barrens 3"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "system_message_contains",
+      "equals": 1,
+      "within_ms": 1500,
+      "text": "the Barrens"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "nearby_creature_count",
+      "equals": 1,
+      "within_ms": 1500,
+      "entry": 994310
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "nearby_gameobject_count",
+      "equals": 1,
+      "within_ms": 1500,
+      "entry": 994311
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "owner",
+      "entry": 994311
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "casting",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "ms": 10500
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "item_count",
+      "equals": 1,
+      "within_ms": 1500,
+      "item": 1615010
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "aura_stacks",
+      "equals": 1,
+      "within_ms": 1500,
+      "spell": 1005000
+    },
+    {
+      "action": "use_item",
+      "actor": "owner",
+      "item": 1615010,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "item_count",
+      "equals": 1,
+      "within_ms": 1500,
+      "item": 1615010
+    },
+    {
+      "action": "teleport",
+      "actor": "owner",
+      "map": 1,
+      "x": -956.664,
+      "y": -3754.71,
+      "z": 5.33239,
+      "o": 0.996637
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "aura_stacks",
+      "equals": 0,
+      "within_ms": 1500,
+      "spell": 1005000
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "snapshot",
+      "actor": "owner",
+      "metric": "carried_item_count",
+      "save_as": "before_rewards"
+    },
+    {
+      "action": "use_item",
+      "actor": "owner",
+      "item": 1615010,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "item_count",
+      "equals": 0,
+      "within_ms": 1500,
+      "item": 1615010
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "item_count",
+      "equals": 20,
+      "within_ms": 1500,
+      "item": 967008
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "item_count",
+      "equals": 20,
+      "within_ms": 1500,
+      "item": 967014
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "item_count",
+      "equals": 20,
+      "within_ms": 1500,
+      "item": 967017
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "carried_item_count",
+      "equals": 64,
+      "within_ms": 1500,
+      "relative_to": "before_rewards"
+    }
+  ]
+}

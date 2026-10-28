@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Targorr the Dread drops loot (#7743)",
+  "contract": [
+    "#7743: a player reports that Targorr the Dread, the Stockade boss, gives no loot. His creature entry 1696",
+    "carries eleven creature_loot_template rows, including item 3630 at 100 % and three reference groups, so the",
+    "table is not empty and a kill has to drop something; the CoA difficulty variants 101696 and 201696 carry the",
+    "same 100 % row plus a 1 % row. This scenario spawns the base entry, kills it and opens its loot, which either",
+    "reproduces the report or shows the drop working and moves the suspicion to the difficulty variant."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "p", "race": 1, "class": 32, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "targorr", "owner": "p", "entry": 1696, "faction": 14, "level": 60, "health": 50000, "distance": 5}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the spawn settle", "ms": 7000},
+    {"action": "attack_nearby", "label": "Kill Targorr", "actor": "p", "entry": 1696, "kill": true},
+    {
+      "action": "assert", "label": "the boss is dead", "actor": "targorr", "metric": "alive",
+      "equals": 0, "within_ms": 20000
+    },
+    {"action": "loot_nearby", "label": "Open his loot", "actor": "p", "entry": 1696},
+    {
+      "action": "assert", "label": "REALITY: the corpse holds loot", "actor": "p", "metric": "loot_count",
+      "min": 1, "within_ms": 3000
+    }
+  ]
+}

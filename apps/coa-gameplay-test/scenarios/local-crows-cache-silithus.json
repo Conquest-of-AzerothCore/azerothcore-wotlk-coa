@@ -1,0 +1,238 @@
+{
+  "schema": 1,
+  "name": "Silithus Crows Cache location and Cenarion Hold delivery",
+  "contract": "Crow's Cache spawns at the user's exact Southwind Village coordinates in Silithus, announces that location, allows a ten-second High-Risk claim. Marker transport and removal are covered by local-crows-cache; exact Silithus projection and tooltip are covered by crows_cache_map. The carry aura clears and the cache opens with five raid items plus materials in Cenarion Hold. Requires CrowsCache.Enable=1. Automatic selection normally picks one of Tanaris or Silithus at random; isolated scenarios disable random selection for deterministic automatic-timer coverage. The fixture clears the four local hostile ghosts before the uninterrupted claim test; NPC damage otherwise correctly interrupts opening.",
+  "players": [
+    {
+      "id": "owner",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 1,
+    "x": -7203.1616,
+    "y": 372.38562,
+    "z": 25.355282,
+    "o": 4.4326873
+  },
+  "timeout_ms": 90000,
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "owner",
+      "value": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "owner",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "set_aura",
+      "actor": "owner",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "nearby_creature_count",
+      "entry": 12178,
+      "within_ms": 1500,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "nearby_creature_count",
+      "entry": 12179,
+      "within_ms": 1500,
+      "min": 2
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "owner",
+      "entry": 12178,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "owner",
+      "entry": 12178,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "owner",
+      "entry": 12179,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "owner",
+      "entry": 12179,
+      "kill": true
+    },
+    {
+      "action": "stop_attack",
+      "actor": "owner"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "console",
+      "command": "crows silithus 3"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "system_message_contains",
+      "equals": 1,
+      "within_ms": 1500,
+      "text": "Southwind Village, Silithus"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "nearby_creature_count",
+      "equals": 1,
+      "within_ms": 1500,
+      "entry": 994310
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "nearby_gameobject_count",
+      "equals": 1,
+      "within_ms": 1500,
+      "entry": 994311
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "owner",
+      "entry": 994311
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "casting",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "ms": 10500
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "item_count",
+      "equals": 1,
+      "within_ms": 1500,
+      "item": 1615010
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "aura_stacks",
+      "equals": 1,
+      "within_ms": 1500,
+      "spell": 1005000
+    },
+    {
+      "action": "use_item",
+      "actor": "owner",
+      "item": 1615010,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "item_count",
+      "equals": 1,
+      "within_ms": 1500,
+      "item": 1615010
+    },
+    {
+      "action": "teleport",
+      "actor": "owner",
+      "map": 1,
+      "x": -6818.09,
+      "y": 733.814,
+      "z": 41.5661
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "aura_stacks",
+      "equals": 0,
+      "within_ms": 1500,
+      "spell": 1005000
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "snapshot",
+      "actor": "owner",
+      "metric": "carried_item_count",
+      "save_as": "before_rewards"
+    },
+    {
+      "action": "use_item",
+      "actor": "owner",
+      "item": 1615010,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "item_count",
+      "equals": 0,
+      "within_ms": 1500,
+      "item": 1615010
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "item_count",
+      "equals": 20,
+      "within_ms": 1500,
+      "item": 967008
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "item_count",
+      "equals": 20,
+      "within_ms": 1500,
+      "item": 967014
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "item_count",
+      "equals": 20,
+      "within_ms": 1500,
+      "item": 967017
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "carried_item_count",
+      "equals": 64,
+      "within_ms": 1500,
+      "relative_to": "before_rewards"
+    }
+  ]
+}

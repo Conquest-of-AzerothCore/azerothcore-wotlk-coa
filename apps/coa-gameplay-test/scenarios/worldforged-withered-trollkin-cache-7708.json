@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Worldforged Withered Trollkin Shoulders cache stands on the Boulderfist cave floor (#7708)",
+  "contract": "The Witherbark Cache pickup (95855, guid 6941348) spawned inside rock in the Boulderfist cave; the only walkable polygon at its old XY was the surface 31 yd above it. rev_20261028_02 moves it to the reporter's own position, which lands on the cave floor.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -1234.99, "y": -1997.35, "z": 37.22, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the cache is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95855, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the pickup is grounded on the cave floor", "actor": "p", "metric": "spawn_placement", "guid": 6941348, "spawn_type": "gameobject", "tolerance": 1.5, "equals": 0 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 95855 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "the cache is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

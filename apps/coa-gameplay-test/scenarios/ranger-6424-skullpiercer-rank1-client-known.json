@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Ranger: the Advantage bar keeps Skullpiercer rank 1 known to the client (#6424)",
+  "contract": "#6424 The Ascension client (patch-B ClassResources.lua) shows the Ranger Advantage combo bar only while IsSpellIDKnown(802036), Skullpiercer rank 1, which the Ranger starts with in action button 3. Skullpiercer uses Focus, so SpellInfo::IsStackableWithRanks is false and learning rank 2, 501715 (level 10), superseded 802036: the client was told to replace it, and SendInitialSpells skipped the inactive rank on every later login, so the bar vanished at level 10 for good. Expected: after learning 501715, and after a relog, the client still knows 802036 and 501715 while the server keeps 501715 as the active rank and moves button 3 to it; rank 3, 501716 (level 18), still supersedes 501715 normally.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 1 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "assert", "actor": "ranger", "metric": "client_knows_spell", "spell": 802036, "equals": 1, "label": "a new Ranger's client knows Skullpiercer rank 1" },
+    { "action": "assert", "actor": "ranger", "metric": "action_button", "button": 3, "equals": 802036, "label": "Skullpiercer rank 1 is in button 3" },
+    { "action": "set_level", "actor": "ranger", "value": 10 },
+    { "action": "learn", "actor": "ranger", "spell": 501715, "label": "learn Skullpiercer rank 2" },
+    { "action": "assert", "actor": "ranger", "metric": "spell_active", "spell": 501715, "equals": 1, "label": "rank 2 is the active rank" },
+    { "action": "assert", "actor": "ranger", "metric": "spell_active", "spell": 802036, "equals": 0, "label": "rank 1 is no longer the active rank" },
+    { "action": "assert", "actor": "ranger", "metric": "client_knows_spell", "spell": 501715, "equals": 1, "label": "the client knows rank 2" },
+    { "action": "assert", "actor": "ranger", "metric": "client_knows_spell", "spell": 802036, "equals": 1, "label": "the client still knows rank 1, so the Advantage bar stays" },
+    { "action": "assert", "actor": "ranger", "metric": "action_button", "button": 3, "equals": 501715, "label": "button 3 now casts rank 2" },
+    { "action": "relog", "actor": "ranger" },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "actor": "ranger", "metric": "client_knows_spell", "spell": 802036, "equals": 1, "label": "after a relog the client still knows rank 1" },
+    { "action": "assert", "actor": "ranger", "metric": "client_knows_spell", "spell": 501715, "equals": 1, "label": "after a relog the client knows rank 2" },
+    { "action": "assert", "actor": "ranger", "metric": "action_button", "button": 3, "equals": 501715, "label": "after a relog button 3 still casts rank 2" },
+    { "action": "set_level", "actor": "ranger", "value": 18 },
+    { "action": "learn", "actor": "ranger", "spell": 501716, "label": "learn Skullpiercer rank 3" },
+    { "action": "assert", "actor": "ranger", "metric": "client_knows_spell", "spell": 501716, "equals": 1, "label": "the client knows rank 3" },
+    { "action": "assert", "actor": "ranger", "metric": "client_knows_spell", "spell": 501715, "equals": 0, "label": "rank 3 supersedes rank 2 as before" },
+    { "action": "assert", "actor": "ranger", "metric": "client_knows_spell", "spell": 802036, "equals": 1, "label": "the client still knows rank 1 at rank 3" }
+  ]
+}

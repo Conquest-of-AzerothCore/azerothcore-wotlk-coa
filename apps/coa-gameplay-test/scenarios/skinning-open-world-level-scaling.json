@@ -1,7 +1,18 @@
 {
   "schema": 1,
   "name": "Skinning in the open world keeps the authored requirement with level scaling on and off",
-  "contract": "Requires DestinyWeaver.Enable=1, DestinyWeaver.LevelScaling=1 and DestinyWeaver.Scaling.Offset=3. Spell::CheckCast requires (level - 10) * 10 Skinning below 100 skill, so a level-20 Ranger with Skinning 40 skins beasts of level 5 (0), 11 (10) and 14 (40, the orange edge) and is refused SPELL_FAILED_LOW_CASTLEVEL (49) by level 15 (50). In the open world the Destiny Weaver only lifts a creature, to 17 for a level-20 character. The lift must not raise the skinning requirement: the corpse's skinning loot is the authored creature's, and a lifted requirement would lock a scaled character out of every beast below its own level (a level-5 wolf shown at 17 needs 70). With scaling off the same four beasts give the same four results. Black Riding Wolf 5194 is a beast with skinning table 100001 and no creature loot or money, so its corpse becomes skinnable as soon as it dies.",
+  "contract": [
+    "Requires CoALegendaryItems.DropChance=0: this scenario checks skinning an otherwise empty corpse.",
+    "Requires DestinyWeaver.Enable=1, DestinyWeaver.LevelScaling=1 and DestinyWeaver.Scaling.Offset=4.",
+    "Spell::CheckCast requires (level - 10) * 10 Skinning below 100 skill, so a level-20 Ranger with Skinning 40",
+    "skins beasts of level 5 (0), 11 (10) and 14 (40, the orange edge) and is refused SPELL_FAILED_LOW_CASTLEVEL (49)",
+    "by level 15 (50). In the open world the Destiny Weaver only lifts a creature, to 16 for a level-20 character.",
+    "The lift must not raise the skinning requirement: the corpse's skinning loot is the authored creature's, and a",
+    "lifted requirement would lock a scaled character out of every beast below its own level (a level-5 wolf shown at",
+    "16 needs 60). With scaling off the same four beasts give the same four results. Black Riding Wolf 5194 is a",
+    "beast with skinning table 100001 and no creature loot or money, so its corpse becomes skinnable as soon as it",
+    "dies."
+  ],
   "timeout_ms": 180000,
   "location": {
     "map": 0,
@@ -111,11 +122,11 @@
     },
     {
       "action": "assert",
-      "label": "Scaling on lifts the level-5 wolf to 17",
+      "label": "Scaling on lifts the level-5 wolf to 16",
       "actor": "ranger",
       "metric": "view_level",
       "target": "scaled_grey",
-      "equals": 17,
+      "equals": 16,
       "within_ms": 2000
     },
     {

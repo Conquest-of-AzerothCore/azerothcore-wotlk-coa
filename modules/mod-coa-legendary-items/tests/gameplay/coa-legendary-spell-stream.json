@@ -1,0 +1,8118 @@
+{
+  "schema": 1,
+  "name": "CoA Legendary Items: SQL spells and ability selectors in the client stream",
+  "contract": "Requires CoALegendaryItems.Enable=1 and CoA.SendDisplayPatches=1. All 64 SQL-only power spells are streamed using the 170-word SMSG_PATCH_SPELL layout and four sized strings. Timed buffs have native eight-second duration, visible attributes, an existing icon and amount-aware descriptions. Signature modifiers and every first/highest native ability rank carry matching dedicated selectors. Captured socketless packets establish construction, not client rendering or delivery.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "viewer",
+      "race": 1,
+      "class": 12,
+      "level": 32
+    }
+  ],
+  "steps": [
+    {
+      "action": "client_packet",
+      "actor": "viewer",
+      "opcode": 1377
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "min": 64,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710000,
+      "index": 0,
+      "equals": 9710000
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710000,
+      "index": 4,
+      "equals": 256
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710000,
+      "index": 40,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710000,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710000,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710000,
+      "index": 95,
+      "equals": 99
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710000,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710000,
+      "index": 144,
+      "equals": 18
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710000,
+      "index": 170,
+      "equals": 16
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710000,
+      "text": "Bloodoath Signet",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710000,
+      "text": "Increases melee and ranged attack power by an amount that grows with the item level.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710001,
+      "index": 0,
+      "equals": 9710001
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710001,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710001,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710001,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710001,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710001,
+      "index": 95,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710001,
+      "index": 133,
+      "equals": 516
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710001,
+      "index": 144,
+      "equals": 18
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710001,
+      "index": 170,
+      "equals": 32
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710001,
+      "text": "Wayfarers of the Northern Wastes",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710001,
+      "text": "Increases movement speed by 15%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710002,
+      "index": 0,
+      "equals": 9710002
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710002,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710002,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710002,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710002,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710002,
+      "index": 95,
+      "equals": 108
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710002,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710002,
+      "index": 144,
+      "equals": 18
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710002,
+      "index": 170,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710002,
+      "index": 80,
+      "equals": 11
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710002,
+      "index": 122,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710002,
+      "index": 123,
+      "equals": 1024
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710002,
+      "index": 124,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710002,
+      "text": "Cask of the Last Ancestor",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710002,
+      "text": "Increases the main hit damage of your Keg Smash by $s1%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710003,
+      "index": 0,
+      "equals": 9710003
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710003,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710003,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710003,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710003,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710003,
+      "index": 95,
+      "equals": 13
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710003,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710003,
+      "index": 144,
+      "equals": 19
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710003,
+      "index": 170,
+      "equals": 13
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710003,
+      "text": "Soulfire Loop",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710003,
+      "text": "Increases spell power by an amount that grows with the item level.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710004,
+      "index": 0,
+      "equals": 9710004
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710004,
+      "index": 4,
+      "equals": 256
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710004,
+      "index": 40,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710004,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710004,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710004,
+      "index": 95,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710004,
+      "index": 133,
+      "equals": 516
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710004,
+      "index": 144,
+      "equals": 19
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710004,
+      "index": 170,
+      "equals": 19
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710004,
+      "text": "Gravewalker Sandals",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710004,
+      "text": "Increases movement speed by 18%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710005,
+      "index": 0,
+      "equals": 9710005
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710005,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710005,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710005,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710005,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710005,
+      "index": 95,
+      "equals": 108
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710005,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710005,
+      "index": 144,
+      "equals": 19
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710005,
+      "index": 170,
+      "equals": 24
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710005,
+      "index": 80,
+      "equals": 11
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710005,
+      "index": 122,
+      "equals": 32
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710005,
+      "index": 123,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710005,
+      "index": 124,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710005,
+      "text": "Mask of the Laughing Loa",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710005,
+      "text": "Increases the main hit damage of your Bad Juju by $s1%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710006,
+      "index": 0,
+      "equals": 9710006
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710006,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710006,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710006,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710006,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710006,
+      "index": 95,
+      "equals": 99
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710006,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710006,
+      "index": 144,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710006,
+      "index": 170,
+      "equals": 16
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710006,
+      "text": "Oathbreaker Seal",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710006,
+      "text": "Increases attack power and spell power by amounts that grow with the item level.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710007,
+      "index": 0,
+      "equals": 9710007
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710007,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710007,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710007,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710007,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710007,
+      "index": 95,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710007,
+      "index": 133,
+      "equals": 516
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710007,
+      "index": 144,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710007,
+      "index": 170,
+      "equals": 18
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710007,
+      "text": "Cindertrail Treads",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710007,
+      "text": "Increases movement speed by 20%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710008,
+      "index": 0,
+      "equals": 9710008
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710008,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710008,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710008,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710008,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710008,
+      "index": 95,
+      "equals": 108
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710008,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710008,
+      "index": 144,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710008,
+      "index": 170,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710008,
+      "index": 80,
+      "equals": 11
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710008,
+      "index": 122,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710008,
+      "index": 123,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710008,
+      "index": 124,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710008,
+      "text": "Shard of the Fallen World",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710008,
+      "text": "Increases the main hit damage of your Ruin by $s1%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710009,
+      "index": 0,
+      "equals": 9710009
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710009,
+      "index": 4,
+      "equals": 256
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710009,
+      "index": 40,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710009,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710009,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710009,
+      "index": 95,
+      "equals": 99
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710009,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710009,
+      "index": 144,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710009,
+      "index": 170,
+      "equals": 13
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710009,
+      "text": "Ashen Verdict",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710009,
+      "text": "Increases melee and ranged attack power by an amount that grows with the item level.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710010,
+      "index": 0,
+      "equals": 9710010
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710010,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710010,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710010,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710010,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710010,
+      "index": 95,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710010,
+      "index": 133,
+      "equals": 516
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710010,
+      "index": 144,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710010,
+      "index": 170,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710010,
+      "text": "Boots of the Accused",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710010,
+      "text": "Increases movement speed by 10%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710011,
+      "index": 0,
+      "equals": 9710011
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710011,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710011,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710011,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710011,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710011,
+      "index": 95,
+      "equals": 108
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710011,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710011,
+      "index": 144,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710011,
+      "index": 170,
+      "equals": 28
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710011,
+      "index": 80,
+      "equals": 11
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710011,
+      "index": 122,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710011,
+      "index": 123,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710011,
+      "index": 124,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710011,
+      "text": "Last Stake of the Inquisitor",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710011,
+      "text": "Increases the main hit damage of your Stake by $s1%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710012,
+      "index": 0,
+      "equals": 9710012
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710012,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710012,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710012,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710012,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710012,
+      "index": 95,
+      "equals": 99
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710012,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710012,
+      "index": 144,
+      "equals": 22
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710012,
+      "index": 170,
+      "equals": 17
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710012,
+      "text": "Thunderbound Band",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710012,
+      "text": "Increases attack power and spell power by amounts that grow with the item level.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710013,
+      "index": 0,
+      "equals": 9710013
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710013,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710013,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710013,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710013,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710013,
+      "index": 95,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710013,
+      "index": 133,
+      "equals": 516
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710013,
+      "index": 144,
+      "equals": 22
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710013,
+      "index": 170,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710013,
+      "text": "Stormroamer Striders",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710013,
+      "text": "Increases movement speed by 15%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710014,
+      "index": 0,
+      "equals": 9710014
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710014,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710014,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710014,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710014,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710014,
+      "index": 95,
+      "equals": 108
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710014,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710014,
+      "index": 144,
+      "equals": 22
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710014,
+      "index": 170,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710014,
+      "index": 80,
+      "equals": 11
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710014,
+      "index": 122,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710014,
+      "index": 123,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710014,
+      "index": 124,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710014,
+      "text": "Splinter of the Skyfather",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710014,
+      "text": "Increases the main hit damage of your Arm of Thorim by $s1%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710015,
+      "index": 0,
+      "equals": 9710015
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710015,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710015,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710015,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710015,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710015,
+      "index": 95,
+      "equals": 99
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710015,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710015,
+      "index": 144,
+      "equals": 23
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710015,
+      "index": 170,
+      "equals": 19
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710015,
+      "text": "Xorothian Bloodseal",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710015,
+      "text": "Increases melee and ranged attack power by an amount that grows with the item level.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710016,
+      "index": 0,
+      "equals": 9710016
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710016,
+      "index": 4,
+      "equals": 256
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710016,
+      "index": 40,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710016,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710016,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710016,
+      "index": 95,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710016,
+      "index": 133,
+      "equals": 516
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710016,
+      "index": 144,
+      "equals": 23
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710016,
+      "index": 170,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710016,
+      "text": "Sabatons of the Unbroken Rider",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710016,
+      "text": "Increases movement speed by 18%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710017,
+      "index": 0,
+      "equals": 9710017
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710017,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710017,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710017,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710017,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710017,
+      "index": 95,
+      "equals": 108
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710017,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710017,
+      "index": 144,
+      "equals": 23
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710017,
+      "index": 170,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710017,
+      "index": 80,
+      "equals": 11
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710017,
+      "index": 122,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710017,
+      "index": 123,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710017,
+      "index": 124,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710017,
+      "text": "Chain of the Seventh Gate",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710017,
+      "text": "Increases the main hit damage of your Chainwhip by $s1%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710018,
+      "index": 0,
+      "equals": 9710018
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710018,
+      "index": 4,
+      "equals": 256
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710018,
+      "index": 40,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710018,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710018,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710018,
+      "index": 95,
+      "equals": 99
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710018,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710018,
+      "index": 144,
+      "equals": 24
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710018,
+      "index": 170,
+      "equals": 23
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710018,
+      "text": "Bastion of the Resolute",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710018,
+      "text": "Increases melee and ranged attack power by an amount that grows with the item level.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710019,
+      "index": 0,
+      "equals": 9710019
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710019,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710019,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710019,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710019,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710019,
+      "index": 95,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710019,
+      "index": 133,
+      "equals": 516
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710019,
+      "index": 144,
+      "equals": 24
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710019,
+      "index": 170,
+      "equals": 23
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710019,
+      "text": "March of the Unyielding",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710019,
+      "text": "Increases movement speed by 20%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710020,
+      "index": 0,
+      "equals": 9710020
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710020,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710020,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710020,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710020,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710020,
+      "index": 95,
+      "equals": 108
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710020,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710020,
+      "index": 144,
+      "equals": 24
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710020,
+      "index": 170,
+      "equals": 27
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710020,
+      "index": 80,
+      "equals": 11
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710020,
+      "index": 122,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710020,
+      "index": 123,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710020,
+      "index": 124,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710020,
+      "text": "Heart of the Stone Colossus",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710020,
+      "text": "Increases the main hit damage of your Heavy Blow by $s1%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710021,
+      "index": 0,
+      "equals": 9710021
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710021,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710021,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710021,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710021,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710021,
+      "index": 95,
+      "equals": 99
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710021,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710021,
+      "index": 144,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710021,
+      "index": 170,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710021,
+      "text": "Vow of the Dawnblade",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710021,
+      "text": "Increases attack power and spell power by amounts that grow with the item level.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710022,
+      "index": 0,
+      "equals": 9710022
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710022,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710022,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710022,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710022,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710022,
+      "index": 95,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710022,
+      "index": 133,
+      "equals": 516
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710022,
+      "index": 144,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710022,
+      "index": 170,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710022,
+      "text": "Silver Pilgrim Treads",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710022,
+      "text": "Increases movement speed by 10%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710023,
+      "index": 0,
+      "equals": 9710023
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710023,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710023,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710023,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710023,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710023,
+      "index": 95,
+      "equals": 108
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710023,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710023,
+      "index": 144,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710023,
+      "index": 170,
+      "equals": 29
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710023,
+      "index": 80,
+      "equals": 11
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710023,
+      "index": 122,
+      "equals": 16384
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710023,
+      "index": 123,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710023,
+      "index": 124,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710023,
+      "text": "Scales of the Final Reckoning",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710023,
+      "text": "Increases the main hit damage of your Reckoning by $s1%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710024,
+      "index": 0,
+      "equals": 9710024
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710024,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710024,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710024,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710024,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710024,
+      "index": 95,
+      "equals": 13
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710024,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710024,
+      "index": 144,
+      "equals": 26
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710024,
+      "index": 170,
+      "equals": 16
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710024,
+      "text": "Crimson Covenant",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710024,
+      "text": "Increases spell power by an amount that grows with the item level.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710025,
+      "index": 0,
+      "equals": 9710025
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710025,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710025,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710025,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710025,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710025,
+      "index": 95,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710025,
+      "index": 133,
+      "equals": 516
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710025,
+      "index": 144,
+      "equals": 26
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710025,
+      "index": 170,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710025,
+      "text": "Footfalls of the Restless Heart",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710025,
+      "text": "Increases movement speed by 15%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710026,
+      "index": 0,
+      "equals": 9710026
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710026,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710026,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710026,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710026,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710026,
+      "index": 95,
+      "equals": 108
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710026,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710026,
+      "index": 144,
+      "equals": 26
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710026,
+      "index": 170,
+      "equals": 26
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710026,
+      "index": 80,
+      "equals": 11
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710026,
+      "index": 122,
+      "equals": 256
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710026,
+      "index": 123,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710026,
+      "index": 124,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710026,
+      "text": "Vial of the First Sanguine",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710026,
+      "text": "Increases the main hit damage of your Veinburst by $s1%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710027,
+      "index": 0,
+      "equals": 9710027
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710027,
+      "index": 4,
+      "equals": 256
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710027,
+      "index": 40,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710027,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710027,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710027,
+      "index": 95,
+      "equals": 99
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710027,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710027,
+      "index": 144,
+      "equals": 27
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710027,
+      "index": 170,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710027,
+      "text": "Signet of the Silent Hunt",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710027,
+      "text": "Increases melee and ranged attack power by an amount that grows with the item level.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710028,
+      "index": 0,
+      "equals": 9710028
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710028,
+      "index": 4,
+      "equals": 256
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710028,
+      "index": 40,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710028,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710028,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710028,
+      "index": 95,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710028,
+      "index": 133,
+      "equals": 516
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710028,
+      "index": 144,
+      "equals": 27
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710028,
+      "index": 170,
+      "equals": 22
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710028,
+      "text": "Path of the White Stag",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710028,
+      "text": "Increases movement speed by 18%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710029,
+      "index": 0,
+      "equals": 9710029
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710029,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710029,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710029,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710029,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710029,
+      "index": 95,
+      "equals": 108
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710029,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710029,
+      "index": 144,
+      "equals": 27
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710029,
+      "index": 170,
+      "equals": 22
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710029,
+      "index": 80,
+      "equals": 11
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710029,
+      "index": 122,
+      "equals": 67108864
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710029,
+      "index": 123,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710029,
+      "index": 124,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710029,
+      "text": "Eye of the Far Horizon",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710029,
+      "text": "Increases the main hit damage of your Precision Shot by $s1%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710030,
+      "index": 0,
+      "equals": 9710030
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710030,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710030,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710030,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710030,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710030,
+      "index": 95,
+      "equals": 13
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710030,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710030,
+      "index": 144,
+      "equals": 28
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710030,
+      "index": 170,
+      "equals": 24
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710030,
+      "text": "Loop of the Missing Hour",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710030,
+      "text": "Increases spell power by an amount that grows with the item level.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710031,
+      "index": 0,
+      "equals": 9710031
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710031,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710031,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710031,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710031,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710031,
+      "index": 95,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710031,
+      "index": 133,
+      "equals": 516
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710031,
+      "index": 144,
+      "equals": 28
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710031,
+      "index": 170,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710031,
+      "text": "Footsteps Between Seconds",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710031,
+      "text": "Increases movement speed by 20%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710032,
+      "index": 0,
+      "equals": 9710032
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710032,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710032,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710032,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710032,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710032,
+      "index": 95,
+      "equals": 108
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710032,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710032,
+      "index": 144,
+      "equals": 28
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710032,
+      "index": 170,
+      "equals": 28
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710032,
+      "index": 80,
+      "equals": 11
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710032,
+      "index": 122,
+      "equals": 2048
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710032,
+      "index": 123,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710032,
+      "index": 124,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710032,
+      "text": "Prism of Unwritten Tomorrows",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710032,
+      "text": "Increases the main hit damage of your Chromatic Shard by $s1%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710033,
+      "index": 0,
+      "equals": 9710033
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710033,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710033,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710033,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710033,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710033,
+      "index": 95,
+      "equals": 13
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710033,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710033,
+      "index": 144,
+      "equals": 29
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710033,
+      "index": 170,
+      "equals": 18
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710033,
+      "text": "Gravebound Promise",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710033,
+      "text": "Increases spell power by an amount that grows with the item level.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710034,
+      "index": 0,
+      "equals": 9710034
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710034,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710034,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710034,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710034,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710034,
+      "index": 95,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710034,
+      "index": 133,
+      "equals": 516
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710034,
+      "index": 144,
+      "equals": 29
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710034,
+      "index": 170,
+      "equals": 18
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710034,
+      "text": "Pale Road Slippers",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710034,
+      "text": "Increases movement speed by 10%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710035,
+      "index": 0,
+      "equals": 9710035
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710035,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710035,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710035,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710035,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710035,
+      "index": 95,
+      "equals": 13
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710035,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710035,
+      "index": 144,
+      "equals": 29
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710035,
+      "index": 170,
+      "equals": 29
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710035,
+      "text": "Phylactery of Borrowed Breath",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710035,
+      "text": "Increases spell power by an amount that grows with the item level.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710036,
+      "index": 0,
+      "equals": 9710036
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710036,
+      "index": 4,
+      "equals": 256
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710036,
+      "index": 40,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710036,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710036,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710036,
+      "index": 95,
+      "equals": 13
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710036,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710036,
+      "index": 144,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710036,
+      "index": 170,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710036,
+      "text": "Coal of the Undying Flame",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710036,
+      "text": "Increases spell power by an amount that grows with the item level.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710037,
+      "index": 0,
+      "equals": 9710037
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710037,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710037,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710037,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710037,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710037,
+      "index": 95,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710037,
+      "index": 133,
+      "equals": 516
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710037,
+      "index": 144,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710037,
+      "index": 170,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710037,
+      "text": "Emberwake Boots",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710037,
+      "text": "Increases movement speed by 15%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710038,
+      "index": 0,
+      "equals": 9710038
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710038,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710038,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710038,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710038,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710038,
+      "index": 95,
+      "equals": 108
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710038,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710038,
+      "index": 144,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710038,
+      "index": 170,
+      "equals": 24
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710038,
+      "index": 80,
+      "equals": 11
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710038,
+      "index": 122,
+      "equals": 524288
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710038,
+      "index": 123,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710038,
+      "index": 124,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710038,
+      "text": "Crown of the Falling Sun",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710038,
+      "text": "Increases the main hit damage of your Firefall by $s1%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710039,
+      "index": 0,
+      "equals": 9710039
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710039,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710039,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710039,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710039,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710039,
+      "index": 95,
+      "equals": 99
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710039,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710039,
+      "index": 144,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710039,
+      "index": 170,
+      "equals": 24
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710039,
+      "text": "Pact of the Hollow Saint",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710039,
+      "text": "Increases attack power and spell power by amounts that grow with the item level.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710040,
+      "index": 0,
+      "equals": 9710040
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710040,
+      "index": 4,
+      "equals": 256
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710040,
+      "index": 40,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710040,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710040,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710040,
+      "index": 95,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710040,
+      "index": 133,
+      "equals": 516
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710040,
+      "index": 144,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710040,
+      "index": 170,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710040,
+      "text": "Steps of the Unseen Choir",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710040,
+      "text": "Increases movement speed by 18%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710041,
+      "index": 0,
+      "equals": 9710041
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710041,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710041,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710041,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710041,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710041,
+      "index": 95,
+      "equals": 108
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710041,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710041,
+      "index": 144,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710041,
+      "index": 170,
+      "equals": 29
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710041,
+      "index": 80,
+      "equals": 11
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710041,
+      "index": 122,
+      "equals": 16
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710041,
+      "index": 123,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710041,
+      "index": 124,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710041,
+      "text": "Scripture of the Nameless One",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710041,
+      "text": "Increases the main hit damage of your Malevolence by $s1%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710042,
+      "index": 0,
+      "equals": 9710042
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710042,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710042,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710042,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710042,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710042,
+      "index": 95,
+      "equals": 13
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710042,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710042,
+      "index": 144,
+      "equals": 32
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710042,
+      "index": 170,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710042,
+      "text": "Orbit of the Lost Constellation",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710042,
+      "text": "Increases spell power by an amount that grows with the item level.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710043,
+      "index": 0,
+      "equals": 9710043
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710043,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710043,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710043,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710043,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710043,
+      "index": 95,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710043,
+      "index": 133,
+      "equals": 516
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710043,
+      "index": 144,
+      "equals": 32
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710043,
+      "index": 170,
+      "equals": 22
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710043,
+      "text": "Astral Wanderer Treads",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710043,
+      "text": "Increases movement speed by 20%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710044,
+      "index": 0,
+      "equals": 9710044
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710044,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710044,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710044,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710044,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710044,
+      "index": 95,
+      "equals": 108
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710044,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710044,
+      "index": 144,
+      "equals": 32
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710044,
+      "index": 170,
+      "equals": 26
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710044,
+      "index": 80,
+      "equals": 11
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710044,
+      "index": 122,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710044,
+      "index": 123,
+      "equals": 256
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710044,
+      "index": 124,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710044,
+      "text": "Fragment of the First Star",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710044,
+      "text": "Increases the main hit damage of your Starcall by $s1%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710045,
+      "index": 0,
+      "equals": 9710045
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710045,
+      "index": 4,
+      "equals": 256
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710045,
+      "index": 40,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710045,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710045,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710045,
+      "index": 95,
+      "equals": 13
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710045,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710045,
+      "index": 144,
+      "equals": 33
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710045,
+      "index": 170,
+      "equals": 26
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710045,
+      "text": "Halo of the Returning Dawn",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710045,
+      "text": "Increases spell power by an amount that grows with the item level.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710046,
+      "index": 0,
+      "equals": 9710046
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710046,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710046,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710046,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710046,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710046,
+      "index": 95,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710046,
+      "index": 133,
+      "equals": 516
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710046,
+      "index": 144,
+      "equals": 33
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710046,
+      "index": 170,
+      "equals": 22
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710046,
+      "text": "Golden Pilgrim Sandals",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710046,
+      "text": "Increases movement speed by 10%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710047,
+      "index": 0,
+      "equals": 9710047
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710047,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710047,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710047,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710047,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710047,
+      "index": 95,
+      "equals": 108
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710047,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710047,
+      "index": 144,
+      "equals": 33
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710047,
+      "index": 170,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710047,
+      "index": 80,
+      "equals": 11
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710047,
+      "index": 122,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710047,
+      "index": 123,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710047,
+      "index": 124,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710047,
+      "text": "Sunstone of the Burning Prayer",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710047,
+      "text": "Increases the main hit damage of your Dawnsear by $s1%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710048,
+      "index": 0,
+      "equals": 9710048
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710048,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710048,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710048,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710048,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710048,
+      "index": 95,
+      "equals": 99
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710048,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710048,
+      "index": 144,
+      "equals": 34
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710048,
+      "index": 170,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710048,
+      "text": "Overclocked Gyroseal",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710048,
+      "text": "Increases attack power and spell power by amounts that grow with the item level.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710049,
+      "index": 0,
+      "equals": 9710049
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710049,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710049,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710049,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710049,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710049,
+      "index": 95,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710049,
+      "index": 133,
+      "equals": 516
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710049,
+      "index": 144,
+      "equals": 34
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710049,
+      "index": 170,
+      "equals": 23
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710049,
+      "text": "Runaway Clockwork Boots",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710049,
+      "text": "Increases movement speed by 15%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710050,
+      "index": 0,
+      "equals": 9710050
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710050,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710050,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710050,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710050,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710050,
+      "index": 95,
+      "equals": 108
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710050,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710050,
+      "index": 144,
+      "equals": 34
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710050,
+      "index": 170,
+      "equals": 24
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710050,
+      "index": 80,
+      "equals": 11
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710050,
+      "index": 122,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710050,
+      "index": 123,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710050,
+      "index": 124,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710050,
+      "text": "Unstable Masterwork Core",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710050,
+      "text": "Increases the main hit damage of your Bomb Toss by $s1%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710051,
+      "index": 0,
+      "equals": 9710051
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710051,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710051,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710051,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710051,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710051,
+      "index": 95,
+      "equals": 13
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710051,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710051,
+      "index": 144,
+      "equals": 35
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710051,
+      "index": 170,
+      "equals": 16
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710051,
+      "text": "Widow Queen Seal",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710051,
+      "text": "Increases spell power by an amount that grows with the item level.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710052,
+      "index": 0,
+      "equals": 9710052
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710052,
+      "index": 4,
+      "equals": 256
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710052,
+      "index": 40,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710052,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710052,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710052,
+      "index": 95,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710052,
+      "index": 133,
+      "equals": 516
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710052,
+      "index": 144,
+      "equals": 35
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710052,
+      "index": 170,
+      "equals": 29
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710052,
+      "text": "Treads of the Molting Serpent",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710052,
+      "text": "Increases movement speed by 18%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710053,
+      "index": 0,
+      "equals": 9710053
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710053,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710053,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710053,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710053,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710053,
+      "index": 95,
+      "equals": 108
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710053,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710053,
+      "index": 144,
+      "equals": 35
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710053,
+      "index": 170,
+      "equals": 27
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710053,
+      "index": 80,
+      "equals": 11
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710053,
+      "index": 122,
+      "equals": 4096
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710053,
+      "index": 123,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710053,
+      "index": 124,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710053,
+      "text": "Fang of the Thousand Venoms",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710053,
+      "text": "Increases the main hit damage of your Widowmaker by $s1%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710054,
+      "index": 0,
+      "equals": 9710054
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710054,
+      "index": 4,
+      "equals": 256
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710054,
+      "index": 40,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710054,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710054,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710054,
+      "index": 95,
+      "equals": 99
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710054,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710054,
+      "index": 144,
+      "equals": 36
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710054,
+      "index": 170,
+      "equals": 23
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710054,
+      "text": "Harvest of the Forsaken",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710054,
+      "text": "Increases melee and ranged attack power by an amount that grows with the item level.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710055,
+      "index": 0,
+      "equals": 9710055
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710055,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710055,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710055,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710055,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710055,
+      "index": 95,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710055,
+      "index": 133,
+      "equals": 516
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710055,
+      "index": 144,
+      "equals": 36
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710055,
+      "index": 170,
+      "equals": 22
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710055,
+      "text": "Stride Beyond the Veil",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710055,
+      "text": "Increases movement speed by 20%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710056,
+      "index": 0,
+      "equals": 9710056
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710056,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710056,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710056,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710056,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710056,
+      "index": 95,
+      "equals": 108
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710056,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710056,
+      "index": 144,
+      "equals": 36
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710056,
+      "index": 170,
+      "equals": 28
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710056,
+      "index": 80,
+      "equals": 11
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710056,
+      "index": 122,
+      "equals": 4096
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710056,
+      "index": 123,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710056,
+      "index": 124,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710056,
+      "text": "Hourglass of the Last Breath",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710056,
+      "text": "Increases the main hit damage of your Doomrend by $s1%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710057,
+      "index": 0,
+      "equals": 9710057
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710057,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710057,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710057,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710057,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710057,
+      "index": 95,
+      "equals": 99
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710057,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710057,
+      "index": 144,
+      "equals": 37
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710057,
+      "index": 170,
+      "equals": 22
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710057,
+      "text": "Oath of the First Wild",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710057,
+      "text": "Increases attack power and spell power by amounts that grow with the item level.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710058,
+      "index": 0,
+      "equals": 9710058
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710058,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710058,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710058,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710058,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710058,
+      "index": 95,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710058,
+      "index": 133,
+      "equals": 516
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710058,
+      "index": 144,
+      "equals": 37
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710058,
+      "index": 170,
+      "equals": 24
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710058,
+      "text": "Trail of the Elder Beast",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710058,
+      "text": "Increases movement speed by 10%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710059,
+      "index": 0,
+      "equals": 9710059
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710059,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710059,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710059,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710059,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710059,
+      "index": 95,
+      "equals": 108
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710059,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710059,
+      "index": 144,
+      "equals": 37
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710059,
+      "index": 170,
+      "equals": 28
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710059,
+      "index": 80,
+      "equals": 11
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710059,
+      "index": 122,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710059,
+      "index": 123,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710059,
+      "index": 124,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710059,
+      "text": "Heart of the Broken Mountain",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710059,
+      "text": "Increases the main hit damage of your Seismic Smash by $s1%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710060,
+      "index": 0,
+      "equals": 9710060
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710060,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710060,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710060,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710060,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710060,
+      "index": 95,
+      "equals": 13
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710060,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710060,
+      "index": 144,
+      "equals": 38
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710060,
+      "index": 170,
+      "equals": 23
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710060,
+      "text": "Seal of the Living Rune",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710060,
+      "text": "Increases spell power by an amount that grows with the item level.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710061,
+      "index": 0,
+      "equals": 9710061
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710061,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710061,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710061,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710061,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710061,
+      "index": 95,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710061,
+      "index": 133,
+      "equals": 516
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710061,
+      "index": 144,
+      "equals": 38
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710061,
+      "index": 170,
+      "equals": 27
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710061,
+      "text": "Boots of the Shifting Glyph",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710061,
+      "text": "Increases movement speed by 15%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710062,
+      "index": 0,
+      "equals": 9710062
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710062,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710062,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710062,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710062,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710062,
+      "index": 95,
+      "equals": 108
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710062,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710062,
+      "index": 144,
+      "equals": 38
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710062,
+      "index": 170,
+      "equals": 27
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710062,
+      "index": 80,
+      "equals": 11
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710062,
+      "index": 122,
+      "equals": 1024
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710062,
+      "index": 123,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710062,
+      "index": 124,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710062,
+      "text": "Tablet of the Unmaking Word",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710062,
+      "text": "Increases the main hit damage of your Glyphic Ruin by $s1%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710063,
+      "index": 0,
+      "equals": 9710063
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710063,
+      "index": 4,
+      "equals": 448
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710063,
+      "index": 40,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710063,
+      "index": 68,
+      "equals": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710063,
+      "index": 71,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710063,
+      "index": 95,
+      "equals": 101
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710063,
+      "index": 133,
+      "equals": 456
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710063,
+      "index": 144,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9710063,
+      "index": 170,
+      "equals": 22
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710063,
+      "text": "Mantle of the Unbroken",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9710063,
+      "text": "Increases armor by 20%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 805808,
+      "index": 145,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 805808,
+      "index": 146,
+      "equals": 1025
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 805808,
+      "index": 147,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 572331,
+      "index": 145,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 572331,
+      "index": 146,
+      "equals": 1025
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 572331,
+      "index": 147,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 802087,
+      "index": 145,
+      "equals": 32
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 802087,
+      "index": 146,
+      "equals": 1024
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 802087,
+      "index": 147,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 501181,
+      "index": 145,
+      "equals": 32
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 501181,
+      "index": 146,
+      "equals": 1024
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 501181,
+      "index": 147,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 801895,
+      "index": 145,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 801895,
+      "index": 146,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 801895,
+      "index": 147,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 501299,
+      "index": 145,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 501299,
+      "index": 146,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 501299,
+      "index": 147,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 680537,
+      "index": 145,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 680537,
+      "index": 146,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 680537,
+      "index": 147,
+      "equals": 1024
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 681352,
+      "index": 145,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 681352,
+      "index": 146,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 681352,
+      "index": 147,
+      "equals": 1024
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 801847,
+      "index": 145,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 801847,
+      "index": 146,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 801847,
+      "index": 147,
+      "equals": 32
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 567520,
+      "index": 145,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 567520,
+      "index": 146,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 567520,
+      "index": 147,
+      "equals": 32
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 800081,
+      "index": 145,
+      "equals": 524290
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 800081,
+      "index": 146,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 800081,
+      "index": 147,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 503367,
+      "index": 145,
+      "equals": 524290
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 503367,
+      "index": 146,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 503367,
+      "index": 147,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 803129,
+      "index": 145,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 803129,
+      "index": 146,
+      "equals": 4194304
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 803129,
+      "index": 147,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 503126,
+      "index": 145,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 503126,
+      "index": 146,
+      "equals": 4194304
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 503126,
+      "index": 147,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 500146,
+      "index": 145,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 500146,
+      "index": 146,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 500146,
+      "index": 147,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 554406,
+      "index": 145,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 554406,
+      "index": 146,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 554406,
+      "index": 147,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 801005,
+      "index": 145,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 801005,
+      "index": 146,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 801005,
+      "index": 147,
+      "equals": 128
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 547209,
+      "index": 145,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 547209,
+      "index": 146,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 547209,
+      "index": 147,
+      "equals": 128
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 804961,
+      "index": 145,
+      "equals": 4096
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 804961,
+      "index": 146,
+      "equals": 65536
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 804961,
+      "index": 147,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 573342,
+      "index": 145,
+      "equals": 4096
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 573342,
+      "index": 146,
+      "equals": 65536
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 573342,
+      "index": 147,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 800172,
+      "index": 145,
+      "equals": 4096
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 800172,
+      "index": 146,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 800172,
+      "index": 147,
+      "equals": 4194304
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 567532,
+      "index": 145,
+      "equals": 4096
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 567532,
+      "index": 146,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 567532,
+      "index": 147,
+      "equals": 4194304
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 300693,
+      "index": 145,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 300693,
+      "index": 146,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 300693,
+      "index": 147,
+      "equals": 1024
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 301279,
+      "index": 145,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 301279,
+      "index": 146,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 301279,
+      "index": 147,
+      "equals": 1024
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 801179,
+      "index": 145,
+      "equals": 5120
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 801179,
+      "index": 146,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 801179,
+      "index": 147,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 572122,
+      "index": 145,
+      "equals": 5120
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 572122,
+      "index": 146,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 572122,
+      "index": 147,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 805421,
+      "index": 145,
+      "equals": 16384
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 805421,
+      "index": 146,
+      "equals": 131072
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 805421,
+      "index": 147,
+      "equals": 128
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 504260,
+      "index": 145,
+      "equals": 2097408
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 504260,
+      "index": 146,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 504260,
+      "index": 147,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 504820,
+      "index": 145,
+      "equals": 2097408
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 504820,
+      "index": 146,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 504820,
+      "index": 147,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 500075,
+      "index": 145,
+      "equals": 67108864
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 500075,
+      "index": 146,
+      "equals": 8388608
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 500075,
+      "index": 147,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 572113,
+      "index": 145,
+      "equals": 67108864
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 572113,
+      "index": 146,
+      "equals": 8388608
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 572113,
+      "index": 147,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 801292,
+      "index": 145,
+      "equals": 2048
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 801292,
+      "index": 146,
+      "equals": 4096
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 801292,
+      "index": 147,
+      "equals": 33554432
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 501840,
+      "index": 145,
+      "equals": 2048
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 501840,
+      "index": 146,
+      "equals": 4096
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 501840,
+      "index": 147,
+      "equals": 33554432
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 801905,
+      "index": 145,
+      "equals": 524288
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 801905,
+      "index": 146,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 801905,
+      "index": 147,
+      "equals": 8192
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 500714,
+      "index": 145,
+      "equals": 16
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 500714,
+      "index": 146,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 500714,
+      "index": 147,
+      "equals": 2048
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 502243,
+      "index": 145,
+      "equals": 16
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 502243,
+      "index": 146,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 502243,
+      "index": 147,
+      "equals": 2048
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 800497,
+      "index": 145,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 800497,
+      "index": 146,
+      "equals": 536871168
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 800497,
+      "index": 147,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 302569,
+      "index": 145,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 302569,
+      "index": 146,
+      "equals": 536871168
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 302569,
+      "index": 147,
+      "equals": 0
+    }
+  ]
+}

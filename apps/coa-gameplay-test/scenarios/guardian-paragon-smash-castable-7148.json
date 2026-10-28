@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "name": "Paragon Smash replaces Heavy Blow and stays castable at ten Paragon stacks (#7148)",
+  "contract": "Paragon 706514 stacks through 706516 (three per Heavy Blow hit) and, at ten, applies 707138 and replaces the active Heavy Blow with Paragon Smash 802629. The report says the button turns into Paragon Smash but cannot be pressed. With 707138 active and Heavy Blow off cooldown, the replacement must be registered for the known Heavy Blow rank and Paragon Smash must cast, damage its target and start Heavy Blow's shared cooldown. Paragon Smash 802629 is an instant spell whose server contract sets POWER_ENERGY, so both resources are filled before the cast.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "guardian",
+      "race": 1,
+      "class": 18,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "guardian",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 4
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 5000 },
+    { "action": "learn", "actor": "guardian", "spell": 503119 },
+    { "action": "learn", "actor": "guardian", "spell": 706514 },
+    {
+      "action": "assert",
+      "label": "SETUP: Paragon is active",
+      "actor": "guardian",
+      "metric": "aura",
+      "spell": 706514,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Heavy Blow is known",
+      "actor": "guardian",
+      "metric": "knows_spell",
+      "spell": 503119,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no replacement before ten stacks",
+      "actor": "guardian",
+      "metric": "temporary_spell_replacement",
+      "spell": 503119,
+      "equals": 503119
+    },
+    { "action": "set_aura", "actor": "guardian", "spell": 707138, "stacks": 1 },
+    { "action": "wait", "label": "Let the per-update synchronization run", "ms": 1500 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Heavy Blow is replaced by Paragon Smash",
+      "actor": "guardian",
+      "metric": "temporary_spell_replacement",
+      "spell": 503119,
+      "equals": 802629
+    },
+    {
+      "action": "assert",
+      "label": "Paragon Smash is learned for the replacement",
+      "actor": "guardian",
+      "metric": "knows_spell",
+      "spell": 802629,
+      "equals": 1
+    },
+    { "action": "set_power", "actor": "guardian", "power": 1, "value": 1000 },
+    { "action": "set_power", "actor": "guardian", "power": 3, "value": 100 },
+    {
+      "action": "cast",
+      "label": "DISCRIMINATING: Paragon Smash is castable",
+      "actor": "guardian",
+      "spell": 802629,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the cast is accepted",
+      "actor": "guardian",
+      "metric": "cast_failure",
+      "spell": 802629,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Paragon Smash damages the target",
+      "actor": "guardian",
+      "metric": "spell_damage_count",
+      "spell": 802629,
+      "target": "dummy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Paragon Smash consumes its ready aura",
+      "actor": "guardian",
+      "metric": "aura",
+      "spell": 707138,
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}

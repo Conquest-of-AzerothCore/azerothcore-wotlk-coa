@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "Heaven's Appraisal makes Gavel of Wrath strike 5 nearby enemies (#9108)",
+  "contract": "Heaven's Appraisal 300353's own tooltip (Spell.dbc Description[enUS]): '...Gavel of Grace: Restores $504722s1% of your maximum mana...Gavel of Wrath: Strikes 5 additional nearby enemies.' AscensionSunClericAbilities.cpp's Holy Form (805301) + 300353 + Named(info,800617) branch implemented that by recasting the original ability (`Cast(player, enemy, info->Id)`), a CastSpell(...,true) (TRIGGERED_FULL_MASK). Spell::CheckCast runs CheckRange(strict) unconditionally for triggered casts (Spell.cpp:6176-6177, 'Triggered spells also have range check', no TriggerCastFlags bypasses it) measured from the caster (the player), not from `target`; Gavel of Wrath is melee/Combat Range (RangeIndex 2), whose real_max_range after subtracting 2*MIN_MELEE_REACH leaves roughly a 1-yard pad beyond both units' hitboxes, so every recast on an enemy more than a yard or two past the already-melee'd primary target silently failed SPELL_FAILED_OUT_OF_RANGE before ever reaching OnSpellCast/spell_damage_count (confirmed by direct measurement: LOG_ERROR instrumentation showed Nearby(target,8) finding and validating every candidate, yet spell_cast_count(802561) never exceeding 1). The fix delivers the 5 extra strikes as direct spell damage instead of a second range-checked cast, mirroring AscensionWildcardConsecratedWeapon.cpp's aura_wildcard_consecrated_weapon::HandleProc sequence exactly: SpellNonMeleeDamage(caster,target,spellInfo,schoolMask) -> CalculateSpellDamageTaken(&dmg,amount,spellInfo) -> Unit::DealDamageMods(target,dmg.damage,&dmg.absorb) -> SendSpellNonMeleeDamageLog(&dmg) -> DealSpellDamage(&dmg,true), using the primary hit's own already-resolved `damage` value and `info` as spellInfo so the combat log and this scenario's spell_damage_count both read as Gavel of Wrath (802561) damage. Nearby(target,8), the enemy!=target/IsValidAttackTarget filters and the `count++ < 5` cap are unchanged. Five extra dummies stand 6-10 yards past an already-melee'd primary target (so each is within Nearby(target,8)'s own boundary-padded search, per the same direct measurement, but well beyond the player's own melee reach, which is exactly the range check the old recast failed) and must all take Gavel of Wrath damage. A second, unenchanted Sun Cleric (Holy Form active, Heaven's Appraisal not learned) is the control: its own nearby dummy must take none.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "plain",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "target", "owner": "cleric", "entry": 36, "level": 60, "health": 1000000, "distance": 3 },
+    { "id": "extra1", "owner": "cleric", "entry": 36, "level": 60, "health": 1000000, "distance": 9 },
+    { "id": "extra2", "owner": "cleric", "entry": 36, "level": 60, "health": 1000000, "distance": 10 },
+    { "id": "extra3", "owner": "cleric", "entry": 36, "level": 60, "health": 1000000, "distance": 11 },
+    { "id": "extra4", "owner": "cleric", "entry": 36, "level": 60, "health": 1000000, "distance": 12 },
+    { "id": "extra5", "owner": "cleric", "entry": 36, "level": 60, "health": 1000000, "distance": 13 },
+    { "id": "control_target", "owner": "plain", "entry": 36, "level": 60, "health": 1000000, "distance": 3 },
+    { "id": "control_extra", "owner": "plain", "entry": 36, "level": 60, "health": 1000000, "distance": 9 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "cleric", "spell": 802561 },
+    { "action": "set_aura", "actor": "cleric", "spell": 805301, "stacks": 1, "label": "Holy Form active" },
+    { "action": "learn", "actor": "cleric", "spell": 300353 },
+    { "action": "add_item", "actor": "cleric", "item": 4901 },
+    { "action": "equip", "label": "Test Polearm in the main hand", "actor": "cleric", "item": 4901, "slot": 15 },
+    { "action": "learn", "actor": "plain", "spell": 802561 },
+    { "action": "set_aura", "actor": "plain", "spell": 805301, "stacks": 1, "label": "Holy Form active (control)" },
+    { "action": "add_item", "actor": "plain", "item": 4901 },
+    { "action": "equip", "label": "Test Polearm in the main hand (control)", "actor": "plain", "item": 4901, "slot": 15 },
+    { "action": "assert", "label": "SETUP: Holy Form is active", "actor": "cleric", "metric": "aura", "spell": 805301, "equals": 1 },
+    { "action": "assert", "label": "SETUP: Heaven's Appraisal is known", "actor": "cleric", "metric": "knows_spell", "spell": 300353, "equals": 1 },
+    { "action": "assert", "label": "SETUP: control Holy Form is active", "actor": "plain", "metric": "aura", "spell": 805301, "equals": 1 },
+    { "action": "assert", "label": "SETUP: control does not know Heaven's Appraisal", "actor": "plain", "metric": "knows_spell", "spell": 300353, "equals": 0 },
+    { "action": "cast", "actor": "cleric", "spell": 802561, "target": "target" },
+    { "action": "assert", "label": "Primary target takes Gavel of Wrath damage", "actor": "cleric", "metric": "spell_damage_count", "spell": 802561, "target": "target", "min": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: extra1 (6y past target, beyond the player's melee reach) takes Gavel of Wrath damage", "actor": "cleric", "metric": "spell_damage_count", "spell": 802561, "target": "extra1", "min": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: extra2 (7y past target) takes Gavel of Wrath damage", "actor": "cleric", "metric": "spell_damage_count", "spell": 802561, "target": "extra2", "min": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: extra3 (8y past target) takes Gavel of Wrath damage", "actor": "cleric", "metric": "spell_damage_count", "spell": 802561, "target": "extra3", "min": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: extra4 (9y past target) takes Gavel of Wrath damage", "actor": "cleric", "metric": "spell_damage_count", "spell": 802561, "target": "extra4", "min": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: extra5 (10y past target, the 5th and last under the cap) takes Gavel of Wrath damage", "actor": "cleric", "metric": "spell_damage_count", "spell": 802561, "target": "extra5", "min": 1, "within_ms": 3000 },
+    { "action": "cast", "actor": "plain", "spell": 802561, "target": "control_target" },
+    { "action": "assert", "label": "CONTROL: the unenchanted primary target still takes Gavel of Wrath damage", "actor": "plain", "metric": "spell_damage_count", "spell": 802561, "target": "control_target", "min": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "CONTROL: without Heaven's Appraisal, the nearby dummy takes none", "actor": "plain", "metric": "spell_damage_count", "spell": 802561, "target": "control_extra", "equals": 0, "within_ms": 3000 }
+  ]
+}

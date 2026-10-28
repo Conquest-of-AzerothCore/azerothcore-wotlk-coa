@@ -591,8 +591,23 @@ struct npc_hallows_end_soh : public ScriptedAI
         pos = 0;
         counter = 0;
         unitList.clear();
-        me->CastSpell(me, SPELL_HORSEMAN_MOUNT, true);
+        MountHorsemanSteed();
         me->SetSpeed(MOVE_WALK, 3.0f, true);
+    }
+
+    // The aura of 48025 is interrupted by movement, turning and casting, so the steed is mounted directly.
+    void MountHorsemanSteed()
+    {
+        SpellInfo const* mountSpell = sSpellMgr->GetSpellInfo(SPELL_HORSEMAN_MOUNT);
+        if (!mountSpell)
+            return;
+
+        CreatureTemplate const* steed = sObjectMgr->GetCreatureTemplate(mountSpell->Effects[EFFECT_0].MiscValue);
+        if (!steed)
+            return;
+
+        if (CreatureModel const* model = ObjectMgr::ChooseDisplayId(steed))
+            me->Mount(model->CreatureDisplayID);
     }
 
     EventMap events;

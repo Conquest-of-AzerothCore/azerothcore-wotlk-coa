@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Lenore the Hoarder nets the player who fights her",
+  "contract": [
+    "Issue #7025. In the Wanted: Lenore the Hoarder footage (73M5UW9zTE4 02:53) Lenore 991515 casts Net 12024 half a",
+    "second after her aggro line and again about 25 s later. Expected: a player who attacks her is rooted by Net while",
+    "the fight lasts."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "p", "race": 1, "class": 1, "level": 15}
+  ],
+  "creatures": [
+    {"id": "lenore", "owner": "p", "entry": 991515, "distance": 3, "level": 15, "reaction": 2}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let Lenore reach the client", "ms": 1000},
+    {"action": "attack", "label": "Attack Lenore", "actor": "p", "target": "lenore"},
+    {"action": "assert", "label": "Lenore nets the player", "actor": "p", "metric": "aura", "spell": 12024,
+     "equals": 1, "within_ms": 30000}
+  ]
+}

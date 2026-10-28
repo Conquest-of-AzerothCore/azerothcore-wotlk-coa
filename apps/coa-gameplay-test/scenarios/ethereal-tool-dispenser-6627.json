@@ -1,0 +1,336 @@
+{
+  "schema": 1,
+  "name": "Ethereal Tool Dispenser crate payout and the rod upgrade (#6627)",
+  "contract": "The Ethereal Tool Dispenser Crate (8263511) is consumed once and replaces itself in the bags with the Ethereal Tool Dispenser (8263501), the convenience item whose own item category lets it stand in for the eight profession tools. Using the Dispenser takes up the trade of the highest Runed Rod the opener carries: a Runed Arcanite Rod (16207) turns it into Dispenser I (8263502), a Runed Eternium Rod (22463) into Dispenser II (8263503), and a Runed Titanium Rod (44452) into Dispenser III (8263504), in one step and without passing through the tiers below. The rod itself is kept, and a Dispenser that is already high enough is neither spent, downgraded nor replaced when it is used again. A shaman totem (Earth Totem 5175, category 2) is not a rod: it cannot upgrade a Dispenser, and carrying one must not stop a rod from upgrading it. Every refused use says so in a system message instead of silently doing nothing.",
+  "timeout_ms": 300000,
+  "players": [
+    {
+      "id": "buyer",
+      "race": 2,
+      "class": 7,
+      "level": 80
+    },
+    {
+      "id": "skipped",
+      "race": 2,
+      "class": 7,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+
+    {
+      "action": "add_item",
+      "actor": "buyer",
+      "item": 8263511
+    },
+    {
+      "action": "assert",
+      "label": "the crate arrives",
+      "actor": "buyer",
+      "metric": "item_count",
+      "item": 8263511,
+      "equals": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "buyer",
+      "item": 8263511,
+      "spell": 60034
+    },
+    {
+      "action": "assert",
+      "label": "the crate is spent",
+      "actor": "buyer",
+      "metric": "item_count",
+      "item": 8263511,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the crate pays the Ethereal Tool Dispenser",
+      "actor": "buyer",
+      "metric": "item_count",
+      "item": 8263501,
+      "equals": 1,
+      "within_ms": 4000
+    },
+
+    {
+      "action": "use_item",
+      "actor": "buyer",
+      "item": 8263501,
+      "spell": 8263501
+    },
+    {
+      "action": "assert",
+      "label": "with no rod to learn the Dispenser stays as it is",
+      "actor": "buyer",
+      "metric": "item_count",
+      "item": 8263501,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "and says what it wants",
+      "actor": "buyer",
+      "metric": "system_message_contains",
+      "text": "carry one and use the Dispenser again",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "and says it in the middle of the screen too",
+      "actor": "buyer",
+      "metric": "notification_contains",
+      "text": "carry one and use the Dispenser again",
+      "equals": 1,
+      "within_ms": 4000
+    },
+
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "add_item",
+      "actor": "buyer",
+      "item": 5175
+    },
+    {
+      "action": "use_item",
+      "actor": "buyer",
+      "item": 8263501,
+      "spell": 8263501
+    },
+    {
+      "action": "assert",
+      "label": "an Earth Totem is not a rod and does not upgrade anything",
+      "actor": "buyer",
+      "metric": "item_count",
+      "item": 8263501,
+      "equals": 1,
+      "within_ms": 4000
+    },
+
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "add_item",
+      "actor": "buyer",
+      "item": 16207
+    },
+    {
+      "action": "use_item",
+      "actor": "buyer",
+      "item": 8263501,
+      "spell": 8263501
+    },
+    {
+      "action": "assert",
+      "label": "the Runed Arcanite Rod upgrades the Dispenser to I",
+      "actor": "buyer",
+      "metric": "item_count",
+      "item": 8263502,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the upgraded Dispenser replaces the old one instead of stacking",
+      "actor": "buyer",
+      "metric": "item_count",
+      "item": 8263501,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the upgrade is announced on screen as well",
+      "actor": "buyer",
+      "metric": "notification_contains",
+      "text": "becomes Ethereal Tool Dispenser I",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the rod is kept",
+      "actor": "buyer",
+      "metric": "item_count",
+      "item": 16207,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "and the totem in the bags did not block the upgrade",
+      "actor": "buyer",
+      "metric": "item_count",
+      "item": 5175,
+      "equals": 1,
+      "within_ms": 4000
+    },
+
+    {
+      "action": "add_item",
+      "actor": "buyer",
+      "item": 22463
+    },
+    {
+      "action": "use_item",
+      "actor": "buyer",
+      "item": 8263502,
+      "spell": 8263501
+    },
+    {
+      "action": "assert",
+      "label": "the Runed Eternium Rod upgrades Dispenser I to II",
+      "actor": "buyer",
+      "metric": "item_count",
+      "item": 8263503,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "and the Eternium Rod is kept",
+      "actor": "buyer",
+      "metric": "item_count",
+      "item": 22463,
+      "equals": 1,
+      "within_ms": 4000
+    },
+
+    {
+      "action": "add_item",
+      "actor": "buyer",
+      "item": 44452
+    },
+    {
+      "action": "use_item",
+      "actor": "buyer",
+      "item": 8263503,
+      "spell": 8263501
+    },
+    {
+      "action": "assert",
+      "label": "the Runed Titanium Rod upgrades Dispenser II to III",
+      "actor": "buyer",
+      "metric": "item_count",
+      "item": 8263504,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "and the Titanium Rod is kept",
+      "actor": "buyer",
+      "metric": "item_count",
+      "item": 44452,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "use_item",
+      "actor": "buyer",
+      "item": 8263504,
+      "spell": 8263501
+    },
+    {
+      "action": "assert",
+      "label": "the highest tier is neither spent nor downgraded",
+      "actor": "buyer",
+      "metric": "item_count",
+      "item": 8263504,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "a Dispenser that already covers the rods says so",
+      "actor": "buyer",
+      "metric": "system_message_contains",
+      "text": "already covers every Runed Rod",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "and says it in the middle of the screen too",
+      "actor": "buyer",
+      "metric": "notification_contains",
+      "text": "already covers every Runed Rod",
+      "equals": 1,
+      "within_ms": 4000
+    },
+
+    {
+      "action": "add_item",
+      "actor": "skipped",
+      "item": 8263511
+    },
+    {
+      "action": "use_item",
+      "actor": "skipped",
+      "item": 8263511,
+      "spell": 60034
+    },
+    {
+      "action": "assert",
+      "label": "the second crate pays a Dispenser too",
+      "actor": "skipped",
+      "metric": "item_count",
+      "item": 8263501,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "add_item",
+      "actor": "skipped",
+      "item": 44452
+    },
+    {
+      "action": "use_item",
+      "actor": "skipped",
+      "item": 8263501,
+      "spell": 8263501
+    },
+    {
+      "action": "assert",
+      "label": "a Runed Titanium Rod takes a fresh Dispenser straight to III",
+      "actor": "skipped",
+      "metric": "item_count",
+      "item": 8263504,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "without leaving an intermediate tier behind",
+      "actor": "skipped",
+      "metric": "item_count",
+      "item": 8263502,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "and without spending the rod",
+      "actor": "skipped",
+      "metric": "item_count",
+      "item": 44452,
+      "equals": 1,
+      "within_ms": 4000
+    }
+  ]
+}

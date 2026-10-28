@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Guardian: Shield of Denial is a physical ability and stays usable while silenced (#8255)",
+  "contract": "Shield of Denial 704159 (and rank 707701) deals Physical damage and interrupts, like Heroic Throw and Shield Slam, but Spell.dbc set PreventionType 1 (SPELL_PREVENTION_TYPE_SILENCE), so a silence refused it. Physical weapon abilities use PreventionType 2 (PACIFY), which only a disarm/pacify blocks. A silenced Guardian must still throw the shield, and the same cast without the silence must behave identically.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "guardian", "race": 1, "class": 18, "level": 20 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "guardian", "entry": 36, "faction": 14, "level": 20, "health": 100000, "distance": 5 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "guardian", "spell": 704159 },
+    { "action": "learn", "actor": "guardian", "spell": 800317 },
+    { "action": "cast", "label": "Enter Tower Formation", "actor": "guardian", "spell": 800317 },
+    {
+      "action": "assert", "label": "SETUP: Shield of Denial is known in its required formation",
+      "actor": "guardian", "metric": "knows_spell", "spell": 704159, "equals": 1
+    },
+    {
+      "action": "cast", "label": "CONTROL: throw the shield without a silence", "actor": "guardian",
+      "spell": 704159, "target": "enemy"
+    },
+    {
+      "action": "assert", "label": "CONTROL: the control cast was not refused",
+      "actor": "guardian", "metric": "cast_failure", "spell": 704159, "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTROL: the shield damaged the enemy",
+      "actor": "enemy", "metric": "health", "max": 99999, "within_ms": 3000
+    },
+    { "action": "reset_cooldown", "actor": "guardian", "spell": 704159 },
+    { "action": "set_aura", "label": "Silence the Guardian", "actor": "guardian", "spell": 15487, "stacks": 1 },
+    {
+      "action": "assert", "label": "SETUP: the Guardian is silenced",
+      "actor": "guardian", "metric": "aura", "spell": 15487, "equals": 1, "within_ms": 2000
+    },
+    { "action": "snapshot", "label": "Remember the enemy's health before the silenced cast", "actor": "enemy", "metric": "health", "save_as": "before" },
+    {
+      "action": "cast", "label": "DISCRIMINATING: throw the shield while silenced", "actor": "guardian",
+      "spell": 704159, "target": "enemy"
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the silenced cast is not refused",
+      "actor": "guardian", "metric": "cast_failure", "spell": 704159, "equals": 0
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the silenced shield still damaged the enemy",
+      "actor": "enemy", "metric": "health", "relative_to": "before", "max": -1, "within_ms": 3000
+    }
+  ]
+}

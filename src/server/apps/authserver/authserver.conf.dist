@@ -315,6 +315,16 @@ RealmCards.GameMode = 11
 RealmCards.Image = "Default"
 
 #
+#    RealmCards.Realm.<id>.GameMode
+#    RealmCards.Realm.<id>.Image
+#    RealmCards.Realm.<id>.DescriptionSpell
+#        Description: Per realm (realmlist.id) game mode and background, overriding the values above,
+#                     and the spell whose description the card shows (0 = none).
+#        Example:     RealmCards.Realm.1.Image = "Voljin"
+#                     RealmCards.Realm.1.DescriptionSpell = 13977864
+#        Default:     RealmCards.GameMode, RealmCards.Image, 0
+
+#
 ###################################################################################################
 
 ###################################################################################################

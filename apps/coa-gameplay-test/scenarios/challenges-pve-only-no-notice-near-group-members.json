@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Adventure Mode does not show the PvE-only notice when an area spell passes over group members",
+  "contract": "An area spell tests every unit in its radius with IsValidAttackTarget, so it also tests nearby players the caster could never fight. A Human warrior in Adventure Mode (211, PVE_ONLY) with PvP enabled casts Thunder Clap (6343) next to a PvP-enabled Orc in the same group and an ungrouped Human. The group keeps the Orc friendly and the Human shares the warrior's faction, so neither can be attacked by the warrior with or without Adventure Mode, and 'Your challenge is PvE only: you cannot fight players.' must not appear for them: the notice belongs to a player the warrior could otherwise fight.",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053 },
+  "players": [
+    { "id": "adventurer", "race": 1, "class": 1, "level": 1 },
+    { "id": "groupmate", "race": 2, "class": 1, "level": 1 },
+    { "id": "bystander", "race": 1, "class": 1, "level": 1 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "start_challenge", "actor": "adventurer", "challenge": 211, "level": 1 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "assert", "label": "Adventure Mode starts", "actor": "adventurer", "metric": "challenge_start_code",
+      "equals": 0 },
+    { "action": "teleport", "actor": "adventurer", "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "teleport", "actor": "groupmate", "map": 0, "x": -9615.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "teleport", "actor": "bystander", "map": 0, "x": -9617.06, "y": -286.949, "z": 57.3053, "o": 0 },
+    { "action": "pvp", "actor": "adventurer", "enabled": true },
+    { "action": "pvp", "actor": "groupmate", "enabled": true },
+    { "action": "group", "actor": "adventurer", "target": "groupmate" },
+    { "action": "learn", "actor": "adventurer", "spell": 6343 },
+    { "action": "set_power", "actor": "adventurer", "power": 1, "value": 1000 },
+    { "action": "wait", "ms": 500 },
+    { "action": "cast", "actor": "adventurer", "spell": 6343 },
+    { "action": "assert", "label": "Thunder Clap is cast", "actor": "adventurer", "metric": "spell_cast_count",
+      "spell": 6343, "equals": 1, "within_ms": 2000 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "no PvE-only notice for the group member or the friendly bystander",
+      "actor": "adventurer", "metric": "system_message_contains", "text": "Your challenge is PvE only", "equals": 0 }
+  ]
+}

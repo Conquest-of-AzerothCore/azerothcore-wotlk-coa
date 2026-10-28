@@ -63,7 +63,7 @@ namespace
     uint32 CharacterSelectionMaxActive()
     {
         uint32 const maximum = sConfigMgr->GetOption<uint32>(
-            "CoA.CharacterSelectionMaxActive", 10);
+            "CoA.CharacterSelectionMaxActive", 128);
         return std::clamp(maximum, uint32(1), CHARACTER_LIST_MAXIMUM);
     }
 

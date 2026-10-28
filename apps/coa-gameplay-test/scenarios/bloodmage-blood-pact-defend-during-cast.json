@@ -1,0 +1,148 @@
+{
+  "schema": 1,
+  "name": "Blood Pact lets its caster dodge or parry while casting (#3245)",
+  "contract": "Blood Pact 801955's tooltip closing clause promises its caster can still dodge or parry while casting. Unit::CanDefendDuringCast() gates that at the 4 dodge/parry call sites in Unit.cpp that otherwise zero dodge/parry chance through IsNonMeleeSpellCast's generic-cast branch. QA Test 100% Dodge 10020 (aura 49 SPELL_AURA_MOD_DODGE_PERCENT, EffectBasePoints 99 + DieSides 1 = 100) plus Evasion 5277 (same aura, EffectBasePoints 49 + DieSides 1 = 50) are both applied as a fixture, past the 10000/10000 roll ceiling Unit::RollMeleeOutcomeAgainst compares dodge_chance*100 against, so every swing that is actually rolled is a certain dodge, independent of the fix under test. The attacker's melee_hit_rating removes misses so every swing that is NOT dodged lands; the attacker deliberately carries no expertise_rating, since RollMeleeOutcomeAgainst subtracts Player::GetExpertiseDodgeOrParryReduction from dodge_chance before the cast check runs, which would cancel the fixture regardless of the fix (this is why an earlier statistical attempt at this regression, recorded in bloodmage-blood-pact.json's prior contract text, saw landed rates far above what a dodge fixture should allow). Bloodmoon Blast 572332 is a real 2000 ms Bloodmage cast (confirmed by spell_cast_time_ms). A player's very first native autoattack (its own attack timer still at its initial zero) delivers its first swing almost immediately on the attack request rather than waiting a full weapon-swing cycle; a later swing, or a swing after stop_attack/attack on the same player, waits out the rest of the normal weapon-swing cycle, which is longer than this 2000 ms cast. Each phase therefore issues its cast first and only then sends a player's own first-ever attack request, making that one guaranteed instant first swing the swing under measurement, provably mid-cast rather than racing the cast's own registration into m_currentSpells or landing in an idle gap between casts. The test phase uses a second, otherwise identical attacker player for exactly this reason: it has never attacked before, so its own first attack request reproduces the same instant swing the control phase observed on the first attacker. The swing/damage snapshots are taken between the cast and the attack request, and the 500 ms wait afterwards (with an explicit casting==1 check) stays inside the 2000 ms cast. Control: without Blood Pact, IsNonMeleeSpellCast's generic-cast branch zeros the 100% dodge while casting, so every mid-cast swing lands (melee_damage_count tracks melee_attack_count 1:1). Test: with Blood Pact learned and active, CanDefendDuringCast() keeps the 100% dodge fixture live during the same kind of cast, so every mid-cast swing is dodged (melee_damage_count stays at 0) even though the attacker keeps swinging. Blood Pact's own native effects (its own +50 dodge, the ranged-hit debuff, the Blood Runs Cold healing clause) are covered by bloodmage-blood-pact.json and are not re-exercised here; the 100% dodge comes only from the QA fixture, isolating the cast-defense mechanism from the spell's own magnitude.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    { "id": "bloodmage", "race": 1, "class": 20, "level": 80 },
+    { "id": "attacker", "race": 2, "class": 1, "level": 80, "melee_hit_rating": 10000 },
+    { "id": "attacker2", "race": 2, "class": 1, "level": 80, "melee_hit_rating": 10000 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 5000 },
+    { "action": "teleport", "actor": "bloodmage", "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    {
+      "action": "teleport", "actor": "attacker", "map": 0, "x": -9614.06, "y": -288.949, "z": 57.3053, "o": 3.14159
+    },
+    {
+      "action": "teleport", "actor": "attacker2", "map": 0, "x": -9617.06, "y": -291.949, "z": 57.3053, "o": 1.5708
+    },
+    { "action": "pvp", "actor": "bloodmage", "enabled": true },
+    { "action": "pvp", "actor": "attacker", "enabled": true },
+    { "action": "pvp", "actor": "attacker2", "enabled": true },
+    { "action": "set_health", "actor": "bloodmage", "maximum": 1000000, "value": 1000000 },
+    { "action": "set_health", "actor": "attacker", "maximum": 1000000, "value": 1000000 },
+    { "action": "set_health", "actor": "attacker2", "maximum": 1000000, "value": 1000000 },
+    { "action": "unlearn", "actor": "bloodmage", "spell": 572332 },
+    { "action": "unlearn", "actor": "bloodmage", "spell": 501614 },
+    { "action": "unlearn", "actor": "bloodmage", "spell": 501613 },
+    { "action": "unlearn", "actor": "bloodmage", "spell": 501612 },
+    { "action": "unlearn", "actor": "bloodmage", "spell": 501611 },
+    { "action": "unlearn", "actor": "bloodmage", "spell": 501610 },
+    { "action": "unlearn", "actor": "bloodmage", "spell": 501609 },
+    { "action": "unlearn", "actor": "bloodmage", "spell": 501608 },
+    { "action": "unlearn", "actor": "bloodmage", "spell": 501607 },
+    { "action": "unlearn", "actor": "bloodmage", "spell": 500125 },
+    { "action": "learn", "actor": "bloodmage", "spell": 572332 },
+    {
+      "action": "assert", "label": "SETUP: Bloodmoon Blast is a real 2000 ms cast", "actor": "bloodmage",
+      "metric": "spell_cast_time_ms", "spell": 572332, "equals": 2000
+    },
+    { "action": "set_aura", "label": "Fixture: a certain dodge", "actor": "bloodmage", "spell": 10020, "stacks": 1 },
+    {
+      "action": "set_aura", "label": "Fixture: dodge margin past the roll ceiling", "actor": "bloodmage", "spell": 5277,
+      "stacks": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: dodge chance is well past 100 percent", "actor": "bloodmage",
+      "metric": "dodge_chance", "min": 140
+    },
+    {
+      "action": "cast", "label": "CONTROL: a plain generic cast, no Blood Pact yet", "actor": "bloodmage",
+      "spell": 572332, "target": "attacker"
+    },
+    {
+      "action": "snapshot", "label": "CONTROL: swings before the attack starts", "actor": "attacker",
+      "metric": "melee_attack_count", "save_as": "control_swings_before"
+    },
+    {
+      "action": "snapshot", "label": "CONTROL: landed swings before the attack starts", "actor": "attacker",
+      "metric": "melee_damage_count", "save_as": "control_damage_before"
+    },
+    {
+      "action": "attack",
+      "label": "The attacker starts swinging once the cast is already in progress, so its own instant first swing is mid-cast",
+      "actor": "attacker", "target": "bloodmage"
+    },
+    { "action": "wait", "label": "Let the instant first swing resolve, still inside the 2000 ms cast", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Bloodmage is still mid-cast", "actor": "bloodmage",
+      "metric": "casting", "equals": 1
+    },
+    {
+      "action": "snapshot", "label": "CONTROL: mid-cast swing count", "actor": "attacker",
+      "metric": "melee_attack_count", "relative_to": "control_swings_before", "save_as": "control_swings"
+    },
+    {
+      "action": "assert", "label": "SETUP: the attacker swung during the control cast", "actor": "attacker",
+      "metric": "melee_attack_count", "relative_to": "control_swings_before", "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: casting zeros the 100% dodge fixture, every mid-cast swing lands",
+      "actor": "attacker", "metric": "melee_damage_count", "relative_to": "control_damage_before",
+      "ratio_to": "control_swings", "min": 0.99, "max": 1.01
+    },
+    { "action": "stop_attack", "actor": "attacker" },
+    {
+      "action": "wait",
+      "label": "Let the control cast finish cleanly (500 ms already elapsed, the cast needs 2000 ms total)",
+      "ms": 1800
+    },
+    {
+      "action": "assert", "label": "SETUP: the control cast has finished", "actor": "bloodmage",
+      "metric": "casting", "equals": 0
+    },
+    { "action": "learn", "label": "Know the pact before casting it", "actor": "bloodmage", "spell": 801955 },
+    { "action": "set_power", "actor": "bloodmage", "power": 1, "value": 1000 },
+    { "action": "cast", "actor": "bloodmage", "spell": 801955 },
+    {
+      "action": "assert", "label": "Blood Pact is active on its caster", "actor": "bloodmage",
+      "metric": "aura", "spell": 801955, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "cast", "label": "TEST: the same generic cast, now with Blood Pact active", "actor": "bloodmage",
+      "spell": 572332, "target": "attacker2"
+    },
+    {
+      "action": "snapshot", "label": "TEST: swings before the second attacker's first-ever attack", "actor": "attacker2",
+      "metric": "melee_attack_count", "save_as": "test_swings_before"
+    },
+    {
+      "action": "snapshot", "label": "TEST: landed swings before the second attacker's first-ever attack",
+      "actor": "attacker2", "metric": "melee_damage_count", "save_as": "test_damage_before"
+    },
+    {
+      "action": "attack",
+      "label": "A second, fresh attacker's own first-ever attack carries the same instant first swing once the cast is already in progress",
+      "actor": "attacker2", "target": "bloodmage"
+    },
+    { "action": "wait", "label": "Let the instant first swing resolve, still inside the 2000 ms cast", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Bloodmage is still mid-cast", "actor": "bloodmage",
+      "metric": "casting", "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: Blood Pact is still active mid-cast", "actor": "bloodmage",
+      "metric": "aura", "spell": 801955, "equals": 1
+    },
+    {
+      "action": "snapshot", "label": "TEST: mid-cast swing count", "actor": "attacker2",
+      "metric": "melee_attack_count", "relative_to": "test_swings_before", "save_as": "test_swings"
+    },
+    {
+      "action": "assert", "label": "SETUP: the second attacker swung during the test cast", "actor": "attacker2",
+      "metric": "melee_attack_count", "relative_to": "test_swings_before", "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Blood Pact keeps the 100% dodge fixture live mid-cast, no swing lands (#3245)",
+      "actor": "attacker2", "metric": "melee_damage_count", "relative_to": "test_damage_before", "equals": 0
+    },
+    { "action": "assert", "label": "The attacker survived the measurement", "actor": "attacker", "metric": "alive", "equals": 1 },
+    { "action": "assert", "label": "The second attacker survived the measurement", "actor": "attacker2", "metric": "alive", "equals": 1 },
+    { "action": "assert", "label": "The Bloodmage survived the measurement", "actor": "bloodmage", "metric": "alive", "equals": 1 },
+    { "action": "stop_attack", "actor": "attacker2" }
+  ]
+}

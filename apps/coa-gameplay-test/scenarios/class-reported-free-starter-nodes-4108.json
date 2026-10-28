@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "name": "Reported free starter nodes are granted at specialization selection (#4108)",
+  "contract": [
+    "The active CharacterAdvancement records mark Keg Smash, Sanguine Essence, Inspiring Leader, and Tempest",
+    "Sovereign free (AE 0, TE 0). Their authored dependencies include the specialization identity and a paid",
+    "shared-class signature. The server intentionally removes paid shared-class prerequisites from automatic",
+    "specialization nodes, so they must be available immediately when a level-10 player chooses the tree without",
+    "spending specialization points. Native specialization uploads exercise acquisition instead of learning the",
+    "nodes by fixture commands."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "barb",
+      "race": 1,
+      "class": 12,
+      "level": 10
+    },
+    {
+      "id": "bm",
+      "race": 1,
+      "class": 20,
+      "level": 10
+    },
+    {
+      "id": "guard",
+      "race": 1,
+      "class": 18,
+      "level": 10
+    },
+    {
+      "id": "storm",
+      "race": 1,
+      "class": 16,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "barb",
+      "id": 3
+    },
+    {
+      "action": "assert",
+      "actor": "barb",
+      "metric": "knows_spell",
+      "label": "The free specialization node is granted immediately",
+      "spell": 805808,
+      "equals": 1
+    },
+    {
+      "action": "specialization",
+      "actor": "bm",
+      "id": 25
+    },
+    {
+      "action": "assert",
+      "actor": "bm",
+      "metric": "knows_spell",
+      "label": "The free specialization node is granted immediately",
+      "spell": 505188,
+      "equals": 1
+    },
+    {
+      "action": "specialization",
+      "actor": "guard",
+      "id": 20
+    },
+    {
+      "action": "assert",
+      "actor": "guard",
+      "metric": "knows_spell",
+      "label": "The free specialization node is granted immediately",
+      "spell": 505344,
+      "equals": 1
+    },
+    {
+      "action": "specialization",
+      "actor": "storm",
+      "id": 14
+    },
+    {
+      "action": "assert",
+      "actor": "storm",
+      "metric": "knows_spell",
+      "label": "The free specialization node is granted immediately",
+      "spell": 560020,
+      "equals": 1
+    }
+  ]
+}

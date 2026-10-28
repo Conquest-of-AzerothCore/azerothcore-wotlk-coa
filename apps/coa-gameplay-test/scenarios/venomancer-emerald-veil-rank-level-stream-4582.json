@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Emerald Veil ranks stream their training level so the client stops offering an unlearnable rank (#4582)",
+  "contract": [
+    "Spell.dbc gives all six Emerald Veil ranks SpellLevel 16, while they are trained at 14/22/30/38/46/54 (their",
+    "BaseLevel and the class rank progression). The client picks the highest learnable rank from SpellLevel, so from",
+    "level 16 it offers rank 6 (801152) and shows \"New Rank Available!\" permanently. The server's own SpellLevel",
+    "feeds the level penalty of the heal, so only the client copy changes: ranks 2-6 are streamed through",
+    "SMSG_PATCH_SPELL (opcode 2346) with SpellLevel, field 39, set to the progression's training level. Expected",
+    "before: none of the five rows arrive. After: each arrives with its training level."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "v",
+      "race": 1,
+      "class": 29,
+      "level": 19
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the login patch stream settle",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "Emerald Veil rank 2 (800939) reaches the client with spell level 22, the level it is trained at",
+      "actor": "v",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 800939,
+      "index": 39,
+      "equals": 22,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Emerald Veil rank 3 (800959) reaches the client with spell level 30, the level it is trained at",
+      "actor": "v",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 800959,
+      "index": 39,
+      "equals": 30,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Emerald Veil rank 4 (801110) reaches the client with spell level 38, the level it is trained at",
+      "actor": "v",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 801110,
+      "index": 39,
+      "equals": 38,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Emerald Veil rank 5 (801115) reaches the client with spell level 46, the level it is trained at",
+      "actor": "v",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 801115,
+      "index": 39,
+      "equals": 46,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Emerald Veil rank 6 (801152) reaches the client with spell level 54, the level it is trained at",
+      "actor": "v",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 801152,
+      "index": 39,
+      "equals": 54,
+      "within_ms": 5000
+    }
+  ]
+}

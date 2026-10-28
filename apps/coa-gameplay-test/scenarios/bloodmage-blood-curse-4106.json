@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Blood Curse lasts 30 seconds in worgen form (#4106)",
+  "contract": "#4106 'Blood curse' (build 7b66e4380) reported the Cursed Form without the worgen model. Blood Curse 562720 (BaseLevel 6) applies SPELL_AURA_MOD_SHAPESHIFT form 57 for DurationIndex 9 = 30000 ms. Since 99b87598b (#1406), spell_linked_spell adds 563124 'Worgen Form Visual' (SPELL_AURA_TRANSFORM to creature 56332, display 574) with the form. Expected: at the level Blood Curse becomes available, the Bloodmage enters the Cursed Form for 30 s and wears display 574. Passes on main; pins the tooltip duration and the model.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "b", "race": 1, "class": 20, "level": 6 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "b", "spell": 562720 },
+    { "action": "cast", "actor": "b", "spell": 562720 },
+    { "action": "assert", "label": "Blood Curse enters the Cursed Form", "actor": "b", "metric": "aura", "spell": 562720, "caster": "b", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "The form lasts the tooltip's 30 seconds", "actor": "b", "metric": "aura_duration_ms", "spell": 562720, "min": 28000, "max": 30000 },
+    { "action": "assert", "label": "The Worgen Form Visual rides on the form", "actor": "b", "metric": "aura", "spell": 563124, "caster": "b", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "The Bloodmage wears the worgen display", "actor": "b", "metric": "display_id", "equals": 574 }
+  ]
+}

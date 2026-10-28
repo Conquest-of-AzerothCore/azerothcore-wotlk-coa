@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Wildcard ability cards set after the starters guarantee their spell in the level rolls",
+  "contract": "On Darkmoon - Season 10 Wildcard a Hero slotted collected Ability and Talent Skill Cards (three normal and three golden each; the second and third ability slot only count from level 25 and 40) once its four starting abilities stood: the client blocks these slots during the starting phase, and the server refused CMSG 0x622 once the fifth spell was learned with SET_SKILL_CARD_WILDCARD_STARTING_PHASE_COMPLETE ('slot default/talent cards at 4 starters; block ability and talent cards after the 5th spell is learned'). A slotted card 'guarantees drafting a specific Ability': the first level roll whose pool reaches the card's level gives the card's entry (a talent card its rank), and the server marks the card used (SMSG 0x625 blocked) before revealing the spell.",
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "wild", "race": 1, "class": 10, "level": 1}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 3000},
+    {"action": "console", "command": "coa gamemode WildCard on Harnessa"},
+    {"action": "add_item", "actor": "wild", "item": 97885, "count": 10},
+    {"action": "client_packet", "label": "Open ten ability packs", "actor": "wild", "opcode": 1642, "fields": [{"string": "PURCHASE_SEALED_CARD_TYPE_DEFAULT_PACK"}, {"u32": 10}]},
+    {"action": "wait", "ms": 500},
+    {"action": "client_packet", "label": "Reveal them", "actor": "wild", "opcode": 1622, "fields": [{"wildcard_pending_cards": 50}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "Up to fifty ability cards are collected", "actor": "wild", "metric": "wildcard_cards_collected", "min": 40, "max": 50},
+    {"action": "assert", "label": "and each paid a Darkmoon Ticket", "actor": "wild", "metric": "item_count", "item": 246190, "equals": 50},
+
+    {"action": "client_packet", "label": "Set an ability card before the starters", "actor": "wild", "opcode": 1570, "fields": [{"u32": 0}, {"string": "SKILL_CARD_DEFAULT_NORMAL"}, {"u32": 0}, {"wildcard_lowest_card": 0}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "Ability cards wait for the starters", "actor": "wild", "metric": "server_packet_contains", "opcode": 1571, "text": "SET_SKILL_CARD_UNKNOWN", "equals": 1},
+    {"action": "assert", "label": "and stay out of the slot", "actor": "wild", "metric": "wildcard_roll_cards_set", "equals": 0},
+
+    {"action": "client_packet", "label": "Roll the starting abilities", "actor": "wild", "opcode": 1611},
+    {"action": "wait", "ms": 500},
+    {"action": "client_packet", "label": "Set the lowest ability card", "actor": "wild", "opcode": 1570, "fields": [{"u32": 0}, {"string": "SKILL_CARD_DEFAULT_NORMAL"}, {"u32": 0}, {"wildcard_lowest_card": 0}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The card is set", "actor": "wild", "metric": "server_packet_contains", "opcode": 1571, "text": "SET_SKILL_CARD_OK", "equals": 1},
+    {"action": "assert", "label": "in an ability slot", "actor": "wild", "metric": "wildcard_roll_cards_set", "equals": 1},
+    {"action": "assert", "label": "and shown to the client", "actor": "wild", "metric": "server_packets", "opcode": 1573, "equals": 1},
+
+    {"action": "client_packet", "label": "Set the same card into another slot", "actor": "wild", "opcode": 1570, "fields": [{"u32": 0}, {"string": "SKILL_CARD_DEFAULT_NORMAL"}, {"u32": 1}, {"wildcard_lowest_card": 0}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "One card per entry", "actor": "wild", "metric": "server_packet_contains", "opcode": 1571, "text": "SET_SKILL_CARD_ENTRY_ALREADY_ACTIVATED", "equals": 1},
+
+    {"action": "set_level", "actor": "wild", "value": 10},
+    {"action": "client_packet", "label": "Roll the fifth spell", "actor": "wild", "opcode": 1603, "fields": [{"u32": 0}, {"u32": 0}, {"u32": 0}, {"u8": 0}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The roll plays the card", "actor": "wild", "metric": "wildcard_roll_cards_used", "equals": 1},
+    {"action": "assert", "label": "The client sees it used and the starter slots cleared", "actor": "wild", "metric": "server_packets", "opcode": 1573, "equals": 6},
+    {"action": "assert", "label": "Its spell is learned", "actor": "wild", "metric": "wildcard_spells_known", "equals": 5},
+
+    {"action": "client_packet", "label": "Set a card after the fifth spell", "actor": "wild", "opcode": 1570, "fields": [{"u32": 0}, {"string": "SKILL_CARD_DEFAULT_NORMAL"}, {"u32": 1}, {"wildcard_lowest_card": 0}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The slots are closed", "actor": "wild", "metric": "server_packet_contains", "opcode": 1571, "text": "SET_SKILL_CARD_WILDCARD_STARTING_PHASE_COMPLETE", "equals": 1},
+    {"action": "assert", "label": "and keep their one card", "actor": "wild", "metric": "wildcard_roll_cards_set", "equals": 1}
+  ]
+}

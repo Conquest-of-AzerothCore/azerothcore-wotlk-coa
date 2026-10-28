@@ -1,0 +1,1511 @@
+{
+ "schema": 1,
+ "name": "Heaven's Appraisal keeps Gavels from being dodged (#8865)",
+ "contract": "Heaven's Appraisal 300353 (Level 40 passive) reads \"Your Gavels can no longer be missed, dodged, or parried\". Gavel of Light 800611, Grace 800614 and Wrath 800617 are SpellFamilyName 33, SpellFamilyFlags[1] 32 melee-class spells. Effect 0 of 300353 is a flat SPELLMOD_RESIST_MISS_CHANCE of +1000 on that mask, which Unit::MeleeSpellMissChance applies to the Gavel's hit chance, so misses were already removed. Effects 1 and 2 are flat modifiers for other spells and the Sun Cleric contract turned them into dummies, so nothing stopped Unit::MeleeSpellHitResult from rolling dodge and parry; SPELL_AURA_IGNORE_COMBAT_RESULT is the native aura for that (MiscValue 2 dodge, 4 parry) and only affects spells its class mask names. The contract now turns effects 1 and 2 of 300353 into those two auras on mask [0,32,0]. Two level 60 Horde warriors with PvP on stand in for the targets, each carrying Evasion 5277 (+50% dodge, re-applied before every round because it lasts only 15 seconds), so the target also keeps its native parry. The Sun Cleric with 300353 casts Gavel of Light 20 times and every cast must deal damage (a dodge deals none); the control Sun Cleric without it hits an identically dodging target and must be dodged at least once (the target's dodge chance is 41.9%, so 20 straight hits has a chance near 0.002%). Parry takes the same path through the same aura (MiscValue 4); the warrior's parry rides along in the same twelve casts but is not isolated.",
+ "timeout_ms": 240000,
+ "players": [
+  {
+   "id": "blessed",
+   "race": 1,
+   "class": 27,
+   "level": 60,
+   "allow_regeneration": false
+  },
+  {
+   "id": "plain",
+   "race": 1,
+   "class": 27,
+   "level": 60,
+   "allow_regeneration": false
+  },
+  {
+   "id": "blessed_foe",
+   "race": 2,
+   "class": 1,
+   "level": 60,
+   "allow_regeneration": false
+  },
+  {
+   "id": "plain_foe",
+   "race": 2,
+   "class": 1,
+   "level": 60,
+   "allow_regeneration": false
+  }
+ ],
+ "steps": [
+  {
+   "action": "wait",
+   "label": "Let spawn AI and level scaling settle",
+   "ms": 5000
+  },
+  {
+   "action": "teleport",
+   "actor": "blessed",
+   "map": 0,
+   "x": -9617.06,
+   "y": -288.949,
+   "z": 57.3053,
+   "o": 3.14159
+  },
+  {
+   "action": "teleport",
+   "actor": "blessed_foe",
+   "map": 0,
+   "x": -9619.06,
+   "y": -288.949,
+   "z": 57.3053,
+   "o": 0
+  },
+  {
+   "action": "teleport",
+   "actor": "plain",
+   "map": 0,
+   "x": -9617.06,
+   "y": -268.949,
+   "z": 57.3053,
+   "o": 3.14159
+  },
+  {
+   "action": "teleport",
+   "actor": "plain_foe",
+   "map": 0,
+   "x": -9619.06,
+   "y": -268.949,
+   "z": 57.3053,
+   "o": 0
+  },
+  {
+   "action": "wait",
+   "label": "Let the teleports settle",
+   "ms": 2000
+  },
+  {
+   "action": "pvp",
+   "actor": "blessed",
+   "enabled": true
+  },
+  {
+   "action": "pvp",
+   "actor": "plain",
+   "enabled": true
+  },
+  {
+   "action": "pvp",
+   "actor": "blessed_foe",
+   "enabled": true
+  },
+  {
+   "action": "pvp",
+   "actor": "plain_foe",
+   "enabled": true
+  },
+  {
+   "action": "set_health",
+   "actor": "blessed_foe",
+   "maximum": 1000000,
+   "value": 10000
+  },
+  {
+   "action": "set_aura",
+   "label": "Evasion makes the target dodge half of what reaches it",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "set_health",
+   "actor": "plain_foe",
+   "maximum": 1000000,
+   "value": 10000
+  },
+  {
+   "action": "set_aura",
+   "label": "Evasion makes the target dodge half of what reaches it",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "learn",
+   "actor": "blessed",
+   "spell": 800611
+  },
+  {
+   "action": "learn",
+   "actor": "blessed",
+   "spell": 300353
+  },
+  {
+   "action": "learn",
+   "actor": "plain",
+   "spell": 800611
+  },
+  {
+   "action": "assert",
+   "label": "SETUP: the Sun Cleric with Heaven's Appraisal knows it",
+   "actor": "blessed",
+   "metric": "knows_spell",
+   "spell": 300353,
+   "equals": 1
+  },
+  {
+   "action": "assert",
+   "label": "SETUP: the control Sun Cleric does not know it",
+   "actor": "plain",
+   "metric": "knows_spell",
+   "spell": 300353,
+   "equals": 0
+  },
+  {
+   "action": "assert",
+   "label": "SETUP: the Evasion fixture is active on the first target",
+   "actor": "blessed_foe",
+   "metric": "aura",
+   "spell": 5277,
+   "equals": 1
+  },
+  {
+   "action": "assert",
+   "label": "SETUP: the Evasion fixture is active on the control target",
+   "actor": "plain_foe",
+   "metric": "aura",
+   "spell": 5277,
+   "equals": 1
+  },
+  {
+   "action": "assert",
+   "label": "SETUP: the first target's dodge chance reflects Evasion",
+   "actor": "blessed_foe",
+   "metric": "dodge_chance",
+   "min": 40
+  },
+  {
+   "action": "assert",
+   "label": "SETUP: the control target's dodge chance reflects Evasion",
+   "actor": "plain_foe",
+   "metric": "dodge_chance",
+   "min": 40
+  },
+  {
+   "action": "add_item",
+   "actor": "blessed",
+   "item": 2495
+  },
+  {
+   "action": "equip",
+   "actor": "blessed",
+   "item": 2495,
+   "slot": 15
+  },
+  {
+   "action": "add_item",
+   "actor": "plain",
+   "item": 2495
+  },
+  {
+   "action": "equip",
+   "actor": "plain",
+   "item": 2495,
+   "slot": 15
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "blessed",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "blessed",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "blessed Gavel of Light 1",
+   "actor": "blessed",
+   "spell": 800611,
+   "target": "blessed_foe"
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "plain",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "plain",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "plain Gavel of Light 1",
+   "actor": "plain",
+   "spell": 800611,
+   "target": "plain_foe"
+  },
+  {
+   "action": "wait",
+   "ms": 1600
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "blessed",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "blessed",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "blessed Gavel of Light 2",
+   "actor": "blessed",
+   "spell": 800611,
+   "target": "blessed_foe"
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "plain",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "plain",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "plain Gavel of Light 2",
+   "actor": "plain",
+   "spell": 800611,
+   "target": "plain_foe"
+  },
+  {
+   "action": "wait",
+   "ms": 1600
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "blessed",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "blessed",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "blessed Gavel of Light 3",
+   "actor": "blessed",
+   "spell": 800611,
+   "target": "blessed_foe"
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "plain",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "plain",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "plain Gavel of Light 3",
+   "actor": "plain",
+   "spell": 800611,
+   "target": "plain_foe"
+  },
+  {
+   "action": "wait",
+   "ms": 1600
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "blessed",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "blessed",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "blessed Gavel of Light 4",
+   "actor": "blessed",
+   "spell": 800611,
+   "target": "blessed_foe"
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "plain",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "plain",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "plain Gavel of Light 4",
+   "actor": "plain",
+   "spell": 800611,
+   "target": "plain_foe"
+  },
+  {
+   "action": "wait",
+   "ms": 1600
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "blessed",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "blessed",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "blessed Gavel of Light 5",
+   "actor": "blessed",
+   "spell": 800611,
+   "target": "blessed_foe"
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "plain",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "plain",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "plain Gavel of Light 5",
+   "actor": "plain",
+   "spell": 800611,
+   "target": "plain_foe"
+  },
+  {
+   "action": "wait",
+   "ms": 1600
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "blessed",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "blessed",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "blessed Gavel of Light 6",
+   "actor": "blessed",
+   "spell": 800611,
+   "target": "blessed_foe"
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "plain",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "plain",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "plain Gavel of Light 6",
+   "actor": "plain",
+   "spell": 800611,
+   "target": "plain_foe"
+  },
+  {
+   "action": "wait",
+   "ms": 1600
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "blessed",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "blessed",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "blessed Gavel of Light 7",
+   "actor": "blessed",
+   "spell": 800611,
+   "target": "blessed_foe"
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "plain",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "plain",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "plain Gavel of Light 7",
+   "actor": "plain",
+   "spell": 800611,
+   "target": "plain_foe"
+  },
+  {
+   "action": "wait",
+   "ms": 1600
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "blessed",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "blessed",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "blessed Gavel of Light 8",
+   "actor": "blessed",
+   "spell": 800611,
+   "target": "blessed_foe"
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "plain",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "plain",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "plain Gavel of Light 8",
+   "actor": "plain",
+   "spell": 800611,
+   "target": "plain_foe"
+  },
+  {
+   "action": "wait",
+   "ms": 1600
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "blessed",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "blessed",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "blessed Gavel of Light 9",
+   "actor": "blessed",
+   "spell": 800611,
+   "target": "blessed_foe"
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "plain",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "plain",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "plain Gavel of Light 9",
+   "actor": "plain",
+   "spell": 800611,
+   "target": "plain_foe"
+  },
+  {
+   "action": "wait",
+   "ms": 1600
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "blessed",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "blessed",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "blessed Gavel of Light 10",
+   "actor": "blessed",
+   "spell": 800611,
+   "target": "blessed_foe"
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "plain",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "plain",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "plain Gavel of Light 10",
+   "actor": "plain",
+   "spell": 800611,
+   "target": "plain_foe"
+  },
+  {
+   "action": "wait",
+   "ms": 1600
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "blessed",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "blessed",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "blessed Gavel of Light 11",
+   "actor": "blessed",
+   "spell": 800611,
+   "target": "blessed_foe"
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "plain",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "plain",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "plain Gavel of Light 11",
+   "actor": "plain",
+   "spell": 800611,
+   "target": "plain_foe"
+  },
+  {
+   "action": "wait",
+   "ms": 1600
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "blessed",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "blessed",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "blessed Gavel of Light 12",
+   "actor": "blessed",
+   "spell": 800611,
+   "target": "blessed_foe"
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "plain",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "plain",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "plain Gavel of Light 12",
+   "actor": "plain",
+   "spell": 800611,
+   "target": "plain_foe"
+  },
+  {
+   "action": "wait",
+   "ms": 1600
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "blessed",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "blessed",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "blessed Gavel of Light 13",
+   "actor": "blessed",
+   "spell": 800611,
+   "target": "blessed_foe"
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "plain",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "plain",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "plain Gavel of Light 13",
+   "actor": "plain",
+   "spell": 800611,
+   "target": "plain_foe"
+  },
+  {
+   "action": "wait",
+   "ms": 1600
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "blessed",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "blessed",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "blessed Gavel of Light 14",
+   "actor": "blessed",
+   "spell": 800611,
+   "target": "blessed_foe"
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "plain",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "plain",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "plain Gavel of Light 14",
+   "actor": "plain",
+   "spell": 800611,
+   "target": "plain_foe"
+  },
+  {
+   "action": "wait",
+   "ms": 1600
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "blessed",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "blessed",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "blessed Gavel of Light 15",
+   "actor": "blessed",
+   "spell": 800611,
+   "target": "blessed_foe"
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "plain",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "plain",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "plain Gavel of Light 15",
+   "actor": "plain",
+   "spell": 800611,
+   "target": "plain_foe"
+  },
+  {
+   "action": "wait",
+   "ms": 1600
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "blessed",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "blessed",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "blessed Gavel of Light 16",
+   "actor": "blessed",
+   "spell": 800611,
+   "target": "blessed_foe"
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "plain",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "plain",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "plain Gavel of Light 16",
+   "actor": "plain",
+   "spell": 800611,
+   "target": "plain_foe"
+  },
+  {
+   "action": "wait",
+   "ms": 1600
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "blessed",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "blessed",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "blessed Gavel of Light 17",
+   "actor": "blessed",
+   "spell": 800611,
+   "target": "blessed_foe"
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "plain",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "plain",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "plain Gavel of Light 17",
+   "actor": "plain",
+   "spell": 800611,
+   "target": "plain_foe"
+  },
+  {
+   "action": "wait",
+   "ms": 1600
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "blessed",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "blessed",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "blessed Gavel of Light 18",
+   "actor": "blessed",
+   "spell": 800611,
+   "target": "blessed_foe"
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "plain",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "plain",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "plain Gavel of Light 18",
+   "actor": "plain",
+   "spell": 800611,
+   "target": "plain_foe"
+  },
+  {
+   "action": "wait",
+   "ms": 1600
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "blessed",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "blessed",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "blessed Gavel of Light 19",
+   "actor": "blessed",
+   "spell": 800611,
+   "target": "blessed_foe"
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "plain",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "plain",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "plain Gavel of Light 19",
+   "actor": "plain",
+   "spell": 800611,
+   "target": "plain_foe"
+  },
+  {
+   "action": "wait",
+   "ms": 1600
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "blessed_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 0
+  },
+  {
+   "action": "set_aura",
+   "actor": "plain_foe",
+   "spell": 5277,
+   "stacks": 1
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "blessed",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "blessed",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "blessed Gavel of Light 20",
+   "actor": "blessed",
+   "spell": 800611,
+   "target": "blessed_foe"
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "plain",
+   "spell": 800611
+  },
+  {
+   "action": "set_power",
+   "actor": "plain",
+   "power": 0,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "label": "plain Gavel of Light 20",
+   "actor": "plain",
+   "spell": 800611,
+   "target": "plain_foe"
+  },
+  {
+   "action": "wait",
+   "ms": 1600
+  },
+  {
+   "action": "assert",
+   "label": "DISCRIMINATING: every Gavel of Light from the Heaven's Appraisal Sun Cleric lands",
+   "actor": "blessed",
+   "metric": "spell_damage_count",
+   "spell": 800611,
+   "target": "blessed_foe",
+   "equals": 20
+  },
+  {
+   "action": "assert",
+   "label": "CONTROL: without Heaven's Appraisal the target avoids some Gavels",
+   "actor": "plain",
+   "metric": "spell_damage_count",
+   "spell": 800611,
+   "target": "plain_foe",
+   "max": 19
+  }
+ ]
+}

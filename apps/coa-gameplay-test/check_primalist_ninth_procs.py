@@ -58,7 +58,9 @@ def main():
                 actual = values[phase+'_'+target+'_healed']
                 assert maximum-2 <= actual <= maximum, (phase, target, actual, maximum)
             print(f"{phase}: {values[phase+'_damage']:g} source damage, {values[phase+'_near_healed']:g} healing per ally")
-        assert values['power_damage'] > values['talented_damage']
+        assert values['power_source_damage'] > values['talented_source_damage']
+        print(f"Fixed-base source damage: {values['talented_source_damage']:g} -> "
+              f"{values['power_source_damage']:g}")
     elif mode == 'spiritual-frenzy':
         for phase in ['baseline', 'first', 'highest', 'removed']:
             assert values[phase+'_target_delta'] < 0

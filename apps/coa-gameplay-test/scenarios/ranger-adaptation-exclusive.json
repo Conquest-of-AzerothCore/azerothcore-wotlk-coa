@@ -1,0 +1,683 @@
+{
+  "schema": 1,
+  "name": "Ranger Adaptation: the strongest Footpad's and Woodsman's Adaptation wins per target, any caster…",
+  "contract": [
+    "Footpad's Adaptation (523489, ranks 523490-523493) and Greater Footpad's Adaptation 523513 grant armor",
+    "(SPELL_AURA_MOD_RESISTANCE) and all primary attributes (SPELL_AURA_MOD_STAT); rank 5 523493 and 523513",
+    "both grant 285 armor and 12 of each attribute, and the single-target tooltip says 'Does not stack with",
+    "other similar effects'. Woodsman's Adaptation (800266, ranks up to 803666) and Greater Woodsman's",
+    "Adaptation 680294 grant melee and ranged attack power; rank 7 803666 and 680294 both grant 232.",
+    "spell_group 2100002 (523489, 523513) and 2100003 (800266, 680294) with",
+    "SPELL_GROUP_STACK_RULE_EXCLUSIVE_HIGHEST (4) make each pair one buff per target:",
+    "Unit::IsHighestExclusiveAuraEffect refuses a weaker cast, an equal or stronger cast replaces the older",
+    "one whoever cast it, and the two pairs stay independent. Rule 1 (EXCLUSIVE) would let a rank 1 cast",
+    "(523489: 105 armor, 4 of each attribute; 800266: 30 attack power) replace a raid member's Greater buff.",
+    "Expected on a grouped warrior ally: max-rank Footpad's from one Ranger gives +309 armor (285 plus 2",
+    "armor per point of its +12 Agility); Greater Footpad's from a second Ranger replaces it (still +309, not",
+    "+618); the first Ranger's max rank replaces the Greater again; the second Ranger's copy of the same rank",
+    "replaces the first Ranger's; Woodsman's rank 7 (+232 attack power over the Footpad's-buffed value) sits",
+    "beside Footpad's, and Greater Woodsman's replaces it (still +232) without touching Footpad's. A rank 1",
+    "Footpad's or Woodsman's cast on a target carrying the Greater buff is refused and leaves the Greater",
+    "buff and the stat totals unchanged; with the Greater buff removed, rank 1 lands, and a Greater cast then",
+    "replaces it.",
+    "Ranger Adaptation: the strongest Footpad's and Woodsman's Adaptation wins per target, any caster (#5000,",
+    "#5011)"
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80
+    },
+    {
+      "id": "second",
+      "race": 1,
+      "class": 21,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the characters settle",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "ranger",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "ranger",
+      "target": "second"
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 523493
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 803666
+    },
+    {
+      "action": "learn",
+      "actor": "second",
+      "spell": 523513
+    },
+    {
+      "action": "learn",
+      "actor": "second",
+      "spell": 523493
+    },
+    {
+      "action": "learn",
+      "actor": "second",
+      "spell": 680294
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "armor",
+      "save_as": "armor_alone"
+    },
+    {
+      "action": "cast",
+      "label": "Max-rank Footpad's Adaptation on the ally",
+      "actor": "ranger",
+      "spell": 523493,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "The ally carries rank 5",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 523493,
+      "caster": "ranger",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 5 adds 309 armor (285 + 2 per point of the +12 Agility)",
+      "actor": "ally",
+      "metric": "armor",
+      "relative_to": "armor_alone",
+      "equals": 309
+    },
+    {
+      "action": "cast",
+      "label": "Greater Footpad's Adaptation from the second Ranger",
+      "actor": "second",
+      "spell": 523513
+    },
+    {
+      "action": "assert",
+      "label": "The ally carries the Greater buff",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 523513,
+      "caster": "second",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The Greater buff replaced rank 5",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 523493,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Armor is still +309, not doubled",
+      "actor": "ally",
+      "metric": "armor",
+      "relative_to": "armor_alone",
+      "equals": 309
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Max rank again from the first Ranger",
+      "actor": "ranger",
+      "spell": 523493,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 5 is back on the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 523493,
+      "caster": "ranger",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 5 replaced the Greater buff",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 523513,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Armor is +309 once more",
+      "actor": "ally",
+      "metric": "armor",
+      "relative_to": "armor_alone",
+      "equals": 309
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "The second Ranger's own rank 5",
+      "actor": "second",
+      "spell": 523493,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "The second Ranger's rank 5 lands",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 523493,
+      "caster": "second",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "It replaced the first Ranger's copy",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 523493,
+      "caster": "ranger",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Two casters still give +309 armor (285 + 2 per point of the +12 Agility)",
+      "actor": "ally",
+      "metric": "armor",
+      "relative_to": "armor_alone",
+      "equals": 309
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "attack_power",
+      "save_as": "ap_before_woodsman"
+    },
+    {
+      "action": "cast",
+      "label": "Max-rank Woodsman's Adaptation on the ally",
+      "actor": "ranger",
+      "spell": 803666,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "The ally carries Woodsman's rank 7",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 803666,
+      "caster": "ranger",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Woodsman's leaves Footpad's alone",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 523493,
+      "caster": "second",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 7 adds 232 attack power",
+      "actor": "ally",
+      "metric": "attack_power",
+      "relative_to": "ap_before_woodsman",
+      "equals": 232
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Greater Woodsman's Adaptation from the second Ranger",
+      "actor": "second",
+      "spell": 680294
+    },
+    {
+      "action": "assert",
+      "label": "The ally carries Greater Woodsman's",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 680294,
+      "caster": "second",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Greater Woodsman's replaced rank 7",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 803666,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Attack power is still +232, not doubled",
+      "actor": "ally",
+      "metric": "attack_power",
+      "relative_to": "ap_before_woodsman",
+      "equals": 232
+    },
+    {
+      "action": "assert",
+      "label": "Footpad's is still untouched",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 523493,
+      "caster": "second",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Greater Footpad's Adaptation from the second Ranger, before the rank 1 checks",
+      "actor": "second",
+      "spell": 523513
+    },
+    {
+      "action": "assert",
+      "label": "The ally carries the Greater buff again",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 523513,
+      "caster": "second",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "unlearn",
+      "actor": "ranger",
+      "spell": 523493,
+      "all_specs": true,
+      "label": "Remove higher ranks so the rank-one cast is active"
+    },
+    {
+      "action": "unlearn",
+      "actor": "ranger",
+      "spell": 523492,
+      "all_specs": true,
+      "label": "Remove higher ranks so the rank-one cast is active"
+    },
+    {
+      "action": "unlearn",
+      "actor": "ranger",
+      "spell": 523491,
+      "all_specs": true,
+      "label": "Remove higher ranks so the rank-one cast is active"
+    },
+    {
+      "action": "unlearn",
+      "actor": "ranger",
+      "spell": 523490,
+      "all_specs": true,
+      "label": "Remove higher ranks so the rank-one cast is active"
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 523489
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "spell_active",
+      "spell": 523489,
+      "equals": 1,
+      "label": "The lower-rank control is an active spell"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Rank 1 Footpad's Adaptation on a target with the Greater buff",
+      "actor": "ranger",
+      "spell": 523489,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "label": "Give the refused cast time to resolve",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 is refused: a weaker buff does not replace a stronger one",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 523489,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Greater buff is still there",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 523513,
+      "caster": "second",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Armor is still +309",
+      "actor": "ally",
+      "metric": "armor",
+      "relative_to": "armor_alone",
+      "equals": 309
+    },
+    {
+      "action": "set_aura",
+      "label": "Remove the Greater buff",
+      "actor": "ally",
+      "spell": 523513,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Greater buff is gone",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 523513,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Rank 1 Footpad's Adaptation on a bare target",
+      "actor": "ranger",
+      "spell": 523489,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 lands when nothing stronger is present",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 523489,
+      "caster": "ranger",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 adds far less than the Greater buff",
+      "actor": "ally",
+      "metric": "armor",
+      "relative_to": "armor_alone",
+      "min": 100,
+      "max": 140
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Greater Footpad's Adaptation over rank 1",
+      "actor": "second",
+      "spell": 523513
+    },
+    {
+      "action": "assert",
+      "label": "The Greater buff lands",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 523513,
+      "caster": "second",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The Greater buff replaced rank 1",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 523489,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Armor is +309 again",
+      "actor": "ally",
+      "metric": "armor",
+      "relative_to": "armor_alone",
+      "equals": 309
+    },
+    {
+      "action": "unlearn",
+      "actor": "ranger",
+      "spell": 803666,
+      "all_specs": true,
+      "label": "Remove higher ranks so the rank-one cast is active"
+    },
+    {
+      "action": "unlearn",
+      "actor": "ranger",
+      "spell": 803324,
+      "all_specs": true,
+      "label": "Remove higher ranks so the rank-one cast is active"
+    },
+    {
+      "action": "unlearn",
+      "actor": "ranger",
+      "spell": 803323,
+      "all_specs": true,
+      "label": "Remove higher ranks so the rank-one cast is active"
+    },
+    {
+      "action": "unlearn",
+      "actor": "ranger",
+      "spell": 803322,
+      "all_specs": true,
+      "label": "Remove higher ranks so the rank-one cast is active"
+    },
+    {
+      "action": "unlearn",
+      "actor": "ranger",
+      "spell": 803321,
+      "all_specs": true,
+      "label": "Remove higher ranks so the rank-one cast is active"
+    },
+    {
+      "action": "unlearn",
+      "actor": "ranger",
+      "spell": 803320,
+      "all_specs": true,
+      "label": "Remove higher ranks so the rank-one cast is active"
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 800266
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "spell_active",
+      "spell": 800266,
+      "equals": 1,
+      "label": "The lower-rank control is an active spell"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Rank 1 Woodsman's Adaptation on a target with Greater Woodsman's",
+      "actor": "ranger",
+      "spell": 800266,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "label": "Give the refused cast time to resolve",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 is refused: a weaker buff does not replace a stronger one",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 800266,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Greater Woodsman's is still there",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 680294,
+      "caster": "second",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Attack power is still +232",
+      "actor": "ally",
+      "metric": "attack_power",
+      "relative_to": "ap_before_woodsman",
+      "equals": 232
+    },
+    {
+      "action": "set_aura",
+      "label": "Remove Greater Woodsman's",
+      "actor": "ally",
+      "spell": 680294,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Greater Woodsman's is gone",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 680294,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Rank 1 Woodsman's Adaptation on a bare target",
+      "actor": "ranger",
+      "spell": 800266,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 lands when nothing stronger is present",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 800266,
+      "caster": "ranger",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 adds 30 attack power",
+      "actor": "ally",
+      "metric": "attack_power",
+      "relative_to": "ap_before_woodsman",
+      "equals": 30
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Greater Woodsman's Adaptation over rank 1",
+      "actor": "second",
+      "spell": 680294
+    },
+    {
+      "action": "assert",
+      "label": "Greater Woodsman's lands",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 680294,
+      "caster": "second",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Greater Woodsman's replaced rank 1",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 800266,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Attack power is +232 again",
+      "actor": "ally",
+      "metric": "attack_power",
+      "relative_to": "ap_before_woodsman",
+      "equals": 232
+    }
+  ]
+}

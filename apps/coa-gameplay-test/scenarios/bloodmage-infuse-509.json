@@ -1,0 +1,391 @@
+{
+  "schema": 1,
+  "name": "Infuse accumulates 10% of group damage, absorbs healing, and unleashes the stored amount as Shadow damage (#509)",
+  "contract": [
+    "Infuse 681403 (SpellFamilyName 26, Shadow, 40 yd, 30 s cooldown, health cost 35% of base mana) is a 10 s",
+    "debuff (DurationIndex 1) whose effect 0 is SPELL_AURA_DUMMY with EffectTriggerSpell 681404 and whose effect 1",
+    "is SPELL_AURA_SCHOOL_ABSORB with MiscValue 127 (all schools); 681404 is a single SPELL_EFFECT_SCHOOL_DAMAGE.",
+    "The client's own cast description reads \\\"Accumulates damage dealt to the target by you, your party or raid",
+    "members, and their minions for $d, then unleashes the stored amount as Shadow damage.\\\" and the debuff's",
+    "unit-frame tooltip reads \\\"Accumulating damage dealt by the caster's group at diminishing rates; unleashes the",
+    "stored amount when this effect expires.\\\". No rate is given by the client data, so the only original number is",
+    "the talent text of the same ability (Conquest of Azeroth Fleshweaver tree, node 7434): \\\"Accumulates 10% of",
+    "all damage dealt to the target and unleashes it after 10 seconds, dealing Shadow damage and absorbing healing",
+    "done to the target equal to the damage done for 10 seconds. Damage dealt is unable to exceed 3 times your",
+    "maximum health.\\\" That is what this scenario measures: damage the target takes from the caster and the",
+    "caster's party or raid members (and their minions) adds 10% of its value to a pool stored on the aura, capped",
+    "at three times the caster's maximum health; the pool is mirrored into the absorb effect's amount so the unit",
+    "frame shows it and healing done to the target is absorbed by it; on expiry the pool is cast through 681404 as",
+    "its base points, which the core resolves to exactly that amount because 681404's own bonus multiplier is zero",
+    "and it has no spell bonus entry. The heal absorb is measured comparatively: auto-attack swings leave a pool",
+    "far smaller than the 32-38 point heal used here, so the heal must land for less than the first one did (the",
+    "cumulative healing total stays under 1.9 times the control heal instead of the doubling seen without an",
+    "absorb), while the pool snapshot proves the stored amount and the absorb capacity agree exactly. NOT asserted",
+    "here: party/raid membership of the damaging unit (the scenario damages with the caster itself), the",
+    "three-times-maximum-health cap (the pool stays far below it), the \\\"diminishing rates\\\" wording of the debuff",
+    "tooltip (the original data gives no rate behind it, so none was invented), and whether a dispelled or",
+    "dead-target debuff should still explode (only AURA_REMOVE_BY_EXPIRE unleashes). Expiry helper 681404 targets",
+    "one enemy selected from a destination area (target type 16, radius index 13 = 10 yards, MaxAffectedTargets =",
+    "1), and the core randomly reduces a larger eligible target list. Keep the Horde healer 20 yards from the",
+    "victim, within Greater Heal (2050) range of 40 yards, so healing the PvP victim does not add a second nearby",
+    "enemy to that selection. Preserve all original damage, pool, absorb and expiry assertions, and assert that no",
+    "expiry damage is delivered to the healer."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "healer",
+      "race": 5,
+      "class": 5,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "victim",
+      "race": 5,
+      "class": 1,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "teleport",
+      "label": "Place the healer outside the expiry area while keeping ordinary heals in range",
+      "actor": "healer",
+      "map": 0,
+      "x": -9597.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: healer is outside the ten-yard expiry area",
+      "actor": "healer",
+      "metric": "distance",
+      "target": "victim",
+      "min": 19.9,
+      "max": 20.1,
+      "within_ms": 1000
+    },
+    {
+      "action": "pvp",
+      "actor": "bloodmage",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "victim",
+      "enabled": true
+    },
+    {
+      "action": "set_health",
+      "label": "Infuse pays 35% of base mana as health; keep the caster well above it",
+      "actor": "bloodmage",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_health",
+      "label": "Injure the victim so heals are effective, not overheal",
+      "actor": "victim",
+      "value": 90000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_health",
+      "actor": "healer",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 681403
+    },
+    {
+      "action": "learn",
+      "label": "A small heal whose size the pool easily covers once damage is stored",
+      "actor": "healer",
+      "spell": 2050
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: heal the victim before Infuse",
+      "actor": "healer",
+      "spell": 2050,
+      "target": "victim"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the heal lands",
+      "actor": "healer",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "victim",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "snapshot",
+      "label": "CONTROL: cumulative healing on the victim",
+      "actor": "healer",
+      "metric": "spell_heal_total",
+      "spell": 2050,
+      "target": "victim",
+      "save_as": "heal_control"
+    },
+    {
+      "action": "cast",
+      "label": "Infuse the victim",
+      "actor": "bloodmage",
+      "spell": 681403,
+      "target": "victim"
+    },
+    {
+      "action": "assert",
+      "label": "Infuse lands as a debuff",
+      "actor": "victim",
+      "metric": "aura",
+      "spell": 681403,
+      "caster": "bloodmage",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The debuff lasts ten seconds",
+      "actor": "victim",
+      "metric": "aura_duration_ms",
+      "spell": 681403,
+      "caster": "bloodmage",
+      "min": 9000,
+      "max": 10000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: nothing is stored yet",
+      "actor": "victim",
+      "metric": "aura_script_value",
+      "spell": 681403,
+      "caster": "bloodmage",
+      "key": 681403,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no heal absorb yet",
+      "actor": "victim",
+      "metric": "aura_amount",
+      "spell": 681403,
+      "caster": "bloodmage",
+      "effect": 1,
+      "equals": 0
+    },
+    {
+      "action": "attack",
+      "label": "Auto-attacks are the controlled damage source inside the window",
+      "actor": "bloodmage",
+      "target": "victim"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "bloodmage"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the swings hit the victim",
+      "actor": "bloodmage",
+      "metric": "melee_damage_count",
+      "target": "victim",
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the debuff survived the damage",
+      "actor": "victim",
+      "metric": "aura",
+      "spell": 681403,
+      "caster": "bloodmage",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Damage dealt to the victim while Infuse was active",
+      "actor": "bloodmage",
+      "metric": "melee_damage_total",
+      "target": "victim",
+      "save_as": "bolt_total"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pool is 10% of the damage the victim took",
+      "actor": "victim",
+      "metric": "aura_script_value",
+      "spell": 681403,
+      "caster": "bloodmage",
+      "key": 681403,
+      "ratio_to": "bolt_total",
+      "min": 0.09,
+      "max": 0.11
+    },
+    {
+      "action": "snapshot",
+      "label": "The stored amount",
+      "actor": "victim",
+      "metric": "aura_script_value",
+      "spell": 681403,
+      "caster": "bloodmage",
+      "key": 681403,
+      "save_as": "pool"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the heal absorb capacity equals the damage done",
+      "actor": "victim",
+      "metric": "aura_amount",
+      "spell": 681403,
+      "caster": "bloodmage",
+      "effect": 1,
+      "ratio_to": "pool",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "assert",
+      "label": "Nothing explodes before expiry",
+      "actor": "bloodmage",
+      "metric": "spell_damage_count",
+      "spell": 681404,
+      "target": "victim",
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "label": "Re-injure so the second heal is effective if it lands at all",
+      "actor": "victim",
+      "value": 90000,
+      "maximum": 100000
+    },
+    {
+      "action": "cast",
+      "label": "Heal the victim while the pool is up",
+      "actor": "healer",
+      "spell": 2050,
+      "target": "victim"
+    },
+    {
+      "action": "assert",
+      "label": "The second heal is cast",
+      "actor": "healer",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "victim",
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: healing done to the target is absorbed by the damage done",
+      "actor": "healer",
+      "metric": "spell_heal_total",
+      "spell": 2050,
+      "target": "victim",
+      "ratio_to": "heal_control",
+      "max": 1.9
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the debuff expires after its ten seconds",
+      "actor": "victim",
+      "metric": "aura",
+      "spell": 681403,
+      "caster": "bloodmage",
+      "equals": 0,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the stored amount is unleashed once when the debuff expires",
+      "actor": "bloodmage",
+      "metric": "spell_damage_count",
+      "spell": 681404,
+      "target": "victim",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the unleash deals the stored amount as Shadow damage",
+      "actor": "bloodmage",
+      "metric": "spell_damage_total",
+      "spell": 681404,
+      "target": "victim",
+      "ratio_to": "pool",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "assert",
+      "label": "The debuff is gone after the unleash",
+      "actor": "victim",
+      "metric": "aura",
+      "spell": 681403,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The caster survived the health cost",
+      "actor": "bloodmage",
+      "metric": "health",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The victim survived",
+      "actor": "victim",
+      "metric": "health",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the expiry helper does not select the distant healer",
+      "actor": "bloodmage",
+      "metric": "spell_damage_count",
+      "spell": 681404,
+      "target": "healer",
+      "equals": 0
+    }
+  ]
+}

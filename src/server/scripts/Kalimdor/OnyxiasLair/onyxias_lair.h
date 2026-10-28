@@ -38,6 +38,14 @@ enum eCreatures
     NPC_ONYXIAN_WHELP           = 11262,
     NPC_ONYXIA_TRIGGER          = 12758,
     NPC_ONYXIAN_LAIR_GUARD      = 36561,
+    // Basalthane (custom boss, see spell_basalthane.cpp) and his 3 pillars - not a
+    // tracked SetBossNumber() boss (pure SmartAI, no C++ BossAI class), so his kill is
+    // picked up via the generic ZoneScript::OnUnitDeath hook instead - see
+    // instance_onyxias_lair.cpp's basalthanePillarsShattered persistent flag.
+    NPC_BASALTHANE               = 10189,
+    NPC_BASALTHANE_PILLAR_1      = 10186, // Volatile Pillar
+    NPC_BASALTHANE_PILLAR_2      = 10187, // Crumbling Pillar
+    NPC_BASALTHANE_PILLAR_3      = 10188, // Searing Pillar
 };
 
 enum eActions
@@ -48,8 +56,19 @@ enum eActions
 enum eGameObjects
 {
     GO_WHELP_SPAWNER            = 176510,
-    GO_WHELP_EGG                = 176511
+    GO_WHELP_EGG                = 176511,
+    // Basalthane's visible pillars: a spike visual + collision pair on each pillar
+    // creature (see spell_basalthane.cpp's SetPillarGameObjects)
+    GO_FIRE_PILLAR_VISUAL_1     = 348503,
+    GO_FIRE_PILLAR_VISUAL_2     = 348504,
+    GO_FIRE_PILLAR_VISUAL_3     = 348505,
+    GO_FIRE_PILLAR_COLLISION_1  = 348506,
+    GO_FIRE_PILLAR_COLLISION_2  = 348507,
+    GO_FIRE_PILLAR_COLLISION_3  = 348508
 };
+
+// Phase no player is ever in - a shattered pillar's collision is parked here
+constexpr uint32 PHASEMASK_FIRE_PILLAR_HIDDEN = 0x40000000;
 
 enum eAchievementData
 {

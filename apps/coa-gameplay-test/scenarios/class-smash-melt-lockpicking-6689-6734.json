@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "name": "Smash Lock and Melt Lock teach Lockpicking (#6689, #6734)",
+  "contract": "Smash Lock570122 and Melt Lock804662 are native OPEN_LOCK effects of LOCKTYPE_PICKLOCK1, which consumes and advances skill633. As with the original Pick Lock1804 and corrected Tinker804154, learning either must initialize the Lockpicking skill rather than bind the spell to another unrelated skill.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "barbarian",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    },
+    {
+      "id": "pyro",
+      "race": 1,
+      "class": 24,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "barbarian",
+      "spell": 570122
+    },
+    {
+      "action": "assert",
+      "actor": "barbarian",
+      "metric": "knows_spell",
+      "spell": 570122,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "barbarian",
+      "metric": "skill_value",
+      "skill": 633,
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "pyro",
+      "spell": 804662
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "knows_spell",
+      "spell": 804662,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "skill_value",
+      "skill": 633,
+      "min": 1
+    },
+    {
+      "action": "set_skill",
+      "actor": "barbarian",
+      "skill": 633,
+      "value": 100,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "pyro",
+      "skill": 633,
+      "value": 100,
+      "maximum": 300
+    },
+    {
+      "action": "relog",
+      "actor": "barbarian"
+    },
+    {
+      "action": "relog",
+      "actor": "pyro"
+    },
+    {
+      "action": "assert",
+      "actor": "barbarian",
+      "metric": "skill_value",
+      "skill": 633,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "skill_value",
+      "skill": 633,
+      "equals": 100
+    }
+  ]
+}

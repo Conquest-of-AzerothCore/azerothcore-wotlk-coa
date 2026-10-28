@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "name": "Razorfen Kraul: Blind Hunter and Earthcaller Halmgar stay in the world on Normal",
+  "contract": [
+    "On Ascension Blind Hunter (4425) and Earthcaller Halmgar (4842) are fixed encounters (#7348, #7349). The stock",
+    "AzerothCore row that despawned them on AI init with a 70 % chance is gone, so both stay after they spawn on",
+    "Normal. With the row both would survive only 9 % of runs."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 47,
+    "x": 2110.0,
+    "y": 1700.0,
+    "z": 80.3,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "hunter",
+      "owner": "hero",
+      "entry": 4425,
+      "distance": 6
+    },
+    {
+      "id": "earthcaller",
+      "owner": "hero",
+      "entry": 4842,
+      "distance": 6
+    }
+  ],
+  "steps": [
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Razorfen Kraul",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 47
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the instance is Normal",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Past the despawn the old AI-init row scheduled",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Blind Hunter is still there",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 4425,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Earthcaller Halmgar is still there",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 4842,
+      "equals": 1
+    }
+  ]
+}

@@ -1,0 +1,483 @@
+{
+  "schema": 1,
+  "name": "Witch Hunter Smoke Grenade accelerates allies and blocks hostile targeting across its edge (#3943)",
+  "contract": [
+    "Smoke Grenade 805756 promises an 8-second, 8-yard cloud, 40% ally movement speed from 805757, 60% enemy slow, and enemies unable to target into or out of the smoke. The class completion hooks cast a friendly persistent aura and gate hostile targeting across the cloud. This regression exercises the complete reported mechanic through ordinary casts and opposing PvP-enabled players outside sanctuary.",
+    "A Horde mage 7 yards from the cloud center and an Alliance target 10.5 yards from it are 3.5 yards apart. Their ordinary Fire Blast works before smoke. With the Horde mage inside and the victim outside, the same cast is rejected; a target 7.5 yards from the center, inside the same cloud remains attackable. The inverse outside-to-inside cast is also rejected. After expiry, the original target is attackable again. Ally speed rises from 1.0 to 1.4 and enemy speed falls to 0.4 only while the cloud is active. Fire Blast cooldown is reset between independent controls; normal cast, resource, targeting and aura rules remain enabled.",
+    "The helper must be a beneficial aura on its caster and nearby allies, and must never apply to the opposing player. Its native persistent-area ally selector and aura polarity are part of the reported friendly speed mechanic."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9617.41,
+    "y": -288,
+    "z": 57.65,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    },
+    {
+      "id": "enemy",
+      "race": 2,
+      "class": 8,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "inside",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "outside",
+      "race": 1,
+      "class": 8,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "hunter",
+      "map": 0,
+      "x": -9617.41,
+      "y": -288,
+      "z": 57.65,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -9615.41,
+      "y": -288,
+      "z": 57.65,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy",
+      "map": 0,
+      "x": -9610.41,
+      "y": -288,
+      "z": 57.65,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "inside",
+      "map": 0,
+      "x": -9609.91,
+      "y": -288,
+      "z": 57.65,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "outside",
+      "map": 0,
+      "x": -9606.91,
+      "y": -288,
+      "z": 57.65,
+      "o": 3.141592653589793
+    },
+    {
+      "action": "wait",
+      "ms": 1000,
+      "label": "Let fixture teleports settle"
+    },
+    {
+      "action": "pvp",
+      "actor": "hunter",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "ally",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "inside",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "outside",
+      "enabled": true
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 805756
+    },
+    {
+      "action": "learn",
+      "actor": "enemy",
+      "spell": 2136
+    },
+    {
+      "action": "learn",
+      "actor": "outside",
+      "spell": 2136
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "run_speed_rate",
+      "label": "CONTROL: the caster has ordinary movement speed",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "run_speed_rate",
+      "label": "CONTROL: the ally has ordinary movement speed",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "run_speed_rate",
+      "label": "CONTROL: the enemy has ordinary movement speed",
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 2136,
+      "target": "outside"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "cast_failure",
+      "label": "CONTROL: the inside-to-outside attack works before smoke",
+      "spell": 2136,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_damage_count",
+      "label": "CONTROL: the ordinary hostile spell deals damage",
+      "spell": 2136,
+      "target": "outside",
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "outside",
+      "spell": 2136,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the outside-to-inside attack works before smoke",
+      "actor": "outside",
+      "metric": "cast_failure",
+      "spell": 2136,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the inverse hostile spell deals damage",
+      "actor": "outside",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "outside",
+      "spell": 2136
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "enemy",
+      "spell": 2136
+    },
+    {
+      "action": "wait",
+      "label": "Clear the control spells' native global cooldowns",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 805756
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "cast_failure",
+      "label": "The ordinary self-centered smoke cast is accepted",
+      "spell": 805756,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "dynamic_object",
+      "label": "The hostile smoke cloud exists",
+      "spell": 805756,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 805757,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 1500,
+      "label": "The caster receives the friendly smoke aura"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "aura_positive",
+      "spell": 805757,
+      "caster": "hunter",
+      "equals": 1,
+      "label": "Friendly smoke appears as a beneficial aura"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "run_speed_rate",
+      "min": 1.399,
+      "max": 1.401,
+      "label": "Smoke grants its caster 40% movement speed"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "dynamic_object",
+      "spell": 805757,
+      "equals": 1,
+      "label": "Exactly one friendly cloud accompanies the hostile cloud"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "dynamic_object_duration_ms",
+      "spell": 805756,
+      "save_as": "hostile_duration"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "dynamic_object_duration_ms",
+      "spell": 805757,
+      "relative_to": "hostile_duration",
+      "min": -100,
+      "max": 100,
+      "label": "Friendly and hostile clouds have matching native lifetimes"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "label": "Allies inside receive the friendly speed aura",
+      "spell": 805757,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_positive",
+      "spell": 805757,
+      "caster": "hunter",
+      "equals": 1,
+      "label": "Friendly smoke appears as a beneficial aura"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "run_speed_rate",
+      "label": "Smoke grants allies 40% movement speed",
+      "min": 1.399,
+      "max": 1.401
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "label": "Enemies inside receive smoke",
+      "spell": 805756,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "run_speed_rate",
+      "label": "Smoke slows enemies by 60%",
+      "min": 0.399,
+      "max": 0.401
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 805757,
+      "caster": "hunter",
+      "equals": 0,
+      "label": "CONTROL: enemies receive no friendly speed aura"
+    },
+    {
+      "action": "assert",
+      "actor": "outside",
+      "metric": "aura",
+      "label": "CONTROL: allies beyond eight yards receive no speed aura",
+      "spell": 805757,
+      "caster": "hunter",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 2136,
+      "target": "outside"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "cast_failure",
+      "label": "Enemies inside cannot target outside the smoke",
+      "spell": 2136,
+      "equals": 12
+    },
+    {
+      "action": "cast",
+      "actor": "outside",
+      "spell": 2136,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "outside",
+      "metric": "cast_failure",
+      "label": "Enemies outside cannot target into the smoke",
+      "spell": 2136,
+      "equals": 12
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 2136,
+      "target": "inside"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "cast_failure",
+      "label": "CONTROL: hostile targeting within the same smoke works",
+      "spell": 2136,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_damage_count",
+      "label": "CONTROL: hostile damage within the smoke is delivered",
+      "spell": 2136,
+      "target": "inside",
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "dynamic_object",
+      "label": "The smoke expires after eight seconds",
+      "spell": 805756,
+      "equals": 0,
+      "within_ms": 9000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "label": "The friendly aura ends with the smoke",
+      "spell": 805757,
+      "caster": "hunter",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "run_speed_rate",
+      "label": "Ally movement speed returns to normal",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "run_speed_rate",
+      "label": "Enemy movement speed returns to normal",
+      "equals": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "enemy",
+      "spell": 2136
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 2136,
+      "target": "outside"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "cast_failure",
+      "label": "Hostile targeting across the former boundary works after expiry",
+      "spell": 2136,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_damage_count",
+      "label": "Hostile damage resumes after expiry",
+      "spell": 2136,
+      "target": "outside",
+      "min": 2,
+      "within_ms": 1500
+    }
+  ]
+}

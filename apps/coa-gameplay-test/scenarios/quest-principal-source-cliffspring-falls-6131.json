@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "The Principal Source: the Cliffspring Falls sampler fills in the pool under the falls, not on the cliff above (#6131)",
+  "contract": [
+    "Report #6131: the Empty Cliffspring Falls Sampler (15844) did nothing at the foot of the waterfall or above at the cave entrance, with the error that the player is in the wrong place. No coordinates were given.",
+    "The sampler casts Draw Water Sample (19564): 3 s cast, RequiresSpellFocus 705, creates the Filled Cliffspring Falls Sampler (15845). Its tooltip asks for water 'from the waterfall at the mouth of the Cliffspring Falls cave'.",
+    "The only focus 705 is Cliffspring River Waterfall (175371, Data1 radius 15), spawned once at map 1, 7214.03, -388.655, -1.68851 in the pool where the falls land (stock spawn; pfQuest places 175371 at Darkshore 50.8, 25.6).",
+    "Expected: standing in that pool the sampler fills; on the cliff above the falls (about 41 yards from the focus) it stays empty."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "druid", "race": 4, "class": 11, "level": 14 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "prepare_quest", "label": "Fixture: druid is on The Principal Source, sample not drawn", "actor": "druid", "quest": 6122, "complete": false },
+    { "action": "destroy_item", "label": "Fixture: drop the delivery sampler the quest fixture grants", "actor": "druid", "item": 15845 },
+    { "action": "assert", "label": "Accepting the quest gives the empty sampler", "actor": "druid", "metric": "item_count", "item": 15844, "equals": 1 },
+    { "action": "assert", "label": "The druid starts without a filled sampler", "actor": "druid", "metric": "item_count", "item": 15845, "equals": 0 },
+    { "action": "set_phase", "label": "druid joins the world phase the waterfall focus is spawned in", "actor": "druid", "value": 1 },
+
+    { "action": "teleport", "label": "druid stands on the cliff above the falls, at the river's edge", "actor": "druid", "map": 1, "x": 7196.0, "y": -405.0, "z": 32.0 },
+    { "action": "wait", "label": "Let the grid load", "ms": 4000 },
+    { "action": "use_item", "label": "druid uses the empty sampler above the falls", "actor": "druid", "item": 15844, "spell": 19564 },
+    { "action": "wait", "label": "Wait past the 3 s cast", "ms": 5000 },
+    { "action": "assert", "label": "Above the falls the sampler stays empty", "actor": "druid", "metric": "item_count", "item": 15845, "equals": 0 },
+    { "action": "assert", "label": "The empty sampler is kept", "actor": "druid", "metric": "item_count", "item": 15844, "equals": 1 },
+
+    { "action": "teleport", "label": "druid stands in the pool under the falls, beside the waterfall focus", "actor": "druid", "map": 1, "x": 7220.0, "y": -386.0, "z": -3.0 },
+    { "action": "wait", "label": "Let the grid load", "ms": 4000 },
+    { "action": "use_item", "label": "druid uses the empty sampler in the pool", "actor": "druid", "item": 15844, "spell": 19564 },
+    { "action": "assert", "label": "The pool under the falls fills the sampler", "actor": "druid", "metric": "item_count", "item": 15845, "equals": 1, "within_ms": 7000 },
+    { "action": "assert", "label": "The filled sampler counts for the quest", "actor": "druid", "metric": "quest_status", "quest": 6122, "equals": 1, "within_ms": 2000 }
+  ]
+}

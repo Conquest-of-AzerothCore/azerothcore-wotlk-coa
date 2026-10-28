@@ -9,6 +9,12 @@ class Unit;
 
 namespace AscensionBarbarian
 {
+enum TankardMarkers : uint32
+{
+    SPELL_FULL_TANKARD = 805814,
+    SPELL_EMPTY_TANKARD = 806055
+};
+
 inline bool Family(SpellInfo const* info, uint32 word, uint32 mask)
 {
     return info && info->SpellFamilyName == 18 && (info->SpellFamilyFlags[word] & mask);

@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Highest Order raises Shadowsong's Mandate's Warden's Blade chance by 60 (#949)",
-  "contract": "Highest Order 680771 (Spell.dbc, SpellFamilyName 32) carries E0 SPELL_AURA_ADD_PCT_MODIFIER (108, -25) on the cooldown and E1 SPELL_AURA_ADD_FLAT_MODIFIER (107) on SPELLMOD_CHANCE_OF_SUCCESS (18) with EffectBasePoints 59 (+60), both with EffectSpellClassMask word2 0x20, the SpellFamilyFlags word2 of Shadowsong's Mandate 805439 alone (flags [0,0,0x20]). Its description promises to raise the chance to trigger Warden's Blade by that amount; Mandate's own ProcChance is 40 (starcaller warden-1 report, DBC read), so 40+60 must reach 100%. Mandate's proc is the aura_ascension_starcaller_event script (AscensionStarcallerEvents.cpp): Check() requires an outgoing critical damage hit and then rolled Chance(player, 805439), which read the raw ProcChance and never applied SPELLMOD_CHANCE_OF_SUCCESS, so the talent was inert; Proc() then casts the highest known Warden's Blade 805508 on the target. Chance() now applies the modifier, and rev_20260921_10 sets spell_proc.Chance to 100 so the script roll is the only roll (Aura::CalcProcChance would otherwise roll the DBC chance a second time, giving 0.4 x 0.4 = 16% without the talent). Both fixtures are identical (race 1, class 26, level 80, 10000 melee hit and crit rating, so a Celestial Strike 800496 - SPELL_DAMAGE_CLASS_MELEE, instant, no cooldown - always hits and always crits, clamped at 100%) and each is given Mandate 805439 by set_aura, re-applied every five casts because its duration is 10 s. The new spell_cast_count metric counts casts of 805508 by the actor including the triggered ones; nobody casts Blade by hand, so every count is a Mandate proc. Twenty crits per fixture: with the talent the chance is 100% so the count reaches at least 16 (allowing four casts the server drops); before the fix it is 40%, and P(X>=16 of 20 at 0.4) = 0.03%. The control, without the talent, stays at 40% and must not exceed 14 (P(X>=15 of 20 at 0.4) = 0.16% false failure).",
+  "contract": "Highest Order 680771 (Spell.dbc, SpellFamilyName 32) carries E0 SPELL_AURA_ADD_PCT_MODIFIER (108, -25) on the cooldown and E1 SPELL_AURA_ADD_FLAT_MODIFIER (107) on SPELLMOD_CHANCE_OF_SUCCESS (18) with EffectBasePoints 59 (+60), both with EffectSpellClassMask word2 0x20, the SpellFamilyFlags word2 of Shadowsong's Mandate 805439 alone (flags [0,0,0x20]). Its description promises to raise the chance to trigger Warden's Blade by that amount; Mandate's own ProcChance is 40 (starcaller warden-1 report, DBC read), so 40+60 must reach 100%. Mandate's proc is the aura_ascension_starcaller_event script (AscensionStarcallerEvents.cpp): Check() requires an outgoing critical damage hit and then rolled Chance(player, 805439), which read the raw ProcChance and never applied SPELLMOD_CHANCE_OF_SUCCESS, so the talent was inert; Proc() then casts the highest known Warden's Blade 805508 on the target. Chance() now applies the modifier, and rev_20260921_10 sets spell_proc.Chance to 100 so the script roll is the only roll (Aura::CalcProcChance would otherwise roll the DBC chance a second time, giving 0.4 x 0.4 = 16% without the talent). Both fixtures are identical (race 1, class 26, level 80, 10000 melee hit and crit rating, so a Celestial Strike 800496 - SPELL_DAMAGE_CLASS_MELEE, instant, no cooldown - always hits and always crits, clamped at 100%) and each is given Mandate 805439 by set_aura, re-applied every five casts because its duration is 10 s. Proc probability is measured independently of cast cascades: aura_proc_rate passes 40,000 outgoing critical Celestial Strike damage events through the native aura eligibility path, including both the core roll and the script check, without executing the proc. The untalented control must remain within 38-42% and the talented actor must accept 100% of the events. This distinguishes the promised 40+60% chance from an ignored modifier or a second core 40% roll. Twenty ordinary Celestial Strike casts per actor still exercise the native proc execution and must produce at least 16 Warden's Blade casts with Highest Order. Cast counts include triggered casts and any subsequent procs, so they are recorded for the control but are not interpreted as twenty independent probability trials.",
   "timeout_ms": 180000,
   "players": [
     {
@@ -108,6 +108,33 @@
       "actor": "talent",
       "spell": 805439,
       "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Mandate accepts 40% of critical hits without Highest Order",
+      "actor": "control",
+      "metric": "aura_proc_rate",
+      "spell": 805439,
+      "target": "dummy_control",
+      "trigger_spell": 800496,
+      "type_mask": 16,
+      "hit_mask": 2,
+      "trials": 40000,
+      "min": 38,
+      "max": 42
+    },
+    {
+      "action": "assert",
+      "label": "Highest Order adds 60 percentage points to reach 100%",
+      "actor": "talent",
+      "metric": "aura_proc_rate",
+      "spell": 805439,
+      "target": "dummy_talent",
+      "trigger_spell": 800496,
+      "type_mask": 16,
+      "hit_mask": 2,
+      "trials": 40000,
+      "equals": 100
     },
     {
       "action": "cast",
@@ -515,12 +542,12 @@
       "min": 16
     },
     {
-      "action": "assert",
-      "label": "Without the talent Mandate keeps its own 40% chance",
+      "action": "snapshot",
+      "label": "Record untalented Blade casts without treating cascades as independent trials",
       "actor": "control",
       "metric": "spell_cast_count",
       "spell": 805508,
-      "max": 14
+      "save_as": "control_blade_casts"
     }
   ]
 }

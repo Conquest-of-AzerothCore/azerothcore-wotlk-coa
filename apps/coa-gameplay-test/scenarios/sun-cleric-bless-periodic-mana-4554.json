@@ -1,0 +1,222 @@
+{
+  "schema": 1,
+  "name": "Bless affects its ally and caster and restores mana on its first periodic tick (#4554)",
+  "contract": [
+    "Bless 804247 targets an ally and promises a 5% maximum-health heal and mana restoration every ten seconds.",
+    "Its effective periodic aura applies to the ally and mirrors to the caster; helper 805360 E1 defines 5%",
+    "maximum mana. The server records the energize as 504877. Check both auras, actual heal events for both",
+    "targets, and the mana event rather than passive mana regeneration. An enemy is not a valid Bless target.",
+    "Changing allies must keep the caster copy and remove only the earlier ally copy."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 27,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "other",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "c",
+      "spell": 804247
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804247,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "cast_failure",
+      "label": "Bless rejects an enemy",
+      "spell": 804247,
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804247,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "cast_failure",
+      "spell": 804247,
+      "equals": 0,
+      "label": "The ally cast is accepted normally"
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "aura",
+      "spell": 804247,
+      "caster": "c",
+      "equals": 1,
+      "label": "The paired Bless applies to the caster",
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "label": "The ally receives Bless",
+      "spell": 804247,
+      "caster": "c",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "aura",
+      "label": "The caster receives Bless too",
+      "spell": 804247,
+      "caster": "c",
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "power": 0,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "c",
+      "metric": "max_power",
+      "power": 0,
+      "save_as": "max_mana"
+    },
+    {
+      "action": "wait",
+      "ms": 10500
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_heal_count",
+      "label": "Bless heals the caster",
+      "spell": 707522,
+      "target": "c",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_heal_count",
+      "label": "Bless heals its ally",
+      "spell": 707522,
+      "target": "ally",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_energize_count",
+      "label": "Bless restores mana on its first tick",
+      "spell": 504877,
+      "target": "c",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_energize_total",
+      "label": "The tick restores five percent of maximum mana",
+      "spell": 504877,
+      "target": "c",
+      "ratio_to": "max_mana",
+      "min": 0.049,
+      "max": 0.051
+    },
+    {
+      "action": "wait",
+      "ms": 5000,
+      "label": "Respect the native fifteen-second Bless cooldown"
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "power": 0,
+      "value": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804247,
+      "target": "other"
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "cast_failure",
+      "spell": 804247,
+      "equals": 0,
+      "label": "The second ally cast is accepted normally"
+    },
+    {
+      "action": "assert",
+      "actor": "other",
+      "metric": "aura",
+      "spell": 804247,
+      "caster": "c",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "A new ally receives Bless"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 804247,
+      "caster": "c",
+      "equals": 0,
+      "label": "Only the current ally keeps Bless"
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "aura",
+      "spell": 804247,
+      "caster": "c",
+      "equals": 1,
+      "label": "Changing allies preserves the caster Bless"
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "c",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 10
+    }
+  ]
+}

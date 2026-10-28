@@ -1,0 +1,244 @@
+{
+  "schema": 1,
+  "name": "Killing the final boss of a Dungeon Finder raid finishes the raid without Prestige dungeon credit (#8402)",
+  "contract": "A real kill of a raid's final boss credits its instance encounter and finishes the Dungeon Finder raid for every member, so Ragnaros's death in a Dungeon Finder Molten Core moves the raid to the finished state. Ragnaros stays immune to players until Majordomo Executus finishes his intro, so the summon passes ACTION_FINISH_RAGNAROS_INTRO (-2) and waits for the script to make him attackable. The Prestige: Dungeons daily counts only completed non-raid dungeons, so the raid completion leaves its dungeon objective untouched.",
+  "timeout_ms": 150000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p1",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "p2",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "p3",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "p4",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "p5",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "p6",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "label": "p2 joins the raid group",
+      "actor": "p1",
+      "target": "p2"
+    },
+    {
+      "action": "group",
+      "label": "p3 joins the raid group",
+      "actor": "p1",
+      "target": "p3"
+    },
+    {
+      "action": "group",
+      "label": "p4 joins the raid group",
+      "actor": "p1",
+      "target": "p4"
+    },
+    {
+      "action": "group",
+      "label": "p5 joins the raid group",
+      "actor": "p1",
+      "target": "p5"
+    },
+    {
+      "action": "group",
+      "label": "p6 joins the raid group",
+      "actor": "p1",
+      "target": "p6"
+    },
+    {
+      "action": "prepare_quest",
+      "label": "p1 holds Prestige: Dungeons in progress",
+      "actor": "p1",
+      "quest": 80955,
+      "complete": false
+    },
+    {
+      "action": "assert",
+      "label": "p1 starts with no dungeon completions on Prestige: Dungeons",
+      "actor": "p1",
+      "metric": "quest_objective_count",
+      "quest": 80955,
+      "index": 1,
+      "equals": 0
+    },
+    {
+      "action": "lfg_dungeon",
+      "label": "The raid is assigned Molten Core",
+      "actor": "p1",
+      "dungeon": 421
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p1"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p2"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p3"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p4"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p5"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p6"
+    },
+    {
+      "action": "assert",
+      "label": "p1 enters Molten Core",
+      "actor": "p1",
+      "metric": "map_id",
+      "equals": 409,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "p2 enters Molten Core",
+      "actor": "p2",
+      "metric": "map_id",
+      "equals": 409,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "p3 enters Molten Core",
+      "actor": "p3",
+      "metric": "map_id",
+      "equals": 409,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "p4 enters Molten Core",
+      "actor": "p4",
+      "metric": "map_id",
+      "equals": 409,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "p5 enters Molten Core",
+      "actor": "p5",
+      "metric": "map_id",
+      "equals": 409,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "p6 enters Molten Core",
+      "actor": "p6",
+      "metric": "map_id",
+      "equals": 409,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Molten Core runs at normal difficulty",
+      "actor": "p1",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "label": "Ragnaros rises inside the Dungeon Finder raid at the end of Majordomo's intro",
+      "actor": "p1",
+      "entry": 11502,
+      "as": "ragnaros",
+      "distance": 5,
+      "ai_action": -2
+    },
+    {
+      "action": "wait",
+      "label": "Let Ragnaros's intro make him attackable",
+      "ms": 9000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "p1 kills Ragnaros",
+      "actor": "p1",
+      "entry": 11502,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Ragnaros is dead",
+      "actor": "ragnaros",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "p1 finishes the Dungeon Finder raid",
+      "actor": "p1",
+      "metric": "lfg_state",
+      "equals": 6,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p6 finishes the Dungeon Finder raid",
+      "actor": "p6",
+      "metric": "lfg_state",
+      "equals": 6,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "the raid kill does not count as a Prestige: Dungeons completion",
+      "actor": "p1",
+      "metric": "quest_objective_count",
+      "quest": 80955,
+      "index": 1,
+      "equals": 0
+    }
+  ]
+}

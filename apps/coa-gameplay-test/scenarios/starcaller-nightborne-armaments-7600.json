@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "Nightborne Armaments' buff stays off above 35% health and steady below it (#7600)",
+  "contract": "#7600: Nightborne Armaments 680789 reads 'While below 35% health, your damage taken is reduced by $680790s1%'. AscensionStarcaller Refresh (every 250 ms) adds the 680790 buff while the player is below 35% health and removes it otherwise, like the other module-driven buffs (100250, 801148, 706436). Their drivers' periodic triggers are turned into dummies and their buffs made permanent; 680789 kept its Spell.dbc PERIODIC_TRIGGER_SPELL that casts 680790 every 250 ms regardless of health, and 680790 kept its 1 sec duration, so the buff flickered at full health and dropped every second below 35%. Expected: below 35% the buff is present with an unlimited duration, and at full health it is absent. The full-health flicker itself is not observable here: 680790 is DO_NOT_LOG, so its aura-triggered cast sends no SPELL_GO, and the trigger and the Refresh removal land in the same update.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "star",
+      "race": 1,
+      "class": 26,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login state settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "star",
+      "label": "Learn Nightborne Armaments",
+      "spell": 680789
+    },
+    {
+      "action": "assert",
+      "actor": "star",
+      "label": "SETUP: the passive is active",
+      "metric": "aura",
+      "spell": 680789,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Stay at full health for 3 sec",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "star",
+      "label": "CONTROL: the buff is absent at full health",
+      "metric": "aura",
+      "spell": 680790,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "star",
+      "label": "Drop below 35% health",
+      "value": 100
+    },
+    {
+      "action": "assert",
+      "actor": "star",
+      "label": "Below 35% health the buff is present",
+      "metric": "aura",
+      "spell": 680790,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "star",
+      "label": "DISCRIMINATING: the buff does not expire while below 35% health",
+      "metric": "aura_duration_ms",
+      "spell": 680790,
+      "equals": -1
+    }
+  ]
+}

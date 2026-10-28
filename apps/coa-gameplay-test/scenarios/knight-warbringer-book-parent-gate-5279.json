@@ -1,0 +1,340 @@
+{
+  "schema": 1,
+  "name": "Knight of Xoroth: Books refuse unowned Warbringer ranks (#5279)",
+  "contract": [
+    "Independent original Warbringer 570727 states that it transforms Flames of Xoroth. Original advancement",
+    "12166 grants this zero-cost parent only with War identity 4016 (ChrSpecs 18). The existing native",
+    "TalentReplacements lifecycle requires the matching spec and known parent for all Warbringer ranks.",
+    "Hellfire (16) and Defiance (17) must refuse direct trainer purchase of rank 2 (802582), retain money,",
+    "War at level 18 trains Flames of Xoroth normally; its legitimately granted replacement stays a known row.",
+    "CoA.AutoProgression is off on this verification realm; the control purchases the original spell and rank.",
+    "Expected acquisition comes from the original talent relationship, not an invented spec-only book policy."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hellfire",
+      "race": 1,
+      "class": 17,
+      "level": 18
+    },
+    {
+      "id": "defiance",
+      "race": 1,
+      "class": 17,
+      "level": 18
+    },
+    {
+      "id": "war",
+      "race": 1,
+      "class": 17,
+      "level": 18
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "money",
+      "actor": "hellfire",
+      "copper": 1000000
+    },
+    {
+      "action": "specialization",
+      "actor": "hellfire",
+      "id": 16
+    },
+    {
+      "action": "learn",
+      "actor": "hellfire",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "hellfire",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "hellfire",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "hellfire"
+    },
+    {
+      "action": "assert",
+      "label": "hellfire: does not own the War replacement talent",
+      "actor": "hellfire",
+      "metric": "knows_spell",
+      "spell": 570727,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hellfire",
+      "metric": "knows_spell",
+      "spell": 802582,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "hellfire",
+      "metric": "carried_money",
+      "save_as": "hellfire_money"
+    },
+    {
+      "action": "trainer_buy",
+      "label": "hellfire: request Warbringer rank 2 directly",
+      "actor": "hellfire",
+      "spell": 802582
+    },
+    {
+      "action": "assert",
+      "label": "hellfire: server refuses the unowned replacement",
+      "actor": "hellfire",
+      "metric": "spellbook_buy_failed",
+      "spell": 802582,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hellfire",
+      "metric": "spellbook_buy_succeeded",
+      "spell": 802582,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hellfire",
+      "metric": "carried_money",
+      "relative_to": "hellfire_money",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hellfire",
+      "metric": "knows_spell",
+      "spell": 802582,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hellfire",
+      "metric": "spellbook_offers_spell",
+      "spell": 802582,
+      "equals": 0
+    },
+    {
+      "action": "money",
+      "actor": "defiance",
+      "copper": 1000000
+    },
+    {
+      "action": "specialization",
+      "actor": "defiance",
+      "id": 17
+    },
+    {
+      "action": "learn",
+      "actor": "defiance",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "defiance",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "defiance",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "defiance"
+    },
+    {
+      "action": "assert",
+      "label": "defiance: does not own the War replacement talent",
+      "actor": "defiance",
+      "metric": "knows_spell",
+      "spell": 570727,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "defiance",
+      "metric": "knows_spell",
+      "spell": 802582,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "defiance",
+      "metric": "carried_money",
+      "save_as": "defiance_money"
+    },
+    {
+      "action": "trainer_buy",
+      "label": "defiance: request Warbringer rank 2 directly",
+      "actor": "defiance",
+      "spell": 802582
+    },
+    {
+      "action": "assert",
+      "label": "defiance: server refuses the unowned replacement",
+      "actor": "defiance",
+      "metric": "spellbook_buy_failed",
+      "spell": 802582,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "defiance",
+      "metric": "spellbook_buy_succeeded",
+      "spell": 802582,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "defiance",
+      "metric": "carried_money",
+      "relative_to": "defiance_money",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "defiance",
+      "metric": "knows_spell",
+      "spell": 802582,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "defiance",
+      "metric": "spellbook_offers_spell",
+      "spell": 802582,
+      "equals": 0
+    },
+    {
+      "action": "money",
+      "actor": "war",
+      "copper": 1000000
+    },
+    {
+      "action": "specialization",
+      "actor": "war",
+      "id": 18
+    },
+    {
+      "action": "learn",
+      "actor": "war",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "war",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "war"
+    },
+    {
+      "action": "trainer_buy",
+      "label": "Train Flames of Xoroth through the normal book",
+      "actor": "war",
+      "spell": 801059
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "spellbook_buy_succeeded",
+      "spell": 801059,
+      "equals": 1
+    },
+    {
+      "action": "trainer_buy",
+      "label": "Train the eligible Flames upgrade through the normal book",
+      "actor": "war",
+      "spell": 802411
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "spellbook_buy_succeeded",
+      "spell": 802411,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "War has trained the eligible original Flames of Xoroth rank",
+      "actor": "war",
+      "metric": "knows_spell",
+      "spell": 802411,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "War acquires its authored zero-cost Warbringer parent",
+      "actor": "war",
+      "metric": "knows_spell",
+      "spell": 570727,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The native replacement lifecycle grants the eligible rank",
+      "actor": "war",
+      "metric": "knows_spell",
+      "spell": 802582,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "war"
+    },
+    {
+      "action": "assert",
+      "label": "The legitimate replacement remains a known trainer row",
+      "actor": "war",
+      "metric": "trainer_window_state",
+      "spell": 802582,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "trainer_window_state",
+      "spell": 802583,
+      "equals": 1
+    }
+  ]
+}

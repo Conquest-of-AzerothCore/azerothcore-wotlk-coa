@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "name": "Recuperate heals exactly three percent every three seconds per consumed combo point",
+  "contract": [
+    "Captured Recuperate965425 is OBS_MOD_HEALTH20, amount3 percent, interval3000ms. Its tooltip",
+    "defines3seconds per combo point. With normal Sinister Strike casts, a wounded Hero at1000 maximum",
+    "health must receive60 health for2 combo points and150 for5; ordinary regeneration is suppressed."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 10,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 10,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "console", "command": "coa gamemode WildCard on Harnessa"},
+    {"action": "learn", "actor": "hero", "spell": 201},
+    {"action": "learn", "actor": "hero", "spell": 1752},
+    {"action": "learn", "actor": "hero", "spell": 965425},
+    {"action": "add_item", "actor": "hero", "item": 25},
+    {"action": "equip", "actor": "hero", "item": 25, "slot": 15},
+    {"action": "set_power", "actor": "hero", "power": 3, "value": 100},
+    {"action": "cast", "actor": "hero", "spell": 1752, "target": "enemy"},
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "hero", "power": 3, "value": 100},
+    {"action": "cast", "actor": "hero", "spell": 1752, "target": "enemy"},
+    {"action": "wait", "ms": 1600},
+    {"action": "assert", "actor": "hero", "metric": "combo_points", "equals": 2},
+    {"action": "set_health", "actor": "hero", "maximum": 1000, "value": 500},
+    {"action": "set_power", "actor": "hero", "power": 3, "value": 100},
+    {"action": "cast", "actor": "hero", "spell": 965425, "target": "enemy"},
+    {"action": "assert", "actor": "hero", "metric": "cast_failure", "spell": 965425, "equals": 0},
+    {"action": "assert", "actor": "hero", "metric": "aura", "spell": 965425, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "actor": "hero", "metric": "aura_duration_ms", "spell": 965425, "min": 5900, "max": 6000},
+    {"action": "wait", "ms": 6600},
+    {"action": "assert", "actor": "hero", "metric": "health", "equals": 560},
+    {"action": "assert", "actor": "hero", "metric": "aura", "spell": 965425, "equals": 0},
+    {"action": "set_power", "actor": "hero", "power": 3, "value": 100},
+    {"action": "cast", "actor": "hero", "spell": 1752, "target": "enemy"},
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "hero", "power": 3, "value": 100},
+    {"action": "cast", "actor": "hero", "spell": 1752, "target": "enemy"},
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "hero", "power": 3, "value": 100},
+    {"action": "cast", "actor": "hero", "spell": 1752, "target": "enemy"},
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "hero", "power": 3, "value": 100},
+    {"action": "cast", "actor": "hero", "spell": 1752, "target": "enemy"},
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "hero", "power": 3, "value": 100},
+    {"action": "cast", "actor": "hero", "spell": 1752, "target": "enemy"},
+    {"action": "wait", "ms": 1600},
+    {"action": "assert", "actor": "hero", "metric": "combo_points", "equals": 5},
+    {"action": "set_health", "actor": "hero", "maximum": 1000, "value": 500},
+    {"action": "set_power", "actor": "hero", "power": 3, "value": 100},
+    {"action": "cast", "actor": "hero", "spell": 965425, "target": "enemy"},
+    {"action": "assert", "actor": "hero", "metric": "cast_failure", "spell": 965425, "equals": 0},
+    {"action": "assert", "actor": "hero", "metric": "aura", "spell": 965425, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "actor": "hero", "metric": "aura_duration_ms", "spell": 965425, "min": 14900, "max": 15000},
+    {"action": "wait", "ms": 15600},
+    {"action": "assert", "actor": "hero", "metric": "health", "equals": 650},
+    {"action": "assert", "actor": "hero", "metric": "aura", "spell": 965425, "equals": 0}
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Ranger Campsite places its bedrolls, and resting on one grants Well Rested",
+  "contract": "Ranger Campsite 807955 places three objects with SPELL_EFFECT_TRANS_DOOR: Bright Campfire 31511 and the Ranger's Campsite bedrolls 1005767 and 1005768. Captured client gameobject caches give both bedrolls type 22 (GAMEOBJECT_TYPE_SPELLCASTER) with Data0 583404 'Resting'; without a gameobject_template row Spell::EffectTransmitted skips them and only the campfire appears. Using a bedroll casts 583404 on the user: a 60 s aura (DurationIndex 3) whose periodic effect (SPELL_AURA_PERIODIC_TRIGGER_SPELL, amplitude 59999 ms) triggers 997616 'Well Rested'. A Ranger who rests out the full minute on the bedroll carries Well Rested.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "learn", "actor": "ranger", "spell": 807955 },
+    { "action": "cast", "label": "Make camp", "actor": "ranger", "spell": 807955, "target": "ranger" },
+    {
+      "action": "assert", "label": "The campfire is placed", "actor": "ranger",
+      "metric": "owned_gameobject_count", "entry": 31511, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "The first bedroll is placed", "actor": "ranger",
+      "metric": "owned_gameobject_count", "entry": 1005767, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "The second bedroll is placed", "actor": "ranger",
+      "metric": "owned_gameobject_count", "entry": 1005768, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "Not resting before using a bedroll", "actor": "ranger",
+      "metric": "aura", "spell": 583404, "equals": 0
+    },
+    { "action": "use_nearby_gameobject", "label": "Lie down on a bedroll", "actor": "ranger", "entry": 1005767 },
+    {
+      "action": "assert", "label": "The bedroll applies Resting", "actor": "ranger",
+      "metric": "aura", "spell": 583404, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "Not yet Well Rested while resting", "actor": "ranger",
+      "metric": "aura", "spell": 997616, "equals": 0
+    },
+    {
+      "action": "assert", "label": "A full minute of rest grants Well Rested", "actor": "ranger",
+      "metric": "aura", "spell": 997616, "equals": 1, "within_ms": 70000
+    }
+  ]
+}

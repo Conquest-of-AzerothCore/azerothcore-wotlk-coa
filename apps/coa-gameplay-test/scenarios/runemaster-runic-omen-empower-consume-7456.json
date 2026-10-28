@@ -1,0 +1,142 @@
+{
+  "schema": 1,
+  "name": "Runic Omen empower is consumed by the boosted Runeblade (#7456)",
+  "contract": "#7456: every Runeblade stays +30% boosted once Runic Omen first triggers. Chain: talent 705580 procs counter 520285 per Runeblade to 3 stacks; the counter's own Effect1 (DUMMY trigger 705596) runs Empower(), which removes the counter and casts empower 705596 (+30%, aura 108). But 705596's DurationIndex 1 is 300000010 ms (~83 h) with no charges and no consume path (its aura-42 trigger 520756 is an empty unreferenced record), so the boost never ends. Fix: Empower() also removes 705596 on any later hit of the cycle, making it single-use; removal runs post-damage in all orders (Runeblade effects precede the proc-phase restack, and the restack's own Effect1 re-runs Empower idempotently). Rank 707144 (req 12, reporter's level band) binds through the same Effect1 shape as the base rank. Fails pre-fix at the final assert (empower still up after the 4th hit).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "rune",
+      "race": 1,
+      "class": 32,
+      "level": 14,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "rune",
+      "entry": 36,
+      "level": 14,
+      "health": 1000000,
+      "distance": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "rune",
+      "label": "Learn Runic Omen",
+      "spell": 705580
+    },
+    {
+      "action": "learn",
+      "actor": "rune",
+      "label": "Learn Runeblade",
+      "spell": 707144
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the mana fixture below stays inside the character's own pool",
+      "actor": "rune",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1500
+    },
+    {
+      "action": "set_power",
+      "label": "Keep mana out of the experiment",
+      "actor": "rune",
+      "power": 0,
+      "value": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "rune",
+      "label": "First Runeblade builds omen stack 1",
+      "spell": 707144,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rune",
+      "equals": 0,
+      "label": "SETUP: first Runeblade accepted",
+      "metric": "cast_failure",
+      "spell": 707144
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown clear",
+      "ms": 1800
+    },
+    {
+      "action": "cast",
+      "actor": "rune",
+      "label": "Second Runeblade builds omen stack 2",
+      "spell": 707144,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown clear",
+      "ms": 1800
+    },
+    {
+      "action": "cast",
+      "actor": "rune",
+      "label": "Third Runeblade completes the omen",
+      "spell": 707144,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit and the omen handler resolve",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "rune",
+      "equals": 0,
+      "label": "Omen counter consumed by the third hit",
+      "metric": "aura",
+      "spell": 520285,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "rune",
+      "equals": 1,
+      "label": "SETUP: empower granted by the third hit",
+      "metric": "aura",
+      "spell": 705596,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "rune",
+      "label": "Fourth Runeblade strikes empowered",
+      "spell": 707144,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit and the consume handler resolve",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "rune",
+      "equals": 0,
+      "label": "DISCRIMINATING: empower consumed by the boosted hit, no chain",
+      "metric": "aura",
+      "spell": 705596,
+      "within_ms": 2000
+    }
+  ]
+}

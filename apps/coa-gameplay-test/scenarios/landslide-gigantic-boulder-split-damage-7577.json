@@ -1,0 +1,195 @@
+{
+  "schema": 1,
+  "name": "Landslide's Gigantic Boulder and Hurl Boulder impact split their damage between the players hit (#7577)",
+  "contract": [
+    "In the supplied CoA Spell.dbc, Gigantic Boulder 2100734 is one instant Nature SCHOOL_DAMAGE effect of 8500 plus 1..500 on TARGET_UNIT_DEST_AREA_ENEMY with a 10 yd radius, and Hurl Boulder's impact 2100733 is the same with 4500 plus 1..500. Both tooltips say the damage is split between all targets hit. Neither has a spell power coefficient or level scaling, so the roll does not depend on the caster.",
+    "SPELL_ATTR0_CU_SHARE_DAMAGE divides the roll by the number of targets before critical strikes and mitigation. A level-80 Human Warrior has no Nature resistance and no level-based partial resist against a level-80 caster, and a creature's magic critical strike deals 150%. The open-world fixture avoids the dungeon spell and creature damage multipliers, and equal levels give no Destiny Weaver view.",
+    "With two players inside the radius, each loses 4250..4500 from Gigantic Boulder (6375..6750 if critical); an unsplit hit is 8501..9000 (12751..13500 if critical). With one player inside, that player loses the full unsplit amount, which proves the setup applies no other damage multiplier. Two players hit by 2100733 each lose 2250..2500 (3375..3750 if critical) instead of 4501..5000 (6751..7500 if critical). Every range excludes the other outcome."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "first",
+      "race": 1,
+      "class": 1,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "second",
+      "race": 1,
+      "class": 1,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "landslide",
+      "owner": "first",
+      "entry": 36,
+      "faction": 14,
+      "level": 80,
+      "health": 500000,
+      "reaction": 0,
+      "distance": 3,
+      "spell_hit_bonus": 100,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_health",
+      "actor": "first",
+      "maximum": 40000,
+      "value": 40000
+    },
+    {
+      "action": "set_health",
+      "actor": "second",
+      "maximum": 40000,
+      "value": 40000
+    },
+    {
+      "action": "cast",
+      "actor": "landslide",
+      "target": "first",
+      "spell": 2100734
+    },
+    {
+      "action": "assert",
+      "label": "Gigantic Boulder is cast",
+      "actor": "first",
+      "metric": "spell_go_count",
+      "spell": 2100734,
+      "entry": 36,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The first player takes half of Gigantic Boulder",
+      "actor": "first",
+      "metric": "health",
+      "min": 33250,
+      "max": 35750,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The second player takes half of Gigantic Boulder",
+      "actor": "second",
+      "metric": "health",
+      "min": 33250,
+      "max": 35750,
+      "within_ms": 2000
+    },
+    {
+      "action": "teleport",
+      "actor": "second",
+      "map": 0,
+      "x": -9597.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "first",
+      "maximum": 40000,
+      "value": 40000
+    },
+    {
+      "action": "set_health",
+      "actor": "second",
+      "maximum": 40000,
+      "value": 40000
+    },
+    {
+      "action": "cast",
+      "actor": "landslide",
+      "target": "first",
+      "spell": 2100734
+    },
+    {
+      "action": "assert",
+      "label": "A lone player takes all of Gigantic Boulder",
+      "actor": "first",
+      "metric": "health",
+      "min": 26500,
+      "max": 31499,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "A player outside the radius takes no damage",
+      "actor": "second",
+      "metric": "health",
+      "equals": 40000
+    },
+    {
+      "action": "teleport",
+      "actor": "second",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "first",
+      "maximum": 40000,
+      "value": 40000
+    },
+    {
+      "action": "set_health",
+      "actor": "second",
+      "maximum": 40000,
+      "value": 40000
+    },
+    {
+      "action": "cast",
+      "actor": "landslide",
+      "target": "first",
+      "spell": 2100733
+    },
+    {
+      "action": "assert",
+      "label": "The first player takes half of Hurl Boulder's impact",
+      "actor": "first",
+      "metric": "health",
+      "min": 36250,
+      "max": 37750,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The second player takes half of Hurl Boulder's impact",
+      "actor": "second",
+      "metric": "health",
+      "min": 36250,
+      "max": 37750,
+      "within_ms": 2000
+    }
+  ]
+}

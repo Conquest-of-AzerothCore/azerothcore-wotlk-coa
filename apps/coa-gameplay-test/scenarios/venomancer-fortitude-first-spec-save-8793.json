@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Venomancer Fortitude first specialization save survives a relog",
+  "contract": "#8793: a level 10 Venomancer (class 29) chose Fortitude, saved, and the Character Advancement window kept offering all four specializations. The client derives the active specialization from the first ChrSpecs identity entry it receives in the 0x0726 known-entries list, so the save must leave the Fortitude identity entry 4054 (Exposed Flesh 92144) known. Choosing Fortitude (ChrSpecs 52) makes the client upload identity 4054, signature entry 7229 (Hive Instinct 804968, the ChrSpecs signature spell) and the zero-cost entry 31202 (Expulsion 805094), which CharacterAdvancement.dbc chains on 4054 and 7229. Core bfe93aa95a refused that whole upload because 31202 was checked against the spellbook from before the switch; #8750 accepts automatic entries that the proposed build grants. The save must activate Fortitude, grant the three spells, and keep them after a database relog. The control adds Stalking entry 12201 (Widowmaker 804961) to the same save, which must be refused, so the chained entry demonstrably reaches the server.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "venomancer", "race": 1, "class": 29, "level": 10}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks and class synchronisation settle", "ms": 5000},
+    {"action": "assert", "label": "Exposed Flesh is not known before the save", "actor": "venomancer", "metric": "knows_spell", "spell": 92144, "equals": 0},
+    {"action": "assert", "label": "Expulsion is not known before the save", "actor": "venomancer", "metric": "knows_spell", "spell": 805094, "equals": 0},
+    {"action": "specialization", "label": "Control: a Stalking entry in the same save reaches the server and is refused", "actor": "venomancer", "id": 52, "entries": [31202, 12201], "refused": true},
+    {"action": "assert", "label": "The refused save leaves Exposed Flesh unknown", "actor": "venomancer", "metric": "knows_spell", "spell": 92144, "equals": 0},
+    {"action": "specialization", "label": "Fortitude save carries Expulsion", "actor": "venomancer", "id": 52, "entries": [31202]},
+    {"action": "assert", "label": "Fortitude identity Exposed Flesh is granted", "actor": "venomancer", "metric": "knows_spell", "spell": 92144, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "Signature Hive Instinct is granted", "actor": "venomancer", "metric": "knows_spell", "spell": 804968, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "Chained Expulsion is granted", "actor": "venomancer", "metric": "knows_spell", "spell": 805094, "equals": 1, "within_ms": 3000},
+    {"action": "relog", "label": "Save and reload the character", "actor": "venomancer"},
+    {"action": "wait", "label": "Let login synchronisation settle", "ms": 3000},
+    {"action": "assert", "label": "Exposed Flesh survives the relog", "actor": "venomancer", "metric": "knows_spell", "spell": 92144, "equals": 1},
+    {"action": "assert", "label": "Hive Instinct survives the relog", "actor": "venomancer", "metric": "knows_spell", "spell": 804968, "equals": 1},
+    {"action": "assert", "label": "Expulsion survives the relog", "actor": "venomancer", "metric": "knows_spell", "spell": 805094, "equals": 1}
+  ]
+}

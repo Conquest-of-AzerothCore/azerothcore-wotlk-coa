@@ -1,0 +1,151 @@
+{
+  "schema": 1,
+  "name": "Crossroads: Naj'iri sits beside Raj'iri, declines her unprompted and agrees after Dancing to the Beat",
+  "contract": "Raj'iri 41719 gives and takes 'Play It by Ear' 255078 and takes 'Dancing to the Beat' 255080 at The Crossroads; her sister Naj'iri 741719 sits next to her (#7365). A live capture (#7385) shows Raj'iri at level 15 and Naj'iri at level 8 beside her, and Raj'iri saying 'Feel like dancin' now?' answered by Naj'iri's 'Not really mon...' while the player only took other Crossroads quests; live footage puts Raj'iri's 'How about now mon?' about a minute later. rev_20261010_98 only added the templates and lines, so no Naj'iri existed and nobody spoke. This case walks onto Raj'iri's world spawn 9010700, counts the living Raj'iri at level 15 and Naj'iri at level 8 within 60 yd, and waits without any quest action for Naj'iri's decline, which reaches the player as SMSG_MESSAGECHAT 150 of type CHAT_MSG_MONSTER_SAY 12 in universal language 0, so its first uint32 is 12. It then rewards 255078 and 255079 as setup and hands 255080 in at Raj'iri through the questgiver packet handlers, the path that reaches her SmartAI, and expects Naj'iri's 'Alright, just for a bit...'. Before rev_20261012_03 Naj'iri is missing and neither line is sent. Raj'iri's dance and Naj'iri's sitting and dancing are client-visible and are not observed here.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 1,
+    "x": -399.0,
+    "y": -2603.1,
+    "z": 95.8,
+    "o": 5.5
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 2,
+      "class": 1,
+      "level": 13
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, the phase the Crossroads spawns live in (the lane phase hides them)",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the Crossroads grids activate",
+      "ms": 2000
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "Walk to Raj'iri's world spawn 9010700",
+      "actor": "p",
+      "guid": 9010700
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Raj'iri is there at her live level 15",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 41719,
+      "min_level": 15,
+      "max_level": 15,
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: exactly one living Naj'iri at level 8 is beside her",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 741719,
+      "min_level": 8,
+      "max_level": 8,
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: without any quest action Raj'iri asks and Naj'iri declines",
+      "actor": "p",
+      "metric": "server_packet_contains",
+      "opcode": 150,
+      "row": 12,
+      "text": "Not really mon...",
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: 'Play It by Ear' is ready to turn in",
+      "actor": "p",
+      "quest": 255078
+    },
+    {
+      "action": "reward_quest",
+      "label": "Turn in 'Play It by Ear'",
+      "actor": "p",
+      "quest": 255078
+    },
+    {
+      "action": "assert",
+      "label": "'Play It by Ear' is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255078,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: 'Finding the Rhythm', the step between the two, is ready to turn in",
+      "actor": "p",
+      "quest": 255079
+    },
+    {
+      "action": "reward_quest",
+      "label": "SETUP: turn in 'Finding the Rhythm' so 'Dancing to the Beat' follows in the chain",
+      "actor": "p",
+      "quest": 255079
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: 'Dancing to the Beat' is ready to turn in",
+      "actor": "p",
+      "quest": 255080
+    },
+    {
+      "action": "quest_turn_in",
+      "label": "Hand 'Dancing to the Beat' in at Raj'iri, which starts the sisters' last exchange and Naj'iri's dance",
+      "actor": "p",
+      "quest": 255080,
+      "entry": 41719,
+      "reward": 0
+    },
+    {
+      "action": "assert",
+      "label": "'Dancing to the Beat' is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255080,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Naj'iri agrees to dance after 'Dancing to the Beat'",
+      "actor": "p",
+      "metric": "server_packet_contains",
+      "opcode": 150,
+      "row": 12,
+      "text": "Alright, just for a bit...",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Naj'iri is still there after the action list drove her",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 741719,
+      "min_level": 8,
+      "max_level": 8,
+      "equals": 1,
+      "within_ms": 4000
+    }
+  ]
+}

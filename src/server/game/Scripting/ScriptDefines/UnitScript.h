@@ -53,6 +53,9 @@ enum UnitHook
     UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE,
     UNITHOOK_CAN_UNIT_ATTACK,
     UNITHOOK_SPELL_MAGNET_TARGET,
+    UNITHOOK_RESOLVE_SPELL_CAST,
+    UNITHOOK_ON_HEALTH_CHANGED,
+    UNITHOOK_MODIFY_MELEE_DAMAGE_RANGE,
     UNITHOOK_END
 };
 
@@ -68,6 +71,9 @@ protected:
     UnitScript(char const* name, bool addToScripts = true, std::vector<uint16> enabledHooks = std::vector<uint16>());
 
 public:
+    // Resolve metadata before Spell construction, preserving targets, flags and forwarded values.
+    virtual void ResolveSpellCast(Unit* /*caster*/, SpellInfo const*& /*spellInfo*/) { }
+
     // Called when a unit deals healing to another unit
     virtual void OnHeal(Unit* /*healer*/, Unit* /*reciever*/, uint32& /*gain*/) { }
 
@@ -94,6 +100,9 @@ public:
 
     // Called when Melee Damage is being Dealt
     virtual void ModifyMeleeDamage(Unit* /*target*/, Unit* /*attacker*/, uint32& /*damage*/) { }
+
+    // Called with a melee swing's damage range before the roll
+    virtual void ModifyMeleeDamageRange(Unit* /*target*/, Unit* /*attacker*/, float& /*minDamage*/, float& /*maxDamage*/) { }
 
     // Called when Spell Damage is being Dealt
     virtual void ModifySpellDamageTaken(Unit* /*target*/, Unit* /*attacker*/, int32& /*damage*/, SpellInfo const* /*spellInfo*/) { }
@@ -150,6 +159,7 @@ public:
     virtual void OnUnitExitCombat(Unit* /*unit*/) { }
     virtual void OnUnitDeath(Unit* /*unit*/, Unit* /*killer*/) { }
     virtual void OnUnitSetShapeshiftForm(Unit* /*unit*/, uint8 /*form*/) { }
+    virtual void OnHealthChanged(Unit* /*unit*/) { }
 };
 
 #endif

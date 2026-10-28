@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "name": "Tinker: potions still work while the Mechsuit is active (#9293)",
+  "contract": "A Tinker who built the Mechsuit (801384/803451) is mounted for movement purposes, but item-use casts such as a healing potion must not be refused with SPELL_FAILED_NOT_MOUNTED: the generic mounted guard must exempt the suit's own consumable casts, not only SpellFamilyName 34 abilities.",
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 20
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 2000 },
+    { "action": "learn", "label": "t fixture: Mechsuit talent", "actor": "t", "spell": 92141 },
+    { "action": "learn", "label": "t fixture: Build: Mechsuit", "actor": "t", "spell": 801384 },
+    { "action": "set_aura", "label": "t fixture: pre-fill Scrap", "actor": "t", "spell": 801816, "stacks": 100 },
+    { "action": "cast", "label": "t enters the Mechsuit", "actor": "t", "spell": 801384 },
+    {
+      "action": "assert",
+      "label": "t: the Mechsuit is on",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 801384,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    { "action": "add_item", "label": "t fixture: Minor Healing Potion", "actor": "t", "item": 118, "count": 1 },
+    { "action": "set_health", "label": "t fixture: take damage before drinking the potion", "actor": "t", "value": 1 },
+    { "action": "use_item", "label": "t drinks the potion while in the Mechsuit", "actor": "t", "item": 118, "spell": 439 },
+    { "action": "wait", "ms": 1500 },
+    {
+      "action": "assert",
+      "label": "CONTRACT the potion is not refused with SPELL_FAILED_NOT_MOUNTED while mechsuited",
+      "actor": "t",
+      "metric": "cast_failure",
+      "spell": 439,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT the potion actually healed the Tinker",
+      "actor": "t",
+      "metric": "spell_heal_total",
+      "spell": 439,
+      "target": "t",
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "t stays in the Mechsuit after drinking the potion",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 801384,
+      "equals": 1
+    }
+  ]
+}

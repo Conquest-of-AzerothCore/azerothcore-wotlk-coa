@@ -1,7 +1,16 @@
 {
   "schema": 1,
   "name": "Primalist Wild Carnage chain count and attenuation",
-  "contract": "Seismic Spike enables Wildclaw to hit four additional nearby targets for six seconds. Native first/highest casts hit exactly five of six enemies; an independent checker verifies decreasing jump damage. Baseline, expiry and removal are checked.",
+  "contract": [
+    "Seismic Spike enables Wildclaw to hit four additional nearby targets for six seconds. Native",
+    "first/highest casts hit exactly five of six enemies; an independent checker verifies decreasing jump",
+    "damage. Baseline, expiry and removal are checked. Original Wild Carnage 800041 applies -15 percent to",
+    "SPELLMOD_EFFECT_PAST_FIRST. Each target rolls native weapon damage separately, so the variable",
+    "1.6667-4.1667 damage starter axe made single-hit ratios noisy. Authored item 686004 is a two-handed axe",
+    "with fixed 100-100 damage, no scaling and no stats; learned proficiency 197 and native weapon bounds",
+    "control the sample without changing chain mechanics. The existing authored 100 percent critical control",
+    "applies equally to every jump."
+  ],
   "players": [
     {
       "id": "primalist",
@@ -73,18 +82,25 @@
     {
       "action": "learn",
       "actor": "primalist",
-      "spell": 196
+      "spell": 197
     },
     {
       "action": "add_item",
       "actor": "primalist",
-      "item": 37
+      "item": 686004
     },
     {
       "action": "equip",
       "actor": "primalist",
-      "item": 37,
+      "item": 686004,
       "slot": 15
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "weapon_damage_min",
+      "min": 100,
+      "label": "The authored 100-damage axe supplies a substantial native sample"
     },
     {
       "action": "unlearn",

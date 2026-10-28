@@ -1,0 +1,143 @@
+{
+  "schema": 1,
+  "name": "Prestige Mode keeps profession skills and their caps so skill-ups stay possible",
+  "contract": "Issue #5876: Prestige keeps professions. Cooking, Tailoring and Enchanting hold their value and their maximum through the return to level 1, so the skill can still rise. A skill below its maximum stays below it after Prestige.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8816.5,
+    "y": 627.0,
+    "z": 94.1,
+    "o": 3.8
+  },
+  "players": [
+    {
+      "id": "prestiger",
+      "race": 1,
+      "class": 20,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "chromie",
+      "owner": "prestiger",
+      "entry": 178081,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "prestiger",
+      "id": 25
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_skill",
+      "actor": "prestiger",
+      "skill": 185,
+      "value": 100,
+      "maximum": 150
+    },
+    {
+      "action": "set_skill",
+      "actor": "prestiger",
+      "skill": 197,
+      "value": 150,
+      "maximum": 225
+    },
+    {
+      "action": "set_skill",
+      "actor": "prestiger",
+      "skill": 333,
+      "value": 75,
+      "maximum": 150
+    },
+    {
+      "action": "assert",
+      "label": "Cooking is fixtured",
+      "actor": "prestiger",
+      "metric": "skill_maximum",
+      "skill": 185,
+      "equals": 150
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "prestiger",
+      "target": "chromie",
+      "label": "Speak to Chromie"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "prestiger",
+      "option": 0,
+      "label": "I would like to prestige!"
+    },
+    {
+      "action": "assert",
+      "label": "Back to level 1",
+      "actor": "prestiger",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Skill 185 keeps its value",
+      "actor": "prestiger",
+      "metric": "skill_value",
+      "skill": 185,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Skill 185 keeps its maximum",
+      "actor": "prestiger",
+      "metric": "skill_maximum",
+      "skill": 185,
+      "equals": 150
+    },
+    {
+      "action": "assert",
+      "label": "Skill 197 keeps its value",
+      "actor": "prestiger",
+      "metric": "skill_value",
+      "skill": 197,
+      "equals": 150
+    },
+    {
+      "action": "assert",
+      "label": "Skill 197 keeps its maximum",
+      "actor": "prestiger",
+      "metric": "skill_maximum",
+      "skill": 197,
+      "equals": 225
+    },
+    {
+      "action": "assert",
+      "label": "Skill 333 keeps its value",
+      "actor": "prestiger",
+      "metric": "skill_value",
+      "skill": 333,
+      "equals": 75
+    },
+    {
+      "action": "assert",
+      "label": "Skill 333 keeps its maximum",
+      "actor": "prestiger",
+      "metric": "skill_maximum",
+      "skill": 333,
+      "equals": 150
+    }
+  ]
+}

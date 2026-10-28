@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "The Callboard gives heirlooms no item level, like the character sheet (#6987)",
+  "contract": "The Callboard's highest reached item level (criterion 80129, saved in core.callboard.itemlevel) and its generic cache tier use the same equipped average item level the character sheet shows: seventeen slots without shirt and tabard, an heirloom counted as item level 0 and every other item at its template item level. A level 44 character wearing six heirlooms over its item level 1 starter pants and boots therefore averages (6 x 0 + 2) / 17 = 0.12 and reaches item level 0, not the 41 that counting each heirloom as 2.33 times the level gave. A value an earlier build saved higher than the equipped average is lowered once at the next login; a reached value saved after that correction is a high-water mark and survives later logins.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8828.19,
+    "y": 627.502,
+    "z": 94.0287
+  },
+  "players": [
+    { "id": "barbarian", "race": 1, "class": 1, "level": 44, "ascension_client": true }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "add_item", "actor": "barbarian", "item": 42950 },
+    { "action": "equip", "label": "Champion Herod's Shoulder", "actor": "barbarian", "item": 42950, "slot": 2 },
+    { "action": "add_item", "actor": "barbarian", "item": 48677 },
+    { "action": "equip", "label": "Champion's Deathdealer Breastplate", "actor": "barbarian", "item": 48677, "slot": 4 },
+    { "action": "add_item", "actor": "barbarian", "item": 50255 },
+    { "action": "equip", "label": "Dread Pirate Ring", "actor": "barbarian", "item": 50255, "slot": 10 },
+    { "action": "add_item", "actor": "barbarian", "item": 42991 },
+    { "action": "equip", "label": "Swift Hand of Justice", "actor": "barbarian", "item": 42991, "slot": 12 },
+    { "action": "add_item", "actor": "barbarian", "item": 42992 },
+    { "action": "equip", "label": "Discerning Eye of the Beast", "actor": "barbarian", "item": 42992, "slot": 13 },
+    { "action": "add_item", "actor": "barbarian", "item": 42945 },
+    { "action": "equip", "label": "Venerable Dal'Rend's Sacred Charge", "actor": "barbarian", "item": 42945, "slot": 15 },
+    { "action": "wait", "ms": 1500 },
+    {
+      "action": "assert",
+      "label": "The character sheet shows six heirlooms and the item level 1 starter pants and boots as 0.12",
+      "actor": "barbarian",
+      "metric": "sent_average_item_level",
+      "min": 0.11,
+      "max": 0.125
+    },
+    {
+      "action": "assert",
+      "label": "The Callboard reaches the same item level, 0",
+      "actor": "barbarian",
+      "metric": "player_setting",
+      "source": "core.callboard.itemlevel",
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "set_player_setting",
+      "label": "An earlier build saved the inflated 102 before the correction",
+      "actor": "barbarian",
+      "source": "core.callboard.itemlevel",
+      "index": 0,
+      "value": 102
+    },
+    { "action": "set_player_setting", "actor": "barbarian", "source": "core.callboard.itemlevel", "index": 1, "value": 0 },
+    { "action": "relog", "actor": "barbarian" },
+    { "action": "wait", "ms": 2000 },
+    {
+      "action": "assert",
+      "label": "Login lowers the saved 102 to the equipped 0",
+      "actor": "barbarian",
+      "metric": "player_setting",
+      "source": "core.callboard.itemlevel",
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "set_player_setting",
+      "label": "The character later reached 60 and took that gear off",
+      "actor": "barbarian",
+      "source": "core.callboard.itemlevel",
+      "index": 0,
+      "value": 60
+    },
+    { "action": "relog", "actor": "barbarian" },
+    { "action": "wait", "ms": 2000 },
+    {
+      "action": "assert",
+      "label": "A reached value saved after the correction survives the next login",
+      "actor": "barbarian",
+      "metric": "player_setting",
+      "source": "core.callboard.itemlevel",
+      "index": 0,
+      "equals": 60
+    }
+  ]
+}

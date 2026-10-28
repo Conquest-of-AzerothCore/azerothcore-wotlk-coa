@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Dungeon Diving: Heroic and Mythic dailies are on the Call Board and pay their dungeon's Callboard Cache",
+  "contract": "The Hero's Call Board (gameobject 402000, Stormwind) lists Heroic Dungeon Diving (81245) and Mythic Dungeon Diving (81246) in its PvE category for a level-60 Human; the Mythic quest's text sends the player to 'the Callboard in any major city'. Turning in Heroic Dungeon Diving pays 1500 Runes of Ascension (375250) and one Heroic Dungeon Callboard Cache (1615001); turning in Mythic Dungeon Diving pays 1500 runes and one Mythic Dungeon Callboard Cache (1615002). The caches are a CoA choice: no live source for either is known.",
+  "timeout_ms": 120000,
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 60}
+  ],
+  "location": {"map": 0, "x": -8822.9, "y": 628.4, "z": 93.8, "o": 2.4},
+  "steps": [
+    {"action": "set_phase", "label": "Join the world phase the board is spawned in", "actor": "hero", "value": 1},
+    {"action": "wait", "label": "Let the Stormwind board's grid load", "ms": 3000},
+    {"action": "use_nearby_gameobject", "label": "Click the board", "actor": "hero", "entry": 402000},
+    {"action": "gossip_select", "label": "Choose PvE Quests", "actor": "hero", "option": 0},
+    {"action": "assert", "label": "Heroic Dungeon Diving is offered", "actor": "hero", "metric": "quest_menu_has", "quest": 81245, "equals": 1},
+    {"action": "assert", "label": "and Mythic Dungeon Diving", "actor": "hero", "metric": "quest_menu_has", "quest": 81246, "equals": 1},
+    {"action": "prepare_quest", "label": "Heroic Dungeon Diving is complete", "actor": "hero", "quest": 81245},
+    {"action": "snapshot", "actor": "hero", "metric": "item_count", "item": 375250, "save_as": "runes_before_heroic"},
+    {"action": "reward_quest", "label": "Turn in Heroic Dungeon Diving", "actor": "hero", "quest": 81245},
+    {"action": "assert", "label": "It pays 1500 Runes of Ascension", "actor": "hero", "metric": "item_count", "item": 375250, "relative_to": "runes_before_heroic", "equals": 1500},
+    {"action": "assert", "label": "and a Heroic Dungeon Callboard Cache", "actor": "hero", "metric": "item_count", "item": 1615001, "equals": 1},
+    {"action": "prepare_quest", "label": "Mythic Dungeon Diving is complete", "actor": "hero", "quest": 81246},
+    {"action": "snapshot", "actor": "hero", "metric": "item_count", "item": 375250, "save_as": "runes_before_mythic"},
+    {"action": "reward_quest", "label": "Turn in Mythic Dungeon Diving", "actor": "hero", "quest": 81246},
+    {"action": "assert", "label": "It pays 1500 Runes of Ascension", "actor": "hero", "metric": "item_count", "item": 375250, "relative_to": "runes_before_mythic", "equals": 1500},
+    {"action": "assert", "label": "and a Mythic Dungeon Callboard Cache", "actor": "hero", "metric": "item_count", "item": 1615002, "equals": 1}
+  ]
+}

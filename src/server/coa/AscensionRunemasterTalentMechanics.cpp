@@ -98,12 +98,13 @@ class spell_ascension_runemaster_runic_omen_empower : public SpellScript
         Player* player = GetHitPlayer();
         if (!player)
             return;
-        Aura* counter = player->GetAura(SPELL_RUNIC_OMEN, player->GetGUID());
-        if (counter && counter->GetStackAmount() >= 3)
+        if (Aura* counter = player->GetAura(SPELL_RUNIC_OMEN, player->GetGUID()); counter && counter->GetStackAmount() >= 3)
         {
             player->RemoveAurasDueToSpell(SPELL_RUNIC_OMEN, player->GetGUID());
             player->CastSpell(player, SPELL_RUNIC_OMEN_EMPOWER, true);
         }
+        else if (player->HasAura(SPELL_RUNIC_OMEN_EMPOWER, player->GetGUID()))
+            player->RemoveAurasDueToSpell(SPELL_RUNIC_OMEN_EMPOWER, player->GetGUID());
     }
 
     void Register() override

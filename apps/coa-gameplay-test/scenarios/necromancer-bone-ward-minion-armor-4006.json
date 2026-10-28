@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Bone Ward raises a minion's armor by 50%, not twice that (#4006)",
+  "contract": "#4006: casting Bone Ward 681529 on a level-6 Lesser Skeletal Warrior raised its armor from 14 to 32 (x2.2857) instead of the documented 14 to 21 (x1.5, 'Armor is increased by $s2%' per Spell.dbc Description). Effect index 1 (SPELL_AURA_MOD_RESISTANCE_PCT, +50%) targets TARGET_UNIT_CASTER; effect index 2 (SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, +10% stamina) is the custom SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS (190), which the engine (SpellAuras.cpp, SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS case) already propagates natively from the player's own aura onto every owned summon. AscensionNecromancerAuras.cpp's aura_ascension_necromancer_lifecycle::Apply additionally copied the WHOLE spell onto every minion with player->AddAura(id, minion), duplicating effect index 2 on top of the native propagation while also granting effect index 1, which native propagation does not cover (the fix keeps that half: it is the only way the tooltip's minion-armor promise reaches minions at all). The fix restricts that manual copy's effect mask to exclude whichever effect index carries SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS, leaving the native engine solely responsible for propagating that one effect and the manual copy solely responsible for the rest (here, only the armor effect, since the proc-trigger effect 0 is not asserted by this scenario). The same fix applies to AscensionNecromancerSummons.cpp's identical copy made when a minion is summoned while a ward is already active. A fresh Lesser Skeletal Warrior's pre-ward armor is captured as an independent baseline so the assertion does not depend on a hardcoded creature_template value.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "necromancer", "race": 5, "class": 23, "level": 60 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "learn", "actor": "necromancer", "spell": 500970 },
+    { "action": "learn", "actor": "necromancer", "spell": 681529 },
+    { "action": "cast", "label": "Raise: Lesser Skeletal Warrior", "actor": "necromancer", "spell": 500970 },
+    {
+      "action": "assert", "label": "SETUP: the Lesser Skeletal Warrior is raised",
+      "actor": "necromancer", "metric": "owned_creature_count", "entry": 50065, "min": 1, "within_ms": 8000
+    },
+    {
+      "action": "snapshot", "label": "Baseline minion armor before any Ward",
+      "actor": "necromancer", "metric": "owned_creature_armor", "entry": 50065, "save_as": "minion_baseline"
+    },
+    {
+      "action": "snapshot", "label": "Baseline caster armor before any Ward",
+      "actor": "necromancer", "metric": "armor", "save_as": "caster_baseline"
+    },
+    { "action": "wait", "label": "Global cooldown", "ms": 1600 },
+    { "action": "cast", "label": "Bone Ward", "actor": "necromancer", "spell": 681529 },
+    {
+      "action": "assert", "label": "SETUP: the caster is warded",
+      "actor": "necromancer", "metric": "aura", "spell": 681529, "caster": "necromancer", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTROL: the caster's own armor still rises by the documented 50%",
+      "actor": "necromancer", "metric": "armor", "ratio_to": "caster_baseline", "min": 1.45, "max": 1.56
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the minion's armor rises by 50% (x1.5), not the duplicated x2.2857 before the fix",
+      "actor": "necromancer", "metric": "owned_creature_armor", "entry": 50065, "ratio_to": "minion_baseline",
+      "min": 1.45, "max": 1.56, "within_ms": 4000
+    }
+  ]
+}

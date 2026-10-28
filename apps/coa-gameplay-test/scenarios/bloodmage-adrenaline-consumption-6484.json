@@ -1,0 +1,219 @@
+{
+  "schema": 1,
+  "name": "Adrenaline consumes its instant-cast benefit once (#6484)",
+  "contract": [
+    "Adrenaline Boost promises the next Dark Liturgy or Bloodmoon Blast instant. Fixture only its proc payload",
+    "680678; successful normal casts consume it once, while a refused cast and an unrelated Fireball retain it.",
+    "Melee proc generation and its authored 50% chance are unchanged. Both affected spells have independent",
+    "nonzero cast-time controls."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 20,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572575
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572332
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 133
+    },
+    {
+      "action": "assert",
+      "label": "Dark Liturgy normally has a cast time",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 572575,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Bloodmoon Blast normally has a cast time",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 572332,
+      "min": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 680678,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Adrenaline makes Dark Liturgy instant",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 572575,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 572575,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "An invalid hostile healing target is refused",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 572575,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "A refused cast retains Adrenaline",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 680678,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 133,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "The unrelated Fireball actually hits its enemy",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 133,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "An unrelated successful cast retains Adrenaline",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 680678,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 572575,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "The affected spell actually completes its normal cast",
+      "actor": "caster",
+      "metric": "spell_go_count",
+      "spell": 572575,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "A successful Dark Liturgy cast consumes Adrenaline",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 680678,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The next Dark Liturgy needs its normal cast time",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 572575,
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 680678,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "A fresh Adrenaline makes Bloodmoon Blast instant",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 572332,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 572332,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "The affected spell actually completes its normal cast",
+      "actor": "caster",
+      "metric": "spell_go_count",
+      "spell": 572332,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "A successful Bloodmoon Blast consumes Adrenaline",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 680678,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The next Bloodmoon Blast needs its normal cast time",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 572332,
+      "min": 1
+    }
+  ]
+}

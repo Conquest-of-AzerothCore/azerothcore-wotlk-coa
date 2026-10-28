@@ -1,0 +1,205 @@
+{
+  "schema": 1,
+  "name": "tinker-clockwork-assistant-level-eight-4036",
+  "contract": [
+    "Original Build: Clockwork Assistant 803436 summons the combat pet 60070. Its family SkillLine 10037",
+    "teaches Throw Wrench 574359 starting at SpellLevel 8. At the reported level 8, a normal build must",
+    "produce that pet with Throw Wrench available. A native pet attack command must damage a passive enemy",
+    "while the owner never attacks; eight ordinary pet spell commands must include actual Throw Wrench",
+    "damage, preserving its original Magic hit roll instead of expecting one random first hit. The existing",
+    "family and ability scenarios separately cover higher-level abilities. This scenario does not render or",
+    "click a client pet action bar.",
+    "Require at least eight completed native pet casts before interpreting the damage sample; the original",
+    "equal-level 4% Magic miss chance then gives an all-miss probability at most 0.04^8 < 7e-12."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 8
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 803436
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 803436
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 60070,
+      "within_ms": 9000
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "pet_knows_spell",
+      "spell": 574359,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "health",
+      "save_as": "before_pet_attack"
+    },
+    {
+      "action": "attack",
+      "actor": "tinker",
+      "target": "enemy",
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "health",
+      "relative_to": "before_pet_attack",
+      "max": -1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "melee_damage_count",
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "cast_charm",
+      "actor": "tinker",
+      "spell": 574359,
+      "target": "enemy",
+      "pet": true
+    },
+    {
+      "action": "wait",
+      "ms": 2300
+    },
+    {
+      "action": "cast_charm",
+      "actor": "tinker",
+      "spell": 574359,
+      "target": "enemy",
+      "pet": true
+    },
+    {
+      "action": "wait",
+      "ms": 2300
+    },
+    {
+      "action": "cast_charm",
+      "actor": "tinker",
+      "spell": 574359,
+      "target": "enemy",
+      "pet": true
+    },
+    {
+      "action": "wait",
+      "ms": 2300
+    },
+    {
+      "action": "cast_charm",
+      "actor": "tinker",
+      "spell": 574359,
+      "target": "enemy",
+      "pet": true
+    },
+    {
+      "action": "wait",
+      "ms": 2300
+    },
+    {
+      "action": "cast_charm",
+      "actor": "tinker",
+      "spell": 574359,
+      "target": "enemy",
+      "pet": true
+    },
+    {
+      "action": "wait",
+      "ms": 2300
+    },
+    {
+      "action": "cast_charm",
+      "actor": "tinker",
+      "spell": 574359,
+      "target": "enemy",
+      "pet": true
+    },
+    {
+      "action": "wait",
+      "ms": 2300
+    },
+    {
+      "action": "cast_charm",
+      "actor": "tinker",
+      "spell": 574359,
+      "target": "enemy",
+      "pet": true
+    },
+    {
+      "action": "wait",
+      "ms": 2300
+    },
+    {
+      "action": "cast_charm",
+      "actor": "tinker",
+      "spell": 574359,
+      "target": "enemy",
+      "pet": true
+    },
+    {
+      "action": "wait",
+      "ms": 2300
+    },
+    {
+      "action": "assert",
+      "label": "At least eight normal pet casts completed before the damage sample",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 574359,
+      "pet": true,
+      "min": 8
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 574359,
+      "target": "enemy",
+      "pet": true,
+      "min": 1
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 8,
+      "health": 100000,
+      "distance": 3
+    }
+  ]
+}
