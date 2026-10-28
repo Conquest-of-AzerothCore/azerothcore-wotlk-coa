@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "name": "Crystal Lake keeps a single Worldforged Defias Cowl pickup (#8871)",
+  "contract": "A static replay of the module's catalog pass (2026_09_16_00) alongside the realm-map pass (2026_09_23_05) suggested two Defias Cowl spawns 4.1 yd apart in Crystal Lake, Elwynn: guid 6901068 from the catalog pass and guid 6940336 authored in game. The realm-map pass wipes every worldforged_pickup spawn in guid blocks 6900001-6939999 and 6940001-6999999 before re-inserting its own set, which deletes 6901068 (in the first block) without ever re-adding it; only guid 6940336 survives. The gameplay harness confirms a single spawn in range, so the apparent duplicate is a replay artifact, not a live defect; no SQL change.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -9303.5, "y": -287.5, "z": 71.6, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 19, "level": 11 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "exactly one Defias Cowl pickup stands in Crystal Lake", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95618, "equals": 1 }
+  ]
+}
