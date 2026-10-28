@@ -8,15 +8,19 @@
     "the charm's duration so the fight continues once control returns; it never changes the charm or the boss.",
     "This scenario proves setup correctness (private run, phase match, immune-to-PC window cleared, combat",
     "engaged, Chaotic Link present, player not pre-charmed), then forces the charm directly with",
-    "'.cast target 12483 triggered' so Jammal'an himself (caster = the player's selected victim) casts it on",
-    "the player, exactly as his own SmartAI In-Combat timer eventually would, without waiting on that timer.",
-    "'.cast target' needs a native CMSG_SET_SELECTION first (ChatHandler::getSelectedCreature() reads",
-    "Player::GetTarget()); attack_nearby only sends CMSG_ATTACKSWING and never selects. An earlier attempt at",
-    "this forced cast skipped that selection, failed with 'select character or creature', and was misread as",
-    "an RBAC permission gap. The new select_nearby harness action (apps/coa-gameplay-test) sends the missing",
-    "selection. The closing assertions confirm the player is actually charmed and that Jammal'an neither",
-    "evaded (his Chaotic Link encounter aura would be stripped by Unit::RemoveEvadeAuras() on a real evade,",
-    "and it survives here) nor dropped out of combat."
+    "'.cast back 12483 triggered' so Jammal'an himself (the selected creature) casts it onto the invoking",
+    "player, exactly as his own SmartAI In-Combat timer eventually would, without waiting on that timer.",
+    "Both '.cast back' and '.cast target' need a native CMSG_SET_SELECTION first",
+    "(ChatHandler::getSelectedCreature() reads Player::GetTarget()); attack_nearby only sends",
+    "CMSG_ATTACKSWING and never selects. An earlier attempt at a forced cast skipped that selection, failed",
+    "with 'select character or creature', and was misread as an RBAC permission gap. The new select_nearby",
+    "harness action (apps/coa-gameplay-test) sends the missing selection. '.cast back' (not '.cast target')",
+    "is used because it targets the invoking player directly and does not depend on Creature::GetVictim()",
+    "already pointing at the player, which made an earlier attempt with '.cast target' intermittently fail",
+    "under batch load before the AuraScript's own gate (caster entry, instance, Solo mode -- see",
+    "ManastormSunkenTempleCompat.cpp) ever got a say. The closing assertions confirm the player is actually",
+    "charmed and that Jammal'an neither evaded (his Chaotic Link encounter aura would be stripped by",
+    "Unit::RemoveEvadeAuras() on a real evade, and it survives here) nor dropped out of combat."
   ],
   "timeout_ms": 90000,
   "players": [
@@ -120,19 +124,19 @@
     },
     {
       "action": "select_nearby",
-      "label": "Select Jammal'an so '.cast target' can resolve him as the caster",
+      "label": "Select Jammal'an so '.cast back' can resolve him as the caster",
       "actor": "n",
       "entry": 5710
     },
     {
       "action": "wait",
-      "label": "Let threat processing give Jammal'an a victim before forcing the cast",
+      "label": "Let a little real combat happen before forcing the cast",
       "ms": 3000
     },
     {
       "action": "command",
       "actor": "n",
-      "command": ".cast target 12483 triggered"
+      "command": ".cast back 12483 triggered"
     },
     {
       "action": "assert",
