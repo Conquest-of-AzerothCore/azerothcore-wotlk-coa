@@ -581,7 +581,8 @@ screen and not only in chat. The cache metrics are `carried_pool_item_count` (ne
 optional `table`: `prestigious`, `callboard`, or `loot` for the cache's item loot and its references, and
 optional `min_required_level`/`max_required_level` that keep only carried items in that range; optional
 `dominant_stat` keeps items whose strongest of Agility 3, Strength 4, Intellect 5 and Spirit 6 is that stat,
-and `off_stat` keeps items that carry one of those four but whose strongest is not that stat), `pool_variant_count`, `pool_retired_item_count`, `pool_row_count`,
+and `off_stat` keeps items that carry one of those four but whose strongest is not that stat; optional `quality`
+keeps items of that exact quality), `pool_variant_count`, `pool_retired_item_count`, `pool_row_count`,
 `pool_item_present` (needs `item`; `table` `fire_lord` with `cache` 2400040 reads Cache of the Fire Lord's
 pool across every raid difficulty), and `cache_token_count`, `cache_token_stage`, `cache_token_present`
 (need `cache`, the last also `item`), which read the token table the realm loads and answer how many

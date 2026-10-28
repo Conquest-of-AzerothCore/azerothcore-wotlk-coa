@@ -4857,6 +4857,7 @@ private:
             uint32 const maxRequiredLevel = step.get<uint32>("max_required_level", STRONG_MAX_LEVEL);
             auto dominantStat = step.get_optional<uint32>("dominant_stat");
             auto offStat = step.get_optional<uint32>("off_stat");
+            auto quality = step.get_optional<uint32>("quality");
             auto strongestAttributes = [](ItemTemplate const* proto)
             {
                 std::array<int32, ITEM_MOD_SPIRIT + 1> attributes{};
@@ -4875,7 +4876,7 @@ private:
             };
             uint32 count = 0;
             auto countItem = [pool, &count, &excluded, minRequiredLevel, maxRequiredLevel, &dominantStat, &offStat,
-                &strongestAttributes](Item* item)
+                &quality, &strongestAttributes](Item* item)
             {
                 if (excluded && item->GetEntry() == *excluded)
                     return;
@@ -4883,6 +4884,8 @@ private:
                 if (requiredLevel < minRequiredLevel || requiredLevel > maxRequiredLevel)
                     return;
                 ItemTemplate const* base = sObjectMgr->GetItemTemplate(ItemScaling::BaseEntry(item->GetEntry()));
+                if (quality && (base ? base : item->GetTemplate())->Quality != *quality)
+                    return;
                 std::unordered_set<uint32> const strongest = strongestAttributes(base ? base : item->GetTemplate());
                 if (dominantStat && !strongest.count(*dominantStat))
                     return;

@@ -1110,8 +1110,9 @@ def validate(scenario):
                         f'{where}: row applies only to captured packet counts, values or text')
                 number(step['row'], f'{where}.row', 0, 2**32 - 1, True)
             if 'quality' in step:
-                require(metric in {'loot_count', 'loot_entry', 'loot_required_level', 'loot_item_level'},
-                        f'{where}: quality applies only to corpse/container loot items')
+                require(metric in {'loot_count', 'loot_entry', 'loot_required_level', 'loot_item_level',
+                                   'carried_pool_item_count'},
+                        f'{where}: quality applies only to loot items and carried cache rewards')
                 number(step['quality'], f'{where}.quality', 0, 7, True)
             if metric == 'at_login_flag':
                 number(step.get('id'), f'{where}.id', 1, 0xFFFF, True)
