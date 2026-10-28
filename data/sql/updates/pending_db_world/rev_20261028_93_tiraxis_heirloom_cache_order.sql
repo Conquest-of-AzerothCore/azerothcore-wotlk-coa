@@ -1,21 +1,22 @@
--- Tiraxis' heirloom list (900011): the Experience Heirloom Caches first, then the Heirloom Caches without the
--- experience bonus, then the weapons, off-hands and relics, then the pendants, rings and Stick on a Carrot.
+-- Tiraxis' heirloom list (900011): the heirloom set caches first, each set's two caches side by side - the
+-- Experience Heirloom Cache, then the Heirloom Cache without the experience bonus - then the weapons, off-hands and
+-- relics, then the pendants, rings and Stick on a Carrot.
 -- Fixed slots per item, so a reapply leaves the order unchanged. Like rev_20261024_01 it only acts on a realm that
 -- fills the Vanity Store price table.
 UPDATE `npc_vendor` SET `slot` = CASE `item`
   WHEN 1339051 THEN 0     -- Tattered Dreadmist Raiment - Experience Heirloom Cache
-  WHEN 1339052 THEN 1     -- Preened Ironfeather Armor - Experience Heirloom Cache
-  WHEN 1339053 THEN 2     -- Stained Shadowcraft Armor - Experience Heirloom Cache
-  WHEN 1339054 THEN 3     -- Champion's Battlegear - Experience Heirloom Cache
-  WHEN 1339055 THEN 4     -- Polished Battlegear of Valor - Experience Heirloom Cache
-  WHEN 1339056 THEN 5     -- Armor of Might - Experience Heirloom Cache
-  WHEN 1339057 THEN 6     -- The Mystical Elements - Experience Heirloom Cache
-  WHEN 1339058 THEN 7     -- Tattered Dreadmist Raiment - Heirloom Cache
-  WHEN 1339059 THEN 8     -- Preened Ironfeather Armor - Heirloom Cache
-  WHEN 1339060 THEN 9     -- Stained Shadowcraft Armor - Heirloom Cache
-  WHEN 1339061 THEN 10    -- Champion's Battlegear - Heirloom Cache
-  WHEN 1339062 THEN 11    -- Polished Battlegear of Valor - Heirloom Cache
-  WHEN 1339063 THEN 12    -- Armor of Might - Heirloom Cache
+  WHEN 1339058 THEN 1     -- Tattered Dreadmist Raiment - Heirloom Cache
+  WHEN 1339052 THEN 2     -- Preened Ironfeather Armor - Experience Heirloom Cache
+  WHEN 1339059 THEN 3     -- Preened Ironfeather Armor - Heirloom Cache
+  WHEN 1339053 THEN 4     -- Stained Shadowcraft Armor - Experience Heirloom Cache
+  WHEN 1339060 THEN 5     -- Stained Shadowcraft Armor - Heirloom Cache
+  WHEN 1339054 THEN 6     -- Champion's Battlegear - Experience Heirloom Cache
+  WHEN 1339061 THEN 7     -- Champion's Battlegear - Heirloom Cache
+  WHEN 1339055 THEN 8     -- Polished Battlegear of Valor - Experience Heirloom Cache
+  WHEN 1339062 THEN 9     -- Polished Battlegear of Valor - Heirloom Cache
+  WHEN 1339056 THEN 10    -- Armor of Might - Experience Heirloom Cache
+  WHEN 1339063 THEN 11    -- Armor of Might - Heirloom Cache
+  WHEN 1339057 THEN 12    -- The Mystical Elements - Experience Heirloom Cache
   WHEN 1339064 THEN 13    -- The Mystical Elements - Heirloom Cache
   WHEN 1642999 THEN 14    -- Ancient Crossbow
   WHEN 1642944 THEN 15    -- Balanced Heartseeker
