@@ -57,7 +57,7 @@ METRICS = TIMELINE_METRICS | {
     'pet_power', 'pet_max_power', 'spell_energize_count', 'spell_energize_total',
     'xp', 'next_level_xp', 'skill_value', 'skill_maximum', 'lfg_dungeon_disabled', 'lfg_lock_status', 'lfg_state',
     'lfg_need_allowed',
-    'map_id',
+    'map_id', 'instance_id',
     'in_arena', 'arena_team_members', 'arena_team_season_games', 'arena_team_season_wins',
     'battleground_team', 'team', 'name_query_race',
     'map_difficulty', 'nearby_creature_template', 'nearby_creature_max_health', 'nearby_creature_health_pct',
@@ -840,7 +840,8 @@ def validate(scenario):
                 number(step.get('entry'), f'{where}.entry', 1, 2**31 - 1, True)
             if metric == 'creature_query_quest_item':
                 number(step.get('item'), f'{where}.item', 1, 2**32 - 1, True)
-            if metric in {'map_id', 'map_difficulty', 'nearby_creature_template', 'nearby_creature_max_health',
+            if metric in {'map_id', 'instance_id', 'map_difficulty', 'nearby_creature_template',
+                          'nearby_creature_max_health',
                           'nearby_creature_health_pct', 'nearby_creature_sent_spellclick', 'nearby_creature_can_attack',
                           'nearby_creature_mount_display', 'nearby_creature_display', 'nearby_creature_aura_count',
                           'loot_gear_item_level'}:
