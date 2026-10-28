@@ -5464,6 +5464,13 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_10_YARDS);
     });
 
+    // CoA: Sun Stride starts its normal 24 sec cooldown on cast; the cooldown-on-event flag left it
+    // stuck at "Ability is not ready yet" with no timer.
+    ApplySpellFix({ 680700 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->Attributes &= ~SPELL_ATTR0_COOLDOWN_ON_EVENT;
+    });
+
     // CoA: Baron Geddon's Living Bomb - Knock Up (2105712) is a pure vertical KNOCK_BACK (MiscValue 0,
     // so Spell::EffectKnockBack's speedxy stays 0) whose EffectBasePoints 499 gives a fixed damage value
     // of 500 (DieSides 1), read by EffectKnockBack as speedz = damage * 0.1 = 50.0 yd/s. With

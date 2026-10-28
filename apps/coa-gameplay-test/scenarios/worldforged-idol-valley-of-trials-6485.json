@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "name": "Worldforged Idol of Shifting Sands stands only in Silithus, not the Valley of Trials (#6485)",
+  "contract": "Item 410065 (Draconian Relic Sediment / Idol of Shifting Sands, pickup template 518457) has a recorded spawn only in Silithus (guid 6941857, map 1, -7223.8,891.1,-1.669). Before rev_20261027_90 a second copy, guid 6941858, stood 7000+ yd away in the Valley of Trials (map 1, -200.4,-4359.5,66.174), the same realm-map wrong-zone defect already fixed for other worldforged gear by rev_20261024_90 (#6485).",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 10
+    }
+  ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "teleport", "actor": "p", "map": 1, "x": -200.4, "y": -4359.5, "z": 66.5, "o": 0 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: no misplaced idol copy in the Valley of Trials", "actor": "p", "metric": "nearby_gameobject_count", "entry": 518457, "equals": 0 },
+    { "action": "teleport", "actor": "p", "map": 1, "x": -7223.8, "y": 891.1, "z": -1.0, "o": 0 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "the idol stands at its recorded Silithus spot", "actor": "p", "metric": "nearby_gameobject_count", "entry": 518457, "equals": 1 }
+  ]
+}

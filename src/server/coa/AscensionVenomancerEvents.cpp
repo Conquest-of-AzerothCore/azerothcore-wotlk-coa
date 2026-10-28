@@ -90,7 +90,7 @@ class aura_ascension_venomancer_event : public AuraScript
             case 705980: return damage && Named(info,803570);
             case 705982: return damage && critical && Any(info,{803570,803199,803193});
             case 705993: return (damage || healing) && Chance(player,id);
-            case 706001: return damage && Named(info,803199);
+            case 706001: return damage && Any(info,{803193,803199});
             case 706016: return healing && critical;
             case 706018: return healing && !periodic && Chance(player,id);
             case 706030: return damage && periodic && Chance(player,id);

@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Crimson Dragonscale already rests on the ground at Grim Batol (#8822)",
+  "contract": "The report and a static read of nearby decorative models suggested the pickup (gameobject entry 254233, guid 6940273) was pushed 1.7-2 yd under a raised camp surface by rev_20261006_65. The gameplay harness's own ground probe (the same native Map::GetHeight the server uses) disagrees: at the current height (281.7468) the gap is 0.0003 yd, grounded; restoring the realm-recorded height (284.741) would instead float it 2.99 yd above that ground, since the camp's decorative props are not collidable terrain. The pickup already rests on the ground and opens; no SQL change.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -4051.8, "y": -3454.2, "z": 282.0, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "the pickup stands at its spawn", "actor": "p", "metric": "nearby_gameobject_count", "entry": 254233, "equals": 1 },
+    { "action": "assert", "label": "it already rests on the ground", "actor": "p", "metric": "spawn_ground_gap", "guid": 6940273, "spawn_type": "gameobject", "min": -0.3, "max": 0.3 },
+    { "action": "assert", "label": "it is grounded", "actor": "p", "metric": "spawn_placement", "guid": 6940273, "spawn_type": "gameobject", "tolerance": 0.8, "equals": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 254233 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "it is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

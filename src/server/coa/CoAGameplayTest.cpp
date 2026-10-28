@@ -273,6 +273,7 @@ struct SpawnInspection
     CoAGameplay::PlacementSample sample;
     CoAGameplay::PlacementVerdict verdict{CoAGameplay::PlacementVerdict::Unchecked};
     std::vector<std::pair<uint32, CoAGameplay::DisplayState>> displays;
+    uint8 standState{0};
 };
 
 SpawnInspection InspectCreatureSpawn(CreatureData const& spawn, float tolerance)
@@ -292,6 +293,7 @@ SpawnInspection InspectCreatureSpawn(CreatureData const& spawn, float tolerance)
     inspection.sample.mayFloat = CoAGameplay::CreatureMayFloat(movement, creatureTemplate->flags_extra, animTier);
     inspection.sample.maySwim = movement.IsSwimAllowed();
     inspection.verdict = CoAGameplay::ClassifyPlacement(inspection.sample, tolerance);
+    inspection.standState = addon ? uint8(addon->bytes1 & 0xFF) : 0;
 
     std::unordered_set<uint32> const& client = LoadedClientDisplayIds().creatures;
     std::vector<uint32> displayIds;
@@ -352,7 +354,8 @@ std::unordered_map<ObjectGuid::LowType, uint32> PositiveEventSpawns(
 bool IsPlacementMetric(std::string const& metric)
 {
     return metric == "spawn_placement" || metric == "spawn_ground_gap" || metric == "spawn_submerged"
-        || metric == "spawn_display_state" || metric == "point_placement" || metric == "point_ground_gap";
+        || metric == "spawn_display_state" || metric == "spawn_stand_state"
+        || metric == "point_placement" || metric == "point_ground_gap";
 }
 
 double MeasurePlacement(std::string const& metric, Tree const& step)
@@ -380,6 +383,11 @@ double MeasurePlacement(std::string const& metric, Tree const& step)
     }
     if (metric == "spawn_submerged")
         return CoAGameplay::IsSubmerged(inspection.sample) ? 1.0 : 0.0;
+    if (metric == "spawn_stand_state")
+    {
+        Require(step.get<std::string>("spawn_type") == "creature", "Stand state metric needs a creature spawn");
+        return inspection.standState;
+    }
     Require(!inspection.displays.empty(), "Spawn has no display to check");
     CoAGameplay::DisplayState worst = CoAGameplay::DisplayState::Client;
     for (auto const& [displayId, state] : inspection.displays)
@@ -3591,6 +3599,13 @@ private:
             GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
             return object ? object->GetObjectScale() : 0.0f;
         }
+        if (metric == "nearby_gameobject_ground_offset")
+        {
+            GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
+            Require(object != nullptr, "Ground offset needs an existing nearby gameobject");
+            return object->GetPositionZ() - object->GetMap()->GetHeight(object->GetPhaseMask(),
+                object->GetPositionX(), object->GetPositionY(), MAX_HEIGHT);
+        }
         if (metric == "nearby_gameobject_at_client")
         {
             GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
@@ -3674,6 +3689,17 @@ private:
                 });
             }
             return 100.0 * hits / rolls;
+        }
+        if (metric == "forced_loot_count")
+        {
+            uint32 const wanted = step.get<uint32>("item");
+            Loot loot;
+            loot.lootOwnerGUID = player->GetGUID();
+            loot.AddItem(LootStoreItem(wanted, 0, 100.0f, false, LOOT_MODE_DEFAULT, 0, 1, 1));
+            return std::count_if(loot.items.begin(), loot.items.end(), [wanted](LootItem const& item)
+            {
+                return item.itemid == wanted && !item.is_looted;
+            });
         }
         if (metric == "map_id")
             return player->GetMapId();
@@ -4880,6 +4906,26 @@ private:
                             countItem(item);
             return count;
         }
+        if (metric == "carried_statless_armor_count")
+        {
+            uint32 count = 0;
+            auto countItem = [&count](Item* item)
+            {
+                ItemTemplate const* proto = item->GetTemplate();
+                if (proto->Class == ITEM_CLASS_ARMOR && proto->StatsCount == 0 &&
+                    proto->ScalingStatDistribution == 0 && proto->RandomProperty == 0 && proto->RandomSuffix == 0)
+                    ++count;
+            };
+            for (uint8 slot = EQUIPMENT_SLOT_START; slot < INVENTORY_SLOT_ITEM_END; ++slot)
+                if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
+                    countItem(item);
+            for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
+                if (Bag* container = player->GetBagByPos(bag))
+                    for (uint32 slot = 0; slot < container->GetBagSize(); ++slot)
+                        if (Item* item = container->GetItemByPos(uint8(slot)))
+                            countItem(item);
+            return count;
+        }
         if (metric == "carried_item_level" || metric == "carried_item_required_level" ||
             metric == "carried_item_armor" || metric == "carried_item_scaling_level" ||
             metric == "carried_item_stat")
@@ -6027,6 +6073,17 @@ private:
                 if (sScriptMgr->CanPacketReceive(player->GetSession(), packet))
                     player->GetSession()->HandleLootOpcode(packet);
             }
+        }
+        else if (action == "select_nearby")
+        {
+            float const radius = step.get<float>("radius", 40.0f);
+            Creature* creature = player->FindNearestCreature(step.get<uint32>("entry"), radius, true);
+            Require(creature != nullptr, "Select needs a living creature of that entry within " +
+                std::to_string(radius) + " yards");
+            WorldPacket packet(CMSG_SET_SELECTION, 8);
+            packet << creature->GetGUID();
+            player->GetSession()->HandleSetSelectionOpcode(packet);
+            Require(player->GetTarget() == creature->GetGUID(), "Selection did not take effect");
         }
         else if (action == "loot_creature")
         {

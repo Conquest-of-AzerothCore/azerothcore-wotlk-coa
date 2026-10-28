@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "name": "Barbarian: Carnage grants Born in Blood on a killing blow (#9402)",
+  "contract": "Carnage (803814) tooltip: killing an enemy that yields experience or honor grants Born in Blood (560521). Its own effect is SPELL_AURA_PROC_TRIGGER_SPELL -> 560521, but Spell.dbc gives 803814 ProcFlags 0, and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped generating a proc entry entirely and the aura effect could never fire. A spell_proc row with ProcFlags PROC_FLAG_KILL (2) is required, the same gap the Barbarian-completion pass already closed for the sibling passive Thick Skull (801549), which already has a working row and is not touched here.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 35,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "b",
+      "entry": 299,
+      "level": 35,
+      "distance": 2
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "spell": 803814,
+      "actor": "b"
+    },
+    {
+      "action": "cast",
+      "label": "Activate Carnage's 30 sec window",
+      "actor": "b",
+      "spell": 803814
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Carnage is active",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 803814,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Born in Blood absent before the kill",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 560521,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "d",
+      "value": 1
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "dummy dies",
+      "actor": "d",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING (#9402): killing blow grants Born in Blood from Carnage",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 560521,
+      "equals": 1,
+      "within_ms": 15000
+    }
+  ]
+}

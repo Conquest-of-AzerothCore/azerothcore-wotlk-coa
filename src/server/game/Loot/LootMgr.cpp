@@ -541,6 +541,11 @@ void Loot::AddItem(LootStoreItem const& original)
     if (!proto)
         return;
 
+    if (proto->Class == ITEM_CLASS_RECIPE && proto->SubClass == ITEM_SUBCLASS_JEWELCRAFTING_RECIPE)
+        if (Player* owner = ObjectAccessor::FindPlayer(lootOwnerGUID))
+            if (owner->GetSession()->Expansion() < EXPANSION_THE_BURNING_CRUSADE)
+                return;
+
     uint32 count = urand(item.mincount, item.maxcount);
     uint32 stacks = count / proto->GetMaxStackSize() + (count % proto->GetMaxStackSize() ? 1 : 0);
 

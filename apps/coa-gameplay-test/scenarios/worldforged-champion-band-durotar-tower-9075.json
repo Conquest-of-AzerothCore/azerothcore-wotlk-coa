@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "name": "Worldforged Champion's Band stands on the Durotar Warborn tower balcony (#9075)",
+  "contract": "Pickup template 517370 (item 521092 Champion's Band, guid 6941553) was placed by the realm-map terrain fallback 14.7 yd from its recorded spot and the LootCollector pin, on the slope below the Orcrefugetower2 balcony instead of on it (where Gurgthock and the other Durotar Warborn NPCs stand, rev_20260926_33). Restore the realm's own stored position on the balcony. The balcony is not in the server's vmaps, so spawn_ground_gap cannot be asserted there; reachability is proven by a successful Opening cast.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": 168.986, "y": -3966.811, "z": 51.5, "o": 0 },
+  "players": [ { "id": "p", "race": 2, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the Champion's Band pickup is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 517370, "equals": 1 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 517370 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "DISCRIMINATING: the pickup is within reach of the balcony and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Sally Vernal sits on her Sentinel Hill town hall pew (#9149)",
+  "contract": "rev_20261004_10_coa_westfall_restore seats the Sentinel Hill town hall residents: Everard Handor (guid 9950149) and Willow Brelor (guid 9950152) both get creature_addon bytes1 = 5 (UNIT_STAND_STATE_SIT_MEDIUM_CHAIR). Sally Vernal (entry 776782, guid 9950153, right end of the third pew) was left out of that INSERT, so with no creature_addon row she defaults to bytes1 = 0 (UNIT_STAND_STATE_STAND) and stands upright inside the bench instead of sitting like her neighbors.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "auditor", "race": 1, "class": 12, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Sally Vernal (guid 9950153) sits like her bench neighbors",
+      "actor": "auditor",
+      "metric": "spawn_stand_state",
+      "guid": 9950153,
+      "spawn_type": "creature",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Everard Handor (guid 9950149) still sits on his bench",
+      "actor": "auditor",
+      "metric": "spawn_stand_state",
+      "guid": 9950149,
+      "spawn_type": "creature",
+      "equals": 5
+    }
+  ]
+}

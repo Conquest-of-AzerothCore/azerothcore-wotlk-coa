@@ -35,6 +35,7 @@ enum WitchHunterCastSpells
     SPELL_SHARPSHOOTER = 705456,
     SPELL_SHARPSHOOTER_ENERGIZE = 704385,
     SPELL_DEAL_WITH_THE_DEVIL = 680255,
+    SPELL_SHADOWSTORM = 520277,
     SPELL_SHADOWSTORM_DAMAGE = 520278,
     SPELL_SHADOWSTORM_HEAL = 520793,
     SPELL_SHADOWSTORM_LEECH = 520794
@@ -99,7 +100,11 @@ class witch_hunter_casts : public AllSpellScript
     void OnSpellCast(Spell* spell, Unit* caster, SpellInfo const* info, bool) override
     {
         Player* player = Owner(caster);
-        if (!player || !spell->IsTriggered())
+        if (!player)
+            return;
+        if (!spell->IsTriggered() && Desecrate(info) && player->HasAura(SPELL_SHADOWSTORM))
+            Cast(player, player, SPELL_SHADOWSTORM_DAMAGE);
+        if (!spell->IsTriggered())
             return;
         SpellInfo const* channel = spell->GetTriggeredByAuraSpellInfo();
         if (!channel)

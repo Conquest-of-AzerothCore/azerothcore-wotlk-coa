@@ -62,11 +62,18 @@ void Send(Player* player)
 class KillingBlowTracker : public PlayerScript
 {
 public:
-    KillingBlowTracker() : PlayerScript("AscensionGlory", {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_HONORABLE_KILLING_BLOW}) { }
+    KillingBlowTracker() : PlayerScript("AscensionGlory",
+        {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_MAP_CHANGED, PLAYERHOOK_ON_HONORABLE_KILLING_BLOW}) { }
 
     void OnPlayerLogin(Player* player) override
     {
         Send(player);
+    }
+
+    void OnPlayerMapChanged(Player* player) override
+    {
+        if (player->IsInWorld())
+            Send(player);
     }
 
     void OnPlayerHonorableKillingBlow(Player* killer, Player*) override

@@ -1,0 +1,424 @@
+{
+  "schema": 1,
+  "name": "Adventurer's Satchel armor rewards always carry stats (#4054)",
+  "contract": "Opening an Adventurer's Satchel (item_loot_template 1397884, armor clause class=4 Quality 1-2 drawn from reference_loot_template 1010000-1039999) never hands out an Armor-class reward with zero stat lines, no ScalingStatDistribution and no RandomProperty/RandomSuffix: adventurer_cache_loot::OnBeforeLootEqualChanced (AscensionAdventurerCache.cpp) must reject such candidates before the Armor reward kind is offered. A level 60 character opens 24 satchels in a row; the count of such statless armor it carries must not grow beyond its starting gear, independent of the exact entry rolled.",
+  "players": [
+    {
+      "id": "looter",
+      "race": 1,
+      "class": 18,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "looter",
+      "metric": "carried_statless_armor_count",
+      "save_as": "baseline_statless_armor"
+    },
+    {
+      "action": "add_item",
+      "actor": "looter",
+      "item": 1397884,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "looter",
+      "item": 1397884,
+      "spell": 93461
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "add_item",
+      "actor": "looter",
+      "item": 1397884,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "looter",
+      "item": 1397884,
+      "spell": 93461
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "add_item",
+      "actor": "looter",
+      "item": 1397884,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "looter",
+      "item": 1397884,
+      "spell": 93461
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "add_item",
+      "actor": "looter",
+      "item": 1397884,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "looter",
+      "item": 1397884,
+      "spell": 93461
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "add_item",
+      "actor": "looter",
+      "item": 1397884,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "looter",
+      "item": 1397884,
+      "spell": 93461
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "add_item",
+      "actor": "looter",
+      "item": 1397884,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "looter",
+      "item": 1397884,
+      "spell": 93461
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "add_item",
+      "actor": "looter",
+      "item": 1397884,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "looter",
+      "item": 1397884,
+      "spell": 93461
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "add_item",
+      "actor": "looter",
+      "item": 1397884,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "looter",
+      "item": 1397884,
+      "spell": 93461
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "add_item",
+      "actor": "looter",
+      "item": 1397884,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "looter",
+      "item": 1397884,
+      "spell": 93461
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "add_item",
+      "actor": "looter",
+      "item": 1397884,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "looter",
+      "item": 1397884,
+      "spell": 93461
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "add_item",
+      "actor": "looter",
+      "item": 1397884,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "looter",
+      "item": 1397884,
+      "spell": 93461
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "add_item",
+      "actor": "looter",
+      "item": 1397884,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "looter",
+      "item": 1397884,
+      "spell": 93461
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "add_item",
+      "actor": "looter",
+      "item": 1397884,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "looter",
+      "item": 1397884,
+      "spell": 93461
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "add_item",
+      "actor": "looter",
+      "item": 1397884,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "looter",
+      "item": 1397884,
+      "spell": 93461
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "add_item",
+      "actor": "looter",
+      "item": 1397884,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "looter",
+      "item": 1397884,
+      "spell": 93461
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "add_item",
+      "actor": "looter",
+      "item": 1397884,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "looter",
+      "item": 1397884,
+      "spell": 93461
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "add_item",
+      "actor": "looter",
+      "item": 1397884,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "looter",
+      "item": 1397884,
+      "spell": 93461
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "add_item",
+      "actor": "looter",
+      "item": 1397884,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "looter",
+      "item": 1397884,
+      "spell": 93461
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "add_item",
+      "actor": "looter",
+      "item": 1397884,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "looter",
+      "item": 1397884,
+      "spell": 93461
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "add_item",
+      "actor": "looter",
+      "item": 1397884,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "looter",
+      "item": 1397884,
+      "spell": 93461
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "add_item",
+      "actor": "looter",
+      "item": 1397884,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "looter",
+      "item": 1397884,
+      "spell": 93461
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "add_item",
+      "actor": "looter",
+      "item": 1397884,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "looter",
+      "item": 1397884,
+      "spell": 93461
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "add_item",
+      "actor": "looter",
+      "item": 1397884,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "looter",
+      "item": 1397884,
+      "spell": 93461
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "add_item",
+      "actor": "looter",
+      "item": 1397884,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "looter",
+      "item": 1397884,
+      "spell": 93461
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "looter",
+      "metric": "item_count",
+      "item": 1397884,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "looter",
+      "metric": "carried_statless_armor_count",
+      "relative_to": "baseline_statless_armor",
+      "equals": 0
+    }
+  ]
+}

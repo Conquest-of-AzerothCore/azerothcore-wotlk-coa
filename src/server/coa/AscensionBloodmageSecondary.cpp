@@ -778,6 +778,26 @@ public:
     }
 };
 
+class aura_ascension_bloodmage_female_worgen : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_bloodmage_female_worgen);
+
+    static constexpr uint32 FemaleWorgenDisplay = 142818;
+
+    void Apply(AuraEffect const*, AuraEffectHandleModes)
+    {
+        Unit* target = GetTarget();
+        if (target->IsPlayer() && target->getGender() == GENDER_FEMALE && target->getTransForm() == GetId())
+            target->SetDisplayId(FemaleWorgenDisplay);
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(aura_ascension_bloodmage_female_worgen::Apply, EFFECT_ALL,
+            SPELL_AURA_TRANSFORM, AURA_EFFECT_HANDLE_SEND_FOR_CLIENT_MASK);
+    }
+};
+
 class aura_ascension_bloodmage_shadow_colony : public AuraScript
 {
     PrepareAuraScript(aura_ascension_bloodmage_shadow_colony);
@@ -797,6 +817,7 @@ class aura_ascension_bloodmage_shadow_colony : public AuraScript
 void AddSC_AscensionBloodmageSecondary()
 {
     RegisterSpellScript(aura_ascension_bloodmage_shadow_colony);
+    RegisterSpellScript(aura_ascension_bloodmage_female_worgen);
     RegisterSpellScript(spell_ascension_bloodmage_bloodfang_bite);
     RegisterSpellScript(aura_ascension_bloodmage_bite_wound);
     RegisterSpellScript(aura_ascension_bloodmage_sacrificial_rite);

@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "name": "Worldforged Cryptfiend Fang sits in the Plaguewood Tunnel and can be reached (#8112)",
+  "contract": "The Cryptfiend Fang pickup (1345027, guid 6940279) stood on the mountain surface above the Plaguewood Tunnel, 91.6 yd above the tunnel floor at the same XY, out of reach of any character walking into the tunnel. It is pinned to the tunnel floor at its realm map XY, (2846.800, -2586.100, 86.8) on map 0, so a character standing there can open it.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": 2846.8, "y": -2586.1, "z": 87.6, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the Cryptfiend Fang pickup is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 1345027, "equals": 1 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 1345027 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "the Cryptfiend Fang is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}
