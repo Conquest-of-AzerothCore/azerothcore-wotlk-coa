@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Brill has the Beginner's Book of Ascension and Deathguard Simmer",
+  "contract": [
+    "On the live realm (stream UGryc1wOL_g, 2026-08-29) the Beginner's Book of Ascension 75118 stands in Brill at QuestSuperTrack node 8868, and Deathguard Simmer 1519 stands beside the farm wagon east of the Brill road.",
+    "Before the fix Brill had no book and Simmer stood about 900 yd north on the Deathknell road, so neither counts within 60 yd of its Brill post.",
+    "Both spawns rest on the CoA Brill ground."
+  ],
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": 2245.0, "y": 268.0, "z": 35.0, "o": 0.0 },
+  "players": [ { "id": "p", "race": 5, "class": 12, "level": 10 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "teleport", "actor": "p", "map": 0, "x": 2245.0, "y": 268.0, "z": 35.0, "o": 0.0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: the Beginner's Book of Ascension stands in Brill", "actor": "p", "metric": "nearby_creature_count", "entry": 75118, "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "the book rests on the ground", "actor": "p", "metric": "spawn_ground_gap", "guid": 9005100, "spawn_type": "creature", "min": -0.5, "max": 0.5 },
+    { "action": "teleport", "actor": "p", "map": 0, "x": 2292.0, "y": 388.0, "z": 35.0, "o": 0.0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: Deathguard Simmer stands in Brill by the wagon", "actor": "p", "metric": "nearby_creature_count", "entry": 1519, "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "Simmer rests on the ground", "actor": "p", "metric": "spawn_ground_gap", "guid": 29794, "spawn_type": "creature", "min": -0.5, "max": 0.5 }
+  ]
+}
