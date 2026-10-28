@@ -246,6 +246,44 @@ CoAGameplay::PlacementSample ProbeTerrain(uint32 mapId, uint32 phaseMask, float 
     return sample;
 }
 
+float ProbeClearance(std::vector<CoAGameplay::ClearanceRay> const& rays, uint32 mapId, float x, float y, float z)
+{
+    Require(sMapStore.LookupEntry(mapId) != nullptr, "Unknown map: " + std::to_string(mapId));
+    Require(sWorld->getBoolConfig(CONFIG_VMAP_ENABLE_LOS)
+        && VMAP::VMapFactory::createOrGetVMapMgr()->isLineOfSightCalcEnabled(), "VMap line of sight is disabled");
+    Map* map = sMapMgr->CreateBaseMap(mapId);
+    map->GetGridTerrainData(x, y);
+    return CoAGameplay::NearestHit(rays, [map, x, y, z](CoAGameplay::ClearanceRay const& ray) -> std::optional<float>
+    {
+        float const startZ = z + ray.originHeight;
+        float const endX = x + ray.dx * CoAGameplay::ClearanceReach;
+        float const endY = y + ray.dy * CoAGameplay::ClearanceReach;
+        float const endZ = startZ + ray.dz * CoAGameplay::ClearanceReach;
+        map->GetGridTerrainData(endX, endY);
+        float hitX = endX;
+        float hitY = endY;
+        float hitZ = endZ;
+        if (!map->GetMapCollisionData().GetStaticTree().GetObjectHitPos(x, y, startZ, endX, endY, endZ,
+            hitX, hitY, hitZ, 0.0f))
+            return std::nullopt;
+        return std::hypot(hitX - x, hitY - y, hitZ - startZ);
+    });
+}
+
+SpawnData const& FindSpawn(Tree const& step)
+{
+    uint32 const guid = step.get<uint32>("guid");
+    if (step.get<std::string>("spawn_type") == "creature")
+    {
+        CreatureData const* spawn = sObjectMgr->GetCreatureData(guid);
+        Require(spawn != nullptr, "Unknown creature spawn: " + std::to_string(guid));
+        return *spawn;
+    }
+    GameObjectData const* spawn = sObjectMgr->GetGameObjectData(guid);
+    Require(spawn != nullptr, "Unknown gameobject spawn: " + std::to_string(guid));
+    return *spawn;
+}
+
 struct ClientDisplayIds
 {
     std::unordered_set<uint32> creatures;
@@ -354,8 +392,8 @@ std::unordered_map<ObjectGuid::LowType, uint32> PositiveEventSpawns(
 bool IsPlacementMetric(std::string const& metric)
 {
     return metric == "spawn_placement" || metric == "spawn_ground_gap" || metric == "spawn_submerged"
-        || metric == "spawn_display_state" || metric == "spawn_stand_state"
-        || metric == "point_placement" || metric == "point_ground_gap";
+        || metric == "spawn_display_state" || metric == "spawn_stand_state" || metric == "spawn_clearance"
+        || metric == "spawn_headroom" || metric == "point_placement" || metric == "point_ground_gap";
 }
 
 double MeasurePlacement(std::string const& metric, Tree const& step)
@@ -369,6 +407,13 @@ double MeasurePlacement(std::string const& metric, Tree const& step)
         std::optional<float> const gap = CoAGameplay::GroundGap(sample);
         Require(gap.has_value(), "No ground found for the point");
         return *gap;
+    }
+
+    if (metric == "spawn_clearance" || metric == "spawn_headroom")
+    {
+        SpawnData const& spawn = FindSpawn(step);
+        return ProbeClearance(metric == "spawn_clearance" ? CoAGameplay::LevelRays() : CoAGameplay::HeadroomRays(),
+            spawn.mapid, spawn.posX, spawn.posY, spawn.posZ);
     }
 
     SpawnInspection const inspection = InspectSpawn(step,
