@@ -195,6 +195,10 @@ constexpr uint16 SMSG_PATCH_ITEM = 0x0932;
 constexpr uint16 SMSG_PATCH_ITEM_DISPLAY_INFO = 0x096B;
 constexpr uint16 SMSG_PATCH_CHARACTER_ADVANCEMENT = 0x064A;
 constexpr uint16 SMSG_PATCH_SPELL = 0x092A;
+constexpr uint16 SMSG_PATCH_SPELL_VISUAL = 0x092C;
+constexpr uint16 SMSG_PATCH_SPELL_VISUAL_KIT = 0x092D;
+constexpr uint16 SMSG_PATCH_SPELL_VISUAL_KIT_MODEL_ATTACH = 0x092E;
+constexpr uint16 SMSG_PATCH_SPELL_VISUAL_EFFECT_NAME = 0x092F;
 constexpr uint16 SMSG_PATCH_SUPER_TRACK = 0x06BE;
 constexpr uint16 SMSG_PATCH_QUEST_SUPER_TRACK = 0x06BF;
 constexpr uint16 SMSG_PATCH_SKILL_LINE_ABILITY = 0x0934;
@@ -4210,6 +4214,8 @@ public:
     for (QuestSuperTrackPatch const &patch : rows.QuestSuperTracks)
       bytes += SendQuestSuperTrackRow(player, QuestSuperTrackRowFor(patch, player->getRaceMask()));
 
+    bytes += SendSpellVisualRows(player);
+
     for (SkillLineAbilityPatchRow const& row : rows.SkillLineAbilities)
         bytes += SendSkillLineAbilityRow(player, row);
 
@@ -4762,6 +4768,91 @@ private:
     for (uint32 value : row)
       packet << value;
     return SendRowPacket(player, packet);
+  }
+
+  std::size_t SendSpellVisualRow(Player *player, uint16 opcode,
+                                 std::vector<uint32> const &values) const {
+    WorldPacket packet(opcode, values.size() * sizeof(uint32));
+    for (uint32 value : values)
+      packet << value;
+    return SendRowPacket(player, packet);
+  }
+
+  std::size_t SendSpellVisualRows(Player *player) const {
+    std::size_t bytes = 0;
+    uint32 visuals = 0, kits = 0, attaches = 0, effects = 0;
+
+    if (QueryResult result = WorldDatabase.Query(
+            "SELECT `ID`, `PrecastKit`, `CastKit`, `ImpactKit`, `StateKit`, `StateDoneKit`, `ChannelKit`, "
+            "`HasMissile`, `MissileModel`, `MissilePathType`, `MissileDestinationAttachment`, `MissileSound`, "
+            "`AnimEventSoundID`, `Flags`, `CasterImpactKit`, `TargetImpactKit`, `MissileAttachment`, "
+            "`MissileFollowGroundHeight`, `MissileFollowGroundDropSpeed`, `MissileFollowGroundApproach`, "
+            "`MissileFollowGroundFlags`, `MissileMotion`, `MissileTargetingKit`, `InstantAreaKit`, "
+            "`ImpactAreaKit`, `PersistentAreaKit`, `MissileCastOffsetX`, `MissileCastOffsetY`, "
+            "`MissileCastOffsetZ`, `MissileImpactOffsetX`, `MissileImpactOffsetY`, `MissileImpactOffsetZ` "
+            "FROM `spellvisual_dbc`"))
+    {
+      do {
+        Field *fields = result->Fetch();
+        std::vector<uint32> values(32);
+        for (uint32 i = 0; i < 26; ++i)
+          values[i] = fields[i].Get<uint32>();
+        for (uint32 i = 26; i < 32; ++i)
+          values[i] = std::bit_cast<uint32>(fields[i].Get<float>());
+        bytes += SendSpellVisualRow(player, SMSG_PATCH_SPELL_VISUAL, values);
+        ++visuals;
+      } while (result->NextRow());
+    }
+
+    if (QueryResult result = WorldDatabase.Query("SELECT * FROM `spellvisualkit_dbc`"))
+    {
+      do {
+        Field *fields = result->Fetch();
+        std::vector<uint32> values(38);
+        for (uint32 i = 0; i < 38; ++i)
+          values[i] = fields[i].Get<uint32>();
+        bytes += SendSpellVisualRow(player, SMSG_PATCH_SPELL_VISUAL_KIT, values);
+        ++kits;
+      } while (result->NextRow());
+    }
+
+    if (QueryResult result = WorldDatabase.Query(
+            "SELECT `ID`, `ParentSpellVisualKitID`, `SpellVisualEffectNameID`, `AttachmentID`, `OffsetX`, "
+            "`OffsetY`, `OffsetZ`, `Yaw`, `Pitch`, `Roll` FROM `spellvisualkitmodelattach_dbc`"))
+    {
+      do {
+        Field *fields = result->Fetch();
+        std::vector<uint32> values(10);
+        for (uint32 i = 0; i < 4; ++i)
+          values[i] = fields[i].Get<uint32>();
+        for (uint32 i = 4; i < 10; ++i)
+          values[i] = std::bit_cast<uint32>(fields[i].Get<float>());
+        bytes += SendSpellVisualRow(player, SMSG_PATCH_SPELL_VISUAL_KIT_MODEL_ATTACH, values);
+        ++attaches;
+      } while (result->NextRow());
+    }
+
+    if (QueryResult result = WorldDatabase.Query(
+            "SELECT `ID`, `Name`, `FilePath`, `Scale`, `Scale2`, `MinScale`, `MaxScale` "
+            "FROM `spellvisualeffectname_dbc`"))
+    {
+      do {
+        Field *fields = result->Fetch();
+        WorldPacket packet(SMSG_PATCH_SPELL_VISUAL_EFFECT_NAME, 28 + 64);
+        packet << uint32(fields[0].Get<uint32>());
+        AppendSizedString(packet, fields[1].Get<std::string>());
+        AppendSizedString(packet, fields[2].Get<std::string>());
+        for (uint32 i = 3; i < 7; ++i)
+          packet << fields[i].Get<float>();
+        bytes += SendRowPacket(player, packet);
+        ++effects;
+      } while (result->NextRow());
+    }
+
+    LOG_INFO("coa", "Streamed {} SpellVisual, {} SpellVisualKit, {} attach and {} effect rows to {}",
+             visuals, kits, attaches, effects, player->GetName());
+
+    return bytes;
   }
 
   std::size_t SendSpellRow(Player *player, SpellPatchRow const &row) const {

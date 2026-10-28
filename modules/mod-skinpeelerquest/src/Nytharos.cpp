@@ -295,6 +295,14 @@ namespace
 
         void UpdateAI(uint32 /*diff*/) override
         {
+            // The patrol ring runs well past the 30-yard home leash, so an attack
+            // anywhere on it was rejected as out of the leash area. Keep home on
+            // his current patrol point until he is engaged; the fight itself is
+            // then leashed to wherever the pull happened, as usual.
+            if (!me->IsInCombat())
+                me->SetHomePosition(me->GetPositionX(), me->GetPositionY(),
+                    me->GetPositionZ(), me->GetOrientation());
+
             if (!UpdateVictim())
                 return;
 

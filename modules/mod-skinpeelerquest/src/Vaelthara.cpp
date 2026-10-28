@@ -389,6 +389,12 @@ namespace
             if (!creature || creature->GetEntry() != VAELTHARA_ENTRY)
                 return;
 
+            // Her patrol spans far more than the 30-yard home leash, so keep home
+            // on the current patrol point until she is engaged.
+            if (!creature->IsInCombat())
+                creature->SetHomePosition(creature->GetPositionX(), creature->GetPositionY(),
+                    creature->GetPositionZ(), creature->GetOrientation());
+
             VaeltharaState& state = g_vaeltharaStates[creature->GetGUID().GetCounter()];
             uint32 const now = getMSTime();
 

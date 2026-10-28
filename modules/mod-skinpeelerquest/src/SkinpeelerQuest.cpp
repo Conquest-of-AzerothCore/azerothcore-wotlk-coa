@@ -33,6 +33,8 @@
 namespace
 {
     constexpr uint32 APEX_STORMSFANG_ENTRY = 9916222;
+    constexpr uint32 APEX_VAELTHARA_ENTRY = 9916223;
+    constexpr uint32 APEX_NYTHAROS_ENTRY = 9916224;
     constexpr uint32 APEX_SPIRIT_WOLF_ENTRY = 9916211;
     constexpr uint32 APEX_THUNDER_POUNCE = 1004112;
     constexpr uint32 APEX_POUNCE_IMPACT = 1004116;
@@ -317,6 +319,39 @@ namespace
         }
     };
 
+    // The core measures the leash from the creature's home position. All three
+    // apex bosses patrol far past the 30-yard radius, so an opening hit from
+    // range was rejected: the boss never engaged and the pull read as "too far".
+    // Anchor home on the attacker at the first hit, then start the fight.
+    class ApexPullScript : public UnitScript
+    {
+    public:
+        ApexPullScript() : UnitScript("ApexPullScript", true, {UNITHOOK_ON_DAMAGE}) { }
+
+        void OnDamage(Unit* attacker, Unit* victim, uint32& /*damage*/) override
+        {
+            if (!attacker || !victim || !victim->IsCreature() ||
+                !attacker->IsAlive() || !victim->IsAlive())
+                return;
+
+            uint32 const entry = victim->GetEntry();
+            if (entry != APEX_STORMSFANG_ENTRY && entry != APEX_VAELTHARA_ENTRY &&
+                entry != APEX_NYTHAROS_ENTRY)
+                return;
+
+            if (!attacker->IsControlledByPlayer())
+                return;
+
+            Creature* boss = victim->ToCreature();
+            if (boss->IsInCombat() && boss->GetVictim())
+                return;
+
+            boss->SetHomePosition(attacker->GetPositionX(), attacker->GetPositionY(),
+                attacker->GetPositionZ(), attacker->GetOrientation());
+            boss->AI()->AttackStart(attacker);
+        }
+    };
+
     class SkinpeelerStormfangCreatureScript : public AllCreatureScript
     {
     public:
@@ -339,6 +374,12 @@ namespace
                     KeepWolfSeparation(creature);
                 return;
             }
+
+            // The patrol spans more than the 30-yard home leash, so keep home on
+            // the current patrol point until he is engaged.
+            if (!creature->IsInCombat())
+                creature->SetHomePosition(creature->GetPositionX(), creature->GetPositionY(),
+                    creature->GetPositionZ(), creature->GetOrientation());
 
             if (creature->GetReactState() == REACT_AGGRESSIVE && !creature->IsInCombat())
                 creature->SetReactState(REACT_DEFENSIVE);
@@ -790,6 +831,7 @@ void Addmod_skinpeelerquestScripts()
     new SkinpeelerStormfangSpellScript();
     new SkinpeelerStormfangCreatureScript();
     new SkinpeelerStormfangUnitScript();
+    new ApexPullScript();
     new SkinpeelerTrackScript();
     new SkinpeelerIconTriggerScript();
     AddVaeltharaScripts();
