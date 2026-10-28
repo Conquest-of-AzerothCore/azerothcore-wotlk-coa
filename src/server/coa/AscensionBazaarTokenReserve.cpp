@@ -13,10 +13,9 @@
 namespace
 {
 std::mutex reserveLock;
-std::unordered_map<uint32, uint32> reserves; // account -> reserve, loaded on first use
-thread_local uint32 spendDepth = 0;          // DestroyItemCount calls DestroyItem: only the outer scope counts
+std::unordered_map<uint32, uint32> reserves;
+thread_local uint32 spendDepth = 0;
 
-// Caller holds reserveLock.
 uint32& ReserveRef(uint32 accountId)
 {
     auto itr = reserves.find(accountId);
@@ -31,7 +30,6 @@ uint32& ReserveRef(uint32 accountId)
     return reserves.emplace(accountId, reserve).first->second;
 }
 
-// Caller holds reserveLock.
 void Store(uint32 accountId, uint32 reserve)
 {
     ReserveRef(accountId) = reserve;
@@ -60,7 +58,6 @@ uint32 QueryCount(std::string const& sql)
     return 0;
 }
 
-// Tokens in bags/bank of characters matching `where` (aliases: ci, ii, c).
 uint32 CountInventory(std::string const& where)
 {
     return QueryCount(Acore::StringFormat(
@@ -69,7 +66,6 @@ uint32 CountInventory(std::string const& where)
         "WHERE ii.`itemEntry` = {} AND {}", AscensionBazaarTokenReserve::TOKEN_ITEM, where));
 }
 
-// Tokens attached to mail whose receiver matches `where` (aliases: m, mi, ii, c).
 uint32 CountMail(std::string const& where)
 {
     return QueryCount(Acore::StringFormat(
@@ -112,7 +108,6 @@ void AscensionBazaarTokenReserve::OnCharacterDeleted(uint32 accountId, uint32 lo
     if (!accountId || !GetReserve(accountId))
         return;
 
-    // A soft-deleted character already has account 0 and was counted when it was unlinked.
     std::string const where = Acore::StringFormat("c.`guid` = {} AND c.`account` = {}", lowGuid, accountId);
     Lower(accountId, CountInventory(where) + CountMail(where));
 }
