@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "name": "Elwynn Forest has one Worldforged Defias Shanker pickup (#8545)",
+  "contract": "The Murloc Tool pickup (entry 95688, item 451111) stood twice in Elwynn, 3.1 yd apart: the original catalog row (guid 6901119) and the hand-authored copy (guid 6940343). Only the authored one remains; the Alterac Mountains copy (guid 6940344, restored by #9253) is untouched.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -9689.9, "y": -74.0, "z": 41.5, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 10 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: one Defias Shanker pickup near the spring", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95688, "equals": 1 }
+  ]
+}
