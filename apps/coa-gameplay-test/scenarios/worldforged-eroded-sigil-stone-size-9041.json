@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "name": "Worldforged Eroded Sigil Stone is pickup-sized, not a tower (#9041)",
+  "contract": "Pickup template 254162 (Eroded Sigil Stone, guid 6940444, map 0, Tirisfal Glades) uses display 1025463 (world/expansion01/doodads/generic/bloodelf/runestone/be_runestone01.m2, geo-box height 20.29 yd). At size 0.4 (set by #6146) it still stands 8.1 yd tall, about 6.6x the median apparent height (1.22 yd) of the 1,331 worldforged pickups whose display and size are fixed by the realm-map restoration. 0.06 brings it to about 1.22 yd, in line with every comparable pickup.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": 1688.3, "y": 1550.2, "z": 123.3, "o": 0 },
+  "players": [
+    { "id": "p", "race": 5, "class": 12, "level": 2 }
+  ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the Eroded Sigil Stone stands in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 254162, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the stone is pickup-sized, not a tower", "actor": "p", "metric": "nearby_gameobject_scale", "entry": 254162, "min": 0.05, "max": 0.08 }
+  ]
+}
