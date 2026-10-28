@@ -183,10 +183,10 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (9950714, 312443, 0, 0, 0, 1, 1, 0, 26.3, -888.1, 62.3, 1.67, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Shadowmage Greenfield (client SuperTrack point; facing estimated)'),
 (9950715, 312428, 0, 0, 0, 1, 1, 0, 36.8, -918.5, 96.7, 2.4, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Asteria the Soulcleaver (client SuperTrack point; facing estimated)'),
 (9950716, 312429, 0, 0, 0, 1, 1, 0, 36.4, -913.7, 96.7, 2.77, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Priestess Mar''lynn Evermorne (client SuperTrack point; facing estimated)'),
-(9950717, 312439, 0, 0, 0, 1, 1, 0, 44.1, -907.2, 96.7, 0.19, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Magister Morninglare (Tarren Mill tower top beside Asteria; spot and facing estimated)'),
-(9950718, 312402, 0, 0, 0, 1, 1, 0, 26.0, -931.6, 88.1, 5.34, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Bergamont Lestern (client SuperTrack point; facing estimated)'),
-(9950719, 312406, 0, 0, 0, 1, 1, 0, 26.0, -931.7, 62.4, 0.54, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Shadowmage Krenna (client SuperTrack point; facing estimated)'),
-(9950720, 312405, 0, 0, 0, 1, 1, 0, 32.7, -906.5, 62.4, 0.17, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Shadowmage Vorman (client SuperTrack point; facing estimated)'),
+(9950717, 312439, 0, 0, 0, 1, 1, 0, 44.1, -907.2, 96.8, 0.19, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Magister Morninglare (client SuperTrack point; facing estimated)'),
+(9950718, 312402, 0, 0, 0, 1, 1, 0, 27.9, -911.3, 62.4, 5.34, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Bergamont Lestern (client SuperTrack turn-in point of 1377; facing estimated)'),
+(9950719, 312406, 0, 0, 0, 1, 1, 0, 26.0, -931.7, 88.1, 0.54, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Shadowmage Krenna (client SuperTrack point; facing estimated)'),
+(9950720, 312405, 0, 0, 0, 1, 1, 0, 32.7, -906.5, 72.7, 0.17, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Shadowmage Vorman (client SuperTrack point; facing estimated)'),
 (9950721, 312506, 0, 0, 0, 1, 1, 0, 33.6, -814.8, 87.9, 6.14, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Farlang Woodmarg (client SuperTrack point; facing estimated)'),
 (9950722, 312505, 0, 0, 0, 1, 1, 0, -91.8, -811.5, 57.9, 5.77, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Surgeon Batharis (client SuperTrack point; facing estimated)'),
 (9950723, 312503, 0, 0, 0, 1, 1, 0, -88.8, -809.5, 57.9, 5.03, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Glutton (beside Surgeon Batharis; spot and facing estimated)'),
@@ -590,8 +590,9 @@ INSERT INTO `quest_template_addon` (`ID`, `MaxLevel`, `AllowableClasses`, `Sourc
 (255154, 0, 0, 0, 255153, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 -- Givers and enders follow the captured texts (Details speaker, EndText target) and the client SuperTrack turn-in
--- points. 255136 starts from item 650200, which carries no start quest, so it has no giver here; Magistrate Henry
--- Maleb's colleague Lydon ends it as the text says.
+-- points. 1377 ends at Bergamont Lestern (its CompletedText) on the tower's ground floor. 255136 follows the Silverpine
+-- Blighthollow chain: Apothecary Holm (500329), who ends 255135, gives it with the logbook 650200; Holm and that chain
+-- are not on this server, so 255136 has no giver here. Apothecary Lydon ends it as the text says.
 DELETE FROM `creature_queststarter` WHERE `quest` IN (1327,1328,1329,1330,1331,1332,1333,1334,1335,1336,1337,1343,1344,
   1345,1346,1347,1349,1350,1353,1354,1355,1356,1357,1376,1377,1378,1379,1400,1401,100082,100083,255020,255021,255049,
   255107,255118,255119,255120,255121,255122,255123,255124,255125,255126,255127,255128,255136,255140,255141,255142,
@@ -676,10 +677,10 @@ INSERT INTO `creature_questender` (`id`, `quest`) VALUES
 (255279, 255020),
 (255279, 255021),
 (312397, 1349),
+(312402, 1377),
 (312402, 255127),
 (312414, 1354),
 (312428, 1376),
-(312428, 1377),
 (312428, 1378),
 (312429, 255128),
 (312443, 255126),
@@ -851,9 +852,12 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (17, 0, 355830, 0, 0, 31, 1, 3, 2270, 0, 0, 0, 0, '', 'Spell 355830 - target creature 2270'),
 (17, 0, 355830, 0, 1, 31, 1, 3, 41755, 0, 0, 0, 0, '', 'Spell 355830 - target creature 41755');
 
--- The syringe (355728) and extractor (355734) take their sample from a slain yeti or Syndicate target.
+-- The syringe (355728) and extractor (355734) take their sample from a slain yeti or Syndicate target, whose corpse
+-- then despawns after one second so it yields one sample (estimated).
 DELETE FROM `spell_scripts` WHERE `id` IN (355728,355734);
 INSERT INTO `spell_scripts` (`id`, `effIndex`, `delay`, `command`, `datalong`, `datalong2`, `dataint`, `x`, `y`,
   `z`, `o`) VALUES
 (355728, 1, 0, 17, 355214, 1, 0, 0, 0, 0, 0),
-(355734, 1, 0, 17, 355218, 1, 0, 0, 0, 0, 0);
+(355728, 1, 0, 18, 1000, 0, 0, 0, 0, 0, 0),
+(355734, 1, 0, 17, 355218, 1, 0, 0, 0, 0, 0),
+(355734, 1, 0, 18, 1000, 0, 0, 0, 0, 0, 0);
