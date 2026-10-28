@@ -56,6 +56,19 @@ public:
     }
 };
 
+class primalist_aftershock_metadata : public GlobalScript
+{
+public:
+    primalist_aftershock_metadata() : GlobalScript("primalist_aftershock_metadata",
+        {GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR}) { }
+
+    void OnLoadSpellCustomAttr(SpellInfo* info) override
+    {
+        if (info->Id == Aftershock)
+            info->ProcCharges = 1;
+    }
+};
+
 class primalist_seismic_smash_scaling : public UnitScript
 {
 public:
@@ -77,5 +90,6 @@ public:
 void AddSC_AscensionPrimalistSeismicResources()
 {
     new primalist_seismic_resources();
+    new primalist_aftershock_metadata();
     new primalist_seismic_smash_scaling();
 }
