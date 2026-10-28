@@ -51,3 +51,9 @@ SET `description` = REPLACE(`description`, 'contains 1 Bow and 1 Arrow Incarnati
                             'contains 1 Bow, 1 Arrow Incarnation, 1 Sword, 1 Staff and 1 Wand.')
 WHERE `entry` IN (198331, 198332, 198333)
   AND EXISTS (SELECT 1 FROM `coa_client_vanity_collection` WHERE `BazaarTokenCost` > 0);
+
+-- 3) With five pieces each, the Arsenals cost what rev_20261023_03 gives a cache of 4-7 pieces: 2700 (was 2200).
+UPDATE `coa_client_vanity_collection`
+SET `BazaarTokenCost` = 2700
+WHERE `ItemID` IN (198331, 198332, 198333)  -- Love, Sky and Twilight Witch's Arsenal
+  AND `BazaarTokenCost` > 0;
