@@ -203,9 +203,10 @@ TEST(CoAPrestige, RewardsParseAsItemCountPairs)
 
 TEST(CoAPrestige, ExperienceBonusMultipliesAndSaturates)
 {
-    EXPECT_EQ(ApplyExperienceBonus(456, 150), 1140u);
-    EXPECT_EQ(ApplyExperienceBonus(146, 150), 365u);
-    EXPECT_EQ(ApplyExperienceBonus(100, 0), 100u);
+    EXPECT_EQ(ApplyExperienceBonus(100, 300), 300u);
+    EXPECT_EQ(ApplyExperienceBonus(456, 150), 684u);
+    EXPECT_EQ(ApplyExperienceBonus(146, 150), 219u);
+    EXPECT_EQ(ApplyExperienceBonus(100, 0), 0u);
     EXPECT_EQ(ApplyExperienceBonus(0, 150), 0u);
     EXPECT_EQ(ApplyExperienceBonus(std::numeric_limits<uint32_t>::max(), 150), std::numeric_limits<uint32_t>::max());
 }

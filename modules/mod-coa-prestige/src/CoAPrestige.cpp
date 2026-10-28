@@ -556,7 +556,7 @@ namespace
         ReactivateRemainingRanks(player, chains);
         player->SendInitialActionButtons();
         StripTemporaryAuras(player);
-        AscensionRulesets::Apply(player, AscensionRulesets::Ruleset::WarMode);
+        AscensionRulesets::Apply(player, AscensionRulesets::Ruleset::PvE);
 
         CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
         std::vector<Item*> mailed;

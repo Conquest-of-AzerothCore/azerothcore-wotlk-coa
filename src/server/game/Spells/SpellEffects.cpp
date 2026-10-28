@@ -20,6 +20,8 @@
 #include "BattlegroundMgr.h"
 #include "BattlegroundSA.h"
 #include "CellImpl.h"
+#include "Containers.h"
+#include <array>
 #include "Chat.h"
 #include "Common.h"
 #include "Creature.h"
@@ -241,8 +243,8 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectAscensionRestoreBaseManaPct,              //166 SPELL_EFFECT_ASCENSION_RESTORE_BASE_MANA_PCT
     &Spell::EffectNULL,                                     //167 unknown Ascension effect
     &Spell::EffectAscensionPlaySpellVisualKit,              //168 SPELL_EFFECT_ASCENSION_PLAY_SPELL_VISUAL_KIT
-    &Spell::EffectNULL,                                     //169 SPELL_EFFECT_ASCENSION_SPREAD_AURA
-    &Spell::EffectNULL,                                     //170 SPELL_EFFECT_ASCENSION_SPREAD_AURA_2
+    &Spell::EffectAscensionSpreadAura,                      //169 SPELL_EFFECT_ASCENSION_SPREAD_AURA
+    &Spell::EffectAscensionSpellFanout,                     //170 SPELL_EFFECT_ASCENSION_SPREAD_AURA_2
     &Spell::EffectAscensionModifyAuraCharges,               //171 SPELL_EFFECT_ASCENSION_MODIFY_AURA_CHARGES
     &Spell::EffectNULL,                                     //172 unknown Ascension effect
     &Spell::EffectAscensionRefreshAura,                     //173 SPELL_EFFECT_ASCENSION_REFRESH_AURA
@@ -511,6 +513,233 @@ void Spell::EffectDelayedTriggerSpell(SpellEffIndex effIndex)
         }, Milliseconds(effect.Amplitude));
 }
 
+void Spell::EffectAscensionSpreadAura(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET || !unitTarget)
+        return;
+    SpellEffectInfo const& effect = m_spellInfo->Effects[effIndex];
+    bool const friendly = effect.TargetA.GetTarget() == TARGET_UNIT_TARGET_ALLY;
+    bool const preserveState = effect.MiscValue == 5;
+    bool const healingBounce = effect.MiscValue == 7 && friendly;
+    bool const snapshotApply = effect.MiscValue == 3 || preserveState;
+    if ((effect.MiscValue != 1 && !snapshotApply && !healingBounce) || effect.MiscValueB || !effect.TriggerSpell ||
+        (!friendly && effect.TargetA.GetTarget() != TARGET_UNIT_TARGET_ENEMY) || effect.TargetB.GetTarget() != 0 ||
+        (friendly && !preserveState && !healingBounce))
+        return;
+    SpellInfo const* payload = sSpellMgr->GetSpellInfo(effect.TriggerSpell);
+    if (!payload)
+        return;
+    bool hasAura = false;
+    for (SpellEffectInfo const& payloadEffect : payload->Effects)
+        hasAura = hasAura || payloadEffect.IsAura();
+    if (!hasAura)
+        return;
+    Unit* caster = GetOriginalCaster();
+    if (!caster || !caster->IsInWorld() || !unitTarget->IsAlive() ||
+        !(friendly ? caster->IsValidAssistTarget(unitTarget) : caster->IsValidAttackTarget(unitTarget)))
+        return;
+    Aura* source = unitTarget->GetAuraOfRankedSpellOrTwin(effect.TriggerSpell, caster->GetGUID());
+    if (!source || source->IsRemoved() || source->GetDuration() == 0)
+        return;
+    if ((preserveState || healingBounce) && source->GetDuration() < 0)
+        return;
+    if ((preserveState || healingBounce) && source->GetCharges())
+        return;
+    if (friendly && (!caster->IsPlayer() || !source->HasEffectType(SPELL_AURA_PERIODIC_HEAL)))
+        return;
+    uint32 const auraId = source->GetId();
+    if (GetScriptValue(auraId))
+        return;
+    SpellInfo const* auraInfo = source->GetSpellInfo();
+    struct PeriodicSnapshot
+    {
+        bool present = false;
+        int32 amount = 0;
+        float pct = 1.0f;
+        float crit = 0.0f;
+        int32 timer = 0;
+        bool periodic = false;
+    };
+    std::array<PeriodicSnapshot, MAX_SPELL_EFFECTS> snapshot{};
+    uint8 mask = 0;
+    uint8 const stacks = source->GetStackAmount();
+    int32 const remaining = source->GetDuration();
+    int32 const maximum = source->GetMaxDuration();
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        if (AuraEffect const* auraEffect = source->GetEffect(i))
+        {
+            mask |= 1u << i;
+            if (auraEffect->IsPeriodic() || preserveState)
+                snapshot[i] = {true, auraEffect->GetAmount(), auraEffect->GetPctMods(), auraEffect->GetCritChance(),
+                    int32(auraEffect->GetPeriodicTimer()), auraEffect->IsPeriodic()};
+        }
+    float const radius = effect.CalcRadius(caster, this) * m_spellValue->RadiusMod;
+    if (!mask || radius <= 0.0f)
+        return;
+    auto validRecipient = [this, caster, friendly, preserveState, healingBounce, remaining, &effect](Unit* target)
+    {
+        if (!target || target == unitTarget || !target->IsAlive() || !(friendly ? caster->IsValidAssistTarget(target) : caster->IsValidAttackTarget(target)) ||
+            !unitTarget->InSamePhase(target) || !unitTarget->IsWithinLOSInMap(target) ||
+            !caster->IsWithinLOSInMap(target) || !m_spellInfo->CheckTargetCreatureType(target))
+            return false;
+        if (preserveState && friendly && target != caster && !caster->ToPlayer()->IsInRaidWith(target))
+            return false;
+        if (preserveState || healingBounce)
+            if (Aura* existing = target->GetAuraOfRankedSpellOrTwin(effect.TriggerSpell, caster->GetGUID()))
+                if (friendly || existing->GetDuration() >= remaining)
+                    return false;
+        return !(m_spellInfo->AttributesEx6 & SPELL_ATTR6_DO_NOT_CHAIN_TO_CROWD_CONTROLLED_TARGETS) ||
+            (!target->HasBreakableByDamageCrowdControlAura() &&
+                !target->HasUnitState(UNIT_STATE_CONTROLLED | UNIT_STATE_ROOT));
+    };
+    uint8 selection = uint8(effIndex);
+    for (uint8 i = 0; i < uint8(effIndex); ++i)
+    {
+        SpellEffectInfo const& previous = m_spellInfo->Effects[i];
+        if (m_ascensionSpreadSelectionReady[i] && previous.Effect == effect.Effect &&
+            previous.MiscValue == effect.MiscValue && previous.MiscValueB == effect.MiscValueB &&
+            previous.TargetA.GetTarget() == effect.TargetA.GetTarget() &&
+            previous.TargetB.GetTarget() == effect.TargetB.GetTarget() && previous.RadiusEntry == effect.RadiusEntry)
+        {
+            selection = i;
+            break;
+        }
+    }
+    if (!m_ascensionSpreadSelectionReady[selection])
+    {
+        std::list<Unit*> targets;
+        if (friendly)
+        {
+            Acore::AnyFriendlyUnitInObjectRangeCheck check(unitTarget, caster, radius);
+            Acore::UnitListSearcher<Acore::AnyFriendlyUnitInObjectRangeCheck> searcher(unitTarget, targets, check);
+            Cell::VisitObjects(unitTarget, searcher, radius);
+        }
+        else
+        {
+            Acore::AnyUnfriendlyUnitInObjectRangeCheck check(unitTarget, caster, radius);
+            Acore::UnitListSearcher<Acore::AnyUnfriendlyUnitInObjectRangeCheck> searcher(unitTarget, targets, check);
+            Cell::VisitObjects(unitTarget, searcher, radius);
+        }
+        targets.remove_if([&validRecipient](Unit* target) { return !validRecipient(target); });
+        uint32 const limit = m_spellValue->MaxAffectedTargets;
+        if (preserveState || healingBounce)
+        {
+            targets.sort([this, friendly, preserveState](Unit* first, Unit* second)
+            {
+                if (friendly && preserveState && first->GetHealthPct() != second->GetHealthPct())
+                    return first->GetHealthPct() < second->GetHealthPct();
+                if (friendly && !preserveState && unitTarget->GetDistance(first) != unitTarget->GetDistance(second))
+                    return unitTarget->GetDistance(first) < unitTarget->GetDistance(second);
+                return first->GetGUID() < second->GetGUID();
+            });
+            if (limit && targets.size() > limit)
+                targets.resize(limit);
+        }
+        else if (limit && targets.size() > limit)
+            Acore::Containers::RandomResize(targets, limit);
+        for (Unit* target : targets)
+            m_ascensionSpreadTargets[selection].push_back(target->GetGUID());
+        m_ascensionSpreadSelectionReady[selection] = true;
+    }
+    SetScriptValue(auraId, 1);
+    bool const cannotCrit = m_spellInfo->AttributesEx2 & SPELL_ATTR2_CANT_CRIT;
+    for (ObjectGuid targetGuid : m_ascensionSpreadTargets[selection])
+    {
+        Unit* target = ObjectAccessor::GetUnit(*caster, targetGuid);
+        if (!validRecipient(target) || target->IsImmunedToSpell(auraInfo, caster))
+            continue;
+        Aura* propagated = caster->AddAura(auraInfo, mask, target);
+        if (!propagated)
+            continue;
+        if (stacks > 1)
+            propagated->SetStackAmount(stacks);
+        if (preserveState)
+        {
+            propagated->SetMaxDuration(maximum);
+            propagated->SetDuration(remaining);
+        }
+        else if (healingBounce)
+            propagated->SetDuration(std::min(propagated->GetDuration(), remaining));
+        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+            if (AuraEffect* applied = propagated->GetEffect(i))
+            {
+                if (snapshotApply && snapshot[i].present)
+                {
+                    if (preserveState)
+                        applied->ChangeAmount(snapshot[i].amount);
+                    else
+                        applied->SetAmount(snapshot[i].amount);
+                    applied->SetPctMods(snapshot[i].pct);
+                    applied->SetCritChance(snapshot[i].crit);
+                    applied->SetCanBeRecalculated(false);
+                    if (preserveState && snapshot[i].periodic)
+                        applied->SetPeriodicTimer(snapshot[i].timer);
+                }
+                if (cannotCrit && applied->IsPeriodic())
+                    applied->SetCritChance(0.0f);
+            }
+    }
+}
+
+void Spell::EffectAscensionSpellFanout(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET || !unitTarget || !unitTarget->IsAlive() ||
+        (m_spellInfo->Id != 414495 && m_spellInfo->Id != 414499 && m_spellInfo->Id != 414542))
+        return;
+    Player* caster = GetOriginalCaster() ? GetOriginalCaster()->ToPlayer() : nullptr;
+    if (!caster || !caster->IsInWorld() || !caster->IsValidAttackTarget(unitTarget))
+        return;
+    for (uint8 i = 0; i < effIndex; ++i)
+        if (m_spellInfo->Effects[i].Effect == SPELL_EFFECT_ASCENSION_SPREAD_AURA_2)
+            return;
+    SpellInfo const* payload = nullptr;
+    uint32 family = 0;
+    for (SpellEffectInfo const& effect : m_spellInfo->Effects)
+    {
+        if (effect.Effect != SPELL_EFFECT_ASCENSION_SPREAD_AURA_2)
+            continue;
+        if (effect.MiscValue != 1 || effect.MiscValueB || !effect.TriggerSpell)
+            return;
+        SpellInfo const* first = sSpellMgr->GetSpellInfo(effect.TriggerSpell);
+        if (!first)
+            return;
+        SpellInfo const* known = nullptr;
+        for (SpellInfo const* rank = first->GetFirstRankSpell(); rank; rank = rank->GetNextRankSpell())
+            if (caster->HasSpell(rank->Id))
+                known = rank;
+        if (!known)
+            continue;
+        uint32 const root = known->GetFirstRankSpell()->Id;
+        if (family && family != root)
+            return;
+        family = root;
+        payload = known;
+    }
+    if (!payload || GetScriptValue(m_spellInfo->Id))
+        return;
+    SetScriptValue(m_spellInfo->Id, 1);
+    float const radius = m_spellInfo->Effects[effIndex].CalcRadius(caster);
+    uint32 const limit = m_spellInfo->MaxAffectedTargets;
+    if (radius <= 0.0f || !limit)
+        return;
+    std::list<Unit*> targets;
+    Acore::AnyUnfriendlyUnitInObjectRangeCheck check(unitTarget, caster, radius);
+    Acore::UnitListSearcher<Acore::AnyUnfriendlyUnitInObjectRangeCheck> searcher(unitTarget, targets, check);
+    Cell::VisitObjects(unitTarget, searcher, radius);
+    targets.remove_if([this, caster](Unit* target)
+    {
+        return target == unitTarget || !target->IsAlive() || !caster->IsValidAttackTarget(target) ||
+            !unitTarget->IsWithinLOSInMap(target) || !caster->IsWithinLOSInMap(target);
+    });
+    // These reviewed helpers share the newer five-total-target contract. The damage helper supplements
+    // the existing primary cast; the Corruption helper includes that primary victim.
+    Acore::Containers::RandomResize(targets, limit - 1);
+    if (m_spellInfo->Id == 414499)
+        targets.push_front(unitTarget);
+    for (Unit* target : targets)
+        caster->CastSpell(target, payload, TRIGGERED_FULL_MASK, nullptr, nullptr, caster->GetGUID());
+}
+
 void Spell::EffectAscensionRefreshAura(SpellEffIndex effIndex)
 {
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
@@ -575,7 +804,10 @@ void Spell::EffectAscensionModifyAuraDuration(SpellEffIndex effIndex)
     if (!target || !effect.MiscValue)
         return;
 
-    if (Aura* aura = target->GetAuraOfRankedSpell(effect.MiscValue))
+    Aura* aura = target->GetAuraOfRankedSpell(effect.MiscValue, m_caster->GetGUID());
+    if (!aura && m_spellInfo->Id != 270663)
+        aura = target->GetAuraOfRankedSpell(effect.MiscValue);
+    if (aura)
     {
         int32 duration = aura->GetDuration() + damage;
         if (duration <= 0)
@@ -965,8 +1197,12 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
 
                             apply_direct_bonus = false;
                             // Glyph of Conflagrate
-                            if (!m_caster->HasAuraOrTwin(56235))
+                            bool const infiniteBurn = m_caster->HasAura(270425);
+                            bool const preserveImmolate = infiniteBurn && (aura->GetSpellInfo()->SpellFamilyFlags[0] & 0x4);
+                            if (!m_caster->HasAuraOrTwin(56235) && !preserveImmolate)
                                 unitTarget->RemoveAurasDueToSpell(aura->GetId(), m_caster->GetGUID());
+                            if (infiniteBurn)
+                                m_caster->RemoveAurasDueToSpell(270425);
 
                             break;
                         }

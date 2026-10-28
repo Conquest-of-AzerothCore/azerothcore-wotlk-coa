@@ -16,6 +16,7 @@
  */
 
 #include "Unit.h"
+#include <string_view>
 #include "AbstractFollower.h"
 #include "AreaDefines.h"
 #include "ArenaSpectator.h"
@@ -3976,6 +3977,13 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spellInfo
         // Decrease hit chance from victim rating bonus
         if (victim->IsPlayer())
             modHitChance -= int32(victim->ToPlayer()->GetRatingBonusValue(CR_HIT_TAKEN_SPELL));
+    }
+
+    if (HasAura(271151) && spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN && spellInfo->SpellName[LOCALE_enUS])
+    {
+        std::string_view const name = spellInfo->SpellName[LOCALE_enUS];
+        if (name == "Lightning Bolt" || name == "Chain Lightning")
+            modHitChance += 100;
     }
 
     int32 HitChance = modHitChance * 100;
@@ -9276,6 +9284,9 @@ float Unit::SpellPctDamageModsDone(Unit* victim, SpellInfo const* spellProto, Da
     // bonus against aurastate
     DoneTotalMod *= GetTotalAuraMultiplier(SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE, [victim, spellProto, damagetype, this](AuraEffect const* aurEff)
     {
+        if (aurEff->GetMiscValueB() == ASCENSION_SCHOOLMASK_AURASTATE_DAMAGE &&
+            !(aurEff->GetSpellInfo()->GetSchoolMask() & spellProto->GetSchoolMask()))
+            return false;
         if (aurEff->GetMiscValueB() == ASCENSION_CLASSMASK_AURASTATE_DAMAGE && !aurEff->IsAffectedOnSpell(spellProto))
             return false;
         return victim->HasAuraState(AuraStateType(aurEff->GetMiscValue())) && spellProto->ValidateAttribute6SpellDamageMods(this, aurEff, damagetype == DOT);
@@ -9730,6 +9741,23 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     else
         DoneAdvertisedBenefit += SpellBaseDamageBonusDone(spellPowerSchool);
 
+    if (effIndex == EFFECT_0 && damagetype != DOT && IsPlayer() && HasAura(84867))
+        switch (spellProto->Id)
+        {
+            case 271324:
+            case 271337:
+            case 271338:
+            case 271339:
+            case 271340:
+            case 271333:
+            case 271334:
+            case 271335:
+                DoneAdvertisedBenefit += SpellBaseDamageBonusDone(spellPowerSchool);
+                break;
+            default:
+                break;
+        }
+
     // Check for table values
     float coeff = spellProto->Effects[effIndex].BonusMultiplier;
     SpellBonusEntry const* bonus = sSpellMgr->GetSpellBonusData(spellProto->Id);
@@ -9834,8 +9862,8 @@ float Unit::GetAscensionNormalTuningDamageMultiplier(Unit const* victim, uint32 
 {
     // Copied aura 341 means damage against monsters (e.g. Frozen Waters 271942
     // and Fire and Ice 1582385). Enable only the reviewed normal tuning records
-    // and the first difficulty aura of each Adventure Mode tier; aura 322 carries
-    // the separately authored PvP tuning.
+    // and the first difficulty aura of each Adventure Mode tier, plus the reviewed
+    // Frozen Waters and Pack Tactics pet buffs. Aura 322 carries their separate PvP scope.
     if (!victim || victim->IsCharmedOwnedByPlayerOrPlayer())
         return 1.0f;
 
@@ -9843,8 +9871,10 @@ float Unit::GetAscensionNormalTuningDamageMultiplier(Unit const* victim, uint32 
         [schoolMask](AuraEffect const* effect)
         {
             uint32 const id = effect->GetId();
-            bool const reviewed = (id >= 887000 && id <= 887090) || IsAdventureModeDamageDoneAura(id);
-            return reviewed && (effect->GetMiscValue() & schoolMask);
+            bool const reviewed = (id >= 887000 && id <= 887090) || IsAdventureModeDamageDoneAura(id) ||
+                id == 271942 || id == 275097;
+            return reviewed && ((effect->GetMiscValue() & schoolMask) ||
+                (id == 271942 && effect->GetMiscValue() == 0));
         });
 }
 
@@ -9858,7 +9888,8 @@ float Unit::GetAscensionPvpTuningDamageMultiplier(Unit const* victim, uint32 sch
     return GetTotalAuraMultiplier(SPELL_AURA_ASCENSION_MOD_PVP_DAMAGE_DONE_PCT,
         [schoolMask](AuraEffect const* effect)
         {
-            return IsAscensionPvpTuningAura(effect->GetId()) && (effect->GetMiscValue() & schoolMask);
+            return (IsAscensionPvpTuningAura(effect->GetId()) || effect->GetId() == 275097) &&
+                (effect->GetMiscValue() & schoolMask);
         });
 }
 
@@ -9897,6 +9928,19 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
                 IsAscensionTuningDamageTakenSource(effect, caster);
         });
     TakenTotalMod *= GetHealthBasedDamageTakenMultiplier();
+
+    if (damagetype == DOT && caster)
+        TakenTotalMod *= GetTotalAuraMultiplier(SPELL_AURA_214, [caster, spellProto](AuraEffect const* effect)
+        {
+            return effect->GetMiscValueB() == 1 && effect->GetCasterGUID() == caster->GetGUID() &&
+                (effect->GetMiscValue() & spellProto->GetSchoolMask());
+        });
+
+    if (caster && caster->IsPlayer() && caster->HasAura(271125) &&
+        spellProto->SpellFamilyName == SPELLFAMILY_HUNTER && spellProto->SpellName[LOCALE_enUS] &&
+        std::string_view(spellProto->SpellName[LOCALE_enUS]) == "Explosive Shot" &&
+        GetAuraOfRankedSpellOrTwin(44457, caster->GetGUID()))
+        AddPct(TakenTotalMod, IsPlayer() ? 20 : 30);
 
     TakenTotalMod = processDummyAuras(TakenTotalMod);
 
@@ -10379,6 +10423,14 @@ float Unit::SpellTakenCritChance(Unit const* caster, SpellInfo const* spellProto
         });
     }
 
+    // Low Tide: Nature healing gains critical chance only on the caster's Riptide target.
+    // This target-side path also feeds periodic-heal critical snapshots when those heals can crit.
+    if (caster && (schoolMask & SPELL_SCHOOL_MASK_NATURE) && spellProto->IsPositive() &&
+        (spellProto->HasEffect(SPELL_EFFECT_HEAL) || spellProto->HasAura(SPELL_AURA_PERIODIC_HEAL)) &&
+        GetAuraEffect(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_SHAMAN, 0, 0, 0x10, caster->GetGUID()))
+        if (AuraEffect const* lowTide = caster->GetAuraEffect(270391, EFFECT_0))
+            crit_chance += lowTide->GetAmount();
+
     // Modify critical chance by victim SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE
     // xinef: should be calculated at the end
     if (caster)
@@ -10799,9 +10851,23 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, u
 
     if (caster)
     {
+        if (damagetype == DOT)
+            TakenTotalMod *= GetTotalAuraMultiplier(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS,
+                [caster, spellProto](AuraEffect const* effect)
+            {
+                if (effect->GetCasterGUID() != caster->GetGUID() ||
+                    !(effect->GetMiscValueB() & spellProto->GetSchoolMask()))
+                    return false;
+                if (effect->GetMiscValue() == ASCENSION_PERIODIC_HEAL_FROM_CASTER)
+                    return true;
+                return effect->GetMiscValue() == ASCENSION_PERIODIC_HEAL_EXCEPT_CLASSMASK &&
+                    !effect->IsAffectedOnSpell(spellProto);
+            });
         TakenTotalMod *= GetTotalAuraMultiplier(SPELL_AURA_MOD_HEALING_RECEIVED, [caster, spellProto](AuraEffect const* aurEff)
         {
-           return caster->GetGUID() == aurEff->GetCasterGUID() && aurEff->IsAffectedOnSpell(spellProto);
+            if (aurEff->GetId() == 271315 && spellProto->Id != 271303)
+                return false;
+            return caster->GetGUID() == aurEff->GetCasterGUID() && aurEff->IsAffectedOnSpell(spellProto);
         });
     }
 
@@ -11303,6 +11369,10 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
     // bonus against aurastate
     DoneTotalMod *= GetTotalAuraMultiplier(SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE, [victim, spellProto, this](AuraEffect const* aurEff)
     {
+        if (aurEff->GetMiscValueB() == ASCENSION_SCHOOLMASK_AURASTATE_DAMAGE &&
+            !(aurEff->GetSpellInfo()->GetSchoolMask() &
+                (spellProto ? spellProto->GetSchoolMask() : SPELL_SCHOOL_MASK_NORMAL)))
+            return false;
         if (aurEff->GetMiscValueB() == ASCENSION_CLASSMASK_AURASTATE_DAMAGE &&
             (!spellProto || !aurEff->IsAffectedOnSpell(spellProto)))
             return false;

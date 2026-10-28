@@ -631,7 +631,7 @@ class spell_pri_penance : public SpellScript
 };
 
 // -17 - Power Word: Shield
-static int32 CalculateSpellAmount(Unit* caster, int32 amount, SpellInfo const* spellInfo, AuraEffect const* aurEff)
+static int32 CalculateSpellAmount(Unit* caster, Unit* target, int32 amount, SpellInfo const* spellInfo, AuraEffect const* aurEff)
 {
     // +80.68% from sp bonus
     float bonus = 0.8068f;
@@ -668,6 +668,9 @@ static int32 CalculateSpellAmount(Unit* caster, int32 amount, SpellInfo const* s
         AddPct(amount, bgDampening->GetAmount());
     }
 
+    if (target && target->HealthBelowPct(75) && caster->HasAura(270561))
+        AddPct(amount, 75);
+
     return amount;
 };
 
@@ -684,7 +687,7 @@ class spell_pri_power_word_shield_aura : public AuraScript
     {
         canBeRecalculated = false;
         if (Unit* caster = GetCaster())
-            amount = CalculateSpellAmount(caster, amount, GetSpellInfo(), aurEff);
+            amount = CalculateSpellAmount(caster, GetTarget(), amount, GetSpellInfo(), aurEff);
     }
 
     void ReflectDamage(AuraEffect* aurEff, DamageInfo& dmgInfo, uint32& absorbAmount)
@@ -724,7 +727,7 @@ class spell_pri_power_word_shield : public SpellScript
         if (AuraEffect* aurEff = target->GetAuraEffect(SPELL_AURA_SCHOOL_ABSORB, (SpellFamilyNames)GetSpellInfo()->SpellFamilyName, GetSpellInfo()->SpellIconID, EFFECT_0))
         {
             int32 newAmount = GetSpellInfo()->Effects[EFFECT_0].CalcValue(caster, nullptr, nullptr);
-            newAmount = CalculateSpellAmount(caster, newAmount, GetSpellInfo(), aurEff);
+            newAmount = CalculateSpellAmount(caster, target, newAmount, GetSpellInfo(), aurEff);
 
             if (aurEff->GetAmount() > newAmount)
                 return SPELL_FAILED_AURA_BOUNCED;
@@ -733,8 +736,15 @@ class spell_pri_power_word_shield : public SpellScript
         return SPELL_CAST_OK;
     }
 
+    void ConsumeDominantShield()
+    {
+        if (GetHitAura())
+            GetCaster()->RemoveAurasDueToSpell(270634);
+    }
+
     void Register() override
     {
+        AfterHit += SpellHitFn(spell_pri_power_word_shield::ConsumeDominantShield);
         OnCheckCast += SpellCheckCastFn(spell_pri_power_word_shield::CheckCast);
     }
 };

@@ -1377,6 +1377,8 @@ class spell_mage_missile_barrage : public AuraScript
 
     bool CheckProc(ProcEventInfo& eventInfo)
     {
+        if (GetTarget()->HasAura(276693))
+            return false;
         SpellInfo const* spellInfo = eventInfo.GetSpellInfo();
         if (!spellInfo)
             return false;
@@ -1567,9 +1569,23 @@ class spell_mage_clearcasting : public AuraScript
         return true;
     }
 
+    void SpellSlinger(ProcEventInfo& eventInfo)
+    {
+        Unit* owner = GetTarget();
+        if (!owner || !owner->IsPlayer() || !owner->HasAura(270804) || GetAura()->GetCharges() != 1)
+            return;
+        Spell const* spell = eventInfo.GetProcSpell();
+        Unit* target = spell ? spell->m_targets.GetUnitTarget() : eventInfo.GetActionTarget();
+        if (!target || !owner->IsValidAttackTarget(target))
+            target = owner->ToPlayer()->GetSelectedUnit();
+        if (target && owner->IsValidAttackTarget(target) && sSpellMgr->GetSpellInfo(270806))
+            owner->CastSpell(target, 270806, true);
+    }
+
     void Register() override
     {
         DoCheckProc += AuraCheckProcFn(spell_mage_clearcasting::CheckProc);
+        AfterProc += AuraProcFn(spell_mage_clearcasting::SpellSlinger);
     }
 };
 

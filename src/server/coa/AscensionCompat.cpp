@@ -238,10 +238,13 @@ constexpr std::array<uint16, 8> QUEUED_EXTENSION_OPCODES = {
 
 constexpr uint16 CMSG_QUERY_VENDORED_ITEM_RECOVERY = 0x05DE;
 constexpr uint16 CMSG_RECOVER_VENDORED_ITEM = 0x05E0;
+constexpr uint16 CMSG_QUERY_DELETED_ITEM_RECOVERY = 0x05E2;
+constexpr uint16 CMSG_RECOVER_DELETED_ITEM = 0x05E4;
 constexpr uint16 CMSG_CLAIM_TUTORIAL_REWARD = 0x06A8;
 
-constexpr std::array<uint16, 3> MODULE_EXTENSION_OPCODES = {
-    CMSG_QUERY_VENDORED_ITEM_RECOVERY, CMSG_RECOVER_VENDORED_ITEM, CMSG_CLAIM_TUTORIAL_REWARD};
+constexpr std::array<uint16, 5> MODULE_EXTENSION_OPCODES = {
+    CMSG_QUERY_VENDORED_ITEM_RECOVERY, CMSG_RECOVER_VENDORED_ITEM,
+    CMSG_QUERY_DELETED_ITEM_RECOVERY, CMSG_RECOVER_DELETED_ITEM, CMSG_CLAIM_TUTORIAL_REWARD};
 
 constexpr std::array<uint16, 6> CORE_EXTENSION_OPCODES = {CMSG_RESET_DUNGEONS, CMSG_PORT_GRAVEYARD,
     CMSG_TAXI_REQUEST_EARLY_LANDING, CMSG_STABLE_DELETE_PET, CMSG_QUERY_INSTANCE_BINDS, CMSG_RESET_INSTANCE};
@@ -9639,13 +9642,22 @@ void ApplyAscensionExperienceContracts(SpellInfo* info)
         case 57353:
         case 71354:
         case 157353:
-        case 818046:
         case 819046:
         case 993943:
             for (SpellEffectInfo& effect : info->Effects)
                 if (effect.ApplyAuraName == SPELL_AURA_MOD_XP_PCT &&
                     (effect.MiscValue == 2 || effect.MiscValue == 8))
                     effect.ApplyAuraName = SPELL_AURA_MOD_XP_QUEST_PCT;
+            break;
+        case 818046:
+            for (SpellEffectInfo& effect : info->Effects)
+                if (effect.ApplyAuraName == SPELL_AURA_MOD_XP_PCT)
+                {
+                    if (effect.MiscValue == 7)
+                        effect.MiscValue = 1;
+                    else if (effect.MiscValue == 8)
+                        effect.ApplyAuraName = SPELL_AURA_MOD_XP_QUEST_PCT;
+                }
             break;
         case 818059:
         {
@@ -10498,9 +10510,21 @@ class spell_ascension_experience_potion : public SpellScript
 
     static bool AccountHasHigherLevelCharacter(Player* player)
     {
-        return CharacterDatabase.Query(
-            "SELECT 1 FROM `characters` WHERE `account` = {} AND `guid` <> {} AND `level` > {} LIMIT 1",
-            player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(), player->GetLevel()) != nullptr;
+        CharacterDatabasePreparedStatement* stmt =
+            CharacterDatabase.GetPreparedStatement(CHAR_SEL_ACCOUNT_LEVEL_OR_PRESTIGE);
+        stmt->SetData(0, std::string("core.coa_prestige"));
+        stmt->SetData(1, player->GetSession()->GetAccountId());
+        stmt->SetData(2, player->GetGUID().GetCounter());
+        PreparedQueryResult result = CharacterDatabase.Query(stmt);
+        if (!result)
+            return false;
+
+        do
+        {
+            if (result->Fetch()[0].Get<uint8>() > player->GetLevel())
+                return true;
+        } while (result->NextRow());
+        return false;
     }
 
     static constexpr uint32 SPELL_RESILIENT_CONSTITUTION = 552011;

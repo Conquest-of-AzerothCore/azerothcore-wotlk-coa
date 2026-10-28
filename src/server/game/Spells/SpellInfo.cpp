@@ -1734,6 +1734,17 @@ bool SpellInfo::IsAuraExclusiveBySpecificPerCasterWith(SpellInfo const* spellInf
 
 SpellCastResult SpellInfo::CheckShapeshift(uint32 form) const
 {
+    if (form == 48)
+    {
+        bool const healing = HasEffect(SPELL_EFFECT_HEAL) || HasEffect(SPELL_EFFECT_HEAL_PCT) ||
+            HasEffect(SPELL_EFFECT_HEAL_MAX_HEALTH) || HasAura(SPELL_AURA_PERIODIC_HEAL);
+        std::string_view const name = SpellName[LOCALE_enUS] ? SpellName[LOCALE_enUS] : "";
+        if (healing || HasAura(SPELL_AURA_MOD_SHAPESHIFT) || IsPassive() ||
+            name == "Lightning Bolt" || name == "Chain Lightning")
+            return SPELL_CAST_OK;
+        return SPELL_FAILED_NOT_SHAPESHIFT;
+    }
+
     // talents that learn spells can have stance requirements that need ignore
     // (this requirement only for client-side stance show in talent description)
     if (GetTalentSpellCost(Id) > 0 &&

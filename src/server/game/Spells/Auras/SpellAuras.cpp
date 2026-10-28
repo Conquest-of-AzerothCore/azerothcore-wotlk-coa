@@ -1705,6 +1705,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                                 multiplier += 0.5f;
 
                             int32 basepoints0 = int32(CalculatePct(caster->GetMaxPower(POWER_MANA), multiplier));
+                            if (caster->HasAura(270563))
+                                basepoints0 *= 2;
                             caster->CastCustomSpell(caster, 47755, &basepoints0, nullptr, nullptr, true);
                         }
                         // effect on aura target

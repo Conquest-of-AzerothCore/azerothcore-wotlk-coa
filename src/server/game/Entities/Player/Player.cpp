@@ -4305,8 +4305,38 @@ bool Player::HasTalent(uint32 spell, uint8 spec) const
 
 bool Player::HasActiveSpell(uint32 spell) const
 {
-    PlayerSpellMap::const_iterator itr = m_spells.find(spell);
-    return (itr != m_spells.end() && itr->second->State != PLAYERSPELL_REMOVED && itr->second->Active && itr->second->IsInSpec(m_activeSpec));
+    auto active = [this](uint32 id)
+    {
+        auto const itr = m_spells.find(id);
+        return itr != m_spells.end() && itr->second->State != PLAYERSPELL_REMOVED &&
+            itr->second->Active && itr->second->IsInSpec(m_activeSpec);
+    };
+    if (active(spell))
+        return true;
+    SpellInfo const* requested = sSpellMgr->GetSpellInfo(spell);
+    if (!requested || requested->IsPassive() || requested->SpellLevel > GetLevel())
+        return false;
+    for (AuraEffect const* effect : GetAuraEffectsByType(SPELL_AURA_ASCENSION_OVERRIDE_SPELL))
+    {
+        SpellEffectInfo const& data = effect->GetSpellInfo()->Effects[effect->GetEffIndex()];
+        if (data.MiscValue <= 0 || data.MiscValueB || data.DieSides || effect->GetAmount() <= 0)
+            continue;
+        SpellInfo const* original = sSpellMgr->GetSpellInfo(uint32(data.MiscValue));
+        SpellInfo const* replacement = sSpellMgr->GetSpellInfo(uint32(effect->GetAmount()));
+        if (!original || !replacement ||
+            replacement->GetFirstRankSpell() != requested->GetFirstRankSpell())
+            continue;
+        if (original != original->GetFirstRankSpell() || replacement != replacement->GetFirstRankSpell())
+        {
+            if (replacement->Id == spell && active(original->Id))
+                return true;
+            continue;
+        }
+        for (SpellInfo const* rank = original; rank; rank = rank->GetNextRankSpell())
+            if (active(rank->Id) && requested->GetRank() <= rank->GetRank())
+                return true;
+    }
+    return false;
 }
 
 /**

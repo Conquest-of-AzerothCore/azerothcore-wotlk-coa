@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "AscensionItemRecovery.h"
 #include "AccountMgr.h"
 #include "AchievementMgr.h"
 #include "ArenaTeam.h"
@@ -4078,6 +4079,10 @@ void Player::AddItemToBuyBackSlot(Item* pItem, uint32 money)
 {
     if (pItem)
     {
+        bool const archived = AscensionItemRecovery::Capture && AscensionItemRecovery::Capture(this, pItem,
+            pItem->GetCount(), AscensionItemRecovery::Source::Vendored, money);
+        if (!archived && sWorld->getBoolConfig(CONFIG_ITEMDELETE_VENDOR))
+            GetSession()->RecordRecoveryItem(pItem, pItem->GetCount());
         uint32 slot = m_currentBuybackSlot;
         // if current back slot non-empty search oldest or free
         if (m_items[slot])
@@ -4141,6 +4146,8 @@ void Player::RemoveItemFromBuyBackSlot(uint32 slot, bool del)
         Item* pItem = m_items[slot];
         if (pItem)
         {
+            if (!del && AscensionItemRecovery::ForgetVendor)
+                AscensionItemRecovery::ForgetVendor(this, pItem);
             pItem->RemoveFromWorld();
             if (del)
                 pItem->SetState(ITEM_REMOVED, this);
@@ -7310,6 +7317,8 @@ void Player::SaveToDB(CharacterDatabaseTransaction trans, bool create, bool logo
 
     _SaveEntryPoint(trans);
     _SaveInventory(trans);
+    if (AscensionItemRecovery::Flush)
+        AscensionItemRecovery::Flush(this, trans);
     _SaveQuestStatus(trans);
     _SaveDailyQuestStatus(trans);
     _SaveWeeklyQuestStatus(trans);
@@ -7355,6 +7364,8 @@ void Player::AdditionalSavingAddMask(uint8 mask)
 void Player::SaveInventoryAndGoldToDB(CharacterDatabaseTransaction trans)
 {
     _SaveInventory(trans);
+    if (AscensionItemRecovery::Flush)
+        AscensionItemRecovery::Flush(this, trans);
     SaveGoldToDB(trans);
 }
 

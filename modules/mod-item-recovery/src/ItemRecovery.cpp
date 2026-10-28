@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionCoAConfig.h"
+#include "ExactItemRecovery.h"
 #include "Config.h"
 #include "DatabaseEnv.h"
 #include "Item.h"
@@ -10,6 +11,7 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
+#include <array>
 #include <atomic>
 #include <cstring>
 #include <deque>
@@ -24,13 +26,19 @@ namespace
     constexpr uint16 SMSG_QUERY_VENDORED_ITEM_RECOVERY_RESULT = 0x05DF;
     constexpr uint16 CMSG_RECOVER_VENDORED_ITEM = 0x05E0;
     constexpr uint16 SMSG_RECOVER_VENDORED_ITEM_RESULT = 0x05E1;
+    constexpr uint16 CMSG_QUERY_DELETED_ITEM_RECOVERY = 0x05E2;
+    constexpr uint16 SMSG_QUERY_DELETED_ITEM_RECOVERY_RESULT = 0x05E3;
+    constexpr uint16 CMSG_RECOVER_DELETED_ITEM = 0x05E4;
+    constexpr uint16 SMSG_RECOVER_DELETED_ITEM_RESULT = 0x05E5;
     constexpr char RecoveryConfigKey[] = "CONFIG_RECOVERY_VENDORED_ITEM_ENABLED";
+    constexpr char DeletedRecoveryConfigKey[] = "CONFIG_RECOVERY_DELETED_ITEM_ENABLED";
     constexpr std::size_t MaxQueuedRequests = 16;
     constexpr std::size_t RequestsPerUpdate = 4;
 
     struct Request
     {
         bool query = false;
+        bool deleted = false;
         uint32 index = 0;
         std::string id;
     };
@@ -41,98 +49,126 @@ namespace
         ObjectGuid guid;
         uint32 price;
         uint32 count;
+        uint64 archiveId = 0;
+        uint32 entry = 0;
+        uint64 timestamp = 0;
+        bool deleted = false;
     };
 
     struct AccountState
     {
         uint32 character = 0;
         std::deque<Request> requests;
-        std::vector<Offer> offers;
+        std::array<std::vector<Offer>, 2> offers;
     };
 
     std::atomic<bool> enabled{false};
+    std::atomic<bool> archiveEnabled{false};
     std::atomic<bool> pending{false};
     std::mutex stateMutex;
     std::unordered_map<uint32, AccountState> states;
 
-    void SendResult(Player* player, char const* suffix)
+    void SendResult(Player* player, char const* suffix, bool deleted = false)
     {
-        WorldPacket response(SMSG_RECOVER_VENDORED_ITEM_RESULT, 64);
-        response << (std::string("VENDORED_ITEM_RECOVERY_") + suffix);
+        WorldPacket response(deleted ? SMSG_RECOVER_DELETED_ITEM_RESULT : SMSG_RECOVER_VENDORED_ITEM_RESULT, 64);
+        response << (std::string(deleted ? "DELETED_ITEM_RECOVERY_" : "VENDORED_ITEM_RECOVERY_") + suffix);
         player->SendDirectMessage(&response);
     }
 
-    void SendOffers(Player* player)
+    std::string OfferId(Offer const& offer)
+    {
+        return offer.archiveId ? "snapshot:" + std::to_string(offer.archiveId) : offer.guid.ToString();
+    }
+
+    void SendOffers(Player* player, bool deleted = false)
     {
         std::vector<Offer> offers;
-        for (uint32 slot = BUYBACK_SLOT_START; slot < BUYBACK_SLOT_END; ++slot)
-            if (Item* item = player->GetItemFromBuyBackSlot(slot))
-                offers.push_back({slot, item->GetGUID(),
-                    player->GetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1 + slot - BUYBACK_SLOT_START),
-                    item->GetCount()});
-
-        // Extensions.dll 0x10301A70: a common item-recovery record followed by two empty cost maps.
-        WorldPacket response(SMSG_QUERY_VENDORED_ITEM_RECOVERY_RESULT, 4 + offers.size() * 128);
+        if (!deleted)
+            for (uint32 slot = BUYBACK_SLOT_START; slot < BUYBACK_SLOT_END; ++slot)
+                if (Item* item = player->GetItemFromBuyBackSlot(slot))
+                {
+                    uint32 const stamp = player->GetUInt32Value(
+                        PLAYER_FIELD_BUYBACK_TIMESTAMP_1 + slot - BUYBACK_SLOT_START);
+                    offers.push_back({slot, item->GetGUID(),
+                        player->GetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1 + slot - BUYBACK_SLOT_START),
+                        item->GetCount(), 0, item->GetEntry(), uint64(player->m_logintime + stamp - 30 * HOUR), false});
+                }
+        for (ExactItemRecovery::Offer const& archived : ExactItemRecovery::Offers(player, deleted))
+        {
+            if (offers.size() == 500)
+                break;
+            offers.push_back({0, ObjectGuid::Empty, archived.price, archived.count, archived.id,
+                archived.entry, archived.timestamp, deleted});
+        }
+        WorldPacket response(deleted ? SMSG_QUERY_DELETED_ITEM_RECOVERY_RESULT :
+            SMSG_QUERY_VENDORED_ITEM_RECOVERY_RESULT, 4 + offers.size() * 128);
         response << uint32(offers.size());
         for (Offer const& offer : offers)
         {
-            Item* item = player->GetItemFromBuyBackSlot(offer.slot);
-            uint32 const stamp = player->GetUInt32Value(
-                PLAYER_FIELD_BUYBACK_TIMESTAMP_1 + offer.slot - BUYBACK_SLOT_START);
-            uint64 const soldAt = uint64(player->m_logintime + stamp - 30 * HOUR);
-            response << offer.guid.ToString() << item->GetEntry() << offer.count;
+            response << OfferId(offer) << offer.entry << offer.count;
             response << std::string() << uint32(0) << uint8(0);
-            response << soldAt << uint64(offer.price) << uint32(0) << uint32(0);
-
+            response << offer.timestamp << uint64(offer.price) << uint32(0) << uint32(0);
             WorldPacket itemQuery(CMSG_ITEM_QUERY_SINGLE, sizeof(uint32));
-            itemQuery << item->GetEntry();
+            itemQuery << offer.entry;
             player->GetSession()->HandleItemQuerySingleOpcode(itemQuery);
         }
-
         {
             std::lock_guard<std::mutex> lock(stateMutex);
             AccountState& state = states[player->GetSession()->GetAccountId()];
             state.character = player->GetGUID().GetCounter();
-            state.offers = std::move(offers);
+            state.offers[deleted ? 1 : 0] = std::move(offers);
         }
         player->SendDirectMessage(&response);
     }
 
     void Recover(Player* player, Request const& request)
     {
+        auto result = [player, &request](char const* suffix)
+        {
+            SendResult(player, suffix, request.deleted);
+            SendOffers(player, request.deleted);
+        };
         Offer offer{};
         bool found = false;
         {
             std::lock_guard<std::mutex> lock(stateMutex);
             auto const itr = states.find(player->GetSession()->GetAccountId());
-            if (itr != states.end() && itr->second.character == player->GetGUID().GetCounter()
-                && request.index < itr->second.offers.size())
+            if (itr != states.end() && itr->second.character == player->GetGUID().GetCounter())
             {
-                offer = itr->second.offers[request.index];
-                found = true;
+                std::vector<Offer> const& offers = itr->second.offers[request.deleted ? 1 : 0];
+                if (request.index < offers.size())
+                {
+                    offer = offers[request.index];
+                    found = true;
+                }
             }
         }
 
         if (!found)
-            return SendResult(player, "OUT_OF_RANGE");
-        if (request.id != offer.guid.ToString())
-            return SendResult(player, "ID_MISMATCH");
+            return result("OUT_OF_RANGE");
+        if (request.id != OfferId(offer) || request.deleted != offer.deleted)
+            return result("ID_MISMATCH");
+        if (offer.archiveId)
+        {
+            result(ExactItemRecovery::Restore(player, offer.archiveId, request.deleted));
+            return;
+        }
 
         Item* item = player->GetItemFromBuyBackSlot(offer.slot);
         if (!item || item->GetGUID() != offer.guid || item->GetCount() != offer.count)
-            return SendResult(player, "ALREADY_RECOVERED");
+            return result("ALREADY_RECOVERED");
 
         uint32 const price = player->GetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1 + offer.slot - BUYBACK_SLOT_START);
         if (price != offer.price)
-            return SendResult(player, "ID_MISMATCH");
+            return result("ID_MISMATCH");
         if (!player->IsAlive() || player->GetTradeData() || player->IsBeingTeleportedFar())
-            return SendResult(player, "UNKNOWN");
+            return result("UNKNOWN");
         if (!player->HasEnoughMoney(price))
-            return SendResult(player, "NOT_ENOUGH_MONEY");
+            return result("NOT_ENOUGH_MONEY");
 
         ItemPosCountVec destinations;
         if (player->CanStoreItem(NULL_BAG, NULL_SLOT, destinations, item, false) != EQUIP_ERR_OK)
-            return SendResult(player, "NOT_ENOUGH_SPACE");
+            return result("NOT_ENOUGH_SPACE");
 
         // The same item instance native buyback returns: enchantments, random properties, charges,
         // binding and durability are preserved.
@@ -154,8 +190,7 @@ namespace
         player->SendNewItem(stored, offer.count, false, false);
         player->SaveToDB(transaction, false, false);
         CharacterDatabase.CommitTransaction(transaction);
-        SendResult(player, "OK");
-        SendOffers(player);
+        result("OK");
     }
 
     bool ReadRecoverRequest(WorldPacket const& packet, Request& request)
@@ -182,6 +217,8 @@ public:
     void OnAfterConfigLoad(bool /*reload*/) override
     {
         enabled.store(sConfigMgr->GetOption<bool>("ItemRecovery.Enable", true));
+        archiveEnabled.store(enabled.load() && sConfigMgr->GetOption<bool>("ItemRecovery.Archive.Enable", true));
+        ExactItemRecovery::Configure();
     }
 };
 
@@ -193,7 +230,8 @@ public:
     bool CanPacketReceiveEarly(WorldSession* session, WorldPacket const& packet) override
     {
         uint16 const opcode = packet.GetOpcode();
-        if ((opcode != CMSG_QUERY_VENDORED_ITEM_RECOVERY && opcode != CMSG_RECOVER_VENDORED_ITEM)
+        if ((opcode != CMSG_QUERY_VENDORED_ITEM_RECOVERY && opcode != CMSG_RECOVER_VENDORED_ITEM &&
+            opcode != CMSG_QUERY_DELETED_ITEM_RECOVERY && opcode != CMSG_RECOVER_DELETED_ITEM)
             || !session || !enabled.load())
             return true;
 
@@ -201,7 +239,8 @@ public:
             return false;
 
         Request request;
-        request.query = opcode == CMSG_QUERY_VENDORED_ITEM_RECOVERY;
+        request.query = opcode == CMSG_QUERY_VENDORED_ITEM_RECOVERY || opcode == CMSG_QUERY_DELETED_ITEM_RECOVERY;
+        request.deleted = opcode == CMSG_QUERY_DELETED_ITEM_RECOVERY || opcode == CMSG_RECOVER_DELETED_ITEM;
         if (request.query ? !packet.empty() : !ReadRecoverRequest(packet, request))
             return false;
 
@@ -257,7 +296,7 @@ public:
         for (Request const& request : requests)
         {
             if (request.query)
-                SendOffers(player);
+                SendOffers(player, request.deleted);
             else
                 Recover(player, request);
         }
@@ -266,10 +305,11 @@ public:
 
 void AddItemRecoveryScripts()
 {
+    ExactItemRecovery::Initialize();
     RegisterAscensionClientConfig([](AscensionClientConfig& config)
     {
-        if (enabled.load())
-            config.Booleans.emplace_back(RecoveryConfigKey, true);
+        config.Booleans.emplace_back(RecoveryConfigKey, enabled.load());
+        config.Booleans.emplace_back(DeletedRecoveryConfigKey, archiveEnabled.load());
     });
     new ItemRecoveryWorld();
     new ItemRecoveryNetwork();

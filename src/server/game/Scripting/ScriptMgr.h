@@ -729,6 +729,7 @@ public: /* SpellSC */
     void OnSpellSuccessfulDispel(Spell* spell, Unit* target, SpellEffIndex effect, uint32 count);
     void OnSpellCritChance(Spell* spell, Unit* target, float& chance);
     void OnGuardianSummoned(Spell* spell, TempSummon* summon);
+    void OnSpellGlobalCooldown(Spell* spell, int32& duration);
 
 public: /* GameEventScript */
     void OnGameEventStart(uint16 EventID);

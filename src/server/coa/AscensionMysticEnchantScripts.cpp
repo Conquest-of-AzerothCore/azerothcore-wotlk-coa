@@ -364,7 +364,7 @@ class spell_ascension_mystic_renewed_through_absolution : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mystic_renewed_through_absolution);
 
-    void HandleProc(AuraEffect const*, ProcEventInfo& eventInfo)
+    void HandleProc(AuraEffect const* effect, ProcEventInfo& eventInfo)
     {
         PreventDefaultAction();
         Unit* caster = GetTarget();
@@ -376,6 +376,11 @@ class spell_ascension_mystic_renewed_through_absolution : public AuraScript
         if (!renew)
             return;
         renew->GetBase()->Remove();
+        if (GetId() == 272989)
+        {
+            caster->CastSpell(target, 272993, true, nullptr, effect);
+            return;
+        }
         caster->CastSpell(target, SPELL_RENEWED_THROUGH_ABSOLUTION_HEAL, true);
         if (Aura* weakenedSoul = target->GetAura(SPELL_WEAKENED_SOUL))
         {
@@ -458,6 +463,8 @@ class spell_ascension_mystic_atonement_heal : public SpellScript
 
     void Register() override
     {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ascension_mystic_atonement_heal::SelectLowest,
+            EFFECT_ALL, TARGET_UNIT_SRC_AREA_ALLY);
         OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ascension_mystic_atonement_heal::SelectLowest,
             EFFECT_ALL, TARGET_UNIT_DEST_AREA_ALLY);
         OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ascension_mystic_atonement_heal::SelectLowest,
@@ -678,6 +685,9 @@ class spell_ascension_mystic_cryotherapist : public AuraScript
         if (!spell)
             return;
         uint32 heal = SPELL_CRYOTHERAPIST_BOLT;
+        uint32 const source = sSpellMgr->GetSpellTwinSource(spell->Id);
+        if (source == 116 || source == 205 || source == 837)
+            heal = 271305;
         if (spell->SpellFamilyName == SPELLFAMILY_MAGE && (spell->SpellFamilyFlags[1] & MAGE_DEEP_FREEZE_FLAG1))
             heal = SPELL_CRYOTHERAPIST_DEEP_FREEZE;
         else if (spell->SpellFamilyName == SPELLFAMILY_PRIEST && (spell->SpellFamilyFlags[1] & PRIEST_ICY_PENANCE_FLAG1))

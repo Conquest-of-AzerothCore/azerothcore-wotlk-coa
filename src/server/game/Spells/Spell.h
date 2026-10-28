@@ -25,7 +25,9 @@
 #include "SharedDefines.h"
 #include "SpellInfo.h"
 #include "Unit.h"
+#include <array>
 #include <map>
+#include <vector>
 #include <optional>
 
 class Unit;
@@ -311,6 +313,8 @@ public:
     void EffectAscensionHealthPctDamage(SpellEffIndex effIndex);
     void EffectDelayedTriggerSpell(SpellEffIndex effIndex);
     void EffectAscensionPlaySpellVisualKit(SpellEffIndex effIndex);
+    void EffectAscensionSpreadAura(SpellEffIndex effIndex);
+    void EffectAscensionSpellFanout(SpellEffIndex effIndex);
     void EffectAscensionRefreshAura(SpellEffIndex effIndex);
     void EffectAscensionModifyAuraStacks(SpellEffIndex effIndex);
     void EffectAscensionModifyAuraStacksBySpell(SpellEffIndex effIndex);
@@ -702,6 +706,8 @@ public:
     uint8 m_spellFlags;                                 // for spells whose target was changed in cast i.e. due to reflect
     mutable uint32 m_scriptEventMask;                   // per-cast bookkeeping, including read-only proc callbacks
     std::map<uint32, uint64> m_scriptValues;
+    std::array<std::vector<ObjectGuid>, MAX_SPELL_EFFECTS> m_ascensionSpreadTargets;
+    std::array<bool, MAX_SPELL_EFFECTS> m_ascensionSpreadSelectionReady{};
     std::optional<float> m_jumpFinalOrientation;
     uint32 m_scriptHealthLeechDamage = 0;
     uint32 m_scriptHealingIncludingOverheal = 0;

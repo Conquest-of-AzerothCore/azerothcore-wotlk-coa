@@ -150,6 +150,12 @@ void ScriptMgr::OnGuardianSummoned(Spell* spell, TempSummon* summon)
         script->OnGuardianSummoned(spell, summon));
 }
 
+void ScriptMgr::OnSpellGlobalCooldown(Spell* spell, int32& duration)
+{
+    CALL_ENABLED_HOOKS(AllSpellScript, ALLSPELLHOOK_ON_GLOBAL_COOLDOWN,
+        script->OnSpellGlobalCooldown(spell, duration));
+}
+
 AllSpellScript::AllSpellScript(char const* name, std::vector<uint16> enabledHooks)
     : ScriptObject(name, ALLSPELLHOOK_END)
 {

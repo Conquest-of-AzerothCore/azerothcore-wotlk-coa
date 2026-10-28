@@ -2,6 +2,7 @@ import argparse
 import os
 from pathlib import Path
 import runpy
+import shutil
 import struct
 import subprocess
 import tempfile
@@ -52,9 +53,9 @@ def main():
     kills = source('src/server/game/Entities/Player/KillRewarder.cpp')
     start = kills.index('bool const recruitAFriend')
     kills = kills[start:kills.index('sScriptMgr->OnPlayerGiveXP', start)]
-    manastorm = source('src/server/coa/AscensionManastorm.cpp')
-    snapshot = manastorm[manastorm.index('bool const recruitAFriend'):]
-    snapshot = snapshot[:snapshot.index('uint32 const xp')]
+    manastorm = source('modules/mod-manastorm-endless/src/ManastormExperience.cpp')
+    snapshot = manastorm[manastorm.index('bool const recruitAFriend', manastorm.index('void ManastormExperience::Settle')):]
+    snapshot = snapshot[:snapshot.index('uint32 amount')]
     header = (ROOT / 'src/server/game/Miscellaneous/LocalLevelScaling.h').as_posix()
     code = r'''
 #include <array>
@@ -76,6 +77,7 @@ struct AuraEffect
     SpellInfo const* spell;uint8 index;
     uint32 GetId()const{return spell->Id;}SpellInfo const* GetSpellInfo()const{return spell;}
     uint8 GetEffIndex()const{return index;}int GetAmount()const{return spell->Effects[index].BasePoints+1;}
+    int GetMiscValue()const{return spell->Effects[index].MiscValue;}
 };
 using AuraEffectList=std::vector<AuraEffect const*>;
 template<class T> void AddPct(T& value,int amount){value*=1.0f+amount/100.0f;}
@@ -84,8 +86,9 @@ struct Manager
     bool AddSameEffectStackRuleSpellGroups(SpellInfo const*,uint8,uint32,int,std::map<int,int>&){return false;}
 } manager;
 auto sSpellMgr=&manager;
-struct Unit
+class Unit
 {
+public:
     std::map<AuraType,AuraEffectList> auras;
     AuraEffectList const& GetAuraEffectsByType(AuraType type)const
     {static AuraEffectList empty;auto i=auras.find(type);return i==auras.end()?empty:i->second;}
@@ -94,7 +97,7 @@ struct Unit
 struct QuestXPEntry {std::array<uint32,10> Exp{};};
 struct XPStore {std::map<int,QuestXPEntry> data;QuestXPEntry const* LookupEntry(int id){return &data.at(id);}};
 XPStore sQuestXPStore;
-struct Quest {int Level=7;uint32 RewardXPDifficulty=5;uint32 XPValue(uint8,bool)const;bool IsDFQuest()const{return false;}
+class Quest {public:uint32 Id=7;int Level=7;uint32 RewardXPDifficulty=5;uint32 XPValue(uint8,bool)const;bool IsDFQuest()const{return false;}
     int GetQuestLevel()const{return Level;}};
 class Player:public Unit
 {
@@ -104,19 +107,25 @@ public:
     bool GetsRecruitAFriendBonus(bool)const{return raf;}
     uint32 CalculateQuestRewardXP(Quest const*);uint32 KillXP(uint32);float ManastormMultiplier();
 };
-struct ScriptMgr {void OnPlayerBeforeGetLevelForXPGain(Player*,uint8&) {}} scripts;
+struct ScriptMgr {bool noBonus=false; bool OnPlayerHasNoBonusExperience(Player*)const{return noBonus;}
+    void OnPlayerBeforeGetLevelForXPGain(Player*,uint8&) {}} scripts;
 auto sScriptMgr=&scripts;
 ''' + correction + multiplier + xp_value + quest + r'''
+struct Victim {bool IsPlayer()const{return false;}} victim;
+auto* _victim=&victim;
+constexpr int32 XP_SOURCE_MASK_KILL=1,XP_SOURCE_MASK_BATTLEGROUND=8;
 uint32 Player::KillXP(uint32 xp){Player* player=this;
 ''' + kills + r'''return xp;}
 float Player::ManastormMultiplier(){Player* player=this;
-''' + snapshot + r'''return xpMultiplier;}
+''' + snapshot + r'''return static_cast<float>(auraMultiplier);}
 int main()
 {
     std::map<uint32,SpellInfo> spells;
 ''' + '\n'.join(init) + '\n' + '\n'.join(
         f'    sQuestXPStore.data[{level}].Exp[5]={xp[level][6]};' for level in (7, 13, 20)) + r'''
     LocalLevelScaling::QuestEnabled=true;
+    LocalLevelScaling::QuestCurveOwner=+[](uint32)->LocalLevelScaling::QuestCurve const*
+    {static LocalLevelScaling::QuestCurve curve{1,80,0,{}};return &curve;};
     Player player;Quest quest;
     assert(player.CalculateQuestRewardXP(&quest)==900);
     player.playerLevel=20;assert(player.CalculateQuestRewardXP(&quest)==1550);player.playerLevel=13;
@@ -153,16 +162,19 @@ int main()
     assert(spells[804821].Effects[0].ApplyAuraName==200); // Unrelated profession aura is unchanged.
 }
 '''
-    compiler = str(Path(os.environ['VCToolsInstallDir']) / 'bin/Hostx64/x64/cl.exe')
+    compiler = shutil.which(os.environ.get('CXX', 'cl' if os.name == 'nt' else 'c++'))
+    assert compiler, 'Enable the C++20 compiler environment.'
     with tempfile.TemporaryDirectory(prefix='coa-quest-xp-') as directory:
         out = Path(directory)
         cpp, exe = out / 'xp.cpp', out / 'xp.exe'
         cpp.write_text(code, encoding='utf-8')
-        subprocess.run([compiler, '/nologo', '/std:c++17', '/EHsc', '/W4', '/WX', '/wd4244', '/utf-8',
-                        str(cpp), '/Fe' + str(exe)], cwd=out, check=True, timeout=60)
+        (out / 'Define.h').write_text('#define AC_GAME_API\n', encoding='utf-8')
+        flags = (['/nologo', '/std:c++20', '/EHsc', '/W4', '/WX', '/wd4244', '/utf-8', '/I' + str(out), str(cpp), '/Fe' + str(exe)]
+                 if Path(compiler).stem.lower() == 'cl' else ['-std=c++20', '-I' + str(out), str(cpp), '-o', str(exe)])
+        subprocess.run([compiler, *flags], cwd=out, check=True, timeout=60)
         subprocess.run([str(exe)], cwd=out, check=True, timeout=15)
     print('PASS: scaled Pelt Collection XP; potions/heirlooms/party aura; separate kill/quest bonuses; RaF exclusion; '
-          'Adventure Mode quest bonus and kill penalty')
+          'Adventure Mode quest bonus and kill penalty; active Manastorm quest-style RAF/Aura exclusion')
 
 
 if __name__ == '__main__':

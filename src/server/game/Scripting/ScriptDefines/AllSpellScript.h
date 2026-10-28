@@ -47,6 +47,7 @@ enum AllSpellHook
     ALLSPELLHOOK_ON_INTERRUPT_DURATION,
     ALLSPELLHOOK_ON_SUCCESSFUL_DISPEL,
     ALLSPELLHOOK_ON_GUARDIAN_SUMMONED,
+    ALLSPELLHOOK_ON_GLOBAL_COOLDOWN,
     ALLSPELLHOOK_END
 };
 
@@ -153,6 +154,7 @@ public:
 
     // Called once per guardian Spell::SummonGuardian creates, after its level and stats are set.
     virtual void OnGuardianSummoned(Spell* /*spell*/, TempSummon* /*summon*/) { }
+    virtual void OnSpellGlobalCooldown(Spell* /*spell*/, int32& /*duration*/) { }
 };
 
 // Compatibility for old scripts

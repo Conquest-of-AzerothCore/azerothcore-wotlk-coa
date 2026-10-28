@@ -688,9 +688,14 @@ class spell_ascension_summoned_effect_summon : public SpellScript
         int32 duration = GetSpellInfo()->GetDuration();
         if (Player* modOwner = caster->GetSpellModOwner())
             modOwner->ApplySpellMod(GetSpellInfo()->Id, SPELLMOD_DURATION, duration);
-        caster->GetMap()->SummonCreature(row->Creature, *destination,
+        Creature* summon = caster->GetMap()->SummonCreature(row->Creature, *destination,
             sSummonPropertiesStore.LookupEntry(uint32(effect.MiscValueB)), duration > 0 ? uint32(duration) : 0, caster,
             GetSpellInfo()->Id);
+        if (summon && row->Kind == Behaviour::Store && GetEffectValue() > 0)
+        {
+            summon->SetMaxHealth(uint32(GetEffectValue()));
+            summon->SetHealth(uint32(GetEffectValue()));
+        }
     }
 
     void Register() override

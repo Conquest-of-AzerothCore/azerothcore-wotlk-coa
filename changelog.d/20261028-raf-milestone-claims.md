@@ -1,0 +1,5 @@
+Recruit milestone rewards read their TINYINT required_level as uint8 rather than uint32. The previous width mismatch could display huge levels and reject eligible recruits, preventing automatic level-10 bag and level-60 token delivery. Existing once-per-account/realm reservations and mail receipts remain authoritative; eligible missed rewards are retried by login/periodic recovery and RAF commands.
+
+Bare .raf claim now lists rewards rather than only printing usage, and retries automatic recruit milestone delivery. Recruit milestones display their own IDs, real levels and delivery status, separately from recruiter rewards. Recruiter rewards display item names, availability and .raf claim <reward_id> instructions. The validated recruit COUNT result is read as uint64, matching its SQL type.
+
+No migration is needed; existing configured reward IDs and thresholds are preserved. Verification is static/source and affected-file formatting only. Compilation, live database state and actual mail delivery remain unverified; no deployment performed.

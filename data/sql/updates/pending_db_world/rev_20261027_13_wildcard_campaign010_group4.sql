@@ -1,0 +1,10 @@
+START TRANSACTION;
+DELETE FROM `spell_script_names` WHERE `spell_id` = 270423 AND `ScriptName` IN ('spell_ascension_mystic_enchant_proc', 'aura_wildcard_burn_restoration');
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (270423, 'aura_wildcard_burn_restoration');
+DELETE FROM `spell_proc` WHERE `SpellId` = 270423;
+INSERT INTO `spell_proc` (`SpellId`, `ProcFlags`, `SpellTypeMask`, `SpellPhaseMask`, `HitMask`, `AttributesMask`, `Chance`) VALUES (270423, 332116, 1, 2, 3, 2, 100);
+DELETE FROM `spell_script_names` WHERE `spell_id` = 270426 AND `ScriptName` IN ('spell_ascension_mystic_enchant_proc', 'aura_wildcard_burn_restoration');
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (270426, 'aura_wildcard_burn_restoration');
+DELETE FROM `spell_proc` WHERE `SpellId` = 270426;
+INSERT INTO `spell_proc` (`SpellId`, `ProcFlags`, `SpellTypeMask`, `SpellPhaseMask`, `HitMask`, `AttributesMask`, `Chance`) VALUES (270426, 332116, 1, 2, 3, 2, 100);
+COMMIT;

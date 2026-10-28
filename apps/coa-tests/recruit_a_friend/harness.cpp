@@ -79,7 +79,11 @@ struct WorldSession {
     SpellCastResult CheckRecruitAFriendSummon(Player const*) const;
     bool ValidateRecruitAFriendSummon(ObjectGuid,bool);
 };
+struct PlayerSetting {uint32 value=0;};
+using PlayerSettingVector=std::vector<PlayerSetting>;
 struct Player {
+    PlayerSettingVector prestige;
+    PlayerSettingVector const* FindPlayerSettings(char const*)const{return prestige.empty()?nullptr:&prestige;}
     ObjectGuid guid;
     ObjectGuid selected{999};
     WorldSession session;
@@ -106,7 +110,7 @@ struct Player {
     uint32 GetUInt32Value(int) const { return maxLevel; }
     Group* GetGroup() const { return group; }
     bool IsInMap(Player*) const { return sameMap; }
-    bool IsAtRecruitAFriendDistance(Player*) const { return near; }
+    bool IsAtRecruitAFriendDistance(Player*, bool = false) const { return near; }
     bool IsAlive() const { return alive; }
     bool IsInCombat() const { return combat; }
     bool IsBeingTeleported() const { return teleport; }
@@ -179,6 +183,11 @@ struct Fixture {
     void unchanged(char const* name) { check(target.level==10 && donor.m_grantableLevels==1,name); }
 };
 int main() {
+    { Fixture f; f.target.prestige={{3},{1}}; f.propose(); f.accept(); f.unchanged("active Prestige recipient cannot receive a grant"); }
+    { Fixture f; f.propose(); f.target.prestige={{3},{1}}; f.accept(); f.unchanged("Prestige activated after proposal blocks acceptance without spending credit"); }
+    { Fixture f; f.target.prestige={{3},{0}}; f.propose(); f.accept(); check(f.target.level==11 && f.donor.m_grantableLevels==0,"completed Prestige history alone does not block grants"); }
+    { Fixture f; f.donor.prestige={{3},{1}}; f.propose(); f.accept(); check(f.target.level==11,"Prestige donor may still grant to an eligible recipient"); }
+
     { Fixture f; f.accept(); f.unchanged("forged acceptance has no proposal"); }
     { Fixture f; f.propose(); f.accept(); check(f.target.level==11 && f.donor.m_grantableLevels==0,"valid grant");
       check(f.donor.flags==0x80,"last credit clears only RAF flag");
@@ -244,6 +253,26 @@ int main() {
       check(f.target.session.ValidateRecruitAFriendSummon(f.donor.guid,true),"linked summon accepted"); }
     { Fixture f; f.target.inworld=false; check(f.donor.session.CheckRecruitAFriendSummon(&f.target)!=SPELL_CAST_OK,"offline target rejected"); }
 #endif
+    { Fixture f; f.donor.session.recruiterId=0; f.donor.session.recruits=true; f.target.session.recruiterId=11;
+      f.propose(); f.accept();
+      check(f.target.level==11 && f.donor.m_grantableLevels==0,"recruiter grants earned level to direct recruit");
+      f.accept(); check(f.target.level==11,"reverse grant acceptance replay rejected"); }
+    { Fixture f; f.donor.session.recruiterId=0; f.donor.session.recruits=true; f.target.session.recruiterId=11;
+      f.propose(); f.target.session.recruiterId=33; f.accept(); f.unchanged("reverse link rechecked at acceptance"); }
+    { Fixture f; f.donor.session.recruiterId=0; f.target.session.recruiterId=0;
+      f.donor.session.recruits=true; f.target.session.recruits=true;
+      f.propose(); f.accept(); f.unchanged("unrelated recruiter accounts cannot grant"); }
+    { Fixture f; f.donor.session.recruiterId=33; f.target.session.recruiterId=33;
+      f.propose(); f.accept(); f.unchanged("sibling recruits cannot grant"); }
+    { Fixture f; f.donor.session.recruiterId=0; f.donor.session.recruits=true; f.target.session.recruiterId=11;
+      f.target.session.account=11; f.propose(); f.accept(); f.unchanged("same-account reverse grant rejected"); }
+    { Fixture f; f.donor.session.recruiterId=0; f.donor.session.recruits=true; f.donor.SetGrantableLevels(0);
+      f.donor.Earn(1,10); check(f.donor.m_grantableLevels==5,"recruiter earns one credit per two levels");
+      check(f.donor.flags==0x81,"recruiter credit native flag set"); }
+    { Fixture f; f.donor.session.recruiterId=0; f.donor.session.recruits=false; f.donor.SetGrantableLevels(0);
+      f.donor.Earn(1,10); check(f.donor.m_grantableLevels==0,"unlinked accounts earn no grant credits"); }
+    { Fixture f; f.donor.session.recruiterId=0; f.donor.session.recruits=true; f.donor.SetGrantableLevels(254);
+      f.donor.Earn(1,10); check(f.donor.m_grantableLevels==255,"recruiter credit balance saturates"); }
     std::cout<<checks<<" production RAF checks, "<<failures<<" failures\n";
     return failures ? 1 : 0;
 }

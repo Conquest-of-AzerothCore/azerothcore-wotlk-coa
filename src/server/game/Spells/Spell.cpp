@@ -6029,8 +6029,22 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* /*param1*/, uint32* /*para
         if (target != m_caster)
         {
             // Must be behind the target
-            if (m_spellInfo->HasAttribute(SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET) && target->HasInArc(static_cast<float>(M_PI), m_caster))
-                return SPELL_FAILED_NOT_BEHIND;
+            if (m_spellInfo->HasAttribute(SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET) &&
+                target->HasInArc(static_cast<float>(M_PI), m_caster))
+            {
+                bool ignored = false;
+                for (AuraEffect const* effect : m_caster->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS))
+                    if (effect->GetMiscValue() == ASCENSION_IGNORE_BEHIND_REQUIREMENT &&
+                        effect->IsAffectedOnSpell(m_spellInfo) &&
+                        (effect->GetMiscValueB() == ASCENSION_POSITION_SCOPE_ALL ||
+                            (effect->GetMiscValueB() == ASCENSION_POSITION_SCOPE_MONSTERS && !target->IsPlayer())))
+                    {
+                        ignored = true;
+                        break;
+                    }
+                if (!ignored)
+                    return SPELL_FAILED_NOT_BEHIND;
+            }
 
             // Target must be facing you
             if (m_spellInfo->HasAttribute(SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER) && !target->HasInArc(static_cast<float>(M_PI), m_caster))
@@ -9185,6 +9199,9 @@ void Spell::TriggerGlobalCooldown()
         else if (gcd > MAX_GCD)
             gcd = MAX_GCD;
     }
+
+    sScriptMgr->OnSpellGlobalCooldown(this, gcd);
+    gcd = std::max(gcd, 0);
 
     // Only players or controlled units have global cooldown
     if (m_caster->GetCharmInfo())

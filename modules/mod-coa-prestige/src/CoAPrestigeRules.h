@@ -245,9 +245,9 @@ namespace CoAPrestige
         return rewards;
     }
 
-    inline uint32_t ApplyExperienceBonus(uint32_t amount, uint32_t bonusPercent)
+    inline uint32_t ApplyExperienceBonus(uint32_t amount, uint32_t totalPercent)
     {
-        uint64_t const boosted = uint64_t(amount) * (100u + uint64_t(bonusPercent)) / 100u;
+        uint64_t const boosted = uint64_t(amount) * totalPercent / 100u;
         return uint32_t(std::min<uint64_t>(boosted, std::numeric_limits<uint32_t>::max()));
     }
 
