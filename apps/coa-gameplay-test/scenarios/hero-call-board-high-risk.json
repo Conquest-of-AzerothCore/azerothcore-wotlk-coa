@@ -1,0 +1,187 @@
+{
+  "schema": 1,
+  "name": "Hero's Call Board: the High-Risk category lists the High-Risk quests only for the High-Risk ruleset",
+  "contract": "The High-Risk call board quests require the High-Risk ruleset aura (1004019), and the faction quests also require their board's team. On the Hero's Call Board (gameobject 402000, Stormwind) a level-70 Human with the aura gets a fourth category option, High-Risk Quests, next to PvE, Profession and PvP Quests. It lists the always-offered Karazhan quest 420460 together with the day's and week's pooled dailies and weeklies, at most 14 quests (6 shared and 2 Alliance dailies, 3 weeklies and the 3 unpooled level-70 quests), and none of the PvE dailies such as 18017. Accepting 420460 adds it to the log. The Alliance-only daily 980019 is takeable, the Horde-only daily 980204 is not, and a shared daily 8200169 is. A level-70 Human without the aura sees only the three ordinary categories and can take none of the High-Risk quests.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 70
+    },
+    {
+      "id": "plain",
+      "race": 1,
+      "class": 1,
+      "level": 70
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8822.9,
+    "y": 628.4,
+    "z": 93.8,
+    "o": 2.4
+  },
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join the world phase the board is spawned in",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "The second character joins it too",
+      "actor": "plain",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the Stormwind board's grid load",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The Hero's Call Board is within reach",
+      "actor": "hero",
+      "metric": "nearby_gameobject_count",
+      "entry": 402000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Without the High-Risk ruleset the Karazhan quest cannot be taken",
+      "actor": "plain",
+      "metric": "quest_takeable",
+      "quest": 420460,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "nor a shared High-Risk daily",
+      "actor": "plain",
+      "metric": "quest_takeable",
+      "quest": 8200169,
+      "equals": 0
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "The character without the ruleset clicks the board",
+      "actor": "plain",
+      "entry": 402000
+    },
+    {
+      "action": "assert",
+      "label": "and gets only the three ordinary categories",
+      "actor": "plain",
+      "metric": "gossip_options",
+      "equals": 3
+    },
+    {
+      "action": "set_aura",
+      "label": "Give the hero the High-Risk ruleset",
+      "actor": "hero",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "A shared High-Risk daily is takeable",
+      "actor": "hero",
+      "metric": "quest_takeable",
+      "quest": 8200169,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "and the Alliance-only daily",
+      "actor": "hero",
+      "metric": "quest_takeable",
+      "quest": 980019,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "but not the Horde-only daily",
+      "actor": "hero",
+      "metric": "quest_takeable",
+      "quest": 980204,
+      "equals": 0
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Click the board",
+      "actor": "hero",
+      "entry": 402000
+    },
+    {
+      "action": "assert",
+      "label": "The board adds the High-Risk category",
+      "actor": "hero",
+      "metric": "gossip_options",
+      "equals": 4
+    },
+    {
+      "action": "gossip_select",
+      "label": "Choose High-Risk Quests",
+      "actor": "hero",
+      "option": 3
+    },
+    {
+      "action": "assert",
+      "label": "The category replaces the options with Return",
+      "actor": "hero",
+      "metric": "gossip_options",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "It lists the unpooled quests and at most the pools' share of the rest",
+      "actor": "hero",
+      "metric": "quest_menu_items",
+      "min": 3,
+      "max": 14
+    },
+    {
+      "action": "assert",
+      "label": "The Karazhan quest is offered",
+      "actor": "hero",
+      "metric": "quest_menu_has",
+      "quest": 420460,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The PvE dailies are not in the High-Risk category",
+      "actor": "hero",
+      "metric": "quest_menu_has",
+      "quest": 18017,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "nor the Horde-only daily",
+      "actor": "hero",
+      "metric": "quest_menu_has",
+      "quest": 980204,
+      "equals": 0
+    },
+    {
+      "action": "quest_accept",
+      "label": "Accept the Karazhan quest from the board",
+      "actor": "hero",
+      "gameobject": 402000,
+      "quest": 420460
+    },
+    {
+      "action": "assert",
+      "label": "The quest is in the log",
+      "actor": "hero",
+      "metric": "quest_status",
+      "quest": 420460,
+      "equals": 3
+    }
+  ]
+}
