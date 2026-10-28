@@ -36,10 +36,7 @@
       "actor": "tank",
       "as": "wolf",
       "entry": 9916211,
-      "distance": 3,
-      "faction": 16,
-      "reaction": 2,
-      "unowned": true
+      "distance": 3
     },
     {
       "action": "wait",

@@ -44,10 +44,7 @@
       "actor": "tank",
       "as": "stormfang",
       "entry": 9916212,
-      "distance": 3,
-      "faction": 16,
-      "reaction": 2,
-      "unowned": true
+      "distance": 3
     },
     {
       "action": "summon",
@@ -55,10 +52,7 @@
       "actor": "tank",
       "as": "vaelthara",
       "entry": 9916213,
-      "distance": 3,
-      "faction": 16,
-      "reaction": 2,
-      "unowned": true
+      "distance": 3
     },
     {
       "action": "wait",

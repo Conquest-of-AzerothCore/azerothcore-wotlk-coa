@@ -79,10 +79,7 @@
       "actor": "p1",
       "as": "boss",
       "entry": 9916213,
-      "distance": 3,
-      "faction": 16,
-      "reaction": 2,
-      "unowned": true
+      "distance": 3
     },
     {
       "action": "wait",

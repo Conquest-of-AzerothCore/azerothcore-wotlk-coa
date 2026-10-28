@@ -36,10 +36,7 @@
       "actor": "tank",
       "as": "boss",
       "entry": 9916214,
-      "distance": 3,
-      "faction": 16,
-      "reaction": 2,
-      "unowned": true
+      "distance": 3
     },
     {
       "action": "wait",

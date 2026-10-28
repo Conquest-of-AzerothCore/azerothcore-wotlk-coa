@@ -179,10 +179,7 @@
       "actor": "tank",
       "as": "boss1",
       "entry": 9916212,
-      "distance": 3,
-      "faction": 16,
-      "reaction": 2,
-      "unowned": true
+      "distance": 3
     },
     {
       "action": "wait",
@@ -239,10 +236,7 @@
       "actor": "tank",
       "as": "boss2",
       "entry": 9916212,
-      "distance": 3,
-      "faction": 16,
-      "reaction": 2,
-      "unowned": true
+      "distance": 3
     },
     {
       "action": "wait",
@@ -299,10 +293,7 @@
       "actor": "tank",
       "as": "boss3",
       "entry": 9916212,
-      "distance": 3,
-      "faction": 16,
-      "reaction": 2,
-      "unowned": true
+      "distance": 3
     },
     {
       "action": "wait",
@@ -359,10 +350,7 @@
       "actor": "tank",
       "as": "boss4",
       "entry": 9916212,
-      "distance": 3,
-      "faction": 16,
-      "reaction": 2,
-      "unowned": true
+      "distance": 3
     },
     {
       "action": "wait",
@@ -391,10 +379,7 @@
       "actor": "tank",
       "as": "boss5",
       "entry": 9916212,
-      "distance": 3,
-      "faction": 16,
-      "reaction": 2,
-      "unowned": true
+      "distance": 3
     },
     {
       "action": "wait",
