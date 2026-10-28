@@ -238,6 +238,7 @@ ACTIONS = {
     'encounter_credit': ({'actor', 'entry'}, {'actor', 'entry'}),
     'encounter_start': ({'actor', 'boss_entry'}, {'actor', 'boss_entry', 'radius'}),
     'leave_group': ({'actor'}, {'actor'}),
+    'disconnect': ({'actor'}, {'actor'}),
     'die': ({'actor'}, {'actor', 'revived'}),
     'release_spirit': ({'actor'}, {'actor'}),
     'cast_charm': ({'actor', 'spell'}, {'actor', 'spell', 'target', 'pet', 'destination'}),
@@ -267,6 +268,7 @@ ACTIONS = {
     'spell_click_nearby': ({'actor', 'entry'}, {'actor', 'entry'}),
     'attack_owned_creature': ({'actor', 'target', 'entry'}, {'actor', 'target', 'entry'}),
     'attack_nearby': ({'actor', 'entry'}, {'actor', 'entry', 'kill', 'damage_pct'}),
+    'select_nearby': ({'actor', 'entry'}, {'actor', 'entry', 'radius'}),
     'summon': ({'actor', 'as', 'entry'}, {'actor', 'as', 'entry', 'distance', 'ai_action'}),
     'loot_nearby': ({'actor', 'entry'}, {'actor', 'entry'}),
     'loot_creature': ({'actor', 'target'}, {'actor', 'target'}),
@@ -460,7 +462,7 @@ def validate(scenario):
              {'id', 'race', 'class', 'level', 'bot', 'spell_hit_rating', 'spell_crit_rating',
               'melee_crit_rating', 'ranged_crit_rating', 'ranged_hit_rating', 'melee_hit_rating',
               'expertise_rating', 'allow_regeneration', 'name', 'expansion', 'ascension_client', 'account_of',
-              'role', 'rotation', 'heal_spell', 'taunt_spell', 'rotation_assist'}, 'player')
+              'role', 'rotation', 'heal_spell', 'taunt_spell', 'rotation_assist', 'security'}, 'player')
         identity = player['id']
         require(isinstance(identity, str) and ACTOR_ID.fullmatch(identity), 'Invalid player id')
         require(identity not in actor_ids, 'Duplicate actor id')
@@ -485,6 +487,7 @@ def validate(scenario):
         number(player.get('ranged_hit_rating', 0), 'ranged_hit_rating', 0, 100000, True)
         number(player.get('melee_hit_rating', 0), 'melee_hit_rating', 0, 100000, True)
         number(player.get('expertise_rating', 0), 'expertise_rating', 0, 100000, True)
+        number(player.get('security', 0), 'security', 0, 3, True)
         require(type(player.get('allow_regeneration', True)) is bool, 'allow_regeneration must be boolean')
         validate_raid_role(player)
     for creature in creatures:

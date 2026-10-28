@@ -401,7 +401,12 @@ preserves Static and must leave the talent without a depletion bonus.
 
 Players require `id`, numeric `race` and `class`; `level` defaults to 80. Optional `bot` logs the actor in on a
 session flagged as a bot, the way playerbots flags the sessions it creates, so a scenario can check what the
-server does differently for them. Optional `spell_hit_rating`,
+server does differently for them. Optional `security` (0..3, default 0/`SEC_PLAYER`) raises that one fixture
+session's account security, so a `command` step can reach a GM-gated chat command (for example an authoring
+command that forces an exact, deterministic encounter for the test) without granting it to every other fixture
+player. Leave it unset for ordinary player security, which remains the default for the whole catalog; set it
+only when the scenario specifically exercises GM/admin-gated behavior through that actor's own command. Optional
+`spell_hit_rating`,
 `spell_crit_rating`, `melee_crit_rating`, `ranged_crit_rating`, `ranged_hit_rating`, `melee_hit_rating` and
 `expertise_rating` add fixture ratings through normal calculations, useful for preventing misses, dodges and
 parries, or forcing critical hits, in deterministic tests.
@@ -494,6 +499,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `encounter_credit` | Player `actor` in a dungeon, creature `entry`: credits that dungeon boss kill to the actor's map through the native encounter update, as a boss death does, including the Dungeon Finder completion it triggers. |
 | `encounter_start` | Player `actor`, `boss_entry`, optional `radius` (yards, default 100, maximum 200): finds the nearest living creature of that entry in the actor's phase and starts recording its [encounter timeline](#encounter-timelines). It fails at once with `encounter_start found no creature <entry> within <radius> yards` when none is in range. A scenario has at most one; the case runs exclusively because the recorder is process-global. |
 | `leave_group` | Player `actor`: native `CMSG_GROUP_DISBAND` leave request; fails if the player stays grouped. |
+| `disconnect` | Player `actor`: logs the session out (`WorldSession::LogoutPlayer`) without a following login, simulating a dropped connection; unlike `relog`, the actor never comes back, so no later step may reference it. |
 | `die` | Player `actor`: fixture death through self damage equal to current health; the body stays unreleased. |
 | `release_spirit` | Player `actor`: native `CMSG_REPOP_REQUEST` for an unreleased body; fails if the player is neither a ghost nor alive afterwards. |
 | `cast_charm` | Same fields: native pet-cast handler, with the charmed unit as the default target. `pet: true` casts from the player's pet instead. |
@@ -512,6 +518,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `use_item` | `actor`, `item`, `spell`, optional `target`, `target_item` (an owned item entry, sent as the item target instead of a unit) and `destination`: normal item-use handler. |
 | `use_nearby_gameobject` | `actor`, `entry`, optional `owner` (a player id): native use request for the single gameobject of that entry within 20 yards in the actor's phase; `owner` narrows the choice to the object that player owns, so one of several nearby objects can be clicked. |
 | `spell_click_nearby` | `actor`, `entry`: native `CMSG_SPELLCLICK` on the nearest living creature of that entry within 20 yards, as the client sends on right-clicking a spell-click creature. |
+| `select_nearby` | `actor`, `entry`, optional `radius` (default 40): native `CMSG_SET_SELECTION` on the nearest living creature of that entry, as the client sends on clicking it. GM commands that read `ChatHandler::getSelectedCreature()` (`.cast target`, `.cast back`, …) need this first; `attack_nearby` only sends `CMSG_ATTACKSWING` and never selects. |
 | `use_gameobject` | `actor`, `entry`: native use request for the actor's single nearby owned gameobject. |
 | `voidportal` | Player `actor`, `op` `force` with `group` and `spawn`, or `op` `roll` with `success`: put the one realm-wide Void Portal on that configured point as a point rotation does, or replace the next proximity roll; the manager is process-global, so the case runs exclusively. |
 | `summon` | Player `actor`, `as`, `entry`, optional `distance` (yards along +x, default 5) and `ai_action` (an integer passed to the creature AI's `DoAction`, for a scripted step such as finishing a boss intro): summon a creature into the actor's map and phase under the id `as`. |
