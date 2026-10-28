@@ -17,12 +17,12 @@
 #include "QueryResult.h"
 #include "Item.h"
 #include "Log.h"
+#include "Mail.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 
 #include <algorithm>
-#include <memory>
 #include <unordered_map>
 #include <vector>
 
@@ -81,57 +81,47 @@ public:
             return true;
         }
 
-        // Every piece has to fit before anything is handed over. Opening a
-        // nine-piece set into two free slots and losing seven of them would be
-        // the kind of bug a player never forgives.
-        for (auto const& [member, count] : it->second)
-        {
-            ItemPosCountVec one;
-            InventoryResult const check = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, one, member, count);
-            if (check != EQUIP_ERR_OK)
-            {
-                player->SendEquipError(check, nullptr, nullptr, member);
-                return true;
-            }
-        }
+        uint32 const cacheEntry = item->GetEntry();
+        player->DestroyItemCount(cacheEntry, 1, true);
 
-        // Each piece fitting on its own is not enough: they all need room at once.
-        std::vector<std::unique_ptr<Item>> pieces;
-        std::vector<Item*> pointers;
+        std::vector<Item*> mail;
         for (auto const& [member, count] : it->second)
         {
             uint32 const stackSize = std::max<uint32>(1, sObjectMgr->GetItemTemplate(member)->GetMaxStackSize());
             for (uint32 left = count; left > 0;)
             {
                 uint32 const stack = std::min(left, stackSize);
-                pieces.emplace_back(Item::CreateItem(member, stack, player, false, 0, true));
-                if (!pieces.back())
-                    return true;
-                pointers.push_back(pieces.back().get());
                 left -= stack;
+
+                ItemPosCountVec dest;
+                if (player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, member, stack) == EQUIP_ERR_OK)
+                {
+                    if (Item* given = player->StoreNewItem(dest, member, true, Item::GenerateItemRandomPropertyId(member)))
+                        player->SendNewItem(given, stack, true, false);
+                }
+                else if (Item* piece = Item::CreateItem(member, stack, player))
+                    mail.push_back(piece);
             }
         }
 
-        uint32 limited = 0;
-        InventoryResult const room = player->CanStoreItems(pointers.data(), int(pointers.size()), &limited);
-        if (room != EQUIP_ERR_OK)
+        if (!mail.empty())
         {
-            player->SendEquipError(room, item, nullptr, limited);
-            return true;
-        }
-
-        player->DestroyItemCount(item->GetEntry(), 1, true);
-        for (auto const& [member, count] : it->second)
-        {
-            ItemPosCountVec one;
-            if (player->CanStoreNewItem(NULL_BAG, NULL_SLOT, one, member, count) != EQUIP_ERR_OK)
-                continue;
-            if (Item* given = player->StoreNewItem(one, member, true, Item::GenerateItemRandomPropertyId(member)))
-                player->SendNewItem(given, count, true, false);
+            CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+            for (std::size_t index = 0; index < mail.size(); index += MAX_MAIL_ITEMS)
+            {
+                MailDraft draft("Set cache", "Your bags were full, so the rest of your set was sent by mail.");
+                for (std::size_t i = index; i < std::min(index + std::size_t(MAX_MAIL_ITEMS), mail.size()); ++i)
+                {
+                    mail[i]->SaveToDB(trans);
+                    draft.AddItem(mail[i]);
+                }
+                draft.SendMailTo(trans, MailReceiver(player), MailSender(player));
+            }
+            CharacterDatabase.CommitTransaction(trans);
         }
 
         LOG_DEBUG("module.bazaar", "Ethereal Bazaar: {} opened set cache {} for {} pieces.",
-                  player->GetName(), item->GetEntry(), it->second.size());
+                  player->GetName(), cacheEntry, it->second.size());
         return true;
     }
 };
