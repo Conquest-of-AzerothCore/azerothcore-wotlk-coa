@@ -1859,6 +1859,20 @@ namespace lfg
             }
         }
 
+        // Whether any teleported player queued for a random dungeon, independent of whether they
+        // already carry the cooldown aura from a previous pop (#8947): that aura's presence must not
+        // gate the instance-unbind decision below, or a repeat-queue with the same party can reuse the
+        // group's already-progressed instance instead of resetting it.
+        bool hasRandomLfgQueuer = false;
+        for (ObjectGuid const& guid : playersToTeleport)
+        {
+            if (selectedRandomLfgDungeon(guid))
+            {
+                hasRandomLfgQueuer = true;
+                break;
+            }
+        }
+
         bool randomDungeon = false;
         std::vector<Player*> playersTeleported;
         // Teleport Player
@@ -1871,11 +1885,11 @@ namespace lfg
 
                 // Add the cooldown spell if queued for a random dungeon
                 // xinef: add aura
-                if ((randomDungeon || selectedRandomLfgDungeon(player->GetGUID())) && !player->HasAura(LFG_SPELL_DUNGEON_COOLDOWN))
+                if (hasRandomLfgQueuer)
                 {
                     randomDungeon = true;
                     // if player is debugging, don't add dungeon cooldown
-                    if (!m_Testing)
+                    if (!player->HasAura(LFG_SPELL_DUNGEON_COOLDOWN) && !m_Testing)
                     {
                         player->AddAura(LFG_SPELL_DUNGEON_COOLDOWN, player);
                     }
