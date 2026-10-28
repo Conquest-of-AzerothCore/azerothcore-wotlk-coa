@@ -8,6 +8,7 @@
 #include "CreatureData.h"
 #include "SharedDefines.h"
 #include "UnitDefines.h"
+#include <algorithm>
 #include <cmath>
 
 namespace CoAGameplay
@@ -48,6 +49,39 @@ namespace CoAGameplay
     bool IsSubmerged(PlacementSample const& sample)
     {
         return sample.liquidLevel && sample.z < *sample.liquidLevel;
+    }
+
+    std::vector<ClearanceRay> const& LevelRays()
+    {
+        static std::vector<ClearanceRay> const rays = []
+        {
+            constexpr uint32 Directions = 24;
+            std::vector<ClearanceRay> built;
+            for (float height : { 0.6f, 1.2f, 1.8f })
+                for (uint32 step = 0; step < Directions; ++step)
+                {
+                    float const angle = 2.0f * float(M_PI) * float(step) / float(Directions);
+                    built.push_back({ height, std::cos(angle), std::sin(angle), 0.0f });
+                }
+            return built;
+        }();
+        return rays;
+    }
+
+    std::vector<ClearanceRay> const& HeadroomRays()
+    {
+        static std::vector<ClearanceRay> const rays{ { 0.3f, 0.0f, 0.0f, 1.0f } };
+        return rays;
+    }
+
+    float NearestHit(std::vector<ClearanceRay> const& rays,
+        std::function<std::optional<float>(ClearanceRay const&)> const& hitDistance)
+    {
+        float nearest = ClearanceReach;
+        for (ClearanceRay const& ray : rays)
+            if (std::optional<float> const distance = hitDistance(ray))
+                nearest = std::clamp(*distance, 0.0f, nearest);
+        return nearest;
     }
 
     DisplayState ClassifyDisplay(bool inServerStore, bool inClientDbc)

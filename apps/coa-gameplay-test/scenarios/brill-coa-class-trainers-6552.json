@@ -1,10 +1,10 @@
 {
   "schema": 1,
-  "name": "Brill has a trainer for every CoA class (#6552)",
+  "name": "Brill has no CoA class trainers and Veylin stands clear of the inn",
   "contract": [
-    "Brill, the first Horde town of Tirisfal Glades, offered only the stock class trainers, so a CoA character who left Deathknell had nowhere nearby to train.",
-    "With the CoA class trainer event 195 running, each of the 21 CoA classes 12-32 has exactly one trainer of its class within 60 yards of the centre of the Brill town square, in the world phase.",
-    "The trainer posts are inferred, not sourced, so each one is also checked against the terrain: the ground height under every post lies within 0.75 yd of its spawn height."
+    "The 21 CoA class trainer posts of #6552 were inferred against the vanilla Brill square and several stood inside the buildings of the rebuilt CoA town (patch-WB1); no archive gives a real post, so they were removed.",
+    "With the CoA class trainer event 195 running, no trainer of the 21 CoA classes 12-32 stands within 60 yards of the centre of the Brill town square, while the stock Deathguard Burgess does.",
+    "Destiny Weaver Veylin's post stands on the ground, 1.5 yd or more from the nearest wall or prop of the CoA town's vmap models at body height, with no roof within 3 yd above."
   ],
   "timeout_ms": 240000,
   "location": {
@@ -49,486 +49,212 @@
     },
     {
       "action": "assert",
-      "label": "Brill: Barbarian trainer Ray'chelle Greenhill",
+      "label": "Brill: stock Deathguard Burgess stands on the square, so the grid is loaded",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 1652,
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Brill: no Barbarian trainer Ray'chelle Greenhill",
       "actor": "p",
       "metric": "nearby_creature_count",
       "entry": 602951,
-      "equals": 1,
-      "within_ms": 10000
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "Brill: Witch Doctor trainer Zerin'dai",
+      "label": "Brill: no Witch Doctor trainer Zerin'dai",
       "actor": "p",
       "metric": "nearby_creature_count",
       "entry": 650296,
-      "equals": 1,
-      "within_ms": 10000
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "Brill: Felsworn trainer Thimakria Dilanore",
+      "label": "Brill: no Felsworn trainer Thimakria Dilanore",
       "actor": "p",
       "metric": "nearby_creature_count",
       "entry": 650276,
-      "equals": 1,
-      "within_ms": 10000
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "Brill: Witch Hunter trainer Phineas the Fervent",
+      "label": "Brill: no Witch Hunter trainer Phineas the Fervent",
       "actor": "p",
       "metric": "nearby_creature_count",
       "entry": 650275,
-      "equals": 1,
-      "within_ms": 10000
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "Brill: Stormbringer trainer Harold Garett",
+      "label": "Brill: no Stormbringer trainer Harold Garett",
       "actor": "p",
       "metric": "nearby_creature_count",
       "entry": 602773,
-      "equals": 1,
-      "within_ms": 10000
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "Brill: Knight of Xoroth trainer Galgrimorth",
+      "label": "Brill: no Knight of Xoroth trainer Galgrimorth",
       "actor": "p",
       "metric": "nearby_creature_count",
       "entry": 602781,
-      "equals": 1,
-      "within_ms": 10000
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "Brill: Guardian trainer Deathguard Solor",
+      "label": "Brill: no Guardian trainer Deathguard Solor",
       "actor": "p",
       "metric": "nearby_creature_count",
       "entry": 650279,
-      "equals": 1,
-      "within_ms": 10000
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "Brill: Templar trainer Benjamin the Sinless",
+      "label": "Brill: no Templar trainer Benjamin the Sinless",
       "actor": "p",
       "metric": "nearby_creature_count",
       "entry": 602803,
-      "equals": 1,
-      "within_ms": 10000
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "Brill: Bloodmage trainer Belinaros Cicero",
+      "label": "Brill: no Bloodmage trainer Belinaros Cicero",
       "actor": "p",
       "metric": "nearby_creature_count",
       "entry": 602922,
-      "equals": 1,
-      "within_ms": 10000
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "Brill: Ranger trainer Sigi Mikayla",
+      "label": "Brill: no Ranger trainer Sigi Mikayla",
       "actor": "p",
       "metric": "nearby_creature_count",
       "entry": 650281,
-      "equals": 1,
-      "within_ms": 10000
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "Brill: Chronomancer trainer Nyrmedormi",
+      "label": "Brill: no Chronomancer trainer Nyrmedormi",
       "actor": "p",
       "metric": "nearby_creature_count",
       "entry": 602822,
-      "equals": 1,
-      "within_ms": 10000
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "Brill: Necromancer trainer Kobidus the Lich",
+      "label": "Brill: no Necromancer trainer Kobidus the Lich",
       "actor": "p",
       "metric": "nearby_creature_count",
       "entry": 503930,
-      "equals": 1,
-      "within_ms": 10000
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "Brill: Pyromancer trainer Ridley of Lordaeron",
+      "label": "Brill: no Pyromancer trainer Ridley of Lordaeron",
       "actor": "p",
       "metric": "nearby_creature_count",
       "entry": 650293,
-      "equals": 1,
-      "within_ms": 10000
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "Brill: Cultist trainer Vytalas the Dreamer",
+      "label": "Brill: no Cultist trainer Vytalas the Dreamer",
       "actor": "p",
       "metric": "nearby_creature_count",
       "entry": 602833,
-      "equals": 1,
-      "within_ms": 10000
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "Brill: Starcaller trainer Fal'ador Yanille",
+      "label": "Brill: no Starcaller trainer Fal'ador Yanille",
       "actor": "p",
       "metric": "nearby_creature_count",
       "entry": 602850,
-      "equals": 1,
-      "within_ms": 10000
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "Brill: Sun Cleric trainer Lightspeaker Shaylan",
+      "label": "Brill: no Sun Cleric trainer Lightspeaker Shaylan",
       "actor": "p",
       "metric": "nearby_creature_count",
       "entry": 650327,
-      "equals": 1,
-      "within_ms": 10000
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "Brill: Tinker trainer Ol' Jimbles",
+      "label": "Brill: no Tinker trainer Ol' Jimbles",
       "actor": "p",
       "metric": "nearby_creature_count",
       "entry": 602873,
-      "equals": 1,
-      "within_ms": 10000
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "Brill: Venomancer trainer Wun'zujek",
+      "label": "Brill: no Venomancer trainer Wun'zujek",
       "actor": "p",
       "metric": "nearby_creature_count",
       "entry": 650288,
-      "equals": 1,
-      "within_ms": 10000
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "Brill: Reaper trainer Sidus the Soul-Collector",
+      "label": "Brill: no Reaper trainer Sidus the Soul-Collector",
       "actor": "p",
       "metric": "nearby_creature_count",
       "entry": 602891,
-      "equals": 1,
-      "within_ms": 10000
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "Brill: Primalist trainer Thako Maz",
+      "label": "Brill: no Primalist trainer Thako Maz",
       "actor": "p",
       "metric": "nearby_creature_count",
       "entry": 650290,
-      "equals": 1,
-      "within_ms": 10000
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "Brill: Runemaster trainer Thalen Mackenzie",
+      "label": "Brill: no Runemaster trainer Thalen Mackenzie",
       "actor": "p",
       "metric": "nearby_creature_count",
       "entry": 602913,
-      "equals": 1,
-      "within_ms": 10000
+      "equals": 0
     },
     {
       "action": "teleport_to_spawn",
       "actor": "p",
-      "guid": 9005000
+      "guid": 9000022
     },
     {
       "action": "assert",
-      "label": "Barbarian post 9005000 stands on the ground (z 34.83)",
+      "label": "Destiny Weaver Veylin post 9000022 stands on the ground (z 34.47)",
       "actor": "p",
       "metric": "ground_height",
-      "min": 34.08,
-      "max": 35.58,
+      "min": 33.72,
+      "max": 35.22,
       "within_ms": 5000
-    },
-    {
-      "action": "teleport_to_spawn",
-      "actor": "p",
-      "guid": 9005001
     },
     {
       "action": "assert",
-      "label": "Witch Doctor post 9005001 stands on the ground (z 34.88)",
+      "label": "Barbarian trainer post 9005000 keeps 1.5 yd from every wall and prop of the CoA town",
       "actor": "p",
-      "metric": "ground_height",
-      "min": 34.13,
-      "max": 35.63,
-      "within_ms": 5000
-    },
-    {
-      "action": "teleport_to_spawn",
-      "actor": "p",
-      "guid": 9005002
+      "metric": "spawn_clearance",
+      "guid": 9005000,
+      "spawn_type": "creature",
+      "min": 1.5
     },
     {
       "action": "assert",
-      "label": "Felsworn post 9005002 stands on the ground (z 34.88)",
+      "label": "Barbarian trainer post 9005000 has no roof within 3 yd above it",
       "actor": "p",
-      "metric": "ground_height",
-      "min": 34.13,
-      "max": 35.63,
-      "within_ms": 5000
-    },
-    {
-      "action": "teleport_to_spawn",
-      "actor": "p",
-      "guid": 9005003
-    },
-    {
-      "action": "assert",
-      "label": "Witch Hunter post 9005003 stands on the ground (z 34.85)",
-      "actor": "p",
-      "metric": "ground_height",
-      "min": 34.1,
-      "max": 35.6,
-      "within_ms": 5000
-    },
-    {
-      "action": "teleport_to_spawn",
-      "actor": "p",
-      "guid": 9005004
-    },
-    {
-      "action": "assert",
-      "label": "Stormbringer post 9005004 stands on the ground (z 34.81)",
-      "actor": "p",
-      "metric": "ground_height",
-      "min": 34.06,
-      "max": 35.56,
-      "within_ms": 5000
-    },
-    {
-      "action": "teleport_to_spawn",
-      "actor": "p",
-      "guid": 9005005
-    },
-    {
-      "action": "assert",
-      "label": "Knight of Xoroth post 9005005 stands on the ground (z 34.71)",
-      "actor": "p",
-      "metric": "ground_height",
-      "min": 33.96,
-      "max": 35.46,
-      "within_ms": 5000
-    },
-    {
-      "action": "teleport_to_spawn",
-      "actor": "p",
-      "guid": 9005006
-    },
-    {
-      "action": "assert",
-      "label": "Guardian post 9005006 stands on the ground (z 34.57)",
-      "actor": "p",
-      "metric": "ground_height",
-      "min": 33.82,
-      "max": 35.32,
-      "within_ms": 5000
-    },
-    {
-      "action": "teleport_to_spawn",
-      "actor": "p",
-      "guid": 9005007
-    },
-    {
-      "action": "assert",
-      "label": "Templar post 9005007 stands on the ground (z 34.45)",
-      "actor": "p",
-      "metric": "ground_height",
-      "min": 33.7,
-      "max": 35.2,
-      "within_ms": 5000
-    },
-    {
-      "action": "teleport_to_spawn",
-      "actor": "p",
-      "guid": 9005008
-    },
-    {
-      "action": "assert",
-      "label": "Bloodmage post 9005008 stands on the ground (z 34.53)",
-      "actor": "p",
-      "metric": "ground_height",
-      "min": 33.78,
-      "max": 35.28,
-      "within_ms": 5000
-    },
-    {
-      "action": "teleport_to_spawn",
-      "actor": "p",
-      "guid": 9005009
-    },
-    {
-      "action": "assert",
-      "label": "Ranger post 9005009 stands on the ground (z 34.23)",
-      "actor": "p",
-      "metric": "ground_height",
-      "min": 33.48,
-      "max": 34.98,
-      "within_ms": 5000
-    },
-    {
-      "action": "teleport_to_spawn",
-      "actor": "p",
-      "guid": 9005010
-    },
-    {
-      "action": "assert",
-      "label": "Chronomancer post 9005010 stands on the ground (z 34.24)",
-      "actor": "p",
-      "metric": "ground_height",
-      "min": 33.49,
-      "max": 34.99,
-      "within_ms": 5000
-    },
-    {
-      "action": "teleport_to_spawn",
-      "actor": "p",
-      "guid": 9005011
-    },
-    {
-      "action": "assert",
-      "label": "Necromancer post 9005011 stands on the ground (z 34.95)",
-      "actor": "p",
-      "metric": "ground_height",
-      "min": 34.2,
-      "max": 35.7,
-      "within_ms": 5000
-    },
-    {
-      "action": "teleport_to_spawn",
-      "actor": "p",
-      "guid": 9005012
-    },
-    {
-      "action": "assert",
-      "label": "Pyromancer post 9005012 stands on the ground (z 35.11)",
-      "actor": "p",
-      "metric": "ground_height",
-      "min": 34.36,
-      "max": 35.86,
-      "within_ms": 5000
-    },
-    {
-      "action": "teleport_to_spawn",
-      "actor": "p",
-      "guid": 9005013
-    },
-    {
-      "action": "assert",
-      "label": "Cultist post 9005013 stands on the ground (z 35.20)",
-      "actor": "p",
-      "metric": "ground_height",
-      "min": 34.45,
-      "max": 35.95,
-      "within_ms": 5000
-    },
-    {
-      "action": "teleport_to_spawn",
-      "actor": "p",
-      "guid": 9005014
-    },
-    {
-      "action": "assert",
-      "label": "Starcaller post 9005014 stands on the ground (z 35.14)",
-      "actor": "p",
-      "metric": "ground_height",
-      "min": 34.39,
-      "max": 35.89,
-      "within_ms": 5000
-    },
-    {
-      "action": "teleport_to_spawn",
-      "actor": "p",
-      "guid": 9005015
-    },
-    {
-      "action": "assert",
-      "label": "Sun Cleric post 9005015 stands on the ground (z 35.12)",
-      "actor": "p",
-      "metric": "ground_height",
-      "min": 34.37,
-      "max": 35.87,
-      "within_ms": 5000
-    },
-    {
-      "action": "teleport_to_spawn",
-      "actor": "p",
-      "guid": 9005016
-    },
-    {
-      "action": "assert",
-      "label": "Tinker post 9005016 stands on the ground (z 35.00)",
-      "actor": "p",
-      "metric": "ground_height",
-      "min": 34.25,
-      "max": 35.75,
-      "within_ms": 5000
-    },
-    {
-      "action": "teleport_to_spawn",
-      "actor": "p",
-      "guid": 9005017
-    },
-    {
-      "action": "assert",
-      "label": "Venomancer post 9005017 stands on the ground (z 34.86)",
-      "actor": "p",
-      "metric": "ground_height",
-      "min": 34.11,
-      "max": 35.61,
-      "within_ms": 5000
-    },
-    {
-      "action": "teleport_to_spawn",
-      "actor": "p",
-      "guid": 9005018
-    },
-    {
-      "action": "assert",
-      "label": "Reaper post 9005018 stands on the ground (z 34.69)",
-      "actor": "p",
-      "metric": "ground_height",
-      "min": 33.94,
-      "max": 35.44,
-      "within_ms": 5000
-    },
-    {
-      "action": "teleport_to_spawn",
-      "actor": "p",
-      "guid": 9005019
-    },
-    {
-      "action": "assert",
-      "label": "Primalist post 9005019 stands on the ground (z 34.54)",
-      "actor": "p",
-      "metric": "ground_height",
-      "min": 33.79,
-      "max": 35.29,
-      "within_ms": 5000
-    },
-    {
-      "action": "teleport_to_spawn",
-      "actor": "p",
-      "guid": 9005020
-    },
-    {
-      "action": "assert",
-      "label": "Runemaster post 9005020 stands on the ground (z 34.40)",
-      "actor": "p",
-      "metric": "ground_height",
-      "min": 33.65,
-      "max": 35.15,
-      "within_ms": 5000
+      "metric": "spawn_headroom",
+      "guid": 9005000,
+      "spawn_type": "creature",
+      "min": 3
     }
   ]
 }
