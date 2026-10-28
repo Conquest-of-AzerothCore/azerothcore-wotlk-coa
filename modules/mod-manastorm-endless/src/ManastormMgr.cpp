@@ -2939,6 +2939,10 @@ namespace
     constexpr uint32 HEART_PROJECTILE_LAUNCHER_LIFETIME_MS = 35000;
     constexpr uint32 HEART_PICKUP_ARM_DELAY_MS = 1000;
     constexpr uint32 HEART_PICKUP_CHECK_INTERVAL_MS = 500;
+
+    // Matches the documented "a short disconnect can resume an existing
+    // instance for up to 120 seconds" window (docs/coa/manastorm.md).
+    constexpr uint32 MEMBER_DISCONNECT_GRACE_MS = 120000;
     constexpr float HEART_PICKUP_DISTANCE = 1.0f;
 
     constexpr float HEART_MIN_LANDING_DISTANCE = 10.0f;
@@ -5715,10 +5719,29 @@ void ManastormMgr::RestoreOriginalDifficulties(Player* player)
     _originalDifficulties.erase(itr);
 }
 
+void ManastormMgr::OnPlayerLogout(Player* player)
+{
+    if (!player)
+        return;
+
+    ManastormRun* run = GetRunFor(player);
+    if (!run)
+        return;
+
+    _disconnectGraceTimers[player->GetGUID().GetCounter()] =
+        DisconnectGraceState{ run->GetRunId(), MEMBER_DISCONNECT_GRACE_MS };
+}
+
 void ManastormMgr::OnPlayerLogin(Player* player)
 {
     if (!player || !player->GetSession())
         return;
+
+    // The player is back; whatever happens next (successful reconnect, a
+    // stale-stage FailRun below, or no active run at all) is no longer the
+    // disconnect this grace timer was tracking.
+    _disconnectGraceTimers.erase(player->GetGUID().GetCounter());
+
     ManastormExperience::Instance().Settle(player);
     ManastormRun* run = GetRunFor(player);
     if (!run)
@@ -9579,6 +9602,32 @@ void ManastormMgr::Update(uint32 diff)
     }
     else
         _runValidationTimer -= diff;
+
+    // A disconnected member whose partner(s) stay on the private stage
+    // never hits the empty-instance expiry above. Give up on them once the
+    // documented resume window elapses so the rest of the group is no
+    // longer blocked from starting a new run together.
+    for (auto itr = _disconnectGraceTimers.begin(); itr != _disconnectGraceTimers.end();)
+    {
+        if (itr->second.RemainingMs > diff)
+        {
+            itr->second.RemainingMs -= diff;
+            ++itr;
+            continue;
+        }
+
+        ObjectGuid::LowType const guid = itr->first;
+        uint64 const runId = itr->second.RunId;
+        itr = _disconnectGraceTimers.erase(itr);
+
+        auto memberItr = _memberRunIds.find(guid);
+        if (memberItr == _memberRunIds.end() || memberItr->second != runId)
+            continue;
+
+        auto runItr = _runs.find(runId);
+        if (runItr != _runs.end() && runItr->second)
+            FailRun(*runItr->second, "A disconnected run member did not reconnect within the resume window.");
+    }
 
     UpdateManastormPotionCharges(diff);
 

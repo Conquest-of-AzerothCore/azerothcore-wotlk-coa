@@ -774,6 +774,8 @@ public:
     void OnPlayerLogout(Player* player) override
     {
         ManastormClientUIFixes::ResetObjectiveHighlight(player);
+        if (ManastormModuleConfig::Enabled())
+            ManastormMgr::Instance().OnPlayerLogout(player);
     }
 
     void OnPlayerMapChanged(Player* player) override

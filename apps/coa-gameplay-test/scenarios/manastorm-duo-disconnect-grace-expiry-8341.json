@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "name": "Manastorm: a disconnected duo member's stale run registration expires after the resume window (#8341)",
+  "contract": [
+    "#8341: a player grouped with a duo partner who had disconnected mid-run got ENTER_MANASTORM_BAD_GROUP_SIZE",
+    "from ValidateEnter() (ManastormClientBridge.cpp) because the disconnected partner stayed registered in",
+    "ManastormMgr's _memberRunIds. OnPlayerLogout (Manastorm.cpp) never called StopRun/FailRun for the logging",
+    "-out member, and the private instance's own empty-map unload timer never starts while another member",
+    "(here, the one who stays online) keeps the stage non-empty, so nothing else ever cleaned up the stale",
+    "membership either; docs/coa/manastorm.md promises a short disconnect only blocks resume 'for up to 120",
+    "seconds', not indefinitely.",
+    "The fix adds ManastormMgr::OnPlayerLogout, which starts a 120000ms grace timer for the logging-out",
+    "member's run id, canceled by ManastormMgr::OnPlayerLogin if they come back, and otherwise consumed by",
+    "ManastormMgr::Update to FailRun the run once it expires and the member is still mapped to that same run.",
+    "This scenario starts a real duo run (both members physically transferred into the private stage) from a",
+    "known fixed position, then disconnects one member through the harness's native WorldSession::LogoutPlayer",
+    "while the other stays inside the stage (so the stage never becomes empty and the engine's own idle-unload",
+    "timer, which this fix's grace timer is independent of, never starts). It asserts that once the documented",
+    "120-second resume window elapses, the remaining member's run is failed and they land back at that saved",
+    "pre-run position (ManastormFailureExit::SavedLocation, the same exit the pre-existing 'stage no longer",
+    "available for reconnect' and 'private stage instance has expired' paths already use for an abandoned",
+    "run, as opposed to FactionHub, which only the death/wipe release path uses), proving the stale",
+    "registration no longer survives indefinitely. Before the fix nothing ever ends the run here, so the",
+    "remaining member would stay in the private instance forever."
+  ],
+  "timeout_ms": 180000,
+  "location": { "map": 0, "x": -284.971, "y": 1466.26, "z": 38.6926, "o": 0 },
+  "players": [
+    {
+      "id": "a",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "security": 2
+    },
+    {
+      "id": "b",
+      "race": 2,
+      "class": 23,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "a",
+      "target": "b"
+    },
+    {
+      "action": "command",
+      "actor": "a",
+      "command": ".manastorm segment test 49"
+    },
+    {
+      "action": "assert",
+      "label": "The group leader entered the private duo Manastorm instance",
+      "actor": "a",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The duo partner was transferred into the same private instance",
+      "actor": "b",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "Match the native phase 1 Manastorm room",
+      "actor": "a",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "Match the native phase 1 Manastorm room",
+      "actor": "b",
+      "value": 1
+    },
+    {
+      "action": "disconnect",
+      "actor": "b"
+    },
+    {
+      "action": "wait",
+      "ms": 125000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the remaining member never left or died; the stage stayed non-empty the whole time",
+      "actor": "a",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The disconnected member's expired grace window failed the run and ejected the remaining member",
+      "actor": "a",
+      "metric": "private_instance",
+      "within_ms": 5000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The remaining member was ejected back to their saved pre-run position, not left stuck as a ghost",
+      "actor": "a",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The remaining member landed back on the map they entered from",
+      "actor": "a",
+      "metric": "map_id",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The remaining member landed back at the exact saved pre-run position",
+      "actor": "a",
+      "metric": "point_distance_2d",
+      "x": -284.971,
+      "y": 1466.26,
+      "max": 3
+    }
+  ]
+}
