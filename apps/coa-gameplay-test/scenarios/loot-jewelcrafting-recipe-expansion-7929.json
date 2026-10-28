@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "name": "Jewelcrafting recipes never drop on an Expansion 0 session (#7929)",
+  "contract": "Loot::AddItem (LootMgr.cpp) never consulted the loot owner's session expansion, so a Jewelcrafting recipe (item class 9, subclass 10) could be added to loot for a character whose account is Expansion 0 (Classic), although Trainer.cpp's ProfessionExpansion keeps Jewelcrafting unlearnable at every trainer below EXPANSION_THE_BURNING_CRUSADE (#6026). Design: Truesilver Boar (21944) is such a recipe. The fix rejects the item in Loot::AddItem when the loot owner's session expansion is below EXPANSION_THE_BURNING_CRUSADE. forced_loot_count adds the item directly through Loot::AddItem with the actor as loot owner, bypassing the loot table RNG, and reports how many uncollected copies survive that call.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "classic", "race": 1, "class": 12, "level": 60, "expansion": 0 },
+    { "id": "wrath", "race": 1, "class": 12, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "DISCRIMINATING: a Jewelcrafting recipe never drops for an Expansion 0 session", "actor": "classic", "metric": "forced_loot_count", "item": 21944, "equals": 0 },
+    { "action": "assert", "label": "REGRESSION: the same recipe still drops for an Expansion 2 (Wrath) session", "actor": "wrath", "metric": "forced_loot_count", "item": 21944, "equals": 1 },
+    { "action": "assert", "label": "CONTROL: an unrelated item is unaffected by the gate on an Expansion 0 session", "actor": "classic", "metric": "forced_loot_count", "item": 6948, "equals": 1 }
+  ]
+}

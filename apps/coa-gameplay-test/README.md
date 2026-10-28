@@ -772,6 +772,9 @@ returns the highest per-item level that native item scaling stored for such an i
 `loot_slot` with `item` also picks up a copy of that item.
 `creature_loot_quality_rate` requires `entry` (a creature loot id), fills that template `rolls` times (default 10000)
 for the actor and reports the percentage of fills holding an item of at least `quality` (default 3, rare).
+`forced_loot_count` requires `item`, adds it directly through `Loot::AddItem` with the actor as loot owner
+(bypassing any loot table), and reports how many uncollected copies survive that call; a gate inside `AddItem`
+that rejects the item for that actor reports zero.
 `loot_slot` accepts an optional `item` to find that item in the current creature corpse's or chest's per-player
 slots, then submits the native pickup request. Without it, `slot` defaults to zero. `respawn_remaining` reads a
 fixture creature's remaining death-time respawn timer in seconds; summoned fixtures still use corpse-based timing.
