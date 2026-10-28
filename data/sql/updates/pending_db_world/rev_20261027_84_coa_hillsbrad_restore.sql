@@ -367,13 +367,13 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (9950728, 312414, 0, 0, 0, 1, 1, 0, -59.2, -790.1, 58.49, 3.5, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Cleric Abigail (client SuperTrack point; z terrain, facing estimated)'),
 (9950729, 991521, 0, 0, 0, 1, 1, 0, -232.0, -1188.0, 86.44, 4.01, 120, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Juliette Livingston (quest 1355 WDB POI; z terrain, facing estimated)'),
 (9950730, 512485, 0, 0, 0, 1, 1, 0, -846.0, -520.0, 14.12, 1.13, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Martha Livingston (Southshore; spot, z terrain and facing estimated)'),
-(9950731, 255281, 0, 0, 0, 1, 1, 0, -418.5, -1402.2, 98.6, 2.77, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Kezia (client SuperTrack point; z and facing estimated)'),
-(9950732, 255282, 0, 0, 0, 1, 1, 0, -434.3, -1484.0, 91.5, 3.14, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Lord Valesir (client SuperTrack point; z and facing estimated)'),
+(9950731, 255281, 0, 0, 0, 1, 1, 0, -418.5, -1402.2, 136.8, 2.77, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Kezia (client SuperTrack point; facing estimated)'),
+(9950732, 255282, 0, 0, 0, 1, 1, 0, -434.3, -1484.0, 104.7, 3.14, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Lord Valesir (client SuperTrack point; facing estimated)'),
 (9950733, 829501, 0, 0, 0, 1, 1, 0, -153.6, -577.9, 162.85, 5.49, 900, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Old Grayback (client SuperTrack point; z terrain, facing and respawn estimated)'),
 (9950734, 829500, 0, 0, 0, 1, 1, 0, -1114.9, -1357.8, 55.89, 5.12, 900, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Silkshadow (client SuperTrack point; z terrain, facing and respawn estimated)'),
 (9950735, 829502, 0, 0, 0, 1, 1, 0, -1055.2, 98.7, 56.38, 5.86, 900, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Highclaw (client SuperTrack point; z terrain, facing and respawn estimated)'),
-(9950736, 829504, 0, 0, 0, 1, 1, 0, -984.1, -1026.2, 30.9, 0.32, 900, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Gloomsnarl the Hexer (client SuperTrack point; z terrain, facing and respawn estimated)'),
-(9950737, 350192, 0, 0, 0, 1, 1, 0, 132.7, 474.9, 41.94, 2.08, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Arcane Anomaly (client SuperTrack point; z terrain, facing and respawn estimated)'),
+(9950736, 829504, 0, 0, 0, 1, 1, 0, -984.1, -1026.2, 31.2, 0.32, 900, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Gloomsnarl the Hexer (client SuperTrack point; facing and respawn estimated)'),
+(9950737, 350192, 0, 0, 0, 1, 1, 0, 132.7, 474.9, 44.2, 2.08, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Arcane Anomaly (client SuperTrack point; facing and respawn estimated)'),
 (9950738, 255536, 0, 0, 0, 1, 1, 0, 197.2, 380.7, -2.22, 0, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Southern Dalaran Wardstone (client SuperTrack point; z terrain)'),
 (9950739, 255537, 0, 0, 0, 1, 1, 0, 269.5, 456.4, 57.35, 0, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Western Dalaran Wardstone (client SuperTrack point; z terrain)'),
 (9950740, 255538, 0, 0, 0, 1, 1, 0, 279.7, 325.7, 2.72, 0, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Eastern Dalaran Wardstone (client SuperTrack point; z terrain)'),
@@ -527,12 +527,14 @@ INSERT INTO `creature_default_trainer` (`CreatureId`, `TrainerId`) VALUES
 
 -- Stock Tarren Mill and Southshore spawns that float or sink: z follows the floor under them (vmap floors of the
 -- inn, chapel and houses), Tallow moves up to the inn's upper floor as in the live video, and spawns standing in a
--- wall, doorway or tree (vmap ray test) move to the nearest open spot; spots estimated.
+-- wall, doorway or tree (vmap ray test) move to the nearest open spot; spots estimated. Monika Sengutz and Derak
+-- Nightfall stand on the client QuestSuperTrack turn-in points of 255118-255120 and 1350.
 UPDATE `creature` SET `position_z` = 63.3 WHERE `guid` = 14853;
 UPDATE `creature` SET `position_z` = 63.3 WHERE `guid` = 14854;
-UPDATE `creature` SET `position_z` = 55.8 WHERE `guid` = 15284;
+UPDATE `creature` SET `position_x` = 8.0, `position_y` = -948.0, `position_z` = 56.4 WHERE `guid` = 15284;
 UPDATE `creature` SET `position_x` = -49.4, `position_y` = -970.4, `position_z` = 56.9 WHERE `guid` = 15285;
 UPDATE `creature` SET `position_z` = 55.8 WHERE `guid` = 15287;
+UPDATE `creature` SET `position_x` = 9.6, `position_y` = -886.1, `position_z` = 57.7 WHERE `guid` = 15288;
 UPDATE `creature` SET `position_x` = -22.0, `position_y` = -958.0, `position_z` = 55.4 WHERE `guid` = 15289;
 UPDATE `creature` SET `position_z` = 56.4 WHERE `guid` = 15292;
 UPDATE `creature` SET `position_x` = -9.3, `position_y` = -902.0, `position_z` = 57.5 WHERE `guid` = 15293;
