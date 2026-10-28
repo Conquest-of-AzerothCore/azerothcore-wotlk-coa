@@ -4875,6 +4875,26 @@ private:
                             countItem(item);
             return count;
         }
+        if (metric == "carried_statless_armor_count")
+        {
+            uint32 count = 0;
+            auto countItem = [&count](Item* item)
+            {
+                ItemTemplate const* proto = item->GetTemplate();
+                if (proto->Class == ITEM_CLASS_ARMOR && proto->StatsCount == 0 &&
+                    proto->ScalingStatDistribution == 0 && proto->RandomProperty == 0 && proto->RandomSuffix == 0)
+                    ++count;
+            };
+            for (uint8 slot = EQUIPMENT_SLOT_START; slot < INVENTORY_SLOT_ITEM_END; ++slot)
+                if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
+                    countItem(item);
+            for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
+                if (Bag* container = player->GetBagByPos(bag))
+                    for (uint32 slot = 0; slot < container->GetBagSize(); ++slot)
+                        if (Item* item = container->GetItemByPos(uint8(slot)))
+                            countItem(item);
+            return count;
+        }
         if (metric == "carried_item_level" || metric == "carried_item_required_level" ||
             metric == "carried_item_armor" || metric == "carried_item_scaling_level" ||
             metric == "carried_item_stat")

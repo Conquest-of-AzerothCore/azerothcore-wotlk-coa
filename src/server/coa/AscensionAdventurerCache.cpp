@@ -65,6 +65,12 @@ enum RewardKind : uint8
     RewardKindCount
 };
 
+bool HasWearableStats(ItemTemplate const* item)
+{
+    return item->StatsCount > 0 || item->ScalingStatDistribution != 0 ||
+        item->RandomProperty != 0 || item->RandomSuffix != 0;
+}
+
 void OpenCache(Player* player, Item* item)
 {
     player->SendEquipError(EQUIP_ERR_NONE, item, nullptr);
@@ -175,7 +181,8 @@ public:
             uint32 level = kind == Material ? item->ItemLevel : item->RequiredLevel;
             uint32 ceiling = player->GetLevel() + (kind == Material ? 5 : 0);
             if (level > ceiling || (kind != Material && player->CanUseItem(item) != EQUIP_ERR_OK) ||
-                (kind == Armor && item->GetSkill() && !player->GetSkillValue(item->GetSkill())))
+                (kind == Armor && item->GetSkill() && !player->GetSkillValue(item->GetSkill())) ||
+                (kind == Armor && !HasWearableStats(item)))
                 continue;
             rewards[kind].push_back(entry);
             bestLevel[kind] = std::max(bestLevel[kind], level);
