@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "name": "The Wondrous Wisdomball offers a Human only the Scarlet Monastery quests their race may take (#8258)",
+  "contract": "Issue #8258 reported that a Human character was offered Horde quests at the Wondrous Wisdomball. Since #9501, AscensionWisdomball.cpp's CanOffer requires Player::SatisfyQuestRace, and the ball's accept path goes through CanOffer too. Scarlet Monastery (map 189, QuestSortID 796) has Alliance quests (AllowableRaces 1101: 1053 In the Name of the Light, 1050 Mythology of the Titans) and Horde quests (AllowableRaces 690: 1048 Into The Scarlet Monastery, 1051 Vorrel's Revenge, 1113 Hearts of Zeal). A Human (race 1) is offered the Alliance quests and none of the Horde ones, and a hostile client accept of a Horde quest at the ball is refused.",
+  "timeout_ms": 180000,
+  "players": [
+    { "id": "human", "race": 1, "class": 1, "level": 80 }
+  ],
+  "location": {
+    "map": 189,
+    "x": 1688.99,
+    "y": 1053.48,
+    "z": 18.6775,
+    "o": 0,
+    "ignore_access": true
+  },
+  "steps": [
+    { "action": "wait", "label": "Let Scarlet Monastery settle", "ms": 8000 },
+    { "action": "add_item", "label": "Obtain the companion, as a purchase would", "actor": "human", "item": 101169, "count": 1 },
+    { "action": "use_item", "label": "Using the item teaches its summon", "actor": "human", "item": 101169, "spell": 55884 },
+    {
+      "action": "assert",
+      "label": "The summon is learned",
+      "actor": "human", "metric": "knows_spell", "spell": 83050, "equals": 1, "within_ms": 3000
+    },
+    { "action": "cast", "label": "Summon the ball in Scarlet Monastery", "actor": "human", "spell": 83050 },
+    { "action": "wait", "label": "Let the summon land", "ms": 3000 },
+    {
+      "action": "assert",
+      "label": "The cast produced a creature this Human owns",
+      "actor": "human", "metric": "owned_creature_count", "entry": 79025, "min": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The Alliance In the Name of the Light is offered",
+      "actor": "human", "metric": "ball_offers_quest", "quest": 1053, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The Alliance Mythology of the Titans is offered",
+      "actor": "human", "metric": "ball_offers_quest", "quest": 1050, "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Horde Into The Scarlet Monastery is not offered",
+      "actor": "human", "metric": "ball_offers_quest", "quest": 1048, "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Horde Vorrel's Revenge is not offered",
+      "actor": "human", "metric": "ball_offers_quest", "quest": 1051, "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Horde Hearts of Zeal is not offered",
+      "actor": "human", "metric": "ball_offers_quest", "quest": 1113, "equals": 0
+    },
+    { "action": "quest_accept", "label": "Try to take Hearts of Zeal anyway, as a hostile client would", "actor": "human", "quest": 1113, "entry": 79025 },
+    {
+      "action": "assert",
+      "label": "The ball refuses it - it never enters the log",
+      "actor": "human", "metric": "quest_status", "quest": 1113, "equals": 0
+    },
+    { "action": "quest_accept", "label": "Take the Alliance In the Name of the Light", "actor": "human", "quest": 1053, "entry": 79025 },
+    {
+      "action": "assert",
+      "label": "The Alliance quest enters the Human's log",
+      "actor": "human", "metric": "quest_status", "quest": 1053, "min": 1, "within_ms": 3000
+    }
+  ]
+}

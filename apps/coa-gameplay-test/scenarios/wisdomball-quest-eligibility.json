@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "The Wondrous Wisdomball offers a dungeon's quests to either faction (#6443), and never a quest that would complete before the player does anything",
-  "contract": "AscensionWisdomball.cpp lists a dungeon's quests by map alone and accepts them through Player::CanAddQuest (log space and source item only). Issue #6443, decided by the user: the ball ignores a quest's AllowableRaces, so PR #5578's Player::SatisfyQuestRace check in CanOffer is gone. Blackfathom Deeps quests 1200 (AllowableRaces 1101, Alliance) and 6561 (AllowableRaces 690, Horde) are both 'Blackfathom Villainy'; neither has an ExclusiveGroup, so a Horde character is offered and granted both, the duplicate #5486 reported. Ragefire Chasm quests 5722 ('Searching for the Lost Satchel', starter Rahauro 11833, ender Maur Grimtotem 11834) and 5724 ('Returning the Lost Satchel', starter 11834, StartItem 14381, ender 11833) have no RequiredNpcOrGo/RequiredItemId/RequiredPlayerKills objective at all: granting either through the ball leaves it satisfied on the spot, without the player doing anything. The ball must not offer them. Blackfathom Deeps has three more such quests that no hand-kept list named: 1198 In Search of Thaelrid and 6562 Trouble in the Deeps are talk-to steps with no objective, and 6564 Allegiance to the Old Gods requires only its own StartItem 16790, so each was handed out complete and paid straight back at the ball. The ball withholds every quest without a player objective (kill, cast, speak-to, player kill, exploration or event, money or reputation, or a required item other than its StartItem), plus the hand-kept IDs. Quest 5723, a real Ragefire Chasm quest with an objective, stays offered as a control.",
+  "name": "The Wondrous Wisdomball offers a dungeon's quests only to races that may take them (#8258), and never a quest that would complete before the player does anything",
+  "contract": "AscensionWisdomball.cpp lists a dungeon's quests by map alone and accepts them through Player::CanAddQuest (log space and source item only). Since #9501, CanOffer requires Player::SatisfyQuestRace again (issue #8258 replaces the #6443 decision), and the ball's accept path goes through CanOffer. Blackfathom Deeps quests 1200 (AllowableRaces 1101, Alliance) and 6561 (AllowableRaces 690, Horde) are both 'Blackfathom Villainy'; a Horde character is offered and granted only 6561, and a hostile client accept of 1200 is refused. Ragefire Chasm quests 5722 ('Searching for the Lost Satchel', starter Rahauro 11833, ender Maur Grimtotem 11834) and 5724 ('Returning the Lost Satchel', starter 11834, StartItem 14381, ender 11833) have no RequiredNpcOrGo/RequiredItemId/RequiredPlayerKills objective at all: granting either through the ball leaves it satisfied on the spot, without the player doing anything. The ball must not offer them. Blackfathom Deeps has three more such quests that no hand-kept list named: 1198 In Search of Thaelrid and 6562 Trouble in the Deeps are talk-to steps with no objective, and 6564 Allegiance to the Old Gods requires only its own StartItem 16790, so each was handed out complete and paid straight back at the ball. The ball withholds every quest without a player objective (kill, cast, speak-to, player kill, exploration or event, money or reputation, or a required item other than its StartItem), plus the hand-kept IDs. Quest 5723, a real Ragefire Chasm quest with an objective, stays offered as a control.",
   "timeout_ms": 180000,
   "players": [
     { "id": "raider", "race": 10, "class": 13, "level": 80 }
@@ -32,8 +32,8 @@
     },
     {
       "action": "assert",
-      "label": "A Horde character is offered the Alliance Blackfathom Villainy",
-      "actor": "raider", "metric": "ball_offers_quest", "quest": 1200, "equals": 1, "within_ms": 5000
+      "label": "A Horde character is not offered the Alliance Blackfathom Villainy",
+      "actor": "raider", "metric": "ball_offers_quest", "quest": 1200, "equals": 0, "within_ms": 5000
     },
     {
       "action": "assert",
@@ -61,16 +61,16 @@
       "label": "The ball refuses it - it never enters the log",
       "actor": "raider", "metric": "quest_status", "quest": 1198, "equals": 0
     },
-    { "action": "quest_accept", "label": "Take the Alliance version at the ball", "actor": "raider", "quest": 1200, "entry": 79025 },
+    { "action": "quest_accept", "label": "Try to take the Alliance version anyway, as a hostile client would", "actor": "raider", "quest": 1200, "entry": 79025 },
     {
       "action": "assert",
-      "label": "The Alliance quest enters the Horde character's log",
-      "actor": "raider", "metric": "quest_status", "quest": 1200, "min": 1, "within_ms": 3000
+      "label": "The ball refuses it - the Alliance quest never enters the Horde character's log",
+      "actor": "raider", "metric": "quest_status", "quest": 1200, "equals": 0
     },
-    { "action": "quest_accept", "label": "Take the Horde version too", "actor": "raider", "quest": 6561, "entry": 79025 },
+    { "action": "quest_accept", "label": "Take the Horde version", "actor": "raider", "quest": 6561, "entry": 79025 },
     {
       "action": "assert",
-      "label": "The character's own faction quest is granted as well",
+      "label": "The character's own faction quest is granted",
       "actor": "raider", "metric": "quest_status", "quest": 6561, "min": 1, "within_ms": 3000
     },
     {
