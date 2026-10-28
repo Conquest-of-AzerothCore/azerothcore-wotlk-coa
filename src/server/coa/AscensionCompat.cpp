@@ -7721,7 +7721,7 @@ public:
     p << static_cast<uint32>(0);
     for (uint8 f : flags)
       p << f;
-    p << "";
+    p << (model == "hero" ? "area-52" : "");
     p << realm.Name;
     p << REALM_INFO_ADDONS_ALLOWED;
 
@@ -8461,6 +8461,7 @@ public:
     }
     else if (opcode == CMSG_CHAR_ENUM)
     {
+      SendAscensionCoAConfig(session);
       SendAscensionCharacterListInfo(session);
       AscensionCollectionService& service = AscensionCollectionService::Instance();
       service.SendRealmInfo(session);
