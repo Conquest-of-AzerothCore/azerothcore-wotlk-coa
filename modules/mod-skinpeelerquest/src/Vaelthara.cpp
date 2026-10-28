@@ -805,7 +805,7 @@ namespace
                     continue;
 
                 WorldPacket data;
-                ChatHandler::BuildChatPacket(data, CHAT_MSG_RAID_BOSS_EMOTE, LANG_UNIVERSAL, creature, player, text);
+                ChatHandler::BuildChatPacket(data, CHAT_MSG_MONSTER_EMOTE, LANG_UNIVERSAL, creature, player, text);
                 player->GetSession()->SendPacket(&data);
             }
         }
@@ -898,6 +898,9 @@ namespace
             creature->CastSpell(target, VAELTHARA_STALKED, true);
             SendStalkMessage(creature, target);
             creature->AI()->AttackStart(target);
+            // Keep her facing the fixated player: a stale orientation after a leap or a
+            // knockback makes the client refuse melee swings on her ("facing the wrong way").
+            creature->SetFacingToObject(target);
             DoBloodrush(creature, state, target, now);
 
             LOG_INFO("coa", "VAELTHARA: stalk on {}", target->GetName());
