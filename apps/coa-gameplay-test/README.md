@@ -1094,6 +1094,7 @@ must be a player but is not used.
 | `spawn_placement` | `guid`, `spawn_type`, `tolerance` | The verdict code below. |
 | `spawn_submerged` | `guid`, `spawn_type` | 1 when the spawn is below a liquid surface, else 0. |
 | `spawn_display_state` | `guid`, `spawn_type` | The worst state of the spawn's displays: 0 `missing`, 1 `server_only`, 2 `client`. Fails "Spawn has no display to check" without a display. |
+| `spawn_stand_state` | `guid`, `spawn_type` (`creature` only) | The creature's effective `creature_addon.bytes1` (else template addon) low byte: the `UNIT_STAND_STATE` a load applies, 0 `stand` without an addon. Fails "Stand state metric needs a creature spawn" for a gameobject. |
 | `point_ground_gap` | `map`, `x`, `y`, `z` | The point's height above its ground, as for a spawn. Fails "No ground found for the point". |
 | `point_placement` | `map`, `x`, `y`, `z`, `tolerance` | The verdict code of the point, phase 1, without exemptions. |
 

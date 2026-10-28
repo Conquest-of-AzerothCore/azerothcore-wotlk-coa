@@ -273,6 +273,7 @@ struct SpawnInspection
     CoAGameplay::PlacementSample sample;
     CoAGameplay::PlacementVerdict verdict{CoAGameplay::PlacementVerdict::Unchecked};
     std::vector<std::pair<uint32, CoAGameplay::DisplayState>> displays;
+    uint8 standState{0};
 };
 
 SpawnInspection InspectCreatureSpawn(CreatureData const& spawn, float tolerance)
@@ -292,6 +293,7 @@ SpawnInspection InspectCreatureSpawn(CreatureData const& spawn, float tolerance)
     inspection.sample.mayFloat = CoAGameplay::CreatureMayFloat(movement, creatureTemplate->flags_extra, animTier);
     inspection.sample.maySwim = movement.IsSwimAllowed();
     inspection.verdict = CoAGameplay::ClassifyPlacement(inspection.sample, tolerance);
+    inspection.standState = addon ? uint8(addon->bytes1 & 0xFF) : 0;
 
     std::unordered_set<uint32> const& client = LoadedClientDisplayIds().creatures;
     std::vector<uint32> displayIds;
@@ -352,7 +354,8 @@ std::unordered_map<ObjectGuid::LowType, uint32> PositiveEventSpawns(
 bool IsPlacementMetric(std::string const& metric)
 {
     return metric == "spawn_placement" || metric == "spawn_ground_gap" || metric == "spawn_submerged"
-        || metric == "spawn_display_state" || metric == "point_placement" || metric == "point_ground_gap";
+        || metric == "spawn_display_state" || metric == "spawn_stand_state"
+        || metric == "point_placement" || metric == "point_ground_gap";
 }
 
 double MeasurePlacement(std::string const& metric, Tree const& step)
@@ -380,6 +383,11 @@ double MeasurePlacement(std::string const& metric, Tree const& step)
     }
     if (metric == "spawn_submerged")
         return CoAGameplay::IsSubmerged(inspection.sample) ? 1.0 : 0.0;
+    if (metric == "spawn_stand_state")
+    {
+        Require(step.get<std::string>("spawn_type") == "creature", "Stand state metric needs a creature spawn");
+        return inspection.standState;
+    }
     Require(!inspection.displays.empty(), "Spawn has no display to check");
     CoAGameplay::DisplayState worst = CoAGameplay::DisplayState::Client;
     for (auto const& [displayId, state] : inspection.displays)
