@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Stay a While: Dark Priestess Ashara's sermon can be ended early (COA-9235)",
+  "contract": "Stay a While 1660054 credits listening to Dark Priestess Ashara 162847 (credit 162921). Her option <Stay a while and listen.> starts a sermon of almost a minute. Like Aliscar Lend's lesson, she now offers \"Thank you, I've heard enough.\" while the sermon runs; choosing it closes the window and gives the credit at once. A fixture Ashara owned by the player runs the same SmartAI.",
+  "timeout_ms": 30000,
+  "location": { "map": 0, "x": 2193.9, "y": 329.5, "z": 34.7, "o": 0 },
+  "players": [
+    { "id": "a", "race": 5, "class": 1, "level": 8 }
+  ],
+  "creatures": [
+    { "id": "ashara", "owner": "a", "entry": 162847, "distance": 3, "faction": 35, "level": 30 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "prepare_quest", "actor": "a", "quest": 1660054, "complete": false },
+    { "action": "gossip_hello", "actor": "a", "target": "ashara" },
+    { "action": "assert", "label": "SETUP: Ashara offers her sermon", "actor": "a", "metric": "gossip_option_text", "index": 0, "text": "<Stay a while and listen.>", "equals": 1, "within_ms": 2000 },
+    { "action": "gossip_select", "actor": "a", "option": 0, "label": "<Stay a while and listen.>" },
+    { "action": "wait", "label": "the sermon begins", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the sermon has not credited a yet", "actor": "a", "metric": "quest_objective_count", "quest": 1660054, "equals": 0 },
+    { "action": "gossip_hello", "actor": "a", "target": "ashara" },
+    { "action": "assert", "label": "DISCRIMINATING: during the sermon Ashara offers to end it", "actor": "a", "metric": "gossip_option_text", "index": 0, "text": "Thank you, I've heard enough.", "equals": 1, "within_ms": 2000 },
+    { "action": "gossip_select", "actor": "a", "option": 0, "label": "Thank you, I've heard enough." },
+    { "action": "assert", "label": "ending the sermon early gives the credit", "actor": "a", "metric": "quest_objective_count", "quest": 1660054, "equals": 1, "within_ms": 2000 }
+  ]
+}
