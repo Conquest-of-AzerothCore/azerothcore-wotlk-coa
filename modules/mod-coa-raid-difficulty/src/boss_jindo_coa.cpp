@@ -53,6 +53,7 @@ namespace
         SPELL_HEX                      = 17172,
         SPELL_SUMMON_SHADE_OF_JINDO    = 24308,
         SPELL_BANISH                   = 24466,
+        SPELL_DELUSIONS_OF_JINDO       = 24306,
 
         SPELL_SUMMON_BRAIN_WASH        = 2118501,
         SPELL_SUMMON_HEALING_STREAM    = 2118503,
@@ -155,6 +156,11 @@ namespace
                     if (Unit* target = ObjectAccessor::GetUnit(*me, _target))
                     {
                         me->AddAura(SPELL_DELUSIONS_VISION, target);
+                        // 2118511/2118512 carry the vision and the damage but not the detection the
+                        // Shade of Jin'do's own invisibility (24307, type 2) needs; vanilla's Delusions
+                        // of Jin'do (24306) already paired the curse with that detection as its third
+                        // effect, so reuse only that effect here.
+                        me->AddAura(sSpellMgr->GetSpellInfo(SPELL_DELUSIONS_OF_JINDO), 1 << EFFECT_2, target);
                         me->CastSpell(target, SPELL_DELUSIONS_DOT, true);
                         target->CastSpell(target, SPELL_SUMMON_SHADE_OF_JINDO, true);
                         TrackShades(target);
