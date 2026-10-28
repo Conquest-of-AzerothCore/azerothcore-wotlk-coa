@@ -2330,8 +2330,11 @@ private:
     {
         uint32 const expansion = actor.definition.get<uint32>("expansion", EXPANSION_WRATH_OF_THE_LICH_KING);
         Require(expansion <= EXPANSION_WRATH_OF_THE_LICH_KING, "Player expansion must be 0..2");
+        uint32 const security = actor.definition.get<uint32>("security", uint32(SEC_PLAYER));
+        Require(security <= uint32(SEC_ADMINISTRATOR),
+            "Player security must be 0..3 (SEC_PLAYER..SEC_ADMINISTRATOR)");
         actor.session = std::make_unique<WorldSession>(actor.accountId, std::string(actor.account), 0, nullptr,
-            SEC_PLAYER, uint8(expansion), 0, LOCALE_enUS, 0, false, false, 0,
+            AccountTypes(security), uint8(expansion), 0, LOCALE_enUS, 0, false, false, 0,
             actor.definition.get<bool>("bot", false));
         actor.session->SetAscensionCompatEnabled(actor.definition.get<bool>("ascension_client", false));
         actor.session->SetSocketlessPacketObserver([&actor](WorldPacket const& packet)

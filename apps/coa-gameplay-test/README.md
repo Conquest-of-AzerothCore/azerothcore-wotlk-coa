@@ -401,7 +401,12 @@ preserves Static and must leave the talent without a depletion bonus.
 
 Players require `id`, numeric `race` and `class`; `level` defaults to 80. Optional `bot` logs the actor in on a
 session flagged as a bot, the way playerbots flags the sessions it creates, so a scenario can check what the
-server does differently for them. Optional `spell_hit_rating`,
+server does differently for them. Optional `security` (0..3, default 0/`SEC_PLAYER`) raises that one fixture
+session's account security, so a `command` step can reach a GM-gated chat command (for example an authoring
+command that forces an exact, deterministic encounter for the test) without granting it to every other fixture
+player. Leave it unset for ordinary player security, which remains the default for the whole catalog; set it
+only when the scenario specifically exercises GM/admin-gated behavior through that actor's own command. Optional
+`spell_hit_rating`,
 `spell_crit_rating`, `melee_crit_rating`, `ranged_crit_rating`, `ranged_hit_rating`, `melee_hit_rating` and
 `expertise_rating` add fixture ratings through normal calculations, useful for preventing misses, dodges and
 parries, or forcing critical hits, in deterministic tests.
