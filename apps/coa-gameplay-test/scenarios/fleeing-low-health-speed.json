@@ -1,7 +1,17 @@
 {
   "schema": 1,
   "name": "Fleeing creature honours the low-health movement speed penalty",
-  "contract": "Unit::UpdateSpeed reduces a non-boss, non-pet, snare-vulnerable creature's run speed by 1.66% for each percent of maximum health below 30, so a creature at 1% health runs at 52% of its current rate. A creature whose flee spline is already in flight must move at that reduced speed, not at the speed captured when the spline was launched. One area fear puts two identical creatures into FleeingMovementGenerator; the scenario waits until the runner has actually started travelling before it measures, because a leg launched after the drop would pick up the new speed on its own and prove nothing. The runner's own displacement over the 250ms before the drop is the speed reference, so the check does not depend on which heading the flee roll produced. The control creature is never touched and is recorded, not asserted, because displacement from a stationary caster depends on that heading. The CoA Psychic Scream aura lasts 6000ms, which bounds the measured sequence.",
+  "contract": [
+    "A non-boss, non-pet, snare-vulnerable creature at 1% health has 52% of its full-health run speed: the",
+    "original 1.66% penalty per percent below 30 truncates to 48%. An already active flee spline must adopt",
+    "that speed without waiting for a new flee leg. Psychic Scream 8122 fears two identical creatures for the",
+    "original 6000ms. Select a native spline with at least 500ms remaining, record its actual movement",
+    "velocity, and lower only the runner to 1% health. Within 100ms its in-flight spline velocity must become",
+    "52% of its own baseline, while the control's run rate remains unchanged. A pre-drop remaining-time check",
+    "ensures the old leg cannot finish within that observation window. The original movement generator",
+    "deliberately pauses 800-1500ms between legs, so continuous displacement through two arbitrary 600ms",
+    "windows is not a valid requirement."
+  ],
   "timeout_ms": 240000,
   "location": {
     "map": 1,
@@ -119,13 +129,37 @@
     },
     {
       "action": "assert",
-      "label": "Wait until the runner's flee spline is actually in flight",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 8122,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Select an active flee leg with enough remaining flight time",
       "actor": "runner",
-      "metric": "distance",
-      "target": "caster",
-      "relative_to": "runner_spawn",
-      "min": 0.5,
+      "metric": "spline_remaining_ms",
+      "min": 500,
       "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The selected flee leg is moving",
+      "actor": "runner",
+      "metric": "moving",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "runner",
+      "metric": "spline_speed",
+      "save_as": "runner_spline_full"
+    },
+    {
+      "action": "assert",
+      "actor": "runner",
+      "metric": "spline_speed",
+      "min": 1
     },
     {
       "action": "snapshot",
@@ -141,79 +175,34 @@
     },
     {
       "action": "assert",
-      "label": "OBSERVED fleeing run speed rate",
+      "label": "Fear has enough duration for the in-flight speed observation",
       "actor": "runner",
-      "metric": "run_speed_rate",
-      "min": 0.0
-    },
-    {
-      "action": "snapshot",
-      "actor": "runner",
-      "metric": "distance",
-      "target": "caster",
-      "save_as": "runner_d0"
-    },
-    {
-      "action": "snapshot",
-      "actor": "control",
-      "metric": "distance",
-      "target": "caster",
-      "save_as": "control_d0"
-    },
-    {
-      "action": "wait",
-      "label": "Reference window: runner in flight at full health",
-      "ms": 250
-    },
-    {
-      "action": "snapshot",
-      "actor": "runner",
-      "metric": "distance",
-      "target": "caster",
-      "relative_to": "runner_d0",
-      "save_as": "runner_ref_delta"
+      "metric": "aura_duration_ms",
+      "spell": 8122,
+      "caster": "caster",
+      "min": 500
     },
     {
       "action": "assert",
-      "label": "Runner was travelling at full flee speed before the drop",
+      "label": "The original leg cannot finish within the 100ms speed observation",
       "actor": "runner",
-      "metric": "distance",
-      "target": "caster",
-      "relative_to": "runner_d0",
-      "min": 1.2
-    },
-    {
-      "action": "assert",
-      "label": "OBSERVED control displacement over the reference 250ms",
-      "actor": "control",
-      "metric": "distance",
-      "target": "caster",
-      "relative_to": "control_d0",
-      "min": -1000.0
-    },
-    {
-      "action": "snapshot",
-      "actor": "runner",
-      "metric": "distance",
-      "target": "caster",
-      "save_as": "runner_d1"
-    },
-    {
-      "action": "snapshot",
-      "actor": "control",
-      "metric": "distance",
-      "target": "caster",
-      "save_as": "control_d1"
+      "metric": "spline_remaining_ms",
+      "min": 300
     },
     {
       "action": "set_health",
-      "label": "Drop only the runner to 1% of maximum health",
       "actor": "runner",
       "value": 1000
     },
     {
       "action": "assert",
-      "label": "Runner run speed rate drops to 52% of its fleeing rate",
+      "actor": "runner",
+      "metric": "health_pct",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The runner's unit run speed drops to the independently expected 52%",
       "actor": "runner",
       "metric": "run_speed_rate",
       "ratio_to": "runner_rate_fleeing",
@@ -222,7 +211,31 @@
     },
     {
       "action": "assert",
-      "label": "Control run speed rate is unchanged",
+      "label": "The already active flee spline adopts the low-health speed",
+      "actor": "runner",
+      "metric": "spline_speed",
+      "ratio_to": "runner_spline_full",
+      "min": 0.515,
+      "max": 0.525,
+      "within_ms": 100
+    },
+    {
+      "action": "assert",
+      "label": "The slowed spline is still in flight",
+      "actor": "runner",
+      "metric": "spline_remaining_ms",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The runner continues moving on its slowed flee leg",
+      "actor": "runner",
+      "metric": "moving",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The untouched control's run speed is unchanged",
       "actor": "control",
       "metric": "run_speed_rate",
       "ratio_to": "control_rate_fleeing",
@@ -230,80 +243,8 @@
       "max": 1.005
     },
     {
-      "action": "wait",
-      "label": "First measured window after the health drop",
-      "ms": 600
-    },
-    {
       "action": "assert",
-      "label": "Runner 600ms displacement is at most 1.7x its 250ms full-speed reference",
-      "actor": "runner",
-      "metric": "distance",
-      "target": "caster",
-      "relative_to": "runner_d1",
-      "ratio_to": "runner_ref_delta",
-      "max": 1.7
-    },
-    {
-      "action": "assert",
-      "label": "Runner 600ms displacement is under 4.2 yards",
-      "actor": "runner",
-      "metric": "distance",
-      "target": "caster",
-      "relative_to": "runner_d1",
-      "min": 0.8,
-      "max": 4.2
-    },
-    {
-      "action": "assert",
-      "label": "OBSERVED control displacement over the same 600ms",
-      "actor": "control",
-      "metric": "distance",
-      "target": "caster",
-      "relative_to": "control_d1",
-      "min": -1000.0
-    },
-    {
-      "action": "snapshot",
-      "actor": "runner",
-      "metric": "distance",
-      "target": "caster",
-      "save_as": "runner_d2"
-    },
-    {
-      "action": "snapshot",
-      "actor": "control",
-      "metric": "distance",
-      "target": "caster",
-      "save_as": "control_d2"
-    },
-    {
-      "action": "wait",
-      "label": "Second measured window after the health drop",
-      "ms": 600
-    },
-    {
-      "action": "assert",
-      "label": "Runner stays slowed in the second 600ms window",
-      "actor": "runner",
-      "metric": "distance",
-      "target": "caster",
-      "relative_to": "runner_d2",
-      "min": 0.8,
-      "max": 4.2
-    },
-    {
-      "action": "assert",
-      "label": "OBSERVED control displacement over the second 600ms",
-      "actor": "control",
-      "metric": "distance",
-      "target": "caster",
-      "relative_to": "control_d2",
-      "min": -1000.0
-    },
-    {
-      "action": "assert",
-      "label": "Runner is still fleeing",
+      "label": "The runner remains feared through the speed change",
       "actor": "runner",
       "metric": "aura",
       "spell": 8122,

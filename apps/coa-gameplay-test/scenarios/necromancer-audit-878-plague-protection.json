@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Plague Protection raises every Fetid Ward value by 15%, its damage-to-healing share included (#878)",
+  "contract": "Plague Protection 570046 (Rank 1; Rank 2 is 570226) reads 'Increases the effectiveness of your Wards by $s1%.' Its effect is SPELL_AURA_ADD_PCT_MODIFIER (108), MiscValue 8 (SPELLMOD_ALL_EFFECTS), EffectBasePoints 14 + DieSides 1 = 15, class mask (0, 0, 0x80) in SpellFamilyName 29: exactly the Wards, Fetid Ward 680388, Glacial Ward 681460 and Bone Ward 681529 (all family flags 0, 0, 0x80). Unit::ApplyEffectModifiers applies it to every effect value the caster computes, so the Ward auras natively carry 1.15x amounts: Fetid Ward reads 'While active, $s1% of your damage dealt heals you and your minions, split evenly amongst them, and healing received is increased by $s2%' with 30 and 10 (EffectBasePoints 29/9 + 1), which become int32(30 * 1.15f) = 34 and int32(10 * 1.15f) = 11, the values its buff tooltip shows as $W1/$W2. The healing-received half (SPELL_AURA_MOD_HEALING_PCT) is native; the damage share is script-driven: effect 0 (aura 354, a dummy after ApplyContracts) is read by AscensionNecromancerEvents.cpp LeechArmy, which took the percentage from the unmodified spell record (Amount(680388), no caster) and so ignored Plague Protection. It now takes the amount of the actor's own Ward aura effect 0. Each damaging hit by a Necromancer with no minions casts 681463 (SPELL_EFFECT_HEAL, BonusMultiplier 0, SPELL_ATTR3_IGNORE_CASTER_MODIFIERS) on itself for floor(damage * share / 100), which the target's Ward then raises by its healing-received amount, so the healing to damage ratio is 0.30 * 1.10 = 0.330 without the talent and 0.34 * 1.11 = 0.377 with Rank 1 (0.30 * 1.11 = 0.333 before the fix), less integer truncation of at most ~1% on ~750-damage Lichfrost hits. Two identical Necromancers (one with Plague Protection) each ward themselves and cast three Lichfrost 501980 at their own golem; overhealing counts, since the heal log reports the full amount.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "control", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 },
+    { "id": "protected", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "control_golem", "owner": "control", "entry": 36, "level": 80, "health": 1000000, "distance": 10 },
+    { "id": "protected_golem", "owner": "protected", "entry": 36, "level": 80, "health": 1000000, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI, level scaling and the Necromancer auras settle", "ms": 5000 },
+    { "action": "learn", "actor": "control", "spell": 680388 },
+    { "action": "learn", "actor": "control", "spell": 501980 },
+    { "action": "learn", "actor": "protected", "spell": 680388 },
+    { "action": "learn", "actor": "protected", "spell": 501980 },
+    { "action": "learn", "actor": "protected", "spell": 570046 },
+    {
+      "action": "assert", "label": "SETUP: the Plague Protection passive is active", "actor": "protected",
+      "metric": "aura", "spell": 570046, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: the control Necromancer lacks Plague Protection", "actor": "control",
+      "metric": "aura", "spell": 570046, "equals": 0
+    },
+    { "action": "cast", "label": "Control raises Fetid Ward", "actor": "control", "spell": 680388 },
+    { "action": "cast", "label": "Protected raises Fetid Ward", "actor": "protected", "spell": 680388 },
+    {
+      "action": "assert", "label": "SETUP: the control Necromancer is warded", "actor": "control",
+      "metric": "aura", "spell": 680388, "caster": "control", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: the protected Necromancer is warded", "actor": "protected",
+      "metric": "aura", "spell": 680388, "caster": "protected", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTROL: Fetid Ward heals for 30% of damage without the talent", "actor": "control",
+      "metric": "aura_amount", "spell": 680388, "effect": 0, "caster": "control", "equals": 30
+    },
+    {
+      "action": "assert", "label": "CONTROL: Fetid Ward raises healing received by 10% without the talent",
+      "actor": "control", "metric": "aura_amount", "spell": 680388, "effect": 1, "caster": "control", "equals": 10
+    },
+    {
+      "action": "assert", "label": "Plague Protection raises the Ward's damage share to 34%", "actor": "protected",
+      "metric": "aura_amount", "spell": 680388, "effect": 0, "caster": "protected", "equals": 34
+    },
+    {
+      "action": "assert", "label": "Plague Protection raises the Ward's healing received to 11%", "actor": "protected",
+      "metric": "aura_amount", "spell": 680388, "effect": 1, "caster": "protected", "equals": 11
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "cast", "actor": "control", "spell": 501980, "target": "control_golem" },
+    { "action": "cast", "actor": "protected", "spell": 501980, "target": "protected_golem" },
+    { "action": "wait", "label": "Let both Lichfrosts land", "ms": 3500 },
+    { "action": "cast", "actor": "control", "spell": 501980, "target": "control_golem" },
+    { "action": "cast", "actor": "protected", "spell": 501980, "target": "protected_golem" },
+    { "action": "wait", "label": "Let both Lichfrosts land", "ms": 3500 },
+    { "action": "cast", "actor": "control", "spell": 501980, "target": "control_golem" },
+    { "action": "cast", "actor": "protected", "spell": 501980, "target": "protected_golem" },
+    {
+      "action": "assert", "label": "SETUP: three control Lichfrosts hit", "actor": "control",
+      "metric": "spell_damage_count", "spell": 501980, "target": "control_golem", "equals": 3, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "SETUP: three protected Lichfrosts hit", "actor": "protected",
+      "metric": "spell_damage_count", "spell": 501980, "target": "protected_golem", "equals": 3, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Let the last Ward heals resolve", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: each control hit heals the control Necromancer once", "actor": "control",
+      "metric": "spell_heal_count", "spell": 681463, "target": "control", "equals": 3
+    },
+    {
+      "action": "assert", "label": "SETUP: each protected hit heals the protected Necromancer once", "actor": "protected",
+      "metric": "spell_heal_count", "spell": 681463, "target": "protected", "equals": 3
+    },
+    {
+      "action": "snapshot", "actor": "control", "metric": "spell_damage_total", "spell": 501980,
+      "target": "control_golem", "save_as": "control_damage"
+    },
+    {
+      "action": "snapshot", "actor": "protected", "metric": "spell_damage_total", "spell": 501980,
+      "target": "protected_golem", "save_as": "protected_damage"
+    },
+    {
+      "action": "assert", "label": "CONTROL: the Ward returns 30% x 1.10 = 0.330 of the damage", "actor": "control",
+      "metric": "spell_heal_total", "spell": 681463, "target": "control", "ratio_to": "control_damage",
+      "min": 0.322, "max": 0.3305
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: with Plague Protection the Ward returns 34% x 1.11 = 0.377 of the damage (0.333 before the fix)",
+      "actor": "protected", "metric": "spell_heal_total", "spell": 681463, "target": "protected",
+      "ratio_to": "protected_damage", "min": 0.368, "max": 0.3780
+    }
+  ]
+}

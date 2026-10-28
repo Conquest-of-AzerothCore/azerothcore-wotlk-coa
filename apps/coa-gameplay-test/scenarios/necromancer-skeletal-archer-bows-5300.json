@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Necromancer: every animated Skeletal Archer carries a bow (#5300)",
+  "contract": [
+    "Animate: Skeletal Archer 805040 triggers 500330, whose authored base count is three Skeletal Archers",
+    "(creature 50076) for 15 seconds. The summons must carry bows in their ranged equipment slots, as",
+    "their archer role requires. Count bows by the runtime item's weapon class and bow subclass, without",
+    "requiring a particular item ID or display. A second nearby Necromancer owns none of these archers,",
+    "and guns must not satisfy the bow check. All three freshly animated archers must also have bows",
+    "after the original summons expire. This covers native equipment loading, not rendered animations.",
+    "The existing ranged Shadow attack 801516 is authored by Spell.dbc and is outside this equipment fix."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 36 },
+    { "id": "other", "race": 5, "class": 23, "level": 36 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "necro", "spell": 805040 },
+    { "action": "assert", "actor": "necro", "metric": "owned_creature_count", "entry": 50076, "equals": 0 },
+    { "action": "cast", "actor": "necro", "spell": 805040 },
+    {
+      "action": "assert", "label": "The normal cast animates three archers", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50076, "equals": 3, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Every spawned archer carries a ranged bow", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50076, "ranged_weapon_subclass": 2, "equals": 3
+    },
+    {
+      "action": "assert", "label": "The archers carry no ranged guns", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50076, "ranged_weapon_subclass": 3, "equals": 0
+    },
+    {
+      "action": "assert", "label": "The nearby player does not own these archers", "actor": "other",
+      "metric": "owned_creature_count", "entry": 50076, "ranged_weapon_subclass": 2, "equals": 0
+    },
+    { "action": "wait", "ms": 16000 },
+    {
+      "action": "assert", "label": "The original archers expire", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50076, "equals": 0
+    },
+    { "action": "reset_cooldown", "actor": "necro", "spell": 805040 },
+    { "action": "cast", "actor": "necro", "spell": 805040 },
+    {
+      "action": "assert", "label": "All fresh archers load their bows too", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50076, "ranged_weapon_subclass": 2,
+      "equals": 3, "within_ms": 3000
+    }
+  ]
+}

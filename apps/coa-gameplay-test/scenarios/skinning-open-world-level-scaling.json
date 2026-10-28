@@ -1,0 +1,531 @@
+{
+  "schema": 1,
+  "name": "Skinning in the open world keeps the authored requirement with level scaling on and off",
+  "contract": [
+    "Requires CoALegendaryItems.DropChance=0: this scenario checks skinning an otherwise empty corpse.",
+    "Requires DestinyWeaver.Enable=1, DestinyWeaver.LevelScaling=1 and DestinyWeaver.Scaling.Offset=4.",
+    "Spell::CheckCast requires (level - 10) * 10 Skinning below 100 skill, so a level-20 Ranger with Skinning 40",
+    "skins beasts of level 5 (0), 11 (10) and 14 (40, the orange edge) and is refused SPELL_FAILED_LOW_CASTLEVEL (49)",
+    "by level 15 (50). In the open world the Destiny Weaver only lifts a creature, to 16 for a level-20 character.",
+    "The lift must not raise the skinning requirement: the corpse's skinning loot is the authored creature's, and a",
+    "lifted requirement would lock a scaled character out of every beast below its own level (a level-5 wolf shown at",
+    "16 needs 60). With scaling off the same four beasts give the same four results. Black Riding Wolf 5194 is a",
+    "beast with skinning table 100001 and no creature loot or money, so its corpse becomes skinnable as soon as it",
+    "dies."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 20,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "scaled_grey",
+      "owner": "ranger",
+      "entry": 5194,
+      "level": 5,
+      "health": 1,
+      "distance": 2
+    },
+    {
+      "id": "scaled_green",
+      "owner": "ranger",
+      "entry": 5194,
+      "level": 11,
+      "health": 1,
+      "distance": 2
+    },
+    {
+      "id": "scaled_orange",
+      "owner": "ranger",
+      "entry": 5194,
+      "level": 14,
+      "health": 1,
+      "distance": 2
+    },
+    {
+      "id": "scaled_red",
+      "owner": "ranger",
+      "entry": 5194,
+      "level": 15,
+      "health": 1,
+      "distance": 2
+    },
+    {
+      "id": "grey",
+      "owner": "ranger",
+      "entry": 5194,
+      "level": 5,
+      "health": 1,
+      "distance": 3
+    },
+    {
+      "id": "green",
+      "owner": "ranger",
+      "entry": 5194,
+      "level": 11,
+      "health": 1,
+      "distance": 3
+    },
+    {
+      "id": "orange",
+      "owner": "ranger",
+      "entry": 5194,
+      "level": 14,
+      "health": 1,
+      "distance": 3
+    },
+    {
+      "id": "red",
+      "owner": "ranger",
+      "entry": 5194,
+      "level": 15,
+      "health": 1,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 8613
+    },
+    {
+      "action": "set_skill",
+      "actor": "ranger",
+      "skill": 393,
+      "value": 40,
+      "maximum": 75
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "ranger",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "label": "Scaling on lifts the level-5 wolf to 16",
+      "actor": "ranger",
+      "metric": "view_level",
+      "target": "scaled_grey",
+      "equals": 16,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_skill",
+      "actor": "ranger",
+      "skill": 393,
+      "value": 40,
+      "maximum": 75
+    },
+    {
+      "action": "attack",
+      "actor": "ranger",
+      "target": "scaled_grey"
+    },
+    {
+      "action": "assert",
+      "actor": "scaled_grey",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 8613,
+      "target": "scaled_grey"
+    },
+    {
+      "action": "assert",
+      "label": "Scaled: the level-5 wolf is skinned",
+      "actor": "ranger",
+      "metric": "spell_cast_count",
+      "spell": 8613,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 8613,
+      "equals": 0
+    },
+    {
+      "action": "close_loot",
+      "actor": "ranger"
+    },
+    {
+      "action": "set_skill",
+      "actor": "ranger",
+      "skill": 393,
+      "value": 40,
+      "maximum": 75
+    },
+    {
+      "action": "attack",
+      "actor": "ranger",
+      "target": "scaled_green"
+    },
+    {
+      "action": "assert",
+      "actor": "scaled_green",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 8613,
+      "target": "scaled_green"
+    },
+    {
+      "action": "assert",
+      "label": "Scaled: the level-11 wolf is skinned",
+      "actor": "ranger",
+      "metric": "spell_cast_count",
+      "spell": 8613,
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 8613,
+      "equals": 0
+    },
+    {
+      "action": "close_loot",
+      "actor": "ranger"
+    },
+    {
+      "action": "set_skill",
+      "actor": "ranger",
+      "skill": 393,
+      "value": 40,
+      "maximum": 75
+    },
+    {
+      "action": "attack",
+      "actor": "ranger",
+      "target": "scaled_orange"
+    },
+    {
+      "action": "assert",
+      "actor": "scaled_orange",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 8613,
+      "target": "scaled_orange"
+    },
+    {
+      "action": "assert",
+      "label": "Scaled: the level-14 wolf is skinned at exactly its requirement",
+      "actor": "ranger",
+      "metric": "spell_cast_count",
+      "spell": 8613,
+      "equals": 3,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 8613,
+      "equals": 0
+    },
+    {
+      "action": "close_loot",
+      "actor": "ranger"
+    },
+    {
+      "action": "set_skill",
+      "actor": "ranger",
+      "skill": 393,
+      "value": 40,
+      "maximum": 75
+    },
+    {
+      "action": "attack",
+      "actor": "ranger",
+      "target": "scaled_red"
+    },
+    {
+      "action": "assert",
+      "actor": "scaled_red",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 8613,
+      "target": "scaled_red"
+    },
+    {
+      "action": "assert",
+      "label": "Scaled: the level-15 wolf needs 50",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 8613,
+      "equals": 49,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "spell_cast_count",
+      "spell": 8613,
+      "equals": 3
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "ranger",
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "label": "Scaling off shows the level-5 wolf at 5",
+      "actor": "ranger",
+      "metric": "view_level",
+      "target": "grey",
+      "equals": 5,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_skill",
+      "actor": "ranger",
+      "skill": 393,
+      "value": 40,
+      "maximum": 75
+    },
+    {
+      "action": "attack",
+      "actor": "ranger",
+      "target": "grey"
+    },
+    {
+      "action": "assert",
+      "actor": "grey",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 8613,
+      "target": "grey"
+    },
+    {
+      "action": "assert",
+      "label": "Unscaled: the level-5 wolf is skinned",
+      "actor": "ranger",
+      "metric": "spell_cast_count",
+      "spell": 8613,
+      "equals": 4,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 8613,
+      "equals": 0
+    },
+    {
+      "action": "close_loot",
+      "actor": "ranger"
+    },
+    {
+      "action": "set_skill",
+      "actor": "ranger",
+      "skill": 393,
+      "value": 40,
+      "maximum": 75
+    },
+    {
+      "action": "attack",
+      "actor": "ranger",
+      "target": "green"
+    },
+    {
+      "action": "assert",
+      "actor": "green",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 8613,
+      "target": "green"
+    },
+    {
+      "action": "assert",
+      "label": "Unscaled: the level-11 wolf is skinned",
+      "actor": "ranger",
+      "metric": "spell_cast_count",
+      "spell": 8613,
+      "equals": 5,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 8613,
+      "equals": 0
+    },
+    {
+      "action": "close_loot",
+      "actor": "ranger"
+    },
+    {
+      "action": "set_skill",
+      "actor": "ranger",
+      "skill": 393,
+      "value": 40,
+      "maximum": 75
+    },
+    {
+      "action": "attack",
+      "actor": "ranger",
+      "target": "orange"
+    },
+    {
+      "action": "assert",
+      "actor": "orange",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 8613,
+      "target": "orange"
+    },
+    {
+      "action": "assert",
+      "label": "Unscaled: the level-14 wolf is skinned at exactly its requirement",
+      "actor": "ranger",
+      "metric": "spell_cast_count",
+      "spell": 8613,
+      "equals": 6,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 8613,
+      "equals": 0
+    },
+    {
+      "action": "close_loot",
+      "actor": "ranger"
+    },
+    {
+      "action": "set_skill",
+      "actor": "ranger",
+      "skill": 393,
+      "value": 40,
+      "maximum": 75
+    },
+    {
+      "action": "attack",
+      "actor": "ranger",
+      "target": "red"
+    },
+    {
+      "action": "assert",
+      "actor": "red",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 8613,
+      "target": "red"
+    },
+    {
+      "action": "assert",
+      "label": "Unscaled: the level-15 wolf needs 50",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 8613,
+      "equals": 49,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "spell_cast_count",
+      "spell": 8613,
+      "equals": 6
+    }
+  ]
+}

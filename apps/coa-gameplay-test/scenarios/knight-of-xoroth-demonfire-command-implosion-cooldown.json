@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Demonfire Command cuts Implosion's cooldown from 40 to 30 sec (#790)",
+  "contract": "Demonfire Command 707028 (CharacterAdvancement 6860, Defiance, one rank) reads 'Reduces the cooldown of Implosion by $/1000;s1 sec.' In Spell.dbc its only effect is SPELL_AURA_ADD_FLAT_MODIFIER (107) on the caster, MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -10001 with DieSides 1 = -10000 ms, EffectSpellClassMask dword0 0x10000000 with SpellFamilyName 23. Implosion 524897 is SpellFamilyName 23 with SpellFamilyFlags dword0 0x10000000 and RecoveryTime 40000 (no category recovery), so the native Player::ApplySpellMod(SPELLMOD_COOLDOWN) in the cooldown path must make its cooldown 30000 ms; no CoA code handles 707028. Implosion needs a Demonfire (500906) aura to cast (CasterAuraSpell), so the fixture grants one stack before each cast. The same knight casts Implosion before and after the talent.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "knight", "spell": 524897 },
+    {
+      "action": "assert", "label": "SETUP: no cooldown modifier applies to Implosion before the talent",
+      "actor": "knight", "metric": "spell_modifier", "spell": 524897, "op": 11, "base": 40000, "equals": 40000
+    },
+    {
+      "action": "set_aura", "label": "Grant Demonfire, which Implosion requires", "actor": "knight",
+      "spell": 500906, "stacks": 1
+    },
+    { "action": "cast", "label": "Implosion without the talent", "actor": "knight", "spell": 524897 },
+    {
+      "action": "assert", "label": "SETUP: Implosion goes on its full 40 sec cooldown", "actor": "knight",
+      "metric": "cooldown_ms", "spell": 524897, "min": 38000, "max": 40000, "within_ms": 2000
+    },
+    { "action": "reset_cooldown", "actor": "knight", "spell": 524897 },
+    { "action": "learn", "actor": "knight", "spell": 707028 },
+    {
+      "action": "set_aura", "label": "Force the Demonfire Command passive aura", "actor": "knight",
+      "spell": 707028, "stacks": 1
+    },
+    { "action": "wait", "label": "Let the passive's modifier and any global cooldown settle", "ms": 1600 },
+    {
+      "action": "assert", "label": "SETUP: Demonfire Command is active", "actor": "knight", "metric": "aura",
+      "spell": 707028, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the cooldown modifier takes 10 sec off Implosion",
+      "actor": "knight", "metric": "spell_modifier", "spell": 524897, "op": 11, "base": 40000, "equals": 30000
+    },
+    {
+      "action": "set_aura", "label": "Grant Demonfire again for the second Implosion", "actor": "knight",
+      "spell": 500906, "stacks": 1
+    },
+    { "action": "cast", "label": "Implosion with Demonfire Command", "actor": "knight", "spell": 524897 },
+    {
+      "action": "assert", "label": "CONTRACT: Implosion now goes on a 30 sec cooldown", "actor": "knight",
+      "metric": "cooldown_ms", "spell": 524897, "min": 28000, "max": 30000, "within_ms": 2000
+    }
+  ]
+}

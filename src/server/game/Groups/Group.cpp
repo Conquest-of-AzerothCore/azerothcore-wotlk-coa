@@ -26,6 +26,7 @@
 #include "InstanceSaveMgr.h"
 #include "LFG.h"
 #include "LFGMgr.h"
+#include "LocalLevelScaling.h"
 #include "Log.h"
 #include "MapMgr.h"
 #include "MiscPackets.h"
@@ -948,7 +949,11 @@ void Group::SendLootStartRoll(uint32 CountDown, uint32 mapid, Roll const& r)
             continue;
 
         if (itr->second == NOT_EMITED_YET)
+        {
+            if (uint32 level = LocalLevelScaling::RollPreviewLevel(p))
+                r.previewLevels[p->GetGUID()] = level;
             p->SendDirectMessage(&data);
+        }
     }
 }
 
@@ -1015,6 +1020,8 @@ void Group::SendLootStartRollToPlayer(uint32 countDown, uint32 mapId, Player* p,
         voteMask &= ~ROLL_FLAG_TYPE_NEED;
     data << uint8(voteMask);                                // roll type mask
 
+    if (uint32 level = LocalLevelScaling::RollPreviewLevel(p))
+        r.previewLevels[p->GetGUID()] = level;
     p->SendDirectMessage(&data);
 }
 
@@ -1181,6 +1188,9 @@ void Group::GroupLoot(Loot* loot, WorldObject* pLootedObject)
 
                 loot->items[itemSlot].is_blocked = true;
 
+                if (r->totalPass != r->totalPlayersRolling)
+                    sScriptMgr->OnGroupLootRollStart(this, *r, *loot, *i);
+
                 // If there is any "auto pass", broadcast the pass now.
                 if (r->totalPass)
                 {
@@ -1268,6 +1278,8 @@ void Group::GroupLoot(Loot* loot, WorldObject* pLootedObject)
 
             loot->quest_items[itemSlot - loot->items.size()].is_blocked = true;
 
+            sScriptMgr->OnGroupLootRollStart(this, *r, *loot, *i);
+
             SendLootStartRoll(60000, pLootedObject->GetMapId(), *r);
 
             RollId.push_back(r);
@@ -1342,6 +1354,8 @@ void Group::NeedBeforeGreed(Loot* loot, WorldObject* lootedObject)
 
                 loot->items[itemSlot].is_blocked = true;
 
+                sScriptMgr->OnGroupLootRollStart(this, *r, *loot, *i);
+
                 //Broadcast Pass and Send Rollstart
                 for (Roll::PlayerVote::const_iterator itr = r->playerVote.begin(); itr != r->playerVote.end(); ++itr)
                 {
@@ -1411,6 +1425,8 @@ void Group::NeedBeforeGreed(Loot* loot, WorldObject* lootedObject)
             r->itemSlot = itemSlot;
 
             loot->quest_items[itemSlot - loot->items.size()].is_blocked = true;
+
+            sScriptMgr->OnGroupLootRollStart(this, *r, *loot, *i);
 
             //Broadcast Pass and Send Rollstart
             for (Roll::PlayerVote::const_iterator itr = r->playerVote.begin(); itr != r->playerVote.end(); ++itr)
@@ -1949,13 +1965,20 @@ void Group::UpdatePlayerOutOfRange(Player* player)
         return;
 
     WorldPacket data;
-    player->GetSession()->BuildPartyMemberStatsChangedPacket(player, &data);
 
     for (GroupReference* itr = GetFirstMember(); itr != nullptr; itr = itr->next())
     {
         Player* member = itr->GetSource();
-        if (member && (!member->IsInMap(player) || !member->IsWithinDist(player, member->GetSightRange(player), false)))
+        if (!member || member->GetSession()->IsHeadlessBot())
+            continue;
+
+        if (!member->IsInMap(player) || !member->IsWithinDist(player, member->GetSightRange(player), false))
+        {
+            if (data.GetOpcode() == NULL_OPCODE)
+                player->GetSession()->BuildPartyMemberStatsChangedPacket(player, &data);
+
             member->SendDirectMessage(&data);
+        }
     }
 }
 
@@ -2333,10 +2356,11 @@ void Group::ResetInstances(uint8 method, bool isRaid, Player* leader)
     {
         case INSTANCE_RESET_ALL:
             {
-                if (leader->GetDifficulty(false) != DUNGEON_DIFFICULTY_NORMAL)
-                    break;
+                // CoA: Heroic and Mythic 5-man dungeons are resettable like Normal ones; permanent binds still block
                 std::vector<InstanceSave*> toUnbind;
-                BoundInstancesMap const& m_boundInstances = sInstanceSaveMgr->PlayerGetBoundInstances(leader->GetGUID(), Difficulty(DUNGEON_DIFFICULTY_NORMAL));
+                for (uint8 difficulty = DUNGEON_DIFFICULTY_NORMAL; difficulty < MAX_DUNGEON_DIFFICULTY; ++difficulty)
+                {
+                BoundInstancesMap const& m_boundInstances = sInstanceSaveMgr->PlayerGetBoundInstances(leader->GetGUID(), Difficulty(difficulty));
                 for (BoundInstancesMap::const_iterator itr = m_boundInstances.begin(); itr != m_boundInstances.end(); ++itr)
                 {
                     InstanceSave* instanceSave = itr->second.save;
@@ -2356,6 +2380,7 @@ void Group::ResetInstances(uint8 method, bool isRaid, Player* leader)
                     }
 
                     sInstanceSaveMgr->DeleteInstanceSavedData(instanceSave->GetInstanceId());
+                }
                 }
                 for (std::vector<InstanceSave*>::const_iterator itr = toUnbind.begin(); itr != toUnbind.end(); ++itr)
                     sInstanceSaveMgr->UnbindAllFor(*itr);

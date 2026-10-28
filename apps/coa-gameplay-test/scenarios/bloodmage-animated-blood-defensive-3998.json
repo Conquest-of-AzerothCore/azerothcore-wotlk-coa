@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Animated Blood worms leave unengaged enemies alone and fight their owner's target (#3998)",
+  "contract": "Animated Blood 573299 summons two Blood Worms 325301 through SummonProperties 61 (ally guardian). Unscripted guardians get AggressorAI and Guardian::InitStats sets REACT_AGGRESSIVE, so the worms pulled any hostile in line of sight. The worms should aid their owner in combat: a hostile the owner has not engaged stays out of combat, and once the owner attacks it the worms damage it without the owner's own swings.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 20, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "caster", "entry": 36, "level": 80, "health": 100000, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "caster", "spell": 573299 },
+    { "action": "cast", "actor": "caster", "spell": 573299 },
+    {
+      "action": "assert", "label": "Two Blood Worms are summoned",
+      "actor": "caster", "metric": "owned_creature_count", "entry": 325301, "equals": 2, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Give the worms time to pull the nearby enemy", "ms": 6000 },
+    {
+      "action": "assert", "label": "The enemy the owner has not engaged stays out of combat",
+      "actor": "enemy", "metric": "combat", "equals": 0
+    },
+    {
+      "action": "assert", "label": "The enemy is untouched",
+      "actor": "enemy", "metric": "health", "equals": 100000
+    },
+    { "action": "attack", "actor": "caster", "target": "enemy" },
+    { "action": "wait", "ms": 500 },
+    { "action": "stop_attack", "actor": "caster" },
+    { "action": "wait", "label": "Let any owner swing land", "ms": 1000 },
+    { "action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "after_owner" },
+    { "action": "wait", "label": "Worms fight the owner's target", "ms": 4000 },
+    {
+      "action": "assert", "label": "The worms damage the enemy their owner attacked",
+      "actor": "enemy", "metric": "health", "relative_to": "after_owner", "max": -1
+    }
+  ]
+}

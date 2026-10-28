@@ -1,0 +1,219 @@
+{
+  "schema": 1,
+  "name": "Huntress Shot, Moon Arrow and Starfire Shot cast in the client's 2.5/2.5/3.0 s, scaled by ranged haste (#1324)",
+  "contract": [
+    "The report (level 26 Starcaller) says Huntress Shot, Moon Arrow and Starfire Shot used to cast in 1.25 s and",
+    "now take 1.85 s. Shipped client data: Huntress Shot 680220 and Moon Arrow 801972 have CastingTimeIndex 5",
+    "(SpellCastTimes 2000 ms, PerLevel 0, Minimum 2000); Starfire Shot 801978 has index 19 (2500 ms). All three carry",
+    "SPELL_ATTR0_USES_RANGED_SLOT (Attributes 0x10012), DmgClass 3 (ranged) and StartRecoveryTime 1250 in",
+    "category 133, so 1250 ms is their global cooldown, not a cast time. The CoA client's own cast-time routine",
+    "(Ascension.exe, Spell_C.cpp function at VA 0x7ff180, called by the spell tooltip before SPELL_CAST_TIME_SEC at",
+    "0x624471) takes the SpellCastTimes base, applies SPELLMOD_CASTING_TIME, applies UNIT_MOD_CAST_SPEED only to",
+    "spells without IS_ABILITY/TRADESPELL, then 'test byte [spell+0x10], 2' adds 500 ms for ranged-slot spells and",
+    "scales by UNIT_FIELD_RANGEDATTACKTIME over the ranged weapon's delay (ranged haste). The client therefore shows",
+    "2.5, 2.5 and 3.0 s unhasted. The server matches: SpellInfo::CalcCastTime adds the same 500 ms and",
+    "Unit::ModSpellCastTime multiplies ranged-class casts by m_modAttackSpeedPct[RANGED_ATTACK]. Expected on an",
+    "unhasted level-26 fixture: 2500, 2500 and 3000 ms. Starbarian rank 1 704778 (SPELL_AURA_MOD_MELEE_RANGED_HASTE",
+    "4) divides them by 1.04: 2403.8 and 2884.6 ms. A real Huntress Shot on a hostile golem 15 yd ahead (Worn",
+    "Shortbow 2504 in the ranged slot, as in starcaller-moon-priest-huntress-shot-stars) starts with 2200..2500 ms",
+    "on its cast timer and a 1050..1250 ms global cooldown, has 150..530 ms left after a 2000 ms wait, completes",
+    "within 1 s and damages the target. Nothing in the shipped data gives a 1.25 s cast; the report's 1.85 s",
+    "depends on the reporter's ranged haste and talents, which the report does not include."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "shooter",
+      "race": 1,
+      "class": 26,
+      "level": 26,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    },
+    {
+      "id": "hasted",
+      "race": 1,
+      "class": 26,
+      "level": 26
+    }
+  ],
+  "creatures": [
+    {
+      "id": "golem",
+      "owner": "shooter",
+      "entry": 36,
+      "level": 26,
+      "health": 100000,
+      "distance": 15
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "shooter",
+      "spell": 680220
+    },
+    {
+      "action": "learn",
+      "actor": "shooter",
+      "spell": 801972
+    },
+    {
+      "action": "learn",
+      "actor": "shooter",
+      "spell": 801978
+    },
+    {
+      "action": "learn",
+      "actor": "hasted",
+      "spell": 680220
+    },
+    {
+      "action": "learn",
+      "actor": "hasted",
+      "spell": 801978
+    },
+    {
+      "action": "learn",
+      "actor": "hasted",
+      "spell": 704778
+    },
+    {
+      "action": "add_item",
+      "actor": "shooter",
+      "item": 2504
+    },
+    {
+      "action": "equip",
+      "actor": "shooter",
+      "item": 2504,
+      "slot": 17
+    },
+    {
+      "action": "wait",
+      "label": "Let the equipment settle",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Huntress Shot: 2000 ms base plus the 500 ms ranged-slot time the client also adds",
+      "actor": "shooter",
+      "metric": "spell_cast_time_ms",
+      "spell": 680220,
+      "equals": 2500
+    },
+    {
+      "action": "assert",
+      "label": "Moon Arrow: 2000 ms base plus 500 ms",
+      "actor": "shooter",
+      "metric": "spell_cast_time_ms",
+      "spell": 801972,
+      "equals": 2500
+    },
+    {
+      "action": "assert",
+      "label": "Starfire Shot: 2500 ms base plus 500 ms",
+      "actor": "shooter",
+      "metric": "spell_cast_time_ms",
+      "spell": 801978,
+      "equals": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Starbarian rank 1 is active on the hasted fixture",
+      "actor": "hasted",
+      "metric": "aura",
+      "spell": 704778,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "4% ranged haste shortens Huntress Shot to 2500/1.04",
+      "actor": "hasted",
+      "metric": "spell_cast_time_ms",
+      "spell": 680220,
+      "min": 2400,
+      "max": 2410
+    },
+    {
+      "action": "assert",
+      "label": "4% ranged haste shortens Starfire Shot to 3000/1.04",
+      "actor": "hasted",
+      "metric": "spell_cast_time_ms",
+      "spell": 801978,
+      "min": 2880,
+      "max": 2890
+    },
+    {
+      "action": "cast",
+      "label": "Fire Huntress Shot at the golem",
+      "actor": "shooter",
+      "spell": 680220,
+      "target": "golem"
+    },
+    {
+      "action": "assert",
+      "label": "The real cast starts with its 2500 ms timer",
+      "actor": "shooter",
+      "metric": "cast_remaining_ms",
+      "spell": 680220,
+      "min": 2200,
+      "max": 2500
+    },
+    {
+      "action": "assert",
+      "label": "The 1.25 s in the report is the shot's global cooldown",
+      "actor": "shooter",
+      "metric": "global_cooldown_ms",
+      "spell": 680220,
+      "min": 1050,
+      "max": 1250
+    },
+    {
+      "action": "wait",
+      "label": "Wait most of the cast",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "About 500 ms of the cast remain",
+      "actor": "shooter",
+      "metric": "cast_remaining_ms",
+      "spell": 680220,
+      "min": 150,
+      "max": 530
+    },
+    {
+      "action": "assert",
+      "label": "The cast completes on time",
+      "actor": "shooter",
+      "metric": "cast_remaining_ms",
+      "spell": 680220,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The completed shot damages the golem",
+      "actor": "shooter",
+      "metric": "spell_damage_count",
+      "spell": 680220,
+      "target": "golem",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

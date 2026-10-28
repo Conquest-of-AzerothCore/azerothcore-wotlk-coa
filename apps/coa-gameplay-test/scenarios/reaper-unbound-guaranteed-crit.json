@@ -1,0 +1,138 @@
+{
+  "schema": 1,
+  "name": "Unbound guarantees Soul Bolt crits and adds crit damage below 20% health (#3096)",
+  "contract": [
+    "Spell 706785 (Unbound) carries two OVERRIDE_CLASS_SCRIPTS auras on Soul Bolt (500627, family 36,",
+    "classmask 8388608): a guaranteed-crit selector and a +25% crit damage selector, both gated on the",
+    "target being below 20% health (AURA_STATE_HEALTHLESS_20_PERCENT).",
+    "Before the fix neither raw selector (20000/20001) is remapped by AscensionConditionalCombatRules, so",
+    "Unit::GetAscensionConditionalCombatModifier falls through its default case and both effects are inert.",
+    "After the fix, spell_taken_crit_chance for Soul Bolt against a sub-20%-health target reads 100, and",
+    "spell_critical_damage for Soul Bolt against that target is 25 points higher than against a full-health target."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 0,
+      "melee_hit_rating": 10000,
+      "melee_crit_rating": 0
+    }
+  ],
+  "creatures": [
+    {
+      "id": "victim",
+      "owner": "reaper",
+      "entry": 299,
+      "level": 80,
+      "distance": 2,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 706785
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: victim starts at full health",
+      "actor": "victim",
+      "metric": "health_pct",
+      "min": 99,
+      "max": 100
+    },
+    {
+      "action": "assert",
+      "label": "Above 20% health, Soul Bolt is not a guaranteed crit",
+      "actor": "reaper",
+      "metric": "spell_taken_crit_chance",
+      "spell": 500627,
+      "target": "victim",
+      "max": 50
+    },
+    {
+      "action": "snapshot",
+      "label": "Soul Bolt critical damage against a full-health victim",
+      "actor": "reaper",
+      "metric": "spell_critical_damage",
+      "spell": 500627,
+      "target": "victim",
+      "save_as": "full_health_crit"
+    },
+    {
+      "action": "set_health",
+      "actor": "victim",
+      "value": 150000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: victim is now below 20% health",
+      "actor": "victim",
+      "metric": "health_pct",
+      "max": 19.99
+    },
+    {
+      "action": "assert",
+      "label": "Below 20% health, Soul Bolt is a guaranteed crit",
+      "actor": "reaper",
+      "metric": "spell_taken_crit_chance",
+      "spell": 500627,
+      "target": "victim",
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Below 20% health, Soul Bolt's critical damage carries Unbound's +25%",
+      "actor": "reaper",
+      "metric": "spell_critical_damage",
+      "spell": 500627,
+      "target": "victim",
+      "ratio_to": "full_health_crit",
+      "min": 1.24,
+      "max": 1.26
+    },
+    {
+      "action": "unlearn",
+      "actor": "reaper",
+      "spell": 706785
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning Unbound removes the guaranteed crit even below 20% health",
+      "actor": "reaper",
+      "metric": "spell_taken_crit_chance",
+      "spell": 500627,
+      "target": "victim",
+      "max": 50
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning Unbound removes the crit damage bonus",
+      "actor": "reaper",
+      "metric": "spell_critical_damage",
+      "spell": 500627,
+      "target": "victim",
+      "relative_to": "full_health_crit",
+      "min": -1,
+      "max": 1
+    }
+  ]
+}

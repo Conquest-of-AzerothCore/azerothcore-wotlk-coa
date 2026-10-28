@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "name": "Hero's Call Board Plaguelands quests show their objective areas on the world map (#5682)",
+  "contract": "The PvE Call Board quests had no quest_poi rows, so CMSG_QUEST_POI_QUERY (0x1E3) answered SMSG_QUEST_POI_QUERY_RESPONSE (0x1E4) with quest id 0 and no POIs, and the client drew nothing. Each creature objective now has one POI per spawn cluster of its NPC. Expected: Plague's Predatory Pests 18030 answers with 16 POIs on map 0, Eastern Plaguelands world map area 23 (client WorldMapArea.dbc); Echoes of Despair 18054 answers with 3 POIs on Western Plaguelands area 22. Objective NPCs that spawn only as an extra entry of a multi-entry spawn (creature_multispawn) are marked too: Winterfall Purge 17926 answers with 4 POIs on Winterspring area 281 (2 Winterfall Pathfinder 7442 clusters, 2 Winterfall Totemic 7441 clusters) and Demon Dispersal 18019 with 3 on Felwood area 182 (one per objective, Jadefire Betrayer 7108 included). Map rendering itself is not observed.",
+  "timeout_ms": 30000,
+  "location": { "map": 0, "x": 2314.55, "y": -5322.86, "z": 82.05, "o": 0 },
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "prepare_quest", "label": "Take Plague's Predatory Pests", "actor": "hero", "quest": 18030, "complete": false },
+    {
+      "action": "client_packet", "label": "Query the 18030 map POIs", "actor": "hero", "opcode": 483, "consumed": false,
+      "fields": [{ "u32": 1 }, { "u32": 18030 }]
+    },
+    {
+      "action": "assert", "label": "The POI response names quest 18030", "actor": "hero",
+      "metric": "server_packet_u32", "opcode": 484, "row": 1, "index": 1, "equals": 18030, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Every 18030 spawn cluster is marked", "actor": "hero",
+      "metric": "server_packet_u32", "opcode": 484, "row": 1, "index": 2, "equals": 16, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The 18030 POIs sit on the Eastern Plaguelands map", "actor": "hero",
+      "metric": "server_packet_u32", "opcode": 484, "row": 1, "index": 6, "equals": 23, "within_ms": 3000
+    },
+    { "action": "prepare_quest", "label": "Take Echoes of Despair", "actor": "hero", "quest": 18054, "complete": false },
+    {
+      "action": "client_packet", "label": "Query the 18054 map POIs", "actor": "hero", "opcode": 483, "consumed": false,
+      "fields": [{ "u32": 1 }, { "u32": 18054 }]
+    },
+    {
+      "action": "assert", "label": "The POI response names quest 18054", "actor": "hero",
+      "metric": "server_packet_u32", "opcode": 484, "row": 1, "index": 1, "equals": 18054, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Every 18054 objective is marked", "actor": "hero",
+      "metric": "server_packet_u32", "opcode": 484, "row": 1, "index": 2, "equals": 3, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The 18054 POIs sit on the Western Plaguelands map", "actor": "hero",
+      "metric": "server_packet_u32", "opcode": 484, "row": 1, "index": 6, "equals": 22, "within_ms": 3000
+    },
+    { "action": "prepare_quest", "label": "Take Winterfall Purge", "actor": "hero", "quest": 17926, "complete": false },
+    {
+      "action": "client_packet", "label": "Query the 17926 map POIs", "actor": "hero", "opcode": 483, "consumed": false,
+      "fields": [{ "u32": 1 }, { "u32": 17926 }]
+    },
+    {
+      "action": "assert", "label": "The POI response names quest 17926", "actor": "hero",
+      "metric": "server_packet_u32", "opcode": 484, "row": 1, "index": 1, "equals": 17926, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Both 17926 objectives are marked", "actor": "hero",
+      "metric": "server_packet_u32", "opcode": 484, "row": 1, "index": 2, "equals": 4, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The 17926 POIs sit on the Winterspring map", "actor": "hero",
+      "metric": "server_packet_u32", "opcode": 484, "row": 1, "index": 6, "equals": 281, "within_ms": 3000
+    },
+    { "action": "prepare_quest", "label": "Take Demon Dispersal", "actor": "hero", "quest": 18019, "complete": false },
+    {
+      "action": "client_packet", "label": "Query the 18019 map POIs", "actor": "hero", "opcode": 483, "consumed": false,
+      "fields": [{ "u32": 1 }, { "u32": 18019 }]
+    },
+    {
+      "action": "assert", "label": "The POI response names quest 18019", "actor": "hero",
+      "metric": "server_packet_u32", "opcode": 484, "row": 1, "index": 1, "equals": 18019, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Every 18019 objective is marked", "actor": "hero",
+      "metric": "server_packet_u32", "opcode": 484, "row": 1, "index": 2, "equals": 3, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The 18019 POIs sit on the Felwood map", "actor": "hero",
+      "metric": "server_packet_u32", "opcode": 484, "row": 1, "index": 6, "equals": 182, "within_ms": 3000
+    }
+  ]
+}

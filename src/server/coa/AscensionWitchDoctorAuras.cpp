@@ -28,13 +28,14 @@ void SyncReplacements(Player* player)
         if (Family(info, 1, 4) && id != Volley)
         {
             selected = true;
-            if (player->HasAura(VolleyReady) || (player->HasAura(Gift) && HasSummon(player, NpcMimic)))
+            if ((player->HasAura(VolleyReady) || (player->HasAura(Gift) && HasSummon(player, NpcMimic))) &&
+                id == KnownRank(player, id))
                 child = Volley;
         }
         else if (IsHex(info))
         {
             selected = true;
-            if (player->HasAura(UmbralReady))
+            if (player->HasAura(UmbralReady) && id == KnownRank(player, id))
                 child = Umbral;
         }
         else if (Family(info, 1, 32768) && !IsArrow(info) && id != HexfireWrath)
@@ -60,7 +61,7 @@ void SyncReplacements(Player* player)
             if (player->HasAura(TikiTalent) && (player->HasAura(Crystal) || player->HasAura(Beast)))
                 child = Tiki;
         }
-        else if (id == CallSseratus)
+        else if (id == CallSseratusChannel)
         {
             selected = true;
             if (player->HasAura(ViperTalent))
@@ -76,7 +77,7 @@ void SyncReplacements(Player* player)
             continue;
         if (child && !player->HasSpell(child))
             player->learnSpell(child, true);
-        player->SetTemporarySpellReplacement(id, child);
+        player->SetTemporarySpellReplacement(id, child, child != Volley && child != Umbral);
     }
 }
 }
@@ -229,6 +230,7 @@ class aura_ascension_witch_doctor_lifecycle : public AuraScript
                        std::max(0, player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW)) * 0.15f +
                        player->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.15f),
                 SPELL_DIRECT_DAMAGE, EFFECT_0);
+            player->ApplySpellMod(EclipseSplash, SPELLMOD_DAMAGE, _splash);
         }
         if (id == SenjinBuff)
             GetAura()->SetCharges(2);
@@ -387,7 +389,8 @@ class aura_ascension_witch_doctor_lifecycle : public AuraScript
             IngredientChanged(player, id, false);
         if (id == Spirit && player == GetTarget())
         {
-            for (uint32 helper : {SpiritStats, SpiritCast, SpiritChance, SpiritSpeed})
+            for (uint32 helper : {SpiritStats, SpiritCast, SpiritChance, SpiritSpeed, SpiritOrbOne, SpiritOrbTwo,
+                                  SpiritOrbThree, SpiritOrbFour, SpiritOrbFive})
                 player->RemoveAurasDueToSpell(helper);
         }
         if (IsHex(GetSpellInfo()))

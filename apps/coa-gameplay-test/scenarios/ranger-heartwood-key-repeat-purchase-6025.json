@@ -1,0 +1,167 @@
+{
+  "schema": 1,
+  "name": "ranger-heartwood-key-repeat-purchase-6025",
+  "contract": [
+    "A level-60 Ranger has a controlled grant of Bushcraft prerequisite 807959 and may buy Heartwood Key recipe 808075 once. The native trainer purchase teaches it, charges its utility price, marks the row Known (state 2), and rejects a repeated purchase without a second charge. Used rows are intentionally retained for stable window ordering; this does not verify client rendering."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "r",
+      "race": 1,
+      "class": 21,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 807959,
+      "label": "Fixture the Bushcraft recipe prerequisite owned by the reported Ranger"
+    },
+    {
+      "action": "money",
+      "actor": "r",
+      "copper": 2000000
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 5000,
+      "label": "r: owned_creature_count 1"
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "r"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "knows_spell",
+      "spell": 807959,
+      "equals": 1,
+      "label": "r: knows_spell 807959 1"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "trainer_window_state",
+      "spell": 808075,
+      "equals": 0,
+      "label": "r: trainer_window_state 808075 0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "carried_money",
+      "save_as": "purse_before",
+      "label": "r: carried_money"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "r",
+      "spell": 808075
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spellbook_buy_succeeded",
+      "spell": 808075,
+      "equals": 1,
+      "label": "r: spellbook_buy_succeeded 808075 1"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "knows_spell",
+      "spell": 808075,
+      "equals": 1,
+      "label": "r: knows_spell 808075 1"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "carried_money",
+      "relative_to": "purse_before",
+      "max": -1,
+      "label": "r: carried_money -1"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "trainer_window_state",
+      "spell": 808075,
+      "equals": 2,
+      "label": "r: trainer_window_state 808075 2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "carried_money",
+      "save_as": "purse_after",
+      "label": "r: carried_money"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "r",
+      "spell": 808075
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spellbook_buy_failed",
+      "spell": 808075,
+      "equals": 1,
+      "label": "r: spellbook_buy_failed 808075 1"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spellbook_buy_succeeded",
+      "spell": 808075,
+      "equals": 1,
+      "label": "r: spellbook_buy_succeeded 808075 1"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "carried_money",
+      "relative_to": "purse_after",
+      "equals": 0,
+      "label": "r: carried_money 0"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "trainer_window_state",
+      "spell": 808075,
+      "equals": 2,
+      "label": "r: trainer_window_state 808075 2"
+    }
+  ]
+}

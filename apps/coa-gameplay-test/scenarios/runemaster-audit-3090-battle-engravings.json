@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Runemaster audit: Battle Engravings removes Ley Lock's cast time but cuts 0.5s of duration (#3090)",
+  "contract": "Battle Engravings 706674 effect 0 is SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 10 (SPELLMOD_CASTING_TIME), EffectBasePoints -101 + DieSides 1 = -100%; effect 1 is SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 1 (SPELLMOD_DURATION), EffectBasePoints -501 + 1 = -500ms. Both effects' EffectSpellClassMask word 2 is 524288. Ley Lock 800995 has SpellFamilyName 38, SpellFamilyFlags word 2 bit 19 (524288) - an exact classmask match, and its own CastingTimeIndex 3 resolves to a real 500ms cast time (SpellCastTimes.dbc). Player::ApplySpellMod must therefore zero Ley Lock's real cast time and subtract 500ms from any op-1 query against it once 706674 is learned. Verification note: the op-10 probe must use a base value under 10000ms - Player::ApplySpellMod (Player.cpp) has a deliberate anti-exploit guard, 'skip > 10sec spell casts for instant cast setting', that SKIPS any SPELLMOD_CASTING_TIME percent mod entirely when the probed base value is >= 10000ms and the mod's own percent is <= -100; a synthetic 100000ms probe silently no-ops instead of zeroing, so this uses the spell_cast_time_ms metric against Ley Lock's own real (sub-10s) cast time instead.",
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "assert", "label": "before: Ley Lock's real cast time is the DBC's 500ms", "actor": "rm",
+      "metric": "spell_cast_time_ms", "spell": 800995, "min": 498, "max": 502},
+    {"action": "assert", "label": "before: 800995 has no duration modifier (op 1)", "actor": "rm",
+      "metric": "spell_modifier", "spell": 800995, "op": 1, "base": 100000, "min": 99998, "max": 100002},
+    {"action": "learn", "actor": "rm", "spell": 706674},
+    {"action": "assert", "label": "Battle Engravings (706674) is active", "actor": "rm",
+      "metric": "aura", "spell": 706674, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "706674 op 10 percent -100 zeroes Ley Lock's real cast time",
+      "actor": "rm", "metric": "spell_cast_time_ms", "spell": 800995, "min": 0, "max": 2},
+    {"action": "assert", "label": "706674 op 1 flat -500 reaches Ley Lock's duration",
+      "actor": "rm", "metric": "spell_modifier", "spell": 800995, "op": 1, "base": 100000, "min": 99498, "max": 99502}
+  ]
+}

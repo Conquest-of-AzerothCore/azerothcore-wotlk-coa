@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "name": "Necromancer Infest on the action bar is saved as Virulency (#5469)",
+  "contract": "AscensionNecromancerAbilities.cpp:99-104 (Virulency): a successful Virulency 801938 on a target carrying the Necromancer's diseases casts Infestation 803782, learns Infest 803781 with learnSpell(803781, true) (PLAYERSPELL_TEMPORARY, never written to character_spell) and calls SetTemporarySpellReplacement(801938, 803781). The replacement ends when Infestation is spent or removed (AscensionNecromancerAbilities.cpp:74, AscensionNecromancerAuras.cpp:228). A button holding Infest 803781 was saved by Player::_SaveActions as 803781; Player::_LoadActions at the next login runs before any Virulency learns it again, so IsActionButtonDataValid would refuse and delete it. persisted_action_button reads Player::GetSavedActionButtonSpell, the id _SaveActions writes: the Infest button must be saved as Virulency 801938, and an ordinary known spell (Flesh to Worms 500338) must be saved unchanged. Fixture copied from necromancer-creeping-plagues-infest.json.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "source", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 8 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "necro", "spell": 500338 },
+    { "action": "learn", "actor": "necro", "spell": 801938 },
+    { "action": "cast", "label": "Disease the source", "actor": "necro", "spell": 500338, "target": "source" },
+    {
+      "action": "assert",
+      "label": "SETUP: the source carries Flesh to Worms",
+      "actor": "source",
+      "metric": "aura",
+      "spell": 500338,
+      "caster": "necro",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "cast", "label": "Virulency copies the disease", "actor": "necro", "spell": 801938, "target": "source" },
+    {
+      "action": "assert",
+      "label": "Virulency is replaced by Infest",
+      "actor": "necro",
+      "metric": "temporary_spell_replacement",
+      "spell": 801938,
+      "equals": 803781,
+      "within_ms": 3000
+    },
+    { "action": "set_action_button", "actor": "necro", "button": 2, "spell": 803781 },
+    { "action": "set_action_button", "actor": "necro", "button": 3, "spell": 500338 },
+    {
+      "action": "assert",
+      "label": "The bar holds Infest",
+      "actor": "necro",
+      "metric": "action_button",
+      "button": 2,
+      "equals": 803781
+    },
+    {
+      "action": "assert",
+      "label": "The Infest button is saved as Virulency",
+      "actor": "necro",
+      "metric": "persisted_action_button",
+      "button": 2,
+      "equals": 801938
+    },
+    {
+      "action": "assert",
+      "label": "Control: an ordinary known spell is saved unchanged",
+      "actor": "necro",
+      "metric": "persisted_action_button",
+      "button": 3,
+      "equals": 500338
+    }
+  ]
+}

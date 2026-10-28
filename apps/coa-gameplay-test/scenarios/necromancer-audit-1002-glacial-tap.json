@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "Necromancer audit: Glacial Tap instantly restores 30 Runic Power on a 12 s cooldown (#1002)",
+  "contract": "Glacial Tap 805369 (CharacterAdvancement 29787, Class tab, class 23) reads 'Tap into necrotic energies, instantly regenerating $/10;s1 Runic Power.' with an instant cast and 12 sec cooldown. Spell.dbc: CastingTimeIndex 1 (instant), RecoveryTime 12000, effect 0 SPELL_EFFECT_ENERGIZE (30) on the caster, MiscValue 6 (Runic Power), BasePoints 299 + DieSides 1 = 300 (Runic Power is stored in tenths, so 30). The Necromancer's display power is Runic Power (ChrClasses 23 power type 6, maximum 1000), so Spell::EffectEnergize applies it natively. From 0 Runic Power one cast logs a 300 energize and leaves 27-30 Runic Power (one out-of-combat decay tick at most), starts a cooldown of at most 12 s, and a second cast during that cooldown is refused without another energize.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "learn", "actor": "necro", "spell": 805369 },
+    { "action": "assert", "actor": "necro", "metric": "knows_spell", "spell": 805369, "equals": 1 },
+    { "action": "set_power", "actor": "necro", "power": 6, "value": 0 },
+    { "action": "assert", "label": "SETUP: Runic Power is empty", "actor": "necro", "metric": "power", "power": 6, "equals": 0 },
+    { "action": "cast", "actor": "necro", "spell": 805369 },
+    {
+      "action": "assert", "label": "Glacial Tap energizes 30 Runic Power", "actor": "necro",
+      "metric": "spell_energize_total", "spell": 805369, "power": 6, "equals": 300, "within_ms": 1500
+    },
+    {
+      "action": "assert", "label": "The Runic Power bar gains the 30", "actor": "necro",
+      "metric": "power", "power": 6, "min": 270, "max": 300
+    },
+    {
+      "action": "assert", "label": "Glacial Tap starts its 12 s cooldown", "actor": "necro",
+      "metric": "cooldown_ms", "spell": 805369, "min": 10000, "max": 12000
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1500 },
+    { "action": "cast", "actor": "necro", "spell": 805369 },
+    {
+      "action": "assert", "label": "A second cast during the cooldown is refused", "actor": "necro",
+      "metric": "cast_failure", "spell": 805369, "min": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The refused cast adds no Runic Power", "actor": "necro",
+      "metric": "spell_energize_count", "spell": 805369, "power": 6, "equals": 1
+    }
+  ]
+}

@@ -1,0 +1,255 @@
+{
+  "schema": 1,
+  "name": "Fatesealer protects the Reaper for each generated soul",
+  "contract": "Fatesealer 705442 promises that each newly generated Reaped Soul grants 2% damage reduction for 15 seconds, stacking three times. Soul gains are resource aura stack increases, and a grant at the three-soul cap is not a generation. The child aura 705443 carries the damage reduction and stack limit.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80
+    },
+    {
+      "id": "attacker",
+      "race": 10,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the world settle",
+      "ms": 6000
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline physical damage taken",
+      "actor": "reaper",
+      "metric": "melee_damage_taken",
+      "target": "attacker",
+      "save_as": "physical_before"
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline Frost damage taken",
+      "actor": "reaper",
+      "metric": "spell_damage_taken",
+      "spell": 116,
+      "target": "attacker",
+      "save_as": "frost_before"
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 705442
+    },
+    {
+      "action": "assert",
+      "label": "Fatesealer talent is active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 705442,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "No protection before a soul is generated",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 705443,
+      "equals": 0
+    },
+    {
+      "action": "grant_resource",
+      "actor": "reaper",
+      "spell": 500363,
+      "amount": 1
+    },
+    {
+      "action": "assert",
+      "label": "First generated soul grants one Fatesealer stack",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 705443,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Fatesealer child carries the promised two percent reduction",
+      "actor": "reaper",
+      "metric": "aura_amount",
+      "spell": 705443,
+      "equals": -2
+    },
+    {
+      "action": "assert",
+      "label": "One Fatesealer stack reduces physical damage taken by two percent",
+      "actor": "reaper",
+      "metric": "melee_damage_taken",
+      "target": "attacker",
+      "ratio_to": "physical_before",
+      "min": 0.97,
+      "max": 0.99
+    },
+    {
+      "action": "assert",
+      "label": "One Fatesealer stack reduces Frost damage taken by two percent",
+      "actor": "reaper",
+      "metric": "spell_damage_taken",
+      "spell": 116,
+      "target": "attacker",
+      "ratio_to": "frost_before",
+      "min": 0.97,
+      "max": 0.99
+    },
+    {
+      "action": "assert",
+      "label": "Fatesealer starts with a fifteen second duration",
+      "actor": "reaper",
+      "metric": "aura_duration_ms",
+      "spell": 705443,
+      "min": 12000,
+      "max": 15000
+    },
+    {
+      "action": "grant_resource",
+      "actor": "reaper",
+      "spell": 500363,
+      "amount": 1
+    },
+    {
+      "action": "assert",
+      "label": "Second generated soul adds a protection stack",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 705443,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "grant_resource",
+      "actor": "reaper",
+      "spell": 500363,
+      "amount": 1
+    },
+    {
+      "action": "assert",
+      "label": "Third generated soul reaches the protection cap",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 705443,
+      "equals": 3,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Each real soul gain cast the child once",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 705443,
+      "equals": 3
+    },
+    {
+      "action": "grant_resource",
+      "actor": "reaper",
+      "spell": 500363,
+      "amount": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let a capped grant settle",
+      "ms": 250
+    },
+    {
+      "action": "assert",
+      "label": "A grant at the soul cap does not cast Fatesealer",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 705443,
+      "equals": 3
+    },
+    {
+      "action": "grant_resource",
+      "actor": "reaper",
+      "spell": 500363,
+      "amount": -1
+    },
+    {
+      "action": "assert",
+      "label": "Spending a soul does not cast Fatesealer",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 705443,
+      "equals": 3
+    },
+    {
+      "action": "grant_resource",
+      "actor": "reaper",
+      "spell": 500363,
+      "amount": 1
+    },
+    {
+      "action": "assert",
+      "label": "Regaining the spent soul casts Fatesealer without exceeding three stacks",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 705443,
+      "equals": 4,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Fatesealer remains capped at three protection stacks",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 705443,
+      "equals": 3
+    },
+    {
+      "action": "wait",
+      "label": "Wait beyond the refreshed protection duration",
+      "ms": 15500
+    },
+    {
+      "action": "assert",
+      "label": "Fatesealer protection expires",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 705443,
+      "equals": 0
+    },
+    {
+      "action": "grant_resource",
+      "actor": "reaper",
+      "spell": 500363,
+      "amount": -3
+    },
+    {
+      "action": "grant_resource",
+      "actor": "reaper",
+      "spell": 500363,
+      "amount": 3
+    },
+    {
+      "action": "assert",
+      "label": "A single three-soul award grants three Fatesealer stacks",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 705443,
+      "equals": 3,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "A three-soul award casts Fatesealer once per gained soul",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 705443,
+      "equals": 7
+    }
+  ]
+}

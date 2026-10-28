@@ -17,19 +17,19 @@ HARNESS = r'''
 #include <cmath>
 #include <cstdint>
 #include <optional>
+#include <utility>
 #include <vector>
 using uint8=std::uint8_t;using uint32=std::uint32_t;
 // ENUMS
 enum SpellEffIndex : uint8 { EFFECT_0 = 0 };
 enum Rates { RATE_DURABILITY_LOSS_ON_SPIRIT_RESURRECT };
 enum TeleportToOptions : uint32 { TELE_TO_SPELL = 0x10 };
-struct GraveyardStruct { uint32 Map; float x; float y; float z; };
 struct Map { bool instanceable = false; bool Instanceable() const { return instanceable; } };
 struct Battlefield { bool war = false; bool IsWarTime() const { return war; } };
 struct Teleport { uint32 map; float x; float y; float z; float o; uint32 options; };
 struct Player
 {
-    TeamId team = TEAM_ALLIANCE; uint32 level = 80, mapId = 0, zone = 1; float x = 0, y = 0, o = 2;
+    TeamId team = TEAM_ALLIANCE; uint32 level = 80, mapId = 0, zone = 1; float x = 0, y = 0, z = 0, o = 2;
     bool alive = false, veto = false; Map* map = nullptr;
     std::vector<Teleport> teleports; std::vector<float> resurrected; std::vector<bool> sickness;
     std::vector<double> durability; uint32 bones = 0;
@@ -41,6 +41,9 @@ struct Player
     uint32 GetZoneId() const { return zone; }
     Map* GetMap() const { return map; }
     float GetOrientation() const { return o; }
+    float GetPositionX() const { return x; }
+    float GetPositionY() const { return y; }
+    float GetPositionZ() const { return z; }
     float GetExactDist2dSq(float px, float py) const { return (px - x) * (px - x) + (py - y) * (py - y); }
     void ResurrectPlayer(float percent, bool sick) { resurrected.push_back(percent); sickness.push_back(sick); alive = !veto; }
     void DurabilityLossAll(double percent, bool inventory) { assert(inventory); durability.push_back(percent); }
@@ -48,13 +51,33 @@ struct Player
     void TeleportTo(uint32 m, float px, float py, float pz, float po, uint32 options)
     { teleports.push_back({ m, px, py, pz, po, options }); }
 };
-struct SpellInfo { uint32 Id; };
-struct Graveyards
+// PROGRESS
+struct ScriptMgr
 {
-    std::optional<GraveyardStruct> grave;
-    GraveyardStruct const* GetClosestGraveyard(Player*, TeamId) { return grave ? &*grave : nullptr; }
-} graveyards;
-auto sGraveyard = &graveyards;
+    std::vector<std::pair<CoAProgressEvent, uint32>> events;
+    void OnPlayerCoAProgress(Player*, CoAProgressEvent event, uint32 value) { events.push_back({ event, value }); }
+} scripts;
+auto sScriptMgr = &scripts;
+bool reportedOnce(uint32 spell)
+{
+    bool const reported = scripts.events.size() == 1 && scripts.events[0].first == CoAProgressEvent::ClosestResurrection
+        && scripts.events[0].second == spell;
+    scripts.events.clear();
+    return reported;
+}
+struct SpellInfo { uint32 Id; };
+struct TaxiNodesEntry { uint32 map_id = 0; float x = 0, y = 0, z = 0; };
+struct TaxiNodesStore
+{
+    TaxiNodesEntry entry;
+    TaxiNodesEntry const* LookupEntry(uint32 id) { return id ? &entry : nullptr; }
+} sTaxiNodesStore;
+struct ObjectMgr
+{
+    uint32 node = 0;
+    uint32 GetNearestTaxiNode(float, float, float, uint32, uint32) { return node; }
+} objectMgr;
+auto sObjectMgr = &objectMgr;
 struct Battlefields
 {
     Battlefield field; uint32 zone = 0;
@@ -83,15 +106,17 @@ int main()
 {
     Map open, dungeon; dungeon.instanceable = true;
 
-    // Closest Town: the graveyard the ghost would repop at.
+    // Closest Town: the nearest flight-master town of the player's faction.
     {
         Player p = make(TEAM_HORDE, 1, -2725.0f, -1115.0f, &open);
         Script town{ &p, { SPELL_RESURRECT_CLOSEST_TOWN } };
         assert(town.Load());
-        graveyards.grave = GraveyardStruct{ 1, -2350.0f, -360.0f, -9.0f };
+        objectMgr.node = 1;
+        sTaxiNodesStore.entry = TaxiNodesEntry{ 1, -2350.0f, -360.0f, -9.0f };
         assert(town.CheckCast() == SPELL_CAST_OK);
         realm.rate = 25.0f;
         town.Resurrect(EFFECT_0);
+        assert(reportedOnce(SPELL_RESURRECT_CLOSEST_TOWN));
         assert(p.alive && p.resurrected == std::vector<float>{ 0.5f } && p.sickness == std::vector<bool>{ true });
         assert(p.durability == std::vector<double>{ 0.25 } && p.bones == 1 && p.teleports.size() == 1);
         assert(p.teleports[0].map == 1 && p.teleports[0].x == -2350.0f && p.teleports[0].y == -360.0f);
@@ -100,21 +125,21 @@ int main()
         // Alive players are refused, and an effect that still fires does nothing to them.
         assert(town.CheckCast() == SPELL_FAILED_TARGET_NOT_DEAD);
         town.Resurrect(EFFECT_0);
-        assert(p.teleports.size() == 1 && p.resurrected.size() == 1);
+        assert(p.teleports.size() == 1 && p.resurrected.size() == 1 && scripts.events.empty());
 
         // The durability loss follows the realm rate, and no rate means none.
         Player q = make(TEAM_HORDE, 1, 0, 0, &open); realm.rate = 0.0f;
         Script again{ &q, { SPELL_RESURRECT_CLOSEST_TOWN } };
         again.Resurrect(EFFECT_0);
-        assert(q.alive && q.durability.empty() && q.teleports.size() == 1);
+        assert(q.alive && q.durability.empty() && q.teleports.size() == 1 && reportedOnce(SPELL_RESURRECT_CLOSEST_TOWN));
 
-        // No graveyard to go to.
-        Player r = make(TEAM_HORDE, 1, 0, 0, &open); graveyards.grave.reset();
+        // No reachable town leaves the spell unusable.
+        Player r = make(TEAM_HORDE, 1, 0, 0, &open); objectMgr.node = 0;
         Script none{ &r, { SPELL_RESURRECT_CLOSEST_TOWN } };
         assert(none.CheckCast() == SPELL_FAILED_NOT_HERE);
         none.Resurrect(EFFECT_0);
-        assert(!r.alive && r.teleports.empty() && r.resurrected.empty());
-        graveyards.grave = GraveyardStruct{ 1, 1.0f, 2.0f, 3.0f };
+        assert(!r.alive && r.teleports.empty() && r.resurrected.empty() && scripts.events.empty());
+        objectMgr.node = 1;
 
         // Dungeons, battlegrounds and arenas use the ordinary way back.
         Player d = make(TEAM_HORDE, 1, 0, 0, &dungeon);
@@ -137,6 +162,7 @@ int main()
         Script town{ &p, { SPELL_RESURRECT_CLOSEST_TOWN } };
         town.Resurrect(EFFECT_0);
         assert(!p.alive && p.resurrected.size() == 1 && p.durability.empty() && !p.bones && p.teleports.empty());
+        assert(scripts.events.empty());
     }
 
     // Closest City: level gate, then the nearest capital of the player's own faction.
@@ -163,13 +189,15 @@ int main()
         assert(p.alive && p.teleports.size() == 1 && p.bones == 1);
         assert(p.teleports[0].map == c.destMap && p.teleports[0].x == c.destX && p.teleports[0].options == TELE_TO_SPELL);
         assert(p.resurrected == std::vector<float>{ 0.5f } && p.sickness == std::vector<bool>{ true });
+        assert(reportedOnce(SPELL_RESURRECT_CLOSEST_CITY));
     }
 
     Player low = make(TEAM_ALLIANCE, 0, 0, 0, &open); low.level = 9;
     Script gated{ &low, { SPELL_RESURRECT_CLOSEST_CITY } };
     assert(gated.CheckCast() == SPELL_FAILED_LEVEL_REQUIREMENT);
     // The town spell has no level requirement.
-    graveyards.grave = GraveyardStruct{ 0, 1.0f, 2.0f, 3.0f };
+    objectMgr.node = 1;
+    sTaxiNodesStore.entry = TaxiNodesEntry{ 0, 1.0f, 2.0f, 3.0f };
     Script lowTown{ &low, { SPELL_RESURRECT_CLOSEST_TOWN } };
     assert(lowTown.CheckCast() == SPELL_CAST_OK);
     return 0;
@@ -180,13 +208,16 @@ int main()
 def build_harness(source):
     shared = (ROOT / "src/server/shared/SharedDefines.h").read_text(encoding="utf-8")
     enums = "".join(method(shared, "enum " + name) + ";\n" for name in ("TeamId", "SpellCastResult"))
+    player_script = (ROOT / "src/server/game/Scripting/ScriptDefines/PlayerScript.h").read_text(encoding="utf-8")
+    progress = method(player_script, "enum class CoAProgressEvent") + ";\n"
     start = source.index("enum ClosestResurrection")
     end = source.index("class spell_ascension_closest_resurrection")
     body = source[start:end]
     methods = "".join(method(source, signature).replace(" override", "")
                       for signature in ("bool Load()", "std::optional<Destination> FindDestination(",
                                         "SpellCastResult CheckCast()", "void Resurrect("))
-    return HARNESS.replace("// ENUMS", enums).replace("// SOURCE", body).replace("// METHODS", methods)
+    return (HARNESS.replace("// ENUMS", enums).replace("// PROGRESS", progress).replace("// SOURCE", body)
+            .replace("// METHODS", methods))
 
 
 def compile_and_run(code):
@@ -243,7 +274,8 @@ def main():
                       "ORDER BY 1").fetchall() == [(84423,), (84433,)]
     assert db.execute("SELECT COUNT(*) FROM spell_script_names WHERE ScriptName IN ('keep','spell_ascension_ruleset_select')"
                       ).fetchone() == (2,)
-    print("PASS: town and city destinations, level/death/instance/Wintergrasp gates, vetoed resurrection and SQL binding")
+    print("PASS: town and city destinations, level/death/instance/Wintergrasp gates, vetoed resurrection, "
+          "progress reports and SQL binding")
 
 
 if __name__ == "__main__":

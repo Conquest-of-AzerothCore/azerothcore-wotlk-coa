@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Runic Animation shortens Animate: Skeletal Archer and Command: Hook cooldowns by 20% (#812)",
+  "contract": "Runic Animation 707445 (CharacterAdvancement 7145, Animation tab, 1 talent point) reads 'Reduces the cooldown of Animate: Skeletal Archers and Command: Hook by $s2%.' Its effect 1 is SPELL_AURA_ADD_PCT_MODIFIER (108), MiscValue 11 (SPELLMOD_COOLDOWN), EffectBasePoints -21 + DieSides 1 = -20, class mask (0x400, 0, 0x800) in SpellFamilyName 29; effect 0 is a flat SPELLMOD_EFFECT1 modifier of 0 (-1 + 1). Animate: Skeletal Archer 805040 (family flags 0x200008, 0, 0x802) matches word 2 and Command: Hook 504316 (0x400, 0, 0x1000000) matches word 0; both have RecoveryTime 30000 and no category cooldown. The passive is a native spell modifier: Player::AddSpellAndCategoryCooldowns applies ApplySpellMod(SPELLMOD_COOLDOWN) to RecoveryTime, so both cooldowns become 24000 ms once the talent is known and stay 30000 ms without it. The audit's premise (no source reference to 707445) does not apply to native aura types. Animate: Tomb King 805044 (0x200008, 0x800, 0x40000000) overlaps neither word and keeps its base value, the negative control for the mask. The three archers the first Animate raises are the minions Command: Hook requires.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "n", "entry": 36, "level": 80, "health": 1000000, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "n", "spell": 805040 },
+    { "action": "learn", "actor": "n", "spell": 504316 },
+    {
+      "action": "assert", "label": "SETUP: Runic Animation is not known yet", "actor": "n",
+      "metric": "aura", "spell": 707445, "equals": 0
+    },
+    { "action": "cast", "label": "Animate archers without Runic Animation", "actor": "n", "spell": 805040 },
+    {
+      "action": "assert", "label": "SETUP: three Skeletal Archers answer the Animate", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50076, "equals": 3, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTROL: Animate: Skeletal Archer starts its full 30 s cooldown", "actor": "n",
+      "metric": "cooldown_ms", "spell": 805040, "min": 28000, "max": 30000
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "set_power", "actor": "n", "power": 6, "value": 1000 },
+    { "action": "cast", "label": "Command: Hook without Runic Animation", "actor": "n", "spell": 504316, "target": "golem" },
+    {
+      "action": "assert", "label": "CONTROL: Command: Hook starts its full 30 s cooldown", "actor": "n",
+      "metric": "cooldown_ms", "spell": 504316, "min": 28000, "max": 30000, "within_ms": 1000
+    },
+    { "action": "reset_cooldown", "actor": "n", "spell": 805040 },
+    { "action": "reset_cooldown", "actor": "n", "spell": 504316 },
+    { "action": "learn", "actor": "n", "spell": 707445 },
+    {
+      "action": "assert", "label": "SETUP: the Runic Animation passive is active", "actor": "n",
+      "metric": "aura", "spell": 707445, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Runic Animation modifies Animate: Skeletal Archer's 30000 ms cooldown to 24000 ms",
+      "actor": "n", "metric": "spell_modifier", "spell": 805040, "op": 11, "base": 30000, "min": 23999, "max": 24001
+    },
+    {
+      "action": "assert", "label": "Runic Animation modifies Command: Hook's 30000 ms cooldown to 24000 ms",
+      "actor": "n", "metric": "spell_modifier", "spell": 504316, "op": 11, "base": 30000, "min": 23999, "max": 24001
+    },
+    {
+      "action": "assert", "label": "NEGATIVE CONTROL: Animate: Tomb King is outside the class mask", "actor": "n",
+      "metric": "spell_modifier", "spell": 805044, "op": 11, "base": 30000, "min": 29999, "max": 30001
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "cast", "label": "Animate archers with Runic Animation", "actor": "n", "spell": 805040 },
+    {
+      "action": "assert", "label": "Animate: Skeletal Archer's cooldown is 20% shorter (24 s)", "actor": "n",
+      "metric": "cooldown_ms", "spell": 805040, "min": 22500, "max": 24000, "within_ms": 1000
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "set_power", "actor": "n", "power": 6, "value": 1000 },
+    { "action": "cast", "label": "Command: Hook with Runic Animation", "actor": "n", "spell": 504316, "target": "golem" },
+    {
+      "action": "assert", "label": "Command: Hook's cooldown is 20% shorter (24 s)", "actor": "n",
+      "metric": "cooldown_ms", "spell": 504316, "min": 22500, "max": 24000, "within_ms": 1000
+    }
+  ]
+}

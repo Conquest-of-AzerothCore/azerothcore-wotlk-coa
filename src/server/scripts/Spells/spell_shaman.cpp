@@ -235,7 +235,7 @@ class spell_sha_feral_spirit_scaling : public AuraScript
         if (Unit* owner = GetUnitOwner()->GetOwner())
         {
             int32 modifier = 30;
-            if (AuraEffect const* gofsEff = owner->GetAuraEffect(SPELL_SHAMAN_GLYPH_OF_FERAL_SPIRIT, EFFECT_0))
+            if (AuraEffect const* gofsEff = owner->GetAuraEffectOfRankedSpellOrTwin(SPELL_SHAMAN_GLYPH_OF_FERAL_SPIRIT, EFFECT_0))
                 modifier += gofsEff->GetAmount();
 
             amount = CalculatePct(std::max<int32>(0, owner->GetTotalAttackPowerValue(BASE_ATTACK)), modifier);
@@ -248,7 +248,7 @@ class spell_sha_feral_spirit_scaling : public AuraScript
         if (Unit* owner = GetUnitOwner()->GetOwner())
         {
             int32 modifier = 30;
-            if (AuraEffect const* gofsEff = owner->GetAuraEffect(SPELL_SHAMAN_GLYPH_OF_FERAL_SPIRIT, EFFECT_0))
+            if (AuraEffect const* gofsEff = owner->GetAuraEffectOfRankedSpellOrTwin(SPELL_SHAMAN_GLYPH_OF_FERAL_SPIRIT, EFFECT_0))
                 modifier += gofsEff->GetAmount();
 
             amount = CalculatePct(std::max<int32>(0, owner->GetTotalAttackPowerValue(BASE_ATTACK)), modifier);
@@ -350,7 +350,7 @@ class spell_sha_fire_elemental_scaling : public AuraScript
         if (Unit* owner = GetUnitOwner()->GetOwner())
         {
             int32 fire = owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE);
-            amount = CalculatePct(std::max<int32>(0, fire), (GetUnitOwner()->GetEntry() == NPC_FIRE_ELEMENTAL ? 300 : 150));
+            amount = CalculatePct(std::max<int32>(0, fire), (GetStockPetEntry(GetUnitOwner()->GetEntry()) == NPC_FIRE_ELEMENTAL ? 300 : 150));
         }
     }
 
@@ -601,7 +601,7 @@ class spell_sha_earth_shield : public AuraScript
             // Glyph of Earth Shield
             //! WORKAROUND
             //! this glyphe is a proc
-            if (AuraEffect* glyphe = caster->GetAuraEffect(SPELL_SHAMAN_GLYPH_OF_EARTH_SHIELD, EFFECT_0))
+            if (AuraEffect* glyphe = caster->GetAuraEffectOfRankedSpellOrTwin(SPELL_SHAMAN_GLYPH_OF_EARTH_SHIELD, EFFECT_0))
                 AddPct(amount, glyphe->GetAmount());
 
             // xinef: Improved Shields
@@ -662,7 +662,7 @@ class spell_sha_earthbind_totem : public AuraScript
         if (!owner)
             return;
         // Storm, Earth and Fire
-        if (AuraEffect* aurEff = owner->GetAuraEffectOfRankedSpell(SPELL_SHAMAN_STORM_EARTH_AND_FIRE, EFFECT_1))
+        if (AuraEffect* aurEff = owner->GetAuraEffectOfRankedSpellOrTwin(SPELL_SHAMAN_STORM_EARTH_AND_FIRE, EFFECT_1))
         {
             if (roll_chance_i(aurEff->GetAmount()))
                 GetCaster()->CastSpell(GetCaster(), SPELL_SHAMAN_TOTEM_EARTHBIND_EARTHGRAB, false);
@@ -736,7 +736,7 @@ class spell_sha_earthliving_weapon : public AuraScript
             }
         }
 
-        if (AuraEffect const* aurEff = caster->GetAuraEffectOfRankedSpell(SPELL_SHAMAN_BLESSING_OF_THE_ETERNALS_R1, EFFECT_1, caster->GetGUID()))
+        if (AuraEffect const* aurEff = caster->GetAuraEffectOfRankedSpellOrTwin(SPELL_SHAMAN_BLESSING_OF_THE_ETERNALS_R1, EFFECT_1, caster->GetGUID()))
         {
             if (eventInfo.GetProcTarget()->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
             {
@@ -761,10 +761,11 @@ class spell_sha_fire_nova : public SpellScript
     bool Validate(SpellInfo const* spellInfo) override
     {
         SpellInfo const* firstRankSpellInfo = sSpellMgr->GetSpellInfo(SPELL_SHAMAN_FIRE_NOVA_R1);
-        if (!firstRankSpellInfo || !spellInfo->IsRankOf(firstRankSpellInfo))
+        SpellInfo const* stockRank = sSpellMgr->GetSpellInfo(sSpellMgr->GetSpellTwinSource(spellInfo->Id));
+        if (!firstRankSpellInfo || !stockRank || !stockRank->IsRankOf(firstRankSpellInfo))
             return false;
 
-        uint8 rank = spellInfo->GetRank();
+        uint8 rank = stockRank->GetRank();
         if (!sSpellMgr->GetSpellWithRank(SPELL_SHAMAN_FIRE_NOVA_TRIGGERED_R1, rank, true))
             return false;
         return true;
@@ -792,9 +793,10 @@ class spell_sha_fire_nova : public SpellScript
         Unit* caster = GetCaster();
         if (Creature* totem = caster->GetMap()->GetCreature(caster->m_SummonSlot[1]))
         {
-            uint8 rank = GetSpellInfo()->GetRank();
+            uint32 const spellId = GetSpellInfo()->Id;
+            uint8 rank = sSpellMgr->GetSpellInfo(sSpellMgr->GetSpellTwinSource(spellId))->GetRank();
             if (totem->IsTotem())
-                caster->CastSpell(totem, sSpellMgr->GetSpellWithRank(SPELL_SHAMAN_FIRE_NOVA_TRIGGERED_R1, rank), true);
+                caster->CastSpell(totem, sSpellMgr->GetSpellTwinFor(sSpellMgr->GetSpellWithRank(SPELL_SHAMAN_FIRE_NOVA_TRIGGERED_R1, rank), spellId), true);
         }
     }
 
@@ -822,8 +824,11 @@ class spell_sha_flame_shock : public AuraScript
             if (AuraEffect const* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, SHAMAN_ICON_ID_SHAMAN_LAVA_FLOW, EFFECT_0))
             {
                 if (SpellInfo const* firstRankSpellInfo = sSpellMgr->GetSpellInfo(SPELL_SHAMAN_LAVA_FLOWS_R1))
-                    if (!aurEff->GetSpellInfo()->IsRankOf(firstRankSpellInfo))
+                {
+                    SpellInfo const* stockRank = sSpellMgr->GetSpellInfo(sSpellMgr->GetSpellTwinSource(aurEff->GetId()));
+                    if (!aurEff->GetSpellInfo()->IsRankOf(firstRankSpellInfo) && !(stockRank && stockRank->IsRankOf(firstRankSpellInfo)))
                         return;
+                }
 
                 uint8 rank = aurEff->GetSpellInfo()->GetRank();
                 caster->CastSpell(caster, sSpellMgr->GetSpellWithRank(SPELL_SHAMAN_LAVA_FLOWS_TRIGGERED_R1, rank), true);
@@ -855,16 +860,11 @@ class spell_sha_healing_stream_totem : public SpellScript
             {
                 if (Unit* owner = caster->GetOwner())
                 {
+                    if (triggeringSpell && sSpellMgr->GetSpellTwinSource(triggeringSpell->Id) != triggeringSpell->Id)
+                        damage = triggeringSpell->Effects[EFFECT_0].CalcValue(owner);
+
                     if (triggeringSpell)
                         damage = int32(owner->SpellHealingBonusDone(target, triggeringSpell, damage, HEAL, effIndex));
-
-                    // Restorative Totems
-                    if (AuraEffect* dummy = owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, SHAMAN_ICON_ID_RESTORATIVE_TOTEMS, 1))
-                        AddPct(damage, dummy->GetAmount());
-
-                    // Glyph of Healing Stream Totem
-                    if (AuraEffect const* aurEff = owner->GetAuraEffect(SPELL_SHAMAN_GLYPH_OF_HEALING_STREAM_TOTEM, EFFECT_0))
-                        AddPct(damage, aurEff->GetAmount());
 
                     damage = int32(target->SpellHealingBonusTaken(owner, triggeringSpell, damage, HEAL));
                 }
@@ -1257,7 +1257,7 @@ class spell_sha_thunderstorm : public SpellScript
     void HandleKnockBack(SpellEffIndex effIndex)
     {
         // Glyph of Thunderstorm
-        if (GetCaster()->HasAura(SPELL_SHAMAN_GLYPH_OF_THUNDERSTORM))
+        if (GetCaster()->HasAuraOrTwin(SPELL_SHAMAN_GLYPH_OF_THUNDERSTORM))
             PreventHitDefaultEffect(effIndex);
     }
 
@@ -1854,7 +1854,8 @@ class spell_sha_lightning_shield : public AuraScript
     void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
     {
         PreventDefaultAction();
-        uint32 triggerSpell = sSpellMgr->GetSpellWithRank(SPELL_SHAMAN_LIGHTNING_SHIELD_DAMAGE_R1, aurEff->GetSpellInfo()->GetRank());
+        uint8 const rank = sSpellMgr->GetSpellInfo(sSpellMgr->GetSpellTwinSource(aurEff->GetId()))->GetRank();
+        uint32 triggerSpell = sSpellMgr->GetSpellTwinFor(sSpellMgr->GetSpellWithRank(SPELL_SHAMAN_LIGHTNING_SHIELD_DAMAGE_R1, rank), aurEff->GetId());
         eventInfo.GetActionTarget()->CastSpell(eventInfo.GetActor(), triggerSpell, aurEff);
     }
 

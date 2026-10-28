@@ -756,6 +756,43 @@ bool FlightPathMovementGenerator::DoUpdate(Player* player, uint32 /*diff*/)
     return i_currentNode < (i_path.size() - 1);
 }
 
+bool FlightPathMovementGenerator::RequestEarlyLanding(Player* player)
+{
+    if (i_currentNode + 1 >= i_path.size())
+        return false;
+
+    TaxiPathNodeList const path = i_path;
+    std::deque<TaxiNodeChangeInfo> const pathSwitches = _pointsForPathSwitch;
+    uint32 const passedNode = i_currentNode;
+    std::deque<uint32> const route = player->m_taxi.GetPath();
+    if (!player->m_taxi.RequestEarlyLanding())
+        return false;
+
+    i_currentNode = 0;
+    if (LoadPath(player))
+    {
+        for (uint32 nextNode = passedNode + 1; nextNode < path.size(); ++nextNode)
+        {
+            auto const node = std::find(i_path.begin(), i_path.end(), path[nextNode]);
+            if (node == i_path.end())
+                continue;
+
+            i_currentNode = uint32(std::distance(i_path.begin(), node));
+            InitEndGridInfo();
+            DoReset(player);
+            return true;
+        }
+    }
+
+    player->m_taxi.ClearTaxiDestinations();
+    for (uint32 destination : route)
+        player->m_taxi.AddTaxiDestination(destination);
+    i_path = path;
+    _pointsForPathSwitch = pathSwitches;
+    i_currentNode = passedNode;
+    return false;
+}
+
 void FlightPathMovementGenerator::SetCurrentNodeAfterTeleport()
 {
     if (i_path.empty() || i_currentNode >= i_path.size())

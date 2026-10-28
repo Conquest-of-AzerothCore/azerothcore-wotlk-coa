@@ -1,0 +1,804 @@
+{
+  "schema": 1,
+  "name": "Reaper Essence Invigoration heals missing health on Soul Infusion spend",
+  "contract": "At 50% chance, Soul Infusion spend heals 3% of missing health. Doomrend and Soulrend must trigger it.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "reaper", "race": 2, "class": 30, "level": 60,
+      "spell_hit_rating": 10000, "melee_hit_rating": 10000, "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {"id": "enemy", "owner": "reaper", "entry": 36, "level": 2, "distance": 3, "health": 1000000}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let actor state settle", "ms": 5000},
+    {"action": "learn", "actor": "reaper", "spell": 805186},
+    {"action": "learn", "actor": "reaper", "spell": 502668},
+    {"action": "learn", "actor": "reaper", "spell": 572342},
+    {
+      "action": "assert", "label": "Essence Invigoration aura is active", "actor": "reaper", "metric": "aura",
+      "spell": 805186, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Loaded helper is the original client three-percent rank", "actor": "reaper",
+      "metric": "spell_effect_value", "spell": 805187, "equals": 3
+    },
+    {"action": "set_health", "actor": "reaper", "value": 75000, "maximum": 100000},
+    {
+      "action": "assert", "label": "Maximum health is pinned", "actor": "reaper", "metric": "max_health",
+      "equals": 100000
+    },
+    {
+      "action": "assert", "label": "Harvest Time is absent", "actor": "reaper", "metric": "aura", "spell": 803995,
+      "equals": 0
+    },
+    {
+      "action": "snapshot", "actor": "reaper", "metric": "spell_heal_count", "spell": 805187,
+      "save_as": "q_doom_count_before"
+    },
+    {
+      "action": "snapshot", "actor": "reaper", "metric": "spell_heal_total", "spell": 805187,
+      "save_as": "q_doom_total_before"
+    },
+    {
+      "action": "snapshot", "actor": "reaper", "metric": "spell_cast_count", "spell": 805187,
+      "save_as": "q_doom_casts_before"
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 75000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "q_doom_enemy_before_1"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "q_doom spend 1 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "q_doom_enemy_before_1", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "q_doom spend 1 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 75000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "q_doom_enemy_before_2"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "q_doom spend 2 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "q_doom_enemy_before_2", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "q_doom spend 2 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 75000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "q_doom_enemy_before_3"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "q_doom spend 3 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "q_doom_enemy_before_3", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "q_doom spend 3 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 75000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "q_doom_enemy_before_4"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "q_doom spend 4 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "q_doom_enemy_before_4", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "q_doom spend 4 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 75000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "q_doom_enemy_before_5"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "q_doom spend 5 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "q_doom_enemy_before_5", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "q_doom spend 5 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 75000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "q_doom_enemy_before_6"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "q_doom spend 6 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "q_doom_enemy_before_6", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "q_doom spend 6 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 75000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "q_doom_enemy_before_7"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "q_doom spend 7 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "q_doom_enemy_before_7", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "q_doom spend 7 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 75000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "q_doom_enemy_before_8"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "q_doom spend 8 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "q_doom_enemy_before_8", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "q_doom spend 8 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 75000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "q_doom_enemy_before_9"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "q_doom spend 9 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "q_doom_enemy_before_9", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "q_doom spend 9 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 75000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "q_doom_enemy_before_10"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "q_doom spend 10 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "q_doom_enemy_before_10", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "q_doom spend 10 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 75000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "q_doom_enemy_before_11"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "q_doom spend 11 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "q_doom_enemy_before_11", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "q_doom spend 11 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 75000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "q_doom_enemy_before_12"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "q_doom spend 12 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "q_doom_enemy_before_12", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "q_doom spend 12 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 75000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "q_doom_enemy_before_13"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "q_doom spend 13 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "q_doom_enemy_before_13", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "q_doom spend 13 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 75000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "q_doom_enemy_before_14"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "q_doom spend 14 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "q_doom_enemy_before_14", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "q_doom spend 14 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 75000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "q_doom_enemy_before_15"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "q_doom spend 15 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "q_doom_enemy_before_15", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "q_doom spend 15 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 75000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "q_doom_enemy_before_16"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "q_doom spend 16 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "q_doom_enemy_before_16", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "q_doom spend 16 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "snapshot", "actor": "reaper", "metric": "spell_heal_count", "spell": 805187,
+      "relative_to": "q_doom_count_before", "save_as": "q_doom_heal_count"
+    },
+    {
+      "action": "assert", "label": "q_doom has at least two heal procs", "actor": "reaper",
+      "metric": "spell_heal_count", "spell": 805187, "relative_to": "q_doom_count_before", "min": 2, "max": 16
+    },
+    {
+      "action": "assert", "label": "q_doom casts the helper for its heal procs", "actor": "reaper",
+      "metric": "spell_cast_count", "spell": 805187, "relative_to": "q_doom_casts_before", "min": 2, "max": 16
+    },
+    {
+      "action": "assert", "label": "q_doom keeps maximum health fixed", "actor": "reaper", "metric": "max_health",
+      "equals": 100000
+    },
+    {
+      "action": "assert", "label": "q_doom healing follows missing health per proc", "actor": "reaper",
+      "metric": "spell_heal_total", "spell": 805187, "relative_to": "q_doom_total_before",
+      "ratio_to": "q_doom_heal_count", "min": 700, "max": 800
+    },
+    {
+      "action": "snapshot", "actor": "reaper", "metric": "spell_heal_count", "spell": 805187,
+      "save_as": "t_doom_count_before"
+    },
+    {
+      "action": "snapshot", "actor": "reaper", "metric": "spell_heal_total", "spell": 805187,
+      "save_as": "t_doom_total_before"
+    },
+    {
+      "action": "snapshot", "actor": "reaper", "metric": "spell_cast_count", "spell": 805187,
+      "save_as": "t_doom_casts_before"
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_doom_enemy_before_1"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_doom spend 1 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_doom_enemy_before_1", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_doom spend 1 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_doom_enemy_before_2"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_doom spend 2 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_doom_enemy_before_2", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_doom spend 2 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_doom_enemy_before_3"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_doom spend 3 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_doom_enemy_before_3", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_doom spend 3 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_doom_enemy_before_4"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_doom spend 4 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_doom_enemy_before_4", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_doom spend 4 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_doom_enemy_before_5"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_doom spend 5 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_doom_enemy_before_5", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_doom spend 5 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_doom_enemy_before_6"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_doom spend 6 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_doom_enemy_before_6", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_doom spend 6 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_doom_enemy_before_7"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_doom spend 7 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_doom_enemy_before_7", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_doom spend 7 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_doom_enemy_before_8"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_doom spend 8 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_doom_enemy_before_8", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_doom spend 8 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_doom_enemy_before_9"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_doom spend 9 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_doom_enemy_before_9", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_doom spend 9 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_doom_enemy_before_10"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_doom spend 10 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_doom_enemy_before_10", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_doom spend 10 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_doom_enemy_before_11"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_doom spend 11 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_doom_enemy_before_11", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_doom spend 11 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_doom_enemy_before_12"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_doom spend 12 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_doom_enemy_before_12", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_doom spend 12 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_doom_enemy_before_13"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_doom spend 13 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_doom_enemy_before_13", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_doom spend 13 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_doom_enemy_before_14"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_doom spend 14 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_doom_enemy_before_14", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_doom spend 14 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_doom_enemy_before_15"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_doom spend 15 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_doom_enemy_before_15", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_doom spend 15 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_doom_enemy_before_16"},
+    {"action": "cast", "actor": "reaper", "spell": 502668, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_doom spend 16 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_doom_enemy_before_16", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_doom spend 16 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "snapshot", "actor": "reaper", "metric": "spell_heal_count", "spell": 805187,
+      "relative_to": "t_doom_count_before", "save_as": "t_doom_heal_count"
+    },
+    {
+      "action": "assert", "label": "t_doom has at least two heal procs", "actor": "reaper",
+      "metric": "spell_heal_count", "spell": 805187, "relative_to": "t_doom_count_before", "min": 2, "max": 16
+    },
+    {
+      "action": "assert", "label": "t_doom casts the helper for its heal procs", "actor": "reaper",
+      "metric": "spell_cast_count", "spell": 805187, "relative_to": "t_doom_casts_before", "min": 2, "max": 16
+    },
+    {
+      "action": "assert", "label": "t_doom keeps maximum health fixed", "actor": "reaper", "metric": "max_health",
+      "equals": 100000
+    },
+    {
+      "action": "assert", "label": "t_doom healing follows missing health per proc", "actor": "reaper",
+      "metric": "spell_heal_total", "spell": 805187, "relative_to": "t_doom_total_before",
+      "ratio_to": "t_doom_heal_count", "min": 2150, "max": 2350
+    },
+    {
+      "action": "snapshot", "actor": "reaper", "metric": "spell_heal_count", "spell": 805187,
+      "save_as": "t_soul_count_before"
+    },
+    {
+      "action": "snapshot", "actor": "reaper", "metric": "spell_heal_total", "spell": 805187,
+      "save_as": "t_soul_total_before"
+    },
+    {
+      "action": "snapshot", "actor": "reaper", "metric": "spell_cast_count", "spell": 805187,
+      "save_as": "t_soul_casts_before"
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_soul_enemy_before_1"},
+    {"action": "cast", "actor": "reaper", "spell": 572342, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_soul spend 1 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_soul_enemy_before_1", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_soul spend 1 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_soul_enemy_before_2"},
+    {"action": "cast", "actor": "reaper", "spell": 572342, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_soul spend 2 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_soul_enemy_before_2", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_soul spend 2 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_soul_enemy_before_3"},
+    {"action": "cast", "actor": "reaper", "spell": 572342, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_soul spend 3 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_soul_enemy_before_3", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_soul spend 3 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_soul_enemy_before_4"},
+    {"action": "cast", "actor": "reaper", "spell": 572342, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_soul spend 4 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_soul_enemy_before_4", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_soul spend 4 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_soul_enemy_before_5"},
+    {"action": "cast", "actor": "reaper", "spell": 572342, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_soul spend 5 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_soul_enemy_before_5", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_soul spend 5 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_soul_enemy_before_6"},
+    {"action": "cast", "actor": "reaper", "spell": 572342, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_soul spend 6 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_soul_enemy_before_6", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_soul spend 6 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_soul_enemy_before_7"},
+    {"action": "cast", "actor": "reaper", "spell": 572342, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_soul spend 7 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_soul_enemy_before_7", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_soul spend 7 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_soul_enemy_before_8"},
+    {"action": "cast", "actor": "reaper", "spell": 572342, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_soul spend 8 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_soul_enemy_before_8", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_soul spend 8 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_soul_enemy_before_9"},
+    {"action": "cast", "actor": "reaper", "spell": 572342, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_soul spend 9 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_soul_enemy_before_9", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_soul spend 9 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_soul_enemy_before_10"},
+    {"action": "cast", "actor": "reaper", "spell": 572342, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_soul spend 10 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_soul_enemy_before_10", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_soul spend 10 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_soul_enemy_before_11"},
+    {"action": "cast", "actor": "reaper", "spell": 572342, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_soul spend 11 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_soul_enemy_before_11", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_soul spend 11 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_soul_enemy_before_12"},
+    {"action": "cast", "actor": "reaper", "spell": 572342, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_soul spend 12 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_soul_enemy_before_12", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_soul spend 12 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_soul_enemy_before_13"},
+    {"action": "cast", "actor": "reaper", "spell": 572342, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_soul spend 13 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_soul_enemy_before_13", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_soul spend 13 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_soul_enemy_before_14"},
+    {"action": "cast", "actor": "reaper", "spell": 572342, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_soul spend 14 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_soul_enemy_before_14", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_soul spend 14 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_soul_enemy_before_15"},
+    {"action": "cast", "actor": "reaper", "spell": 572342, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_soul spend 15 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_soul_enemy_before_15", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_soul spend 15 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3},
+    {"action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1},
+    {"action": "set_health", "actor": "reaper", "value": 25000, "maximum": 100000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "t_soul_enemy_before_16"},
+    {"action": "cast", "actor": "reaper", "spell": 572342, "target": "enemy"},
+    {
+      "action": "assert", "label": "t_soul spend 16 hits the target", "actor": "enemy", "metric": "health",
+      "relative_to": "t_soul_enemy_before_16", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "t_soul spend 16 consumes Soul Infusion", "actor": "reaper", "metric": "aura",
+      "spell": 803031, "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "snapshot", "actor": "reaper", "metric": "spell_heal_count", "spell": 805187,
+      "relative_to": "t_soul_count_before", "save_as": "t_soul_heal_count"
+    },
+    {
+      "action": "assert", "label": "t_soul has at least two heal procs", "actor": "reaper",
+      "metric": "spell_heal_count", "spell": 805187, "relative_to": "t_soul_count_before", "min": 2, "max": 16
+    },
+    {
+      "action": "assert", "label": "t_soul casts the helper for its heal procs", "actor": "reaper",
+      "metric": "spell_cast_count", "spell": 805187, "relative_to": "t_soul_casts_before", "min": 2, "max": 16
+    },
+    {
+      "action": "assert", "label": "t_soul keeps maximum health fixed", "actor": "reaper", "metric": "max_health",
+      "equals": 100000
+    }
+  ]
+}

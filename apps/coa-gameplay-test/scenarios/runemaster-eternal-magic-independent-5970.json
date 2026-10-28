@@ -1,0 +1,399 @@
+{
+  "schema": 1,
+  "name": "runemaster eternal magic independent 5970",
+  "contract": [
+    "Original Spell.dbc 806698 and Exiles specify Primordial Blast restores three Runeblade charges and reduces",
+    "its cooldown by four seconds. They do not require Riftblade. Runeblade 707141 has three charges with",
+    "six-second recovery. Three normal casts consume all charges; Primordial Blast must restore three before",
+    "natural recovery. The untalented control must remain empty. Riftblade 92154 is explicitly absent. No charge",
+    "restoration fixture supplies the result."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "eternal",
+      "race": 1,
+      "class": 32,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "control",
+      "race": 1,
+      "class": 32,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "eternal",
+      "spell": 227
+    },
+    {
+      "action": "learn",
+      "actor": "eternal",
+      "spell": 707141
+    },
+    {
+      "action": "learn",
+      "actor": "eternal",
+      "spell": 800732
+    },
+    {
+      "action": "learn",
+      "actor": "eternal",
+      "spell": 801087
+    },
+    {
+      "action": "add_item",
+      "actor": "eternal",
+      "item": 35
+    },
+    {
+      "action": "equip",
+      "actor": "eternal",
+      "item": 35,
+      "slot": 15
+    },
+    {
+      "action": "unlearn",
+      "actor": "eternal",
+      "spell": 92154,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "eternal",
+      "spell": 806698,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 227
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 707141
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 800732
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 801087
+    },
+    {
+      "action": "add_item",
+      "actor": "control",
+      "item": 35
+    },
+    {
+      "action": "equip",
+      "actor": "control",
+      "item": 35,
+      "slot": 15
+    },
+    {
+      "action": "unlearn",
+      "actor": "control",
+      "spell": 92154,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "control",
+      "spell": 806698,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "eternal",
+      "spell": 806698
+    },
+    {
+      "action": "assert",
+      "actor": "eternal",
+      "metric": "aura",
+      "spell": 92154,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "eternal",
+      "metric": "spell_charges",
+      "spell": 707141,
+      "equals": 3
+    },
+    {
+      "action": "cast",
+      "actor": "eternal",
+      "spell": 707141,
+      "target": "eternal_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "eternal",
+      "metric": "spell_damage_count",
+      "spell": 707141,
+      "target": "eternal_enemy",
+      "equals": 1,
+      "within_ms": 600
+    },
+    {
+      "action": "stop_attack",
+      "actor": "eternal"
+    },
+    {
+      "action": "assert",
+      "actor": "eternal",
+      "metric": "spell_charges",
+      "spell": 707141,
+      "equals": 2
+    },
+    {
+      "action": "wait",
+      "ms": 1050
+    },
+    {
+      "action": "cast",
+      "actor": "eternal",
+      "spell": 707141,
+      "target": "eternal_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "eternal",
+      "metric": "spell_damage_count",
+      "spell": 707141,
+      "target": "eternal_enemy",
+      "equals": 2,
+      "within_ms": 600
+    },
+    {
+      "action": "stop_attack",
+      "actor": "eternal"
+    },
+    {
+      "action": "assert",
+      "actor": "eternal",
+      "metric": "spell_charges",
+      "spell": 707141,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1050
+    },
+    {
+      "action": "cast",
+      "actor": "eternal",
+      "spell": 707141,
+      "target": "eternal_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "eternal",
+      "metric": "spell_damage_count",
+      "spell": 707141,
+      "target": "eternal_enemy",
+      "equals": 3,
+      "within_ms": 600
+    },
+    {
+      "action": "stop_attack",
+      "actor": "eternal"
+    },
+    {
+      "action": "assert",
+      "actor": "eternal",
+      "metric": "spell_charges",
+      "spell": 707141,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1050
+    },
+    {
+      "action": "cast",
+      "actor": "eternal",
+      "spell": 800732,
+      "target": "eternal_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "eternal",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "eternal_enemy",
+      "equals": 1,
+      "within_ms": 800
+    },
+    {
+      "action": "assert",
+      "actor": "eternal",
+      "metric": "spell_charges",
+      "spell": 707141,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 92154,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_charges",
+      "spell": 707141,
+      "equals": 3
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 707141,
+      "target": "control_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 707141,
+      "target": "control_enemy",
+      "equals": 1,
+      "within_ms": 600
+    },
+    {
+      "action": "stop_attack",
+      "actor": "control"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_charges",
+      "spell": 707141,
+      "equals": 2
+    },
+    {
+      "action": "wait",
+      "ms": 1050
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 707141,
+      "target": "control_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 707141,
+      "target": "control_enemy",
+      "equals": 2,
+      "within_ms": 600
+    },
+    {
+      "action": "stop_attack",
+      "actor": "control"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_charges",
+      "spell": 707141,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1050
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 707141,
+      "target": "control_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 707141,
+      "target": "control_enemy",
+      "equals": 3,
+      "within_ms": 600
+    },
+    {
+      "action": "stop_attack",
+      "actor": "control"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_charges",
+      "spell": 707141,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1050
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 800732,
+      "target": "control_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "control_enemy",
+      "equals": 1,
+      "within_ms": 800
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_charges",
+      "spell": 707141,
+      "equals": 0
+    }
+  ],
+  "creatures": [
+    {
+      "id": "eternal_enemy",
+      "owner": "eternal",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "distance": 3
+    },
+    {
+      "id": "control_enemy",
+      "owner": "control",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "distance": 3
+    }
+  ]
+}

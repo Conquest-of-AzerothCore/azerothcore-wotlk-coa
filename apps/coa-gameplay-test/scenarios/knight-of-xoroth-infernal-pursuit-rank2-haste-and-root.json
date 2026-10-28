@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Infernal Pursuit rank 2 raises melee haste by 6% and shortens an incoming root by 30% (#769)",
+  "contract": "Infernal Pursuit is CharacterAdvancement 6859 (Hellfire) with ranks 704992 and 707745. Rank 2 707745 reads 'Increases your melee haste by $s1% and reduces the duration of root effects against you by $s2%.' In Spell.dbc effect 0 is SPELL_AURA_MOD_MELEE_HASTE (138), BasePoints 5 with DieSides 1 = 6, and effect 1 is SPELL_AURA_MECHANIC_DURATION_MOD (232), MiscValue 7 (MECHANIC_ROOT), BasePoints -31 with DieSides 1 = -30; both target the caster. Both are native auras with no CoA handler: aura 138 divides the melee attack time by 1.06 (1 / 1.06 = 0.9434), and aura 232 is read by Unit::ModSpellDuration when a harmful spell with a root mechanic lands. Web 745 (Mechanic 7, DurationIndex 28 = 5000 ms, magic, physical school) is cast by a level 80 creature on each level 60 knight, so it cannot miss and each knight takes its first, undiminished root: the control knight keeps the full 5 sec and the knight with rank 2 gets 5000 * 0.7 = 3500 ms.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 60 },
+    { "id": "control", "race": 1, "class": 17, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "webber", "owner": "knight", "entry": 36, "level": 80, "health": 100000, "distance": 3 },
+    { "id": "control_webber", "owner": "control", "entry": 36, "level": 80, "health": 100000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "snapshot", "actor": "knight", "metric": "attack_time_ms", "save_as": "attack_time_before" },
+    {
+      "action": "assert", "label": "SETUP: the baseline attack time is positive", "actor": "knight",
+      "metric": "attack_time_ms", "min": 1
+    },
+    { "action": "learn", "actor": "knight", "spell": 707745 },
+    {
+      "action": "set_aura", "label": "Force the rank 2 passive aura", "actor": "knight", "spell": 707745,
+      "stacks": 1
+    },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: rank 2 of Infernal Pursuit is active", "actor": "knight",
+      "metric": "aura", "spell": 707745, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: the control knight has no Infernal Pursuit", "actor": "control",
+      "metric": "aura", "spell": 707745, "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTRACT: melee attack time drops by 6% haste (x 1 / 1.06)", "actor": "knight",
+      "metric": "attack_time_ms", "ratio_to": "attack_time_before", "min": 0.938, "max": 0.949
+    },
+    {
+      "action": "cast", "label": "Web the control knight", "actor": "control_webber", "spell": 745,
+      "target": "control"
+    },
+    {
+      "action": "assert", "label": "SETUP: the control knight is webbed", "actor": "control", "metric": "aura",
+      "spell": 745, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: without the talent the root keeps its full 5 sec", "actor": "control",
+      "metric": "aura_duration_ms", "spell": 745, "min": 4000, "max": 5000
+    },
+    { "action": "cast", "label": "Web the knight with rank 2", "actor": "webber", "spell": 745, "target": "knight" },
+    {
+      "action": "assert", "label": "SETUP: the knight with rank 2 is webbed", "actor": "knight", "metric": "aura",
+      "spell": 745, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: rank 2 shortens the root by 30% (5000 -> 3500 ms)", "actor": "knight",
+      "metric": "aura_duration_ms", "spell": 745, "min": 2500, "max": 3500
+    }
+  ]
+}

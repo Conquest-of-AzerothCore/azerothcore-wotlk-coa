@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Rotpriest doubles the 150% spell crit of Mycosis, Venom Bolt and Serpent's Fang (#6980)",
+  "contract": "#6980 reported crits of about 2.75-2.94x with Rotpriest and expected 2.0x. Classified already works. Rotpriest 706209 effect 1 is SPELL_AURA_MOD_CRIT_DAMAGE_BONUS (163), misc 126 (every magic school), BasePoints 99 DieSides 1 = +100, tooltip 'Increases your spell critical damage by $s2%'. Unit::SpellCriticalDamageBonus gives magic spells a 150% critical strike and multiplies the whole amount by 1 + 100%, so 1.5 * 2.0 = 3.0x; Ascension's 'now deal 200% damage' talents at +34 (1.5 * 1.34) confirm aura 163 multiplies the full 150%. Mycosis 572156, Venom Bolt 800869 and Serpent's Fang 800946 are Nature DmgClass magic spells with no matching SPELLMOD_CRIT_DAMAGE_BONUS source. From a fixed 1000 base the control must read 1500 and the Rotpriest player 3000 for each; 2000 would match the reporter's expectation and anything above 3000 extra stacking.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    { "id": "control", "race": 1, "class": 29, "level": 60 },
+    { "id": "rot", "race": 1, "class": 29, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "control", "entry": 12142, "level": 60, "health": 100000, "distance": 5 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "assert", "label": "CONTROL: Mycosis crits for 150% of a 1000 base", "actor": "control",
+      "metric": "spell_critical_damage", "spell": 572156, "target": "dummy", "min": 1499, "max": 1501 },
+    { "action": "assert", "label": "CONTROL: Venom Bolt crits for 150% of a 1000 base", "actor": "control",
+      "metric": "spell_critical_damage", "spell": 800869, "target": "dummy", "min": 1499, "max": 1501 },
+    { "action": "assert", "label": "CONTROL: Serpent's Fang crits for 150% of a 1000 base", "actor": "control",
+      "metric": "spell_critical_damage", "spell": 800946, "target": "dummy", "min": 1499, "max": 1501 },
+    { "action": "learn", "actor": "rot", "spell": 706209 },
+    { "action": "assert", "label": "Rotpriest's critical-damage effect resolves to 100", "actor": "rot",
+      "metric": "aura_amount", "spell": 706209, "caster": "rot", "effect": 1, "equals": 100, "within_ms": 3000 },
+    { "action": "assert", "label": "Rotpriest: Mycosis crits for 300% of a 1000 base", "actor": "rot",
+      "metric": "spell_critical_damage", "spell": 572156, "target": "dummy", "min": 2999, "max": 3001 },
+    { "action": "assert", "label": "Rotpriest: Venom Bolt crits for 300% of a 1000 base", "actor": "rot",
+      "metric": "spell_critical_damage", "spell": 800869, "target": "dummy", "min": 2999, "max": 3001 },
+    { "action": "assert", "label": "Rotpriest: Serpent's Fang crits for 300% of a 1000 base", "actor": "rot",
+      "metric": "spell_critical_damage", "spell": 800946, "target": "dummy", "min": 2999, "max": 3001 }
+  ]
+}

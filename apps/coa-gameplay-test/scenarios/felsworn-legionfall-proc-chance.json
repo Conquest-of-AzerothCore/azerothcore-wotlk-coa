@@ -1,0 +1,1386 @@
+{
+  "schema": 1,
+  "name": "Legionfall procs at its own 15% chance, not 15%*15% (#4722)",
+  "contract": "Legionfall 801899 reads a $h% chance (Spell.dbc ProcChance 15, confirmed on both the client extraction and the running worldserver's own /azerothcore/env/dist/data/dbc/Spell.dbc) on melee ABILITY damage (DBC description: 'Melee ability damage now has a $h% chance to reset the cooldown of Annihilan Strike...') to reset Annihilan Strike's cooldown and grant 801902 (reduced Energy cost on the next cast). aura_ascension_felsworn_event::Check (case 801899, AscensionFelswornEvents.cpp) requires event.GetSpellInfo() to be non-null before rolling roll_chance_f(info->ProcChance) via Chance(player, id) - unlike case 681376 (Chaotic, #4719), which rolls unconditionally. A raw melee autoattack's DamageInfo is built from CalcDamageInfo (Unit.cpp DamageInfo::DamageInfo(CalcDamageInfo const&, uint8)), which always sets m_spellInfo(nullptr), so ProcEventInfo::GetSpellInfo() returns null for autoattacks and case 801899's `info &&` gate is never satisfied - a prior revision's 200 autoattack ('attack' action) swings could never proc Legionfall regardless of the Chance() fix. This revision casts Annihilan Strike (801903, DmgClass 2/MELEE) repeatedly, each a genuine PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS melee-ability hit carrying a real SpellInfo (set_power to 100 Energy before each cast to avoid resource starvation). The worldserver's OWN Spell.dbc (distinct from the client extraction, which reports CategoryRecoveryTime 0 for this id) sets Category 991 with CategoryRecoveryTime 10000ms for 801903 - a real 10-second native cooldown the client dbc does not show; StartRecoveryCategory 133/1000ms is a separate, shorter shared-GCD lock. A first attempt at this scenario spaced casts 1200ms apart (covering only the GCD) and 191 of 200 casts failed outright with cast_failure reason 67 (SPELL_FAILED_NOT_READY), starving the trial count to ~60 landed casts instead of 200 and failing the DISCRIMINATING assertion (observed 9, needed 11) even with the correct fix and the correct ability - a scenario timing defect, not a code or fix defect. This revision spaces casts 10100ms apart (exceeding the real 10000ms native cooldown with margin for the simulated clock's up-to-25ms step) and asserts cast_failure == 0 after every cast to prove each of the 55 trials lands; the 10100ms spacing times, combined with the 10-minute scenario timeout ceiling, bound the trial count to 55 rather than 200. rev_20260928_95_felsworn_legionfall_proc_chance.sql restores spell_proc.Chance = 100 for 801899 (confirmed loaded via a live SELECT), so SpellMgr's native gate always passes and the script's own 15% roll is the only probability; each successful proc casts 801902 directly (no aura is named as its trigger), so spell_cast_count on 801902 counts exact proc events. 55 landed melee-ability hits give a binomial floor: at the true 15% rate P(successes >= 4) is approximately 96.4%; at a doubled-roll 2.25% rate P(successes >= 4) is approximately 3.7% - min: 4 discriminates the two hypotheses with a false-failure probability near 3.6% and a false-pass probability near 3.7%, looser than the felsworn-chaotic-proc-chance sibling scenario because the real 10-second per-cast cooldown caps the achievable trial count within a 10-minute scenario timeout.",
+  "timeout_ms": 600000,
+  "players": [
+    {
+      "id": "felsworn",
+      "race": 1,
+      "class": 14,
+      "level": 80,
+      "melee_hit_rating": 100000,
+      "expertise_rating": 100000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "felsworn",
+      "entry": 36,
+      "health": 5000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "felsworn",
+      "spell": 801899
+    },
+    {
+      "action": "learn",
+      "actor": "felsworn",
+      "spell": 801903
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Legionfall passive is active",
+      "actor": "felsworn",
+      "metric": "aura",
+      "spell": 801899,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no proc yet",
+      "actor": "felsworn",
+      "metric": "spell_cast_count",
+      "spell": 801902,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 1 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 2 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 3 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 4 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 5 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 6 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 7 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 8 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 9 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 10 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 11 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 12 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 13 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 14 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 15 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 16 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 17 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 18 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 19 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 20 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 21 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 22 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 23 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 24 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 25 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 26 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 27 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 28 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 29 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 30 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 31 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 32 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 33 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 34 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 35 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 36 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 37 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 38 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 39 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 40 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 41 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 42 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 43 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 44 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 45 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 46 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 47 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 48 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 49 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 50 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 51 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 52 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 53 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 54 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Annihilan Strike cast 55 succeeded (clear of the server DBC's real 10000ms Category 991 CategoryRecoveryTime)",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a single roll at the DBC's 15% clears the binomial floor for 55 trials; a squared 2.25% roll does not",
+      "actor": "felsworn",
+      "metric": "spell_cast_count",
+      "spell": 801902,
+      "min": 4
+    }
+  ]
+}

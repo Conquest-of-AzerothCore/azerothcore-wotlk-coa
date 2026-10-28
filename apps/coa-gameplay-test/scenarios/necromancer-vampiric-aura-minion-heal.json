@@ -1,0 +1,303 @@
+{
+  "schema": 1,
+  "name": "Vampiric Aura heals a Necromancer below 50% health from Undead minion damage (#478)",
+  "contract": [
+    "Vampiric Aura 300241 (CharacterAdvancement 6458, Class tab) reads \"While you are below 50% health, your Undead",
+    "minions now heal you for $560607s2% of their damage dealt.\" 300241 is a passive whose effect 1 is",
+    "SPELL_AURA_PERIODIC_TRIGGER_SPELL every 1000 ms on 560607 (SpellDuration 39 = 2000 ms). 560607's effect 1 is",
+    "SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS with SpellRadius 12 = 100 yd and EffectBasePoints 9 + DieSides 1",
+    "= 10, so every summon near the Necromancer carries 560607 from its owner; 561095 is the SPELL_EFFECT_HEAL the",
+    "tooltip's heal is delivered with. AscensionNecromancerEvents.cpp handles it natively for minion damage",
+    "(46bf8121e): below 50% health, a hit from a minion that carries the owner's 560607 casts 561095 on the owner",
+    "for 10% of that hit. Two identical Necromancers each raise a Ghoul and attack a golem one yard away. Melee hit",
+    "and expertise are controlled for both owners. After twelve seconds, each golem must have lost more health than",
+    "its owner dealt in melee, independently proving minion damage. Only the owner below half health is healed by",
+    "561095; the full-health owner is not. Regeneration is disabled. This scenario verifies healing eligibility,",
+    "not the exact leech ratio. The close targets keep formation placement and pet chasing outside the healing",
+    "observation."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "wounded",
+      "race": 5,
+      "class": 23,
+      "level": 80,
+      "allow_regeneration": false,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "healthy",
+      "race": 5,
+      "class": 23,
+      "level": 80,
+      "allow_regeneration": false,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "wounded_golem",
+      "owner": "wounded",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 1
+    },
+    {
+      "id": "healthy_golem",
+      "owner": "healthy",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "wounded",
+      "spell": 300241
+    },
+    {
+      "action": "learn",
+      "actor": "wounded",
+      "spell": 500971
+    },
+    {
+      "action": "learn",
+      "actor": "healthy",
+      "spell": 300241
+    },
+    {
+      "action": "learn",
+      "actor": "healthy",
+      "spell": 500971
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Vampiric Aura is active on the wounded Necromancer",
+      "actor": "wounded",
+      "metric": "aura",
+      "spell": 300241,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Vampiric Aura is active on the healthy Necromancer",
+      "actor": "healthy",
+      "metric": "aura",
+      "spell": 300241,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Raise the wounded Necromancer's Ghoul",
+      "actor": "wounded",
+      "spell": 500971
+    },
+    {
+      "action": "cast",
+      "label": "Raise the healthy Necromancer's Ghoul",
+      "actor": "healthy",
+      "spell": 500971
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the wounded Necromancer's Ghoul is raised",
+      "actor": "wounded",
+      "metric": "owned_creature_count",
+      "entry": 50073,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the healthy Necromancer's Ghoul is raised",
+      "actor": "healthy",
+      "metric": "owned_creature_count",
+      "entry": 50073,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "The wounded Necromancer's Ghoul carries its owner's Vampiric Aura",
+      "actor": "wounded",
+      "metric": "owned_creature_count",
+      "entry": 50073,
+      "spell": 560607,
+      "caster": "wounded",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The healthy Necromancer's Ghoul carries its owner's Vampiric Aura",
+      "actor": "healthy",
+      "metric": "owned_creature_count",
+      "entry": 50073,
+      "spell": 560607,
+      "caster": "healthy",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_health",
+      "actor": "wounded",
+      "value": 500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the wounded Necromancer is below 50% health",
+      "actor": "wounded",
+      "metric": "health_pct",
+      "max": 49
+    },
+    {
+      "action": "snapshot",
+      "actor": "wounded_golem",
+      "metric": "health",
+      "save_as": "wounded_golem_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "healthy_golem",
+      "metric": "health",
+      "save_as": "healthy_golem_health"
+    },
+    {
+      "action": "attack",
+      "actor": "wounded",
+      "target": "wounded_golem"
+    },
+    {
+      "action": "attack",
+      "actor": "healthy",
+      "target": "healthy_golem"
+    },
+    {
+      "action": "wait",
+      "label": "Observe twelve seconds of controlled minion combat",
+      "ms": 12000
+    },
+    {
+      "action": "snapshot",
+      "actor": "wounded",
+      "metric": "melee_damage_total",
+      "save_as": "wounded_owner_damage"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the owner lands positive melee damage",
+      "actor": "wounded",
+      "metric": "melee_damage_total",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: target damage exceeds its owner melee damage, proving Ghoul damage",
+      "actor": "wounded_golem",
+      "metric": "health",
+      "relative_to": "wounded_golem_health",
+      "ratio_to": "wounded_owner_damage",
+      "max": -1.01
+    },
+    {
+      "action": "snapshot",
+      "actor": "healthy",
+      "metric": "melee_damage_total",
+      "save_as": "healthy_owner_damage"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the owner lands positive melee damage",
+      "actor": "healthy",
+      "metric": "melee_damage_total",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: target damage exceeds its owner melee damage, proving Ghoul damage",
+      "actor": "healthy_golem",
+      "metric": "health",
+      "relative_to": "healthy_golem_health",
+      "ratio_to": "healthy_owner_damage",
+      "max": -1.01
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the wounded owner remains below half health",
+      "actor": "wounded",
+      "metric": "health_pct",
+      "max": 49
+    },
+    {
+      "action": "assert",
+      "label": "Ghoul damage heals the Necromancer below 50% health",
+      "actor": "wounded",
+      "metric": "spell_heal_count",
+      "spell": 561095,
+      "target": "wounded",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The heal is a positive amount",
+      "actor": "wounded",
+      "metric": "spell_heal_total",
+      "spell": 561095,
+      "target": "wounded",
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "label": "Give the healthy Necromancer's Ghoul the same fighting time",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the healthy Necromancer's golem is being hit",
+      "actor": "healthy_golem",
+      "metric": "health",
+      "relative_to": "healthy_golem_health",
+      "max": -1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the healthy Necromancer is above 50% health",
+      "actor": "healthy",
+      "metric": "health_pct",
+      "min": 51
+    },
+    {
+      "action": "assert",
+      "label": "No heal above 50% health",
+      "actor": "healthy",
+      "metric": "spell_heal_count",
+      "spell": 561095,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The wounded Necromancer is still below 50% health",
+      "actor": "wounded",
+      "metric": "health_pct",
+      "max": 49
+    }
+  ]
+}

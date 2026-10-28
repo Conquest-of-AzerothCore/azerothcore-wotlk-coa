@@ -1,0 +1,58 @@
+[worldserver]
+
+# Enable/disable the Manastorm gameplay module (requires restart).
+Manastorm.Enable = 1
+
+# Weekly cap for regular endgame-track caches only, per character and shared across modes/tiers.
+# Leveling and normal-track caches (including level 60), first-clear bonus caches,
+# Treasure Keeper caches, currencies, cases, card packs and Greedy Demon rewards are exempt.
+# Uses the core weekly quest reset schedule. Both options are reloadable.
+Manastorm.WeeklyCacheLockout.Enabled = 1
+# Valid range: 0..255; invalid values log an error and fall back to 5.
+# With Enabled = 1, Limit = 0 blocks all regular endgame cache awards.
+Manastorm.WeeklyCacheLockout.Limit = 5
+
+# Automatic affixes require this stage creature level and completion of the first native affix unlock depth.
+# Individual progression affixes still require their matching native unlock/toast; those depths are unchanged.
+Manastorm.AffixMinimumLevel = 50
+
+# 1 = caches follow Ascension.CallboardCache.ReleaseStage in coa.conf:
+# 0 Normal Dungeons, 1 Heroic Dungeons, 2 Mythic Dungeons, 3 Molten Core ... 8 Naxxramas.
+# A closed cache tier falls back to the highest eligible lower bracket; DB depth/unlock requirements still apply.
+# Greedy Demon loot uses an item-level ceiling derived from released enabled endgame cache brackets.
+# 0 = release-stage restrictions are disabled; existing depth/unlock requirements still apply.
+# Reloadable.
+Manastorm.FollowReleaseStage = 0
+
+# Client integration mode (requires restart):
+#   1 = reconstructed 3.3.5 client addon transport (MANASTORM addon prefix)
+#   2 = original Ascension native Manastorm protocol (uses the included CoA native opcode bridge)
+Manastorm.ClientMode = 2
+
+# Existing raid-target skull and optional native client highlight can be compared independently.
+# NativeHighlight uses the existing Mode 2 Lua transport; no client files are installed.
+# Experimental: the client controls which creatures qualify and whether geometry occludes them.
+# Relog or change stages after reloading these settings; a native highlight can linger up to 10 seconds.
+Manastorm.Objective.RaidSkull = 1
+Manastorm.Objective.NativeHighlight = 0
+
+# Matching original client Manastorm.dbc, read-only identity validation in Mode 2.
+# Default when omitted: <DataDir>/dbc/Manastorm.dbc.
+# Manastorm.NativeDBCPath = "C:/path/to/matching/Manastorm.dbc"
+# This module exclusively owns Manastorm requests and gameplay.
+# The compatibility donor run service is never registered.
+# AscensionCompat.Enable / remote-client admission remain core connection settings.
+
+# Client UI fixes pushed as Lua 5 seconds after login (Mode 2 only, no client files).
+# Bitmask, 0 = off and the stock client UI is left unchanged:
+#   1 = the group finder keybind also opens inside a Manastorm run
+#   2 = reward icons anchor below the Potential Rewards divider
+#   4 = the queue panel handles an empty enterable-level list and uncached reward items
+#   8 = the loadout flyout hides when there are no loadout spells
+#  15 = all of the above
+# A /reload drops them until the next login.
+Manastorm.ClientUIFixes = 0
+
+# Native Mobility covers all 36 listed class spell families automatically in Mode 2.
+# Runtime supporting auras follow the active mixture and are removed outside your Manastorm stage.
+# Requires the matching <DataDir>/dbc/Spell.dbc. No client files or SQL edits are needed.

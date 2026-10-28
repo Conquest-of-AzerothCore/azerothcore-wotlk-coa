@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Issue 3290: Silencing Rune silences nearby enemies after a 1s delay",
+  "contract": [
+    "802631 effect 183 is SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DELAYED, a registered CoA effect (Spell::",
+    "EffectAscensionTriggerSpellDelayed, SpellEffects.cpp:498-538): it schedules a delayed CastSpell of the",
+    "trigger spell after Milliseconds(std::max<int32>(1, damage)) via m_Events.AddEventAtOffset, and",
+    "EffectBasePoints[0]=999 supplies that 999ms delay (matching the tooltip's '1.00 sec'). 803745 is a native",
+    "SPELL_EFFECT_PERSISTENT_AREA_AURA (radius index 8 = 5 yd) applying SPELL_AURA_MOD_SILENCE to",
+    "TARGET_UNIT_DEST_AREA_ENEMY for 6000ms (SpellDuration id 32), matching the tooltip's 'for 6 sec'. No CoA",
+    "code runs at 803745 itself.",
+    "Verification note: both 802631 and 803745 have SpellInfo::GetExplicitTargetMask() == TARGET_FLAG_DEST_LOCATION",
+    "only (TARGET_UNIT_DEST_AREA_ENEMY has TARGET_REFERENCE_TYPE_DEST, not TARGET_FLAG_UNIT_MASK, confirmed via",
+    "the target-info table at SpellInfo.cpp:231). Spell::InitExplicitTargets (Spell.cpp:727-786) strips ANY unit",
+    "target that a caller supplies whenever the spell doesn't itself need TARGET_FLAG_UNIT_MASK",
+    "('m_targets.RemoveObjectTarget()'), so casting 802631 at a distant unit target is discarded - it never",
+    "carries through to EffectAscensionTriggerSpellDelayed's 'target = m_targets.GetUnitTarget()' (which reads",
+    "nullptr and falls back to 'target = m_caster'). Both the original cast and the delayed re-cast of 803745",
+    "therefore always center their destination on the CASTER's own position (confirmed live: with the fixture",
+    "creature 10 yd away, 803745 was confirmed cast via spell_cast_count but landed on neither the caster nor",
+    "the creature). Silencing Rune is architecturally a self-centered ground rune, matching its own tooltip",
+    "('Inscribe a rune' at the caster's feet), not a distant-target spell - this places the fixture creature",
+    "within the rune's real 5 yd radius of the caster instead of the draft's 10 yd distance."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [{"id": "rm", "race": 1, "class": 32, "level": 60}],
+  "creatures": [{"id": "target", "owner": "rm", "entry": 36, "faction": 14, "level": 60, "health": 1000000, "distance": 3}],
+  "steps": [
+    {"action": "wait", "ms": 1000},
+    {"action": "learn", "actor": "rm", "spell": 802631},
+    {"action": "cast", "actor": "rm", "spell": 802631, "target": "target"},
+    {"action": "assert", "label": "SETUP: target is not silenced before the 1s delay", "actor": "target",
+     "metric": "aura", "spell": 803745, "equals": 0},
+    {"action": "wait", "ms": 1400},
+    {"action": "assert", "label": "CONTRACT: target is silenced once the rune activates", "actor": "target",
+     "metric": "aura", "spell": 803745, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "CONTRACT: the silence lasts around the tooltip's 6 sec", "actor": "target",
+     "metric": "aura_duration_ms", "spell": 803745, "min": 4500, "max": 6000}
+  ]
+}

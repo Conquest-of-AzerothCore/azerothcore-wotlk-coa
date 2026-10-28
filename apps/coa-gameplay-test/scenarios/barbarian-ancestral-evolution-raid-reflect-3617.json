@@ -1,0 +1,252 @@
+{
+  "schema": 1,
+  "name": "Ancestral Evolution reflects 20% of damage taken by grouped allies (#3617)",
+  "contract": [
+    "In the supplied active DBC, 806229 belongs to Barbarian Ancestry, not Tinker. Its twenty-second raid aura has amount 20 and promises reflection of all damage taken. The issue correctly identifies its missing handler despite the wrong class title.",
+    "A normal Barbarian cast applies the aura to a grouped Mage. Actual direct and periodic hostile spell damage are observed independently of reflected damage, so random critical strikes cannot change the expected ratio. The forwarded value must be resolved once and must not recurse."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "barbarian",
+      "race": 1,
+      "class": 12,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 8,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "enemy",
+      "race": 5,
+      "class": 8,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "barbarian",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy",
+      "map": 0,
+      "x": -9614.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.141593
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "group",
+      "actor": "barbarian",
+      "target": "ally"
+    },
+    {
+      "action": "pvp",
+      "actor": "barbarian",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "ally",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "learn",
+      "actor": "barbarian",
+      "spell": 806229
+    },
+    {
+      "action": "learn",
+      "actor": "enemy",
+      "spell": 42873
+    },
+    {
+      "action": "learn",
+      "actor": "enemy",
+      "spell": 48125
+    },
+    {
+      "action": "cast",
+      "actor": "barbarian",
+      "spell": 806229
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 806229,
+      "caster": "barbarian",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_damage_total",
+      "save_as": "direct_before",
+      "spell": 42873,
+      "target": "ally"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "spell_damage_total",
+      "save_as": "reflect_before",
+      "spell": 806229,
+      "target": "enemy"
+    },
+    {
+      "action": "set_power",
+      "actor": "enemy",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 42873,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_damage_count",
+      "spell": 42873,
+      "target": "ally",
+      "min": 1,
+      "within_ms": 1500,
+      "label": "The hostile control must actually damage the ally"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_damage_count",
+      "spell": 806229,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 1500,
+      "label": "The Barbarian's raid aura reflects an ally's incoming hit"
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_damage_total",
+      "save_as": "direct_damage",
+      "spell": 42873,
+      "target": "ally",
+      "relative_to": "direct_before"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_damage_total",
+      "spell": 806229,
+      "target": "enemy",
+      "relative_to": "reflect_before",
+      "ratio_to": "direct_damage",
+      "min": 0.195,
+      "max": 0.205,
+      "label": "The reflection uses 20% of actual damage taken"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "spell_damage_total",
+      "save_as": "periodic_reflect_before",
+      "spell": 806229,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_damage_total",
+      "save_as": "periodic_before",
+      "spell": 48125,
+      "target": "ally"
+    },
+    {
+      "action": "set_power",
+      "actor": "enemy",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 48125,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_damage_total",
+      "save_as": "periodic_damage",
+      "spell": 48125,
+      "target": "ally",
+      "relative_to": "periodic_before"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_damage_total",
+      "spell": 806229,
+      "target": "enemy",
+      "relative_to": "periodic_reflect_before",
+      "ratio_to": "periodic_damage",
+      "min": 0.195,
+      "max": 0.205,
+      "label": "Periodic damage is reflected as well"
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
+}

@@ -1,0 +1,255 @@
+{
+  "schema": 1,
+  "name": "Righteous Upheaval counts landed Zealotry triggers (#5999)",
+  "contract": [
+    "501564 at reported level 34 promises +10% for each time Zealotry was triggered during Oath Chain, with no positive damage condition.",
+    "Prime Oath Chain through one normal Vindication before measuring. While that chain is already active, normal Vindication801446 triggers offhand Zealotry801450; compare actual completed Zealotry casts with the increment of807764 stacks. Holy Protection7249 absorbs Holy damage without stopping physical Vindication. Normal Righteous Upheaval consumes the chain and stacks."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 19,
+      "level": 34,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "t",
+      "entry": 36,
+      "level": 34,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 201
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 674
+    },
+    {
+      "action": "add_item",
+      "actor": "t",
+      "item": 2027,
+      "count": 2
+    },
+    {
+      "action": "equip",
+      "actor": "t",
+      "item": 2027,
+      "slot": 15
+    },
+    {
+      "action": "equip",
+      "actor": "t",
+      "item": 2027,
+      "slot": 16
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 801446
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 501564
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 801446,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "spell_damage_count",
+      "spell": 801446,
+      "target": "e",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 704576,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "t",
+      "metric": "aura_stacks",
+      "spell": 807764,
+      "save_as": "stacks_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "t",
+      "metric": "spell_damage_count",
+      "spell": 801450,
+      "target": "e",
+      "save_as": "zealotry_damage_before"
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 704576,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "aura_stacks",
+      "spell": 807764,
+      "equals": 0,
+      "relative_to": "stacks_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "t",
+      "metric": "spell_cast_count",
+      "save_as": "zealotry_before",
+      "spell": 801450
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 801446,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "spell_damage_count",
+      "spell": 801446,
+      "target": "e",
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 704576,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "spell_cast_count",
+      "spell": 801450,
+      "relative_to": "zealotry_before",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "t",
+      "metric": "spell_cast_count",
+      "save_as": "zealotry_triggers",
+      "spell": 801450,
+      "relative_to": "zealotry_before"
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "spell_damage_count",
+      "spell": 801450,
+      "target": "e",
+      "min": 1,
+      "relative_to": "zealotry_damage_before"
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "aura_stacks",
+      "spell": 807764,
+      "ratio_to": "zealotry_triggers",
+      "min": 1,
+      "max": 1,
+      "label": "Each actual Zealotry trigger grants one Upheaval stack even when absorbed",
+      "relative_to": "stacks_before"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 501564,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "spell_damage_count",
+      "spell": 501564,
+      "target": "e",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 704576,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "aura_stacks",
+      "spell": 807764,
+      "equals": 0,
+      "label": "The normal Oath Breaker consumes its accumulated stacks"
+    }
+  ]
+}

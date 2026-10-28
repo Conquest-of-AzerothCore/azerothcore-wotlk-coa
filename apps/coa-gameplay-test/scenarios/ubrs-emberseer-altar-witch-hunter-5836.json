@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "name": "UBRS: Blackrock Altar starts the Pyroguard Emberseer event for a Witch Hunter",
+  "contract": "Using the Blackrock Altar in the Hall of Binding channels Emberseer Object Visual and then casts Emberseer Start, whose event releases the Blackhand Incarcerators so they can be attacked. Before the altar is used they cannot be attacked.",
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 229,
+    "x": 144.445,
+    "y": -278.5,
+    "z": 91.55,
+    "o": 4.71,
+    "ignore_access": true
+  },
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Upper Blackrock Spire",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 229
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Blackrock Altar is within reach",
+      "actor": "hero",
+      "metric": "nearby_gameobject_count",
+      "entry": 175706,
+      "equals": 1
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Use the Blackrock Altar",
+      "actor": "hero",
+      "entry": 175706
+    },
+    {
+      "action": "assert",
+      "label": "The altar starts the Emberseer Object Visual channel",
+      "actor": "hero",
+      "metric": "casting",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 9000
+    },
+    {
+      "action": "assert",
+      "label": "The ritual completes and casts Emberseer Start",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 16533,
+      "min": 1
+    },
+    {
+      "action": "attack_nearby",
+      "label": "CONTRACT: a Blackhand Incarcerator can be attacked after the altar starts the event",
+      "actor": "hero",
+      "entry": 10316,
+      "kill": true
+    }
+  ]
+}

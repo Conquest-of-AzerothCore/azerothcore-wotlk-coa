@@ -1,0 +1,196 @@
+{
+  "schema": 1,
+  "name": "Blood Rituals heals a marked ally when Bloodmoon Blast is cast (#6401)",
+  "contract": "#6401: Bloodmoon Blast must heal the ally the Bloodmage actually marked. #5934 gated that heal on aura 706624 ('Blood Rituals'), which no character on this client set can hold: it is not a rank spell of any CharacterAdvancement.dbc entry (its Sanguine neighbours 705731/705732/705733 are entries 33706/33704/33707 there), it has no SkillLineAbility row, and it appears in neither the client's talent-tree table (SpellbookTreeSpellData.h), the trainer offers (SpellbookOfferData.h), AscensionSpellProgressionData nor playercreateinfo_spell_custom - its only in-client mention is Dark Liturgy's tooltip reference @s:706624:0@. The record that carries the current Sanguine talent text, 705729 ('Dark Liturgy now marks allies for $706623d and Bloodmoon Blast now heals marked allies for ${$704119m1+$SP*0.07+$STA*0.085}'), has a single SkillLineAbility row (91377, SkillLine 73, AcquireMethod 0) and Player::learnSkillRewardedSpells grants only AcquireMethod 1/2, so it is unlearnable too, and it is not a catalog rank spell either. The #5934 gate therefore read an aura nobody can acquire, so casting Bloodmoon Blast healed no one at all. The contract that is reachable is the mark's own: 706623's tooltip is 'Healed whenever the Bloodmage uses Bloodmoon Blast. Lasts $d.' (SpellDuration 18 = 20 s) and Dark Liturgy rank 1 (501623, level 20, class-20 chain 800781) applies that mark natively through its own EffectTriggerSpell, bouncing to up to 10 allies. 704119 is the heal (SPELL_EFFECT_HEAL, TargetA 22 TARGET_SRC_CASTER + TargetB 30 TARGET_UNIT_SRC_AREA_ALLY, RadiusIndex 27, EffectBasePoints 3 / DieSides 1 / RealPointsPerLevel 3.7, MaxAffectedTargets 25) and its spell_ascension_blood_rituals_heal target-select script still narrows the area down to 706623 carriers, the same shape Dark Essence's 681036 selector uses. This scenario pins that contract: the marked ally is healed exactly once per cast with no Blood Rituals aura learned, the unmarked ally is never healed, and learning either legacy aura (706624, the #5934 id, or 705729, the live-text id) adds no second heal per cast - the counters are cumulative and exact, so any overshoot fails. The install tooltip's $SP*0.07/$STA*0.085 bonus-healing terms remain a separate tooltip-parity question (no spell_bonus_data row backs them) and are not asserted. 572332 is the Bloodmoon Blast rank a level-80 character owns per AscensionSpellProgressionData.h's 500125 chain.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    },
+    {
+      "id": "ritual_ally",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    },
+    {
+      "id": "plain_ally",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 706624
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 705729
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572332
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ritual_ally"
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "plain_ally"
+    },
+    {
+      "action": "set_aura",
+      "label": "Blood Rituals mark on one ally only",
+      "actor": "ritual_ally",
+      "spell": 706623,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "label": "Bloodmoon Blast with no Blood Rituals aura",
+      "actor": "caster",
+      "spell": 572332,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The marked ally is healed without any Blood Rituals aura",
+      "actor": "caster",
+      "metric": "spell_heal_count",
+      "spell": 704119,
+      "target": "ritual_ally",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "An ally without the Blood Rituals mark is not healed",
+      "actor": "caster",
+      "metric": "spell_heal_count",
+      "spell": 704119,
+      "target": "plain_ally",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Refresh the mark before the second cast",
+      "actor": "ritual_ally",
+      "spell": 706623,
+      "stacks": 1
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 706624
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown from the first cast",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Bloodmoon Blast with the legacy 706624 aura",
+      "actor": "caster",
+      "spell": 572332,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "The legacy #5934 aura adds no second heal",
+      "actor": "caster",
+      "metric": "spell_heal_count",
+      "spell": 704119,
+      "target": "ritual_ally",
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The unmarked ally stays unhealed",
+      "actor": "caster",
+      "metric": "spell_heal_count",
+      "spell": 704119,
+      "target": "plain_ally",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Refresh the mark before the third cast",
+      "actor": "ritual_ally",
+      "spell": 706623,
+      "stacks": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 706624
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 705729
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown from the second cast",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Bloodmoon Blast with the live-text 705729 aura",
+      "actor": "caster",
+      "spell": 572332,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "One heal per cast with the live-text aura as well",
+      "actor": "caster",
+      "metric": "spell_heal_count",
+      "spell": 704119,
+      "target": "ritual_ally",
+      "equals": 3,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The unmarked ally still stays unhealed",
+      "actor": "caster",
+      "metric": "spell_heal_count",
+      "spell": 704119,
+      "target": "plain_ally",
+      "equals": 0
+    }
+  ]
+}

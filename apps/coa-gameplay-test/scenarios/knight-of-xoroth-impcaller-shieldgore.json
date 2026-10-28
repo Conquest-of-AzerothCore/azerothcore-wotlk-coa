@@ -1,0 +1,166 @@
+{
+  "schema": 1,
+  "name": "Impcaller makes Shieldgore summon a Hellfire Imp (#4933)",
+  "contract": "Impcaller 706755 reads 'Shieldgore summons a Hellfire Imp for 10 sec'. Its effect 0 is PROC_TRIGGER_SPELL into Hellfire Imp 807699 (SUMMON entry 50301, duration index 1 = 10 sec) with ProcFlags 0, so the proc is scripted: AscensionXorothAbilities.cpp summons entry 50301 when an Infernal Strike/Shieldgore rank is cast while the knight has the Impcaller talent aura. Learning the talent alone must be enough; the player should not need to press any other button.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 19
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "knight",
+      "entry": 36,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "knight",
+      "item": 629951
+    },
+    {
+      "action": "equip",
+      "label": "One-hander so a shield fits",
+      "actor": "knight",
+      "item": 629951,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "knight",
+      "item": 2362
+    },
+    {
+      "action": "equip",
+      "label": "Shieldgore requires a shield",
+      "actor": "knight",
+      "item": 2362,
+      "slot": 16
+    },
+    {
+      "action": "learn",
+      "actor": "knight",
+      "spell": 804353
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Control: Shieldgore without the talent",
+      "actor": "knight",
+      "spell": 804353,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Shieldgore cast #1 completed",
+      "actor": "knight",
+      "metric": "spell_cast_count",
+      "spell": 804353,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no imp without Impcaller",
+      "actor": "knight",
+      "metric": "owned_creature_count",
+      "entry": 50301,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "label": "Pick the Impcaller talent",
+      "actor": "knight",
+      "spell": 706755
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Impcaller passive is active",
+      "actor": "knight",
+      "metric": "aura",
+      "spell": 706755,
+      "equals": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "knight",
+      "spell": 804353
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Shieldgore with Impcaller",
+      "actor": "knight",
+      "spell": 804353,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Shieldgore cast #2 completed",
+      "actor": "knight",
+      "metric": "spell_cast_count",
+      "spell": 804353,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Shieldgore summoned one Hellfire Imp",
+      "actor": "knight",
+      "metric": "owned_creature_count",
+      "entry": 50301,
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "ms": 10500
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the imp lasts 10 sec",
+      "actor": "knight",
+      "metric": "owned_creature_count",
+      "entry": 50301,
+      "equals": 0,
+      "within_ms": 1500
+    }
+  ]
+}

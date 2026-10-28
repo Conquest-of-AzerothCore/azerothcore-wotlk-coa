@@ -5,6 +5,7 @@
 
 #include "Player.h"
 #include "SpellAuras.h"
+#include "SpellInfo.h"
 #include <array>
 
 namespace AscensionClassTuning
@@ -110,27 +111,45 @@ inline constexpr std::array<Entry, 91> Entries = {{
     { 887090, 32, 63 },
 }};
 
+inline constexpr uint32 PvpSpellOffset = 100;
+
+inline bool IsPvpTuningSpell(uint32 spellId)
+{
+    return spellId >= Entries.front().SpellId + PvpSpellOffset && spellId <= Entries.back().SpellId + PvpSpellOffset;
+}
+
+inline void DisablePvpHealingTuning(SpellInfo* info)
+{
+    if (!info || !IsPvpTuningSpell(info->Id))
+        return;
+
+    for (SpellEffectInfo& effect : info->Effects)
+        if (effect.IsAura(SPELL_AURA_MOD_HEALING_DONE_PERCENT))
+            effect.ApplyAuraName = SPELL_AURA_DUMMY;
+}
+
 inline void Synchronize(Player* player, uint32 specId, bool refreshAmounts)
 {
     if (!player || !player->IsAlive() || !player->FindMap())
         return;
 
     for (Entry const& entry : Entries)
-    {
-        if (entry.ClassId != player->getClass() || (entry.SpecId && entry.SpecId != specId))
+        for (uint32 spellId : { entry.SpellId, entry.SpellId + PvpSpellOffset })
         {
-            player->RemoveAurasDueToSpell(entry.SpellId);
-            continue;
-        }
+            if (entry.ClassId != player->getClass() || (entry.SpecId && entry.SpecId != specId))
+            {
+                player->RemoveAurasDueToSpell(spellId);
+                continue;
+            }
 
-        if (Aura* aura = player->GetAura(entry.SpellId))
-        {
-            if (refreshAmounts)
-                aura->RecalculateAmountOfEffects();
+            if (Aura* aura = player->GetAura(spellId))
+            {
+                if (refreshAmounts)
+                    aura->RecalculateAmountOfEffects();
+            }
+            else
+                player->AddAura(spellId, player);
         }
-        else
-            player->AddAura(entry.SpellId, player);
-    }
 }
 }
 

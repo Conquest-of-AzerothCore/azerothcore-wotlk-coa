@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "NPCs are never immune to poisons; bleed and other mechanic immunity still applies to non-poisons",
+  "contract": "CoA rule: creatures not controlled by a player take every poison (Dispel 4). Hydra's Venom 285897 is a poison whose spell and effect mechanic is BLEED, so Mechanical Chicken 8376 (creature_immunities -68, BLEED only) was immune to it before; it now takes the venom. Rend 772, a bleed that is not a poison, still misses the chicken. Resist Poison 6513 (aura 41, dispel immunity to poison) on a dummy 36 blocked Poison 744 before; the dummy now takes it. A level 60 Harvest Golem 36 of the player faction 1 casts every harmful spell on level 1 fixtures, so miss, dodge and parry chances are zero and only immunity can stop a hit.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "anchor", "race": 1, "class": 8, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "caster", "owner": "anchor", "entry": 36, "faction": 1, "level": 60, "health": 100000, "distance": 4 },
+    { "id": "venom_chicken", "owner": "anchor", "entry": 8376, "level": 1, "health": 100000, "distance": 6 },
+    { "id": "rend_chicken", "owner": "anchor", "entry": 8376, "level": 1, "health": 100000, "distance": 8 },
+    { "id": "warded", "owner": "anchor", "entry": 36, "level": 1, "health": 100000, "distance": 2 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and local level scaling settle", "ms": 5000 },
+    { "action": "cast", "label": "The bleed-immune chicken takes Hydra's Venom", "actor": "caster",
+      "spell": 285897, "target": "venom_chicken" },
+    {
+      "action": "assert", "label": "Hydra's Venom lands despite the chicken's bleed immunity",
+      "actor": "venom_chicken", "metric": "aura", "spell": 285897, "equals": 1, "within_ms": 2000
+    },
+    { "action": "cast", "label": "The bleed-immune chicken takes Rend", "actor": "caster", "spell": 772,
+      "target": "rend_chicken" },
+    { "action": "wait", "label": "Give Rend its full chance to land", "ms": 1500 },
+    {
+      "action": "assert", "label": "Bleed immunity still blocks Rend, which is not a poison",
+      "actor": "rend_chicken", "metric": "aura", "spell": 772, "equals": 0
+    },
+    { "action": "cast", "label": "The dummy casts Resist Poison on itself", "actor": "warded", "spell": 6513 },
+    {
+      "action": "assert", "label": "The dummy carries Resist Poison", "actor": "warded",
+      "metric": "aura", "spell": 6513, "equals": 1
+    },
+    { "action": "cast", "label": "The poison-resistant dummy takes Poison", "actor": "caster", "spell": 744,
+      "target": "warded" },
+    {
+      "action": "assert", "label": "Poison lands despite the dummy's dispel immunity to poison", "actor": "warded",
+      "metric": "aura", "spell": 744, "equals": 1, "within_ms": 2000
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Stormbringer: Waterfall shortens cooldowns on critical strikes (#3638)",
-  "contract": "#3638 Waterfall (806412) is SPELL_ATTR0_PASSIVE with ProcChance 100, Spell.dbc ProcFlags 0 and one effect: SPELL_EFFECT_APPLY_AURA with EffectApplyAuraName 42 (SPELL_AURA_PROC_TRIGGER_SPELL) on EffectTriggerSpell 807661. With no spell_proc row, SpellMgr::LoadSpellProcs skipped it ('Skip if no proc flags in DBC') and Aura::GetProcEffectMask returned 0 ('only auras with spell proc entry can trigger proc'), so 807661 was never cast. 807661 itself is already implemented: its three effects are 165 (SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN, handled by Spell::EffectAscensionModifyCooldown, which reads EffectMiscValue as the spell id and the effect value as the delta) on TARGET_UNIT_CASTER, each with EffectBasePoints -501 / EffectDieSides 1 -> -500 ms, on EffectMiscValue 707365 (Overload Mechanical), 500932 (Gust of Wind) and 503352 (Torrential Wrath). The fix is one spell_proc row with ProcFlags 65536 (PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG), SpellTypeMask 1, SpellPhaseMask 2, HitMask 2 (PROC_HIT_CRITICAL alone, because the mechanic is critical strikes only) and Chance 0, which makes the engine use the record's own ProcChance of 100. Gust of Wind 500932 has RecoveryTime and CategoryRecoveryTime 35000, so a critical Shock takes 500 ms off it. Elapsed time is removed from the measurement by a second Stormbringer who starts the same cooldown at the same moment and never learns Waterfall, as in chronomancer-a-ripple-in-time-cooldown. The 10000 spell_crit_rating fixture only guarantees the DONE-side chance (Unit::SpellDoneCritChance, asserted at SETUP): the roll actually used by Spell::CalculateDamageDoneForAllTargets also runs the target through Unit::SpellTakenCritChance, which applies Unit::ApplyResilience(CR_CRIT_TAKEN_SPELL) against whoever GetOwner() resolves to for a creature victim; the fixture dummy is summoned via Player::SummonCreature, which sets its OwnerGUID to the attacking caster, so that reduction is sourced from the caster's own combat rating rather than being unconditionally zero like a plain NPC's. A live run recorded 3 of 4 critical Shocks proccing Waterfall, so the fixture's crit chance is very high but not the hard 100% the DONE-side number alone suggests. The block below casts five Shocks and requires at least four Waterfall procs, and the final cooldown-delta band is widened to also accept a fifth proc, rather than demanding a perfect 4-for-4 the engine does not actually promise. PARTIAL: the tooltip on 806412 says 'all of your cooldowns' while the shipped trigger names exactly three spell ids and Spell.dbc has only three effect slots, and 806412 says 'critical damage' while 807661 says 'critical Froststorm Damage'. Neither question is resolved here, so the scenario asserts only the named Gust of Wind cooldown and the rows apply no school restriction.",
+  "contract": "#3638 Waterfall (806412) is SPELL_ATTR0_PASSIVE with ProcChance 100, Spell.dbc ProcFlags 0 and one effect: SPELL_EFFECT_APPLY_AURA with EffectApplyAuraName 42 (SPELL_AURA_PROC_TRIGGER_SPELL) on EffectTriggerSpell 807661. With no spell_proc row, SpellMgr::LoadSpellProcs skipped it ('Skip if no proc flags in DBC') and Aura::GetProcEffectMask returned 0 ('only auras with spell proc entry can trigger proc'), so 807661 was never cast. 807661 itself is already implemented: its three effects are 165 (SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN, handled by Spell::EffectAscensionModifyCooldown, which reads EffectMiscValue as the spell id and the effect value as the delta) on TARGET_UNIT_CASTER, each with EffectBasePoints -501 / EffectDieSides 1 -> -500 ms, on EffectMiscValue 707365 (Overload Mechanical), 500932 (Gust of Wind) and 503352 (Torrential Wrath). The fix is one spell_proc row with ProcFlags 65536 (PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG), SpellTypeMask 1, SpellPhaseMask 2, HitMask 2 (PROC_HIT_CRITICAL alone, because the mechanic is critical strikes only) and Chance 0, which makes the engine use the record's own ProcChance of 100. Gust of Wind 500932 has RecoveryTime and CategoryRecoveryTime 35000, so a critical Shock takes 500 ms off it. Elapsed time is removed from the measurement by a second Stormbringer who starts the same cooldown at the same moment and never learns Waterfall, as in chronomancer-a-ripple-in-time-cooldown. The enemy is a Harvest Golem (36) 20 yd ahead, outside Gust of Wind's 12 yd cone (EffectRadiusIndex 32) and inside Shock's 35 yd range, so the two setup casts touch nothing and start their cooldowns in adjacent world updates. With a Rabbit (721) 3 yd ahead, the control's Gust of Wind knocked it back and it evaded for about 850 ms; the harness runs no step while a fixture evades, so the Waterfall caster started the same cooldown that much later and the BASELINE delta read 846 ms before any Shock. A damaged Rabbit also flees in random directions (CritterAI), which can carry it out of Shock's range or arc. The 10000 spell_crit_rating fixture only guarantees the DONE-side chance (Unit::SpellDoneCritChance, asserted at SETUP): the roll actually used by Spell::CalculateDamageDoneForAllTargets also runs the target through Unit::SpellTakenCritChance, which applies Unit::ApplyResilience(CR_CRIT_TAKEN_SPELL) against whoever GetOwner() resolves to for a creature victim; the fixture dummy is summoned via Player::SummonCreature, which sets its OwnerGUID to the attacking caster, so that reduction is sourced from the caster's own combat rating rather than being unconditionally zero like a plain NPC's. A live run recorded 3 of 4 critical Shocks proccing Waterfall, so the fixture's crit chance is very high but not the hard 100% the DONE-side number alone suggests. The block below casts five Shocks and requires at least four Waterfall procs, and the final cooldown-delta band is widened to also accept a fifth proc, rather than demanding a perfect 4-for-4 the engine does not actually promise. PARTIAL: the tooltip on 806412 says 'all of your cooldowns' while the shipped trigger names exactly three spell ids and Spell.dbc has only three effect slots, and 806412 says 'critical damage' while 807661 says 'critical Froststorm Damage'. Neither question is resolved here, so the scenario asserts only the named Gust of Wind cooldown and the rows apply no school restriction.",
   "timeout_ms": 180000,
   "players": [
     {
@@ -24,10 +24,10 @@
     {
       "id": "dummy",
       "owner": "wf",
-      "entry": 721,
+      "entry": 36,
       "level": 80,
       "health": 1000000,
-      "distance": 3
+      "distance": 20
     }
   ],
   "location": {
@@ -112,10 +112,11 @@
     },
     {
       "action": "assert",
-      "label": "SETUP: the knockback left the enemy inside Shock's 35 yard range",
+      "label": "SETUP: the enemy stands outside Gust of Wind's 12 yard cone and inside Shock's 35 yard range",
       "actor": "wf",
       "metric": "distance",
       "target": "dummy",
+      "min": 13,
       "max": 34
     },
     {
@@ -148,7 +149,8 @@
     },
     {
       "action": "wait",
-      "ms": 1900
+      "label": "Let the second Shock land (1500 ms cast plus 500 ms flight over 20 yd) before Waterfall is learned",
+      "ms": 2500
     },
     {
       "action": "snapshot",
@@ -260,7 +262,8 @@
     },
     {
       "action": "wait",
-      "ms": 1900
+      "label": "Let the fifth Shock land (1500 ms cast plus 500 ms flight over 20 yd)",
+      "ms": 2500
     },
     {
       "action": "assert",

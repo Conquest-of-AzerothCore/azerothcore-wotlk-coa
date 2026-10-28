@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "name": "Chronomancer: Rapid Acceleration raises Accelerated Recovery's healing scaling and heals 15% of it at once (#1163)",
+  "contract": "Rapid Acceleration 570149 (Spell.dbc, family 28, passive) reads 'Increases the bonus healing scaling of Accelerated Recovery by $s1%. Your Accelerated Recovery instantly heals the target for $s2% of the total periodic effect.' with $s1 = $s2 = 15 (BasePoints 14 + DieSides 1). Effect 0 is SPELL_AURA_ADD_PCT_MODIFIER with class mask word1 0x10000000, the family flag of every Accelerated Recovery rank (800857, 501772-501778), and MiscValue 40, a private client spellmod index that AuraEffect::CalculateSpellMod and Player::AddSpellMod discard because it is at least MAX_SPELLMOD. The client names that index itself: Weapon Empowerment 92857 '[Spell Power Direct]' uses op 24 and 92858 '[Spell Power DoT]' uses op 40, so op 40 is the percentage modifier of a periodic effect's spell power coefficient; Accelerated Recovery is a pure SPELL_AURA_PERIODIC_HEAL, where this core's SPELLMOD_BONUS_MULTIPLIER (24) scales exactly that coefficient in Unit::SpellHealingBonusDone. Effect 1 is an unscripted SPELL_AURA_DUMMY. The client's Accelerated Recovery heal 804500 (SPELL_EFFECT_HEAL, same family flag, SPELL_ATTR3_TREAT_AS_PERIODIC) carries the instant heal as a resolved amount. Expected: with the talent, SPELLMOD_BONUS_MULTIPLIER for rank 8 (501778) is 1.15 times the control's (fails before the fix), and applying rank 8 (15000 ms, 1000 ms amplitude, 15 ticks) heals the target through 804500 for 15% of the tick amount times 15 ticks, i.e. 2.25 times one tick, while the control gets no such heal (fails before the fix). The per-tick spell power coefficient itself is not asserted: the shipped data carries none for Accelerated Recovery (EffectBonusMultiplier 0, no spell_bonus_data row in the repository), so the 15% applies to whatever coefficient the world database supplies.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 22, "level": 80 },
+    { "id": "talent", "race": 1, "class": 22, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "control", "spell": 501778 },
+    { "action": "learn", "actor": "talent", "spell": 501778 },
+    { "action": "learn", "actor": "talent", "spell": 570149 },
+    {
+      "action": "assert", "label": "Learning Rapid Acceleration applies its passive",
+      "actor": "talent", "metric": "aura", "spell": 570149, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "snapshot", "label": "The control's coefficient multiplier for Accelerated Recovery",
+      "actor": "control", "metric": "spell_modifier", "spell": 501778, "op": 24, "base": 100, "save_as": "control_multiplier"
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the talent raises Accelerated Recovery's coefficient multiplier by 15%",
+      "actor": "talent", "metric": "spell_modifier", "spell": 501778, "op": 24, "base": 100,
+      "ratio_to": "control_multiplier", "min": 1.1499, "max": 1.1501
+    },
+    { "action": "cast", "actor": "control", "spell": 501778 },
+    { "action": "cast", "actor": "talent", "spell": 501778 },
+    {
+      "action": "assert", "label": "The control's Accelerated Recovery landed",
+      "actor": "control", "metric": "aura", "spell": 501778, "caster": "control", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The talented Chronomancer's Accelerated Recovery landed",
+      "actor": "talent", "metric": "aura", "spell": 501778, "caster": "talent", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Accelerated Recovery rank 8 runs 15 sec, so 15 one-second ticks",
+      "actor": "talent", "metric": "aura_duration_ms", "spell": 501778, "caster": "talent", "min": 13500, "max": 15000
+    },
+    {
+      "action": "snapshot", "label": "One tick of the talented caster's Accelerated Recovery",
+      "actor": "talent", "metric": "aura_amount", "spell": 501778, "caster": "talent", "effect": 0, "save_as": "talent_tick"
+    },
+    {
+      "action": "assert", "label": "SETUP: the tick amount is positive",
+      "actor": "talent", "metric": "aura_amount", "spell": 501778, "caster": "talent", "effect": 0, "min": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the instant heal is 15% of 15 ticks, 2.25 times one tick",
+      "actor": "talent", "metric": "spell_heal_total", "spell": 804500, "ratio_to": "talent_tick", "min": 2.2, "max": 2.26,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The instant heal lands once per application",
+      "actor": "talent", "metric": "spell_heal_count", "spell": 804500, "equals": 1
+    },
+    { "action": "wait", "label": "Let a would-be heal from the control's cast arrive", "ms": 1000 },
+    {
+      "action": "assert", "label": "Without the talent Accelerated Recovery has no instant heal",
+      "actor": "control", "metric": "spell_heal_count", "spell": 804500, "equals": 0
+    }
+  ]
+}

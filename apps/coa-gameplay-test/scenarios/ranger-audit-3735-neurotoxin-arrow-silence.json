@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Neurotoxin Arrow silences its target via a native direct trigger (#3735)",
+  "contract": "500071 'Neurotoxin Arrow' reads 'Shoot ... dealing ... Nature damage and silencing them ...'. Effect 0 is SPELL_EFFECT_SCHOOL_DAMAGE and effect 1 is SPELL_EFFECT_TRIGGER_SPELL (64, a direct cast-time trigger, not a proc) firing 500616 (SPELL_AURA_MOD_SILENCE, DurationIndex 36 = 1000 ms) unconditionally at hit via the generic Spell::EffectTriggerSpell dispatch (SpellEffects.cpp); no spell_proc dependency, no script needed. CasterAuraSpell 804329 (SPELL_ADVANTAGE) gates the cast on at least one stack of Advantage, and EquippedItemClass 2/EquippedItemSubClassMask 262148 (bits 2 and 18, Bow among them) requires a ranged weapon in the ranged slot -- item 2504 'Worn Shortbow' (item_template: class 2, subclass 2 Bow) is the same fixture item the existing ranger-superb-shot-auto-shot-focus.json scenario equips at slot 17. 500071 has a 5-30 yd range (min range 5 yd); the fixture creature needs an explicit distance (default is 0, inside the minimum range, which fails the cast with SPELL_FAILED_TOO_CLOSE/128 before the silence is ever applied).",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "ranger", "entry": 16542, "level": 80, "health": 500000, "faction": 14, "distance": 15 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and setup settle", "ms": 3000 },
+    { "action": "learn", "actor": "ranger", "spell": 500071 },
+    { "action": "add_item", "actor": "ranger", "item": 2504 },
+    { "action": "equip", "label": "Equip a ranged bow", "actor": "ranger", "item": 2504, "slot": 17 },
+    { "action": "set_aura", "label": "Grant one stack of Advantage so the cast is not rejected", "actor": "ranger", "spell": 804329, "stacks": 1 },
+    {
+      "action": "assert", "label": "baseline: the target carries no silence yet", "actor": "dummy",
+      "metric": "aura", "spell": 500616, "equals": 0
+    },
+    { "action": "cast", "actor": "ranger", "spell": 500071, "target": "dummy" },
+    {
+      "action": "assert", "label": "CONTRACT: Neurotoxin Arrow silenced the struck enemy", "actor": "dummy",
+      "metric": "aura", "spell": 500616, "equals": 1, "within_ms": 3000
+    }
+  ]
+}

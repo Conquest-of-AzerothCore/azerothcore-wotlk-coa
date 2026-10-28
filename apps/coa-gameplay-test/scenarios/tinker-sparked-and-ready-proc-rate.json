@@ -1,0 +1,2336 @@
+{
+  "schema": 1,
+  "name": "Sparked and Ready! procs at its native 5 percent chance (#4643)",
+  "contract": "Native 5% Sparked and Ready proc; ranged hit rating guarantees 150 eligible Rocket hits.",
+  "timeout_ms": 599000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 80,
+      "ranged_hit_rating": 1000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "t",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 30
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 705815
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 500235
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Sparked and Ready starts with no procs recorded",
+      "actor": "t",
+      "metric": "spell_cast_count",
+      "spell": 537247,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500235,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "assert",
+      "label": "Complete all 150 Rocket Launcher casts",
+      "actor": "t",
+      "metric": "spell_cast_count",
+      "spell": 500235,
+      "equals": 150
+    },
+    {
+      "action": "assert",
+      "label": "Every Rocket Launcher contributes a landed fire hit",
+      "actor": "t",
+      "metric": "spell_damage_count",
+      "spell": 500220,
+      "target": "d",
+      "equals": 150,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Sparked and Ready procs at its native five percent chance",
+      "actor": "t",
+      "metric": "spell_cast_count",
+      "spell": 537247,
+      "min": 3
+    }
+  ]
+}

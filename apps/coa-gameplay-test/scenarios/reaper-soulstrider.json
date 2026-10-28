@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "Soulstrider strengthens Veilwalk speed (#816)",
+  "contract": "Soulstrider 572340 adds 25 to Veilwalk 803990 effect 0, raising speed from +50% to +75%.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "walker",
+      "race": 5,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "walker",
+      "spell": 572340
+    },
+    {
+      "action": "learn",
+      "actor": "walker",
+      "spell": 803990
+    },
+    {
+      "action": "snapshot",
+      "label": "Unmodified running speed",
+      "actor": "walker",
+      "metric": "run_speed_rate",
+      "save_as": "base_speed"
+    },
+    {
+      "action": "assert",
+      "label": "Veilwalk unmodified effect is fifty",
+      "actor": "walker",
+      "metric": "spell_modifier",
+      "spell": 803990,
+      "op": 3,
+      "base": 50,
+      "equals": 50
+    },
+    {
+      "action": "learn",
+      "actor": "walker",
+      "spell": 572340
+    },
+    {
+      "action": "assert",
+      "label": "Soulstrider raises the Veilwalk effect to seventy five",
+      "actor": "walker",
+      "metric": "spell_modifier",
+      "spell": 803990,
+      "op": 3,
+      "base": 50,
+      "equals": 75
+    },
+    {
+      "action": "cast",
+      "label": "Activate Veilwalk",
+      "actor": "walker",
+      "spell": 803990
+    },
+    {
+      "action": "assert",
+      "label": "Veilwalk speed aura is active",
+      "actor": "walker",
+      "metric": "aura",
+      "spell": 803990,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Soulstrider makes Veilwalk seventy five percent faster",
+      "actor": "walker",
+      "metric": "run_speed_rate",
+      "ratio_to": "base_speed",
+      "min": 1.74,
+      "max": 1.76
+    }
+  ]
+}

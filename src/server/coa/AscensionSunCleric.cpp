@@ -23,6 +23,8 @@ namespace AscensionSunCleric
 {
 namespace
 {
+constexpr uint32 Fortuitous = 561328;
+constexpr uint32 FortuitousHelper = 561396;
 std::unordered_map<ObjectGuid, std::unique_ptr<SunClericState>> states;
 std::mutex stateMutex;
 }
@@ -110,6 +112,17 @@ void SetHelper(Player* player, uint32 id, bool enabled)
         Cast(player, player, id);
     else if (!enabled)
         player->RemoveAurasDueToSpell(id);
+}
+void KeepHelper(Player* player, uint32 id, bool enabled)
+{
+    SetHelper(player, id, enabled);
+    if (enabled)
+        if (Aura* aura = player->GetAura(id))
+            if (aura->GetDuration() >= 0 || aura->GetMaxDuration() >= 0)
+            {
+                aura->SetMaxDuration(-1);
+                aura->SetDuration(-1);
+            }
 }
 void SetAmount(Player* player, uint32 id, uint8 slot, int32 amount)
 {
@@ -203,7 +216,10 @@ void Extend(Player* player, uint32 id, int32 milliseconds)
     Aura* aura = player->GetAura(id);
     if (!aura)
     {
+        bool const wasOnCooldown = player->HasSpellCooldown(id);
         Cast(player, player, id);
+        if (!wasOnCooldown && player->HasSpellCooldown(id))
+            player->RemoveSpellCooldown(id, true);
         aura = player->GetAura(id);
         if (aura)
             aura->SetDuration(milliseconds);
@@ -245,8 +261,8 @@ void ActivateDawn(Player* player)
     Resource(player, SolarPower, -20);
     Cast(player, player, Dawn);
     if (Aura* aura = player->GetAura(Dawn))
-        aura->SetCharges(10);
-    if (AuraEffect* choice = player->GetAuraEffect(Dawn, EFFECT_1))
+        aura->SetCharges(aura->CalcMaxCharges());
+    if (AuraEffect* choice = player->GetAuraEffect(Dawn, EFFECT_0))
         choice->SetAmount(1);
     if (player->HasAura(704586))
         Cast(player, player, 805265);
@@ -264,11 +280,11 @@ void ActivateDawn(Player* player)
                 Cast(player, player, helper);
     Refresh(player);
 }
-void Fulfill(Player* player, Spell* spell, Unit* target)
+void Fulfill(Player* player, Spell* spell, Spell* guard, Unit* target)
 {
-    if (!spell || !spell->GetScriptValue(Dawn) || spell->GetScriptValue(807441))
+    if (!spell || !guard || !spell->GetScriptValue(Dawn) || guard->GetScriptValue(807441))
         return;
-    spell->SetScriptValue(807441, 1);
+    guard->SetScriptValue(807441, 1);
     if (player->HasAura(805581))
         Reduce(player, 500154, std::abs(Amount(807445)));
     if (player->HasAura(680622))
@@ -327,12 +343,18 @@ void Refresh(Player* player)
                 state.blessed = ally->GetGUID();
                 break;
             }
-    bool healthy = player->IsAlive() && player->GetHealthPct() > 80;
-    for (auto [talent, helper] : {std::pair(561328u, 561396u), std::pair(704585u, 707769u),
+    if (!player->IsAlive())
+        state.healthyAbove80 = false;
+    else if (player->GetHealthPct() > 80)
+        state.healthyAbove80 = true;
+    else if (player->GetHealthPct() <= 75)
+        state.healthyAbove80 = false;
+    bool healthy = state.healthyAbove80;
+    for (auto [talent, helper] : {std::pair(Fortuitous, FortuitousHelper), std::pair(704585u, 707769u),
                                 std::pair(805267u, 807876u), std::pair(300314u, 301341u)})
-        SetHelper(player, helper, healthy && player->HasAura(talent));
+        KeepHelper(player, helper, healthy && player->HasAura(talent));
     bool day = player->IsAlive() && Daytime();
-    SetHelper(player, 707768, day && player->HasAura(707078));
+    KeepHelper(player, 707768, day && player->HasAura(707078));
     int32 extraHaste = 0;
     for (uint32 id : {300363, 300621, 300626})
         if (player->HasAura(id))
@@ -349,12 +371,19 @@ void Refresh(Player* player)
         player->RemoveAurasDueToSpell(id);
     bool replacement = player->IsAlive() && player->HasAura(803238) && player->HasSpell(Highest(player, 800231));
     if (replacement && !player->HasSpell(504764))
-        player->learnSpell(504764, true);
+        player->learnSpellWithoutAnnouncement(504764);
     for (auto const& pair : player->GetSpellMap())
         if (player->HasSpell(pair.first) && Named(sSpellMgr->GetSpellInfo(pair.first), 800231))
             player->SetTemporarySpellReplacement(pair.first, replacement ? 504764 : 0);
     if (!replacement)
         player->removeSpell(504764, SPEC_MASK_ALL, true);
+    bool conversion = player->IsAlive() && player->HasAura(Dawn) && player->HasSpell(DawnCast);
+    if (conversion && !player->HasSpell(RadiantConversion))
+        player->learnSpellWithoutAnnouncement(RadiantConversion);
+    if (player->HasSpell(DawnCast))
+        player->SetTemporarySpellReplacement(DawnCast, conversion ? RadiantConversion : 0);
+    if (!conversion)
+        player->removeSpell(RadiantConversion, SPEC_MASK_ALL, true);
     if (!player->IsInCombat())
         state.firstAttacks.clear();
     state.refreshing = false;

@@ -63,7 +63,7 @@ namespace
     uint32 CharacterSelectionMaxActive()
     {
         uint32 const maximum = sConfigMgr->GetOption<uint32>(
-            "CoA.CharacterSelectionMaxActive", 10);
+            "CoA.CharacterSelectionMaxActive", 128);
         return std::clamp(maximum, uint32(1), CHARACTER_LIST_MAXIMUM);
     }
 
@@ -140,7 +140,7 @@ namespace
         uint32 const charGuid = packet.read<uint32>(0);
         uint32 const accountId = session->GetAccountId();
 
-        session->GetQueryProcessor().AddCallback(
+        session->QueueQueryCallback(
             CharacterDatabase.AsyncQuery(BuildCharacterStateQuery(charGuid)).WithCallback(
                 [session, accountId, charGuid](QueryResult result)
                 {
@@ -202,7 +202,7 @@ namespace
         uint32 const charGuid = packet.read<uint32>(0);
         uint32 const accountId = session->GetAccountId();
 
-        session->GetQueryProcessor().AddCallback(
+        session->QueueQueryCallback(
             CharacterDatabase.AsyncQuery(BuildCharacterStateQuery(charGuid)).WithCallback(
                 [session, accountId, charGuid](QueryResult result)
                 {
@@ -417,7 +417,7 @@ void SendAscensionCharacterListInfo(WorldSession* session)
         "ORDER BY COALESCE(`s`.`active` <> 0, 1) DESC, COALESCE(`c`.`order`, `c`.`guid`)",
         accountId, SPELL_ASCENSION_HIGH_RISK, accountId);
 
-    session->GetQueryProcessor().AddCallback(
+    session->QueueQueryCallback(
         CharacterDatabase.AsyncQuery(query).WithCallback(
             [session, maxActive](QueryResult result)
             {

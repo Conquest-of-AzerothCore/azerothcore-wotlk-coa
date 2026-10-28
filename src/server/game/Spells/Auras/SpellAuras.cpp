@@ -843,7 +843,7 @@ void Aura::RefreshDuration(bool withMods)
     {
         int32 duration = m_spellInfo->GetMaxDuration();
         // Calculate duration of periodics affected by haste.
-        if (caster->HasAuraTypeWithAffectMask(SPELL_AURA_PERIODIC_HASTE, m_spellInfo) || m_spellInfo->HasAttribute(SPELL_ATTR5_SPELL_HASTE_AFFECTS_PERIODIC))
+        if (caster->HasDurationShorteningPeriodicHaste(m_spellInfo) || m_spellInfo->HasAttribute(SPELL_ATTR5_SPELL_HASTE_AFFECTS_PERIODIC))
             duration = int32(duration * caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
         SetMaxDuration(duration);
 
@@ -887,7 +887,7 @@ void Aura::RefreshTimersWithMods()
 {
     Unit* caster = GetCaster();
     m_maxDuration = CalcMaxDuration();
-    if ((caster && caster->HasAuraTypeWithAffectMask(SPELL_AURA_PERIODIC_HASTE, m_spellInfo)) || m_spellInfo->HasAttribute(SPELL_ATTR5_SPELL_HASTE_AFFECTS_PERIODIC))
+    if ((caster && caster->HasDurationShorteningPeriodicHaste(m_spellInfo)) || m_spellInfo->HasAttribute(SPELL_ATTR5_SPELL_HASTE_AFFECTS_PERIODIC))
     {
         m_maxDuration = int32(m_maxDuration * caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
     }
@@ -1096,7 +1096,8 @@ bool Aura::CanBeSaved() const
 
 bool Aura::CanBeSentToClient() const
 {
-    return !IsPassive() || GetSpellInfo()->HasAreaAuraEffect() || HasEffectType(SPELL_AURA_ABILITY_IGNORE_AURASTATE);
+    return !IsPassive() || GetSpellInfo()->HasAreaAuraEffect() || HasEffectType(SPELL_AURA_ABILITY_IGNORE_AURASTATE) ||
+           HasEffectType(SPELL_AURA_ASCENSION_IGNORE_MIN_RANGE);
 }
 
 bool Aura::IsSingleTargetWith(Aura const* aura) const
@@ -1316,6 +1317,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
     // mods at aura apply
     if (apply)
     {
+        if (sSpellMgr->GetSpellTwinSource(GetId()) == 60970 && target->IsPlayer())
+            for (uint32 intercept : sSpellMgr->GetSpellAndRelatives(20252))
+                target->ToPlayer()->RemoveSpellCooldown(intercept, true);
+
         switch (GetSpellInfo()->SpellFamilyName)
         {
             case SPELLFAMILY_GENERIC:
@@ -1333,10 +1338,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         if (GetStackAmount() >= 5 && !target->HasAura(50812))
                             target->CastSpell(target, 50812, true);
                         break;
-                    case 60970: // Heroic Fury (remove Intercept cooldown)
-                        if (target->IsPlayer())
-                            target->ToPlayer()->RemoveSpellCooldown(20252, true);
-                        break;
                 }
                 break;
             case SPELLFAMILY_MAGE:
@@ -1345,7 +1346,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 if (GetSpellInfo()->SpellFamilyFlags[0] & 0x00000001 && GetSpellInfo()->SpellFamilyFlags[2] & 0x00000008)
                 {
                     // Glyph of Fireball
-                    if (caster->HasAura(56368))
+                    if (caster->HasAuraOrTwin(56368))
                         SetDuration(0);
                 }
                 else if (GetSpellInfo()->SpellFamilyFlags[0] & 0x00000020 && GetSpellInfo()->SpellVisual[0] == 13)
@@ -1449,7 +1450,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 else if (m_spellInfo->SpellFamilyFlags[0] & 0x1 && m_spellInfo->SpellFamilyFlags[2] & 0x400 && GetEffect(0))
                 {
                     // Glyph of Power Word: Shield
-                    if (AuraEffect* glyph = caster->GetAuraEffect(55672, 0))
+                    if (AuraEffect* glyph = caster->GetAuraEffectOfRankedSpellOrTwin(55672, 0))
                     {
                         // instantly heal m_amount% of the absorb-value
                         int32 heal = glyph->GetAmount() * GetEffect(0)->GetAmount() / 100;
@@ -1640,13 +1641,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 98, 0))
                     {
                         uint32 spellId = 0;
-                        switch (aurEff->GetId())
+                        switch (sSpellMgr->GetSpellTwinSource(aurEff->GetId()))
                         {
                             case 53759:
-                                spellId = 60947;
+                                spellId = sSpellMgr->GetSpellTwinFor(60947, aurEff->GetId());
                                 break;
                             case 53754:
-                                spellId = 60946;
+                                spellId = sSpellMgr->GetSpellTwinFor(60946, aurEff->GetId());
                                 break;
                             default:
                                 LOG_ERROR("spells.aura", "Aura::HandleAuraSpecificMods: Unknown rank of Improved Fear ({}) found", aurEff->GetId());
@@ -1673,7 +1674,11 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 else if (removeMode == AURA_REMOVE_BY_ENEMY_SPELL && GetSpellInfo()->SpellFamilyFlags[0] & 0x00000001)
                 {
                     // Rapture
-                    if (Aura const* aura = caster->GetAuraOfRankedSpell(47535))
+                    Aura const* rapture = caster->GetAuraOfRankedSpell(47535);
+                    auto const [twinBegin, twinEnd] = sSpellMgr->GetSpellTwins().equal_range(47535);
+                    for (auto twin = twinBegin; !rapture && twin != twinEnd; ++twin)
+                        rapture = caster->GetAuraOfRankedSpell(twin->second);
+                    if (Aura const* aura = rapture)
                     {
                         // check cooldown
                         if (caster->IsPlayer())
@@ -1693,9 +1698,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         if (AuraEffect const* aurEff = aura->GetEffect(0))
                         {
                             float multiplier = (float)aurEff->GetAmount();
-                            if (aurEff->GetId() == 47535)
+                            uint32 const raptureRank = sSpellMgr->GetSpellTwinSource(aurEff->GetId());
+                            if (raptureRank == 47535)
                                 multiplier -= 0.5f;
-                            else if (aurEff->GetId() == 47537)
+                            else if (raptureRank == 47537)
                                 multiplier += 0.5f;
 
                             int32 basepoints0 = int32(CalculatePct(caster->GetMaxPower(POWER_MANA), multiplier));
@@ -1744,7 +1750,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 
                         Player* player = caster->ToPlayer();
                         // Glyph of Guardian Spirit
-                        if (AuraEffect* aurEff = player->GetAuraEffect(63231, 0))
+                        if (AuraEffect* aurEff = player->GetAuraEffectOfRankedSpellOrTwin(63231, 0))
                         {
                             if (!player->HasSpellCooldown(47788))
                                 break;
@@ -1815,7 +1821,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 break;
             case SPELLFAMILY_HUNTER:
                 // Glyph of Freezing Trap
-                if ((GetSpellInfo()->SpellFamilyFlags[0] & 0x00000008) && caster && caster->HasAura(56845))
+                if ((GetSpellInfo()->SpellFamilyFlags[0] & 0x00000008) && caster && caster->HasAuraOrTwin(56845))
                 {
                     target->CastSpell(target, 61394, true);
                 }
@@ -1831,7 +1837,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             if (GetSpellInfo()->SpellFamilyFlags[0] & 0x00400000)
             {
                 // Master of Subtlety
-                if (AuraEffect const* aurEff = target->GetAuraEffectOfRankedSpell(31221, 0))
+                if (AuraEffect const* aurEff = target->GetAuraEffectOfRankedSpellOrTwin(31221, 0))
                 {
                     if (!apply)
                         target->CastSpell(target, 31666, true);
@@ -1845,7 +1851,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     }
                 }
                 // Overkill
-                if (target->HasAura(58426))
+                if (target->HasAuraOrTwin(58426))
                 {
                     if (!apply)
                         target->CastSpell(target, 58428, true);
@@ -2128,7 +2134,7 @@ void Aura::AddProcCooldown(SpellProcEntry const* procEntry, TimePoint now)
 
 void Aura::ResetProcCooldown()
 {
-    m_procCooldown = std::chrono::steady_clock::now();
+    m_procCooldown = GameTime::SteadyNow();
 }
 
 void Aura::PrepareProcToTrigger(AuraApplication* aurApp, ProcEventInfo& eventInfo, TimePoint now)
@@ -2952,17 +2958,17 @@ void DynObjAura::FillTargetMap(std::map<Unit*, uint8>& targets, Unit* /*caster*/
         SpellInfo const* spellInfo = GetSpellInfo();
         SpellEffectInfo const& effect = spellInfo->Effects[effIndex];
         UnitList targetList;
-        // CoA: Eldritch Obelisk's speed-buff effect (Cultist spell 560321 triggers 560322; effect 2 is
-        // SPELL_EFFECT_PERSISTENT_AREA_AURA) encodes its ally selector in EffectImplicitTargetA (31
-        // TARGET_UNIT_DEST_AREA_ALLY) with TargetB unset, but this function only ever inspects TargetB, so
-        // the buff never reaches allies (#960). EffectImplicitTargetA also carries an ally selector for many
-        // other, unrelated spells (confirmed with a full Spell.dbc scan), so this exemption is scoped to this
-        // one spell rather than checking TargetA generally, which would change their behaviour too.
-        bool const eldritchObeliskAllySpeed = spellInfo->Id == 560322 &&
-            effect.TargetA.GetTarget() == TARGET_UNIT_DEST_AREA_ALLY;
+        // CoA: Eldritch Obelisk (560322), Harvesting Grounds (707591), Shadra's Lair (804978, effect 2) and
+        // Deathwind's Spirit Realm trigger (effect 1, 582526) encode their ally selectors in EffectImplicitTargetA
+        // with TargetB unset.
+        // Other spells also use this selector, so keep the exception scoped to these effects.
+        bool const deathwindRank = spellInfo->Id == 800174 || (spellInfo->Id >= 502989 && spellInfo->Id <= 503000);
+        bool const deathwindSpiritRealm = deathwindRank && effIndex == 1 && effect.TriggerSpell == 582526;
+        bool const coaTargetAAlly = (spellInfo->Id == 560322 || spellInfo->Id == 707591 || spellInfo->Id == 804978 ||
+            deathwindSpiritRealm) && effect.TargetA.GetTarget() == TARGET_UNIT_DEST_AREA_ALLY;
         bool const targetBAlly = effect.TargetB.GetTarget() == TARGET_DEST_DYNOBJ_ALLY ||
             effect.TargetB.GetTarget() == TARGET_UNIT_DEST_AREA_ALLY;
-        if (targetBAlly || eldritchObeliskAllySpeed)
+        if (targetBAlly || coaTargetAAlly)
         {
             Acore::AnyFriendlyUnitInObjectRangeCheck u_check(GetDynobjOwner(), dynObjOwnerCaster, radius);
             Acore::UnitListSearcher<Acore::AnyFriendlyUnitInObjectRangeCheck> searcher(GetDynobjOwner(), targetList, u_check);
@@ -2986,6 +2992,9 @@ void DynObjAura::FillTargetMap(std::map<Unit*, uint8>& targets, Unit* /*caster*/
         for (UnitList::iterator itr = targetList.begin(); itr != targetList.end(); ++itr)
         {
             Unit* target = *itr;
+
+            if (deathwindSpiritRealm && !target->HasAura(705404))
+                continue;
 
             Optional<float> collisionHeight = { };
             Optional<float> combatReach = { };

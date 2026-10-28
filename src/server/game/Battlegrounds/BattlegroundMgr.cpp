@@ -37,9 +37,11 @@
 #include "GameEventMgr.h"
 #include "GameGraveyard.h"
 #include "GameTime.h"
+#include "Group.h"
 #include "Map.h"
 #include "MapMgr.h"
 #include "MiscPackets.h"
+#include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"
 #include "Player.h"
@@ -49,6 +51,7 @@
 #include "WorldPacket.h"
 #include "WorldState.h"
 #include "WorldStateDefines.h"
+#include <algorithm>
 #include <unordered_map>
 
 bool BattlegroundTemplate::IsArena() const
@@ -99,6 +102,7 @@ void BattlegroundMgr::DeleteAllBattlegrounds()
 // used to update running battlegrounds, and delete finished ones
 void BattlegroundMgr::Update(uint32 diff)
 {
+    ExpireWargameInvitations();
     // update all battlegrounds and delete if needed
     for (auto& [_, bgData] : bgDataStore)
     {
@@ -274,7 +278,10 @@ Battleground* BattlegroundMgr::GetBattlegroundThroughClientInstance(uint32 insta
         return nullptr;
 
     if (bg->isArena())
-        return GetBattleground(instanceId, bgTypeId);
+    {
+        Battleground* instance = GetBattleground(instanceId, bgTypeId);
+        return instance && !instance->IsWargame() ? instance : nullptr;
+    }
 
     auto const& it = bgDataStore.find(bgTypeId);
     if (it == bgDataStore.end())
@@ -282,7 +289,7 @@ Battleground* BattlegroundMgr::GetBattlegroundThroughClientInstance(uint32 insta
 
     for (auto const& itr : it->second._Battlegrounds)
     {
-        if (itr.second->GetClientInstanceID() == instanceId)
+        if (!itr.second->IsWargame() && itr.second->GetClientInstanceID() == instanceId)
             return itr.second;
     }
 
@@ -378,7 +385,17 @@ uint32 BattlegroundMgr::CreateClientVisibleInstanceId(BattlegroundTypeId bgTypeI
 // create a new battleground that will really be used to play
 Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId originalBgTypeId, PvPDifficultyEntry const* bracketEntry, uint8 arenaType, bool isRated)
 {
-    BattlegroundTypeId bgTypeId = GetRandomBG(originalBgTypeId, bracketEntry->minLevel);
+    return CreateBattlegroundInstance(originalBgTypeId, bracketEntry, arenaType, isRated, false);
+}
+
+Battleground* BattlegroundMgr::CreateBattlegroundInstance(BattlegroundTypeId originalBgTypeId,
+    PvPDifficultyEntry const* bracketEntry, uint8 arenaType, bool isRated, bool isWargame)
+{
+    if (!bracketEntry)
+        return nullptr;
+
+    BattlegroundTypeId bgTypeId = isWargame ? originalBgTypeId
+        : GetRandomBG(originalBgTypeId, bracketEntry->minLevel);
 
     if (originalBgTypeId == BATTLEGROUND_AA)
         originalBgTypeId = bgTypeId;
@@ -405,8 +422,10 @@ Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId original
 
     bg->SetBracket(bracketEntry);
     bg->SetInstanceID(sMapMgr->GenerateInstanceId());
-    bg->SetClientInstanceID(CreateClientVisibleInstanceId(originalBgTypeId, bracketEntry->GetBracketId()));
+    bg->SetClientInstanceID(isWargame ? 0
+        : CreateClientVisibleInstanceId(originalBgTypeId, bracketEntry->GetBracketId()));
     bg->Init();
+    bg->m_IsWargame = isWargame;
     bg->SetStatus(STATUS_WAIT_JOIN); // start the joining of the bg
     bg->SetArenaType(arenaType);
     bg->SetBgTypeID(originalBgTypeId);
@@ -414,8 +433,8 @@ Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId original
     bg->SetRated(isRated);
     bg->SetRandom(isRandom);
 
-    // Set up correct min/max player counts for scoreboards
-    if (bg->isArena())
+    // Private matches use roster limits, not a ranked arena bracket.
+    if (bg->isArena() && !isWargame)
     {
         uint32 maxPlayersPerTeam = ArenaTeam::GetReqPlayersForType(arenaType) / 2;
         sScriptMgr->OnSetArenaMaxPlayersPerTeam(arenaType, maxPlayersPerTeam);
@@ -423,6 +442,177 @@ Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId original
     }
 
     return bg;
+}
+
+Battleground* BattlegroundMgr::CreateNewWargame(BattlegroundTypeId bgTypeId,
+    PvPDifficultyEntry const* bracketEntry)
+{
+    // Do not substitute another map when a requested private-match map is unavailable.
+    // Custom maps need their own implementation and data before they can be admitted here.
+    Battleground* original = GetBattlegroundTemplate(bgTypeId);
+    if (!bracketEntry || !original || bracketEntry->mapId != original->GetMapId()
+        || bgTypeToTemplate.find(bgTypeId) == bgTypeToTemplate.end()
+        || bgTypeId == BATTLEGROUND_AA || bgTypeId == BATTLEGROUND_RB)
+        return nullptr;
+
+    Battleground* battleground = CreateBattlegroundInstance(bgTypeId, bracketEntry, 0, false, true);
+    if (!battleground)
+        return nullptr;
+
+    // Original tutorial 32 permits 1v1 and arbitrary group sizes; the documented
+    // upper bound is the raid roster limit, not the regular map's queue size.
+    battleground->SetMinPlayersPerTeam(1);
+    battleground->SetMaxPlayersPerTeam(MAXRAIDSIZE);
+    return battleground;
+}
+
+namespace
+{
+    bool ReadWargameRoster(Player* leader, uint32 map, std::vector<ObjectGuid>& roster,
+        BattlegroundBracketId& bracket)
+    {
+        if (!leader)
+            return false;
+
+        Group* group = leader->GetGroup();
+        if (group && (group->isBGGroup() || !group->IsLeader(leader->GetGUID())))
+            return false;
+
+        if (group)
+            for (auto const& slot : group->GetMemberSlots())
+                roster.push_back(slot.guid);
+        else
+            roster.push_back(leader->GetGUID());
+
+        if (roster.empty() || roster.size() > MAXRAIDSIZE)
+            return false;
+
+        std::sort(roster.begin(), roster.end());
+        if (std::adjacent_find(roster.begin(), roster.end()) != roster.end()
+            || !std::binary_search(roster.begin(), roster.end(), leader->GetGUID()))
+            return false;
+
+        PvPDifficultyEntry const* leaderBracket = GetBattlegroundBracketByLevel(map, leader->GetLevel());
+        if (!leaderBracket)
+            return false;
+        bracket = leaderBracket->GetBracketId();
+        for (ObjectGuid guid : roster)
+        {
+            Player* player = ObjectAccessor::FindPlayer(guid);
+            if (!player || !player->IsInWorld() || !player->IsAlive() || player->IsInCombat()
+                || player->IsBeingTeleported() || player->IsInFlight() || player->InBattleground()
+                || player->InBattlegroundQueue())
+                return false;
+
+            PvPDifficultyEntry const* memberBracket = GetBattlegroundBracketByLevel(map, player->GetLevel());
+            if (!memberBracket || memberBracket->GetBracketId() != bracket)
+                return false;
+        }
+        return true;
+    }
+}
+
+void BattlegroundMgr::ExpireWargameInvitations()
+{
+    std::lock_guard<std::mutex> lock(m_WargameLock);
+    ExpireWargameInvitationsLocked();
+}
+
+// Challenges are requested and answered from the map threads of both leaders.
+void BattlegroundMgr::ExpireWargameInvitationsLocked()
+{
+    auto const now = std::chrono::steady_clock::now();
+    for (auto itr = m_WargameInvitations.begin(); itr != m_WargameInvitations.end();)
+    {
+        if (itr->second.Deadline <= now)
+            itr = m_WargameInvitations.erase(itr);
+        else
+            ++itr;
+    }
+}
+
+uint64 BattlegroundMgr::RequestWargame(Player* challenger, Player* opponent, BattlegroundTypeId type,
+    std::chrono::steady_clock::time_point deadline)
+{
+    std::lock_guard<std::mutex> lock(m_WargameLock);
+    ExpireWargameInvitationsLocked();
+    Battleground* original = GetBattlegroundTemplate(type);
+    if (!challenger || !opponent || challenger == opponent || !original
+        || bgTypeToTemplate.find(type) == bgTypeToTemplate.end()
+        || type == BATTLEGROUND_AA || type == BATTLEGROUND_RB
+        || deadline <= std::chrono::steady_clock::now())
+        return 0;
+
+    WargameAdmission admission{ type, { challenger->GetGUID(), opponent->GetGUID() }, {} };
+    BattlegroundBracketId firstBracket;
+    BattlegroundBracketId secondBracket;
+    if (!ReadWargameRoster(challenger, original->GetMapId(), admission.Rosters[TEAM_ALLIANCE], firstBracket)
+        || !ReadWargameRoster(opponent, original->GetMapId(), admission.Rosters[TEAM_HORDE], secondBracket)
+        || firstBracket != secondBracket)
+        return 0;
+
+    for (ObjectGuid guid : admission.Rosters[TEAM_ALLIANCE])
+        if (std::binary_search(admission.Rosters[TEAM_HORDE].begin(), admission.Rosters[TEAM_HORDE].end(), guid))
+            return 0;
+
+    // One live challenge per participant. A new request cannot silently replace
+    // the roster or map to which the opposing leader is about to consent.
+    for (auto const& entry : m_WargameInvitations)
+        for (auto const& reserved : entry.second.Admission.Rosters)
+            for (auto const& roster : admission.Rosters)
+                for (ObjectGuid guid : roster)
+                    if (std::binary_search(reserved.begin(), reserved.end(), guid))
+                        return 0;
+
+    if (!++m_NextWargameInvitation)
+        ++m_NextWargameInvitation;
+    m_WargameInvitations.emplace(m_NextWargameInvitation, WargameInvitation{ std::move(admission), deadline });
+    return m_NextWargameInvitation;
+}
+
+std::optional<WargameAdmission> BattlegroundMgr::AcceptWargame(Player* opponent, uint64 invitation)
+{
+    WargameAdmission admission{};
+    {
+        std::lock_guard<std::mutex> lock(m_WargameLock);
+        ExpireWargameInvitationsLocked();
+        auto itr = m_WargameInvitations.find(invitation);
+        if (!opponent || itr == m_WargameInvitations.end()
+            || itr->second.Admission.Leaders[TEAM_HORDE] != opponent->GetGUID())
+            return std::nullopt;
+
+        admission = std::move(itr->second.Admission);
+        m_WargameInvitations.erase(itr); // Consume before any transfer; stale accepts cannot start a second match.
+    }
+    Battleground* original = GetBattlegroundTemplate(admission.Type);
+    if (!original)
+        return std::nullopt;
+
+    std::array<BattlegroundBracketId, PVP_TEAMS_COUNT> brackets;
+    for (uint8 team = 0; team < PVP_TEAMS_COUNT; ++team)
+    {
+        std::vector<ObjectGuid> current;
+        if (!ReadWargameRoster(ObjectAccessor::FindPlayer(admission.Leaders[team]), original->GetMapId(),
+            current, brackets[team]) || current != admission.Rosters[team])
+            return std::nullopt;
+    }
+    if (brackets[TEAM_ALLIANCE] != brackets[TEAM_HORDE])
+        return std::nullopt;
+    return admission;
+}
+
+bool BattlegroundMgr::CancelWargame(Player* leader, uint64 invitation)
+{
+    std::lock_guard<std::mutex> lock(m_WargameLock);
+    ExpireWargameInvitationsLocked();
+    auto itr = m_WargameInvitations.find(invitation);
+    if (!leader || itr == m_WargameInvitations.end())
+        return false;
+    auto const& leaders = itr->second.Admission.Leaders;
+    if (std::find(leaders.begin(), leaders.end(), leader->GetGUID()) == leaders.end())
+        return false;
+    m_WargameInvitations.erase(itr);
+    return true;
 }
 
 // used to create the BG templates
@@ -949,6 +1139,9 @@ BattlegroundTypeId BattlegroundMgr::GetRandomBG(BattlegroundTypeId bgTypeId, uin
             }
         }
 
+        if (ids.empty())
+            return bgTypeId == BATTLEGROUND_RB ? BATTLEGROUND_TYPE_NONE : bgTypeId;
+
         return *Acore::Containers::SelectRandomWeightedContainerElement(ids, weights);
     }
 
@@ -1022,6 +1215,7 @@ std::unordered_map<int, BattlegroundTypeId> BattlegroundMgr::queueToBg =
     { BATTLEGROUND_QUEUE_2v2,   BATTLEGROUND_AA },
     { BATTLEGROUND_QUEUE_3v3,   BATTLEGROUND_AA },
     { BATTLEGROUND_QUEUE_5v5,   BATTLEGROUND_AA },
+    { BATTLEGROUND_QUEUE_1v1,   BATTLEGROUND_AA },
 };
 
 std::unordered_map<int, Battleground*> BattlegroundMgr::bgtypeToBattleground =
@@ -1083,12 +1277,14 @@ std::unordered_map<uint32, BattlegroundQueueTypeId> BattlegroundMgr::ArenaTypeTo
 {
     { ARENA_TYPE_2v2, BATTLEGROUND_QUEUE_2v2 },
     { ARENA_TYPE_3v3, BATTLEGROUND_QUEUE_3v3 },
-    { ARENA_TYPE_5v5, BATTLEGROUND_QUEUE_5v5 }
+    { ARENA_TYPE_5v5, BATTLEGROUND_QUEUE_5v5 },
+    { ARENA_TYPE_1v1, BATTLEGROUND_QUEUE_1v1 }
 };
 
 std::unordered_map<uint32, ArenaType> BattlegroundMgr::QueueToArenaType =
 {
     { BATTLEGROUND_QUEUE_2v2, ARENA_TYPE_2v2 },
     { BATTLEGROUND_QUEUE_3v3, ARENA_TYPE_3v3 },
-    { BATTLEGROUND_QUEUE_5v5, ARENA_TYPE_5v5 }
+    { BATTLEGROUND_QUEUE_5v5, ARENA_TYPE_5v5 },
+    { BATTLEGROUND_QUEUE_1v1, ARENA_TYPE_1v1 }
 };

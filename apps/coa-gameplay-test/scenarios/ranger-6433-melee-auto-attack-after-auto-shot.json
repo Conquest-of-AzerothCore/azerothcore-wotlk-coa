@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "name": "A Ranger with a bow melees once an Auto Shot target closes to melee range (#6433)",
+  "contract": "#6433: a level 58 Ranger shoots with a bow, but once the enemy reaches melee range no melee auto attacks happen. The Ranger's Auto Shot is stock spell 75 (SpellRange 114, 35 yds, SPELL_RANGE_RANGED; SPELL_ATTR2_AUTO_REPEAT, SPELL_ATTR4_AUTO_RANGED_COMBAT). Inside melee range Spell::CheckRange answers SPELL_FAILED_TOO_CLOSE for SPELL_RANGE_RANGED spells, and Unit::_UpdateAutoRepeatSpell keeps Auto Shot current without firing. The server never starts a player's melee swings by itself: the client asks for them with CMSG_ATTACKSWING. Expected: Auto Shot hits the defensive enemy at 15 yds, the enemy closes to melee range, no melee swing happens before the attack request, and after the native attack request the Ranger lands melee auto attacks with the main-hand weapon while the bow stays equipped.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "ranger", "race": 1, "class": 21, "level": 58, "melee_hit_rating": 10000,
+      "ranged_hit_rating": 10000, "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy", "owner": "ranger", "entry": 36, "level": 50, "health": 1000000, "distance": 15,
+      "reaction": 1
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 5000 },
+    { "action": "learn", "actor": "ranger", "spell": 75 },
+    { "action": "learn", "actor": "ranger", "spell": 201 },
+    { "action": "learn", "actor": "ranger", "spell": 264 },
+    { "action": "add_item", "actor": "ranger", "item": 25 },
+    { "action": "equip", "actor": "ranger", "item": 25, "slot": 15 },
+    { "action": "add_item", "actor": "ranger", "item": 2504 },
+    { "action": "equip", "actor": "ranger", "item": 2504, "slot": 17 },
+    { "action": "wait", "label": "Let the equipment settle", "ms": 1500 },
+    {
+      "action": "assert", "label": "SETUP: the main hand holds a weapon", "actor": "ranger",
+      "metric": "weapon_damage_min", "hand": 0, "min": 1
+    },
+    { "action": "cast", "label": "Start Auto Shot", "actor": "ranger", "spell": 75, "target": "enemy" },
+    {
+      "action": "assert", "label": "SETUP: Auto Shot hits the enemy at range", "actor": "ranger",
+      "metric": "spell_damage_count", "spell": 75, "target": "enemy", "min": 1, "within_ms": 8000
+    },
+    {
+      "action": "assert", "label": "SETUP: the enemy closes to melee range", "actor": "ranger",
+      "metric": "distance", "target": "enemy", "max": 4, "within_ms": 15000
+    },
+    {
+      "action": "assert", "label": "CONTROL: without an attack request the server starts no melee swing",
+      "actor": "ranger", "metric": "melee_attack_count", "equals": 0
+    },
+    { "action": "attack", "actor": "ranger", "target": "enemy" },
+    {
+      "action": "assert", "label": "The enemy is the Ranger's melee victim", "actor": "ranger",
+      "metric": "victim", "target": "enemy", "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: main-hand melee auto attacks land with the bow equipped",
+      "actor": "ranger", "metric": "melee_damage_count", "hand": 0, "min": 2, "within_ms": 10000
+    }
+  ]
+}

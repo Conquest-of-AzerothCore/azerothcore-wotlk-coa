@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Aether Current keeps feather fall and water walking but not hover (#5335)",
+  "contract": [
+    "Issue #5335: Aether Current 531512 applied FEATHER_FALL (105), HOVER (106) and WATER_WALK (104) together. HOVER switches the client to altitude-hold physics, which is why directional steering stopped working while falling.",
+    "The spell is bound to spell_ascension_stormbringer_aether_current, which prevents the EFFECT_1 HOVER aura from applying. After one cast the caster must carry 105 and 104 and must not carry 106."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {"id": "storm", "race": 1, "class": 16, "level": 20}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login and class synchronisation settle", "ms": 3000},
+    {"action": "learn", "actor": "storm", "spell": 531512},
+    {"action": "cast", "actor": "storm", "spell": 531512},
+    {"action": "assert", "label": "Feather fall is applied", "actor": "storm", "metric": "aura", "spell": 105, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "Water walking is applied", "actor": "storm", "metric": "aura", "spell": 104, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "Hover is suppressed", "actor": "storm", "metric": "aura", "spell": 106, "equals": 0, "within_ms": 3000}
+  ]
+}

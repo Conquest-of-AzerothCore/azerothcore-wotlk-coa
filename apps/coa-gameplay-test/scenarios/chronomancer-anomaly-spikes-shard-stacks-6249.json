@@ -1,0 +1,269 @@
+{
+  "schema": 1,
+  "name": "chronomancer-anomaly-spikes-shard-stacks-6249",
+  "contract": [
+    "Every landed Anomaly Spike grants one stack of the authored 503829 cast-time aura while Chromatic Shard is",
+    "known. Its 10% cast-time reduction stacks to ten for 30 seconds. Real spike hits acquire all stacks; none",
+    "are supplied as fixtures. Twelve hits prove the cap, a normal Shard cast proves instant delivery, and expiry",
+    "restores the 3500 ms cast time."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 22,
+      "level": 59,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "ranged_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "t",
+      "owner": "p",
+      "entry": 299,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 801292
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 567543
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 503826
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_cast_time_ms",
+      "spell": 567543,
+      "equals": 3500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 503826,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 503826,
+      "target": "t",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura_stacks",
+      "spell": 503829,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_cast_time_ms",
+      "spell": 567543,
+      "equals": 3150
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 503826,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 503826,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 503826,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 503826,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 503826,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 503826,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 503826,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 503826,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 503826,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 503826,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 503826,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 503826,
+      "target": "t",
+      "equals": 12
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura_stacks",
+      "spell": 503829,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_cast_time_ms",
+      "spell": 567543,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 567543,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 567543,
+      "target": "t",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 30500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 503829,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_cast_time_ms",
+      "spell": 567543,
+      "equals": 3500
+    }
+  ]
+}

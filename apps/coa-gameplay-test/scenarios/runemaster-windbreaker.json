@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "Issue 775: Windbreaker raises each Hurricane strike by 30% while Weapon Engraving: Air is active",
+  "contract": [
+    "Windbreaker 804094 (passive) reads 'While Weapon Engraving: Air is active, the damage of each strike of your",
+    "Hurricane is increased by $s1% (30%).' Its only effect is a flat SPELLMOD_EFFECT2 (12) modifier, BasePoints 29,",
+    "on family 38 mask1 0x4000, which Air Engraving 653223 carries: the equip spell of Weapon Engraving: Air's",
+    "enchant 999, active exactly while the engraving is. Air Engraving's second effect is a percent SPELLMOD_DAMAGE",
+    "modifier worth 0 whose class mask is empty in the client data. An empty mask matches every family 38",
+    "spell (SpellInfo::IsAffected), so before this change the +30 raised every Runemaster spell, the Hurricane",
+    "channel and Runeblade included, instead of only the strike. The only family 38 spell with mask2 0x4 is the Hurricane strike 645437, whose damage path applies",
+    "SPELLMOD_DAMAGE. Expected: with Windbreaker and Air Engraving the strike's damage modifier is 1000 -> 1300 and",
+    "its native melee damage bonus rises 30%; Windbreaker alone, Air Engraving alone, the Hurricane channel 645435 and",
+    "Runeblade 707141 stay at 1000. Learning or removing Windbreaker while the engraving is active updates it."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 60},
+    {"id": "late", "race": 1, "class": 32, "level": 60}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rm", "entry": 36, "level": 60, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "snapshot", "actor": "rm", "metric": "melee_spell_damage_done", "spell": 645437, "target": "dummy",
+      "save_as": "strike_base"},
+    {"action": "assert", "label": "SETUP: the Hurricane strike is unmodified", "actor": "rm",
+      "metric": "spell_modifier", "spell": 645437, "op": 0, "base": 1000, "equals": 1000},
+    {"action": "learn", "actor": "rm", "spell": 804094},
+    {"action": "assert", "label": "Windbreaker passive is active", "actor": "rm", "metric": "aura", "spell": 804094,
+      "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "Windbreaker alone does not change Hurricane", "actor": "rm",
+      "metric": "spell_modifier", "spell": 645437, "op": 0, "base": 1000, "equals": 1000},
+
+    {"action": "set_aura", "label": "Weapon Engraving: Air is active", "actor": "rm", "spell": 653223, "stacks": 1},
+    {"action": "assert", "actor": "rm", "metric": "aura", "spell": 653223, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "Windbreaker raises Air Engraving's Hurricane bonus to 30", "actor": "rm",
+      "metric": "aura_amount", "spell": 653223, "effect": 1, "equals": 30},
+    {"action": "assert", "label": "Each Hurricane strike deals 30% more damage", "actor": "rm",
+      "metric": "spell_modifier", "spell": 645437, "op": 0, "base": 1000, "equals": 1300},
+    {"action": "assert", "label": "The strike's native damage bonus rises 30%", "actor": "rm",
+      "metric": "melee_spell_damage_done", "spell": 645437, "target": "dummy", "ratio_to": "strike_base",
+      "min": 1.29, "max": 1.31},
+    {"action": "assert", "label": "The Hurricane channel itself is unchanged", "actor": "rm",
+      "metric": "spell_modifier", "spell": 645435, "op": 0, "base": 1000, "equals": 1000},
+    {"action": "assert", "label": "Runeblade is unchanged", "actor": "rm", "metric": "spell_modifier",
+      "spell": 707141, "op": 0, "base": 1000, "equals": 1000},
+    {"action": "set_aura", "label": "Weapon Engraving: Air ends", "actor": "rm", "spell": 653223, "stacks": 0},
+    {"action": "assert", "label": "Without Weapon Engraving: Air the bonus is gone", "actor": "rm",
+      "metric": "spell_modifier", "spell": 645437, "op": 0, "base": 1000, "equals": 1000, "within_ms": 1000},
+
+    {"action": "set_aura", "label": "Weapon Engraving: Air is active before Windbreaker", "actor": "late",
+      "spell": 653223, "stacks": 1},
+    {"action": "assert", "actor": "late", "metric": "aura", "spell": 653223, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "Air Engraving alone does not change Hurricane", "actor": "late",
+      "metric": "spell_modifier", "spell": 645437, "op": 0, "base": 1000, "equals": 1000},
+    {"action": "learn", "actor": "late", "spell": 804094},
+    {"action": "assert", "actor": "late", "metric": "aura", "spell": 804094, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "Learning Windbreaker while engraved updates the bonus", "actor": "late",
+      "metric": "aura_amount", "spell": 653223, "effect": 1, "equals": 30, "within_ms": 1000},
+    {"action": "assert", "label": "Learning Windbreaker while engraved raises the strike 30%", "actor": "late",
+      "metric": "spell_modifier", "spell": 645437, "op": 0, "base": 1000, "equals": 1300},
+    {"action": "unlearn", "actor": "late", "spell": 804094},
+    {"action": "assert", "actor": "late", "metric": "aura", "spell": 804094, "equals": 0, "within_ms": 2000},
+    {"action": "assert", "label": "Removing Windbreaker while engraved removes the bonus", "actor": "late",
+      "metric": "aura_amount", "spell": 653223, "effect": 1, "equals": 0, "within_ms": 1000},
+    {"action": "assert", "label": "Removing Windbreaker returns the strike to 1000", "actor": "late",
+      "metric": "spell_modifier", "spell": 645437, "op": 0, "base": 1000, "equals": 1000}
+  ]
+}

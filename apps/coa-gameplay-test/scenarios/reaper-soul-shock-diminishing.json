@@ -1,0 +1,151 @@
+{
+  "schema": 1,
+  "name": "Reaper Soul Shock diminishes on players, refreshes on out-of-combat creatures, like Sap (#197)",
+  "contract": "Soul Shock 803989 (Reaper, class 30, level 8) carries Sap's data: Mechanic 30 MECHANIC_SAPPED on a SPELL_AURA_MOD_STUN effect, DurationIndex 31 = 8000 ms, RecoveryTime and CategoryRecoveryTime 0, Stances FORM_STEALTH (Underwalk 800797), SPELL_ATTR1_ONLY_PEACEFUL_TARGETS (target cannot be in combat), SPELL_ATTR1_ALLOW_WHILE_STEALTHED, SPELL_ATTR3_SUPPRESS_TARGET_PROCS (no initial aggro), SPELL_ATTR5_LIMIT_N and a TAKE_DAMAGE aura interrupt, the same restrictions as Sap 2070/6770/11297/51724. Its tooltip names no cooldown and no diminishing returns, and the client's CrowdControl.lua files 803989 under CROWD_CONTROL_TYPE_INCAPACITATE, like Sap 2070. In 3.3.5 that category diminishes only on players and player-controlled units, so on a player successive applications within 15 sec last 8, 4 and 2 sec and the fourth is immune, while an ordinary creature gets the full 8 sec on every recast for as long as it stays out of combat; damage breaks the effect and a creature in combat refuses the cast (SPELL_FAILED_TARGET_AFFECTING_COMBAT 110). Issue #197 asked for 8/4/2 on a creature; neither the tooltip nor the spell data supports creature diminishing or a cooldown, so this records the Sap-equivalent contract.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "reaper", "race": 5, "class": 30, "level": 80, "spell_hit_rating": 10000 },
+    {
+      "id": "rival", "race": 1, "class": 1, "level": 80, "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "wolf", "owner": "reaper", "entry": 299, "level": 80, "health": 100000, "distance": 3 }
+  ],
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and player setup settle", "ms": 5000 },
+    { "action": "learn", "actor": "reaper", "spell": 800797 },
+    { "action": "learn", "actor": "reaper", "spell": 803989 },
+    { "action": "pvp", "actor": "reaper", "enabled": true },
+    { "action": "pvp", "actor": "rival", "enabled": true },
+    { "action": "cast", "actor": "reaper", "spell": 800797 },
+    {
+      "action": "assert", "label": "The Reaper enters Underwalk", "actor": "reaper", "metric": "aura",
+      "spell": 800797, "equals": 1, "within_ms": 2000
+    },
+    { "action": "wait", "ms": 1600 },
+    { "action": "cast", "actor": "reaper", "spell": 803989, "target": "rival" },
+    { "action": "wait", "ms": 300 },
+    {
+      "action": "assert", "label": "Soul Shock saps the rival player", "actor": "rival", "metric": "aura",
+      "spell": 803989, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The first application on a player lasts the full 8 sec", "actor": "rival",
+      "metric": "aura_duration_ms", "spell": 803989, "min": 7500, "max": 8000
+    },
+    { "action": "assert", "label": "The sapped player is stunned", "actor": "rival", "metric": "stunned", "equals": 1 },
+    {
+      "action": "assert", "label": "Soul Shock does not engage the player", "actor": "rival", "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert", "label": "Soul Shock does not break Underwalk", "actor": "reaper", "metric": "aura",
+      "spell": 800797, "equals": 1
+    },
+    { "action": "wait", "ms": 1700 },
+    { "action": "cast", "actor": "reaper", "spell": 803989, "target": "rival" },
+    { "action": "wait", "ms": 300 },
+    {
+      "action": "assert", "label": "The second application on a player is diminished to 4 sec", "actor": "rival",
+      "metric": "aura_duration_ms", "spell": 803989, "min": 3500, "max": 4000
+    },
+    { "action": "wait", "ms": 1200 },
+    { "action": "cast", "actor": "reaper", "spell": 803989, "target": "rival" },
+    { "action": "wait", "ms": 300 },
+    {
+      "action": "assert", "label": "The third application on a player is diminished to 2 sec", "actor": "rival",
+      "metric": "aura_duration_ms", "spell": 803989, "min": 1500, "max": 2000
+    },
+    { "action": "wait", "ms": 2500 },
+    {
+      "action": "assert", "label": "The diminished sap has expired", "actor": "rival", "metric": "aura",
+      "spell": 803989, "equals": 0
+    },
+    {
+      "action": "snapshot", "actor": "reaper", "metric": "spell_cast_count", "spell": 803989,
+      "save_as": "casts_before_immune"
+    },
+    { "action": "cast", "actor": "reaper", "spell": 803989, "target": "rival" },
+    { "action": "wait", "ms": 500 },
+    {
+      "action": "assert", "label": "The fourth cast on the player is accepted", "actor": "reaper",
+      "metric": "cast_failure", "spell": 803989, "equals": 0
+    },
+    {
+      "action": "assert", "label": "The fourth cast completes", "actor": "reaper", "metric": "spell_cast_count",
+      "spell": 803989, "relative_to": "casts_before_immune", "equals": 1
+    },
+    {
+      "action": "assert", "label": "The player is immune to a fourth application within 15 sec", "actor": "rival",
+      "metric": "aura", "spell": 803989, "equals": 0
+    },
+    { "action": "wait", "label": "Let the global cooldown end", "ms": 1000 },
+    { "action": "cast", "actor": "reaper", "spell": 803989, "target": "wolf" },
+    { "action": "wait", "ms": 300 },
+    {
+      "action": "assert", "label": "Soul Shock saps the creature", "actor": "wolf", "metric": "aura",
+      "spell": 803989, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The first application on the creature lasts 8 sec", "actor": "wolf",
+      "metric": "aura_duration_ms", "spell": 803989, "min": 7500, "max": 8000
+    },
+    {
+      "action": "assert", "label": "Soul Shock does not engage the creature", "actor": "wolf", "metric": "combat",
+      "equals": 0
+    },
+    { "action": "wait", "ms": 2700 },
+    { "action": "cast", "actor": "reaper", "spell": 803989, "target": "wolf" },
+    { "action": "wait", "ms": 300 },
+    {
+      "action": "assert", "label": "The second application on the creature refreshes the full 8 sec, not 4",
+      "actor": "wolf", "metric": "aura_duration_ms", "spell": 803989, "min": 7500, "max": 8000
+    },
+    { "action": "wait", "ms": 2700 },
+    { "action": "cast", "actor": "reaper", "spell": 803989, "target": "wolf" },
+    { "action": "wait", "ms": 300 },
+    {
+      "action": "assert", "label": "The third application on the creature refreshes the full 8 sec, not 2",
+      "actor": "wolf", "metric": "aura_duration_ms", "spell": 803989, "min": 7500, "max": 8000
+    },
+    { "action": "wait", "ms": 2700 },
+    { "action": "cast", "actor": "reaper", "spell": 803989, "target": "wolf" },
+    { "action": "wait", "ms": 300 },
+    {
+      "action": "assert", "label": "The fourth application on the creature still lasts 8 sec, no immunity",
+      "actor": "wolf", "metric": "aura_duration_ms", "spell": 803989, "min": 7500, "max": 8000
+    },
+    { "action": "assert", "label": "The creature is still stunned", "actor": "wolf", "metric": "stunned", "equals": 1 },
+    {
+      "action": "assert", "label": "The chained creature is still out of combat", "actor": "wolf",
+      "metric": "combat", "equals": 0
+    },
+    {
+      "action": "assert", "label": "The Reaper is still in Underwalk", "actor": "reaper", "metric": "aura",
+      "spell": 800797, "equals": 1
+    },
+    { "action": "attack", "actor": "rival", "target": "wolf" },
+    {
+      "action": "assert", "label": "Damage breaks Soul Shock", "actor": "wolf", "metric": "aura", "spell": 803989,
+      "equals": 0, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "The attacked creature is in combat", "actor": "wolf", "metric": "combat",
+      "equals": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Let the global cooldown end", "ms": 1500 },
+    { "action": "cast", "actor": "reaper", "spell": 803989, "target": "wolf" },
+    {
+      "action": "assert", "label": "A creature in combat refuses Soul Shock (TARGET_AFFECTING_COMBAT)",
+      "actor": "reaper", "metric": "cast_failure", "spell": 803989, "equals": 110, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The creature in combat stays unsapped", "actor": "wolf", "metric": "aura",
+      "spell": 803989, "equals": 0
+    },
+    { "action": "stop_attack", "actor": "rival" }
+  ]
+}

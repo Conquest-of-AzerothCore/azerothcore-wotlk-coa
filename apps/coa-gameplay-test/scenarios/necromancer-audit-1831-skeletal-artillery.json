@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Skeletal Artillery adds one or two Skeletal Archers to Animate: Skeletal Archer (#1831)",
+  "contract": "Skeletal Artillery (CharacterAdvancement 7146, Animation tab, class 23) has two ranks: 302518 reads 'Your Animate: Skeletal Archers now summons $s1 additional Skeletal Archer.' and 302921 '... summons $s1 additional Skeletal Archers.' Both are passives in SpellFamilyName 29 whose effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107), MiscValue 3 (SPELLMOD_EFFECT1), class mask (0, 0, 0x400000), with EffectBasePoints 0 (rank 1) and 1 (rank 2) + DieSides 1, so $s1 is 1 and 2. The mask selects only the summon helper 500330 (family flags 8, 0, 0x400000), not the parent 805040 (0x200008, 0, 0x802). Animate: Skeletal Archer 805040 triggers 500330, whose effect 0 is SPELL_EFFECT_SUMMON of creature 50076 with EffectBasePoints 2 + DieSides 1 = 3 ('Animate ${$500330m1} Skeletal Archers'), so the talent's modifier makes that effect 4 (rank 1) or 5 (rank 2). 500330 is bound to spell_ascension_necromancer_summon, which prevents the native summon and raised the fixed NecromancerSummons count of 3 whatever the modifiers said, so the talent summoned nothing extra. The count now applies the caster's effect modifiers for the summoning effect, as Spell::EffectSummonType does for the native effect value. A rank 1 Necromancer's cast must raise four archers and a rank 2 Necromancer's five; necromancer-audit-857-animate-skeletal-archer is the untalented control with three.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "rank1", "race": 5, "class": 23, "level": 80 },
+    { "id": "rank2", "race": 5, "class": 23, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the Life Force aura synchronize", "ms": 3000 },
+    { "action": "learn", "actor": "rank1", "spell": 805040 },
+    { "action": "learn", "actor": "rank1", "spell": 302518 },
+    { "action": "learn", "actor": "rank2", "spell": 805040 },
+    { "action": "learn", "actor": "rank2", "spell": 302921 },
+    {
+      "action": "assert", "label": "SETUP: the rank 1 passive is active", "actor": "rank1",
+      "metric": "aura", "spell": 302518, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: the rank 2 passive is active", "actor": "rank2",
+      "metric": "aura", "spell": 302921, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Rank 1 raises the summon helper's effect value from 3 to 4", "actor": "rank1",
+      "metric": "spell_effect_value", "spell": 500330, "effect": 0, "equals": 4
+    },
+    {
+      "action": "assert", "label": "Rank 2 raises the summon helper's effect value from 3 to 5", "actor": "rank2",
+      "metric": "spell_effect_value", "spell": 500330, "effect": 0, "equals": 5
+    },
+    {
+      "action": "assert", "label": "SETUP: rank 1 has no archer before the cast", "actor": "rank1",
+      "metric": "owned_creature_count", "entry": 50076, "equals": 0
+    },
+    {
+      "action": "assert", "label": "SETUP: rank 2 has no archer before the cast", "actor": "rank2",
+      "metric": "owned_creature_count", "entry": 50076, "equals": 0
+    },
+    { "action": "cast", "label": "Animate: Skeletal Archer with rank 1", "actor": "rank1", "spell": 805040 },
+    { "action": "cast", "label": "Animate: Skeletal Archer with rank 2", "actor": "rank2", "spell": 805040 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: rank 1 animates 3 + 1 Skeletal Archers", "actor": "rank1",
+      "metric": "owned_creature_count", "entry": 50076, "equals": 4, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: rank 2 animates 3 + 2 Skeletal Archers", "actor": "rank2",
+      "metric": "owned_creature_count", "entry": 50076, "equals": 5, "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let any late summon land", "ms": 1500 },
+    {
+      "action": "assert", "label": "Rank 1 keeps exactly four archers", "actor": "rank1",
+      "metric": "owned_creature_count", "entry": 50076, "equals": 4
+    },
+    {
+      "action": "assert", "label": "Rank 2 keeps exactly five archers", "actor": "rank2",
+      "metric": "owned_creature_count", "entry": 50076, "equals": 5
+    },
+    {
+      "action": "assert", "label": "The archers still occupy no Life Force: 2 free of 2", "actor": "rank2",
+      "metric": "aura_stacks", "spell": 525004, "equals": 2, "within_ms": 2000
+    }
+  ]
+}

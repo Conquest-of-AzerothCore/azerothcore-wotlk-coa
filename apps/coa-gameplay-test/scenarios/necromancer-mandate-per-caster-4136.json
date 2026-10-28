@@ -1,0 +1,190 @@
+{
+  "schema": 1,
+  "name": "necromancer-mandate-per-caster-4136",
+  "contract": [
+    "A Necromancer keeps one Mandate on each target (#4136, #6046): Grim Mandate 572787 replaces that Necromancer's",
+    "Foul Mandate 800199, and Greater Foul Mandate 680286 replaces that Necromancer's Grim Mandate. A Mandate from a",
+    "different Necromancer stays beside it."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "a",
+      "race": 5,
+      "class": 23,
+      "level": 60
+    },
+    {
+      "id": "b",
+      "race": 5,
+      "class": 23,
+      "level": 60
+    },
+    {
+      "id": "c",
+      "race": 5,
+      "class": 23,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "a",
+      "spell": 800199
+    },
+    {
+      "action": "learn",
+      "actor": "a",
+      "spell": 572787
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 800199
+    },
+    {
+      "action": "learn",
+      "actor": "c",
+      "spell": 572787
+    },
+    {
+      "action": "learn",
+      "actor": "c",
+      "spell": 680286
+    },
+    {
+      "action": "cast",
+      "actor": "a",
+      "spell": 800199,
+      "target": "a"
+    },
+    {
+      "action": "assert",
+      "actor": "a",
+      "metric": "aura",
+      "spell": 800199,
+      "caster": "a",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "a",
+      "spell": 572787,
+      "target": "a"
+    },
+    {
+      "action": "assert",
+      "actor": "a",
+      "metric": "aura",
+      "spell": 572787,
+      "caster": "a",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Grim Mandate replaces the same Necromancer's Foul Mandate",
+      "actor": "a",
+      "metric": "aura",
+      "spell": 800199,
+      "caster": "a",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 800199,
+      "target": "a"
+    },
+    {
+      "action": "assert",
+      "actor": "a",
+      "metric": "aura",
+      "spell": 800199,
+      "caster": "b",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Another Necromancer's Foul Mandate leaves the Grim Mandate in place",
+      "actor": "a",
+      "metric": "aura",
+      "spell": 572787,
+      "caster": "a",
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 572787,
+      "target": "c"
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "aura",
+      "spell": 572787,
+      "caster": "c",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 680286,
+      "target": "c"
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "aura",
+      "spell": 680286,
+      "caster": "c",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Greater Foul Mandate replaces the same Necromancer's Grim Mandate",
+      "actor": "c",
+      "metric": "aura",
+      "spell": 572787,
+      "caster": "c",
+      "equals": 0
+    }
+  ]
+}

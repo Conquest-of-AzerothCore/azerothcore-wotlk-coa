@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Optional second names: creation, loading, lookup, Who and commands",
-  "contract": "Single names and distinct full names with the same first word coexist. Creation and login preserve both words, and full-name lookups resolve the intended character.",
+  "name": "Optional second names: creation, loading, lookup, Who, commands and whispers",
+  "contract": "Single names and distinct full names with the same first word coexist. Creation and login preserve both words, and full-name lookups resolve the intended character. Commands and whispers reach a two-word name when it is quoted; an unquoted whisper goes to the first word alone.",
   "timeout_ms": 90000,
   "players": [
     { "id": "single", "name": "nAMEPROBE", "race": 1, "class": 8, "level": 20 },
@@ -30,6 +30,27 @@
     { "action": "assert", "actor": "single", "metric": "level", "equals": 20 },
     { "action": "console", "command": "character level Nameprobe 22" },
     { "action": "assert", "actor": "single", "metric": "level", "equals": 22 },
-    { "action": "assert", "actor": "first", "metric": "level", "equals": 21 }
+    { "action": "assert", "actor": "first", "metric": "level", "equals": 21 },
+    { "action": "console", "command": "character level \"Nameprobe Frost\" 23" },
+    { "action": "assert", "actor": "second", "metric": "level", "equals": 23 },
+    { "action": "assert", "actor": "single", "metric": "level", "equals": 22 },
+    { "action": "whisper", "actor": "long", "to": "Nameprobe", "text": "Ashvale hello one" },
+    { "action": "whisper", "actor": "long", "to": "\"Nameprobe", "text": "Ashvale\" hello two" },
+    { "action": "whisper", "actor": "long", "to": "\"Nameprobe", "text": "Frost\" hello three" },
+    { "action": "whisper", "actor": "long", "to": "\"Nameprobe\"", "text": "hello four" },
+    { "action": "whisper", "actor": "long", "to": "\"Nameprobe", "text": "hello five" },
+    { "action": "whisper", "actor": "single", "to": "\"Abcdefghijkl", "text": "hello six" },
+    { "action": "whisper", "actor": "single", "to": "Abcdefghijkl", "text": "hello seven" },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "actor": "single", "metric": "whispers_received", "from": "long", "text": "Ashvale hello one", "equals": 1 },
+    { "action": "assert", "actor": "first", "metric": "whispers_received", "from": "long", "text": "hello two", "equals": 1 },
+    { "action": "assert", "actor": "single", "metric": "whispers_received", "from": "long", "text": "hello two", "equals": 0 },
+    { "action": "assert", "actor": "second", "metric": "whispers_received", "from": "long", "text": "hello three", "equals": 1 },
+    { "action": "assert", "actor": "single", "metric": "whispers_received", "from": "long", "text": "hello four", "equals": 1 },
+    { "action": "assert", "actor": "single", "metric": "whispers_received", "from": "long", "text": "hello five", "equals": 0 },
+    { "action": "assert", "actor": "first", "metric": "whispers_received", "from": "long", "text": "hello five", "equals": 0 },
+    { "action": "assert", "actor": "second", "metric": "whispers_received", "from": "long", "text": "hello five", "equals": 0 },
+    { "action": "assert", "actor": "long", "metric": "whispers_received", "from": "single", "text": "hello six", "equals": 1 },
+    { "action": "assert", "actor": "long", "metric": "whispers_received", "from": "single", "text": "hello seven", "equals": 0 }
   ]
 }

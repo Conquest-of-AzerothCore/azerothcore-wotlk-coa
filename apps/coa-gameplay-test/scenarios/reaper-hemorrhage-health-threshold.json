@@ -1,0 +1,161 @@
+{
+  "schema": 1,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "reaper",
+      "entry": 36,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "name": "Hemorrhage grants critical chance and damage below 35% (#1265)",
+  "contract": [
+    "Hemorrhage adds twenty critical percentage points against enemies below 35% health.",
+    "Hemorrhage also adds twenty percent Reaper ability damage below 35% health.",
+    "The damage bonus is SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE on the target's AURA_STATE_HEALTHLESS_35_PERCENT, which Unit::Update refreshes from current health, while the crit bonus reads current health directly; each health change is therefore given world updates before the damage bonus is measured, in both directions."
+  ],
+  "timeout_ms": 60000,
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 60000
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "spell_taken_crit_chance",
+      "spell": 500517,
+      "target": "target",
+      "save_as": "crit_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "spell_damage_done",
+      "spell": 500517,
+      "target": "target",
+      "save_as": "damage_base"
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 705432
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 705432,
+      "equals": 1,
+      "label": "Hemorrhage passive is active"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_taken_crit_chance",
+      "spell": 500517,
+      "target": "target",
+      "relative_to": "crit_base",
+      "equals": 0,
+      "label": "No critical bonus above thirty-five percent"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_damage_done",
+      "spell": 500517,
+      "target": "target",
+      "relative_to": "damage_base",
+      "equals": 0,
+      "label": "No damage bonus above thirty-five percent"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 34000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "health_pct",
+      "max": 34.99,
+      "label": "Target below thirty-five percent"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_taken_crit_chance",
+      "spell": 500517,
+      "target": "target",
+      "relative_to": "crit_base",
+      "equals": 20,
+      "label": "Hemorrhage adds twenty critical points below threshold"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_damage_done",
+      "spell": 500517,
+      "target": "target",
+      "ratio_to": "damage_base",
+      "min": 1.19,
+      "max": 1.21,
+      "label": "Hemorrhage adds twenty percent damage below threshold"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 36000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "health_pct",
+      "min": 35.01,
+      "label": "Target returns above thirty-five percent"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_taken_crit_chance",
+      "spell": 500517,
+      "target": "target",
+      "relative_to": "crit_base",
+      "equals": 0,
+      "label": "Hemorrhage critical bonus ends above threshold"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_damage_done",
+      "spell": 500517,
+      "target": "target",
+      "relative_to": "damage_base",
+      "equals": 0,
+      "label": "Hemorrhage damage bonus ends above threshold"
+    }
+  ]
+}

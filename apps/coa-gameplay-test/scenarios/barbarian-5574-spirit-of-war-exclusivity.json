@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Spirit of War is exclusive with the other Spirits (#5574, fix #5651)",
+  "contract": "Issue #5574 (class 12 Barbarian, lvl 51): all Spirit auras show active on the stance bar at once. barbarian-spirit-self-exclusivity.json already proves this for Hunt (707763) vs Savagery (707775); it never casts Spirit of War (712467), the spell actually named by this issue's own prior batch note. aura_ascension_barbarian_lifecycle::Apply (AscensionBarbarianCompletion.cpp) runs its Spirit-exclusivity RemoveAurasDueToSpell loop over all five Spirits {707763, 707764, 707775, 712467, 712468} unconditionally, before the EFFECT_0 guard that broke it pre-#5651 for Hunt and Savagery (whose self markers sit on effect 1/2). This scenario exercises that same loop for War specifically, in both directions.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "b", "race": 1, "class": 12, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+
+    { "action": "learn", "actor": "b", "spell": 707763 },
+    { "action": "learn", "actor": "b", "spell": 712467 },
+
+    { "action": "cast", "actor": "b", "spell": 707763 },
+    { "action": "assert", "label": "Spirit of the Hunt applies its own aura", "actor": "b", "metric": "aura", "spell": 707763, "equals": 1, "within_ms": 3000 },
+
+    { "action": "cast", "actor": "b", "spell": 712467 },
+    { "action": "assert", "label": "Spirit of War applies its own aura", "actor": "b", "metric": "aura", "spell": 712467, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "CONTRACT: Spirit of War removes Spirit of the Hunt", "actor": "b", "metric": "aura", "spell": 707763, "equals": 0 },
+
+    { "action": "cast", "actor": "b", "spell": 707763 },
+    { "action": "assert", "label": "Re-casting Spirit of the Hunt applies its own aura again", "actor": "b", "metric": "aura", "spell": 707763, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "CONTRACT: Spirit of the Hunt removes Spirit of War", "actor": "b", "metric": "aura", "spell": 712467, "equals": 0 }
+  ]
+}

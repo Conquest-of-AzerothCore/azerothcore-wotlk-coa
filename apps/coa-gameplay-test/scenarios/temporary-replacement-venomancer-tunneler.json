@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "A Tunneler Spindlebind button is saved as Spindlebind (#5469)",
+  "contract": "AscensionVenomancer::Refresh runs every 500 ms from venomancer_player::OnPlayerUpdate (AscensionVenomancer.cpp:444-448). With the Tunneler talent 630932 ('Your Spindlebind now has 2 charges ... @s:504706') it learns the 2-charge Spindlebind 504706 with learnSpell(..., true) (line 407) and replaces every known Spindlebind rank (chain of 800887) with it through SetTemporarySpellReplacement (lines 402-410). 504706 is never written to character_spell, so a button holding it must be saved as Spindlebind 800887, the spell persisted_action_button reads from Player::GetSavedActionButtonSpell; a button holding Spindlebind itself is saved unchanged.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "v", "race": 1, "class": 29, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login state settle", "ms": 3000 },
+    { "action": "learn", "actor": "v", "spell": 800887 },
+    { "action": "learn", "actor": "v", "spell": 630932 },
+    {
+      "action": "assert",
+      "label": "Tunneler replaces Spindlebind with its 2-charge variant",
+      "actor": "v",
+      "metric": "temporary_spell_replacement",
+      "spell": 800887,
+      "equals": 504706,
+      "within_ms": 3000
+    },
+    { "action": "set_action_button", "actor": "v", "button": 2, "spell": 504706 },
+    { "action": "set_action_button", "actor": "v", "button": 3, "spell": 800887 },
+    {
+      "action": "assert",
+      "label": "The bar holds the Tunneler Spindlebind",
+      "actor": "v",
+      "metric": "action_button",
+      "button": 2,
+      "equals": 504706
+    },
+    {
+      "action": "assert",
+      "label": "The Tunneler Spindlebind button is saved as Spindlebind",
+      "actor": "v",
+      "metric": "persisted_action_button",
+      "button": 2,
+      "equals": 800887
+    },
+    {
+      "action": "assert",
+      "label": "Control: the Spindlebind button is saved unchanged",
+      "actor": "v",
+      "metric": "persisted_action_button",
+      "button": 3,
+      "equals": 800887
+    }
+  ]
+}

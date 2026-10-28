@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Warcraft Reborn Shaman Rockbiter Weapon (1108017) enchants the equipped weapon (#7834)",
+  "contract": [
+    "Rockbiter Weapon 1108017 (Warcraft Reborn Shaman, class 7): SpellFamilyName SHAMAN, FamilyFlags[0] 0x400000 (the stock Rockbiter family signature), effect 1 = SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY with MiscValue 10029 (SpellItemEnchantment: +12 attack power), damage 101.",
+    "Spell::EffectEnchantItemTmp (SpellEffects.cpp) special-cases the stock Rockbiter Weapon ranks by mapping their Effect[1] base-value damage to a hardcoded enchant spell id, gated by `GetSpellTwinSource(id) == id`. That check answers true both for a genuine stock rank and for any spell SpellMgr never registered as anybody's twin, since GetSpellTwinSource falls back to identity. 1108017 is not registered as a twin, so it took the hardcoded branch, whose switch has no case for damage 101, logging 'Damage 101 not handled in S'RW' and returning without enchanting the weapon at all.",
+    "Reproduced before the fix: casting 1108017 on an equipped weapon left temp enchant slot 1 (TEMP_ENCHANTMENT_SLOT) at 0 and logged that error. The fix adds `m_spellInfo->Id < 100000` to the branch's guard (CoA custom spell ids are all 100000 and above), so 1108017 now falls through to the generic enchant path and applies its own MiscValue enchant 10029."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "s", "race": 2, "class": 7, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "add_item", "actor": "s", "item": 36 },
+    { "action": "equip", "actor": "s", "item": 36, "slot": 15 },
+    { "action": "learn", "actor": "s", "spell": 1108017 },
+    {
+      "action": "assert", "label": "SETUP: the weapon has no temp enchant yet", "actor": "s",
+      "metric": "item_enchantment", "item": 36, "slot": 1, "equals": 0
+    },
+    { "action": "cast", "actor": "s", "spell": 1108017, "target_item": 36 },
+    { "action": "assert", "actor": "s", "metric": "cast_failure", "spell": 1108017, "equals": 0 },
+    {
+      "action": "assert", "label": "Rockbiter Weapon enchants the equipped weapon with its own enchant 10029", "actor": "s",
+      "metric": "item_enchantment", "item": 36, "slot": 1, "equals": 10029, "within_ms": 2000
+    }
+  ]
+}

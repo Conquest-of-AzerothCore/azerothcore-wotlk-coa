@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "name": "Lifestealer raises Soul Strike missing-health healing (#1827)",
+  "contract": "Lifestealer 301366 adds three points to Soul Strike's missing-health percentage (500574).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Soul Strike restores 10% of missing health without Lifestealer",
+      "actor": "reaper",
+      "metric": "spell_effect_value",
+      "spell": 500574,
+      "effect": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "No flat talent modifier before learning Lifestealer",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 500574,
+      "op": 3,
+      "base": 10,
+      "equals": 10
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 301366
+    },
+    {
+      "action": "assert",
+      "label": "Lifestealer increases the missing-health percentage to 13",
+      "actor": "reaper",
+      "metric": "spell_effect_value",
+      "spell": 500574,
+      "effect": 0,
+      "equals": 13
+    },
+    {
+      "action": "assert",
+      "label": "Lifestealer adds three flat points to the missing-health effect",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 500574,
+      "op": 3,
+      "base": 10,
+      "equals": 13
+    },
+    {
+      "action": "unlearn",
+      "actor": "reaper",
+      "spell": 301366
+    },
+    {
+      "action": "assert",
+      "label": "Removing Lifestealer restores the base missing-health percentage",
+      "actor": "reaper",
+      "metric": "spell_effect_value",
+      "spell": 500574,
+      "effect": 0,
+      "equals": 10
+    }
+  ]
+}

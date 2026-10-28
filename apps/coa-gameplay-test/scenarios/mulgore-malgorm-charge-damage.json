@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "name": "Malgorm charge damages players along its path without forced instant kills (#7019)",
+  "contract": [
+    "Malgorm's charge must keep running past its target and damage a second player on the telegraphed line. Charge 256745 uses its authored 156-180 damage roll with native creature-level scaling and mitigation, instead of a one-million-damage override. The bystander has 5000 fixture health and no regeneration. After observing a charge cast, the bystander must lose health and remain alive; merely surviving before the charge hits is insufficient. The primary target retains its high-health fixture so the encounter can reach the charge."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -2712.6,
+    "y": 19.0,
+    "z": 14.5,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 6,
+      "class": 1,
+      "level": 10
+    },
+    {
+      "id": "bystander",
+      "race": 6,
+      "class": 1,
+      "level": 7,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "malgorm",
+      "owner": "hero",
+      "entry": 161816,
+      "faction": 16,
+      "level": 7,
+      "health": 100000,
+      "reaction": 2,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 2156414,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 5000000
+    },
+    {
+      "action": "set_health",
+      "actor": "bystander",
+      "maximum": 5000,
+      "value": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "bystander",
+      "map": 1,
+      "x": -2716.6,
+      "y": 19.0,
+      "z": 14.5,
+      "o": 0
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "malgorm"
+    },
+    {
+      "action": "assert",
+      "label": "The charge tramples his target",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "spell": 256745,
+      "entry": 161816,
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "wait",
+      "label": "Allow the charge to pass the bystander",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The charge damages the bystander without a forced instant kill",
+      "actor": "bystander",
+      "metric": "health",
+      "min": 1,
+      "max": 4999,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The bystander survives normal charge damage",
+      "actor": "bystander",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "His hardened target survives",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

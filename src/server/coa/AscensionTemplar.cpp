@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <memory>
 #include <mutex>
+#include <set>
 #include <unordered_map>
 
 namespace AscensionTemplar
@@ -127,9 +128,18 @@ void ReduceLibrams(Player* player, int32 milliseconds)
 }
 void Replacement(Player* player, uint32 root, uint32 replacement)
 {
+    if (replacement && !player->HasActiveSpell(replacement))
+        player->learnSpell(replacement, true);
+    std::set<uint32> lent;
     for (auto const& pair : player->GetSpellMap())
         if (player->HasSpell(pair.first) && Named(sSpellMgr->GetSpellInfo(pair.first), root))
+        {
+            if (!replacement)
+                lent.insert(player->GetTemporarySpellReplacement(pair.first));
             player->SetTemporarySpellReplacement(pair.first, replacement);
+        }
+    for (uint32 id : lent)
+        player->removeSpell(id, SPEC_MASK_ALL, true);
 }
 void ClearOaths(Player* player)
 {
@@ -156,8 +166,8 @@ void GrantOath(Player* player, uint32 oath)
     Cast(player, player, 704576);
     if (Aura* aura = player->GetAura(704576))
     {
-        aura->SetDuration(first ? aura->GetMaxDuration() : duration);
-        if (Aura* granted = first ? player->GetAura(oath) : nullptr)
+        aura->SetDuration(aura->GetMaxDuration());
+        if (Aura* granted = player->GetAura(oath))
             granted->SetDuration(aura->GetDuration());
     }
     if (first && State(player).retribution)
@@ -202,19 +212,10 @@ void Zealotry(Player* player, Unit* target, bool repeat)
     if (!target || !player->IsValidAttackTarget(target))
         return;
     Cast(player, target, 801450);
-    if (!repeat && ((player->HasAura(572554) && roll_chance_i(10)) ||
-                    (!player->HasAura(572554) && player->HasAura(572548) && roll_chance_i(10))))
+    uint32 sermon = player->HasAura(572554) ? 572554 : player->HasAura(572548) ? 572548 : 0;
+    SpellInfo const* info = sermon ? sSpellMgr->GetSpellInfo(sermon) : nullptr;
+    if (!repeat && info && roll_chance_i(info->ProcChance))
         Zealotry(player, target, true);
-}
-uint32 HopeCount(Player* player)
-{
-    uint32 count = 0;
-    for (ObjectGuid guid : State(player).copies)
-        if (Creature* unit = ObjectAccessor::GetCreature(*player, guid))
-            if (unit->IsAlive() && unit->GetOwnerGUID() == player->GetGUID() && player->InSamePhase(unit) &&
-                player->IsWithinDistInMap(unit, 15.0f))
-                ++count;
-    return count;
 }
 void SpreadCondemn(Player* player, Unit* target)
 {
@@ -286,6 +287,8 @@ class templar_player : public PlayerScript
                                state.copies.end());
             if (!player->IsAlive())
                 AscensionTemplar::ClearOaths(player);
+            if (player->HasAura(705303) && !player->CanParry())
+                player->SetCanParry(true);
             if (player->HasAura(560096) && !player->HasAura(567572))
                 AscensionTemplar::Cast(player, player, 567572);
             else if (!player->HasAura(560096) && player->HasAura(567572, player->GetGUID()))

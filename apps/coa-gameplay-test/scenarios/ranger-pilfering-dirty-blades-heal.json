@@ -1,0 +1,172 @@
+{
+  "schema": 1,
+  "name": "Ranger Pilfering: Dirty Blades swings heal for 50% of Dirty Blades' damage (#2516)",
+  "contract": "Pilfering 705087 adds 10 percentage points to Dirty Blades 680276's native effect-0 modifier and heals for 50% of its actual Nature damage. Dirty Blades now casts 520571 from landed melee auto attacks; that helper's AfterHit observes damage after resistance and absorption, then casts 520880 using Pilfering's effect-1 percentage. Without Dirty Blades, white swings produce neither Nature damage nor a heal. With both buffs, the Dirty Blades amount is 80 and an unabsorbed Nature hit heals half its resolved damage, rounded down. The level-28 ordinary-cast, healing-debuff and Nature-absorb controls are in ranger-dirty-blades-6714.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "golem",
+      "owner": "ranger",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Fixture stun, so the golem neither fights back nor avoids swings",
+      "actor": "ranger",
+      "spell": 23775
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 23775,
+      "target": "golem"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the golem is stunned",
+      "actor": "golem",
+      "metric": "aura",
+      "spell": 23775,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 705087
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Pilfering is active on the Ranger",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 705087,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_health",
+      "label": "Leave room for the heal",
+      "actor": "ranger",
+      "value": 100
+    },
+    {
+      "action": "attack",
+      "actor": "ranger",
+      "target": "golem"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: a swing lands without Dirty Blades",
+      "actor": "ranger",
+      "metric": "melee_damage_count",
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Without Dirty Blades Pilfering heals nothing",
+      "actor": "ranger",
+      "metric": "spell_heal_count",
+      "spell": 520880,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Dirty Blades for its 4 seconds",
+      "actor": "ranger",
+      "spell": 680276,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "ranger",
+      "metric": "spell_damage_total",
+      "save_as": "nature_before",
+      "spell": 520571
+    },
+    {
+      "action": "snapshot",
+      "actor": "ranger",
+      "metric": "spell_heal_total",
+      "spell": 520880,
+      "save_as": "heal_before"
+    },
+    {
+      "action": "assert",
+      "label": "Dirty Blades carries Pilfering's +10",
+      "actor": "ranger",
+      "metric": "aura_amount",
+      "spell": 680276,
+      "effect": 0,
+      "equals": 80
+    },
+    {
+      "action": "assert",
+      "label": "A Dirty Blades swing heals the Ranger",
+      "actor": "ranger",
+      "metric": "spell_heal_count",
+      "spell": 520880,
+      "min": 1,
+      "within_ms": 3500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ranger"
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 680276,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "ranger",
+      "metric": "spell_damage_total",
+      "relative_to": "nature_before",
+      "save_as": "blades_nature",
+      "spell": 520571
+    },
+    {
+      "action": "assert",
+      "label": "The heal is 50% of resolved Dirty Blades Nature damage, rounded per hit",
+      "actor": "ranger",
+      "metric": "spell_heal_total",
+      "spell": 520880,
+      "relative_to": "heal_before",
+      "ratio_to": "blades_nature",
+      "min": 0.45,
+      "max": 0.501
+    }
+  ]
+}

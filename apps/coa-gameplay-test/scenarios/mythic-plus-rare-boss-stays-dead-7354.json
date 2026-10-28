@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Mythic+ rare wing bosses stay dead for the run (#7354)",
+  "contract": [
+    "#7354: rare mobs the client lists as bosses respawned during a keystone run. Ironspine (6489, spawn 9780157) is",
+    "a Scarlet Monastery - Graveyard encounter (DungeonEncounterExtra 2606) with a 300 s spawn timer. Killed without a",
+    "key it respawns within the hour; killed during a +2 Graveyard run it stays dead for the instance (a week)."
+  ],
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 60 },
+    { "id": "plain", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "set_health", "actor": "hero", "value": 5000000, "maximum": 5000000 },
+    { "action": "set_health", "actor": "plain", "value": 5000000, "maximum": 5000000 },
+    { "action": "teleport", "actor": "plain", "map": 189, "x": 1688.99, "y": 1053.48, "z": 18.68 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "set_phase", "label": "Join world phase 1, where the Graveyard is spawned", "actor": "plain", "value": 1 },
+    { "action": "wait", "ms": 2500 },
+    { "action": "teleport", "actor": "plain", "map": 189, "x": 1836.8, "y": 1311.0, "z": 18.9 },
+    { "action": "wait", "ms": 300 },
+    { "action": "attack_nearby", "actor": "plain", "entry": 6489, "kill": true },
+    { "action": "assert", "label": "CONTROL: without a key Ironspine respawns within the hour", "actor": "plain", "metric": "spawn_respawn_remaining", "spawn": 9780157, "min": 1, "max": 3600, "within_ms": 1000 },
+    { "action": "ascension_dungeon_difficulty_packet", "actor": "hero", "value": 2 },
+    { "action": "wait", "ms": 250 },
+    { "action": "teleport", "actor": "hero", "map": 189, "x": 1688.99, "y": 1053.48, "z": 18.68 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "add_item", "actor": "hero", "item": 1234535, "count": 1 },
+    { "action": "use_item", "actor": "hero", "item": 1234535, "spell": 161 },
+    { "action": "assert", "label": "CONTROL: socket window", "actor": "hero", "metric": "server_packets", "opcode": 2310, "equals": 1, "within_ms": 1000 },
+    { "action": "client_packet", "actor": "hero", "opcode": 1319 },
+    { "action": "wait", "ms": 10500 },
+    { "action": "assert", "label": "CONTROL: the run is under way", "actor": "hero", "metric": "server_packet_u8", "opcode": 2312, "index": 8, "equals": 3, "within_ms": 2000 },
+    { "action": "set_phase", "label": "Join world phase 1, where the Graveyard is spawned", "actor": "hero", "value": 1 },
+    { "action": "wait", "ms": 2500 },
+    { "action": "assert", "label": "CONTROL: the keyed instance has its own living Ironspine", "actor": "hero", "metric": "spawn_respawn_remaining", "spawn": 9780157, "equals": 0 },
+    { "action": "teleport", "actor": "hero", "map": 189, "x": 1836.8, "y": 1311.0, "z": 18.9 },
+    { "action": "wait", "ms": 300 },
+    { "action": "attack_nearby", "actor": "hero", "entry": 6489, "kill": true },
+    { "action": "assert", "label": "CONTROL: Ironspine counts as a Graveyard encounter", "actor": "hero", "metric": "server_packet_u32", "opcode": 2313, "index": 1, "equals": 2606, "within_ms": 1000 },
+    { "action": "assert", "label": "Ironspine stays dead for the rest of the keystone's instance", "actor": "hero", "metric": "spawn_respawn_remaining", "spawn": 9780157, "min": 86400 }
+  ]
+}

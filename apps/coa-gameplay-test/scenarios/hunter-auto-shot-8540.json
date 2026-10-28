@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Hunter: Auto Shot fires with a bow and arrows in the bags (#8540)",
+  "contract": "Auto Shot 75 is an auto-repeat ranged spell. With a bow in the ranged slot and matching arrows carried, starting Auto Shot at a target beyond melee range must produce ranged damage; drawing the weapon without firing means the start was refused or the attack type was wrong. The report was already reported unreproducible with a bow, arrows and a 10-25 yd target, so this scenario holds that reproduction.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "hunter", "race": 1, "class": 3, "level": 20 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "hunter", "entry": 36, "faction": 14, "level": 20, "health": 100000, "distance": 15 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "hunter", "spell": 75 },
+    { "action": "learn", "label": "Learn Bows proficiency", "actor": "hunter", "spell": 264 },
+    { "action": "add_item", "actor": "hunter", "item": 559993 },
+    { "action": "equip", "actor": "hunter", "item": 559993, "slot": 17 },
+    { "action": "add_item", "actor": "hunter", "item": 2512, "count": 200 },
+    {
+      "action": "assert", "label": "SETUP: the bow occupies the ranged slot",
+      "actor": "hunter", "metric": "equipped_item", "slot": 17, "equals": 559993
+    },
+    {
+      "action": "assert", "label": "SETUP: arrows are carried",
+      "actor": "hunter", "metric": "item_count", "item": 2512, "min": 1
+    },
+    { "action": "snapshot", "label": "Remember the enemy's health", "actor": "enemy", "metric": "health", "save_as": "before" },
+    { "action": "cast", "label": "Start Auto Shot", "actor": "hunter", "spell": 75, "target": "enemy" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Auto Shot is not refused",
+      "actor": "hunter", "metric": "cast_failure", "spell": 75, "equals": 0
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the enemy takes ranged damage",
+      "actor": "enemy", "metric": "health", "relative_to": "before", "max": -1, "within_ms": 5000
+    }
+  ]
+}

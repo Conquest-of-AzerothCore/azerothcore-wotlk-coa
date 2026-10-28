@@ -1,0 +1,398 @@
+{
+  "schema": 1,
+  "name": "Runic Obliteration proc buff transforms the actual Blast and restores it (#6381)",
+  "contract": "An owned Runic Obliteration buff replaces known Primordial Blast. A normal cast through the original button fires three native missiles and generates Frost, Flame and Arcane glyphs, consumes the buff and restores the parent. Natural expiry, unlearning/relearning and a real relog also restore routing while preserving an independently owned child. Native Elemental Burst proc acquisition is covered by runemaster-audit-2734-runic-obliteration. Before equipping the independently authored 145-SP staff, calculate a native damage control from 63 base damage, the integer contribution of 44% of 145. With the staff equipped, a zero-base missile must match that control through the same damage modifiers. No glyph talents are active during this coefficient check.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 32,
+      "level": 60,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "p",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 800732
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 10040,
+      "stacks": 3
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "max_power",
+      "power": 0,
+      "min": 20000,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "temporary_spell_replacement",
+      "spell": 800732,
+      "equals": 800732
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 805794,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 227
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 22800
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_power",
+      "school": 4,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "spell_damage_done",
+      "spell": 807014,
+      "base": 63,
+      "target": "enemy",
+      "save_as": "expected_staff_contribution"
+    },
+    {
+      "action": "equip",
+      "actor": "p",
+      "item": 22800,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_power",
+      "school": 4,
+      "equals": 145
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_done",
+      "spell": 807014,
+      "base": 0,
+      "target": "enemy",
+      "relative_to": "expected_staff_contribution",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 705560
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 92152
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 705625
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 805727
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 805742,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "temporary_spell_replacement",
+      "spell": 800732,
+      "equals": 805794,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 805794,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 800732,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 807014,
+      "target": "enemy",
+      "within_ms": 4000,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 520090,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 520091,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 520092,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 805742,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "temporary_spell_replacement",
+      "spell": 800732,
+      "equals": 800732
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 805794,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 805742,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "temporary_spell_replacement",
+      "spell": 800732,
+      "equals": 805794,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 805742,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "temporary_spell_replacement",
+      "spell": 800732,
+      "equals": 800732
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 805794,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 800732,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 805794
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 805742,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "temporary_spell_replacement",
+      "spell": 800732,
+      "equals": 805794
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "temporary_spell_replacement",
+      "spell": 800732,
+      "equals": 800732
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 805794,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 805742,
+      "stacks": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "p",
+      "spell": 800732,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "temporary_spell_replacement",
+      "spell": 800732,
+      "equals": 800732
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 805794,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 800732
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "temporary_spell_replacement",
+      "spell": 800732,
+      "equals": 805794
+    },
+    {
+      "action": "relog",
+      "actor": "p"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 805742,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "temporary_spell_replacement",
+      "spell": 800732,
+      "equals": 800732
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 805794,
+      "equals": 1
+    }
+  ]
+}

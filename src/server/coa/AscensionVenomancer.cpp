@@ -323,19 +323,45 @@ void Spread(Player* player, Unit* source, Unit* target, uint32 root)
         return;
     }
 }
-void ApplyVenoms(Player* player, Unit* target)
+void ApplyVenoms(Player* player, Unit* target, bool fromSpiderling)
 {
     for (auto [activation, helper] : {std::pair(630868u,630869u), std::pair(805731u,805895u),
         std::pair(805775u,805894u), std::pair(805776u,805896u), std::pair(805777u,805897u), std::pair(805778u,706000u)})
         if (player->HasAura(activation))
         {
-            if (helper == 805894)
+            if (fromSpiderling && helper == 706000)
+            {
+                SpellInfo const* info = sSpellMgr->GetSpellInfo(helper);
+                if (!info || !player->IsInWorld() || !target || !target->IsAlive())
+                    continue;
+                SpellCastTargets targets;
+                targets.SetUnitTarget(target);
+                Spell* venom = new Spell(player, info, TRIGGERED_FULL_MASK);
+                venom->SetScriptValue(SpiderlingVenomSource, 1);
+                venom->prepare(&targets);
+            }
+            else if (helper == 805894)
                 Cast(player, player, helper);
             else if (helper == 630869)
                 player->CastSpell(target->GetPositionX(),target->GetPositionY(),target->GetPositionZ(),helper,true);
             else
                 Cast(player, target, helper);
         }
+}
+void UpdateSpiderLordDisplay(Player* player)
+{
+    bool spiderLord = player->HasAura(Beetle) && player->HasAura(SpiderLord);
+    uint32 beetleDisplay = player->GetModelForForm(player->GetShapeshiftForm(), Beetle);
+    if (spiderLord && beetleDisplay && player->GetDisplayId() == beetleDisplay)
+    {
+        float boundingRadius = player->GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS);
+        float combatReach = player->GetCombatReach();
+        player->SetDisplayId(SpiderLordDisplay);
+        player->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, boundingRadius);
+        player->SetFloatValue(UNIT_FIELD_COMBATREACH, combatReach);
+    }
+    else if (!spiderLord && player->GetDisplayId() == SpiderLordDisplay)
+        player->RestoreDisplayId();
 }
 void Refresh(Player* player)
 {
@@ -352,7 +378,8 @@ void Refresh(Player* player)
     SetHelper(player, 560281, player->IsAlive() && player->HasAura(800912));
     SetHelper(player, 800293, spider && player->HasAura(805104));
     SetHelper(player, 800389, spider && player->HasAura(805140));
-    SetHelper(player, 805139, beetle && player->HasAura(704264));
+    SetHelper(player, 805139, beetle && player->HasAura(SpiderLord));
+    UpdateSpiderLordDisplay(player);
     SetHelper(player, 504792, player->HasAura(503856));
     SetAmount(player, 803216, 1, int32(5 * (player->GetStat(STAT_INTELLECT) + player->GetStat(STAT_AGILITY))));
     SetAmount(player, 705970, 0, beetle ? Amount(705970) : 0);
@@ -383,16 +410,17 @@ void Refresh(Player* player)
         else if (!enabled)
             player->removeSpell(active, SPEC_MASK_ALL, true);
     }
-    for (auto [root, replacement, enabled] : {std::tuple(800880u,504705u,
-             player->HasAura(807600) && Count(player,807244) >= 2),
-             std::tuple(800887u,504706u,player->HasAura(630932))})
+    bool widowsKiss = player->HasAura(807600);
+    for (auto [root, replacement, known, enabled] : {std::tuple(800880u,504705u,widowsKiss,
+             widowsKiss && Count(player,807244) >= 2),
+             std::tuple(800887u,504706u,player->HasAura(630932),player->HasAura(630932))})
     {
-        if (enabled && !player->HasSpell(replacement))
+        if (known && !player->HasSpell(replacement))
             player->learnSpell(replacement, true);
         for (auto const& pair : player->GetSpellMap())
             if (player->HasSpell(pair.first) && Named(sSpellMgr->GetSpellInfo(pair.first),root))
                 player->SetTemporarySpellReplacement(pair.first,enabled ? replacement : 0);
-        if (!enabled)
+        if (!known)
             player->removeSpell(replacement,SPEC_MASK_ALL,true);
     }
     if (!state.host.IsEmpty())
@@ -440,8 +468,19 @@ public:
         states.erase(player->GetGUID());
     }
 };
+class venomancer_unit : public UnitScript
+{
+public:
+    venomancer_unit() : UnitScript("venomancer_unit", true, {UNITHOOK_ON_DISPLAYID_CHANGE}) { }
+    void OnDisplayIdChange(Unit* unit, uint32) override
+    {
+        if (Player* player = AscensionVenomancer::Owner(unit); player == unit)
+            AscensionVenomancer::UpdateSpiderLordDisplay(player);
+    }
+};
 }
 void AddSC_AscensionVenomancer()
 {
     new venomancer_player();
+    new venomancer_unit();
 }

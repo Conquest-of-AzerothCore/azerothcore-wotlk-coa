@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "name": "Berserker Axe spends its charges on a 1 second global cooldown (#4327)",
+  "contract": "Berserker Axe rank 2 (503408) requires Enraged, has 3 charges on an 8 sec recharge and a StartRecoveryTime of 1000 ms in Spell.dbc (AscensionDB: GCD 1.0 sec). An enraged Barbarian with a thrown weapon may cast it, spending one charge, and the global cooldown it starts must be 1000 ms rather than the 1500 ms default.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "barbarian",
+      "race": 1,
+      "class": 12,
+      "level": 22,
+      "ranged_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "barbarian",
+      "entry": 36,
+      "level": 22,
+      "health": 500000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "barbarian",
+      "item": 585
+    },
+    {
+      "action": "equip",
+      "actor": "barbarian",
+      "item": 585,
+      "slot": 17
+    },
+    {
+      "action": "learn",
+      "actor": "barbarian",
+      "spell": 503408
+    },
+    {
+      "action": "assert",
+      "label": "Berserker Axe starts with 3 charges",
+      "actor": "barbarian",
+      "metric": "spell_charges",
+      "spell": 503408,
+      "equals": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "barbarian",
+      "spell": 801761,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "barbarian",
+      "spell": 503408,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "One cast spends one charge",
+      "actor": "barbarian",
+      "metric": "spell_charges",
+      "spell": 503408,
+      "equals": 2,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "The global cooldown is 1 second",
+      "actor": "barbarian",
+      "metric": "global_cooldown_ms",
+      "spell": 503408,
+      "min": 900,
+      "max": 1000
+    }
+  ]
+}

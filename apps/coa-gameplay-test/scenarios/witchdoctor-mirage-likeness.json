@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Mirage leaves a clone of the doctor that runs away (#298)",
+  "contract": "Mirage 501136 reads: 'Become invisible for $d, gaining 5 Spirits, leaving a copy of yourself behind, and reducing threat each second.' Its effect 2 summons Uncanny Likeness 840000 (SummonProperties 64), the same creature Haunt 573425 summons with the text 'Create a visage of yourself that runs away from you to fool enemies'. A copy of the doctor must look like the doctor, including customization and equipment: the native way to make a creature render as a specific player is the clone-caster aura (Clone Me! 45204, SPELL_AURA_CLONE_CASTER), which sets the caster's display and the mirror-image flag so the client asks for the player's appearance (SMSG_MIRRORIMAGE_DATA); a bare player display id without it renders an uncustomized, untextured body (the reported white figure). The copy therefore carries the doctor's Clone Me! aura and display, and, as the shared Uncanny Likeness does for Haunt, runs away from the doctor instead of standing at the cast point. While invisible the doctor cannot see it (native invisibility detection), which is not observable here.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "doctor", "race": 1, "class": 13, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the character settle", "ms": 3000 },
+    { "action": "learn", "actor": "doctor", "spell": 501136 },
+    { "action": "cast", "label": "Mirage", "actor": "doctor", "spell": 501136 },
+    {
+      "action": "assert", "label": "The doctor turns invisible", "actor": "doctor", "metric": "aura", "spell": 501136,
+      "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Mirage leaves one copy", "actor": "doctor", "metric": "owned_creature_count",
+      "entry": 840000, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "#298: the copy clones the doctor's appearance", "actor": "doctor",
+      "metric": "owned_creature_count", "entry": 840000, "spell": 45204, "caster": "doctor", "equals": 1
+    },
+    {
+      "action": "assert", "label": "The copy wears the doctor's display", "actor": "doctor",
+      "metric": "owned_creature_count", "entry": 840000, "owner_display": true, "equals": 1
+    },
+    { "action": "wait", "label": "Give the copy time to run", "ms": 4000 },
+    {
+      "action": "assert", "label": "#298: the copy has run away from the doctor", "actor": "doctor",
+      "metric": "owned_creature_count", "entry": 840000, "min_distance": 8, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The copy still carries the clone", "actor": "doctor",
+      "metric": "owned_creature_count", "entry": 840000, "spell": 45204, "caster": "doctor", "equals": 1
+    }
+  ]
+}

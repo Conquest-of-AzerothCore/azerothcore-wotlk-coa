@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "name": "Cultist: Presence of N'Zoth grows its Tentacle out of the caster (#8638)",
+  "contract": "Presence of N'Zoth 803037 (Spell.dbc) is a proc aura; its client description reads 'giving damage dealt a $h% chance to summon Tentacles on your back that attack a nearby enemy for $500707d'. Spell.dbc carries no summon effect for it: aura_ascension_cultist_event's 803037 branch calls AscensionCultist::Summon(500464, ...) directly, so its placement and appearance are the script's choice. The 'on your back' half is a client visual, not a world object: the Ascension client accepts SMSG_OVERRIDE_SPELL_VISUAL (0x662, u64 guid, u32 spell, u32 visual; AuraScript-side AscSpellVisuals) and renders a spell's StateKit models at the unit's attachment points while its aura is up. Eldritch Tentacle 500707 is the carrier - it has an 8 sec dummy aura on the caster and its shipped SpellVisual is 0 - so the branch sends (caster, 500707, 889830) and applies 500707's aura on the caster; 889830 is the shipped cultist tentacle visual whose StateKit 863071 attaches six cfx_priest_voidform_tentacle models at attachment points 5/6 (shoulders/upper back). The attacking creature 500464 is still summoned for the silence and the 8 sec lifetime, but at the caster and hidden from rendering, because a visible Yogg-Saron tentacle standing on the ground beside the cultist is exactly the #8638 report. Unit::SetVisible(false) alone is not enough: WorldObject::CanSeeOrDetect returns true early for obj->IsAlwaysVisibleFor(seer), and Unit::IsAlwaysVisibleFor answers true when the seer is the summon's charmer or owner, so the caster kept receiving and rendering their own carrier even though no other player did - which is why this check reads owned_creature_display (the model the client is told to render) and not only the object's visibility flag. The carrier therefore also swaps to display 11686 (InvisibleStalker) and drops UNIT_FLAG_NOT_SELECTABLE. A direct 500707 cast (the learnable Eldritch Tentacle ability, whose client description summons the tentacle at the target location) is untouched and must stay visible. Expected: damage summons a living 500464 owned by the caster and hidden from clients, the proc leaves the 8 sec 500707 aura on the caster (the visual carrier), the Tentacle silences the enemy whose damage triggered it with 806596, and it still expires on its 8 sec lifetime; casting 500707 directly afterwards summons a visible 500464. Coverage limit: the harness cannot observe client-rendered attached models or the 0x662 packet, so only the aura carrier, the summon's hidden state, its placement and its behaviour are covered.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "cultist", "entry": 36, "level": 80, "health": 5000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "cultist", "spell": 803037 },
+    { "action": "learn", "actor": "cultist", "spell": 43429 },
+    { "action": "learn", "actor": "cultist", "spell": 17742 },
+    {
+      "action": "assert", "label": "SETUP: no Eldritch Tentacle exists yet",
+      "actor": "cultist", "metric": "owned_creature_count", "entry": 500464, "equals": 0
+    },
+    { "action": "cast", "label": "Apply Presence of N'Zoth", "actor": "cultist", "spell": 803037 },
+    {
+      "action": "assert", "label": "SETUP: Presence of N'Zoth is active",
+      "actor": "cultist", "metric": "aura", "spell": 803037, "equals": 1, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Let Presence's global cooldown expire", "ms": 1700 },
+    { "action": "cast", "label": "Feed periodic damage through the first ground effect", "actor": "cultist", "spell": 43429 },
+    {
+      "action": "assert", "label": "SETUP: the first ground effect is burning the golem",
+      "actor": "cultist", "metric": "dynamic_object", "spell": 43429, "equals": 1, "within_ms": 2000
+    },
+    { "action": "cast", "label": "Add the second ground effect", "actor": "cultist", "spell": 17742 },
+    {
+      "action": "assert", "label": "SETUP: the second ground effect is burning the golem",
+      "actor": "cultist", "metric": "dynamic_object", "spell": 17742, "equals": 1, "within_ms": 2000
+    },
+    { "action": "attack", "label": "Melee damage adds proc events", "actor": "cultist", "target": "golem" },
+    {
+      "action": "assert", "label": "Damage dealt summons a Tentacle through Presence of N'Zoth",
+      "actor": "cultist", "metric": "owned_creature_count", "entry": 500464, "min": 1, "within_ms": 19000
+    },
+    {
+      "action": "assert", "label": "The Presence Tentacle renders as the invisible stalker model, so no Yogg-Saron tentacle stands on the ground",
+      "actor": "cultist", "metric": "owned_creature_display", "entry": 500464, "equals": 11686
+    },
+    {
+      "action": "assert", "label": "The Tentacle silences the enemy whose damage summoned it",
+      "actor": "golem", "metric": "aura", "spell": 806596, "equals": 1, "within_ms": 7000
+    },
+    {
+      "action": "assert", "label": "The proc applies the 8 sec Eldritch Tentacle aura whose client visual is the attached back tentacles",
+      "actor": "cultist", "metric": "aura", "spell": 500707, "equals": 1
+    },
+    { "action": "set_aura", "label": "Remove Presence so no later Tentacle can be summoned", "actor": "cultist", "spell": 803037, "stacks": 0 },
+    { "action": "stop_attack", "actor": "cultist" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Thoughtseize's periodic damage ticks with the caster's spell power, not the carrier's",
+      "actor": "cultist", "metric": "spell_damage_total", "spell": 806596, "target": "golem", "min": 1, "within_ms": 8000
+    },
+    {
+      "action": "assert", "label": "SETUP: the carrier is still alive for the placement check",
+      "actor": "cultist", "metric": "owned_creature_count", "entry": 500464, "min": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the carrier stays on the caster instead of standing 2-6 yards away on the ground",
+      "actor": "cultist", "metric": "owned_creature_count", "entry": 500464, "min_distance": 2.5, "equals": 0
+    },
+    { "action": "wait", "label": "Outlast the 8 sec Eldritch Tentacle lifetime", "ms": 9000 },
+    {
+      "action": "assert", "label": "The Presence Tentacle still expires on its 8 sec lifetime",
+      "actor": "cultist", "metric": "owned_creature_count", "entry": 500464, "equals": 0
+    },
+    { "action": "learn", "actor": "cultist", "spell": 500707 },
+    { "action": "cast", "label": "Cast Eldritch Tentacle directly, which is a real ground tentacle", "actor": "cultist", "spell": 500707 },
+    {
+      "action": "assert", "label": "The direct cast still summons its Tentacle",
+      "actor": "cultist", "metric": "owned_creature_count", "entry": 500464, "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTROL: the direct cast keeps the visible Yogg-Saron tentacle model",
+      "actor": "cultist", "metric": "owned_creature_visible", "entry": 500464, "equals": 1
+    }
+  ]
+}

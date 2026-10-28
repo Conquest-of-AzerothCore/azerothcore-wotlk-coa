@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Soothing Flames adds a 30% HoT after Kindle heals an ally (#5234)",
+  "contract": "#5234: Soothing Flames 704855's Description reads 'Healing done by Kindle and Cinderheart now additionally heals the target for 30% of the healing done over $807403d' -- 807403 is a SPELL_AURA_PERIODIC_HEAL aura on the ally. aura_ascension_pyromancer_event::Check (AscensionPyromancerEvents.cpp) case 704855 returns Any(info, {800806, 803819}) for outgoing healing and Handle calls Accumulate(player, target, 807403, CalculatePct(healing, 30)), which SetAmount()s effect 1 of the 807403 aura to the raw 30%-of-heal total. A spell_proc row exists for 704855 and spell_script_names binds it to aura_ascension_pyromancer_event (rev_20260909_11_pyromancer_completion.sql); static reading of the whole gating chain found no obvious blocker, but the reporter states nothing happens, so this scenario reproduces it rather than asserting a fix: cast Kindle (803819) on an ally with Soothing Flames known and check both that the HoT aura appears and that its accumulated amount (effect 1) is 30% of the logged effective heal. No code or SQL change is made; the controller runs this to establish pass/fail.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "group", "actor": "caster", "target": "ally" },
+    { "action": "learn", "actor": "caster", "spell": 803819 },
+    { "action": "learn", "actor": "caster", "spell": 704855 },
+    { "action": "assert", "label": "control: ally carries no Soothing Flames HoT before the cast", "actor": "ally", "metric": "aura", "spell": 807403, "caster": "caster", "equals": 0 },
+    { "action": "set_health", "actor": "ally", "value": 100 },
+    { "action": "cast", "label": "Kindle on the ally", "actor": "caster", "spell": 803819, "target": "ally" },
+    { "action": "assert", "label": "control: Kindle cast succeeded", "actor": "caster", "metric": "cast_failure", "spell": 803819, "equals": 0, "within_ms": 3000 },
+    { "action": "wait", "label": "Let Kindle's 2000ms cast resolve", "ms": 2500 },
+    { "action": "snapshot", "actor": "caster", "metric": "spell_effective_heal_total", "spell": 803819, "target": "ally", "save_as": "kindle_heal" },
+    { "action": "assert", "label": "control: Kindle actually healed the ally", "actor": "caster", "metric": "spell_effective_heal_total", "spell": 803819, "target": "ally", "min": 1 },
+    { "action": "assert", "label": "Soothing Flames applies its HoT to the ally", "actor": "ally", "metric": "aura", "spell": 807403, "caster": "caster", "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "The HoT's accumulated amount is 30% of the logged Kindle heal", "actor": "ally", "metric": "aura_amount", "spell": 807403, "caster": "caster", "effect": 1, "ratio_to": "kindle_heal", "min": 0.29, "max": 0.31 }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Grovekeeper Life choice: does selecting one option also grant the other (#5046)",
+  "contract": "#5046: reported that both Life-tab choice passives end up active and neither can be unselected. CharacterAdvancement Group 127887 (parsed directly from CharacterAdvancement.dbc, both ClassType 31 'Primalist', Tab 84 'Life', RequiredLevel 20, AbilityEssenceCost 0, TalentEssenceCost 0) holds exactly two entries: 6243 (Vitality Surge, 504214) and 11243 (Grovekeeper's Presence, 805443) -- the 'choose one of several free options' mechanism AscensionCompat.cpp's GetSelectableFreeGroup reads. CanGrantAutomaticEntry explicitly skips auto-granting any entry with a nonzero selectable-free group, so neither is granted by the ordinary automatic path; a specific entry is bought through the native advancement_rank upload instead, the same path character-advancement-native-requests.json exercises. Both entries are SPELL_ATTR0_PASSIVE + TARGET_UNIT_CASTER, so a granted spell self-applies its aura immediately. This scenario only reproduces the report: it does not change any code. It buys Vitality Surge (entry 6243) and records whether the un-selected sibling (Grovekeeper's Presence, 805443) also becomes known, which the exclusivity-selection code at AscensionCompat.cpp:1467-1528/6668-6692 was not confirmed to prevent within the time-box.",
+  "timeout_ms": 30000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "specialization", "label": "spec into Life", "actor": "primalist", "id": 58 },
+    { "action": "assert", "label": "control: neither Life choice is known before any selection", "actor": "primalist", "metric": "knows_spell", "spell": 504214, "equals": 0 },
+    { "action": "assert", "label": "control: neither Life choice is known before any selection", "actor": "primalist", "metric": "knows_spell", "spell": 805443, "equals": 0 },
+    { "action": "advancement_rank", "label": "buy Vitality Surge", "actor": "primalist", "entry": 6243, "rank": 1 },
+    { "action": "assert", "label": "the selected option is granted", "actor": "primalist", "metric": "knows_spell", "spell": 504214, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "reproduction: is the un-selected sibling also granted", "actor": "primalist", "metric": "knows_spell", "spell": 805443, "equals": 0 }
+  ]
+}

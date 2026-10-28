@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "name": "Necromancer Crypt Keeper makes Crypt Swarm bounce to 2 more enemies (#791)",
+  "contract": "Crypt Keeper 560596 is an Animation talent (CharacterAdvancement 7112, ClassType 25 = class 23, Tab 61, TalentEssenceCost 1, choice group with Unrelenting 704718) whose description reads 'Your Crypt Swarm now bounces to 2 additional nearby enemies, at ${-($800343f1-1)*100}% reduced value per enemy struck.' Effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107) MiscValue 17 (SPELLMOD_JUMP_TARGETS), BasePoints 1 + DieSides 1 = 2, EffectSpellClassMask (0, 0, 0x200) in SpellFamilyName 29; effect 1 (SPELLMOD_DAMAGE) has amount 0. The only 0x200 holder is Crypt Swarm's damage 800343 (family flags 0, 0, 0x200; TARGET_UNIT_TARGET_ENEMY, EffectChainTarget 1, EffectDamageMultiplier 0.7, DmgClass magic), which the channel 500965 triggers every EffectAmplitude through SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, cast by the Necromancer because 800343 needs an explicit unit target. Spell::SelectImplicitChainTargets adds the caster's SPELLMOD_JUMP_TARGETS to EffectChainTarget, so each tick strikes 1 enemy without the talent and 3 with it, chaining to the nearest enemy within 10 yd; the 0.7 per-jump multiplier ($800343f1 = 0.7, i.e. 30% less) is native DBC data and is not measured here because critical strikes make single hits nondeterministic. Three golems stand 3 yd apart in a line: before the talent only the channel target takes Crypt Swarm damage, after it all three do.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "primary", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 8 },
+    { "id": "second", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 11 },
+    { "id": "third", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 14 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "necro", "spell": 500965 },
+    {
+      "action": "snapshot", "actor": "necro", "metric": "spell_damage_count", "spell": 800343, "target": "primary",
+      "save_as": "primary0"
+    },
+    {
+      "action": "snapshot", "actor": "necro", "metric": "spell_damage_count", "spell": 800343, "target": "second",
+      "save_as": "second0"
+    },
+    {
+      "action": "snapshot", "actor": "necro", "metric": "spell_damage_count", "spell": 800343, "target": "third",
+      "save_as": "third0"
+    },
+    {
+      "action": "cast", "label": "Channel Crypt Swarm without the talent", "actor": "necro", "spell": 500965,
+      "target": "primary"
+    },
+    {
+      "action": "assert", "label": "SETUP: Crypt Swarm damages its target", "actor": "necro",
+      "metric": "spell_damage_count", "spell": 800343, "target": "primary", "relative_to": "primary0", "min": 1,
+      "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let the channel finish", "ms": 3500 },
+    {
+      "action": "assert", "label": "CONTROL: the second golem is not struck without the talent", "actor": "necro",
+      "metric": "spell_damage_count", "spell": 800343, "target": "second", "relative_to": "second0", "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTROL: the third golem is not struck without the talent", "actor": "necro",
+      "metric": "spell_damage_count", "spell": 800343, "target": "third", "relative_to": "third0", "equals": 0
+    },
+    { "action": "learn", "actor": "necro", "spell": 560596 },
+    {
+      "action": "assert", "label": "The talent aura is applied", "actor": "necro",
+      "metric": "aura", "spell": 560596, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "snapshot", "actor": "necro", "metric": "spell_damage_count", "spell": 800343, "target": "primary",
+      "save_as": "primary1"
+    },
+    {
+      "action": "snapshot", "actor": "necro", "metric": "spell_damage_count", "spell": 800343, "target": "second",
+      "save_as": "second1"
+    },
+    {
+      "action": "snapshot", "actor": "necro", "metric": "spell_damage_count", "spell": 800343, "target": "third",
+      "save_as": "third1"
+    },
+    {
+      "action": "cast", "label": "Channel Crypt Swarm with the talent", "actor": "necro", "spell": 500965,
+      "target": "primary"
+    },
+    { "action": "wait", "label": "Let the channel finish", "ms": 4000 },
+    {
+      "action": "assert", "label": "The channel target is still struck", "actor": "necro",
+      "metric": "spell_damage_count", "spell": 800343, "target": "primary", "relative_to": "primary1", "min": 2
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Crypt Swarm bounces to the second golem", "actor": "necro",
+      "metric": "spell_damage_count", "spell": 800343, "target": "second", "relative_to": "second1", "min": 2
+    },
+    {
+      "action": "assert", "label": "Crypt Swarm bounces on to the third golem", "actor": "necro",
+      "metric": "spell_damage_count", "spell": 800343, "target": "third", "relative_to": "third1", "min": 2
+    }
+  ]
+}

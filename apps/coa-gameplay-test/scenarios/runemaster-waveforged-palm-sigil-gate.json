@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "name": "Runemaster Waveforged opens the Palm Sigil gate only for 4 sec after Hurricane ends",
+  "contract": [
+    "Waveforged 705565 (Riftblade talent, one dummy aura) reads 'After Hurricane ends, you may now use abilities that",
+    "require Runeshroud for $500469d.' Its window 500469 lasts 4 sec (SpellDuration 35) and Hurricane's removal",
+    "handler casts it. Every Palm Sigil requires CasterAuraSpell 808089 'Runeshroud or Waveforged', which",
+    "SyncRuneshroudOrWaveforged kept while the passive 705565 was present (#162), so knowing the talent opened the",
+    "gate permanently. Expected: with only the talent known there is no marker and Palm Sigil: Arcane 805380 is",
+    "refused with SPELL_FAILED_CASTER_AURASTATE (22); the gate stays closed while Hurricane 645435 strikes; when",
+    "Hurricane ends the 4 sec window opens the gate and a 1.5 sec Palm Sigil completes; the gate closes with the",
+    "window and Palm Sigil is refused again."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rm", "entry": 36, "level": 80, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 197},
+    {"action": "add_item", "actor": "rm", "item": 12784},
+    {"action": "equip", "actor": "rm", "item": 12784, "slot": 15},
+    {"action": "learn", "actor": "rm", "spell": 645435},
+    {"action": "learn", "actor": "rm", "spell": 805380},
+    {"action": "assert", "label": "SETUP: no Palm Sigil gate at rest", "actor": "rm", "metric": "aura",
+      "spell": 808089, "equals": 0},
+
+    {"action": "learn", "actor": "rm", "spell": 705565},
+    {"action": "assert", "label": "SETUP: the Waveforged passive is active", "actor": "rm", "metric": "aura",
+      "spell": 705565, "equals": 1, "within_ms": 1000},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "CONTRACT: knowing Waveforged does not open the Palm Sigil gate", "actor": "rm",
+      "metric": "aura", "spell": 808089, "equals": 0},
+    {"action": "cast", "actor": "rm", "spell": 805380},
+    {"action": "assert", "label": "CONTRACT: Palm Sigil is refused outside Runeshroud and the Waveforged window",
+      "actor": "rm", "metric": "cast_failure", "spell": 805380, "equals": 22, "within_ms": 1000},
+    {"action": "wait", "ms": 2000},
+    {"action": "assert", "actor": "rm", "metric": "aura", "spell": 805380, "equals": 0},
+
+    {"action": "cast", "actor": "rm", "spell": 645435, "target": "dummy"},
+    {"action": "assert", "label": "SETUP: Hurricane strikes", "actor": "rm", "metric": "aura", "spell": 645435,
+      "equals": 1, "within_ms": 500},
+    {"action": "assert", "label": "No Waveforged window while Hurricane strikes", "actor": "rm", "metric": "aura",
+      "spell": 500469, "equals": 0},
+    {"action": "assert", "label": "The gate stays closed while Hurricane strikes", "actor": "rm", "metric": "aura",
+      "spell": 808089, "equals": 0},
+    {"action": "assert", "label": "SETUP: Hurricane ends", "actor": "rm", "metric": "aura", "spell": 645435,
+      "equals": 0, "within_ms": 4000},
+    {"action": "assert", "label": "Hurricane's end opens the Waveforged window", "actor": "rm", "metric": "aura",
+      "spell": 500469, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "The window lasts 4 sec", "actor": "rm", "metric": "aura_duration_ms",
+      "spell": 500469, "min": 3000, "max": 4000},
+    {"action": "assert", "label": "CONTRACT: the window opens the Palm Sigil gate", "actor": "rm", "metric": "aura",
+      "spell": 808089, "equals": 1, "within_ms": 500},
+    {"action": "cast", "actor": "rm", "spell": 805380},
+    {"action": "assert", "label": "CONTRACT: Palm Sigil completes during the window", "actor": "rm",
+      "metric": "aura", "spell": 805380, "equals": 1, "within_ms": 2500},
+
+    {"action": "assert", "label": "The Waveforged window expires", "actor": "rm", "metric": "aura", "spell": 500469,
+      "equals": 0, "within_ms": 4000},
+    {"action": "assert", "label": "CONTRACT: the gate closes with the window", "actor": "rm", "metric": "aura",
+      "spell": 808089, "equals": 0, "within_ms": 1000},
+    {"action": "set_aura", "actor": "rm", "spell": 805380, "stacks": 0},
+    {"action": "cast", "actor": "rm", "spell": 805380},
+    {"action": "assert", "label": "CONTRACT: Palm Sigil is refused once the window has closed", "actor": "rm",
+      "metric": "cast_failure", "spell": 805380, "equals": 22, "within_ms": 1000},
+    {"action": "wait", "ms": 2000},
+    {"action": "assert", "actor": "rm", "metric": "aura", "spell": 805380, "equals": 0},
+    {"action": "assert", "label": "The talent itself stays", "actor": "rm", "metric": "aura", "spell": 705565,
+      "equals": 1}
+  ]
+}

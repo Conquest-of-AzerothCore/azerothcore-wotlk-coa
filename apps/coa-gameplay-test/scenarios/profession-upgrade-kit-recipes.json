@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Profession trainers teach the Upgrade Kit recipes of their trade",
+  "contract": "A profession's trainers teach its Upgrade Kit recipes like any other recipe: the row requires the kit's own RequiredSkill and RequiredSkillRank, costs nothing, and appears only at trainers whose recipes already reach that rank. A Stormwind blacksmithing trainer (Therum Deepforge, trainer 60) offers the Copper Bar Upgrade Kit (93800, rank 1) as available to a new blacksmith and sells it, shows the Bronze Bar Upgrade Kit (93867, rank 105) as unavailable and refuses it at skill 1, and has no Saronite Bar Upgrade Kit row (94525, rank 425) because none of its recipes go above 300. A Grand Master blacksmithing trainer (Borus Ironbender, trainer 59) sells the Saronite kit to a blacksmith at 425.",
+  "timeout_ms": 180000,
+  "players": [
+    { "id": "novice", "race": 1, "class": 1, "level": 10 },
+    { "id": "veteran", "race": 1, "class": 1, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "creatures": [
+    { "id": "artisan", "owner": "novice", "entry": 5511, "distance": 2, "faction": 35 },
+    { "id": "grandmaster", "owner": "veteran", "entry": 26564, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_skill", "actor": "novice", "skill": 164, "value": 1, "maximum": 75 },
+    { "action": "gossip_hello", "actor": "novice", "target": "artisan", "label": "talk to Therum Deepforge" },
+    { "action": "gossip_select", "actor": "novice", "option": 0, "label": "ask for training" },
+    { "action": "assert", "actor": "novice", "metric": "trainer_list_packets", "equals": 1, "label": "the trainer window opens" },
+    { "action": "assert", "actor": "novice", "metric": "trainer_window_state", "spell": 93800, "equals": 0, "label": "Copper Bar Upgrade Kit is offered and available at skill 1" },
+    { "action": "assert", "actor": "novice", "metric": "trainer_window_state", "spell": 93867, "equals": 1, "label": "Bronze Bar Upgrade Kit is listed but needs skill 105" },
+    { "action": "assert", "actor": "novice", "metric": "trainer_window_state", "spell": 94525, "equals": -1, "label": "Saronite Bar Upgrade Kit is not a row at an Artisan trainer" },
+    { "action": "trainer_buy", "actor": "novice", "target": "artisan", "spell": 93800, "label": "learn Copper Bar Upgrade Kit" },
+    { "action": "assert", "actor": "novice", "metric": "spellbook_buy_succeeded", "spell": 93800, "equals": 1, "label": "the trainer taught the kit recipe" },
+    { "action": "assert", "actor": "novice", "metric": "knows_spell", "spell": 93800, "equals": 1, "label": "the blacksmith knows Copper Bar Upgrade Kit" },
+    { "action": "trainer_buy", "actor": "novice", "target": "artisan", "spell": 93867, "label": "ask for Bronze Bar Upgrade Kit at skill 1" },
+    { "action": "assert", "actor": "novice", "metric": "spellbook_buy_failed", "spell": 93867, "equals": 1, "label": "the purchase is refused below skill 105" },
+    { "action": "assert", "actor": "novice", "metric": "knows_spell", "spell": 93867, "equals": 0, "label": "nothing was learned" },
+
+    { "action": "set_skill", "actor": "veteran", "skill": 164, "value": 425, "maximum": 450 },
+    { "action": "gossip_hello", "actor": "veteran", "target": "grandmaster", "label": "talk to Borus Ironbender" },
+    { "action": "gossip_select", "actor": "veteran", "option": 0, "label": "ask for training" },
+    { "action": "assert", "actor": "veteran", "metric": "trainer_list_packets", "equals": 1, "label": "the trainer window opens" },
+    { "action": "assert", "actor": "veteran", "metric": "trainer_window_state", "spell": 94525, "equals": 0, "label": "Saronite Bar Upgrade Kit is available at skill 425" },
+    { "action": "trainer_buy", "actor": "veteran", "target": "grandmaster", "spell": 94525, "label": "learn Saronite Bar Upgrade Kit" },
+    { "action": "assert", "actor": "veteran", "metric": "spellbook_buy_succeeded", "spell": 94525, "equals": 1, "label": "the Grand Master trainer taught it" },
+    { "action": "assert", "actor": "veteran", "metric": "knows_spell", "spell": 94525, "equals": 1, "label": "the blacksmith knows Saronite Bar Upgrade Kit" }
+  ]
+}

@@ -18,6 +18,7 @@
 #include "DBCStores.h"
 #include "GameObjectAI.h"
 #include "Log.h"
+#include "Map.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"
 #include "Player.h"
@@ -407,7 +408,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
     if (mover == _player)
     {
-        uint32 replacement = _player->GetTemporarySpellReplacement(spellId);
+        uint32 replacement = _player->GetCastReplacement(spellId);
         if (replacement != spellId)
         {
             spellInfo = sSpellMgr->GetSpellInfo(replacement);
@@ -459,7 +460,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         // not have spell in spellbook or spell passive and not casted by client
         if (!(spellInfo->Targets & TARGET_FLAG_GAMEOBJECT_ITEM) && (!mover->ToPlayer()->HasActiveSpell(spellId) || spellInfo->IsPassive()))
         {
-            bool allow = false;
+            bool allow = spellId == 45927 && mover == _player && (IsARecruiter() || GetRecruiterId());
 
             // allow casting of unknown spells for special lock cases
             if (GameObject* go = targets.GetGOTarget())
@@ -568,6 +569,19 @@ void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
     recvPacket.read_skip<uint8>();                          // counter, increments with every CANCEL packet, don't use for now
     recvPacket >> spellId;
 
+    // Preserve explicit cancellation. This opcode has no reason field, so a
+    // moving client cancellation cannot safely be treated as an automatic one.
+    if (_player->HasAura(1300179) || _player->HasManastormMovementGrace())
+    {
+        Spell const* current = _player->GetCurrentSpell(CURRENT_GENERIC_SPELL);
+        Map const* map = _player->FindMap();
+        LOG_DEBUG("spells.scripts",
+            "Mobility client cancellation: requested={} current={} moving={} grace={} privateMap={}.",
+            spellId, current ? current->GetSpellInfo()->Id : 0,
+            _player->isMoving(), _player->HasManastormMovementGrace(),
+            map && map->IsScriptedPrivateInstance());
+    }
+
     _player->SpellQueue.clear();
 
     _player->InterruptSpell(CURRENT_MELEE_SPELL);
@@ -595,8 +609,12 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
     {
         if (Spell* curSpell = _player->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
             if (curSpell->m_spellInfo->Id == spellId)
+            {
                 _player->InterruptSpell(CURRENT_CHANNELED_SPELL);
-        return;
+                return;
+            }
+        // No matching channel is running: fall through so a lingering
+        // channeled aura can still be removed by the rules below.
     }
 
     // non channeled case:

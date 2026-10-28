@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Grimtotem Marauders stand neutral",
+  "contract": [
+    "rev_20261004_87_coa_grimtotem_marauder_neutral makes the Grimtotem Marauder 161809 neutral (faction 7), as players",
+    "recall it on CoA. Expected: a player standing 4 yd from a Marauder on Red Cloud Mesa is not pulled into combat, as",
+    "a hostile Marauder with its 10 yd detection would pull them."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 1, "x": -3331.8, "y": -766.0, "z": 52.5, "o": 0},
+  "players": [{"id": "scout", "race": 6, "class": 1, "level": 3}],
+  "steps": [
+    {"action": "set_phase", "actor": "scout", "value": 1},
+    {"action": "teleport", "actor": "scout", "map": 1, "x": -3331.8, "y": -766.0, "z": 52.5, "o": 0},
+    {"action": "assert", "label": "A Marauder stands within reach", "actor": "scout", "metric": "nearby_creature_count",
+     "entry": 161809, "min": 1, "within_ms": 5000},
+    {"action": "teleport", "actor": "scout", "map": 1, "x": -3329.8, "y": -766.0, "z": 52.5, "o": 0},
+    {"action": "wait", "ms": 4000},
+    {"action": "assert", "label": "The Marauder leaves the player alone", "actor": "scout", "metric": "combat",
+     "equals": 0}
+  ]
+}

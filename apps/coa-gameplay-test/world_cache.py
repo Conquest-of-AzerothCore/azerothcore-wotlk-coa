@@ -3,9 +3,12 @@ import json
 import os
 import re
 import secrets
+import threading
 
 IDENTIFIER = re.compile(r'[A-Za-z_][A-Za-z0-9_]*\Z')
 OWNER_TABLE = 'coa_gameplay_cache_owner'
+MAX_CHECKSUM_WORKERS = 8
+CHECKSUM_TIMEOUT = 300
 
 
 def require(condition, message):
@@ -48,6 +51,65 @@ def input_fingerprint(root, source_config, module_source, environment=None):
     return result.hexdigest()
 
 
+def run_parallel(function, items, workers):
+    items = list(items)
+    results = [None] * len(items)
+    if workers <= 1 or len(items) <= 1:
+        for index, item in enumerate(items):
+            results[index] = function(item)
+        return results
+    pending = iter(enumerate(items))
+    lock = threading.Lock()
+    stop = threading.Event()
+    failures = []
+
+    def work():
+        while not stop.is_set():
+            with lock:
+                entry = next(pending, None)
+            if entry is None:
+                return
+            index, item = entry
+            try:
+                results[index] = function(item)
+            except BaseException as error:
+                with lock:
+                    failures.append(error)
+                stop.set()
+
+    threads = []
+    try:
+        for _ in range(min(workers, len(items))):
+            thread = threading.Thread(target=work)
+            thread.start()
+            threads.append(thread)
+    except BaseException:
+        stop.set()
+        raise
+    finally:
+        try:
+            for thread in threads:
+                thread.join()
+        except BaseException:
+            stop.set()
+            for thread in threads:
+                thread.join()
+            raise
+    if failures:
+        raise failures[0]
+    return results
+
+
+def checksum_batches(database, name, tables):
+    workers = max(1, min(getattr(database, 'copy_workers', 1), MAX_CHECKSUM_WORKERS, len(tables)))
+    statements = [
+        'CHECKSUM TABLE ' + ', '.join(f'`{name}`.`{table}`' for table in tables[index::workers]) + ' EXTENDED;'
+        for index in range(workers)
+    ]
+    return run_parallel(lambda statement: database.sql('world', statement, timeout=CHECKSUM_TIMEOUT).splitlines(),
+                        statements, workers)
+
+
 def world_fingerprint(database, name):
     require(IDENTIFIER.fullmatch(name), 'Invalid world schema name')
     rows = database.sql('world', f'SHOW FULL TABLES FROM `{name}`;').splitlines()
@@ -60,14 +122,13 @@ def world_fingerprint(database, name):
             tables.append(table)
     require(tables, 'World database is empty')
     tables.sort()
-    names = ', '.join(f'`{name}`.`{table}`' for table in tables)
-    checksums = database.sql('world', f'CHECKSUM TABLE {names} EXTENDED;', timeout=300).splitlines()
     expected = {f'{name}.{table}' for table in tables}
     values = {}
-    for row in checksums:
-        table, checksum = row.split('\t')
-        require(table in expected and checksum.isdecimal(), 'World checksum unavailable; use --fresh-databases')
-        values[table.split('.', 1)[1]] = checksum
+    for checksums in checksum_batches(database, name, tables):
+        for row in checksums:
+            table, checksum = row.split('\t')
+            require(table in expected and checksum.isdecimal(), 'World checksum unavailable; use --fresh-databases')
+            values[table.split('.', 1)[1]] = checksum
     require(len(values) == len(tables), 'Incomplete world checksums')
     for _ in range(3):
         definitions = database.sql('world', '\n'.join(f'SHOW CREATE TABLE `{name}`.`{table}`;' for table in tables))
@@ -129,7 +190,7 @@ class WorldCache:
     def drop(self):
         if not self.created_here:
             self.verify_owner()
-        self.database.sql('world', f'DROP DATABASE `{self.name}`;')
+        self.database.drop('world', self.name)
         self.owned = False
         self.created_here = False
         self.path.unlink(missing_ok=True)

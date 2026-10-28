@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "name": "The Shadowhound learns its pet family's abilities (#267)",
+  "contract": "Houndmaster's Whistle 801343 summons pet 50124 (SPELL_EFFECT_SUMMON_PET). The client's CreatureFamily.dbc row 551 'Shadowhound' holds skill line 11805 'Pet - Shadowhound', whose SkillLineAbility rows (acquire method 2, learned with the skill) are Shadow Growl 680239 (taunt, spell level 1), Shadow Claw 800697 (up to 3 enemies, level 11), Track 500181 (leap dealing damage to up to 5 enemies, level 12) and the passive Shadowhound Visual 500036 (level 9); Scent of Magic 800528 shortens 'the Hound's next Track' through class mask B 0x400, Track's own flag. A level 20 Shadowhound therefore knows all four. The passive is the one of them a pet applies to itself on learning, so its aura on the pet observes that the family list was taught; the active abilities are taught by the same Pet::InitLevelupSpellsForLevel pass. Before the fix the pet had no family and no default spells.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "wh", "race": 1, "class": 15, "level": 20}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 3000},
+    {"action": "learn", "actor": "wh", "spell": 801343},
+    {"action": "cast", "label": "Houndmaster's Whistle", "actor": "wh", "spell": 801343},
+    {"action": "assert", "label": "The Shadowhound is out", "actor": "wh", "metric": "pet_entry", "equals": 50124, "within_ms": 5000},
+    {
+      "action": "assert",
+      "label": "The Shadowhound has learned its family's passive",
+      "actor": "wh",
+      "metric": "pet_aura_stacks",
+      "spell": 500036,
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

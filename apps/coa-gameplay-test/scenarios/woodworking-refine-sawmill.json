@@ -1,0 +1,184 @@
+{
+  "schema": 1,
+  "name": "Woodworking refine answers the marked sawmill places and a placed Portable Sawmill",
+  "contract": "Woodworking's five Refine spells carry SpellFocusObject 1653 and the realm's twenty sawmill places carry no gameobject, so the requirement is answered by where the player stands and by a sawmill a player places. The same cast is refused away from both, completed at a marked place with nothing placed, and completed at a placed Portable Sawmill away from every marked place.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9200.0,
+    "y": -1700.0,
+    "z": 258.915,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "woodworker",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_skill",
+      "actor": "woodworker",
+      "skill": 732,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "woodworker",
+      "spell": 13977861
+    },
+    {
+      "action": "add_item",
+      "actor": "woodworker",
+      "item": 8210210,
+      "count": 10
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "woodworker",
+      "spell": 13977861
+    },
+    {
+      "action": "cast",
+      "actor": "woodworker",
+      "spell": 13977861
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "cast_failure",
+      "spell": 13977861,
+      "min": 1,
+      "within_ms": 3000,
+      "label": "Refine Forestwood Plank is refused 411 yards from the nearest sawmill place"
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "item_count",
+      "item": 8210230,
+      "equals": 0,
+      "label": "the refused cast refines nothing"
+    },
+    {
+      "action": "teleport",
+      "actor": "woodworker",
+      "map": 0,
+      "x": -9404.85,
+      "y": -1343.52,
+      "z": 50.11,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "woodworker",
+      "spell": 13977861
+    },
+    {
+      "action": "cast",
+      "actor": "woodworker",
+      "spell": 13977861
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "cast_failure",
+      "spell": 13977861,
+      "equals": 0,
+      "within_ms": 4000,
+      "label": "the same cast is accepted at the Elwynn sawmill place with nothing placed there"
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "item_count",
+      "item": 8210230,
+      "min": 1,
+      "label": "the cast at the marked place produced a Forestwood Plank"
+    },
+    {
+      "action": "teleport",
+      "actor": "woodworker",
+      "map": 0,
+      "x": -9200.0,
+      "y": -1700.0,
+      "z": 258.915,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "add_item",
+      "actor": "woodworker",
+      "item": 1777064
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "woodworker",
+      "spell": 13977861
+    },
+    {
+      "action": "use_item",
+      "actor": "woodworker",
+      "item": 1777064,
+      "spell": 9931368,
+      "destination": {
+        "x": -9200.0,
+        "y": -1700.0,
+        "z": 258.915
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 12000
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "nearby_gameobject_count",
+      "entry": 2201004,
+      "min": 1,
+      "label": "using the Portable Sawmill placed gameobject 2201004"
+    },
+    {
+      "action": "cast",
+      "actor": "woodworker",
+      "spell": 13977861
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "cast_failure",
+      "spell": 13977861,
+      "equals": 0,
+      "within_ms": 4000,
+      "label": "a Portable Sawmill placed away from every sawmill place answers the cast"
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "item_count",
+      "item": 8210230,
+      "min": 2,
+      "label": "the cast at the placed sawmill produced a second Forestwood Plank"
+    }
+  ]
+}

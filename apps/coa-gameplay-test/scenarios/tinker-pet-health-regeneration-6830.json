@@ -1,0 +1,147 @@
+{
+  "schema": 1,
+  "name": "Tinker Clockwork Assistant recovers health instead of losing fractional percentages",
+  "contract": [
+    "A normal Build Clockwork Assistant803436 makes permanent pet60070. With unchanged owner stats,",
+    "periodic pet scaling must retain exact native health and allow ordinary out-of-combat regeneration.",
+    "Wound the pet to621, allow several regen periods, and require progress beyond the reported621/627",
+    "loop with a stable maximum. No fixture suppresses pet regeneration.",
+    "Native controlled-creature regeneration adds floor(Spirit*.25*RATE_HEALTH) each2000ms with mana.",
+    "The assertion tests sustained progress and a stable maximum; no arbitrary percentage-heal rate is assumed.",
+    "A native pet attack starts combat. With no incoming damage or combat regen, scaling must retain621.",
+    "Killing that target clears combat; subsequent normal regeneration must increase health."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 28,
+      "level": 20,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 20,
+      "health": 100000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 803436
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 803436,
+      "target": "hero"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "pet_entry",
+      "equals": 60070,
+      "within_ms": 9000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "pet_max_health",
+      "save_as": "maximum"
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "enemy",
+      "pet": true
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "pet": true,
+      "value": 621
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "pet_health",
+      "equals": 621
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "pet_health",
+      "equals": 621,
+      "label": "Scaling retains exact health while combat suppresses regeneration"
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 20000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "pet_max_health",
+      "relative_to": "maximum",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "pet_health",
+      "min": 628,
+      "label": "Native regen advances beyond the reported621/627 loop without scaling damage"
+    }
+  ]
+}

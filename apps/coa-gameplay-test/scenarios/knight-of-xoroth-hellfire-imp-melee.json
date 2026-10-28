@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "Hellfire Imps melee their owner's target",
+  "contract": "npc_ascension_xoroth_summon gives the Hellfire Imp (50301) weapon damage from the knight's level and attack power and sends it after the knight's victim. The imp has no firebolt of its own (800444 comes only from Hellfire Reprimand 706565 on hit), so its melee swing is its damage. CreatureAI::UpdateVictim returns false until the creature is engaged, and an imp that has never dealt damage is never engaged, so the melee swing must not wait on UpdateVictim. After the knight stops attacking, the enemy keeps losing health only to the imp.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 11
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "knight",
+      "entry": 36,
+      "level": 11,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "knight", "spell": 804883 },
+    { "action": "set_power", "actor": "knight", "power": 1, "value": 1000 },
+    { "action": "cast", "label": "Call: Hellfire Imp", "actor": "knight", "spell": 804883 },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "SETUP: a Hellfire Imp is out", "actor": "knight", "metric": "owned_creature_count", "entry": 50301, "min": 1 },
+    { "action": "attack", "label": "Give the imp a target", "actor": "knight", "target": "enemy" },
+    { "action": "wait", "ms": 1000 },
+    { "action": "stop_attack", "actor": "knight" },
+    { "action": "wait", "ms": 500 },
+    { "action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "enemy_hp_imp_only" },
+    { "action": "wait", "ms": 6000 },
+    { "action": "assert", "label": "CONTRACT: the imp alone keeps damaging the enemy", "actor": "enemy", "metric": "health", "ratio_to": "enemy_hp_imp_only", "max": 0.9999 }
+  ]
+}

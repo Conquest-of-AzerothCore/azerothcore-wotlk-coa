@@ -1,0 +1,299 @@
+{
+  "schema": 1,
+  "name": "Knight of Xoroth: Books refuse unowned Shieldgore ranks (#5276)",
+  "contract": [
+    "Independent original Shieldgore 301302 states that it transforms Infernal Strike. CharacterAdvancement",
+    "30229 grants this zero-cost parent only with Defiance identity 4018 (ChrSpecs 17). The existing native",
+    "TalentReplacements lifecycle requires the matching spec and known parent for all Shieldgore ranks.",
+    "Hellfire (16) and War (18) must therefore refuse a direct trainer purchase of rank 2 (806869), retain money,",
+    "and learn no rank. Defiance at level 18 keeps its legitimately granted rank and future level-gated row.",
+    "Expected acquisition comes from the original talent relationship, not an invented spec-only book policy."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hellfire",
+      "race": 1,
+      "class": 17,
+      "level": 18
+    },
+    {
+      "id": "war",
+      "race": 1,
+      "class": 17,
+      "level": 18
+    },
+    {
+      "id": "defiance",
+      "race": 1,
+      "class": 17,
+      "level": 18
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "money",
+      "actor": "hellfire",
+      "copper": 1000000
+    },
+    {
+      "action": "specialization",
+      "actor": "hellfire",
+      "id": 16
+    },
+    {
+      "action": "learn",
+      "actor": "hellfire",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "hellfire",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "hellfire",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "hellfire"
+    },
+    {
+      "action": "assert",
+      "label": "hellfire: does not own the Defiance replacement talent",
+      "actor": "hellfire",
+      "metric": "knows_spell",
+      "spell": 301302,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hellfire",
+      "metric": "knows_spell",
+      "spell": 806869,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "hellfire",
+      "metric": "carried_money",
+      "save_as": "hellfire_money"
+    },
+    {
+      "action": "trainer_buy",
+      "label": "hellfire: request Shieldgore rank 2 directly",
+      "actor": "hellfire",
+      "spell": 806869
+    },
+    {
+      "action": "assert",
+      "label": "hellfire: server refuses the unowned replacement",
+      "actor": "hellfire",
+      "metric": "spellbook_buy_failed",
+      "spell": 806869,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hellfire",
+      "metric": "spellbook_buy_succeeded",
+      "spell": 806869,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hellfire",
+      "metric": "carried_money",
+      "relative_to": "hellfire_money",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hellfire",
+      "metric": "knows_spell",
+      "spell": 806869,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hellfire",
+      "metric": "spellbook_offers_spell",
+      "spell": 806869,
+      "equals": 0
+    },
+    {
+      "action": "money",
+      "actor": "war",
+      "copper": 1000000
+    },
+    {
+      "action": "specialization",
+      "actor": "war",
+      "id": 18
+    },
+    {
+      "action": "learn",
+      "actor": "war",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "war",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "war"
+    },
+    {
+      "action": "assert",
+      "label": "war: does not own the Defiance replacement talent",
+      "actor": "war",
+      "metric": "knows_spell",
+      "spell": 301302,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "knows_spell",
+      "spell": 806869,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "war",
+      "metric": "carried_money",
+      "save_as": "war_money"
+    },
+    {
+      "action": "trainer_buy",
+      "label": "war: request Shieldgore rank 2 directly",
+      "actor": "war",
+      "spell": 806869
+    },
+    {
+      "action": "assert",
+      "label": "war: server refuses the unowned replacement",
+      "actor": "war",
+      "metric": "spellbook_buy_failed",
+      "spell": 806869,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "spellbook_buy_succeeded",
+      "spell": 806869,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "carried_money",
+      "relative_to": "war_money",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "knows_spell",
+      "spell": 806869,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "spellbook_offers_spell",
+      "spell": 806869,
+      "equals": 0
+    },
+    {
+      "action": "money",
+      "actor": "defiance",
+      "copper": 1000000
+    },
+    {
+      "action": "specialization",
+      "actor": "defiance",
+      "id": 17
+    },
+    {
+      "action": "learn",
+      "actor": "defiance",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "defiance",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "defiance",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "defiance"
+    },
+    {
+      "action": "assert",
+      "label": "Defiance acquires its authored zero-cost Shieldgore parent",
+      "actor": "defiance",
+      "metric": "knows_spell",
+      "spell": 301302,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The native replacement lifecycle grants the eligible rank",
+      "actor": "defiance",
+      "metric": "knows_spell",
+      "spell": 806869,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The legitimate replacement remains a known trainer row",
+      "actor": "defiance",
+      "metric": "trainer_window_state",
+      "spell": 806869,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "defiance",
+      "metric": "trainer_window_state",
+      "spell": 806870,
+      "equals": 1
+    }
+  ]
+}

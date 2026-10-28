@@ -1,7 +1,7 @@
 {
  "schema": 1,
  "name": "Necromancer: Life For Power shield is capped (#4172)",
- "contract": "Life For Power (705746) converts 20% of healing taken into a shield (707194). The shield cannot grow past the Necromancer's maximum health.",
+ "contract": "Life For Power (705746) converts 20% of healing taken into a shield (707194, 10 s) that cannot grow past the Necromancer's maximum health. Greater Heal (25213) heals 1248-1465 at level 60, so one heal converts 249-293 (439 on a critical heal), 0.1-0.3 of the fixture's 1956 maximum health, and eight heals at the 3.2 s cadence convert at least 1992: the shield reaches exactly maximum health by the eighth heal. The heal that reaches the cap still converts and refreshes the shield, so it is present at that reading. Heals at the cap convert nothing and, as the tooltip says the shield is gained for the amount absorbed, do not refresh it, so after them the shield is either at maximum health or has expired 10 s after the capping heal; it never exceeds maximum health.",
  "timeout_ms": 120000,
  "players": [
   {
@@ -49,94 +49,14 @@
    "ms": 3200
   },
   {
-   "action": "set_power",
-   "power": 0,
-   "value": 2500,
+   "action": "assert",
+   "label": "one heal converts 20% of Greater Heal into the shield",
+   "metric": "aura_amount",
+   "spell": 707194,
+   "ratio_to": "mh",
+   "min": 0.1,
+   "max": 0.3,
    "actor": "n"
-  },
-  {
-   "action": "cast",
-   "spell": 25213,
-   "actor": "n"
-  },
-  {
-   "action": "wait",
-   "ms": 3200
-  },
-  {
-   "action": "set_power",
-   "power": 0,
-   "value": 2500,
-   "actor": "n"
-  },
-  {
-   "action": "cast",
-   "spell": 25213,
-   "actor": "n"
-  },
-  {
-   "action": "wait",
-   "ms": 3200
-  },
-  {
-   "action": "set_power",
-   "power": 0,
-   "value": 2500,
-   "actor": "n"
-  },
-  {
-   "action": "cast",
-   "spell": 25213,
-   "actor": "n"
-  },
-  {
-   "action": "wait",
-   "ms": 3200
-  },
-  {
-   "action": "set_power",
-   "power": 0,
-   "value": 2500,
-   "actor": "n"
-  },
-  {
-   "action": "cast",
-   "spell": 25213,
-   "actor": "n"
-  },
-  {
-   "action": "wait",
-   "ms": 3200
-  },
-  {
-   "action": "set_power",
-   "power": 0,
-   "value": 2500,
-   "actor": "n"
-  },
-  {
-   "action": "cast",
-   "spell": 25213,
-   "actor": "n"
-  },
-  {
-   "action": "wait",
-   "ms": 3200
-  },
-  {
-   "action": "set_power",
-   "power": 0,
-   "value": 2500,
-   "actor": "n"
-  },
-  {
-   "action": "cast",
-   "spell": 25213,
-   "actor": "n"
-  },
-  {
-   "action": "wait",
-   "ms": 3200
   },
   {
    "action": "set_power",
@@ -245,18 +165,59 @@
   },
   {
    "action": "assert",
-   "label": "shield exists",
+   "label": "eight heals fill the shield to exactly maximum health",
    "metric": "aura_amount",
    "spell": 707194,
-   "min": 1000,
+   "ratio_to": "mh",
+   "equals": 1,
    "actor": "n"
   },
   {
+   "action": "set_power",
+   "power": 0,
+   "value": 2500,
+   "actor": "n"
+  },
+  {
+   "action": "cast",
+   "spell": 25213,
+   "actor": "n"
+  },
+  {
+   "action": "wait",
+   "ms": 3200
+  },
+  {
    "action": "assert",
-   "label": "shield is capped at maximum health",
+   "label": "heal 9: the shield never exceeds maximum health",
    "metric": "aura_amount",
    "spell": 707194,
-   "max": 1956,
+   "ratio_to": "mh",
+   "max": 1,
+   "actor": "n"
+  },
+  {
+   "action": "set_power",
+   "power": 0,
+   "value": 2500,
+   "actor": "n"
+  },
+  {
+   "action": "cast",
+   "spell": 25213,
+   "actor": "n"
+  },
+  {
+   "action": "wait",
+   "ms": 3200
+  },
+  {
+   "action": "assert",
+   "label": "heal 10: the shield never exceeds maximum health",
+   "metric": "aura_amount",
+   "spell": 707194,
+   "ratio_to": "mh",
+   "max": 1,
    "actor": "n"
   }
  ]

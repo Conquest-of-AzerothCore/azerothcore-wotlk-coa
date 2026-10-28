@@ -1,14 +1,15 @@
 {
   "schema": 1,
   "name": "Stormbringer: Thundershocker works natively (#1682)",
-  "contract": "#1682: Thundershocker (300610) is a flat SPELLMOD_EFFECT3 (23, i.e. effect index 2) modifier, EffectBasePoints 29 + DieSides 1 = +30, class mask (0,0,2), which matches Eye of the Storm's own family-22 flags (0,0,2). The chain is 806307 -> periodic trigger 806455 -> trigger 807712, and 807712's own effect 2 is SPELL_AURA_MOD_DAMAGE_FROM_CASTER (base 0); the modifier raises that amount from 0 to 30 on the root debuff itself, so 'while rooted by Eye of the Storm' is satisfied by construction. Unit::SpellDamageBonusTaken applies it to any family-22 hit from the same caster (Unit.cpp), read here through spell_damage_taken on the rooted dummy (fixed base 1000 per apps/coa-gameplay-test/README.md, target identifies the attacker), giving 1000 -> 1300. #2154: High Voltage (570191) is a flat SPELLMOD_DURATION (1) modifier, EffectBasePoints 999 + DieSides 1 = +1000 ms, class mask (0,0,16777216) matching Arm of Thorim's own triggered stun spell 570339 (flags (0,0,16777216)) and nothing else; Aura::CalcMaxDuration applies SPELLMOD_DURATION without requiring the target spell to opt into spell mods (SpellInfo.cpp), raising the stun's SpellDuration.dbc id 36 base of 1000 ms to 2000 ms. Both auras are snapshotted at application time, so each half re-triggers its aura after learning the talent instead of re-reading a stale one. Arm of Thorim (501433-501437) is also gated by the class-16 custom resource system (AscensionCompatData::ResourceCostRules, src/server/coa/AscensionCustomResourceData.h): it requires at least 1 stack of the 'Static' resource aura 803102 and consumes it entirely on cast (Consumption::All); AscensionResourceService::CheckCast (src/server/coa/AscensionCompat.cpp) returns SPELL_FAILED_NO_POWER when the caster holds fewer stacks than required, independently of actual mana. The fixture grants 1 Static stack via set_aura immediately before each Arm of Thorim cast, since the cast fully drains it. Eye of the Storm (806307) and Arm of Thorim (501433) share StartRecoveryCategory 133 (the standard 1000-1500 ms global cooldown, Spell.cpp TriggerGlobalCooldown/GlobalCooldownMgr, keyed only by StartRecoveryCategory, independent of the per-spell cooldown reset_cooldown clears): the Arm of Thorim BASELINE cast triggers that shared GCD, so the Thundershocker recast of 806307 must wait for it to clear before casting, not only for 806307's own 30 s category cooldown (cleared by reset_cooldown).",
+  "contract": "#1682: Thundershocker (300610) is a flat SPELLMOD_EFFECT3 (23, i.e. effect index 2) modifier, EffectBasePoints 29 + DieSides 1 = +30, class mask (0,0,2), which matches Eye of the Storm's own family-22 flags (0,0,2). The chain is 806307 -> periodic trigger 806455 -> trigger 807712, and 807712's own effect 2 is SPELL_AURA_MOD_DAMAGE_FROM_CASTER (base 0); the modifier raises that amount from 0 to 30 on the root debuff itself, so 'while rooted by Eye of the Storm' is satisfied by construction. Unit::SpellDamageBonusTaken applies it to any family-22 hit from the same caster (Unit.cpp), read here through spell_damage_taken on the rooted dummy (fixed base 1000 per apps/coa-gameplay-test/README.md, target identifies the attacker), giving 1000 -> 1300. The root is snapshotted at application time, so the Thundershocker half re-triggers it after learning the talent instead of re-reading a stale one. The Arm of Thorim cast is only an unmodified baseline: its triggered stun 570339 keeps its SpellDuration.dbc id 36 base of 1000 ms and the SPELLMOD_DURATION query stays 1000 because this scenario never learns High Voltage 570191. The #2154 extension to 2000 ms is exercised by stormbringer-lightning-chain-family-high-voltage.json, which learns 570191 and recasts on a dummy that was never stunned. Arm of Thorim (501433-501437) is also gated by the class-16 custom resource system (AscensionCompatData::ResourceCostRules, src/server/coa/AscensionCustomResourceData.h): it requires at least 1 stack of the 'Static' resource aura 803102 and consumes it entirely on cast (Consumption::All); AscensionResourceService::CheckCast (src/server/coa/AscensionCompat.cpp) returns SPELL_FAILED_NO_POWER when the caster holds fewer stacks than required, independently of actual mana. The fixture grants 1 Static stack via set_aura immediately before each Arm of Thorim cast, since the cast fully drains it. Eye of the Storm (806307) and Arm of Thorim (501433) share StartRecoveryCategory 133 (the standard 1000-1500 ms global cooldown, Spell.cpp TriggerGlobalCooldown/GlobalCooldownMgr, keyed only by StartRecoveryCategory, independent of the per-spell cooldown reset_cooldown clears): the Arm of Thorim BASELINE cast triggers that shared GCD, so the Thundershocker recast of 806307 must wait for it to clear before casting, not only for 806307's own 30 s category cooldown (cleared by reset_cooldown). Eye of the Storm's 806455, Arm of Thorim and its stun are magic spells that can miss a level-80 target, which left the root or the stun missing, so the caster carries spell_hit_rating. aura_duration_ms is the remaining duration, read at least one world update after the stun lands, so the baseline bounds it by 1000 ms rather than equating it (990 ms was read after a 10 ms step and 810 ms after a slow real-clock update).",
   "timeout_ms": 90000,
   "players": [
     {
       "id": "s",
       "race": 8,
       "class": 16,
-      "level": 80
+      "level": 80,
+      "spell_hit_rating": 10000
     }
   ],
   "creatures": [
@@ -136,7 +137,7 @@
     },
     {
       "action": "assert",
-      "label": "BASELINE: Arm of Thorim's stun lasts its DBC 1000 ms without High Voltage",
+      "label": "BASELINE: Arm of Thorim's triggered stun is applied",
       "actor": "aot_dummy",
       "metric": "aura",
       "spell": 570339,
@@ -146,11 +147,12 @@
     },
     {
       "action": "assert",
-      "label": "BASELINE: Arm of Thorim's stun duration query is 1000 ms",
+      "label": "BASELINE: Arm of Thorim's stun has at most its DBC 1000 ms left",
       "actor": "aot_dummy",
       "metric": "aura_duration_ms",
       "spell": 570339,
-      "equals": 1000
+      "min": 500,
+      "max": 1000
     },
     {
       "action": "assert",
@@ -193,6 +195,16 @@
       "action": "wait",
       "label": "Let the periodic trigger re-apply the root with Thundershocker learned",
       "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The talented expiry trigger has applied its root before the amount is measured",
+      "actor": "eots_dummy",
+      "metric": "aura",
+      "spell": 807712,
+      "caster": "s",
+      "equals": 1,
+      "within_ms": 3000
     },
     {
       "action": "assert",

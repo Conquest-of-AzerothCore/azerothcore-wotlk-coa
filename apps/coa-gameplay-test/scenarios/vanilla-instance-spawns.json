@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "name": "Vanilla instances: Ascension spawns restored in Scarlet Monastery Graveyard",
+  "contract": "The Scarlet Monastery Graveyard holds four Scarlet Scryers beside the Scarlet Torturers, at the db.exil.es creature_spawn positions (SUB dump 2026-10-04); Ascension combat logs show two to four Scryers per run. The Shadowfang Keep stable pools are random and are not asserted here.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "visitor",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "visitor",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_phase",
+      "actor": "visitor",
+      "value": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "visitor",
+      "map": 189,
+      "x": 1775,
+      "y": 1135,
+      "z": 7.5
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "visitor",
+      "metric": "nearby_creature_count",
+      "entry": 4306,
+      "equals": 12,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "visitor",
+      "metric": "nearby_creature_count",
+      "entry": 4293,
+      "equals": 4,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_phase",
+      "actor": "visitor"
+    }
+  ]
+}

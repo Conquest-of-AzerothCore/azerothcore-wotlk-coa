@@ -15,6 +15,7 @@
 namespace
 {
 using namespace AscensionTinker;
+constexpr uint32 SnapshotTaken = Scrap;
 bool Select(uint32 id, SpellInfo const* info)
 {
     switch (id)
@@ -29,10 +30,16 @@ bool Select(uint32 id, SpellInfo const* info)
         default: return false;
     }
 }
+bool TrainingDummy(Unit const* unit)
+{
+    Creature const* creature = unit->ToCreature();
+    return creature && creature->GetScriptName() == "npc_training_dummy";
+}
 void Snapshot(Player* player, Spell* spell)
 {
-    if (spell->IsTriggered())
+    if (spell->IsTriggered() || spell->GetScriptValue(SnapshotTaken))
         return;
+    spell->SetScriptValue(SnapshotTaken,1);
     for (uint32 id : TinkerFinite)
         if (Select(id,spell->GetSpellInfo()))
             if (Aura* aura = player->GetAura(id))
@@ -69,21 +76,34 @@ class tinker_spells : public AllSpellScript
 {
 public:
     tinker_spells() : AllSpellScript("tinker_spells",
-        {ALLSPELLHOOK_ON_SPELL_CHECK_CAST,ALLSPELLHOOK_ON_BEFORE_EFFECTS,ALLSPELLHOOK_ON_CAST,
+        {ALLSPELLHOOK_ON_SPELL_CHECK_CAST,ALLSPELLHOOK_ON_PREPARE,ALLSPELLHOOK_ON_BEFORE_EFFECTS,ALLSPELLHOOK_ON_CAST,
          ALLSPELLHOOK_ON_CRIT_CHANCE,ALLSPELLHOOK_ON_HIT_RESULT}) { }
     void OnSpellCheckCast(Spell* spell, bool, SpellCastResult& result) override
     {
         Player* player = Owner(spell->GetCaster());
         auto* info = spell->GetSpellInfo();
-        if (!player || player != spell->GetCaster() || info->SpellFamilyName != 34 || spell->IsTriggered() ||
-            result != SPELL_CAST_OK)
+        if (!player || player != spell->GetCaster() || info->SpellFamilyName != 34 || spell->IsTriggered())
+            return;
+        if ((info->Id == GatlingGun || Any(info,{801387,801389,805372})) && !player->HasAura(Mechsuit))
+            result = SPELL_FAILED_ONLY_MOUNTED;
+        else if (Named(info,500549) && player->HasAura(Mechsuit))
+            result = SPELL_FAILED_NOT_MOUNTED;
+        if (result != SPELL_CAST_OK)
             return;
         if (info->Id == Mechsuit && !Count(player,Scrap))
             result = SPELL_FAILED_NO_POWER;
-        if ((info->Id == 500213 || Any(info,{801387,801389,805372})) && !player->HasAura(Mechsuit))
-            result = SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
         if (info->Id == 504594 && !player->HasAura(681245))
             result = SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+    }
+    void OnSpellPrepare(Spell* spell, Unit* caster, SpellInfo const* info) override
+    {
+        Player* player = Owner(caster);
+        if (!player || player != caster || info->SpellFamilyName != 34)
+            return;
+        if (spell->getState() == SPELL_STATE_PREPARING)
+            Snapshot(player,spell);
+        if (Named(info,801005) && spell->GetScriptValue(707272))
+            player->GetGlobalCooldownMgr().CancelGlobalCooldown(info);
     }
     void OnSpellBeforeEffects(Spell* spell, Unit* caster, SpellInfo const* info) override
     {
@@ -190,9 +210,12 @@ public:
             for (Creature* device : Devices(player))
                 if (device->GetEntry() == 467073)
                 {
-                    Position position = device->GetPosition();
                     for (uint8 n = 0; n < 3; ++n)
+                    {
+                        Position position = device->GetPosition();
+                        device->MovePositionToFirstCollision(position,1.5f,n * 2 * float(M_PI) / 3);
                         Summon(player,target,500535,&position);
+                    }
                     break;
                 }
         if (id == 802052 && player->HasAura(300636))
@@ -235,7 +258,7 @@ public:
             return;
         if (target->IsPlayer())
             target->RemoveAurasDueToSpell(560711);
-        if (damage && Named(info,801005) && player->HasAura(805314))
+        if ((damage || TrainingDummy(target)) && Named(info,801005) && player->HasAura(805314))
             if (Aura* tracer = target->GetAura(653247,player->GetGUID()); tracer && tracer->GetStackAmount() >= 10)
                 Cast(player,target,803438);
         if (Nanobots(player,target) && player->HasAura(560734) &&
@@ -279,6 +302,17 @@ class spell_ascension_tinker_ability : public SpellScript
             return;
         uint32 id = GetSpellInfo()->Id;
         auto type = GetSpellInfo()->Effects[index].Effect;
+        if (id == 500470)
+        {
+            PreventHitDefaultEffect(index);
+            if (handled)
+                return;
+            handled = true;
+            for (Creature* device : Devices(player))
+                if (Turret(device->GetEntry()))
+                    device->DespawnOrUnsummon();
+            return;
+        }
         if (id == 801744)
         {
             PreventHitDefaultEffect(index);

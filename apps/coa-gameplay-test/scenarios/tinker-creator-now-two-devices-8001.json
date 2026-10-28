@@ -1,0 +1,212 @@
+{
+  "schema": 1,
+  "name": "Tinker: I'm The Creator Now (503549) keeps its stacks when several devices proc it (#8001)",
+  "contract": "Issue #8001: with 2-3 stacks of 'I'm The Creator Now', further summon damage removes 1-2 stacks, never below one, so 2-3 stacks cannot be held for the 30 s duration. Expected: 'The buff stacks should remain for the full duration of 30 secs. If additional procs occur the buff time should be extended keeping all the current stacks and adding a stack if not at 3 stacks.' Spell.dbc 503549 has StackAmount 3 and a 30 s duration, and its effects target TARGET_UNIT_MASTER, so the device that procs it casts it on its owner. AscensionTinkerEvents.cpp DeviceEvent() had each damaging device cast 503549 as itself, so every device owned a separate 503549 aura on the Tinker. Aura::CanStackWith refuses the same spell rank from a different caster, so a proc from a second device replaced the first device's aura, with all its stacks, by a new single-stack one: exactly the reported loss of stacks that never drops below one. The fix keeps the device as the caster, for the master targeting, and makes the Tinker the original caster, so every proc lands on one Tinker-owned aura that stacks and refreshes. This scenario gives a level 80 Tinker with the talent both a Mechano-Bear (803405, permanent device 60671) and a Sentry Turret (500239, device 50046), both carrying the device event aura 707698, and sends both at a dummy. The buff must belong to the Tinker, reach its 3 stacks while both devices are hitting, and still hold 3 stacks after 12 more seconds of procs from both devices.",
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "tinker",
+      "entry": 299,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 503534
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 803405
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "cast",
+      "label": "Build the Mechano-Bear",
+      "actor": "tinker",
+      "spell": 803405
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Mechano-Bear is out",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 60671,
+      "within_ms": 9000
+    },
+    {
+      "action": "cast",
+      "label": "Build the Sentry Turret",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Sentry Turret stands",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50046,
+      "equals": 1,
+      "within_ms": 9000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Mechano-Bear carries the device event aura 707698",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 60671,
+      "spell": 707698,
+      "caster": "tinker",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Sentry Turret carries the device event aura 707698",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50046,
+      "spell": 707698,
+      "caster": "tinker",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: no buff before any device damage",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 503549,
+      "equals": 0
+    },
+    {
+      "action": "attack",
+      "label": "Send the Mechano-Bear at the dummy",
+      "actor": "tinker",
+      "target": "dummy",
+      "pet": true
+    },
+    {
+      "action": "attack",
+      "label": "Attack the dummy so the Sentry Turret takes it as its focus target",
+      "actor": "tinker",
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Mechano-Bear is fighting the dummy",
+      "actor": "tinker",
+      "metric": "owned_creature_victim",
+      "entry": 60671,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Sentry Turret is firing Sentry Shot 706689",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 706689,
+      "entry": 50046,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the device's proc puts the buff on the Tinker as one Tinker-owned aura",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 503549,
+      "caster": "tinker",
+      "equals": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: procs from both devices build the buff up to its 3 stacks",
+      "actor": "tinker",
+      "metric": "aura_stacks",
+      "spell": 503549,
+      "caster": "tinker",
+      "equals": 3,
+      "within_ms": 40000
+    },
+    {
+      "action": "snapshot",
+      "label": "Count the Sentry Shots fired before the hold",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 706689,
+      "entry": 50046,
+      "save_as": "shots_before_hold"
+    },
+    {
+      "action": "wait",
+      "ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "The Sentry Turret kept firing during the hold",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 706689,
+      "entry": 50046,
+      "relative_to": "shots_before_hold",
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "label": "The Mechano-Bear was still fighting the dummy during the hold",
+      "actor": "tinker",
+      "metric": "owned_creature_victim",
+      "entry": 60671,
+      "target": "dummy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: further procs from either device keep all 3 stacks",
+      "actor": "tinker",
+      "metric": "aura_stacks",
+      "spell": 503549,
+      "caster": "tinker",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the Tinker carries no second, device-owned copy of the buff",
+      "actor": "tinker",
+      "metric": "aura_stacks",
+      "spell": 503549,
+      "equals": 3
+    }
+  ]
+}

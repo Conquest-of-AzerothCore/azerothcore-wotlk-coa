@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "name": "Dark Soul converts armor-penetration rating into Stamina (#3095)",
+  "contract": [
+    "Dark Soul (706784) explicitly promises Stamina equal to armor-penetration rating. Its authored ten-",
+    "second periodic helper (707091) already carries a native flat Stamina aura. Armor Penetration 70",
+    "(39922) is only a fixture: the supplied DBC amount is ten rating despite its old name, and the",
+    "native combat-rating observation must confirm ten. Dark Soul must add ten Stamina, update that",
+    "amount when the rating disappears or returns, and remove its own helper when the talent is removed.",
+    "The contract permits the existing ten-second periodic update interval and does not infer a new",
+    "coefficient from the implementation."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 1,
+      "class": 30,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "stat",
+      "stat": 2,
+      "save_as": "stamina_without_talent"
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 39922,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "The native armor-penetration fixture grants ten rating",
+      "actor": "reaper",
+      "metric": "combat_rating",
+      "rating": 24,
+      "equals": 10
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 706784
+    },
+    {
+      "action": "assert",
+      "label": "Dark Soul is active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 706784,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Dark Soul grants one Stamina per armor-penetration rating",
+      "actor": "reaper",
+      "metric": "stat",
+      "stat": 2,
+      "relative_to": "stamina_without_talent",
+      "equals": 10,
+      "within_ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "The active helper carries the ten-Stamina bonus",
+      "actor": "reaper",
+      "metric": "aura_amount",
+      "spell": 707091,
+      "effect": 0,
+      "equals": 10
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 39922,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Removing armor penetration removes its Stamina bonus",
+      "actor": "reaper",
+      "metric": "stat",
+      "stat": 2,
+      "relative_to": "stamina_without_talent",
+      "equals": 0,
+      "within_ms": 12000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 39922,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Restoring armor penetration restores the Stamina bonus",
+      "actor": "reaper",
+      "metric": "stat",
+      "stat": 2,
+      "relative_to": "stamina_without_talent",
+      "equals": 10,
+      "within_ms": 12000
+    },
+    {
+      "action": "unlearn",
+      "actor": "reaper",
+      "spell": 706784
+    },
+    {
+      "action": "assert",
+      "label": "Removing Dark Soul removes its helper",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 707091,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Removing Dark Soul restores original Stamina",
+      "actor": "reaper",
+      "metric": "stat",
+      "stat": 2,
+      "relative_to": "stamina_without_talent",
+      "equals": 0
+    }
+  ]
+}

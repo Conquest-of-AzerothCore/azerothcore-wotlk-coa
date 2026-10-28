@@ -1,0 +1,262 @@
+{
+  "schema": 1,
+  "name": "Temporal Anomaly stores half of incoming damage and heals on expiry (#3627)",
+  "contract": [
+    "Active 806315 has a ten-second all-school absorb with amount 50 and MiscValueB 50. Its tooltip states that 50% of damage is stored and converted into healing at the end.",
+    "DBC helper 807799 is a zero-base self heal describing accumulated damage. The bank must store actual absorbed damage and release its resolved value once on natural expiry. Cancellation does not reach the end of the duration.",
+    "Gnomish Death Ray 13493 supplies four fixed 150-point Physical periodic ticks and ignores caster modifiers. Regeneration is disabled. The same native aura before and during Temporal Anomaly distinguishes a percentage absorb from the current flat 50-point shield, without random critical strikes."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "chrono",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "chrono",
+      "spell": 806315
+    },
+    {
+      "action": "set_health",
+      "actor": "chrono",
+      "value": 20000,
+      "maximum": 20000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono",
+      "metric": "health",
+      "save_as": "before_control"
+    },
+    {
+      "action": "set_aura",
+      "actor": "chrono",
+      "spell": 13493,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 4600
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono",
+      "metric": "health",
+      "save_as": "control_loss",
+      "relative_to": "before_control"
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "health",
+      "relative_to": "before_control",
+      "label": "The control records four armor-mitigated periodic ticks",
+      "min": -650,
+      "max": -450
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono",
+      "metric": "spell_damage_total",
+      "spell": 13493,
+      "target": "chrono",
+      "save_as": "control_damage"
+    },
+    {
+      "action": "set_health",
+      "actor": "chrono",
+      "value": 10000,
+      "maximum": 20000
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "chrono",
+      "spell": 806315
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "aura",
+      "spell": 806315,
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono",
+      "metric": "health",
+      "save_as": "before_shield"
+    },
+    {
+      "action": "set_aura",
+      "actor": "chrono",
+      "spell": 13493,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 4600
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono",
+      "metric": "spell_damage_total",
+      "spell": 13493,
+      "target": "chrono",
+      "relative_to": "control_damage",
+      "save_as": "shield_damage"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono",
+      "metric": "health",
+      "relative_to": "before_shield",
+      "save_as": "shield_loss"
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "health",
+      "relative_to": "before_shield",
+      "ratio_to": "control_loss",
+      "min": 0.49,
+      "max": 0.51,
+      "label": "Half the damage is stored instead of only a flat 50-point absorb"
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "aura",
+      "spell": 806315,
+      "equals": 1,
+      "label": "The percentage shield survives every hit"
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "spell_heal_count",
+      "spell": 807799,
+      "target": "chrono",
+      "equals": 0,
+      "label": "The bank does not heal before expiry"
+    },
+    {
+      "action": "wait",
+      "ms": 6500
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "aura",
+      "spell": 806315,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "spell_heal_count",
+      "spell": 807799,
+      "target": "chrono",
+      "equals": 1,
+      "label": "Natural expiry pays out exactly once"
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "spell_heal_total",
+      "spell": 807799,
+      "target": "chrono",
+      "label": "The absorbed half becomes exactly the stored heal",
+      "ratio_to": "shield_loss",
+      "min": -1.02,
+      "max": -0.98
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "spell_effective_heal_total",
+      "spell": 807799,
+      "target": "chrono",
+      "ratio_to": "shield_loss",
+      "min": -1.02,
+      "max": -0.98
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono",
+      "metric": "spell_heal_count",
+      "save_as": "heals_before_cancel",
+      "spell": 807799,
+      "target": "chrono"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chrono",
+      "spell": 806315
+    },
+    {
+      "action": "cast",
+      "actor": "chrono",
+      "spell": 806315
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "aura",
+      "spell": 806315,
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "set_aura",
+      "actor": "chrono",
+      "spell": 13493,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "chrono",
+      "spell": 806315
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "spell_heal_count",
+      "spell": 807799,
+      "target": "chrono",
+      "relative_to": "heals_before_cancel",
+      "equals": 0,
+      "label": "Cancelling a nonempty bank does not pay an expiry heal"
+    }
+  ]
+}

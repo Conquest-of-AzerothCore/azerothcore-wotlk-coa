@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Continuum and Distortion spells consume all Echo Fragments (#5017)",
+  "contract": "Every spell whose CasterAuraSpell is 804455 (Echo Fragment) reads 'per Echo Fragment consumed' in its own Description[enUS]: Flux Emitter 804435 (Continuum), Singularity Core 804438 (Continuum), Paradox Cannon 806203 (Continuum), Arc Collision 524853 (Distortion) and both Shatter Echo records 572417/804503 (Distortion, both independently acquirable per their own SkillLineAbility rows). AscensionCustomResourceData.h's ResourceCostRules had zero class-22 rows, so nothing ever removed the fragments: the aura only ever expired on its own duration. The new rows use ResourceConsumption::All, matching AscensionCompat.cpp's OnSpellCast handling (player->RemoveAurasDueToSpell(804455) on a class-22 cast in range), so casting any of these spells while Echo Fragment stacks are up must drop the stack count to 0 in the same cast that consumes them. This scenario exercises one Continuum spell (804435, self-target) and one Distortion spell (524853, enemy-target) and resets the fixture between them so each consumption is independently observed. Fails before the fix (stacks unchanged by either cast), passes after.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "chronomancer", "race": 1, "class": 22, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "chronomancer", "entry": 36, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "chronomancer", "spell": 804435 },
+    { "action": "learn", "actor": "chronomancer", "spell": 524853 },
+    { "action": "set_aura", "actor": "chronomancer", "spell": 804455, "stacks": 3 },
+    {
+      "action": "assert",
+      "label": "Fixture: 3 Echo Fragments before casting Flux Emitter",
+      "actor": "chronomancer",
+      "metric": "aura_stacks",
+      "spell": 804455,
+      "equals": 3
+    },
+    { "action": "cast", "actor": "chronomancer", "spell": 804435 },
+    {
+      "action": "assert",
+      "label": "Flux Emitter (Continuum) consumes all Echo Fragments",
+      "actor": "chronomancer",
+      "metric": "aura_stacks",
+      "spell": 804455,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let Flux Emitter's global cooldown pass", "ms": 1600 },
+    { "action": "set_aura", "actor": "chronomancer", "spell": 804455, "stacks": 3 },
+    {
+      "action": "assert",
+      "label": "Fixture: 3 Echo Fragments before casting Arc Collision",
+      "actor": "chronomancer",
+      "metric": "aura_stacks",
+      "spell": 804455,
+      "equals": 3
+    },
+    { "action": "cast", "actor": "chronomancer", "spell": 524853, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "Arc Collision (Distortion) consumes all Echo Fragments",
+      "actor": "chronomancer",
+      "metric": "aura_stacks",
+      "spell": 804455,
+      "equals": 0,
+      "within_ms": 3000
+    }
+  ]
+}

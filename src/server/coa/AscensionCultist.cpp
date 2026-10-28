@@ -4,6 +4,7 @@
 #include "CellImpl.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
+#include "Map.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "Random.h"
@@ -11,6 +12,8 @@
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
 #include <algorithm>
 #include <memory>
 #include <mutex>
@@ -75,6 +78,19 @@ void Cast(Unit* caster, Unit* target, uint32 id)
 {
     if (caster && target && target->IsAlive() && caster->IsInWorld())
         caster->CastSpell(target, id, true);
+}
+void OverrideSpellVisual(Unit* unit, uint32 spell, uint32 visual)
+{
+    if (!unit || !unit->IsInWorld())
+        return;
+    WorldPacket packet(0x662, 16);
+    packet << unit->GetGUID().GetRawValue() << spell << visual;
+    Map* map = unit->GetMap();
+    for (auto itr = map->GetPlayers().begin(); itr != map->GetPlayers().end(); ++itr)
+        if (Player* observer = itr->GetSource();
+            observer == unit || (observer->IsInMap(unit) &&
+                observer->IsWithinDistInMap(unit, map->GetVisibilityRange())))
+            observer->GetSession()->SendPacket(&packet);
 }
 void Copy(Unit* caster, Unit* target, uint32 id, uint32 amount)
 {
@@ -153,7 +169,8 @@ bool Resource(Player* player, uint32 id, int32 delta, bool force)
     after = Count(player, id);
     if (before < 60 && after >= 60 && player->HasAura(300307))
         Cast(player, player, 573285);
-    if (after == 100 && before < 100 && !player->HasSpell(92131) && !player->HasSpell(805120))
+    if (after == 100 && before < 100 && !player->HasSpell(92131) && !player->HasSpell(805120) &&
+        !player->HasSpell(680750))
         Cast(player, player, 803060);
     Refresh(player);
     return true;
@@ -244,7 +261,7 @@ void Refresh(Player* player)
     }
     else
         SetHelper(player, 807883, false);
-    SetHelper(player, 500727, player->IsAlive() && player->HasSpell(500706));
+    SetHelper(player, 500727, player->IsAlive() && (stacks || player->HasSpell(Insanity)));
     for (auto [root, replacement, active] : {std::tuple(804670u, 804711u, player->HasAura(706182)),
              std::tuple(800416u, 504719u, player->HasAura(255070)),
              std::tuple(500110u, 680576u, player->HasAura(681794)),

@@ -1,0 +1,167 @@
+{
+  "schema": 1,
+  "name": "Dynamic XP: players choose only the rates Dynamic.XP.Preset.Allowed offers",
+  "contract": "Realm decision 2026-10-12: .xp offers the flat rates in Dynamic.XP.Preset.Allowed, by default 1, 2, 3, 4 and 5, plus .xp default; x7 and the per-band dynamic rate are withdrawn. A refused .xp 6, .xp 7 or .xp dynamic leaves the character's existing choice in place. Requires the module defaults (Dynamic.XP.Preset 1, Dynamic.XP.Preset.PlayerChoice 1, Dynamic.XP.Preset.Allowed 1,2,3,4,5). A completed mining action at skill 75 against a required 50 is the XP vehicle, as in profession-xp: under xN it awards exactly N times the x1 award, and .xp default returns to the realm's x1.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "miner",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_skill",
+      "actor": "miner",
+      "skill": 186,
+      "value": 75,
+      "maximum": 75
+    },
+    {
+      "action": "command",
+      "actor": "miner",
+      "command": ".xp 1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "miner",
+      "metric": "xp",
+      "save_as": "x1_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "miner",
+      "skill": 186,
+      "required": 50
+    },
+    {
+      "action": "snapshot",
+      "actor": "miner",
+      "metric": "xp",
+      "relative_to": "x1_before",
+      "save_as": "x1_award"
+    },
+    {
+      "action": "command",
+      "actor": "miner",
+      "command": ".xp 3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "miner",
+      "metric": "xp",
+      "save_as": "x3_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "miner",
+      "skill": 186,
+      "required": 50
+    },
+    {
+      "action": "assert",
+      "actor": "miner",
+      "label": ".xp 3 triples the award",
+      "metric": "xp",
+      "relative_to": "x3_before",
+      "ratio_to": "x1_award",
+      "equals": 3
+    },
+    {
+      "action": "command",
+      "actor": "miner",
+      "command": ".xp 5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "miner",
+      "metric": "xp",
+      "save_as": "x5_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "miner",
+      "skill": 186,
+      "required": 50
+    },
+    {
+      "action": "assert",
+      "actor": "miner",
+      "label": ".xp 5 quintuples the award",
+      "metric": "xp",
+      "relative_to": "x5_before",
+      "ratio_to": "x1_award",
+      "equals": 5
+    },
+    {
+      "action": "command",
+      "actor": "miner",
+      "label": ".xp 6 is not offered",
+      "command": ".xp 6",
+      "rejected": true
+    },
+    {
+      "action": "command",
+      "actor": "miner",
+      "label": ".xp 7 is no longer offered",
+      "command": ".xp 7",
+      "rejected": true
+    },
+    {
+      "action": "command",
+      "actor": "miner",
+      "label": ".xp dynamic is no longer offered",
+      "command": ".xp dynamic",
+      "rejected": true
+    },
+    {
+      "action": "snapshot",
+      "actor": "miner",
+      "metric": "xp",
+      "save_as": "after_refused_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "miner",
+      "skill": 186,
+      "required": 50
+    },
+    {
+      "action": "assert",
+      "actor": "miner",
+      "label": "Refused rates keep the x5 choice",
+      "metric": "xp",
+      "relative_to": "after_refused_before",
+      "ratio_to": "x1_award",
+      "equals": 5
+    },
+    {
+      "action": "command",
+      "actor": "miner",
+      "command": ".xp default"
+    },
+    {
+      "action": "snapshot",
+      "actor": "miner",
+      "metric": "xp",
+      "save_as": "default_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "miner",
+      "skill": 186,
+      "required": 50
+    },
+    {
+      "action": "assert",
+      "actor": "miner",
+      "label": ".xp default follows the realm's x1",
+      "metric": "xp",
+      "relative_to": "default_before",
+      "ratio_to": "x1_award",
+      "equals": 1
+    }
+  ]
+}

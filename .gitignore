@@ -6,6 +6,9 @@
 /conf/*
 !/conf/dist
 /modules/*
+!/modules/mod-coa-change-potions/
+!/modules/mod-coa-mythic-plus/
+!/modules/mod-cfbg/
 !/modules/*.md
 !/modules/*.sh
 !/modules/CMakeLists.txt
@@ -126,11 +129,33 @@ __pycache__/
 #
 # ==================
 !/modules/mod-ascension/
+!/modules/mod-book-of-artisans/
 !/modules/mod-coa-challenges/
 !/modules/mod-worldforged-pickups/
 !/modules/mod-teleport-actionbar/
+!/modules/mod-manastorm-endless/
 !/modules/mod-portablemail/
 !/modules/mod-craftsmans-codex/
 !/modules/mod-spellbook/
 !/modules/mod-destiny-weaver/
 !/modules/mod-treasure-keeper/
+!/modules/mod-coa-titan-scrolls/
+!/modules/mod-path-to-ascension/
+!/modules/mod-war-games/
+!/modules/mod-hero-call-board/
+!/modules/mod-item-recovery/
+!/modules/mod-battlehorn/
+!/modules/mod-scrolls-of-retreat/
+!/modules/mod-coa-prestige/
+!/modules/mod-coa-lottery/
+!/modules/mod-woodworking/
+!/modules/mod-portable-sawmill/
+!/modules/mod-coa-legendary-items/
+!/modules/mod-ethereal-bazaar/
+
+# Local Manastorm test runtime and duplicate client staging copies
+/ManastormTestRepack/
+/modules/mod-manastorm-endless/client/Corrected Addons Needs to get added to patch b/
+
+# Unrelated legacy client override; not part of the four-file Manastorm package
+/modules/mod-manastorm-endless/client/overlay/Interface/FrameXML/StaticPopup.lua

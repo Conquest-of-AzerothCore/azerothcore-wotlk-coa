@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Morriga Hollowhoof warns of the Mountain Path when she gives To Whom I Devote",
+  "contract": [
+    "rev_20261004_96_coa_morriga_mountain_path_warning gives Morriga Hollowhoof 161818 a monster say on accepting",
+    "To Whom I Devote 1660035: \"The Mountain Path will be guarded by some of my father's finest warriors. Tread",
+    "carefully.\" Expected: after its prerequisite 1660030 is rewarded, accepting 1660035 from her puts it in the log",
+    "and sends the hero exactly one chat line."
+  ],
+  "timeout_ms": 30000,
+  "location": {"map": 1, "x": -2712.6, "y": 19.0, "z": 14.5, "o": 0},
+  "players": [{"id": "hero", "race": 6, "class": 1, "level": 6}],
+  "creatures": [{"id": "morriga", "owner": "hero", "entry": 161818, "faction": 35, "level": 15, "distance": 2}],
+  "steps": [
+    {"action": "wait", "ms": 500},
+    {"action": "prepare_quest", "actor": "hero", "quest": 1660030},
+    {"action": "reward_quest", "actor": "hero", "quest": 1660030},
+    {"action": "assert", "label": "The prerequisite is rewarded", "actor": "hero", "metric": "quest_status",
+     "quest": 1660030, "equals": 6},
+    {"action": "wait", "ms": 500},
+    {"action": "snapshot", "actor": "hero", "metric": "system_messages", "save_as": "chat_before_accept"},
+    {"action": "quest_accept", "label": "Accept To Whom I Devote from Morriga", "actor": "hero", "quest": 1660035,
+     "entry": 161818},
+    {"action": "assert", "label": "The quest is in the log", "actor": "hero", "metric": "quest_status",
+     "quest": 1660035, "equals": 3, "within_ms": 2000},
+    {"action": "assert", "label": "Morriga speaks her warning", "actor": "hero", "metric": "system_messages",
+     "relative_to": "chat_before_accept", "equals": 1, "within_ms": 2000},
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "label": "and says it only once", "actor": "hero", "metric": "system_messages",
+     "relative_to": "chat_before_accept", "equals": 1}
+  ]
+}

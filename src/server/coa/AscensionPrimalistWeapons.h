@@ -8,6 +8,7 @@ class SpellInfo;
 bool IsAscensionPrimalistWeaponsEligible(Player const* player, bool allowUnconfirmed = false);
 void ApplyAscensionPrimalistWeaponsContract(SpellInfo* info);
 void RemoveAscensionPrimalistWeapons(Player* player);
+void ReconcileAscensionPrimalistWeapon(Player* player);
 void AddSC_AscensionPrimalistWeapons();
 
 #endif

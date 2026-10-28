@@ -140,6 +140,28 @@ WorldDatabase.WorkerThreads     = 1
 CharacterDatabase.WorkerThreads = 1
 
 #
+#    LoginDatabase.TransactionIsolation
+#    WorldDatabase.TransactionIsolation
+#    CharacterDatabase.TransactionIsolation
+#        Description: Transaction isolation level of every connection of the pool, synchronous and
+#                     asynchronous, applied on each connect and reconnect. Empty keeps the MySQL
+#                     server default (REPEATABLE-READ unless the server is configured otherwise).
+#                     A value not listed under Values stops the server at startup.
+#                     READ-UNCOMMITTED and READ-COMMITTED need row-based binary logging
+#                     (binlog_format ROW or MIXED, or binary logging off); with binlog_format
+#                     STATEMENT the server stops at startup, because MySQL would reject every write.
+#        Example:     "READ-COMMITTED" - (Avoids the gap-lock deadlocks of concurrent character
+#                                         creation when CharacterDatabase.WorkerThreads is above 1)
+#        Values:      "READ-UNCOMMITTED", "READ-COMMITTED", "REPEATABLE-READ", "SERIALIZABLE"
+#        Default:     "" - (LoginDatabase.TransactionIsolation)
+#                     "" - (WorldDatabase.TransactionIsolation)
+#                     "" - (CharacterDatabase.TransactionIsolation)
+
+LoginDatabase.TransactionIsolation     = ""
+WorldDatabase.TransactionIsolation     = ""
+CharacterDatabase.TransactionIsolation = ""
+
+#
 #    LoginDatabase.SynchThreads
 #    WorldDatabase.SynchThreads
 #    CharacterDatabase.SynchThreads
@@ -1874,11 +1896,11 @@ PersistentCharacterCleanFlags = 0
 #
 #    CharDelete.Method
 #        Description: Character deletion behavior.
-#        Default:     0 - (Completely remove character from the database)
-#                     1 - (Unlink the character from account and free up the name, Appears as
-#                         deleted ingame)
+#        Default:     1 - (Unlink the character from account and free up the name, Appears as
+#                         deleted ingame; restorable until CharDelete.KeepDays elapses)
+#                     0 - (Completely remove character from the database)
 
-CharDelete.Method = 0
+CharDelete.Method = 1
 
 #
 #    CharDelete.MinLevel
@@ -2033,9 +2055,9 @@ CharactersPerAccount = 128
 #                     also hides its create button while this many characters are
 #                     active, so one free slot is needed to create another.
 #        Range:       1-128
-#        Default:     10
+#        Default:     128
 
-CharactersPerRealm = 10
+CharactersPerRealm = 128
 
 #
 #    HeroicCharactersPerRealm
@@ -2315,6 +2337,15 @@ Achievement.RealmFirstKillWindow = 60
 Achievement.RealmFirstRaceLimitOnePerCharacter = 1
 
 #
+#    Achievement.RealmFirstBlockBots
+#        Description: Companions (bots) cannot earn 'Realm First!' achievements, so they never take
+#                     a server first away from real players.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled, bots can earn them like any player)
+
+Achievement.RealmFirstBlockBots = 1
+
+#
 ###################################################################################################
 
 ###################################################################################################
@@ -2560,7 +2591,9 @@ Rate.XP.Global = 0.9295
 #        Set Profession to 0 to disable ordinary profession awards. All rates reload with .reload config.
 #        Profession-only challenges retain their separate per-skill-up formula and group sharing;
 #        those awards also use Global and dynamic XP. Woodcutting/woodworking have no core action path here.
-Rate.XP.Profession = 0.4
+#        Smelting is a Mining craft and uses Rate.XP.Profession.Smelting instead of the Mining rate, so
+#        ore pays once when mined; 0 (default) gives smelting no XP.
+Rate.XP.Profession = 0.2
 Rate.XP.Profession.BaseFraction = 0.02
 Rate.XP.Profession.Gray = 0
 Rate.XP.Profession.Green = 0.95
@@ -2569,6 +2602,7 @@ Rate.XP.Profession.Orange = 1.05
 Rate.XP.Profession.Mining = 2.11
 Rate.XP.Profession.Herbalism = 1.44
 Rate.XP.Profession.Disenchanting = 1.44
+Rate.XP.Profession.Smelting = 0
 Rate.XP.Profession.Skinning = 0.55
 Rate.XP.Profession.Fishing = 0.33
 Rate.XP.Profession.Blacksmithing = 3.77
@@ -3479,9 +3513,9 @@ Instance.UnloadDelay = 1800000
 #
 #   AccountInstancesPerHour
 #        Description: Controls the max amount of different instances player can enter within hour
-#        Default:     5
+#        Default:     10
 
-AccountInstancesPerHour = 5
+AccountInstancesPerHour = 10
 
 #
 #    Instance.SharedNormalHeroicId
@@ -3623,6 +3657,20 @@ DungeonFinder.CastDeserter = 1
 #        Default:     1 - (Blizzlike: All dungeons are available for queue, even if already completed)
 
 DungeonFinder.AllowCompleted = 1
+
+#
+#    DungeonFinder.MaxExpansion
+#
+#        Description: Most recent expansion whose dungeons the Dungeon Finder offers, whatever the
+#                     account's expansion. Conquest of Azeroth stops at level 60: the Burning Crusade
+#                     dungeons open at 58 in LFGDungeons.dbc but need level 64-67 to enter.
+#                     Below 2, the normal random dungeon of that expansion stays open up to
+#                     MaxPlayerLevel (Random Classic Dungeon stops at 59 in the DBC).
+#        Default:     0 - (Classic dungeons only)
+#                     1 - (Up to The Burning Crusade)
+#                     2 - (Up to Wrath of the Lich King, Blizzlike)
+
+DungeonFinder.MaxExpansion = 0
 
 #
 #    DungeonFinder.DungeonSelectionCooldown
@@ -4648,6 +4696,30 @@ AllowTwoSide.Interaction.Arena = 0
 AllowTwoSide.Interaction.Auction = 0
 
 #
+#    AllowTwoSide.Interaction.Mail
+#        Description: Allow sending mails between factions.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+AllowTwoSide.Interaction.Mail = 1
+
+#
+#    AllowTwoSide.Trade
+#        Description: Allow trading between factions.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+AllowTwoSide.Trade = 1
+
+#
+#    AllowTwoSide.WhoList
+#        Description: Show characters of both factions in the who list and the friends list.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+AllowTwoSide.WhoList = 1
+
+#
 #    TalentsInspecting
 #        Description: Allow inspecting characters from the opposing faction.
 #                     Doesn't affect characters in gamemaster mode.
@@ -4682,17 +4754,23 @@ RecruitAFriend.MaxLevel = 60
 #    RecruitAFriend.MaxDifference
 #        Description: Highest level difference between linked Recruiter and Friend benefit from
 #                     the Recruit-A-Friend experience multiplier.
-#        Default:     4
+#        Default:     30
 
-RecruitAFriend.MaxDifference = 4
+#    Legacy value 4 is automatically treated as 30 when loading or reloading the config.
+RecruitAFriend.MaxDifference = 30
 
 #
 #    MaxRecruitAFriendBonusDistance
-#        Description: Max distance between character and and group to gain the Recruit-A-Friend
-#                     XP multiplier.
+#        Description: Max distance for Recruit-A-Friend level grants and reputation bonuses.
 #        Default:     100
 
 MaxRecruitAFriendBonusDistance = 100
+
+#    MaxRecruitAFriendXPDistance
+#        Description: Max distance between linked group members for the Recruit-A-Friend XP bonus.
+#        Default:     200
+
+MaxRecruitAFriendXPDistance = 200
 
 #
 ###################################################################################################
@@ -5040,3 +5118,11 @@ Cluster.IsCrossrealm=0
 # CLUSTER SETTINGS END                                                                            #
 #                                                                                                 #
 ###################################################################################################
+
+# Social.AccountWideFriends
+# Share friends/notes across owner characters and follow the friend's current character.
+# Requires the Ascension client friend-metadata protocol. Not for stock 3.3.5 clients.
+# Existing character friendships are imported once per account on first use after enabling.
+# Conflicting notes or more than 50 friend accounts require administrator reconciliation.
+# Ignore lists remain character-specific. Restart required; default disabled.
+Social.AccountWideFriends = 0

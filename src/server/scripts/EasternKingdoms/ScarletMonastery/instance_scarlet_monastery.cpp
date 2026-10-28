@@ -72,6 +72,7 @@ enum DataTypes
     DATA_VORREL                   = 7,
     DATA_ARCANIST_DOAN            = 8,
     DATA_DOOR_CHAPEL              = 9,
+    DATA_WHITEMANE_FAKE_DEATH     = 11,  // 1 while Whitemane lies "dead" waiting for Mograine
 
     GAMEOBJECT_PUMPKIN_SHRINE     = 10
 };
@@ -178,6 +179,17 @@ public:
                         if (!mograine)
                             return;
 
+                        // A wipe after Whitemane fell: she was never really dead, so both reset.
+                        if (_whitemaneFakeDead)
+                        {
+                            EndFakeDeath(whitemane);
+                            whitemane->SetFullHealth();
+                            whitemane->DespawnOrUnsummon(0ms, 20s);
+                            mograine->DespawnOnEvade(20s);
+                            _encounter = NOT_STARTED;
+                            return;
+                        }
+
                         if (whitemane->IsAlive() && mograine->IsAlive())
                         {
                             // When Whitemane emerges from the main gate, Whitemane will stand next to Mograine's corpse and will not reset Whitemane
@@ -207,7 +219,21 @@ public:
                         _encounter = data;
                     }
                     if (data == DONE)
+                    {
                         _encounter = DONE;
+                        // Mograine is dead: now Whitemane dies for real, and her loot opens.
+                        if (_whitemaneFakeDead)
+                            if (Creature* whitemane = instance->GetCreature(_whitemaneGUID))
+                            {
+                                EndFakeDeath(whitemane);
+                                KillWhitemane(whitemane);
+                            }
+                    }
+                    break;
+                case DATA_WHITEMANE_FAKE_DEATH:
+                    if (data && !_whitemaneFakeDead)
+                        if (Creature* whitemane = instance->GetCreature(_whitemaneGUID))
+                            StartFakeDeath(whitemane);
                     break;
                 case TYPE_ASHBRINGER_EVENT:
                     if (data == IN_PROGRESS)
@@ -237,6 +263,34 @@ public:
                 default:
                     break;
             }
+        }
+
+        // Whitemane cannot drop below 1 health: her SmartAI keeps her invincible at 1 for the whole
+        // fight (the step that lifted it after she raises Mograine is gone). Reaching 1 is her death,
+        // decided here: a fake one while Mograine still stands, the real one once he is down.
+        void Update(uint32 diff) override
+        {
+            if (_whitemaneCheck > diff)
+            {
+                _whitemaneCheck -= diff;
+                return;
+            }
+            _whitemaneCheck = 500;
+
+            if (_whitemaneFakeDead)
+                return;
+            Creature* whitemane = instance->GetCreature(_whitemaneGUID);
+            if (!whitemane || !whitemane->IsAlive() || !whitemane->IsInCombat() || whitemane->GetHealth() > 1)
+                return;
+
+            Creature* mograine = instance->GetCreature(_mograineGUID);
+            // Still in his staged death (out of reach) he is about to be raised: wait for that.
+            if (mograine && mograine->IsAlive() && mograine->HasUnitFlag(UNIT_FLAG_NOT_SELECTABLE))
+                return;
+            if (mograine && mograine->IsAlive())
+                StartFakeDeath(whitemane);
+            else
+                KillWhitemane(whitemane);
         }
 
         ObjectGuid GetGuidData(uint32 type) const override
@@ -270,12 +324,55 @@ public:
                 case TYPE_ASHBRINGER_EVENT:
                     return _ashencounter;
                     break;
+                case DATA_WHITEMANE_FAKE_DEATH:
+                    return _whitemaneFakeDead ? 1 : 0;
                 default:
                     return 0;
                     break;
             }
         }
     private:
+        // Whitemane killed while Mograine still fights only plays dead: at 1 health, out of reach,
+        // her AI off and no loot yet. Mograine's death finishes her; a wipe stands her back up.
+        void StartFakeDeath(Creature* whitemane)
+        {
+            _whitemaneFakeDead = true;
+            whitemane->SetHealth(1);
+            whitemane->InterruptNonMeleeSpells(true);
+            whitemane->AttackStop();
+            whitemane->StopMoving();
+            whitemane->SetReactState(REACT_PASSIVE);
+            whitemane->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            whitemane->SetStandState(UNIT_STAND_STATE_DEAD);
+            whitemane->SetDynamicFlag(UNIT_DYNFLAG_DEAD);
+            whitemane->IsAIEnabled = false;
+        }
+
+        void EndFakeDeath(Creature* whitemane)
+        {
+            _whitemaneFakeDead = false;
+            whitemane->IsAIEnabled = true;
+            whitemane->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            whitemane->SetStandState(UNIT_STAND_STATE_STAND);
+            whitemane->RemoveDynamicFlag(UNIT_DYNFLAG_DEAD);
+            whitemane->SetReactState(REACT_AGGRESSIVE);
+        }
+
+        void KillWhitemane(Creature* whitemane)
+        {
+            Unit* killer = whitemane->GetLootRecipient();
+            if (!killer)
+                for (auto const& ref : instance->GetPlayers())
+                    if (Player* player = ref.GetSource(); player && player->IsAlive())
+                    {
+                        killer = player;
+                        break;
+                    }
+            Unit::Kill(killer ? killer : whitemane, whitemane);
+        }
+
+        bool _whitemaneFakeDead{};
+        uint32 _whitemaneCheck{};
         ObjectGuid _doorHighInquisitorGUID;
         ObjectGuid _doorChapelGUID;
         ObjectGuid _mograineGUID;

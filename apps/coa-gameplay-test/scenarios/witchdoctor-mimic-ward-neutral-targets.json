@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Mimic Ward repeats Malefic Arrow, Reclamation and Spirit Volley on neutral targets (#207)",
+  "contract": "Mimic Ward 707162 reads: 'For the duration when you cast Malefic Arrow (Shadowhunter 92086; Malefic Wrath otherwise), Reclamation (Shadowhunter) and Loa's Brew the ward will also cast it on your target.' The tooltip does not limit this to hostile-faction targets, so a target the Witch Doctor may attack (a neutral faction-7 unit, like a training dummy) must receive the ward's copy too. Bwonsamdi's Gift 707650 transforms Reclamation into Spirit Volley 504582 while the ward is up, and Spirit Volley 'Scales with modifiers to Reclamation', so the transformed Reclamation is repeated like Reclamation. The ward's copies are observed as SMSG_SPELL_GO packets sent by creature entry 300659 (the ward) for the exact spell, and the hostile copies' damage as the doctor's spell damage on that target. The hostile faction-14 control shows the ward already repeated Malefic Arrow there; the ward's own attack check (a non-player-controlled creature versus a neutral unit) refused the neutral target, which is the reported failure. Loa's Brew on the doctor is a friendly-target control. The extra ward copy in the report was fixed by #402 and is covered by chosen-one-mimic-ward.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "doctor", "race": 1, "class": 13, "level": 80, "spell_hit_rating": 10000, "ranged_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "hostile", "owner": "doctor", "entry": 36, "faction": 14, "level": 80, "health": 1000000, "distance": 12 },
+    { "id": "neutral", "owner": "doctor", "entry": 36, "faction": 7, "level": 80, "health": 1000000, "distance": 12 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 4000 },
+    { "action": "learn", "label": "Shadowhunter specialization", "actor": "doctor", "spell": 92086 },
+    { "action": "assert", "actor": "doctor", "metric": "aura", "spell": 92086, "equals": 1, "within_ms": 2000 },
+    { "action": "learn", "actor": "doctor", "spell": 707162 },
+    { "action": "learn", "actor": "doctor", "spell": 801674 },
+    { "action": "learn", "actor": "doctor", "spell": 806288 },
+    { "action": "learn", "actor": "doctor", "spell": 504582 },
+    { "action": "learn", "actor": "doctor", "spell": 801670 },
+    { "action": "add_item", "actor": "doctor", "item": 2504 },
+    { "action": "equip", "label": "Bow for the ranged-slot shots", "actor": "doctor", "item": 2504, "slot": 17 },
+    { "action": "wait", "label": "Let the equipment settle", "ms": 1500 },
+    { "action": "cast", "label": "Summon the Mimic Ward", "actor": "doctor", "spell": 707162 },
+    {
+      "action": "assert", "label": "One Mimic Ward", "actor": "doctor", "metric": "owned_creature_count",
+      "entry": 300659, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "cast", "label": "Hostile control: Malefic Arrow", "actor": "doctor", "spell": 801674,
+      "target": "hostile"
+    },
+    {
+      "action": "assert", "label": "The doctor fires Malefic Arrow at the hostile unit", "actor": "doctor",
+      "metric": "spell_go_count", "spell": 801674, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Hostile control: the ward repeats Malefic Arrow", "actor": "doctor",
+      "metric": "spell_go_count", "spell": 801674, "entry": 300659, "equals": 1, "within_ms": 2000
+    },
+    { "action": "reset_cooldown", "actor": "doctor", "spell": 801674 },
+    { "action": "wait", "label": "Global cooldown", "ms": 1600 },
+    {
+      "action": "cast", "label": "Malefic Arrow at the neutral unit", "actor": "doctor", "spell": 801674,
+      "target": "neutral"
+    },
+    {
+      "action": "assert", "label": "The doctor fires Malefic Arrow at the neutral unit", "actor": "doctor",
+      "metric": "spell_go_count", "spell": 801674, "equals": 2, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "#207: the ward repeats Malefic Arrow at the neutral unit", "actor": "doctor",
+      "metric": "spell_go_count", "spell": 801674, "entry": 300659, "equals": 2, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "#207: both Malefic Arrows damage the neutral unit", "actor": "doctor",
+      "metric": "spell_damage_count", "spell": 801674, "target": "neutral", "equals": 2, "within_ms": 3000
+    },
+    { "action": "wait", "label": "Global cooldown", "ms": 1600 },
+    {
+      "action": "cast", "label": "Reclamation at the neutral unit", "actor": "doctor", "spell": 806288,
+      "target": "neutral"
+    },
+    {
+      "action": "assert", "label": "#207: the ward repeats Reclamation at the neutral unit", "actor": "doctor",
+      "metric": "spell_go_count", "spell": 806288, "entry": 300659, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "#207: both Reclamations damage the neutral unit", "actor": "doctor",
+      "metric": "spell_damage_count", "spell": 806288, "target": "neutral", "equals": 2, "within_ms": 3000
+    },
+    { "action": "reset_cooldown", "actor": "doctor", "spell": 707162 },
+    { "action": "wait", "label": "Global cooldown", "ms": 1600 },
+    { "action": "cast", "label": "Renew the Mimic Ward for the remaining casts", "actor": "doctor", "spell": 707162 },
+    {
+      "action": "assert", "label": "The renewed ward replaces the first one", "actor": "doctor",
+      "metric": "owned_creature_count", "entry": 300659, "equals": 1, "within_ms": 1000
+    },
+    { "action": "wait", "label": "Global cooldown", "ms": 1600 },
+    {
+      "action": "set_aura", "label": "Spirit Volley stands in for Reclamation", "actor": "doctor", "spell": 505158,
+      "stacks": 1
+    },
+    { "action": "assert", "actor": "doctor", "metric": "aura", "spell": 505158, "equals": 1, "within_ms": 1000 },
+    {
+      "action": "cast", "label": "Spirit Volley at the neutral unit", "actor": "doctor", "spell": 504582,
+      "target": "neutral"
+    },
+    {
+      "action": "assert", "label": "#207: the ward repeats Spirit Volley at the neutral unit", "actor": "doctor",
+      "metric": "spell_go_count", "spell": 504582, "entry": 300659, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "#207: both Spirit Volleys damage the neutral unit", "actor": "doctor",
+      "metric": "spell_damage_count", "spell": 504582, "target": "neutral", "equals": 2, "within_ms": 3000
+    },
+    { "action": "wait", "label": "Global cooldown", "ms": 1600 },
+    { "action": "cast", "label": "Friendly control: Loa's Brew on the doctor", "actor": "doctor", "spell": 801670 },
+    {
+      "action": "assert", "label": "Friendly control: the ward repeats Loa's Brew", "actor": "doctor",
+      "metric": "spell_go_count", "spell": 801670, "entry": 300659, "equals": 1, "within_ms": 5000
+    }
+  ]
+}

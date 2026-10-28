@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Dawn client patches permit recasting the active phase (#5741)",
+  "contract": "Requires CoA.SendDisplayPatches=1. Raw Dawn 804584 requires caster aura 704396 and excludes active Dawn 807440. The clarified cancellation behavior requires both restrictions to be zero in the client SMSG_PATCH_SPELL row (opcode 2346, numeric fields 24 and 26). Explicitly require the Dawn row before checking zero-valued fields, and use Runeshroud 500639 as a control proving the login patch stream is present. This verifies emitted client data, while client rendering and input remain outside the native harness. The Dawn aura 807440 must also stream with the raw non-shapeshifted attribute (65536) retained and the debuff and no-cancel attributes cleared, allowing manual buff cancellation.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "The existing login spell patch stream reaches this session",
+      "actor": "cleric",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 500639,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Dawn is included in the client patch stream",
+      "actor": "cleric",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 804584,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Recasting Dawn does not require the twenty-Solar-Power readiness aura",
+      "actor": "cleric",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 804584,
+      "index": 24,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Active Dawn no longer excludes recasting the same spell",
+      "actor": "cleric",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 804584,
+      "index": 26,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Dawn aura is included in the client patch stream",
+      "actor": "cleric",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 807440,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Dawn retains its non-shapeshifted flag and clears debuff and no-cancel flags",
+      "actor": "cleric",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 807440,
+      "index": 4,
+      "equals": 65536
+    }
+  ]
+}

@@ -1,7 +1,27 @@
 {
   "schema": 1,
   "name": "Stormbringer: Shockingly Powerful triggers Conduction on a Torrential Wrath critical (#2162)",
-  "contract": "Shockingly Powerful 572310 reads 'Critical strikes with Torrential Wrath now trigger Conductive. Increases the damage of Stormflow by $s2%.' Effect 1 is SPELL_AURA_ADD_PCT_MODIFIER with MiscValue 22 (SPELLMOD_DOT), EffectBasePoints 49 + EffectDieSides 1 = 50 and EffectSpellClassMask 0x0/0x10000/0x0, which is Stormflow 567555 (SpellFamilyFlags1 0x10000, a SPELL_AURA_PERIODIC_DAMAGE channel, amplitude 1000): that half is delivered by the native spell-modifier path and Player::ApplySpellMod makes percentage DAMAGE/DOT mods multiplicative, so a base of 1000 reads 1000 without the passive and 1000 * 1.5 = 1500 with it. Effect 0 is aura 42 (SPELL_AURA_PROC_TRIGGER_SPELL) with TriggerSpell 567560 Conduction - the spell the DBC record names, where the tooltip says 'Conductive' - and EffectSpellClassMask 0/0/0. Spell.dbc gives 572310 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it ('Skip if no proc flags in DBC') and Aura::GetProcEffectMask returned 0: no critical strike ever triggered Conduction, and the restriction to Torrential Wrath (SpellFamilyName 22, SpellFamilyMask1 0x1) and to criticals (HitMask 2 = PROC_HIT_CRITICAL at SpellPhaseMask 2 = PROC_SPELL_PHASE_HIT) has to come from the spell_proc row. The fixture's spell_crit_rating 100000 makes the critical deterministic instead of hoping for one, which the scenario checks with spell_done_crit_chance before relying on it. Torrential Wrath 804017 has CastingTimeIndex 19 = 2500 ms; it carries no AscensionCustomResourceData.h cost rule, but its own Spell.dbc CasterAuraSpell field is 573249 (\"At Least 40 Static\"), so Spell::CheckCast rejects it below 40 stacks of 803102 - the scenario seeds 100 stacks before the first cast to satisfy that native gate.",
+  "contract": [
+    "Shockingly Powerful 572310 reads 'Critical strikes with Torrential Wrath now trigger Conductive.",
+    "Increases the damage of Stormflow by $s2%.' Effect 1 is SPELL_AURA_ADD_PCT_MODIFIER with MiscValue 22",
+    "(SPELLMOD_DOT), EffectBasePoints 49 + EffectDieSides 1 = 50 and EffectSpellClassMask 0x0/0x10000/0x0,",
+    "which is Stormflow 567555 (SpellFamilyFlags1 0x10000, a SPELL_AURA_PERIODIC_DAMAGE channel, amplitude",
+    "1000): that half is delivered by the native spell-modifier path and Player::ApplySpellMod makes",
+    "percentage DAMAGE/DOT mods multiplicative, so a base of 1000 reads 1000 without the passive and 1000 *",
+    "1.5 = 1500 with it. Effect 0 is aura 42 (SPELL_AURA_PROC_TRIGGER_SPELL) with TriggerSpell 567560",
+    "Conduction - the spell the DBC record names, where the tooltip says 'Conductive' - and",
+    "EffectSpellClassMask 0/0/0. Spell.dbc gives 572310 ProcFlags 0 and no spell_proc row existed, so",
+    "SpellMgr::LoadSpellProcs skipped it ('Skip if no proc flags in DBC') and Aura::GetProcEffectMask",
+    "returned 0: no critical strike ever triggered Conduction, and the restriction to Torrential Wrath",
+    "(SpellFamilyName 22, SpellFamilyMask1 0x1) and to criticals (HitMask 2 = PROC_HIT_CRITICAL at",
+    "SpellPhaseMask 2 = PROC_SPELL_PHASE_HIT) has to come from the spell_proc row. The fixture's",
+    "spell_crit_rating 100000 makes the critical deterministic instead of hoping for one, which the scenario",
+    "checks with spell_done_crit_chance before relying on it. Torrential Wrath 804017 has CastingTimeIndex 19",
+    "= 2500 ms; its effective AscensionCustomResourceData.h rule charges 40 Static, and its own Spell.dbc",
+    "CasterAuraSpell field is 573249 (\"At Least 40 Static\"), so Spell::CheckCast rejects it below 40 stacks",
+    "of 803102 - the scenario seeds 100 stacks before every cast and verifies 60 remain after the normal cast",
+    "completes to satisfy that native gate."
+  ],
   "timeout_ms": 120000,
   "players": [
     {
@@ -31,63 +51,185 @@
     "o": 0
   },
   "steps": [
-    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
-    { "action": "learn", "actor": "storm", "spell": 804017 },
-    { "action": "learn", "actor": "storm", "spell": 567555 },
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "actor": "storm", "spell": 804017},
+    {"action": "learn", "actor": "storm", "spell": 567555},
     {
-      "action": "assert", "label": "BASELINE: Stormflow periodic damage is unmodified without the passive",
-      "actor": "storm", "metric": "spell_modifier", "spell": 567555, "op": 22, "base": 1000, "equals": 1000
+      "action": "assert",
+      "label": "BASELINE: Stormflow periodic damage is unmodified without the passive",
+      "actor": "storm",
+      "metric": "spell_modifier",
+      "spell": 567555,
+      "op": 22,
+      "base": 1000,
+      "equals": 1000
     },
     {
-      "action": "assert", "label": "BASELINE: no Conduction has been cast yet",
-      "actor": "storm", "metric": "spell_cast_count", "spell": 567560, "equals": 0
+      "action": "assert",
+      "label": "BASELINE: no Conduction has been cast yet",
+      "actor": "storm",
+      "metric": "spell_cast_count",
+      "spell": 567560,
+      "equals": 0
     },
     {
-      "action": "assert", "label": "SETUP: every Torrential Wrath hit will be a critical",
-      "actor": "storm", "metric": "spell_done_crit_chance", "spell": 804017, "target": "dummy", "min": 100
+      "action": "assert",
+      "label": "SETUP: every Torrential Wrath hit will be a critical",
+      "actor": "storm",
+      "metric": "spell_done_crit_chance",
+      "spell": 804017,
+      "target": "dummy",
+      "min": 100
     },
-    { "action": "set_aura", "actor": "storm", "spell": 803102, "stacks": 100 },
-    { "action": "cast", "actor": "storm", "spell": 804017, "target": "dummy" },
+    {"action": "set_aura", "actor": "storm", "spell": 803102, "stacks": 100},
+    {"action": "cast", "actor": "storm", "spell": 804017, "target": "dummy"},
     {
-      "action": "assert", "label": "SETUP: the control Torrential Wrath cast was accepted",
-      "actor": "storm", "metric": "cast_failure", "spell": 804017, "equals": 0
-    },
-    { "action": "wait", "ms": 4000 },
-    {
-      "action": "assert", "label": "CONTROL: a critical Torrential Wrath alone casts no Conduction",
-      "actor": "storm", "metric": "spell_cast_count", "spell": 567560, "equals": 0
-    },
-    { "action": "learn", "actor": "storm", "spell": 572310 },
-    {
-      "action": "assert", "label": "SETUP: the Shockingly Powerful passive is active",
-      "actor": "storm", "metric": "aura", "spell": 572310, "equals": 1
-    },
-    {
-      "action": "assert", "label": "BASELINE: the native half raises Stormflow periodic damage by 50% (1000 -> 1500)",
-      "actor": "storm", "metric": "spell_modifier", "spell": 567555, "op": 22, "base": 1000, "equals": 1500
+      "action": "assert",
+      "label": "Torrential Wrath 1 was accepted normally",
+      "actor": "storm",
+      "metric": "cast_failure",
+      "spell": 804017,
+      "equals": 0
     },
     {
-      "action": "assert", "label": "CONTROL: the modifier does not leak onto Torrential Wrath's direct damage",
-      "actor": "storm", "metric": "spell_modifier", "spell": 804017, "op": 0, "base": 1000, "equals": 1000
-    },
-    { "action": "cast", "actor": "storm", "spell": 804017, "target": "dummy" },
-    {
-      "action": "assert", "label": "SETUP: the measured Torrential Wrath cast was accepted",
-      "actor": "storm", "metric": "cast_failure", "spell": 804017, "equals": 0
-    },
-    {
-      "action": "assert", "label": "DISCRIMINATING: the critical strike procs Shockingly Powerful",
-      "actor": "storm", "metric": "spell_proc_count", "spell": 572310, "min": 1, "within_ms": 6000
+      "action": "assert",
+      "label": "Torrential Wrath 1 completes and pays 40 Static",
+      "actor": "storm",
+      "metric": "aura_stacks",
+      "spell": 803102,
+      "equals": 60,
+      "within_ms": 4000
     },
     {
-      "action": "assert", "label": "DISCRIMINATING: the proc casts Conduction 567560",
-      "actor": "storm", "metric": "spell_cast_count", "spell": 567560, "min": 1
+      "action": "assert",
+      "label": "SETUP: the control Torrential Wrath cast was accepted",
+      "actor": "storm",
+      "metric": "cast_failure",
+      "spell": 804017,
+      "equals": 0
     },
-    { "action": "wait", "ms": 1000 },
-    { "action": "cast", "actor": "storm", "spell": 804017, "target": "dummy" },
+    {"action": "wait", "ms": 4000},
     {
-      "action": "assert", "label": "DISCRIMINATING: a second critical procs it again",
-      "actor": "storm", "metric": "spell_proc_count", "spell": 572310, "min": 2, "within_ms": 6000
+      "action": "assert",
+      "label": "CONTROL: a critical Torrential Wrath alone casts no Conduction",
+      "actor": "storm",
+      "metric": "spell_cast_count",
+      "spell": 567560,
+      "equals": 0
+    },
+    {"action": "learn", "actor": "storm", "spell": 572310},
+    {
+      "action": "assert",
+      "label": "SETUP: the Shockingly Powerful passive is active",
+      "actor": "storm",
+      "metric": "aura",
+      "spell": 572310,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the native half raises Stormflow periodic damage by 50% (1000 -> 1500)",
+      "actor": "storm",
+      "metric": "spell_modifier",
+      "spell": 567555,
+      "op": 22,
+      "base": 1000,
+      "equals": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the modifier does not leak onto Torrential Wrath's direct damage",
+      "actor": "storm",
+      "metric": "spell_modifier",
+      "spell": 804017,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "set_aura",
+      "label": "Fund Torrential Wrath 2 without bypassing its 40 Static cost",
+      "actor": "storm",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {"action": "cast", "actor": "storm", "spell": 804017, "target": "dummy"},
+    {
+      "action": "assert",
+      "label": "Torrential Wrath 2 was accepted normally",
+      "actor": "storm",
+      "metric": "cast_failure",
+      "spell": 804017,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Torrential Wrath 2 completes and pays 40 Static",
+      "actor": "storm",
+      "metric": "aura_stacks",
+      "spell": 803102,
+      "equals": 60,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the measured Torrential Wrath cast was accepted",
+      "actor": "storm",
+      "metric": "cast_failure",
+      "spell": 804017,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the critical strike procs Shockingly Powerful",
+      "actor": "storm",
+      "metric": "spell_proc_count",
+      "spell": 572310,
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the proc casts Conduction 567560",
+      "actor": "storm",
+      "metric": "spell_cast_count",
+      "spell": 567560,
+      "min": 1
+    },
+    {"action": "wait", "ms": 1000},
+    {
+      "action": "set_aura",
+      "label": "Fund Torrential Wrath 3 without bypassing its 40 Static cost",
+      "actor": "storm",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {"action": "cast", "actor": "storm", "spell": 804017, "target": "dummy"},
+    {
+      "action": "assert",
+      "label": "Torrential Wrath 3 was accepted normally",
+      "actor": "storm",
+      "metric": "cast_failure",
+      "spell": 804017,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Torrential Wrath 3 completes and pays 40 Static",
+      "actor": "storm",
+      "metric": "aura_stacks",
+      "spell": 803102,
+      "equals": 60,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a second critical procs it again",
+      "actor": "storm",
+      "metric": "spell_proc_count",
+      "spell": 572310,
+      "min": 2,
+      "within_ms": 6000
     }
   ]
 }

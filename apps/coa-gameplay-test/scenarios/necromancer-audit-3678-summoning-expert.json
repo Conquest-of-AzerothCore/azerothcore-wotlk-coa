@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Necromancer audit: Summoning Expert raises Life Force to 3 and reaches raised minions (#3678)",
+  "contract": "Summoning Expert 807494 (CharacterAdvancement 4237, ClassType 25 = class 23, RequiredLevel 30) reads 'Increases your maximum Life Force by $s1 and your Undead minion's Stamina by $s2%.' Effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107) MiscValue 31 (SPELLMOD_MAX_AURA_STACKS), EffectBasePoints 0 + DieSides 1 = +1, EffectSpellClassMask word 1 = 0x20000 in SpellFamilyName 29 -- the identical class mask, op and mechanism issue #1925 already proved native for Master Animator: it selects only Life Force 805011 (StackAmount 2) and 525004, and SpellInfo::CalcMaxAuraStacks (SpellInfo.cpp:1454) calls `modOwner->ApplySpellMod(Id, SPELLMOD_MAX_AURA_STACKS, maximum)`. Effect 1 is SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS (190) with aura 137 (SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE), MiscValue 2 (Stamina), EffectBasePoints 9 + DieSides 1 = +10 -- the same custom effect #1814's Rotting Flesh scenario and the Crown's Call scenario (necromancer-crowns-call-intellect-minions.json) already proved reaches the owner's already-summoned minions via the periodic UnitAura rescan, not only fresh summons. As the Crown's Call scenario's contract documents, the harness reads a non-pet minion's owned aura only through owned_creature_count's spell filter (Player::GetGuardianPet only returns a Category-2/IsPet minion; Lesser Skeletal Warrior 500970/50065 uses SummonProperties row 61, Category 1 SUMMON_CATEGORY_ALLY, so it is never the guardian pet and pet_aura_amount always reads 0/absent for it regardless of whether the aura is installed) -- so this scenario proves presence of Summoning Expert's aura on the raised minion, not its exact +10% Stamina magnitude, which was read directly from the DBC effect above. Both mechanisms are established, working, native/custom-native paths; nothing here needs a CoA script.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [ { "id": "n", "race": 5, "class": 23, "level": 30 } ],
+  "steps": [
+    { "action": "wait", "label": "Let the Life Force aura synchronize", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 500970 },
+    {
+      "action": "assert", "label": "PRECONDITION: Life Force capacity is 2 without the passive", "actor": "n",
+      "metric": "aura_stacks", "spell": 805011, "equals": 2, "within_ms": 3000
+    },
+    { "action": "cast", "label": "Raise a Lesser Skeletal Warrior before the passive", "actor": "n", "spell": 500970 },
+    {
+      "action": "assert", "label": "SETUP: the warrior is raised", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50065, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "CONTROL: the warrior carries no Summoning Expert aura yet", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50065, "spell": 807494, "caster": "n", "equals": 0
+    },
+    { "action": "learn", "label": "Learn Summoning Expert", "actor": "n", "spell": 807494 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Summoning Expert raises Life Force capacity to 3", "actor": "n",
+      "metric": "aura_stacks", "spell": 805011, "equals": 3, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the already-raised warrior gets the Stamina aura via the periodic rescan",
+      "actor": "n", "metric": "owned_creature_count", "entry": 50065, "spell": 807494, "caster": "n", "equals": 1,
+      "within_ms": 3000
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 500 },
+    { "action": "cast", "label": "Raise a second warrior into the talented Life Force", "actor": "n", "spell": 500970 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: a second warrior fits into the raised capacity 3",
+      "actor": "n", "metric": "owned_creature_count", "entry": 50065, "equals": 2, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "The Stamina aura reaches both raised warriors", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50065, "spell": 807494, "caster": "n", "equals": 2,
+      "within_ms": 3000
+    }
+  ]
+}

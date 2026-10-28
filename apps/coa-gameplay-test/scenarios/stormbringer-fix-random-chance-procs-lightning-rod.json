@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Stormbringer: Lightning Rod spreads Volt from Forked Lightning damage (#1681)",
-  "contract": "#1681 Lightning Rod (300609) is SPELL_ATTR0_PASSIVE with ProcChance 15, Spell.dbc ProcFlags 0 and one effect: SPELL_EFFECT_APPLY_AURA with EffectApplyAuraName 42 (SPELL_AURA_PROC_TRIGGER_SPELL) on EffectTriggerSpell 300928. Two independent dead ends stopped it. With no spell_proc row, SpellMgr::LoadSpellProcs skipped the record ('Skip if no proc flags in DBC') and Aura::GetProcEffectMask returned 0 ('only auras with spell proc entry can trigger proc'), so the 15% roll never happened; and 300928's only effect is 169 (SPELL_EFFECT_ASCENSION_SPREAD_AURA), which this core binds to Spell::EffectNULL, so even a restored proc would have done nothing. The fix therefore performs the roll and the spread in the module, in the class's existing AllSpellScript OnSpellHitResult hook, which already runs a chance-on-direct-damage proc for Electrocutioner. The roll reuses that same arithmetic - the talent's own ProcChance plus one point per five stacks of Static 803102, which is what 'Chance increases based on Static level' means - so at 100 Static the chance is 15 + 20 = 35 per Forked Lightning hit. The spread copies 300928's own DBC row: MaxAffectedTargets 1 enemies inside EffectRadiusIndex 14 (SpellRadius.dbc 14 = 8.0 yards), receiving a copy of the caster's Volt (EffectTriggerSpell 500928, DurationIndex 85 = 18000 ms) with its stacks, remaining duration and per-effect amounts, the same helper shape AscensionPyromancer::Spread uses and the same idiom as its call site, which takes the count and the radius from the spread spell's own record. Forked Lightning 801851 is the trigger (SpellFamilyName 22, DmgClass 1, first spell of its rank chain). The discriminator is the presence of the caster's Volt on an enemy that was never a Volt target and is not reachable by any other path; it reads absent on the current binary. The scenario deliberately asserts no damage number, and it does not assert a proc rate, which the harness cannot measure. OPEN: 300928 carries both EffectMiscValue 5 and MaxAffectedTargets 1 while the tooltip says 'each affected enemy'. The implementation follows MaxAffectedTargets because that is what the analogous call site reads; which field the original server used is unresolved. Root cause of the BASELINE failure investigated separately from the fix itself: creature entry 721 is a Rabbit (creature_template type CREATURE_TYPE_CRITTER). CritterAI::JustEngagedWith (PassiveAI.cpp) puts a critter into a timed flee on its first hit, and CreatureAI::_EnterEvadeMode (CreatureAI.cpp) calls RemoveEvadeAuras() once that flee (CreatureFamilyFleeDelay, default 7000 ms) expires, stripping the caster's Volt before the scenario's own 18000 ms duration runs out; Volt carries none of RemoveEvadeAuras' exempt attributes (SPELL_ATTR0_CU_IGNORE_EVADE, SPELL_ATTR1_AURA_STAYS_AFTER_COMBAT). This is a fixture defect, not a Lightning Rod logic bug: AscensionStormbringerTalents.cpp's SPELL_FORKED_LIGHTNING already equals 801851, the chain's own first rank in spell_ranks, so the OnSpellHitResult comparison at line 201 is correct as written. Both creatures now use entry 36 (Harvest Golem, non-critter), matching the entry used by the sibling #2802 Thunder Wave scenario for the same Volt-duration dependency. Volt and Forked Lightning both carry StartRecoveryCategory 133 / StartRecoveryTime 1500 (the shared 1.5 s GCD); the SETUP Volt cast and the first Forked Lightning cast were back to back with no gap, so the first Forked Lightning attempt failed with SPELL_FAILED_NOT_READY (reason 67, result.json cast_failures). A 1701 ms wait now separates them, matching the same GCD fix already applied elsewhere in this batch (stormbringer-fix-on-cast-proc-cooldowns-evergale.json, stormbringer-fix-static-electricity.json).",
+  "contract": "#1681 Lightning Rod (300609) is SPELL_ATTR0_PASSIVE with ProcChance 15, Spell.dbc ProcFlags 0 and one effect: SPELL_EFFECT_APPLY_AURA with EffectApplyAuraName 42 (SPELL_AURA_PROC_TRIGGER_SPELL) on EffectTriggerSpell 300928. Two independent dead ends stopped it. With no spell_proc row, SpellMgr::LoadSpellProcs skipped the record ('Skip if no proc flags in DBC') and Aura::GetProcEffectMask returned 0 ('only auras with spell proc entry can trigger proc'), so the 15% roll never happened; and 300928's only effect is 169 (SPELL_EFFECT_ASCENSION_SPREAD_AURA), which this core binds to Spell::EffectNULL, so even a restored proc would have done nothing. The fix therefore performs the roll and the spread in the module, in the class's existing AllSpellScript OnSpellHitResult hook, which already runs a chance-on-direct-damage proc for Electrocutioner. The roll reuses that same arithmetic - the talent's own ProcChance plus one point per five stacks of Static 803102, which is what 'Chance increases based on Static level' means - so at 100 Static the chance is 15 + 20 = 35 per Forked Lightning hit. The spread copies 300928's own DBC row: MaxAffectedTargets 1 enemies inside EffectRadiusIndex 14 (SpellRadius.dbc 14 = 8.0 yards), receiving a copy of the caster's Volt (EffectTriggerSpell 500928, DurationIndex 85 = 18000 ms) with its stacks, remaining duration and per-effect amounts, the same helper shape AscensionPyromancer::Spread uses and the same idiom as its call site, which takes the count and the radius from the spread spell's own record. Forked Lightning 801851 is the trigger (SpellFamilyName 22, DmgClass 1, first spell of its rank chain). The discriminator is the presence of the caster's Volt on an enemy that was never a Volt target and is not reachable by any other path; it reads absent on the current binary. The scenario deliberately asserts no damage number, and it does not assert a proc rate, which the harness cannot measure. OPEN: 300928 carries both EffectMiscValue 5 and MaxAffectedTargets 1 while the tooltip says 'each affected enemy'. The implementation follows MaxAffectedTargets because that is what the analogous call site reads; which field the original server used is unresolved. Root cause of the BASELINE failure investigated separately from the fix itself: creature entry 721 is a Rabbit (creature_template type CREATURE_TYPE_CRITTER). CritterAI::JustEngagedWith (PassiveAI.cpp) puts a critter into a timed flee on its first hit, and CreatureAI::_EnterEvadeMode (CreatureAI.cpp) calls RemoveEvadeAuras() once that flee (CreatureFamilyFleeDelay, default 7000 ms) expires, stripping the caster's Volt before the scenario's own 18000 ms duration runs out; Volt carries none of RemoveEvadeAuras' exempt attributes (SPELL_ATTR0_CU_IGNORE_EVADE, SPELL_ATTR1_AURA_STAYS_AFTER_COMBAT). This is a fixture defect, not a Lightning Rod logic bug: AscensionStormbringerTalents.cpp's SPELL_FORKED_LIGHTNING already equals 801851, the chain's own first rank in spell_ranks, so the OnSpellHitResult comparison at line 201 is correct as written. Both creatures now use entry 36 (Harvest Golem, non-critter), matching the entry used by the sibling #2802 Thunder Wave scenario for the same Volt-duration dependency. Volt and Forked Lightning both carry StartRecoveryCategory 133 / StartRecoveryTime 1500 (the shared 1.5 s GCD); the SETUP Volt cast and the first Forked Lightning cast were back to back with no gap, so the first Forked Lightning attempt failed with SPELL_FAILED_NOT_READY (reason 67, result.json cast_failures). A 1701 ms wait now separates them, matching the same GCD fix already applied elsewhere in this batch (stormbringer-fix-on-cast-proc-cooldowns-evergale.json, stormbringer-fix-static-electricity.json). The spread is observed through the neighbour's Volt damage events (spell_damage_count 500928 from the caster on the neighbour), not through the neighbour's aura at the end. SpreadVolt gives the copy the origin's remaining duration, and the primary Volt is refreshed every 14600 ms (a 1600 ms wait plus five 2600 ms Forked Lightning steps), so a copy made in the first or second Lightning Rod block expires 3400 ms into the next block, long before a final aura check. That check could only see the last five hits and failed with probability 0.65^5 = 11.6%, which is what an accelerated run recorded. Every copy keeps at least 4000 ms of the origin's duration and the origin's 3000 ms periodic timer (EffectAmplitude 3000), so each spread yields at least one logged tick; the count accumulates over all 15 hits, and the 4000 ms observation window lets a copy made by the last hit tick without any further cast. The baseline asserts the same metric reads zero for the neighbour and positive for the primary enemy.",
   "timeout_ms": 300000,
   "players": [
     {
@@ -222,6 +222,24 @@
       "spell": 500928,
       "caster": "s",
       "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the caster's Volt ticks on the primary enemy are observable as Volt damage events",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 500928,
+      "target": "primary",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: without Lightning Rod the neighbouring enemy never took Volt damage from the caster",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 500928,
+      "target": "neighbor",
+      "equals": 0
     },
     {
       "action": "learn",
@@ -611,15 +629,6 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: Lightning Rod spread the Volt to the neighbouring enemy in 15 Forked Lightning hits (15% + 100 Static / 5 = 35% per hit, so a run of 15 misses is 0.16%)",
-      "actor": "neighbor",
-      "metric": "aura",
-      "spell": 500928,
-      "caster": "s",
-      "equals": 1
-    },
-    {
-      "action": "assert",
       "label": "DISCRIMINATING: the primary enemy keeps its Volt, so the aura was copied and not moved",
       "actor": "primary",
       "metric": "aura",
@@ -634,6 +643,16 @@
       "metric": "spell_cast_count",
       "spell": 500928,
       "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Lightning Rod spread the caster's Volt to the neighbouring enemy, which took its periodic damage, in 15 Forked Lightning hits (15% + 100 Static / 5 = 35% per hit, so a run of 15 misses is 0.16%)",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 500928,
+      "target": "neighbor",
+      "min": 1,
+      "within_ms": 4000
     }
   ]
 }

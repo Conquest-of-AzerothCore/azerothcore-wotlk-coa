@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "name": "Nutty Hardtack grants Spirit and Stamina",
+  "contract": [
+    "Item 772067 uses Food 1141, whose client description promises Spirit and Stamina after 10 seconds eating.",
+    "Well Fed 19743 grants 3 Spirit and 3 Stamina; each stat effect has base points 2 and die sides 1.",
+    "The existing mana-regeneration aura effect retains amount 5; this does not measure actual regeneration or UI.",
+    "Removing Well Fed returns Spirit and Stamina to their pre-food values. Requires CoA.Enable=1."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "eater", "race": 7, "class": 8, "level": 60, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "actor": "eater", "metric": "combat", "equals": 0 },
+    { "action": "assert", "actor": "eater", "metric": "aura", "spell": 19743, "equals": 0 },
+    { "action": "set_health", "actor": "eater", "maximum": 100000, "value": 1000 },
+    { "action": "set_power", "actor": "eater", "power": 0, "value": 0 },
+    { "action": "snapshot", "actor": "eater", "metric": "stat", "stat": 2, "save_as": "stamina_before" },
+    { "action": "snapshot", "actor": "eater", "metric": "stat", "stat": 4, "save_as": "spirit_before" },
+    { "action": "add_item", "actor": "eater", "item": 772067 },
+    { "action": "assert", "actor": "eater", "metric": "item_count", "item": 772067, "equals": 1 },
+    { "action": "use_item", "actor": "eater", "item": 772067, "spell": 1141 },
+    {
+      "action": "assert", "label": "Item use starts eating", "actor": "eater",
+      "metric": "aura", "spell": 1141, "equals": 1, "within_ms": 1000
+    },
+    { "action": "assert", "actor": "eater", "metric": "item_count", "item": 772067, "equals": 0 },
+    { "action": "wait", "ms": 5000 },
+    {
+      "action": "assert", "label": "Five seconds of eating is not enough for Well Fed", "actor": "eater",
+      "metric": "aura", "spell": 19743, "equals": 0
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "stat", "stat": 2,
+      "relative_to": "stamina_before", "equals": 0
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "stat", "stat": 4,
+      "relative_to": "spirit_before", "equals": 0
+    },
+    { "action": "wait", "ms": 5500 },
+    {
+      "action": "assert", "label": "Eating for ten seconds grants Well Fed", "actor": "eater",
+      "metric": "aura", "spell": 19743, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "snapshot", "label": "Record Stamina gained from the food", "actor": "eater",
+      "metric": "stat", "stat": 2, "relative_to": "stamina_before", "save_as": "stamina_gain"
+    },
+    {
+      "action": "snapshot", "label": "Record Spirit gained from the food", "actor": "eater",
+      "metric": "stat", "stat": 4, "relative_to": "spirit_before", "save_as": "spirit_gain"
+    },
+    {
+      "action": "assert", "label": "Nutty Hardtack grants three Stamina", "actor": "eater",
+      "metric": "stat", "stat": 2, "relative_to": "stamina_before", "equals": 3
+    },
+    {
+      "action": "assert", "label": "Nutty Hardtack grants three Spirit", "actor": "eater",
+      "metric": "stat", "stat": 4, "relative_to": "spirit_before", "equals": 3
+    },
+    {
+      "action": "assert", "label": "The existing mana-regeneration aura amount remains five", "actor": "eater",
+      "metric": "aura_amount", "spell": 19743, "effect": 2, "equals": 5
+    },
+    { "action": "set_aura", "actor": "eater", "spell": 1141, "stacks": 0 },
+    { "action": "assert", "actor": "eater", "metric": "aura", "spell": 1141, "equals": 0 },
+    {
+      "action": "assert", "label": "Well Fed persists after eating stops", "actor": "eater",
+      "metric": "aura", "spell": 19743, "equals": 1
+    },
+    { "action": "set_aura", "actor": "eater", "spell": 19743, "stacks": 0 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "actor": "eater", "metric": "aura", "spell": 19743, "equals": 0 },
+    {
+      "action": "assert", "label": "Removing Well Fed restores Stamina", "actor": "eater",
+      "metric": "stat", "stat": 2, "relative_to": "stamina_before", "equals": 0
+    },
+    {
+      "action": "assert", "label": "Removing Well Fed restores Spirit", "actor": "eater",
+      "metric": "stat", "stat": 4, "relative_to": "spirit_before", "equals": 0
+    }
+  ]
+}

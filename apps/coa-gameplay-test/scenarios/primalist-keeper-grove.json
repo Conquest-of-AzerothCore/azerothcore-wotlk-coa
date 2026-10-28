@@ -25,9 +25,9 @@
   ],
   "steps": [
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "baseline",
-      "command": ".localspec 58"
+      "id": 58
     },
     {
       "action": "learn",
@@ -77,9 +77,9 @@
       "max": 120000
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "talented",
-      "command": ".localspec 58"
+      "id": 58
     },
     {
       "action": "learn",
@@ -134,9 +134,9 @@
       "max": 90000
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "removed",
-      "command": ".localspec 58"
+      "id": 58
     },
     {
       "action": "learn",

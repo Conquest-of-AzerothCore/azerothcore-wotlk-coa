@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionChronomancerTalents.h"
+#include "Group.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
@@ -9,6 +10,7 @@
 #include "SpellScript.h"
 #include <algorithm>
 #include <limits>
+#include <vector>
 
 namespace
 {
@@ -34,10 +36,15 @@ enum ChronomancerTalentSpells : uint32
     SPELL_TIMEGUARD = 804441,
     SPELL_MARK_OF_ORDER_ADD_STACK = 806270,
     SPELL_IDEAL_TIME_BUFF = 807210,
-    SPELL_NOZDORMUS_GAZE = 807691
+    SPELL_NOZDORMUS_GAZE = 807691,
+    SPELL_DESTABILIZE_TIME_SLOW = 570761,
+    SPELL_THE_VAST_INFINITE = 706083,
+    SPELL_THE_VAST_INFINITE_SHARE = 707600,
+    SPELL_THE_VAST_INFINITE_HEAL = 707601
 };
 
 constexpr uint32 TimeguardHeavyHitPercent = 20;
+constexpr uint16 AscensionReduceRemainingCooldownPctEffect = 192;
 
 bool IsAeonActivation(uint32 id)
 {
@@ -145,6 +152,55 @@ class spell_ascension_unmaker_of_realities : public AuraScript
     }
 };
 
+class spell_ascension_destabilize_time : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_destabilize_time);
+
+    bool Validate(SpellInfo const*) override
+    {
+        return ValidateSpellInfo({SPELL_DESTABILIZE_TIME_SLOW});
+    }
+
+    void MatchSlow(AuraEffect const*, AuraEffectHandleModes)
+    {
+        Unit* caster = GetCaster();
+        Unit* target = GetTarget();
+        if (!caster || !target)
+            return;
+        Aura* slow = target->GetAura(SPELL_DESTABILIZE_TIME_SLOW, caster->GetGUID());
+        if (!slow)
+            slow = caster->AddAura(SPELL_DESTABILIZE_TIME_SLOW, target);
+        if (!slow)
+            return;
+        slow->SetMaxDuration(GetMaxDuration());
+        slow->SetDuration(GetDuration());
+        if (slow->GetStackAmount() != GetStackAmount())
+            slow->SetStackAmount(GetStackAmount());
+    }
+
+    void RemoveSlow(AuraEffect const*, AuraEffectHandleModes)
+    {
+        GetTarget()->RemoveAurasDueToSpell(SPELL_DESTABILIZE_TIME_SLOW, GetCasterGUID());
+    }
+
+    void GainStackOnCast(AuraEffect const*, ProcEventInfo&)
+    {
+        PreventDefaultAction();
+        if (uint32(GetStackAmount()) < GetSpellInfo()->StackAmount)
+            GetAura()->SetStackAmount(uint8(GetStackAmount() + 1));
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(spell_ascension_destabilize_time::MatchSlow, EFFECT_0,
+            SPELL_AURA_PROC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+        AfterEffectRemove += AuraEffectRemoveFn(spell_ascension_destabilize_time::RemoveSlow, EFFECT_0,
+            SPELL_AURA_PROC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+        OnEffectProc += AuraEffectProcFn(spell_ascension_destabilize_time::GainStackOnCast, EFFECT_0,
+            SPELL_AURA_PROC_TRIGGER_SPELL);
+    }
+};
+
 class spell_ascension_timeguard : public AuraScript
 {
     PrepareAuraScript(spell_ascension_timeguard);
@@ -188,6 +244,119 @@ class spell_ascension_timeguard : public AuraScript
     }
 };
 
+class spell_ascension_the_bieko_effect : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_the_bieko_effect);
+
+    void ReduceRemainingCooldown(SpellEffIndex effIndex)
+    {
+        PreventHitDefaultEffect(effIndex);
+        Player* player = GetHitUnit() ? GetHitUnit()->ToPlayer() : nullptr;
+        int32 const spellId = GetSpellInfo()->Effects[effIndex].MiscValue;
+        if (!player || spellId <= 0)
+            return;
+        if (uint32 const remaining = player->GetSpellCooldownDelay(uint32(spellId)))
+            player->ModifySpellCooldown(uint32(spellId),
+                -int32(CalculatePct(remaining, std::clamp(GetEffectValue(), 0, 100))));
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_ascension_the_bieko_effect::ReduceRemainingCooldown, EFFECT_ALL,
+            AscensionReduceRemainingCooldownPctEffect);
+    }
+};
+
+class spell_ascension_the_vast_infinite : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_the_vast_infinite);
+
+    bool Validate(SpellInfo const*) override
+    {
+        return ValidateSpellInfo({SPELL_THE_VAST_INFINITE_SHARE, SPELL_THE_VAST_INFINITE_HEAL});
+    }
+
+    std::vector<Player*> Holders(Player* victim) const
+    {
+        std::vector<Player*> holders;
+        if (Group* group = victim->GetGroup())
+            for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
+                if (Player* member = ref->GetSource(); member && member->IsInMap(victim) && member->IsAlive() &&
+                    member->GetAura(SPELL_THE_VAST_INFINITE, GetCasterGUID()))
+                    holders.push_back(member);
+        if (holders.empty())
+            holders.push_back(victim);
+        return holders;
+    }
+
+    void Amount(AuraEffect const*, int32& amount, bool& recalculate)
+    {
+        amount = -1;
+        recalculate = false;
+    }
+
+    void Absorb(AuraEffect*, DamageInfo& damage, uint32& amount)
+    {
+        amount = 0;
+        SpellInfo const* source = damage.GetSpellInfo();
+        if (source && source->Id == SPELL_THE_VAST_INFINITE_SHARE)
+            return;
+        SpellEffectInfo const& effect = GetSpellInfo()->Effects[EFFECT_0];
+        uint64 const capacity = CalculatePct(uint64(GetTarget()->GetMaxHealth()), std::max(0, effect.MiscValueB));
+        uint64 const absorbed = GetAura()->GetScriptValue(SPELL_THE_VAST_INFINITE);
+        if (absorbed >= capacity)
+            return;
+        uint64 const portion = CalculatePct(uint64(damage.GetDamage()), std::clamp(effect.CalcValue(), 0, 100));
+        amount = uint32(std::min(portion, capacity - absorbed));
+    }
+
+    void Share(AuraEffect*, DamageInfo&, uint32& amount)
+    {
+        Player* victim = GetTarget()->ToPlayer();
+        if (!amount || !victim)
+            return;
+        GetAura()->SetScriptValue(SPELL_THE_VAST_INFINITE, GetAura()->GetScriptValue(SPELL_THE_VAST_INFINITE) + amount);
+        std::vector<Player*> const holders = Holders(victim);
+        uint32 const share = amount / uint32(holders.size());
+        uint32 const remainder = amount - share * uint32(holders.size());
+        for (Player* holder : holders)
+        {
+            uint32 const portion = share + (holder == victim ? remainder : 0);
+            Aura* link = holder->GetAura(SPELL_THE_VAST_INFINITE, GetCasterGUID());
+            if (!portion || !link)
+                continue;
+            link->SetScriptValue(SPELL_THE_VAST_INFINITE_SHARE,
+                link->GetScriptValue(SPELL_THE_VAST_INFINITE_SHARE) + portion);
+            holder->m_Events.AddEventAtOffset([holder, portion]()
+            {
+                if (holder->IsAlive())
+                    holder->CastCustomSpell(SPELL_THE_VAST_INFINITE_SHARE, SPELLVALUE_BASE_POINT0, int32(portion),
+                        holder, true);
+            }, 1ms);
+        }
+    }
+
+    void Heal(AuraEffect const*, AuraEffectHandleModes)
+    {
+        Unit* target = GetTarget();
+        uint64 const shared = GetAura()->GetScriptValue(SPELL_THE_VAST_INFINITE_SHARE);
+        if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE || !target->IsAlive() || !shared)
+            return;
+        target->CastCustomSpell(SPELL_THE_VAST_INFINITE_HEAL, SPELLVALUE_BASE_POINT0,
+            int32(std::min<uint64>(shared, uint64(std::numeric_limits<int32>::max()))), target, true);
+    }
+
+    void Register() override
+    {
+        DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_ascension_the_vast_infinite::Amount,
+            EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
+        OnEffectAbsorb += AuraEffectAbsorbFn(spell_ascension_the_vast_infinite::Absorb, EFFECT_0);
+        AfterEffectAbsorb += AuraEffectAbsorbFn(spell_ascension_the_vast_infinite::Share, EFFECT_0);
+        AfterEffectRemove += AuraEffectRemoveFn(spell_ascension_the_vast_infinite::Heal, EFFECT_0,
+            SPELL_AURA_SCHOOL_ABSORB, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
 class chronomancer_talent_casts : public AllSpellScript
 {
 public:
@@ -205,12 +374,40 @@ public:
             player->CastSpell(player, SPELL_THROUGH_THE_AEONS_BUFF, true);
     }
 };
+
+constexpr uint32 BlackHoleRank1 = 707557;
+constexpr uint32 BlackHoleRank2 = 707743;
+constexpr uint32 MeltRealityAndUnmakeFamilyFlags1 = 512 | 33554432;
+
+void ApplyBlackHoleSlowedDamageContract(SpellInfo* info)
+{
+    if (info->Id != BlackHoleRank1 && info->Id != BlackHoleRank2)
+        return;
+
+    SpellEffectInfo& effect = info->Effects[EFFECT_0];
+    bool const copied = effect.ApplyAuraName == SPELL_AURA_OVERRIDE_CLASS_SCRIPTS &&
+        effect.MiscValue == ASCENSION_CLASSMASK_AURASTATE_DAMAGE && effect.MiscValueB == ASCENSION_TARGET_SLOWED;
+    bool const converted = effect.ApplyAuraName == SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE &&
+        effect.MiscValue == ASCENSION_TARGET_SLOWED && effect.MiscValueB == ASCENSION_CLASSMASK_AURASTATE_DAMAGE;
+    if (effect.Effect != SPELL_EFFECT_APPLY_AURA || (!copied && !converted) ||
+        effect.SpellClassMask != flag96(0, MeltRealityAndUnmakeFamilyFlags1, 0) ||
+        effect.TargetA.GetTarget() != TARGET_UNIT_CASTER || effect.TargetB.GetTarget())
+    {
+        LOG_ERROR("coa", "Skipped unexpected Black Hole record {}", info->Id);
+        return;
+    }
+
+    effect.ApplyAuraName = SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE;
+    effect.MiscValue = ASCENSION_TARGET_SLOWED;
+    effect.MiscValueB = ASCENSION_CLASSMASK_AURASTATE_DAMAGE;
+}
 }
 
 void ApplyAscensionChronomancerTalentContracts(SpellInfo* info)
 {
     if (info->SpellFamilyName != 28)
         return;
+    ApplyBlackHoleSlowedDamageContract(info);
     if (info->Id == SPELL_ROLL_BACK)
     {
         info->Effects[EFFECT_0].Effect = SPELL_EFFECT_DISPEL;
@@ -249,6 +446,11 @@ void ApplyAscensionChronomancerTalentContracts(SpellInfo* info)
     {
         info->ProcCharges = 1;
     }
+    if (info->Id == SPELL_THE_VAST_INFINITE_SHARE || info->Id == SPELL_THE_VAST_INFINITE_HEAL)
+    {
+        info->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT;
+        info->AscensionInheritsResolvedAmount = true;
+    }
     if (info->Id != SPELL_SHIMMER)
         return;
     info->Effects[EFFECT_1].BasePoints = info->Effects[EFFECT_0].BasePoints;
@@ -260,5 +462,8 @@ void AddSC_AscensionChronomancerTalents()
     new chronomancer_talent_casts();
     RegisterSpellScript(spell_ascension_dimensional_divergence);
     RegisterSpellScript(spell_ascension_unmaker_of_realities);
+    RegisterSpellScript(spell_ascension_destabilize_time);
     RegisterSpellScript(spell_ascension_timeguard);
+    RegisterSpellScript(spell_ascension_the_bieko_effect);
+    RegisterSpellScript(spell_ascension_the_vast_infinite);
 }

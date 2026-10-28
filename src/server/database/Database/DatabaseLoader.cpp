@@ -74,7 +74,17 @@ DatabaseLoader& DatabaseLoader::AddDatabase(DatabaseWorkerPool<T>& pool, std::st
 
         uint8 const synchThreads = sConfigMgr->GetOption<uint8>(name + "Database.SynchThreads", 1);
 
-        pool.SetConnectionInfo(dbString, asyncThreads, synchThreads);
+        std::string const transactionIsolation =
+            sConfigMgr->GetOption<std::string>(name + "Database.TransactionIsolation", "", false);
+        if (!transactionIsolation.empty() && !MySQLConnectionInfo::IsTransactionIsolationLevel(transactionIsolation))
+        {
+            LOG_ERROR(_logger, "{} database: invalid transaction isolation level '{}'. Please pick READ-UNCOMMITTED, "
+                      "READ-COMMITTED, REPEATABLE-READ or SERIALIZABLE, or leave it empty for the server default.",
+                      name, transactionIsolation);
+            return false;
+        }
+
+        pool.SetConnectionInfo(dbString, asyncThreads, synchThreads, transactionIsolation);
 
         if (uint32 error = pool.Open())
         {

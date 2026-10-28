@@ -1,0 +1,175 @@
+{
+  "schema": 1,
+  "name": "Scarlet Monastery: Whitemane's Deep Sleep ends when she re-engages (#5172)",
+  "contract": "At 50% health High Inquisitor Whitemane (3977) runs actionlist 397700: she stops attacking, turns passive and casts Deep Sleep 9256, whose effect 0 applies aura 12 SPELL_AURA_MOD_STUN with TargetA 22 / TargetB 15 = enemies around the caster in radius index 12 = 100 yd, pets included (no player-only attribute). Setting her data 1 1 starts timed event 1 after 200 ms when Scarlet Commander Mograine (3976) stands within 5 yd (conditions source group 17), which runs actionlist 397701: Scarlet Resurrection after 4500 ms, say after 1900 ms, sheath after 1400 ms, emote, then after 2000 ms she resets invincibility, turns aggressive and attacks, about 10 s after the sleep. Stock 3.3.5 Deep Sleep has DurationIndex 1 = 10000 ms, so the sleep ended as she re-engaged; the former AzerothCore C++ script waited 7 s for it to run out. CoA's Spell.dbc (Ascension patch-T) gives it DurationIndex 3 = 60000 ms without aura interrupt flags, the up-to-1-min duration Ascension shows, so the players and their pets stay asleep for about 50 s while she and Mograine attack. Expected: the player and the Witch Hunter's Shadowhound (50124) still sleep during the resurrection and both wake when she re-engages, far short of the 60 s aura duration.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "whitemane",
+      "owner": "p",
+      "entry": 3977,
+      "level": 84,
+      "health": 100000,
+      "distance": 3
+    },
+    {
+      "id": "mograine",
+      "owner": "p",
+      "entry": 3976,
+      "level": 84,
+      "health": 100000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Houndmaster's Whistle",
+      "actor": "p",
+      "spell": 801343
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 801343
+    },
+    {
+      "action": "assert",
+      "label": "The Shadowhound is out",
+      "actor": "p",
+      "metric": "pet_entry",
+      "equals": 50124,
+      "within_ms": 15000
+    },
+    {
+      "action": "set_health",
+      "label": "Survive Whitemane's attacks for the whole encounter phase",
+      "actor": "p",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "set_health",
+      "label": "Keep the Shadowhound alive for the whole encounter phase",
+      "actor": "p",
+      "pet": true,
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "attack",
+      "actor": "p",
+      "target": "whitemane"
+    },
+    {
+      "action": "attack",
+      "actor": "p",
+      "target": "whitemane",
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "label": "Whitemane is engaged",
+      "actor": "whitemane",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_health",
+      "label": "Drop Whitemane below 50% health",
+      "actor": "whitemane",
+      "value": 40000
+    },
+    {
+      "action": "assert",
+      "label": "Whitemane puts the player into Deep Sleep",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 9256,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Whitemane puts the Shadowhound into Deep Sleep",
+      "actor": "p",
+      "metric": "pet_aura_stacks",
+      "spell": 9256,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Stay within the resurrection sequence",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The player still sleeps while Whitemane resurrects Mograine",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 9256,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Shadowhound still sleeps while Whitemane resurrects Mograine",
+      "actor": "p",
+      "metric": "pet_aura_stacks",
+      "spell": 9256,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The player wakes when Whitemane re-engages, not after the 60 s aura duration",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 9256,
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The Shadowhound wakes with the player",
+      "actor": "p",
+      "metric": "pet_aura_stacks",
+      "spell": 9256,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Waking was not caused by death",
+      "actor": "p",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Shadowhound is still out",
+      "actor": "p",
+      "metric": "pet_entry",
+      "equals": 50124
+    },
+    {
+      "action": "assert",
+      "label": "Whitemane is still fighting",
+      "actor": "whitemane",
+      "metric": "combat",
+      "equals": 1
+    }
+  ]
+}

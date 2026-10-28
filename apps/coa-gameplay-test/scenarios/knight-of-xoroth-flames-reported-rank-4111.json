@@ -1,0 +1,2996 @@
+{
+  "schema": 1,
+  "name": "knight-of-xoroth-flames-reported-rank-4111",
+  "contract": [
+    "Original Flames of Xoroth 802412 is the reported rank at level 36: frontal Fire damage, 15 Rage cost,",
+    "increased damage for each Demonfire consumed. Original Demonfire Hidden 704195 supplies +50% damage per",
+    "stack for this family flag. A level-36 Knight with sufficient Rage casts the reported spell normally at",
+    "a same-level enemy with one and six Demonfire. Both casts must deal damage and consume all Demonfire;",
+    "the six/one damage ratio must agree with (1+6*0.5)/(1+0.5), allowing its small original damage roll. No",
+    "triggered parent casts or disabled costs substitute for the normal cast. Both ordinary hits use an",
+    "asserted native Fire critical chance of at least 100 percent, so independent critical rolls cannot skew",
+    "the stack comparison. The reported original rank has a six-point damage roll and caps level scaling at",
+    "30. Compare 32 actual critical hits per Demonfire amount rather than two independent rolls; preserve the",
+    "original 2.45 to 2.85 ratio bounds and native 1500 ms global cooldown. Independent original 704195",
+    "Effect 1 is aura 108 (ADD_PCT_MODIFIER), MiscValue 0 (SPELLMOD_DAMAGE), base points 49 plus its die: a",
+    "50 percent modifier of the whole spell damage. Its class-mask word 1 is 2, matching original 802412",
+    "family 23 word 1 bit 2. This supports scaling the complete damage rather than just the AP or SP",
+    "coefficient. Original 802412 independently encodes 0.45 Fire SP plus 0.15 AP; no coefficient values are",
+    "inferred from a failing run."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 36,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "knight",
+      "spell": 802412
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "knows_spell",
+      "spell": 802412,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_crit_chance",
+      "school": 2,
+      "min": 100
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 3,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 4,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 5,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 6,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 7,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 8,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 9,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 10,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 11,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 12,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 13,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 14,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 15,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 16,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 17,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 18,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 19,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 20,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 21,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 22,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 23,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 24,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 25,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 26,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 27,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 28,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 29,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 30,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 31,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 32,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "snapshot",
+      "actor": "knight",
+      "metric": "spell_damage_total",
+      "spell": 802412,
+      "target": "enemy",
+      "save_as": "one_demonfire"
+    },
+    {
+      "action": "snapshot",
+      "actor": "knight",
+      "metric": "spell_damage_total",
+      "spell": 802412,
+      "target": "enemy",
+      "save_as": "before_six"
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 33,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 34,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 35,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 36,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 37,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 38,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 39,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 40,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 41,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 42,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 43,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 44,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 45,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 46,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 47,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 48,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 49,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 50,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 51,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 52,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 53,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 54,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 55,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 56,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 57,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 58,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 59,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 60,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 61,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 62,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 63,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 500906,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 802412,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 802412,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "equals": 64,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_total",
+      "spell": 802412,
+      "target": "enemy",
+      "relative_to": "before_six",
+      "ratio_to": "one_demonfire",
+      "min": 2.45,
+      "max": 2.85
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 802412,
+      "target": "enemy",
+      "critical": true,
+      "equals": 64
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "alive",
+      "equals": 1
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "knight",
+      "entry": 36,
+      "level": 36,
+      "health": 100000,
+      "distance": 3
+    }
+  ]
+}

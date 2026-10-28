@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "name": "Evil Never Sleeps maintains Night Hunter without expiry or recasts (#4801)",
+  "contract": [
+    "Spell.dbc 804185 promises nighttime Agility; 807198 grants 4% Agility for 30000 ms, with no authored haste.",
+    "The parent must keep that helper alive, remove the opposite helper and clean up both on removal.",
+    "Run only while realm-local time stays in [18:00,06:00); allow at least 120 seconds before dawn.",
+    "hour 0 starts the case in 00:00-00:59 realm-local time, over five hours before dawn on either clock.",
+    "Learn the parent after clearing fixture state; only it casts the selected helper. Seed the opposite helper.",
+    "Duration must stay near 30000 ms after 5 seconds and across two 31-second waits, with exactly one cast.",
+    "Cast counts retain evidence of an expiry/recast even when the brief absence falls between observations."
+  ],
+  "timeout_ms": 120000,
+  "hour": 0,
+  "players": [{ "id": "hunter", "race": 1, "class": 15, "level": 60 }],
+  "steps": [
+    { "action": "wait", "label": "Let character setup settle", "ms": 5000 },
+    { "action": "unlearn", "actor": "hunter", "spell": 804185, "all_specs": true },
+    { "action": "set_aura", "actor": "hunter", "spell": 804185, "stacks": 0 },
+    { "action": "set_aura", "actor": "hunter", "spell": 807198, "stacks": 0 },
+    { "action": "set_aura", "actor": "hunter", "spell": 807231, "stacks": 0 },
+    {
+      "action": "snapshot", "actor": "hunter", "metric": "spell_cast_count", "spell": 807198,
+      "save_as": "night_casts_before"
+    },
+    {
+      "action": "snapshot", "actor": "hunter", "metric": "spell_cast_count", "spell": 807231,
+      "save_as": "day_casts_before"
+    },
+    { "action": "snapshot", "actor": "hunter", "metric": "stat", "stat": 1, "save_as": "agility_before" },
+    {
+      "action": "snapshot", "actor": "hunter", "metric": "cast_speed_multiplier", "save_as": "cast_speed_before"
+    },
+    {
+      "action": "snapshot", "actor": "hunter", "metric": "attack_time_ms", "hand": 0,
+      "save_as": "melee_before"
+    },
+    {
+      "action": "snapshot", "actor": "hunter", "metric": "attack_time_ms", "hand": 2,
+      "save_as": "ranged_before"
+    },
+    {
+      "action": "set_aura", "label": "Seed stale Day Hunter before the parent starts",
+      "actor": "hunter", "spell": 807231, "stacks": 1
+    },
+    { "action": "learn", "actor": "hunter", "spell": 804185 },
+    {
+      "action": "assert", "label": "The learned parent is active",
+      "actor": "hunter", "metric": "aura", "spell": 804185, "equals": 1
+    },
+    {
+      "action": "assert", "label": "First parent tick selects Night Hunter: requires nighttime",
+      "actor": "hunter", "metric": "aura", "spell": 807198, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The parent removes stale Day Hunter",
+      "actor": "hunter", "metric": "aura", "spell": 807231, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Night Hunter was cast exactly once",
+      "actor": "hunter", "metric": "spell_cast_count", "spell": 807198,
+      "relative_to": "night_casts_before", "equals": 1
+    },
+    {
+      "action": "assert", "actor": "hunter", "metric": "aura_amount", "spell": 807198,
+      "effect": 0, "equals": 4
+    },
+    {
+      "action": "assert", "label": "Initial Agility is increased by 4% allowing integer rounding",
+      "actor": "hunter", "metric": "stat", "stat": 1, "ratio_to": "agility_before", "min": 1.03, "max": 1.041
+    },
+    {
+      "action": "assert", "label": "Night Hunter grants no spell haste",
+      "actor": "hunter", "metric": "cast_speed_multiplier", "ratio_to": "cast_speed_before",
+      "min": 0.999, "max": 1.001
+    },
+    {
+      "action": "assert", "label": "Night Hunter grants no melee haste",
+      "actor": "hunter", "metric": "attack_time_ms", "hand": 0, "ratio_to": "melee_before",
+      "min": 0.999, "max": 1.001
+    },
+    {
+      "action": "assert", "label": "Night Hunter grants no ranged haste",
+      "actor": "hunter", "metric": "attack_time_ms", "hand": 2, "ratio_to": "ranged_before",
+      "min": 0.999, "max": 1.001
+    },
+    { "action": "wait", "label": "Allow ten parent maintenance ticks", "ms": 5000 },
+    {
+      "action": "assert", "label": "Night Hunter is refreshed before its first expiry",
+      "actor": "hunter", "metric": "aura_duration_ms", "spell": 807198, "min": 29000, "max": 30000
+    },
+    {
+      "action": "assert", "label": "Refreshing did not recast Night Hunter",
+      "actor": "hunter", "metric": "spell_cast_count", "spell": 807198,
+      "relative_to": "night_casts_before", "equals": 1
+    },
+    { "action": "wait", "label": "Cross the first natural 30-second expiry boundary", "ms": 31000 },
+    {
+      "action": "assert", "label": "No expiry and recast occurred across the first boundary",
+      "actor": "hunter", "metric": "spell_cast_count", "spell": 807198,
+      "relative_to": "night_casts_before", "equals": 1
+    },
+    {
+      "action": "assert", "actor": "hunter", "metric": "aura_duration_ms", "spell": 807198,
+      "min": 29000, "max": 30000
+    },
+    { "action": "assert", "actor": "hunter", "metric": "aura", "spell": 807231, "equals": 0 },
+    {
+      "action": "assert", "actor": "hunter", "metric": "stat", "stat": 1,
+      "ratio_to": "agility_before", "min": 1.03, "max": 1.041
+    },
+    { "action": "wait", "label": "Cross the second natural 30-second expiry boundary", "ms": 31000 },
+    {
+      "action": "assert", "label": "No expiry and recast occurred across the second boundary",
+      "actor": "hunter", "metric": "spell_cast_count", "spell": 807198,
+      "relative_to": "night_casts_before", "equals": 1
+    },
+    {
+      "action": "assert", "actor": "hunter", "metric": "aura_duration_ms", "spell": 807198,
+      "min": 29000, "max": 30000
+    },
+    { "action": "assert", "actor": "hunter", "metric": "aura", "spell": 807231, "equals": 0 },
+    {
+      "action": "assert", "actor": "hunter", "metric": "spell_cast_count", "spell": 807231,
+      "relative_to": "day_casts_before", "equals": 0
+    },
+    {
+      "action": "assert", "actor": "hunter", "metric": "stat", "stat": 1,
+      "ratio_to": "agility_before", "min": 1.03, "max": 1.041
+    },
+    {
+      "action": "assert", "actor": "hunter", "metric": "cast_speed_multiplier",
+      "ratio_to": "cast_speed_before", "min": 0.999, "max": 1.001
+    },
+    {
+      "action": "assert", "actor": "hunter", "metric": "attack_time_ms", "hand": 0,
+      "ratio_to": "melee_before", "min": 0.999, "max": 1.001
+    },
+    {
+      "action": "assert", "actor": "hunter", "metric": "attack_time_ms", "hand": 2,
+      "ratio_to": "ranged_before", "min": 0.999, "max": 1.001
+    },
+    { "action": "unlearn", "label": "Remove the parent passive", "actor": "hunter", "spell": 804185 },
+    { "action": "assert", "actor": "hunter", "metric": "aura", "spell": 804185, "equals": 0 },
+    { "action": "assert", "actor": "hunter", "metric": "aura", "spell": 807198, "equals": 0 },
+    { "action": "assert", "actor": "hunter", "metric": "aura", "spell": 807231, "equals": 0 },
+    { "action": "wait", "label": "Allow removed-parent maintenance ticks to expose a leak", "ms": 1500 },
+    { "action": "assert", "actor": "hunter", "metric": "aura", "spell": 807198, "equals": 0 },
+    { "action": "assert", "actor": "hunter", "metric": "aura", "spell": 807231, "equals": 0 },
+    {
+      "action": "assert", "actor": "hunter", "metric": "spell_cast_count", "spell": 807198,
+      "relative_to": "night_casts_before", "equals": 1
+    },
+    {
+      "action": "assert", "label": "Agility returns to baseline",
+      "actor": "hunter", "metric": "stat", "stat": 1, "relative_to": "agility_before", "equals": 0
+    },
+    {
+      "action": "assert", "actor": "hunter", "metric": "cast_speed_multiplier",
+      "ratio_to": "cast_speed_before", "min": 0.999, "max": 1.001
+    },
+    {
+      "action": "assert", "actor": "hunter", "metric": "attack_time_ms", "hand": 0,
+      "ratio_to": "melee_before", "min": 0.999, "max": 1.001
+    },
+    {
+      "action": "assert", "actor": "hunter", "metric": "attack_time_ms", "hand": 2,
+      "ratio_to": "ranged_before", "min": 0.999, "max": 1.001
+    }
+  ]
+}

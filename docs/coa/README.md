@@ -11,7 +11,8 @@ Sources live in `src/server/coa/`, focused regressions in `apps/coa-tests/`, and
 configuration templates in `src/server/coa/conf/`. They install to
 `etc/modules/coa.conf` and `etc/modules/coa_bugreport.conf`; runtime configuration is
 supplied there, not by committing live local credentials. CoA logs under `coa`,
-`coa.gameplay_test` and `coa.highrisk`.
+`coa.gameplay_test`, `coa.highrisk` and `coa.hotpatch`. Server-sent interface Lua is described in
+`client-hot-patch.md`.
 
 This fork, CoA included, is licensed under the root `LICENSE` (GNU GPL v2), like
 AzerothCore. Most CoA source files still carry the short "GNU AGPL v3" notice from
@@ -38,12 +39,12 @@ protocol, data or process problem.
 ## Upgrading a server configured before the move
 
 - Move the settings of `etc/modules/mod_ascension_compat.conf` into `coa.conf`,
-  renaming its `AscensionCompat.*` keys to `CoA.*` (for example `CoA.LevelScaling`),
+  renaming its `AscensionCompat.*` keys to `CoA.*` (for example `CoA.QuestLevelScaling`),
   then delete `mod_ascension_compat.conf`. Installing the server removes the old
   `mod_ascension_compat.conf.dist`; delete it by hand if you install another way, or
   `acore.sh` copies it back to `mod_ascension_compat.conf`.
 - Rename environment overrides the same way: `AC_ASCENSION_COMPAT_<KEY>` becomes
-  `AC_CO_A_<KEY>` (for example `AC_CO_A_LEVEL_SCALING`).
+  `AC_CO_A_<KEY>` (for example `AC_CO_A_QUEST_LEVEL_SCALING`).
 - Add `Logger.coa=4,Console Server` to `worldserver.conf`, and rename any
   `Logger.module.ascension_compat`, `Logger.module.gameplay_test` or
   `Logger.module.highrisk` line to `Logger.coa`, `Logger.coa.gameplay_test` or
@@ -61,11 +62,66 @@ them; running it and the CoA tests in `apps/coa-tests/` that read client data do
 `COA_DBC_DIR` when the tests should read another directory.
 [`apps/coa-dbc`](../../apps/coa-dbc/README.md) extracts and checks them.
 
+The models of the Venomancer Beetle, Venomwing and Weaver Forms (CreatureModelData 20612
+`custom_nerubianbeetle`, 22063 `custom_flyingnerubian2` and 23813
+`maldraxxusmutant_noarmor`) have hand attachment points but lack the `0x10` flag that
+native animal forms such as Cat, Bear and Ghost Wolf carry, so the client hangs a drawn
+weapon on them in combat (#5128). The Spider and Sea Serpent Form models have no hand
+attachments. The weapon's visibility is decided by the client alone. When preparing a
+requested client update, run `apps/coa-spells/venomancer_form_weapons.py --input
+<CreatureModelData.dbc> --output <candidate-CreatureModelData.dbc>`; it sets the flag on
+those three rows in a separate output and never packages or installs a client archive.
+
 ## World database installation
 
 Import the [world database package](../../apps/coa-world/README.md) into an empty
 world schema before the first worldserver startup. The same guide covers auditing
 an existing database and updating the package.
+
+## Equipped gear drops
+
+Rewarded enemy kills can drop one existing wearable item with the same display as the enemy's armor,
+weapon or shield. Armor comes from the active `creature_display_preset` or the current model's
+`CreatureDisplayInfoExtra` outfit. Weapon entries supply their display and weapon type. Preset slots contain
+display IDs, not loot item IDs. Matching also preserves the equipment slot, including robe/chest variants.
+Mage-class creatures prefer Intellect gear; shield bearers prefer defenses and Stamina; other creatures
+prefer Strength, Agility or attack power. Equal matches prefer the closest eligible level, then quality,
+with a stable item-ID tie break. Unknown outfits and appearances without a wearable match produce no drop.
+
+`CoA.EquippedGearLoot` enables the feature; `CoA.EquippedGearLootChance` is a reloadable per-kill percentage,
+defaulting to 5. Only unbound or BoE gear through uncommon quality is eligible. Required level must not
+exceed the creature's level; items without one use item level minus five, floored at zero. NPC placeholders,
+deprecated, conjured, quest, random-affix and requirement-gated items are excluded, as are pets, summons, controlled
+creatures, dungeon bosses and disabled loot rewards. Drops are generated once with corpse loot, including
+creatures without an ordinary loot table, before native group permissions and quality thresholds. Existing
+loot remains, exact item duplicates are skipped, and the loot-window capacity is respected. Native item
+scaling can lift the chosen reward while preserving its appearance. Obtaining the
+item uses the existing appearance collection path when `CoA.AutoCollectAppearances` is enabled.
+Scaled items without a direct wardrobe mapping use their base item's mapping, while collection persistence
+retains the obtained item as its source.
+Items missing a direct `ItemAppearances` row inherit an existing equipment appearance only when display,
+slot, class and subclass match that appearance's captured source item. Direct mappings remain authoritative;
+robe/chest and weapon-hand variants share a slot. An item mapping whose source appearance has a different
+display cannot supply an alias. Looks absent from the captured wardrobe catalog remain uncollectible.
+No appearance record or client DBC row is invented.
+
+The [archived public changelog](https://github.com/hertigservices/ascension-data/blob/main/datasets/research-jeff-fro-coa-changelog-public-73833f29a4c2999b26184e55affe3c769682ccdb4431b2b6e9a4ebb4bbfaf72f.json)
+describes immersive gear in entries 62796/62797 (2025-07-28), caster additions in 63297/63298 (2025-08-09),
+and increased rogue drop chances in 64953 (2025-10-20). It supplies neither item pools nor exact probabilities.
+The rate, quality cap and selection policy here are reconstruction choices. Generic loot rates are unchanged;
+the archived generic-loot reductions cannot be reproduced exactly from those notes. The extensions
+[appearance API](https://github.com/firstoni-dev/ascension-extensions-reconstruction/blob/main/src/Ascension/AscAppearance.cpp)
+maps items to collected appearances; its `GetCreatureDisplayItems` function concerns incarnation appearances,
+and supplies no enemy loot table. This feature needs no new client packet or invented item template.
+
+`python -B tools/verify_all.py --stages harness --harness equipped_gear_loot` exercises the production selector,
+configuration callbacks and native `Loot::AddItem`/`FillLoot` with bounded APIs. Setting
+`COA_EQUIPPED_LOOT_BEFORE=1` selects the `origin/main` loot integration as a failing control;
+`COA_EQUIPPED_LOOT_BASE` can pin another pre-feature Git revision. The harness
+covers roles, appearance slots, model alternatives, presets, weapons, exclusions, capacity, duplicates,
+empty loot tables and group rights. It does not verify client rendering or a player collecting the appearance.
+The `equipped-gear-loot` gameplay scenario checks the installed caster/shield equipment and generated item
+templates through native loot processing, with ordinary creature fixtures and the default 5% configuration.
 
 ## Automatic specialization talents
 
@@ -360,11 +416,31 @@ filter. Tooltip links remain documentation, not unconditional spellbook grants.
 This closes the reviewed acquisition/trigger gaps, not every outstanding mechanic
 in the broader class-completion audits.
 
+Templar Scarlet Training turns the next Argent Blade into Scarlet Hammer through the
+Scarlet Crusader aura (301172), which the client also uses for the button glow. The
+server lends Scarlet Hammer, and Vindication's Divine Fury, only while the swap is
+active. The client row still describes the retired Chastise version; when preparing a
+requested client update, run `apps/coa-spells/scarlet_crusader_tooltip.py --input
+<Spell.dbc> --output <candidate-Spell.dbc>`. It rewrites that row's English texts in a
+separate output and never packages or installs a client archive.
+
+## Keeper's Scrolls
+
+A Keeper's Scroll blesses the zone it is used in, not the player: everyone in the
+zone gets its buff, players entering later get it for the time left, and a second
+scroll of the same kind is refused while one is active. The registry lives in
+memory, so a restart clears active blessings.
+
+Keeper's Scroll: Steadfast's item spell (91770) is an empty dummy with no tooltip,
+so its blessing is the aura spell 91769 instead: +25% mounted speed for one hour
+with the client's own tooltip. A scroll whose blessing is a different spell gives
+it to the user as well.
+
 ## Login and natural regeneration
 
-The copied client's `Extensions.dll` patches the ping timer at executable address
-`0x632DE5` from -30000 to -5000 milliseconds (DLL write at `0x10A689AC`). The inspected
-DLL SHA-256 is `f7b713095aab17a1e376f487290d4b7c4c18931635e4d91136d76db2592be8fa`.
+`Extensions.dll` patches the ping timer at executable address `0x632DE5` from -30000 to
+-5000 milliseconds (DLL write at `0x10A689AC`); the reconstructed DLL
+(`firstoni-dev/ascension-extensions-reconstruction`) makes the same write.
 Stock AzerothCore counts pings less than 27 seconds apart as overspeed; ordinary
 accounts are disconnected after exceeding `MaxOverspeedPings`, while GM permission
 23 bypasses that check. Local connections with `CoA.Enable = 1` accept
@@ -372,13 +448,51 @@ the five-second cadence with a one-second jitter margin. Faster sustained floodi
 still reaches the strike limit. Other connections retain the stock limit.
 
 For a realm dedicated to this client, set `CoA.AllowRemoteClients = 1`
-and restart worldserver. This also applies the configured plaintext world headers,
-extension opcode range, ping interval, Ascension spell-modifier packet layout and
-class-10 character creation mapping to remote connections. The default is `0`;
-password proofs, IP bans and packet size validation remain required.
-The native v4 client also needs the [world-address fix](../../apps/client-compat/README.md)
-to enter remote worlds without its DLL corrupting an active client hook. That fix uses
-the authserver's realm address without a per-IP allowlist.
+and restart worldserver. This also applies the extension opcode range, ping interval,
+Ascension spell-modifier packet layout and class-10 character creation mapping to remote
+connections. The default is `0`; password proofs, IP bans and packet size validation
+remain required.
+
+The server talks to the client interface only through the DLL's native packets; it has
+no addon-message or chat-command channel. The reconstructed DLL authenticates with stock
+SRP6 and keeps the stock world-header cipher, which is the only header mode the server
+supports. Client binaries are maintained outside this repository.
+
+- `SMSG_REALM_INFO` (0x09BC) is sent at `CMSG_CHAR_ENUM`: realm id, ruleset, rates, eight
+  realm-kind gates, then the realm data path and the realm name as C strings, then the
+  add-ons flag. The data path stays empty: a non-empty one makes the DLL hot-swap client
+  data from `Data\<path>\`. The name is the authserver's `realmlist` name.
+- The Ascension realm list builds its cards from extra realm-list entries named
+  `realm!expansion!gamemode!image!unlocked!page!index!spell` in the last realm category,
+  and hides a realm without one. The authserver adds one offline entry per realm; see
+  `RealmCards.*` in `authserver.conf.dist`. `RealmCards.Category` must sort after every
+  realm's own category.
+- Wardrobe outfits: `CMSG_SAVE_APPEARANCE_OUTFIT` (0x069E, name and the category-indexed
+  appearance list) and `CMSG_DELETE_APPEARANCE_OUTFIT` (0x06A0) are answered with
+  `SAVE_/DELETE_APPEARANCE_OUTFIT_OK` or `_UNKNOWN` (0x069F / 0x06A1) and stored in
+  `character_appearance_outfit`; `SMSG_APPEARANCE_OUTFIT_INFO` (0x069D) lists them at login.
+  A saved outfit may name only collected appearances; names are 1-64 bytes, 100 per character.
+- `SMSG_UPDATE_CONFIGS` (0x058D) is sent once per login with every client setting; see
+  [client configuration](client-xp-config.md).
+- `SMSG_ACCOUNT_INFO` (0x09BB) is sent at login with the account's GM level and characters.
+- Help menu tickets use the ticket packets 0x0701-0x071E and the `.support` GM commands; see
+  [player tickets](player-tickets.md).
+- `SMSG_PATCH_GLOBAL_STRINGS` (0x0676) carries the eight PvE and PvP Power tooltip lines at login with `%g` in
+  place of the client's `%d`, so the character sheet shows the exact percentage; see
+  [item power](item-power.md).
+- Requests the core session handles like stock ones, registered in its opcode table and let
+  through the CoA packet filter: the portrait menu's reset all dungeons (`CMSG_RESET_DUNGEONS`,
+  0x061F); the ghost frame's return to graveyard (`CMSG_PORT_GRAVEYARD`, 0x0544), which
+  moves a released ghost to its closest graveyard; and the flight's early landing request
+  (`CMSG_TAXI_REQUEST_EARLY_LANDING`, 0x05F2), which ends the flight at the next discovered
+  flight point on its route, so the later legs are neither flown nor paid; and the stable
+  window's delete button (`CMSG_STABLE_DELETE_PET`, 0x067C), which deletes a stabled pet and
+  answers `SMSG_STABLE_RESULT` 8, after which the client lists the stable again.
+- `CMSG_QUERY_INSTANCE_BINDS` (0x06FD), sent at every world entry, is answered with
+  `SMSG_QUERY_INSTANCE_BINDS_RESULT` (0x06FE): `QUERY_INSTANCE_BINDS_OK`, then the player's binds
+  that can still be reset as instance id, map and difficulty. The portrait menu's Reset Instances
+  list shows them, and `CMSG_RESET_INSTANCE` (0x058C: u32 map, u8 difficulty) resets one of them
+  like the stock reset: only outside a group or by its leader, and not while players are inside.
 
 The `gtOCTRegenHP`, `gtRegenHPPerSpt` and `gtRegenMPPerSpt` client files each contain
 3,200 single-float rows indexed by class and level. Their SQL overlay tables are empty,

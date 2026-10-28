@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Ranger Bushcraft is castable at level 5 and its recipe crafts once Crude Leather is held (#244)",
+  "contract": "Bushcraft 800267 has one effect, SPELL_EFFECT_TRADE_SKILL (47), with SkillLineAbility 86407 (SkillLine 505 'Bushcraft', AcquireMethod 2, MinSkillLineRank 1). Spell::EffectTradeSkill is a no-op: the 3.3.5 client draws the recipe window itself for a successful trade-skill cast, from the player's skill 505 and its known SkillLine 505 spells, so the server's part is the skill, the known recipes and an accepted cast. The live baseline (AscensionLiveBaselineData: class 21 spell 800267, skill {21, 505, 1, 300}) is applied at character creation, so a new Ranger holds skill 505 at 1 and SetSkill learns the AcquireMethod 2 rows of SkillLine 505: 800267 and Crude Waterskin 802808 (reagent Crude Leather 2000155 x1, creates item 10521). The only Crude Leather recipe, Cure Light Leather 804790 (BaseLevel 8), and the Bushcraft rank spell 573523 are sold by the Book of Ascension at level 8 (SpellbookOfferData class 21 level 8), so at level 5 the window's single recipe cannot be crafted without Crude Leather. The scenario proves the server side at level 5: the skill and recipe are present, 800267 completes without a refusal, the recipe is refused for missing reagents (SPELL_FAILED_REAGENTS 100) and crafts once one Crude Leather is held. It does not test the client's window rendering.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 5 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 2000 },
+    {
+      "action": "assert", "label": "Creation grants the Bushcraft window spell", "actor": "ranger",
+      "metric": "knows_spell", "spell": 800267, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Creation grants the Bushcraft skill", "actor": "ranger",
+      "metric": "skill_value", "skill": 505, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The skill teaches the Crude Waterskin recipe", "actor": "ranger",
+      "metric": "knows_spell", "spell": 802808, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Cure Light Leather is a level 8 book purchase", "actor": "ranger",
+      "metric": "knows_spell", "spell": 804790, "equals": 0
+    },
+    { "action": "cast", "actor": "ranger", "spell": 800267 },
+    {
+      "action": "assert", "label": "Bushcraft completes", "actor": "ranger",
+      "metric": "spell_cast_count", "spell": 800267, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Bushcraft is not refused", "actor": "ranger",
+      "metric": "cast_failure", "spell": 800267, "equals": 0
+    },
+    { "action": "cast", "actor": "ranger", "spell": 802808 },
+    {
+      "action": "assert", "label": "Crude Waterskin needs Crude Leather", "actor": "ranger",
+      "metric": "cast_failure", "spell": 802808, "equals": 100, "within_ms": 2000
+    },
+    { "action": "add_item", "actor": "ranger", "item": 2000155, "count": 1 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "cast", "actor": "ranger", "spell": 802808 },
+    {
+      "action": "assert", "label": "Crude Waterskin crafts with Crude Leather", "actor": "ranger",
+      "metric": "item_count", "item": 10521, "equals": 1, "within_ms": 8000
+    },
+    {
+      "action": "assert", "label": "The craft consumes the Crude Leather", "actor": "ranger",
+      "metric": "item_count", "item": 2000155, "equals": 0
+    }
+  ]
+}

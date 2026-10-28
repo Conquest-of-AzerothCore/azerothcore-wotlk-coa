@@ -53,8 +53,12 @@ client is told the new count through the field it already reads.
   unlock has to be remembered somewhere the character owns, because the counter it feeds is
   rebuilt from scratch at every login.
 * `spell_craftsmans_codex` (a `SpellScript` on the dummy effect): using a codex adds one unlocked
-  slot, hands the new allowance to the core and says so; a codex that would be worth nothing is
-  refused before the cast instead of being consumed for it.
+  slot, hands the new allowance to the core and announces it in the two places a player looks - a
+  coloured line in the chat frame (`Craftsman's Codex` in gold, the new `primary profession slot`
+  in green) and a short coloured line across the middle of the screen. Neither line counts slots,
+  deliberately: the counters are what `.codex status` is for, and quoting them in a toast makes
+  the player subtract instead of read. A codex that would be worth nothing is refused before the
+  cast instead of being consumed for it.
 * `craftsmans_codex_allowance` (a `PlayerScript`), for the three moments the counter can be wrong;
   see below.
 * `.codex status|grant|reset` for game masters.
@@ -93,9 +97,11 @@ client is told the new count through the field it already reads.
 
 1. Boot: `>> mod-craftsmans-codex: Craftsman's Codex complete - spell 93292 bound, item(s) 97871
    grant one primary profession slot each (base 2, up to 13 professions on this realm).`
-2. In game: `.additem 97871`, right-click it, wait out the 5 second cast. You get a system message
-   with the new count, the item is consumed, and a **third** primary profession can now be learned
-   from its trainer. A second codex opens a fourth, and so on.
+2. In game: `.additem 97871`, right-click it, wait out the 5 second cast. You get the announcement
+   twice - `Craftsman's Codex: a new primary profession slot is unlocked.` in chat, and
+   `New profession slot unlocked` across the middle of the screen - the item is consumed, and a
+   **third** primary profession can now be learned from its trainer. A second codex opens a fourth,
+   and so on. `.codex grant` announces itself the same way to the player it grants to.
 3. `.codex status <name>` reports the unlocked slots, the allowance, the professions held and how
    many are still free - for an offline character too. `.codex grant <name> [count]` and
    `.codex reset <name>` hand slots out or take them back without an item.

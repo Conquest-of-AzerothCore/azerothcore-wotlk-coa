@@ -96,7 +96,7 @@ class spell_ascension_witch_hunter_vampiric_tonic : public AuraScript
 
     bool Load() override
     {
-        return IsWitchHunter(GetCaster()) && GetCaster() == GetTarget();
+        return IsWitchHunter(GetCaster()) && GetCaster() == GetUnitOwner();
     }
 
     bool CheckProc(ProcEventInfo& eventInfo)

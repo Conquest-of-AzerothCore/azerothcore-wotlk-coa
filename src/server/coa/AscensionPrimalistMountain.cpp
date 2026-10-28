@@ -51,20 +51,32 @@ class aura_ascension_mountain_threshold : public AuraScript
     void Changed(AuraEffect const*, AuraEffectHandleModes mode)
     {
         uint8 current = GetStackAmount();
-        bool crossed = _previous < 5 && current >= 5;
+        uint8 previous = _previous;
+        bool crossedUp = previous < 5 && current >= 5;
+        bool crossedDown = previous >= 5 && current < 5;
         _previous = current;
         Unit* owner = GetTarget();
-        if (mode == AURA_EFFECT_HANDLE_REAL || !crossed || !owner->IsPlayer() ||
-            owner->getClass() != CLASS_WILDWALKER || !owner->IsAlive() ||
-            GetCasterGUID() != owner->GetGUID() || !owner->HasAura(CallOfTheMountain))
+        if (mode == AURA_EFFECT_HANDLE_REAL || !owner->IsPlayer() ||
+            owner->getClass() != CLASS_WILDWALKER || GetCasterGUID() != owner->GetGUID())
             return;
-        owner->CastSpell(owner, MountainBuff, true);
+        if (crossedDown)
+            owner->RemoveAurasDueToSpell(MountainBuff, owner->GetGUID());
+        else if (crossedUp && owner->IsAlive() && owner->GetLevel() >= 40 && owner->HasAura(CallOfTheMountain))
+            owner->CastSpell(owner, MountainBuff, true);
+    }
+
+    void Cleared(AuraEffect const*, AuraEffectHandleModes)
+    {
+        Unit* owner = GetTarget();
+        owner->RemoveAurasDueToSpell(MountainBuff, owner->GetGUID());
     }
 
     void Register() override
     {
         AfterEffectApply += AuraEffectApplyFn(aura_ascension_mountain_threshold::Changed,
             EFFECT_0, SPELL_AURA_MOD_INCREASE_SPEED, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
+        AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_mountain_threshold::Cleared,
+            EFFECT_0, SPELL_AURA_MOD_INCREASE_SPEED, AURA_EFFECT_HANDLE_REAL);
     }
 };
 

@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "name": "cultist-hallucination-attacked-clone-combat-4362",
+  "contract": [
+    "An NPC attacking a passive Hallucination clone must engage the clone while its Cultist owner remains out of",
+    "combat, as shown in the original report. Use native creature AI AttackStart on an actual owned clone and",
+    "observe the attacker and owner combat states. The owner neither attacks nor assists the clone.",
+    "Preserve the original twenty-yard fixture. Assert owner isolation while all three original three-second",
+    "clones still exist, then again after expiry. This observes engagement and combat propagation; landed melee",
+    "damage is outside this scenario. Native fixture descendants must be cleaned between queued scenarios."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 25,
+      "level": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "c",
+      "spell": 560301
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 560301
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "owned_creature_count",
+      "entry": 840025,
+      "equals": 3,
+      "within_ms": 1000
+    },
+    {
+      "action": "attack_owned_creature",
+      "actor": "enemy",
+      "target": "c",
+      "entry": 840025
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "owned_creature_count",
+      "entry": 840025,
+      "equals": 3,
+      "label": "The attacker engages while the original three-second clones still exist"
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "combat",
+      "equals": 0,
+      "label": "Engaging a live clone does not engage its owner"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "combat",
+      "equals": 0
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "c",
+      "entry": 36,
+      "level": 30,
+      "health": 1000000,
+      "distance": 20
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  }
+}

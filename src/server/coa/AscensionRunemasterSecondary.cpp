@@ -1,4 +1,5 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+#include "AscensionTalentReplacementData.h"
 #include "Player.h"
 #include "Random.h"
 #include "ScriptMgr.h"
@@ -22,6 +23,8 @@ enum RunemasterSecondarySpells : uint32
     SPELL_RIFTBLADE_COUNTER = 500468,
     SPELL_RIFTBLADE_MANA = 500466,
     SPELL_WATER_AMOUNT = 802645,
+    SPELL_LEYSTONE_SPRINGS = 300581,
+    SPELL_LEYSTONE_MANA = 520866,
     SPELL_PRIMORDIAL_BLAST = 800732,
     SPELL_SMOLDER = 801087,
     SPELL_WARPDAGGER = 500287,
@@ -36,10 +39,31 @@ enum RunemasterSecondarySpells : uint32
     SPELL_ARCANE_SIGIL = 805380,
     SPELL_ARCANE_SIGIL_DOT = 807819,
     SPELL_ARCANE_SIGIL_SILENCE = 808020,
+    SPELL_FIRE_SIGIL_HIT = 807012,
+    SPELL_FROST_SIGIL_HIT = 807825,
+    SPELL_WATER_SIGIL_DRAIN = 807818,
+    SPELL_ETERNAL_MAGIC = 806698,
+    SPELL_ETERNAL_MAGIC_CHARGES = 3,
     SPELL_FIRE_ENGRAVING = 653211,
-    SPELL_FIREBRAND = 653210,
-    SPELL_FIREBRAND_EXPLOSION = 653212
+    SPELL_FIREBRAND = 653210
 };
+
+bool IsPrimordialBlast(uint32 spellId)
+{
+    if (sSpellMgr->GetFirstSpellInChain(spellId) == SPELL_PRIMORDIAL_BLAST)
+        return true;
+    return std::any_of(AscensionCompatData::TalentReplacements.begin(),
+        AscensionCompatData::TalentReplacements.end(),
+        [spellId](AscensionCompatData::TalentReplacement const& entry)
+        {
+            return entry.OriginalSpellId == SPELL_PRIMORDIAL_BLAST &&
+                std::any_of(entry.Ranks.begin(), entry.Ranks.end(),
+                    [spellId](AscensionCompatData::ReplacementRank const& rank)
+                    {
+                        return rank.SpellId == spellId;
+                    });
+        });
+}
 
 bool HasTattoo(Player* player, uint32 root)
 {
@@ -107,7 +131,16 @@ public:
     void ModifySpellEffectBaseValue(Unit const* caster, SpellInfo const* info, uint8 index, float& value) override
     {
         Player* player = caster ? const_cast<Unit*>(caster)->ToPlayer() : nullptr;
-        if (!player || player->getClass() != CLASS_SPIRIT_MAGE || info->Id != SPELL_RIFTBLADE_MANA || index != EFFECT_0)
+        if (!player || player->getClass() != CLASS_SPIRIT_MAGE || index != EFFECT_0)
+            return;
+        if (info->Id == SPELL_LEYSTONE_MANA)
+        {
+            AuraEffect const* springs = player->GetAuraEffect(SPELL_LEYSTONE_SPRINGS, EFFECT_1, player->GetGUID());
+            if (springs && HasTattoo(player, SPELL_WATER_TATTOO))
+                AddPct(value, springs->GetAmount());
+            return;
+        }
+        if (info->Id != SPELL_RIFTBLADE_MANA)
             return;
         value += std::max(0.0f, player->GetTotalAttackPowerValue(BASE_ATTACK)) * 0.3f;
         if (HasTattoo(player, SPELL_WATER_TATTOO))
@@ -130,22 +163,24 @@ public:
         uint32 root = sSpellMgr->GetFirstSpellInChain(info->Id);
         if (root == SPELL_SMOLDER)
             player->RemoveAurasDueToSpell(SPELL_SPELLFIRE_READY, player->GetGUID());
-        if (player->HasAura(SPELL_RIFTBLADE, player->GetGUID()))
+        bool const riftblade = player->HasAura(SPELL_RIFTBLADE, player->GetGUID());
+        bool const eternalMagic = player->HasAura(SPELL_ETERNAL_MAGIC, player->GetGUID());
+        bool const primordialBlast = IsPrimordialBlast(info->Id);
+        if ((primordialBlast && (riftblade || eternalMagic)) ||
+            (root == SPELL_SMOLDER && riftblade))
         {
-            if (root == SPELL_PRIMORDIAL_BLAST || root == SPELL_SMOLDER)
+            if (uint32 rank = KnownRank(player, SPELL_RUNEBLADE))
+                player->RestoreSpellCharge(rank,
+                    primordialBlast && eternalMagic ? SPELL_ETERNAL_MAGIC_CHARGES : 1);
+        }
+        if (root == SPELL_RUNEBLADE && riftblade)
+        {
+            player->CastSpell(player, SPELL_RIFTBLADE_COUNTER, true);
+            if (Aura* counter = player->GetAura(SPELL_RIFTBLADE_COUNTER, player->GetGUID());
+                counter && counter->GetStackAmount() >= 3)
             {
-                if (uint32 rank = KnownRank(player, SPELL_RUNEBLADE))
-                    player->RestoreSpellCharge(rank);
-            }
-            else if (root == SPELL_RUNEBLADE)
-            {
-                player->CastSpell(player, SPELL_RIFTBLADE_COUNTER, true);
-                if (Aura* counter = player->GetAura(SPELL_RIFTBLADE_COUNTER, player->GetGUID());
-                    counter && counter->GetStackAmount() >= 3)
-                {
-                    player->RemoveAurasDueToSpell(SPELL_RIFTBLADE_COUNTER, player->GetGUID());
-                    player->CastSpell(player, SPELL_RIFTBLADE_MANA, true);
-                }
+                player->RemoveAurasDueToSpell(SPELL_RIFTBLADE_COUNTER, player->GetGUID());
+                player->CastSpell(player, SPELL_RIFTBLADE_MANA, true);
             }
         }
         if ((root == SPELL_RUNEBLADE || root == SPELL_WARPDAGGER) &&
@@ -207,7 +242,6 @@ class aura_ascension_arcane_palm_sigil : public AuraScript
         PreventDefaultAction();
         Unit* player = GetTarget();
         uint64 amount = uint64(event.GetDamageInfo()->GetDamage()) * std::clamp(effect->GetAmount(), 0, 100) / 100;
-        GetAura()->Remove();
         player->CastCustomSpell(SPELL_ARCANE_SIGIL_DOT, SPELLVALUE_BASE_POINT0,
             int32(std::min<uint64>(amount, std::numeric_limits<int32>::max())),
             event.GetActionTarget(), TRIGGERED_FULL_MASK);
@@ -218,6 +252,48 @@ class aura_ascension_arcane_palm_sigil : public AuraScript
     {
         DoCheckProc += AuraCheckProcFn(aura_ascension_arcane_palm_sigil::Check);
         OnEffectProc += AuraEffectProcFn(aura_ascension_arcane_palm_sigil::Proc, EFFECT_0, AuraType(354));
+    }
+};
+
+class aura_ascension_damage_palm_sigil : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_damage_palm_sigil);
+
+    bool Validate(SpellInfo const* info) override
+    {
+        uint32 const helper = info->Effects[EFFECT_0].TriggerSpell;
+        return info->Effects[EFFECT_0].IsAura(AuraType(354)) &&
+            (helper == SPELL_FIRE_SIGIL_HIT || helper == SPELL_FROST_SIGIL_HIT ||
+                helper == SPELL_WATER_SIGIL_DRAIN) && ValidateSpellInfo({helper});
+    }
+
+    bool Check(ProcEventInfo& event)
+    {
+        Unit* player = GetTarget();
+        Unit* target = event.GetActionTarget();
+        DamageInfo const* damage = event.GetDamageInfo();
+        bool const physicalSpellAllowed = GetSpellInfo()->Effects[EFFECT_0].TriggerSpell == SPELL_FIRE_SIGIL_HIT;
+        return player->IsPlayer() && player->getClass() == CLASS_SPIRIT_MAGE && player->IsAlive() &&
+            GetCaster() == player && event.GetActor() == player && target && target->IsAlive() &&
+            target != player && !player->IsFriendlyTo(target) && damage && damage->GetDamage() &&
+            damage->GetDamageType() == SPELL_DIRECT_DAMAGE &&
+            (physicalSpellAllowed || (damage->GetSchoolMask() & SPELL_SCHOOL_MASK_MAGIC));
+    }
+
+    void Proc(AuraEffect const* effect, ProcEventInfo& event)
+    {
+        PreventDefaultAction();
+        uint64 const amount = uint64(event.GetDamageInfo()->GetDamage()) * std::max(0, effect->GetAmount()) / 100;
+        GetTarget()->CastCustomSpell(effect->GetSpellInfo()->Effects[effect->GetEffIndex()].TriggerSpell,
+            SPELLVALUE_BASE_POINT0,
+            int32(std::min<uint64>(amount, std::numeric_limits<int32>::max())), event.GetActionTarget(),
+            TRIGGERED_FULL_MASK, nullptr, effect);
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(aura_ascension_damage_palm_sigil::Check);
+        OnEffectProc += AuraEffectProcFn(aura_ascension_damage_palm_sigil::Proc, EFFECT_0, AuraType(354));
     }
 };
 
@@ -258,27 +334,6 @@ class aura_ascension_runemaster_fire_engraving : public AuraScript
     }
 };
 
-class aura_ascension_runemaster_firebrand : public AuraScript
-{
-    PrepareAuraScript(aura_ascension_runemaster_firebrand);
-
-    void Explode(AuraEffect const*, AuraEffectHandleModes)
-    {
-        Unit* caster = GetCaster();
-        Unit* target = GetTarget();
-        if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE || !caster || !target->IsAlive())
-            return;
-        for (uint8 stack = GetStackAmount(); stack > 0; --stack)
-            caster->CastSpell(target, SPELL_FIREBRAND_EXPLOSION, true);
-    }
-
-    void Register() override
-    {
-        AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_runemaster_firebrand::Explode, EFFECT_0,
-                                                SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
-    }
-};
-
 class runemaster_secondary_metadata : public GlobalScript
 {
 public:
@@ -289,7 +344,9 @@ public:
     {
         if (info->SpellFamilyName != 38)
             return;
-        if (info->Id == SPELL_FISTS_HIT || info->Id == SPELL_ARCANE_SIGIL_DOT)
+        if (info->Id == SPELL_FISTS_HIT || info->Id == SPELL_ARCANE_SIGIL_DOT ||
+            info->Id == SPELL_FIRE_SIGIL_HIT || info->Id == SPELL_FROST_SIGIL_HIT ||
+            info->Id == SPELL_WATER_SIGIL_DRAIN)
         {
             info->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT;
             info->AttributesEx3 |= SPELL_ATTR3_IGNORE_CASTER_MODIFIERS;
@@ -313,6 +370,6 @@ void AddSC_AscensionRunemasterSecondary()
     new runemaster_secondary_casts();
     new runemaster_secondary_metadata();
     RegisterSpellScript(aura_ascension_arcane_palm_sigil);
+    RegisterSpellScript(aura_ascension_damage_palm_sigil);
     RegisterSpellScript(aura_ascension_runemaster_fire_engraving);
-    RegisterSpellScript(aura_ascension_runemaster_firebrand);
 }

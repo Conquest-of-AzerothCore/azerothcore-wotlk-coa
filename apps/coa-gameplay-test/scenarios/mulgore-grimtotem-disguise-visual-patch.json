@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Mulgore Grimtotem Disguise: the client stream drops the green ghost state visual",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1.",
+    "Client Spell.dbc gives both disguises (256709, 256710) SpellVisual 278464, whose state kit plays GreenGhost_state.",
+    "The login patch stream sends both rows as SMSG_PATCH_SPELL (0x092A) with SpellVisual 364269, the same impact kit only.",
+    "Socketless packet construction does not establish how the client renders the aura."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -3619.49,
+    "y": -959.45,
+    "z": 205.057,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "client",
+      "race": 6,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "The warrior disguise row carries the impact-only visual",
+      "actor": "client",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 256709,
+      "index": 131,
+      "equals": 364269
+    },
+    {
+      "action": "assert",
+      "label": "The guard disguise row carries the impact-only visual",
+      "actor": "client",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 256710,
+      "index": 131,
+      "equals": 364269
+    }
+  ]
+}

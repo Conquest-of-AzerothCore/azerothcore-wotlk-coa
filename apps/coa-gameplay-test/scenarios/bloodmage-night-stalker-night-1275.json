@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Night Stalker grants its bonus at night (#1275)",
+  "contract": [
+    "Spell.dbc 807774 triggers 808013 every 10000 ms; 808013 grants +5% damage and +5% healing for 11000 ms.",
+    "808013 carries SPELL_ATTR0 0x2000 'Only usable during nighttime'; every text source grants the bonus at night.",
+    "hour 0 starts the case in 00:00-00:59 realm-local time, the Witch Hunter Night() clock.",
+    "The parent must grant 808013 within one 10000 ms period and keep refreshing it across the next tick.",
+    "This pins the night half of the gate: it passes before and after the fix."
+  ],
+  "timeout_ms": 60000,
+  "hour": 0,
+  "players": [{ "id": "stalker", "race": 1, "class": 20, "level": 80 }],
+  "steps": [
+    { "action": "wait", "label": "Let character setup settle", "ms": 5000 },
+    { "action": "set_aura", "actor": "stalker", "spell": 808013, "stacks": 0 },
+    { "action": "learn", "actor": "stalker", "spell": 807774 },
+    {
+      "action": "assert", "label": "The learned parent is active",
+      "actor": "stalker", "metric": "aura", "spell": 807774, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The first parent tick grants the bonus at night",
+      "actor": "stalker", "metric": "aura", "spell": 808013, "equals": 1, "within_ms": 12000
+    },
+    {
+      "action": "assert", "label": "The bonus raises damage by 5%",
+      "actor": "stalker", "metric": "aura_amount", "spell": 808013, "effect": 0, "equals": 5
+    },
+    { "action": "wait", "label": "Cross the next parent tick", "ms": 10000 },
+    {
+      "action": "assert", "label": "The bonus is still active after the next tick",
+      "actor": "stalker", "metric": "aura", "spell": 808013, "equals": 1
+    }
+  ]
+}

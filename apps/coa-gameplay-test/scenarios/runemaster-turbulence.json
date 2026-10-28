@@ -1,0 +1,123 @@
+{
+  "schema": 1,
+  "name": "Issue 1136: Turbulence leaves a damaging Turbulent Spiral on every tick",
+  "contract": [
+    "Turbulence 705575 (Riftblade talent) reads 'Send out a gust of wind ... strikes nearby enemies in a",
+    "$706526a1 (6) yd radius for $706526s1% (200%) Weapon Damage as Nature damage every $t1 (0.5) sec for $d",
+    "(3 sec). While active, you leave behind a Turbulent Spiral every $t1 sec for $707153d (6 sec).' The spiral,",
+    "rendered from 707153, reads 'Enemies in the area take an additional ${$707153m1+$707153ppl1+$AP*0.135}",
+    "Nature Damage every $707153t1 sec.' Effect 0 is aura 23 triggering the gust 706526 every 500 ms; nothing in",
+    "the record casts 707153 (a 3 yd persistent area aura, periodic damage every 1000 ms, SpellDuration 32 = 6 sec),",
+    "and no spell_bonus_data row gave its tick the 0.135 attack power. Expected: 5-6 gust ticks, each also leaving",
+    "one spiral at the caster; an enemy 2 yd away takes spiral damage; the last spiral outlasts Turbulence and all",
+    "expire within 6 sec after. A tick gains 0.135 per point of attack power times the caster's own damage done",
+    "(about 1.11 on this fixture), a 0.13-0.16 window that excludes the 0.17 of 706526's stale helper text x1.11.",
+    "After the first spiral, move its caster five yards sideways. The victim stays in the first three-yard",
+    "spiral and within the six-yard gust radius, while later spirals are outside the victim. This exercises",
+    "the authored leave-behind condition without overlapping same-caster periodic area aura applications."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {
+      "id": "rm", "race": 1, "class": 32, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rm", "entry": 36, "level": 80, "health": 1000000, "distance": 2}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 705575},
+    {"action": "snapshot", "actor": "rm", "metric": "attack_power", "save_as": "ap_base"},
+    {
+      "action": "snapshot", "actor": "rm", "metric": "spell_damage_done", "spell": 707153, "periodic": true,
+      "target": "dummy", "save_as": "spiral_base"
+    },
+    {"action": "set_aura", "label": "Volcanic Fury adds 400 attack power", "actor": "rm", "spell": 67391, "stacks": 1},
+    {
+      "action": "assert", "label": "SETUP: attack power increased", "actor": "rm", "metric": "attack_power",
+      "relative_to": "ap_base", "min": 300, "within_ms": 1000
+    },
+    {"action": "snapshot", "actor": "rm", "metric": "attack_power", "relative_to": "ap_base", "save_as": "ap_gain"},
+    {
+      "action": "assert",
+      "label": "A Turbulent Spiral tick gains 0.135 per attack power (times the caster's damage done)", "actor": "rm",
+      "metric": "spell_damage_done", "spell": 707153, "periodic": true, "target": "dummy", "relative_to": "spiral_base",
+      "ratio_to": "ap_gain", "min": 0.13, "max": 0.16
+    },
+    {"action": "set_aura", "actor": "rm", "spell": 67391, "stacks": 0},
+    {"action": "snapshot", "actor": "rm", "metric": "spell_cast_count", "spell": 706526, "save_as": "gusts"},
+    {"action": "snapshot", "actor": "rm", "metric": "spell_cast_count", "spell": 707153, "save_as": "spirals"},
+    {
+      "action": "snapshot", "actor": "rm", "metric": "spell_damage_count", "spell": 706526, "target": "dummy",
+      "save_as": "gust_hits"
+    },
+    {
+      "action": "snapshot", "actor": "rm", "metric": "spell_damage_count", "spell": 707153, "target": "dummy",
+      "save_as": "spiral_hits"
+    },
+    {
+      "action": "assert", "label": "SETUP: no Turbulent Spiral before Turbulence", "actor": "rm",
+      "metric": "dynamic_object", "spell": 707153, "equals": 0
+    },
+    {"action": "cast", "actor": "rm", "spell": 705575},
+    {
+      "action": "assert", "label": "Turbulence is active", "actor": "rm", "metric": "aura", "spell": 705575,
+      "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Turbulence leaves a Turbulent Spiral behind", "actor": "rm",
+      "metric": "dynamic_object", "spell": 707153, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "teleport", "actor": "rm", "map": 0, "x": -8949.95, "y": -127.493, "z": 83.5312, "o": 0,
+      "label": "Leave the first spiral behind before later spirals form"
+    },
+    {
+      "action": "assert", "actor": "rm", "metric": "distance", "target": "dummy", "min": 5.2, "max": 5.6,
+      "within_ms": 1000, "label": "CONTROL: victim stays inside gust radius and outside later spiral radius"
+    },
+    {
+      "action": "assert", "actor": "rm", "metric": "aura", "spell": 705575, "equals": 1,
+      "label": "CONTROL: movement preserves active Turbulence"
+    },
+    {
+      "action": "assert", "label": "An enemy in the spiral takes its Nature damage", "actor": "rm",
+      "metric": "spell_damage_count", "spell": 707153, "target": "dummy", "relative_to": "spiral_hits", "min": 1,
+      "within_ms": 2500
+    },
+    {
+      "action": "assert", "label": "Turbulence ends after 3 sec", "actor": "rm", "metric": "aura", "spell": 705575,
+      "equals": 0, "within_ms": 3500
+    },
+    {"action": "wait", "label": "Let the last gust land", "ms": 500},
+    {
+      "action": "snapshot", "actor": "rm", "metric": "spell_cast_count", "spell": 706526, "relative_to": "gusts",
+      "save_as": "ticks"
+    },
+    {
+      "action": "assert", "label": "Turbulence ticks every 0.5 sec for 3 sec", "actor": "rm",
+      "metric": "spell_cast_count", "spell": 706526, "relative_to": "gusts", "min": 5, "max": 6
+    },
+    {
+      "action": "assert", "label": "The gust strikes the nearby enemy on every tick", "actor": "rm",
+      "metric": "spell_damage_count", "spell": 706526, "target": "dummy", "relative_to": "gust_hits", "min": 5,
+      "max": 6
+    },
+    {
+      "action": "assert", "label": "Each tick leaves exactly one Turbulent Spiral", "actor": "rm",
+      "metric": "spell_cast_count", "spell": 707153, "relative_to": "spirals", "ratio_to": "ticks", "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert", "label": "The last spiral outlasts Turbulence", "actor": "rm", "metric": "dynamic_object",
+      "spell": 707153, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The spirals expire 6 sec after they are left", "actor": "rm",
+      "metric": "dynamic_object", "spell": 707153, "equals": 0, "within_ms": 7000
+    }
+  ]
+}

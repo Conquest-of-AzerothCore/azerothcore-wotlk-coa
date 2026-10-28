@@ -1,0 +1,217 @@
+{
+  "schema": 1,
+  "name": "Companions that reuse a creature or boss model are summoned at their live scale",
+  "contract": "A summoned companion's object scale is its creature_template_model DisplayScale. Lil' Chromaggus, Baby Kodo, the Night Web Spider Hatchling, Lootbot 3000 and Fix-o-Tron 5000 reuse full-size creature displays, and live sniffs taken 2026-08-31/09-01 show each summoned with OBJECT_FIELD_SCALE_X 0.1, 0.25, 0.25, 0.7 and 0.55. At a server scale of 1 they draw at the full size of the creature whose model they borrow.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9458.0,
+    "y": 42.0,
+    "z": 55.5
+  },
+  "players": [
+    {
+      "id": "owner",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "learn",
+      "actor": "owner",
+      "spell": 84200
+    },
+    {
+      "action": "learn",
+      "actor": "owner",
+      "spell": 313636
+    },
+    {
+      "action": "learn",
+      "actor": "owner",
+      "spell": 313639
+    },
+    {
+      "action": "learn",
+      "actor": "owner",
+      "spell": 9930889
+    },
+    {
+      "action": "learn",
+      "actor": "owner",
+      "spell": 92981
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "owner",
+      "spell": 84200
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_entry",
+      "equals": 79055,
+      "within_ms": 4000,
+      "label": "84200 summons Lil' Chromaggus"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_display",
+      "equals": 14367,
+      "within_ms": 4000,
+      "label": "Lil' Chromaggus draws as display 14367"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_scale",
+      "min": 0.09,
+      "max": 0.11,
+      "within_ms": 4000,
+      "label": "Lil' Chromaggus is summoned at its live scale 0.1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "owner",
+      "spell": 313636
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_entry",
+      "equals": 519908,
+      "within_ms": 4000,
+      "label": "313636 summons Baby Kodo"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_display",
+      "equals": 2702,
+      "within_ms": 4000,
+      "label": "Baby Kodo draws as display 2702"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_scale",
+      "min": 0.24,
+      "max": 0.26,
+      "within_ms": 4000,
+      "label": "Baby Kodo is summoned at its live scale 0.25"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "owner",
+      "spell": 313639
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_entry",
+      "equals": 519910,
+      "within_ms": 4000,
+      "label": "313639 summons Night Web Spider Hatchling"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_display",
+      "equals": 539,
+      "within_ms": 4000,
+      "label": "Night Web Spider Hatchling draws as display 539"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_scale",
+      "min": 0.24,
+      "max": 0.26,
+      "within_ms": 4000,
+      "label": "Night Web Spider Hatchling is summoned at its live scale 0.25"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "owner",
+      "spell": 9930889
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_entry",
+      "equals": 44022,
+      "within_ms": 4000,
+      "label": "9930889 summons Lootbot 3000"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_display",
+      "equals": 6888,
+      "within_ms": 4000,
+      "label": "Lootbot 3000 draws as display 6888"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_scale",
+      "min": 0.69,
+      "max": 0.71,
+      "within_ms": 4000,
+      "label": "Lootbot 3000 is summoned at its live scale 0.7"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "owner",
+      "spell": 92981
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_entry",
+      "equals": 80879,
+      "within_ms": 4000,
+      "label": "92981 summons Fix-o-Tron 5000"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_display",
+      "equals": 90773,
+      "within_ms": 4000,
+      "label": "Fix-o-Tron 5000 draws as display 90773"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_scale",
+      "min": 0.54,
+      "max": 0.56,
+      "within_ms": 4000,
+      "label": "Fix-o-Tron 5000 is summoned at its live scale 0.55"
+    }
+  ]
+}

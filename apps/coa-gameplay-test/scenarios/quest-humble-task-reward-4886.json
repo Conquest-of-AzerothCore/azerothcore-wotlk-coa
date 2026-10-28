@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "A Humble Task: a Templar who hands in the Water Pitcher receives the Small Red Pouch (#4886)",
+  "contract": [
+    "Quest 753 A Humble Task ends at Chief Hawkwind 2981 and has one fixed reward, Small Red Pouch 805, with no choice",
+    "rewards (server quest_template; AscensionDB client captures RewardItem1 805, RewardChoiceItemId1 0). The issue",
+    "reports a level 3 Templar who saw no item after the turn-in. Expected: a level 3 Templar who turns in 753",
+    "carries one Small Red Pouch afterwards."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 1, "x": -2874.0, "y": -218.0, "z": 55.0, "o": 3.9},
+  "players": [{"id": "templar", "race": 10, "class": 19, "level": 3}],
+  "steps": [
+    {"action": "wait", "label": "Let login settle", "ms": 3000},
+    {"action": "prepare_quest", "label": "Fixture: the Templar carries the Water Pitcher", "actor": "templar",
+     "quest": 753},
+    {"action": "assert", "label": "SETUP: the Water Pitcher is in the bags", "actor": "templar",
+     "metric": "item_count", "item": 4755, "equals": 1},
+    {"action": "assert", "label": "SETUP: no Small Red Pouch before the turn-in", "actor": "templar",
+     "metric": "item_count", "item": 805, "equals": 0},
+    {"action": "reward_quest", "label": "Hand in the Water Pitcher", "actor": "templar", "quest": 753},
+    {"action": "assert", "label": "A Humble Task is rewarded", "actor": "templar", "metric": "quest_rewarded",
+     "quest": 753, "equals": 1},
+    {"action": "assert", "label": "The Small Red Pouch reached the bags", "actor": "templar",
+     "metric": "item_count", "item": 805, "equals": 1, "within_ms": 5000}
+  ]
+}

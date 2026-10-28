@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Ambuscade's +35% Skullpiercer/Flank bonus only applies with a polearm equipped (#2496)",
+  "contract": "705053 'Ambuscade' reads 'Increases the base damage of Skullpiercer and Flank by 20%, plus an additional 35% if you have a polearm equipped.' It is a passive with effect 0 SPELL_AURA_ADD_PCT_MODIFIER (MiscValue 0 = SPELLMOD_DAMAGE, BasePoints 19+1=20%, class mask word1 0x8020000 = bits 17 and 27) applied unconditionally, and effect 1 SPELL_AURA_PERIODIC_TRIGGER_SPELL (amplitude 10000 ms) casting 707887 every 10 sec. 707887 carries the identical class mask, ADD_PCT_MODIFIER MiscValue 0, BasePoints 34+1=35%, DurationIndex 38 (11000 ms), and EquippedItemClass 2/EquippedItemSubClassMask 64 (polearm). 707887 is not passive, so every periodic retrigger runs through Spell::CheckCast/CheckItems (Spell.cpp), which fails SPELL_FAILED_EQUIPPED_ITEM_CLASS without a polearm equipped; the aura's own 11 sec duration outlives the 10 sec retrigger by 1 sec so a continuously-equipped polearm keeps it refreshed. PR #5421 called Ambuscade 'an ungated aura-23 tick' by reading only 705053's own EquippedItemClass (-1, unrestricted) and missing that the triggered spell carries its own gate. Item 1406 'Pearl-encrusted Spear' (item_template: class 2, subclass 6 Polearm, AllowableClass -1, RequiredLevel 20, RequiredSkill 0) is a real, unconditionally usable polearm.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the character settle", "ms": 3000 },
+    { "action": "learn", "actor": "ranger", "spell": 705053 },
+    {
+      "action": "assert", "label": "SETUP: Ambuscade is active", "actor": "ranger",
+      "metric": "aura", "spell": 705053, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTROL: no polearm equipped, 707887 has not appeared yet", "actor": "ranger",
+      "metric": "aura", "spell": 707887, "equals": 0
+    },
+    { "action": "wait", "label": "Past one 10 sec retrigger with no polearm equipped", "ms": 11000 },
+    {
+      "action": "assert", "label": "CONTROL: no polearm equipped, the +35% bonus never appears", "actor": "ranger",
+      "metric": "aura", "spell": 707887, "equals": 0
+    },
+    { "action": "add_item", "actor": "ranger", "item": 1406 },
+    { "action": "equip", "label": "Equip a polearm (Pearl-encrusted Spear)", "actor": "ranger", "item": 1406, "slot": 15 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: with a polearm equipped, the next retrigger lands 707887", "actor": "ranger",
+      "metric": "aura", "spell": 707887, "equals": 1, "within_ms": 12000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: 707887 grants the +35% bonus", "actor": "ranger",
+      "metric": "aura_amount", "spell": 707887, "equals": 35
+    }
+  ]
+}

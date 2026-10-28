@@ -1,0 +1,274 @@
+{
+  "schema": 1,
+  "name": "Leaving Manastorm removes its three starter items (#4471)",
+  "contract": "Manastorm grants Endless Manastorm Potion (254041), Millhouse's Regeneration Matrix (97895) and Millhouse's Magical Escape (254042) on entry. The three run supplies must leave inventory after the player successfully returns to the open world, while ordinary carried items remain. Removal must survive a native character save/logout/login, and entering a later run must grant the supplies again. Native 0x0651 enter and 0x0665 leave requests must complete real private-instance transfers; disabling Manastorm cannot satisfy this test. Requires Ascension.Manastorm.Enable = 1.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "player",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "player",
+      "item": 2589,
+      "count": 3
+    },
+    {
+      "action": "client_packet",
+      "actor": "player",
+      "opcode": 1617,
+      "fields": [
+        {
+          "u32": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "player",
+      "metric": "private_instance",
+      "equals": 1,
+      "within_ms": 10000,
+      "label": "The native enter request reached a Manastorm instance"
+    },
+    {
+      "action": "assert",
+      "actor": "player",
+      "metric": "item_count",
+      "item": 254041,
+      "equals": 1,
+      "label": "Endless Manastorm Potion is granted on entry"
+    },
+    {
+      "action": "assert",
+      "actor": "player",
+      "metric": "item_count",
+      "item": 97895,
+      "equals": 1,
+      "label": "Regeneration Matrix is granted on entry"
+    },
+    {
+      "action": "assert",
+      "actor": "player",
+      "metric": "item_count",
+      "item": 254042,
+      "equals": 1,
+      "label": "Magical Escape is granted on entry"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "actor": "player",
+      "opcode": 1637
+    },
+    {
+      "action": "assert",
+      "actor": "player",
+      "metric": "private_instance",
+      "equals": 0,
+      "within_ms": 10000,
+      "label": "The native leave request returned to the open world"
+    },
+    {
+      "action": "snapshot",
+      "actor": "player",
+      "metric": "item_count",
+      "item": 254041,
+      "save_as": "after_leave_254041",
+      "label": "Endless Manastorm Potion count after returning to the open world"
+    },
+    {
+      "action": "snapshot",
+      "actor": "player",
+      "metric": "item_count",
+      "item": 97895,
+      "save_as": "after_leave_97895",
+      "label": "Regeneration Matrix count after returning to the open world"
+    },
+    {
+      "action": "snapshot",
+      "actor": "player",
+      "metric": "item_count",
+      "item": 254042,
+      "save_as": "after_leave_254042",
+      "label": "Magical Escape count after returning to the open world"
+    },
+    {
+      "action": "assert",
+      "actor": "player",
+      "metric": "item_count",
+      "item": 254041,
+      "equals": 0,
+      "within_ms": 3000,
+      "label": "Endless Manastorm Potion is removed after leaving"
+    },
+    {
+      "action": "assert",
+      "actor": "player",
+      "metric": "item_count",
+      "item": 97895,
+      "equals": 0,
+      "label": "Regeneration Matrix is removed after leaving"
+    },
+    {
+      "action": "assert",
+      "actor": "player",
+      "metric": "item_count",
+      "item": 254042,
+      "equals": 0,
+      "label": "Magical Escape is removed after leaving"
+    },
+    {
+      "action": "assert",
+      "actor": "player",
+      "metric": "item_count",
+      "item": 2589,
+      "equals": 3,
+      "label": "Leaving preserves ordinary inventory"
+    },
+    {
+      "action": "relog",
+      "actor": "player"
+    },
+    {
+      "action": "assert",
+      "actor": "player",
+      "metric": "item_count",
+      "item": 254041,
+      "equals": 0,
+      "label": "Endless Manastorm Potion stays absent after native save and relog"
+    },
+    {
+      "action": "assert",
+      "actor": "player",
+      "metric": "item_count",
+      "item": 97895,
+      "equals": 0,
+      "label": "Regeneration Matrix stays absent after native save and relog"
+    },
+    {
+      "action": "assert",
+      "actor": "player",
+      "metric": "item_count",
+      "item": 254042,
+      "equals": 0,
+      "label": "Magical Escape stays absent after native save and relog"
+    },
+    {
+      "action": "assert",
+      "actor": "player",
+      "metric": "item_count",
+      "item": 2589,
+      "equals": 3,
+      "label": "Ordinary inventory survives native save and relog"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "actor": "player",
+      "opcode": 1617,
+      "fields": [
+        {
+          "u32": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "player",
+      "metric": "private_instance",
+      "equals": 1,
+      "within_ms": 10000,
+      "label": "A later run reaches its private Manastorm instance"
+    },
+    {
+      "action": "assert",
+      "actor": "player",
+      "metric": "item_count",
+      "item": 254041,
+      "equals": 1,
+      "label": "Endless Manastorm Potion is granted again for the later run"
+    },
+    {
+      "action": "assert",
+      "actor": "player",
+      "metric": "item_count",
+      "item": 97895,
+      "equals": 1,
+      "label": "Regeneration Matrix is granted again for the later run"
+    },
+    {
+      "action": "assert",
+      "actor": "player",
+      "metric": "item_count",
+      "item": 254042,
+      "equals": 1,
+      "label": "Magical Escape is granted again for the later run"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "actor": "player",
+      "opcode": 1637
+    },
+    {
+      "action": "assert",
+      "actor": "player",
+      "metric": "private_instance",
+      "equals": 0,
+      "within_ms": 10000,
+      "label": "The later run also returns to the open world"
+    },
+    {
+      "action": "assert",
+      "actor": "player",
+      "metric": "item_count",
+      "item": 254041,
+      "equals": 0,
+      "label": "Endless Manastorm Potion is removed after the later run",
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "player",
+      "metric": "item_count",
+      "item": 97895,
+      "equals": 0,
+      "label": "Regeneration Matrix is removed after the later run"
+    },
+    {
+      "action": "assert",
+      "actor": "player",
+      "metric": "item_count",
+      "item": 254042,
+      "equals": 0,
+      "label": "Magical Escape is removed after the later run"
+    },
+    {
+      "action": "assert",
+      "actor": "player",
+      "metric": "item_count",
+      "item": 2589,
+      "equals": 3,
+      "label": "Both exits preserve ordinary inventory"
+    }
+  ]
+}

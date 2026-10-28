@@ -1,0 +1,407 @@
+{
+  "schema": 1,
+  "name": "Northshire class chain: the pendant, the statue and the rest of the valley's chain objects exist (#6757, #6728)",
+  "contract": "rev_20260930_98_northshire_baseline_restore reverted the valley to the pre-revamp world and deleted the CoA rows it found there. rev_20261003_00_coa_northshire_trainer_interaction.sql repaired that regression for the trainer templates, but the spawns were never restored: on a world database that has applied the restore the class chains point at objects that do not exist. #6757 reports it as 'Defias thugs do not drop the quest item' for Lost Pendant (Sun Cleric quest 200058, the pendant is a chest - guids 7912105/7912106, entry 9301103, item 663319) and #6728 as 'no reaction from Uther's statue' for A Quiet Life (entry 9301105, guid 7912102). rev_20261007_20_coa_northshire_class_chain_spawns.sql republishes the authored rows for the 18 gameobjects at guids 7912100-7912117, the chain NPCs at 9003120-9003129 and their two addons. Expected before the SQL: the CONTROL creature Scorch (9300101) is found, because it is one of the four chain rows that survived, and every one of the chain objects is absent - the pendant cannot be looted and 663319 never reaches the bags. Expected after: each chain object is found next to its authored spot, the statue and the mine-mouth and farmhouse chain NPCs are back, and 663319 reaches the bags. rev_20261007_70_coa_northshire_pendant_and_statue.sql then finishes the two objects the way they were set by hand in game: one Lost Pendant, size 0.3, on the crate at the Defias camp (guid 7912105) and the trail spawn (guid 7912106) deleted, and Uther's Statue as a generic 1.5-size statue on the bank in front of the falls. The count reads here prove the spawn half: exactly one pendant is in the valley at all, and it lights up as the quest object of a Sun Cleric on 200058. The loot actions only open a gameobject the player summoned, so the chest is copied beside the crate to prove the chest's loot path hands over the quest-required 663319 (a quest-required roll, which the core keeps in the player's quest-item slots rather than the ordinary loot list).",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8960.4,
+    "y": -212.9,
+    "z": 77.008,
+    "o": 1.25
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 27,
+      "level": 8
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join the world phase the valley's CoA spawns live in",
+      "actor": "c",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the valley's spawns and the login stream settle",
+      "ms": 6000
+    },
+    {
+      "action": "teleport",
+      "label": "Go to the graveyard wall where Old Agatha stands",
+      "actor": "c",
+      "map": 0,
+      "x": -8960.4,
+      "y": -212.9,
+      "z": 77.008,
+      "o": 1.25
+    },
+    {
+      "action": "wait",
+      "label": "Let the grid load",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the chain NPC that survived the restore is found, so the metric reads the live world",
+      "actor": "c",
+      "metric": "nearby_creature_count",
+      "entry": 9300104,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "teleport",
+      "label": "Go to the crate at the Defias camp, where the valley's one Lost Pendant stands",
+      "actor": "c",
+      "map": 0,
+      "x": -8956.38,
+      "y": -435.027,
+      "z": 66.4,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the grid load",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the valley's Lost Pendant stands on the camp crate (guid 7912105). The deleted trail spawn is 37 yards away, outside this read, so the deletion is proven by the read at its own old spot below",
+      "actor": "c",
+      "metric": "nearby_gameobject_count",
+      "entry": 9301103,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "and the valley's chain campfire is back beside it (guid 7912101)",
+      "actor": "c",
+      "metric": "nearby_gameobject_count",
+      "entry": 21282,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "teleport",
+      "label": "Go to the trail toward the river, where the deleted pendant used to stand",
+      "actor": "c",
+      "map": 0,
+      "x": -8931,
+      "y": -409,
+      "z": 66.564,
+      "o": 2.2
+    },
+    {
+      "action": "wait",
+      "label": "Let the grid load",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the trail spawn is gone - rev_20261007_70 deletes guid 7912106, which stood on this very spot, so this read is 0",
+      "actor": "c",
+      "metric": "nearby_gameobject_count",
+      "entry": 9301103,
+      "equals": 0,
+      "within_ms": 8000
+    },
+    {
+      "action": "teleport",
+      "label": "Go to the foot of the Northshire falls, in front of them, where Uther's Statue stands",
+      "actor": "c",
+      "map": 0,
+      "x": -8739.86,
+      "y": -413.297,
+      "z": 83.4,
+      "o": 2.97193
+    },
+    {
+      "action": "wait",
+      "label": "Let the grid load",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Uther's Statue is back for A Quiet Life (guid 7912102, #6728)",
+      "actor": "c",
+      "metric": "nearby_gameobject_count",
+      "entry": 9301105,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "teleport",
+      "label": "Go to the Abbey chapel floor, where the Training Wand lies",
+      "actor": "c",
+      "map": 0,
+      "x": -8909.4,
+      "y": -183.3,
+      "z": 81.939,
+      "o": 1.2
+    },
+    {
+      "action": "wait",
+      "label": "Let the grid load",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "the Training Wand of the Northshire chain is back (guid 7912103)",
+      "actor": "c",
+      "metric": "nearby_gameobject_count",
+      "entry": 9301101,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "teleport",
+      "label": "Go to the foot of the first stone bust in the main hall",
+      "actor": "c",
+      "map": 0,
+      "x": -8898.6,
+      "y": -181.2,
+      "z": 81.939,
+      "o": 2.9
+    },
+    {
+      "action": "wait",
+      "label": "Let the grid load",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "the Eye of the Beholder of the Runes of Power riddle is back (guid 7912104)",
+      "actor": "c",
+      "metric": "nearby_gameobject_count",
+      "entry": 9301102,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "teleport",
+      "label": "Go to the north kobold camp, beside the wheelbarrow",
+      "actor": "c",
+      "map": 0,
+      "x": -8779.3,
+      "y": -115.8,
+      "z": 82.641,
+      "o": 0.4
+    },
+    {
+      "action": "wait",
+      "label": "Let the grid load",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "the Scrap Metal of Ingenuity At It's Finest! is back (guid 7912107)",
+      "actor": "c",
+      "metric": "nearby_gameobject_count",
+      "entry": 9301104,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "teleport",
+      "label": "Go to the clearing north of the Defias camp",
+      "actor": "c",
+      "map": 0,
+      "x": -8918.5,
+      "y": -418,
+      "z": 66.037,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the grid load",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "the Ritual Circle of Death Calls is back (guid 7912100)",
+      "actor": "c",
+      "metric": "nearby_gameobject_count",
+      "entry": 9301100,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "teleport",
+      "label": "Go to the supply yard of the Defias-held stockade",
+      "actor": "c",
+      "map": 0,
+      "x": -8800.79,
+      "y": -408.43,
+      "z": 75.172,
+      "o": 3.1
+    },
+    {
+      "action": "wait",
+      "label": "Let the grid load",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "the chain NPC of the stockade is back (guid 9003123, entry 9300102)",
+      "actor": "c",
+      "metric": "nearby_creature_count",
+      "entry": 9300102,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "teleport",
+      "label": "Go to the CoA farmhouse north of the Abbey",
+      "actor": "c",
+      "map": 0,
+      "x": -8677.65,
+      "y": -185.65,
+      "z": 92.28,
+      "o": 3.94
+    },
+    {
+      "action": "wait",
+      "label": "Let the grid load",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "the seated chain NPC of the farmhouse is back (guid 9003124, entry 9300103)",
+      "actor": "c",
+      "metric": "nearby_creature_count",
+      "entry": 9300103,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "teleport",
+      "label": "Go to Chaplain Nysoni in the Abbey library, who gives Lost Pendant (200058)",
+      "actor": "c",
+      "map": 0,
+      "x": -8852.5,
+      "y": -193.5,
+      "z": 81.932,
+      "o": 2.5
+    },
+    {
+      "action": "wait",
+      "label": "Let the grid load",
+      "ms": 2500
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Finish the prerequisite Solar Scripture (49986) as a fixture",
+      "actor": "c",
+      "quest": 49986
+    },
+    {
+      "action": "reward_quest",
+      "label": "Hand it in so the chain unlocks",
+      "actor": "c",
+      "quest": 49986
+    },
+    {
+      "action": "quest_accept",
+      "label": "Take Lost Pendant (200058) from Nysoni the way a player does, so the quest sits incomplete in the log",
+      "actor": "c",
+      "quest": 200058,
+      "entry": 50286
+    },
+    {
+      "action": "assert",
+      "label": "Lost Pendant is in the log and incomplete, the state a player hunting the pendant is in",
+      "actor": "c",
+      "metric": "quest_status",
+      "quest": 200058,
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "teleport",
+      "label": "Return to the crate the pendant stands on",
+      "actor": "c",
+      "map": 0,
+      "x": -8956.38,
+      "y": -435.027,
+      "z": 66.4,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the grid load",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the one world pendant the quest points at lights up as a quest object for a player on 200058, so it is clickable for them",
+      "actor": "c",
+      "metric": "nearby_gameobject_quest_active",
+      "entry": 9301103,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the bags hold no pendant yet",
+      "actor": "c",
+      "metric": "item_count",
+      "item": 663319,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "summon_gameobject",
+      "label": "Stand in a copy of the Lost Pendant chest (entry 9301103) beside the crate: the loot and use actions only open a gameobject the player summoned, so the copy proves the chest's loot path while the count above proves the world spawn",
+      "actor": "c",
+      "entry": 9301103,
+      "distance": 2,
+      "duration_s": 300
+    },
+    {
+      "action": "assert",
+      "label": "the copy is the only pendant the loot actions can see, because they filter on the player's own summons",
+      "actor": "c",
+      "metric": "owned_gameobject_count",
+      "entry": 9301103,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "label": "Let the copy become ready",
+      "ms": 1000
+    },
+    {
+      "action": "loot_gameobject",
+      "label": "Open the copy's loot window",
+      "actor": "c",
+      "entry": 9301103
+    },
+    {
+      "action": "loot_slot",
+      "label": "DISCRIMINATING: take the pendant out of the copy - the item-selected slot lookup reads the player's quest-item slots, so it fails unless 663319 rolled there",
+      "actor": "c",
+      "item": 663319
+    },
+    {
+      "action": "close_loot",
+      "label": "Close the copy's loot window",
+      "actor": "c"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the chest pays out the quest item 663319 a Sun Cleric on 200058 needs - the chain can be finished",
+      "actor": "c",
+      "metric": "item_count",
+      "item": 663319,
+      "min": 1,
+      "within_ms": 8000
+    }
+  ]
+}

@@ -1,0 +1,209 @@
+{
+  "schema": 1,
+  "name": "Mythic+ progress packet encounter ids (probe)",
+  "contract": "probe",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "hero",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 34,
+      "x": 54.23,
+      "y": 0.28,
+      "z": -18.34
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 400333,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "hero",
+      "item": 400333,
+      "spell": 161
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: socket",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 2310,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "client_packet",
+      "actor": "hero",
+      "opcode": 1319
+    },
+    {
+      "action": "wait",
+      "ms": 10500
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 1696,
+      "as": "targorr",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 1696,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "progress: count after Targorr",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 2313,
+      "index": 0,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "progress: first id after Targorr",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 2313,
+      "index": 1,
+      "min": 0
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 1716,
+      "as": "bazil",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 1716,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "progress: count after Bazil",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 2313,
+      "index": 0,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "progress: id1",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 2313,
+      "index": 1,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "progress: id2",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 2313,
+      "index": 2,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "progress: forces after ids",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 2313,
+      "index": 3,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "instance info names the run's instance",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 2497,
+      "index": 0,
+      "min": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 0,
+      "x": -8914.0,
+      "y": -133.0,
+      "z": 80.6
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "leaving the dungeon ends the client's run",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 2497,
+      "index": 0,
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Necromancer Frigid Death raises Glacial Impact damage by 50% (#700)",
+  "contract": "Frigid Death 560851 is a Rime talent (CharacterAdvancement 5605, ClassType 25 = class 23, Tab 60, TalentEssenceCost 1) whose description reads 'Increases the damage of Glacial Impact by $s1%.' Its only effect is SPELL_AURA_ADD_PCT_MODIFIER (108) MiscValue 0 (SPELLMOD_DAMAGE), BasePoints 49 + DieSides 1 = 50, EffectSpellClassMask (0, 0, 0x10000000) in SpellFamilyName 29. The only damage spell with that family flag is Glacial Impact's damage 707592 (SCHOOL_DAMAGE, family flags 0, 0, 0x10000000), which every Glacial Impact rank (704355, 707911, 707399-707402) triggers through effect 0 SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE; the other flag holder, Animate: Crypt Fiend 801941, deals no damage. Unit::SpellDamageBonusDone multiplies the done damage by the caster's SPELLMOD_DAMAGE modifiers, so the native done-damage calculation for 707592 must be exactly 1.5 times its value without the talent, while Lichfrost 801722 (family flags 0, 0, 0x8000000) stays unchanged.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "snapshot", "actor": "necro", "metric": "spell_damage_done", "target": "golem", "spell": 707592,
+      "save_as": "impact0"
+    },
+    {
+      "action": "snapshot", "actor": "necro", "metric": "spell_damage_done", "target": "golem", "spell": 801722,
+      "save_as": "lichfrost0"
+    },
+    { "action": "learn", "actor": "necro", "spell": 560851 },
+    {
+      "action": "assert", "label": "The talent aura is applied", "actor": "necro",
+      "metric": "aura", "spell": 560851, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Glacial Impact damage is multiplied by 1.5", "actor": "necro",
+      "metric": "spell_damage_done", "target": "golem", "spell": 707592, "ratio_to": "impact0",
+      "min": 1.499, "max": 1.501
+    },
+    {
+      "action": "assert", "label": "CONTROL: Lichfrost damage is unchanged", "actor": "necro",
+      "metric": "spell_damage_done", "target": "golem", "spell": 801722, "ratio_to": "lichfrost0",
+      "min": 0.999, "max": 1.001
+    },
+    { "action": "unlearn", "actor": "necro", "spell": 560851 },
+    {
+      "action": "assert", "label": "Unlearning restores the original Glacial Impact damage", "actor": "necro",
+      "metric": "spell_damage_done", "target": "golem", "spell": 707592, "ratio_to": "impact0",
+      "min": 0.999, "max": 1.001, "within_ms": 2000
+    }
+  ]
+}

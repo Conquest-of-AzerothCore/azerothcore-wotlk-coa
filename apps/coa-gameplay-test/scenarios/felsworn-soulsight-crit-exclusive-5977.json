@@ -1,0 +1,114 @@
+{
+  "schema": 1,
+  "name": "Fel Infusion and Soulsight share one party critical-strike bonus (#5977)",
+  "contract": [
+    "Original 560533 and 300565 each grant three percentage points of party critical strike chance and explicitly",
+    "do not stack with similar effects. Both visible auras may remain. The unrelated ally must receive exactly",
+    "three, never six, points of spell critical chance; neither owner-specific Fel Infusion bonus nor Soulsight",
+    "fragment proc is conflated with the shared party bonus."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 14,
+      "level": 60
+    },
+    {
+      "id": "rival",
+      "race": 1,
+      "class": 30,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "rival"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "spell_crit_chance",
+      "save_as": "crit_base"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 560533
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 560533,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 560533,
+      "caster": "caster",
+      "effect": 0,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_crit_chance",
+      "relative_to": "crit_base",
+      "min": 2.99,
+      "max": 3.01,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "rival",
+      "spell": 300565
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300565,
+      "caster": "rival",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_crit_chance",
+      "relative_to": "crit_base",
+      "min": 2.99,
+      "max": 3.01
+    }
+  ]
+}

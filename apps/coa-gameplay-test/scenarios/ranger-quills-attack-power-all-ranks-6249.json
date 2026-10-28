@@ -1,0 +1,380 @@
+{
+  "schema": 1,
+  "name": "ranger-quills-attack-power-all-ranks-6249",
+  "contract": [
+    "Every authored Quills rank specifies 30% AP. Battle Shout increases melee AP and, through the Ranger stat",
+    "relationship, half as much RAP. The native damage bonus must change by 0.3 times the measured melee AP gain",
+    "before the authored Ranger PvE tuning. The fixture verifies the normal 20% PvE reduction (887009), so",
+    "observed outgoing damage changes by 0.24 times that AP gain at every rank and return when removed. Aspect of",
+    "the Hawk then changes only RAP and must not change Quills damage. A normal highest-rank cast with its",
+    "Advantage prerequisite proves damage delivery."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 21,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "ranged_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "t",
+      "owner": "p",
+      "entry": 299,
+      "level": 80,
+      "health": 1000000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "p",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura_amount",
+      "spell": 887009,
+      "effect": 0,
+      "equals": -20
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "melee_damage_done",
+      "target": "t",
+      "equals": 800
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "attack_power",
+      "save_as": "ap_start"
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "ranged_attack_power",
+      "save_as": "rap_start"
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "spell_damage_done",
+      "save_as": "damage_560966",
+      "spell": 560966,
+      "target": "t"
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "spell_damage_done",
+      "save_as": "damage_561184",
+      "spell": 561184,
+      "target": "t"
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "spell_damage_done",
+      "save_as": "damage_561185",
+      "spell": 561185,
+      "target": "t"
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "spell_damage_done",
+      "save_as": "damage_561186",
+      "spell": 561186,
+      "target": "t"
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "spell_damage_done",
+      "save_as": "damage_561187",
+      "spell": 561187,
+      "target": "t"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 47436,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "attack_power",
+      "save_as": "ap_gain",
+      "relative_to": "ap_start"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "attack_power",
+      "relative_to": "ap_start",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "ranged_attack_power",
+      "relative_to": "rap_start",
+      "ratio_to": "ap_gain",
+      "min": 0.49,
+      "max": 0.51
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_done",
+      "spell": 560966,
+      "target": "t",
+      "relative_to": "damage_560966",
+      "ratio_to": "ap_gain",
+      "min": 0.235,
+      "max": 0.245
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_done",
+      "spell": 561184,
+      "target": "t",
+      "relative_to": "damage_561184",
+      "ratio_to": "ap_gain",
+      "min": 0.235,
+      "max": 0.245
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_done",
+      "spell": 561185,
+      "target": "t",
+      "relative_to": "damage_561185",
+      "ratio_to": "ap_gain",
+      "min": 0.235,
+      "max": 0.245
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_done",
+      "spell": 561186,
+      "target": "t",
+      "relative_to": "damage_561186",
+      "ratio_to": "ap_gain",
+      "min": 0.235,
+      "max": 0.245
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_done",
+      "spell": 561187,
+      "target": "t",
+      "relative_to": "damage_561187",
+      "ratio_to": "ap_gain",
+      "min": 0.235,
+      "max": 0.245
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 47436,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_done",
+      "spell": 560966,
+      "target": "t",
+      "relative_to": "damage_560966",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_done",
+      "spell": 561184,
+      "target": "t",
+      "relative_to": "damage_561184",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_done",
+      "spell": 561185,
+      "target": "t",
+      "relative_to": "damage_561185",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_done",
+      "spell": 561186,
+      "target": "t",
+      "relative_to": "damage_561186",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_done",
+      "spell": 561187,
+      "target": "t",
+      "relative_to": "damage_561187",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 13165,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "attack_power",
+      "relative_to": "ap_start",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "ranged_attack_power",
+      "relative_to": "rap_start",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_done",
+      "spell": 560966,
+      "target": "t",
+      "relative_to": "damage_560966",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_done",
+      "spell": 561184,
+      "target": "t",
+      "relative_to": "damage_561184",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_done",
+      "spell": 561185,
+      "target": "t",
+      "relative_to": "damage_561185",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_done",
+      "spell": 561186,
+      "target": "t",
+      "relative_to": "damage_561186",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_done",
+      "spell": 561187,
+      "target": "t",
+      "relative_to": "damage_561187",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 13165,
+      "stacks": 0
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 561187
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 804329,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 561187,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 561187,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 561187,
+      "target": "t",
+      "equals": 1
+    }
+  ]
+}

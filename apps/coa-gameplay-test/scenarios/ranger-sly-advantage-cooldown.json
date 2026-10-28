@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Sly reduces Woodland Adept's cooldown by 10% per Advantage stack (#860)",
+  "contract": "Sly 560339 (Ranger class ability, CharacterAdvancement 6347) reads \"Your Woodland Adept and Elude now triggers a $s1% reduced cooldown for each stack of Advantage active when cast\". It is a single SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 12 = SPELLMOD_EFFECT2, EffectBasePoints -11 + DieSides 1 = -10, masked to SpellFamily 27 word0 0x80000000. The only records it can reach are Ambuscade 804936 and 802612 'Skullpiercer Focus Regen Advantage Hidden', a 5-stack hidden Advantage companion like 704337/801429/801700 whose effect 1 is SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 11 = SPELLMOD_COOLDOWN, value 0, masked to word2 0x4000, which in family 27 is exactly Woodland Adept 570015 and Elude 801345. So Sly turns that companion into -10% cooldown per stack, and the aura amount is multiplied by its stack count. Nothing kept 802612 on the Ranger: aura_ascension_ranger_advantage mirrored Advantage 804329 onto the other three companions only. Woodland Adept has RecoveryTime and CategoryRecoveryTime 180000. Control: with 3 Advantage and no Sly the cast still costs the full 180 sec. With Sly and 3 Advantage the companion's effect 1 must read -30 and the next cast must cost 180000 * 0.7 = 126000 ms. Before the fix 802612 is absent and the cooldown stays 180 sec.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the character settle", "ms": 3000 },
+    { "action": "learn", "actor": "ranger", "spell": 570015 },
+    { "action": "set_aura", "label": "Three Advantage", "actor": "ranger", "spell": 804329, "stacks": 3 },
+    {
+      "action": "assert", "label": "The hidden cooldown companion mirrors the three Advantage stacks", "actor": "ranger",
+      "metric": "aura_stacks", "spell": 802612, "caster": "ranger", "equals": 3, "within_ms": 2000
+    },
+    { "action": "cast", "label": "Control Woodland Adept without Sly", "actor": "ranger", "spell": 570015 },
+    {
+      "action": "assert", "label": "Control: without Sly Woodland Adept keeps its full 180 sec cooldown", "actor": "ranger",
+      "metric": "cooldown_ms", "spell": 570015, "min": 170000, "max": 180000, "within_ms": 2000
+    },
+    { "action": "set_aura", "label": "Leave the Elude stealth before learning Sly", "actor": "ranger", "spell": 801345, "stacks": 0 },
+    { "action": "reset_cooldown", "actor": "ranger", "spell": 570015 },
+    { "action": "learn", "actor": "ranger", "spell": 560339 },
+    {
+      "action": "assert", "label": "SETUP: Sly is active on the Ranger", "actor": "ranger",
+      "metric": "aura", "spell": 560339, "equals": 1, "within_ms": 3000
+    },
+    { "action": "set_aura", "label": "Clear Advantage and its companions", "actor": "ranger", "spell": 804329, "stacks": 0 },
+    { "action": "set_aura", "label": "Three Advantage again, with Sly known", "actor": "ranger", "spell": 804329, "stacks": 3 },
+    {
+      "action": "assert", "label": "Sly makes the companion a 10% cooldown reduction per stack", "actor": "ranger",
+      "metric": "aura_amount", "spell": 802612, "caster": "ranger", "effect": 1, "equals": -30, "within_ms": 2000
+    },
+    { "action": "cast", "label": "Woodland Adept with Sly and three Advantage", "actor": "ranger", "spell": 570015 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: three Advantage stacks cut the cooldown by 30%", "actor": "ranger",
+      "metric": "cooldown_ms", "spell": 570015, "min": 120000, "max": 126000, "within_ms": 2000
+    }
+  ]
+}

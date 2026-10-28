@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "name": "Uldaman: Ironaya follows dungeon level scaling like every other boss (#9074, #9076, #9576)",
+  "contract": "Ironaya (creature_template 7228, Uldaman map 70) authored unit_flags 33554434 = UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE. mod-destiny-weaver's ViewableCreature() excludes any creature whose spawn/template unit_flags carry those bits from per-viewer dungeon level scaling, so with the authored flags she stayed at her authored level 40 for every party regardless of their own level. The fix clears both bits in creature_template so she scales inside Uldaman's 15-59 band like Archaedas, Grimlok, Revelosh and the Ancient Stone Keeper, which already spawn with unit_flags 0. GO_IRONAYA_SEAL_DOOR gates physical access to her chamber independently of these bits, so clearing them does not change who can reach her.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 70,
+    "x": -235.673,
+    "y": 309.639,
+    "z": -47.5976,
+    "o": 0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 15,
+      "level": 30
+    }
+  ],
+  "creatures": [
+    {
+      "id": "ironaya",
+      "owner": "p",
+      "entry": 7228,
+      "distance": 6
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 2000
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the player is inside Uldaman",
+      "actor": "p",
+      "metric": "map_id",
+      "equals": 70
+    },
+    {
+      "action": "assert",
+      "label": "A level 30 character sees Ironaya at their own level, not her authored 40",
+      "actor": "p",
+      "metric": "view_level",
+      "target": "ironaya",
+      "equals": 30,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The level 30 character is sent level 30 for Ironaya",
+      "actor": "p",
+      "metric": "sent_level",
+      "target": "ironaya",
+      "equals": 30,
+      "within_ms": 3000
+    }
+  ]
+}

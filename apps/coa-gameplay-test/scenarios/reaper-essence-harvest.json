@@ -1,0 +1,255 @@
+{
+  "schema": 1,
+  "name": "Reaper Essence Harvest increases Ghostly Weapon Frost damage (#882)",
+  "contract": "Essence Harvest 707908 adds ten points to Ghostly Weapon 803997 effect 0, from 25 to 35. Ghostly Weapon should cast Frost child 804474 from landed melee hits. The child cannot crit and ignores caster and target damage modifiers in the client DBC. Compare its logged damage with the same window's logged physical melee damage, first without the talent and then with it.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "location": { "map": 530, "x": 10349.6, "y": -6357.29, "z": 33.4026, "o": 5.31605 },
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "reaper",
+      "entry": 1601,
+      "level": 80,
+      "health": 1000000,
+      "distance": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 803997
+    },
+    {
+      "action": "assert",
+      "label": "Ghostly Weapon starts at 25 percent",
+      "actor": "reaper",
+      "metric": "spell_effect_value",
+      "spell": 803997,
+      "effect": 0,
+      "equals": 25
+    },
+    {
+      "action": "set_power",
+      "actor": "reaper",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 803997
+    },
+    {
+      "action": "assert",
+      "label": "Ghostly Weapon aura carries the base amount",
+      "actor": "reaper",
+      "metric": "aura_amount",
+      "spell": 803997,
+      "effect": 0,
+      "equals": 25,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "No Frost child cast before any melee attack",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 804474,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "melee_damage_total",
+      "save_as": "base_melee_start"
+    },
+    {
+      "action": "attack",
+      "actor": "reaper",
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let several base Ghostly Weapon melee hits resolve",
+      "ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "reaper"
+    },
+    {
+      "action": "snapshot",
+      "label": "Measure base physical damage",
+      "actor": "reaper",
+      "metric": "melee_damage_total",
+      "relative_to": "base_melee_start",
+      "save_as": "base_melee_damage"
+    },
+    {
+      "action": "assert",
+      "label": "Base melee attacks landed",
+      "actor": "reaper",
+      "metric": "melee_damage_count",
+      "hand": 0,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Base Ghostly Weapon casts the Frost child",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 804474,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Base Ghostly Weapon deals Frost damage",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 804474,
+      "target": "enemy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Base Frost damage is about 25 percent of resolved melee damage",
+      "actor": "reaper",
+      "metric": "spell_damage_total",
+      "spell": 804474,
+      "target": "enemy",
+      "ratio_to": "base_melee_damage",
+      "min": 0.22,
+      "max": 0.27
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "spell_damage_total",
+      "spell": 804474,
+      "target": "enemy",
+      "save_as": "base_frost_total"
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 804474,
+      "save_as": "base_frost_casts"
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803997,
+      "stacks": 0
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 707908
+    },
+    {
+      "action": "assert",
+      "label": "Essence Harvest adds ten points to Ghostly Weapon",
+      "actor": "reaper",
+      "metric": "spell_effect_value",
+      "spell": 803997,
+      "effect": 0,
+      "equals": 35
+    },
+    {
+      "action": "restore_charges",
+      "actor": "reaper",
+      "spell": 803997
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 803997
+    },
+    {
+      "action": "set_power",
+      "actor": "reaper",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 803997
+    },
+    {
+      "action": "assert",
+      "label": "Ghostly Weapon aura carries the talented amount",
+      "actor": "reaper",
+      "metric": "aura_amount",
+      "spell": 803997,
+      "effect": 0,
+      "equals": 35,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "melee_damage_total",
+      "save_as": "talented_melee_start"
+    },
+    {
+      "action": "attack",
+      "actor": "reaper",
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let several talented Ghostly Weapon melee hits resolve",
+      "ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "reaper"
+    },
+    {
+      "action": "snapshot",
+      "label": "Measure talented physical damage",
+      "actor": "reaper",
+      "metric": "melee_damage_total",
+      "relative_to": "talented_melee_start",
+      "save_as": "talented_melee_damage"
+    },
+    {
+      "action": "assert",
+      "label": "Talented Ghostly Weapon casts its Frost child again",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 804474,
+      "relative_to": "base_frost_casts",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Talent raises Frost damage to about 35 percent of resolved melee damage",
+      "actor": "reaper",
+      "metric": "spell_damage_total",
+      "spell": 804474,
+      "target": "enemy",
+      "relative_to": "base_frost_total",
+      "ratio_to": "talented_melee_damage",
+      "min": 0.32,
+      "max": 0.37
+    }
+  ]
+}

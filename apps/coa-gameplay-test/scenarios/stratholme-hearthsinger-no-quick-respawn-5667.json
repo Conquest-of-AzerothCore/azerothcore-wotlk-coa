@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "name": "Stratholme: Hearthsinger Forresten does not respawn five minutes after his death (COA-5667)",
+  "contract": "Hearthsinger Forresten (10558, guid 9950081) is a CoA-placed Stratholme boss. Like the other CoA boss spawns there (The Unforgiven 9950080/9970179, Magistrate Barthilas 9950286, Timmy the Cruel 9950289) he kept a 300 s respawn, because the vanilla respawn pass skipped CoA spawns, so he came back during the same run. The stock Stratholme bosses use 86400 s. Killed, he must still be dead 5 min 15 s later.",
+  "timeout_ms": 420000,
+  "location": { "map": 329, "x": 3672.0, "y": -3332.5, "z": 124.9, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 1, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "label": "Let the instance load", "ms": 4000 },
+    { "action": "assert", "label": "SETUP: Hearthsinger is here", "actor": "p", "metric": "nearby_creature_count", "entry": 10558, "equals": 1 },
+    { "action": "attack_nearby", "label": "Kill Hearthsinger", "actor": "p", "entry": 10558, "kill": true },
+    { "action": "assert", "label": "He is dead", "actor": "p", "metric": "nearby_creature_count", "entry": 10558, "equals": 0, "within_ms": 2000 },
+    { "action": "wait", "label": "Wait past the old 300 s respawn", "ms": 315000 },
+    { "action": "assert", "label": "DISCRIMINATING: he has not respawned", "actor": "p", "metric": "nearby_creature_count", "entry": 10558, "equals": 0 }
+  ]
+}

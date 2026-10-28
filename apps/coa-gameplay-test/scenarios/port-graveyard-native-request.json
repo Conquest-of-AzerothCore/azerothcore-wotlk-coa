@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Native return to graveyard sends a released ghost back to its graveyard",
+  "contract": "The ghost frame's Return to graveyard button calls PortGraveyard(), which Extensions.dll sends as the empty CMSG_PORT_GRAVEYARD (0x0544). The frame is shown only to a ghost. Retail's return to graveyard moves a released ghost to its closest graveyard and does nothing for a living or unreleased player. A death in Northshire Valley releases at the Northshire graveyard (graveyard 105, -8935.33 -188.646). Expected: the request reaches the server; a living player is not moved; a ghost walked back to its corpse is returned to the Northshire graveyard.",
+  "timeout_ms": 30000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "walker", "race": 1, "class": 1, "level": 10 }
+  ],
+  "steps": [
+    {
+      "action": "client_packet", "label": "Ask to return to the graveyard while alive", "actor": "walker",
+      "opcode": 1348, "consumed": false
+    },
+    { "action": "wait", "label": "Give a teleport time to start", "ms": 1000 },
+    {
+      "action": "assert", "label": "A living player is not moved", "actor": "walker", "metric": "position_x",
+      "min": -8918.41, "max": -8916.41
+    },
+    { "action": "die", "actor": "walker" },
+    {
+      "action": "client_packet", "label": "Release the spirit", "actor": "walker", "opcode": 346,
+      "fields": [ { "u8": 0 } ], "consumed": false
+    },
+    {
+      "action": "assert", "label": "The ghost is released at the Northshire graveyard", "actor": "walker",
+      "metric": "position_y", "min": -189.646, "max": -187.646, "within_ms": 5000
+    },
+    {
+      "action": "teleport", "label": "The ghost walks back to its corpse", "actor": "walker",
+      "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711
+    },
+    {
+      "action": "assert", "label": "The ghost stands at its corpse, away from the graveyard", "actor": "walker",
+      "metric": "position_y", "min": -116.853, "max": -114.853, "within_ms": 5000
+    },
+    {
+      "action": "client_packet", "label": "Ask to return to the graveyard", "actor": "walker", "opcode": 1348,
+      "consumed": false
+    },
+    {
+      "action": "assert", "label": "The ghost is back at the Northshire graveyard", "actor": "walker",
+      "metric": "position_y", "min": -189.646, "max": -187.646, "within_ms": 5000
+    },
+    {
+      "action": "assert", "actor": "walker", "metric": "position_x", "min": -8936.33, "max": -8934.33
+    },
+    { "action": "assert", "label": "The ghost is still dead", "actor": "walker", "metric": "alive", "equals": 0 }
+  ]
+}

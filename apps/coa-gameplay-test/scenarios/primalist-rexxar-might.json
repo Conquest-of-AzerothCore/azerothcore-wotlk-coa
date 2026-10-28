@@ -1,7 +1,13 @@
 {
   "schema": 1,
   "name": "Primalist Rexxar Might: owner critical strike arms one pet bleed",
-  "contract": "Physical owner critical damage arms the pet; its next positive attack consumes the readiness and applies three two-second bleed ticks. +100 owner AP adds 15 to the base of each tick, followed by native pet damage modifiers; extra pet AP and owner Spell Power do not add another coefficient. Nature critical hits, absence and unlearning are controls. A native stun fixture holds attacks while readiness is inspected.",
+  "contract": [
+    "Physical owner critical damage arms the pet; its next positive attack consumes the readiness and applies",
+    "three two-second bleed ticks. +100 owner AP adds 15 to the base of each tick, followed by native pet",
+    "damage modifiers; extra pet AP and owner Spell Power do not add another coefficient. Nature critical",
+    "hits, absence and unlearning are controls. A native stun fixture holds attacks while readiness is",
+    "inspected."
+  ],
   "timeout_ms": 180000,
   "players": [
     {
@@ -34,9 +40,9 @@
   ],
   "steps": [
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "primalist",
-      "command": ".localspec 59"
+      "id": 59
     },
     {
       "action": "learn",
@@ -71,6 +77,51 @@
       "metric": "pet_entry",
       "equals": 1188,
       "within_ms": 24000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 61017,
+      "effect": 0,
+      "min": 100,
+      "within_ms": 4000,
+      "label": "Native pet hit scaling has settled"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 61017,
+      "effect": 2,
+      "min": 100,
+      "within_ms": 4000,
+      "label": "Native pet expertise scaling has settled"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 23775
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "target": "target",
+      "spell": 23775,
+      "label": "Hold the passive target still and prevent defensive blocks"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "stunned",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "The passive target cannot block required physical damage"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the fixture stun global cooldown"
     },
     {
       "action": "set_aura",

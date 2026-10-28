@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Heartwood Key: recipe 808075 creates item 1041710",
+  "contract": "The Book of Ascension recipe Heartwood Key (808075) consumes Crude Leather, Arcanite Bar, Rune Thread and a Heartwood Log and creates one Heartwood Key (1041710).",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "crafter", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "learn", "actor": "crafter", "spell": 808075 },
+    { "action": "add_item", "actor": "crafter", "item": 2000155 },
+    { "action": "add_item", "actor": "crafter", "item": 12360 },
+    { "action": "add_item", "actor": "crafter", "item": 14341 },
+    { "action": "add_item", "actor": "crafter", "item": 8210217 },
+    { "action": "cast", "actor": "crafter", "spell": 808075 },
+    { "action": "wait", "ms": 5000 },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "item_count",
+      "item": 1041710,
+      "equals": 1,
+      "label": "the recipe created one Heartwood Key"
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "item_count",
+      "item": 8210217,
+      "equals": 0,
+      "label": "the Heartwood Log was consumed"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Reaper Haunt leaves a visage of the caster that runs away",
-  "contract": "Haunt (573425) summons a visage of the Reaper (entry 840000) that runs away from the caster. Haunt requires stealth, so the fixture applies a stealth aura. Haunt has three charges with a 30-second recharge. A cast consumes one charge, which must remain spent after the four-second movement observation.",
+  "name": "Reaper Haunt leaves a visage of the caster that clones the caster and runs away",
+  "contract": "Haunt (573425) reads 'Create a visage of yourself that runs away from you to fool enemies' and summons entry 840000, the same Uncanny Likeness Mirage 501136 leaves behind (#298). A visage of the Reaper must look like the Reaper, including customization and equipment: the native way to make a creature render as a specific player is the clone-caster aura (Clone Me! 45204, SPELL_AURA_CLONE_CASTER), which sets the caster's display and the mirror-image flag so the client asks for the player's appearance (SMSG_MIRRORIMAGE_DATA). A bare player display id without it renders the uncustomized, untextured body #298 reported for the Mirage copy, which the Reaper branch of npc_ascension_witch_doctor still set; the visage therefore carries the Reaper's Clone Me! aura and display and runs away from the Reaper. Haunt requires stealth, so the fixture applies a stealth aura. Haunt has three charges with a 30-second recharge. A cast consumes one charge, which must remain spent after the four-second movement observation.",
   "timeout_ms": 120000,
   "players": [
     {
@@ -78,6 +78,16 @@
       "min": 1
     },
     {
+      "action": "assert",
+      "label": "The visage clones the Reaper's appearance through Clone Me!",
+      "actor": "r",
+      "metric": "owned_creature_count",
+      "entry": 840000,
+      "spell": 45204,
+      "caster": "r",
+      "min": 1
+    },
+    {
       "action": "wait",
       "ms": 4000
     },
@@ -88,6 +98,16 @@
       "metric": "owned_creature_count",
       "entry": 840000,
       "min_distance": 8,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The running visage still carries the clone",
+      "actor": "r",
+      "metric": "owned_creature_count",
+      "entry": 840000,
+      "spell": 45204,
+      "caster": "r",
       "min": 1
     },
     {

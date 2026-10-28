@@ -18,6 +18,7 @@
 #include "Chat.h"
 #include "CommandScript.h"
 #include "Language.h"
+#include "Mail.h"
 #include "Player.h"
 #include "RBAC.h"
 #include "WorldSession.h"
@@ -34,7 +35,8 @@ public:
         static ChatCommandTable gearCommandTable =
         {
             { "repair",  HandleGearRepairCommand, rbac::RBAC_PERM_COMMAND_GEAR_REPAIR, Console::No },
-            { "stats",   HandleGearStatsCommand,  rbac::RBAC_PERM_COMMAND_GEAR_STATS,  Console::No }
+            { "stats",   HandleGearStatsCommand,  rbac::RBAC_PERM_COMMAND_GEAR_STATS,  Console::No },
+            { "unequip", HandleGearUnequipCommand, rbac::RBAC_PERM_COMMAND_GEAR_UNEQUIP, Console::Yes }
         };
 
         static ChatCommandTable commandTable =
@@ -73,6 +75,119 @@ public:
         if (handler->needReportToTarget(target->GetConnectedPlayer()))
         {
             ChatHandler(target->GetConnectedPlayer()->GetSession()).PSendSysMessage(LANG_YOUR_ITEMS_REPAIRED, nameLink);
+        }
+
+        return true;
+    }
+
+    static bool HandleGearUnequipCommand(ChatHandler* handler,
+        Variant<EXACT_SEQUENCE("all"), ItemTemplate const*> items, uint8 mailAll, Optional<PlayerIdentifier> target)
+    {
+        if (mailAll > 1)
+        {
+            handler->SendErrorMessage("Use 0 to move the items into the bags, or 1 to mail them.");
+            return false;
+        }
+
+        if (!target)
+        {
+            target = PlayerIdentifier::FromTargetOrSelf(handler);
+        }
+
+        if (!target || !target->IsConnected())
+        {
+            handler->SendErrorMessage(LANG_PLAYER_NOT_FOUND);
+            return false;
+        }
+
+        Player* player = target->GetConnectedPlayer();
+        if (handler->HasLowerSecurity(player))
+        {
+            return false;
+        }
+
+        std::vector<uint8> slots;
+        for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
+        {
+            Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+            if (!item)
+            {
+                continue;
+            }
+
+            if (items.holds_alternative<ItemTemplate const*>())
+            {
+                if (item->GetEntry() != items.get<ItemTemplate const*>()->ItemId)
+                {
+                    continue;
+                }
+
+                slots.push_back(slot);
+                break;
+            }
+
+            slots.push_back(slot);
+        }
+
+        if (items.holds_alternative<ItemTemplate const*>() && slots.empty())
+        {
+            handler->SendErrorMessage("{} does not have item {} equipped.", handler->playerLink(target->GetName()),
+                items.get<ItemTemplate const*>()->ItemId);
+            return false;
+        }
+
+        uint32 storedCount = 0;
+        std::vector<Item*> mailItems;
+        for (uint8 slot : slots)
+        {
+            Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+            ItemPosCountVec dest;
+            if (!mailAll && player->CanStoreItem(NULL_BAG, NULL_SLOT, dest, item, false) == EQUIP_ERR_OK)
+            {
+                player->RemoveItem(INVENTORY_SLOT_BAG_0, slot, true);
+                player->StoreItem(dest, item, true);
+                ++storedCount;
+                continue;
+            }
+
+            player->MoveItemFromInventory(INVENTORY_SLOT_BAG_0, slot, true);
+            mailItems.push_back(item);
+        }
+
+        if (!mailItems.empty())
+        {
+            WorldSession* session = handler->GetSession();
+            uint32 senderGuid = session ? session->GetPlayer()->GetGUID().GetCounter() : 0;
+            MailSender sender(MAIL_NORMAL, senderGuid, MAIL_STATIONERY_GM);
+            CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+            for (std::size_t first = 0; first < mailItems.size(); first += MAX_MAIL_ITEMS)
+            {
+                MailDraft draft("Unequipped items", "A Game Master removed your equipped items.");
+                std::size_t last = std::min(first + MAX_MAIL_ITEMS, mailItems.size());
+                for (std::size_t i = first; i < last; ++i)
+                {
+                    mailItems[i]->DeleteFromInventoryDB(trans);
+                    mailItems[i]->SaveToDB(trans);
+                    draft.AddItem(mailItems[i]);
+                }
+
+                draft.SendMailTo(trans, MailReceiver(player), sender, MAIL_CHECK_MASK_COPIED);
+            }
+
+            CharacterDatabase.CommitTransaction(trans);
+        }
+
+        player->UpdateTitansGrip();
+
+        std::string nameLink = handler->playerLink(target->GetName());
+        handler->PSendSysMessage("Unequipped {}: {} item(s) moved to the bags, {} item(s) sent by mail.", nameLink,
+            storedCount, mailItems.size());
+
+        if (handler->needReportToTarget(player))
+        {
+            ChatHandler(player->GetSession()).PSendSysMessage(
+                "{} unequipped your gear: {} item(s) moved to your bags, {} item(s) sent to your mailbox.",
+                handler->GetNameLink(), storedCount, mailItems.size());
         }
 
         return true;

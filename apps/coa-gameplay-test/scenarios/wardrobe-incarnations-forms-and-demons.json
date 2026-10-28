@@ -1,0 +1,268 @@
+{
+  "schema": 1,
+  "name": "Wardrobe incarnations change shapeshift forms and summoned demons for every class the client offers them to",
+  "contract": [
+    "AppearanceCategories.dbc rows of type APPEARANCE_TYPE_INCARNATION name a shapeshift form (field 19 = 1, form id in field 20) or a summoned creature (field 19 = 2, entries in fields 20 and 21), and a class mask in fields 23 and 24 (Extensions.dll FUN_101b0b00). The Appearances.dbc row's field 8 is the creature display.",
+    "Bear Form (17) and the Summoned Imp (25) are offered to Druid or Warlock and to Hero. Appearance 822 shows Bear Form as display 1083; appearance 1456 shows the Imp as display 77022.",
+    "The selection was saved but never shown. Now the form takes the selected display while it lasts and after logging in again, the demon takes it when summoned and when the selection changes, clearing the selection restores the native look, and a class outside the mask is refused."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "hero",
+      "name": "Incarnate",
+      "race": 4,
+      "class": 10,
+      "level": 80
+    },
+    {
+      "id": "warrior",
+      "name": "Plainform",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 5487
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 688
+    },
+    {
+      "action": "snapshot",
+      "label": "The character's own model",
+      "actor": "hero",
+      "metric": "display_id",
+      "save_as": "native"
+    },
+    {
+      "action": "cast",
+      "label": "Bear Form without a selection",
+      "actor": "hero",
+      "spell": 5487
+    },
+    {
+      "action": "snapshot",
+      "label": "The form's own model",
+      "actor": "hero",
+      "metric": "display_id",
+      "save_as": "stock_bear"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "apply_appearances",
+      "label": "Select the Bear Form incarnation while in Bear Form",
+      "actor": "hero",
+      "selection": {
+        "17": 822
+      }
+    },
+    {
+      "action": "assert",
+      "label": "The selection is accepted",
+      "actor": "hero",
+      "metric": "server_packet_contains",
+      "opcode": 1688,
+      "text": "APPLY_APPEARANCES_OK",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The bear takes the incarnation at once",
+      "actor": "hero",
+      "metric": "display_id",
+      "equals": 1083,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_aura",
+      "label": "Leave Bear Form",
+      "actor": "hero",
+      "spell": 5487
+    },
+    {
+      "action": "assert",
+      "label": "Leaving the form restores the character",
+      "actor": "hero",
+      "metric": "display_id",
+      "within_ms": 1000,
+      "relative_to": "native",
+      "equals": 0
+    },
+    {
+      "action": "relog",
+      "label": "Log in again",
+      "actor": "hero"
+    },
+    {
+      "action": "cast",
+      "label": "Bear Form after logging in again",
+      "actor": "hero",
+      "spell": 5487
+    },
+    {
+      "action": "assert",
+      "label": "The saved incarnation is used",
+      "actor": "hero",
+      "metric": "display_id",
+      "equals": 1083,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "hero",
+      "spell": 5487
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 10040,
+      "stacks": 3
+    },
+    {
+      "action": "assert",
+      "label": "Mana pool for the summons",
+      "actor": "hero",
+      "metric": "max_power",
+      "power": 0,
+      "min": 20000,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 688
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Summon Imp",
+      "actor": "hero",
+      "spell": 688
+    },
+    {
+      "action": "assert",
+      "label": "The imp is out",
+      "actor": "hero",
+      "metric": "pet_entry",
+      "equals": 416,
+      "within_ms": 15000
+    },
+    {
+      "action": "snapshot",
+      "label": "The imp's own model",
+      "actor": "hero",
+      "metric": "pet_display",
+      "save_as": "stock_imp"
+    },
+    {
+      "action": "apply_appearances",
+      "label": "Select the Imp incarnation with the imp out",
+      "actor": "hero",
+      "selection": {
+        "17": 822,
+        "25": 1456
+      }
+    },
+    {
+      "action": "assert",
+      "label": "The imp takes the incarnation at once",
+      "actor": "hero",
+      "metric": "pet_display",
+      "equals": 77022,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 688
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Summon the imp again",
+      "actor": "hero",
+      "spell": 688
+    },
+    {
+      "action": "wait",
+      "ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "A newly summoned imp takes the incarnation",
+      "actor": "hero",
+      "metric": "pet_display",
+      "equals": 77022,
+      "within_ms": 3000
+    },
+    {
+      "action": "apply_appearances",
+      "label": "Clear the Imp incarnation",
+      "actor": "hero",
+      "selection": {
+        "17": 822
+      }
+    },
+    {
+      "action": "assert",
+      "label": "The imp returns to its own model",
+      "actor": "hero",
+      "metric": "pet_display",
+      "relative_to": "stock_imp",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "apply_appearances",
+      "label": "A warrior selects the Bear Form incarnation",
+      "actor": "warrior",
+      "selection": {
+        "17": 822
+      }
+    },
+    {
+      "action": "assert",
+      "label": "Bear Form incarnations are not offered to warriors",
+      "actor": "warrior",
+      "metric": "server_packet_contains",
+      "opcode": 1688,
+      "text": "APPLY_APPEARANCES_NOT_AVAILABLE_FOR_CLASS",
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}

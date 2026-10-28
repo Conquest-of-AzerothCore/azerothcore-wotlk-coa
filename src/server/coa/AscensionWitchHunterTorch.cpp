@@ -35,7 +35,7 @@ class spell_ascension_witch_hunter_torch_stacks : public AuraScript
     bool Load() override
     {
         Unit* caster = GetCaster();
-        return caster && caster->IsPlayer() && caster->getClass() == CLASS_WITCH_HUNTER && caster == GetTarget();
+        return caster && caster->IsPlayer() && caster->getClass() == CLASS_WITCH_HUNTER && caster == GetUnitOwner();
     }
 
     bool CheckProc(ProcEventInfo& eventInfo)

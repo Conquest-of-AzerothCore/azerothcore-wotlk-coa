@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "Reaper Reaver reduces Soulstone Lure cooldown natively",
+  "contract": [
+    "Reaver 807419 promises 'Reduces the cooldown of Deathstalker, Soul Shear, and Soulstone Lure by 50%'.",
+    "Its DBC effect 1 is SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 11 (SPELLMOD_COOLDOWN), EffectBasePoints",
+    "-51 (value -50), EffectSpellClassMask dword2 4, SpellFamilyName 36.",
+    "Soulstone Lure (561376) has SpellFamilyName 36 and SpellFamilyFlags dword2 4, an exact match.",
+    "Player::GetSpellRecoveryTime calls ApplySpellMod(id, SPELLMOD_COOLDOWN, recovery) unconditionally for every",
+    "spell cast, so this native engine mechanism delivers the tooltip with no CoA-specific handler required."
+  ],
+  "players": [
+    {
+      "id": "reaper",
+      "race": 2,
+      "class": 30,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "No cooldown reduction without Reaver",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 561376,
+      "op": 11,
+      "base": 30000,
+      "equals": 30000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 807419
+    },
+    {
+      "action": "assert",
+      "label": "Reaver aura active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 807419,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Soulstone Lure cooldown halved",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 561376,
+      "op": 11,
+      "base": 30000,
+      "equals": 15000
+    }
+  ]
+}

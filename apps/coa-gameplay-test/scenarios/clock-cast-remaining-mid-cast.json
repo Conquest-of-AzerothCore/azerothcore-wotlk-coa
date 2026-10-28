@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "name": "Clock probe: a 5 s cast counts down by game time and completes on time",
+  "contract": [
+    "Pyroblast rank 1 (11366) has CastingTimeIndex 6 = 5000 ms in the installed SpellCastTimes.dbc; the fresh",
+    "level-80 mage has no haste, so spell_cast_time_ms reads 5000 (asserted). Spell::update lowers the cast timer by",
+    "each player update's diff, which is the world step, so cast_remaining_ms falls by the game time that passes:",
+    "4700..5000 just after the cast, 2200..2530 after a 2500 ms wait, 150..530 after 2000 ms more; the cast then",
+    "completes within 1 s and Pyroblast damages the target. The bands allow the step ticks between assertions and",
+    "one diff of offset between the cast and the first timer update, so they hold with a 25 ms world step. A cast",
+    "timer that ignores fast-forwarded game time stays near 5000; one that runs ahead finishes before the checks."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 8, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "target", "owner": "caster", "entry": 36, "level": 80, "health": 100000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 5000 },
+    { "action": "learn", "actor": "caster", "spell": 11366 },
+    {
+      "action": "assert", "label": "SETUP: the cast takes the DBC 5000 ms", "actor": "caster",
+      "metric": "spell_cast_time_ms", "spell": 11366, "equals": 5000
+    },
+    { "action": "cast", "actor": "caster", "spell": 11366, "target": "target" },
+    {
+      "action": "assert", "label": "SETUP: the cast started with its full 5000 ms", "actor": "caster",
+      "metric": "cast_remaining_ms", "spell": 11366, "min": 4700, "max": 5000
+    },
+    { "action": "wait", "label": "Wait into the middle of the cast", "ms": 2500 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: about 2500 ms remain mid-cast", "actor": "caster",
+      "metric": "cast_remaining_ms", "spell": 11366, "min": 2200, "max": 2530
+    },
+    { "action": "wait", "label": "Wait until the cast nearly ends", "ms": 2000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: about 500 ms remain near the end", "actor": "caster",
+      "metric": "cast_remaining_ms", "spell": 11366, "min": 150, "max": 530
+    },
+    {
+      "action": "assert", "label": "The cast completes on time", "actor": "caster",
+      "metric": "cast_remaining_ms", "spell": 11366, "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The completed cast damaged the target", "actor": "caster",
+      "metric": "spell_damage_count", "spell": 11366, "target": "target", "min": 1, "within_ms": 3000
+    }
+  ]
+}

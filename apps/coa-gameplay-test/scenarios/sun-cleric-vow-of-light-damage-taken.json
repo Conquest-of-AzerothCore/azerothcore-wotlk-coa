@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Vow of Light turns melee damage the Sun Cleric takes into Solar Power and a heal on the nearest ally (#1511)",
+  "contract": "#1511 reports that Vow of Light 807547 has no effect; its healing-taken half is pinned by sun-cleric-vow-of-light-heal, and a maintainer noted the damage-taken trigger was never checked with real hits. Vow of Light reads 'Direct damage taken or direct healing taken by you generates 1 Solar Power and heals the nearest nearby ally equal to $807750s1% of the amount.' 807750 effect 0 has EffectBasePoints 9, so 9%; its client ProcFlags 1081344 include PROC_FLAG_TAKEN_DAMAGE. Solar Power is the caster aura 500149 (StackAmount 20). The heal copy is 505197 (SPELL_EFFECT_HEAL, radius index 10 = 30 yd, one target), which the Sun Cleric contracts aim at the chosen ally. A hostile Horde warrior, both players flagged for PvP because fixture creatures are passive and never swing, lands unavoidable melee auto attacks on the grouped Sun Cleric (melee hit and expertise fixtures remove misses, dodges and parries). Each landed hit must add Solar Power and heal the grouped ally standing beside the Sun Cleric; that ally's own regeneration is suppressed, so any rise in its health comes from the copy. No Dawn is active, so Solar Power generation is not blocked.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80 },
+    { "id": "ally", "race": 1, "class": 1, "level": 80, "allow_regeneration": false },
+    { "id": "attacker", "race": 2, "class": 1, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "group", "actor": "cleric", "target": "ally" },
+    { "action": "learn", "actor": "cleric", "spell": 807547 },
+    { "action": "cast", "actor": "cleric", "spell": 807547 },
+    {
+      "action": "assert", "label": "SETUP: Vow of Light is active", "actor": "cleric",
+      "metric": "aura", "spell": 807547, "caster": "cleric", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "BASELINE: no Solar Power yet", "actor": "cleric",
+      "metric": "aura_stacks", "spell": 500149, "equals": 0
+    },
+    { "action": "set_health", "label": "Leave the ally room to be healed", "actor": "ally", "value": 1000 },
+    { "action": "snapshot", "actor": "ally", "metric": "health", "save_as": "ally_health" },
+    { "action": "snapshot", "actor": "cleric", "metric": "health", "save_as": "cleric_health" },
+    { "action": "pvp", "actor": "cleric", "enabled": true },
+    { "action": "pvp", "actor": "attacker", "enabled": true },
+    { "action": "attack", "label": "A hostile player swings at the Sun Cleric", "actor": "attacker", "target": "cleric" },
+    {
+      "action": "assert", "label": "SETUP: the Sun Cleric takes melee damage", "actor": "cleric",
+      "metric": "health", "relative_to": "cleric_health", "max": -1, "within_ms": 8000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: damage taken generates Solar Power", "actor": "cleric",
+      "metric": "aura_stacks", "spell": 500149, "min": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: a share of the damage taken heals the grouped ally", "actor": "ally",
+      "metric": "health", "relative_to": "ally_health", "min": 1, "within_ms": 2000
+    },
+    { "action": "stop_attack", "actor": "attacker" }
+  ]
+}

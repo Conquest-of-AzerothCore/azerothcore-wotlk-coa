@@ -395,7 +395,7 @@ class spell_ascension_pyromancer_ability : public SpellScript
         if (!player)
             return;
         uint32 id = GetSpellInfo()->Id;
-        if (id == 520868 && index == EFFECT_0 && GetHitUnit())
+        if (id == 520868 && index == EFFECT_0 && IsInTargetHook() && GetHitUnit())
         {
             PreventHitDefaultEffect(index);
             Cast(player, GetHitUnit(), 1604);
@@ -414,8 +414,8 @@ class spell_ascension_pyromancer_ability : public SpellScript
                 summoned = true;
                 Position position =
                     GetExplTargetDest() ? GetExplTargetDest()->GetPosition() : player->GetNearPosition(2, 0);
-                Summon(player, GetSpellInfo()->Effects[index].MiscValue, position,
-                       std::max(0, GetSpellInfo()->GetDuration()));
+                Summon(player, GetSpellInfo()->Effects[index].MiscValue, GetSpellInfo()->Effects[index].MiscValueB,
+                       position, std::max(0, GetSpellInfo()->GetDuration()));
             }
         }
         if (id == 520019 && GetHitUnit())
@@ -453,10 +453,27 @@ class spell_ascension_pyromancer_ability : public SpellScript
         OnEffectHitTarget += SpellEffectFn(spell_ascension_pyromancer_ability::Effect, EFFECT_ALL, SPELL_EFFECT_ANY);
     }
 };
+
+class spell_ascension_pyromancer_pillar_of_flame : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_pyromancer_pillar_of_flame);
+
+    void FilterPrimaryTarget(std::list<WorldObject*>& targets)
+    {
+        if (Unit* victim = GetExplTargetUnit())
+            targets.remove(victim);
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ascension_pyromancer_pillar_of_flame::FilterPrimaryTarget, EFFECT_1, TARGET_UNIT_DEST_AREA_ENEMY);
+    }
+};
 }
 void AddSC_AscensionPyromancerAbilities()
 {
     new pyromancer_spells();
     RegisterSpellScript(spell_ascension_pyromancer_resource);
     RegisterSpellScript(spell_ascension_pyromancer_ability);
+    RegisterSpellScript(spell_ascension_pyromancer_pillar_of_flame);
 }

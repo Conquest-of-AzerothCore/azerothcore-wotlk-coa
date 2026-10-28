@@ -143,7 +143,7 @@ public:
         if (Named(info, 800413))
         {
             if (target && (player->HasAura(301200) || player->HasAura(301067)))
-                Summon(player, 533030, target->GetNearPosition(3, 0), 12000, target);
+                Summon(player, 533030, target->GetNearPosition(3, 0), 12000, target, id);
             if (player->HasAura(301068))
                 Cast(player, player, 301067);
         }
@@ -402,14 +402,13 @@ class spell_ascension_cultist_ability : public SpellScript
 {
     PrepareSpellScript(spell_ascension_cultist_ability);
     bool done = false;
-    void Effect(SpellEffIndex index)
+    void Effect(SpellEffIndex index, Unit* target)
     {
         Player* player = Owner(GetCaster());
         if (!player)
             return;
         uint32 id = GetSpellInfo()->Id;
         auto const& effect = GetSpellInfo()->Effects[index];
-        Unit* target = GetHitUnit();
         if (Any(GetSpellInfo(), {808036, 808037, 808038}) && !index && target)
         {
             uint32 offset = id - 808036;
@@ -434,8 +433,9 @@ class spell_ascension_cultist_ability : public SpellScript
         {
             done = true;
             player->GetThreatMgr().RemoveMeFromThreatLists();
+            uint32 duration = sSpellMgr->GetSpellInfo(706932)->GetDuration();
             for (uint32 n = 0; n < 3; ++n)
-                Summon(player, 840000, player->GetNearPosition(2, float(n) * 2), 15000, player->GetVictim());
+                Summon(player, 840000, player->GetNearPosition(2, float(n) * 2), duration, player->GetVictim(), id);
         }
         if (effect.Effect == SPELL_EFFECT_SUMMON)
         {
@@ -444,11 +444,20 @@ class spell_ascension_cultist_ability : public SpellScript
             {
                 done = true;
                 Position position = GetExplTargetDest() ? GetExplTargetDest()->GetPosition() : player->GetNearPosition(2, 0);
-                Summon(player, effect.MiscValue, position, std::max(1000, GetSpellInfo()->GetDuration()), GetExplTargetUnit());
+                Summon(player, effect.MiscValue, position, std::max(1000, GetSpellInfo()->GetDuration()),
+                    GetExplTargetUnit(), GetSpellInfo()->Id);
             }
         }
         if (id == 804779 && (effect.Effect == 174 || effect.Effect == 164))
             PreventHitDefaultEffect(index);
+    }
+    void EffectHit(SpellEffIndex index)
+    {
+        Effect(index, nullptr);
+    }
+    void EffectHitTarget(SpellEffIndex index)
+    {
+        Effect(index, GetHitUnit());
     }
     void Launch(SpellEffIndex index)
     {
@@ -460,8 +469,9 @@ class spell_ascension_cultist_ability : public SpellScript
     {
         OnEffectLaunch += SpellEffectFn(spell_ascension_cultist_ability::Launch, EFFECT_ALL, SPELL_EFFECT_ANY);
         OnEffectLaunchTarget += SpellEffectFn(spell_ascension_cultist_ability::Launch, EFFECT_ALL, SPELL_EFFECT_ANY);
-        OnEffectHit += SpellEffectFn(spell_ascension_cultist_ability::Effect, EFFECT_ALL, SPELL_EFFECT_ANY);
-        OnEffectHitTarget += SpellEffectFn(spell_ascension_cultist_ability::Effect, EFFECT_ALL, SPELL_EFFECT_ANY);
+        OnEffectHit += SpellEffectFn(spell_ascension_cultist_ability::EffectHit, EFFECT_ALL, SPELL_EFFECT_ANY);
+        OnEffectHitTarget += SpellEffectFn(spell_ascension_cultist_ability::EffectHitTarget, EFFECT_ALL,
+            SPELL_EFFECT_ANY);
     }
 };
 class spell_ascension_cultist_shield : public SpellScript

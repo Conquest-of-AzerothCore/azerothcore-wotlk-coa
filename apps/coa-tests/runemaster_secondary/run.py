@@ -17,11 +17,12 @@ HERE = Path(__file__).resolve().parent
 def fixture():
     method = runpy.run_path(str(HERE.parent / 'client_compat/run.py'))['method']
     code = (HERE.parent / 'reaper_secondary/harness.cpp').read_text().split('// SOURCE')[0]
-    code = code.replace('// ENUMS', method((ROOT / 'src/server/game/Spells/SpellInfo.h').read_text(),
-                                         'enum SpellCustomAttributes') + ';')
+    code = code.replace('// ENUMS', '#include "%s"\n%s;' % (
+        (ROOT / 'src/server/coa/AscensionTalentReplacementData.h').as_posix(),
+        method((ROOT / 'src/server/game/Spells/SpellInfo.h').read_text(), 'enum SpellCustomAttributes')))
     code = code.replace('struct Unit;', '''
 using AuraType=uint32;
-constexpr uint32 CLASS_SPIRIT_MAGE=32, EFFECT_2=2, UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE=7,
+constexpr uint32 CLASS_SPIRIT_MAGE=32, EFFECT_1=1, EFFECT_2=2, UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE=7,
     BASE_ATTACK=0, OFF_ATTACK=1, SPELLVALUE_MELEE_ATTACK_TYPE=10, SPELL_DIRECT_DAMAGE=1,
     SPELL_SCHOOL_MASK_MAGIC=126, SPELL_ATTR2_CANT_CRIT=1,
     SPELL_ATTR3_IGNORE_CASTER_MODIFIERS=2, SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS=4,
@@ -36,14 +37,22 @@ struct Unit;''', 1)
     struct Effect
 ''')
     code = code.replace('int32 value=0;', 'int32 value=0, BasePoints=0; float BonusMultiplier=1.0f;')
+    code = code.replace('uint32 ApplyAuraName=42;', '''uint32 ApplyAuraName=42, TriggerSpell=0;
+        bool IsAura(uint32 type) const { return ApplyAuraName==type; }''')
     code = code.replace('uint8 stacks=1;', '''bool removed=false; void Remove() { removed=true; }
     int32 duration=3000;
     int32 GetDuration() const { return duration; }
     void SetDuration(int32 value) { duration=value; }
-    bool ModStackAmount(int32 num) { stacks+=num; duration=3000; return false; }
+    bool ModStackAmount(int32 num) { stacks=uint8(stacks+num); duration=3000; return false; }
     uint8 stacks=1;''')
-    code = code.replace('struct AuraEffect {};',
-                        'struct AuraEffect { int32 amount=5; int32 GetAmount() const { return amount; } };')
+    code = code.replace('struct AuraEffect {};', '''struct AuraEffect
+    {
+        int32 amount=5;
+        SpellInfo spellInfo;
+        int32 GetAmount() const { return amount; }
+        SpellInfo const* GetSpellInfo() const { return &spellInfo; }
+        uint32 GetEffIndex() const { return 0; }
+    };''')
     code = code.replace('struct Unit\n{', '''
 struct SpellCastTargets { Unit* target=nullptr; void SetUnitTarget(Unit* unit) { target=unit; } };
 struct CustomSpellValues
@@ -75,18 +84,29 @@ struct Unit
         assert(triggered); casts.push_back({info->Id,targets.target,values->mods.at(0),values->mods.at(10)});
     }
     void CastCustomSpell(''')
+    code = code.replace('int32 amount,Unit* target,bool triggered)',
+                        'int32 amount,Unit* target,bool triggered,void* = nullptr,AuraEffect const* = nullptr)')
     code = code.replace('uint32 cls=30,', '''std::map<uint32,int> spells;
-    std::vector<uint32> restored, cleared;
+    std::vector<uint32> restored, restoredCounts, cleared;
     bool offhand=true;
     auto const& GetSpellMap() const { return spells; }
     bool HasActiveSpell(uint32 id) const { return spells.contains(id); }
-    void RestoreSpellCharge(uint32 id) { restored.push_back(id); }
+    AuraEffect const* GetAuraEffect(uint32,uint32,uint32) const { return nullptr; }
+    void RestoreSpellCharge(uint32 id,uint32 count) { restored.push_back(id); restoredCounts.push_back(count); }
     void RemoveSpellCooldown(uint32 id,bool update) { assert(update); cleared.push_back(id); }
     void* GetWeaponForAttack(uint32 hand,bool usable) { assert(hand==1 && usable); return offhand?this:nullptr; }
     uint32 cls=32,''')
     code = code.replace('uint32 amount=100, school=1;',
                         'uint32 amount=100, school=1, type=1; uint32 GetDamageType() const { return type; }')
     code = code.replace('bool prevented=false;', '''Aura fixtureAura; Aura* GetAura() { return &fixtureAura; }
+    SpellInfo fixtureSpellInfo;
+    SpellInfo const* GetSpellInfo() const { return &fixtureSpellInfo; }
+    virtual bool Validate(SpellInfo const*) { return true; }
+    static bool ValidateSpellInfo(std::initializer_list<uint32> ids)
+    {
+        for (uint32 id : ids) if (!sSpellMgr->GetSpellInfo(id)) return false;
+        return true;
+    }
     struct Application { uint32 mode=AURA_REMOVE_BY_EXPIRE; uint32 GetRemoveMode() const { return mode; } } fixtureApplication;
     Application const* GetTargetApplication() const { return &fixtureApplication; }
     uint8 GetStackAmount() const { return fixtureAura.stacks; }
@@ -148,6 +168,25 @@ int main()
     spell.info.Id=502632; casts.OnSpellCast(&spell,&player,&spell.info,false);
     assert(player.restored.back()==707148 && !player.HasAura(801512,1));
     spell.info.Id=800732; casts.OnSpellCast(&spell,&player,&spell.info,false); assert(player.restored.size()==2);
+    assert(player.restoredCounts==std::vector<uint32>({1,1}));
+    player.AddAura(806698,&player);
+    auto const withMagic=player.restored.size();
+    casts.OnSpellCast(&spell,&player,&spell.info,false);
+    assert(player.restored.size()==withMagic+1 && player.restored.back()==707148 &&
+        player.restoredCounts.back()==3);
+    for (uint32 blast : {712668u,712858u,713002u,712404u,805794u})
+    {
+        auto const before=player.restored.size();
+        spell.info.Id=blast; casts.OnSpellCast(&spell,&player,&spell.info,false);
+        assert(player.restored.size()==before+1 && player.restored.back()==707148 &&
+            player.restoredCounts.back()==3);
+    }
+    spell.info.Id=502632; casts.OnSpellCast(&spell,&player,&spell.info,false);
+    assert(player.restoredCounts.back()==1);
+    player.RemoveAurasDueToSpell(806698,1); player.restored.resize(2); player.restoredCounts.resize(2);
+    auto const withoutMagic=player.restored.size();
+    spell.info.Id=712668; casts.OnSpellCast(&spell,&player,&spell.info,false);
+    assert(player.restored.size()==withoutMagic+1 && player.restoredCounts.back()==1);
     player.AddAura(92153,&player); spell.info.Id=707148; player.casts.clear();
     casts.OnSpellHitResult(&spell,&enemy,0,301,0,false);
     assert(player.casts.size()==1 && player.casts.back().id==712298 && player.casts.back().amount==150);
@@ -162,12 +201,30 @@ int main()
     aura_ascension_arcane_palm_sigil sigil; sigil.fixtureCaster=sigil.fixtureTarget=&player;
     DamageInfo damage; damage.amount=301; damage.school=64;
     ProcEventInfo event{&player,&enemy,&damage}; AuraEffect amount;
-    assert(sigil.Check(event)); sigil.Proc(&amount,event); assert(sigil.fixtureAura.removed);
+    assert(sigil.Check(event)); sigil.Proc(&amount,event); assert(!sigil.fixtureAura.removed);
     assert(player.casts[player.casts.size()-2].id==807819 && player.casts[player.casts.size()-2].amount==15);
     assert(player.casts.back().id==808020);
     damage.type=2; assert(!sigil.Check(event)); damage.type=1;
     damage.school=1; assert(!sigil.Check(event)); damage.school=64;
     event.actor=&other; assert(!sigil.Check(event));
+    aura_ascension_damage_palm_sigil copied; copied.fixtureCaster=copied.fixtureTarget=&player;
+    copied.fixtureSpellInfo.Effects[0].TriggerSpell=807012;
+    event.actor=&player; damage.amount=301; damage.school=64; damage.type=1;
+    amount.amount=120; amount.spellInfo.Effects[0].TriggerSpell=807012;
+    assert(copied.Check(event)); copied.Proc(&amount,event);
+    assert(copied.prevented && !copied.fixtureAura.removed);
+    assert(player.casts.back().id==807012 && player.casts.back().amount==361);
+    damage.school=1; assert(copied.Check(event)); damage.school=64;
+    copied.fixtureSpellInfo.Effects[0].TriggerSpell=807825;
+    amount.amount=30; amount.spellInfo.Effects[0].TriggerSpell=807825; copied.Proc(&amount,event);
+    assert(player.casts.back().id==807825 && player.casts.back().amount==90);
+    copied.fixtureSpellInfo.Effects[0].TriggerSpell=807818;
+    amount.amount=50; amount.spellInfo.Effects[0].TriggerSpell=807818; copied.Proc(&amount,event);
+    assert(player.casts.back().id==807818 && player.casts.back().amount==150);
+    damage.type=2; assert(!copied.Check(event)); damage.type=1;
+    damage.school=1; assert(!copied.Check(event)); damage.school=64;
+    event.actor=&other; assert(!copied.Check(event));
+    amount.amount=5;
     aura_ascension_runemaster_fire_engraving engraving; engraving.fixtureCaster=engraving.fixtureTarget=&player;
     damage.type=0; event.actor=&player; player.casts.clear();
     assert(engraving.Check(event)); engraving.Proc(&amount,event);
@@ -176,13 +233,6 @@ int main()
     engraving.Proc(&amount,event); assert(player.casts.empty() && brand->stacks==2 && brand->duration==1200);
     damage.type=2; assert(!engraving.Check(event)); damage.type=1;
     event.actor=&other; assert(!engraving.Check(event)); event.actor=&player;
-    aura_ascension_runemaster_firebrand firebrand; firebrand.fixtureCaster=&player; firebrand.fixtureTarget=&enemy;
-    firebrand.fixtureAura.stacks=3; player.casts.clear();
-    firebrand.Explode(&amount,1);
-    assert(player.casts.size()==3 && player.casts.back().id==653212 && player.casts.back().target==&enemy);
-    firebrand.fixtureApplication.mode=0; player.casts.clear(); firebrand.Explode(&amount,1); assert(player.casts.empty());
-    firebrand.fixtureApplication.mode=AURA_REMOVE_BY_EXPIRE; enemy.alive=false;
-    firebrand.Explode(&amount,1); assert(player.casts.empty()); enemy.alive=true;
     runemaster_secondary_metadata metadata; SpellInfo info; info.SpellFamilyName=38; info.Id=712298;
     metadata.OnLoadSpellCustomAttr(&info); assert(info.AscensionInheritsResolvedAmount);
 }

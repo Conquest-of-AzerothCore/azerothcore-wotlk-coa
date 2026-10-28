@@ -1,4 +1,4 @@
-CLI_DESCRIPTION = """Regress Barbaric Rage's cooldown contract: ability cooldowns, not the shared global cooldown (#3945)."""
+CLI_DESCRIPTION = """Regress Barbaric Rage's contract: its native global cooldown modifier is not retargeted (#3945)."""
 import argparse
 from pathlib import Path
 import os
@@ -37,7 +37,9 @@ def main():
                                           cwd=ROOT).decode("utf-8")
     else:
         source = (ROOT / path).read_text(encoding="utf-8")
-    block = extract_if_body(source, "if (id == 804337)")
+    contracts = extract_if_body(source, "void ApplyContracts(SpellInfo* info)")
+    needle = "if (id == 804337)"
+    block = extract_if_body(source, needle) if needle in contracts else ""
     code = r"""
 #include <cstdint>
 #include <cassert>
@@ -50,6 +52,7 @@ struct SpellInfo { uint32 Id = 0; SpellEffectInfo Effects[3]; };
 void ApplyBarbaricRageContract(SpellInfo* info)
 {
     uint32 id = info->Id;
+    (void)id;
 """ + block + r"""
 }
 int main()
@@ -57,10 +60,10 @@ int main()
     SpellInfo rage;
     rage.Id = 804337;
     ApplyBarbaricRageContract(&rage);
-    // Barbaric Rage must reduce ability cooldowns, not the ~1.5s global cooldown it shipped with.
-    assert(rage.Effects[EFFECT_0].MiscValue == SPELLMOD_COOLDOWN);
+    assert(rage.Effects[EFFECT_0].MiscValue == SPELLMOD_GLOBAL_COOLDOWN);
+    assert(rage.Effects[EFFECT_0].MiscValue != SPELLMOD_COOLDOWN);
     SpellInfo other;
-    other.Id = 801761; // An unrelated spell must not be touched by this contract.
+    other.Id = 801761;
     ApplyBarbaricRageContract(&other);
     assert(other.Effects[EFFECT_0].MiscValue == SPELLMOD_GLOBAL_COOLDOWN);
 }
@@ -73,7 +76,7 @@ int main()
         subprocess.run([str(compiler), "/nologo", "/std:c++20", "/EHsc", "/W4", "/WX", "/utf-8",
                         str(cpp), "/Fe" + str(exe)], cwd=out, check=True, timeout=60)
         subprocess.run([str(exe)], cwd=out, check=True, timeout=15)
-    print("PASS: Barbaric Rage retargets ability cooldowns; unrelated spells are untouched")
+    print("PASS: Barbaric Rage keeps its native global cooldown modifier; unrelated spells are untouched")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Random Classic Heroic and Mythic stay listed for an under-geared level 60 player; the join still enforces the gear requirements",
+  "contract": "The Ascension Dungeon Finder dropdown lists a random dungeon only when the server does not lock it (Ascension_PVE.lua InitializeDropdown); the live client greys Random Classic Dungeon Mythic (2258) with its item level and PvE Power reason (C_LFG.CanUseRandomLFD). The server therefore leaves Random Classic Dungeon Heroic (1258) and Mythic (2258) out of an under-geared level 60 player's lock list and refuses only the join. A level 50 player is still locked out of 2258 by level.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [
+    { "id": "naked", "race": 1, "class": 1, "level": 60, "ascension_client": true },
+    { "id": "low", "race": 1, "class": 1, "level": 50, "ascension_client": true }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "CONTROL: a level 50 player is locked out of Random Classic Dungeon Mythic by level", "actor": "low", "metric": "lfg_lock_status", "dungeon": 2258, "equals": 2 },
+    { "action": "assert", "label": "Random Classic Dungeon Mythic is not locked for an under-geared level 60 player", "actor": "naked", "metric": "lfg_lock_status", "dungeon": 2258, "equals": 0 },
+    { "action": "assert", "label": "Random Classic Dungeon Heroic is not locked for an under-geared level 60 player", "actor": "naked", "metric": "lfg_lock_status", "dungeon": 1258, "equals": 0 },
+    { "action": "lfg_join", "label": "naked queues for Random Classic Dungeon Mythic", "actor": "naked", "dungeons": [2258], "roles": 8 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "the join still refuses a player without item level 58 and PvE Power 350", "actor": "naked", "metric": "lfg_state", "equals": 0 }
+  ]
+}

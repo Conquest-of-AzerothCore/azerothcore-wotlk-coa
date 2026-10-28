@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Radiant Flame keeps channeling at the range Solar Champion grants it (#1438)",
+  "contract": "#1438: 'Radiant Flame interrupts casting at the max allowed range distance, it starts casting and then stops, even though it's within allowed range' (level 60 Sun Cleric). Radiant Flame rank 7 560867 is a channel (SPELL_ATTR1_IS_CHANNELED, DurationIndex 35 = 4000 ms, RangeIndex 4 = 30 yd) whose effect 0 is SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE (227) every 1000 ms with SPELL_ATTR5_EXTRA_INITIAL_PERIOD, triggering the sphere 807058 'Radiant Flame (Damage)', which has its own RangeIndex 4 (30 yd). The Piety talent Solar Champion 504734 is SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_RANGE +20% on class mask word0 0x8000000, which matches every Radiant Flame rank (SpellFamilyFlags[0] 0x8000000) but not the sphere (SpellFamilyFlags[2] 0x8), so a talented Sun Cleric may open the channel at 36 yd plus both combat reaches while each sphere is still range-checked strictly at 30 yd plus reaches. Spell::prepare ends a non-passive periodic aura whose triggered spell fails CheckCast (SetDuration(0) with SendChannelUpdate(0)), so the first, immediate sphere out of its own range ends the channel it belongs to: the channel starts and then stops. The tooltip ('Launch radiant spheres at an enemy ... repeating every $t1 sec for $d') makes the spheres part of the channel, so the channel's own range, which Spell::UpdateChanneledTargetList enforces with the talent and tolerance, must decide. The fixture Sun Cleric (combat reach 1.5) opens Radiant Flame with Solar Champion on a Harvest Golem (display 367, combat reach 1.275) 35 yd away: beyond the sphere's 32.8 yd but within the talented channel's 38.8 yd. Before the fix the channel is gone at once and no sphere is cast; after it the channel runs and the spheres keep landing.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "far", "owner": "cleric", "entry": 36, "level": 80, "health": 1000000, "distance": 35 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "cleric", "spell": 560867 },
+    { "action": "learn", "label": "Piety talent: +20% range for Radiant Flame", "actor": "cleric", "spell": 504734 },
+    {
+      "action": "assert", "label": "SETUP: Solar Champion is active", "actor": "cleric",
+      "metric": "aura", "spell": 504734, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: Solar Champion extends Radiant Flame to 36 yards", "actor": "cleric",
+      "metric": "spell_max_range", "spell": 560867, "min": 35.99, "max": 36.01
+    },
+    {
+      "action": "assert", "label": "SETUP: the golem stands 35 yards away", "actor": "cleric",
+      "metric": "distance", "target": "far", "min": 34.5, "max": 35.5
+    },
+    { "action": "snapshot", "actor": "far", "metric": "health", "save_as": "far_health" },
+    { "action": "cast", "actor": "cleric", "spell": 560867, "target": "far" },
+    {
+      "action": "assert", "label": "SETUP: the channel was accepted at the talented range", "actor": "cleric",
+      "metric": "cast_failure", "spell": 560867, "equals": 0
+    },
+    { "action": "wait", "label": "Past the immediate first sphere and the next tick", "ms": 1500 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Radiant Flame is still channeling", "actor": "cleric",
+      "metric": "cast_remaining_ms", "spell": 560867, "min": 1000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the channel aura is still on the golem", "actor": "far",
+      "metric": "aura", "spell": 560867, "caster": "cleric", "equals": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the spheres keep being launched", "actor": "cleric",
+      "metric": "spell_cast_count", "spell": 807058, "min": 2
+    },
+    {
+      "action": "assert", "label": "The spheres damage the golem", "actor": "far",
+      "metric": "health", "relative_to": "far_health", "max": -1, "within_ms": 3000
+    }
+  ]
+}

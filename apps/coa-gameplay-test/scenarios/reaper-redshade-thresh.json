@@ -1,16 +1,29 @@
 {
   "schema": 1,
   "name": "Redshade turns Reap into Thresh and then Bloodshatter",
-  "contract": "Redshade owns temporary spellbook entries, but native casts of Thresh and Bloodshatter require their respective transform auras. Bloodshatter takes priority while both auras exist. Expiry and talent removal revoke access. Reap forwarding grants the intended resources without rewriting saved action buttons.",
+  "contract": [
+    "Redshade owns temporary spellbook entries, but native casts of Thresh and Bloodshatter require their",
+    "respective transform auras. Bloodshatter takes priority while both auras exist. Expiry and talent",
+    "removal revoke access. Reap forwarding grants the intended resources without rewriting saved action",
+    "buttons. Thresh and Bloodshatter use the original melee damage class; this fixture supplies melee hit",
+    "and expertise so their required successful-hit resource grants cannot be lost to unrelated miss, dodge",
+    "or parry rolls. A native fixture stun prevents independent target blocks, and Runic Power starts at zero",
+    "with regeneration disabled; a landed forwarded Thresh and its resource grants are required explicitly."
+  ],
   "timeout_ms": 120000,
   "players": [
     {
       "id": "reaper",
       "race": 10,
       "class": 30,
-      "level": 80
+      "level": 80,
+      "melee_hit_rating": 100000,
+      "expertise_rating": 100000,
+      "allow_regeneration": false,
+      "spell_hit_rating": 100000
     }
   ],
+  "location": { "map": 530, "x": 10349.6, "y": -6357.29, "z": 33.4026, "o": 5.31605 },
   "creatures": [
     {
       "id": "enemy",
@@ -101,6 +114,44 @@
       "equals": 573303
     },
     {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 23775
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "target": "enemy",
+      "spell": 23775,
+      "label": "Hold the passive target still and prevent independent blocks"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "stunned",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the fixture stun global cooldown"
+    },
+    {
+      "action": "set_power",
+      "actor": "reaper",
+      "power": 6,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 505170,
+      "target": "enemy",
+      "save_as": "thresh_before"
+    },
+    {
       "action": "set_aura",
       "actor": "reaper",
       "spell": 525058,
@@ -145,6 +196,17 @@
       "spell": 525058,
       "equals": 0,
       "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 505170,
+      "target": "enemy",
+      "relative_to": "thresh_before",
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "The forwarded Thresh actually deals damage before generating resources"
     },
     {
       "action": "assert",

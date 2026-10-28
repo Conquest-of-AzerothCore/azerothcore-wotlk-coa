@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "name": "Bloodmage Apotheosis converts damage dealt into healing (#7430)",
+  "contract": "#7430: Apotheosis buff up, rage draining, zero healing. Cause: both ranks (804195/804203) carry a lone aura-354 effect, which is inert without a handler, and both records have ProcFlags 0 with no spell_proc row, so no proc entry existed and no AuraScript was bound - the buff sat dead. Fix: rev_20261018_36 adds proc rows (all damage-done flags; SchoolMask 32 shadow-only for 804195, Cooldown 1000 once-per-second for 804203) and binds aura_ascension_bloodmage_apotheosis, which heals 100% of dealt damage through each rank's own trigger heal (807857/807934). Rank 804203 (req 40, reporter's level band) is the probe: melee swings deal damage, each dealing swing procs the heal. Fails pre-fix (no healing ever lands).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "mage",
+      "race": 1,
+      "class": 20,
+      "level": 42,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "mage",
+      "entry": 36,
+      "level": 42,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "mage",
+      "label": "Learn Apotheosis",
+      "spell": 804203
+    },
+    {
+      "action": "set_power",
+      "label": "Fill rage for the trance",
+      "actor": "mage",
+      "power": 1,
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "mage",
+      "label": "Enter Apotheosis",
+      "spell": 804203
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "equals": 1,
+      "label": "SETUP: Apotheosis is up",
+      "metric": "aura",
+      "spell": 804203,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_power",
+      "label": "Top rage back up before swinging",
+      "actor": "mage",
+      "power": 1,
+      "value": 5000
+    },
+    {
+      "action": "attack",
+      "actor": "mage",
+      "target": "dummy",
+      "label": "Swing at the dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let several swing timers fire",
+      "ms": 8000
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "label": "SETUP: the swings dealt melee damage",
+      "metric": "melee_damage_total",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "label": "DISCRIMINATING: Apotheosis healed off the dealt damage",
+      "metric": "spell_heal_total",
+      "spell": 807934,
+      "target": "mage",
+      "min": 1,
+      "within_ms": 5000
+    }
+  ]
+}

@@ -21,6 +21,7 @@
 #include "DBCEnums.h"
 #include "Define.h"
 #include "EnumFlag.h"
+#include <bit>
 #include <cassert>
 
 float const GROUND_HEIGHT_TOLERANCE = 0.05f; // Extra tolerance to z position to check if it is in air or on ground.
@@ -132,7 +133,7 @@ enum Classes
     CLASS_SHAMAN         = 7,  // TITLE Shaman
     CLASS_MAGE           = 8,  // TITLE Mage
     CLASS_WARLOCK        = 9,  // TITLE Warlock
-    // CLASS_HERO        = 10, // Ascension classless/free-pick shell
+    CLASS_HERO           = 10, // TITLE Hero
     CLASS_DRUID          = 11, // TITLE Druid
     CLASS_BARBARIAN      = 12, // TITLE Barbarian
     CLASS_WITCH_DOCTOR   = 13, // TITLE Witch Doctor
@@ -160,12 +161,17 @@ enum Classes
 // max+1 for player class
 #define MAX_CLASSES       33
 
-// Every client class bit except Ascension's reserved classless/free-pick ID 10.
-#define CLASSMASK_ALL_PLAYABLE 0xFFFFFDFFu
+// Every client class bit, including Ascension's classless Hero (ID 10).
+#define CLASSMASK_ALL_PLAYABLE 0xFFFFFFFFu
 
 constexpr bool IsAscensionClass(uint8 classId)
 {
     return classId >= CLASS_BARBARIAN && classId <= CLASS_SPIRIT_MAGE;
+}
+
+constexpr bool UsesProjectileAmmo(uint8 classId)
+{
+    return classId != CLASS_HERO && !IsAscensionClass(classId);
 }
 
 // Several WotLK formulas have hard-coded per-class constants rather than DBC
@@ -174,6 +180,7 @@ constexpr Classes GetLegacyClassForCustomClass(Classes playerClass)
 {
     switch (playerClass)
     {
+        case CLASS_HERO:          return CLASS_DRUID;
         case CLASS_BARBARIAN:     return CLASS_ROGUE;
         case CLASS_WITCH_DOCTOR:  return CLASS_SHAMAN;
         case CLASS_DEMON_HUNTER:  return CLASS_ROGUE;
@@ -225,12 +232,24 @@ constexpr uint32 ExpandLegacyClassMask(uint32 classMask)
     if (classMask & 0xFFFFF800u)
         return classMask;
 
+    // A mask naming every WotLK class predates Hero and means every class.
+    constexpr uint32 wotlkPlayableMask = 0x5FFu;
+    if ((classMask & wotlkPlayableMask) == wotlkPlayableMask)
+        return CLASSMASK_ALL_PLAYABLE;
+
     uint32 result = classMask;
     for (uint8 classId = CLASS_BARBARIAN; classId < MAX_CLASSES; ++classId)
         if (classMask & (uint32(1) << (GetLegacyClassForCustomClass(Classes(classId)) - 1)))
             result |= uint32(1) << (classId - 1);
 
     return result;
+}
+
+// A quest for a single stock class is that class's own quest and stays closed to custom classes. A quest shared
+// by several stock classes restricts by gear family, so it also admits the custom classes of those families.
+constexpr uint32 ExpandLegacyQuestClassMask(uint32 classMask)
+{
+    return std::popcount(classMask) > 1 ? ExpandLegacyClassMask(classMask) : classMask;
 }
 
 // valid classes for creature_template.unit_class
@@ -1022,18 +1041,23 @@ enum SpellEffects
     SPELL_EFFECT_ASCENSION_FIRST                    = 165,
     SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN          = 165,
     SPELL_EFFECT_ASCENSION_RESTORE_BASE_MANA_PCT    = 166,
+    SPELL_EFFECT_ASCENSION_PLAY_SPELL_VISUAL_KIT    = 168,
     SPELL_EFFECT_ASCENSION_SPREAD_AURA              = 169,
     SPELL_EFFECT_ASCENSION_SPREAD_AURA_2            = 170,
+    SPELL_EFFECT_ASCENSION_MODIFY_AURA_CHARGES      = 171,
     SPELL_EFFECT_ASCENSION_REFRESH_AURA             = 173,
     SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS       = 175,
     SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS_2     = 176,
     SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION     = 177,
+    SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DURATION   = 178,
     SPELL_EFFECT_ASCENSION_RESTORE_BASE_HEALTH_PCT  = 181,
     SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DELAYED    = 183,
     SPELL_EFFECT_ASCENSION_TRIGGER_RANDOM_SPELL     = 184,
     SPELL_EFFECT_ASCENSION_RESTORE_SPELL_CHARGES    = 187,
     SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS    = 190,
+    SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT      = 192,
     SPELL_EFFECT_ASCENSION_RESET_COOLDOWN           = 195,
+    SPELL_EFFECT_ASCENSION_MODIFY_FAMILY_COOLDOWN   = 197,
     SPELL_EFFECT_ASCENSION_LAST                     = 198,
     TOTAL_SPELL_EFFECTS                             = 199
 };
@@ -2722,7 +2746,8 @@ enum LockType
     LOCKTYPE_SLOW_CLOSE            = 18,
     LOCKTYPE_FISHING               = 19,
     LOCKTYPE_INSCRIPTION           = 20,
-    LOCKTYPE_OPEN_FROM_VEHICLE     = 21
+    LOCKTYPE_OPEN_FROM_VEHICLE     = 21,
+    LOCKTYPE_WOODCUTTING           = 24
 };
 
 // CreatureType.dbc
@@ -3321,11 +3346,13 @@ enum SkillType
     SKILL_PET_WIND_SERPENT         = 656,
     SKILL_LANG_GUTTERSPEAK         = 673,
     SKILL_RIDING_KODO              = 713,
+    SKILL_WOODCUTTING              = 732,
     SKILL_RACIAL_TROLL             = 733,
     SKILL_RACIAL_GNOME             = 753,
     SKILL_RACIAL_HUMAN             = 754,
     SKILL_JEWELCRAFTING            = 755,
     SKILL_RACIAL_BLOODELF          = 756,
+    SKILL_WOODWORKING              = 757,
     SKILL_PET_EVENT_RC             = 758,
     SKILL_LANG_DRAENEI             = 759,
     SKILL_RACIAL_DRAENEI           = 760,
@@ -3373,6 +3400,8 @@ inline SkillType SkillByLockType(LockType locktype)
             return SKILL_FISHING;
         case LOCKTYPE_INSCRIPTION:
             return SKILL_INSCRIPTION;
+        case LOCKTYPE_WOODCUTTING:
+            return SKILL_WOODCUTTING;
         default:
             break;
     }
@@ -3993,6 +4022,7 @@ enum BattlegroundQueueTypeId : uint8
     BATTLEGROUND_QUEUE_2v2       = 8,
     BATTLEGROUND_QUEUE_3v3       = 9,
     BATTLEGROUND_QUEUE_5v5       = 10,
+    BATTLEGROUND_QUEUE_1v1       = 11,
     MAX_BATTLEGROUND_QUEUE_TYPES = 20,
 };
 

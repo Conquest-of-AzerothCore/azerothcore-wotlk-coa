@@ -8,7 +8,7 @@
 class Player;
 
 void SynchronizeAscensionRunemasterEchoes(Player* player, uint32 specializationId);
-void SendAscensionRunemasterEchoesOwnership(Player* player);
+void SendAscensionRunemasterEchoesCooldown(Player* player);
 void AddAscensionRunemasterEchoesScripts();
 
 #endif

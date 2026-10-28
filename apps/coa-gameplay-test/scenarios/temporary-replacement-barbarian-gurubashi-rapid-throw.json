@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Rapid Throw on the action bar is saved as Throw Weapon (#5469)",
+  "contract": "Gurubashi Technique 705198 gives a 25% chance on a Throw-family cast (SpellFamilyName 18, SpellFamilyFlags[1] & 262144) to grant the Gurubashi Technique buff 706487 (AscensionBarbarianCompletion.cpp:407-408). aura_ascension_barbarian_lifecycle::Apply on 706487 (AscensionBarbarianCompletion.cpp:273-281) teaches Rapid Throw 807482 with learnSpell(807482, true), a temporary spell never written to character_spell, and registers it with Player::SetTemporarySpellReplacement over every active Throw-family spell except 807236, Throw Weapon Rank 1 804136 among them. Before the fix Player::_SaveActions wrote 807482 for a button holding Rapid Throw, and Player::_LoadActions at the next login runs before the buff teaches it again, so the button was refused and deleted. The fixture applies 706487 directly instead of rolling the 25% proc. persisted_action_button reads Player::GetSavedActionButtonSpell, the id _SaveActions writes. A button holding Rapid Throw must be saved as Throw Weapon; a button holding Throw Weapon is saved unchanged.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "barbarian", "race": 1, "class": 12, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login state settle", "ms": 3000 },
+    { "action": "learn", "actor": "barbarian", "spell": 804136 },
+    {
+      "action": "set_aura", "label": "Gain the Gurubashi Technique buff", "actor": "barbarian",
+      "spell": 706487, "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "The buff replaces Throw Weapon with Rapid Throw",
+      "actor": "barbarian",
+      "metric": "temporary_spell_replacement",
+      "spell": 804136,
+      "equals": 807482,
+      "within_ms": 3000
+    },
+    { "action": "set_action_button", "actor": "barbarian", "button": 2, "spell": 807482 },
+    { "action": "set_action_button", "actor": "barbarian", "button": 3, "spell": 804136 },
+    {
+      "action": "assert",
+      "label": "The bar holds Rapid Throw",
+      "actor": "barbarian",
+      "metric": "action_button",
+      "button": 2,
+      "equals": 807482
+    },
+    {
+      "action": "assert",
+      "label": "The Rapid Throw button is saved as Throw Weapon",
+      "actor": "barbarian",
+      "metric": "persisted_action_button",
+      "button": 2,
+      "equals": 804136
+    },
+    {
+      "action": "assert",
+      "label": "Control: an ordinary known spell is saved unchanged",
+      "actor": "barbarian",
+      "metric": "persisted_action_button",
+      "button": 3,
+      "equals": 804136
+    }
+  ]
+}

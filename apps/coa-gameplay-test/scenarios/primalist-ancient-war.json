@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Primalist Ancient of War form and Hammer effectiveness",
-  "contract": "The twenty-second form selects the available Ancient of War display, reduces movement by thirty percent, adds twenty points of melee/spell crit to the party, and increases Hammer of Life conversion from twenty to twenty-six percent. Expiry restores all modifiers; actual damage and healing copies are checked independently.",
+  "contract": "The twenty-second form transforms into creature 346922 with its own Ancient of War form display 111212 (client scale 0.7) rather than NPC display 1461 at client scale 3.0 (#7519), reduces movement by thirty percent, keeps native auto-attack swinging and damaging, adds twenty points of melee/spell crit to the party, and increases Hammer of Life conversion from twenty to twenty-six percent. Expiry restores all modifiers; actual damage and healing copies are checked independently. Specialization 58 grants Infused With Power 503718 (ProcChance 20): effective Hammer of Life heals apply 503719, +5% critical strike chance to the party (SPELL_AURA_MOD_CRIT_PCT, BasePoints 4) for 10000 ms. The baseline Wildclaw's Hammer of Life heal on the ally sometimes applied it just before the crit baselines were taken, so the primalist and the ally read 5 points higher there and -5 after expiry while the ungrouped outsider did not; the scenario unlearns the unrelated proc and checks the buff is absent from the baselines.",
   "players": [
     {
       "id": "primalist",
@@ -44,9 +44,9 @@
   "timeout_ms": 100000,
   "steps": [
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "primalist",
-      "command": ".localspec 58"
+      "id": 58
     },
     {
       "action": "teleport",
@@ -211,6 +211,21 @@
       "equals": 20
     },
     {
+      "action": "unlearn",
+      "label": "Remove Infused With Power, whose 20% party crit proc from Hammer of Life heals is unrelated",
+      "actor": "primalist",
+      "spell": 503718,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Infused With Power is gone",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 503718,
+      "equals": 0
+    },
+    {
       "action": "set_health",
       "actor": "target",
       "value": 30000
@@ -339,6 +354,22 @@
       "label": "Recalculate native Agility crit after fixture level and weapon setup"
     },
     {
+      "action": "assert",
+      "label": "SETUP: no Infused With Power buff sits in the crit baseline",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 503719,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Infused With Power buff sits in the crit baseline",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 503719,
+      "equals": 0
+    },
+    {
       "action": "snapshot",
       "actor": "primalist",
       "metric": "melee_crit_chance",
@@ -383,7 +414,7 @@
       "action": "assert",
       "actor": "primalist",
       "metric": "display_id",
-      "equals": 1461,
+      "equals": 111212,
       "within_ms": 1000
     },
     {
@@ -453,6 +484,52 @@
       "spell": 803973,
       "effect": 0,
       "equals": 26
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "melee_attack_count",
+      "save_as": "formswingsbefore"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "melee_damage_count",
+      "save_as": "formhitsbefore"
+    },
+    {
+      "action": "attack",
+      "actor": "primalist",
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "primalist"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_attack_count",
+      "relative_to": "formswingsbefore",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_damage_count",
+      "relative_to": "formhitsbefore",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 504222,
+      "equals": 1
     },
     {
       "action": "set_health",

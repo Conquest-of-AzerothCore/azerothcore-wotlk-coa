@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Hook, Line, and Sinker cuts Flesh Hook and Chainwhip's cooldown by 5 sec (#1368)",
+  "contract": "Hook, Line, and Sinker 680991 reads 'Reduces the cooldown of Flesh Hook and Chainwhip by $/1000;s1 sec.' (installed moa_description: '-5 sec'). Its sole effect is native aura 107 (SPELL_AURA_ADD_FLAT_MODIFIER), MiscValue 11 (SPELLMOD_COOLDOWN), EffectBasePoints -5001 with DieSides 1 -> resolved -5000 ms, verified via csv.DictReader against /home/fab/CoaServer/reference/snapshots/ascension-data/tables/spell.csv.gz. Its classmask [524288, 0, 1] intersects both named abilities' own family flags on different words: Chainwhip (spell_family_id 23, family_flags word0 bit19 = 524288, e.g. rank 8 503365) on word0, and Flesh Hook (family_flags word0 bit3 = 8, word2 bit0 = 1, e.g. rank 4 501490) on word2 -- a per-word AND match is sufficient for AuraEffect::CalculateSpellMod's classmask check. The level-60 Knight of Xoroth owns Flesh Hook rank 501490 (AscensionSpellProgressionData.h:691) and Chainwhip rank 503365 (:713). Player::ApplySpellMod (Player.cpp:10219) is the native consumer: for SPELLMOD_FLAT it accumulates totalflat and applies it directly, so a 10000ms base becomes 5000ms. The harness's 'spell_modifier' metric calls this exact native path directly.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: Flesh Hook's cooldown is unmodified before the talent",
+      "actor": "knight", "metric": "spell_modifier", "spell": 501490, "op": 11, "base": 10000, "equals": 10000
+    },
+    {
+      "action": "assert", "label": "SETUP: Chainwhip's cooldown is unmodified before the talent",
+      "actor": "knight", "metric": "spell_modifier", "spell": 503365, "op": 11, "base": 10000, "equals": 10000
+    },
+    { "action": "learn", "actor": "knight", "spell": 680991 },
+    { "action": "set_aura", "actor": "knight", "spell": 680991, "stacks": 1, "label": "Force the Hook, Line, and Sinker passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Hook, Line, and Sinker passive is active",
+      "actor": "knight", "metric": "aura", "spell": 680991, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Flesh Hook's cooldown drops by 5000 ms (word2 bit0 classmask overlap)",
+      "actor": "knight", "metric": "spell_modifier", "spell": 501490, "op": 11, "base": 10000, "equals": 5000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Chainwhip's cooldown drops by 5000 ms (word0 bit19 classmask overlap)",
+      "actor": "knight", "metric": "spell_modifier", "spell": 503365, "op": 11, "base": 10000, "equals": 5000
+    }
+  ]
+}

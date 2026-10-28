@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "name": "Worldforged Apprentice Staff stands at the live realm's Brambleblade Ravine spot and can be opened there (COA-7892)",
+  "contract": "The live gameobject dump stands the Apprentice Staff pickup (95670, guid 6941409, item 450983) at (-2943.06, -1000.69, 55.331) in Brambleblade Ravine. rev_20261014_95_worldforged_lootcollector_alignment.sql moved it to (-2948.74, -1009.44, 55.452), 10 yd away inside the hut wall. A character standing at the live spot opens it with Opening, whose interaction range is 5 yd.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": -2943.06, "y": -1000.69, "z": 55.331, "o": 0 },
+  "players": [ { "id": "p", "race": 6, "class": 1, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the staff is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95670, "equals": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 95670 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "DISCRIMINATING: the staff is within reach of the live spot and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

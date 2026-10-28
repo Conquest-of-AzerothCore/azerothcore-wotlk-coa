@@ -1,0 +1,165 @@
+{
+  "schema": 1,
+  "name": "Dispelling Soulrot damages the dispeller (#1392)",
+  "contract": [
+    "A direct Soulrot helper cast isolates the dispel clause from Deathchaser proc wiring.",
+    "An allied Mage removes the Curse from the opposing player and takes immediate Soulrot damage from the Reaper."
+  ],
+  "timeout_ms": 45000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "victim",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "dispeller",
+      "race": 1,
+      "class": 8,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 804660
+    },
+    {
+      "action": "learn",
+      "actor": "dispeller",
+      "spell": 475
+    },
+    {
+      "action": "pvp",
+      "actor": "reaper",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "victim",
+      "enabled": true
+    },
+    {
+      "action": "assert",
+      "label": "Victim starts without Soulrot",
+      "actor": "victim",
+      "metric": "aura",
+      "spell": 804660,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Reaper applies Soulrot directly",
+      "actor": "reaper",
+      "spell": 804660,
+      "target": "victim"
+    },
+    {
+      "action": "assert",
+      "label": "Soulrot helper cast was accepted",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 804660,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Curse is present before dispel",
+      "actor": "victim",
+      "metric": "aura",
+      "spell": 804660,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Dispeller has taken no Soulrot retaliation",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 805089,
+      "target": "dispeller",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Reaper has attack power for Soulrot scaling",
+      "actor": "reaper",
+      "metric": "attack_power",
+      "min": 500
+    },
+    {
+      "action": "cast",
+      "label": "Mage dispels the Curse from an ally",
+      "actor": "dispeller",
+      "spell": 475,
+      "target": "victim"
+    },
+    {
+      "action": "assert",
+      "label": "Dispel Curse cast was accepted",
+      "actor": "dispeller",
+      "metric": "cast_failure",
+      "spell": 475,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Dispel removed the Soulrot Curse",
+      "actor": "victim",
+      "metric": "aura",
+      "spell": 804660,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Soulrot cast the retaliation helper",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 805089,
+      "target": "dispeller",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Soulrot immediately struck the dispeller",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 805089,
+      "target": "dispeller",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Soulrot retaliation includes attack power damage",
+      "actor": "reaper",
+      "metric": "spell_damage_total",
+      "spell": 805089,
+      "target": "dispeller",
+      "min": 2000
+    }
+  ]
+}

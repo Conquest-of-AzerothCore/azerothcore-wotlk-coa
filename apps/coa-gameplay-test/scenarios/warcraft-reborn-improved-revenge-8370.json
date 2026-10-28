@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "name": "Warcraft Reborn Improved Revenge makes Revenge strike an additional target",
+  "contract": [
+    "Issue 8370: Improved Revenge's additional strike never happened. Reborn Revenge (1106572 rank 1 .. 1157823 rank 9) has EffectChainTarget 0, stock Revenge has 1.",
+    "Spell::SelectImplicitChainTargets chains only when ChainTarget + SPELLMOD_JUMP_TARGETS > 1.",
+    "Improved Revenge 1112797 / 1112799 effect 0 is ADD_FLAT_MODIFIER JUMP_TARGETS base 1 die 1 = +2, so Revenge reaches 2 targets: the target plus one additional target, as the tooltip says."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "w",
+      "race": 1,
+      "class": 1,
+      "level": 80,
+      "name": "Rebornrevng"
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Revenge rank 9 has no chain targets without the talent",
+      "actor": "w",
+      "metric": "spell_modifier",
+      "spell": 1157823,
+      "op": 17,
+      "base": 0,
+      "min": 0,
+      "max": 0
+    },
+    {
+      "action": "learn",
+      "actor": "w",
+      "spell": 1112797
+    },
+    {
+      "action": "assert",
+      "label": "Improved Revenge rank 1: Revenge rank 9 strikes 2 targets",
+      "actor": "w",
+      "metric": "spell_modifier",
+      "spell": 1157823,
+      "op": 17,
+      "base": 0,
+      "min": 2,
+      "max": 2
+    },
+    {
+      "action": "assert",
+      "label": "Improved Revenge rank 1: Revenge rank 1 strikes 2 targets",
+      "actor": "w",
+      "metric": "spell_modifier",
+      "spell": 1106572,
+      "op": 17,
+      "base": 0,
+      "min": 2,
+      "max": 2
+    },
+    {
+      "action": "unlearn",
+      "actor": "w",
+      "spell": 1112797
+    },
+    {
+      "action": "learn",
+      "actor": "w",
+      "spell": 1112799
+    },
+    {
+      "action": "assert",
+      "label": "Improved Revenge rank 2: Revenge rank 9 strikes 2 targets",
+      "actor": "w",
+      "metric": "spell_modifier",
+      "spell": 1157823,
+      "op": 17,
+      "base": 0,
+      "min": 2,
+      "max": 2
+    },
+    {
+      "action": "assert",
+      "label": "Improved Revenge rank 2: Revenge rank 1 strikes 2 targets",
+      "actor": "w",
+      "metric": "spell_modifier",
+      "spell": 1106572,
+      "op": 17,
+      "base": 0,
+      "min": 2,
+      "max": 2
+    },
+    {
+      "action": "assert",
+      "label": "Improved Revenge rank 2 leaves Heroic Strike alone (control)",
+      "actor": "w",
+      "metric": "spell_modifier",
+      "spell": 1147450,
+      "op": 17,
+      "base": 0,
+      "min": 0,
+      "max": 0
+    }
+  ]
+}

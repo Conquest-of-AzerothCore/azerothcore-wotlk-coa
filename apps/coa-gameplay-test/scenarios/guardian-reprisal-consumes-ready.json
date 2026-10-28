@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Guardian Reprisal: casting consumes the Reprisal Ready buff (#5666)",
+  "contract": "Reprisal 800316 (SPELL_GUARDIAN_REPRISAL) requires the Reprisal Ready buff 504885 (Valiant Effort's proc, SPELL_GUARDIAN_REPRISAL_READY) to cast. A successful cast should consume that buff, not leave it up for the next Reprisal.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "knight", "race": 1, "class": 18, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "target", "owner": "knight", "entry": 36, "level": 80, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "knight", "spell": 800316 },
+    { "action": "set_power", "actor": "knight", "power": 3, "value": 100 },
+    { "action": "set_aura", "actor": "knight", "spell": 504885, "stacks": 1 },
+    {
+      "action": "assert", "label": "Fixture grants the Reprisal Ready buff", "actor": "knight",
+      "metric": "aura", "spell": 504885, "equals": 1
+    },
+    {
+      "action": "snapshot", "actor": "target", "metric": "health", "save_as": "health_before"
+    },
+    { "action": "cast", "actor": "knight", "spell": 800316, "target": "target" },
+    {
+      "action": "assert", "label": "Reprisal only casts while the buff is active, so this proves the cast landed",
+      "actor": "target", "metric": "health", "relative_to": "health_before", "max": -1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Reprisal consumes the Reprisal Ready buff it required to cast",
+      "actor": "knight", "metric": "aura", "spell": 504885, "equals": 0, "within_ms": 1000
+    }
+  ]
+}

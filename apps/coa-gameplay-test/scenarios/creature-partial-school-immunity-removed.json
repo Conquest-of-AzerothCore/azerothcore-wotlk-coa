@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "name": "NPCs take damage from every school; only full invulnerability still blocks it",
+  "contract": "CoA rule: creatures not controlled by a player keep no partial school immunity. Discordant Surge 13279 uses creature_immunities -6 (SchoolMask 16, frost) and Molten Elemental 11321 carries the passive aura 7942 'Immunity: Fire' (school mask 4) from creature_template_addon; both blocked a player's Frostbolt 116 or Fire Blast 2136 entirely before. Flame Protection 32404 (aura 40 damage immunity, school mask 4) cast by a dummy 36 on itself no longer blocks Fire Blast damage either. Divine Shield 642 (school immunity to all 127 schools) on a dummy 36 still blocks Fire Blast, so banish, Ice Block and similar full invulnerability stay.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "mage", "race": 1, "class": 8, "level": 60, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "surge", "owner": "mage", "entry": 13279, "level": 60, "health": 100000, "distance": 8 },
+    { "id": "molten", "owner": "mage", "entry": 11321, "level": 60, "health": 100000, "distance": 8 },
+    { "id": "warded", "owner": "mage", "entry": 36, "level": 60, "health": 100000, "distance": 8 },
+    { "id": "shielded", "owner": "mage", "entry": 36, "level": 60, "health": 100000, "distance": 8 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and local level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "mage", "spell": 116 },
+    { "action": "learn", "actor": "mage", "spell": 2136 },
+    {
+      "action": "assert", "label": "Molten Elemental carries its passive fire immunity aura", "actor": "molten",
+      "metric": "aura", "spell": 7942, "equals": 1
+    },
+    { "action": "snapshot", "actor": "surge", "metric": "max_health", "save_as": "surge_max" },
+    { "action": "snapshot", "actor": "surge", "metric": "health", "save_as": "surge_before" },
+    { "action": "cast", "label": "Frostbolt on the frost-immune water elemental", "actor": "mage", "spell": 116,
+      "target": "surge" },
+    { "action": "wait", "ms": 4000 },
+    {
+      "action": "assert", "label": "Water elemental maximum health stays stable", "actor": "surge",
+      "metric": "max_health", "relative_to": "surge_max", "equals": 0
+    },
+    {
+      "action": "assert", "label": "Frostbolt damages the water elemental despite its template frost immunity",
+      "actor": "surge", "metric": "health", "relative_to": "surge_before", "max": -1
+    },
+    { "action": "snapshot", "actor": "molten", "metric": "max_health", "save_as": "molten_max" },
+    { "action": "snapshot", "actor": "molten", "metric": "health", "save_as": "molten_before" },
+    { "action": "cast", "label": "Fire Blast on the Molten Elemental", "actor": "mage", "spell": 2136,
+      "target": "molten" },
+    { "action": "wait", "ms": 1500 },
+    {
+      "action": "assert", "label": "Molten Elemental maximum health stays stable", "actor": "molten",
+      "metric": "max_health", "relative_to": "molten_max", "equals": 0
+    },
+    {
+      "action": "assert", "label": "Fire Blast damages the Molten Elemental despite Immunity: Fire",
+      "actor": "molten", "metric": "health", "relative_to": "molten_before", "max": -1
+    },
+    { "action": "cast", "label": "The dummy casts Flame Protection on itself", "actor": "warded", "spell": 32404 },
+    {
+      "action": "assert", "label": "The dummy carries Flame Protection", "actor": "warded",
+      "metric": "aura", "spell": 32404, "equals": 1
+    },
+    { "action": "reset_cooldown", "actor": "mage", "spell": 2136 },
+    { "action": "wait", "label": "Let the global cooldown expire", "ms": 1600 },
+    { "action": "snapshot", "actor": "warded", "metric": "max_health", "save_as": "warded_max" },
+    { "action": "snapshot", "actor": "warded", "metric": "health", "save_as": "warded_before" },
+    { "action": "cast", "label": "Fire Blast on the fire damage immune dummy", "actor": "mage", "spell": 2136,
+      "target": "warded" },
+    { "action": "wait", "ms": 1500 },
+    {
+      "action": "assert", "label": "Flame-protected dummy maximum health stays stable", "actor": "warded",
+      "metric": "max_health", "relative_to": "warded_max", "equals": 0
+    },
+    {
+      "action": "assert", "label": "Fire Blast damages the dummy despite its fire damage immunity",
+      "actor": "warded", "metric": "health", "relative_to": "warded_before", "max": -1
+    },
+    { "action": "cast", "label": "The dummy casts Divine Shield on itself", "actor": "shielded", "spell": 642 },
+    {
+      "action": "assert", "label": "The dummy carries Divine Shield", "actor": "shielded",
+      "metric": "aura", "spell": 642, "equals": 1
+    },
+    { "action": "reset_cooldown", "actor": "mage", "spell": 2136 },
+    { "action": "wait", "label": "Let the global cooldown expire", "ms": 1600 },
+    { "action": "snapshot", "actor": "shielded", "metric": "health", "save_as": "shielded_before" },
+    { "action": "cast", "label": "Fire Blast on the shielded dummy", "actor": "mage", "spell": 2136,
+      "target": "shielded" },
+    { "action": "wait", "ms": 1500 },
+    {
+      "action": "assert", "label": "Full school immunity still blocks the damage", "actor": "shielded",
+      "metric": "health", "relative_to": "shielded_before", "equals": 0
+    }
+  ]
+}

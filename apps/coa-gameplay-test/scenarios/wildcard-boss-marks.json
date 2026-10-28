@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "A dungeon boss pays Runes of Ascension to every Wildcard Hero of the group in reward range",
+  "contract": "On Darkmoon - Season 10 Wildcard every dungeon and raid boss dropped Runes of Ascension (item 375250, party loot, so each group member got the full stack): 50 for a normal dungeon boss such as Edwin VanCleef (639), up to 7000 for a Mythic raid boss, per the 'Dropped by' list archived on db.ascension.gg on 2026-08-04 (table ascension_wildcard_boss_marks). The server grants the amount on the kill to each Wildcard Hero of the killer's group within reward distance, whatever the level difference; ordinary creatures pay nothing.",
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0},
+  "players": [
+    {"id": "wild", "race": 1, "class": 10, "level": 20},
+    {"id": "friend", "race": 1, "class": 10, "level": 20}
+  ],
+  "creatures": [
+    {"id": "boss", "owner": "wild", "entry": 639, "level": 20, "health": 20, "distance": 2},
+    {"id": "wolf", "owner": "wild", "entry": 2158, "level": 20, "health": 20, "distance": 2}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "console", "command": "coa gamemode WildCard on Harnessa"},
+    {"action": "console", "command": "coa gamemode WildCard on Harnessb"},
+    {"action": "group", "actor": "wild", "target": "friend"},
+    {"action": "learn", "label": "Death Touch Copy kills outright", "actor": "wild", "spell": 24080},
+    {"action": "snapshot", "actor": "wild", "metric": "item_count", "item": 375250, "save_as": "killer_runes"},
+    {"action": "snapshot", "actor": "friend", "metric": "item_count", "item": 375250, "save_as": "friend_runes"},
+    {"action": "cast", "actor": "wild", "spell": 24080, "target": "boss"},
+    {"action": "assert", "label": "The group kills Edwin VanCleef", "actor": "boss", "metric": "alive", "equals": 0, "within_ms": 45000},
+    {"action": "assert", "label": "The killer gets 50 Runes of Ascension", "actor": "wild", "metric": "item_count", "item": 375250, "relative_to": "killer_runes", "equals": 50, "within_ms": 3000},
+    {"action": "assert", "label": "and so does the other member", "actor": "friend", "metric": "item_count", "item": 375250, "relative_to": "friend_runes", "equals": 50},
+    {"action": "cast", "actor": "wild", "spell": 24080, "target": "wolf"},
+    {"action": "assert", "label": "The group kills an ordinary creature", "actor": "wolf", "metric": "alive", "equals": 0, "within_ms": 45000},
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "label": "which pays no runes", "actor": "wild", "metric": "item_count", "item": 375250, "relative_to": "killer_runes", "equals": 50}
+  ]
+}

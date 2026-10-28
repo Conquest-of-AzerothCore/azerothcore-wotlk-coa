@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Thunderkeg spawns its gameobject (#5726)",
+  "contract": "Conjure Thunderkeg 807849 is SPELL_EFFECT_TRANS_DOOR with EffectMiscValue 195002 (Spell.dbc). Spell::EffectTransmitted (SpellEffects.cpp) looks the id up with sObjectMgr->GetGameObjectTemplate and silently returns, logging an error, when the row is missing; no gameobject_template row for 195002 existed anywhere before this fix, so the cast animation played but nothing was ever placed. The new pending_db_world migration adds gameobject_template entry 195002 (type 22 GAMEOBJECT_TYPE_SPELLCASTER, displayId 1013445, name 'Thunderkeg', sourced from hertigservices/ascension-data exiles-db-export-2026-09-13), so the cast must now leave exactly one owned gameobject of that entry near the caster.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "s", "race": 1, "class": 16, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+
+    { "action": "assert", "label": "No Thunderkeg object exists yet", "actor": "s", "metric": "owned_gameobject_count", "entry": 195002, "equals": 0 },
+
+    { "action": "learn", "actor": "s", "spell": 807849 },
+    { "action": "cast", "actor": "s", "spell": 807849, "target": "s" },
+    { "action": "assert", "label": "The Thunderkeg gameobject is placed near the caster", "actor": "s", "metric": "owned_gameobject_count", "entry": 195002, "equals": 1, "within_ms": 5000 }
+  ]
+}

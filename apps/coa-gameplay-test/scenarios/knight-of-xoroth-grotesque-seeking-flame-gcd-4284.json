@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "name": "Grotesque removes Seeking Flame's cooldown in Hellfire Form without clearing it afterwards (#4284)",
+  "contract": [
+    "Grotesque 707515 reads 'While Hellfire Form is active, your Seeking Flame now has no cooldown'. The server let",
+    "each Seeking Flame 805671 cast start its 6 s cooldown and the global cooldown, then sent SMSG_CLEAR_COOLDOWN for",
+    "the spell, which wiped the client's global cooldown swipe while the server still enforced it. Grotesque now",
+    "carries a native -100% SPELLMOD_COOLDOWN on Seeking Flame (family word 1 0x20) whose amount is zero outside",
+    "Hellfire Form 805696, so no cooldown starts and nothing is cleared. Expected: the modifier leaves 6000 ms at 6000",
+    "without Hellfire Form and reduces it to 0 inside it; a cast in Hellfire Form leaves no cooldown, keeps the global",
+    "cooldown and sends no clear; after Hellfire Form ends the next cast starts the full cooldown again."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "knight", "race": 1, "class": 17, "level": 20, "spell_hit_rating": 10000, "allow_regeneration": false}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "knight", "entry": 36, "level": 20, "health": 1000000, "distance": 8}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 5000},
+    {"action": "learn", "actor": "knight", "spell": 805671},
+    {"action": "learn", "actor": "knight", "spell": 707515},
+    {"action": "set_power", "actor": "knight", "power": 1, "value": 1000},
+    {"action": "assert", "label": "Without Hellfire Form Grotesque leaves the cooldown alone", "actor": "knight",
+     "metric": "spell_modifier", "spell": 805671, "op": 11, "base": 6000, "equals": 6000},
+    {"action": "set_aura", "label": "Enter Hellfire Form", "actor": "knight", "spell": 805696, "stacks": 1},
+    {"action": "assert", "label": "In Hellfire Form Grotesque removes the cooldown natively", "actor": "knight",
+     "metric": "spell_modifier", "spell": 805671, "op": 11, "base": 6000, "equals": 0},
+    {"action": "snapshot", "actor": "knight", "metric": "server_packets", "opcode": 478, "row": 805671,
+     "save_as": "clears"},
+    {"action": "snapshot", "actor": "knight", "metric": "spell_damage_count", "spell": 805671, "target": "dummy",
+     "save_as": "flames"},
+    {"action": "cast", "label": "Seeking Flame in Hellfire Form", "actor": "knight", "spell": 805671,
+     "target": "dummy"},
+    {"action": "assert", "label": "The global cooldown runs", "actor": "knight", "metric": "global_cooldown_ms",
+     "spell": 805671, "min": 1, "within_ms": 300},
+    {"action": "assert", "label": "No cooldown starts", "actor": "knight", "metric": "cooldown_ms", "spell": 805671,
+     "equals": 0},
+    {"action": "assert", "label": "SETUP: the cast landed", "actor": "knight", "metric": "spell_damage_count",
+     "spell": 805671, "target": "dummy", "relative_to": "flames", "min": 1, "within_ms": 3000},
+    {"action": "assert", "label": "No SMSG_CLEAR_COOLDOWN is sent for Seeking Flame", "actor": "knight",
+     "metric": "server_packets", "opcode": 478, "row": 805671, "relative_to": "clears", "equals": 0},
+    {"action": "cancel_aura", "label": "Leave Hellfire Form", "actor": "knight", "spell": 805696},
+    {"action": "assert", "label": "Outside Hellfire Form the cooldown is back", "actor": "knight",
+     "metric": "spell_modifier", "spell": 805671, "op": 11, "base": 6000, "equals": 6000},
+    {"action": "wait", "label": "Clear the global cooldown", "ms": 2000},
+    {"action": "set_power", "actor": "knight", "power": 1, "value": 1000},
+    {"action": "cast", "label": "Seeking Flame outside Hellfire Form", "actor": "knight", "spell": 805671,
+     "target": "dummy"},
+    {"action": "assert", "label": "The full cooldown starts again", "actor": "knight", "metric": "cooldown_ms",
+     "spell": 805671, "min": 5000, "within_ms": 1000}
+  ]
+}

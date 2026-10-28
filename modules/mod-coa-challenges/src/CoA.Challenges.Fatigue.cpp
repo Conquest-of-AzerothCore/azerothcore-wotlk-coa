@@ -120,17 +120,21 @@ namespace CoAChallenges
     {
         if (!player)
             return;
+        RefreshFatigueTracking(player, LoadActiveChallengeRows(player->GetGUID().GetCounter()));
+    }
+
+    void RefreshFatigueTracking(Player* player, std::vector<ActiveChallengeRow> const& rows)
+    {
+        if (!player)
+            return;
         uint32 guid = player->GetGUID().GetCounter();
         uint32 found = 0;
-        if (QueryResult r = CharacterDatabase.Query(
-                "SELECT challengeId FROM coa_character_challenge WHERE guid = {}", guid))
-        {
-            do
+        for (ActiveChallengeRow const& row : rows)
+            if (IsFatigueChallenge(row.challengeId))
             {
-                uint32 cid = r->Fetch()[0].Get<uint32>();
-                if (IsFatigueChallenge(cid)) { found = cid; break; }
-            } while (r->NextRow());
-        }
+                found = row.challengeId;
+                break;
+            }
         if (!found)
         {
             ClearFatigue(player);

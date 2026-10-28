@@ -17,13 +17,19 @@
 
 #define _CRT_SECURE_NO_DEPRECATE
 
+#include <algorithm>
+#include <cctype>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <deque>
 #include <filesystem>
 #include <set>
+#include <string>
+#include <system_error>
 #include <unordered_map>
-#include <cstring>
+#include <utility>
+#include <vector>
 
 #ifdef _WIN32
 #include "direct.h"
@@ -94,24 +100,12 @@ float CONF_use_minHeight = -500.0f;
 
 // This option allow use float to int conversion
 bool  CONF_allow_float_to_int   = true;
+std::set<uint32> CONF_only_maps;
+std::set<uint32> CONF_skip_maps;
 float CONF_float_to_int8_limit  = 2.0f;      // Max accuracy = val/256
 float CONF_float_to_int16_limit = 2048.0f;   // Max accuracy = val/65536
 float CONF_flat_height_delta_limit = 0.005f; // If max - min less this value - surface is flat
 float CONF_flat_liquid_delta_limit = 0.001f; // If max - min less this value - liquid surface is flat
-
-// List MPQ for extract from
-char const* CONF_mpq_list[] =
-{
-    "common.MPQ",
-    "common-2.MPQ",
-    "lichking.MPQ",
-    "expansion.MPQ",
-    "patch.MPQ",
-    "patch-2.MPQ",
-    "patch-3.MPQ",
-    "patch-4.MPQ",
-    "patch-5.MPQ",
-};
 
 static char const* const langs[] = {"enGB", "enUS", "deDE", "esES", "frFR", "koKR", "zhCN", "zhTW", "enCN", "enTW", "esMX", "ruRU" };
 #define LANG_COUNT 12
@@ -162,6 +156,8 @@ void Usage(char* prg)
         "-o set output path\n"\
         "-e extract only MAP(1)/DBC(2)/Camera(4) - standard: all(7)\n"\
         "-f height stored as int (less map size but lost some accuracy) 1 by default\n"\
+        "-m extract only this map id (repeatable)\n"\
+        "-x skip this map id (repeatable)\n"\
         "Example: %s -f 0 -i \"c:\\games\\game\"", prg, prg);
     exit(1);
 }
@@ -213,6 +209,18 @@ void HandleArgs(int argc, char* arg[])
                 {
                     Usage(arg[0]);
                 }
+                break;
+            case 'm':
+                if (c + 1 < argc)
+                    CONF_only_maps.insert(atoi(arg[(c++) + 1]));
+                else
+                    Usage(arg[0]);
+                break;
+            case 'x':
+                if (c + 1 < argc)
+                    CONF_skip_maps.insert(atoi(arg[(c++) + 1]));
+                else
+                    Usage(arg[0]);
                 break;
             case 'e':
                 if (c + 1 < argc)                           // all ok
@@ -757,7 +765,17 @@ bool ConvertADT(std::string const& inputPath, std::string const& outputPath, int
                 }
 
                 liquid_entry[i][j] = h->LiquidType;
-                switch (LiquidTypes.at(h->LiquidType).SoundBank)
+                auto const liquidType = LiquidTypes.find(h->LiquidType);
+                uint8 soundBank = LIQUID_TYPE_WATER;
+                if (liquidType != LiquidTypes.end())
+                    soundBank = liquidType->second.SoundBank;
+                else
+                {
+                    printf("\nUnknown liquid type %u for map %s chunk %d,%d, treated as water\n", h->LiquidType,
+                        inputPath.c_str(), i, j);
+                }
+
+                switch (soundBank)
                 {
                     case LIQUID_TYPE_WATER: liquid_flags[i][j] |= MAP_LIQUID_TYPE_WATER; break;
                     case LIQUID_TYPE_OCEAN: liquid_flags[i][j] |= MAP_LIQUID_TYPE_OCEAN; if (attrs.Deep) liquid_flags[i][j] |= MAP_LIQUID_TYPE_DARK_WATER; break;
@@ -992,6 +1010,9 @@ void ExtractMapsFromMpq(uint32 build)
     printf("Convert map files\n");
     for (uint32 z = 0; z < map_count; ++z)
     {
+        if ((!CONF_only_maps.empty() && !CONF_only_maps.count(map_ids[z].id)) || CONF_skip_maps.count(map_ids[z].id))
+            continue;
+
         printf("Extract %s (%d/%u)                  \n", map_ids[z].name, z + 1, map_count);
         // Loadup map grid data
         mpqMapName = Acore::StringFormat(R"(World\Maps\{}\{}.wdt)", map_ids[z].name, map_ids[z].name);
@@ -1141,35 +1162,88 @@ void ExtractCameraFiles(int locale, bool basicLocale)
     printf("Extracted %u camera files\n", count);
 }
 
-void LoadLocaleMPQFiles(int const locale)
+static bool IsNumericPatchSuffix(std::string const& suffix)
 {
-    char filename[512];
-
-    sprintf(filename, "%s/Data/%s/locale-%s.MPQ", input_path, langs[locale], langs[locale]);
-    new MPQArchive(filename);
-
-    for (int i = 1; i <= 9; ++i)
-    {
-        char ext[3] = "";
-        if (i > 1)
-            sprintf(ext, "-%i", i);
-
-        sprintf(filename, "%s/Data/%s/patch-%s%s.MPQ", input_path, langs[locale], langs[locale], ext);
-        if (FileExists(filename))
-            new MPQArchive(filename);
-    }
+    return !suffix.empty() && suffix.find_first_not_of("0123456789") == std::string::npos;
 }
 
-void LoadCommonMPQFiles()
+// Archives matching patch-<letters>.MPQ in the client Data directory, sorted by suffix.
+static std::vector<std::string> LetteredPatchArchives(std::string const& dataDir)
 {
-    char filename[512];
-    int count = sizeof(CONF_mpq_list) / sizeof(char*);
-    for (int i = 0; i < count; ++i)
+    std::vector<std::pair<std::string, std::string>> found;
+    std::error_code error;
+    for (std::filesystem::directory_iterator it(dataDir, error), end; !error && it != end; it.increment(error))
     {
-        sprintf(filename, "%s/Data/%s", input_path, CONF_mpq_list[i]);
-        if (FileExists(filename))
-            new MPQArchive(filename);
+        if (!it->is_regular_file(error))
+            continue;
+
+        std::string const name = it->path().filename().string();
+        std::string upper = name;
+        for (char& c : upper)
+            c = static_cast<char>(toupper(static_cast<unsigned char>(c)));
+
+        if (upper.size() < 11 || upper.compare(0, 6, "PATCH-") != 0 || upper.compare(upper.size() - 4, 4, ".MPQ") != 0)
+            continue;
+
+        std::string const suffix = upper.substr(6, upper.size() - 10);
+        if (IsNumericPatchSuffix(suffix))
+            continue;
+
+        found.emplace_back(suffix, name);
     }
+
+    std::sort(found.begin(), found.end());
+
+    std::vector<std::string> result;
+    for (auto const& entry : found)
+        result.push_back(dataDir + "/" + entry.second);
+    return result;
+}
+
+// Client load order, lowest priority first: base archives, locale base archives,
+// numbered patches interleaved with their locale counterparts, then lettered patches.
+// MPQArchive pushes to the front of gOpenArchives and MPQFile searches front to back,
+// so the last archive opened wins a file name collision.
+static std::vector<std::string> ClientArchiveChain(int const locale)
+{
+    std::string const dataDir = std::string(input_path) + "/Data";
+    std::string const localeDir = dataDir + "/" + langs[locale];
+    std::string const lang = langs[locale];
+    std::vector<std::string> chain;
+
+    for (char const* base : { "common.MPQ", "common-2.MPQ", "expansion.MPQ", "lichking.MPQ" })
+        chain.push_back(dataDir + "/" + base);
+
+    for (char const* base : { "locale-", "expansion-locale-", "lichking-locale-" })
+        chain.push_back(localeDir + "/" + base + lang + ".MPQ");
+
+    for (int i = 1; i <= 99; ++i)
+    {
+        std::string const number = i > 1 ? "-" + std::to_string(i) : "";
+        chain.push_back(dataDir + "/patch" + number + ".MPQ");
+        chain.push_back(localeDir + "/patch-" + lang + number + ".MPQ");
+    }
+
+    for (std::string const& archive : LetteredPatchArchives(dataDir))
+        chain.push_back(archive);
+
+    return chain;
+}
+
+void LoadClientArchives(int const locale)
+{
+    uint32 opened = 0;
+    for (std::string const& archive : ClientArchiveChain(locale))
+    {
+        if (!FileExists(archive.c_str()))
+            continue;
+
+        std::size_t const before = gOpenArchives.size();
+        new MPQArchive(archive.c_str());
+        if (gOpenArchives.size() > before)
+            ++opened;
+    }
+    printf("Opened %u client archives\n", opened);
 }
 
 inline void CloseMPQFiles()
@@ -1197,7 +1271,7 @@ int main(int argc, char* arg[])
             printf("Detected locale: %s\n", langs[i]);
 
             //Open MPQs
-            LoadLocaleMPQFiles(i);
+            LoadClientArchives(i);
 
             if ((CONF_extract & EXTRACT_DBC) == 0)
             {
@@ -1234,8 +1308,7 @@ int main(int argc, char* arg[])
         printf("Using locale: %s\n", langs[FirstLocale]);
 
         // Open MPQs
-        LoadLocaleMPQFiles(FirstLocale);
-        LoadCommonMPQFiles();
+        LoadClientArchives(FirstLocale);
 
         ExtractCameraFiles(FirstLocale, true);
         // Close MPQs
@@ -1247,8 +1320,7 @@ int main(int argc, char* arg[])
         printf("Using locale: %s\n", langs[FirstLocale]);
 
         // Open MPQs
-        LoadLocaleMPQFiles(FirstLocale);
-        LoadCommonMPQFiles();
+        LoadClientArchives(FirstLocale);
 
         // Extract maps
         ExtractMapsFromMpq(build);

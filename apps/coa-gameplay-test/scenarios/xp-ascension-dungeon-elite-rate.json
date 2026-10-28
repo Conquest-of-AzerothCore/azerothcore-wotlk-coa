@@ -1,7 +1,15 @@
 {
   "schema": 1,
   "name": "Kill XP: Ascension dungeon-elite rate",
-  "contract": "Uses the live Ascension realm rates captured in PR #4128 (Rate.XP.Global 0.9295, Rate.XP.Kill 1.0909091, Rate.XP.DungeonElite 2.175) with no source-config override of those keys. The Stormwind Stockade (map 34) is level 1-60 content, so a level-20 player killing a level-20 elite there has a base gain of 145; the award truncates 145*2.175*1.0909091 = 344, then Rate.XP.Global gives 319. Stock AzerothCore awarded 290.",
+  "contract": [
+    "Uses the live Ascension realm rates captured in PR #4128 (Rate.XP.Global 0.9295, Rate.XP.Kill 1.0909091,",
+    "Rate.XP.DungeonElite 2.175) with no source-config override of those keys. The Stormwind Stockade (map 34) is",
+    "level 1-60 content, so a level-20 player killing a level-20 elite there has a base gain of 145; the award",
+    "truncates 145*2.175*1.0909091 = 344, then Rate.XP.Global gives 319. Stock AzerothCore awarded 290.",
+    "Each attacker uses a native Deadly Bronze Poniard (3490), learned daggers, level-20 weapon skill, hit rating",
+    "and expertise. Real melee damage and enemy death are prerequisites; reward assertions retain the original",
+    "spell and XP expectations."
+  ],
   "timeout_ms": 120000,
   "location": {
     "map": 34,
@@ -16,7 +24,9 @@
       "id": "delver",
       "race": 1,
       "class": 1,
-      "level": 20
+      "level": 20,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
     }
   ],
   "creatures": [
@@ -34,6 +44,42 @@
       "action": "wait",
       "label": "Let spawn AI settle",
       "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "delver",
+      "spell": 1180
+    },
+    {
+      "action": "add_item",
+      "actor": "delver",
+      "item": 3490,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "delver",
+      "item": 3490,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "delver",
+      "skill": 173,
+      "value": 100,
+      "maximum": 100
+    },
+    {
+      "action": "assert",
+      "actor": "delver",
+      "metric": "melee_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "delver",
+      "metric": "expertise",
+      "min": 100
     },
     {
       "action": "command",
@@ -63,6 +109,13 @@
       "metric": "alive",
       "equals": 0,
       "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "actor": "delver",
+      "metric": "melee_damage_count",
+      "min": 1,
+      "label": "A trained weapon lands a real damaging kill before evaluating the reward"
     },
     {
       "action": "assert",

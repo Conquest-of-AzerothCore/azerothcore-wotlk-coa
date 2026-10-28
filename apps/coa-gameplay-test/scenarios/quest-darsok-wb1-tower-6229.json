@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Darsok Swiftdagger stands on top of the patch-WB1 Crossroads tower (#6229)",
+  "contract": [
+    "Report #6229: Darsok Swiftdagger (3449) is not on top of the Crossroads tower, so his quests cannot be taken there.",
+    "Patch-WB1 moved the Crossroads tower; the client QuestSuperTrack point for Darsok is -516.888, -2597.390, 129.469 on map 1.",
+    "Darsok's spawn 14415 is a quest giver (npcflag 2) for Harpy Raiders 867 (MinLevel 12, AllowableRaces 690).",
+    "A level 12 orc standing at that tower-top point in the world phase must find Darsok within quest-giver reach (30 yards) and take quest 867 from him; the stock spawn point (-474.894, -2607.74) is 43 yards away."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "orc", "race": 2, "class": 1, "level": 12 }
+  ],
+  "location": { "map": 1, "x": -514.888, "y": -2597.39, "z": 129.469, "o": 3.14 },
+  "steps": [
+    { "action": "set_phase", "label": "Join the world phase Darsok is spawned in", "actor": "orc", "value": 1 },
+    { "action": "wait", "label": "Let the grid load", "ms": 3000 },
+    { "action": "assert", "label": "Darsok's spawn is nearby", "actor": "orc", "metric": "nearby_creature_count", "entry": 3449, "equals": 1 },
+    { "action": "quest_accept", "label": "Take Harpy Raiders from Darsok on the tower top", "actor": "orc", "quest": 867, "entry": 3449 },
+    { "action": "assert", "label": "Harpy Raiders is in progress", "actor": "orc", "metric": "quest_status", "quest": 867, "equals": 3, "within_ms": 3000 }
+  ]
+}

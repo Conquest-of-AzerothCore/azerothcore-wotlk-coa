@@ -1,0 +1,138 @@
+{
+  "schema": 1,
+  "name": "Gnomeregan - Tinker's Court via Dungeon Finder names Thermaplugg as the objective and completes on his kill (#5621)",
+  "contract": "#5621: in a Dungeon Finder run of a Gnomeregan wing the objective tracker read 'Defeat: Unknown'. The tracker names GetLFGBoss(), which the client resolves from the current LFG dungeon id (SMSG 0x66D) through DungeonEncounterExtra.dbc; row 382 (Mekgineer Thermaplugg 7800) is the final encounter of wing 1033 (Tinker's Court) in both the client and server DBC, and instance_encounters 382 has lastEncounterDungeon 1033 since #5164. Expected: on entering, p1 receives 0x66D carrying 1033, and crediting Thermaplugg completes the wing so the Classic Random reward of the 24-34 bracket is paid.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p1",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    },
+    {
+      "id": "p2",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    },
+    {
+      "id": "p3",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    },
+    {
+      "id": "p4",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    },
+    {
+      "id": "p5",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p2"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p3"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p4"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p5"
+    },
+    {
+      "action": "lfg_dungeon",
+      "label": "The group is assigned Gnomeregan - Tinker's Court",
+      "actor": "p1",
+      "dungeon": 1033
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p1"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p2"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p3"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p4"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p5"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: p1 enters Gnomeregan",
+      "actor": "p1",
+      "metric": "map_id",
+      "equals": 90,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the client is told its current LFG dungeon is 1033 (SMSG 0x66D), the id DungeonEncounterExtra.dbc resolves to Mekgineer Thermaplugg instead of 'Defeat: Unknown'",
+      "actor": "p1",
+      "metric": "server_packet_u32",
+      "opcode": 1645,
+      "index": 0,
+      "equals": 1033,
+      "within_ms": 5000
+    },
+    {
+      "action": "encounter_credit",
+      "label": "Mekgineer Thermaplugg, final boss of Gnomeregan - Tinker's Court, is credited",
+      "actor": "p1",
+      "entry": 7800
+    },
+    {
+      "action": "assert",
+      "label": "p1 is rewarded Classic Random 24-34 (1st) 24883: the boss kill completed the dungeon",
+      "actor": "p1",
+      "metric": "quest_rewarded",
+      "quest": 24883,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p2 is rewarded Classic Random 24-34 (1st) 24883: the boss kill completed the dungeon",
+      "actor": "p2",
+      "metric": "quest_rewarded",
+      "quest": 24883,
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "name": "Three Totems Grimtotems drop coin and Malgorm his Bracers",
+  "contract": [
+    "rev_20261004_60_coa_three_totems_mob_loot gives the Three Totems mobs the loot of stock Mulgore analogues: the",
+    "Grimtotem Warrior the Palemane Skinner's 2-11 copper, and Malgorm Hollowhoof 10-25 copper and his own Bracers",
+    "626264 every kill. Expected: a killed Warrior drops at least 2 copper, and a killed Malgorm at least 10 copper",
+    "and the Bracers."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 1,
+    "x": -2712.6,
+    "y": 19.0,
+    "z": 14.5,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 6,
+      "class": 1,
+      "level": 7,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "warrior",
+      "owner": "hero",
+      "entry": 161814,
+      "faction": 16,
+      "level": 6,
+      "health": 12,
+      "distance": 3
+    },
+    {
+      "id": "malgorm",
+      "owner": "hero",
+      "entry": 161816,
+      "faction": 16,
+      "level": 7,
+      "health": 12,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "warrior"
+    },
+    {
+      "action": "assert",
+      "actor": "warrior",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 60000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "loot_creature",
+      "actor": "hero",
+      "target": "warrior"
+    },
+    {
+      "action": "assert",
+      "label": "The Grimtotem Warrior drops coin",
+      "actor": "hero",
+      "metric": "loot_gold",
+      "min": 2
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "malgorm"
+    },
+    {
+      "action": "assert",
+      "actor": "malgorm",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 60000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "loot_creature",
+      "actor": "hero",
+      "target": "malgorm"
+    },
+    {
+      "action": "assert",
+      "label": "Malgorm drops his coin",
+      "actor": "hero",
+      "metric": "loot_gold",
+      "min": 10
+    },
+    {
+      "action": "assert",
+      "label": "Malgorm drops his Bracers",
+      "actor": "hero",
+      "metric": "loot_count",
+      "item": 626264,
+      "min": 1
+    }
+  ]
+}

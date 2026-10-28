@@ -26,6 +26,15 @@
       "level": 80
     }
   ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "primalist",
+      "entry": 36,
+      "level": 80,
+      "distance": 35
+    }
+  ],
   "steps": [
     {
       "action": "pvp",
@@ -56,7 +65,7 @@
       "actor": "primalist",
       "metric": "spell_damage_done",
       "spell": 804002,
-      "target": "enemy",
+      "target": "dummy",
       "save_as": "base_damage"
     },
     {
@@ -70,11 +79,11 @@
       "actor": "primalist",
       "metric": "spell_damage_done",
       "spell": 804002,
-      "target": "enemy",
+      "target": "dummy",
       "relative_to": "base_damage",
       "label": "ap100",
-      "min": 8,
-      "max": 9
+      "min": 7,
+      "max": 8
     },
     {
       "action": "set_aura",
@@ -105,10 +114,10 @@
       "actor": "primalist",
       "metric": "spell_damage_done",
       "spell": 804002,
-      "target": "enemy",
+      "target": "dummy",
       "relative_to": "base_damage",
       "label": "sp23",
-      "equals": 8
+      "equals": 7
     },
     {
       "action": "set_power",
@@ -161,5 +170,5 @@
       "equals": 0
     }
   ],
-  "contract": "Geode 804002 adds 34.9% generic Spell Power and 8.5% Attack Power; the physical hit grants five Rage (50 internal units) to its caster."
+  "contract": "Geode 804002 adds 34.9% generic Spell Power and 8.5% Attack Power; the physical hit grants five Rage (50 internal units) to its caster. The coefficient probes query a creature, so the normal Primalist class tuning 887019 (-15% at level 60+) multiplies them: 100 AP adds 8 or 9 before tuning and 7 or 8 after truncation (1014 x 0.85 = 861, 1023 x 0.85 = 869); 23 SP adds floor(23 x 0.349) = 8 before tuning and 7 after it (1022 x 0.85 = 868). The Rage cast still targets the enemy player."
 }

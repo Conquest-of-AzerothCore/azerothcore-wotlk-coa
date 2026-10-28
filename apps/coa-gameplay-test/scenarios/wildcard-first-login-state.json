@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "A new Wildcard Hero receives its skill card collection, card slots and scrolls on its very first login",
+  "contract": "On a Wildcard realm (CoAChallenges.GameModes.Realm = WildCard) every Hero plays Wildcard. mod-coa-challenges computes a character's game modes during the login, after the CoA scripts' initial-packet hooks ran; on a new character's first login the stored mask is still empty at that point. The Wildcard state the client needs must still arrive exactly once on that first login: the skill card collection (SMSG 0x648, all starter cards count as collected, so the Starter Skill Cards tab can slot them), the starter and roll card slots (0x624), the Scroll of Fortune tokens (0x66F), Silas' reward lists (0x6AB, 0x6B8), the pending cards (0x653) and the reroll counts (0x6EE). Player report 2026-09-30: a newly created character could not slot starter cards until it logged in again.",
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -6240.3, "y": 331.0, "z": 382.8, "o": 0},
+  "players": [
+    {"id": "fresh", "race": 7, "class": 10, "level": 1}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the first login finish", "ms": 2000},
+    {"action": "assert", "label": "The first login sends the skill card collection once", "actor": "fresh", "metric": "server_packets", "opcode": 1608, "equals": 1},
+    {"action": "assert", "label": "the skill card slots", "actor": "fresh", "metric": "server_packets", "opcode": 1572, "equals": 1},
+    {"action": "assert", "label": "the Scroll of Fortune tokens", "actor": "fresh", "metric": "server_packets", "opcode": 1647, "equals": 1},
+    {"action": "assert", "label": "Silas' reward list", "actor": "fresh", "metric": "server_packets", "opcode": 1707, "equals": 1},
+    {"action": "assert", "label": "the claimed rewards", "actor": "fresh", "metric": "server_packets", "opcode": 1720, "equals": 1},
+    {"action": "assert", "label": "the pending cards", "actor": "fresh", "metric": "server_packets", "opcode": 1619, "equals": 1},
+    {"action": "assert", "label": "and the reroll counts", "actor": "fresh", "metric": "server_packets", "opcode": 1774, "equals": 1}
+  ]
+}

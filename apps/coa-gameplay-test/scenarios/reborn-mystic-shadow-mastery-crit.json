@@ -1,0 +1,124 @@
+{
+ "schema": 1,
+ "name": "Warcraft Reborn Mystic Enchant Shadow Mastery adds 5 points of Mind Flay critical strike chance",
+ "contract": [
+  "Shadow Mastery 1134970 reads \"increases ... the critical strike chance of your Mind Flay by 5%\". Its effect is a positive percent critical strike chance modifier, which multiplied a base of 0 and did nothing."
+ ],
+ "timeout_ms": 90000,
+ "players": [
+  {
+   "id": "w",
+   "race": 1,
+   "class": 5,
+   "level": 80,
+   "melee_hit_rating": 10000,
+   "spell_hit_rating": 10000,
+   "expertise_rating": 10000
+  }
+ ],
+ "creatures": [],
+ "steps": [
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 43,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 44,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 54,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 55,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 160,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 172,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 95,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "add_item",
+   "actor": "w",
+   "item": 36500
+  },
+  {
+   "action": "equip",
+   "actor": "w",
+   "item": 36500,
+   "slot": 15
+  },
+  {
+   "action": "set_aura",
+   "actor": "w",
+   "spell": 1134970,
+   "stacks": 1
+  },
+  {
+   "action": "wait",
+   "ms": 500
+  },
+  {
+   "action": "assert",
+   "actor": "w",
+   "metric": "aura",
+   "label": "enchant aura active",
+   "spell": 1134970,
+   "equals": 1
+  },
+  {
+   "action": "assert",
+   "actor": "w",
+   "metric": "aura_amount",
+   "label": "effect 1 amount 3",
+   "spell": 1134970,
+   "effect": 0,
+   "equals": 3
+  },
+  {
+   "action": "assert",
+   "actor": "w",
+   "metric": "spell_modifier",
+   "label": "Mind Flay (1508381): op 7 1000 -> 1005",
+   "spell": 1508381,
+   "op": 7,
+   "base": 1000,
+   "min": 1004.49,
+   "max": 1005.51
+  }
+ ]
+}

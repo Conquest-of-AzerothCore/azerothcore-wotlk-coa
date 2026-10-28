@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "The Treasure Keeper companions serve in PvE and refuse War Mode and High-Risk",
-  "contract": "Both companions summon through their own spells as minipets (SummonProperties 41: control pet, slot 5), and the summoned companion is a banker in the only sense the server cares about: it carries UNIT_NPC_FLAG_BANKER, the flag the core's own bank handler asks the unit for, so the client's click - CMSG_BANKER_ACTIVATE with the pet's GUID - is answered with the character's native bank window (SMSG_SHOW_BANK). Each draws at the display and scale its item promises, and either one replaces the other, so a character keeps one companion at a time. The rulesets are three separate states. PvE (the marker 9931032, which the client builds on top of the shared War Mode aura) keeps the companion; War Mode (that same aura with no marker) and High-Risk (1004019) refuse the summon, while a companion that is already out keeps its banker flag, stays clickable, and has that click answered with the reason instead of a bank window. A companion serves whoever clicks it: the window the core opens is the clicker's own bank, so a second character clicking the same keeper gets their bank under the same rules, read from themselves. A city is exempt from all of it, because a city is not open world and the rulesets cannot reach a character inside one: in Stormwind the companion summons and its click opens the bank while War Mode is on. Every refusal is sent both to the chat log and to the middle of the screen (SMSG_NOTIFICATION), from one string. An allowed summon says nothing in chat, so those two states stay indistinguishable on the client by design, and the ruleset each attempt was judged under is in the log instead. The refusal is the module's own: the client is sent SPELL_FAILED_DONT_REPORT (27) and the player is told why in chat instead. A summon cast inside the global cooldown is queued by the realm's own spell queue rather than executed, so each cast here is followed by a window rather than by an instant read.",
+  "contract": "Both companions summon through their own spells as minipets (SummonProperties 41: control pet, slot 5), and the summoned companion is a banker in the only sense the server cares about: it carries UNIT_NPC_FLAG_BANKER, the flag the core's own bank handler asks the unit for, so the client's click - CMSG_BANKER_ACTIVATE with the pet's GUID - is answered with the character's native bank window (SMSG_SHOW_BANK). Each draws at the display and scale its item promises, and either one replaces the other, so a character keeps one companion at a time. The rulesets are three separate states. PvE (the PvE Mode aura 9931032 alone, without the War Mode aura) keeps the companion; War Mode (1004119) and High-Risk (1004019) refuse the summon, while a companion that is already out keeps its banker flag, stays clickable, and has that click answered with the reason instead of a bank window. A companion serves whoever clicks it: the window the core opens is the clicker's own bank, so a second character clicking the same keeper gets their bank under the same rules, read from themselves. A city is exempt from all of it, because a city is not open world and the rulesets cannot reach a character inside one: in Stormwind the companion summons and its click opens the bank while War Mode is on. Every refusal is sent both to the chat log and to the middle of the screen (SMSG_NOTIFICATION), from one string. An allowed summon says nothing in chat, so those two states stay indistinguishable on the client by design, and the ruleset each attempt was judged under is in the log instead. The refusal is the module's own: the client is sent SPELL_FAILED_DONT_REPORT (27) and the player is told why in chat instead. A summon cast inside the global cooldown is queued by the realm's own spell queue rather than executed, so each cast here is followed by a window rather than by an instant read.",
   "timeout_ms": 240000,
   "location": {
     "map": 0,
@@ -76,9 +76,9 @@
       "actor": "keeper",
       "metric": "aura",
       "spell": 1004119,
-      "equals": 1,
+      "equals": 0,
       "within_ms": 4000,
-      "label": "The set the client shows as War Mode is part of what the client calls PvE"
+      "label": "The PvE set carries no War Mode aura, so the character shows only PvE Mode"
     },
     {
       "action": "snapshot",
@@ -565,9 +565,9 @@
       "actor": "keeper",
       "metric": "aura",
       "spell": 1004119,
-      "equals": 1,
+      "equals": 0,
       "within_ms": 4000,
-      "label": "whose set includes the aura the client shows as War Mode"
+      "label": "and the War Mode aura is removed, so only PvE Mode is shown"
     },
     {
       "action": "assert",

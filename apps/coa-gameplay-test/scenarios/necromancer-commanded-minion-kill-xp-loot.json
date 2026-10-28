@@ -1,0 +1,168 @@
+{
+  "schema": 1,
+  "name": "Necromancer: a mob killed by a commanded Ghoul is worth experience and loot (#4011, #4875)",
+  "contract": [
+    "A Necromancer who orders a Ghoul at a mob has used an ability on that mob, so the mob belongs to that",
+    "player. Creature::LowerPlayerDamageReq only records _damagedByPlayer from a player, from a unit a player",
+    "moves, from a unit a player charms or from a player-controlled unit owned by a player (7f7131c76, #4221),",
+    "and a Necromancer Guardian is none of those, so a Ghoul-only kill leaves",
+    "Creature::IsDamageEnoughForLootingAndReward false and Unit::Kill clears the loot recipient. Casting Command:",
+    "Undead 504868 on a mob must therefore hand that mob to the caster: the Ghoul kills it alone, the caster's",
+    "experience rises and the caster may loot it. Kobold 6 has random item drops but guarantees 1\u20135 copper in the",
+    "effective creature template. Open the corpse in interaction range and collect its money through the native",
+    "loot handler; item drop RNG is outside the ownership contract."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "necro",
+      "race": 5,
+      "class": 23,
+      "level": 20,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "kobold",
+      "owner": "necro",
+      "entry": 6,
+      "faction": 7,
+      "level": 18,
+      "health": 300,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 500971
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 504868
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 0,
+      "value": 500
+    },
+    {
+      "action": "cast",
+      "label": "Raise a Ghoul",
+      "actor": "necro",
+      "spell": 500971
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: one Ghoul is raised",
+      "actor": "necro",
+      "metric": "owned_creature_count",
+      "entry": 50073,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Let the Ghoul take its formation place",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "necro",
+      "metric": "xp",
+      "save_as": "xp_before"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Necromancer never swung at the kobold",
+      "actor": "necro",
+      "metric": "melee_attack_count",
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Command: Undead on the kobold",
+      "actor": "necro",
+      "spell": 504868,
+      "target": "kobold"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Ghoul kills the kobold",
+      "actor": "kobold",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 120000
+    },
+    {
+      "action": "assert",
+      "label": "A minion-only kill of a mob the player commanded is worth experience",
+      "actor": "necro",
+      "metric": "xp",
+      "relative_to": "xp_before",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The experience did not cross a level, so the delta is meaningful",
+      "actor": "necro",
+      "metric": "level",
+      "equals": 20
+    },
+    {
+      "action": "snapshot",
+      "actor": "necro",
+      "metric": "carried_money",
+      "save_as": "money_before_loot"
+    },
+    {
+      "action": "loot_nearby",
+      "actor": "necro",
+      "entry": 6
+    },
+    {
+      "action": "assert",
+      "actor": "necro",
+      "metric": "loot_gold",
+      "min": 1,
+      "label": "The commanding player can open the kobold\u2019s guaranteed copper loot"
+    },
+    {
+      "action": "loot_money",
+      "actor": "necro"
+    },
+    {
+      "action": "assert",
+      "actor": "necro",
+      "metric": "carried_money",
+      "relative_to": "money_before_loot",
+      "min": 1,
+      "label": "The commanding player receives the guaranteed copper"
+    }
+  ]
+}

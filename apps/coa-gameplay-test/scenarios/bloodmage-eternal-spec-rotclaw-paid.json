@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Eternal grants Eternal Curse for free and sells Rotclaw for its specialization point (#1416)",
+  "contract": "#1416 expects choosing the Eternal specialization to give Rotclaw 804197 automatically, as the other Bloodmage specializations give their first-row form, and reports that Eternal's form does not replace Blood Curse. CharacterAdvancement.dbc, class 20: the free first-row forms are cost-0 entries whose description transforms Blood Curse 562720 - Sanguine Essence 505188 (entry 7750, Fleshweaver, needs Fleshcraft 29629 and identity 9905), Transgression 504728 (entry 31175, Sanguine, needs 4025 and Scarlet Delirium 29543) and Accursed Form 504710 (entry 29485, Accursed, needs 4026), each reading 'Transforms your Blood Curse into ...'. Eternal's (ChrSpecs 99, tab PACKLEADER) cost-0 entry is its identity Eternal Curse 92114 (entry 4027, needs Blood Pact 31117), whose description is 'Teaches you Eternal Curse and allows you to dual wield' (800157 and 674), not a Blood Curse transformation. Rotclaw is entry 30191 on the same tab with TalentEssenceCost 1, an ordinary specialization talent. CharacterAdvancementEssence gives class 20 one class and one specialization point at level 11. Expected: after Eternal and Blood Pact the Bloodmage owns 92114 and 800157, Blood Curse stays unreplaced, Rotclaw is not owned, and the specialization point buys it.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "bloodmage", "race": 1, "class": 20, "level": 11 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks and class synchronisation settle", "ms": 5000 },
+    { "action": "learn", "label": "Blood Curse fixture: level grants are not auto-learned", "actor": "bloodmage", "spell": 562720 },
+    { "action": "specialization", "label": "Choose Eternal", "actor": "bloodmage", "id": 99 },
+    {
+      "action": "advancement_rank", "label": "Choose the class talent Blood Pact", "actor": "bloodmage",
+      "entry": 31117, "rank": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: Blood Pact is owned", "actor": "bloodmage",
+      "metric": "knows_spell", "spell": 801955, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Eternal's free first-row node, Eternal Curse, is granted", "actor": "bloodmage",
+      "metric": "knows_spell", "spell": 92114, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Eternal Curse teaches its Cursed Form", "actor": "bloodmage",
+      "metric": "knows_spell", "spell": 800157, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Eternal Curse teaches rather than replaces Blood Curse", "actor": "bloodmage",
+      "metric": "temporary_spell_replacement", "spell": 562720, "equals": 562720
+    },
+    {
+      "action": "assert", "label": "Rotclaw is a paid talent, not granted with the specialization", "actor": "bloodmage",
+      "metric": "knows_spell", "spell": 804197, "equals": 0
+    },
+    {
+      "action": "advancement_rank", "label": "Spend the specialization point on Rotclaw", "actor": "bloodmage",
+      "entry": 30191, "rank": 1
+    },
+    {
+      "action": "assert", "label": "The specialization point buys Rotclaw", "actor": "bloodmage",
+      "metric": "knows_spell", "spell": 804197, "equals": 1, "within_ms": 3000
+    }
+  ]
+}

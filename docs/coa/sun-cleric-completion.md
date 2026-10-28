@@ -28,9 +28,10 @@ Vow modifier. Incoming spells from another player cannot borrow that player's Da
 Vow of Light therefore fulfills from a compatible own selected event, such as a self heal.
 
 Generation is blocked while Dawn exists and during its selected result handlers, including the
-last charged channel. Dawn's school-choice flag is stored in its otherwise unused effect-1 amount
-so ordinary aura saves preserve whether Sunrise/Sunset has already been selected. Pendant refreshes
-charges/duration without rearming that choice. Finite bonuses snapshot aura generations before
+last charged channel. Dawn's school-choice flag is stored in its effect-0 amount, the proc slot the
+contract turns into a dummy, so ordinary aura saves preserve whether Sunrise/Sunset has already been
+selected. Effect 1 stays the native Dawnsear cast-time modifier that Solar Conduit raises. Pendant
+refreshes charges/duration without rearming that choice. Finite bonuses snapshot aura generations before
 effects and consume only those generations; Hot Spot and Learning Light keep two/three charges.
 Bulwark consumes only block/full-block events and preserves saved remaining charges on load.
 
@@ -211,21 +212,25 @@ under `apps/coa-gameplay-test/scenarios/sun-cleric-*.json` rather than by new co
 |---|---|---|
 | #171 | Sun Cleric Valkerie Spec - Valkerie Tree |  |
 | #323 | SUN CLERIC SULAR POWER |  |
-| #708 | Burn The Heretics | 560857 |
-| #733 | Blightbreaker | 707433 |
 | #1505 | Sun Cleric Dawn -> Radiant Conversion Do |  |
 | #1511 | Sun Cleric Vow of Light has no effect |  |
-| #1562 | Solar Conduit | 300321 |
 | #3110 | The Chosen King | 707079 |
 | #4071 | Vow of Dawn animations (Sun Cleric) |  |
 
-- **#733 Blightbreaker** and **#1562 Solar Conduit** were first closed as already correct and the
-  closure was withdrawn when their scenarios failed on a live worldserver. For #1562 the cause is
-  known: `aura_ascension_sun_cleric_lifecycle::Calculate` pins Dawn's effect-1 amount to 1, a value
-  `ActivateDawn` reuses as the Sunrise/Sunset school-choice flag, so Solar Conduit's
-  `SPELLMOD_EFFECT2` boost lands and is overwritten before any cast reads it. Fixing it means moving
-  that flag off the effect amount, which is wider than this batch.
+- **#1562 Solar Conduit** was first closed as already correct and the closure was withdrawn when its
+  scenario failed on a live worldserver. Dawn's effect 1 is the `SPELLMOD_CASTING_TIME` modifier on
+  Dawnsear that Solar Conduit's `SPELLMOD_EFFECT2` raises to -20%, but the contract turned it into a
+  dummy and `aura_ascension_sun_cleric_lifecycle::Calculate` pinned its amount to 1 as the
+  Sunrise/Sunset school-choice flag. The flag now lives on effect 0 and effect 1 stays native
+  (`sun-cleric-solar-conduit-dawnsear`).
 - **#323** (Solar Power resource display) and **#171** (empty Valkyrie talent tab) are client-side:
   no server metric exists for either.
-- **#708**, **#3110**, **#1505**, **#1511** and **#4071** each have a tooltip clause with no
+- **#3110**, **#1505**, **#1511** and **#4071** each have a tooltip clause with no
   server-side mechanism to carry it; the measurable halves are covered by scenarios.
+- **#708 Burn The Heretics** was listed here for its Scorch Marks clause, but Scorch Marks is the
+  finite aura 807059 that Radiant Flame consumes in `Finish`. Since 2026-09-27 that consumption grants
+  the named buff 560856 to a caster with 560857 (`sun-cleric-burn-the-heretics-scorch-marks`).
+- **#733 Blightbreaker** was withdrawn together with #1562, but Mercy chains to nearby allies
+  (`sun-cleric-mercy`), so reading the aura without naming its caster could pick up another cleric's
+  3000 ms Mercy. With one caster and caster-named reads, Mercy ticks every 1500 ms and costs twice as
+  much (`sun-cleric-blightbreaker-mercy`).

@@ -67,7 +67,7 @@ public:
         return commandTable;
     }
 
-    static bool HandleGMTicketAssignToCommand(ChatHandler* handler, uint32 ticketId, std::string target)
+    static bool HandleGMTicketAssignToCommand(ChatHandler* handler, uint32 ticketId, QuotedString target)
     {
         if (!normalizePlayerName(target))
             return false;
@@ -392,7 +392,7 @@ public:
         return true;
     }
 
-    static bool HandleGMTicketGetByNameCommand(ChatHandler* handler, std::string name)
+    static bool HandleGMTicketGetByNameCommand(ChatHandler* handler, QuotedString name)
     {
         if (!normalizePlayerName(name))
             return false;

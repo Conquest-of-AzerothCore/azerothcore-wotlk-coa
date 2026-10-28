@@ -28,6 +28,7 @@
 #include "IPLocation.h"
 #include "Language.h"
 #include "Player.h"
+#include "ObjectAccessor.h"
 #include "RBAC.h"
 #include "Realm.h"
 #include "ScriptMgr.h"
@@ -103,10 +104,34 @@ public:
 
         static ChatCommandTable commandTable =
         {
-            { "account", accountCommandTable }
+            { "account", accountCommandTable },
+            { "raf", HandleRecruitAFriendCommand, rbac::RBAC_PERM_COMMAND_ACCOUNT, Console::No }
         };
 
         return commandTable;
+    }
+
+    static bool HandleRecruitAFriendCommand(ChatHandler* handler, char const* args)
+    {
+        if (!args || !*args)
+        {
+            handler->SendSysMessage("Usage: .raf <online player>. The recipient must accept the permanent account link.");
+            return false;
+        }
+
+        std::string name(args);
+        if (name == "status" || name == "rewards" || name == "claim" || name.rfind("claim ", 0) == 0)
+            return handler->GetSession()->HandleRecruitAFriendRewardsCommand(name);
+
+        if (!normalizePlayerName(name))
+        {
+            handler->SendErrorMessage("Enter a valid character name. Usage: .raf <CharacterName>.");
+            return false;
+        }
+
+        Player* target = ObjectAccessor::FindPlayerByName(name);
+        handler->GetSession()->InviteRecruitAFriend(target);
+        return true;
     }
 
     static bool HandleAccount2FASetupCommand(ChatHandler* handler, char const* args)

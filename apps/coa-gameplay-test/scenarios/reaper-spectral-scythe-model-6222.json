@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "The Spectral Scythe keeps its scythe model instead of turning into a pig (#7914)",
+  "contract": [
+    "Spectral Scythe 250305 (display 25398, the runebladed sword model) carries Spectral Scythe Passive 500485, whose",
+    "periodic trigger casts Show Weapons Only 707188. Its effect 1 transforms the caster into creature 427586, which",
+    "does not exist in the world database, so the core fell back to the pink pig 16358. The transform is now a dummy",
+    "and the Scythe keeps its own display."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "reaper", "race": 5, "class": 30, "level": 45 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "learn", "actor": "reaper", "spell": 500484 },
+    { "action": "grant_resource", "actor": "reaper", "spell": 500363, "amount": 1 },
+    { "action": "cast", "label": "Spectral Scythe", "actor": "reaper", "spell": 500484 },
+    { "action": "assert", "label": "SETUP: the Spectral Scythe is summoned", "actor": "reaper", "metric": "owned_creature_count", "entry": 250305, "min": 1, "within_ms": 3000 },
+    { "action": "wait", "label": "Let the passive's periodic trigger run", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the Scythe shows its own model, not the pig", "actor": "reaper", "metric": "owned_creature_display", "entry": 250305, "equals": 25398 }
+  ]
+}

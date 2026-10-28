@@ -581,6 +581,10 @@ struct _Damage
     uint32  DamageType;                                     // id from Resistances.dbc
 };
 
+// Item spell category shared by potions and potion-like consumables (ranger waterskins declare the
+// same category and cooldown as classic potions). The client enforces this pool across spell families.
+inline constexpr uint32 SPELL_CATEGORY_SHARED_POTION_COOLDOWN = 5004;
+
 struct _ItemStat
 {
     uint32  ItemStatType;
@@ -827,6 +831,13 @@ struct ItemTemplate
     }
 
     [[nodiscard]] bool IsPotion() const { return Class == ITEM_CLASS_CONSUMABLE && SubClass == ITEM_SUBCLASS_POTION; }
+    [[nodiscard]] bool UsesSharedPotionCooldown(uint32 spellId) const
+    {
+        for (_Spell const& itemSpell : Spells)
+            if (uint32(itemSpell.SpellId) == spellId)
+                return itemSpell.SpellCategory == SPELL_CATEGORY_SHARED_POTION_COOLDOWN;
+        return false;
+    }
     [[nodiscard]] bool IsWeaponVellum() const { return Class == ITEM_CLASS_TRADE_GOODS && SubClass == ITEM_SUBCLASS_WEAPON_ENCHANTMENT; }
     [[nodiscard]] bool IsArmorVellum() const { return Class == ITEM_CLASS_TRADE_GOODS && SubClass == ITEM_SUBCLASS_ARMOR_ENCHANTMENT; }
     [[nodiscard]] bool IsConjuredConsumable() const { return Class == ITEM_CLASS_CONSUMABLE && HasFlag(ITEM_FLAG_CONJURED); }

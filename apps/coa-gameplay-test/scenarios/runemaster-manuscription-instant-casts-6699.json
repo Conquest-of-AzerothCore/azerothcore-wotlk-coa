@@ -1,0 +1,175 @@
+{
+  "schema": 1,
+  "name": "Chapter of Frost fires on instant Thaumaturgy (#6699)",
+  "contract": "Chapter of Frost525400 must expend one of its ten charges and emit525401 native damage after an instant direct Thaumaturgy804550 cast.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "rune",
+      "race": 1,
+      "class": 32,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "rune",
+      "spell": 804550
+    },
+    {
+      "action": "set_aura",
+      "actor": "rune",
+      "spell": 525400,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rune",
+      "metric": "aura_charges",
+      "spell": 525400,
+      "equals": 10
+    },
+    {
+      "action": "cast",
+      "actor": "rune",
+      "spell": 804550,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "rune",
+      "metric": "cast_failure",
+      "spell": 804550,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "rune",
+      "metric": "spell_damage_count",
+      "spell": 525401,
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "rune",
+      "metric": "aura_charges",
+      "spell": 525400,
+      "equals": 9
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rune",
+      "spell": 804550
+    },
+    {
+      "action": "cast",
+      "actor": "rune",
+      "spell": 804550,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "rune",
+      "metric": "spell_damage_count",
+      "spell": 525401,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "rune",
+      "metric": "aura_charges",
+      "spell": 525400,
+      "equals": 8
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "rune",
+      "spell": 802202
+    },
+    {
+      "action": "cast",
+      "actor": "rune",
+      "spell": 802202,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "rune",
+      "metric": "cast_failure",
+      "spell": 802202,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "rune",
+      "metric": "spell_damage_count",
+      "spell": 525401,
+      "equals": 3,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "rune",
+      "metric": "aura_charges",
+      "spell": 525400,
+      "equals": 7
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "rune",
+      "spell": 525400
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rune",
+      "spell": 804550
+    },
+    {
+      "action": "cast",
+      "actor": "rune",
+      "spell": 804550,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "rune",
+      "metric": "spell_damage_count",
+      "spell": 525401,
+      "equals": 3
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "rune",
+      "entry": 36,
+      "health": 100000,
+      "level": 60,
+      "distance": 3
+    }
+  ]
+}

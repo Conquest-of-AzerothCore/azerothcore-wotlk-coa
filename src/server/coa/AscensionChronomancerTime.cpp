@@ -53,8 +53,14 @@ enum TimeSpells : uint32
     TimeOutStasis = 802228,
     ExpeditingTime = 706055,
     BorrowedTime = 680373,
-    BorrowedTimeHeal = 680374
+    BorrowedTimeHeal = 680374,
+    RapidAcceleration = 570149,
+    RapidAccelerationHeal = 804500,
+    SingularityCoreTrigger = 804437,
+    SpellRangeThirtyYards = 4
 };
+
+constexpr int32 PrivatePeriodicSpellPowerCoefficientPct = 40;
 
 Player* Chronomancer(Unit* caster)
 {
@@ -136,6 +142,18 @@ void ExtendRecovery(Player* player, Unit* target)
         recovery->SetMaxDuration(recovery->GetMaxDuration() + extension);
         recovery->SetDuration(recovery->GetDuration() + extension);
     }
+}
+
+void ApplyRapidAcceleration(Player* player, Unit* target, Aura* recovery)
+{
+    AuraEffect const* periodic = recovery->GetEffect(EFFECT_0);
+    if (!periodic || !player->HasAura(RapidAcceleration))
+        return;
+    uint64 total = uint64(std::max(0, periodic->GetAmount())) * uint64(std::max(0, periodic->GetTotalTicks()));
+    uint64 heal = total * uint64(std::clamp(Amount(RapidAcceleration, EFFECT_1), 0, 100)) / 100;
+    if (heal)
+        player->CastCustomSpell(RapidAccelerationHeal, SPELLVALUE_BASE_POINT0,
+            int32(std::min<uint64>(heal, uint64(std::numeric_limits<int32>::max()))), target, true);
 }
 
 void ApplyEpochAeon(Player* player, Unit* target, uint32 healing, uint32 healingIncludingOverheal)
@@ -266,7 +284,10 @@ public:
         if (IsRank(id, Recovery))
         {
             if (Aura* aura = target->GetAuraOfRankedSpell(Recovery, player->GetGUID()))
+            {
                 aura->SetScriptValue(Fortify, 0);
+                ApplyRapidAcceleration(player, target, aura);
+            }
             if (!spell->IsTriggered() && player->HasAura(KeepAccelerating))
                 SpreadRecovery(player, target, KeepAcceleratingSpread);
         }
@@ -369,6 +390,8 @@ void ApplyTimeContracts(SpellInfo* info)
     }
     if (info->SpellFamilyName != 28)
         return;
+    if (info->Id == SingularityCoreTrigger && info->Effects[EFFECT_0].Effect == SPELL_EFFECT_NORMALIZED_WEAPON_DMG)
+        info->RangeEntry = sSpellRangeStore.LookupEntry(SpellRangeThirtyYards);
     if (IsRank(info->Id, Fortify))
         info->Effects[EFFECT_1].Effect = 0;
     if (info->Id == Sands)
@@ -397,12 +420,24 @@ void ApplyTimeContracts(SpellInfo* info)
     }
     if (info->Id == Renewal)
         info->AttributesCu |= SPELL_ATTR0_CU_AURA_CANNOT_BE_SAVED;
+    if (info->Id == OvercorrectionHeal)
+        info->AscensionInheritsResolvedAmount = true;
     if (info->Id == Renewal || info->Id == Protection || info->Id == OvercorrectionHeal)
     {
         info->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT;
         info->AttributesEx3 |= SPELL_ATTR3_IGNORE_CASTER_MODIFIERS;
         info->AttributesEx4 |= SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS;
         info->AttributesEx6 |= SPELL_ATTR6_IGNORE_HEALTH_MODIFIERS;
+        info->Effects[EFFECT_0].BonusMultiplier = 0.0f;
+    }
+    if (info->Id == RapidAcceleration && info->Effects[EFFECT_0].IsAura(SPELL_AURA_ADD_PCT_MODIFIER) &&
+        info->Effects[EFFECT_0].MiscValue == PrivatePeriodicSpellPowerCoefficientPct)
+        info->Effects[EFFECT_0].MiscValue = SPELLMOD_BONUS_MULTIPLIER;
+    if (info->Id == RapidAccelerationHeal)
+    {
+        info->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT;
+        info->AttributesEx3 |= SPELL_ATTR3_IGNORE_CASTER_MODIFIERS;
+        info->Effects[EFFECT_0].RealPointsPerLevel = 0.0f;
         info->Effects[EFFECT_0].BonusMultiplier = 0.0f;
     }
 }

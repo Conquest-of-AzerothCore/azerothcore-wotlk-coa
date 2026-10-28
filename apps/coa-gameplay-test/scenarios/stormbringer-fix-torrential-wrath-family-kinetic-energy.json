@@ -1,7 +1,29 @@
 {
   "schema": 1,
   "name": "Stormbringer: Kinetic Energy stacks when Torrential Wrath or Deluge is cast (#3636)",
-  "contract": "Kinetic Energy 806409 reads 'Casting Torrential Wrath or Deluge now grants you a stack of Kinetic Energy.' Its single effect is aura 42 (SPELL_AURA_PROC_TRIGGER_SPELL) with TriggerSpell 806410 and TargetA 1 (caster); the buff 806410 is SPELL_AURA_MOD_CRIT_PCT with EffectBasePoints 1 + EffectDieSides 1 = 2, StackAmount 3 and DurationIndex 29 = 12000 ms, and aura 290 is handled natively (AuraEffect::HandleAuraModCritPct, read back through Player::UpdateSpellCritChance). Spell.dbc gives 806409 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it ('Skip if no proc flags in DBC') and Aura::GetProcEffectMask returned 0: nothing ever cast 806410. The aura-42 effect also carries EffectSpellClassMask 0/0/0, so the 'Torrential Wrath or Deluge' restriction only exists once a spell_proc row supplies SpellFamilyName 22 with SpellFamilyMask1 0x8001 (Torrential Wrath bit 0, Deluge bit 15). Expected amounts are read from 806410's own fields: 2 per stack, 2 x 3 = 6 at the cap of 3 stacks, because AuraEffect::CalculateAmount multiplies by the stack amount. Torrential Wrath 804017 has CastingTimeIndex 19 = 2500 ms, which is why each cast is given a 3500 ms window; it also carries CasterAuraSpell 573249 ('At Least 40 Static'), one of the ResourceThresholdRules in AscensionCustomResourceData.h ({16, 803102, 40, 573249}) that AscensionCompat::SynchronizeThresholdResources applies whenever the caster holds at least 40 stacks of Static (803102), so the fixture sets Static to 100 before the first cast (Spell::CheckCast, Spell.cpp:5858, otherwise returns SPELL_FAILED_CASTER_AURASTATE); Torrential Wrath itself has no ResourceConsumption rule and does not spend Static. Deluge 806400 is instant, ground targeted (TargetA 16), costs 50 Static (AscensionCustomResourceData.h) and requires its own CasterAuraSpell 707050 ('At Least 50 Static'), already covered by the same Static fixture reapplied before its cast; Stormflow 567555 is family 22 with SpellFamilyFlags1 0x10000, outside the mask, and is the negative control.",
+  "contract": [
+    "Kinetic Energy 806409 reads 'Casting Torrential Wrath or Deluge now grants you a stack of Kinetic",
+    "Energy.' Its single effect is aura 42 (SPELL_AURA_PROC_TRIGGER_SPELL) with TriggerSpell 806410 and",
+    "TargetA 1 (caster); the buff 806410 is SPELL_AURA_MOD_CRIT_PCT with EffectBasePoints 1 + EffectDieSides",
+    "1 = 2, StackAmount 3 and DurationIndex 29 = 12000 ms, and aura 290 is handled natively",
+    "(AuraEffect::HandleAuraModCritPct, read back through Player::UpdateSpellCritChance). Spell.dbc gives",
+    "806409 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it ('Skip if no",
+    "proc flags in DBC') and Aura::GetProcEffectMask returned 0: nothing ever cast 806410. The aura-42 effect",
+    "also carries EffectSpellClassMask 0/0/0, so the 'Torrential Wrath or Deluge' restriction only exists",
+    "once a spell_proc row supplies SpellFamilyName 22 with SpellFamilyMask1 0x8001 (Torrential Wrath bit 0,",
+    "Deluge bit 15). Expected amounts are read from 806410's own fields: 2 per stack, 2 x 3 = 6 at the cap of",
+    "3 stacks, because AuraEffect::CalculateAmount multiplies by the stack amount. Torrential Wrath 804017",
+    "has CastingTimeIndex 19 = 2500 ms, which is why each cast is given a 3500 ms window; it also carries",
+    "CasterAuraSpell 573249 ('At Least 40 Static'), one of the ResourceThresholdRules in",
+    "AscensionCustomResourceData.h ({16, 803102, 40, 573249}) that",
+    "AscensionCompat::SynchronizeThresholdResources applies whenever the caster holds at least 40 stacks of",
+    "Static (803102), so the fixture sets Static to 100 before every cast (Spell::CheckCast, Spell.cpp:5858,",
+    "otherwise returns SPELL_FAILED_CASTER_AURASTATE); the effective ResourceConsumption rule charges 40",
+    "Static for each Torrential Wrath. Deluge 806400 is instant, ground targeted (TargetA 16), costs 50",
+    "Static (AscensionCustomResourceData.h) and requires its own CasterAuraSpell 707050 ('At Least 50",
+    "Static'), already covered by the same Static fixture reapplied before its cast; Stormflow 567555 is",
+    "family 22 with SpellFamilyFlags1 0x10000, outside the mask, and is the negative control."
+  ],
   "timeout_ms": 180000,
   "players": [
     {
@@ -30,96 +52,268 @@
     "o": 0
   },
   "steps": [
-    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
-    { "action": "learn", "actor": "storm", "spell": 804017 },
-    { "action": "learn", "actor": "storm", "spell": 806400 },
-    { "action": "learn", "actor": "storm", "spell": 567555 },
-    { "action": "learn", "actor": "storm", "spell": 806409 },
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "actor": "storm", "spell": 804017},
+    {"action": "learn", "actor": "storm", "spell": 806400},
+    {"action": "learn", "actor": "storm", "spell": 567555},
+    {"action": "learn", "actor": "storm", "spell": 806409},
     {
-      "action": "assert", "label": "SETUP: the Kinetic Energy passive is active",
-      "actor": "storm", "metric": "aura", "spell": 806409, "equals": 1
+      "action": "assert",
+      "label": "SETUP: the Kinetic Energy passive is active",
+      "actor": "storm",
+      "metric": "aura",
+      "spell": 806409,
+      "equals": 1
     },
     {
-      "action": "assert", "label": "BASELINE: no Kinetic Energy buff before any cast",
-      "actor": "storm", "metric": "aura", "spell": 806410, "equals": 0
+      "action": "assert",
+      "label": "BASELINE: no Kinetic Energy buff before any cast",
+      "actor": "storm",
+      "metric": "aura",
+      "spell": 806410,
+      "equals": 0
     },
-    { "action": "snapshot", "actor": "storm", "metric": "spell_crit_chance", "save_as": "crit_base" },
-    { "action": "set_aura", "actor": "storm", "spell": 803102, "stacks": 100 },
-    { "action": "cast", "actor": "storm", "spell": 804017, "target": "dummy" },
+    {"action": "snapshot", "actor": "storm", "metric": "spell_crit_chance", "save_as": "crit_base"},
+    {"action": "set_aura", "actor": "storm", "spell": 803102, "stacks": 100},
+    {"action": "cast", "actor": "storm", "spell": 804017, "target": "dummy"},
     {
-      "action": "assert", "label": "SETUP: the first Torrential Wrath cast was accepted",
-      "actor": "storm", "metric": "cast_failure", "spell": 804017, "equals": 0
-    },
-    {
-      "action": "assert", "label": "DISCRIMINATING: casting Torrential Wrath grants Kinetic Energy 806410",
-      "actor": "storm", "metric": "aura", "spell": 806410, "equals": 1, "within_ms": 5000
-    },
-    {
-      "action": "assert", "label": "DISCRIMINATING: one cast is one stack",
-      "actor": "storm", "metric": "aura_stacks", "spell": 806410, "equals": 1
-    },
-    {
-      "action": "assert", "label": "One stack is the DBC value of +2% critical strike chance",
-      "actor": "storm", "metric": "aura_amount", "spell": 806410, "effect": 0, "equals": 2
+      "action": "assert",
+      "label": "Torrential Wrath 1 was accepted normally",
+      "actor": "storm",
+      "metric": "cast_failure",
+      "spell": 804017,
+      "equals": 0
     },
     {
-      "action": "assert", "label": "DISCRIMINATING: the player's spell critical chance rises by 2",
-      "actor": "storm", "metric": "spell_crit_chance", "relative_to": "crit_base", "equals": 2
-    },
-    { "action": "wait", "ms": 1000 },
-    { "action": "cast", "actor": "storm", "spell": 804017, "target": "dummy" },
-    {
-      "action": "assert", "label": "DISCRIMINATING: a second cast is a second stack",
-      "actor": "storm", "metric": "aura_stacks", "spell": 806410, "equals": 2, "within_ms": 5000
-    },
-    { "action": "wait", "ms": 1000 },
-    { "action": "cast", "actor": "storm", "spell": 804017, "target": "dummy" },
-    {
-      "action": "assert", "label": "DISCRIMINATING: a third cast reaches the DBC StackAmount of 3",
-      "actor": "storm", "metric": "aura_stacks", "spell": 806410, "equals": 3, "within_ms": 5000
+      "action": "assert",
+      "label": "Torrential Wrath 1 completes and pays 40 Static",
+      "actor": "storm",
+      "metric": "aura_stacks",
+      "spell": 803102,
+      "equals": 60,
+      "within_ms": 4000
     },
     {
-      "action": "assert", "label": "Three stacks amount to 3 x 2 = 6 percentage points",
-      "actor": "storm", "metric": "aura_amount", "spell": 806410, "effect": 0, "equals": 6
+      "action": "assert",
+      "label": "SETUP: the first Torrential Wrath cast was accepted",
+      "actor": "storm",
+      "metric": "cast_failure",
+      "spell": 804017,
+      "equals": 0
     },
     {
-      "action": "assert", "label": "DISCRIMINATING: the player's spell critical chance rises by 6",
-      "actor": "storm", "metric": "spell_crit_chance", "relative_to": "crit_base", "min": 5.9, "max": 6.1
-    },
-    { "action": "wait", "ms": 1000 },
-    { "action": "cast", "actor": "storm", "spell": 804017, "target": "dummy" },
-    { "action": "wait", "ms": 3500 },
-    {
-      "action": "assert", "label": "A fourth cast stays at the cap of 3 stacks",
-      "actor": "storm", "metric": "aura_stacks", "spell": 806410, "equals": 3
+      "action": "assert",
+      "label": "DISCRIMINATING: casting Torrential Wrath grants Kinetic Energy 806410",
+      "actor": "storm",
+      "metric": "aura",
+      "spell": 806410,
+      "equals": 1,
+      "within_ms": 5000
     },
     {
-      "action": "assert", "label": "SETUP: the buff expires on its own 12 sec after the last cast",
-      "actor": "storm", "metric": "aura", "spell": 806410, "equals": 0, "within_ms": 14000
-    },
-    { "action": "set_aura", "actor": "storm", "spell": 803102, "stacks": 100 },
-    {
-      "action": "cast", "actor": "storm", "spell": 806400, "target": "dummy",
-      "destination": { "x": -8917.41, "y": -115.853, "z": 82.3711 }
-    },
-    {
-      "action": "assert", "label": "SETUP: the Deluge cast was accepted",
-      "actor": "storm", "metric": "cast_failure", "spell": 806400, "equals": 0
+      "action": "assert",
+      "label": "DISCRIMINATING: one cast is one stack",
+      "actor": "storm",
+      "metric": "aura_stacks",
+      "spell": 806410,
+      "equals": 1
     },
     {
-      "action": "assert", "label": "DISCRIMINATING: casting Deluge also grants a stack (family mask bit 15)",
-      "actor": "storm", "metric": "aura_stacks", "spell": 806410, "equals": 1, "within_ms": 5000
+      "action": "assert",
+      "label": "One stack is the DBC value of +2% critical strike chance",
+      "actor": "storm",
+      "metric": "aura_amount",
+      "spell": 806410,
+      "effect": 0,
+      "equals": 2
     },
-    { "action": "wait", "label": "Let the global cooldown from Deluge run out", "ms": 1600 },
-    { "action": "cast", "actor": "storm", "spell": 567555, "target": "dummy" },
     {
-      "action": "assert", "label": "SETUP: the Stormflow control cast was accepted",
-      "actor": "storm", "metric": "cast_failure", "spell": 567555, "equals": 0
+      "action": "assert",
+      "label": "DISCRIMINATING: the player's spell critical chance rises by 2",
+      "actor": "storm",
+      "metric": "spell_crit_chance",
+      "relative_to": "crit_base",
+      "equals": 2
     },
-    { "action": "wait", "ms": 2000 },
+    {"action": "wait", "ms": 1000},
     {
-      "action": "assert", "label": "CONTROL: Stormflow is family 22 but outside the mask and grants nothing",
-      "actor": "storm", "metric": "aura_stacks", "spell": 806410, "equals": 1
+      "action": "set_aura",
+      "label": "Fund Torrential Wrath 2 without bypassing its 40 Static cost",
+      "actor": "storm",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {"action": "cast", "actor": "storm", "spell": 804017, "target": "dummy"},
+    {
+      "action": "assert",
+      "label": "Torrential Wrath 2 was accepted normally",
+      "actor": "storm",
+      "metric": "cast_failure",
+      "spell": 804017,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Torrential Wrath 2 completes and pays 40 Static",
+      "actor": "storm",
+      "metric": "aura_stacks",
+      "spell": 803102,
+      "equals": 60,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a second cast is a second stack",
+      "actor": "storm",
+      "metric": "aura_stacks",
+      "spell": 806410,
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {"action": "wait", "ms": 1000},
+    {
+      "action": "set_aura",
+      "label": "Fund Torrential Wrath 3 without bypassing its 40 Static cost",
+      "actor": "storm",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {"action": "cast", "actor": "storm", "spell": 804017, "target": "dummy"},
+    {
+      "action": "assert",
+      "label": "Torrential Wrath 3 was accepted normally",
+      "actor": "storm",
+      "metric": "cast_failure",
+      "spell": 804017,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Torrential Wrath 3 completes and pays 40 Static",
+      "actor": "storm",
+      "metric": "aura_stacks",
+      "spell": 803102,
+      "equals": 60,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a third cast reaches the DBC StackAmount of 3",
+      "actor": "storm",
+      "metric": "aura_stacks",
+      "spell": 806410,
+      "equals": 3,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Three stacks amount to 3 x 2 = 6 percentage points",
+      "actor": "storm",
+      "metric": "aura_amount",
+      "spell": 806410,
+      "effect": 0,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the player's spell critical chance rises by 6",
+      "actor": "storm",
+      "metric": "spell_crit_chance",
+      "relative_to": "crit_base",
+      "min": 5.9,
+      "max": 6.1
+    },
+    {"action": "wait", "ms": 1000},
+    {
+      "action": "set_aura",
+      "label": "Fund Torrential Wrath 4 without bypassing its 40 Static cost",
+      "actor": "storm",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {"action": "cast", "actor": "storm", "spell": 804017, "target": "dummy"},
+    {
+      "action": "assert",
+      "label": "Torrential Wrath 4 was accepted normally",
+      "actor": "storm",
+      "metric": "cast_failure",
+      "spell": 804017,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Torrential Wrath 4 completes and pays 40 Static",
+      "actor": "storm",
+      "metric": "aura_stacks",
+      "spell": 803102,
+      "equals": 60,
+      "within_ms": 4000
+    },
+    {"action": "wait", "ms": 3500},
+    {
+      "action": "assert",
+      "label": "A fourth cast stays at the cap of 3 stacks",
+      "actor": "storm",
+      "metric": "aura_stacks",
+      "spell": 806410,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the buff expires on its own 12 sec after the last cast",
+      "actor": "storm",
+      "metric": "aura",
+      "spell": 806410,
+      "equals": 0,
+      "within_ms": 14000
+    },
+    {"action": "set_aura", "actor": "storm", "spell": 803102, "stacks": 100},
+    {
+      "action": "cast",
+      "actor": "storm",
+      "spell": 806400,
+      "target": "dummy",
+      "destination": {
+        "x": -8917.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Deluge cast was accepted",
+      "actor": "storm",
+      "metric": "cast_failure",
+      "spell": 806400,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: casting Deluge also grants a stack (family mask bit 15)",
+      "actor": "storm",
+      "metric": "aura_stacks",
+      "spell": 806410,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {"action": "wait", "label": "Let the global cooldown from Deluge run out", "ms": 1600},
+    {"action": "cast", "actor": "storm", "spell": 567555, "target": "dummy"},
+    {
+      "action": "assert",
+      "label": "SETUP: the Stormflow control cast was accepted",
+      "actor": "storm",
+      "metric": "cast_failure",
+      "spell": 567555,
+      "equals": 0
+    },
+    {"action": "wait", "ms": 2000},
+    {
+      "action": "assert",
+      "label": "CONTROL: Stormflow is family 22 but outside the mask and grants nothing",
+      "actor": "storm",
+      "metric": "aura_stacks",
+      "spell": 806410,
+      "equals": 1
     }
   ]
 }

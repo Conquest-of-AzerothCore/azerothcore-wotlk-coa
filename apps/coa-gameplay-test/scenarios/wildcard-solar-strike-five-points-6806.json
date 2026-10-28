@@ -1,0 +1,274 @@
+{
+  "schema": 1,
+  "name": "Five-point Solar Strike consumes points and applies a correctly scaled three-tick burn",
+  "contract": [
+    "Ascension Solar Strike274545 promises a twenty-percent Solar Burn chance per combo point. Five",
+    "points earned by normal Sinister Strike casts make the chance100%; normal finisher must consume",
+    "points and apply274532 from the original caster. Solar Burn deals periodic Spellstorm damage.",
+    "Solar Burn274532 current descriptor adds2%AP and2%SP per3s tick for9s. The independent expected tick is",
+    "floor(base+AP*.02+SP*.02)."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 25,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 25,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 201
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 1752
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 274545
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 1752,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 1752,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 1752,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 1752,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 1752,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "combo_points",
+      "equals": 5
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 23271,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 10031,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "attack_power",
+      "min": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "attack_power",
+      "save_as": "solar_ap",
+      "label": "solar_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_power",
+      "school": 6,
+      "save_as": "solar_sp",
+      "label": "solar_sp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_effect_value",
+      "spell": 274532,
+      "effect": 0,
+      "save_as": "solar_base",
+      "label": "solar_base"
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 274545,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "cast_failure",
+      "spell": 274545,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "combo_points",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 274532,
+      "caster": "hero",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "aura_amount",
+      "spell": 274532,
+      "effect": 0,
+      "caster": "hero",
+      "save_as": "solar_tick",
+      "label": "solar_tick"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 274545,
+      "target": "enemy",
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 9500
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 274532,
+      "target": "enemy",
+      "equals": 3,
+      "label": "solar_ticks"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_damage_total",
+      "spell": 274532,
+      "target": "enemy",
+      "save_as": "solar_total",
+      "label": "solar_total"
+    }
+  ]
+}

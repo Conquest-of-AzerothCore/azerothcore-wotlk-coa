@@ -1,0 +1,153 @@
+{
+  "schema": 1,
+  "name": "Level-fifteen Bloodmoon Blast remains usable in Sanguine Essence (#6376)",
+  "contract": "The reported level-fifteen Bloodmoon Blast rank 501608 must normally damage its enemy while Sanguine Essence is active. The shared Cursed markers and native Rotclaw control remain present.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "essence",
+      "race": 1,
+      "class": 20,
+      "level": 15,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "essence",
+      "entry": 36,
+      "level": 15,
+      "health": 1000000,
+      "distance": 15
+    },
+    {
+      "id": "near",
+      "owner": "essence",
+      "entry": 36,
+      "level": 15,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 999999
+    },
+    {
+      "action": "wait",
+      "label": "Injured fixture avoids full-health level rescaling",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "essence",
+      "spell": 501608
+    },
+    {
+      "action": "learn",
+      "actor": "essence",
+      "spell": 503486
+    },
+    {
+      "action": "set_aura",
+      "actor": "essence",
+      "spell": 680692,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Sanguine Essence is active",
+      "actor": "essence",
+      "metric": "aura",
+      "spell": 680692,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Sanguine Essence keeps the shared Cursed Form marker",
+      "actor": "essence",
+      "metric": "aura",
+      "spell": 525031,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Sanguine Essence keeps the Cursed ability marker",
+      "actor": "essence",
+      "metric": "aura",
+      "spell": 524861,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "save_as": "target_health"
+    },
+    {
+      "action": "assert",
+      "actor": "essence",
+      "metric": "melee_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "cast",
+      "actor": "essence",
+      "spell": 501608,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Bloodmoon Blast damages its target in Sanguine Essence",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "target_health",
+      "max": -1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "The cast is not refused",
+      "actor": "essence",
+      "metric": "cast_failure",
+      "spell": 501608,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "essence",
+      "spell": 503486
+    },
+    {
+      "action": "assert",
+      "label": "Guard: Rotclaw still bleeds a nearby enemy in Sanguine Essence",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 503486,
+      "caster": "essence",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Guard: Rotclaw is not refused",
+      "actor": "essence",
+      "metric": "cast_failure",
+      "spell": 503486,
+      "equals": 0
+    }
+  ]
+}

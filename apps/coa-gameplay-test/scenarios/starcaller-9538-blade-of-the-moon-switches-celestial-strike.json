@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "Starcaller: Blade of the Moon switches Celestial Strike to Moonblade (#9538)",
+  "contract": "aura_ascension_starcaller_lifecycle::Apply for buff 802681 (Blade of the Moon's proc) calls Replace(player, 800496, 801125) (AscensionStarcallerAuras.cpp), which only works through Player::SetTemporarySpellReplacement if both the Celestial Strike rank and Moonblade 801125 are already active spells. Moonblade has no acquisition path of its own (not granted by advancement, class spell, trainer or module), so the swap silently no-op'd. Apply now learns 801125 with learnSpell(..., true) (PLAYERSPELL_TEMPORARY, mirroring AscensionBloodmageHemostasis.cpp's Blood Burst bridge) before calling Replace, and Remove reverts that temporary knowledge with removeSpell(801125, SPEC_MASK_ALL, true) after clearing the replacement.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "starcaller", "race": 1, "class": 26, "level": 50 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "starcaller", "spell": 502291 },
+    {
+      "action": "assert", "label": "SETUP: Moonblade is not known before the buff", "actor": "starcaller",
+      "metric": "knows_spell", "spell": 801125, "equals": 0
+    },
+    {
+      "action": "assert", "label": "SETUP: Celestial Strike is not replaced before the buff", "actor": "starcaller",
+      "metric": "temporary_spell_replacement", "spell": 502291, "equals": 502291
+    },
+    { "action": "set_aura", "label": "Apply Blade of the Moon's buff", "actor": "starcaller", "spell": 802681, "stacks": 1 },
+    {
+      "action": "assert", "label": "Moonblade is temporarily learned", "actor": "starcaller",
+      "metric": "knows_spell", "spell": 801125, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Celestial Strike is replaced by Moonblade", "actor": "starcaller",
+      "metric": "temporary_spell_replacement", "spell": 502291, "equals": 801125, "within_ms": 1000
+    },
+    { "action": "set_aura", "label": "The buff expires", "actor": "starcaller", "spell": 802681, "stacks": 0 },
+    {
+      "action": "assert", "label": "The replacement reverts", "actor": "starcaller",
+      "metric": "temporary_spell_replacement", "spell": 502291, "equals": 502291, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Moonblade is forgotten again", "actor": "starcaller",
+      "metric": "knows_spell", "spell": 801125, "equals": 0, "within_ms": 1000
+    }
+  ]
+}

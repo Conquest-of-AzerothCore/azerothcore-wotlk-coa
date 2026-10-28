@@ -21,6 +21,7 @@
 #include "Common.h"
 #include "DatabaseEnvFwd.h"
 #include "ObjectGuid.h"
+#include "Optional.h"
 #include <map>
 
 struct AuctionEntry;
@@ -115,6 +116,18 @@ private:
     ObjectGuid::LowType  m_receiver_lowguid;
 };
 
+// A mail whose rows were appended to a transaction but not yet shown to anyone: the receiver's mail list and the
+// character cache change only in MailDraft::PublishStagedMail, which callers run once the transaction committed.
+struct StagedMail
+{
+    uint32 mailId;
+    ObjectGuid::LowType receiverGuidLow;
+    MailSender sender;
+    MailCheckMask checked;
+    time_t deliverTime;
+    time_t expireTime;
+};
+
 class MailDraft
 {
     typedef std::map<ObjectGuid, Item*> MailItemMap;
@@ -140,10 +153,17 @@ public:                                                 // modifiers
 public:                                                 // finishers
     void SendReturnToSender(uint32 sender_acc, ObjectGuid::LowType sender_guid, ObjectGuid::LowType receiver_guid, CharacterDatabaseTransaction trans);
     void SendMailTo(CharacterDatabaseTransaction trans, MailReceiver const& receiver, MailSender const& sender, MailCheckMask checked = MAIL_CHECK_MASK_NONE, uint32 deliver_delay = 0, uint32 custom_expiration = 0, bool deleteMailItemsFromDB = false, bool sendMail = true);
+    // Runs the send hook and appends the mail rows only; empty when a hook suppressed the mail.
+    Optional<StagedMail> StageMailTo(CharacterDatabaseTransaction trans, ObjectGuid::LowType receiverGuidLow, MailSender const& sender, MailCheckMask checked = MAIL_CHECK_MASK_NONE, uint32 custom_expiration = 0);
+    // Gives the items to an online receiver that does not already hold the mail, otherwise frees them.
+    void PublishStagedMail(StagedMail const& staged, Player* receiver);
+    // Frees the in-memory items of a mail whose transaction did not commit.
+    void DiscardItems() { deleteIncludedItems(CharacterDatabaseTransaction(nullptr)); }
 
 private:
     void deleteIncludedItems(CharacterDatabaseTransaction trans, bool inDB = false);
     void prepareItems(Player* receiver, CharacterDatabaseTransaction trans);                // called from SendMailTo for generate mailTemplateBase items
+    StagedMail AppendMailRows(CharacterDatabaseTransaction trans, ObjectGuid::LowType receiverGuidLow, MailSender const& sender, MailCheckMask checked, uint32 deliver_delay, uint32 custom_expiration);
 
     uint16      m_mailTemplateId;
     bool        m_mailTemplateItemsNeed;

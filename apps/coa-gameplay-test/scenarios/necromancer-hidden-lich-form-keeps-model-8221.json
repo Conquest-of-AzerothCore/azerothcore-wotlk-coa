@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "name": "Necromancer: the Hidden Lich Form wardrobe incarnation keeps the normal model (#8221)",
+  "contract": [
+    "AppearanceCategories.dbc category 67 'Necromancer Lich Form' is APPEARANCE_TYPE_INCARNATION kind 4, class mask 4194304 (class 23). Appearances.dbc row 211705 names it with field 8 = -500981.",
+    "Lich Form 500981 casts the passive 504691 (MOD_SHAPESHIFT form 50), which supplies the Lich display through Unit::GetModelForForm. With the Hidden Lich Form incarnation selected and collected, Lich Form must keep the character's own model instead; clearing the selection restores the stock Lich display.",
+    "Only Lich Form (form 50, category 67) is wired; the sibling Pyromancer Draconic Form category is out of scope for this report."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "snapshot", "actor": "n", "metric": "display_id", "save_as": "native_display" },
+    { "action": "learn", "actor": "n", "spell": 500981 },
+    { "action": "cast", "label": "Lich Form without a selection", "actor": "n", "spell": 500981 },
+    {
+      "action": "assert", "label": "SETUP: the Lich model aura is applied", "actor": "n",
+      "metric": "aura", "spell": 504691, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: the stock Lich display replaces the native model", "actor": "n",
+      "metric": "display_id", "relative_to": "native_display", "min": 1
+    },
+    { "action": "snapshot", "actor": "n", "metric": "display_id", "save_as": "stock_lich_display" },
+    {
+      "action": "apply_appearances",
+      "label": "Select the Hidden Lich Form incarnation while already shapeshifted",
+      "actor": "n",
+      "selection": { "67": 211705 }
+    },
+    {
+      "action": "assert", "label": "The selection is accepted", "actor": "n",
+      "metric": "server_packet_contains", "opcode": 1688, "text": "APPLY_APPEARANCES_OK", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The normal model returns at once", "actor": "n",
+      "metric": "display_id", "relative_to": "native_display", "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Lich Form buffs are unaffected", "actor": "n",
+      "metric": "aura", "spell": 504691, "equals": 1
+    },
+    { "action": "cancel_aura", "label": "Leave Lich Form", "actor": "n", "spell": 500981 },
+    {
+      "action": "assert", "label": "Leaving the form removes the model aura", "actor": "n",
+      "metric": "aura", "spell": 504691, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The character keeps its own model after unshifting", "actor": "n",
+      "metric": "display_id", "relative_to": "native_display", "equals": 0
+    },
+    {
+      "action": "apply_appearances",
+      "label": "Clear the Hidden Lich Form selection",
+      "actor": "n",
+      "selection": {}
+    },
+    {
+      "action": "assert", "label": "The clear is accepted", "actor": "n",
+      "metric": "server_packet_contains", "opcode": 1688, "text": "APPLY_APPEARANCES_OK", "equals": 1, "within_ms": 2000
+    },
+    { "action": "cast", "label": "Lich Form with the selection cleared", "actor": "n", "spell": 500981 },
+    {
+      "action": "assert", "label": "SETUP: the Lich model aura is applied again", "actor": "n",
+      "metric": "aura", "spell": 504691, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The stock Lich display returns once the selection is cleared", "actor": "n",
+      "metric": "display_id", "relative_to": "stock_lich_display", "equals": 0, "within_ms": 1000
+    }
+  ]
+}

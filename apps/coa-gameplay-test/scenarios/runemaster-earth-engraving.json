@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "name": "Runemaster Earth Engraving grants its proc aura and procs Weapon Engraving: Earth damage",
+  "contract": [
+    "Weapon Engraving: Earth 653218 puts temporary enchant 1002 on the weapon; its equip spell (type 3) is Earth",
+    "Engraving 653219, a dummy and a zero spell modifier whose description reads 'Your direct damage has a",
+    "$653221h% chance to deal ... Nature damage to enemies within $653272a1 yds of your target.' The proc belongs to",
+    "653221 ('Passive2', aura 42 triggering 653272, ProcChance 15, ProcFlags 0), which nothing applied, so the",
+    "engraving never dealt damage and Earthen Fists 806982 (+10 proc chance per stack on family 38 mask2 0x2000000,",
+    "only 653221), Stone Savant and Steam Conjurer had nothing to act on. 653219 is applied as a fixture aura (the",
+    "scenario format has no item target for cast). Expected: 653219 brings 653221; with Earthen Fists at 5 stacks",
+    "(15 -> 65%) landed auto attacks proc 653272 on the target (about 13 swings over 18 sec, so no proc has",
+    "probability 0.35^13 < 2e-6); removing 653219 removes 653221 and no further 653272 follows."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rm", "entry": 36, "level": 60, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 1180},
+    {"action": "add_item", "actor": "rm", "item": 2092},
+    {"action": "equip", "label": "A fast dagger lands many swings", "actor": "rm", "item": 2092, "slot": 15},
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "label": "SETUP: no proc aura without the engraving", "actor": "rm", "metric": "aura",
+      "spell": 653221, "equals": 0},
+
+    {"action": "set_aura", "label": "Earth Engraving, the equip spell of the Weapon Engraving: Earth enchant",
+      "actor": "rm", "spell": 653219, "stacks": 1},
+    {"action": "assert", "label": "CONTRACT: Earth Engraving grants its proc aura", "actor": "rm", "metric": "aura",
+      "spell": 653221, "equals": 1, "within_ms": 1000},
+
+    {"action": "set_aura", "label": "Earthen Fists at 5 stacks", "actor": "rm", "spell": 806982, "stacks": 5},
+    {"action": "assert", "label": "SETUP: the proc chance rises from 15 to 65", "actor": "rm",
+      "metric": "spell_modifier", "spell": 653221, "op": 18, "base": 15, "equals": 65},
+    {"action": "snapshot", "actor": "rm", "metric": "melee_damage_count", "hand": 0, "save_as": "swings"},
+    {"action": "attack", "actor": "rm", "target": "dummy"},
+    {"action": "wait", "ms": 9000},
+    {"action": "set_aura", "actor": "rm", "spell": 806982, "stacks": 0},
+    {"action": "set_aura", "label": "Refresh Earthen Fists", "actor": "rm", "spell": 806982, "stacks": 5},
+    {"action": "wait", "ms": 9000},
+    {"action": "assert", "label": "SETUP: auto attacks landed", "actor": "rm", "metric": "melee_damage_count",
+      "hand": 0, "relative_to": "swings", "min": 8},
+    {"action": "assert", "label": "CONTRACT: direct damage procs Earth Engraving", "actor": "rm",
+      "metric": "spell_proc_count", "spell": 653221, "min": 1},
+    {"action": "assert", "label": "CONTRACT: the proc deals Weapon Engraving: Earth damage to the target",
+      "actor": "rm", "metric": "spell_damage_count", "spell": 653272, "target": "dummy", "min": 1},
+
+    {"action": "set_aura", "label": "The engraving ends", "actor": "rm", "spell": 653219, "stacks": 0},
+    {"action": "assert", "label": "CONTRACT: the proc aura leaves with Earth Engraving", "actor": "rm",
+      "metric": "aura", "spell": 653221, "equals": 0, "within_ms": 1000},
+    {"action": "snapshot", "actor": "rm", "metric": "spell_cast_count", "spell": 653272, "save_as": "engraved_hits"},
+    {"action": "snapshot", "actor": "rm", "metric": "melee_damage_count", "hand": 0, "save_as": "plain_swings"},
+    {"action": "set_aura", "actor": "rm", "spell": 806982, "stacks": 0},
+    {"action": "set_aura", "actor": "rm", "spell": 806982, "stacks": 5},
+    {"action": "wait", "ms": 9000},
+    {"action": "stop_attack", "actor": "rm"},
+    {"action": "assert", "label": "SETUP: auto attacks continued", "actor": "rm", "metric": "melee_damage_count",
+      "hand": 0, "relative_to": "plain_swings", "min": 4},
+    {"action": "assert", "label": "CONTRACT: no Weapon Engraving: Earth damage without the engraving", "actor": "rm",
+      "metric": "spell_cast_count", "spell": 653272, "relative_to": "engraved_hits", "equals": 0},
+    {"action": "set_aura", "actor": "rm", "spell": 806982, "stacks": 0}
+  ]
+}

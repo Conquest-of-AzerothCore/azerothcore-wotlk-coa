@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "name": "barbarian-ancestral-combat-normal-learn-and-login-6249",
+  "contract": [
+    "Ancestral Combat is an authored passive with ALLOW_WHILE_NOT_SHAPESHIFTED. Native learning and login must",
+    "apply it in normal form, and physical main-hand autoattacks must produce its 25% Frost weapon-strike helper.",
+    "Sixty-four positive physical hits put the probability of no proc below one in a million. Forgetting the",
+    "passive removes it; no Ancestral Combat aura is supplied as a fixture."
+  ],
+  "timeout_ms": 210000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 80,
+      "allow_regeneration": false,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "t",
+      "owner": "p",
+      "entry": 299,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 201
+    },
+    {
+      "action": "set_skill",
+      "actor": "p",
+      "skill": 43,
+      "value": 400,
+      "maximum": 400
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 851
+    },
+    {
+      "action": "equip",
+      "actor": "p",
+      "item": 851,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 801782
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 801782,
+      "equals": 1
+    },
+    {
+      "action": "login_hooks",
+      "actor": "p"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 801782,
+      "equals": 1
+    },
+    {
+      "action": "attack",
+      "actor": "p",
+      "target": "t"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "melee_damage_count",
+      "min": 64,
+      "within_ms": 165000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "p"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 801783,
+      "target": "t",
+      "min": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "p",
+      "spell": 801782
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 801782,
+      "equals": 0
+    }
+  ]
+}

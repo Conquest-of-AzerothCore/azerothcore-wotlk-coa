@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Worldforged Claw Scarred Mail stands in the Dun Morogh cave, not on the hill above it (#9275)",
+  "contract": "Dwarf Remains (entry 95673, guid 6940256, item 450780) stood on a hilltop at the realm-map marker, 38.6 yd above the client's own recorded sighting inside the cave below ('on top of a mini mountain instead of inside the cave'). Restore the client-recorded interior position.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -5311.6, "y": -99.4, "z": 403.5, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the pickup stands in the cave, not 21 yd away and 72 yd above", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95673, "equals": 1 },
+    { "action": "assert", "label": "the restored spot is near the cave floor", "actor": "p", "metric": "spawn_ground_gap", "guid": 6940256, "spawn_type": "gameobject", "min": -0.5, "max": 1.0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 95673 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "it is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

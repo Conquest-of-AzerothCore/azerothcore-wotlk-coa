@@ -45,9 +45,9 @@
       "o": 0
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "primalist",
-      "command": ".localspec 95"
+      "id": 95
     },
     {
       "action": "learn",
@@ -150,8 +150,17 @@
       "save_as": "baseline_582532_0_before",
       "label": "baseline_582532_0_before",
       "spell": 582532,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "baseline_582532_0_crits_before",
+      "label": "baseline_582532_0_crits_before",
+      "spell": 582532,
       "target": "enemy",
-      "critical": false
+      "critical": true
     },
     {
       "action": "cast",
@@ -169,9 +178,8 @@
       "metric": "spell_damage_count",
       "spell": 582532,
       "target": "enemy",
-      "critical": false,
       "relative_to": "baseline_582532_0_before",
-      "min": 1
+      "equals": 1
     },
     {
       "action": "snapshot",
@@ -181,8 +189,18 @@
       "label": "baseline_582532_0_hits",
       "spell": 582532,
       "target": "enemy",
-      "critical": false,
       "relative_to": "baseline_582532_0_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "baseline_582532_0_crits",
+      "label": "baseline_582532_0_crits",
+      "spell": 582532,
+      "target": "enemy",
+      "relative_to": "baseline_582532_0_crits_before",
+      "critical": true
     },
     {
       "action": "snapshot",
@@ -246,8 +264,17 @@
       "save_as": "baseline_503264_0_before",
       "label": "baseline_503264_0_before",
       "spell": 503264,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "baseline_503264_0_crits_before",
+      "label": "baseline_503264_0_crits_before",
+      "spell": 503264,
       "target": "enemy",
-      "critical": false
+      "critical": true
     },
     {
       "action": "cast",
@@ -265,9 +292,8 @@
       "metric": "spell_damage_count",
       "spell": 503264,
       "target": "enemy",
-      "critical": false,
       "relative_to": "baseline_503264_0_before",
-      "min": 1
+      "equals": 5
     },
     {
       "action": "snapshot",
@@ -277,8 +303,18 @@
       "label": "baseline_503264_0_hits",
       "spell": 503264,
       "target": "enemy",
-      "critical": false,
       "relative_to": "baseline_503264_0_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "baseline_503264_0_crits",
+      "label": "baseline_503264_0_crits",
+      "spell": 503264,
+      "target": "enemy",
+      "relative_to": "baseline_503264_0_crits_before",
+      "critical": true
     },
     {
       "action": "snapshot",
@@ -348,6 +384,15 @@
       "save_as": "baseline_582532_1_before",
       "label": "baseline_582532_1_before",
       "spell": 582532,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "baseline_582532_1_crits_before",
+      "label": "baseline_582532_1_crits_before",
+      "spell": 582532,
       "target": "enemy",
       "critical": true
     },
@@ -367,9 +412,18 @@
       "metric": "spell_damage_count",
       "spell": 582532,
       "target": "enemy",
-      "critical": true,
       "relative_to": "baseline_582532_1_before",
-      "min": 1
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "target": "enemy",
+      "relative_to": "baseline_582532_1_crits_before",
+      "equals": 1,
+      "critical": true
     },
     {
       "action": "snapshot",
@@ -379,8 +433,18 @@
       "label": "baseline_582532_1_hits",
       "spell": 582532,
       "target": "enemy",
-      "critical": true,
       "relative_to": "baseline_582532_1_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "baseline_582532_1_crits",
+      "label": "baseline_582532_1_crits",
+      "spell": 582532,
+      "target": "enemy",
+      "relative_to": "baseline_582532_1_crits_before",
+      "critical": true
     },
     {
       "action": "snapshot",
@@ -444,6 +508,15 @@
       "save_as": "baseline_503264_1_before",
       "label": "baseline_503264_1_before",
       "spell": 503264,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "baseline_503264_1_crits_before",
+      "label": "baseline_503264_1_crits_before",
+      "spell": 503264,
       "target": "enemy",
       "critical": true
     },
@@ -463,9 +536,18 @@
       "metric": "spell_damage_count",
       "spell": 503264,
       "target": "enemy",
-      "critical": true,
       "relative_to": "baseline_503264_1_before",
-      "min": 1
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "target": "enemy",
+      "relative_to": "baseline_503264_1_crits_before",
+      "equals": 5,
+      "critical": true
     },
     {
       "action": "snapshot",
@@ -475,8 +557,18 @@
       "label": "baseline_503264_1_hits",
       "spell": 503264,
       "target": "enemy",
-      "critical": true,
       "relative_to": "baseline_503264_1_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "baseline_503264_1_crits",
+      "label": "baseline_503264_1_crits",
+      "spell": 503264,
+      "target": "enemy",
+      "relative_to": "baseline_503264_1_crits_before",
+      "critical": true
     },
     {
       "action": "snapshot",
@@ -558,8 +650,17 @@
       "save_as": "talented_582532_0_before",
       "label": "talented_582532_0_before",
       "spell": 582532,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "talented_582532_0_crits_before",
+      "label": "talented_582532_0_crits_before",
+      "spell": 582532,
       "target": "enemy",
-      "critical": false
+      "critical": true
     },
     {
       "action": "cast",
@@ -577,9 +678,8 @@
       "metric": "spell_damage_count",
       "spell": 582532,
       "target": "enemy",
-      "critical": false,
       "relative_to": "talented_582532_0_before",
-      "min": 1
+      "equals": 1
     },
     {
       "action": "snapshot",
@@ -589,8 +689,18 @@
       "label": "talented_582532_0_hits",
       "spell": 582532,
       "target": "enemy",
-      "critical": false,
       "relative_to": "talented_582532_0_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "talented_582532_0_crits",
+      "label": "talented_582532_0_crits",
+      "spell": 582532,
+      "target": "enemy",
+      "relative_to": "talented_582532_0_crits_before",
+      "critical": true
     },
     {
       "action": "snapshot",
@@ -654,8 +764,17 @@
       "save_as": "talented_503264_0_before",
       "label": "talented_503264_0_before",
       "spell": 503264,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "talented_503264_0_crits_before",
+      "label": "talented_503264_0_crits_before",
+      "spell": 503264,
       "target": "enemy",
-      "critical": false
+      "critical": true
     },
     {
       "action": "cast",
@@ -673,9 +792,8 @@
       "metric": "spell_damage_count",
       "spell": 503264,
       "target": "enemy",
-      "critical": false,
       "relative_to": "talented_503264_0_before",
-      "min": 1
+      "equals": 5
     },
     {
       "action": "snapshot",
@@ -685,8 +803,18 @@
       "label": "talented_503264_0_hits",
       "spell": 503264,
       "target": "enemy",
-      "critical": false,
       "relative_to": "talented_503264_0_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "talented_503264_0_crits",
+      "label": "talented_503264_0_crits",
+      "spell": 503264,
+      "target": "enemy",
+      "relative_to": "talented_503264_0_crits_before",
+      "critical": true
     },
     {
       "action": "snapshot",
@@ -756,6 +884,15 @@
       "save_as": "talented_582532_1_before",
       "label": "talented_582532_1_before",
       "spell": 582532,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "talented_582532_1_crits_before",
+      "label": "talented_582532_1_crits_before",
+      "spell": 582532,
       "target": "enemy",
       "critical": true
     },
@@ -775,9 +912,18 @@
       "metric": "spell_damage_count",
       "spell": 582532,
       "target": "enemy",
-      "critical": true,
       "relative_to": "talented_582532_1_before",
-      "min": 1
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "target": "enemy",
+      "relative_to": "talented_582532_1_crits_before",
+      "equals": 1,
+      "critical": true
     },
     {
       "action": "snapshot",
@@ -787,8 +933,18 @@
       "label": "talented_582532_1_hits",
       "spell": 582532,
       "target": "enemy",
-      "critical": true,
       "relative_to": "talented_582532_1_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "talented_582532_1_crits",
+      "label": "talented_582532_1_crits",
+      "spell": 582532,
+      "target": "enemy",
+      "relative_to": "talented_582532_1_crits_before",
+      "critical": true
     },
     {
       "action": "snapshot",
@@ -852,6 +1008,15 @@
       "save_as": "talented_503264_1_before",
       "label": "talented_503264_1_before",
       "spell": 503264,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "talented_503264_1_crits_before",
+      "label": "talented_503264_1_crits_before",
+      "spell": 503264,
       "target": "enemy",
       "critical": true
     },
@@ -871,9 +1036,18 @@
       "metric": "spell_damage_count",
       "spell": 503264,
       "target": "enemy",
-      "critical": true,
       "relative_to": "talented_503264_1_before",
-      "min": 1
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "target": "enemy",
+      "relative_to": "talented_503264_1_crits_before",
+      "equals": 5,
+      "critical": true
     },
     {
       "action": "snapshot",
@@ -883,8 +1057,18 @@
       "label": "talented_503264_1_hits",
       "spell": 503264,
       "target": "enemy",
-      "critical": true,
       "relative_to": "talented_503264_1_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "talented_503264_1_crits",
+      "label": "talented_503264_1_crits",
+      "spell": 503264,
+      "target": "enemy",
+      "relative_to": "talented_503264_1_crits_before",
+      "critical": true
     },
     {
       "action": "snapshot",
@@ -966,8 +1150,17 @@
       "save_as": "removed_582532_0_before",
       "label": "removed_582532_0_before",
       "spell": 582532,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "removed_582532_0_crits_before",
+      "label": "removed_582532_0_crits_before",
+      "spell": 582532,
       "target": "enemy",
-      "critical": false
+      "critical": true
     },
     {
       "action": "cast",
@@ -985,9 +1178,8 @@
       "metric": "spell_damage_count",
       "spell": 582532,
       "target": "enemy",
-      "critical": false,
       "relative_to": "removed_582532_0_before",
-      "min": 1
+      "equals": 1
     },
     {
       "action": "snapshot",
@@ -997,8 +1189,18 @@
       "label": "removed_582532_0_hits",
       "spell": 582532,
       "target": "enemy",
-      "critical": false,
       "relative_to": "removed_582532_0_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "removed_582532_0_crits",
+      "label": "removed_582532_0_crits",
+      "spell": 582532,
+      "target": "enemy",
+      "relative_to": "removed_582532_0_crits_before",
+      "critical": true
     },
     {
       "action": "snapshot",
@@ -1062,8 +1264,17 @@
       "save_as": "removed_503264_0_before",
       "label": "removed_503264_0_before",
       "spell": 503264,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "removed_503264_0_crits_before",
+      "label": "removed_503264_0_crits_before",
+      "spell": 503264,
       "target": "enemy",
-      "critical": false
+      "critical": true
     },
     {
       "action": "cast",
@@ -1081,9 +1292,8 @@
       "metric": "spell_damage_count",
       "spell": 503264,
       "target": "enemy",
-      "critical": false,
       "relative_to": "removed_503264_0_before",
-      "min": 1
+      "equals": 5
     },
     {
       "action": "snapshot",
@@ -1093,8 +1303,18 @@
       "label": "removed_503264_0_hits",
       "spell": 503264,
       "target": "enemy",
-      "critical": false,
       "relative_to": "removed_503264_0_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "removed_503264_0_crits",
+      "label": "removed_503264_0_crits",
+      "spell": 503264,
+      "target": "enemy",
+      "relative_to": "removed_503264_0_crits_before",
+      "critical": true
     },
     {
       "action": "snapshot",
@@ -1164,6 +1384,15 @@
       "save_as": "removed_582532_1_before",
       "label": "removed_582532_1_before",
       "spell": 582532,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "removed_582532_1_crits_before",
+      "label": "removed_582532_1_crits_before",
+      "spell": 582532,
       "target": "enemy",
       "critical": true
     },
@@ -1183,9 +1412,18 @@
       "metric": "spell_damage_count",
       "spell": 582532,
       "target": "enemy",
-      "critical": true,
       "relative_to": "removed_582532_1_before",
-      "min": 1
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "target": "enemy",
+      "relative_to": "removed_582532_1_crits_before",
+      "equals": 1,
+      "critical": true
     },
     {
       "action": "snapshot",
@@ -1195,8 +1433,18 @@
       "label": "removed_582532_1_hits",
       "spell": 582532,
       "target": "enemy",
-      "critical": true,
       "relative_to": "removed_582532_1_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "removed_582532_1_crits",
+      "label": "removed_582532_1_crits",
+      "spell": 582532,
+      "target": "enemy",
+      "relative_to": "removed_582532_1_crits_before",
+      "critical": true
     },
     {
       "action": "snapshot",
@@ -1260,6 +1508,15 @@
       "save_as": "removed_503264_1_before",
       "label": "removed_503264_1_before",
       "spell": 503264,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "removed_503264_1_crits_before",
+      "label": "removed_503264_1_crits_before",
+      "spell": 503264,
       "target": "enemy",
       "critical": true
     },
@@ -1279,9 +1536,18 @@
       "metric": "spell_damage_count",
       "spell": 503264,
       "target": "enemy",
-      "critical": true,
       "relative_to": "removed_503264_1_before",
-      "min": 1
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "target": "enemy",
+      "relative_to": "removed_503264_1_crits_before",
+      "equals": 5,
+      "critical": true
     },
     {
       "action": "snapshot",
@@ -1291,8 +1557,18 @@
       "label": "removed_503264_1_hits",
       "spell": 503264,
       "target": "enemy",
-      "critical": true,
       "relative_to": "removed_503264_1_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "removed_503264_1_crits",
+      "label": "removed_503264_1_crits",
+      "spell": 503264,
+      "target": "enemy",
+      "relative_to": "removed_503264_1_crits_before",
+      "critical": true
     },
     {
       "action": "snapshot",
@@ -1585,5 +1861,11 @@
       "relative_to": "removed_cd_500696"
     }
   ],
-  "contract": "Each Seismic Spike or Crash damage event grants one Geomolding; critical damage adds one Geomolding and one Earthshaping, respecting native caps. Lithic Lance reduces every Terrasurge rank cooldown by four seconds only while Rupturer is learned. Native no-talent and unlearning controls establish pre-existing resource grants. Earthshaker enables periodic critical hits; Dream and target critical vulnerability make the critical samples deterministic."
+  "contract": [
+    "Each Seismic Spike or Crash damage event grants one Geomolding; critical damage adds one Geomolding and",
+    "one Earthshaping, respecting native caps. Lithic Lance reduces every Terrasurge rank cooldown by four",
+    "seconds only while Rupturer is learned. Native no-talent and unlearning controls establish pre-existing",
+    "resource grants. Earthshaker enables periodic critical hits; ordinary samples count observed critical",
+    "events rather than assuming none. Dream and target critical vulnerability guarantee critical samples."
+  ]
 }

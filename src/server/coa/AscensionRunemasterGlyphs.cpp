@@ -32,6 +32,16 @@ constexpr uint32 SPELL_PHASE_RUSH_PASSIVE = 805724;
 constexpr uint32 SPELL_PHASE_RUSH_BUFF = 805725;
 constexpr uint32 SPELL_UNLEASHED_POWER = 807504;
 constexpr uint32 SPELL_UNLEASHED_POWER_DEBUFF = 504844;
+constexpr uint32 SPELL_PRIMORDIAL_SALVOS = 800752;
+constexpr uint32 SPELL_FROST_SALVO = 800730;
+constexpr uint32 SPELL_FLAME_SALVO = 800729;
+constexpr uint32 SPELL_ARCANE_SALVO = 800731;
+
+void LaunchPrimordialSalvo(Unit* caster, Unit* target, uint32 salvo)
+{
+    if (caster->HasAura(SPELL_PRIMORDIAL_SALVOS, caster->GetGUID()) && target->IsAlive())
+        caster->CastSpell(target, salvo, TRIGGERED_FULL_MASK);
+}
 
 bool IsElementalBurst(uint32 id)
 {
@@ -127,6 +137,7 @@ class spell_ascension_runemaster_glyph_cast : public SpellScript
 
         std::array<uint32, 3> const carriers = {SPELL_FROST_GLYPH, SPELL_FLAME_GLYPH, SPELL_ARCANE_GLYPH};
         std::array<uint32, 3> const helpers = {SPELL_UNLEASHED_FROST, SPELL_UNLEASHED_FLAME, SPELL_UNLEASHED_ARCANE};
+        std::array<uint32, 3> const salvos = {SPELL_FROST_SALVO, SPELL_FLAME_SALVO, SPELL_ARCANE_SALVO};
         std::array<bool, 3> active = {};
         bool any = false;
         for (std::size_t i = 0; i < carriers.size(); ++i)
@@ -141,6 +152,7 @@ class spell_ascension_runemaster_glyph_cast : public SpellScript
             if (active[i])
             {
                 caster->CastSpell(target, helpers[i], TRIGGERED_FULL_MASK);
+                LaunchPrimordialSalvo(caster, target, salvos[i]);
                 if (caster->HasAura(SPELL_SCROLL_PASSIVE))
                     caster->CastSpell(caster, SPELL_SCROLL_BUFF, TRIGGERED_FULL_MASK);
             }
@@ -156,6 +168,20 @@ class spell_ascension_runemaster_glyph_cast : public SpellScript
     }
 
     bool _released = false;
+};
+
+class spell_ascension_runemaster_runic_obliteration_glyph : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_runemaster_runic_obliteration_glyph);
+
+    bool Load() override { return IsRunemaster(GetCaster()); }
+
+    void Generate() { GenerateGlyph(GetCaster()); }
+
+    void Register() override
+    {
+        AfterCast += SpellCastFn(spell_ascension_runemaster_runic_obliteration_glyph::Generate);
+    }
 };
 
 class spell_ascension_runemaster_glyph_payload : public SpellScript
@@ -269,6 +295,13 @@ class spell_ascension_runemaster_overloaded_frost : public AuraScript
 
 void ApplyAscensionRunemasterGlyphContracts(SpellInfo* info)
 {
+    if (info && info->Id == SPELL_UNLEASHED_ARCANE &&
+        info->SpellFamilyName == uint32(CLASS_SPIRIT_MAGE) + 6 &&
+        info->Effects[EFFECT_0].Effect == SPELL_EFFECT_SCHOOL_DAMAGE &&
+        info->Effects[EFFECT_0].TargetA.GetTarget() == TARGET_UNIT_TARGET_ENEMY &&
+        info->Effects[EFFECT_0].TargetB.GetTarget() == TARGET_UNIT_DEST_AREA_ENEMY)
+        info->AttributesEx2 |= SPELL_ATTR2_ALLOW_DEAD_TARGET;
+
     if (info && info->Id == SPELL_ARCANE_GLYPH_PASSIVE &&
         info->SpellFamilyName == uint32(CLASS_SPIRIT_MAGE) + 6)
     {
@@ -300,6 +333,7 @@ void ApplyAscensionRunemasterGlyphContracts(SpellInfo* info)
 void AddAscensionRunemasterGlyphScripts()
 {
     RegisterSpellScript(spell_ascension_runemaster_glyph_cast);
+    RegisterSpellScript(spell_ascension_runemaster_runic_obliteration_glyph);
     RegisterSpellScript(spell_ascension_runemaster_glyph_payload);
     RegisterSpellScript(spell_ascension_runemaster_overloaded_frost);
 }

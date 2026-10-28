@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "name": "Annihilan Strike generates 2 Felfury on hit (#4665)",
+  "contract": [
+    "Annihilan Strike 801903 promises two Felfury on a landed two-weapon attack. The active DBC classifies the",
+    "parent and both weapon children as melee damage; melee hit and expertise ratings guarantee a successful",
+    "hostile hit. Spell hit rating alone leaves dodge, parry and melee misses uncontrolled. No Twin Fury talent",
+    "is learned, so critical strikes do not add talent resource grants. The native cast must generate two Felfury."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "felsworn",
+      "race": 1,
+      "class": 14,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 100000,
+      "expertise_rating": 100000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "felsworn",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "felsworn",
+      "spell": 801903
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Felfury before the cast",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800058,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 801903,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 801903,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: both weapon hits landing grants the DBC's 2 Felfury",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800058,
+      "equals": 2,
+      "within_ms": 3000
+    }
+  ]
+}

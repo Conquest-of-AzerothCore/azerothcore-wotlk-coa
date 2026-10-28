@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Dominion grants Armor when Soul Infusion is gained (#1339)",
+  "contract": [
+    "Dominion 803999 promises: 'Gaining Soul Infusion now increases your Armor by 585 for 6 sec.'",
+    "Spell.dbc's own ProcFlags (4, DONE_MELEE_AUTO_ATTACK) do not match this event: gaining Soul",
+    "Infusion is not a native combat proc, it is AscensionCompat.cpp's SynchronizeThresholdResources",
+    "casting 803031 once the Reaper's Reaped Soul stacks reach 3, the same event",
+    "ApplyAscensionReaperSoulInfusionGained already answers for Damned and Purgatory. Dominion's own",
+    "trigger spell 804000 (SPELL_AURA_MOD_BASE_RESISTANCE, MiscValue 1 Physical/Armor) is added to that",
+    "same function, matching the pattern used for the other two Soul-Infusion-gain talents."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "reaper", "race": 2, "class": 30, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "reaper", "spell": 803999 },
+    { "action": "assert", "actor": "reaper", "metric": "knows_spell", "spell": 803999, "equals": 1 },
+    { "action": "assert", "actor": "reaper", "metric": "aura", "spell": 803031, "equals": 0 },
+    { "action": "assert", "actor": "reaper", "metric": "aura", "spell": 804000, "equals": 0 },
+    { "action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3 },
+    { "action": "assert", "label": "Reaching 3 Reaped Souls grants Soul Infusion", "actor": "reaper", "metric": "aura", "spell": 803031, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Dominion applies its Armor buff at the same time", "actor": "reaper", "metric": "aura", "spell": 804000, "equals": 1, "within_ms": 500 }
+  ]
+}

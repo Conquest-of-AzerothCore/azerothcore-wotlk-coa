@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Native instance bind query lists the binds a player can reset",
+  "contract": "The original client sends C_LootLockout.QueryInstanceBinds() as the empty CMSG_QUERY_INSTANCE_BINDS (0x06FD) at every world entry and instance info update. Extensions.dll reads SMSG 0x06FE as a result C string, then on QUERY_INSTANCE_BINDS_OK u32 count and count x {u32, u32 map, u32 difficulty}; C_LootLockout.ListInstanceBinds() gives the portrait menu's Reset Instances list from it, one entry per map and difficulty. Entering a normal dungeon binds the player to that instance until it is reset. Expected: a player without binds gets an empty OK list; after entering and leaving Deadmines the list names one Deadmines bind.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    { "id": "delver", "race": 1, "class": 1, "level": 20 }
+  ],
+  "steps": [
+    {
+      "action": "client_packet", "label": "Query the instance binds", "actor": "delver", "opcode": 1789,
+      "consumed": false
+    },
+    {
+      "action": "assert", "label": "The query is answered", "actor": "delver", "metric": "server_packet_contains",
+      "opcode": 1790, "text": "QUERY_INSTANCE_BINDS_OK", "equals": 1
+    },
+    {
+      "action": "assert", "label": "A player without binds gets an empty list", "actor": "delver",
+      "metric": "instance_binds_listed", "equals": 0
+    },
+    {
+      "action": "teleport", "label": "Enter Deadmines", "actor": "delver", "map": 36, "x": -16.4, "y": -383.07,
+      "z": 61.78
+    },
+    { "action": "assert", "actor": "delver", "metric": "map_id", "equals": 36, "within_ms": 15000 },
+    {
+      "action": "teleport", "label": "Leave Deadmines", "actor": "delver", "map": 0, "x": -9617.06, "y": -288.949,
+      "z": 57.3053
+    },
+    { "action": "assert", "actor": "delver", "metric": "map_id", "equals": 0, "within_ms": 15000 },
+    {
+      "action": "client_packet", "label": "Query the instance binds again", "actor": "delver", "opcode": 1789,
+      "consumed": false
+    },
+    {
+      "action": "assert", "label": "The Deadmines bind is listed", "actor": "delver", "metric": "instance_binds_listed",
+      "id": 36, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Nothing else is listed", "actor": "delver", "metric": "instance_binds_listed",
+      "equals": 1
+    }
+  ]
+}

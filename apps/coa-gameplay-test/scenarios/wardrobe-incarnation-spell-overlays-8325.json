@@ -1,0 +1,254 @@
+{
+  "schema": 1,
+  "name": "Issue 8325: Warcraft Reborn druid Moonkin Astral Form and Tree of Life Forest Guardian incarnations",
+  "contract": [
+    "Appearances 47636 (item 499402 Incarnation: Moonkin Astral Form, category 22) and 47647 (item 499401 Incarnation: Tree of Life Forest Guardian Form, category 23) are APPEARANCE_DISPLAY_TYPE_SPELL rows: field 3 = spell 499397 Moonkin Astral Form / 499396 Tree of Life Spectral Form (dummy aura, spell visual only), field 8 = minus that spell.",
+    "Control: appearance 47637 (category 22, DISPLAY_TYPE_CREATURE, field 8 = display 48920) shows on the same druid.",
+    "The overlay aura is applied while the druid is in the matching form, removed on leaving it, and returns with the form after logging in again; the selection is not refused as INVALID_SELECTION."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "d",
+      "name": "Astralform",
+      "race": 4,
+      "class": 11,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "d",
+      "spell": 1124858
+    },
+    {
+      "action": "learn",
+      "actor": "d",
+      "spell": 1133891
+    },
+    {
+      "action": "cast",
+      "label": "Reborn Moonkin Form",
+      "actor": "d",
+      "spell": 1124858
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: in Moonkin Form",
+      "actor": "d",
+      "metric": "aura",
+      "spell": 1124858,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "label": "Stock Moonkin model",
+      "actor": "d",
+      "metric": "display_id",
+      "save_as": "stock_moonkin"
+    },
+    {
+      "action": "apply_appearances",
+      "label": "Select a creature Moonkin incarnation (control)",
+      "actor": "d",
+      "selection": {
+        "22": 47637
+      }
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: creature selection accepted",
+      "actor": "d",
+      "metric": "server_packet_contains",
+      "opcode": 1688,
+      "text": "APPLY_APPEARANCES_OK",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: creature incarnation shows on a WCR druid",
+      "actor": "d",
+      "metric": "display_id",
+      "equals": 48920,
+      "within_ms": 1000
+    },
+    {
+      "action": "apply_appearances",
+      "label": "Select Moonkin Astral Form",
+      "actor": "d",
+      "selection": {
+        "22": 47636
+      }
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Astral Form selection accepted",
+      "actor": "d",
+      "metric": "server_packet_contains",
+      "opcode": 1688,
+      "text": "APPLY_APPEARANCES_OK",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The selection is not refused",
+      "actor": "d",
+      "metric": "server_packet_contains",
+      "opcode": 1688,
+      "text": "APPLY_APPEARANCES_INVALID_SELECTION",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Moonkin Astral Form overlay aura 499397 applied",
+      "actor": "d",
+      "metric": "aura",
+      "spell": 499397,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Astral Form keeps the stock Moonkin model",
+      "actor": "d",
+      "metric": "display_id",
+      "relative_to": "stock_moonkin",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "d",
+      "spell": 1124858
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Reborn Tree of Life",
+      "actor": "d",
+      "spell": 1133891
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: in Tree of Life",
+      "actor": "d",
+      "metric": "aura",
+      "spell": 1133891,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "apply_appearances",
+      "label": "Select Tree of Life Forest Guardian Form",
+      "actor": "d",
+      "selection": {
+        "23": 47647
+      }
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Forest Guardian selection accepted",
+      "actor": "d",
+      "metric": "server_packet_contains",
+      "opcode": 1688,
+      "text": "APPLY_APPEARANCES_OK",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The selection is not refused",
+      "actor": "d",
+      "metric": "server_packet_contains",
+      "opcode": 1688,
+      "text": "APPLY_APPEARANCES_INVALID_SELECTION",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Tree of Life Spectral Form overlay aura 499396 applied",
+      "actor": "d",
+      "metric": "aura",
+      "spell": 499396,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cancel_aura",
+      "label": "Leave Tree of Life",
+      "actor": "d",
+      "spell": 1133891
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: leaving the form removes the overlay",
+      "actor": "d",
+      "metric": "aura",
+      "spell": 499396,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let the selection save commit",
+      "ms": 5000
+    },
+    {
+      "action": "relog",
+      "label": "Log in again",
+      "actor": "d"
+    },
+    {
+      "action": "assert",
+      "label": "No overlay out of form after logging in",
+      "actor": "d",
+      "metric": "aura",
+      "spell": 499396,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "Tree of Life after logging in again",
+      "actor": "d",
+      "spell": 1133891
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: in Tree of Life after logging in",
+      "actor": "d",
+      "metric": "aura",
+      "spell": 1133891,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the saved Forest Guardian returns with the form",
+      "actor": "d",
+      "metric": "aura",
+      "spell": 499396,
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}

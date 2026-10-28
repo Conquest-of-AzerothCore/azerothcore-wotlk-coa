@@ -1,0 +1,4 @@
+DELETE FROM `coa_client_spell_description` WHERE `ID` IN (520091, 520097);
+INSERT INTO `coa_client_spell_description` (`ID`, `Description`, `ToolTip`) VALUES
+(520091, '|cFFFFFFFFUnleash|r: Deals ${$520097m1*$<scalingbp>+$spfi*0.35} Fire Damage and an additional ${($520097d*1000/$520097T2)*($520097m1*$<scalingbp>+$SP*.1)} Fire Damage over $520097d.\r\n\r\nThe periodic damage stacks up to $520097u times.', 'Use Glyphic Ruin or Thaumaturgy to unleash any active Glyph on the enemy.\r\n\r\nUnleash: Deal Fire Damage and an additional  Fire Damage over $520097d.\r\n\r\nThe periodic damage stacks up to $520097u times.'),
+(520097, 'Deals ${$m1*$<scalingbp>+$SP*0.35} Fire Damage and an additional ${($d*1000/$T2)*($m2*$<scalingbp>+$SP*.1)} Fire Damage over $d.\r\n\r\nThe periodic damage stacks up to $u times.', 'Dealing ${$w2} Fire Damage every $t2 sec for $d\r\n\r\nThe periodic damage stacks up to $u times.');

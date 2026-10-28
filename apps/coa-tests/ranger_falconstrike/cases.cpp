@@ -14,7 +14,7 @@ int main()
     ability.caster = &player;
     assert(ability.CheckReady() != SPELL_CAST_OK);
     lifecycle.OnPlayerLogin(&player);
-    assert(player.spells.size() == 1);
+    assert(player.spells.size() == 2 && player.HasActiveSpell(806345));
     Spell spell;
     SpellInfo info;
     info.SpellFamilyName = 27;
@@ -23,7 +23,7 @@ int main()
     {
         casts.OnSpellCast(&spell, &player, &info, false);
         assert(player.GetTemporarySpellReplacement(500074) == 500074);
-        assert(!player.HasActiveSpell(806345));
+        assert(player.HasActiveSpell(806345));
     }
     spell.triggered = true;
     casts.OnSpellCast(&spell, &player, &info, false);
@@ -36,7 +36,7 @@ int main()
     assert(ability.CheckReady() == SPELL_CAST_OK);
     info.SpellFamilyFlags[1] = 4194304;
     casts.OnSpellCast(&spell, &player, &info, false);
-    assert(!player.HasAura(573338) && !player.HasActiveSpell(806345));
+    assert(!player.HasAura(573338) && player.HasActiveSpell(806345));
     assert(player.GetTemporarySpellReplacement(500074) == 500074);
     assert(ability.CheckReady() != SPELL_CAST_OK);
     info.SpellFamilyFlags[1] = 0;
@@ -46,7 +46,7 @@ int main()
     assert(player.GetTemporarySpellReplacement(500074) == 806345);
     player.auras.erase(573338);
     lifecycle.OnPlayerUpdate(&player, 1);
-    assert(player.GetTemporarySpellReplacement(500074) == 500074 && !player.HasActiveSpell(806345));
+    assert(player.GetTemporarySpellReplacement(500074) == 500074 && player.HasActiveSpell(806345));
     for (std::size_t i = 0; i < Falconstrikes.size(); ++i)
     {
         player.level = levels[i];

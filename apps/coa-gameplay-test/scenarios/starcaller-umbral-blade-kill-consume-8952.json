@@ -1,0 +1,170 @@
+{
+  "schema": 1,
+  "name": "Umbral Blade consumes Scattered Stars when its hit kills the target (#8952)",
+  "contract": "Umbral Blade 681546 (Spell.dbc: effect 0 TRIGGER_SPELL_WITH_VALUE -> damage 574165, effect 1 TRIGGER_SPELL -> 573282 -> 572315 -> StartConsume -> 804716; TargetAuraSpell 804378; cost 0, no cooldown) says \"Consumes Scattered Stars\". Report #8952: a killing blow with Umbral Blade leaves the stars and returns no mana. Both fixtures are the same race/class/level and apply one star with Fan of Knives 680703, set mana to 0 and cast Umbral Blade. The control's target is healthy (the consume path that works); the test's target has 1 health so Umbral Blade kills it and the consume must still return 8% of maximum mana. The test's final mana over the control's must be about 1.0; when the killing blow loses the consume, the test returns only regeneration (near 0). Companion to the Lunar Lance corpse scenario (#4224).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "ranged_hit_rating": 10000
+    },
+    {
+      "id": "test",
+      "race": 1,
+      "class": 26,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy_alive",
+      "owner": "control",
+      "entry": 36,
+      "level": 80,
+      "distance": 3
+    },
+    {
+      "id": "enemy_dying",
+      "owner": "test",
+      "entry": 36,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 409,
+    "x": 1091.89,
+    "y": -466.985,
+    "z": -105.084,
+    "o": 3.14159,
+    "ignore_access": true
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 680703
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 681546
+    },
+    {
+      "action": "learn",
+      "actor": "test",
+      "spell": 680703
+    },
+    {
+      "action": "learn",
+      "actor": "test",
+      "spell": 681546
+    },
+    {
+      "action": "cast",
+      "label": "Control gains one Scattered Star",
+      "actor": "control",
+      "spell": 680703,
+      "target": "enemy_alive"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy_alive",
+      "metric": "aura_stacks",
+      "spell": 804378,
+      "caster": "control",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "Test gains one Scattered Star",
+      "actor": "test",
+      "spell": 680703,
+      "target": "enemy_dying"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy_dying",
+      "metric": "aura_stacks",
+      "spell": 804378,
+      "caster": "test",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown of Fan of Knives end so the control's Umbral Blade is accepted",
+      "ms": 2500
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "label": "Control consumes its star on a living target",
+      "actor": "control",
+      "spell": 681546,
+      "target": "enemy_alive"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "snapshot",
+      "label": "Mana returned by a living target",
+      "actor": "control",
+      "metric": "power",
+      "save_as": "alive_mana"
+    },
+    {
+      "action": "set_health",
+      "label": "Leave the test target one hit from death",
+      "actor": "enemy_dying",
+      "value": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "test",
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "label": "Test Umbral Blade kills its target while it holds a star",
+      "actor": "test",
+      "spell": 681546,
+      "target": "enemy_dying"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The corpse still pays the consume mana",
+      "actor": "test",
+      "metric": "power",
+      "ratio_to": "alive_mana",
+      "min": 0.8,
+      "max": 1.25
+    }
+  ]
+}

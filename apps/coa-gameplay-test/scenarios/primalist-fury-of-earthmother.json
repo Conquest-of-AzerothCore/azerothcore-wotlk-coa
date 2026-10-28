@@ -30,9 +30,9 @@
   ],
   "steps": [
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "primalist",
-      "command": ".localspec 60"
+      "id": 60
     },
     {
       "action": "learn",

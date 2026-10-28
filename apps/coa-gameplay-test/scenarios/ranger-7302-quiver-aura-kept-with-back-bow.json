@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Ranger: a Quiver aura stays active when a back-sheathed bow is equipped (#7302)",
+  "contract": "#7302 The Quiver model is the aura's spell visual (Skirmisher's Quiver 801069, SpellVisual 645, state kit 1145 attaches the quiver model at attachment 28). The report: with a bow that sheathes on the back, such as Old Bow 484322 (sheath 4; Worn Shortbow 2504 has sheath 0), the quiver model disappears. 801069 has EquippedItemClass -1, AuraInterruptFlags 0 and an unlimited duration, so the server must keep the aura through ranged weapon changes; the missing model is then drawn, or not, by the client. Expected: the aura 801069 is active after casting it with Worn Shortbow, after equipping Old Bow, after switching back to Worn Shortbow and after equipping Old Bow again.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "add_item", "actor": "ranger", "item": 2504 },
+    { "action": "add_item", "actor": "ranger", "item": 484322 },
+    { "action": "equip", "actor": "ranger", "item": 2504, "slot": 17, "label": "Equip Worn Shortbow (sheath 0) in the ranged slot" },
+    { "action": "learn", "actor": "ranger", "spell": 801069, "label": "Fixture: Skirmisher's Quiver" },
+    { "action": "cast", "actor": "ranger", "spell": 801069, "label": "Cast Skirmisher's Quiver" },
+    { "action": "assert", "actor": "ranger", "metric": "aura", "spell": 801069, "equals": 1, "within_ms": 3000, "label": "The Quiver aura is active with Worn Shortbow" },
+    { "action": "equip", "actor": "ranger", "item": 484322, "slot": 17, "label": "Equip Old Bow (sheath 4, worn on the back)" },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "actor": "ranger", "metric": "aura", "spell": 801069, "equals": 1, "label": "The Quiver aura stays active with Old Bow" },
+    { "action": "equip", "actor": "ranger", "item": 2504, "slot": 17, "label": "Switch back to Worn Shortbow" },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "actor": "ranger", "metric": "aura", "spell": 801069, "equals": 1, "label": "The Quiver aura stays active after switching back" },
+    { "action": "equip", "actor": "ranger", "item": 484322, "slot": 17, "label": "Equip Old Bow again" },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "actor": "ranger", "metric": "aura", "spell": 801069, "equals": 1, "label": "The Quiver aura stays active with Old Bow equipped again" }
+  ]
+}

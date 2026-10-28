@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Fury of Anub'Rekhan survives a shapeshift (#5355)",
+  "contract": "#5355: Fury of Anub'Rekhan (800894, coa-dbc-viewer record --id 800894) is permanent (DurationIndex=0) with Stances=0, StancesNot=0 (unrestricted by any shapeshift form) and three SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT (aura 132) effects at BasePoints=9 (rolled to an effective 10 via SpellEffectInfo::CalcValue's DieSides==1 -> basePoints += 1 rule) for mana/rage/energy (EffectMiscValue 0/1/3). AzerothCore's native shapeshift-passive strip (AuraEffect::HandleShapeshiftBoosts, Aura::IsRemovedOnShapeLost) requires m_spellInfo->Stances != 0 to remove a passive on a form change, so this Stances=0 passive should be left alone across a shapeshift. The reported symptom is that it stops applying after entering a form; both the aura's presence and each effect's exact amount are asserted before and after shapeshifting into Spider Form (800841) to catch either the aura being fully removed or silently reset to 0.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "v", "race": 1, "class": 29, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn settle", "ms": 3000 },
+    { "action": "learn", "actor": "v", "spell": 800894 },
+    { "action": "assert", "label": "BASELINE: Fury of Anub'Rekhan is applied", "actor": "v", "metric": "aura",
+      "spell": 800894, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "BASELINE: mana bonus effect is +10", "actor": "v", "metric": "aura_amount",
+      "spell": 800894, "effect": 0, "equals": 10 },
+    { "action": "assert", "label": "BASELINE: rage bonus effect is +10", "actor": "v", "metric": "aura_amount",
+      "spell": 800894, "effect": 1, "equals": 10 },
+    { "action": "assert", "label": "BASELINE: energy bonus effect is +10", "actor": "v", "metric": "aura_amount",
+      "spell": 800894, "effect": 2, "equals": 10 },
+    { "action": "learn", "actor": "v", "spell": 800841 },
+    { "action": "cast", "actor": "v", "spell": 800841 },
+    { "action": "assert", "label": "SETUP: Spider Form is active", "actor": "v", "metric": "aura",
+      "spell": 800841, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: Fury of Anub'Rekhan is still applied after shapeshifting",
+      "actor": "v", "metric": "aura", "spell": 800894, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: mana bonus effect is still +10 after shapeshifting",
+      "actor": "v", "metric": "aura_amount", "spell": 800894, "effect": 0, "equals": 10 },
+    { "action": "assert", "label": "DISCRIMINATING: rage bonus effect is still +10 after shapeshifting",
+      "actor": "v", "metric": "aura_amount", "spell": 800894, "effect": 1, "equals": 10 },
+    { "action": "assert", "label": "DISCRIMINATING: energy bonus effect is still +10 after shapeshifting",
+      "actor": "v", "metric": "aura_amount", "spell": 800894, "effect": 2, "equals": 10 }
+  ]
+}

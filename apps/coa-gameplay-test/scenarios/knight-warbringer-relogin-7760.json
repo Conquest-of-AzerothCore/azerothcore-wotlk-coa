@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Warbringer rank survives relogin and first spec pick for Knight of Xoroth War (#7760)",
+  "contract": [
+    "#7760: every login drops Warbringer (802586, the level-52 War-spec rank of 570727 over Flames of Xoroth 801059) from the action bar on a Knight of Xoroth War (class 17, spec 18). Rank spells are granted TEMPORARY by SynchronizeTalentReplacements (learnSpellWithoutAnnouncement defaults temporary), so they vanish on logout and must be re-granted by the login SynchronizeProgression; the grant needs the stored spec (18) and the parent talent spell (570727) known at sync time.",
+    "This scenario mirrors the reporter: level 60, spec 18 with the 570727 talent aura up, 802586 dragged to bar button 10, then a real logout/login of the same character (relog saves to DB like a normal logout). The save downgrades the button to the origin spell (GetSavedActionButtonSpell never persists temporary ranks), and action bars load asynchronously after the login sync, so nothing restored the dragged rank: the slot kept the origin and the client lost Warbringer every login. The fix upgrades origin-holding buttons to their active replacement inside the replacement sync and re-runs that sync (plus a bar resend) once the bar rows have loaded. After login hooks settle the scenario asserts the bar slot, the known spell, the client book and the display replacement.",
+    "Passing means the dragged rank survives the full save/load round trip; the bar assert fails pre-fix (slot holds the origin 573448) while the spell asserts pass, which isolates the loss to bar restore rather than spell granting. A second actor covers first spec pick: with Flames already on the bar, picking War spec must transform that button instantly, so no manual re-drag is needed and no duplicate appears after relog."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {
+      "id": "k",
+      "race": 1,
+      "class": 17,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "k2",
+      "race": 1,
+      "class": 17,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {"id": "target", "owner": "k", "entry": 36, "level": 60, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "learn", "actor": "k2", "spell": 573448},
+    {"action": "set_action_button", "label": "k2 drags Flames to the bar before ever picking War spec", "actor": "k2", "spell": 573448, "button": 10},
+    {"action": "specialization", "actor": "k2", "id": 18},
+    {"action": "assert", "label": "k2 War talent aura is active", "actor": "k2", "metric": "aura", "spell": 570727, "equals": 1},
+    {"action": "assert", "label": "k2 rank granted on first pick", "actor": "k2", "metric": "knows_spell", "spell": 802586, "equals": 1},
+    {"action": "assert", "label": "k2 Flames button transforms instantly on first pick", "actor": "k2", "metric": "action_button", "button": 10, "equals": 802586},
+    {"action": "learn", "actor": "k", "spell": 573448},
+    {"action": "specialization", "actor": "k", "id": 18},
+    {"action": "assert", "label": "War talent aura is active", "actor": "k", "metric": "aura", "spell": 570727, "equals": 1},
+    {"action": "assert", "label": "level-60 rank known in-session", "actor": "k", "metric": "knows_spell", "spell": 802586, "equals": 1},
+    {"action": "set_action_button", "label": "drag Warbringer to the bar like the reporter", "actor": "k", "spell": 802586, "button": 10},
+    {"action": "assert", "label": "bar holds Warbringer before relog", "actor": "k", "metric": "action_button", "button": 10, "equals": 802586},
+    {"action": "relog", "actor": "k"},
+    {"action": "login_hooks", "actor": "k"},
+    {"action": "assert", "label": "level-60 rank re-granted by the login sync", "actor": "k", "metric": "knows_spell", "spell": 802586, "equals": 1},
+    {"action": "assert", "label": "display replacement restored after relog", "actor": "k", "metric": "temporary_spell_replacement", "spell": 573448, "equals": 802586},
+    {"action": "assert", "label": "client book keeps Warbringer after relog", "actor": "k", "metric": "client_knows_spell", "spell": 802586, "equals": 1},
+    {"action": "assert", "label": "bar still holds Warbringer after relog", "actor": "k", "metric": "action_button", "button": 10, "equals": 802586}
+  ]
+}

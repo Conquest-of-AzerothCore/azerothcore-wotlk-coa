@@ -64,11 +64,11 @@
       "execution": [
         {
           "stage": "catalog load",
-          "interpretation": "Joins class/spec data, filters rank entries, then resolves automatic dependencies.",
+          "interpretation": "Joins class/spec data, filters rank entries, resolves automatic dependencies and records each specialization's identity and signature entries.",
           "source": {
             "path": "src/server/coa/AscensionCoATalentData.cpp",
             "anchor": "bool LoadCoATalentData()",
-            "reviewed_sha256": "14cced38457cdf8539ac09fe9b7e14abbd5c2328db0620875e744e9b6395eacd"
+            "reviewed_sha256": "1071eb29fa10c2e7f3f01effbab972d97230443ad2de3c651ce4e4b4438a6771"
           }
         },
         {
@@ -77,16 +77,16 @@
           "source": {
             "path": "src/server/coa/AscensionCompat.cpp",
             "anchor": "  bool SetTalentRank(Player* player,",
-            "reviewed_sha256": "37bacd57ff6eb2651ca7201962c78786d91342da40dcb157390e7c7c3f1368b3"
+            "reviewed_sha256": "ac3b9f80e9ace0d21461336f2bc0d041c722c45c3346184e4bb4ec42ca73c400"
           }
         },
         {
           "stage": "client upload",
-          "interpretation": "Validates the requested known-entry set before applying rank changes.",
+          "interpretation": "Reads the specialization from identity and paid entries; entering another one without choosing its talents switches and restores its stored build, otherwise validates and applies the complete set.",
           "source": {
             "path": "src/server/coa/AscensionCompat.cpp",
             "anchor": "  bool ApplyKnownEntriesUpload(Player* player,",
-            "reviewed_sha256": "37bacd57ff6eb2651ca7201962c78786d91342da40dcb157390e7c7c3f1368b3"
+            "reviewed_sha256": "ac3b9f80e9ace0d21461336f2bc0d041c722c45c3346184e4bb4ec42ca73c400"
           }
         }
       ],

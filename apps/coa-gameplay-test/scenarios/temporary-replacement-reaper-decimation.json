@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "A Decimate button is saved as Reap (#5469)",
+  "contract": "With Decimation 704193, six stacks of the Decimation counter 573289 run aura_ascension_reaper_decimation_counter::Apply (AscensionReaperRedshade.cpp:74), which grants Decimate 500523 as a temporary spell when it is not already known (addSpell(SPELL_DECIMATE, ..., temporary = true), line 81) and replaces every known Reap rank with it through SetTemporarySpellReplacement (line 85). A temporary spell is never written to character_spell, and Player::_LoadActions runs before the counter reaches six again, so a saved Decimate button would be refused and deleted at login. persisted_action_button reads Player::GetSavedActionButtonSpell, the spell id _SaveActions writes: a button holding Decimate must be saved as Reap 500357, and a button holding Reap itself is saved unchanged.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "r", "race": 1, "class": 30, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login state settle", "ms": 3000},
+    {"action": "learn", "actor": "r", "spell": 500357},
+    {"action": "learn", "actor": "r", "spell": 704193},
+    {
+      "action": "assert", "label": "SETUP: Decimate is not otherwise known", "actor": "r", "metric": "knows_spell",
+      "spell": 500523, "equals": 0
+    },
+    {"action": "set_aura", "label": "Fixture: six Decimation counter stacks", "actor": "r", "spell": 573289, "stacks": 6},
+    {
+      "action": "assert", "label": "Six stacks replace Reap with Decimate", "actor": "r",
+      "metric": "temporary_spell_replacement", "spell": 500357, "equals": 500523, "within_ms": 1000
+    },
+    {"action": "set_action_button", "actor": "r", "button": 2, "spell": 500523},
+    {"action": "set_action_button", "actor": "r", "button": 3, "spell": 500357},
+    {
+      "action": "assert", "label": "The bar holds Decimate", "actor": "r", "metric": "action_button", "button": 2,
+      "equals": 500523
+    },
+    {
+      "action": "assert", "label": "The Decimate button is saved as Reap", "actor": "r",
+      "metric": "persisted_action_button", "button": 2, "equals": 500357
+    },
+    {
+      "action": "assert", "label": "Control: an ordinary known spell is saved unchanged", "actor": "r",
+      "metric": "persisted_action_button", "button": 3, "equals": 500357
+    }
+  ]
+}

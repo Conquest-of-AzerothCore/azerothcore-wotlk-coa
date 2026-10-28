@@ -5,6 +5,7 @@
 #include "Spell.h"
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
+#include "SpellMgr.h"
 #include "SpellScript.h"
 #include <algorithm>
 #include <cmath>
@@ -14,6 +15,9 @@ namespace
 {
 using namespace AscensionBloodmage;
 constexpr uint32 VitalityCost = 10;
+constexpr uint32 Hemopulse = 524906;
+constexpr uint32 DarkfallenLamentLeech = 630874;
+constexpr uint32 DarkLiturgy = 800781;
 
 bool IsBloodmage(Player const* player)
 {
@@ -22,8 +26,7 @@ bool IsBloodmage(Player const* player)
 
 bool CanEmpower(Player* player)
 {
-    if (!IsBloodmage(player) || !player->HasAura(PooledVitalityTalent) || player->HasAura(CursedFormCheck) ||
-        player->HasAura(CursedForm))
+    if (!IsBloodmage(player) || !player->HasAura(PooledVitalityTalent) || player->HasAura(CursedForm))
         return false;
     Aura const* pool = player->GetAura(PooledVitality, player->GetGUID());
     return pool && uint32(pool->GetStackAmount()) >= VitalityCost;
@@ -101,10 +104,38 @@ public:
     void ModifySpellEffectBaseValue(Unit const* caster, SpellInfo const* info, uint8 index, float& value) override
     {
         if (!caster || !caster->IsPlayer() || caster->getClass() != CLASS_SON_OF_ARUGAL ||
-            info->Id != VitalityHeal || info->SpellFamilyName != 26 || index != EFFECT_0 ||
-            info->Effects[EFFECT_0].Effect != SPELL_EFFECT_HEAL)
+            info->SpellFamilyName != 26 || index != EFFECT_0 ||
+            (info->Effects[EFFECT_0].Effect != SPELL_EFFECT_HEAL &&
+             info->Effects[EFFECT_0].Effect != SPELL_EFFECT_HEALTH_LEECH))
             return;
-        double amount = double(value) + caster->GetStat(STAT_SPIRIT) * 0.5;
+
+        double bonus;
+        if (info->Id == VitalityHeal)
+            bonus = caster->GetStat(STAT_SPIRIT) * 0.5;
+        else if (info->Id == Hemopulse)
+            bonus = caster->GetStat(STAT_SPIRIT) * 0.45 + caster->GetStat(STAT_STAMINA) * 0.35;
+        else if (GetEmpowerment(info->Id) == Heartbreak)
+            bonus = std::max(0, const_cast<Unit*>(caster)->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW)) * 0.5 +
+                caster->GetStat(STAT_SPIRIT);
+        else if (GetEmpowerment(info->Id) == Mend || sSpellMgr->GetFirstSpellInChain(info->Id) == DarkLiturgy)
+            bonus = caster->GetStat(STAT_SPIRIT) * 0.25;
+        else if (info->Id == DarkfallenLamentLeech &&
+            info->Effects[EFFECT_0].Effect == SPELL_EFFECT_HEALTH_LEECH &&
+            info->Effects[EFFECT_0].BonusMultiplier == 0)
+        {
+            if (SpellBonusEntry const* native = sSpellMgr->GetSpellBonusData(info->Id))
+                if (native->direct_damage != 0 || native->ap_bonus != 0)
+                    return;
+            float coefficient = 100.0f;
+            if (Player* owner = caster->GetSpellModOwner())
+                owner->ApplySpellMod(info->Id, SPELLMOD_BONUS_MULTIPLIER, coefficient);
+            bonus = std::max(0, const_cast<Unit*>(caster)->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_SHADOW)) *
+                coefficient / 100.0f;
+        }
+        else
+            return;
+
+        double amount = double(value) + bonus;
         if (std::isfinite(amount) && amount >= 0 &&
             double(float(amount)) <= std::numeric_limits<int32>::max())
             value = float(amount);
@@ -150,6 +181,15 @@ class spell_ascension_bloodmage_empowered : public SpellScript
     PrepareSpellScript(spell_ascension_bloodmage_empowered);
     bool _heartbreak = false;
 
+    void SnapshotNightFeastRage()
+    {
+        Player* player = GetCaster()->ToPlayer();
+        if (!player || player->getClass() != CLASS_SON_OF_ARUGAL ||
+            GetEmpowerment(m_scriptSpellId) != Bloodbolt || !player->HasAura(NightFeast))
+            return;
+        GetSpell()->SetScriptValue(m_scriptSpellId, player->GetPower(POWER_RAGE));
+    }
+
     bool Load() override
     {
         return GetCaster()->IsPlayer() && GetCaster()->getClass() == CLASS_SON_OF_ARUGAL &&
@@ -177,6 +217,15 @@ class spell_ascension_bloodmage_empowered : public SpellScript
 
     void ModifyHit()
     {
+        Player* player = GetCaster()->ToPlayer();
+        if (player && GetEmpowerment(m_scriptSpellId) == Bloodbolt &&
+            player->HasAura(NightFeast) && GetHitDamage() > 0)
+        {
+            uint64 rage = GetSpell()->GetScriptValue(m_scriptSpellId);
+            double multiplier = 1.0 + double(rage) / 1000.0;
+            SetHitDamage(int32(std::min(double(GetHitDamage()) * multiplier,
+                double(std::numeric_limits<int32>::max()))));
+        }
         if (Empowered(Bloodbolt) && GetHitUnit() == GetExplTargetUnit() && GetHitDamage() > 0)
             SetHitDamage(int32(std::min<int64>(int64(GetHitDamage()) * 2, std::numeric_limits<int32>::max())));
         if (Empowered(Fleshcraft) && GetHitUnit() && GetHitUnit()->IsAlive() && GetHitHeal() > 0)
@@ -192,6 +241,7 @@ class spell_ascension_bloodmage_empowered : public SpellScript
 
     void Register() override
     {
+        BeforeCast += SpellCastFn(spell_ascension_bloodmage_empowered::SnapshotNightFeastRage);
         if (GetEmpowerment(m_scriptSpellId) == Heartbreak)
             OnEffectLaunchTarget += SpellEffectFn(spell_ascension_bloodmage_empowered::HeartbreakPower,
                 EFFECT_1, SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE);

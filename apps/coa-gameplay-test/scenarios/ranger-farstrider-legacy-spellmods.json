@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "name": "Ranger Farstrider's Opportunity and Farstrider's Leap apply their native spell modifiers (#1595, #1596)",
+  "contract": "Farstrider's Opportunity 300462 (SpellFamilyName 27, SPELL_ATTR0_PASSIVE) reads 'Reduces the cooldown of Flank by $/1000;s1 sec and increases its damage by $s2%.' Effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107), MiscValue 11 = SPELLMOD_COOLDOWN, BasePoints -3001 + DieSides 1 = -3000 ms, mask (0, 131072, 0); effect 1 is SPELL_AURA_ADD_PCT_MODIFIER (108), MiscValue 0 = SPELLMOD_DAMAGE, BasePoints 14 + 1 = +15%, mask (2097152, 131072, 0). Word 1 bit 131072 in family 27 belongs to Flank alone (804940, 805082-805088, 582530-582531). Farstrider's Leap 300463 (family 27, passive) reads 'Increases the range of Reposition by $s1 yds.': SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 5 = SPELLMOD_RANGE, BasePoints 9 + 1 = +10, mask (0, 128, 0), which in family 27 is Reposition 800085 alone (SpellRange 217 = 30 yds). These are native spell modifiers handled by AuraEffect::HandleAddModifier, so no script is needed: with both learned, Flank's cooldown modifier must turn 10000 ms into 7000 ms, its damage modifier must multiply by 1.15, Reposition's range must rise from 30 to 40 yds, and Ravage 803851 (family 27 word 1 bit 4096, outside both masks) must be untouched. Neither spell nor Reposition is granted by the live client catalog (no CharacterAdvancement entry; SkillLineAbility only, AcquireMethod 0), and Flank carries no RecoveryTime, so this scenario only proves the modifiers work once the auras are present.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the character settle", "ms": 3000 },
+    {
+      "action": "snapshot", "actor": "ranger", "metric": "spell_modifier", "spell": 804940, "op": 11, "base": 10000,
+      "save_as": "flank_cooldown_before"
+    },
+    {
+      "action": "snapshot", "actor": "ranger", "metric": "spell_modifier", "spell": 804940, "op": 0, "base": 1000,
+      "save_as": "flank_damage_before"
+    },
+    {
+      "action": "snapshot", "actor": "ranger", "metric": "spell_modifier", "spell": 803851, "op": 0, "base": 1000,
+      "save_as": "ravage_damage_before"
+    },
+    { "action": "snapshot", "actor": "ranger", "metric": "spell_max_range", "spell": 800085, "save_as": "reposition_before" },
+    { "action": "learn", "actor": "ranger", "spell": 300462 },
+    { "action": "learn", "actor": "ranger", "spell": 300463 },
+    {
+      "action": "assert", "label": "SETUP: Farstrider's Opportunity is active", "actor": "ranger",
+      "metric": "aura", "spell": 300462, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: Farstrider's Leap is active", "actor": "ranger",
+      "metric": "aura", "spell": 300463, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Flank's cooldown modifier is 3 sec shorter", "actor": "ranger",
+      "metric": "spell_modifier", "spell": 804940, "op": 11, "base": 10000, "relative_to": "flank_cooldown_before",
+      "min": -3000.01, "max": -2999.99
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Flank's damage modifier rises by 15%", "actor": "ranger",
+      "metric": "spell_modifier", "spell": 804940, "op": 0, "base": 1000, "ratio_to": "flank_damage_before",
+      "min": 1.1499, "max": 1.1501
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Reposition's range rises by 10 yds", "actor": "ranger",
+      "metric": "spell_max_range", "spell": 800085, "relative_to": "reposition_before", "min": 9.99, "max": 10.01
+    },
+    {
+      "action": "assert", "label": "REGRESSION: Ravage's damage modifier is untouched", "actor": "ranger",
+      "metric": "spell_modifier", "spell": 803851, "op": 0, "base": 1000, "ratio_to": "ravage_damage_before",
+      "min": 0.9999, "max": 1.0001
+    }
+  ]
+}

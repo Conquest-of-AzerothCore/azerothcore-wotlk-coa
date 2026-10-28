@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Hero Divine Star flies out thirty yards then returns to its origin (#7364)",
+  "contract": [
+    "Divine Star 760060 (Ranked(760060, 840056, Behaviour::Tick, 760061, 760062, 0, Motion::OutAndBack, 30.0f) in",
+    "AscensionSummonedEffects.h): the anchor creature 840056 launches on the caster's facing toward",
+    "GetFirstCollisionPosition(30, 0) and, on MovementInform at that outbound point, immediately issues the return",
+    "leg back to the owner's position (AscensionSummonedEffects.cpp Launch/MovementInform). The travel time is",
+    "min(duration(760061)=3000ms, duration(760060)=6000ms) halved for OutAndBack = 1500ms one-way, so the full",
+    "round trip is 3000ms, matching 760061's own 3000ms duration and the tooltip's claim that the star heals",
+    "allies on its way out and on its way back to its original position. This is an independent expectation from",
+    "the DBC duration fields, not from reading whether the current code happens to schedule the return."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "learn", "actor": "hero", "spell": 760060 },
+    { "action": "cast", "actor": "hero", "spell": 760060, "target": "hero" },
+    {
+      "action": "assert",
+      "label": "SETUP: the Divine Star anchor summon exists right after cast",
+      "actor": "hero", "metric": "owned_creature_count", "entry": 840056, "equals": 1, "within_ms": 1000
+    },
+    { "action": "wait", "label": "Let the outbound leg (1500 ms) mostly complete", "ms": 1200 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the star is still alive and well away from its origin mid-flight, not vanished early",
+      "actor": "hero", "metric": "nearby_creature_count", "entry": 840056, "min_home_distance": 15, "equals": 1
+    },
+    { "action": "wait", "label": "Let the return leg complete (full round trip is 3000 ms)", "ms": 2300 },
+    {
+      "action": "assert",
+      "label": "The star is still alive after the full round-trip window, not despawned before returning",
+      "actor": "hero", "metric": "owned_creature_count", "entry": 840056, "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the star has returned close to its origin, not stuck or vanished mid-path",
+      "actor": "hero", "metric": "nearby_creature_count", "entry": 840056, "min_home_distance": 15, "equals": 0
+    }
+  ]
+}

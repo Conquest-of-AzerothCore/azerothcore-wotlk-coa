@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "Suffusion of Essence lengthens Suffuse by 2 seconds per Demonfire consumed (#1280)",
+  "contract": "#1280: Suffusion of Essence 706566 (family 23, CharacterAdvancement 34075, class 17 ability option) reads 'Increases the duration of Suffuse by $/1000;s1 sec for each Demonfire consumed' with s1 = 2000 (BasePoints 1999 + DieSides 1). Its effect 0 is the native aura 107 SPELLMOD_EFFECT3 (MiscValue 23) on mask (0, 0, 0x80000000), which matches only Demonfire 500906 (flags (0, 0x10, 0x80000000)); Demonfire's effect 2 is 3000 (BasePoints 2999 + DieSides 1). Suffuse 801063 reads 'Lasts $/1000;500906s3 sec for each Demonfire consumed', so the per-Demonfire duration is Demonfire's effect 2 value including the caster's modifiers: 3 s, or 5 s with Suffusion of Essence. AscensionXorothContracts.cpp turns Demonfire's effects into dummies and xoroth_casts::OnCalcMaxDuration sets the Suffuse auras (801063, whose effect 2 carries Speed Demon, and the heal-over-time 801064) to a literal 3000 ms per consumed Demonfire, so before the fix the talent changed nothing. Expected: with 3 Demonfire consumed, both Suffuse auras last 9 s untalented and 15 s with the talent (9 s before the fix). The talented cast clears the first cast's auras first so the durations are freshly calculated.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "knight", "spell": 801063 },
+    {
+      "action": "assert", "label": "SETUP: Demonfire's effect 2 (Suffuse seconds per Demonfire) is 3000 ms",
+      "actor": "knight", "metric": "spell_effect_value", "spell": 500906, "effect": 2, "min": 2999.5, "max": 3000.5
+    },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 3, "label": "Three Demonfire stacks for the untalented Suffuse" },
+    { "action": "cast", "actor": "knight", "spell": 801063, "label": "Suffuse without Suffusion of Essence" },
+    {
+      "action": "assert", "label": "SETUP: the untalented Suffuse heal-over-time is up",
+      "actor": "knight", "metric": "aura", "spell": 801064, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "BASELINE: 3 Demonfire give a 9 s heal-over-time",
+      "actor": "knight", "metric": "aura_duration_ms", "spell": 801064, "min": 8000, "max": 9000
+    },
+    {
+      "action": "assert", "label": "BASELINE: 3 Demonfire give a 9 s Suffuse aura",
+      "actor": "knight", "metric": "aura_duration_ms", "spell": 801063, "min": 8000, "max": 9000
+    },
+    { "action": "learn", "actor": "knight", "spell": 706566 },
+    { "action": "set_aura", "actor": "knight", "spell": 706566, "stacks": 1, "label": "Force the Suffusion of Essence passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Suffusion of Essence passive is active",
+      "actor": "knight", "metric": "aura", "spell": 706566, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: the talent raises Demonfire's effect 2 to 5000 ms",
+      "actor": "knight", "metric": "spell_effect_value", "spell": 500906, "effect": 2, "min": 4999.5, "max": 5000.5
+    },
+    { "action": "set_aura", "actor": "knight", "spell": 801064, "stacks": 0, "label": "Clear the untalented heal-over-time" },
+    { "action": "set_aura", "actor": "knight", "spell": 801063, "stacks": 0, "label": "Clear the untalented Suffuse aura" },
+    { "action": "reset_cooldown", "actor": "knight", "spell": 801063 },
+    { "action": "wait", "label": "Clear the global cooldown from the first Suffuse cast", "ms": 1700 },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 3, "label": "The same three Demonfire stacks for the talented Suffuse" },
+    { "action": "cast", "actor": "knight", "spell": 801063, "label": "Suffuse with Suffusion of Essence" },
+    {
+      "action": "assert", "label": "SETUP: the talented Suffuse heal-over-time is up",
+      "actor": "knight", "metric": "aura", "spell": 801064, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: 3 Demonfire give a 15 s heal-over-time (5 s each)",
+      "actor": "knight", "metric": "aura_duration_ms", "spell": 801064, "min": 14000, "max": 15000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: 3 Demonfire give a 15 s Suffuse aura (5 s each)",
+      "actor": "knight", "metric": "aura_duration_ms", "spell": 801063, "min": 14000, "max": 15000
+    }
+  ]
+}

@@ -46,6 +46,7 @@ namespace CoAChallenges
 
     // Helpers exposed for the test harness.
     int QuestColor(uint32 questLevel, uint32 playerLevel);
+    bool IsQuestWithoutObjectives(Quest const* quest);
     bool Test_SpellCheckCastBlocked(Player* player, uint32 spellId, bool triggered = false);
     void Test_SetQuiet(bool quiet);
     // Spellbind roulette (GM `.coa ruletestall` regression tests).
@@ -68,6 +69,7 @@ namespace CoAChallenges
     void Test_AuditAllRules(Player* player);
     void Test_AuditAllDefs(Player* player);
     bool Test_CacheToctou(Player* player);
+    bool Test_PetTrialAuras(Player* player);
 
     // Cache TOCTOU seam (implemented in Lifecycle.cpp / GameModes.cpp): lets the
     // regression test inject an invalidation between the DB load and the cache

@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "name": "A Wildcard Hero rolls an ability on even levels, a talent on odd ones, and rerolls with a Scroll of Fortune",
+  "contract": "On Darkmoon - Season 10 Wildcard the Hero's essence budget (CharacterAdvancementEssence.dbc, wildcard rows of class 10) opened an ability roll (2 AE) on every even level from 10 and a talent roll (1 TE) on every odd level from 11. The dice sent CMSG 0x643; the server revealed one entry from the pool of its wildcard level (SMSG 0x621), learned it, sent the build (SMSG 0x726) and answered ROLL_ABILITIES_OK (SMSG 0x644), or ROLL_ABILITIES_NO_ROLL without unspent essence. Talents came with a random number of ranks. A right-click on a stack of Scroll of Fortune items redeemed the whole stack into tokens (SMSG 0x670); rerolling an entry (CMSG 0x61D) spent one, unlearned the entry and answered CA_UNLEARN_OK (SMSG 0x61E), after which the client asked for the replacement roll. The client offers the starting choice whenever its build holds at most four abilities, so a reroll that leaves four abilities shows the swap only with the replacement build. Without a scroll the answer was CA_UNLEARN_NO_SCROLL_OF_FORTUNE, and an entry could not be rerolled while a roll of its kind was still unspent. The fifth spell ended the starting phase: the server emptied and unblocked the four starter skill card slots (SMSG 0x625) that had shown the starting abilities.",
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "wild", "race": 1, "class": 10, "level": 1},
+    {"id": "plain", "race": 1, "class": 10, "level": 10}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 3000},
+    {"action": "console", "command": "coa gamemode WildCard on Harnessa"},
+    {"action": "console", "command": "coa gamemode WildCard off Harnessb"},
+    {"action": "client_packet", "label": "Roll the starting abilities", "actor": "wild", "opcode": 1611},
+    {"action": "wait", "ms": 1500},
+    {"action": "assert", "label": "Four starters are revealed", "actor": "wild", "metric": "server_packets", "opcode": 1569, "equals": 4},
+
+    {"action": "client_packet", "label": "Click the dice at level 1", "actor": "wild", "opcode": 1603, "fields": [{"u32": 0}, {"u32": 0}, {"u32": 0}, {"u8": 0}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The starters spend the level-1 essence", "actor": "wild", "metric": "server_packet_contains", "opcode": 1604, "text": "ROLL_ABILITIES_NO_ROLL", "equals": 1},
+
+    {"action": "set_level", "actor": "wild", "value": 10},
+    {"action": "client_packet", "label": "Roll at level 10", "actor": "wild", "opcode": 1603, "fields": [{"u32": 0}, {"u32": 0}, {"u32": 0}, {"u8": 0}]},
+    {"action": "wait", "ms": 1500},
+    {"action": "assert", "label": "Level 10 rolls", "actor": "wild", "metric": "server_packet_contains", "opcode": 1604, "text": "ROLL_ABILITIES_OK", "equals": 1},
+    {"action": "assert", "label": "and reveals one entry", "actor": "wild", "metric": "server_packets", "opcode": 1569, "equals": 5},
+    {"action": "assert", "label": "The fifth slot holds an ability", "actor": "wild", "metric": "player_setting", "source": "core.wildcard", "index": 4, "min": 1, "max": 1048575},
+    {"action": "assert", "label": "Its spell is learned", "actor": "wild", "metric": "wildcard_spells_known", "equals": 5},
+    {"action": "assert", "label": "The fifth spell empties the four starter skill card slots", "actor": "wild", "metric": "server_packets", "opcode": 1573, "equals": 4},
+    {"action": "client_packet", "label": "Click again at level 10", "actor": "wild", "opcode": 1603, "fields": [{"u32": 0}, {"u32": 0}, {"u32": 0}, {"u8": 0}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The second click is answered", "actor": "wild", "metric": "server_packets", "opcode": 1604, "equals": 3},
+    {"action": "assert", "label": "but one roll per even level reveals nothing more", "actor": "wild", "metric": "server_packets", "opcode": 1569, "equals": 5},
+
+    {"action": "set_level", "actor": "wild", "value": 11},
+    {"action": "client_packet", "label": "Roll at level 11", "actor": "wild", "opcode": 1603, "fields": [{"u32": 0}, {"u32": 0}, {"u32": 0}, {"u8": 0}]},
+    {"action": "wait", "ms": 1500},
+    {"action": "assert", "label": "Level 11 rolls", "actor": "wild", "metric": "server_packets", "opcode": 1569, "equals": 6},
+    {"action": "assert", "label": "The sixth slot holds a talent", "actor": "wild", "metric": "player_setting", "source": "core.wildcard", "index": 5, "min": 8388608, "max": 2147483647},
+    {"action": "assert", "label": "The talent's rank is learned", "actor": "wild", "metric": "wildcard_spells_known", "equals": 6},
+    {"action": "assert", "label": "Later rolls leave the skill card slots alone", "actor": "wild", "metric": "server_packets", "opcode": 1573, "equals": 4},
+
+    {"action": "set_action_button", "label": "Put the level-10 ability on the bar", "actor": "wild", "button": 11, "wildcard_slot": 4},
+    {"action": "client_packet", "label": "Reroll it without a scroll", "actor": "wild", "opcode": 1565, "fields": [{"wildcard_entry": 4}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "A reroll needs a Scroll of Fortune", "actor": "wild", "metric": "server_packet_contains", "opcode": 1566, "text": "CA_UNLEARN_NO_SCROLL_OF_FORTUNE", "equals": 1},
+
+    {"action": "add_item", "actor": "wild", "item": 97913, "count": 3},
+    {"action": "use_item", "label": "Redeem a stack of Scrolls of Fortune I: Abilities", "actor": "wild", "item": 97913, "spell": 102791},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The scrolls become tokens", "actor": "wild", "metric": "server_packet_contains", "opcode": 1648, "text": "TOKEN_TYPE_SCROLL_OF_FORTUNE_I_ABILITIES", "equals": 1},
+    {"action": "assert", "label": "One click stores the whole stack", "actor": "wild", "metric": "player_setting", "source": "core.wildcard.scrolls", "index": 1, "equals": 3},
+    {"action": "assert", "label": "The stack is used up", "actor": "wild", "metric": "item_count", "item": 97913, "equals": 0},
+
+    {"action": "snapshot", "actor": "wild", "metric": "player_setting", "source": "core.wildcard", "index": 4, "save_as": "rolled"},
+    {"action": "snapshot", "actor": "wild", "metric": "server_packets", "opcode": 1830, "save_as": "builds"},
+    {"action": "client_packet", "label": "Reroll the level-10 ability", "actor": "wild", "opcode": 1565, "fields": [{"wildcard_entry": 4}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The reroll unlearns it", "actor": "wild", "metric": "server_packet_contains", "opcode": 1566, "text": "CA_UNLEARN_OK", "equals": 1},
+    {"action": "assert", "label": "Its slot is empty", "actor": "wild", "metric": "player_setting", "source": "core.wildcard", "index": 4, "equals": 0},
+    {"action": "assert", "label": "One scroll is spent", "actor": "wild", "metric": "player_setting", "source": "core.wildcard.scrolls", "index": 1, "equals": 2},
+    {"action": "assert", "label": "The client keeps five abilities until the replacement, or it offers the starting choice", "actor": "wild", "metric": "server_packets", "opcode": 1830, "relative_to": "builds", "equals": 0},
+    {"action": "assert", "label": "The entry is remembered", "actor": "wild", "metric": "player_setting", "source": "core.wildcard.unlearned", "index": 0, "relative_to": "rolled", "equals": 0},
+    {"action": "assert", "label": "Its spell leaves the spellbook", "actor": "wild", "metric": "wildcard_spells_known", "equals": 5},
+    {"action": "assert", "label": "and the action bar", "actor": "wild", "metric": "action_bar_unknown_spells", "equals": 0},
+
+    {"action": "client_packet", "label": "The client asks for the replacement", "actor": "wild", "opcode": 1603, "fields": [{"u32": 0}, {"u32": 0}, {"u32": 0}, {"u8": 0}]},
+    {"action": "wait", "ms": 1500},
+    {"action": "assert", "label": "The replacement is rolled", "actor": "wild", "metric": "server_packets", "opcode": 1569, "equals": 7},
+    {"action": "assert", "label": "into the freed slot", "actor": "wild", "metric": "player_setting", "source": "core.wildcard", "index": 4, "min": 1, "max": 1048575},
+    {"action": "assert", "label": "and learned", "actor": "wild", "metric": "wildcard_spells_known", "equals": 6},
+    {"action": "assert", "label": "The client sees the swap in one build", "actor": "wild", "metric": "server_packets", "opcode": 1830, "relative_to": "builds", "equals": 1},
+
+    {"action": "set_level", "actor": "wild", "value": 12},
+    {"action": "client_packet", "label": "Reroll a starter while the level-12 roll is unspent", "actor": "wild", "opcode": 1565, "fields": [{"wildcard_entry": 0}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The unspent roll comes first", "actor": "wild", "metric": "server_packet_contains", "opcode": 1566, "text": "CA_UNLEARN_WILDCARD_UNSPENT_AE", "equals": 1},
+
+    {"action": "client_packet", "label": "A Hero outside Wildcard clicks", "actor": "plain", "opcode": 1603, "fields": [{"u32": 0}, {"u32": 0}, {"u32": 0}, {"u8": 0}]},
+    {"action": "client_packet", "label": "and tries a reroll", "actor": "plain", "opcode": 1565, "fields": [{"u32": 40134}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "Outside Wildcard nothing is rolled", "actor": "plain", "metric": "server_packet_contains", "opcode": 1604, "text": "ROLL_ABILITIES_NO_ROLL", "equals": 1},
+    {"action": "assert", "label": "or rerolled", "actor": "plain", "metric": "server_packet_contains", "opcode": 1566, "text": "CA_UNLEARN_NOT_WILDCARD", "equals": 1}
+  ]
+}

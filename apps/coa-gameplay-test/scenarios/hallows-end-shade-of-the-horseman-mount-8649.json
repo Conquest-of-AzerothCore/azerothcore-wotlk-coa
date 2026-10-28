@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Hallow's End: the Shade of the Horseman rides his horse over Goldshire and lights the fires",
+  "contract": "Accepting Let the Fires Come! 12135 (available once Fire Brigade Practice 11360 is rewarded) from the Costumed Orphan Matron 24519 in Goldshire summons the Shade of the Horseman 23543, who flies waypoint path 235431 over the village and sets Headless Horseman - Fire (DND) triggers 23686 alight with Start Fire 42132 from 25 s on, giving them Fire Aura Base 42074. He rides the steed of Headless Horseman's Mount 48025, whose Mounted effect names creature 27153 with client displays 25958 and 25159, so he carries a non-zero mount display while he flies his path and after casting the fires; without it he hovers on foot in a swimming pose (#8649, #9052). The 48025 aura itself is removed by movement, turning and casting (AuraInterruptFlags 261182), so it cannot hold the mount once he moves. The visitor waits at (-9473, 45), within 60 yd of the whole path and of every Goldshire fire trigger, because the Shade only casts fires with a player within 60 yd. Rendering is untested.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9431.25,
+    "y": 52.69,
+    "z": 56.59,
+    "o": 1.5
+  },
+  "players": [
+    { "id": "orphan", "race": 1, "class": 1, "level": 10 }
+  ],
+  "steps": [
+    { "action": "set_phase", "label": "Join world phase 1, where the event spawns live", "actor": "orphan", "value": 1 },
+    { "action": "game_event", "event": 12, "active": true },
+    { "action": "assert", "label": "CONTROL: the Costumed Orphan Matron stands beside the visitor", "actor": "orphan",
+      "metric": "nearby_creature_count", "entry": 24519, "min": 1, "within_ms": 10000 },
+    { "action": "prepare_quest", "label": "SETUP: Fire Brigade Practice, which Let the Fires Come! requires",
+      "actor": "orphan", "quest": 11360 },
+    { "action": "reward_quest", "label": "SETUP: hand in Fire Brigade Practice", "actor": "orphan", "quest": 11360 },
+    { "action": "quest_accept", "label": "Accept Let the Fires Come! from the matron", "actor": "orphan",
+      "quest": 12135, "entry": 24519 },
+    { "action": "assert", "label": "CONTROL: Let the Fires Come! is in the quest log", "actor": "orphan",
+      "metric": "quest_status", "quest": 12135, "min": 1 },
+    { "action": "teleport", "label": "Wait in the middle of the Shade's path", "actor": "orphan", "map": 0,
+      "x": -9473.0, "y": 45.0, "z": 57.5 },
+    { "action": "assert", "label": "CONTROL: the matron summoned the Shade of the Horseman", "actor": "orphan",
+      "metric": "nearby_creature_count", "entry": 23543, "min": 1, "within_ms": 5000 },
+    { "action": "wait", "label": "The Shade flies his waypoint path for a while", "ms": 5000 },
+    { "action": "assert", "label": "DISCRIMINATING: the Shade still sits on his horse after moving and turning",
+      "actor": "orphan", "metric": "nearby_creature_mount_display", "entry": 23543, "min": 1 },
+    { "action": "assert", "label": "The Shade sets a Goldshire fire trigger alight", "actor": "orphan",
+      "metric": "nearby_creature_aura_count", "entry": 23686, "spell": 42074, "min": 1, "within_ms": 40000 },
+    { "action": "assert", "label": "He is still on his horse after casting the fires", "actor": "orphan",
+      "metric": "nearby_creature_mount_display", "entry": 23543, "min": 1 }
+  ]
+}

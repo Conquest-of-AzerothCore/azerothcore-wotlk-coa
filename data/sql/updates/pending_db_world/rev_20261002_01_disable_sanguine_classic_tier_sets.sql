@@ -1,0 +1,2 @@
+UPDATE `item_template` SET `itemset` = 0
+WHERE `entry` BETWEEN 7016795 AND 7016966 AND `itemset` BETWEEN 60201 AND 60220;

@@ -1,0 +1,254 @@
+{
+  "schema": 1,
+  "name": "bloodmage valanar thirst cast speed 5923",
+  "contract": [
+    "Original Thirst helper 300796 effect 2 is a family-26 percent SPELLMOD_CASTING_TIME of -7 per stack with",
+    "mask 393216, covering Valanar and Keleseth. Original Valanar 560315 has a 6000-ms cast; expected times at",
+    "one, five and nine Thirst stacks are 5580, 3900 and 2220 ms, with removal restoring 6000. Thirst 706613",
+    "effect 1 separately supplies +10% damage per stack to Valanar. Native spell queries isolate these authored",
+    "modifiers; a normal Valanar cast proves it also lands. Insatiable at ten stacks is avoided in the isolated",
+    "modifier test. The helper installs only effect 2 because Animated Blood duration is already handled by its",
+    "summon hook. A normal paid Bloodmoon Blast refreshes Thirst; cast speed must remain synchronized beyond the",
+    "original expiry and return to baseline when the refreshed resource expires."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "bm",
+      "race": 1,
+      "class": 20,
+      "level": 13,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "bm",
+      "spell": 560315
+    },
+    {
+      "action": "set_aura",
+      "actor": "bm",
+      "spell": 706613,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "bm",
+      "metric": "spell_cast_time_ms",
+      "spell": 560315,
+      "save_as": "plain_cast"
+    },
+    {
+      "action": "assert",
+      "actor": "bm",
+      "metric": "spell_cast_time_ms",
+      "spell": 560315,
+      "equals": 6000
+    },
+    {
+      "action": "set_aura",
+      "actor": "bm",
+      "spell": 706613,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bm",
+      "metric": "spell_cast_time_ms",
+      "spell": 560315,
+      "ratio_to": "plain_cast",
+      "min": 0.929,
+      "max": 0.931
+    },
+    {
+      "action": "set_aura",
+      "actor": "bm",
+      "spell": 706613,
+      "stacks": 5
+    },
+    {
+      "action": "assert",
+      "actor": "bm",
+      "metric": "spell_cast_time_ms",
+      "spell": 560315,
+      "ratio_to": "plain_cast",
+      "min": 0.649,
+      "max": 0.651
+    },
+    {
+      "action": "set_aura",
+      "actor": "bm",
+      "spell": 706613,
+      "stacks": 9
+    },
+    {
+      "action": "assert",
+      "actor": "bm",
+      "metric": "spell_cast_time_ms",
+      "spell": 560315,
+      "ratio_to": "plain_cast",
+      "min": 0.369,
+      "max": 0.371
+    },
+    {
+      "action": "set_aura",
+      "actor": "bm",
+      "spell": 706613,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "bm",
+      "metric": "spell_cast_time_ms",
+      "spell": 560315,
+      "relative_to": "plain_cast",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "bm",
+      "metric": "spell_damage_done",
+      "spell": 560315,
+      "target": "enemy",
+      "equals": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "bm",
+      "spell": 706613,
+      "stacks": 5
+    },
+    {
+      "action": "assert",
+      "actor": "bm",
+      "metric": "spell_damage_done",
+      "spell": 560315,
+      "target": "enemy",
+      "equals": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "bm",
+      "spell": 560315,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "bm",
+      "metric": "spell_damage_count",
+      "spell": 560315,
+      "target": "enemy",
+      "equals": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "bm",
+      "metric": "spell_damage_total",
+      "spell": 560315,
+      "target": "enemy",
+      "min": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "bm",
+      "spell": 706613,
+      "stacks": 0
+    },
+    {
+      "action": "learn",
+      "actor": "bm",
+      "spell": 92112
+    },
+    {
+      "action": "learn",
+      "actor": "bm",
+      "spell": 500125
+    },
+    {
+      "action": "set_aura",
+      "actor": "bm",
+      "spell": 706613,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 12000
+    },
+    {
+      "action": "cast",
+      "actor": "bm",
+      "spell": 500125,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "bm",
+      "metric": "aura_stacks",
+      "spell": 706613,
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 9000
+    },
+    {
+      "action": "assert",
+      "actor": "bm",
+      "metric": "aura_stacks",
+      "spell": 706613,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "bm",
+      "metric": "spell_cast_time_ms",
+      "spell": 560315,
+      "ratio_to": "plain_cast",
+      "min": 0.859,
+      "max": 0.861
+    },
+    {
+      "action": "wait",
+      "ms": 12000
+    },
+    {
+      "action": "assert",
+      "actor": "bm",
+      "metric": "aura",
+      "spell": 706613,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "bm",
+      "metric": "aura",
+      "spell": 300796,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "bm",
+      "metric": "spell_cast_time_ms",
+      "spell": 560315,
+      "equals": 6000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "bm",
+      "entry": 36,
+      "level": 13,
+      "health": 100000,
+      "distance": 5
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Tentacle of C'Thun is summoned at Old God tentacle size (#8637)",
+  "contract": [
+    "Tentacle of C'Thun 801153 summons creature 50272 on display 15788 (EyeStalkofKathune, about 7.12 yd at scale",
+    "1). Its 0.7 template scale made a 4.98 yd tentacle, the largest of the Old God tentacles. The in-game pass settled",
+    "on 0.45, about 3.20 yd, after 0.6 (4.27 yd) and 0.55 (3.91 yd). Expected: the tentacle appears on display 15788",
+    "at a scale between 0.44 and 0.46."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "p", "race": 1, "class": 25, "level": 20}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "learn", "actor": "p", "spell": 801153},
+    {"action": "cast", "label": "Summon the tentacle", "actor": "p", "spell": 801153},
+    {"action": "assert", "label": "SETUP: the tentacle is summoned", "actor": "p", "metric": "owned_creature_count",
+     "entry": 50272, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "SETUP: it uses display 15788", "actor": "p", "metric": "owned_creature_display",
+     "entry": 50272, "equals": 15788},
+    {"action": "assert", "label": "The tentacle stands at Old God tentacle size", "actor": "p",
+     "metric": "owned_creature_scale", "entry": 50272, "min": 0.44, "max": 0.46}
+  ]
+}

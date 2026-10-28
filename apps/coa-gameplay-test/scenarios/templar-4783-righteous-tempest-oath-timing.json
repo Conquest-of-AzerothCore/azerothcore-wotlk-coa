@@ -1,0 +1,29 @@
+{
+ "schema": 1,
+ "name": "Righteous Tempest consumes its Oath on ending, not on cast (#4783)",
+ "contract": "Righteous Tempest 807269 is a self-buff lasting 3000 ms (SpellDuration row 27). Casting it must not immediately clear the Templar's held Oaths; the Oath granted by Condemn 567541 (804922) survives the cast and is only cleared once Righteous Tempest's own buff ends, so its damage bonus (computed from the still-held Oath) is not lost at cast time.",
+ "timeout_ms": 90000,
+ "players": [
+  { "id": "templar", "race": 1, "class": 19, "level": 80, "melee_hit_rating": 10000, "spell_hit_rating": 10000, "expertise_rating": 10000 }
+ ],
+ "creatures": [
+  { "id": "dummy", "owner": "templar", "entry": 36, "health": 1000000, "distance": 3 }
+ ],
+ "steps": [
+  { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+  { "action": "learn", "actor": "templar", "spell": 567541 },
+  { "action": "learn", "actor": "templar", "spell": 807269 },
+  { "action": "add_item", "actor": "templar", "item": 2495 },
+  { "action": "equip", "actor": "templar", "item": 2495, "slot": 15 },
+  { "action": "set_power", "actor": "templar", "power": 3, "value": 100 },
+  { "action": "cast", "actor": "templar", "spell": 567541, "target": "dummy" },
+  { "action": "assert", "label": "Condemn grants its Oath", "actor": "templar", "metric": "aura", "spell": 804922, "equals": 1, "within_ms": 2000 },
+  { "action": "wait", "label": "Global cooldown", "ms": 1600 },
+  { "action": "set_power", "actor": "templar", "power": 3, "value": 100 },
+  { "action": "cast", "actor": "templar", "spell": 807269, "target": "dummy" },
+  { "action": "wait", "label": "Let the cast resolve", "ms": 300 },
+  { "action": "assert", "label": "Oath NOT consumed at Righteous Tempest's cast", "actor": "templar", "metric": "aura", "spell": 804922, "equals": 1 },
+  { "action": "wait", "label": "Past Righteous Tempest's 3000 ms buff duration", "ms": 3500 },
+  { "action": "assert", "label": "Oath consumed once Righteous Tempest ends", "actor": "templar", "metric": "aura", "spell": 804922, "equals": 0 }
+ ]
+}

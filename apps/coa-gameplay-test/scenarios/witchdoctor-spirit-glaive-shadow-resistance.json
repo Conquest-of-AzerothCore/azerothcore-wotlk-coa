@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Spirit Glaive lowers Shadow Resistance by level + 1 (#272)",
+  "contract": "Spirit Glaive 806289 reads: 'Toss spectral glaives that strikes enemies it passes through, dealing Shadow damage, and reducing their Shadow Resistance by ${1*$PL+1} for $d' (5 sec, SpellDuration 28); its debuff tooltip reads 'Shadow Resistance reduced.' Effect 2 is the Shadow-school (misc 32) resistance aura that carries that reduction, so a level-80 doctor's glaive must lower a target's Shadow Resistance by 81 while the debuff lasts and restore it afterwards. A unit's resistance field never goes below zero (Object::SetStatInt32Value), and resist chance treats negative resistance as zero, so the reduction is only observable, and only matters, on a target that has Shadow Resistance: the hostile target is Corrupted Green Whelp 14023, whose creature_template_resistance row gives it 180 Shadow Resistance, and the baseline is asserted before the cast. No client record gives the glaive a percentage increase of Shadow damage taken, so the target's incoming Shadow damage modifier must stay unchanged (the report's 15% damage-taken recollection is not what the live client describes). The glaive's own SpellVisual 540 has no missile model (only a right-hand precast model and throw animation), so a thrown projectile is not observable server-side; the cast itself takes time, during which the client plays that precast model.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "doctor", "race": 1, "class": 13, "level": 80, "spell_hit_rating": 10000, "ranged_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "target", "owner": "doctor", "entry": 14023, "faction": 14, "level": 80, "health": 1000000, "distance": 8 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "doctor", "spell": 806289 },
+    { "action": "add_item", "actor": "doctor", "item": 2504 },
+    {
+      "action": "equip", "label": "Bow for the glaive's ranged-weapon requirement", "actor": "doctor", "item": 2504,
+      "slot": 17
+    },
+    { "action": "wait", "label": "Let the equipment settle", "ms": 1500 },
+    {
+      "action": "assert", "label": "The target has enough Shadow Resistance to show the full reduction",
+      "actor": "target", "metric": "resistance", "school": 5, "min": 81
+    },
+    { "action": "snapshot", "actor": "target", "metric": "resistance", "school": 5, "save_as": "shadow_resistance" },
+    {
+      "action": "snapshot", "actor": "target", "metric": "spell_damage_taken", "spell": 504582, "target": "doctor",
+      "save_as": "shadow_taken"
+    },
+    { "action": "cast", "label": "Spirit Glaive in front of the doctor", "actor": "doctor", "spell": 806289 },
+    {
+      "action": "assert", "label": "The glaive is cast over time, so the client plays its precast hand model",
+      "actor": "doctor", "metric": "casting", "equals": 1
+    },
+    {
+      "action": "assert", "label": "The glaive debuff lands", "actor": "target", "metric": "aura", "spell": 806289,
+      "caster": "doctor", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "The debuff carries level + 1 = 81", "actor": "target", "metric": "aura_amount",
+      "spell": 806289, "effect": 2, "caster": "doctor", "equals": -81
+    },
+    {
+      "action": "assert", "label": "#272: Shadow Resistance is reduced by 81", "actor": "target",
+      "metric": "resistance", "school": 5, "relative_to": "shadow_resistance", "equals": -81
+    },
+    {
+      "action": "assert", "label": "No Shadow damage-taken increase rides on the debuff", "actor": "target",
+      "metric": "spell_damage_taken", "spell": 504582, "target": "doctor", "relative_to": "shadow_taken", "equals": 0
+    },
+    {
+      "action": "assert", "label": "The debuff expires after 5 sec", "actor": "target", "metric": "aura",
+      "spell": 806289, "caster": "doctor", "equals": 0, "within_ms": 7000
+    },
+    {
+      "action": "assert", "label": "Shadow Resistance returns when the debuff ends", "actor": "target",
+      "metric": "resistance", "school": 5, "relative_to": "shadow_resistance", "equals": 0
+    }
+  ]
+}

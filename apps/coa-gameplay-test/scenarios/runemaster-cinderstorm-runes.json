@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "name": "Issue 1115: Cinderstorm Runes makes Hurricane and Smolder deal 50% more below 20% health",
+  "contract": [
+    "Cinderstorm Runes 706458 (Riftblade talent) reads 'Hurricane and Smolder now deal $s1% more damage against",
+    "enemies below 20% maximum health.' Its only effect is aura 112 with the copied selector 20007",
+    "(ASCENSION_CLASSMASK_AURASTATE_DAMAGE), MiscValueB 2 (AURA_STATE_HEALTHLESS_20_PERCENT), BasePoints 49 +",
+    "DieSides 1 = 50 on family 38 mask0 0x200 (Smolder ranks) and mask2 0x4 (the Hurricane strike 645437). No",
+    "override-script handler reads selector 20007, so the talent did nothing. Converted to native aura 303",
+    "(damage versus aura state) with the class-mask scope, as the Ranger and Primalist contracts do, the weapon",
+    "damage bonus of Smolder 801087 and the strike is x1.5 while the enemy is below 20% and x1 above it.",
+    "Runeblade 707141 and a Runemaster without the talent are unchanged."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80},
+    {"id": "plain", "race": 1, "class": 32, "level": 80}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rm", "entry": 36, "level": 80, "health": 100000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {
+      "action": "snapshot", "actor": "rm", "metric": "melee_spell_damage_done", "spell": 801087, "target": "dummy",
+      "save_as": "rm_smolder"
+    },
+    {
+      "action": "snapshot", "actor": "rm", "metric": "melee_spell_damage_done", "spell": 645437, "target": "dummy",
+      "save_as": "rm_strike"
+    },
+    {
+      "action": "snapshot", "actor": "rm", "metric": "spell_damage_done", "spell": 707141, "target": "dummy",
+      "save_as": "rm_runeblade"
+    },
+    {
+      "action": "snapshot", "actor": "plain", "metric": "melee_spell_damage_done", "spell": 801087, "target": "dummy",
+      "save_as": "plain_smolder"
+    },
+    {
+      "action": "snapshot", "actor": "plain", "metric": "melee_spell_damage_done", "spell": 645437, "target": "dummy",
+      "save_as": "plain_strike"
+    },
+    {
+      "action": "snapshot", "actor": "plain", "metric": "spell_damage_done", "spell": 707141, "target": "dummy",
+      "save_as": "plain_runeblade"
+    },
+    {"action": "learn", "actor": "rm", "spell": 706458},
+    {
+      "action": "assert", "label": "Cinderstorm Runes passive is active", "actor": "rm", "metric": "aura",
+      "spell": 706458, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Above 20% health Smolder is unchanged", "actor": "rm",
+      "metric": "melee_spell_damage_done", "spell": 801087, "target": "dummy", "ratio_to": "rm_smolder", "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert", "label": "Above 20% health the Hurricane strike is unchanged", "actor": "rm",
+      "metric": "melee_spell_damage_done", "spell": 645437, "target": "dummy", "ratio_to": "rm_strike", "min": 0.999,
+      "max": 1.001
+    },
+    {"action": "set_health", "label": "The enemy drops to 15% health", "actor": "dummy", "value": 15000},
+    {
+      "action": "assert", "label": "SETUP: the enemy is below 20% health", "actor": "dummy", "metric": "health_pct",
+      "max": 16, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Below 20% health Smolder deals 50% more damage", "actor": "rm",
+      "metric": "melee_spell_damage_done", "spell": 801087, "target": "dummy", "ratio_to": "rm_smolder", "min": 1.49,
+      "max": 1.51, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Below 20% health each Hurricane strike deals 50% more damage", "actor": "rm",
+      "metric": "melee_spell_damage_done", "spell": 645437, "target": "dummy", "ratio_to": "rm_strike", "min": 1.49,
+      "max": 1.51
+    },
+    {
+      "action": "assert", "label": "Runeblade is not affected", "actor": "rm", "metric": "spell_damage_done",
+      "spell": 707141, "target": "dummy", "ratio_to": "rm_runeblade", "min": 0.999, "max": 1.001
+    },
+    {
+      "action": "assert", "label": "Without the talent Smolder is unchanged below 20%", "actor": "plain",
+      "metric": "melee_spell_damage_done", "spell": 801087, "target": "dummy", "ratio_to": "plain_smolder",
+      "min": 0.999, "max": 1.001
+    },
+    {
+      "action": "assert", "label": "Without the talent the Hurricane strike is unchanged below 20%", "actor": "plain",
+      "metric": "melee_spell_damage_done", "spell": 645437, "target": "dummy", "ratio_to": "plain_strike", "min": 0.999,
+      "max": 1.001
+    },
+    {"action": "set_health", "label": "The enemy is back at 25% health", "actor": "dummy", "value": 25000},
+    {
+      "action": "assert", "label": "At 25% health Smolder is unchanged", "actor": "rm",
+      "metric": "melee_spell_damage_done", "spell": 801087, "target": "dummy", "ratio_to": "rm_smolder", "min": 0.999,
+      "max": 1.001, "within_ms": 1000
+    },
+    {"action": "set_health", "actor": "dummy", "value": 15000},
+    {
+      "action": "assert", "actor": "rm", "metric": "melee_spell_damage_done", "spell": 801087, "target": "dummy",
+      "ratio_to": "rm_smolder", "min": 1.49, "max": 1.51, "within_ms": 1000
+    },
+    {"action": "unlearn", "actor": "rm", "spell": 706458},
+    {"action": "assert", "actor": "rm", "metric": "aura", "spell": 706458, "equals": 0, "within_ms": 2000},
+    {
+      "action": "assert", "label": "Removing the talent removes the bonus", "actor": "rm",
+      "metric": "melee_spell_damage_done", "spell": 801087, "target": "dummy", "ratio_to": "rm_smolder", "min": 0.999,
+      "max": 1.001
+    }
+  ]
+}

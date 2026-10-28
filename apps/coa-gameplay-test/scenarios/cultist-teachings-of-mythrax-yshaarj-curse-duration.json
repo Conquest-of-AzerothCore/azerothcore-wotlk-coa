@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "Cultist: Teachings of Mythrax lengthens Presence of Y'Shaarj's cursed ground by 25% (#1054)",
+  "contract": "Teachings of Mythrax 561035 (Spell.dbc, family 31, passive) reads 'Increases the duration of Presence of N'Zoth and Presence of Y'Shaarj by $s1%.' ($s1 = 25). Its SPELLMOD_DURATION class mask (word0 0x08000000) misses both Presence stances and selects Presence of Y'Shaarj 807632, the record whose duration Presence of Y'Shaarj 803035's tooltip quotes ('giving damage dealt a $h% chance to curse the ground for $807632d', DurationIndex 29 = 12000 ms). aura_ascension_cultist_event implements that curse with the ground effect Despoiled Ground 805180 (SPELL_EFFECT_PERSISTENT_AREA_AURA, also 12000 ms), whose family flags are 0, so no class mask can reach it and the talent never applied. Expected: with the talent every cursed ground Presence of Y'Shaarj creates lasts 12000 * 1.25 = 15000 ms; before the fix it lasts 12000 ms. Eight fixture golems in two 20 sec ground effects (43429 and 17742, one-second ticks) give the proc many damage events; the first Despoiled Ground must appear with more than 14 sec remaining, and every one must be gone within 16 sec once Presence is removed.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "golem_a", "owner": "cultist", "entry": 36, "level": 80, "health": 5000000, "distance": 3 },
+    { "id": "golem_b", "owner": "cultist", "entry": 36, "level": 80, "health": 5000000, "distance": 3 },
+    { "id": "golem_c", "owner": "cultist", "entry": 36, "level": 80, "health": 5000000, "distance": 3 },
+    { "id": "golem_d", "owner": "cultist", "entry": 36, "level": 80, "health": 5000000, "distance": 3 },
+    { "id": "golem_e", "owner": "cultist", "entry": 36, "level": 80, "health": 5000000, "distance": 3 },
+    { "id": "golem_f", "owner": "cultist", "entry": 36, "level": 80, "health": 5000000, "distance": 3 },
+    { "id": "golem_g", "owner": "cultist", "entry": 36, "level": 80, "health": 5000000, "distance": 3 },
+    { "id": "golem_h", "owner": "cultist", "entry": 36, "level": 80, "health": 5000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "cultist", "spell": 561035 },
+    { "action": "learn", "actor": "cultist", "spell": 803035 },
+    { "action": "learn", "actor": "cultist", "spell": 43429 },
+    { "action": "learn", "actor": "cultist", "spell": 17742 },
+    {
+      "action": "assert", "label": "Teachings of Mythrax is active",
+      "actor": "cultist", "metric": "aura", "spell": 561035, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Teachings of Mythrax adds 25% to the Y'Shaarj curse's 12 sec duration",
+      "actor": "cultist", "metric": "spell_modifier", "spell": 807632, "op": 1, "base": 12000, "min": 14999.9, "max": 15000.1
+    },
+    { "action": "cast", "actor": "cultist", "spell": 803035 },
+    {
+      "action": "assert", "label": "Presence of Y'Shaarj is active",
+      "actor": "cultist", "metric": "aura", "spell": 803035, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: no cursed ground exists yet",
+      "actor": "cultist", "metric": "dynamic_object", "spell": 805180, "equals": 0
+    },
+    { "action": "wait", "label": "Let Presence's global cooldown expire", "ms": 1700 },
+    { "action": "cast", "actor": "cultist", "spell": 43429 },
+    {
+      "action": "assert", "label": "SETUP: the first ground effect is burning the golems",
+      "actor": "cultist", "metric": "dynamic_object", "spell": 43429, "equals": 1, "within_ms": 2000
+    },
+    { "action": "cast", "actor": "cultist", "spell": 17742 },
+    {
+      "action": "assert", "label": "SETUP: the second ground effect is burning the golems",
+      "actor": "cultist", "metric": "dynamic_object", "spell": 17742, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Presence of Y'Shaarj curses the ground for 15 sec, not 12",
+      "actor": "cultist", "metric": "dynamic_object_duration_ms", "spell": 805180, "min": 14000, "max": 15000,
+      "within_ms": 19000
+    },
+    { "action": "set_aura", "label": "Remove Presence so no later curse can be cast", "actor": "cultist", "spell": 803035, "stacks": 0 },
+    {
+      "action": "assert", "label": "Every cursed ground ends within its 15 sec",
+      "actor": "cultist", "metric": "dynamic_object", "spell": 805180, "equals": 0, "within_ms": 16000
+    }
+  ]
+}

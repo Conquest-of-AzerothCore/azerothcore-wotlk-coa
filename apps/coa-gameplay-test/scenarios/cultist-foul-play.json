@@ -1,18 +1,34 @@
 {
   "schema": 1,
-  "name": "Foul Play's flat-modifier mechanism reaches a Corrupting Whispers classmask record natively (#1035)",
-  "contract": "PARTIAL PROOF -- Refs #1035, not Fixes: this scenario proves the delivery MECHANISM is native, not that the exact tooltip percentage lands on whatever spell the Cultist casts as 'Corrupting Whispers'. Foul Play 706921 (Spell.dbc, read for this scenario) is a single SPELL_EFFECT_APPLY_AURA effect, aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 3 (SPELLMOD_EFFECT1), BasePoints 4 DieSides 1 (+5), EffectSpellClassMask word 0 bit 19 (524288), target caster. Spell.dbc has three records literally named 'Corrupting Whispers' (SpellFamilyName 31 in all three): 706725 has SpellFamilyFlags word 0 = 524288, an exact match; 707092 has word 0 = 33554432, a different bit, no match; 805606 has SpellFamilyFlags (0,0,0) -- no match on its own family flags (its nonzero field is its own effect's EffectSpellClassMask, a different word position). 706725 is not in SpellInfo::IsAffectedBySpellMod's family-31 special-routing switch, so it falls through to the generic IsAffected(family, classmask) check exercised directly by the spell_modifier assertion below (SPELLMOD_EFFECT1, op 3) -- this proves the native spellmod machinery matches 706725's own classmask and would apply Foul Play's +5 to whatever spell executes as 706725. What is NOT established here: 706725 is referenced only as an EffectTriggerSpell[1] target from 520051, 706726 and 805606 (coa-dbc-viewer map, 'incoming' relationships) and no SkillLineAbility/talent acquisition row was found for it independently -- it may be a triggered helper rather than the spell the Cultist directly casts, and the mechanism's classmask matching against a triggered spell's own SpellInfo is standard AzerothCore behavior but was not traced further within this scenario's scope. grep confirms zero occurrences of 706921 in src/server/coa or src/server/game, matching only that no per-spell script exists; the native aura/spellmod path needs none.",
+  "name": "Foul Play raises Corrupting Whispers' damage bonus from 20% to 25% natively (#1035)",
+  "contract": [
+    "Foul Play 706921 (Cultist Corruption talent, CharacterAdvancement 7072) reads 'Increases the damage bonus provided by your Corrupting Whispers by $s1%.' Spell.dbc: one SPELL_EFFECT_APPLY_AURA effect, aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 3 (SPELLMOD_EFFECT1), BasePoints 4 DieSides 1 (+5), EffectSpellClassMask word 0 bit 19 (524288), target caster.",
+    "The Corrupting Whispers buff the Cultist receives is 706725: the Corrupting Whispers specialization spell 92130 grants helper 805606 (AscensionCultist.cpp SetHelper), whose description embeds @s:706725:0@ and whose proc casts 706725 from the player onto the player (AscensionCultistEvents.cpp, case 805606). 706725's effect 0 is SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, BasePoints 19 DieSides 1 (20%), EffectMiscValue 126 (all magic schools), and its SpellFamilyFlags word 0 is exactly 524288. The other two records named Corrupting Whispers are 707092 (Rank 'Test Only', family bit 25) and 805606 (the proc helper), neither of which carries the bonus.",
+    "Unit::ApplyEffectModifiers applies SPELLMOD_EFFECT1 to effect 0 of a spell cast by the modifier owner, so with Foul Play the player's own 706725 aura is created with 25 instead of 20. Expected: without Foul Play, 706725 carries 20 and raises the Cultist's Shadow damage bonus to 1.20x; with Foul Play it carries 25 and raises it to 1.25x; 707092 and 805606 are never modified."
+  ],
   "timeout_ms": 60000,
   "players": [
     { "id": "cultist", "race": 1, "class": 25, "level": 20 }
   ],
+  "creatures": [
+    { "id": "dummy", "owner": "cultist", "entry": 36, "health": 1000000 }
+  ],
   "steps": [
-    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
 
     { "action": "assert", "label": "BASELINE: Corrupting Whispers 706725's SPELLMOD_EFFECT1 modifier is untouched", "actor": "cultist",
       "metric": "spell_modifier", "spell": 706725, "op": 3, "base": 100, "min": 99.99, "max": 100.01 },
     { "action": "assert", "label": "BASELINE control: the non-matching 707092 record is never affected", "actor": "cultist",
       "metric": "spell_modifier", "spell": 707092, "op": 3, "base": 100, "min": 99.99, "max": 100.01 },
+    { "action": "snapshot", "label": "Shadow damage bonus without Corrupting Whispers", "actor": "cultist",
+      "metric": "spell_damage_done", "spell": 500111, "target": "dummy", "save_as": "damage0" },
+
+    { "action": "set_aura", "label": "Corrupting Whispers, cast by the Cultist on itself", "actor": "cultist", "spell": 706725, "stacks": 1 },
+    { "action": "assert", "label": "BASELINE: Corrupting Whispers carries its authored 20% bonus", "actor": "cultist",
+      "metric": "aura_amount", "spell": 706725, "effect": 0, "equals": 20 },
+    { "action": "assert", "label": "BASELINE: Corrupting Whispers raises Shadow damage by 20%", "actor": "cultist",
+      "metric": "spell_damage_done", "spell": 500111, "target": "dummy", "ratio_to": "damage0", "min": 1.198, "max": 1.202 },
+    { "action": "set_aura", "actor": "cultist", "spell": 706725, "stacks": 0 },
 
     { "action": "learn", "actor": "cultist", "spell": 706921 },
     { "action": "assert", "label": "Learning the passive applies its own self-aura", "actor": "cultist", "metric": "aura", "spell": 706921, "equals": 1, "within_ms": 3000 },
@@ -25,9 +41,21 @@
     { "action": "assert", "label": "CONTROL: the zero-classmask 805606 record still ignores the modifier", "actor": "cultist",
       "metric": "spell_modifier", "spell": 805606, "op": 3, "base": 100, "min": 99.99, "max": 100.01 },
 
+    { "action": "set_aura", "label": "Corrupting Whispers again, now with Foul Play", "actor": "cultist", "spell": 706725, "stacks": 1 },
+    { "action": "assert", "label": "CONTRACT: Corrupting Whispers now carries a 25% bonus", "actor": "cultist",
+      "metric": "aura_amount", "spell": 706725, "effect": 0, "equals": 25 },
+    { "action": "assert", "label": "CONTRACT: Corrupting Whispers now raises Shadow damage by 25%", "actor": "cultist",
+      "metric": "spell_damage_done", "spell": 500111, "target": "dummy", "ratio_to": "damage0", "min": 1.248, "max": 1.252 },
+    { "action": "assert", "label": "Foul Play leaves the mana cost reduction alone", "actor": "cultist",
+      "metric": "aura_amount", "spell": 706725, "effect": 2, "equals": -30 },
+    { "action": "set_aura", "actor": "cultist", "spell": 706725, "stacks": 0 },
+
     { "action": "unlearn", "actor": "cultist", "spell": 706921 },
     { "action": "assert", "label": "Unlearning removes the self-aura", "actor": "cultist", "metric": "aura", "spell": 706921, "equals": 0, "within_ms": 3000 },
     { "action": "assert", "label": "706725's modifier returns to baseline", "actor": "cultist",
-      "metric": "spell_modifier", "spell": 706725, "op": 3, "base": 100, "min": 99.99, "max": 100.01 }
+      "metric": "spell_modifier", "spell": 706725, "op": 3, "base": 100, "min": 99.99, "max": 100.01 },
+    { "action": "set_aura", "label": "Corrupting Whispers after unlearning", "actor": "cultist", "spell": 706725, "stacks": 1 },
+    { "action": "assert", "label": "Corrupting Whispers is back to 20% without Foul Play", "actor": "cultist",
+      "metric": "aura_amount", "spell": 706725, "effect": 0, "equals": 20 }
   ]
 }

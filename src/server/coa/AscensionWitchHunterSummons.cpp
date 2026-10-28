@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionWitchHunterCompletion.h"
+#include "AscensionSpecialization.h"
 #include "Creature.h"
 #include "DBCStores.h"
 #include "DynamicObject.h"
@@ -8,6 +9,7 @@
 #include "Map.h"
 #include "MotionMaster.h"
 #include "ObjectAccessor.h"
+#include "Pet.h"
 #include "PetAI.h"
 #include "Player.h"
 #include "ScriptMgr.h"
@@ -101,12 +103,14 @@ class HoundActions
   public:
     explicit HoundActions(Creature* creature) : _me(creature)
     {
+        Player* owner = Owner(creature->GetOwner());
+        _restoredFromSave = owner && owner->GetTemporaryUnsummonedPetNumber() != 0;
         _events.ScheduleEvent(EVENT_REFRESH_OWNER, 1ms);
         _events.ScheduleEvent(EVENT_AUTO_LEAP, 20s);
     }
     ObjectGuid victim;
 
-    void Leap()
+    void Leap(bool called = false)
     {
         Player* owner = Owner(_me->GetOwner());
         Unit* target = ObjectAccessor::GetUnit(*_me, victim);
@@ -119,6 +123,7 @@ class HoundActions
         Position end = target->GetPosition();
         target->MovePositionToFirstCollision(end, target->GetCombatReach(), target->GetRelativeAngle(_me));
         _landingChecks = 0;
+        _called = called;
         _me->GetMotionMaster()->MoveJump(end, 24.0f, 8.0f, POINT_LEAP_LANDING);
         _events.RescheduleEvent(EVENT_CHECK_LANDING, 500ms);
         _events.RescheduleEvent(EVENT_AUTO_LEAP, _me->HasAura(800528) ? 10s : 20s);
@@ -139,13 +144,24 @@ class HoundActions
             }
             if (event == EVENT_REFRESH_OWNER)
             {
-                float healthFraction = _me->GetHealthPct() / 100.0f;
+                if (!_me->getTransForm())
+                {
+                    uint32 display = GetShadowhoundDisplay(owner);
+                    if (!display)
+                        display = _me->GetNativeDisplayId();
+                    if (_me->GetDisplayId() != display)
+                        _me->SetDisplayId(display, _me->GetObjectScale());
+                }
                 uint32 maximum = std::max(1u, owner->CountPctFromMaxHealth(_me->GetEntry() == 50124 ? 40 : 20));
                 if (maximum != _me->GetMaxHealth())
                 {
+                    uint32 health = (!_ownerRefreshed && _restoredFromSave)
+                        ? std::min(_me->GetHealth(), maximum)
+                        : std::max(1u, uint32(maximum * (_me->GetHealthPct() / 100.0f)));
                     _me->SetMaxHealth(maximum);
-                    _me->SetHealth(std::max(1u, uint32(maximum * healthFraction)));
+                    _me->SetHealth(std::max(1u, health));
                 }
+                _ownerRefreshed = true;
                 _me->SetLevel(owner->GetLevel());
                 float damage = owner->GetLevel() + owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.04f;
                 _me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, damage * 0.9f);
@@ -187,10 +203,13 @@ class HoundActions
                               int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.35f);
                 if (owner->HasAura(705450))
                     value += owner->GetLevel() * 2;
-                _me->CastCustomSpell(706332, SPELLVALUE_BASE_POINT1, value, target, TRIGGERED_FULL_MASK, nullptr,
-                                     nullptr, owner->GetGUID());
-                _me->CastCustomSpell(706332, SPELLVALUE_BASE_POINT1, value, target, TRIGGERED_FULL_MASK, nullptr,
-                                     nullptr, owner->GetGUID());
+                _me->CastCustomSpell(706332, SPELLVALUE_BASE_POINT1, value, target, TRIGGERED_FULL_MASK);
+                _me->CastCustomSpell(706332, SPELLVALUE_BASE_POINT1, value, target, TRIGGERED_FULL_MASK);
+                if (_called && owner->HasAura(500056))
+                    for (Unit* enemy : Nearby(target, 6.0f))
+                        if (owner->IsValidAttackTarget(enemy))
+                            Cast(owner, enemy, 500564);
+                _called = false;
                 _me->AI()->AttackStart(target);
             }
             else if (event == EVENT_AUTO_LEAP)
@@ -210,6 +229,9 @@ class HoundActions
     Creature* _me;
     EventMap _events;
     uint8 _landingChecks = 0;
+    bool _called = false;
+    bool _ownerRefreshed = false;
+    bool _restoredFromSave = false;
 };
 
 struct npc_ascension_witch_hunter_pet : PetAI
@@ -224,7 +246,7 @@ struct npc_ascension_witch_hunter_pet : PetAI
     void DoAction(int32 action) override
     {
         if (action == ACTION_CALLED_LEAP)
-            actions.Leap();
+            actions.Leap(true);
     }
     void UpdateAI(uint32 diff) override
     {
@@ -263,7 +285,7 @@ struct npc_ascension_witch_hunter_hound : ScriptedAI
     void DoAction(int32 action) override
     {
         if (action == ACTION_CALLED_LEAP)
-            actions.Leap();
+            actions.Leap(true);
     }
     void UpdateAI(uint32 diff) override
     {
@@ -293,6 +315,9 @@ struct npc_ascension_witch_hunter_field : ScriptedAI
         ownerGuid = owner->GetGUID();
         me->SetOwnerGUID(ownerGuid);
         me->SetFaction(owner->GetFaction());
+        me->m_ControlledByPlayer = true;
+        me->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
+        me->SetByteValue(UNIT_FIELD_BYTES_2, 1, owner->GetByteValue(UNIT_FIELD_BYTES_2, 1) & ~UNIT_BYTE2_FLAG_FFA_PVP);
         me->SetLevel(owner->GetLevel());
         me->SetReactState(REACT_PASSIVE);
         me->SetImmuneToNPC(true);
@@ -317,6 +342,7 @@ struct npc_ascension_witch_hunter_field : ScriptedAI
             me->DespawnOrUnsummon();
             return;
         }
+        me->SetByteValue(UNIT_FIELD_BYTES_2, 1, owner->GetByteValue(UNIT_FIELD_BYTES_2, 1) & ~UNIT_BYTE2_FLAG_FFA_PVP);
         uint32 entry = me->GetEntry();
         if (entry == 254862)
         {
@@ -354,8 +380,10 @@ struct npc_ascension_witch_hunter_field : ScriptedAI
                     else
                     {
                         uint32 count = 0;
-                        uint32 limit = sSpellMgr->GetSpellInfo(681179)->MaxAffectedTargets;
-                        for (Unit* victim : Nearby(enemy, 5.0f))
+                        SpellInfo const* stun = sSpellMgr->GetSpellInfo(681179);
+                        uint32 limit = stun->MaxAffectedTargets;
+                        float radius = entry == 506250 ? stun->Effects[EFFECT_0].CalcRadius(owner) : 5.0f;
+                        for (Unit* victim : Nearby(enemy, radius))
                             if (owner->IsValidAttackTarget(victim))
                             {
                                 if (entry == 506250 && limit && count++ >= limit)
@@ -377,6 +405,26 @@ struct npc_ascension_witch_hunter_field : ScriptedAI
     }
 };
 
+class aura_ascension_witch_hunter_trap_launcher : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_witch_hunter_trap_launcher);
+
+    void Synchronize(AuraEffect const*, AuraEffectHandleModes)
+    {
+        Player* player = Owner(GetTarget());
+        if (player && player == GetTarget() && GetCaster() == player)
+            SynchronizeAscensionTalentReplacements(player);
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(aura_ascension_witch_hunter_trap_launcher::Synchronize,
+            EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+        AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_witch_hunter_trap_launcher::Synchronize,
+            EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
 class spell_ascension_witch_hunter_summon : public SpellScript
 {
     PrepareSpellScript(spell_ascension_witch_hunter_summon);
@@ -391,8 +439,13 @@ class spell_ascension_witch_hunter_summon : public SpellScript
         player->ApplySpellMod(GetSpellInfo()->Id, SPELLMOD_DURATION, duration);
         if (effect.MiscValue == 50224)
         {
+            Unit* target = GetExplTargetUnit();
+            if (!target || target == player)
+                if (Unit* selected = player->GetSelectedUnit(); selected &&
+                    player->HasInArc(float(M_PI), selected) && player->IsValidAttackTarget(selected))
+                    target = selected;
             SummonHounds(player, std::max(1, effect.CalcValue(player)), duration, GetSpellInfo()->Id,
-                         GetExplTargetUnit());
+                         target);
             return;
         }
         Position position = player->GetPosition();
@@ -417,15 +470,57 @@ class spell_ascension_witch_hunter_summon : public SpellScript
 class spell_ascension_witch_hunter_smoke : public SpellScript
 {
     PrepareSpellScript(spell_ascension_witch_hunter_smoke);
-    void After()
+    bool Validate(SpellInfo const*) override
     {
-        if (WorldLocation const* destination = GetExplTargetDest())
-            GetCaster()->CastSpell(destination->GetPositionX(), destination->GetPositionY(),
-                                   destination->GetPositionZ(), 805757, true);
+        return ValidateSpellInfo({805757});
     }
+
+    void ApplyFriendlySmoke(SpellEffIndex)
+    {
+        if (DynamicObject* cloud = GetCaster()->GetDynObject(GetSpellInfo()->Id))
+        {
+            SpellCastTargets targets;
+            targets.SetDst(*cloud);
+            CustomSpellValues values;
+            values.AddSpellMod(SPELLVALUE_AURA_DURATION, cloud->GetDuration());
+            GetCaster()->CastSpell(targets, sSpellMgr->GetSpellInfo(805757), &values, TRIGGERED_FULL_MASK);
+        }
+    }
+
     void Register() override
     {
-        AfterCast += SpellCastFn(spell_ascension_witch_hunter_smoke::After);
+        OnEffectHit += SpellEffectFn(spell_ascension_witch_hunter_smoke::ApplyFriendlySmoke, EFFECT_1,
+                                    SPELL_EFFECT_PERSISTENT_AREA_AURA);
+    }
+};
+
+class spell_ascension_witch_hunter_whistle : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_witch_hunter_whistle);
+
+    static bool HoundDead(Player* player)
+    {
+        if (Pet* pet = player->GetPet())
+            return pet->GetEntry() == 50124 && !pet->IsAlive();
+        PetStable const* stable = player->GetPetStable();
+        if (!stable)
+            return false;
+        PetStable::PetInfo const* hound = Pet::GetLoadPetInfo(*stable, 50124, 0, false).first;
+        return hound && !hound->Health;
+    }
+
+    SpellCastResult CheckCast()
+    {
+        Player* player = GetCaster()->ToPlayer();
+        if (!player || !HoundDead(player))
+            return SPELL_CAST_OK;
+        player->SendTameFailure(PET_TAME_DEAD);
+        return SPELL_FAILED_DONT_REPORT;
+    }
+
+    void Register() override
+    {
+        OnCheckCast += SpellCheckCastFn(spell_ascension_witch_hunter_whistle::CheckCast);
     }
 };
 }
@@ -436,5 +531,7 @@ void AddAscensionWitchHunterSummonScripts()
     RegisterCreatureAI(npc_ascension_witch_hunter_hound);
     RegisterCreatureAI(npc_ascension_witch_hunter_field);
     RegisterSpellScript(spell_ascension_witch_hunter_summon);
+    RegisterSpellScript(aura_ascension_witch_hunter_trap_launcher);
     RegisterSpellScript(spell_ascension_witch_hunter_smoke);
+    RegisterSpellScript(spell_ascension_witch_hunter_whistle);
 }

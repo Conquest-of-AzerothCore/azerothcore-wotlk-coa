@@ -1,0 +1,186 @@
+{
+  "schema": 1,
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "guardian",
+      "race": 1,
+      "class": 18,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "wh",
+      "race": 2,
+      "class": 15,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "horde",
+      "race": 2,
+      "class": 1,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "alliance",
+      "race": 1,
+      "class": 1,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "name": "Witch Hunter: Caltrops respects cross-faction party membership (#4968)",
+  "contract": "Caltrops503679 effect1 has BasePoints11 plus DieSides1, summoning12 creatures506010. An Orc Witch Hunter throws them beyond their3yd trigger radius. Before the owner enables PvP, the summons must not be attackable by PvP-enabled opponents. After a native PvP toggle and a1.1sec synchronization window, both ungrouped Alliance players must be able to attack the summons through native IsValidAttackTarget. Grouping the Alliance Guardian with the Witch Hunter must make the summons friendly to that Guardian while the other Alliance player remains hostile. Native group removal must restore hostility. No fixture changes summon flags or faction.",
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "guardian",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "guardian",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "wh",
+      "map": 0,
+      "x": -9616.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "horde",
+      "map": 0,
+      "x": -9615.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "horde",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "alliance",
+      "map": 0,
+      "x": -9614.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "alliance",
+      "enabled": true
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 503679
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 503679,
+      "destination": {
+        "x": -9604.06,
+        "y": -288.949,
+        "z": 57.3053
+      }
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "owned_creature_count",
+      "entry": 506010,
+      "equals": 12,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "An unflagged owner does not expose Caltrops to player attacks",
+      "actor": "wh",
+      "metric": "owned_creature_attackable",
+      "entry": 506010,
+      "target": "guardian",
+      "equals": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "wh",
+      "enabled": true
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "assert",
+      "label": "An ungrouped opposite-faction player can attack Caltrops",
+      "actor": "wh",
+      "metric": "owned_creature_attackable",
+      "entry": 506010,
+      "target": "guardian",
+      "equals": 1
+    },
+    {
+      "action": "group",
+      "actor": "guardian",
+      "target": "wh"
+    },
+    {
+      "action": "assert",
+      "label": "Opposite-faction party member cannot attack Caltrops",
+      "actor": "wh",
+      "metric": "owned_creature_attackable",
+      "entry": 506010,
+      "target": "guardian",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "An ungrouped opposite-faction player remains hostile",
+      "actor": "wh",
+      "metric": "owned_creature_attackable",
+      "entry": 506010,
+      "target": "alliance",
+      "equals": 1
+    },
+    {
+      "action": "leave_group",
+      "actor": "guardian"
+    },
+    {
+      "action": "assert",
+      "label": "Leaving the party restores ordinary hostility",
+      "actor": "wh",
+      "metric": "owned_creature_attackable",
+      "entry": 506010,
+      "target": "guardian",
+      "equals": 1
+    }
+  ]
+}

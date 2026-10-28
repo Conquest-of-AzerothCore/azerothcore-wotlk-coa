@@ -19,6 +19,7 @@
 #include "Creature.h"
 #include "GameObject.h"
 #include "Group.h"
+#include "LocalLevelScaling.h"
 #include "LootItemStorage.h"
 #include "LootMgr.h"
 #include "Object.h"
@@ -36,6 +37,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
     Player* player = GetPlayer();
     ObjectGuid lguid = player->GetLootGUID();
     Loot* loot = nullptr;
+    bool bonusCacheOverflow = false;
     uint8 lootSlot = 0;
 
     recvData >> lootSlot;
@@ -75,6 +77,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
         }
 
         loot = &pItem->loot;
+        bonusCacheOverflow = pItem->GetEntry() == 1478051 || pItem->GetEntry() == 1478052;
     }
     else if (lguid.IsCorpse())
     {
@@ -99,13 +102,19 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
         }
 
         loot = &creature->loot;
+        if (!creature->IsAlive() && loot->loot_type != LOOT_SKINNING && !creature->isTappedBy(player))
+            if (!creature->IsSharedQuestParticipant(player) || lootSlot < loot->items.size())
+                return;
     }
 
     sScriptMgr->OnPlayerAfterCreatureLoot(player);
 
     InventoryResult msg;
     LootItem* lootItem = player->StoreLootItem(lootSlot, loot, msg);
-    if (msg != EQUIP_ERR_OK && lguid.IsItem() && loot->loot_type != LOOT_CORPSE)
+    bool const fullBonusCache = bonusCacheOverflow &&
+        (msg == EQUIP_ERR_INVENTORY_FULL || msg == EQUIP_ERR_BAG_FULL);
+    if (lootItem && msg != EQUIP_ERR_OK && lguid.IsItem() &&
+        (loot->loot_type != LOOT_CORPSE || fullBonusCache))
     {
         lootItem->is_looted = true;
         loot->NotifyItemRemoved(lootItem->itemIndex);
@@ -173,6 +182,8 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
                 bool lootAllowed = creature && creature->IsAlive() == (creature->loot.loot_type == LOOT_PICKPOCKETING);
                 if (lootAllowed && player->IsWithinLootDistance(creature))
                 {
+                    if (!creature->IsAlive() && !creature->isTappedBy(player))
+                        return;
                     loot = &creature->loot;
                     if (creature->IsAlive())
                         shareMoney = false;
@@ -209,7 +220,7 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
                 if (!member)
                     continue;
 
-                if (player->IsAtLootRewardDistance(member))
+                if (player->IsAtLootRewardDistance(member) && sScriptMgr->OnAllowedToLootContainerCheck(member, guid))
                     playersNear.push_back(member);
             }
 
@@ -572,7 +583,9 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recvData)
     // not move item from loot to target inventory
     Item* newitem = target->StoreNewItem(dest, item.itemid, true, item.randomPropertyId, looters);
     target->SendNewItem(newitem, uint32(item.count), false, false, true);
+    LocalLevelScaling::NotifyMasterLoot(target, newitem);
     target->UpdateLootAchievements(&item, loot);
+    sScriptMgr->OnPlayerMasterLootItem(target, newitem, uint32(item.count), lootguid);
 
     // mark as looted
     item.count = 0;

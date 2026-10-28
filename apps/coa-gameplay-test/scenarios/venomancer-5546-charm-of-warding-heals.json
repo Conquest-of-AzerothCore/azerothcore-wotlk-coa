@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Charm of Warding heals on Exposed Flesh stack gain (#5546)",
+  "contract": "#5546 reports Charm of Warding (705967) 'doesn't heal as expected'. Its tooltip (Spell.dbc Description) reads 'When a stack of Exposed Flesh is applied you are now healed for $s1% of your maximum health', with raw DBC EffectBasePoints[0]=0, EffectDieSides[0]=1 (value = BasePoints+1 = 1%). resource_talent_contracts::OnLoadSpellCustomAttr (AscensionResourceTalents.cpp) rewrites effect 0 to SPELL_AURA_DUMMY with BasePoints=1, DieSides=0, which SpellEffectInfo::CalcValue resolves to the same 1 with no caster (no random roll, no level scaling). The aura_ascension_resource_talent script that multiplies by a companion resource's stack count is registered in spell_script_names (rev_20260915_05_resource_talents.sql) only for Felheart (301287) and Reckless Abandon (504252), never for Charm of Warding, so that multiplier never runs for it and its effect amount stays exactly 1 (not zeroed). AscensionVenomancer.cpp's Expose() heals CountPctFromMaxHealth((applied-current)*Amount(CharmOfWarding)) whenever HasAura(CharmOfWarding) and a stack is gained; the class's own event proc for 805098 (AscensionVenomancerEvents.cpp) calls this Expose(player,1) path directly. Molt's own effect 0 is SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS (175, confirmed via coa-dbc-viewer), which the generic core handler Spell::EffectAscensionModifyAuraStacks routes to ModifyAscensionAuraStacks(caster,target,effect.TriggerSpell=805095,effect.MiscValue=15), granting 15 stacks directly (AscensionVenomancerAbilities.cpp's separate `id==805102: Expose(player,15,true)` line is dead code for this spell - it lives inside spell_ascension_venomancer_ability::Effect, registered only when the bound spell itself HasEffect(SPELL_EFFECT_DUMMY), and Molt's three effects are 175/6/6, none of them DUMMY - but the native path independently reaches the same 15). A prior revision assumed Aura::ModStackAmount's max-stack clamp (Exposed Flesh's own DBC StackAmount=10) would cap this at 10; a native rerun showed 15 stacks actually applied (aura_stacks actual=15), so that clamp theory was wrong for this path and the original 15-stack expectation was correct all along. Separately, Molt itself carries CasterAuraSpell=803183 (Beetle Form, confirmed via coa-dbc-viewer), which Spell::CheckCast enforces natively (Spell.cpp: 'if (m_spellInfo->CasterAuraSpell && !m_caster->HasAura(...)) return SPELL_FAILED_CASTER_AURASTATE;'); a prior revision never entered Beetle Form, so the cast failed outright (reason 22) before any stack could be granted. This revision enters Beetle Form for both fixtures, asserts cast_failure == 0, and expects the confirmed 15 stacks, discriminating this from a Venomancer without the talent, who gains 0%.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 29, "level": 60 },
+    { "id": "warded", "race": 1, "class": 29, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn settle", "ms": 3000 },
+    { "action": "learn", "actor": "control", "spell": 805102 },
+    { "action": "learn", "actor": "control", "spell": 803183 },
+    { "action": "learn", "actor": "warded", "spell": 705967 },
+    { "action": "learn", "actor": "warded", "spell": 805102 },
+    { "action": "learn", "actor": "warded", "spell": 803183 },
+    { "action": "cast", "actor": "control", "spell": 803183, "label": "Enter Beetle Form: Molt carries CasterAuraSpell 803183 (confirmed via coa-dbc-viewer)" },
+    { "action": "cast", "actor": "warded", "spell": 803183, "label": "Enter Beetle Form" },
+    { "action": "assert", "label": "SETUP: control is in Beetle Form", "actor": "control", "metric": "aura", "spell": 803183, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: warded is in Beetle Form", "actor": "warded", "metric": "aura", "spell": 803183, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "label": "Clear the GCD from entering Beetle Form", "ms": 1500 },
+    { "action": "assert", "label": "SETUP: control lacks Charm of Warding", "actor": "control", "metric": "aura", "spell": 705967, "equals": 0 },
+    { "action": "assert", "label": "SETUP: warded has Charm of Warding", "actor": "warded", "metric": "aura", "spell": 705967, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: neither has Exposed Flesh yet", "actor": "control", "metric": "aura", "spell": 805095, "equals": 0 },
+    { "action": "assert", "label": "SETUP: neither has Exposed Flesh yet", "actor": "warded", "metric": "aura", "spell": 805095, "equals": 0 },
+    { "action": "set_health", "actor": "control", "value": 1000 },
+    { "action": "set_health", "actor": "warded", "value": 1000 },
+    { "action": "snapshot", "actor": "control", "metric": "health_pct", "save_as": "control_before" },
+    { "action": "snapshot", "actor": "warded", "metric": "health_pct", "save_as": "warded_before" },
+    { "action": "cast", "actor": "control", "spell": 805102 },
+    { "action": "assert", "label": "SETUP: control's Molt cast succeeded", "actor": "control", "metric": "cast_failure", "spell": 805102, "equals": 0 },
+    { "action": "cast", "actor": "warded", "spell": 805102 },
+    { "action": "assert", "label": "SETUP: warded's Molt cast succeeded", "actor": "warded", "metric": "cast_failure", "spell": 805102, "equals": 0 },
+    { "action": "assert", "label": "SETUP: control gained 15 stacks of Exposed Flesh", "actor": "control",
+      "metric": "aura_stacks", "spell": 805095, "equals": 15, "within_ms": 2000 },
+    { "action": "assert", "label": "SETUP: warded gained 15 stacks of Exposed Flesh", "actor": "warded",
+      "metric": "aura_stacks", "spell": 805095, "equals": 15, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTROL: no Charm of Warding means no heal from Molt",
+      "actor": "control", "metric": "health_pct", "relative_to": "control_before", "min": -0.1, "max": 0.1 },
+    { "action": "assert", "label": "DISCRIMINATING: Charm of Warding heals for 1% max health per stack gained (15 stacks = 15%)",
+      "actor": "warded", "metric": "health_pct", "relative_to": "warded_before", "min": 14.9, "max": 15.1 }
+  ]
+}

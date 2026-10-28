@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Runemaster audit: Elements, Heed My Call! raises Hurricane/Smolder/Hoarfrost crit damage by 15% (#3088)",
+  "contract": "Elements, Heed My Call! 706670 effect 0 is SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 15 (SPELLMOD_CRIT_DAMAGE_BONUS), EffectBasePoints 14 + DieSides 1 = +15, EffectSpellClassMask word 0 = 8389376 (bits 8, 9, 23). Hurricane 645435 (SpellFamilyFlags word 0 bit 8, 256), Smolder 801087 (bit 9, 512) and Hoarfrost 801104 (bit 23, 8388608) sum to exactly 8389376 - all three named targets resolved and classmask-matched byte for byte. Player::ApplySpellMod must therefore raise any op-15 query against all three spells by 15% once 706670 is learned.",
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "assert", "label": "before: Hurricane (645435) has no crit damage modifier", "actor": "rm",
+      "metric": "spell_modifier", "spell": 645435, "op": 15, "base": 100000, "min": 99998, "max": 100002},
+    {"action": "assert", "label": "before: Smolder (801087) has no crit damage modifier", "actor": "rm",
+      "metric": "spell_modifier", "spell": 801087, "op": 15, "base": 100000, "min": 99998, "max": 100002},
+    {"action": "assert", "label": "before: Hoarfrost (801104) has no crit damage modifier", "actor": "rm",
+      "metric": "spell_modifier", "spell": 801104, "op": 15, "base": 100000, "min": 99998, "max": 100002},
+    {"action": "learn", "actor": "rm", "spell": 706670},
+    {"action": "assert", "label": "Elements, Heed My Call! (706670) is active", "actor": "rm",
+      "metric": "aura", "spell": 706670, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "706670 op 15 percent +15 reaches Hurricane (bit 8)", "actor": "rm",
+      "metric": "spell_modifier", "spell": 645435, "op": 15, "base": 100000, "min": 114998, "max": 115002},
+    {"action": "assert", "label": "706670 op 15 percent +15 reaches Smolder (bit 9)", "actor": "rm",
+      "metric": "spell_modifier", "spell": 801087, "op": 15, "base": 100000, "min": 114998, "max": 115002},
+    {"action": "assert", "label": "706670 op 15 percent +15 reaches Hoarfrost (bit 23)", "actor": "rm",
+      "metric": "spell_modifier", "spell": 801104, "op": 15, "base": 100000, "min": 114998, "max": 115002}
+  ]
+}

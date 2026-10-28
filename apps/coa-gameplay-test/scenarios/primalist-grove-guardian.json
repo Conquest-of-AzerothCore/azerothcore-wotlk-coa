@@ -32,6 +32,15 @@
       "spell_hit_rating": 10000
     }
   ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "primalist",
+      "entry": 36,
+      "level": 80,
+      "distance": 35
+    }
+  ],
   "steps": [
     {
       "action": "snapshot",
@@ -92,7 +101,7 @@
       "actor": "primalist",
       "metric": "spell_damage_done",
       "spell": 504824,
-      "target": "enemy",
+      "target": "dummy",
       "periodic": true,
       "save_as": "periodic_504824"
     },
@@ -107,11 +116,11 @@
       "actor": "primalist",
       "metric": "spell_damage_done",
       "spell": 504824,
-      "target": "enemy",
+      "target": "dummy",
       "periodic": true,
       "relative_to": "periodic_504824",
-      "min": 45,
-      "max": 46
+      "min": 38,
+      "max": 39
     },
     {
       "action": "set_aura",
@@ -137,7 +146,7 @@
       "actor": "primalist",
       "metric": "spell_damage_done",
       "spell": 504824,
-      "target": "enemy",
+      "target": "dummy",
       "periodic": true,
       "relative_to": "periodic_504824",
       "equals": 0
@@ -410,5 +419,6 @@
       "spell": 504824,
       "equals": 0
     }
-  ]
+  ],
+  "contract": "The hostile periodic probe queries a creature, so normal class tuning 887019 (-15% at level 60+) scales it: the 100 AP increase of 45 or 46 before tuning reads 38 or 39 (1078 x 0.85 = 916, 1123 x 0.85 = 954)."
 }

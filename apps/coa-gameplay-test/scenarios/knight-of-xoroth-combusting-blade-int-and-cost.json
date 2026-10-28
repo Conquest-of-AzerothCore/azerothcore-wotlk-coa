@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Combusting Blade raises Intellect and cuts Infernal Strike's Rage cost (#699)",
+  "contract": "Combusting Blade 704999 reads 'Increases your Intellect by 5% and reduces the Rage cost of Infernal Strike by -5' (bindmysoul.com/conquest/talents.normalized.json, fetchedAt 2026-07-22T23:10:31.369Z). Effect 0 is aura 80 (SPELL_AURA_MOD_PERCENT_STAT), MiscValue 3 (STAT_INTELLECT), BasePoints 5. Effect 1 is aura 107 (SPELL_AURA_ADD_FLAT_MODIFIER), MiscValue 14 (SPELLMOD_COST), BasePoints -5, classmask (0,768,0) - the same combined Infernal Strike/Shieldgore family mask already used by Fiend (680197) in this file, so the discount survives the Shieldgore replacement. At level 60 the owned Infernal Strike rank is 501518 and the owned Meatsaw rank is 578119 (AscensionSpellProgressionData.h). Intellect is asserted as an exact +1 point rise, not a 1.04-1.06 ratio: this melee class's level-60 base Intellect (GetCreateStat, no gear) is 28, and Unit::GetTotalStatValue's '((base*base_pct)+total)*total_pct' formula gives 28*1.05=29.4, which Player::UpdateStats truncates via SetStat(stat, int32(value)) to 29 - a +1 delta (ratio 1.0357), same as any other percent-stat aura in this engine at a low base value. A 1.04-1.06 ratio window assumes a base large enough that this integer truncation doesn't matter; at 28 it does, so the scenario checks the truncation-exact delta instead.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "snapshot", "actor": "knight", "metric": "stat", "stat": 3, "save_as": "int_before" },
+    { "action": "snapshot", "actor": "knight", "metric": "spell_power_cost", "spell": 501518, "save_as": "infernal_cost_before" },
+    { "action": "snapshot", "actor": "knight", "metric": "spell_power_cost", "spell": 578119, "save_as": "meatsaw_cost_before" },
+    {
+      "action": "assert", "label": "SETUP: Infernal Strike has a nonzero unmodified Rage cost",
+      "actor": "knight", "metric": "spell_power_cost", "spell": 501518, "min": 1
+    },
+    { "action": "learn", "actor": "knight", "spell": 704999 },
+    { "action": "set_aura", "actor": "knight", "spell": 704999, "stacks": 1, "label": "Force the Combusting Blade passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Combusting Blade passive is active",
+      "actor": "knight", "metric": "aura", "spell": 704999, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Intellect rises by 5% (truncates to +1 at this class's base 28 Intellect)",
+      "actor": "knight", "metric": "stat", "stat": 3, "relative_to": "int_before", "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Infernal Strike's Rage cost drops by 5",
+      "actor": "knight", "metric": "spell_power_cost", "spell": 501518, "relative_to": "infernal_cost_before", "equals": -5
+    },
+    {
+      "action": "assert", "label": "REGRESSION: Meatsaw's Rage cost is untouched",
+      "actor": "knight", "metric": "spell_power_cost", "spell": 578119, "relative_to": "meatsaw_cost_before", "equals": 0
+    }
+  ]
+}

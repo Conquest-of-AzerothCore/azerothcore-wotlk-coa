@@ -1,0 +1,322 @@
+{
+  "schema": 1,
+  "name": "Legacy Bear Form and Voidwalker quests grant spells only to the original classes (#6132, #6103)",
+  "contract": "The original Bear Form quest wrapper 19179 learns Bear Form 1105487, Growl 1106795 and Maul 1106807. Voidwalker wrapper 11520 learns 1100697. The existing CoA legacy-class-quest policy excludes Warrior and Shaman grants on custom classes while preserving original classes, quest items and unrelated manually granted spells. The same class boundary must keep a Starcaller from learning Bear Form and a Necromancer from learning the original Warlock pet.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "star",
+      "race": 4,
+      "class": 26,
+      "level": 10
+    },
+    {
+      "id": "druid",
+      "race": 4,
+      "class": 11,
+      "level": 10
+    },
+    {
+      "id": "necro",
+      "race": 1,
+      "class": 23,
+      "level": 10
+    },
+    {
+      "id": "warlock",
+      "race": 1,
+      "class": 9,
+      "level": 10
+    },
+    {
+      "id": "manual",
+      "race": 4,
+      "class": 26,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "star",
+      "quest": 6001
+    },
+    {
+      "action": "reward_quest",
+      "actor": "star",
+      "quest": 6001
+    },
+    {
+      "action": "assert",
+      "actor": "star",
+      "metric": "knows_spell",
+      "spell": 1105487,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "star",
+      "metric": "knows_spell",
+      "spell": 1106795,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "star",
+      "metric": "knows_spell",
+      "spell": 1106807,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "druid",
+      "quest": 6001
+    },
+    {
+      "action": "reward_quest",
+      "actor": "druid",
+      "quest": 6001
+    },
+    {
+      "action": "assert",
+      "actor": "druid",
+      "metric": "knows_spell",
+      "spell": 1105487,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "druid",
+      "metric": "knows_spell",
+      "spell": 1106795,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "druid",
+      "metric": "knows_spell",
+      "spell": 1106807,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "necro",
+      "quest": 1471
+    },
+    {
+      "action": "reward_quest",
+      "actor": "necro",
+      "quest": 1471
+    },
+    {
+      "action": "assert",
+      "actor": "necro",
+      "metric": "knows_spell",
+      "spell": 1100697,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "warlock",
+      "quest": 1471
+    },
+    {
+      "action": "reward_quest",
+      "actor": "warlock",
+      "quest": 1471
+    },
+    {
+      "action": "assert",
+      "actor": "warlock",
+      "metric": "knows_spell",
+      "spell": 1100697,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "restore_quest_spells",
+      "actor": "star"
+    },
+    {
+      "action": "assert",
+      "label": "Restoring completed quests does not grant another class ability",
+      "actor": "star",
+      "metric": "knows_spell",
+      "spell": 1105487,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "label": "Seed an affected older character",
+      "actor": "star",
+      "spell": 1105487
+    },
+    {
+      "action": "assert",
+      "label": "Restoring completed quests does not grant another class ability",
+      "actor": "star",
+      "metric": "knows_spell",
+      "spell": 1106795,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "label": "Seed an affected older character",
+      "actor": "star",
+      "spell": 1106795
+    },
+    {
+      "action": "assert",
+      "label": "Restoring completed quests does not grant another class ability",
+      "actor": "star",
+      "metric": "knows_spell",
+      "spell": 1106807,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "label": "Seed an affected older character",
+      "actor": "star",
+      "spell": 1106807
+    },
+    {
+      "action": "restore_quest_spells",
+      "actor": "necro"
+    },
+    {
+      "action": "assert",
+      "label": "Restoring completed quests does not grant another class ability",
+      "actor": "necro",
+      "metric": "knows_spell",
+      "spell": 1100697,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "label": "Seed an affected older character",
+      "actor": "necro",
+      "spell": 1100697
+    },
+    {
+      "action": "learn",
+      "actor": "star",
+      "spell": 116
+    },
+    {
+      "action": "learn",
+      "actor": "manual",
+      "spell": 1105487
+    },
+    {
+      "action": "login_hooks",
+      "actor": "star"
+    },
+    {
+      "action": "login_hooks",
+      "actor": "necro"
+    },
+    {
+      "action": "login_hooks",
+      "actor": "druid"
+    },
+    {
+      "action": "login_hooks",
+      "actor": "warlock"
+    },
+    {
+      "action": "login_hooks",
+      "actor": "manual"
+    },
+    {
+      "action": "assert",
+      "label": "Login repair respects class and rewarded-quest provenance",
+      "actor": "star",
+      "metric": "knows_spell",
+      "spell": 1105487,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Login repair respects class and rewarded-quest provenance",
+      "actor": "star",
+      "metric": "knows_spell",
+      "spell": 1106795,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Login repair respects class and rewarded-quest provenance",
+      "actor": "star",
+      "metric": "knows_spell",
+      "spell": 1106807,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Login repair respects class and rewarded-quest provenance",
+      "actor": "necro",
+      "metric": "knows_spell",
+      "spell": 1100697,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Login repair respects class and rewarded-quest provenance",
+      "actor": "druid",
+      "metric": "knows_spell",
+      "spell": 1105487,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Login repair respects class and rewarded-quest provenance",
+      "actor": "druid",
+      "metric": "knows_spell",
+      "spell": 1106795,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Login repair respects class and rewarded-quest provenance",
+      "actor": "druid",
+      "metric": "knows_spell",
+      "spell": 1106807,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Login repair respects class and rewarded-quest provenance",
+      "actor": "warlock",
+      "metric": "knows_spell",
+      "spell": 1100697,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Login repair respects class and rewarded-quest provenance",
+      "actor": "manual",
+      "metric": "knows_spell",
+      "spell": 1105487,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Login repair respects class and rewarded-quest provenance",
+      "actor": "star",
+      "metric": "knows_spell",
+      "spell": 116,
+      "equals": 1
+    }
+  ]
+}

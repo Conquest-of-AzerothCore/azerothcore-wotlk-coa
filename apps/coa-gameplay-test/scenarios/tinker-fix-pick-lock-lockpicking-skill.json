@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Tinker Pick Lock grants the Lockpicking skill (#4635)",
+  "contract": "SkillLineAbility 88835 binds Pick Lock (spell 804154) to SkillLine 99 ('Pet - Pit Lord') instead of 633 (Lockpicking), so Player::learnSpell's not-ranked-skill loop never matches SKILL_LOCKPICKING and LearnDefaultSkill(633, 0) is never called. A Tinker who learns 804154 through the normal class progression therefore keeps the ability with skill 633 at 0, unable to open locks despite having the spell. Correcting the row's SkillLine to 633 (as Rogue's own Pick Lock row 825 already does) lets the same code path grant skill 633 alongside the spell.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "tinker", "race": 1, "class": 28, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 2000 },
+    {
+      "action": "assert", "label": "A fresh Tinker has no Lockpicking skill yet", "actor": "tinker",
+      "metric": "skill_value", "skill": 633, "equals": 0
+    },
+    { "action": "learn", "actor": "tinker", "spell": 804154 },
+    {
+      "action": "assert", "label": "Pick Lock is known", "actor": "tinker",
+      "metric": "knows_spell", "spell": 804154, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT learning Pick Lock also grants a usable Lockpicking skill", "actor": "tinker",
+      "metric": "skill_value", "skill": 633, "min": 1
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Lunge generates the Rage its tooltip names",
+  "contract": "#5814 / COA-4727: Lunge 500126 reads 'Leap behind an enemy, dealing ... Physical Damage, dazing them for $/1000;s3 sec, and generating $/10;804864s1 Rage.' Its effects are a jump (42), school damage (2) and a daze (178 -> 50259); none is an energize. 804864 'Lunge' is SPELL_EFFECT_ENERGIZE, MiscValue 1 (Rage), BasePoints 149 + DieSides 1 = 150, i.e. 15 Rage, and no record or script cast it. Lunge requires Cursed Form (CasterAuraSpell 525031). Expected: a Lunge that hits raises the Bloodmage's Rage from 0 by 150 internal units (15 Rage), once per cast; before the fix it stayed at 0.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "b", "race": 1, "class": 20, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "d", "owner": "b", "entry": 299, "level": 80, "distance": 8, "health": 1000000 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "ms": 4000 },
+    { "action": "set_aura", "label": "Cursed Form, which Lunge requires", "actor": "b", "spell": 525031, "stacks": 1 },
+    { "action": "learn", "actor": "b", "spell": 500126 },
+    { "action": "set_power", "actor": "b", "power": 1, "value": 0 },
+    { "action": "assert", "label": "No Rage before Lunge", "actor": "b", "metric": "power", "power": 1, "equals": 0 },
+    { "action": "cast", "label": "Lunge the dummy", "actor": "b", "spell": 500126, "target": "d" },
+    { "action": "assert", "label": "Lunge hit the dummy", "actor": "b", "metric": "spell_damage_count", "spell": 500126, "target": "d", "min": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "Lunge generated 15 Rage, once", "actor": "b", "metric": "power", "power": 1, "min": 150, "max": 150, "within_ms": 2000 }
+  ]
+}

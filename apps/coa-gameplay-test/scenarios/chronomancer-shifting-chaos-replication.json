@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "name": "Shifting Chaos replicates 20% of Chromatic Shard's damage to nearby enemies (#916)",
+  "contract": "Shifting Chaos 706059 (Chronomancer Duality talent, CharacterAdvancement 6159) reads \"Your Chromatic Shard and Anomaly Spikes now deal an additional $s1% their damage dealt as Chromatic Damage all nearby enemies\", $s1 = EffectBasePoints 19 + DieSides 1 = 20. Its only effect is aura 354 with EffectTriggerSpell 801269, and aura 354 has no handler in this core (nullptr in the handler table, absent from the proc trigger table), so nothing ever fired. 801269 'Shifting Chaos AoE' is the payload: SPELL_EFFECT_SCHOOL_DAMAGE on TARGET_UNIT_DEST_AREA_ENEMY, radius 14 = 8 yd, 8 targets, already SPELL_ATTR2_CANT_CRIT, SPELL_ATTR3_IGNORE_CASTER_MODIFIERS and SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS, i.e. a resolved-amount carrier. Chromatic Shard ranks are SpellFamily 28 word1 0x1000 + word2 0x02000000 (801292 rank 1, 3.5 s cast, 30 s cooldown); 801269 shares only the word1 bit, so it cannot replicate itself. The payload is centred on the struck enemy, so the golem and a bystander 3 yd behind it are both inside the 8 yd area. Control: a Shard that lands without the talent casts no 801269. With the talent, the next landing Shard must hit the bystander with 801269 for 20% of the damage the Shard dealt (0.18-0.21 for integer rounding), and the same native area includes the struck golem. Before the fix 801269 never appears.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    { "id": "chronomancer", "race": 1, "class": 22, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "chronomancer", "entry": 36, "level": 80, "health": 1000000, "distance": 10 },
+    { "id": "bystander", "owner": "chronomancer", "entry": 36, "level": 80, "health": 1000000, "distance": 13 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "chronomancer", "spell": 801292 },
+    {
+      "action": "cast", "label": "Control Chromatic Shard without Shifting Chaos", "actor": "chronomancer",
+      "spell": 801292, "target": "golem"
+    },
+    {
+      "action": "assert", "label": "SETUP: the control Shard landed", "actor": "chronomancer",
+      "metric": "spell_damage_count", "spell": 801292, "target": "golem", "equals": 1, "within_ms": 7000
+    },
+    { "action": "wait", "label": "Let any replication land", "ms": 1500 },
+    {
+      "action": "assert", "label": "Control: Chromatic Shard alone replicates nothing", "actor": "chronomancer",
+      "metric": "spell_damage_count", "spell": 801269, "equals": 0
+    },
+    { "action": "learn", "actor": "chronomancer", "spell": 706059 },
+    {
+      "action": "assert", "label": "SETUP: Shifting Chaos is active on the Chronomancer", "actor": "chronomancer",
+      "metric": "aura", "spell": 706059, "equals": 1, "within_ms": 3000
+    },
+    { "action": "reset_cooldown", "actor": "chronomancer", "spell": 801292 },
+    {
+      "action": "snapshot", "actor": "chronomancer", "metric": "spell_damage_total", "spell": 801292, "target": "golem",
+      "save_as": "shard_total_before"
+    },
+    {
+      "action": "snapshot", "actor": "chronomancer", "metric": "spell_damage_total", "spell": 801269,
+      "target": "bystander", "save_as": "chaos_bystander_before"
+    },
+    {
+      "action": "cast", "label": "Chromatic Shard with Shifting Chaos", "actor": "chronomancer", "spell": 801292,
+      "target": "golem"
+    },
+    {
+      "action": "assert", "label": "SETUP: the second Shard landed", "actor": "chronomancer",
+      "metric": "spell_damage_count", "spell": 801292, "target": "golem", "equals": 2, "within_ms": 7000
+    },
+    {
+      "action": "snapshot", "actor": "chronomancer", "metric": "spell_damage_total", "spell": 801292, "target": "golem",
+      "relative_to": "shard_total_before", "save_as": "shard_hit"
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Shard's hit replicates Chromatic damage onto the bystander",
+      "actor": "chronomancer", "metric": "spell_damage_count", "spell": 801269, "target": "bystander", "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The replicated damage is 20% of the damage the Shard dealt", "actor": "chronomancer",
+      "metric": "spell_damage_total", "spell": 801269, "target": "bystander", "relative_to": "chaos_bystander_before",
+      "ratio_to": "shard_hit", "min": 0.18, "max": 0.21
+    },
+    {
+      "action": "assert", "label": "The native area centred on the struck golem includes it", "actor": "chronomancer",
+      "metric": "spell_damage_count", "spell": 801269, "target": "golem", "min": 1, "within_ms": 3000
+    }
+  ]
+}

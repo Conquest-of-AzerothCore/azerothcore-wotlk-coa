@@ -1,0 +1,333 @@
+{
+  "schema": 1,
+  "name": "Felsworn: Noxxion resists Enslave Elemental in every dungeon difficulty (#4835)",
+  "contract": [
+    "Enslave Elemental 954534 is normally trainable by Felsworn 14 at level 20. At level 47 an ordinary",
+    "Dust Devil 832 can be controlled and released; all three level-46 Noxxion variants",
+    "13282/113282/213282 must reject the same normal cast. Archived db.exil.es/npc/13282 explicitly lists",
+    "Charm immunity; page SHA256 cd1659fe7c1a1d0dd193140861d000f5feedaba1dafe1ff12956230459ba076e.",
+    "The pending migration copies curated immunity set -66 to positive 13282 and adds only Charm mask 2.",
+    "Its raw school, dispel, other mechanics, effects, auras and area/chain fields remain unchanged.",
+    "Main ignores partial-school immunity on uncontrolled NPCs through Unit::ApplySpellImmune; Charm",
+    "remains effective. A separate native Mage 8 at level 47 learns normally obtainable Frostbolt 116",
+    "and Fireball 133 to verify positive damage under that policy. The Felsworn learns only its class",
+    "control spell. All casts use normal session handlers, native template AI and immunities. Ordinary",
+    "charm release uses CMSG_PET_ACTION Abandon. No client-rendering or deployment acceptance is claimed."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "felsworn",
+      "race": 1,
+      "class": 14,
+      "level": 47,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "mage",
+      "race": 1,
+      "class": 8,
+      "level": 47,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "ordinary",
+      "owner": "felsworn",
+      "entry": 832,
+      "level": 19,
+      "health": 1000000,
+      "distance": 20
+    },
+    {
+      "id": "normal",
+      "owner": "felsworn",
+      "entry": 13282,
+      "level": 46,
+      "health": 1000000,
+      "distance": 25
+    },
+    {
+      "id": "heroic",
+      "owner": "felsworn",
+      "entry": 113282,
+      "level": 46,
+      "health": 1000000,
+      "distance": 26
+    },
+    {
+      "id": "mythic",
+      "owner": "felsworn",
+      "entry": 213282,
+      "level": 46,
+      "health": 1000000,
+      "distance": 27
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "mage",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_health",
+      "actor": "felsworn",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "learn",
+      "actor": "felsworn",
+      "spell": 954534,
+      "label": "Acquire the class ability available from level 20"
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 954534,
+      "target": "ordinary"
+    },
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "charm_entry",
+      "equals": 832,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "actor": "felsworn",
+      "opcode": 373,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "ordinary"
+        },
+        {
+          "u32": 117440515
+        },
+        {
+          "u64": 0
+        }
+      ],
+      "label": "Release the ordinary elemental with native Abandon"
+    },
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "charm_entry",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_cast_count",
+      "spell": 954534,
+      "save_as": "normal_casts_before"
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 954534,
+      "target": "normal",
+      "label": "Attempt a normal Enslave cast on normal Noxxion"
+    },
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "spell_cast_count",
+      "spell": 954534,
+      "relative_to": "normal_casts_before",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "charm_entry",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "aura",
+      "spell": 954534,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_cast_count",
+      "spell": 954534,
+      "save_as": "heroic_casts_before"
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 954534,
+      "target": "heroic",
+      "label": "Attempt a normal Enslave cast on heroic Noxxion"
+    },
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "spell_cast_count",
+      "spell": 954534,
+      "relative_to": "heroic_casts_before",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "charm_entry",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "aura",
+      "spell": 954534,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_cast_count",
+      "spell": 954534,
+      "save_as": "mythic_casts_before"
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 954534,
+      "target": "mythic",
+      "label": "Attempt a normal Enslave cast on mythic Noxxion"
+    },
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "spell_cast_count",
+      "spell": 954534,
+      "relative_to": "mythic_casts_before",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "charm_entry",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "mythic",
+      "metric": "aura",
+      "spell": 954534,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "mage",
+      "spell": 116
+    },
+    {
+      "action": "learn",
+      "actor": "mage",
+      "spell": 133
+    },
+    {
+      "action": "snapshot",
+      "actor": "normal",
+      "metric": "health",
+      "save_as": "before_frost"
+    },
+    {
+      "action": "cast",
+      "actor": "mage",
+      "spell": 116,
+      "target": "normal"
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "metric": "spell_cast_count",
+      "spell": 116,
+      "equals": 1,
+      "within_ms": 5000,
+      "label": "A normally obtainable Mage Frostbolt completes before testing current NPC school policy"
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "health",
+      "relative_to": "before_frost",
+      "max": -1,
+      "within_ms": 5000,
+      "label": "Frostbolt damages an uncontrolled NPC under the merged school-immunity policy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "normal",
+      "metric": "health",
+      "save_as": "before_fire"
+    },
+    {
+      "action": "cast",
+      "actor": "mage",
+      "spell": 133,
+      "target": "normal"
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "health",
+      "relative_to": "before_fire",
+      "max": -1,
+      "within_ms": 5000
+    }
+  ]
+}

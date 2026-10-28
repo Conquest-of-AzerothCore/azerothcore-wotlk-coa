@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Improved Serrated Shot raises Serrated Shot's DoT modifier by 30% (#3160)",
+  "contract": "707888 'Improved Serrated Shot' reads 'Increases the damage of Serrated Shot by $s1%.' It is a single SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 22 = SPELLMOD_DOT, BasePoints 29+1=30, class mask (0, 0, 128) = word2 bit 7. Serrated Shot rank 1 (500073) and rank 2 (501704) are both SPELL_AURA_PERIODIC_DAMAGE with SpellFamilyFlags (0, 0, 128) = the same word2 bit 7, a direct, confirmed match (a third, unrelated 'Serrated Shot' record, 802038, has all-zero family flags and is not part of this chain). Unit::SpellDamageBonusDone (src/server/game/Entities/Unit/Unit.cpp) calls modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DOT, tmpDamage) unconditionally for every DoT tick, so no script is needed.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the character settle", "ms": 3000 },
+    {
+      "action": "snapshot", "actor": "ranger", "metric": "spell_modifier", "spell": 500073, "op": 22, "base": 1000,
+      "save_as": "dot_before"
+    },
+    { "action": "learn", "actor": "ranger", "spell": 707888 },
+    {
+      "action": "assert", "label": "SETUP: Improved Serrated Shot is active", "actor": "ranger",
+      "metric": "aura", "spell": 707888, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Serrated Shot's DoT modifier rises 30%", "actor": "ranger",
+      "metric": "spell_modifier", "spell": 500073, "op": 22, "base": 1000, "ratio_to": "dot_before",
+      "min": 1.2999, "max": 1.3001
+    }
+  ]
+}

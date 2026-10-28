@@ -1,0 +1,228 @@
+{
+  "schema": 1,
+  "name": "Rampaging Hounds buffs only the casters own Shadowhound (#6021)",
+  "contract": [
+    "Original 570726 explicitly scopes its cleave to your Shadow Hounds. Its periodic helper 562026 effect 1",
+    "targets nearby friendly units, incorrectly granting 562027 to grouped players and other owners pets.",
+    "Native",
+    "summons and aura ownership must show the owner hound receives 562027 while grouped allies, the player",
+    "caster",
+    "and another Witch Hunters hound do not. Removing the talent must remove the owned hound bonus. This",
+    "reproduces the reported recipient defect independently of the combat-log helper name. Normal pet attacks",
+    "must also cleave a second enemy while talented, and stop cleaving after talent removal.",
+    "The original owned pet alone receives health-neutral Regs Hit 984948: its asserted +1000 physical hit",
+    "and +100000 expertise remove random misses and avoidance from the short melee-cleave sample, preserving",
+    "damage, target selection, recipient exclusions and talent-removal checks. Owner hit ratings are not",
+    "substituted for native pet hit."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "wh",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "other",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "wh",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "wh",
+      "target": "other"
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 801343
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 801343
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "pet_entry",
+      "equals": 50124,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "wh",
+      "pet": true,
+      "spell": 984948,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "pet_aura_amount",
+      "spell": 984948,
+      "effect": 0,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "pet_aura_amount",
+      "spell": 984948,
+      "effect": 1,
+      "equals": 100000
+    },
+    {
+      "action": "learn",
+      "actor": "other",
+      "spell": 801343
+    },
+    {
+      "action": "cast",
+      "actor": "other",
+      "spell": 801343
+    },
+    {
+      "action": "assert",
+      "actor": "other",
+      "metric": "pet_entry",
+      "equals": 50124,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 570726
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "aura",
+      "spell": 570726,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 562027,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "aura",
+      "spell": 562027,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "other",
+      "metric": "pet_aura_stacks",
+      "spell": 562027,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "pet_aura_stacks",
+      "spell": 562027,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "attack",
+      "actor": "wh",
+      "target": "primary",
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "spell_damage_count",
+      "spell": 567570,
+      "target": "secondary",
+      "pet": true,
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "snapshot",
+      "actor": "wh",
+      "metric": "spell_damage_count",
+      "spell": 567570,
+      "target": "secondary",
+      "pet": true,
+      "save_as": "cleaves"
+    },
+    {
+      "action": "unlearn",
+      "actor": "wh",
+      "spell": 570726,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "pet_aura_stacks",
+      "spell": 562027,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "spell_damage_count",
+      "spell": 567570,
+      "target": "secondary",
+      "pet": true,
+      "relative_to": "cleaves",
+      "equals": 0
+    }
+  ],
+  "creatures": [
+    {
+      "id": "primary",
+      "owner": "wh",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "secondary",
+      "owner": "wh",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 4
+    }
+  ]
+}

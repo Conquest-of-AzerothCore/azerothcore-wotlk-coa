@@ -97,8 +97,8 @@ window with your own class, and Train learns the rank and pays for it.
 The gameplay test driver in the CoA server component exposes the whole path as metrics
 (`spellbook_rows`, `spellbook_offers_spell`, `spellbook_buy_succeeded`, `spellbook_learned_alerts`,
 `spellbook_unannounced_buys`, ...) through its `trainer_buy` action, and one scenario replays the
-live report of three purchases that were granted without announcing themselves, and a second one buys a
-whole rank ladder in one open window (`books-rank-refresh.json`):
+three purchases of a live report (two talent-tree ranks the book refuses to sell, one class spell it sells
+and announces), and a second one buys a whole rank ladder in one open window (`books-rank-refresh.json`):
 
 ```
 python apps/coa-gameplay-test/run.py validate apps/coa-gameplay-test/scenarios/books-live-repro.json

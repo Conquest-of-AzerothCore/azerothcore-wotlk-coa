@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Custom vendor foods have 10 in stock per vendor (COA-5542)",
+  "contract": "Innkeepers and food vendors sell the custom Ascension foods 772061-772076 with a limited stock of 10 per item, restocked every hour, instead of an unlimited supply. Innkeeper Farley 295 lists Crisped Barley Loaf 772061 with 10 left.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "buyer", "race": 1, "class": 1, "level": 20 }
+  ],
+  "creatures": [
+    { "id": "barkeep", "owner": "buyer", "entry": 295, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "gossip_hello", "actor": "buyer", "target": "barkeep", "label": "talk to the innkeeper" },
+    { "action": "gossip_select", "actor": "buyer", "option": 3, "label": "I want to browse your goods." },
+    { "action": "assert", "label": "the vendor list opens", "actor": "buyer",
+      "metric": "vendor_list_packets", "min": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "the custom food has 10 in stock", "actor": "buyer",
+      "metric": "vendor_stock", "item": 772061, "equals": 10 }
+  ]
+}

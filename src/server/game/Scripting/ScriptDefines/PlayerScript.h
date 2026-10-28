@@ -27,6 +27,10 @@
 #include "AchievementMgr.h"
 #include "KillRewarder.h"
 
+class Object;
+class Pet;
+struct Mail;
+
 enum PlayerHook
 {
     PLAYERHOOK_ON_PLAYER_JUST_DIED,
@@ -136,6 +140,8 @@ enum PlayerHook
     PLAYERHOOK_CAN_GROUP_ACCEPT,
     PLAYERHOOK_CAN_SELL_ITEM,
     PLAYERHOOK_CAN_SEND_MAIL,
+    PLAYERHOOK_CAN_TAKE_MAIL_ITEM,
+    PLAYERHOOK_CAN_TAKE_MAIL_MONEY,
     PLAYERHOOK_PETITION_BUY,
     PLAYERHOOK_PETITION_SHOW_LIST,
     PLAYERHOOK_ON_REWARD_KILL_REWARDER,
@@ -224,6 +230,9 @@ enum PlayerHook
     PLAYERHOOK_ON_CREATE_INITIAL_ITEMS,
     PLAYERHOOK_ON_GET_AMMO_DISPLAY,
     PLAYERHOOK_ON_NORMALIZE_ACTION_BUTTON_SPELL,
+    PLAYERHOOK_ON_TEMPORARY_SPELL_REPLACEMENT_NOTICE,
+    PLAYERHOOK_ON_TEMPORARY_SPELL_LEARN_NOTICE,
+    PLAYERHOOK_ON_TEMPORARY_SPELL_REMOVE_NOTICE,
     PLAYERHOOK_ON_SPELL_CHARGE_CONSUMED,
     PLAYERHOOK_ON_SPELL_COOLDOWN_CALCULATED,
     PLAYERHOOK_CAN_ENTER_MANASTORM,
@@ -231,10 +240,63 @@ enum PlayerHook
     PLAYERHOOK_ON_PLAYER_BREATH_INVERTED,
     PLAYERHOOK_ON_CAN_REGENERATE,
     PLAYERHOOK_ON_CAN_ENERGIZE,
+    PLAYERHOOK_ON_SEND_SPELL_CHARGE_STATES,
     PLAYERHOOK_ON_GET_MAX_ALLOWED_LEVEL,
+    PLAYERHOOK_ON_HAS_NO_BONUS_EXPERIENCE,
+    PLAYERHOOK_ON_HONORABLE_KILLING_BLOW,
     PLAYERHOOK_ON_BANKER_ACTIVATE,
     PLAYERHOOK_ON_BANK_WITHDRAW,
+    PLAYERHOOK_ON_LEARN_PET_TALENT,
+    PLAYERHOOK_ON_LEARN_TRAINER_SPELL,
+    PLAYERHOOK_ON_TAKE_MAIL_ITEM,
+    PLAYERHOOK_CAN_TAKE_QUEST,
+    PLAYERHOOK_CAN_REWARD_QUEST,
+    PLAYERHOOK_ON_QUEST_GIVER_CHOOSE_REWARD,
+    PLAYERHOOK_ON_REFRESH_QUEST_GIVER,
+    PLAYERHOOK_ON_COA_PROGRESS,
+    PLAYERHOOK_ON_GET_GAME_MODE_MASK,
+    PLAYERHOOK_ON_AFTER_APPLY_ITEM_MODS,
+    PLAYERHOOK_ON_COA_PRESTIGE,
+    PLAYERHOOK_ON_COA_PRESTIGE_SAVED,
+    PLAYERHOOK_ON_MASTER_LOOT_ITEM,
+    PLAYERHOOK_ON_GET_SHAPESHIFT_MODEL,
+    PLAYERHOOK_ON_GET_NAME_QUERY_RACE,
     PLAYERHOOK_END
+};
+
+enum class CoAProgressEvent : uint8
+{
+    ManastormEntered,
+    ManastormPurchase,
+    ManastormPotion,
+    ManastormEscape,
+    ManastormActiveSlot,
+    ManastormFullLoadout,
+    ManastormDepthCleared,
+    ClosestResurrection,
+    Transmogrified,
+    VanityDelivered,
+    VanityCollected,
+    AppearanceCollected,
+    ExperimentalTeleporter,
+    OutfitSaved,
+    MysticScrollPurchased,
+    MysticScrollReforged,
+    MysticExtractEarned,
+    MysticEnchantExtracted,
+    MysticCollectionApplied,
+    MysticScrollApplied,
+    MysticPresetActivated,
+    ArchitectOpened,
+    BuildActivated,
+    SoloArenaQueued,
+    WildcardScrollUnlearned,
+    WildcardEntryLocked,
+    WildcardCardPackOpened,
+    WildcardStarterCardSet,
+    WildcardScrollsClaimed,
+    WildcardScrollsRepurchased,
+    WildcardRapidRolled
 };
 
 class PlayerScript : public ScriptObject
@@ -315,6 +377,15 @@ public:
     // cannot be bypassed by a large XP gain.
     virtual uint8 OnPlayerGetMaxAllowedLevel(Player* /*player*/) { return 0; }
 
+    // Whether every experience bonus is suppressed for this player: base XP only.
+    // Consulted by Player::GiveXP (favored, rested, recruit-a-friend) and by the aura
+    // multiplier sites (kills, quests, professions). A NO_BONUS_EXPERIENCE challenge
+    // returns true.
+    virtual bool OnPlayerHasNoBonusExperience(Player* /*player*/) { return false; }
+
+    // Called when a player, or a unit they control, lands the killing blow on a player that counted as an honorable kill
+    virtual void OnPlayerHonorableKillingBlow(Player* /*killer*/, Player* /*victim*/) { }
+
     // Called when a player's reputation changes (before it is actually changed)
     virtual bool OnPlayerReputationChange(Player* /*player*/, uint32 /*factionID*/, int32& /*standing*/, bool /*incremental*/) { return true; }
 
@@ -380,7 +451,22 @@ public:
     virtual void OnPlayerSave(Player* /*player*/) { }
 
     virtual void OnPlayerNormalizeActionButtonSpell(Player* /*player*/, uint32& /*action*/, bool /*loading*/) { }
+
+    // Called just before (sent false) and just after (sent true) SMSG_SUPERCEDED_SPELL tells the client a temporary
+    // spell replacement started or ended
+    virtual void OnPlayerTemporarySpellReplacementNotice(Player* /*player*/, uint32 /*previous*/,
+        uint32 /*replacement*/, bool /*sent*/) { }
+
+    // Called just before (sent false) and just after (sent true) SMSG_LEARNED_SPELL announces a temporary spell
+    virtual void OnPlayerTemporarySpellLearnNotice(Player* /*player*/, uint32 /*spellId*/, bool /*sent*/) { }
+
+    // Called just before (sent false) and just after (sent true) SMSG_REMOVED_SPELL tells the client a temporary spell
+    // is gone
+    virtual void OnPlayerTemporarySpellRemoveNotice(Player* /*player*/, uint32 /*spellId*/, bool /*sent*/) { }
     virtual void OnPlayerSpellChargeConsumed(Player* /*player*/, SpellInfo const* /*spellInfo*/, Spell* /*spell*/, uint32 /*recoveryMs*/, uint64 /*nowEpochMs*/) { }
+
+    // Append charge displays backed by module-owned state after the core's full client reset.
+    virtual void OnPlayerSendSpellChargeStates(Player const* /*player*/) { }
     virtual void OnPlayerSpellCooldownCalculated(Player* /*player*/, SpellInfo const* /*spellInfo*/, Spell* /*spell*/, uint32 /*recoveryMs*/) { }
 
     // Called when a player is bound to an instance
@@ -546,6 +632,10 @@ public:
 
     [[nodiscard]] virtual bool OnPlayerCanSendMail(Player* /*player*/, ObjectGuid /*receiverGuid*/, ObjectGuid /*mailbox*/, std::string& /*subject*/, std::string& /*body*/, uint32 /*money*/, uint32 /*COD*/, Item* /*item*/) { return true; }
 
+    [[nodiscard]] virtual bool OnPlayerCanTakeMailItem(Player* /*player*/, Item* /*item*/) { return true; }
+
+    [[nodiscard]] virtual bool OnPlayerCanTakeMailMoney(Player* /*player*/, uint32 /*money*/) { return true; }
+
     virtual void OnPlayerPetitionBuy(Player* /*player*/, Creature* /*creature*/, uint32& /*charterid*/, uint32& /*cost*/, uint32& /*type*/) { }
 
     virtual void OnPlayerPetitionShowList(Player* /*player*/, Creature* /*creature*/, uint32& /*CharterEntry*/, uint32& /*CharterDispayID*/, uint32& /*CharterCost*/) { }
@@ -601,6 +691,8 @@ public:
 
     virtual void OnPlayerApplyItemModsBefore(Player* /*player*/, uint8 /*slot*/, bool /*apply*/, uint8 /*itemProtoStatNumber*/, uint32 /*statType*/, int32& /*val*/) { }
 
+    virtual void OnPlayerAfterApplyItemMods(Player* /*player*/, Item* /*item*/, uint8 /*slot*/, bool /*apply*/) { }
+
     virtual void OnPlayerApplyEnchantmentItemModsBefore(Player* /*player*/, Item* /*item*/, EnchantmentSlot /*slot*/, bool /*apply*/, uint32 /*enchant_spell_id*/, uint32& /*enchant_amount*/) { }
 
     virtual void OnPlayerApplyWeaponDamage(Player* /*player*/, uint8 /*slot*/, ItemTemplate const* /*proto*/, float& /*minDamage*/, float& /*maxDamage*/, uint8 /*damageIndex*/) { }
@@ -624,6 +716,12 @@ public:
     // Cosmetic fields of outgoing spell-start/go packets. Does not change ammunition or damage.
     virtual void OnPlayerGetAmmoDisplay(Player* /*player*/, SpellInfo const* /*spellInfo*/,
         uint32& /*displayId*/, uint32& /*inventoryType*/) { }
+
+    // Model the player takes in a shapeshift form; leaving modelId at 0 keeps the form's own model.
+    virtual void OnPlayerGetShapeshiftModel(Player* /*player*/, uint8 /*form*/, uint32 /*spellId*/, uint32& /*modelId*/) { }
+
+    // Race sent in name query responses; the client places a battleground scoreboard row by its faction.
+    virtual void OnPlayerGetNameQueryRace(Player* /*player*/, uint8& /*race*/) { }
 
     [[nodiscard]] virtual bool OnPlayerCanEquipItem(Player* /*player*/, uint8 /*slot*/, uint16& /*dest*/, Item* /*pItem*/, bool /*swap*/, bool /*not_loading*/) { return true; }
 
@@ -953,6 +1051,115 @@ public:
      * @param level The level that should be used for XP gain calculations
      */
     virtual void OnPlayerBeforeGetLevelForXPGain(Player const* /*player*/, uint8& /*level*/) {}
+
+    /**
+     * @brief This hook is called after a pet talent was validated and learned.
+     *
+     * @param player Contains information about the Player
+     * @param pet The pet that learned the talent
+     * @param spellId The learned talent spell
+     */
+    virtual void OnPlayerLearnPetTalent(Player* /*player*/, Pet* /*pet*/, uint32 /*spellId*/) { }
+
+    /**
+     * @brief This hook is called after a trainer successfully taught a spell to the player.
+     *
+     * @param player Contains information about the Player
+     * @param trainer The trainer creature
+     * @param spellId The trainer spell that was bought
+     */
+    virtual void OnPlayerLearnTrainerSpell(Player* /*player*/, Creature* /*trainer*/, uint32 /*spellId*/) { }
+
+    /**
+     * @brief This hook is called after an item attachment was moved from a mail into the player's inventory.
+     *
+     * @param player Contains information about the Player
+     * @param mail The mail the item was taken from
+     * @param itemEntry The entry of the taken item
+     */
+    virtual void OnPlayerTakeMailItem(Player* /*player*/, Mail const* /*mail*/, uint32 /*itemEntry*/) { }
+
+    /**
+     * @brief This hook is called when the core checks whether the player may see or take a quest.
+     *
+     * @param player Contains information about the Player
+     * @param quest The quest
+     * @return false to hide the quest and refuse accepting it
+     */
+    [[nodiscard]] virtual bool OnPlayerCanTakeQuest(Player const* /*player*/, Quest const* /*quest*/) { return true; }
+
+    /**
+     * @brief This hook is called when the core checks whether the player may be rewarded for a quest.
+     *
+     * @param player Contains information about the Player
+     * @param quest The quest
+     * @return false to refuse the ordinary quest reward
+     */
+    [[nodiscard]] virtual bool OnPlayerCanRewardQuest(Player const* /*player*/, Quest const* /*quest*/) { return true; }
+
+    /**
+     * @brief This hook is called after a quest reward request from a validated quest giver, before the core rewards it.
+     *
+     * @param player Contains information about the Player
+     * @param questGiver The quest giver object
+     * @param quest The quest
+     * @param reward The chosen reward index
+     * @return true when a script handled the request and the core must not reward the quest itself
+     */
+    [[nodiscard]] virtual bool OnPlayerQuestGiverChooseReward(Player* /*player*/, Object* /*questGiver*/, Quest const* /*quest*/, uint32 /*reward*/) { return false; }
+
+    /**
+     * @brief This hook is called when a quest giver interaction would close the player's quest giver window.
+     *
+     * @param player Contains information about the Player
+     * @param questGiver The quest giver object
+     * @param quest The quest of the interaction
+     * @return true when a script refreshed the quest giver window and the core must keep it open
+     */
+    [[nodiscard]] virtual bool OnPlayerRefreshQuestGiver(Player* /*player*/, Object* /*questGiver*/, Quest const* /*quest*/) { return false; }
+
+    /**
+     * @brief This hook is called when a Conquest of Azeroth system confirms a player's progress event.
+     *
+     * @param player Contains information about the Player
+     * @param event The confirmed event
+     * @param value The event's subject: an item, spell, appearance or depth, or 0
+     */
+    virtual void OnPlayerCoAProgress(Player* /*player*/, CoAProgressEvent /*event*/, uint32 /*value*/) { }
+
+    /**
+     * @brief This hook is called while the Chromie prestige save transaction is built.
+     *
+     * @param player Contains information about the Player
+     * @param trans The transaction that commits with the prestige; append database changes only
+     */
+    virtual void OnPlayerCoAPrestige(Player* /*player*/, CharacterDatabaseTransaction /*trans*/) { }
+
+    /**
+     * @brief This hook is called after the Chromie prestige save transaction has committed.
+     *
+     * @param player Contains information about the Player
+     */
+    virtual void OnPlayerCoAPrestigeSaved(Player* /*player*/) { }
+
+    /**
+     * @brief This hook is called after the master looter gave a loot item to a group member.
+     *
+     * @param player The group member who received the item
+     * @param item The stored item
+     * @param count The stored count
+     * @param lootguid The creature or gameobject the item was looted from
+     */
+    virtual void OnPlayerMasterLootItem(Player* /*player*/, Item* /*item*/, uint32 /*count*/, ObjectGuid /*lootguid*/) { }
+
+    /**
+     * @brief This hook is called to resolve a character's Conquest of Azeroth game mode mask.
+     *
+     * @param player Contains information about the Player
+     * @param mask Receives the game mode mask
+     * @return true when the script resolved the mask
+     */
+    [[nodiscard]] virtual bool OnPlayerGetGameModeMask(Player const* /*player*/, uint32& /*mask*/) { return false; }
 };
 
 #endif

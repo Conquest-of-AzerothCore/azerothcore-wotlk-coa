@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Impish Pestilence gives the Greater Imp the matching Lesser Pestilence, once per 10 s (#375)",
+  "contract": "Impish Pestilence 300398 (Hellfire level 40 passive) reads 'Using a Pestilence now applies a Lesser Pestilence to your pet. You can only apply a Lesser Pestilence to your pet every 10 sec.' and lists 806962, 802603, 802605 and 802604, the pet ('Rank: Pet') auras, all TARGET_UNIT_PET. By name and effect, Pestilence of Apocalypse 804786 maps to 806962 'Pestilence of Apocalypse' (+10% imp Fire damage, mana every 5 s) and Pestilence of War 802345 maps to 802604 'Pestilence of War' (imp damage may heal the knight). 802604's client tooltip reads 'Emanating a Pestilence of Famine.', a client Spell.dbc text slip that the server does not send. Summon: Greater Imp 520661 summons pet entry 510100. Apocalypse itself stays a beneficial self aura (#224). Pestilences share Category 52 with a 4 s category cooldown, so the switches below wait 4.5 s; a switch inside the 10 s window leaves the imp's previous Lesser Pestilence in place, and the next Pestilence used after the window replaces it.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 42 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks and class synchronisation settle", "ms": 5000 },
+    { "action": "learn", "actor": "knight", "spell": 520661 },
+    { "action": "learn", "actor": "knight", "spell": 804786 },
+    { "action": "learn", "actor": "knight", "spell": 802345 },
+    { "action": "learn", "actor": "knight", "spell": 300398 },
+    { "action": "set_aura", "actor": "knight", "spell": 300398, "stacks": 1, "label": "Force the Impish Pestilence passive aura" },
+    { "action": "cast", "label": "Summon: Greater Imp (5 s cast)", "actor": "knight", "spell": 520661 },
+    { "action": "assert", "label": "SETUP: the Greater Imp is the knight's pet", "actor": "knight", "metric": "pet_entry", "equals": 510100, "within_ms": 8000 },
+    { "action": "assert", "label": "SETUP: the Impish Pestilence passive is active", "actor": "knight", "metric": "aura", "spell": 300398, "equals": 1 },
+
+    { "action": "cast", "label": "Pestilence of Apocalypse", "actor": "knight", "spell": 804786 },
+    { "action": "assert", "label": "SETUP: Apocalypse is active on the knight", "actor": "knight", "metric": "aura", "spell": 804786, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "CONTRACT: Apocalypse is a buff on the knight, not a debuff", "actor": "knight", "metric": "aura_positive", "spell": 804786, "equals": 1 },
+    { "action": "assert", "label": "CONTRACT: the imp gets the Lesser Pestilence of Apocalypse", "actor": "knight", "metric": "pet_aura_stacks", "spell": 806962, "equals": 1, "within_ms": 1000 },
+
+    { "action": "wait", "label": "Let the 10 s Lesser Pestilence window pass", "ms": 10500 },
+    { "action": "cast", "label": "Switch to Pestilence of War", "actor": "knight", "spell": 802345 },
+    { "action": "assert", "label": "SETUP: War replaced Apocalypse on the knight", "actor": "knight", "metric": "aura", "spell": 802345, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "CONTRACT: the imp now carries the Lesser Pestilence of War", "actor": "knight", "metric": "pet_aura_stacks", "spell": 802604, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "CONTRACT: the Lesser Pestilence of Apocalypse left the imp", "actor": "knight", "metric": "pet_aura_stacks", "spell": 806962, "equals": 0 },
+
+    { "action": "wait", "label": "Wait out the 4 s Pestilence category cooldown, still inside the 10 s window", "ms": 4500 },
+    { "action": "cast", "label": "Switch back to Apocalypse inside the window", "actor": "knight", "spell": 804786 },
+    { "action": "assert", "label": "SETUP: Apocalypse replaced War on the knight", "actor": "knight", "metric": "aura", "spell": 804786, "equals": 1, "within_ms": 1000 },
+    { "action": "wait", "label": "Give a Lesser Pestilence time to land", "ms": 500 },
+    { "action": "assert", "label": "CONTRACT: inside the 10 s window the imp keeps the Lesser Pestilence of War", "actor": "knight", "metric": "pet_aura_stacks", "spell": 802604, "equals": 1 },
+    { "action": "assert", "label": "CONTRACT: inside the 10 s window the imp does not get Apocalypse", "actor": "knight", "metric": "pet_aura_stacks", "spell": 806962, "equals": 0 },
+
+    { "action": "wait", "label": "Let the window that War started pass", "ms": 6000 },
+    { "action": "cast", "label": "Use Pestilence of Apocalypse again after the window", "actor": "knight", "spell": 804786 },
+    { "action": "assert", "label": "CONTRACT: after the window the imp gets the Lesser Pestilence of Apocalypse", "actor": "knight", "metric": "pet_aura_stacks", "spell": 806962, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "CONTRACT: the Lesser Pestilence of War is gone", "actor": "knight", "metric": "pet_aura_stacks", "spell": 802604, "equals": 0 }
+  ]
+}

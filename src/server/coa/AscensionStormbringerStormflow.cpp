@@ -6,6 +6,8 @@
 #include "SpellAuras.h"
 #include "SpellInfo.h"
 #include "SpellScript.h"
+#include <algorithm>
+#include <limits>
 
 namespace
 {
@@ -18,7 +20,8 @@ enum StormflowSpells : uint32
     SPELL_UNSTABLE = 705723,
     SPELL_UNSTABLE_PERIOD = 707222,
     SPELL_AMPED_FLOW = 806411,
-    SPELL_AMPED_FLOW_TARGETS = 567556
+    SPELL_AMPED_FLOW_TARGETS = 567556,
+    SPELL_UNBRIDLED_FLOW = 578299
 };
 
 enum StormflowFamilyFlags : uint32
@@ -76,6 +79,10 @@ public:
     {
         if (!info || info->SpellFamilyName != 22)
             return;
+        if (info->Id == SPELL_UNBRIDLED_FLOW &&
+            info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_ADD_FLAT_MODIFIER &&
+            info->Effects[EFFECT_0].MiscValue == SPELLMOD_EFFECT3)
+            info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
         auto dummy = [info](uint8 slot)
         {
             info->Effects[slot].ApplyAuraName = SPELL_AURA_DUMMY;
@@ -92,6 +99,28 @@ public:
         }
         if (IsStormflow(info) && info->Effects[EFFECT_1].ApplyAuraName == AURA_STORMFLOW_ALLOWED_SPELLS)
             dummy(EFFECT_1);
+    }
+};
+
+class stormbringer_unbridled_flow : public UnitScript
+{
+public:
+    stormbringer_unbridled_flow() : UnitScript("stormbringer_unbridled_flow", true,
+        {UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN}) { }
+
+    void ModifySpellDamageTaken(Unit* target, Unit* caster, int32& amount, SpellInfo const* info) override
+    {
+        Player* player = caster ? caster->ToPlayer() : nullptr;
+        if (!player || player->getClass() != CLASS_STORMBRINGER || !player->IsAlive() || !info ||
+            info->SpellFamilyName != 22 || amount <= 0 || !target || target == player ||
+            player->IsFriendlyTo(target) || !StormflowChannel(player) ||
+            (!(info->SpellFamilyFlags[0] & 2048) && !(info->SpellFamilyFlags[1] & 128)))
+            return;
+        AuraEffect const* effect = player->GetAuraEffect(SPELL_UNBRIDLED_FLOW, EFFECT_0, player->GetGUID());
+        if (!effect || effect->GetAmount() <= 0)
+            return;
+        uint64 const result = uint64(amount) * (100 + uint64(effect->GetAmount())) / 100;
+        amount = int32(std::min<uint64>(result, std::numeric_limits<int32>::max()));
     }
 };
 
@@ -196,6 +225,7 @@ class aura_ascension_unstable : public AuraScript
 void AddSC_AscensionStormbringerStormflow()
 {
     new stormbringer_stormflow_contracts();
+    new stormbringer_unbridled_flow();
     new stormbringer_stormflow_blessing();
     new stormbringer_stormflow_hits();
     RegisterSpellScript(aura_ascension_stormflow);

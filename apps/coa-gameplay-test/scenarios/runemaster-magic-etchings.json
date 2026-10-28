@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "name": "Runemaster Magic Etchings: Primordial Blast damage stacks Leybreaker armor reduction (#1661)",
+  "contract": [
+    "Magic Etchings 300582 (Runic tree talent, CharacterAdvancement 1734): 'Dealing damage with Primordial Blast",
+    "now reduces the affected target's armor by $520555s1% for $520555d, stacking $520555u times.' Effect 0 is",
+    "PROC_TRIGGER_SPELL 520555 at ProcChance 100; Spell.dbc gives 300582 ProcFlags 0 and no spell_proc row existed,",
+    "so the aura never procced. Leybreaker 520555 is SPELL_AURA_MOD_RESISTANCE_PCT on armor (MiscValue 1),",
+    "BasePoints -5 with DieSides 1 = -4%, TARGET_UNIT_TARGET_ENEMY, SpellDuration 29 = 12 sec, StackAmount 5.",
+    "Primordial Blast 800732 is a magic-class family 38 spell whose mask1 0x100000 it shares only with its ranks,",
+    "its elemental versions and two non-damaging helpers. Expected: without the talent a Primordial Blast hit",
+    "applies nothing; with it each hit adds one Leybreaker stack owned by the Runemaster, armor falls to 96% after",
+    "one hit and to 80% after five, a sixth hit keeps 5 stacks, and each application lasts 12 sec."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80, "spell_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "golem", "owner": "rm", "entry": 36, "level": 80, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 800732},
+    {"action": "assert", "label": "SETUP: the target has armor to reduce", "actor": "golem", "metric": "armor",
+      "min": 100},
+    {"action": "snapshot", "actor": "golem", "metric": "armor", "save_as": "armor_base"},
+
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Control: Primordial Blast without the talent", "actor": "rm", "spell": 800732,
+      "target": "golem"},
+    {"action": "assert", "label": "SETUP: Primordial Blast hits", "actor": "rm", "metric": "spell_damage_count",
+      "spell": 800732, "target": "golem", "equals": 1, "within_ms": 3000},
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "label": "CONTRACT: no Leybreaker without Magic Etchings", "actor": "golem",
+      "metric": "aura", "spell": 520555, "equals": 0},
+
+    {"action": "learn", "actor": "rm", "spell": 300582},
+    {"action": "assert", "label": "SETUP: Magic Etchings is active", "actor": "rm", "metric": "aura",
+      "spell": 300582, "equals": 1, "within_ms": 1000},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 800732},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "actor": "rm", "spell": 800732, "target": "golem"},
+    {"action": "assert", "actor": "rm", "metric": "spell_damage_count", "spell": 800732, "target": "golem",
+      "equals": 2, "within_ms": 3000},
+    {"action": "assert", "label": "CONTRACT: a Primordial Blast hit applies Leybreaker", "actor": "golem",
+      "metric": "aura_stacks", "spell": 520555, "caster": "rm", "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "CONTRACT: one stack reduces armor by 4%", "actor": "golem", "metric": "armor",
+      "ratio_to": "armor_base", "min": 0.955, "max": 0.965},
+    {"action": "assert", "label": "CONTRACT: Leybreaker lasts 12 sec", "actor": "golem",
+      "metric": "aura_duration_ms", "spell": 520555, "caster": "rm", "min": 9000, "max": 12000},
+
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 800732},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "actor": "rm", "spell": 800732, "target": "golem"},
+    {"action": "assert", "label": "CONTRACT: each hit adds a stack", "actor": "golem", "metric": "aura_stacks",
+      "spell": 520555, "caster": "rm", "equals": 2, "within_ms": 3000},
+
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 800732},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "actor": "rm", "spell": 800732, "target": "golem"},
+    {"action": "assert", "actor": "golem", "metric": "aura_stacks", "spell": 520555, "caster": "rm", "equals": 3,
+      "within_ms": 3000},
+
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 800732},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "actor": "rm", "spell": 800732, "target": "golem"},
+    {"action": "assert", "actor": "golem", "metric": "aura_stacks", "spell": 520555, "caster": "rm", "equals": 4,
+      "within_ms": 3000},
+
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 800732},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "actor": "rm", "spell": 800732, "target": "golem"},
+    {"action": "assert", "label": "CONTRACT: five hits reach the five-stack limit", "actor": "golem",
+      "metric": "aura_stacks", "spell": 520555, "caster": "rm", "equals": 5, "within_ms": 3000},
+    {"action": "assert", "label": "CONTRACT: five stacks reduce armor by 20%", "actor": "golem", "metric": "armor",
+      "ratio_to": "armor_base", "min": 0.795, "max": 0.805},
+
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 800732},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "snapshot", "actor": "rm", "metric": "spell_damage_count", "spell": 800732, "target": "golem",
+      "save_as": "hits_before_sixth"},
+    {"action": "cast", "actor": "rm", "spell": 800732, "target": "golem"},
+    {"action": "assert", "label": "SETUP: the sixth Primordial Blast hits", "actor": "rm",
+      "metric": "spell_damage_count", "spell": 800732, "target": "golem", "relative_to": "hits_before_sixth",
+      "equals": 1, "within_ms": 3000},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "CONTRACT: Leybreaker stays at 5 stacks", "actor": "golem", "metric": "aura_stacks",
+      "spell": 520555, "caster": "rm", "equals": 5},
+    {"action": "assert", "actor": "golem", "metric": "armor", "ratio_to": "armor_base", "min": 0.795, "max": 0.805}
+  ]
+}

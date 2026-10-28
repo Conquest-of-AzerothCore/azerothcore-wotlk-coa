@@ -1,0 +1,169 @@
+{
+  "schema": 1,
+  "name": "Valkyr Grip has no Titan Grip physical damage penalty (#5733)",
+  "contract": [
+    "Original 707072 description grants dual wield, selected two-handed weapon use and 6% hit, with no damage penalty.",
+    "Equip a second stat-free two-handed sword and compare native main-hand damage against the same character with only the first sword. Warrior Titan Grip is an independent native penalty control."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "valkyrie",
+      "race": 1,
+      "class": 27,
+      "level": 10
+    },
+    {
+      "id": "warrior",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "valkyrie",
+      "spell": 202
+    },
+    {
+      "action": "learn",
+      "actor": "valkyrie",
+      "spell": 707072
+    },
+    {
+      "action": "add_item",
+      "actor": "valkyrie",
+      "item": 1194
+    },
+    {
+      "action": "equip",
+      "actor": "valkyrie",
+      "item": 1194,
+      "slot": 15
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "valkyrie",
+      "metric": "weapon_damage_min",
+      "hand": 0,
+      "save_as": "valkyrie_one_weapon"
+    },
+    {
+      "action": "add_item",
+      "actor": "valkyrie",
+      "item": 1198
+    },
+    {
+      "action": "equip",
+      "actor": "valkyrie",
+      "item": 1198,
+      "slot": 16
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "valkyrie",
+      "metric": "weapon_damage_min",
+      "hand": 1,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "valkyrie",
+      "metric": "weapon_damage_min",
+      "hand": 0,
+      "ratio_to": "valkyrie_one_weapon",
+      "min": 0.999,
+      "max": 1.001,
+      "label": "Valkyr Grip preserves physical damage"
+    },
+    {
+      "action": "learn",
+      "actor": "warrior",
+      "spell": 674
+    },
+    {
+      "action": "learn",
+      "actor": "warrior",
+      "spell": 202
+    },
+    {
+      "action": "learn",
+      "actor": "warrior",
+      "spell": 46917
+    },
+    {
+      "action": "add_item",
+      "actor": "warrior",
+      "item": 1194
+    },
+    {
+      "action": "equip",
+      "actor": "warrior",
+      "item": 1194,
+      "slot": 15
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "warrior",
+      "metric": "weapon_damage_min",
+      "hand": 0,
+      "save_as": "warrior_one_weapon"
+    },
+    {
+      "action": "add_item",
+      "actor": "warrior",
+      "item": 1198
+    },
+    {
+      "action": "equip",
+      "actor": "warrior",
+      "item": 1198,
+      "slot": 16
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "warrior",
+      "metric": "weapon_damage_min",
+      "hand": 1,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "warrior",
+      "metric": "weapon_damage_min",
+      "hand": 0,
+      "ratio_to": "warrior_one_weapon",
+      "min": 0.899,
+      "max": 0.901,
+      "label": "Stock Warrior Titan Grip retains its ten-percent physical penalty"
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  }
+}

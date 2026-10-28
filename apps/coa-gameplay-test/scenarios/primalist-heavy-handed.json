@@ -19,9 +19,9 @@
   ],
   "steps": [
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "primalist",
-      "command": ".localspec 60"
+      "id": 60
     },
     {
       "action": "learn",
@@ -57,9 +57,9 @@
       "save_as": "primalist_base_armor"
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "ally",
-      "command": ".localspec 60"
+      "id": 60
     },
     {
       "action": "learn",

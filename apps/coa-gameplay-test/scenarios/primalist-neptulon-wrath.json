@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Primalist Neptulon Wrath caster AP and direct-damage procs",
-  "contract": "Allied players receive fifteen seconds of direct-hit and white-hit Froststorm damage based on thirty-five percent of the caster attack power, even when recipients have different AP. Periodic Seismic damage does not trigger it. The sixty-second Exhaustion excludes both recasting and receipt from another caster.",
+  "contract": "Allied players receive fifteen seconds of direct-hit and white-hit Froststorm damage based on thirty-five percent of the caster attack power, even when recipients have different AP. Periodic Seismic damage does not trigger it. The sixty-second Exhaustion excludes both recasting and receipt from another caster. Specialization 58 (Life) grants Douse (807558) automatically at level 40, and each Seismic Crash tick then triggers a direct Douse hit, which Neptulon's Wrath answers as direct damage; the scenario removes Douse so only the periodic Seismic damage is measured.",
   "players": [
     {
       "id": "primalist",
@@ -44,9 +44,9 @@
   "timeout_ms": 100000,
   "steps": [
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "primalist",
-      "command": ".localspec 58"
+      "id": 58
     },
     {
       "action": "teleport",
@@ -190,6 +190,13 @@
       "actor": "primalist",
       "spell": 503258,
       "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 807558,
+      "all_specs": true,
+      "label": "Remove the automatic Life Douse, whose direct Frost hit follows every Seismic Crash tick"
     },
     {
       "action": "learn",

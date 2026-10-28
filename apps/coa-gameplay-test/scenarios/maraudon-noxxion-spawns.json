@@ -1,0 +1,147 @@
+{
+  "schema": 1,
+  "name": "Maraudon: Noxxion summons his spawns and returns targetable once they die (#5257)",
+  "contract": "At 50% health Noxxion (13282) casts Summon Noxxion's Spawns 21707: effect 0 is SPELL_EFFECT_SUMMON of Noxxion's Spawn (13456) with EffectBasePoints 4 and EffectDieSides 1, so five spawns, after a 1000 ms cast (CastingTimeIndex 4). He then turns unselectable and takes the 15 s dummy aura 21708 (DurationIndex 8), which spell_gen_visual_dummy_stun turns into a stun. Each spawn that dies counts towards a counter on Noxxion, and at five the aura and the unselectable flag are removed. Expected, as the report describes: five spawns appear, Noxxion is stunned while they live, and once they are dead he is no longer stunned and can be attacked again.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "noxxion",
+      "owner": "p",
+      "entry": 13282,
+      "level": 48,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_health",
+      "label": "Survive Noxxion and his spawns for the whole phase",
+      "actor": "p",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "attack",
+      "actor": "p",
+      "target": "noxxion"
+    },
+    {
+      "action": "assert",
+      "label": "Noxxion is engaged",
+      "actor": "noxxion",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "No spawn exists before the health threshold",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 13456,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "label": "Drop Noxxion below 50% health",
+      "actor": "noxxion",
+      "value": 40000
+    },
+    {
+      "action": "assert",
+      "label": "Noxxion summons his five spawns",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 13456,
+      "equals": 5,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Noxxion is stunned while his spawns fight",
+      "actor": "noxxion",
+      "metric": "aura",
+      "spell": 21708,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill the first spawn",
+      "actor": "p",
+      "entry": 13456,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill the second spawn",
+      "actor": "p",
+      "entry": 13456,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill the third spawn",
+      "actor": "p",
+      "entry": 13456,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill the fourth spawn",
+      "actor": "p",
+      "entry": 13456,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Noxxion stays stunned while a spawn still lives",
+      "actor": "noxxion",
+      "metric": "aura",
+      "spell": 21708,
+      "equals": 1
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill the last spawn",
+      "actor": "p",
+      "entry": 13456,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "With every spawn dead Noxxion is no longer stunned",
+      "actor": "noxxion",
+      "metric": "stunned",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Noxxion is a valid attack target again",
+      "actor": "p",
+      "entry": 13282
+    },
+    {
+      "action": "assert",
+      "label": "Noxxion fights on",
+      "actor": "noxxion",
+      "metric": "combat",
+      "equals": 1
+    }
+  ]
+}

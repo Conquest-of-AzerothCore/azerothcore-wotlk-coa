@@ -42,9 +42,12 @@ class aura_ascension_lithic_lance_ready : public AuraScript
             return;
         if (player->GetSpellMap().find(LithicLance) == player->GetSpellMap().end())
             player->learnSpell(LithicLance, true);
+        uint32 highest = 0;
         for (uint32 id = GeodeBarrageFirst; id; id = sSpellMgr->GetNextSpellInChain(id))
-            if (player->HasActiveSpell(id) && player->GetTemporarySpellReplacement(id) == id)
-                player->SetTemporarySpellReplacement(id, LithicLance);
+            if (player->HasActiveSpell(id))
+                highest = id;
+        if (highest)
+            player->SetTemporarySpellReplacement(highest, LithicLance);
     }
 
     void Remove(AuraEffect const*, AuraEffectHandleModes)

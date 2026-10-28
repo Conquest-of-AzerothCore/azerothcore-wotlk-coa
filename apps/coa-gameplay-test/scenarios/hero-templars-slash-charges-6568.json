@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Templar's Slash spends its charges on a Hero (#6568)",
+  "contract": "Templar's Slash rank 7 (278753) is a SpellFamilyName 10 spell that SpellCharges.dbc links to charge category 100: 3 charges with an 8 second recharge. Spell.dbc gives it no cooldown of its own, so the charges are the only thing that limits it. ApplyClientSpellCharges only accepted custom class families 18 to 38, so a Hero's family 10 spell kept MaxCharges 0, ConsumeSpellCharge returned early and the spell could be cast endlessly. Three casts spend the three charges.",
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "hero", "race": 1, "class": 10, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "enemy", "owner": "hero", "entry": 36, "level": 60, "health": 500000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks and spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "hero", "spell": 278753},
+    {"action": "assert", "label": "DISCRIMINATING: Templar's Slash starts with 3 charges", "actor": "hero", "metric": "spell_charges", "spell": 278753, "equals": 3},
+    {"action": "cast", "actor": "hero", "spell": 278753, "target": "enemy"},
+    {"action": "assert", "label": "DISCRIMINATING: one cast spends one charge", "actor": "hero", "metric": "spell_charges", "spell": 278753, "equals": 2, "within_ms": 4000},
+    {"action": "wait", "label": "Let the global cooldown lapse", "ms": 1600},
+    {"action": "cast", "actor": "hero", "spell": 278753, "target": "enemy"},
+    {"action": "assert", "label": "A second cast leaves one charge", "actor": "hero", "metric": "spell_charges", "spell": 278753, "equals": 1, "within_ms": 4000},
+    {"action": "wait", "label": "Let the global cooldown lapse", "ms": 1600},
+    {"action": "cast", "actor": "hero", "spell": 278753, "target": "enemy"},
+    {"action": "assert", "label": "A third cast spends the last charge", "actor": "hero", "metric": "spell_charges", "spell": 278753, "equals": 0, "within_ms": 4000}
+  ]
+}

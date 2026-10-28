@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "name": "Fel Rift: Theramore respects its Alliance race mask (#5967)",
+  "contract": "Original SkillLineAbility.dbc row 23488 gives Theramore 535601 race mask 1101 (Alliance) and class mask 8192 (Felsworn). The server grants it at level 40. An existing Horde grant violates that independent faction contract; native GiveLevel must reconcile the spellbook, removing the Horde grant while preserving the Alliance grant. Both actors start at level 40 and learn the spell only to model persisted grants. This tests reconciliation with CoA.AutoProgression = 0 and does not claim rendered spellbook coverage. Correct-faction Stormwind 535595 and Orgrimmar 535598 grants are controls and must remain known.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "alliance",
+      "race": 1,
+      "class": 14,
+      "level": 40
+    },
+    {
+      "id": "horde",
+      "race": 2,
+      "class": 14,
+      "level": 40
+    }
+  ],
+  "steps": [
+    {
+      "action": "learn",
+      "actor": "alliance",
+      "spell": 535601
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "knows_spell",
+      "spell": 535601,
+      "equals": 1,
+      "label": "Fixture models an existing Theramore grant before reconciliation"
+    },
+    {
+      "action": "learn",
+      "actor": "horde",
+      "spell": 535601
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "knows_spell",
+      "spell": 535601,
+      "equals": 1,
+      "label": "Fixture models an existing Theramore grant before reconciliation"
+    },
+    {
+      "action": "learn",
+      "actor": "alliance",
+      "spell": 535595,
+      "label": "Fixture supplies a valid same-faction capital rift"
+    },
+    {
+      "action": "learn",
+      "actor": "horde",
+      "spell": 535598,
+      "label": "Fixture supplies a valid same-faction capital rift"
+    },
+    {
+      "action": "set_level",
+      "actor": "alliance",
+      "value": 41
+    },
+    {
+      "action": "set_level",
+      "actor": "horde",
+      "value": 41
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "knows_spell",
+      "spell": 535601,
+      "equals": 1,
+      "label": "Alliance keeps its level-40 Theramore rift"
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "knows_spell",
+      "spell": 535601,
+      "equals": 0,
+      "label": "Horde loses the Alliance-only Theramore rift during native level reconciliation"
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "knows_spell",
+      "spell": 535595,
+      "equals": 1,
+      "label": "Control: native reconciliation preserves the correct faction capital rift"
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "knows_spell",
+      "spell": 535598,
+      "equals": 1,
+      "label": "Control: native reconciliation preserves the correct faction capital rift"
+    }
+  ]
+}

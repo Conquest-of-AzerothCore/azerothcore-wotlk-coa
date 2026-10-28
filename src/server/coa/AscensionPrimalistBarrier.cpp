@@ -35,10 +35,13 @@ class aura_ascension_earthmother_protection_link : public AuraScript
     {
         Unit* owner = GetTarget();
         Aura* barrier = owner->GetAura(RockBarrier, owner->GetGUID());
-        if (!barrier || !owner->HasAura(EarthmotherProtection))
+        AuraEffect const* talent = owner->GetAuraEffect(EarthmotherProtection, EFFECT_0, owner->GetGUID());
+        if (!barrier || !talent)
             return;
         if (Aura* helper = owner->AddAura(BarrierModifiers, owner))
         {
+            if (AuraEffect* discount = helper->GetEffect(EFFECT_2))
+                discount->ChangeAmount(talent->GetAmount());
             helper->SetMaxDuration(barrier->GetMaxDuration());
             helper->SetDuration(barrier->GetDuration());
         }
@@ -58,6 +61,22 @@ class aura_ascension_earthmother_protection_link : public AuraScript
     }
 };
 
+class primalist_barrier_scaling : public UnitScript
+{
+public:
+    primalist_barrier_scaling() : UnitScript("primalist_barrier_scaling", true,
+        {UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE}) { }
+
+    void ModifySpellEffectBaseValue(Unit const* caster, SpellInfo const* info, uint8 index, float& value) override
+    {
+        if (!caster || !caster->IsPlayer() || caster->getClass() != CLASS_WILDWALKER ||
+            info->SpellFamilyName != 37 || info->Id != RockBarrier || index != EFFECT_0 ||
+            info->Effects[index].ApplyAuraName != SPELL_AURA_MOD_RESISTANCE)
+            return;
+        value += caster->GetStat(STAT_STAMINA) * 3.0f;
+    }
+};
+
 class primalist_barrier_metadata : public GlobalScript
 {
 public:
@@ -71,6 +90,9 @@ public:
             info->AttributesCu &= ~SPELL_ATTR0_CU_FORCE_AURA_SAVING;
             info->AttributesCu |= SPELL_ATTR0_CU_AURA_CANNOT_BE_SAVED;
         }
+        if (info->Id == EarthmotherProtection && info->SpellFamilyName == 37 &&
+            info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_ADD_FLAT_MODIFIER)
+            info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
     }
 };
 
@@ -110,8 +132,6 @@ class spell_ascension_fury_of_earthmother_charge : public SpellScript
         Aura* barrier = owner->GetAura(RockBarrier, owner->GetGUID());
         if (!barrier)
             return;
-        if (barrier->GetCharges() < 255)
-            barrier->SetCharges(barrier->GetCharges() + 1);
         if (Aura* helper = owner->GetAura(BarrierModifiers, owner->GetGUID()))
         {
             helper->SetMaxDuration(std::max(helper->GetMaxDuration(), barrier->GetDuration()));
@@ -132,4 +152,5 @@ void AddSC_AscensionPrimalistBarrier()
     RegisterSpellScript(aura_ascension_fury_of_earthmother);
     RegisterSpellScript(spell_ascension_fury_of_earthmother_charge);
     new primalist_barrier_metadata();
+    new primalist_barrier_scaling();
 }

@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "name": "Void Augmentation names its actual Eldritch Shock target (#6713)",
+  "contract": [
+    "Void Augmentation (680575) describes two extra targets for Twilight Shock, but its native jump modifier",
+    "matches Eldritch Shock (808043). The live spell name and exact family mask establish the corrected name.",
+    "The existing native modifiers remain unchanged: Dreadnought cooldown slot minus 3000 ms and jump targets 3.",
+    "The outgoing description must name Eldritch Shock and preserve the separate Twilight Shieldtoss clause.",
+    "This covers native effect values and spell-text data, not rendered client text or target hit rolls.",
+    "The initial wait exceeds the native 5000 ms description-stream fallback delay."
+  ],
+  "timeout_ms": 30000,
+  "players": [
+    {
+      "id": "cultist",
+      "race": 1,
+      "class": 25,
+      "level": 57
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Allow the five-second client description stream to complete",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Dreadnought's cooldown-reduction slot on Twilight Shieldtoss is inert (0)",
+      "actor": "cultist",
+      "metric": "spell_effect_value",
+      "spell": 567525,
+      "effect": 2,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Eldritch Shock has no extra jump targets before the talent",
+      "actor": "cultist",
+      "metric": "spell_modifier",
+      "spell": 808043,
+      "op": 17,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "cultist",
+      "spell": 680575
+    },
+    {
+      "action": "assert",
+      "label": "Void Augmentation fills Dreadnought's cooldown-reduction slot with -3000 ms",
+      "actor": "cultist",
+      "metric": "spell_effect_value",
+      "spell": 567525,
+      "effect": 2,
+      "equals": -3000
+    },
+    {
+      "action": "assert",
+      "label": "Void Augmentation adds 3 to Eldritch Shock's jump-target total (2 additional enemies)",
+      "actor": "cultist",
+      "metric": "spell_modifier",
+      "spell": 808043,
+      "op": 17,
+      "base": 0,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Description names the spell selected by the modifier",
+      "actor": "cultist",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 680575,
+      "text": "|cffffffffEldritch Shock|r",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "cultist",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 680575,
+      "text": "|cFFFFFFFFTwilight Shieldtoss|r",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "cultist",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 680575,
+      "text": "Twilight Shock",
+      "equals": 0
+    }
+  ]
+}

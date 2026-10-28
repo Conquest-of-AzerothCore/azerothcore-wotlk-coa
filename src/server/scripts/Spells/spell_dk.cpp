@@ -53,6 +53,7 @@ enum DeathKnightSpells
     SPELL_DK_FROST_FEVER                        = 55095,
     SPELL_DK_FROST_PRESENCE                     = 48263,
     SPELL_DK_FROST_PRESENCE_TRIGGERED           = 61261,
+    SPELL_DK_FROST_PRESENCE_BONUS_EFFECTS       = 48905,
     SPELL_DK_GHOUL_EXPLODE                      = 47496,
     SPELL_DK_GLYPH_OF_DISEASE                   = 63334,
     SPELL_DK_GLYPH_OF_ICEBOUND_FORTITUDE        = 58625,
@@ -248,7 +249,7 @@ class spell_dk_raise_ally : public SpellScript
                         AddPct(mod, spellInfo->Effects[EFFECT_1].CalcValue());                                              // Ravenous Dead edits the original scale
                     }
                     // Glyph of the Ghoul
-                    aurEff = GetCaster()->GetAuraEffect(SPELL_DK_GLYPH_OF_THE_GHOUL, EFFECT_0);
+                    aurEff = GetCaster()->GetAuraEffectOfRankedSpellOrTwin(SPELL_DK_GLYPH_OF_THE_GHOUL, EFFECT_0);
                     if (aurEff)
                         mod += CalculatePct(1.0f, aurEff->GetAmount());                                                    // Glyph of the Ghoul adds a flat value to the scale mod
 
@@ -350,7 +351,7 @@ class spell_dk_death_and_decay : public SpellScript
         if (AuraEffect* aurEff = caster->GetAuraEffectDummy(70650))
             AddPct(damage, aurEff->GetAmount());
         // Glyph of Death and Decay
-        if (AuraEffect* aurEff = caster->GetAuraEffect(58629, EFFECT_0))
+        if (AuraEffect* aurEff = caster->GetAuraEffectOfRankedSpellOrTwin(58629, EFFECT_0))
             AddPct(damage, aurEff->GetAmount());
 
         // Xinef: include AOE damage reducing auras
@@ -492,6 +493,17 @@ class spell_dk_summon_gargoyle : public SpellScript
     }
 };
 
+constexpr int32 BLOOD_PRESENCE_HEAL_MAX_HEALTH_PCT = 5;
+
+SpellValueMod ImprovedBloodPresenceAmountMod()
+{
+    SpellInfo const* info = sSpellMgr->GetSpellInfo(SPELL_DK_IMPROVED_BLOOD_PRESENCE_TRIGGERED);
+    for (uint8 i = 0; info && i < MAX_SPELL_EFFECTS; ++i)
+        if (info->Effects[i].ApplyAuraName == SPELL_AURA_PROC_TRIGGER_SPELL)
+            return SpellValueMod(SPELLVALUE_BASE_POINT0 + i);
+    return SPELLVALUE_BASE_POINT1;
+}
+
 // 63611 - Improved Blood Presence Triggered
 class spell_dk_improved_blood_presence_triggered : public AuraScript
 {
@@ -512,15 +524,17 @@ class spell_dk_improved_blood_presence_triggered : public AuraScript
         PreventDefaultAction();
         if (DamageInfo* dmgInfo = eventInfo.GetDamageInfo())
         {
-            int32 bp0 = CalculatePct(static_cast<int32>(dmgInfo->GetDamage()), aurEff->GetAmount());
-            eventInfo.GetActor()->CastCustomSpell(SPELL_DK_IMPROVED_BLOOD_PRESENCE_HEAL, SPELLVALUE_BASE_POINT0, bp0, eventInfo.GetActor(), true, nullptr, aurEff);
+            Unit* actor = eventInfo.GetActor();
+            int32 bp0 = std::min(CalculatePct(static_cast<int32>(dmgInfo->GetDamage()), aurEff->GetAmount()),
+                int32(actor->CountPctFromMaxHealth(BLOOD_PRESENCE_HEAL_MAX_HEALTH_PCT)));
+            actor->CastCustomSpell(SPELL_DK_IMPROVED_BLOOD_PRESENCE_HEAL, SPELLVALUE_BASE_POINT0, bp0, actor, true, nullptr, aurEff);
         }
     }
 
     void Register() override
     {
         DoCheckProc += AuraCheckProcFn(spell_dk_improved_blood_presence_triggered::CheckProc);
-        OnEffectProc += AuraEffectProcFn(spell_dk_improved_blood_presence_triggered::HandleProc, EFFECT_1, SPELL_AURA_PROC_TRIGGER_SPELL);
+        OnEffectProc += AuraEffectProcFn(spell_dk_improved_blood_presence_triggered::HandleProc, EFFECT_FIRST_FOUND, SPELL_AURA_PROC_TRIGGER_SPELL);
     }
 };
 
@@ -811,7 +825,7 @@ class spell_dk_pet_scaling : public AuraScript
             }
 
             // xinef: Glyph of the Ghoul
-            if (AuraEffect const* glyphEff = owner->GetAuraEffect(SPELL_DK_GLYPH_OF_THE_GHOUL, EFFECT_0))
+            if (AuraEffect const* glyphEff = owner->GetAuraEffectOfRankedSpellOrTwin(SPELL_DK_GLYPH_OF_THE_GHOUL, EFFECT_0))
                 modifier += glyphEff->GetAmount();
 
             amount = CalculatePct(std::max<int32>(0, owner->GetStat(stat)), modifier);
@@ -1543,13 +1557,15 @@ class spell_dk_death_grip : public SpellScript
                     target->InterruptNonMeleeSpells(true);
             }
         }
-        else
+        else if (baseTarget)
             baseTarget->CastSpell(caster, 49560, true);
     }
 
     void HandleDummy(SpellEffIndex /*effIndex*/)
     {
         float casterZ = GetCaster()->GetPositionZ(); // for Ring of Valor
+        if (!GetExplTargetDest())
+            return;
         WorldLocation gripPos = *GetExplTargetDest();
         if (Unit* target = GetHitUnit())
             if (!target->HasDetectSpellsAura() || target->HasUnitState(UNIT_STATE_STUNNED)) // Deterrence
@@ -1762,7 +1778,7 @@ class spell_dk_icebound_fortitude : public AuraScript
                 value -= int32((defValue - 400) * 0.15);
 
             // Glyph of Icebound Fortitude
-            if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_DK_GLYPH_OF_ICEBOUND_FORTITUDE, EFFECT_0))
+            if (AuraEffect const* aurEff = caster->GetAuraEffectOfRankedSpellOrTwin(SPELL_DK_GLYPH_OF_ICEBOUND_FORTITUDE, EFFECT_0))
             {
                 int32 valMax = -aurEff->GetAmount();
                 if (value > valMax)
@@ -1798,7 +1814,7 @@ class spell_dk_improved_blood_presence : public AuraScript
     {
         Unit* target = GetTarget();
         if (target->HasAnyAuras(SPELL_DK_FROST_PRESENCE, SPELL_DK_UNHOLY_PRESENCE) && !target->HasAura(SPELL_DK_IMPROVED_BLOOD_PRESENCE_TRIGGERED))
-            target->CastCustomSpell(SPELL_DK_IMPROVED_BLOOD_PRESENCE_TRIGGERED, SPELLVALUE_BASE_POINT1, aurEff->GetAmount(), target, true, nullptr, aurEff);
+            target->CastCustomSpell(SPELL_DK_IMPROVED_BLOOD_PRESENCE_TRIGGERED, ImprovedBloodPresenceAmountMod(), aurEff->GetAmount(), target, true, nullptr, aurEff);
     }
 
     void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
@@ -1936,7 +1952,7 @@ class spell_dk_pestilence : public SpellScript
                 caster->CastSpell(hitUnit, SPELL_DK_FROST_FEVER, true);
         }
         // Refresh on target
-        else if (caster->GetAura(SPELL_DK_GLYPH_OF_DISEASE))
+        else if (caster->GetAuraOfRankedSpellOrTwin(SPELL_DK_GLYPH_OF_DISEASE))
         {
             // Blood Plague
             if (Aura* disease = target->GetAura(SPELL_DK_BLOOD_PLAGUE, caster->GetGUID()))
@@ -1983,6 +1999,7 @@ class spell_dk_presence : public AuraScript
                 SPELL_DK_IMPROVED_BLOOD_PRESENCE_TRIGGERED,
                 SPELL_DK_IMPROVED_UNHOLY_PRESENCE_TRIGGERED,
                 SPELL_DK_FROST_PRESENCE_TRIGGERED,
+                SPELL_DK_FROST_PRESENCE_BONUS_EFFECTS,
                 SPELL_DK_UNHOLY_PRESENCE_TRIGGERED
             });
     }
@@ -1995,7 +2012,7 @@ class spell_dk_presence : public AuraScript
             target->CastSpell(target, SPELL_DK_IMPROVED_BLOOD_PRESENCE_TRIGGERED, true);
         else if (AuraEffect const* impAurEff = target->GetAuraEffectOfRankedSpell(SPELL_DK_IMPROVED_BLOOD_PRESENCE_R1, EFFECT_0))
             if (!target->HasAura(SPELL_DK_IMPROVED_BLOOD_PRESENCE_TRIGGERED))
-                target->CastCustomSpell(SPELL_DK_IMPROVED_BLOOD_PRESENCE_TRIGGERED, SPELLVALUE_BASE_POINT1, impAurEff->GetAmount(), target, true, nullptr, aurEff);
+                target->CastCustomSpell(SPELL_DK_IMPROVED_BLOOD_PRESENCE_TRIGGERED, ImprovedBloodPresenceAmountMod(), impAurEff->GetAmount(), target, true, nullptr, aurEff);
     }
 
     void HandleImprovedFrostPresence(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
@@ -2003,7 +2020,7 @@ class spell_dk_presence : public AuraScript
         Unit* target = GetTarget();
 
         if (GetId() == SPELL_DK_FROST_PRESENCE)
-            target->CastSpell(target, SPELL_DK_FROST_PRESENCE_TRIGGERED, true);
+            target->CastSpell(target, SPELL_DK_FROST_PRESENCE_BONUS_EFFECTS, true);
         else if (AuraEffect const* impAurEff = target->GetAuraEffectOfRankedSpell(SPELL_DK_IMPROVED_FROST_PRESENCE_R1, EFFECT_0))
             if (!target->HasAura(SPELL_DK_FROST_PRESENCE_TRIGGERED))
                 target->CastCustomSpell(SPELL_DK_FROST_PRESENCE_TRIGGERED, SPELLVALUE_BASE_POINT0, impAurEff->GetAmount(), target, true, nullptr, aurEff);
@@ -2035,6 +2052,7 @@ class spell_dk_presence : public AuraScript
         target->RemoveAura(SPELL_DK_IMPROVED_BLOOD_PRESENCE_TRIGGERED);
         target->RemoveAura(SPELL_DK_IMPROVED_UNHOLY_PRESENCE_TRIGGERED);
         target->RemoveAura(SPELL_DK_FROST_PRESENCE_TRIGGERED);
+        target->RemoveAura(SPELL_DK_FROST_PRESENCE_BONUS_EFFECTS);
         target->RemoveAura(SPELL_DK_UNHOLY_PRESENCE_TRIGGERED);
     }
 

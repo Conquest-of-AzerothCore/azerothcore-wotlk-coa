@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Slimy Stingers puddles every enemy struck by Carapace Crash (#5548)",
+  "contract": "#5548: Slimy Stingers (706001, Description[enUS] 'Carapace Crash now creates a pool of Beetle Slime under each enemy struck.@s:704347:0@') procs Beetle Slime (704347) per AscensionVenomancerEvents.cpp: Check() gates on `damage && Named(info,803199)` and has a spell_proc row with Chance=100 (rev_20260910_14_venomancer_completion.sql), so every Carapace Crash hit should trigger a 704347 cast targeted at that hit's own target. Carapace Crash (803199, coa-dbc-viewer record --id 803199) is a self-centered AoE: EffectImplicitTargetA[0]=16 (area enemy), RangeIndex=1 (self), EffectRadiusIndex[0]=14 (SpellRadius 14 = 8 yd), MaxAffectedTargets=25, so it hits every enemy within 8 yd of the caster in one cast. Beetle Slime (704347) is EffectApplyAuraName[0]=3 (periodic damage) with EffectAmplitude[0]=2000ms via a SPELL_EFFECT_PERSISTENT_AREA_AURA (Effect[0]=27) anchored at the struck target's position, so an enemy actually slimed takes recurring 704347 damage; the harness's spell_damage_count/spell_damage_total metric is scoped by (caster, spell, target) and captures periodic ticks like any other spell damage event. If only the caster's current-target gets a puddle (the reported symptom), a second, non-selected enemy hit by the same Carapace Crash cast never takes 704347 damage. A prior revision cast 803199 without ever entering a shapeshift form; Carapace Crash carries CasterAuraSpell=803183 (Beetle Form, confirmed via coa-dbc-viewer), which Spell::CheckCast enforces natively (Spell.cpp: 'if (m_spellInfo->CasterAuraSpell && !m_caster->HasAura(...)) return SPELL_FAILED_CASTER_AURASTATE;'), so the cast failed outright and SETUP never observed a hit - a scenario setup defect, not evidence about Beetle Slime. This revision learns and enters Beetle Form before casting and asserts cast_failure == 0. A subsequent run then failed cast_failure reason 85 (SPELL_FAILED_NO_POWER): Carapace Crash costs 250 (PowerType 1 = Rage) per Spell.dbc, which a fresh fixture does not have; this revision fills Rage to its 1000 maximum before casting. With SETUP now clean (Carapace Crash lands on both d1 and d2, cast_failure 0), a full run still ends with zero Beetle Slime damage on d1 (the caster's own selected target), not just d2 - a stronger form of the reported symptom. REAL_BUG, cause: AscensionVenomancerEvents.cpp:233 casts 704347 with the positional overload `player->CastSpell(target->GetPositionX(),target->GetPositionY(),target->GetPositionZ(),704347,true)`, which builds a SpellCastTargets with only SPELL_FLAG_DEST_LOCATION set (Unit::CastSpell(float,float,float,...), Unit.cpp:1503-1515: 'targets.SetDst(x,y,z,...)', no SetUnitTarget). But 704347's own EffectImplicitTargetA[0] is 53 (TARGET_DEST_TARGET_ENEMY, confirmed via coa-dbc-viewer), whose SpellTargetInfo entry (SpellInfo.cpp:268) is TARGET_REFERENCE_TYPE_TARGET, not TARGET_REFERENCE_TYPE_DEST: Spell::SelectEffectImplicitTargets (Spell.cpp:1015-1023) routes that combination to SelectImplicitTargetDestTargets (Spell.cpp:1738), which resolves the effect's destination from `m_targets.GetObjectTarget()` - the explicit unit target - not from any dest already set. Since the class's call never supplies a unit target, that object target is null and the effect's destination is never correctly resolved against the struck enemy, so the persistent area aura's placement is broken and no damage ever lands. Proposed diff (not applied - no server edit per task scope): replace the positional call at AscensionVenomancerEvents.cpp:233 with `player->CastSpell(target, 704347, true);` (the Unit* overload), which sets both the unit target and, via the same TARGET_DEST_TARGET_ENEMY resolution, the enemy's own position as the puddle's anchor - matching how the effect's own DBC target type expects to be invoked. Left the scenario as the failing proof per this repro's SETUP fix; no server code was changed.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "v", "race": 1, "class": 29, "level": 60, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "d1", "owner": "v", "entry": 36, "level": 60, "health": 500000, "distance": 3 },
+    { "id": "d2", "owner": "v", "entry": 36, "level": 60, "health": 500000, "distance": 6 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn settle", "ms": 3000 },
+    { "action": "learn", "actor": "v", "spell": 706001 },
+    { "action": "learn", "actor": "v", "spell": 803199 },
+    { "action": "learn", "actor": "v", "spell": 803183 },
+    { "action": "cast", "actor": "v", "spell": 803183, "label": "Enter Beetle Form: Carapace Crash carries CasterAuraSpell 803183 (confirmed via coa-dbc-viewer)" },
+    { "action": "assert", "label": "SETUP: Beetle Form is active", "actor": "v", "metric": "aura", "spell": 803183, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "label": "Clear the GCD from entering Beetle Form", "ms": 1500 },
+    { "action": "assert", "label": "BASELINE: d1 has not taken any Beetle Slime damage yet",
+      "actor": "v", "metric": "spell_damage_count", "spell": 704347, "target": "d1", "equals": 0 },
+    { "action": "assert", "label": "BASELINE: d2 has not taken any Beetle Slime damage yet",
+      "actor": "v", "metric": "spell_damage_count", "spell": 704347, "target": "d2", "equals": 0 },
+    { "action": "set_power", "actor": "v", "power": 1, "value": 1000, "label": "Fill Rage: Carapace Crash costs 250 (raw) Rage per Spell.dbc ManaCost" },
+    { "action": "cast", "actor": "v", "spell": 803199, "target": "d1" },
+    { "action": "assert", "label": "SETUP: Carapace Crash cast succeeded", "actor": "v",
+      "metric": "cast_failure", "spell": 803199, "equals": 0 },
+    { "action": "assert", "label": "SETUP: Carapace Crash hit d1", "actor": "v",
+      "metric": "spell_damage_count", "spell": 803199, "target": "d1", "min": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: Carapace Crash hit d2 (same AoE cast)", "actor": "v",
+      "metric": "spell_damage_count", "spell": 803199, "target": "d2", "min": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "d1 takes Beetle Slime puddle damage", "actor": "v",
+      "metric": "spell_damage_count", "spell": 704347, "target": "d1", "min": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "DISCRIMINATING: d2 also takes Beetle Slime puddle damage", "actor": "v",
+      "metric": "spell_damage_count", "spell": 704347, "target": "d2", "min": 1, "within_ms": 5000 }
+  ]
+}

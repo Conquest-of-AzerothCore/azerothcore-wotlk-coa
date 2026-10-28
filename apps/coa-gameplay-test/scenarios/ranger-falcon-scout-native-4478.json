@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "name": "Falcon Scout creates a possessed falcon and restores player vision at expiry (#4478)",
+  "contract": [
+    "Spell 561395 summons NPC 503001 through SummonProperties 1301, category PUPPET (3), which uses native",
+    "possession and camera control. The NPC template is absent on main. The supplied",
+    "hertigservices/ascension-data Exiles cache identifies Falcon Scout 503001 with display 22626 (source SHA256",
+    "9c80498fbe6931a6e4661e4115b8c4b725d5deb4cb643f54a2d074bffd25e331). SpellDuration 3 supplies 60000 ms. Check",
+    "actual controlled NPC, camera viewpoint, seer, and restoration after native summon expiry."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "r",
+      "race": 1,
+      "class": 21,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 561395
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 561395
+    },
+    {
+      "action": "assert",
+      "label": "Falcon Scout is summoned",
+      "actor": "r",
+      "metric": "owned_creature_count",
+      "entry": 503001,
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Native possession controls the falcon",
+      "actor": "r",
+      "metric": "charm_entry",
+      "equals": 503001
+    },
+    {
+      "action": "assert",
+      "label": "The camera follows the falcon",
+      "actor": "r",
+      "metric": "viewpoint_entry",
+      "equals": 503001
+    },
+    {
+      "action": "assert",
+      "label": "Visibility originates from the falcon",
+      "actor": "r",
+      "metric": "seer_entry",
+      "equals": 503001
+    },
+    {
+      "action": "assert",
+      "label": "The player is controlling the scout",
+      "actor": "r",
+      "metric": "controls_self",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 61000
+    },
+    {
+      "action": "assert",
+      "label": "The falcon expires",
+      "actor": "r",
+      "metric": "owned_creature_count",
+      "entry": 503001,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Possession ends",
+      "actor": "r",
+      "metric": "charm_entry",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The camera returns to the player",
+      "actor": "r",
+      "metric": "viewpoint_entry",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Visibility returns to the player",
+      "actor": "r",
+      "metric": "seer_entry",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The player controls themselves again",
+      "actor": "r",
+      "metric": "controls_self",
+      "equals": 1
+    }
+  ]
+}

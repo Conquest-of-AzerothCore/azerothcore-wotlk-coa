@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Valkyr's Grip lets a Valkyrie dual-wield two-handed polearms (#5016, #5371, #5537, #4591)",
+  "contract": "Valkyr's Grip 707072 (SPELL_ATTR0_PASSIVE, cast on learn per Player::_addSpell's cast-passive-at-learn path) description reads 'Allows you to dual wield and to wield a Two-Handed Mace, Sword, or Polearm in each hand...' (Description[enUS], confirmed via coa-dbc-viewer against /home/fab/CoaServer/dbc_clientset). Its cast runs Spell::EffectTitanGrip, which sets Player::m_canTitanGrip, and its Effect[2] SPELL_EFFECT_DUAL_WIELD grants dual wield. Player::CanTitanGrip (Player.cpp) refused any off-hand polearm unless HasBurningCommander() (a hardcoded Demon Hunter-only bypass), so a Sun Cleric with Valkyr's Grip active could equip two swords but never two polearms, even though the same tooltip and DBC (AscensionCustomClassData.h TalentProficiencies {27,707072,200}) grant polearm proficiency for this talent. Fix adds Player::HasValkyrGrip() (Sun Cleric class + HasActiveSpell(707072)) to the same bypass used by HasBurningCommander. Equipping two different 2H polearms (Test Polearm 4901 main hand, Fast Test Polearm 5545 off hand; both RequiredSkill 0, AllowableClass -1, so no unrelated proficiency/class gate can mask the result) must both succeed and the off hand must carry real weapon damage, not the unarmed default.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "valkyrie", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "valkyrie", "spell": 707072 },
+    { "action": "add_item", "actor": "valkyrie", "item": 4901 },
+    { "action": "equip", "label": "Test Polearm in the main hand", "actor": "valkyrie", "item": 4901, "slot": 15 },
+    { "action": "add_item", "actor": "valkyrie", "item": 5545 },
+    { "action": "equip", "label": "Fast Test Polearm in the off hand", "actor": "valkyrie", "item": 5545, "slot": 16 },
+    {
+      "action": "assert", "label": "Main-hand polearm carries real weapon damage",
+      "actor": "valkyrie", "metric": "weapon_damage_min", "hand": 0, "min": 1
+    },
+    {
+      "action": "assert", "label": "Off-hand polearm carries real weapon damage",
+      "actor": "valkyrie", "metric": "weapon_damage_min", "hand": 1, "min": 1
+    }
+  ]
+}

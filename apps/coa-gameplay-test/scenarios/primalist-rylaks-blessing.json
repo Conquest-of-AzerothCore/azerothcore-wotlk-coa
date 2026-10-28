@@ -1,7 +1,11 @@
 {
   "schema": 1,
   "name": "Primalist Rylaks Blessing pet damage and critical stacks",
-  "contract": "First/highest Rylak Bite damage grants the pet one two-percent damage/crit stack, capped at two, lasting ten seconds. The native pet damage multiplier is checked separately from the aura amount; the owner receives no bonus. Baseline, removal, expiry and Geode control.",
+  "contract": [
+    "First/highest Rylak Bite damage grants the pet one two-percent damage/crit stack, capped at two, lasting",
+    "ten seconds. The native pet damage multiplier is checked separately from the aura amount; the owner",
+    "receives no bonus. Baseline, removal, expiry and Geode control."
+  ],
   "players": [
     {
       "id": "primalist",
@@ -34,9 +38,9 @@
   "timeout_ms": 150000,
   "steps": [
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "primalist",
-      "command": ".localspec 59"
+      "id": 59
     },
     {
       "action": "learn",
@@ -89,6 +93,31 @@
       "action": "learn",
       "actor": "primalist",
       "spell": 803138
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 23775
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 23775,
+      "target": "target",
+      "label": "Hold the damage fixture still and prevent random defensive blocks"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "stunned",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "The target cannot block the normal Bite damage sample"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the fixture stun global cooldown before measuring Bite"
     },
     {
       "action": "snapshot",

@@ -56,6 +56,32 @@ namespace GameTime
 
     /// Update all timers
     void UpdateGameTimers();
+
+    AC_GAME_API void EnableSimulation();
+
+    /// Tests and shutdown only: getMSTime() and the game clock return to real time and can move backwards
+    AC_GAME_API void DisableSimulation();
+
+    AC_GAME_API bool IsSimulated();
+
+    AC_GAME_API void RequestStep(Milliseconds step);
+
+    AC_GAME_API Milliseconds TakeStep(Milliseconds realElapsed, Milliseconds minimumPaced);
+
+    /// Before the first simulated step only: that step starts the game's system clock here (never before the real
+    /// system clock) instead of at the real system time; the steady clock keeps its real anchor
+    AC_GAME_API void SetSimulatedSystemAnchor(SystemTimePoint anchor);
+
+    /// Simulation only: the next step also moves every game clock forward by the jump, which the world update
+    /// never receives as part of its diff
+    AC_GAME_API void AdvanceSimulation(Milliseconds jump);
+
+    /// Live steady clock, unlike the per-tick Now(); follows the simulated clock while simulation runs
+    AC_GAME_API TimePoint SteadyNow();
+
+    /// Time that calendar schedules such as quest resets count from: the real clock, or the game time while
+    /// simulation runs, because the simulated game clock can run days ahead of the real one
+    AC_GAME_API Seconds GetCalendarTime();
 }
 
 #endif

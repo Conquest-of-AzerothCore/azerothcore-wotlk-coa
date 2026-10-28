@@ -1,0 +1,1459 @@
+{
+  "schema": 1,
+  "name": "Reaper Soulrend preserves Reaped Souls and Soul Infusion on a missed cast (#7497)",
+  "contract": [
+    "Soulrend 572342 (REAPER_ALL_SOUL_CONSUMERS member, AttributesEx7 SPELL_ATTR7_NO_ATTACK_DODGE and",
+    "SPELL_ATTR7_NO_ATTACK_PARRY, DmgClass SPELL_DAMAGE_CLASS_MELEE) can only be avoided by a plain miss,",
+    "whose chance is capped at 60% by Unit::MeleeSpellMissChance regardless of the level/skill gap.",
+    "A level-60 Reaper with no hit or expertise rating against a stationary level-83 target reaches that",
+    "60% cap, so 50 independently re-primed casts land between roughly 1 and 49 times with overwhelming",
+    "statistical certainty (both extremes are below 2^-31).",
+    "ConsumeReaperSouls (AscensionCompat.cpp) must only remove the Reaped Soul (500363) and Soul Infusion",
+    "(803031) auras when the cast was not avoided by every target; before the fix it removed them on",
+    "every cast regardless of hit/miss. Each trial re-primes both auras immediately before casting, so the",
+    "server only ever records an aura_removed event for a trial whose cast actually landed: the number of",
+    "aura_removed events for each spell must equal the number of landed hits exactly, not the trial count."
+  ],
+  "timeout_ms": 240000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 2,
+      "class": 30,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "reaper",
+      "entry": 36,
+      "level": 83,
+      "distance": 3,
+      "health": 1000000,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "encounter_start",
+      "actor": "reaper",
+      "boss_entry": 36,
+      "radius": 30
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 572342
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 572342,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Every cast actually went out",
+      "actor": "reaper",
+      "metric": "spell_go_count",
+      "spell": 572342,
+      "equals": 50
+    },
+    {
+      "action": "snapshot",
+      "label": "Landed hits",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 572342,
+      "target": "enemy",
+      "save_as": "hits"
+    },
+    {
+      "action": "assert",
+      "label": "The 60% miss cap produces a mix of hits and misses across 50 trials",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 572342,
+      "target": "enemy",
+      "min": 1,
+      "max": 49
+    },
+    {
+      "action": "assert",
+      "label": "Reaped Soul is only removed on the trials that actually landed",
+      "actor": "reaper",
+      "metric": "timeline_count",
+      "event": "aura_removed",
+      "spell": 500363,
+      "target_actors": [
+        "reaper"
+      ],
+      "ratio_to": "hits",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Soul Infusion is only removed on the trials that actually landed",
+      "actor": "reaper",
+      "metric": "timeline_count",
+      "event": "aura_removed",
+      "spell": 803031,
+      "target_actors": [
+        "reaper"
+      ],
+      "ratio_to": "hits",
+      "equals": 1
+    }
+  ]
+}

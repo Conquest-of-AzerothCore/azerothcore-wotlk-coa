@@ -40,8 +40,10 @@ public:
         [[nodiscard]] int32 GetInt32(uint32 dword) const { return Read<int32>(dword * sizeof(uint32)); }
         [[nodiscard]] float GetFloat(uint32 dword) const { return Read<float>(dword * sizeof(uint32)); }
         [[nodiscard]] uint8 GetUInt8(uint32 byteOffset) const { return Read<uint8>(byteOffset); }
+        [[nodiscard]] uint32 GetUInt32At(uint32 byteOffset) const { return Read<uint32>(byteOffset); }
         /// Empty when the offset points outside the string block.
-        [[nodiscard]] std::string_view GetString(uint32 dword) const;
+        [[nodiscard]] std::string_view GetString(uint32 dword) const { return GetStringAt(dword * sizeof(uint32)); }
+        [[nodiscard]] std::string_view GetStringAt(uint32 byteOffset) const;
 
     private:
         friend class ClientDBC;

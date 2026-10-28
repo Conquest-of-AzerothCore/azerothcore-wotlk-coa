@@ -1,14 +1,15 @@
 {
   "schema": 1,
   "name": "Primalist Natures Blessing: three ticks from each resolved Wave heal",
-  "contract": "Each Seismic Wave heal, including critical healing and overhealing, yields three noncritical ticks at 20% each; unrelated healing and talent removal do not proc.",
+  "contract": "Each Seismic Wave heal, including critical healing and overhealing, yields three noncritical ticks at 20% each; unrelated healing and talent removal do not proc. Seismic Wave 572878 also carries a Nature damage effect, so the engine treats the whole spell as negative and rolls spell hit even against the allies it heals; an ally or the full-health target missed that way got neither the heal nor the tick, so the primalist carries spell_hit_rating.",
   "timeout_ms": 120000,
   "players": [
     {
       "id": "primalist",
       "race": 1,
       "class": 31,
-      "level": 80
+      "level": 80,
+      "spell_hit_rating": 10000
     },
     {
       "id": "ally",
@@ -25,9 +26,9 @@
   ],
   "steps": [
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "primalist",
-      "command": ".localspec 58"
+      "id": 58
     },
     {
       "action": "group",

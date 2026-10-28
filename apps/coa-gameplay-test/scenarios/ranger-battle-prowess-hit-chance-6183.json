@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Battle Prowess raises melee and spell hit chance by 1% for the Ranger and the party (#6183)",
+  "contract": [
+    "Battle Prowess 805888 promises 'Increases chance to hit with all spells and attacks by $s1% for you and party and raid members.' Effect 0 is APPLY_AREA_AURA_RAID with SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT 333, BasePoints 0 and DieSides 1, resolving to 1. AuraEffect::HandleAscensionModHitChanceAll feeds that amount into the melee, ranged and spell hit modifiers. The 3.3.5 character sheet shows only hit rating, so an unchanged sheet does not show that the aura has no effect. At the reported level 60, learning the passive must place the aura on the Ranger and a party member and raise both players' melee and spell hit chance by exactly 1; unlearning must remove it from the member."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 60 },
+    { "id": "member", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "group", "label": "Put both players in one party", "actor": "ranger", "target": "member" },
+    { "action": "snapshot", "label": "Baseline Ranger melee hit chance", "actor": "ranger", "metric": "melee_hit_chance", "save_as": "mhit_r0" },
+    { "action": "snapshot", "label": "Baseline Ranger spell hit chance", "actor": "ranger", "metric": "spell_hit_chance", "save_as": "shit_r0" },
+    { "action": "snapshot", "label": "Baseline member melee hit chance", "actor": "member", "metric": "melee_hit_chance", "save_as": "mhit_m0" },
+    { "action": "snapshot", "label": "Baseline member spell hit chance", "actor": "member", "metric": "spell_hit_chance", "save_as": "shit_m0" },
+    { "action": "learn", "actor": "ranger", "spell": 805888 },
+    { "action": "assert", "label": "Battle Prowess reaches the Ranger", "actor": "ranger", "metric": "aura", "spell": 805888, "equals": 1, "within_ms": 15000 },
+    { "action": "assert", "label": "Battle Prowess reaches the party member", "actor": "member", "metric": "aura", "spell": 805888, "equals": 1, "within_ms": 15000 },
+    { "action": "assert", "label": "Effect 0 resolves to 1", "actor": "ranger", "metric": "aura_amount", "spell": 805888, "effect": 0, "equals": 1 },
+    { "action": "assert", "label": "Ranger melee hit chance rises by 1", "actor": "ranger", "metric": "melee_hit_chance", "relative_to": "mhit_r0", "min": 0.9, "max": 1.1 },
+    { "action": "assert", "label": "Ranger spell hit chance rises by 1", "actor": "ranger", "metric": "spell_hit_chance", "relative_to": "shit_r0", "min": 0.9, "max": 1.1 },
+    { "action": "assert", "label": "Member melee hit chance rises by 1", "actor": "member", "metric": "melee_hit_chance", "relative_to": "mhit_m0", "min": 0.9, "max": 1.1 },
+    { "action": "assert", "label": "Member spell hit chance rises by 1", "actor": "member", "metric": "spell_hit_chance", "relative_to": "shit_m0", "min": 0.9, "max": 1.1 },
+    { "action": "unlearn", "actor": "ranger", "spell": 805888 },
+    { "action": "assert", "label": "Unlearning removes it from the member", "actor": "member", "metric": "aura", "spell": 805888, "equals": 0, "within_ms": 15000 },
+    { "action": "assert", "label": "Member melee hit chance returns to baseline", "actor": "member", "metric": "melee_hit_chance", "relative_to": "mhit_m0", "min": -0.1, "max": 0.1 }
+  ]
+}

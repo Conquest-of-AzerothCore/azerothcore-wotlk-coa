@@ -13,6 +13,7 @@
 #include "ScriptedGossip.h"
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
+#include "SpellInfo.h"
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
 #include "Vehicle.h"
@@ -21,12 +22,37 @@ namespace AscensionTinker
 {
 enum TinkerSummonSpell : uint32
 {
-    DestructoBot = 804673
+    DestructoBot = 804673,
+    BuildNoiseBox = 280310,
+    BuildNoiseBoxDevice = 52036
 };
 
 bool Permanent(uint32 entry)
 {
     return entry == 50048 || entry == 500481 || entry == 60671 || entry == 60070 || entry == 60672;
+}
+uint32 AbilitySkillLine(uint32 entry)
+{
+    switch (entry)
+    {
+        case 60070: return 10037;
+        case 60671: return 10038;
+        case 60672: return 10039;
+        case 500481: return 10040;
+        case 50048: return 10041;
+        default: return 0;
+    }
+}
+void TeachAbilities(Pet* pet)
+{
+    for (SkillLineAbilityEntry const* ability : GetSkillLineAbilitiesBySkillLine(AbilitySkillLine(pet->GetEntry())))
+        if (SpellInfo const* spell = sSpellMgr->GetSpellInfo(ability->Spell))
+        {
+            if (spell->SpellLevel > pet->GetLevel())
+                pet->unlearnSpell(spell->Id,false);
+            else if (!pet->HasSpell(spell->Id))
+                pet->learnSpell(spell->Id);
+        }
 }
 bool Turret(uint32 entry)
 {
@@ -65,7 +91,8 @@ std::list<Creature*> Devices(Player* player)
 }
 void Scale(Player* player, Creature* creature, bool initial)
 {
-    float health = creature->GetHealthPct();
+    uint32 health = creature->GetHealth();
+    uint32 maximumHealth = creature->GetMaxHealth();
     float mana = creature->GetMaxPower(POWER_MANA) ?
         float(creature->GetPower(POWER_MANA)) / creature->GetMaxPower(POWER_MANA) : 1;
     creature->SetLevel(player->GetLevel());
@@ -81,7 +108,8 @@ void Scale(Player* player, Creature* creature, bool initial)
     creature->SetStat(STAT_INTELLECT,int32(creature->GetTotalStatValue(STAT_INTELLECT)));
     creature->SetStatFlatModifier(UNIT_MOD_HEALTH,BASE_VALUE,player->GetLevel() * 35.0f + creature->GetStat(STAT_STAMINA) * 10);
     creature->UpdateMaxHealth();
-    creature->SetHealth(initial ? creature->GetMaxHealth() : std::max(1u,creature->CountPctFromMaxHealth(health)));
+    creature->SetHealth(initial || !maximumHealth ? creature->GetMaxHealth() :
+        std::max(1u, uint32(uint64(health) * creature->GetMaxHealth() / maximumHealth)));
     creature->SetStatFlatModifier(UNIT_MOD_MANA,BASE_VALUE,player->GetLevel() * 15.0f + creature->GetStat(STAT_INTELLECT) * 15);
     creature->UpdateMaxPower(POWER_MANA);
     creature->SetPower(POWER_MANA,initial ? creature->GetMaxPower(POWER_MANA) :
@@ -156,6 +184,7 @@ void Summon(Player* player, Unit* target, uint32 spell, Position const* destinat
             player->MovePositionToFirstCollision(position,1 + n * 1.5f,0);
         if (TempSummon* device = player->SummonCreature(entry,position,TEMPSUMMON_TIMED_DESPAWN,duration,0,properties))
         {
+            device->SetOwnerGUID(player->GetGUID());
             device->AI()->SetData(1,spell);
             if (target)
                 device->AI()->SetGUID(target->GetGUID(),1);
@@ -199,6 +228,7 @@ struct npc_ascension_tinker_pet : PetAI
     explicit npc_ascension_tinker_pet(Creature* creature) : PetAI(creature) { }
     EventMap events;
     bool initialized = false;
+    uint8 taughtLevel = 0;
     void UpdateAI(uint32 diff) override
     {
         Player* player = Owner(me);
@@ -207,14 +237,23 @@ struct npc_ascension_tinker_pet : PetAI
             events.Update(diff);
             if (!initialized)
             {
-                if (me->HasReactState(REACT_PASSIVE))
-                    me->SetReactState(REACT_DEFENSIVE);
                 if (CharmInfo* charmInfo = me->GetCharmInfo())
-                    charmInfo->SetPlayerReactState(me->GetReactState());
+                {
+                    if (me->HasReactState(REACT_PASSIVE) && charmInfo->GetPlayerReactState() != REACT_PASSIVE)
+                    {
+                        me->SetReactState(REACT_DEFENSIVE);
+                        charmInfo->SetPlayerReactState(REACT_DEFENSIVE);
+                    }
+                }
             }
             if (!initialized || events.ExecuteEvent())
             {
                 Scale(player,me,!initialized);
+                if (Pet* pet = me->ToPet(); pet && pet->GetLevel() != taughtLevel)
+                {
+                    TeachAbilities(pet);
+                    taughtLevel = pet->GetLevel();
+                }
                 initialized = true;
                 events.ScheduleEvent(1,1000ms);
                 if (me->GetEntry() == 500481)
@@ -228,18 +267,37 @@ struct npc_ascension_tinker_pet : PetAI
 struct npc_ascension_tinker_device : ScriptedAI
 {
     explicit npc_ascension_tinker_device(Creature* creature) : ScriptedAI(creature) { }
-    ObjectGuid owner, focus;
+    ObjectGuid owner, focus, pursued;
     Position start, previous;
     EventMap events;
     std::set<ObjectGuid> used;
     uint32 spell = 0, explosionTargets = 0;
-    bool dropped = false;
-    float travelled = 0;
+    float travelled = 0, travelledAtLastFirepot = 0;
     bool exploded = false;
     bool Mobile() const
     {
         return me->GetEntry() == 226312 || me->GetEntry() == 226012 || me->GetEntry() == 840028 ||
             me->GetEntry() == 226112 || me->GetEntry() == 500711 || me->GetEntry() == 50300;
+    }
+    bool Bomb() const
+    {
+        return me->GetEntry() == 226012 || me->GetEntry() == 840028 || me->GetEntry() == 226112;
+    }
+    bool Explosive() const
+    {
+        return Bomb() || me->GetEntry() == 50045 || me->GetEntry() == 50600 || me->GetEntry() == 226312;
+    }
+    void Pursue(Unit* target)
+    {
+        MotionMaster* motion = me->GetMotionMaster();
+        if (!Bomb())
+            motion->MoveChase(target);
+        else if (pursued != target->GetGUID() || motion->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE)
+        {
+            pursued = target->GetGUID();
+            me->SetWalk(false);
+            motion->MoveFollow(target,0,0,MOTION_SLOT_ACTIVE,false,false);
+        }
     }
     void IsSummonedBy(WorldObject* summoner) override
     {
@@ -250,7 +308,7 @@ struct npc_ascension_tinker_device : ScriptedAI
         me->SetOwnerGUID(owner);
         player->m_Controlled.insert(me);
         me->SetFaction(player->GetFaction());
-        if (Turret(me->GetEntry()))
+        if (Turret(me->GetEntry()) || Explosive() || Beacon(me->GetEntry()))
         {
             me->m_ControlledByPlayer = true;
             me->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
@@ -260,6 +318,13 @@ struct npc_ascension_tinker_device : ScriptedAI
         me->SetCombatMovement(Mobile());
         State(player).summons.insert(me->GetGUID());
         Scale(player,me,true);
+        if (Turret(me->GetEntry()))
+        {
+            Cast(player, player, 807293);
+            if (!player->HasSpell(500470))
+                player->learnSpell(500470, true);
+            player->SetTemporarySpellReplacement(500239, 500470);
+        }
         focus = State(player).focus;
         start = previous = me->GetPosition();
         if (!Mobile())
@@ -300,7 +365,7 @@ struct npc_ascension_tinker_device : ScriptedAI
             focus = guid;
             if (Mobile() && me->GetEntry() != 226312)
                 if (Unit* target = ObjectAccessor::GetUnit(*me,guid))
-                    me->GetMotionMaster()->MoveChase(target);
+                    Pursue(target);
         }
     }
     uint32 GetData(uint32 id) const override
@@ -333,8 +398,19 @@ struct npc_ascension_tinker_device : ScriptedAI
                 Cast(me,enemy,802779);
         }
         if (id == 500601)
-            me->CastSpell(me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),500753,true);
+            player->CastSpell(me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),500753,true);
         me->DespawnOrUnsummon(100ms);
+    }
+    void DropFirepot(Player* player)
+    {
+        auto* info = sSpellMgr->GetSpellInfo(500601);
+        auto targets = Nearby(me,Radius(500601));
+        targets.remove_if([player](Unit* enemy) { return !player->IsValidAttackTarget(enemy); });
+        if (info->MaxAffectedTargets && targets.size() > info->MaxAffectedTargets)
+            targets.resize(info->MaxAffectedTargets);
+        for (Unit* enemy : targets)
+            Cast(me,enemy,500601);
+        player->CastSpell(me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),500753,true);
     }
     void DoAction(int32 action) override
     {
@@ -353,6 +429,16 @@ struct npc_ascension_tinker_device : ScriptedAI
         {
             player->m_Controlled.erase(me);
             State(player).summons.erase(me->GetGUID());
+            if (Turret(me->GetEntry()))
+            {
+                auto devices = Devices(player);
+                if (std::none_of(devices.begin(), devices.end(), [](Creature* device) { return Turret(device->GetEntry()); }))
+                {
+                    player->RemoveAurasDueToSpell(807293, player->GetGUID());
+                    player->SetTemporarySpellReplacement(500239, 0);
+                    player->removeSpell(500470, SPEC_MASK_ALL, true);
+                }
+            }
         }
     }
     void OnDespawn() override { Cleanup(); }
@@ -418,12 +504,12 @@ struct npc_ascension_tinker_device : ScriptedAI
                             break;
                         }
                 }
-                if ((entry == 226012 || entry == 840028 || entry == 226112) && target)
+                if (Bomb() && target)
                 {
                     if (me->IsWithinDistInMap(target,2))
                         Explode();
                     else
-                        me->GetMotionMaster()->MoveChase(target);
+                        Pursue(target);
                 }
                 events.ScheduleEvent(1,200ms);
             }
@@ -491,13 +577,10 @@ struct npc_ascension_tinker_device : ScriptedAI
                             Cast(me,enemy,entry == 500366 ? 712680 : 561269);
                     next = 5000;
                 }
-                if (entry == 226112 && travelled >= 3 && !dropped)
+                if (entry == 226112 && !exploded && travelled - travelledAtLastFirepot >= 3)
                 {
-                    dropped = true;
-                    for (Unit* enemy : Nearby(me,Radius(500601)))
-                        if (player->IsValidAttackTarget(enemy))
-                            Cast(me,enemy,500601);
-                    me->CastSpell(me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),500753,true);
+                    travelledAtLastFirepot = travelled;
+                    DropFirepot(player);
                 }
                 if (entry == 506051)
                     for (Unit* ally : Allies(player,me,Radius(570717)))
@@ -543,10 +626,23 @@ public:
         return true;
     }
 };
+class tinker_noise_box_metadata : public GlobalScript
+{
+public:
+    tinker_noise_box_metadata() : GlobalScript("tinker_noise_box_metadata",
+        {GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR}) { }
+
+    void OnLoadSpellCustomAttr(SpellInfo* info) override
+    {
+        if (info->Id == BuildNoiseBox && info->Effects[EFFECT_0].Effect == SPELL_EFFECT_SUMMON)
+            info->Effects[EFFECT_0].MiscValue = BuildNoiseBoxDevice;
+    }
+};
 }
 void AddSC_AscensionTinkerSummons()
 {
     new go_ascension_tinker_battery();
+    new tinker_noise_box_metadata();
     RegisterCreatureAI(npc_ascension_tinker_pet);
     RegisterCreatureAI(npc_ascension_tinker_device);
 }

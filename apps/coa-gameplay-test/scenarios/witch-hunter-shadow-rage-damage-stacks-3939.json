@@ -1,0 +1,1380 @@
+{
+  "schema": 1,
+  "name": "Shadow Rage deals greater proc damage with Lethal Pursuit stacks (#3939)",
+  "contract": [
+    "Normal Shadowblasts with Shadow Rage grant the owner's aura to its summoned hound. Lethal Pursuit allows",
+    "five stacks. Original Shadow Rage has a 50 percent proc chance: collect damage and proc counts over eighty",
+    "seconds of ordinary pet attacks in each phase, refreshing its finite duration with twenty funded normal",
+    "Shadowblasts. Learn Lethal Pursuit after the one-stack sample so those refreshes remain at one stack.",
+    "Compare mean damage per actual proc against a second otherwise identical enemy after five stacks; damage",
+    "dealt while building stacks cannot enter the second sample. Assert every native refresh's stack count and",
+    "completed normal-cast count. The owner's RAP and both targets stay unchanged; proc chances and attack timers",
+    "are unmodified. Each mean proc hit must equal the captured native aura amount times its stack count plus the",
+    "unchanged owner RAP times 15 percent per stack, allowing one point of integer rounding; a generic increase",
+    "is insufficient. Original 804192 applies its complete per-application amount and 15 percent owner ranged",
+    "attack power once per stack. Five-stack mean proc damage must therefore be approximately five times the one-",
+    "stack mean; the numerical checker preserves the main regression bounds of 4.5 to 5.3 while comparing",
+    "measured counts rather than assuming a single proc."
+  ],
+  "timeout_ms": 240000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "one",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 1,
+      "distance": 12,
+      "health": 1000000
+    },
+    {
+      "id": "five",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 1,
+      "distance": 14,
+      "health": 1000000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 5011
+    },
+    {
+      "action": "add_item",
+      "actor": "hunter",
+      "item": 15807
+    },
+    {
+      "action": "equip",
+      "actor": "hunter",
+      "item": 15807,
+      "slot": 17
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 680264
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 801343
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 705455
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 801343
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_entry",
+      "equals": 50124,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "ranged_attack_power",
+      "save_as": "unchanged_rap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "pet_aura_amount",
+      "spell": 804192,
+      "effect": 2,
+      "save_as": "one_stack_amount"
+    },
+    {
+      "action": "attack",
+      "actor": "hunter",
+      "target": "one",
+      "pet": true
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "one refresh 1 retains 1 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "one refresh 2 retains 1 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "one refresh 3 retains 1 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "one refresh 4 retains 1 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "one refresh 5 retains 1 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "one refresh 6 retains 1 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "one refresh 7 retains 1 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "one refresh 8 retains 1 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "one refresh 9 retains 1 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "one refresh 10 retains 1 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "one refresh 11 retains 1 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "one refresh 12 retains 1 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "one refresh 13 retains 1 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "one refresh 14 retains 1 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "one refresh 15 retains 1 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "one refresh 16 retains 1 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "one refresh 17 retains 1 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "one refresh 18 retains 1 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "one refresh 19 retains 1 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "one refresh 20 retains 1 native stacks"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_cast_count",
+      "spell": 680264,
+      "equals": 21,
+      "label": "Every funded normal Shadowblast completed"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 567570,
+      "target": "one",
+      "min": 1,
+      "label": "Actual Shadow Rage procs occurred against one"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 567570,
+      "target": "one",
+      "save_as": "one_stack_procs"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "spell_damage_total",
+      "spell": 567570,
+      "target": "one",
+      "save_as": "one_stack_damage"
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 572530
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 5,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_amount",
+      "spell": 804192,
+      "effect": 2,
+      "ratio_to": "one_stack_amount",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "ranged_attack_power",
+      "relative_to": "unchanged_rap",
+      "equals": 0,
+      "label": "Lethal Pursuit and stack building leave the owner RAP unchanged"
+    },
+    {
+      "action": "attack",
+      "actor": "hunter",
+      "target": "five",
+      "pet": true
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 5,
+      "within_ms": 1000,
+      "label": "five refresh 1 retains 5 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 5,
+      "within_ms": 1000,
+      "label": "five refresh 2 retains 5 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 5,
+      "within_ms": 1000,
+      "label": "five refresh 3 retains 5 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 5,
+      "within_ms": 1000,
+      "label": "five refresh 4 retains 5 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 5,
+      "within_ms": 1000,
+      "label": "five refresh 5 retains 5 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 5,
+      "within_ms": 1000,
+      "label": "five refresh 6 retains 5 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 5,
+      "within_ms": 1000,
+      "label": "five refresh 7 retains 5 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 5,
+      "within_ms": 1000,
+      "label": "five refresh 8 retains 5 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 5,
+      "within_ms": 1000,
+      "label": "five refresh 9 retains 5 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 5,
+      "within_ms": 1000,
+      "label": "five refresh 10 retains 5 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 5,
+      "within_ms": 1000,
+      "label": "five refresh 11 retains 5 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 5,
+      "within_ms": 1000,
+      "label": "five refresh 12 retains 5 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 5,
+      "within_ms": 1000,
+      "label": "five refresh 13 retains 5 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 5,
+      "within_ms": 1000,
+      "label": "five refresh 14 retains 5 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 5,
+      "within_ms": 1000,
+      "label": "five refresh 15 retains 5 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 5,
+      "within_ms": 1000,
+      "label": "five refresh 16 retains 5 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 5,
+      "within_ms": 1000,
+      "label": "five refresh 17 retains 5 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 5,
+      "within_ms": 1000,
+      "label": "five refresh 18 retains 5 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 5,
+      "within_ms": 1000,
+      "label": "five refresh 19 retains 5 native stacks"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "one"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 5,
+      "within_ms": 1000,
+      "label": "five refresh 20 retains 5 native stacks"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_cast_count",
+      "spell": 680264,
+      "equals": 45,
+      "label": "Every funded normal Shadowblast completed"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 567570,
+      "target": "five",
+      "min": 1,
+      "label": "Actual Shadow Rage procs occurred against five"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 567570,
+      "target": "five",
+      "save_as": "five_stack_procs"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "spell_damage_total",
+      "spell": 567570,
+      "target": "five",
+      "save_as": "five_stack_damage"
+    }
+  ]
+}

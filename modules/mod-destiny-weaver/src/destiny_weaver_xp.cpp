@@ -75,6 +75,11 @@ public:
         if (!player || !amount || !DestinyWeaver::ExperienceBonusControlEnabled(player))
             return;
 
+        // A NO_BONUS_EXPERIENCE challenge already makes Player::GiveXP and the aura sites
+        // drop every positive bonus; stripping again would divide a base award.
+        if (sScriptMgr->OnPlayerHasNoBonusExperience(player))
+            return;
+
         bool const recruitAFriend = player->GetsRecruitAFriendBonus(true);
         std::function<bool(AuraEffect const*)> const include =
             [recruitAFriend](AuraEffect const* effect)

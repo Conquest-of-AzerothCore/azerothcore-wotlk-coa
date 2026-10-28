@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "name": "Nightmare's periodic trigger keeps its rider applied (#1518)",
-  "contract": "Regression guard, not a fix. The issue names two ranks. Rank 1, Nightmare 300225, is the one whose description the issue quotes ('Terrify now reduces the Armor and magic resistance of nearby enemies'); it is not obtainable - obtainable.json reports 0 advancement rows, live_capture false, trigger_reachable false, calculator false and server_class_spell false, and it is the only spell in this audit slice absent from the bindmysoul snapshot, against a class-20 calibration where the live-client capture and the shipped CharacterAdvancement.dbc hold the same 222 spells in both directions. Rank 2, Nightmare 300226, is obtainable (advancement class 20 level 0, live_capture true) and does not use a proc aura at all: its single effect is aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL on Nightmare 301273 with Amplitude 500, which AuraEffect::PeriodicTick handles natively (SpellAuraEffects.cpp, '23 SPELL_AURA_PERIODIC_TRIGGER_SPELL'). This scenario pins that native behaviour: learning the passive must keep 301273 applied within one tick interval. It is expected to pass both before and after this batch - nothing in the batch touches 300226.",
-  "timeout_ms": 90000,
+  "name": "Nightmare's rider stays applied and permanent while the talent is known (#1518, #5656)",
+  "contract": "Covers both the #1518 rider regression and the #5656 flash fix. The issue names two ranks. Rank 1, Nightmare 300225, is the one whose description the issue quotes ('Terrify now reduces the Armor and magic resistance of nearby enemies'); it is not obtainable - obtainable.json reports 0 advancement rows, live_capture false, trigger_reachable false, calculator false and server_class_spell false, and it is the only spell in this audit slice absent from the bindmysoul snapshot, against a class-20 calibration where the live-client capture and the shipped CharacterAdvancement.dbc hold the same 222 spells in both directions. Rank 2, Nightmare 300226, is obtainable (advancement class 20 level 0, live_capture true) and does not use a proc aura at all: its single effect is aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL on Nightmare 301273 with Amplitude 500, which AuraEffect::PeriodicTick handles natively (SpellAuraEffects.cpp, '23 SPELL_AURA_PERIODIC_TRIGGER_SPELL'). Learning the passive must therefore keep 301273 applied within one tick interval. Because 301273 shipped with a 1000 ms duration and was re-applied every 500 ms, its client duration sweep restarted twice a second and the icon flashed (#5656); the Bloodmage talent contracts now load 301273 with the permanent duration entry and mark it unsaveable, so the rider must report duration -1 (the permanent duration) instead of a positive remaining time, and must still be applied after several refresh windows. The talent's own trigger remains the recovery path after death. The rider is expected to be absent before the passive is learned and permanent, not just present, afterwards.",
+  "timeout_ms": 120000,
   "players": [
     {
       "id": "bloodmage",
@@ -50,6 +50,36 @@
       "spell": 301273,
       "equals": 1,
       "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The rider is permanent, not a one-second buff being re-applied (#5656)",
+      "actor": "bloodmage",
+      "metric": "aura_duration_ms",
+      "spell": 301273,
+      "equals": -1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Outlast several re-application windows",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "The rider is still applied after the refresh windows",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 301273,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The rider is still permanent after the refresh windows",
+      "actor": "bloodmage",
+      "metric": "aura_duration_ms",
+      "spell": 301273,
+      "equals": -1
     }
   ]
 }

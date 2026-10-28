@@ -1,0 +1,537 @@
+{
+  "schema": 1,
+  "name": "Prestige Mode: the ninth prestige earns Prestige 9 and the title 'Name IX' (#6546)",
+  "contract": "Each activation at Chromie 178081 credits 888101 once. Achievements 13100-13108 (Prestige 1-9) need 1-9 credits and reward the CharTitles 200-208 ('%s I' to '%s IX') through achievement_reward. After the ninth activation the character holds achievement 13108 and title 208.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 1,
+    "x": 1583.18,
+    "y": -4417.3,
+    "z": 8.35,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "prestiger",
+      "race": 2,
+      "class": 20,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "chromie",
+      "owner": "prestiger",
+      "entry": 178081,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "prestiger",
+      "id": 25
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "prestiger",
+      "target": "chromie",
+      "label": "Speak to Chromie for Prestige 1"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "prestiger",
+      "option": 0,
+      "label": "I would like to prestige!"
+    },
+    {
+      "action": "assert",
+      "label": "Prestige 1 returns the character to level 1",
+      "actor": "prestiger",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Prestige 1 earns its achievement",
+      "actor": "prestiger",
+      "metric": "has_achievement",
+      "achievement": 13100,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and its title, 'Name I'",
+      "actor": "prestiger",
+      "metric": "has_title",
+      "title": 200,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_level",
+      "actor": "prestiger",
+      "value": 60
+    },
+    {
+      "action": "teleport",
+      "actor": "prestiger",
+      "map": 1,
+      "x": 1583.18,
+      "y": -4417.3,
+      "z": 8.35
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "prestiger",
+      "target": "chromie",
+      "label": "Speak to Chromie for Prestige 2"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "prestiger",
+      "option": 0,
+      "label": "I would like to prestige!"
+    },
+    {
+      "action": "assert",
+      "label": "Prestige 2 returns the character to level 1",
+      "actor": "prestiger",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Prestige 2 earns its achievement",
+      "actor": "prestiger",
+      "metric": "has_achievement",
+      "achievement": 13101,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and its title, 'Name II'",
+      "actor": "prestiger",
+      "metric": "has_title",
+      "title": 201,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_level",
+      "actor": "prestiger",
+      "value": 60
+    },
+    {
+      "action": "teleport",
+      "actor": "prestiger",
+      "map": 1,
+      "x": 1583.18,
+      "y": -4417.3,
+      "z": 8.35
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "prestiger",
+      "target": "chromie",
+      "label": "Speak to Chromie for Prestige 3"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "prestiger",
+      "option": 0,
+      "label": "I would like to prestige!"
+    },
+    {
+      "action": "assert",
+      "label": "Prestige 3 returns the character to level 1",
+      "actor": "prestiger",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Prestige 3 earns its achievement",
+      "actor": "prestiger",
+      "metric": "has_achievement",
+      "achievement": 13102,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and its title, 'Name III'",
+      "actor": "prestiger",
+      "metric": "has_title",
+      "title": 202,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_level",
+      "actor": "prestiger",
+      "value": 60
+    },
+    {
+      "action": "teleport",
+      "actor": "prestiger",
+      "map": 1,
+      "x": 1583.18,
+      "y": -4417.3,
+      "z": 8.35
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "prestiger",
+      "target": "chromie",
+      "label": "Speak to Chromie for Prestige 4"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "prestiger",
+      "option": 0,
+      "label": "I would like to prestige!"
+    },
+    {
+      "action": "assert",
+      "label": "Prestige 4 returns the character to level 1",
+      "actor": "prestiger",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Prestige 4 earns its achievement",
+      "actor": "prestiger",
+      "metric": "has_achievement",
+      "achievement": 13103,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and its title, 'Name IV'",
+      "actor": "prestiger",
+      "metric": "has_title",
+      "title": 203,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_level",
+      "actor": "prestiger",
+      "value": 60
+    },
+    {
+      "action": "teleport",
+      "actor": "prestiger",
+      "map": 1,
+      "x": 1583.18,
+      "y": -4417.3,
+      "z": 8.35
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "prestiger",
+      "target": "chromie",
+      "label": "Speak to Chromie for Prestige 5"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "prestiger",
+      "option": 0,
+      "label": "I would like to prestige!"
+    },
+    {
+      "action": "assert",
+      "label": "Prestige 5 returns the character to level 1",
+      "actor": "prestiger",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Prestige 5 earns its achievement",
+      "actor": "prestiger",
+      "metric": "has_achievement",
+      "achievement": 13104,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and its title, 'Name V'",
+      "actor": "prestiger",
+      "metric": "has_title",
+      "title": 204,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_level",
+      "actor": "prestiger",
+      "value": 60
+    },
+    {
+      "action": "teleport",
+      "actor": "prestiger",
+      "map": 1,
+      "x": 1583.18,
+      "y": -4417.3,
+      "z": 8.35
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "prestiger",
+      "target": "chromie",
+      "label": "Speak to Chromie for Prestige 6"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "prestiger",
+      "option": 0,
+      "label": "I would like to prestige!"
+    },
+    {
+      "action": "assert",
+      "label": "Prestige 6 returns the character to level 1",
+      "actor": "prestiger",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Prestige 6 earns its achievement",
+      "actor": "prestiger",
+      "metric": "has_achievement",
+      "achievement": 13105,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and its title, 'Name VI'",
+      "actor": "prestiger",
+      "metric": "has_title",
+      "title": 205,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_level",
+      "actor": "prestiger",
+      "value": 60
+    },
+    {
+      "action": "teleport",
+      "actor": "prestiger",
+      "map": 1,
+      "x": 1583.18,
+      "y": -4417.3,
+      "z": 8.35
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "prestiger",
+      "target": "chromie",
+      "label": "Speak to Chromie for Prestige 7"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "prestiger",
+      "option": 0,
+      "label": "I would like to prestige!"
+    },
+    {
+      "action": "assert",
+      "label": "Prestige 7 returns the character to level 1",
+      "actor": "prestiger",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Prestige 7 earns its achievement",
+      "actor": "prestiger",
+      "metric": "has_achievement",
+      "achievement": 13106,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and its title, 'Name VII'",
+      "actor": "prestiger",
+      "metric": "has_title",
+      "title": 206,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_level",
+      "actor": "prestiger",
+      "value": 60
+    },
+    {
+      "action": "teleport",
+      "actor": "prestiger",
+      "map": 1,
+      "x": 1583.18,
+      "y": -4417.3,
+      "z": 8.35
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "prestiger",
+      "target": "chromie",
+      "label": "Speak to Chromie for Prestige 8"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "prestiger",
+      "option": 0,
+      "label": "I would like to prestige!"
+    },
+    {
+      "action": "assert",
+      "label": "Prestige 8 returns the character to level 1",
+      "actor": "prestiger",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Prestige 8 earns its achievement",
+      "actor": "prestiger",
+      "metric": "has_achievement",
+      "achievement": 13107,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and its title, 'Name VIII'",
+      "actor": "prestiger",
+      "metric": "has_title",
+      "title": 207,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_level",
+      "actor": "prestiger",
+      "value": 60
+    },
+    {
+      "action": "teleport",
+      "actor": "prestiger",
+      "map": 1,
+      "x": 1583.18,
+      "y": -4417.3,
+      "z": 8.35
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "prestiger",
+      "target": "chromie",
+      "label": "Speak to Chromie for Prestige 9"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "prestiger",
+      "option": 0,
+      "label": "I would like to prestige!"
+    },
+    {
+      "action": "assert",
+      "label": "Prestige 9 returns the character to level 1",
+      "actor": "prestiger",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Prestige 9 earns its achievement",
+      "actor": "prestiger",
+      "metric": "has_achievement",
+      "achievement": 13108,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and its title, 'Name IX'",
+      "actor": "prestiger",
+      "metric": "has_title",
+      "title": 208,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_level",
+      "actor": "prestiger",
+      "value": 60
+    },
+    {
+      "action": "teleport",
+      "actor": "prestiger",
+      "map": 1,
+      "x": 1583.18,
+      "y": -4417.3,
+      "z": 8.35
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    }
+  ]
+}

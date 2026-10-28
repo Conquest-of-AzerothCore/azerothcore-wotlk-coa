@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "name": "Issue 3366: Warding Rune dispels magic and voids harmful magic duration on the caster for 6s",
+  "contract": [
+    "804232 eff1 is native SPELL_EFFECT_DISPEL (Spell::EffectDispel, SpellEffects.cpp:2911) targeting",
+    "DISPEL_MAGIC (misc=1) on the caster. eff0 applies stock WotLK aura 245",
+    "(SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL), bp=-101, misc=1, for 6000ms (SpellDuration id 32, matching the",
+    "tooltip's 'for 6 sec'). Unit::CalcAuraDuration (Unit.cpp:12477-12486) reads",
+    "GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL, spellProto->Dispel) and calls",
+    "AddPct(duration, -101) on any harmful aura whose Dispel type matches, driving its duration to (near)",
+    "zero.",
+    "Fixture spell 6136 'Chilled' (Dispel=1 Magic, a harmful SPELL_AURA_MOD_DECREASE_SPEED debuff, native",
+    "duration 5000ms) exercises both effects: it is dispelled by eff1 when already present, and gets ~0",
+    "duration",
+    "from eff0 when applied while Warding Rune is active. No CoA code runs at 804232."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "caster",
+      "owner": "rm",
+      "entry": 36,
+      "faction": 14,
+      "level": 60,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 600001
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 600001,
+      "effect": 0,
+      "equals": 101,
+      "label": "The harmful magic fixture has deterministic native spell hit chance"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 6136,
+      "target": "rm"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the fixture harmful magic debuff lands",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 6136,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 804232
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 804232
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the pre-existing harmful magic aura is dispelled",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 6136,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 6136,
+      "target": "rm"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: a new harmful magic aura lands but with ~zero duration",
+      "actor": "rm",
+      "metric": "aura_duration_ms",
+      "spell": 6136,
+      "max": 500,
+      "within_ms": 500
+    }
+  ]
+}

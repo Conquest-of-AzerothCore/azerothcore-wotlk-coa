@@ -1,0 +1,142 @@
+{
+  "schema": 1,
+  "name": "Native fixture teardown removes hostile descendants before phase reuse: producer",
+  "contract": [
+    "Use original Scholomance Dark Summoner 11582 and its native Summon Risen Lackey 17618 to create an actual",
+    "hostile child 10482. Keep the existing ordinary Vampiric Fang and Wretched controls, then require that child",
+    "to exist before this scenario ends. Teardown must remove descendants of a fixture, including creatures",
+    "without a player owner GUID. The companion scenario reuses this same private phase with a fresh character.",
+    "Both cases run exclusively to make their native case boundary and phase reuse deterministic. They still",
+    "use the accelerated clock and the normal queue; no slower or isolated retry substitutes for cleanup.",
+    "Wretched can proc before the NPC finishes its original four-second summon. Wait for an actual lackey,",
+    "using the unchanged in-combat AI timers, before testing teardown; an early proc does not prove creation."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "summoner",
+      "owner": "bloodmage",
+      "entry": 11582,
+      "faction": 14,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 553272
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 806421
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "bloodmage",
+      "spell": 10040,
+      "stacks": 20
+    },
+    {
+      "action": "assert",
+      "label": "The maximum-health fixture landed",
+      "actor": "bloodmage",
+      "metric": "max_health",
+      "min": 200000,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 553272,
+      "target": "summoner"
+    },
+    {
+      "action": "assert",
+      "label": "Vampiric Fang is on its category cooldown",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 553272,
+      "min": 5000,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_health",
+      "actor": "bloodmage",
+      "value": 60000,
+      "label": "Drop the Bloodmage under the talent's 35% gate"
+    },
+    {
+      "action": "assert",
+      "label": "The health gate is open",
+      "actor": "bloodmage",
+      "metric": "health_pct",
+      "max": 34
+    },
+    {
+      "action": "attack",
+      "actor": "bloodmage",
+      "target": "summoner"
+    },
+    {
+      "action": "assert",
+      "label": "The fixture caster is engaged and summoning",
+      "actor": "summoner",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: being struck while low grants Wretched",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 504284,
+      "equals": 1,
+      "within_ms": 40000
+    },
+    {
+      "action": "assert",
+      "label": "and Wretched's own effect 195 cleared Vampiric Fang's cooldown",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 553272,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "nearby_creature_count",
+      "entry": 10482,
+      "min": 1,
+      "within_ms": 25000,
+      "label": "The producer created a real hostile fixture descendant"
+    }
+  ]
+}

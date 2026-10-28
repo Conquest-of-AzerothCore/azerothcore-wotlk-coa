@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Xorothian Finesse raises parry chance by 5% (#1585)",
+  "contract": "Xorothian Finesse 300385 reads 'Increases your chance to parry by $s1%.' Effect 0 is native aura 47 (SPELL_AURA_MOD_PARRY_PERCENT), EffectBasePoints 4 with DieSides 1 -> 5 (verified directly in the installed Spell.dbc: EffectApplyAuraName[0]=47, EffectBasePoints[0]=4, EffectDieSides[0]=1). Its handler AuraEffect::HandleAuraModParryPercent (src/server/game/Spells/Auras/SpellAuraEffects.cpp:112,4766) is the same native generic stat aura consumed by Player::UpdateParryPercentage -- an exact 1:1 match with the tooltip, no script required. No script anywhere references 300385 (repo-wide grep), consistent with a pure native stat-aura passive.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "snapshot", "actor": "knight", "metric": "parry_chance", "save_as": "parry_before" },
+    { "action": "learn", "actor": "knight", "spell": 300385 },
+    { "action": "set_aura", "actor": "knight", "spell": 300385, "stacks": 1, "label": "Force the Xorothian Finesse passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Xorothian Finesse passive is active",
+      "actor": "knight", "metric": "aura", "spell": 300385, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: parry chance rises by 5 points",
+      "actor": "knight", "metric": "parry_chance", "relative_to": "parry_before", "min": 4.9, "max": 5.1
+    }
+  ]
+}

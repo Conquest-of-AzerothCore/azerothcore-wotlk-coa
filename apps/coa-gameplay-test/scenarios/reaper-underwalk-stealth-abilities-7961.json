@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Underwalk lets the Reaper use stealth-only abilities (#7961)",
+  "contract": "Underwalk 800797 applies shapeshift form 30 FORM_STEALTH (EFFECT_0 MiscValue 30) plus SPELL_AURA_MOD_STEALTH. The Reaper's stealth-only abilities name only that form in their Stances mask (0x20000000), among them Soul Shock 803989 (level 8) and Spectre Stride 801624 (level 2), so both must be castable from Underwalk at the reporter's level 13: Soul Shock applies its aura to an out-of-combat creature and Spectre Stride is not refused.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "reaper", "race": 5, "class": 30, "level": 13, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "wolf", "owner": "reaper", "entry": 299, "level": 13, "health": 100000, "distance": 5 }
+  ],
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and player setup settle", "ms": 5000 },
+    { "action": "learn", "actor": "reaper", "spell": 800797 },
+    { "action": "learn", "actor": "reaper", "spell": 803989 },
+    { "action": "learn", "actor": "reaper", "spell": 801624 },
+    { "action": "cast", "actor": "reaper", "spell": 800797 },
+    {
+      "action": "assert", "label": "The Reaper enters Underwalk", "actor": "reaper", "metric": "aura",
+      "spell": 800797, "equals": 1, "within_ms": 2000
+    },
+    { "action": "wait", "ms": 1600 },
+    { "action": "cast", "actor": "reaper", "spell": 803989, "target": "wolf" },
+    { "action": "wait", "ms": 300 },
+    {
+      "action": "assert", "label": "Soul Shock is not refused in Underwalk", "actor": "reaper",
+      "metric": "cast_failure", "spell": 803989, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Soul Shock saps the creature", "actor": "wolf", "metric": "aura",
+      "spell": 803989, "equals": 1, "within_ms": 1000
+    },
+    { "action": "wait", "ms": 1600 },
+    { "action": "cast", "actor": "reaper", "spell": 801624, "target": "wolf" },
+    { "action": "wait", "ms": 300 },
+    {
+      "action": "assert", "label": "Spectre Stride is not refused in Underwalk", "actor": "reaper",
+      "metric": "cast_failure", "spell": 801624, "equals": 0
+    }
+  ]
+}

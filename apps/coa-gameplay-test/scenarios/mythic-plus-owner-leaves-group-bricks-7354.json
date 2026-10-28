@@ -1,0 +1,220 @@
+{
+  "schema": 1,
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "name": "Mythic+ keystone bricks when its owner leaves the group (#7354)",
+  "contract": [
+    "#7354: leaving the party during a keystone run used to brick the key, stop the timer and downgrade",
+    "it; the run kept going instead. When the keystone's owner leaves the group the run stops (state 2, no more timer",
+    "updates) and the key stays at the level it lost at the start."
+  ],
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "other",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "set_health",
+      "actor": "other",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "group",
+      "actor": "hero",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "hero",
+      "target": "other"
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "hero",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 189,
+      "x": 1630.3,
+      "y": -333.9,
+      "z": 18.6
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 189,
+      "x": 1630.3,
+      "y": -333.9,
+      "z": 18.6
+    },
+    {
+      "action": "teleport",
+      "actor": "other",
+      "map": 189,
+      "x": 1630.3,
+      "y": -333.9,
+      "z": 18.6
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the ally is in the Mythic Armory",
+      "actor": "ally",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 1233329,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "hero",
+      "item": 1233329,
+      "spell": 161
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: socket window",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 2310,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "client_packet",
+      "actor": "hero",
+      "opcode": 1319
+    },
+    {
+      "action": "wait",
+      "ms": 10500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the +3 is running",
+      "actor": "ally",
+      "metric": "server_packet_u8",
+      "opcode": 2312,
+      "index": 8,
+      "equals": 3,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the key lost its level at the start",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 1233263,
+      "equals": 1
+    },
+    {
+      "action": "leave_group",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "the keystone bricks when its owner leaves the group",
+      "actor": "ally",
+      "metric": "server_packet_u8",
+      "opcode": 2312,
+      "index": 8,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the group is told the keystone is depleted",
+      "actor": "ally",
+      "metric": "system_message_contains",
+      "text": "keystone is depleted",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "server_packets",
+      "opcode": 2314,
+      "save_as": "timer_bricked"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "the timer stops",
+      "actor": "ally",
+      "metric": "server_packets",
+      "opcode": 2314,
+      "relative_to": "timer_bricked",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the owner keeps the key one level down",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 1233263,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the owner has no +3 key left",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 1233329,
+      "equals": 0
+    }
+  ]
+}

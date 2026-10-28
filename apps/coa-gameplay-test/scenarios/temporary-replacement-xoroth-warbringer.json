@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Knight of Xoroth Warbringer on the action bar is saved as Flames of Xoroth (#5469)",
+  "contract": "Warbringer 570727 replaces Flames of Xoroth (root 801059) in War specialization 18. AscensionCompat.cpp:941-951 (SynchronizeTalentReplacements, data AscensionTalentReplacementData.h:27-30) learns the level-appropriate Warbringer rank with learnSpell(id, true) (PLAYERSPELL_TEMPORARY, never written to character_spell) and calls SetTemporarySpellReplacement; AscensionXoroth.cpp:208-217 (Refresh) re-applies the same pair through Replace (line 73) while the 570727 aura is present. At level 40, Flames rank 802414 maps to Warbringer 802584 (fixture copied from knight-warbringer-native-rank-replacement-4191.json). A button holding 802584 was saved by Player::_SaveActions as 802584; Player::_LoadActions at the next login runs before the replacement is learned again, so IsActionButtonDataValid would refuse and delete it. persisted_action_button reads Player::GetSavedActionButtonSpell, the id _SaveActions writes: the Warbringer button must be saved as Flames of Xoroth 802414, and a button holding 802414 itself must be saved unchanged.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "k", "race": 1, "class": 17, "level": 40 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login state settle", "ms": 3000 },
+    { "action": "learn", "actor": "k", "spell": 802414 },
+    { "action": "specialization", "actor": "k", "id": 18 },
+    {
+      "action": "assert",
+      "label": "SETUP: the War specialization grants Warbringer",
+      "actor": "k",
+      "metric": "aura",
+      "spell": 570727,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Flames of Xoroth is replaced by Warbringer",
+      "actor": "k",
+      "metric": "temporary_spell_replacement",
+      "spell": 802414,
+      "equals": 802584,
+      "within_ms": 3000
+    },
+    { "action": "set_action_button", "actor": "k", "button": 2, "spell": 802584 },
+    { "action": "set_action_button", "actor": "k", "button": 3, "spell": 802414 },
+    {
+      "action": "assert",
+      "label": "The bar holds Warbringer",
+      "actor": "k",
+      "metric": "action_button",
+      "button": 2,
+      "equals": 802584
+    },
+    {
+      "action": "assert",
+      "label": "The Warbringer button is saved as Flames of Xoroth",
+      "actor": "k",
+      "metric": "persisted_action_button",
+      "button": 2,
+      "equals": 802414
+    },
+    {
+      "action": "assert",
+      "label": "Control: an ordinary known spell is saved unchanged",
+      "actor": "k",
+      "metric": "persisted_action_button",
+      "button": 3,
+      "equals": 802414
+    }
+  ]
+}

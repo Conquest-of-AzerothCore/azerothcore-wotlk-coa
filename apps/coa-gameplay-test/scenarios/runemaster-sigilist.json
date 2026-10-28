@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "name": "Runemaster Sigilist extends crowd control after a Palm Sigil and speeds up Palm Sigils (#1340)",
+  "contract": [
+    "Sigilist 705586 (Runic talent, passive): 'After using a Palm Sigil, the duration of your crowd control effects",
+    "is increased by $706525s1%. Reduces the cast time of all Palm Sigils by $/1000;S2 sec and increases the duration",
+    "of your Palm Sigil buffs by $s3%.' Effect 1 is a native flat SPELLMOD_CASTING_TIME -500 and effect 2 a native",
+    "percent SPELLMOD_DURATION +50, both on family 38 mask2 0x2000, which every player Palm Sigil carries (Earth",
+    "805382: 1500 ms cast, 6 sec aura). Effect 0 is aura 42 naming 706525, a 5 sec self buff whose effect 0 is a",
+    "percent SPELLMOD_DURATION +20 on the crowd control masks (mask0 0x1800082 includes Palm Sigil: Earth's stun",
+    "807824, mask0 0x80). Its EffectSpellClassMask (mask0 0x4) names Runic Tattoos, which 3.3.5 proc auras do not",
+    "read; the tooltip names Palm Sigils. Spell.dbc gives 705586 ProcFlags 0, so SpellMgr generated no proc entry",
+    "and effect 0 never fired. Expected: the cast time and aura duration changes already hold; casting a Palm Sigil",
+    "applies 706525 for 5 sec, during which the stun lasts 1.2 times as long, and a player without the talent gets",
+    "neither. Palm Sigils require the 'Runeshroud or Waveforged' marker 808089, granted here through Runeshroud."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80},
+    {"id": "plain", "race": 1, "class": 32, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the characters settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 805382},
+    {"action": "learn", "actor": "plain", "spell": 805382},
+    {"action": "learn", "actor": "rm", "spell": 705586},
+    {"action": "assert", "label": "Sigilist is active", "actor": "rm", "metric": "aura", "spell": 705586, "equals": 1,
+      "within_ms": 2000},
+    {"action": "set_aura", "actor": "rm", "spell": 500288, "stacks": 1},
+    {"action": "set_aura", "actor": "plain", "spell": 500288, "stacks": 1},
+    {"action": "assert", "label": "SETUP: Runeshroud grants the Palm Sigil marker", "actor": "rm", "metric": "aura",
+      "spell": 808089, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "SETUP: the control has the Palm Sigil marker", "actor": "plain",
+      "metric": "aura", "spell": 808089, "equals": 1, "within_ms": 1000},
+
+    {"action": "assert", "label": "Sigilist reduces the Palm Sigil cast time by 0.5 sec", "actor": "rm",
+      "metric": "spell_cast_time_ms", "spell": 805382, "equals": 1000},
+    {"action": "assert", "label": "Without the talent Palm Sigil takes 1.5 sec", "actor": "plain",
+      "metric": "spell_cast_time_ms", "spell": 805382, "equals": 1500},
+    {"action": "assert", "label": "Before a Palm Sigil the stun duration is unmodified", "actor": "rm",
+      "metric": "spell_modifier", "spell": 807824, "op": 1, "base": 1000, "min": 999.99, "max": 1000.01},
+
+    {"action": "cast", "actor": "rm", "spell": 805382},
+    {"action": "cast", "actor": "plain", "spell": 805382},
+    {"action": "assert", "label": "SETUP: Palm Sigil: Earth is cast", "actor": "rm", "metric": "aura",
+      "spell": 805382, "equals": 1, "within_ms": 1500},
+    {"action": "assert", "label": "Sigilist extends the Palm Sigil buff by 50%", "actor": "rm",
+      "metric": "aura_duration_ms", "spell": 805382, "min": 8000, "max": 9000},
+    {"action": "assert", "label": "Using a Palm Sigil grants Sigilist's crowd control buff", "actor": "rm",
+      "metric": "aura", "spell": 706525, "caster": "rm", "equals": 1, "within_ms": 500},
+    {"action": "assert", "label": "The crowd control buff lasts 5 sec", "actor": "rm", "metric": "aura_duration_ms",
+      "spell": 706525, "min": 4000, "max": 5000},
+    {"action": "assert", "label": "The buff lengthens crowd control by 20%", "actor": "rm",
+      "metric": "spell_modifier", "spell": 807824, "op": 1, "base": 1000, "min": 1199.99, "max": 1200.01},
+    {"action": "assert", "label": "SETUP: the control casts Palm Sigil: Earth", "actor": "plain", "metric": "aura",
+      "spell": 805382, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "Without the talent the Palm Sigil buff keeps 6 sec", "actor": "plain",
+      "metric": "aura_duration_ms", "spell": 805382, "min": 5000, "max": 6000},
+    {"action": "assert", "label": "Without the talent a Palm Sigil grants no crowd control buff", "actor": "plain",
+      "metric": "aura", "spell": 706525, "equals": 0},
+
+    {"action": "assert", "label": "The crowd control buff expires", "actor": "rm", "metric": "aura", "spell": 706525,
+      "equals": 0, "within_ms": 5500},
+    {"action": "assert", "label": "Crowd control returns to its normal duration", "actor": "rm",
+      "metric": "spell_modifier", "spell": 807824, "op": 1, "base": 1000, "min": 999.99, "max": 1000.01}
+  ]
+}

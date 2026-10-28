@@ -1,0 +1,634 @@
+{
+  "schema": 1,
+  "name": "Barbarian ancestor appearance follows the current race across saved-pet reloads (#5527, PR6866 P2)",
+  "contract": [
+    "Report #5527 observes a large Troll ancestor summoned by a Dwarf Barbarian.",
+    "Spell.dbc Ancestor's Call 804869 is ranked Dwarf and summons creature 51266.",
+    "The preserved Exiles NPC 51266 record identifies display 260901 (Earthen Dwarf model 22875).",
+    "Installed CreatureDisplayInfo 260901 has scale 1; CreatureModelData 22875 has authored scale 0.6.",
+    "The shared Ancestry teaching path grants summon 804834, whose pet 51265 instead uses Troll display 173031.",
+    "Dwarf owners must use the authored Dwarf appearance at canonical object scale, retaining shared pet behavior.",
+    "Trolls retain display 173031. Draenei have no authored racial variant and retain the existing fallback.",
+    "Normal specialization and casts exercise summoning; polymorph, relog and dismissal test appearance restoration.",
+    "Ancestor's Call has a 20-second recovery time; resummoning waits for its ordinary cooldown to expire.",
+    "Pet::SavePetToDB persists the native display and the race/faction service retains pet data. A former Dwarf must recover the shared fallback after its owner becomes Draenei or Troll; becoming Dwarf again must recover the Dwarf display.",
+    "Relog's race fixture seeds the owner's post-service database race without modifying saved pet data. Real save/logout/login tests both model fields, repeated persistence and polymorph restoration; it does not submit the character-screen service packet.",
+    "Native model and scale fields are observed; this does not render animations or measure assets on screen."
+  ],
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "troll",
+      "race": 8,
+      "class": 12,
+      "level": 41
+    },
+    {
+      "id": "draenei",
+      "race": 11,
+      "class": 12,
+      "level": 41
+    },
+    {
+      "id": "dwarf",
+      "race": 3,
+      "class": 12,
+      "level": 41
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "troll",
+      "id": 3
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "unlearn",
+      "actor": "troll",
+      "spell": 804729
+    },
+    {
+      "action": "unlearn",
+      "actor": "troll",
+      "spell": 804834
+    },
+    {
+      "action": "learn",
+      "actor": "troll",
+      "spell": 804729
+    },
+    {
+      "action": "assert",
+      "label": "troll learns the normal Ancestry summon",
+      "actor": "troll",
+      "metric": "knows_spell",
+      "spell": 804834,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "troll",
+      "spell": 804834
+    },
+    {
+      "action": "assert",
+      "label": "troll owns the normal Honored Ancestor",
+      "actor": "troll",
+      "metric": "pet_entry",
+      "equals": 51265,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "troll uses its authored ancestor model",
+      "actor": "troll",
+      "metric": "pet_display",
+      "equals": 173031
+    },
+    {
+      "action": "assert",
+      "label": "troll retains the canonical object scale",
+      "actor": "troll",
+      "metric": "pet_scale",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "specialization",
+      "actor": "draenei",
+      "id": 3
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "unlearn",
+      "actor": "draenei",
+      "spell": 804729
+    },
+    {
+      "action": "unlearn",
+      "actor": "draenei",
+      "spell": 804834
+    },
+    {
+      "action": "learn",
+      "actor": "draenei",
+      "spell": 804729
+    },
+    {
+      "action": "assert",
+      "label": "draenei learns the normal Ancestry summon",
+      "actor": "draenei",
+      "metric": "knows_spell",
+      "spell": 804834,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "draenei",
+      "spell": 804834
+    },
+    {
+      "action": "assert",
+      "label": "draenei owns the normal Honored Ancestor",
+      "actor": "draenei",
+      "metric": "pet_entry",
+      "equals": 51265,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "draenei uses its authored ancestor model",
+      "actor": "draenei",
+      "metric": "pet_display",
+      "equals": 173031
+    },
+    {
+      "action": "assert",
+      "label": "draenei retains the canonical object scale",
+      "actor": "draenei",
+      "metric": "pet_scale",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "specialization",
+      "actor": "dwarf",
+      "id": 3
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "unlearn",
+      "actor": "dwarf",
+      "spell": 804729
+    },
+    {
+      "action": "unlearn",
+      "actor": "dwarf",
+      "spell": 804834
+    },
+    {
+      "action": "learn",
+      "actor": "dwarf",
+      "spell": 804729
+    },
+    {
+      "action": "assert",
+      "label": "dwarf learns the normal Ancestry summon",
+      "actor": "dwarf",
+      "metric": "knows_spell",
+      "spell": 804834,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "dwarf",
+      "spell": 804834
+    },
+    {
+      "action": "assert",
+      "label": "dwarf owns the normal Honored Ancestor",
+      "actor": "dwarf",
+      "metric": "pet_entry",
+      "equals": 51265,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "dwarf uses its authored ancestor model",
+      "actor": "dwarf",
+      "metric": "pet_display",
+      "equals": 260901
+    },
+    {
+      "action": "assert",
+      "label": "dwarf retains the canonical object scale",
+      "actor": "dwarf",
+      "metric": "pet_scale",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "set_aura",
+      "actor": "dwarf",
+      "spell": 118,
+      "pet": true,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Polymorph transforms the ancestor",
+      "actor": "dwarf",
+      "metric": "pet_aura_stacks",
+      "spell": 118,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The polymorph model replaces the Dwarf model",
+      "actor": "dwarf",
+      "metric": "pet_display",
+      "max": 70000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "dwarf",
+      "spell": 118,
+      "pet": true,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Ending polymorph restores the Dwarf ancestor",
+      "actor": "dwarf",
+      "metric": "pet_display",
+      "equals": 260901,
+      "within_ms": 2500
+    },
+    {
+      "action": "relog",
+      "actor": "dwarf"
+    },
+    {
+      "action": "assert",
+      "label": "The ancestor remains owned after native relog",
+      "actor": "dwarf",
+      "metric": "pet_entry",
+      "equals": 51265,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Native relog preserves the Dwarf model",
+      "actor": "dwarf",
+      "metric": "pet_display",
+      "equals": 260901
+    },
+    {
+      "action": "client_packet",
+      "actor": "dwarf",
+      "opcode": 373,
+      "consumed": false,
+      "fields": [
+        {
+          "pet_guid": "dwarf"
+        },
+        {
+          "u32": 117440515
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Normal dismissal removes the ancestor",
+      "actor": "dwarf",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The ordinary summon cooldown expires before resummoning",
+      "actor": "dwarf",
+      "metric": "cooldown_ms",
+      "spell": 804834,
+      "equals": 0,
+      "within_ms": 25000
+    },
+    {
+      "action": "cast",
+      "actor": "dwarf",
+      "spell": 804834
+    },
+    {
+      "action": "assert",
+      "label": "Normal resummoning restores the Dwarf ancestor",
+      "actor": "dwarf",
+      "metric": "pet_entry",
+      "equals": 51265,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The resummoned ancestor uses the Dwarf model",
+      "actor": "dwarf",
+      "metric": "pet_display",
+      "equals": 260901
+    },
+    {
+      "action": "assert",
+      "label": "Resummoning retains canonical object scale",
+      "actor": "dwarf",
+      "metric": "pet_scale",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_native_display",
+      "equals": 260901,
+      "label": "Dwarf display is the persisted native model before changing race"
+    },
+    {
+      "action": "relog",
+      "actor": "dwarf",
+      "race": 11,
+      "label": "Reload the saved ancestor with a post-service Draenei owner"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "race",
+      "equals": 11,
+      "label": "The reloaded owner is Draenei"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_entry",
+      "equals": 51265,
+      "label": "Draenei owner keeps the same ancestor entry"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_native_display",
+      "equals": 173031,
+      "label": "Draenei owner receives the correct native ancestor display"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_display",
+      "equals": 173031,
+      "label": "Draenei owner receives the correct visible ancestor display"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_scale",
+      "min": 0.999,
+      "max": 1.001,
+      "label": "Draenei owner retains canonical ancestor scale"
+    },
+    {
+      "action": "set_aura",
+      "actor": "dwarf",
+      "spell": 118,
+      "pet": true,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_aura_stacks",
+      "equals": 1,
+      "label": "The fallback ancestor is polymorphed",
+      "spell": 118
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_display",
+      "max": 70000,
+      "label": "Polymorph temporarily replaces the fallback display"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_native_display",
+      "equals": 173031,
+      "label": "Polymorph preserves the reconciled fallback native display"
+    },
+    {
+      "action": "set_aura",
+      "actor": "dwarf",
+      "spell": 118,
+      "pet": true,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_display",
+      "equals": 173031,
+      "label": "Ending polymorph restores the fallback rather than the former Dwarf model"
+    },
+    {
+      "action": "relog",
+      "actor": "dwarf",
+      "label": "Save and reload the reconciled Draenei fallback again"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "race",
+      "equals": 11,
+      "label": "Draenei race persists across the next relog"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_entry",
+      "equals": 51265,
+      "label": "Draenei ancestor remains present on the next login"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_native_display",
+      "equals": 173031,
+      "label": "Draenei fallback is saved as the next native model"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_display",
+      "equals": 173031,
+      "label": "Draenei fallback remains visible on the next login"
+    },
+    {
+      "action": "relog",
+      "actor": "dwarf",
+      "race": 3,
+      "label": "Reload the saved ancestor with a post-service Dwarf owner"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "race",
+      "equals": 3,
+      "label": "The reloaded owner is Dwarf"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_entry",
+      "equals": 51265,
+      "label": "Dwarf owner keeps the same ancestor entry"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_native_display",
+      "equals": 260901,
+      "label": "Dwarf owner receives the correct native ancestor display"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_display",
+      "equals": 260901,
+      "label": "Dwarf owner receives the correct visible ancestor display"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_scale",
+      "min": 0.999,
+      "max": 1.001,
+      "label": "Dwarf owner retains canonical ancestor scale"
+    },
+    {
+      "action": "relog",
+      "actor": "dwarf",
+      "race": 8,
+      "label": "Reload the saved ancestor with a post-service Troll owner"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "race",
+      "equals": 8,
+      "label": "The reloaded owner is Troll"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_entry",
+      "equals": 51265,
+      "label": "Troll owner keeps the same ancestor entry"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_native_display",
+      "equals": 173031,
+      "label": "Troll owner receives the correct native ancestor display"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_display",
+      "equals": 173031,
+      "label": "Troll owner receives the correct visible ancestor display"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_scale",
+      "min": 0.999,
+      "max": 1.001,
+      "label": "Troll owner retains canonical ancestor scale"
+    },
+    {
+      "action": "relog",
+      "actor": "dwarf",
+      "label": "Save and reload the reconciled Troll fallback again"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "race",
+      "equals": 8,
+      "label": "Troll race persists across the next relog"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_entry",
+      "equals": 51265,
+      "label": "Troll ancestor remains present on the next login"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_native_display",
+      "equals": 173031,
+      "label": "Troll fallback is saved as the next native model"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_display",
+      "equals": 173031,
+      "label": "Troll fallback remains visible on the next login"
+    },
+    {
+      "action": "relog",
+      "actor": "dwarf",
+      "race": 3,
+      "label": "Reload the saved ancestor with a post-service Dwarf owner"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "race",
+      "equals": 3,
+      "label": "The reloaded owner is Dwarf"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_entry",
+      "equals": 51265,
+      "label": "Dwarf owner keeps the same ancestor entry"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_native_display",
+      "equals": 260901,
+      "label": "Dwarf owner receives the correct native ancestor display"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_display",
+      "equals": 260901,
+      "label": "Dwarf owner receives the correct visible ancestor display"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "pet_scale",
+      "min": 0.999,
+      "max": 1.001,
+      "label": "Dwarf owner retains canonical ancestor scale"
+    }
+  ]
+}

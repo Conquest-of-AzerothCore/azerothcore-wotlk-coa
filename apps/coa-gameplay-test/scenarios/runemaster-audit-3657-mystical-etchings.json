@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Runemaster audit: Mystical Etchings cuts Fire/Nature/Frost/Arcane damage taken 15% at rank 2 (#3657)",
+  "contract": "Mystical Etchings rank 2 (807921) has one effect, SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN (87), EffectMiscValue 92 (Fire 4 + Nature 8 + Frost 16 + Arcane 64), EffectBasePoints -16 + DieSides 1 = -15%. It is native, implemented in Unit::MeleeDamageBonus/Unit::SpellDamageBonus, so a Frost-school probe (Frostbolt 116, school mask 16, a subset of 92) should drop 15% once 807921 is learned, while a Holy-school probe (Smite 585, school mask 2, outside 92) stays unaffected.",
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 20}
+  ],
+  "creatures": [
+    {"id": "atk", "owner": "rm", "entry": 36, "level": 20, "distance": 5}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "snapshot", "actor": "rm", "metric": "spell_damage_taken", "target": "atk", "spell": 116,
+      "save_as": "fire_before"},
+    {"action": "snapshot", "actor": "rm", "metric": "spell_damage_taken", "target": "atk", "spell": 585,
+      "save_as": "holy_before"},
+    {"action": "learn", "actor": "rm", "spell": 807921},
+    {"action": "assert", "label": "Mystical Etchings rank 2 (807921) is active", "actor": "rm",
+      "metric": "aura", "spell": 807921, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "Frost damage taken drops 15% (Frostbolt, school mask 16 subset of 92)",
+      "actor": "rm", "metric": "spell_damage_taken", "target": "atk", "spell": 116, "ratio_to": "fire_before",
+      "min": 0.83, "max": 0.87},
+    {"action": "assert", "label": "NEGATIVE CONTROL: Holy damage taken is unaffected (Smite, school mask 2, outside 92)",
+      "actor": "rm", "metric": "spell_damage_taken", "target": "atk", "spell": 585, "ratio_to": "holy_before",
+      "min": 0.999, "max": 1.001}
+  ]
+}

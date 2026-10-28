@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Grimtotem Marauders pull a same-level player from 10 yd like other starting-zone hostiles",
+  "contract": [
+    "Starting-zone hostiles such as the Bristleback Quilboar detect a same-level player at 10 yd. The Three",
+    "Totems Grimtotems kept the 20 yd default, and rev_20261004_50_coa_grimtotem_aggro_range sets them to 10.",
+    "Expected: an aggressive Grimtotem Marauder 161809 of the player's level leaves a player standing 15 yd away",
+    "out of combat and attacks once the player steps to 6 yd."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 1, "x": -2712.6, "y": 19.0, "z": 14.5, "o": 0},
+  "players": [{"id": "hero", "race": 6, "class": 1, "level": 3}],
+  "creatures": [
+    {"id": "marauder", "owner": "hero", "entry": 161809, "faction": 16, "level": 3, "health": 100000,
+     "reaction": 2, "stationary": true, "distance": 30}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "actor": "hero", "metric": "combat", "max": 0, "label": "Out of combat at 30 yd"},
+    {"action": "teleport", "actor": "hero", "map": 1, "x": -2697.6, "y": 19.0, "z": 14.5, "o": 0},
+    {"action": "wait", "ms": 3000},
+    {"action": "assert", "actor": "hero", "metric": "combat", "max": 0,
+     "label": "The Marauder leaves a player 15 yd away alone"},
+    {"action": "teleport", "actor": "hero", "map": 1, "x": -2688.6, "y": 19.0, "z": 14.5, "o": 0},
+    {"action": "wait", "ms": 3000},
+    {"action": "assert", "actor": "marauder", "metric": "combat", "min": 1,
+     "label": "The Marauder pulls a player at 6 yd"}
+  ]
+}

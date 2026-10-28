@@ -1,0 +1,741 @@
+{
+  "schema": 1,
+  "name": "Northshire class chain: the map marks where the Lost Pendant and the waterfall are (#6757, #6728)",
+  "contract": "Lost Pendant (200058, Sun Cleric) and A Quiet Life (200077, Templar) are two Northshire class quests whose objectives live in the world - 200058 wants the Lost Pendant 663319 that leaves the one chest in the valley at the Defias camp (gameobject 9301103, guid 7912105, -8956.38 -435.027) and 200077 wants the walk-in marker at the foot of the Northshire falls (creature 685037, guid 9003129, -8739.5 -410.5, credited within 15 yd out of combat) beside Uther's Statue. Neither quest had a single quest_poi row, not even a turn-in pin, so a player carrying one saw a completely unmarked world map (the sibling A Quiet Life quests 200081/200083 got their rows with the hidden-statue work). rev_20261007_80_coa_northshire_class_objective_markers.sql adds two markers to each: the objective area - ObjectiveIndex 4 for 200058, because it is an item objective (the slot stock 6 'Bounty on Garrick Padfoot' uses for RequiredItemId1), and ObjectiveIndex 0 for 200077, because it is an NPC/gameobject objective (the slot stock 7 'Kobold Camp Cleanup' uses for its camp), both on MapID 0 and WorldMapAreaId 30 (the map area Elwynn Forest draws under Northshire), Floor 0, Priority 0, Flags 1, four corners each - and the turn-in pin, id 1, ObjectiveIndex -1, one point on the trainer the quest is handed to: Chaplain Nysoni (50286, -8854 -193) for 200058 and Brother William (50280, -8907 -211) for 200077, the pair 200081 already carries. This case asks the server for the points the way the quest log does - the CMSG_QUEST_POI_QUERY a real client sends and the SMSG_QUEST_POI_QUERY_RESPONSE it answers with - and reads the fields out of the packet itself, so the whole server-to-client path is covered rather than the database rows. The first query is a control for 200081, a quest the character does not carry (it does have POI rows in the database): it must answer with its quest id and no points at all, which shows an empty answer means 'not carried' and not 'no rows'. The two queries that follow must each answer with exactly two markers on Elwynn Forest, asserted field by field: first the four-corner area, then the single-point pin on the quest giver. The last steps walk the player to the crate, to the thugs guarding it, to the walk-in marker by the statue and to both trainers, which is where the markers are drawn: the ground they cover is where the pendant, the falls and the two turn-ins actually are.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8956.38,
+    "y": -435.027,
+    "z": 66.4,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 27,
+      "level": 8
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join the world phase the valley's CoA spawns live in",
+      "actor": "c",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the valley's spawns settle",
+      "ms": 4000
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: carry Lost Pendant (200058) unfinished, the state a player hunting the pendant is in",
+      "actor": "c",
+      "quest": 200058,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: and carry A Quiet Life (200077) unfinished",
+      "actor": "c",
+      "quest": 200077,
+      "complete": false
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the quest log holds Lost Pendant - status 0 would mean it does not, and the POI answer below is only sent for a quest the log holds",
+      "actor": "c",
+      "metric": "quest_status",
+      "quest": 200058,
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: and it holds A Quiet Life too, so the server has both quests to answer POI queries for",
+      "actor": "c",
+      "metric": "quest_status",
+      "quest": 200077,
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "CONTROL: ask the map to mark 200081, an A Quiet Life the character does not carry but whose POI rows do exist",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        { "u32": 1 },
+        { "u32": 200081 }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the answer names the quest",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 200081,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: and carries no points for it, because the quest is not in this character's log - so a zero count below means 'not carried', not 'no rows in the database'",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark Lost Pendant 200058, exactly what a quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        { "u32": 1 },
+        { "u32": 200058 }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: one quest was asked for, so this is a one-quest answer",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 0,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: and it is 200058's own answer",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 200058,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 200058 now answers with two markers on the map - the objective area and the turn-in pin - where before rev_20261007_80 it answered with none",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its id is 0, the objective",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: it hangs off ObjectiveIndex 4, the item objective (RequiredItemId1 663319), the index stock 6 'Bounty on Garrick Padfoot' marks its item objective with",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the area is on the Eastern Kingdoms, MapID 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 20,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "drawn on the Elwynn Forest map area, WorldMapAreaId 30, which also covers Northshire",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 30,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Floor 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 28,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Priority 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 32,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "and Flags 1, the value every stock objective marker carries",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 36,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the area is a rectangle of four corners, so the client paints a search area instead of pinning one spot",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its first corner is x -9035",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294958261,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "and y -365",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 4294966931,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its opposite corner is x -8940",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 52,
+      "index": 0,
+      "equals": 4294958356,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "and y -460, so the area spans the whole Defias camp the crate stands in and not the trail to the river",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 64,
+      "index": 0,
+      "equals": 4294966836,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The second marker is 200058's turn-in pin, id 1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 76,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: it hangs off ObjectiveIndex -1, which is what makes the client draw a turn-in pin rather than an objective area",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on MapID 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 84,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "and on the Elwynn Forest map area, WorldMapAreaId 30",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 88,
+      "index": 0,
+      "equals": 30,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Flags 1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 100,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the pin is a single point, not an area",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 104,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and that point is Chaplain Nysoni's own spot, x -8854, the trainer 200058 is handed to",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 108,
+      "index": 0,
+      "equals": 4294958442,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "y -193",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 112,
+      "index": 0,
+      "equals": 4294967103,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark A Quiet Life 200077",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        { "u32": 1 },
+        { "u32": 200077 }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: this answer belongs to the 200077 query",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 200077,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 200077 answers with two markers as well - the area over the falls and the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "id 0, the objective",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: it hangs off ObjectiveIndex 0, the NPC/gameobject objective (RequiredNpcOrGo1 685037, the walk-in marker), not an item slot",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on MapID 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 20,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "and on the Elwynn Forest map area, WorldMapAreaId 30",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 30,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Flags 1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 36,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "four corners again",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its first corner is x -8785",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294958511,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "and y -380",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 4294966916,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its opposite corner is x -8695",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 52,
+      "index": 0,
+      "equals": 4294958601,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "and y -450, so the area covers the falls and the bank in front of them",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 64,
+      "index": 0,
+      "equals": 4294966846,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The second marker is 200077's turn-in pin, id 1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 76,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: ObjectiveIndex -1, the turn-in marker",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on MapID 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 84,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "and on Elwynn Forest, WorldMapAreaId 30",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 88,
+      "index": 0,
+      "equals": 30,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "a single point",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 104,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and that point is Brother William's own spot, x -8907, the trainer 200077 is handed to",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 108,
+      "index": 0,
+      "equals": 4294958389,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "y -211",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 112,
+      "index": 0,
+      "equals": 4294967085,
+      "within_ms": 4000
+    },
+    {
+      "action": "teleport",
+      "label": "Walk to the crate at the Defias camp, inside the area 200058 now marks",
+      "actor": "c",
+      "map": 0,
+      "x": -8956.38,
+      "y": -435.027,
+      "z": 66.4,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the grid load",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "the area is pendant ground: the valley's Lost Pendant chest (9301103, guid 7912105) stands on the crate inside it",
+      "actor": "c",
+      "metric": "nearby_gameobject_count",
+      "entry": 9301103,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "and the camp it draws is the thug camp the quest text describes: Defias Thugs (38) stand on it",
+      "actor": "c",
+      "metric": "nearby_creature_count",
+      "entry": 38,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "teleport",
+      "label": "Walk to the walk-in marker at the foot of the Northshire falls, inside the area 200077 now marks",
+      "actor": "c",
+      "map": 0,
+      "x": -8739.5,
+      "y": -410.5,
+      "z": 82.7,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the grid load",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "the area is the waterfall A Quiet Life asks for: the walk-in marker (685037, guid 9003129) that credits it stands inside it",
+      "actor": "c",
+      "metric": "nearby_creature_count",
+      "entry": 685037,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "and so does Uther's Statue (9301105), the landmark the quest's description names",
+      "actor": "c",
+      "metric": "nearby_gameobject_count",
+      "entry": 9301105,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "teleport",
+      "label": "Walk to the spot 200058's turn-in pin names: the Abbey library desk of Chaplain Nysoni",
+      "actor": "c",
+      "map": 0,
+      "x": -8854,
+      "y": -193,
+      "z": 81.932,
+      "o": 2.5
+    },
+    {
+      "action": "wait",
+      "label": "Let the grid load",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "the pin is turn-in ground: Chaplain Nysoni (50286), who gives 200058 and takes it back, stands on it",
+      "actor": "c",
+      "metric": "nearby_creature_count",
+      "entry": 50286,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "teleport",
+      "label": "Walk to the spot 200077's turn-in pin names: the Templar trainer's post at the Abbey",
+      "actor": "c",
+      "map": 0,
+      "x": -8907,
+      "y": -211,
+      "z": 89.17,
+      "o": 1.37
+    },
+    {
+      "action": "wait",
+      "label": "Let the grid load",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "and that pin is turn-in ground too: Brother William (50280), who gives A Quiet Life and takes it back, stands on it",
+      "actor": "c",
+      "metric": "nearby_creature_count",
+      "entry": 50280,
+      "min": 1,
+      "within_ms": 8000
+    }
+  ]
+}

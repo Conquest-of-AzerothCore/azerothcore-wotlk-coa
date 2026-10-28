@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Valkyr's Grip grants its 6% hit chance component (#5733)",
+  "contract": "Valkyr's Grip 707072 (Spell.dbc; tooltip 'Allows you to dual wield and to wield a Two-Handed Mace, Sword, or Polearm in each hand and your chance to hit is increased by $707072s2%') has three effects: 0 SPELL_EFFECT_TITAN_GRIP, 1 SPELL_EFFECT_APPLY_AURA with ApplyAuraName 333 = SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT (EffectBasePoints 5, DieSides 1 -> amount 6, matching the tooltip's $s2), 2 SPELL_EFFECT_DUAL_WIELD. AuraEffect::HandleAscensionModHitChanceAll (SpellAuraEffects.cpp) calls HandleModHitChance, and Unit::StatSystem.cpp's UpdateMeleeHitChances/UpdateSpellHitChances read GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE, SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT) and the spell-hit equivalent, so the 6% bonus is already a native, fully wired stat contribution with no CoA script needed. This scenario pins that contract directly: a control Sun Cleric without the talent versus one with it learned must differ by exactly 6 points of melee and spell hit chance.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 27, "level": 80 },
+    { "id": "valkyrie", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "snapshot", "actor": "control", "metric": "melee_hit_chance", "save_as": "base_melee_hit" },
+    { "action": "snapshot", "actor": "control", "metric": "spell_hit_chance", "save_as": "base_spell_hit" },
+    { "action": "learn", "actor": "valkyrie", "spell": 707072 },
+    {
+      "action": "assert", "label": "Valkyr's Grip is learned and active",
+      "actor": "valkyrie", "metric": "aura", "spell": 707072, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Valkyr's Grip adds 6 points of melee hit chance",
+      "actor": "valkyrie", "metric": "melee_hit_chance", "relative_to": "base_melee_hit", "min": 5.9, "max": 6.1
+    },
+    {
+      "action": "assert", "label": "Valkyr's Grip adds 6 points of spell hit chance",
+      "actor": "valkyrie", "metric": "spell_hit_chance", "relative_to": "base_spell_hit", "min": 5.9, "max": 6.1
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Ghost grants its stealth buff when Sinister Litany is cast (#2670)",
+  "contract": "Ghost 705426 (Spell.dbc: effect 0 Apply Aura PROC_TRIGGER_SPELL, EffectTriggerSpell 705427, EffectSpellClassMask[4] 32; effect 1 Apply Aura ADD_FLAT_MODIFIER) reads 'Sinister Litany now increases the damage of your next spell or ability within 10 sec by $805185s3% and casting it now grants you Ghost for $705427d.' data/sql/updates/pending_db_world/rev_20260921_20_reaper_talent_procs_two.sql wires spell_proc SpellId 705426 (ProcFlags 87060, SpellTypeMask 7, SpellPhaseMask 1, Chance 100) to spell_script_names 'spell_ascension_reaper_talent_proc', and AscensionReaperTalentProcs.h Rules maps talent 705426 to trigger spell {805185} (Sinister Litany), gating the native PROC_TRIGGER_SPELL. 705427 (Ghost) is SPELL_AURA_MOD_STEALTH plus SPELL_AURA_MOD_IGNORE_SHAPESHIFT, matching Ghost's own sub-tooltip 'Enter an enhanced stealth mode that does not break on damage dealt or taken.' This proves the proc/trigger chain that the issue claimed was entirely unimplemented; the +50%-next-hit flat modifier clause is not independently asserted here.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "reaper", "race": 10, "class": 30, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "reaper", "spell": 705426 },
+    { "action": "assert", "label": "Ghost talent aura is active", "actor": "reaper", "metric": "aura", "spell": 705426, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "CONTROL no Ghost stealth buff before casting Sinister Litany", "actor": "reaper", "metric": "aura", "spell": 705427, "equals": 0 },
+    { "action": "learn", "actor": "reaper", "spell": 800797 },
+    { "action": "cast", "actor": "reaper", "spell": 800797 },
+    { "action": "assert", "label": "Underwalk stealth stance is active (Sinister Litany's own Stances requirement)", "actor": "reaper", "metric": "aura", "spell": 800797, "equals": 1, "within_ms": 2000 },
+    { "action": "wait", "ms": 1600 },
+    { "action": "learn", "actor": "reaper", "spell": 805185 },
+    { "action": "cast", "actor": "reaper", "spell": 805185 },
+    { "action": "assert", "label": "Sinister Litany cast was accepted", "actor": "reaper", "metric": "cast_failure", "spell": 805185, "equals": 0 },
+    { "action": "assert", "label": "REGRESSION casting Sinister Litany grants the Ghost stealth buff", "actor": "reaper", "metric": "aura", "spell": 705427, "equals": 1, "within_ms": 3000 }
+  ]
+}

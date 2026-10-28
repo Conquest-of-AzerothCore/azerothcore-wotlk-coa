@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "name": "Necromancer Curse of the Lich extends Rime range and adds Frost crit to owner and summons (#1522)",
+  "contract": "Curse of the Lich 300240 is a Necromancer Rime talent (CharacterAdvancement 34978, ClassType 25 = class 23, Tab 60 Rime, TalentEssenceCost 1) whose description reads 'Increases the range of your Rime spells by $s1 yds and increases the Frost critical strike chance of you and your summons by $s2%.' Effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107) MiscValue 5 (SPELLMOD_RANGE), EffectBasePoints 5 + DieSides 1 = 6, EffectSpellClassMask (0x20000000, 0x44, 0x08000000) in SpellFamilyName 29, which covers the Rime spells Glacial Impact 704355 (0x20000000, 0, 0), Ice Barrage 801760 (0, 0x40, 0) and Lichfrost 801722 (0, 0, 0x08000000), all SpellRange 4 = 30 yd; the Death spell Flesh to Worms 500338 (0x4000, 0, 0x20) is outside the mask. SpellInfo::GetMaxRange applies the caster's SPELLMOD_RANGE, so the Rime spells must reach 36 yd and Flesh to Worms must stay at 30 yd. Effect 1 is native aura 71 SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, MiscValue 16 (Frost), EffectBasePoints 2 + DieSides 1 = 3, which Player::UpdateSpellCritChance adds to the Frost school only: Frost spell crit must rise by 3 points and Shadow must not move. Effect 2 is SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS (190) with the same aura 71 Frost +3 and SpellRadius 12 = 100 yd, which the owner's area aura applies to every summon it controls: a raised Ghoul (500971, creature 50073) must carry 300240 from its owner. None of these effects is aura 42/354, so the Necromancer contract leaves them native and no script is required.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "necro", "spell": 500971 },
+    {
+      "action": "assert", "label": "CONTROL: Lichfrost reaches 30 yd", "actor": "necro",
+      "metric": "spell_max_range", "spell": 801722, "equals": 30
+    },
+    {
+      "action": "assert", "label": "CONTROL: Ice Barrage reaches 30 yd", "actor": "necro",
+      "metric": "spell_max_range", "spell": 801760, "equals": 30
+    },
+    {
+      "action": "assert", "label": "CONTROL: Glacial Impact reaches 30 yd", "actor": "necro",
+      "metric": "spell_max_range", "spell": 704355, "equals": 30
+    },
+    { "action": "snapshot", "actor": "necro", "metric": "spell_crit_chance", "school": 4, "save_as": "frost_crit" },
+    { "action": "snapshot", "actor": "necro", "metric": "spell_crit_chance", "school": 5, "save_as": "shadow_crit" },
+    { "action": "learn", "actor": "necro", "spell": 300240 },
+    {
+      "action": "assert", "label": "The Curse of the Lich passive aura is applied", "actor": "necro",
+      "metric": "aura", "spell": 300240, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Lichfrost reaches 36 yd", "actor": "necro",
+      "metric": "spell_max_range", "spell": 801722, "min": 35.99, "max": 36.01
+    },
+    {
+      "action": "assert", "label": "Ice Barrage reaches 36 yd", "actor": "necro",
+      "metric": "spell_max_range", "spell": 801760, "min": 35.99, "max": 36.01
+    },
+    {
+      "action": "assert", "label": "Glacial Impact reaches 36 yd", "actor": "necro",
+      "metric": "spell_max_range", "spell": 704355, "min": 35.99, "max": 36.01
+    },
+    {
+      "action": "assert", "label": "Flesh to Worms, a Death spell, keeps 30 yd", "actor": "necro",
+      "metric": "spell_max_range", "spell": 500338, "equals": 30
+    },
+    {
+      "action": "assert", "label": "Frost spell crit rises by 3 points", "actor": "necro",
+      "metric": "spell_crit_chance", "school": 4, "relative_to": "frost_crit", "min": 2.99, "max": 3.01
+    },
+    {
+      "action": "assert", "label": "Shadow spell crit is unchanged", "actor": "necro",
+      "metric": "spell_crit_chance", "school": 5, "relative_to": "shadow_crit", "min": -0.01, "max": 0.01
+    },
+    { "action": "cast", "label": "Raise a Ghoul", "actor": "necro", "spell": 500971 },
+    {
+      "action": "assert", "label": "SETUP: the Ghoul is raised", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50073, "equals": 1, "within_ms": 8000
+    },
+    {
+      "action": "assert", "label": "The Ghoul carries its owner's Curse of the Lich Frost crit aura", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50073, "spell": 300240, "caster": "necro", "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

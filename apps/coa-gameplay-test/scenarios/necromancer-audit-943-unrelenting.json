@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "name": "Necromancer audit: Unrelenting shortens the Crypt Swarm channel by 25% (#943)",
+  "contract": "Unrelenting 704718 (CharacterAdvancement 11112, class 23) reads 'Reduces the channel time of your Crypt Swarm by $s1%.' Spell.dbc: effect 0 aura 108 (ADD_PCT_MODIFIER) op 1 (SPELLMOD_DURATION) and effect 1 aura 108 op 19 (SPELLMOD_ACTIVATION_TIME), each BasePoints -26 + DieSides 1 = -25, both with class mask word 0 0x2 in family 29; effect 2 is SPELL_EFFECT_DUMMY, which carries no tooltip mechanic. Crypt Swarm 500965 (family 29, SpellFamilyFlags word 0 0x2) is a channel with SpellDuration 27 = 3000 ms, effect 0 PERIODIC_TRIGGER_SPELL_WITH_VALUE every 1000 ms and effect 2 PERIODIC_TRIGGER_SPELL every 750 ms on the enemy. Native spell mods give the talented caster a 2250 ms channel with 750 ms and 562 ms periods (the same three damage ticks, delivered faster); an untalented caster keeps 3000 ms, 1000 ms and 750 ms. The talented channel must end within 2.6 s of the cast while the untalented one is still running.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "plain", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 },
+    { "id": "swift", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "plain_golem", "owner": "plain", "entry": 36, "level": 80, "health": 1000000, "distance": 8 },
+    { "id": "swift_golem", "owner": "swift", "entry": 36, "level": 80, "health": 1000000, "distance": 8 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "plain", "spell": 500965 },
+    { "action": "learn", "actor": "swift", "spell": 500965 },
+    { "action": "learn", "actor": "swift", "spell": 704718 },
+    {
+      "action": "assert", "label": "SETUP: the Unrelenting passive is active", "actor": "swift",
+      "metric": "aura", "spell": 704718, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTROL: the plain caster has no Unrelenting", "actor": "plain",
+      "metric": "aura", "spell": 704718, "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTROL: Crypt Swarm duration is unmodified", "actor": "plain",
+      "metric": "spell_modifier", "spell": 500965, "op": 1, "base": 3000, "min": 2999, "max": 3001
+    },
+    {
+      "action": "assert", "label": "Unrelenting reduces the Crypt Swarm duration by 25%", "actor": "swift",
+      "metric": "spell_modifier", "spell": 500965, "op": 1, "base": 3000, "min": 2249, "max": 2251
+    },
+    {
+      "action": "assert", "label": "Unrelenting reduces the Crypt Swarm tick period by 25%", "actor": "swift",
+      "metric": "spell_modifier", "spell": 500965, "op": 19, "base": 1000, "min": 749, "max": 751
+    },
+    { "action": "cast", "actor": "plain", "spell": 500965, "target": "plain_golem" },
+    { "action": "cast", "actor": "swift", "spell": 500965, "target": "swift_golem" },
+    {
+      "action": "assert", "label": "Talented Crypt Swarm channels for 2.25 s", "actor": "swift",
+      "metric": "cast_remaining_ms", "spell": 500965, "min": 1950, "max": 2250, "within_ms": 400
+    },
+    {
+      "action": "assert", "label": "CONTROL: untalented Crypt Swarm channels for 3 s", "actor": "plain",
+      "metric": "cast_remaining_ms", "spell": 500965, "min": 2550, "max": 3000, "within_ms": 400
+    },
+    {
+      "action": "assert", "label": "Talented damage ticks every 750 ms", "actor": "swift_golem",
+      "metric": "aura_amplitude_ms", "spell": 500965, "caster": "swift", "effect": 0,
+      "min": 749, "max": 751, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Talented energize ticks every 562 ms", "actor": "swift_golem",
+      "metric": "aura_amplitude_ms", "spell": 500965, "caster": "swift", "effect": 2,
+      "min": 561, "max": 563
+    },
+    {
+      "action": "assert", "label": "CONTROL: untalented damage ticks every 1000 ms", "actor": "plain_golem",
+      "metric": "aura_amplitude_ms", "spell": 500965, "caster": "plain", "effect": 0,
+      "min": 999, "max": 1001, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Talented channel ends within 2.6 s of the cast", "actor": "swift",
+      "metric": "casting", "equals": 0, "within_ms": 2500
+    },
+    {
+      "action": "assert", "label": "The talented channel aura leaves the target with the channel", "actor": "swift_golem",
+      "metric": "aura", "spell": 500965, "caster": "swift", "equals": 0, "within_ms": 200
+    },
+    {
+      "action": "assert", "label": "CONTROL: the untalented channel is still running", "actor": "plain",
+      "metric": "casting", "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTROL: the untalented channel aura is still on its target", "actor": "plain_golem",
+      "metric": "aura", "spell": 500965, "caster": "plain", "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTROL: the untalented channel completes", "actor": "plain",
+      "metric": "casting", "equals": 0, "within_ms": 1500
+    }
+  ]
+}

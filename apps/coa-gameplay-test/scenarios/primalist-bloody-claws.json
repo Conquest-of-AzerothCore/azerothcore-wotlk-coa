@@ -1,7 +1,12 @@
 {
   "schema": 1,
   "name": "Primalist Bloody Claws pet damage and periodic healing",
-  "contract": "Real pet damage applies 10/20/30% periodic healing reduction for fifteen seconds, capped at three stacks. Actual Rejuvenation ticks and direct healing exercise the recipient; native incoming healing probes isolate direct/periodic modifiers. Talent removal stops further applications and existing stacks expire.",
+  "contract": [
+    "Real pet damage applies 10/20/30% periodic healing reduction for fifteen seconds, capped at three",
+    "stacks. Actual Rejuvenation ticks and direct healing exercise the recipient; native incoming healing",
+    "probes isolate direct/periodic modifiers. Talent removal stops further applications and existing stacks",
+    "expire."
+  ],
   "players": [
     {
       "id": "primalist",
@@ -41,9 +46,9 @@
       "o": 3.14159
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "primalist",
-      "command": ".localspec 59"
+      "id": 59
     },
     {
       "action": "pvp",
@@ -57,9 +62,9 @@
       "value": 90000
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "enemy",
-      "command": ".localspec 59"
+      "id": 59
     },
     {
       "action": "pvp",
@@ -89,6 +94,26 @@
       "metric": "pet_entry",
       "equals": 1188,
       "within_ms": 24000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 61017,
+      "effect": 0,
+      "min": 100,
+      "within_ms": 4000,
+      "label": "Native pet hit scaling has settled"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 61017,
+      "effect": 2,
+      "min": 100,
+      "within_ms": 4000,
+      "label": "Native pet expertise scaling has settled"
     },
     {
       "action": "unlearn",

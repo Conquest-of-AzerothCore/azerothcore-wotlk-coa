@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Demonfire Plating rank 1 reduces magic damage taken by 2% and raises Stamina by 3% (#877)",
+  "contract": "Demonfire Plating rank 1 is spell 704966 -- a distinct spell ID from rank 2 (302549), which apps/coa-gameplay-test/scenarios/knight-of-xoroth-demonfire-plating-damage-and-stamina.json already covers for issue #1833; do not conflate the two. 704966 reads 'Reduces your damage taken by $s1% and increases your Stamina by $s2%.' (rank 1 tooltip: -2% damage taken, +3% Stamina, matching the installed moa_description). Effect 0 is native aura 87 (SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN), EffectMiscValue 126 (all magic schools: Holy/Fire/Nature/Frost/Shadow/Arcane, excludes SPELL_SCHOOL_MASK_NORMAL bit 0), EffectBasePoints -3 with DieSides 1 -> -2, verified directly via csv.DictReader against /home/fab/CoaServer/reference/snapshots/ascension-data/tables/spell.csv.gz. Its handler comment is at SpellAuraEffects.cpp:152 (VERIFIED: not :150 as an earlier pass cited -- line 150 is aura 85's dispatch-table entry, two rows above), consumed at Unit.cpp:9427 and :10940 via GetTotalAuraMultiplier(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, ... effect->GetMiscValue() & spellProto->GetSchoolMask()), a real native consumer gated by school mask. Effect 1 is native aura 137 (SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE), EffectMiscValue 2 (STAT_STAMINA), EffectBasePoints 2 with DieSides 1 -> 3, handler AuraEffect::HandleModTotalPercentStat (SpellAuraEffects.cpp:202,4510) -- a fully native stat-percent aura. No script anywhere references 704966; both effects are native generic auras. The scenario probes incoming damage from Fire-school spell 524919 (Burning Blade, SchoolMask=SPELL_SCHOOL_MASK_FIRE=4), which the 126 misc mask includes -- the same probe spell used by the rank 2 scenario.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    },
+    {
+      "id": "attacker",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "snapshot", "actor": "knight", "metric": "stat", "stat": 2, "save_as": "stam_before" },
+    {
+      "action": "snapshot", "actor": "knight", "metric": "spell_damage_taken", "spell": 524919, "target": "attacker",
+      "save_as": "fire_damage_taken_before"
+    },
+    { "action": "learn", "actor": "knight", "spell": 704966 },
+    { "action": "set_aura", "actor": "knight", "spell": 704966, "stacks": 1, "label": "Force rank 1 of the Demonfire Plating passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: rank 1 of Demonfire Plating is active",
+      "actor": "knight", "metric": "aura", "spell": 704966, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Stamina rises by ~3%",
+      "actor": "knight", "metric": "stat", "stat": 2, "ratio_to": "stam_before", "min": 1.025, "max": 1.035
+    },
+    {
+      "action": "assert", "label": "CONTRACT: incoming Fire-school damage drops by ~2%",
+      "actor": "knight", "metric": "spell_damage_taken", "spell": 524919, "target": "attacker",
+      "ratio_to": "fire_damage_taken_before", "min": 0.975, "max": 0.985
+    }
+  ]
+}

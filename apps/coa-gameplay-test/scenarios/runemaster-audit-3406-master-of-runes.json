@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Issue 3406: Master of Runes cuts Rune-spell cooldowns by the tooltip's 25%",
+  "contract": [
+    "804531 is a native SPELL_AURA_ADD_PCT_MODIFIER aura (AuraEffect::CalculateSpellMod, SpellAuraEffects.cpp:173)",
+    "on SPELLMOD_COOLDOWN (misc=11), EffectBasePoints[0]=-26 (displayed -25%, matching the tooltip's 25%",
+    "reduction), family 38 classmask0=0x1000000/classmask1=0x2000000. Silencing Rune 802631's own",
+    "SpellFamilyFlags[0]=0x1000000 overlaps classmask0, so it is affected. Silencing Rune's Spell.dbc",
+    "RecoveryTime is 90000ms. SPELLMOD_COOLDOWN is applied generically at spell-cast cooldown calculation",
+    "(Player.cpp). No CoA code runs at 804531.",
+    "Verification notes: (1) Silencing Rune's CastingTimeIndex 16 resolves to a real 1500ms cast time",
+    "(SpellCastTimes.dbc) - the cooldown is only registered once the cast finishes (Spell::SendSpellCooldown,",
+    "called from _handle_finish_phase), so both cooldown_ms reads need a retry window past 1500ms, not an",
+    "immediate single check. (2) 802631 also has its own StartRecoveryCategory 133 / StartRecoveryTime 1000ms",
+    "(a 1s GCD) - reset_cooldown only clears the plain per-spell cooldown entry, not this GCD, so the second",
+    "cast needs to wait out the GCD from the first cast before it will be accepted."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [{"id": "rm", "race": 1, "class": 32, "level": 60}],
+  "steps": [
+    {"action": "wait", "ms": 500},
+    {"action": "learn", "actor": "rm", "spell": 802631},
+    {"action": "cast", "actor": "rm", "spell": 802631},
+    {"action": "assert", "label": "SETUP: base Silencing Rune cooldown matches the DBC's 90000ms", "actor": "rm",
+     "metric": "cooldown_ms", "spell": 802631, "min": 85000, "max": 95000, "within_ms": 2500},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 802631},
+    {"action": "wait", "label": "Let the 1s GCD from the first cast expire", "ms": 1200},
+    {"action": "learn", "actor": "rm", "spell": 804531},
+    {"action": "cast", "actor": "rm", "spell": 802631},
+    {"action": "assert", "label": "CONTRACT: cooldown is reduced ~25% with Master of Runes", "actor": "rm",
+     "metric": "cooldown_ms", "spell": 802631, "min": 62000, "max": 71000, "within_ms": 2500}
+  ]
+}

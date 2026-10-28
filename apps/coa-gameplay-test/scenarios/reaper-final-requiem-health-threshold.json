@@ -1,0 +1,170 @@
+{
+  "schema": 1,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "reaper",
+      "entry": 36,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "name": "Final Requiem Shadow critical chance below 20% (#1285)",
+  "contract": [
+    "Final Requiem ranks add fifteen or thirty critical percentage points below 20% target health.",
+    "The bonus applies to Shadow damage abilities and excludes Frost abilities."
+  ],
+  "timeout_ms": 60000,
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 25000
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "spell_taken_crit_chance",
+      "spell": 500517,
+      "target": "target",
+      "save_as": "shadow_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "spell_taken_crit_chance",
+      "spell": 503286,
+      "target": "target",
+      "save_as": "frost_base"
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 560486
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 560486,
+      "equals": 1,
+      "label": "Final Requiem rank one active"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_taken_crit_chance",
+      "spell": 500517,
+      "target": "target",
+      "relative_to": "shadow_base",
+      "equals": 0,
+      "label": "No Shadow crit bonus above twenty percent"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 19000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "health_pct",
+      "max": 19.99,
+      "label": "Target below twenty percent"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_taken_crit_chance",
+      "spell": 500517,
+      "target": "target",
+      "relative_to": "shadow_base",
+      "equals": 15,
+      "label": "Rank one adds fifteen Shadow critical points"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_taken_crit_chance",
+      "spell": 503286,
+      "target": "target",
+      "relative_to": "frost_base",
+      "equals": 0,
+      "label": "Rank one excludes Frost Dreadwake"
+    },
+    {
+      "action": "unlearn",
+      "actor": "reaper",
+      "spell": 560486
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 560486,
+      "equals": 0,
+      "label": "Rank one removed"
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 561358
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 561358,
+      "equals": 1,
+      "label": "Final Requiem rank two active"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_taken_crit_chance",
+      "spell": 503286,
+      "target": "target",
+      "relative_to": "frost_base",
+      "equals": 0,
+      "label": "Rank two excludes Frost Dreadwake"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_taken_crit_chance",
+      "spell": 500517,
+      "target": "target",
+      "relative_to": "shadow_base",
+      "equals": 30,
+      "label": "Rank two adds thirty Shadow critical points"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 21000
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_taken_crit_chance",
+      "spell": 500517,
+      "target": "target",
+      "relative_to": "shadow_base",
+      "equals": 0,
+      "label": "Rank two bonus ends above twenty percent"
+    }
+  ]
+}

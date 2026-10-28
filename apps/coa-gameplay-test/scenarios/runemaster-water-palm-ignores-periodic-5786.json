@@ -1,0 +1,155 @@
+{
+  "schema": 1,
+  "name": "Water Palm Sigil ignores periodic damage but consumes on direct magic (#5786)",
+  "contract": [
+    "Original Palm Sigil 500639 affects the next direct magic hit. Physical auto attacks and periodic damage are independent negative controls.",
+    "Observe a real nonqualifying damaging hit, then a normal Elemental Burst. The former must preserve the charge and cast no helper; the latter must trigger once and consume it.",
+    "Snapshot the periodic-damage counter after the normal Sigil cast finishes. Require a new tick beyond that snapshot before checking the charge and helper, so an earlier tick cannot satisfy the exclusion control."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "rm",
+      "entry": 36,
+      "level": 80,
+      "health": 10000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 500639
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 502838
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 589
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 589,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 500469,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 500639
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura_charges",
+      "spell": 500639,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 589,
+      "target": "dummy",
+      "save_as": "periodic_before_active_control",
+      "label": "Count only new periodic ticks after the Sigil becomes active"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 589,
+      "target": "dummy",
+      "min": 1,
+      "within_ms": 4000,
+      "relative_to": "periodic_before_active_control",
+      "label": "A new periodic damage tick actually lands while the Sigil is active"
+    },
+    {
+      "action": "assert",
+      "label": "An actual periodic hit does not consume the next-direct-magic charge",
+      "actor": "rm",
+      "metric": "aura_charges",
+      "spell": 500639,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807818,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 502838,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 502838,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807818,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 500639,
+      "equals": 0
+    }
+  ]
+}

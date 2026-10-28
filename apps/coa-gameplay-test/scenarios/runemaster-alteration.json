@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "name": "Runemaster Alteration strengthens Runic Tattoos by 50% (#531)",
+  "contract": [
+    "Tooltip 707875: 'Increases the effectiveness of your Runic Tattoos by $s1%'.",
+    "Its only effect is aura 108 SPELLMOD_ALL_EFFECTS with BasePoints 49 (+50%).",
+    "Its family 38 mask 0x00200004/0/0x00004020 matches only Runic Tattoos, including every elemental rank.",
+    "The native modifier multiplies each tattoo effect value and truncates the result.",
+    "Earth rank 1 therefore gives 112 instead of 75 armor and 7 instead of 5 Nature resistance.",
+    "Learning Alteration recalculates an active tattoo; removing Alteration restores it.",
+    "A newly cast Water tattoo regenerates 1.5 times the mana of the same tattoo on an unmodified player."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80},
+    {"id": "plain", "race": 1, "class": 32, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the characters settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 801094},
+    {"action": "learn", "actor": "rm", "spell": 801107},
+    {"action": "learn", "actor": "plain", "spell": 801107},
+    {
+      "action": "snapshot", "label": "Armor before any tattoo", "actor": "rm", "metric": "armor",
+      "save_as": "base_armor"
+    },
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "actor": "rm", "spell": 801094},
+    {
+      "action": "assert", "label": "Runic Tattoos: Earth is active", "actor": "rm", "metric": "aura", "spell": 801094,
+      "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Without Alteration Earth grants 75 armor", "actor": "rm", "metric": "aura_amount",
+      "spell": 801094, "effect": 0, "equals": 75
+    },
+    {"action": "learn", "actor": "rm", "spell": 707875},
+    {
+      "action": "assert", "label": "Alteration passive is active", "actor": "rm", "metric": "aura", "spell": 707875,
+      "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Learning Alteration raises the active Earth tattoo's armor by 50%", "actor": "rm",
+      "metric": "aura_amount", "spell": 801094, "effect": 0, "equals": 112, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Alteration raises Earth's Nature resistance by 50%", "actor": "rm",
+      "metric": "aura_amount", "spell": 801094, "effect": 1, "equals": 7
+    },
+    {
+      "action": "assert", "label": "The stronger tattoo reaches the character's armor", "actor": "rm",
+      "metric": "armor", "relative_to": "base_armor", "equals": 112
+    },
+    {"action": "wait", "label": "Let the tattoo category cooldown pass", "ms": 1600},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "actor": "rm", "spell": 801107},
+    {"action": "set_power", "actor": "plain", "power": 0, "value": 2000},
+    {"action": "cast", "actor": "plain", "spell": 801107},
+    {
+      "action": "assert", "label": "Runic Tattoos: Water is active", "actor": "rm", "metric": "aura", "spell": 801107,
+      "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Control: Runic Tattoos: Water is active", "actor": "plain", "metric": "aura",
+      "spell": 801107, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "snapshot", "label": "Water mana regeneration without Alteration", "actor": "plain",
+      "metric": "aura_amount", "spell": 801107, "effect": 0, "save_as": "plain_water"
+    },
+    {
+      "action": "assert", "label": "Alteration raises a newly cast Water tattoo's mana regeneration by 50%",
+      "actor": "rm", "metric": "aura_amount", "spell": 801107, "effect": 0, "ratio_to": "plain_water", "min": 1.48,
+      "max": 1.51
+    },
+    {"action": "unlearn", "actor": "rm", "spell": 707875},
+    {
+      "action": "assert", "label": "Removing Alteration returns Water to its normal strength", "actor": "rm",
+      "metric": "aura_amount", "spell": 801107, "effect": 0, "ratio_to": "plain_water", "equals": 1, "within_ms": 1000
+    }
+  ]
+}

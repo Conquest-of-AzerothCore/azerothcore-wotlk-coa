@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Mythic+ wings and rewards: SFK Halls of the Damned credits Odo with its own encounter id, a Mythical Cache opens",
+  "contract": "In a Shadowfang Keep - Halls of the Damned key (LFG 3320), Odo the Blindwatcher is the final boss with client encounter 15034 (DungeonEncounterExtra.dbc), not the full-dungeon id 2468. Using a Mythical Cache (Mythic 3, 2093964) consumes it and gives one item.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "set_health", "actor": "hero", "value": 5000000, "maximum": 5000000 },
+    { "action": "add_item", "actor": "hero", "item": 2093964, "count": 1 },
+    { "action": "use_item", "actor": "hero", "item": 2093964, "spell": 84284 },
+    { "action": "assert", "label": "the cache is used up", "actor": "hero", "metric": "item_count", "item": 2093964, "equals": 0, "within_ms": 2000 },
+    { "action": "ascension_dungeon_difficulty_packet", "actor": "hero", "value": 2 },
+    { "action": "wait", "ms": 250 },
+    { "action": "teleport", "actor": "hero", "map": 33, "x": -229.135, "y": 2109.18, "z": 76.8898 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "add_item", "actor": "hero", "item": 400313, "count": 1 },
+    { "action": "use_item", "actor": "hero", "item": 400313, "spell": 161 },
+    { "action": "assert", "label": "CONTROL: socket window", "actor": "hero", "metric": "server_packets", "opcode": 2310, "equals": 1, "within_ms": 1000 },
+    { "action": "client_packet", "actor": "hero", "opcode": 1319 },
+    { "action": "wait", "ms": 10500 },
+    { "action": "summon", "actor": "hero", "entry": 4279, "as": "odo", "distance": 4 },
+    { "action": "wait", "ms": 300 },
+    { "action": "attack_nearby", "actor": "hero", "entry": 4279, "kill": true },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "progress: one encounter", "actor": "hero", "metric": "server_packet_u32", "opcode": 2313, "index": 0, "equals": 1 },
+    { "action": "assert", "label": "progress: Odo as the client lists him for this wing", "actor": "hero", "metric": "server_packet_u32", "opcode": 2313, "index": 1, "equals": 15034 }
+  ]
+}

@@ -1,0 +1,600 @@
+{
+  "schema": 1,
+  "name": "Felsworn: idle Doomstride refreshes do not proc Twisted Onslaught or Uther's Light (#1427)",
+  "contract": [
+    "Twisted Onslaught (enchant 105115 equips 1968716): 'Your spell, ranged & melee attacks have chance to ...'.",
+    "1968716 ProcFlags 0x10110: done melee-class, ranged-class and harmful magic spells; ProcChance 15.",
+    "Uther's Light 8397 (Uther's Strength 11302): 'Has a 2% chance when struck in combat'.",
+    "8397 ProcFlags 0x28: taken melee swings and taken melee-class spells; ProcChance 2.",
+    "Neither may fire while the Felsworn stands idle: no attack is made and nothing strikes the character.",
+    "Doomstride 804613 keeps the hidden resist helper 807962 on a Felsworn at full health.",
+    "807962 lasts 11 s (SpellDuration 38); the Felsworn refresh recasts it on the character whenever it is missing.",
+    "807962 has DmgClass 2 (melee): each recast is a done and a taken melee-class spell on the same character.",
+    "Twisted Onslaught (SPELL_ATTR3_CAN_PROC_FROM_PROCS) and Uther's Light (taken flags) accept triggered spells.",
+    "Removing the helper forces the same recast on demand instead of waiting 11 s per cycle.",
+    "Over 40 idle recasts a 15% proc misses every time with probability 0.85^40 = 0.15%.",
+    "Control: 40 Bane of Fire casts at an enemy still roll Twisted Onslaught (same 0.15% miss probability)."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {"id": "felsworn", "race": 1, "class": 14, "level": 60, "spell_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "enemy", "owner": "felsworn", "entry": 36, "level": 60, "distance": 5}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the character and the enemy settle", "ms": 3000},
+    {"action": "learn", "actor": "felsworn", "spell": 804613},
+    {"action": "learn", "actor": "felsworn", "spell": 707901},
+    {
+      "action": "assert", "label": "Doomstride passive is active", "actor": "felsworn", "metric": "aura",
+      "spell": 804613, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "set_aura", "label": "Twisted Onslaught weapon enchant aura", "actor": "felsworn", "spell": 1968716,
+      "stacks": 1
+    },
+    {"action": "set_aura", "label": "Uther's Strength equip aura", "actor": "felsworn", "spell": 8397, "stacks": 1},
+    {
+      "action": "assert", "label": "At full health the Doomstride helper is on the character", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 2000
+    },
+    {"action": "set_aura", "label": "Idle cycle 1: the helper ends", "actor": "felsworn", "spell": 807962, "stacks": 0},
+    {
+      "action": "assert", "label": "Idle cycle 1: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {"action": "set_aura", "label": "Idle cycle 2: the helper ends", "actor": "felsworn", "spell": 807962, "stacks": 0},
+    {
+      "action": "assert", "label": "Idle cycle 2: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {"action": "set_aura", "label": "Idle cycle 3: the helper ends", "actor": "felsworn", "spell": 807962, "stacks": 0},
+    {
+      "action": "assert", "label": "Idle cycle 3: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {"action": "set_aura", "label": "Idle cycle 4: the helper ends", "actor": "felsworn", "spell": 807962, "stacks": 0},
+    {
+      "action": "assert", "label": "Idle cycle 4: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {"action": "set_aura", "label": "Idle cycle 5: the helper ends", "actor": "felsworn", "spell": 807962, "stacks": 0},
+    {
+      "action": "assert", "label": "Idle cycle 5: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {"action": "set_aura", "label": "Idle cycle 6: the helper ends", "actor": "felsworn", "spell": 807962, "stacks": 0},
+    {
+      "action": "assert", "label": "Idle cycle 6: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {"action": "set_aura", "label": "Idle cycle 7: the helper ends", "actor": "felsworn", "spell": 807962, "stacks": 0},
+    {
+      "action": "assert", "label": "Idle cycle 7: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {"action": "set_aura", "label": "Idle cycle 8: the helper ends", "actor": "felsworn", "spell": 807962, "stacks": 0},
+    {
+      "action": "assert", "label": "Idle cycle 8: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {"action": "set_aura", "label": "Idle cycle 9: the helper ends", "actor": "felsworn", "spell": 807962, "stacks": 0},
+    {
+      "action": "assert", "label": "Idle cycle 9: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 10: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 10: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 11: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 11: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 12: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 12: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 13: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 13: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 14: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 14: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 15: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 15: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 16: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 16: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 17: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 17: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 18: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 18: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 19: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 19: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 20: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 20: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 21: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 21: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 22: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 22: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 23: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 23: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 24: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 24: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 25: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 25: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 26: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 26: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 27: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 27: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 28: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 28: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 29: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 29: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 30: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 30: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 31: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 31: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 32: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 32: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 33: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 33: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 34: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 34: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 35: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 35: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 36: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 36: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 37: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 37: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 38: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 38: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 39: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 39: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "set_aura", "label": "Idle cycle 40: the helper ends", "actor": "felsworn", "spell": 807962,
+      "stacks": 0
+    },
+    {
+      "action": "assert", "label": "Idle cycle 40: the refresh puts the helper back", "actor": "felsworn",
+      "metric": "aura", "spell": 807962, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The helper was cast on the idle character at least 40 times", "actor": "felsworn",
+      "metric": "spell_cast_count", "spell": 807962, "min": 40
+    },
+    {
+      "action": "assert", "label": "The character stayed out of combat", "actor": "felsworn", "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert", "label": "Twisted Onslaught never procs while the Felsworn is idle", "actor": "felsworn",
+      "metric": "spell_proc_count", "spell": 1968716, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Uther's Light never procs while nothing strikes the Felsworn", "actor": "felsworn",
+      "metric": "spell_proc_count", "spell": 8397, "equals": 0
+    },
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 1: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 1: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 2: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 2: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 3: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 3: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 4: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 4: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 5: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 5: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 6: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 6: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 7: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 7: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 8: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 8: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 9: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 9: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 10: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 10: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 11: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 11: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 12: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 12: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 13: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 13: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 14: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 14: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 15: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 15: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 16: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 16: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 17: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 17: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 18: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 18: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 19: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 19: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 20: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 20: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 21: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 21: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 22: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 22: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 23: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 23: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 24: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 24: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 25: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 25: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 26: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 26: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 27: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 27: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 28: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 28: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 29: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 29: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 30: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 30: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 31: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 31: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 32: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 32: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 33: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 33: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 34: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 34: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 35: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 35: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 36: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 36: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 37: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 37: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 38: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 38: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 39: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 39: global cooldown", "ms": 1100},
+    {"action": "set_power", "actor": "felsworn", "power": 3, "value": 100},
+    {
+      "action": "cast", "label": "Control cast 40: Bane of Fire at the enemy", "actor": "felsworn", "spell": 707901,
+      "target": "enemy"
+    },
+    {"action": "wait", "label": "Control cast 40: global cooldown", "ms": 1100},
+    {
+      "action": "assert", "label": "Control: Bane of Fire landed on the enemy", "actor": "enemy", "metric": "aura",
+      "spell": 707901, "caster": "felsworn", "equals": 1
+    },
+    {
+      "action": "assert", "label": "Control: harmful spells cast at an enemy still proc Twisted Onslaught",
+      "actor": "felsworn", "metric": "spell_proc_count", "spell": 1968716, "min": 1
+    }
+  ]
+}

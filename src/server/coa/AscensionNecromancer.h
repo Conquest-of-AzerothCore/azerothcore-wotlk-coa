@@ -95,6 +95,16 @@ inline uint32 OccupancyCreature(uint32 aura)
             return row.creature;
     return 0;
 }
+inline uint8 WardMinionEffectMask(SpellInfo const* info)
+{
+    uint8 mask = MAX_EFFECT_MASK;
+    if (!info)
+        return mask;
+    for (uint8 index = 0; index < MAX_SPELL_EFFECTS; ++index)
+        if (info->Effects[index].Effect == SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS)
+            mask &= ~(1 << index);
+    return mask;
+}
 bool Named(SpellInfo const* info, uint32 root);
 Player* Owner(Unit const* unit);
 NecromancerState& State(Player* player);

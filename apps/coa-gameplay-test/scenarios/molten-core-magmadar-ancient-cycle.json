@@ -1,0 +1,654 @@
+{
+  "schema": 1,
+  "name": "Molten Core: Magmadar's body cycles Ancient Hysteria, Dread, Fury and Despair every 66.6-70.2s",
+  "contract": [
+    "Archive WoWCombatLog evidence (4 Magmadar pulls with the cycle, 2026-05-28 to 2026-08-23): one area spell on the raid, always in the order Hysteria 2105311,",
+    "Dread 2105312, Fury 2105313, Despair 2105310, first cast 31.9-35.9s after the pull, then 66.6-70.2s between casts; the starting spell differs per pull, so the server",
+    "draws it at random. No spell lands before 25s; once four casts have run (at most 246.5s) each of the four was cast exactly once."
+  ],
+  "timeout_ms": 330000,
+  "location": {
+    "map": 409,
+    "x": 1144.6,
+    "y": -1020.5,
+    "z": -185.6,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "hero",
+      "entry": 11982,
+      "health": 4000000,
+      "reaction": 2,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000000,
+      "maximum": 2000000000,
+      "label": "Configure the survival health before aggressive creatures can attack"
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Molten Core",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 409
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero survives the settling",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "attack",
+      "label": "Engage the boss",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the boss fights the hero",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 0,
+      "label": "Clear any stale Divine Shield before fixturing it fresh"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1,
+      "label": "Fixture Divine Shield (full school immunity): the hero has no healer, so it must not take real damage to survive the whole Ancient cycle"
+    },
+    {
+      "action": "wait",
+      "ms": 25000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11982,
+      "spell": 2105311,
+      "equals": 0,
+      "label": "Ancient Hysteria has not been cast before the 31.9s first-cast floor"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11982,
+      "spell": 2105312,
+      "equals": 0,
+      "label": "Ancient Dread has not been cast before the 31.9s first-cast floor"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11982,
+      "spell": 2105313,
+      "equals": 0,
+      "label": "Ancient Fury has not been cast before the 31.9s first-cast floor"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11982,
+      "spell": 2105310,
+      "equals": 0,
+      "label": "Ancient Despair has not been cast before the 31.9s first-cast floor"
+    },
+    {
+      "action": "wait",
+      "ms": 10000,
+      "label": "Hold through the Ancient cycle in small increments"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 0,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "wait",
+      "ms": 10000,
+      "label": "Hold through the Ancient cycle in small increments"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 0,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "wait",
+      "ms": 10000,
+      "label": "Hold through the Ancient cycle in small increments"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 0,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "wait",
+      "ms": 10000,
+      "label": "Hold through the Ancient cycle in small increments"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 0,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "wait",
+      "ms": 10000,
+      "label": "Hold through the Ancient cycle in small increments"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 0,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "wait",
+      "ms": 10000,
+      "label": "Hold through the Ancient cycle in small increments"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 0,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "wait",
+      "ms": 10000,
+      "label": "Hold through the Ancient cycle in small increments"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 0,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "wait",
+      "ms": 10000,
+      "label": "Hold through the Ancient cycle in small increments"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 0,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "wait",
+      "ms": 10000,
+      "label": "Hold through the Ancient cycle in small increments"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 0,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "wait",
+      "ms": 10000,
+      "label": "Hold through the Ancient cycle in small increments"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 0,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "wait",
+      "ms": 10000,
+      "label": "Hold through the Ancient cycle in small increments"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 0,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "wait",
+      "ms": 10000,
+      "label": "Hold through the Ancient cycle in small increments"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 0,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "wait",
+      "ms": 10000,
+      "label": "Hold through the Ancient cycle in small increments"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 0,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "wait",
+      "ms": 10000,
+      "label": "Hold through the Ancient cycle in small increments"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 0,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "wait",
+      "ms": 10000,
+      "label": "Hold through the Ancient cycle in small increments"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 0,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "wait",
+      "ms": 10000,
+      "label": "Hold through the Ancient cycle in small increments"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 0,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "wait",
+      "ms": 10000,
+      "label": "Hold through the Ancient cycle in small increments"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 0,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "wait",
+      "ms": 10000,
+      "label": "Hold through the Ancient cycle in small increments"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 0,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "wait",
+      "ms": 10000,
+      "label": "Hold through the Ancient cycle in small increments"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 0,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "wait",
+      "ms": 10000,
+      "label": "Hold through the Ancient cycle in small increments"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 0,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "wait",
+      "ms": 10000,
+      "label": "Hold through the Ancient cycle in small increments"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 0,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "wait",
+      "ms": 10000,
+      "label": "Hold through the Ancient cycle in small increments"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 0,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "wait",
+      "ms": 10000,
+      "label": "Hold through the Ancient cycle in small increments"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 0,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1,
+      "label": "Refresh Divine Shield before it expires"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11982,
+      "spell": 2105311,
+      "min": 1,
+      "within_ms": 260000,
+      "label": "Ancient Hysteria is cast once the cycle has run through"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11982,
+      "spell": 2105312,
+      "min": 1,
+      "within_ms": 260000,
+      "label": "Ancient Dread is cast once the cycle has run through"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11982,
+      "spell": 2105313,
+      "min": 1,
+      "within_ms": 260000,
+      "label": "Ancient Fury is cast once the cycle has run through"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11982,
+      "spell": 2105310,
+      "min": 1,
+      "within_ms": 260000,
+      "label": "Ancient Despair is cast once the cycle has run through"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11982,
+      "spell": 2105311,
+      "equals": 1,
+      "label": "Ancient Hysteria was cast exactly once in the first four casts"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11982,
+      "spell": 2105312,
+      "equals": 1,
+      "label": "Ancient Dread was cast exactly once in the first four casts"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11982,
+      "spell": 2105313,
+      "equals": 1,
+      "label": "Ancient Fury was cast exactly once in the first four casts"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11982,
+      "spell": 2105310,
+      "equals": 1,
+      "label": "Ancient Despair was cast exactly once in the first four casts"
+    }
+  ]
+}

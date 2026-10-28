@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Prestige Mode: the Prestige Challenge aura multiplies kill and quest experience by 2.5",
+  "contract": "A character with the Prestige Challenge aura 9930831 earns 150% more experience from every source, after the realm rates, CoAPrestige.ExperienceBonusPercent defaulting to the aura's own Spell.dbc amount of 150. Both level-20 characters use the live Ascension rates at x1 dynamic experience (see xp-ascension-rates). A level-20 kill in Elwynn Forest awards 146 without the aura; the same character's next kill, with the aura, awards 146 * 2.5 = 365. Raven Hill (163) awards 456 to a character without the aura and 456 * 2.5 = 1140 to one with it.",
+  "timeout_ms": 180000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    { "id": "prestiged", "race": 1, "class": 1, "level": 20 },
+    { "id": "plain", "race": 1, "class": 1, "level": 20 }
+  ],
+  "creatures": [
+    { "id": "first_target", "owner": "prestiged", "entry": 2158, "level": 20, "health": 20, "distance": 2 },
+    { "id": "second_target", "owner": "prestiged", "entry": 2158, "level": 20, "health": 20, "distance": 2 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "command", "actor": "prestiged", "command": ".xp 1" },
+    { "action": "command", "actor": "plain", "command": ".xp 1" },
+
+    { "action": "snapshot", "actor": "prestiged", "metric": "xp", "save_as": "plain_kill" },
+    { "action": "attack", "actor": "prestiged", "target": "first_target" },
+    { "action": "assert", "actor": "first_target", "metric": "alive", "equals": 0, "within_ms": 45000 },
+    { "action": "assert", "label": "A kill without the aura", "actor": "prestiged", "metric": "xp", "relative_to": "plain_kill", "equals": 146, "within_ms": 5000 },
+    { "action": "stop_attack", "actor": "prestiged" },
+
+    { "action": "set_aura", "actor": "prestiged", "spell": 9930831, "stacks": 1 },
+    { "action": "assert", "actor": "prestiged", "metric": "aura", "spell": 9930831, "equals": 1 },
+    { "action": "snapshot", "actor": "prestiged", "metric": "xp", "save_as": "prestiged_kill" },
+    { "action": "attack", "actor": "prestiged", "target": "second_target" },
+    { "action": "assert", "actor": "second_target", "metric": "alive", "equals": 0, "within_ms": 45000 },
+    { "action": "assert", "label": "The same kill with the aura", "actor": "prestiged", "metric": "xp", "relative_to": "prestiged_kill", "equals": 365, "within_ms": 5000 },
+    { "action": "stop_attack", "actor": "prestiged" },
+
+    { "action": "prepare_quest", "actor": "plain", "quest": 163 },
+    { "action": "prepare_quest", "actor": "prestiged", "quest": 163 },
+    { "action": "snapshot", "actor": "plain", "metric": "xp", "save_as": "plain_quest" },
+    { "action": "snapshot", "actor": "prestiged", "metric": "xp", "save_as": "prestiged_quest" },
+    { "action": "reward_quest", "actor": "plain", "quest": 163 },
+    { "action": "reward_quest", "actor": "prestiged", "quest": 163 },
+    { "action": "assert", "label": "Raven Hill without the aura", "actor": "plain", "metric": "xp", "relative_to": "plain_quest", "equals": 456, "within_ms": 5000 },
+    { "action": "assert", "label": "Raven Hill with the aura", "actor": "prestiged", "metric": "xp", "relative_to": "prestiged_quest", "equals": 1140, "within_ms": 5000 }
+  ]
+}

@@ -1,0 +1,292 @@
+{
+  "schema": 1,
+  "name": "Build and Deconstruct Sentry Turret keep a single Deconstruct grant (#6638, #6615)",
+  "contract": [
+    "Build: Sentry Turret 500239 summons Sentry Turret 50046, and the summon teaches Deconstruct Sentry Turret 500470 as a",
+    "temporary spell while it also rewrites the build button to it with Player::SetTemporarySpellReplacement, so one",
+    "button builds and then deconstructs. Deconstruct 500470 runs spell_ascension_tinker_ability's 500470 branch, which",
+    "despawns every owned turret. Tearing down the last turret must take the replacement and the temporary grant away with",
+    "it, exactly as AscensionTinker::Refresh does for Remote Detonation: an unanswered temporary grant leaves the client a",
+    "copy of Deconstruct per build and prints another learn notice. This scenario runs two full build/deconstruct cycles.",
+    "Client action-bar rendering is outside this server-side control."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 10
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the spawn and level scaling settle",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Build: Sentry Turret",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "assert",
+      "label": "Deconstruct is unknown before a turret stands",
+      "actor": "tinker",
+      "metric": "knows_spell",
+      "spell": 500470,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The build button is not rewritten yet",
+      "actor": "tinker",
+      "metric": "temporary_spell_replacement",
+      "spell": 500239,
+      "equals": 500239
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown from learning pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "cast",
+      "label": "First build",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "assert",
+      "label": "A Sentry Turret is deployed",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50046,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The turret marks the Tinker with 807293",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 807293,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The turret grants Deconstruct as a temporary spell",
+      "actor": "tinker",
+      "metric": "knows_spell",
+      "spell": 500470,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The button now reads Deconstruct",
+      "actor": "tinker",
+      "metric": "temporary_spell_replacement",
+      "spell": 500239,
+      "equals": 500470,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The client was told about the Deconstruct grant once",
+      "actor": "tinker",
+      "metric": "spellbook_learned_alerts",
+      "spell": 500470,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown from the build pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500470
+    },
+    {
+      "action": "cast",
+      "label": "First deconstruct",
+      "actor": "tinker",
+      "spell": 500470
+    },
+    {
+      "action": "assert",
+      "label": "The turret is gone",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50046,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The turret marker is gone",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 807293,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The button reads Build again",
+      "actor": "tinker",
+      "metric": "temporary_spell_replacement",
+      "spell": 500239,
+      "equals": 500239,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The temporary grant is taken back with the turret",
+      "actor": "tinker",
+      "metric": "knows_spell",
+      "spell": 500470,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The client is told the grant is gone",
+      "actor": "tinker",
+      "metric": "client_knows_spell",
+      "spell": 500470,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown from the deconstruct pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "cast",
+      "label": "Second build",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "assert",
+      "label": "A second turret is deployed",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50046,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The second turret grants Deconstruct again",
+      "actor": "tinker",
+      "metric": "knows_spell",
+      "spell": 500470,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The button reads Deconstruct again",
+      "actor": "tinker",
+      "metric": "temporary_spell_replacement",
+      "spell": 500239,
+      "equals": 500470,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown from the second build pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500470
+    },
+    {
+      "action": "cast",
+      "label": "Second deconstruct",
+      "actor": "tinker",
+      "spell": 500470
+    },
+    {
+      "action": "assert",
+      "label": "The second turret is gone",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50046,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The second grant is taken back as well",
+      "actor": "tinker",
+      "metric": "knows_spell",
+      "spell": 500470,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The button reads Build again after the second cycle",
+      "actor": "tinker",
+      "metric": "temporary_spell_replacement",
+      "spell": 500239,
+      "equals": 500239,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The client holds the build spell, not the deconstruct helper",
+      "actor": "tinker",
+      "metric": "client_knows_spell",
+      "spell": 500239,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The client holds no leftover copy of Deconstruct",
+      "actor": "tinker",
+      "metric": "client_knows_spell",
+      "spell": 500470,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Two builds announce Deconstruct no more than once each",
+      "actor": "tinker",
+      "metric": "spellbook_learned_alerts",
+      "spell": 500470,
+      "max": 2
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Dungeon Finder keeps Vaults of Inquisition and Road to De Other Side disabled",
+  "contract": "PR #4763 removes Vaults of Inquisition (map 936, LFGDungeons 401, 1401, 2401) and Road to De Other Side (map 937, LFGDungeons 402, 1402, 2402) from Dungeon Finder with `disables` rows of type 8 (DISABLE_TYPE_LFG_MAP). LFGMgr::IsDungeonDisabled decides whether LFGMgr::InitializeLockedDungeons gives a dungeon LFG_LOCKSTATUS_RAID_LOCKED, which removes it from the random pools and from direct selection. It asks DisableMgr about the row at normal difficulty and DisableMgr answers from the row's flags, so a row with flags 0 disables nothing. Every tier of both dungeons must read as disabled, while Deadmines (6), which has no row, stays enabled.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    { "id": "seeker", "race": 1, "class": 1, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "Deadmines stays enabled", "actor": "seeker", "metric": "lfg_dungeon_disabled",
+      "dungeon": 6, "equals": 0 },
+    { "action": "assert", "label": "Vaults of Inquisition normal is disabled", "actor": "seeker",
+      "metric": "lfg_dungeon_disabled", "dungeon": 401, "equals": 1 },
+    { "action": "assert", "label": "Vaults of Inquisition heroic is disabled", "actor": "seeker",
+      "metric": "lfg_dungeon_disabled", "dungeon": 1401, "equals": 1 },
+    { "action": "assert", "label": "Vaults of Inquisition mythic is disabled", "actor": "seeker",
+      "metric": "lfg_dungeon_disabled", "dungeon": 2401, "equals": 1 },
+    { "action": "assert", "label": "Road to De Other Side normal is disabled", "actor": "seeker",
+      "metric": "lfg_dungeon_disabled", "dungeon": 402, "equals": 1 },
+    { "action": "assert", "label": "Road to De Other Side heroic is disabled", "actor": "seeker",
+      "metric": "lfg_dungeon_disabled", "dungeon": 1402, "equals": 1 },
+    { "action": "assert", "label": "Road to De Other Side mythic is disabled", "actor": "seeker",
+      "metric": "lfg_dungeon_disabled", "dungeon": 2402, "equals": 1 }
+  ]
+}

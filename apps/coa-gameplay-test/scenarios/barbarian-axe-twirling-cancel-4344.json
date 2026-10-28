@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "name": "Axe Twirling is a buff the Barbarian can cancel (#4344)",
+  "contract": "Axe Twirling (800401) is a permanent self aura that widens Throw Weapon, Gutspiller and Berserker Axe at the price of 15% less damage done. Spell.dbc marks it SPELL_ATTR4_AURA_IS_BUFF and carries neither SPELL_ATTR0_NO_AURA_CANCEL nor a duration, so the only way to turn it off is cancelling the aura. The applied aura must therefore be positive (a buff, not a debuff) and CMSG_CANCEL_AURA must remove it.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "barbarian",
+      "race": 1,
+      "class": 12,
+      "level": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "barbarian",
+      "spell": 800401
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "barbarian",
+      "spell": 800401
+    },
+    {
+      "action": "assert",
+      "label": "Axe Twirling is active",
+      "actor": "barbarian",
+      "metric": "aura",
+      "spell": 800401,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Axe Twirling is applied as a buff",
+      "actor": "barbarian",
+      "metric": "aura_positive",
+      "spell": 800401,
+      "equals": 1
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "barbarian",
+      "spell": 800401
+    },
+    {
+      "action": "assert",
+      "label": "Cancelling Axe Twirling turns it off",
+      "actor": "barbarian",
+      "metric": "aura",
+      "spell": 800401,
+      "equals": 0,
+      "within_ms": 1000
+    }
+  ]
+}

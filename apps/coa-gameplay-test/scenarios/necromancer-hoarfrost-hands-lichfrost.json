@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "name": "Necromancer Hoarfrost Hands lengthens Lichfrost's slow by 4 sec and adds 4% hit (#748)",
+  "contract": "Hoarfrost Hands 803291 is a Rime talent (CharacterAdvancement 6488, ClassType 25 = class 23, Tab 60, TalentEssenceCost 1) whose description reads 'Increases the duration of Lichfrost's movement speed slow by $/1000;s1 sec and your hit chance by $s2%.' Effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107) MiscValue 1 (SPELLMOD_DURATION), BasePoints 3999 + DieSides 1 = 4000 ms, EffectSpellClassMask (0, 0, 0x8000000) in SpellFamilyName 29, which matches every Lichfrost rank (801722 and 501969-501980, family flags 0, 0, 0x8000000; the same flag AscensionNecromancer::Lichfrost tests). Lichfrost's only aura is its effect 2 MOD_DECREASE_SPEED slow; rank 1 801722 has DurationIndex 27 = 3000 ms. Effect 1 is SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT (333), BasePoints 3 + DieSides 1 = 4, which Player::UpdateMeleeHitChances and UpdateSpellHitChances add to the melee and spell hit modifiers. The talent has no ProcFlags, so its ProcChance 20 is inert. Aura::CalcMaxDuration applies the caster's SPELLMOD_DURATION, so the Lichfrost slow must land with 3000 ms before the talent and 7000 ms after it, and both hit modifiers must rise by exactly 4.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "necro", "spell": 801722 },
+    { "action": "snapshot", "actor": "necro", "metric": "spell_hit_chance", "save_as": "spell_hit0" },
+    { "action": "snapshot", "actor": "necro", "metric": "melee_hit_chance", "save_as": "melee_hit0" },
+    { "action": "cast", "label": "Lichfrost without the talent", "actor": "necro", "spell": 801722, "target": "golem" },
+    {
+      "action": "assert", "label": "SETUP: Lichfrost slows the golem", "actor": "golem",
+      "metric": "aura", "spell": 801722, "caster": "necro", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "CONTROL: the slow lasts 3 sec without the talent", "actor": "golem",
+      "metric": "aura_duration_ms", "spell": 801722, "caster": "necro", "min": 2500, "max": 3000
+    },
+    {
+      "action": "assert", "label": "The first slow expires", "actor": "golem",
+      "metric": "aura", "spell": 801722, "caster": "necro", "equals": 0, "within_ms": 4000
+    },
+    { "action": "learn", "actor": "necro", "spell": 803291 },
+    {
+      "action": "assert", "label": "The talent aura is applied", "actor": "necro",
+      "metric": "aura", "spell": 803291, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Spell hit chance rises by 4%", "actor": "necro",
+      "metric": "spell_hit_chance", "relative_to": "spell_hit0", "min": 3.99, "max": 4.01
+    },
+    {
+      "action": "assert", "label": "Melee hit chance rises by 4%", "actor": "necro",
+      "metric": "melee_hit_chance", "relative_to": "melee_hit0", "min": 3.99, "max": 4.01
+    },
+    { "action": "cast", "label": "Lichfrost with the talent", "actor": "necro", "spell": 801722, "target": "golem" },
+    {
+      "action": "assert", "label": "SETUP: the second Lichfrost slows the golem", "actor": "golem",
+      "metric": "aura", "spell": 801722, "caster": "necro", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the slow lasts 7 sec with the talent", "actor": "golem",
+      "metric": "aura_duration_ms", "spell": 801722, "caster": "necro", "min": 6500, "max": 7000
+    },
+    { "action": "wait", "label": "Outlast the untalented 3 sec duration", "ms": 4000 },
+    {
+      "action": "assert", "label": "The lengthened slow is still active after 4 sec", "actor": "golem",
+      "metric": "aura", "spell": 801722, "caster": "necro", "equals": 1
+    }
+  ]
+}

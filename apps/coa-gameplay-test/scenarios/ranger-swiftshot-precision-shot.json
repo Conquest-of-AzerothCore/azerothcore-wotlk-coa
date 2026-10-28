@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "name": "Ranger Swiftshot: Precision Shot damage applies 4% Physical vulnerability for 12 sec (#482)",
+  "contract": "Swiftshot 705028 (Ranger Archery talent, CharacterAdvancement tab 54) reads 'Damage dealt by Precision Shot now increases enemy Physical damage taken by $800578s1% for $800578d.' The talent record is a single SPELL_AURA_DUMMY with ProcFlags 0 and no spell_proc row, so nothing fires from it; its stale ProcChance 10, MiscValue 10 and BasePoints -26 belong to no clause of the live text, which states no chance. 800578 'Precision Shot' is the promised payload: SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN on TARGET_UNIT_TARGET_ENEMY, MiscValue 1 (Physical), BasePoints 3 + DieSides 1 = 4, DurationIndex 29 = 12000 ms. Its only DBC trigger is Mighty Arbalest 804182, a different talent. Precision Shot is rank chain 500075 (572108-572113): a 3 s ranged Advantage consumer (CasterAuraSpell 804329) that needs a bow or crossbow (EquippedItemClass 2) and has an 8-40 yd range, so the Ranger carries Worn Shortbow 2504, faces +X with the Harvest Golem 15 yd ahead, has ranged hit fixed and gets one Advantage before each shot. Control: a Precision Shot that lands without Swiftshot leaves no 800578 on the target. With Swiftshot learned, the next landing Precision Shot must leave 800578 owned by the Ranger on the target with amount 4 and at most 12 s remaining. Before the fix the vulnerability never appears.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80,
+      "ranged_hit_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "ranger",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 15
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 6000 },
+    { "action": "learn", "actor": "ranger", "spell": 264 },
+    { "action": "learn", "actor": "ranger", "spell": 500075 },
+    { "action": "add_item", "actor": "ranger", "item": 2504 },
+    { "action": "equip", "actor": "ranger", "item": 2504, "slot": 17 },
+    { "action": "wait", "label": "Let the equipment settle", "ms": 1500 },
+    { "action": "snapshot", "actor": "ranger", "metric": "spell_damage_count", "spell": 500075, "save_as": "control_hits_before" },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 100 },
+    { "action": "set_aura", "label": "Precision Shot needs Advantage", "actor": "ranger", "spell": 804329, "stacks": 1 },
+    { "action": "cast", "label": "Control Precision Shot without Swiftshot", "actor": "ranger", "spell": 500075, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "SETUP: the control Precision Shot landed",
+      "actor": "ranger",
+      "metric": "spell_damage_count",
+      "spell": 500075,
+      "relative_to": "control_hits_before",
+      "equals": 1,
+      "within_ms": 7000
+    },
+    { "action": "wait", "label": "Let any follow-up aura land", "ms": 1000 },
+    {
+      "action": "assert",
+      "label": "Control: Precision Shot alone applies no Physical vulnerability",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 800578,
+      "equals": 0
+    },
+    { "action": "learn", "actor": "ranger", "spell": 705028 },
+    {
+      "action": "assert",
+      "label": "SETUP: Swiftshot is active on the Ranger",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 705028,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 100 },
+    { "action": "set_aura", "label": "Advantage for the second shot", "actor": "ranger", "spell": 804329, "stacks": 1 },
+    { "action": "cast", "label": "Precision Shot with Swiftshot", "actor": "ranger", "spell": 500075, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "Precision Shot damage applies the Ranger's Physical vulnerability",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 800578,
+      "caster": "ranger",
+      "equals": 1,
+      "within_ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "The vulnerability increases Physical damage taken by 4%",
+      "actor": "dummy",
+      "metric": "aura_amount",
+      "spell": 800578,
+      "caster": "ranger",
+      "effect": 0,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "The vulnerability lasts 12 seconds",
+      "actor": "dummy",
+      "metric": "aura_duration_ms",
+      "spell": 800578,
+      "caster": "ranger",
+      "min": 9000,
+      "max": 12000
+    }
+  ]
+}

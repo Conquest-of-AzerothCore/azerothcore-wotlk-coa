@@ -1,0 +1,64 @@
+###################################################################################################
+#  mod-path-to-ascension
+#
+#  Path to Ascension: the Ascension client's tutorial book (Tutorial.dbc and its companion tables)
+#  with verified objective progress, one-time rewards and optional quest-log tracking views.
+#
+#  The module reads Tutorial.dbc, TutorialCategories.dbc, TutorialObjectives.dbc and
+#  TutorialRewards.dbc from DataDir/dbc at startup. A missing or different catalog disables the
+#  module with an error; it never replaces client data.
+#
+#  Progress is kept in the character's core.ascension.* settings. All options are read at startup.
+#
+#  This code is part of the AzerothCore project. See AUTHORS file for Copyright information.
+###################################################################################################
+
+[worldserver]
+
+#    PathToAscension.Enable
+#        Description: Load the tutorial catalog and run Path to Ascension.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+PathToAscension.Enable = 1
+
+#    PathToAscension.RealmProfile
+#        Description: The realm column of Tutorial.dbc that decides which tutorials this realm offers:
+#                     0 - Live, 1 - Seasonal, 2 - League, 3 - PTR, 4 - Development.
+#                     The installed catalog matches the Rexxar PTR data, so PTR offers the complete set.
+#                     Tutorials offered here but hidden for the client's own realm type (CoA.RealmType)
+#                     are made visible to the client at login.
+#        Default:     3 - (PTR)
+PathToAscension.RealmProfile = 3
+
+#    PathToAscension.Expansion
+#        Description: The expansion whose tutorial variants this realm offers. Tutorials of other expansions
+#                     are hidden from the client, those of this expansion are shown whatever expansion the
+#                     client derives from MaxPlayerLevel. The Onyxia's Lair and Naxxramas tutorials of the
+#                     original game stay hidden while those raids run as Wrath of the Lich King content,
+#                     and the Mythic+ Dungeons tutorial while the server has no Mythic+ dungeons.
+#                     -1 - Follow the worldserver Expansion option
+#                      0 - Vanilla, 1 - The Burning Crusade, 2 - Wrath of the Lich King
+#        Default:     0 - (Vanilla)
+PathToAscension.Expansion = 0
+
+#    PathToAscension.VerifiedProgress.Enable
+#        Description: Record objective progress from the server events the module observes.
+#        Default:     1 - (Enabled)
+PathToAscension.VerifiedProgress.Enable = 1
+
+#    PathToAscension.Rewards.Enable
+#        Description: Answer the client's reward claims. Every reward is granted once per character.
+#        Default:     1 - (Enabled)
+PathToAscension.Rewards.Enable = 1
+
+#    PathToAscension.Tracking.Enable
+#        Description: Offer the tutorials' quest-log tracking views. They complete with the tutorial and are
+#                     removed when its reward is claimed; they never pay a reward of their own.
+#        Default:     1 - (Enabled)
+PathToAscension.Tracking.Enable = 1
+
+#    PathToAscension.LegacyContent.Enable
+#        Description: Also offer the restored raid and gear tutorials of expansions older than
+#                     PathToAscension.Expansion. Their objectives and rewards are unchanged.
+#        Default:     0 - (Disabled)
+PathToAscension.LegacyContent.Enable = 0

@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Vanity collection: Deliver Item hands over the cosmetic items that had no server template",
+  "contract": "The Vanity collection's Deliver Item button sends CMSG_CUSTOM_ASCENSION_POINT_SPEND_REQUEST (0x0523) with u8 currency 2 and the u32 item id; HandlePointSpendRequest passes it to DeliverVanityItem, which stores the item only when sObjectMgr->GetItemTemplate answers for it. 86 VanityCollection.dbc items (antlers, horns, back pieces and other cosmetic pieces) had no item_template row, so the button delivered nothing for them. rev_20260922_30_vanity_item_templates adds those rows from Item.dbc and ItemAddon.dbc (INSERT IGNORE). CoA.UnlockAllVanity is on in the test realm, so the character is entitled to every static entry. Expected: requesting Twilight Antlers 560478 and item 2977352 puts one of each in the bags.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "collector", "race": 1, "class": 1, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "No antlers before the request", "actor": "collector", "metric": "item_count", "item": 560478, "equals": 0 },
+    {
+      "action": "client_packet", "label": "Deliver Twilight Antlers", "actor": "collector", "opcode": 1315,
+      "fields": [ { "u8": 2 }, { "u32": 560478 } ]
+    },
+    { "action": "assert", "label": "Twilight Antlers were delivered", "actor": "collector", "metric": "item_count", "item": 560478, "equals": 1, "within_ms": 2000 },
+    {
+      "action": "client_packet", "label": "Deliver the last templated vanity item", "actor": "collector", "opcode": 1315,
+      "fields": [ { "u8": 2 }, { "u32": 2977352 } ]
+    },
+    { "action": "assert", "label": "The last templated vanity item was delivered", "actor": "collector", "metric": "item_count", "item": 2977352, "equals": 1, "within_ms": 2000 }
+  ]
+}

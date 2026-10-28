@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Call Lightning already deducts 50 Static per cast (#4239, ALREADY_WORKS)",
+  "contract": "Spell.dbc 500040 description reads 'Depletes 50 Static'. AscensionCustomResourceData.h ResourceCostRules already carries {16, 500040, 500040, 803102, 50, Fixed}, so AscensionCompat.cpp OnSpellCast deducts it. Regression guard: seed Static to 100 (above the spell's native 50-Static CasterAuraSpell 707050 gate) and confirm a single cast drops it to exactly 50.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "storm", "race": 1, "class": 16, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "storm", "entry": 36, "level": 80, "health": 1000000, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "storm", "spell": 500040 },
+    { "action": "set_aura", "actor": "storm", "spell": 803102, "stacks": 100 },
+    { "action": "cast", "actor": "storm", "spell": 500040, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: the cast is accepted",
+      "actor": "storm", "metric": "cast_failure", "spell": 500040, "equals": 0, "within_ms": 1500 },
+    { "action": "assert", "label": "DISCRIMINATING: Call Lightning deducts exactly 50 Static, 100 -> 50",
+      "actor": "storm", "metric": "aura_stacks", "spell": 803102, "equals": 50, "within_ms": 1500 }
+  ]
+}

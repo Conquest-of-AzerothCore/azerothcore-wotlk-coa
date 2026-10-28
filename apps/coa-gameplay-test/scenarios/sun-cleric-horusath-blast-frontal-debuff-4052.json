@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Horusath Blast applies its debuff to every enemy in front (#4052)",
+  "contract": [
+    "Issue #4052: the tooltip promises the debuff on all enemies in front within 8 yards, but only the single hit target received it because OnSpellHitResult called Cast(player, target, 572050) once for 500154.",
+    "The handler now also casts 572050 on every other valid enemy within 8 yards in the caster's front arc. Three hostile fixtures stand at 3, 5 and 7 yards in front; after one cast all three must carry 572050, while the primary target still takes the Holy damage."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 1,
+    "x": -8914.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {"id": "cleric", "race": 1, "class": 27, "level": 34, "spell_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "front3", "owner": "cleric", "entry": 299, "level": 34, "health": 500000, "distance": 3, "stationary": true},
+    {"id": "front5", "owner": "cleric", "entry": 299, "level": 34, "health": 500000, "distance": 5, "stationary": true},
+    {"id": "front7", "owner": "cleric", "entry": 299, "level": 34, "health": 500000, "distance": 7, "stationary": true}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login and class synchronisation settle", "ms": 3000},
+    {"action": "learn", "actor": "cleric", "spell": 500154},
+    {"action": "cast", "actor": "cleric", "spell": 500154, "target": "front3"},
+    {"action": "assert", "label": "The hit target keeps the debuff", "actor": "front3", "metric": "aura", "spell": 572050, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "The second frontal enemy is debuffed too", "actor": "front5", "metric": "aura", "spell": 572050, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "The third frontal enemy is debuffed too", "actor": "front7", "metric": "aura", "spell": 572050, "equals": 1, "within_ms": 3000}
+  ]
+}

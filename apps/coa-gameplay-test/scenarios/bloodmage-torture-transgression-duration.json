@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Torture extends Transgression after spending nine Thirst stacks (#1911)",
+  "contract": "Torture 504071's native effect 0 is SPELL_AURA_ADD_PCT_MODIFIER and already applies Vampiric Feast's 50% leech modifier. Its effect 1 has ProcFlags 0 and references helper 561152, whose native effect adds 5000 ms to Transgression 801076. Vampiric Fang ranks are handled in AscensionBloodmageSecondary.cpp and consume Thirst 706613 only after a successful hit. Verify that eight stacks are consumed without extending Transgression and nine stacks are consumed while extending it by five seconds.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "bloodmage", "race": 1, "class": 20, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "bloodmage", "entry": 36, "health": 1000000, "distance": 5 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "bloodmage", "spell": 504071 },
+    { "action": "learn", "actor": "bloodmage", "spell": 553272 },
+    { "action": "assert", "label": "Torture is active", "actor": "bloodmage", "metric": "aura", "spell": 504071, "equals": 1 },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 801076, "stacks": 1 },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 706613, "stacks": 8 },
+    { "action": "wait", "label": "Leave enough duration to measure the eight-stack control", "ms": 6000 },
+    { "action": "snapshot", "label": "Transgression duration before an eight-stack Fang", "actor": "bloodmage", "metric": "aura_duration_ms", "spell": 801076, "save_as": "duration_before_eight" },
+    { "action": "cast", "label": "Vampiric Fang consumes eight Thirst stacks", "actor": "bloodmage", "spell": 553272, "target": "enemy" },
+    { "action": "assert", "label": "The eight-stack Fang consumes Thirst", "actor": "bloodmage", "metric": "aura", "spell": 706613, "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "label": "Eight stacks do not extend Transgression", "actor": "bloodmage", "metric": "aura_duration_ms", "spell": 801076, "relative_to": "duration_before_eight", "max": 0, "within_ms": 2000 },
+    { "action": "wait", "label": "Allow Vampiric Fang's category cooldown to expire", "ms": 9000 },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 801076, "stacks": 0 },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 801076, "stacks": 1 },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 706613, "stacks": 9 },
+    { "action": "wait", "label": "Leave enough duration to measure the nine-stack case", "ms": 6000 },
+    { "action": "snapshot", "label": "Transgression duration before a nine-stack Fang", "actor": "bloodmage", "metric": "aura_duration_ms", "spell": 801076, "save_as": "duration_before_nine" },
+    { "action": "cast", "label": "Vampiric Fang consumes nine Thirst stacks", "actor": "bloodmage", "spell": 553272, "target": "enemy" },
+    { "action": "assert", "label": "The nine-stack Fang consumes Thirst", "actor": "bloodmage", "metric": "aura", "spell": 706613, "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "label": "Nine stacks extend Transgression by five seconds", "actor": "bloodmage", "metric": "aura_duration_ms", "spell": 801076, "relative_to": "duration_before_nine", "min": 2500, "within_ms": 2000 }
+  ]
+}

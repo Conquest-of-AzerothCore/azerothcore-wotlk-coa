@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "name": "Clotting adds 25% Physical damage to Aortic Assault's closing burst against a bleeding target (#505)",
+  "contract": "Clotting 704115 reads: 'At the end of Aortic Assault's duration, all enemies in a 10 yd frontal cone suffer ${$806214m1*$<scalingbp>+$AP*0.5} Physical damage. Damage dealt by this effect is increased by $s2% against bleeding targets.' Spell.dbc 704115 effect 1 is aura 112 with the raw Ascension selector 20007 (ASCENSION_CLASSMASK_AURASTATE_DAMAGE), MiscValueB 18 (AURA_STATE_BLEEDING), BasePoints 24 -> 25 and EffectSpellClassMask (0, 5242880, 0), which is 806214's own SpellFamilyFlags. Like Terrorizer and Enduring, it is converted at load to SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE, whose class-mask variant in Unit::SpellPctDamageModsDone multiplies only 806214's damage and only against a victim in the bleeding aura state. Expected: with Clotting learned, spell_damage_done(806214) against a bleeding target is 1.25x the same query against a clean target; without Clotting the ratio is exactly 1.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "bleeding",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3,
+      "faction": 7
+    },
+    {
+      "id": "clean",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 8,
+      "faction": 7
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "bloodmage", "spell": 704115 },
+    {
+      "action": "assert", "label": "SETUP: Clotting is learned",
+      "actor": "bloodmage", "metric": "aura", "spell": 704115, "equals": 1
+    },
+    { "action": "learn", "actor": "bloodmage", "spell": 800772 },
+    { "action": "cast", "actor": "bloodmage", "spell": 800772, "target": "bleeding" },
+    {
+      "action": "assert", "label": "SETUP: the first creature is bleeding",
+      "actor": "bleeding", "metric": "aura", "spell": 800772, "caster": "bloodmage",
+      "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "SETUP: the second creature is clean",
+      "actor": "clean", "metric": "aura", "spell": 800772, "caster": "bloodmage", "equals": 0
+    },
+    {
+      "action": "snapshot", "actor": "bloodmage", "metric": "spell_damage_done",
+      "spell": 806214, "target": "clean", "save_as": "clean_damage"
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: with Clotting, the closing burst deals 25% more to a bleeding target",
+      "actor": "bloodmage", "metric": "spell_damage_done", "spell": 806214, "target": "bleeding",
+      "ratio_to": "clean_damage", "min": 1.24, "max": 1.26
+    },
+    { "action": "unlearn", "actor": "bloodmage", "spell": 704115 },
+    {
+      "action": "assert", "label": "SETUP: Clotting is unlearned",
+      "actor": "bloodmage", "metric": "aura", "spell": 704115, "equals": 0
+    },
+    {
+      "action": "snapshot", "actor": "bloodmage", "metric": "spell_damage_done",
+      "spell": 806214, "target": "clean", "save_as": "clean_damage_no_talent"
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: without Clotting, bleeding grants no bonus at all",
+      "actor": "bloodmage", "metric": "spell_damage_done", "spell": 806214, "target": "bleeding",
+      "ratio_to": "clean_damage_no_talent", "equals": 1
+    }
+  ]
+}

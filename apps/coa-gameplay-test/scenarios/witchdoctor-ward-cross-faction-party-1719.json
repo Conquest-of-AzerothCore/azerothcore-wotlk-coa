@@ -1,0 +1,175 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Serpent Ward respects cross-faction party membership (#1719)",
+  "contract": "A level-21 Orc Witch Doctor casts the normally available Serpent Ward while grouped with a Human Tinker. Neither the party member nor a PvP-enabled outsider can attack the unflagged owner's ward. Enabling the owner's PvP flag makes the existing ward attackable by the outsider while preserving party friendliness. Leaving and rejoining the party restores and removes the Tinker's ability to attack it. All attackability observations use native IsValidAttackTarget; the fixture does not change summon faction or flags. This covers the reported hostile ward trigger, not external playerbot behavior or client rendering.",
+  "timeout_ms": 30000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "doctor",
+      "race": 2,
+      "class": 13,
+      "level": 21,
+      "allow_regeneration": false
+    },
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 21,
+      "allow_regeneration": false
+    },
+    {
+      "id": "outsider",
+      "race": 1,
+      "class": 1,
+      "level": 21,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "doctor",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "tinker",
+      "map": 0,
+      "x": -9616.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "outsider",
+      "map": 0,
+      "x": -9615.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "tinker",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "outsider",
+      "enabled": true
+    },
+    {
+      "action": "group",
+      "actor": "tinker",
+      "target": "doctor"
+    },
+    {
+      "action": "learn",
+      "actor": "doctor",
+      "spell": 500960
+    },
+    {
+      "action": "cast",
+      "actor": "doctor",
+      "spell": 500960,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "actor": "doctor",
+      "metric": "owned_creature_count",
+      "entry": 50105,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "An opposite-faction party member cannot attack Serpent Ward",
+      "actor": "doctor",
+      "metric": "owned_creature_attackable",
+      "entry": 50105,
+      "target": "tinker",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "An unflagged owner does not expose the ward to outsider attacks",
+      "actor": "doctor",
+      "metric": "owned_creature_attackable",
+      "entry": 50105,
+      "target": "outsider",
+      "equals": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "doctor",
+      "enabled": true
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "assert",
+      "label": "The existing ward follows the owner's PvP flag",
+      "actor": "doctor",
+      "metric": "owned_creature_attackable",
+      "entry": 50105,
+      "target": "outsider",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Flagging the owner does not expose the ward to party attacks",
+      "actor": "doctor",
+      "metric": "owned_creature_attackable",
+      "entry": 50105,
+      "target": "tinker",
+      "equals": 0
+    },
+    {
+      "action": "leave_group",
+      "actor": "tinker"
+    },
+    {
+      "action": "assert",
+      "label": "Leaving the party restores ordinary hostility",
+      "actor": "doctor",
+      "metric": "owned_creature_attackable",
+      "entry": 50105,
+      "target": "tinker",
+      "equals": 1
+    },
+    {
+      "action": "group",
+      "actor": "tinker",
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "Rejoining the party makes the same ward friendly again",
+      "actor": "doctor",
+      "metric": "owned_creature_attackable",
+      "entry": 50105,
+      "target": "tinker",
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,254 @@
+{
+  "schema": 1,
+  "name": "Coordination grants owner crit chance and damage from normal Falcon hits (#6252)",
+  "contract": "Coordination 520621 routes normal Falcon damage to owner-attributed buff 520622: one percent crit chance and crit damage per stack, capped at ten. Two native 50393 Falcons attack and grant owner stacks. Modifier observations wait for the twelve-second Falcons to expire while their fifteen-second owner buff remains, preventing another hit between stack and modifier reads. A single summon need not reach ten stacks. Untalented and unlearned controls grant no buff. No owner crit rating is forced.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 21,
+      "level": 60,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "p",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 806341
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 116
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 520622,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 520622,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "melee_crit_chance",
+      "save_as": "crit"
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "spell_critical_damage",
+      "spell": 116,
+      "target": "enemy",
+      "save_as": "crit_damage"
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "health",
+      "save_as": "health_before"
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 806341
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "owned_creature_count",
+      "entry": 50393,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "attack",
+      "actor": "p",
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "health",
+      "relative_to": "health_before",
+      "max": -1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 520622,
+      "equals": 0
+    },
+    {
+      "action": "stop_attack",
+      "actor": "p"
+    },
+    {
+      "action": "wait",
+      "ms": 15000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 520621
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "p",
+      "spell": 806341
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 806341
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "owned_creature_count",
+      "entry": 50393,
+      "spell": 520621,
+      "caster": "p",
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "attack",
+      "actor": "p",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura_stacks",
+      "spell": 520622,
+      "min": 1,
+      "within_ms": 10000,
+      "caster": "p"
+    },
+    {
+      "action": "assert",
+      "label": "Let both native Falcons expire so stack-dependent modifier observations cannot race another hit",
+      "actor": "p",
+      "metric": "owned_creature_count",
+      "entry": 50393,
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "p"
+    },
+    {
+      "action": "assert",
+      "label": "The owner-attributed Coordination buff remains after the short-lived Falcons expire",
+      "actor": "p",
+      "metric": "aura_stacks",
+      "spell": 520622,
+      "caster": "p",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "aura_stacks",
+      "spell": 520622,
+      "save_as": "coordination_stacks",
+      "caster": "p"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "melee_crit_chance",
+      "relative_to": "crit",
+      "ratio_to": "coordination_stacks",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_critical_damage",
+      "spell": 116,
+      "target": "enemy",
+      "relative_to": "crit_damage",
+      "ratio_to": "coordination_stacks",
+      "min": 14.9,
+      "max": 15.1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura_stacks",
+      "spell": 520622,
+      "max": 10
+    },
+    {
+      "action": "unlearn",
+      "actor": "p",
+      "spell": 520621
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 520622,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "attack",
+      "actor": "p",
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 520622,
+      "equals": 0
+    }
+  ]
+}

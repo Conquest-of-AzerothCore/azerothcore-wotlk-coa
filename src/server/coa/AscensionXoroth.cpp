@@ -63,6 +63,11 @@ void Reduce(Player* player, uint32 root, int32 milliseconds)
 }
 void Replace(Player* player, uint32 root, uint32 replacement)
 {
+    if (replacement)
+        for (auto const& [id, spell] : player->GetSpellMap())
+            if (player->HasActiveSpell(id) && Named(sSpellMgr->GetSpellInfo(id), replacement) &&
+                sSpellMgr->GetSpellRank(id) > sSpellMgr->GetSpellRank(replacement))
+                replacement = id;
     for (auto const& pair : player->GetSpellMap())
         if (player->HasSpell(pair.first) && Named(sSpellMgr->GetSpellInfo(pair.first), root))
             player->SetTemporarySpellReplacement(pair.first, replacement);
@@ -91,6 +96,10 @@ bool Derived(SpellInfo const* info)
 bool Pestilence(uint32 id)
 {
     return id == 801053 || id == 802344 || id == 802345 || id == 804786 || id == 801054;
+}
+bool Mark(SpellInfo const* info)
+{
+    return info && info->SpellFamilyName == 23 && (info->SpellFamilyFlags[1] & 2147483648u);
 }
 uint32 Count(Unit const* unit, uint32 id)
 {
@@ -126,8 +135,13 @@ void Gain(Player* player, uint32 count)
     if (!player || !player->IsAlive() || !count)
         return;
     uint32 previous = Count(player, 500906);
+    int32 cap = 6;
+    player->ApplySpellMod(500906, SPELLMOD_MAX_AURA_STACKS, cap);
+    uint32 maxStacks = uint32(std::max(cap, 0));
     if (Aura* aura = player->AddAura(500906, player))
-        aura->SetStackAmount(std::min(6u, previous + count));
+        aura->SetStackAmount(std::min(maxStacks, previous + count));
+    if (player->HasAura(524922))
+        player->EnergizeBySpell(player, 524922, 10, POWER_RAGE);
 }
 bool Chance(Player* player, uint32 id, uint32 cooldown, float bonus)
 {
@@ -147,6 +161,12 @@ void Blood(Player* player)
     if (Chance(player, 707631) || Chance(player, 707840))
         Unleash(player, player, .5f);
     Refresh(player);
+}
+void SetRemainingUses(Aura* aura, uint8 uses)
+{
+    aura->SetScriptValue(aura->GetId(), uses);
+    aura->SetCharges(uses);
+    aura->SetUsingCharges(false);
 }
 void Refresh(Player* player)
 {
@@ -173,7 +193,10 @@ void Refresh(Player* player)
         if (aura && aura->GetEffect(EFFECT_0) && aura->GetEffect(EFFECT_0)->GetAmount() != value)
             aura->GetEffect(EFFECT_0)->ChangeAmount(value);
     };
-    scale(302546, player->GetAuraOfRankedSpell(706569) ? imps * Amount(302546) : 0);
+    int32 blockPerImp = player->HasAura(707836)                ? Amount(302546, 1)
+                        : player->GetAuraOfRankedSpell(706569) ? Amount(302546)
+                                                               : 0;
+    scale(302546, int32(imps) * blockPerImp);
     scale(302573, player->HasAura(804340) ? imps * Amount(302573) : 0);
     scale(302574, player->HasAura(804340) ? -int32(imps) * Amount(302574) : 0);
     scale(302592, imps);
@@ -184,13 +207,29 @@ void Refresh(Player* player)
         player->RemoveAurasDueToSpell(id);
     if (AuraEffect* effect = player->GetAuraEffect(704186, EFFECT_0))
         effect->ChangeAmount(Amount(704186) + 10 * Count(player, 500906));
+    if (AuraEffect* effect = player->GetAuraEffect(704953, EFFECT_0))
+        effect->ChangeAmount(Count(player, 500906));
 
     scale(573075, player->HasAura(573035) ? player->GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_BLOCK) / 2 : 0);
-    for (auto const& replacement : {std::array<uint32, 3>{301302, 801016, 804353},
-                                    {800710, 500904, 520005},
+    if (player->HasAura(706502) && !player->HasSpell(504581))
+        player->learnSpell(504581, true);
+    if (!player->HasAura(706502))
+    {
+        player->RemoveAurasDueToSpell(712294);
+        if (player->HasSpell(504581))
+            player->removeSpell(504581, SPEC_MASK_ALL, false);
+    }
+    Replace(player, 800340, player->HasAura(706502) && player->HasAura(712294) ? 504581 : 0);
+    if (player->HasAura(800710) && !player->HasSpell(520005))
+        player->learnSpell(520005);
+    if (!player->HasAura(800710) && player->HasSpell(520005))
+    {
+        Replace(player, 500904, 0);
+        player->removeSpell(520005, SPEC_MASK_ALL, false);
+    }
+    for (auto const& replacement : {std::array<uint32, 3>{800710, 500904, 520005},
                                     {570727, 801059, 802581},
-                                    {807587, 801059, 520292},
-                                    {706755, 804883, 707666}})
+                                    {807587, 801059, 520292}})
     {
         uint32 talent = replacement[0];
         if (talent == 570727 && player->HasAura(807587))
@@ -252,6 +291,8 @@ void Unleash(Player* player, Unit* center, float strength, bool pet)
                                       : 0;
     if (!spell)
         return;
+    if (spell == 801055 && player->HasAura(704954))
+        strength *= 1 + Amount(704954) / 100.0f;
     float old = State(player).unleash;
     State(player).unleash = strength;
     uint32 n = 0;

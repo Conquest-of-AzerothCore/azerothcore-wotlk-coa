@@ -94,6 +94,60 @@ int main()
         info.Effects[1].MiscValue == 144 && !info.Effects[1].BasePoints && !info.Effects[1].DieSides);
     assert(info.Effects[0].ApplyAuraName == 23 && info.Effects[0].TriggerSpell == 712337 &&
         info.Effects[0].Amplitude == 4000 && info.Effects[2].MiscValue == 98);
+
+    runemaster_runic_tempest_events tempest;
+    Player tempestCaster;
+    tempestCaster.cls = CLASS_SPIRIT_MAGE;
+    Aura runicTempest;
+    runicTempest.id = 560036;
+    AuraApplication tempestEnd;
+    tempestEnd.aura = runicTempest;
+    AuraApplication shroudEnd;
+    shroudEnd.aura.id = 500288;
+    tempestCaster.auras.insert(560036);
+    tempest.OnAuraApply(&tempestCaster, &runicTempest);
+    assert(tempestCaster.HasAura(808089));
+    events.OnAuraRemove(&tempestCaster, &shroudEnd, AURA_REMOVE_BY_CANCEL);
+    assert(!tempestCaster.HasAura(808089));
+    tempest.OnAuraRemove(&tempestCaster, &shroudEnd, AURA_REMOVE_BY_CANCEL);
+    assert(tempestCaster.HasAura(808089));
+    tempestCaster.auras.erase(560036);
+    tempest.OnAuraRemove(&tempestCaster, &tempestEnd, AURA_REMOVE_BY_EXPIRE);
+    assert(!tempestCaster.HasAura(808089));
+    tempestCaster.auras.insert(560036);
+    tempest.OnAuraApply(&tempestCaster, &runicTempest);
+    tempestCaster.auras.insert(500288);
+    tempestCaster.auras.erase(560036);
+    tempest.OnAuraRemove(&tempestCaster, &tempestEnd, AURA_REMOVE_BY_CANCEL);
+    assert(tempestCaster.HasAura(808089));
+    tempestCaster.auras.erase(500288);
+    tempestCaster.auras.insert(560036);
+    tempestCaster.alive = false;
+    tempestCaster.auras.erase(808089);
+    tempest.OnAuraRemove(&tempestCaster, &shroudEnd, AURA_REMOVE_BY_DEATH);
+    assert(!tempestCaster.HasAura(808089));
+    tempestCaster.alive = true;
+    tempestCaster.cls = CLASS_WILDWALKER;
+    tempest.OnAuraApply(&tempestCaster, &runicTempest);
+    assert(!tempestCaster.HasAura(808089));
+
+    Player waveforged;
+    waveforged.cls = CLASS_SPIRIT_MAGE;
+    Aura waveforgedTalent;
+    waveforgedTalent.id = 705565;
+    waveforged.auras.insert(705565);
+    events.OnAuraApply(&waveforged, &waveforgedTalent);
+    assert(!waveforged.HasAura(808089));
+    Aura waveforgedWindow;
+    waveforgedWindow.id = 500469;
+    waveforged.auras.insert(500469);
+    events.OnAuraApply(&waveforged, &waveforgedWindow);
+    assert(waveforged.HasAura(808089));
+    waveforged.auras.erase(500469);
+    AuraApplication windowEnd;
+    windowEnd.aura = waveforgedWindow;
+    events.OnAuraRemove(&waveforged, &windowEnd, AURA_REMOVE_BY_EXPIRE);
+    assert(!waveforged.HasAura(808089) && waveforged.HasAura(705565));
 }
 '''
 
@@ -113,12 +167,17 @@ def main():
                        ("src/server/shared/SharedDefines.h", "SpellCastResult")]:
         enums.append(native.extractor.extract((ROOT / path).read_text(), r"enum " + name + r"\b") + ";")
     enums.append("constexpr uint32 CLASS_SPIRIT_MAGE=32, UNITHOOK_ON_AURA_APPLY=4, EFFECT_1=1, "
-                 "SPELL_EFFECT_APPLY_AURA=6, SPELL_AURA_EFFECT_IMMUNITY=37, SPELL_EFFECT_KNOCK_BACK_DEST=144;")
+                 "SPELL_EFFECT_APPLY_AURA=6, SPELL_AURA_EFFECT_IMMUNITY=37, SPELL_EFFECT_KNOCK_BACK_DEST=144, "
+                 "SPELL_AURA_DUMMY=4, SPELL_ATTR0_PASSIVE=0x40, PLAYERHOOK_ON_LOGIN=5;\n#define LOG_ERROR(...)")
     code = (HERE.parent / "primalist_talents/harness.cpp").read_text().split("// ACTUAL_SOURCE")[0]
     code = code.replace("// NATIVE_ENUMS", "\n".join(enums))
     code = code.replace("struct SpellInfo\n{", "struct FixtureEffect { uint32 Effect=0, ApplyAuraName=0, "
-        "TriggerSpell=0, Amplitude=0, DieSides=0; std::int32_t BasePoints=0, MiscValue=0; };\nstruct SpellInfo\n{ "
-        "std::array<FixtureEffect, 3> Effects{};")
+        "TriggerSpell=0, Amplitude=0, DieSides=0; std::int32_t BasePoints=0, MiscValue=0; "
+        "bool IsAura(uint32 aura) const { return Effect == SPELL_EFFECT_APPLY_AURA && ApplyAuraName == aura; } };\n"
+        "struct SpellInfo\n{ std::array<FixtureEffect, 3> Effects{}; uint32 Attributes = 0;")
+    code = code.replace("struct Hook {", "struct PlayerScript\n{\n"
+        "    PlayerScript(char const*, std::initializer_list<int>) { }\n"
+        "    virtual void OnPlayerLogin(Player*) { }\n};\nstruct Hook {")
     code = code.replace("bool HasAura(uint32 id) const", "bool HasAura(uint32 id, uint32 = 0) const")
     code = code.replace("void CastSpell(Unit* target, uint32 id, bool triggered) { casts.emplace_back(target, id, triggered); }",
         "void CastSpell(Unit* target, uint32 id, bool triggered) { casts.emplace_back(target, id, triggered); "
@@ -142,7 +201,8 @@ def main():
         assert rows[712310][95] == 23 and rows[712310][98] == 4000 and rows[712310][116] == 712337
         assert rows[712310][97] == 37 and rows[712310][112] == 98
         assert rows[712337][71] == 136 and rows[712337][80] + rows[712337][74] == 3
-    print("PASS: Earth Tattoo ranks, acquisition/removal ordering, helper continuity and Runeshroud exit gates")
+    print("PASS: Earth Tattoo ranks, acquisition/removal ordering, helper continuity, Runeshroud exit gates, "
+          "the Runic Tempest marker and the Waveforged window")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,148 @@
+{
+  "schema": 1,
+  "name": "Maelstrom high-rank Torrential Wrath spends40 and Brine generates25 Static (#5837)",
+  "contract": [
+    "Installed Torrential Wrath503359 rank9 depletes40 Static; Brine807111 rank7 generates25.",
+    "Normal Maelstrom14 and previously acquired Call Lightning500040/Shock804020 fixtures provide both native replacements. Native casts must land and make the independent documented resource changes."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "s",
+      "race": 1,
+      "class": 16,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "s",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "s",
+      "id": 14
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 500040
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 804020
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "knows_spell",
+      "spell": 503359,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "knows_spell",
+      "spell": 807111,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 573249,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "e",
+      "metric": "health",
+      "save_as": "before_wrath"
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 503359,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "actor": "e",
+      "metric": "health",
+      "relative_to": "before_wrath",
+      "max": -1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "aura_stacks",
+      "spell": 803102,
+      "equals": 60
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "e",
+      "metric": "health",
+      "save_as": "before_brine"
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 807111,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "actor": "e",
+      "metric": "health",
+      "relative_to": "before_brine",
+      "max": -1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "aura_stacks",
+      "spell": 803102,
+      "equals": 25
+    }
+  ]
+}

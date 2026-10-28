@@ -34,8 +34,8 @@ namespace AscensionCompatOpcodes
     {
         uint16 const opcode = packet.GetOpcode();
         for (auto const& [claimed, handler] : ClaimedOpcodes())
-            if (claimed == opcode)
-                return handler(session, packet);
+            if (claimed == opcode && handler(session, packet))
+                return true;
         return false;
     }
 }

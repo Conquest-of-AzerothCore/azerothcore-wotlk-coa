@@ -1,10 +1,10 @@
 {
   "schema": 1,
   "name": "Skewer's mark is applied and consumed natively (#2083)",
-  "contract": "Spell 800095 is a pure marker debuff with no amount, period or trigger; both ends of its life are stock DBC mechanics with no script. Skewer (800093) triggers it on a cone of enemies through effect 1, giving each a single stack for 10000 ms, and Skewer (Pull) [GRIP] (800148) is gated on TargetAuraSpell 800095 and removes it again through its REMOVE_AURA effect. The issue is filed under Tinker, but 800095 is SpellFamilyName 27, which this fork maps to CLASS_RANGER, so the fixture is a Ranger; both spells require an equipped polearm and cost focus. The duration band allows the poll delay between the cast and the measurement.",
+  "contract": "Spell 800095 is a pure marker debuff with no amount, period or trigger; both ends of its life are stock DBC mechanics with no script. Skewer (800093) triggers it on a cone of enemies through effect 1, giving each a single stack for 10000 ms, and Skewer (Pull) [GRIP] (800148) is gated on TargetAuraSpell 800095 and removes it again through its REMOVE_AURA effect. The issue is filed under Tinker, but 800095 is SpellFamilyName 27, which this fork maps to CLASS_RANGER, so the fixture is a Ranger; both spells require an equipped polearm and cost focus. The duration band allows the poll delay between the cast and the measurement. Skewer is DmgClass 2 (SPELL_DAMAGE_CLASS_MELEE), so Unit::MeleeSpellHitResult rolls a 5% miss and a 5% dodge separately for each golem in the cone (the golems face away from the Ranger, so parry and block do not apply), and a missed or dodged golem never receives the Effect 1 trigger; an accelerated run recorded the nearer golem unmarked for the whole 3000 ms window with no cast failure. The Ranger therefore carries melee_hit_rating and expertise_rating 10000, which remove only those avoidance rolls. The pull is DmgClass 0 with SPELL_ATTR7_NO_ATTACK_MISS and needs no rating.",
   "timeout_ms": 90000,
   "players": [
-    { "id": "ranger", "race": 1, "class": 21, "level": 80 }
+    { "id": "ranger", "race": 1, "class": 21, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000 }
   ],
   "creatures": [
     { "id": "markone", "owner": "ranger", "entry": 36, "distance": 3, "health": 1000000 },

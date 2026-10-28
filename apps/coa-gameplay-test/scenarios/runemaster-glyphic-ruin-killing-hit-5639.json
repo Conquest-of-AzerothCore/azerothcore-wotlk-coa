@@ -1,0 +1,256 @@
+{
+  "schema": 1,
+  "name": "Glyphic Ruin releases Arcane Glyph around a killed target (#5639)",
+  "contract": [
+    "Glyphic Ruin 801179 unleashes the active glyph effects on its hit. Arcane Glyph 520092 describes area Arcane damage; its payload 520098 selects the enemy and enemies around that destination within SpellRadius 13. A successful killing hit still consumes the active glyphs and must damage a nearby living enemy around the victim. A nonlethal hit is the control, and an enemy outside the radius must remain untouched. Frost and Flame glyphs are also present for the lethal cast, as in the report."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "victim",
+      "owner": "rm",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 12,
+      "stationary": true
+    },
+    {
+      "id": "nearby",
+      "owner": "rm",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 15,
+      "stationary": true
+    },
+    {
+      "id": "outside",
+      "owner": "rm",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 40,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 801179
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 801179,
+      "target": "victim",
+      "label": "Settle ordinary combat scaling without a glyph"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 801179,
+      "target": "victim",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "victim",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 520098,
+      "target": "nearby",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 520092,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 520092,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 801179,
+      "target": "victim",
+      "label": "Nonlethal release control"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 520098,
+      "target": "nearby",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "victim",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "nearby",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 520092,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 520098,
+      "target": "outside",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 520090,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 520090,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 520091,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 520091,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 520092,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 520092,
+      "equals": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "victim",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 801179,
+      "target": "victim",
+      "label": "Killing hit releases all three active glyphs"
+    },
+    {
+      "action": "assert",
+      "actor": "victim",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 520090,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 520091,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 520092,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 520098,
+      "target": "nearby",
+      "equals": 2,
+      "within_ms": 2000,
+      "label": "The Arcane explosion reaches the nearby living enemy after the killing hit"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 520098,
+      "target": "outside",
+      "equals": 0,
+      "label": "The explosion remains centered on the victim"
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <initializer_list>
@@ -67,6 +68,7 @@ struct Player : Unit
     std::map<uint32, bool> spells;
     std::set<uint32> inactive;
     std::map<uint32, uint32> m_temporarySpellReplacements;
+    std::map<uint32, uint32> m_temporarySpellReplacementOrigins;
     Player* ToPlayer() override { return this; }
     uint32 getClass() const { return cls; }
     bool HasActiveSpell(uint32 id) const { return spells.contains(id) && !inactive.contains(id); }
@@ -75,9 +77,16 @@ struct Player : Unit
     void removeSpell(uint32 id, uint32 mask, bool onlyTemporary)
     { assert(mask == SPEC_MASK_ALL && onlyTemporary); if (spells.contains(id) && spells[id]) spells.erase(id); }
     Session* GetSession() { return &session; }
+    void SendLearnPacket(uint32, bool, bool = false) { }
     void SetTemporarySpellReplacement(uint32 original, uint32 replacement);
     uint32 GetTemporarySpellReplacement(uint32 original) const;
 };
+struct ScriptMgr
+{
+    void OnPlayerTemporarySpellRemoveNotice(Player*, uint32, bool) { }
+    void OnPlayerTemporarySpellReplacementNotice(Player*, uint32, uint32, bool) { }
+} scripts;
+auto sScriptMgr = &scripts;
 // NATIVE
 std::map<ObjectGuid, Unit*> world;
 namespace ObjectAccessor

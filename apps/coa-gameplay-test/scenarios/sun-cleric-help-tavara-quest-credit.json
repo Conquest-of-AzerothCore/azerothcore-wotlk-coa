@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: healing Tavara credits Help Tavara (#5558)",
+  "contract": "Quest 9586 'Help Tavara' (quest_template.sql) requires RequiredNpcOrGo1 17551 (Tavara) x1, ObjectiveText1 'Heal Tavara'. Tavara's SmartAI (smart_scripts.sql, entryorguid 17551 source_type 0) only granted quest credit through SMART_EVENT_SPELLHIT rows naming stock spells 2050/2052 (Priest Lesser Heal), 59544 (Draenei racial Gift of the Naaru) and 139 (Priest Renew); Sun Cleric (class 27, a CoA-added class) shares none of them, so its baseline direct heal Illumination (500143, SPELL_EFFECT_HEAL, granted at class 27's level-0 baseline per AscensionLiveBaselineData.h) never triggered the SMART_ACTION_CALL_KILLEDMONSTER credit. rev_20260929_50_sun_cleric_help_tavara_heal.sql rewrites the full (17551,0) smart_scripts block, keeping the four existing rows and adding a fifth SMART_EVENT_SPELLHIT row for 500143 with the same action/target shape. Healing Tavara with Illumination must credit the quest objective.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "tavara", "owner": "cleric", "entry": 17551, "level": 5, "distance": 3, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "cleric", "spell": 500143 },
+    { "action": "prepare_quest", "actor": "cleric", "quest": 9586, "complete": false },
+    {
+      "action": "assert", "label": "SETUP: Help Tavara starts with no objective credit",
+      "actor": "cleric", "metric": "quest_objective_count", "quest": 9586, "equals": 0
+    },
+    { "action": "cast", "label": "Heal Tavara with the Sun Cleric baseline heal", "actor": "cleric", "spell": 500143, "target": "tavara" },
+    {
+      "action": "assert", "label": "Healing Tavara with Illumination credits Help Tavara",
+      "actor": "cleric", "metric": "quest_objective_count", "quest": 9586, "equals": 1, "within_ms": 3000
+    }
+  ]
+}

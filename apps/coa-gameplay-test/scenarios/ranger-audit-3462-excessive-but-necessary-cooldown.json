@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Excessive But Necessary cuts Elude's and Knockout's cooldown modifiers by 4 sec (#3462)",
+  "contract": "804939 'Excessive But Necessary' reads 'Reduces the cooldown of Elude and Knockout by $/1000;s1 sec.' It is a single SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 11 = SPELLMOD_COOLDOWN, BasePoints -4001+1=-4000 ms, class mask (32, 8, 0) = word0 bit 5, word1 bit 3. Elude 801345 has SpellFamilyFlags (0, 8, 16384) = word1 bit 3, a direct match; Knockout 801435 (RecoveryTime 18000 ms) has SpellFamilyFlags (32, 0, 268435456) = word0 bit 5, also a direct match (the family-flags-all-zero Elude/Knockout duplicates 800701, 803853, 706763 are untouched, moot). Player::AddSpellCooldown/SendSpellCooldown (src/server/game/Entities/Player/Player.cpp) apply ApplySpellMod(spellInfo->Id, SPELLMOD_COOLDOWN, recovery, spell) generically, so no script is needed.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the character settle", "ms": 3000 },
+    {
+      "action": "snapshot", "actor": "ranger", "metric": "spell_modifier", "spell": 801345, "op": 11, "base": 10000,
+      "save_as": "elude_cooldown_before"
+    },
+    {
+      "action": "snapshot", "actor": "ranger", "metric": "spell_modifier", "spell": 801435, "op": 11, "base": 10000,
+      "save_as": "knockout_cooldown_before"
+    },
+    { "action": "learn", "actor": "ranger", "spell": 804939 },
+    {
+      "action": "assert", "label": "SETUP: Excessive But Necessary is active", "actor": "ranger",
+      "metric": "aura", "spell": 804939, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Elude's cooldown modifier drops by 4000 ms", "actor": "ranger",
+      "metric": "spell_modifier", "spell": 801345, "op": 11, "base": 10000, "relative_to": "elude_cooldown_before",
+      "min": -4000.01, "max": -3999.99
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Knockout's cooldown modifier drops by 4000 ms", "actor": "ranger",
+      "metric": "spell_modifier", "spell": 801435, "op": 11, "base": 10000, "relative_to": "knockout_cooldown_before",
+      "min": -4000.01, "max": -3999.99
+    }
+  ]
+}

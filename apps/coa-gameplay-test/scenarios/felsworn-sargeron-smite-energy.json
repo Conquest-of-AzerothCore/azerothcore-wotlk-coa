@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "name": "Sargeron Smite generates 20 Energy on hit (#5165)",
+  "contract": "Sargeron Smite (802060, rank 2 = 501314) tooltip reads 'Blast an enemy for ... Shadowflame Damage and generate $521213s1 Energy', where 521213 (Energize +20 energy) is SPELL_EFFECT_ENERGIZE, EffectMiscValue POWER_ENERGY, EffectBasePoints 19 + DieSides 1 = 20. Neither rank's own DBC effects reference 521213 directly (rank 2's stray Effect[2] SPELL_EFFECT_DUMMY carries TriggerSpell 706658, an unrelated spell that a dummy effect never auto-fires natively anyway), and no CoA script cast 521213 anywhere - the energize half of the tooltip had no implementation at all. The fix adds an unconditional Cast(player, player, 521213) in felsworn_casts::OnSpellHitResult, gated the same way as every other Named(info, 802060) hit-result branch (successful hit, hostile, non-self target), matching the tooltip's unqualified 'generate 20 Energy' (only the free-second-cast half is Inner Demon-gated per the DBC description text).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "felsworn",
+      "race": 1,
+      "class": 14,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "felsworn",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "felsworn",
+      "spell": 501314
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: energy is at the fixtured value",
+      "actor": "felsworn",
+      "metric": "power",
+      "power": 3,
+      "equals": 50
+    },
+    {
+      "action": "set_aura",
+      "label": "SETUP: 501314's Felfury cost (2, ResourceCostRules)",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 2
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 501314,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 501314,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the hit generates exactly the DBC's 20 Energy (BasePoints 19 + DieSides 1), with a small normal regeneration allowance",
+      "actor": "felsworn",
+      "metric": "power",
+      "power": 3,
+      "equals": 70,
+      "within_ms": 300
+    }
+  ]
+}

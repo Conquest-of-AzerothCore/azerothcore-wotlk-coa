@@ -1,0 +1,209 @@
+{
+  "schema": 1,
+  "name": "Spectral Tiger reins select a riding-skill mount and allow normal dismount (#356)",
+  "contract": [
+    "Reins of the Swift Spectral Tiger 33225 and VanityCollection row 185 teach spell 42777, whose client",
+    "description calls it an adaptive Spectral Tiger.",
+    "The client provides Spectral Tiger 499910 with a 60% mounted-speed aura and creature 24003 (display 21973),",
+    "and Swift Spectral Tiger 499909 with a 100% aura and creature 24004 (display 21974).",
+    "Apprentice riding 75 must give 60% ground speed; Journeyman 150 and Artisan 300 must give 100%. A client",
+    "dismount must clear the model and restore normal run speed.",
+    "The test learns through the actual reins item and uses the reported Venomancer class and Orgrimmar position",
+    "at supported level 80. It observes native mount state and speed, not rendered-client appearance."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": 1662.44,
+    "y": -4405.14,
+    "z": 18.0879,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "rider",
+      "race": 2,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_skill",
+      "actor": "rider",
+      "skill": 762,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "add_item",
+      "actor": "rider",
+      "item": 33225
+    },
+    {
+      "action": "use_item",
+      "actor": "rider",
+      "item": 33225,
+      "spell": 55884
+    },
+    {
+      "action": "assert",
+      "label": "Using the reins teaches its collection mount",
+      "actor": "rider",
+      "metric": "knows_spell",
+      "spell": 42777,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Let the item-learning global cooldown expire before mounting",
+      "ms": 2000
+    },
+    {
+      "action": "set_skill",
+      "actor": "rider",
+      "skill": 762,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 42777
+    },
+    {
+      "action": "assert",
+      "label": "Artisan riding shows the matching Spectral Tiger",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 21974,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Artisan riding applies the matching ground speed",
+      "actor": "rider",
+      "metric": "run_speed_rate",
+      "min": 1.999,
+      "max": 2.001
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "label": "The client dismount request removes the mount",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Dismount restores normal run speed",
+      "actor": "rider",
+      "metric": "run_speed_rate",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "set_skill",
+      "actor": "rider",
+      "skill": 762,
+      "value": 75,
+      "maximum": 300
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 42777
+    },
+    {
+      "action": "assert",
+      "label": "Apprentice riding shows the matching Spectral Tiger",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 21973,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Apprentice riding applies the matching ground speed",
+      "actor": "rider",
+      "metric": "run_speed_rate",
+      "min": 1.599,
+      "max": 1.601
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "label": "The client dismount request removes the mount",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Dismount restores normal run speed",
+      "actor": "rider",
+      "metric": "run_speed_rate",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "set_skill",
+      "actor": "rider",
+      "skill": 762,
+      "value": 150,
+      "maximum": 300
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 42777
+    },
+    {
+      "action": "assert",
+      "label": "Journeyman riding shows the matching Spectral Tiger",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 21974,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Journeyman riding applies the matching ground speed",
+      "actor": "rider",
+      "metric": "run_speed_rate",
+      "min": 1.999,
+      "max": 2.001
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "label": "The client dismount request removes the mount",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Dismount restores normal run speed",
+      "actor": "rider",
+      "metric": "run_speed_rate",
+      "min": 0.999,
+      "max": 1.001
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Venomancer: enemies outside Shadra's Lair cannot target the Venomancer inside it (#8348)",
+  "contract": "#8348: Shadra's Lair 804978 (cast in Spider Form 800841, which gives its required caster aura 803184) reads 'Designate the area around you as your Lair for $d. Enemies are unable to target into or out of the Lair and their movement speed is slowed by $s1%.' Its three SPELL_EFFECT_PERSISTENT_AREA_AURA effects use radius index 14 (8 yd): effect 0 slows enemies (TARGET_UNIT_DEST_AREA_ENEMY), effect 1 marks enemies and effect 2 marks allies (EffectImplicitTargetA TARGET_UNIT_DEST_AREA_ALLY, TargetB unset). The Lair check needs the attacker or the target to carry the aura, so the Venomancer inside must carry it from effect 2. A hostile dummy 4 yd away is inside the Lair and one 25 yd away is outside. The outside dummy must not be able to aim the single-target Frostbolt 116 at the Venomancer while the inside dummy still can, and both keep the Venomancer as a valid melee/threat target so the Lair never makes a creature evade.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "v", "race": 1, "class": 29, "level": 60 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "creatures": [
+    { "id": "inside", "owner": "v", "entry": 36, "level": 60, "health": 500000, "distance": 4, "stationary": true },
+    { "id": "outside", "owner": "v", "entry": 36, "level": 60, "health": 500000, "distance": 25, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "v", "spell": 800841 },
+    { "action": "cast", "label": "Spider Form", "actor": "v", "spell": 800841 },
+    { "action": "assert", "label": "SETUP: the Lair's required Beetle or Spider Form aura is on", "actor": "v",
+      "metric": "aura", "spell": 803184, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "learn", "actor": "v", "spell": 804978 },
+    { "action": "assert", "label": "CONTROL: before the Lair the outside dummy can aim Frostbolt at the Venomancer",
+      "actor": "outside", "metric": "can_attack", "target": "v", "spell": 116, "equals": 1 },
+    { "action": "cast", "label": "Shadra's Lair", "actor": "v", "spell": 804978 },
+    { "action": "assert", "label": "SETUP: Shadra's Lair cast succeeded", "actor": "v", "metric": "cast_failure",
+      "spell": 804978, "equals": 0 },
+    { "action": "assert", "label": "SETUP: the Lair ground effect exists", "actor": "v", "metric": "dynamic_object",
+      "spell": 804978, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "CONTROL: the dummy inside the Lair carries its enemy aura", "actor": "inside",
+      "metric": "aura", "spell": 804978, "caster": "v", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTROL: the dummy outside the Lair carries no Lair aura", "actor": "outside",
+      "metric": "aura", "spell": 804978, "caster": "v", "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: the Venomancer inside her Lair carries its ally aura", "actor": "v",
+      "metric": "aura", "spell": 804978, "caster": "v", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: the outside dummy cannot aim Frostbolt into the Lair",
+      "actor": "outside", "metric": "can_attack", "target": "v", "spell": 116, "equals": 0 },
+    { "action": "assert", "label": "CONTROL: the inside dummy can still aim Frostbolt at the Venomancer",
+      "actor": "inside", "metric": "can_attack", "target": "v", "spell": 116, "equals": 1 },
+    { "action": "assert", "label": "GUARD: the outside dummy keeps the Venomancer as a valid threat target (no evade)",
+      "actor": "outside", "metric": "can_attack", "target": "v", "equals": 1 }
+  ]
+}

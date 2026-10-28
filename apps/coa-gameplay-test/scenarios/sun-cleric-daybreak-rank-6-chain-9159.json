@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "Daybreak rank 6 chains with its lower ranks, not as an unrelated spell (#9159, already fixed by #9420)",
+  "contract": "#9159 reported Daybreak missing a rank the player already owned a prerequisite for. #9420 (merged, Refs #9159) found rev_20260903_01_live_class_baseline's spell_ranks chain for Daybreak 500147 stopped at rank 5 (503624), one short of SpellRank.dbc/the trainer, and added rev_20261026_06_coa_sun_cleric_rank_chains.sql: (500147, 572035, 6). Before that row existed, SpellMgr::GetFirstSpellInChain(572035) resolved to 572035 itself, not 500147, so every Named(info,500147)/Highest(player,500147) call in this module's C++ (which key purely on chain membership, never a literal spell id list) silently stopped recognizing the top rank. Hot Spot 301256's own tooltip is 'Casting Daybreak now causes your next 2 Shines...to have a reduced cast time', implemented at AscensionSunClericAbilities.cpp:197-198 as `if (Named(info,500147) && player->HasAura(301256)) Cast(player,player,301242)`. This scenario casts rank 6 (572035) directly, independent of the natural level-up grant path (AscensionSpellProgressionData.h still only lists ranks up to 503624; rank 6 is trainer-sold per #9420's PR body) and asserts the Hot Spot buff 301242 is applied, which only happens when 572035 is recognized as a Daybreak rank; before the fix this cast would not have triggered it.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 572035
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 301256
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Hot Spot is known",
+      "actor": "cleric",
+      "metric": "knows_spell",
+      "spell": 301256,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 572035,
+      "target": "cleric"
+    },
+    {
+      "action": "assert",
+      "label": "Daybreak rank 6 lands as a heal",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 572035,
+      "target": "cleric",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: rank 6 is recognized as Daybreak, granting Hot Spot's buff (#9159)",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 301242,
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

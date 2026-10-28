@@ -30,6 +30,7 @@ enum DataTypes
     TYPE_BARON_FIGHT                    = 4,
     TYPE_MALLOW                         = 5,
     TYPE_BARTHILAS_RUN                  = 6,
+    TYPE_GATES_LOCKED                   = 7,  // 1: keystone or Service Entrance run, the large portcullises start closed
 
     DATA_BARON_RUN_NONE                 = 0,
     DATA_BARON_RUN_GATE                 = 1,
@@ -68,6 +69,10 @@ enum GameobjectIds
     GO_ZIGGURAT_DOORS3                  = 175381,  // maleki
     GO_ZIGGURAT_DOORS4                  = 175405,  // rammstein
     GO_ZIGGURAT_DOORS5                  = 175796,  // baron
+    GO_LARGE_PORTCULLIS_01              = 175375,
+    GO_LARGE_PORTCULLIS_02              = 175376,
+    GO_LARGE_PORTCULLIS_03              = 175377,
+    GO_LARGE_PORTCULLIS_04              = 175372,
     GO_GAUNTLET_GATE                    = 175374,
     GO_SLAUGTHER_GATE                   = 175373,
     GO_SLAUGHTER_GATE_SIDE              = 175358,

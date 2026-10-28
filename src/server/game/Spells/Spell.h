@@ -26,6 +26,7 @@
 #include "SpellInfo.h"
 #include "Unit.h"
 #include <map>
+#include <optional>
 
 class Unit;
 class Player;
@@ -307,13 +308,21 @@ public:
     void EffectUnused(SpellEffIndex effIndex);
     void EffectAscensionModifyCooldown(SpellEffIndex effIndex);
     void EffectAscensionRestoreBaseManaPct(SpellEffIndex effIndex);
+    void EffectAscensionHealthPctDamage(SpellEffIndex effIndex);
+    void EffectDelayedTriggerSpell(SpellEffIndex effIndex);
+    void EffectAscensionPlaySpellVisualKit(SpellEffIndex effIndex);
     void EffectAscensionRefreshAura(SpellEffIndex effIndex);
     void EffectAscensionModifyAuraStacks(SpellEffIndex effIndex);
     void EffectAscensionModifyAuraStacksBySpell(SpellEffIndex effIndex);
     void EffectAscensionModifyAuraDuration(SpellEffIndex effIndex);
+    void EffectAscensionModifyAuraCharges(SpellEffIndex effIndex);
+    void EffectAscensionTriggerSpellWithDuration(SpellEffIndex effIndex);
+    void EffectAscensionModifyCooldownPct(SpellEffIndex effIndex);
     void EffectAscensionRestoreBaseHealthPct(SpellEffIndex effIndex);
+    void EffectAscensionPctDamage(SpellEffIndex effIndex);
     void EffectAscensionTriggerSpellDelayed(SpellEffIndex effIndex);
     void EffectAscensionResetCooldown(SpellEffIndex effIndex);
+    void EffectAscensionModifyFamilyCooldown(SpellEffIndex effIndex);
     void EffectAscensionRestoreSpellCharges(SpellEffIndex effIndex);
     void EffectDistract(SpellEffIndex effIndex);
     void EffectPull(SpellEffIndex effIndex);
@@ -648,6 +657,7 @@ public:
         auto itr = m_scriptValues.find(key);
         return itr != m_scriptValues.end() ? itr->second : 0;
     }
+    void SetJumpFinalOrientation(float orientation) { m_jumpFinalOrientation = orientation; }
 
     [[nodiscard]] uint32 GetTriggeredByAuraTickNumber() const { return m_triggeredByAuraSpell.tickNumber; }
     [[nodiscard]] SpellInfo const* GetTriggeredByAuraSpellInfo() const { return m_triggeredByAuraSpell.spellInfo; }
@@ -692,6 +702,7 @@ public:
     uint8 m_spellFlags;                                 // for spells whose target was changed in cast i.e. due to reflect
     mutable uint32 m_scriptEventMask;                   // per-cast bookkeeping, including read-only proc callbacks
     std::map<uint32, uint64> m_scriptValues;
+    std::optional<float> m_jumpFinalOrientation;
     uint32 m_scriptHealthLeechDamage = 0;
     uint32 m_scriptHealingIncludingOverheal = 0;
 

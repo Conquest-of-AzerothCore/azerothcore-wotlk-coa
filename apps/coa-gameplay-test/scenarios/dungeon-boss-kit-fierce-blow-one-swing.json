@@ -1,0 +1,209 @@
+{
+  "schema": 1,
+  "name": "Lower Blackrock Spire Normal: Highlord Omokk's kit Fierce Blow deals one weapon swing",
+  "contract": [
+    "Fierce Blow (975011) is a single melee weapon strike: its only damaging effect is Weapon Percent Damage",
+    "(effect 31) with base points 99 and one die side, so it deals 100% of the caster's weapon damage. The",
+    "coa_dungeon_boss_kit row for Highlord Omokk (9196) cast it with base points 200, doubling every hit. The",
+    "fix stores 0 so the spell's own 100% applies. Omokk pacifies himself (19951) so no auto attack, Knock Away",
+    "(prevention type 2) or other melee lands, while the triggered kit cast still goes through. Each landed",
+    "Fierce Blow then takes his weapon roll, between weapon_damage_min and at most 1.5 times that, reduced by",
+    "at most 10% by the hero's armor (600 or less against 5415 at level 59). No CoA hook changes the hit",
+    "(damage-taken controls stay at 1000). One landed cast is therefore 0.9-1.5 weapon minimums, while a",
+    "200% cast is at least 1.8. Each of the first two casts may miss or be dodged, but at least one lands;",
+    "both arrive before Omokk's 20 s Frenzy."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 229,
+    "x": -22.79,
+    "y": -300.68,
+    "z": 31.8,
+    "o": 4.65,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 8,
+      "level": 59,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "hero",
+      "entry": 9196,
+      "level": 59,
+      "health": 400000,
+      "reaction": 2,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Lower Blackrock Spire",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 229
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the instance is Normal",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Highlord Omokk pacifies himself so only the triggered kit casts can hit",
+      "actor": "boss",
+      "spell": 19951
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Highlord Omokk is pacified",
+      "actor": "boss",
+      "metric": "aura",
+      "spell": 19951,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero's armor removes at most 10% of a physical hit",
+      "actor": "hero",
+      "metric": "armor",
+      "max": 600
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no damage-taken modifier changes Fierce Blow on the hero",
+      "actor": "hero",
+      "metric": "melee_damage_taken",
+      "spell": 975011,
+      "target": "boss",
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no CoA damage hook scales Fierce Blow on the hero",
+      "actor": "hero",
+      "metric": "script_spell_damage_taken",
+      "spell": 975011,
+      "target": "boss",
+      "equals": 1000
+    },
+    {
+      "action": "snapshot",
+      "label": "Highlord Omokk's minimum weapon damage",
+      "actor": "boss",
+      "metric": "weapon_damage_min",
+      "save_as": "weapon_min"
+    },
+    {
+      "action": "attack",
+      "label": "Engage Highlord Omokk",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Highlord Omokk fights the hero",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "health",
+      "save_as": "before_first"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Highlord Omokk casts his first kit Fierce Blow",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 9196,
+      "spell": 975011,
+      "min": 1,
+      "within_ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "The first Fierce Blow deals at most one weapon swing",
+      "actor": "hero",
+      "metric": "health",
+      "relative_to": "before_first",
+      "ratio_to": "weapon_min",
+      "min": -1.6,
+      "max": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "health",
+      "save_as": "before_second"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Highlord Omokk casts his second kit Fierce Blow",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 9196,
+      "spell": 975011,
+      "min": 2,
+      "within_ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "The second Fierce Blow deals at most one weapon swing",
+      "actor": "hero",
+      "metric": "health",
+      "relative_to": "before_second",
+      "ratio_to": "weapon_min",
+      "min": -1.6,
+      "max": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: at least one Fierce Blow landed",
+      "actor": "hero",
+      "metric": "health",
+      "relative_to": "before_first",
+      "ratio_to": "weapon_min",
+      "max": -0.85
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero survives the measurement",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

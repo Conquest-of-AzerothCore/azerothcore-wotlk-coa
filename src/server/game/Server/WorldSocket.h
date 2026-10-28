@@ -126,7 +126,6 @@ private:
     uint32 _OverSpeedPings;
     std::chrono::seconds _minimumPingInterval{27};
     bool _ascensionCompatEnabled = false;
-    bool _usePlaintextWorldHeaders = false;
     uint32 _firstAscensionExtensionOpcode = 0;
     uint32 _lastAscensionExtensionOpcode = 0;
 

@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Runemaster Advanced Magi raises Elemental Burst spell power scaling (#466)",
+  "contract": [
+    "Tooltip 804557: 'Increases the spell power scaling of Elemental Burst by $s2%'.",
+    "Effect 1 is a percent modifier (aura 108), BasePoints 24 (+25%), on family 38 mask2 0x20000.",
+    "Only the Elemental Burst ranks (802202, 502828-502838) and their helpers carry mask2 0x20000.",
+    "MiscValue 41 is Ascension's private spell power coefficient operation, outside the 3.3.5a SpellModOp range.",
+    "SPELLMOD_BONUS_MULTIPLIER (24) is the operation SpellDamageBonusDone applies to the spell power coefficient.",
+    "Elemental Burst's coefficient is 0.55 ($SP*.55), so 55 must become 68.75 on every rank.",
+    "Primordial Blast 800732 keeps 55, and the Elemental Burst direct damage modifier does not change."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 20}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the character settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 802202},
+    {
+      "action": "assert", "label": "Without Advanced Magi the Elemental Burst coefficient is unmodified",
+      "actor": "rm", "metric": "spell_modifier", "spell": 802202, "op": 24, "base": 55, "equals": 55
+    },
+    {
+      "action": "snapshot", "label": "Elemental Burst direct damage modifier before Advanced Magi", "actor": "rm",
+      "metric": "spell_modifier", "spell": 802202, "op": 0, "base": 1000, "save_as": "burst_damage_mod"
+    },
+    {"action": "learn", "actor": "rm", "spell": 804557},
+    {
+      "action": "assert", "label": "Advanced Magi passive is active", "actor": "rm", "metric": "aura", "spell": 804557,
+      "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Advanced Magi raises Elemental Burst rank 1 spell power scaling by 25%",
+      "actor": "rm", "metric": "spell_modifier", "spell": 802202, "op": 24, "base": 55, "equals": 68.75
+    },
+    {
+      "action": "assert", "label": "Advanced Magi raises Elemental Burst rank 12 spell power scaling by 25%",
+      "actor": "rm", "metric": "spell_modifier", "spell": 502838, "op": 24, "base": 55, "equals": 68.75
+    },
+    {
+      "action": "assert", "label": "Primordial Blast, another Runemaster damage spell, keeps its coefficient",
+      "actor": "rm", "metric": "spell_modifier", "spell": 800732, "op": 24, "base": 55, "equals": 55
+    },
+    {
+      "action": "assert", "label": "Advanced Magi does not change the Elemental Burst direct damage modifier",
+      "actor": "rm", "metric": "spell_modifier", "spell": 802202, "op": 0, "base": 1000,
+      "relative_to": "burst_damage_mod", "equals": 0
+    },
+    {"action": "unlearn", "actor": "rm", "spell": 804557},
+    {
+      "action": "assert", "label": "Removing Advanced Magi restores the original coefficient", "actor": "rm",
+      "metric": "spell_modifier", "spell": 802202, "op": 24, "base": 55, "equals": 55, "within_ms": 2000
+    }
+  ]
+}

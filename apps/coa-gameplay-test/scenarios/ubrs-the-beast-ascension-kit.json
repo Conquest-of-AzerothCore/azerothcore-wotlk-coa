@@ -1,0 +1,188 @@
+{
+  "schema": 1,
+  "name": "Upper Blackrock Spire: The Beast fights with Ascension's kit",
+  "contract": [
+    "The Beast uses Ascension's kit for it (db.exil.es/npc/10430) instead of the old one: Immolate 2100036,",
+    "Fierce Blow 975011, Blast Wave 2100205, Flame Breath 2102192, Bellowing Roar 2100439 and Overrun",
+    "2102159, whose charge tramples the units on its path with 2102160. The encounter fixture normally casts",
+    "original 600001 before engaging and checks its +101 spell-hit aura, so the first required Immolate",
+    "cannot fail this kit test through an unrelated NPC hit roll. The boss still chooses and casts its own",
+    "authored abilities."
+  ],
+  "timeout_ms": 240000,
+  "location": {
+    "map": 229,
+    "x": 118.0,
+    "y": -563.8,
+    "z": 107.5,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "hero",
+      "entry": 10430,
+      "level": 62,
+      "health": 400000,
+      "reaction": 2,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Upper Blackrock Spire",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 229
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000,
+      "maximum": 2000000
+    },
+    {
+      "action": "cast",
+      "actor": "boss",
+      "spell": 600001,
+      "label": "Give the encounter fixture deterministic native spell hit before engaging"
+    },
+    {
+      "action": "assert",
+      "actor": "boss",
+      "metric": "aura_amount",
+      "spell": 600001,
+      "effect": 0,
+      "equals": 101,
+      "label": "The native fixture spell-hit bonus is active"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the fixture buff global cooldown"
+    },
+    {
+      "action": "attack",
+      "label": "Engage The Beast",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: The Beast fights the hero",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The Beast casts Immolate",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 10430,
+      "spell": 2100036,
+      "min": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Immolate burns the hero",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 2100036,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The Beast uses Fierce Blow",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 10430,
+      "spell": 975011,
+      "min": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "The Beast casts Blast Wave",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 10430,
+      "spell": 2100205,
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "The Beast breathes fire",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 10430,
+      "spell": 2102192,
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000,
+      "maximum": 2000000
+    },
+    {
+      "action": "assert",
+      "label": "The Beast casts Overrun",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 10430,
+      "spell": 2102159,
+      "min": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Overrun tramples its path",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 10430,
+      "spell": 2102160,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The Beast uses Bellowing Roar",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 10430,
+      "spell": 2100439,
+      "min": 1,
+      "within_ms": 25000
+    }
+  ]
+}

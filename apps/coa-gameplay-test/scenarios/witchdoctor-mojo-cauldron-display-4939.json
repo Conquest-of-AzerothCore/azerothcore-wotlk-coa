@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Mojo Cauldron preserves its recorded display, scale and charges (#4939)",
+  "contract": "The CoA alpha gameobject cache records entry 129364 with display 57580, size 1.5, interaction spell 572413 and 25 charges. A normal 807908 cast must create that object. Native display and scale checks establish server data; client rendering remains separate.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "doctor",
+      "spell": 807908
+    },
+    {
+      "action": "cast",
+      "actor": "doctor",
+      "spell": 807908
+    },
+    {
+      "action": "assert",
+      "actor": "doctor",
+      "metric": "owned_gameobject_count",
+      "entry": 129364,
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "doctor",
+      "metric": "gameobject_display",
+      "entry": 129364,
+      "equals": 57580
+    },
+    {
+      "action": "assert",
+      "actor": "doctor",
+      "metric": "gameobject_scale",
+      "entry": 129364,
+      "equals": 1.5
+    }
+  ]
+}

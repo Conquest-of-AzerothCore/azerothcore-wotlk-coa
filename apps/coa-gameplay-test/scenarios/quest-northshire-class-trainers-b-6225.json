@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Northshire class trainers take in their class letter quests, part B (#6225)",
+  "contract": [
+    "Report #6225: the CoA class trainers in Northshire Abbey cannot be interacted with, so the class letter quests from Marshal McBride cannot be handed in.",
+    "creature_questender names each trainer as the ender of its class letter quest; this part covers Patal the Mad (50283), Norman Goldshire (50287), Chaplain Nysoni (50286), Troes the Remover (50289), Amanda the Reaver (50295), Doctor Yara (502960), Deacon Frost (50325).",
+    "Each trainer template carries npcflag 51 (gossip, quest giver, trainer); a fixture keeps its template data, so it is a quest giver exactly when the shipped template is.",
+    "Each character of the quest's class holds its completed letter quest and must be able to hand it in to its own trainer (quest status 6, rewarded)."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "c25", "race": 1, "class": 25, "level": 8 },
+    { "id": "c28", "race": 1, "class": 28, "level": 8 },
+    { "id": "c27", "race": 1, "class": 27, "level": 8 },
+    { "id": "c30", "race": 1, "class": 30, "level": 8 },
+    { "id": "c12", "race": 1, "class": 12, "level": 8 },
+    { "id": "c13", "race": 1, "class": 13, "level": 8 },
+    { "id": "c15", "race": 1, "class": 15, "level": 8 }
+  ],
+  "location": { "map": 0, "x": -8911.92, "y": -217.354, "z": 81.94, "o": 0 },
+  "creatures": [
+    { "id": "trainer25", "owner": "c25", "entry": 50283, "level": 10, "distance": 2, "faction": 35 },
+    { "id": "trainer28", "owner": "c28", "entry": 50287, "level": 10, "distance": 2, "faction": 35 },
+    { "id": "trainer27", "owner": "c27", "entry": 50286, "level": 10, "distance": 2, "faction": 35 },
+    { "id": "trainer30", "owner": "c30", "entry": 50289, "level": 10, "distance": 2, "faction": 35 },
+    { "id": "trainer12", "owner": "c12", "entry": 50295, "level": 10, "distance": 2, "faction": 35 },
+    { "id": "trainer13", "owner": "c13", "entry": 502960, "level": 10, "distance": 2, "faction": 35 },
+    { "id": "trainer15", "owner": "c15", "entry": 50325, "level": 10, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "prepare_quest", "label": "Fixture: the Cultist letter quest 49984 is complete", "actor": "c25", "quest": 49984 },
+    { "action": "assert", "label": "The Cultist letter quest is ready to hand in", "actor": "c25", "metric": "quest_status", "quest": 49984, "equals": 1 },
+    { "action": "quest_turn_in", "label": "Hand it in to Patal the Mad", "actor": "c25", "quest": 49984, "entry": 50283, "reward": 0 },
+    { "action": "assert", "label": "Patal the Mad takes the quest in", "actor": "c25", "metric": "quest_status", "quest": 49984, "equals": 6, "within_ms": 3000 },
+    { "action": "prepare_quest", "label": "Fixture: the Tinker letter quest 49985 is complete", "actor": "c28", "quest": 49985 },
+    { "action": "assert", "label": "The Tinker letter quest is ready to hand in", "actor": "c28", "metric": "quest_status", "quest": 49985, "equals": 1 },
+    { "action": "quest_turn_in", "label": "Hand it in to Norman Goldshire", "actor": "c28", "quest": 49985, "entry": 50287, "reward": 0 },
+    { "action": "assert", "label": "Norman Goldshire takes the quest in", "actor": "c28", "metric": "quest_status", "quest": 49985, "equals": 6, "within_ms": 3000 },
+    { "action": "prepare_quest", "label": "Fixture: the Sun Cleric letter quest 49986 is complete", "actor": "c27", "quest": 49986 },
+    { "action": "assert", "label": "The Sun Cleric letter quest is ready to hand in", "actor": "c27", "metric": "quest_status", "quest": 49986, "equals": 1 },
+    { "action": "quest_turn_in", "label": "Hand it in to Chaplain Nysoni", "actor": "c27", "quest": 49986, "entry": 50286, "reward": 0 },
+    { "action": "assert", "label": "Chaplain Nysoni takes the quest in", "actor": "c27", "metric": "quest_status", "quest": 49986, "equals": 6, "within_ms": 3000 },
+    { "action": "prepare_quest", "label": "Fixture: the Reaper letter quest 49987 is complete", "actor": "c30", "quest": 49987 },
+    { "action": "assert", "label": "The Reaper letter quest is ready to hand in", "actor": "c30", "metric": "quest_status", "quest": 49987, "equals": 1 },
+    { "action": "quest_turn_in", "label": "Hand it in to Troes the Remover", "actor": "c30", "quest": 49987, "entry": 50289, "reward": 0 },
+    { "action": "assert", "label": "Troes the Remover takes the quest in", "actor": "c30", "metric": "quest_status", "quest": 49987, "equals": 6, "within_ms": 3000 },
+    { "action": "prepare_quest", "label": "Fixture: the Barbarian letter quest 49990 is complete", "actor": "c12", "quest": 49990 },
+    { "action": "assert", "label": "The Barbarian letter quest is ready to hand in", "actor": "c12", "metric": "quest_status", "quest": 49990, "equals": 1 },
+    { "action": "quest_turn_in", "label": "Hand it in to Amanda the Reaver", "actor": "c12", "quest": 49990, "entry": 50295, "reward": 0 },
+    { "action": "assert", "label": "Amanda the Reaver takes the quest in", "actor": "c12", "metric": "quest_status", "quest": 49990, "equals": 6, "within_ms": 3000 },
+    { "action": "prepare_quest", "label": "Fixture: the Witch Doctor letter quest 49991 is complete", "actor": "c13", "quest": 49991 },
+    { "action": "assert", "label": "The Witch Doctor letter quest is ready to hand in", "actor": "c13", "metric": "quest_status", "quest": 49991, "equals": 1 },
+    { "action": "quest_turn_in", "label": "Hand it in to Doctor Yara", "actor": "c13", "quest": 49991, "entry": 502960, "reward": 0 },
+    { "action": "assert", "label": "Doctor Yara takes the quest in", "actor": "c13", "metric": "quest_status", "quest": 49991, "equals": 6, "within_ms": 3000 },
+    { "action": "prepare_quest", "label": "Fixture: the Witch Hunter letter quest 49992 is complete", "actor": "c15", "quest": 49992 },
+    { "action": "assert", "label": "The Witch Hunter letter quest is ready to hand in", "actor": "c15", "metric": "quest_status", "quest": 49992, "equals": 1 },
+    { "action": "quest_turn_in", "label": "Hand it in to Deacon Frost", "actor": "c15", "quest": 49992, "entry": 50325, "reward": 0 },
+    { "action": "assert", "label": "Deacon Frost takes the quest in", "actor": "c15", "metric": "quest_status", "quest": 49992, "equals": 6, "within_ms": 3000 }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Blast Mine ignores enemies standing on it and explodes when destroyed (#1512)",
+  "contract": "Deploy Blast Mine 801718 reads 'Place down a Blast Mine, lasting $d. When the mine is destroyed, or upon using Remote Detonation, up to $802336i nearby targets are blasted away and enemies take a minor amount of Fire damage.' and the mine's passive 572376 has the tooltip 'Upon being killed this mine will explode, dealing Fire Damage and knocking targets away.' The client data names exactly two triggers, destruction and Remote Detonation 801798; it has no proximity trigger, and the mine 50045 is a passive summon that generates no threat, so nothing makes creatures attack it. #1512 reports that the mine never explodes on its own when enemies walk over it; per the tooltip that is the intended design. The scenario places the mine 1 yd from a hostile level 6 golem and checks it stays armed for five seconds, then moves the level 10 Tinker 14 yd away and has the golem destroy the mine with Decoy Explosive 53273 (10 yd around the golem, SPELL_ATTR3_ALWAYS_HIT, 1440 to 2160 Physical, several times the mine's level * 35 + stamina health). The destroyed mine must explode: npc_ascension_tinker_device::JustDied casts Remote Bomb Explosion 802336 (Fire, SPELL_ATTR0_ALLOW_CAST_WHILE_DEAD) on each enemy within its 8 yd radius, so the golem, which cannot damage itself, must lose health. The golem is four levels below the mine, so the magic hit roll cannot miss (MagicSpellHitResult caps the hit chance at 100%).",
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "tinker", "race": 1, "class": 28, "level": 10}
+  ],
+  "creatures": [
+    {"id": "golem", "owner": "tinker", "entry": 36, "level": 6, "distance": 4, "health": 1000000}
+  ],
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "label": "Deploy Blast Mine", "actor": "tinker", "spell": 801718},
+    {"action": "snapshot", "actor": "golem", "metric": "health", "save_as": "golem_start"},
+    {"action": "cast", "label": "Deploy the mine 1 yd from the golem", "actor": "tinker", "spell": 801718, "destination": {"x": -8914.41, "y": -115.853, "z": 82.3711}},
+    {"action": "assert", "label": "One Blast Mine is placed", "actor": "tinker", "metric": "owned_creature_count", "entry": 50045, "equals": 1, "within_ms": 2000},
+    {"action": "wait", "label": "An enemy stands on the mine", "ms": 5000},
+    {"action": "assert", "label": "An enemy on the mine does not set it off", "actor": "tinker", "metric": "owned_creature_count", "entry": 50045, "equals": 1},
+    {"action": "assert", "label": "The golem took no damage from the armed mine", "actor": "golem", "metric": "health", "relative_to": "golem_start", "equals": 0},
+    {"action": "teleport", "label": "The Tinker steps 14 yd away from the golem", "actor": "tinker", "map": 0, "x": -8899.41, "y": -115.853, "z": 82.3711},
+    {"action": "wait", "ms": 1500},
+    {"action": "assert", "label": "The Tinker is outside the golem's blast", "actor": "tinker", "metric": "distance_2d", "target": "golem", "min": 12},
+    {"action": "assert", "label": "The mine is still armed", "actor": "tinker", "metric": "owned_creature_count", "entry": 50045, "equals": 1},
+    {"action": "snapshot", "actor": "golem", "metric": "health", "save_as": "golem_before_blast"},
+    {"action": "cast", "label": "The golem's blast destroys the mine", "actor": "golem", "spell": 53273},
+    {"action": "assert", "label": "The mine is destroyed", "actor": "tinker", "metric": "owned_creature_count", "entry": 50045, "equals": 0, "within_ms": 2000},
+    {"action": "assert", "label": "The destroyed mine explodes on the golem", "actor": "golem", "metric": "health", "relative_to": "golem_before_blast", "max": -1, "within_ms": 3000},
+    {"action": "assert", "label": "The Tinker is unharmed", "actor": "tinker", "metric": "alive", "equals": 1}
+  ]
+}

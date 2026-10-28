@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Warcraft Reborn: the Guardian of Time sells the Bronzebeard world Mystic Scrolls in one store per original class",
+  "contract": [
+    "On Warcraft Reborn an original-class character sees the Guardian's Mystic Scrolls option (General Goods, Heirlooms, Mystic Scrolls, Altars, two Worldforged upgrades).",
+    "Mystic Scrolls lists nine class stores, Warrior to Druid, with no Death Knight.",
+    "The Warrior store (9781013) holds 61 scrolls and the Druid store (9781021) 67, from rev_20261021_03."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -8816.5, "y": 627.0, "z": 94.1, "o": 3.8},
+  "players": [
+    {"id": "w", "name": "Rebornscroll", "race": 1, "class": 1, "level": 60}
+  ],
+  "creatures": [
+    {"id": "guardian", "owner": "w", "entry": 9780012, "distance": 2, "faction": 35}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 3000},
+    {"action": "gossip_hello", "actor": "w", "target": "guardian", "label": "Speak to the Guardian of Time"},
+    {"action": "assert", "actor": "w", "metric": "gossip_options", "equals": 6, "label": "Main menu offers Mystic Scrolls to an original class"},
+    {"action": "gossip_select", "actor": "w", "option": 2, "label": "Mystic Scrolls"},
+    {"action": "assert", "actor": "w", "metric": "gossip_options", "equals": 9, "label": "Nine class stores, no Death Knight"},
+    {"action": "gossip_select", "actor": "w", "option": 0, "label": "Warrior store"},
+    {"action": "assert", "actor": "w", "metric": "vendor_list_packets", "equals": 1, "label": "The Warrior store opens"},
+    {"action": "assert", "actor": "w", "metric": "vendor_items", "equals": 61, "label": "Warrior store holds its 61 scrolls"},
+    {"action": "gossip_hello", "actor": "w", "target": "guardian", "label": "Speak to the Guardian again"},
+    {"action": "gossip_select", "actor": "w", "option": 2, "label": "Mystic Scrolls"},
+    {"action": "gossip_select", "actor": "w", "option": 8, "label": "Druid store"},
+    {"action": "assert", "actor": "w", "metric": "vendor_list_packets", "equals": 2, "label": "The Druid store opens"},
+    {"action": "assert", "actor": "w", "metric": "vendor_items", "equals": 67, "label": "Druid store holds its 67 scrolls"}
+  ]
+}

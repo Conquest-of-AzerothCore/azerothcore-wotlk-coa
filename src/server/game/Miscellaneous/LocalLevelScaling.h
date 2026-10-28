@@ -7,69 +7,29 @@
 #ifndef AC_LOCAL_LEVEL_SCALING_H
 #define AC_LOCAL_LEVEL_SCALING_H
 
+#include "Define.h"
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <cstdint>
-#include <mutex>
 #include <optional>
-#include <unordered_set>
+#include <utility>
 
 class Creature;
+class Item;
 class Player;
+class Quest;
+class Unit;
+struct ItemTemplate;
 
 namespace LocalLevelScaling
 {
-inline std::atomic<bool> CreatureEnabled{false};
 inline std::atomic<bool> QuestEnabled{false};
-inline std::atomic<std::uint8_t> CreatureOffset{3};
+inline std::atomic<std::uint8_t> CreatureOffset{4};
 
-// De combien de niveaux, au maximum, une creature peut etre remontee au-dessus
-// du sien. Sans ce plafond, un joueur de niveau 30 traversant une zone de
-// depart hissait chaque creature a 27 : les bots de bas niveau qui les
-// engageaient se faisaient tuer par des creatures qui n'etaient pas les leurs.
-//
-// Une creature n'a qu'un seul niveau, diffuse a tous les clients : elle ne peut
-// pas valoir 27 pour un joueur et 2 pour un bot. Borner la remontee est donc le
-// seul compromis possible entre « le contenu reste pertinent » et « le monde
-// reste jouable pour ceux qui y sont deja ».
-//
-// 0 desactive le plafond et rend le comportement d'origine.
-//
-// This ceiling bounds a level that is shared: the one creature every client is
-// told about. A module that gives each character their own version of a creature
-// raises CreatureScalingOwnedPerViewer below, and those levels are bounded by
-// nothing, because one character's version of a creature is theirs alone.
-inline std::atomic<std::uint8_t> CreatureMaxLift{5};
-
-/// Set by the module that owns a character's scaling choice, when that ownership
-/// is per viewer rather than realm wide.
-///
-/// It is how the two models stay out of each other's way: the realm-wide path
-/// lifts the creature object itself, which every client is then told about, so a
-/// character who never asked for scaling would see a raised world anyway. While
-/// this is set, that path stands aside (its `CanScaleCreature` refuses) and the
-/// per-viewer path answers instead - kept live rather than decided once at load,
-/// so a `.reload config` moves between the two models without a restart.
-inline std::atomic<bool> CreatureScalingOwnedPerViewer{false};
-
-/// How much of the level-scaled reward a quest keeps when it is lifted from its own level to the
-/// player's, at the extreme end of the range: the rest is lost in proportion to how much of that
-/// range the quest spans, so a quest at the player's own level always keeps all of it. Both default
-/// to 100, which is no discount at all, and both are set from a module's config.
-///
-/// Money carries a discount by default: the reward class (the tier) says nothing about level - the
-/// median tier is the same in every level band - so paid at full strength a rich quest from a
-/// starting zone would pay what a rich level-appropriate one pays while being trivial to complete.
-/// A discount keeps the old zones worth playing without letting the easy content become the
-/// profitable content, and because the discount only ever scales *down* from the price the class
-/// pays at the player's level, old content can never out-pay level-appropriate content.
-inline std::atomic<std::uint32_t> QuestMoneyKeepSharePercent{100};
-
-/// Experience is left whole by default. The promise scaling makes is that scaled content always
-/// awards experience, and levelling through the old zones is exactly what the system is for - a
-/// discount here would put the dead zones back. Lower it to bound how much of a character's
-/// progress can come from content far below them.
-inline std::atomic<std::uint32_t> QuestXpKeepSharePercent{100};
+/// Whether a query response marks a quest on its curve with the client's scaling flag, which colours
+/// it "standard" instead of by level. Off by default: live quest caches never carried the flag.
+inline std::atomic<bool> QuestClientScalingFlag{false};
 
 /// The realm switches above are the default. A character can have a choice of their own, and
 /// whichever module owns that choice installs a resolver here; the realm switches keep the final
@@ -88,13 +48,154 @@ inline bool ScalingChoiceEnabled(Player const* player)
     return owner && owner(player);
 }
 
+/// The parts of level scaling the character's active challenge switches off, as a mask of the
+/// ChallengeBlocks* bits. The challenge module installs the resolver; zero means nothing is blocked.
+inline constexpr std::uint8_t ChallengeBlocksCreatureScaling = 0x1;
+inline constexpr std::uint8_t ChallengeBlocksQuestScaling = 0x2;
+using ChallengeBlocksResolver = std::uint8_t (*)(Player const*);
+inline std::atomic<ChallengeBlocksResolver> ChallengeBlocksOwner{nullptr};
+
+inline std::uint8_t ChallengeBlocksFor(Player const* player)
+{
+    ChallengeBlocksResolver const owner = ChallengeBlocksOwner.load(std::memory_order_relaxed);
+    return owner && player ? owner(player) : 0;
+}
+
+/// War Mode and High-Risk switch all level scaling off in the open world; their own tooltips say
+/// "Level scaling is disabled while in War Mode / High-Risk". The ruleset owner installs the resolver.
+using RulesetBlocksResolver = bool (*)(Player const*);
+inline std::atomic<RulesetBlocksResolver> RulesetBlocksOwner{nullptr};
+
+/// Everything that holds this character to the authored world, whatever their own choice: the
+/// active challenge's rules and the open-world ruleset, as a mask of the ChallengeBlocks* bits.
+inline std::uint8_t ScalingBlocksFor(Player const* player)
+{
+    RulesetBlocksResolver const ruleset = RulesetBlocksOwner.load(std::memory_order_relaxed);
+    if (ruleset && player && ruleset(player))
+        return ChallengeBlocksCreatureScaling | ChallengeBlocksQuestScaling;
+    return ChallengeBlocksFor(player);
+}
+
+/// Whether the character stands in a dungeon that scales for everyone inside it, whatever their own or
+/// their leader's choice. The module that owns the dungeon list installs the resolver.
+using ScaledDungeonResolver = bool (*)(Player const*);
+inline std::atomic<ScaledDungeonResolver> ScaledDungeonOwner{nullptr};
+
+inline bool InScaledDungeon(Player const* player)
+{
+    ScaledDungeonResolver const owner = ScaledDungeonOwner.load(std::memory_order_relaxed);
+    return owner && player && owner(player);
+}
+
+/// Whether the loot this character takes is scaled to them: only inside a scaled dungeon, and never
+/// while a challenge holds them to the authored world. Open-world loot keeps its authored stats.
+inline bool DungeonLootScales(Player const* player)
+{
+    return InScaledDungeon(player) && !(ScalingBlocksFor(player) & ChallengeBlocksCreatureScaling);
+}
+
+/// Something other than the character's own choice changed whether they see scaled content: a
+/// challenge started or stopped, or the open-world ruleset changed. The module that owns the creature
+/// view installs the resolver and re-sends what the client is holding; false means nobody did, so the
+/// caller refreshes what it can.
+using ScalingChangedResolver = void (*)(Player*);
+inline std::atomic<ScalingChangedResolver> ScalingChangedOwner{nullptr};
+
+inline bool NotifyScalingChanged(Player* player)
+{
+    ScalingChangedResolver const owner = ScalingChangedOwner.load(std::memory_order_relaxed);
+    if (!owner || !player)
+        return false;
+
+    owner(player);
+    return true;
+}
+
 inline bool QuestScalingEnabled(Player const* player)
 {
     if (!QuestEnabled.load(std::memory_order_relaxed))
         return false;
 
     QuestScalingResolver const owner = QuestScalingOwner.load(std::memory_order_relaxed);
-    return !owner || owner(player);
+    if (owner && !owner(player))
+        return false;
+    return !(ScalingBlocksFor(player) & ChallengeBlocksQuestScaling);
+}
+
+/// One quest's row of QuestTemplateScaling.dbc: the levels it is held within and up to six
+/// (player level, offset) points. Only quests with a row scale at all.
+struct QuestCurve
+{
+    std::int32_t MinLevel = 0;
+    std::int32_t MaxLevel = 0;
+    std::uint8_t Count = 0;
+    std::array<std::pair<std::int32_t, std::int32_t>, 6> Points{};
+};
+
+using QuestCurveResolver = QuestCurve const* (*)(std::uint32_t questId);
+inline std::atomic<QuestCurveResolver> QuestCurveOwner{nullptr};
+
+inline QuestCurve const* QuestCurveFor(std::uint32_t questId)
+{
+    QuestCurveResolver const owner = QuestCurveOwner.load(std::memory_order_relaxed);
+    return owner ? owner(questId) : nullptr;
+}
+
+/// The curve a quest follows for a caller that already resolved the character's choice, or nullptr when
+/// the quest is played at its authored level.
+inline QuestCurve const* ScalingCurveFor(bool levelScaling, std::uint32_t questId)
+{
+    if (!levelScaling || !QuestEnabled.load(std::memory_order_relaxed))
+        return nullptr;
+    return QuestCurveFor(questId);
+}
+
+/// The level the curve puts a quest at for a character of `playerLevel`, before the row's bounds: the
+/// point with the highest player level at or below the character's applies, so the quest trails the
+/// character by that point's offset. Below every point the quest stays at its minimum; a row without
+/// points follows the character.
+inline std::int32_t UnclampedCurveLevel(QuestCurve const& curve, std::uint8_t playerLevel)
+{
+    std::int32_t const level = playerLevel;
+    std::int32_t result = curve.Count ? std::max<std::int32_t>(1, curve.MinLevel) : level;
+    bool found = false;
+    std::int32_t bestThreshold = 0;
+    for (std::uint8_t i = 0; i < curve.Count && i < curve.Points.size(); ++i)
+    {
+        auto const [threshold, offset] = curve.Points[i];
+        if (level >= threshold && (!found || threshold > bestThreshold))
+        {
+            found = true;
+            bestThreshold = threshold;
+            result = level + offset;
+        }
+    }
+    return result;
+}
+
+inline std::int32_t CurveLevel(QuestCurve const& curve, std::uint8_t playerLevel)
+{
+    std::int32_t const low = std::max<std::int32_t>(1, curve.MinLevel);
+    std::int32_t const high = std::max(low, curve.MaxLevel);
+    return std::clamp(UnclampedCurveLevel(curve, playerLevel), low, high);
+}
+
+/// Whether the quest is trailing the character right now: at or past its minimum and not yet held
+/// down by its maximum.
+inline bool OnCurve(QuestCurve const& curve, std::uint8_t playerLevel)
+{
+    std::int32_t const low = std::max<std::int32_t>(1, curve.MinLevel);
+    std::int32_t const high = std::max(low, curve.MaxLevel);
+    return std::int32_t(playerLevel) >= low && UnclampedCurveLevel(curve, playerLevel) <= high;
+}
+
+/// The level a quest is played at: its authored level (the character's own for a quest without one),
+/// raised by its curve when it scales. Scaling never lowers a quest.
+inline std::int32_t EffectiveQuestLevel(std::int32_t authoredLevel, std::uint8_t playerLevel,
+    QuestCurve const* curve)
+{
+    std::int32_t const stock = authoredLevel > 0 ? authoredLevel : std::int32_t(playerLevel);
+    return curve ? std::max(stock, CurveLevel(*curve, playerLevel)) : stock;
 }
 
 /// One character's version of one creature, asked for by the few places in the core that compute a
@@ -136,98 +237,216 @@ inline std::uint8_t ViewLevelFor(Player const* viewer, Creature const* creature)
     return owner ? owner(viewer, creature) : 0;
 }
 
-inline std::uint8_t ScaleCreatureLevel(std::uint8_t originalLevel, std::uint8_t playerLevel,
-    std::uint8_t offset = 3)
+/// The max health one character's version of one creature has, or zero when that character sees the
+/// authored creature. For effects worded as a share of "the creature's health", which the character
+/// reads off the health bar they are shown.
+using CreatureViewMaxHealthResolver = std::uint32_t (*)(Player const*, Creature const*);
+inline std::atomic<CreatureViewMaxHealthResolver> CreatureViewMaxHealthOwner{nullptr};
+
+inline std::uint32_t ViewMaxHealthFor(Player const* viewer, Creature const* creature)
 {
-    std::uint8_t floor = playerLevel > offset ? playerLevel - offset : 1;
-
-    // Le plafond s'applique AVANT le max : une creature deja plus haute que
-    // originalLevel + lift garde son niveau, on ne la rabaisse jamais.
-    std::uint8_t lift = CreatureMaxLift.load(std::memory_order_relaxed);
-    if (lift)
-    {
-        std::uint32_t capped = static_cast<std::uint32_t>(originalLevel) + lift;
-        if (floor > capped)
-            floor = static_cast<std::uint8_t>(std::min<std::uint32_t>(capped, 255));
-    }
-
-    return std::max(originalLevel, floor);
+    CreatureViewMaxHealthResolver const owner = CreatureViewMaxHealthOwner.load(std::memory_order_relaxed);
+    return owner ? owner(viewer, creature) : 0;
 }
 
-/// The same rule as ScaleCreatureLevel, without the ceiling.
-///
-/// This is the level a *viewer* is shown for a creature. The ceiling above exists to bound one
-/// character's effect on the level everybody else is told about, and a view is told to nobody else,
-/// so the reason for it is absent: the creature in front of a character comes all the way up to
-/// that character's band, which is the whole point of the feature (a starting-zone creature stays
-/// relevant to the character standing in front of it).
-///
-/// A realm that also runs the realm-wide path keeps its ceiling for that path; the two are
-/// independent, and CreatureScalingOwnedPerViewer is what keeps them from both answering.
+/// `threat` that the character behind `source` generated against `threatOwner`, in the creature's real
+/// health pool: their damage already reaches the pool converted, and threat from anything else (healing,
+/// threat spells, mana drains) is converted by the same ratio so it keeps pace with damage threat. Unchanged
+/// when no character sees a version of the creature.
+AC_GAME_API float PoolThreatFor(Unit const* source, Unit const* threatOwner, float threat);
+
+/// The health `victim` shows the character behind `attacker`: the real health scaled to that character's
+/// version of the creature, which is the size damage logs report hits in. The real health otherwise.
+AC_GAME_API std::uint32_t ShownHealthFor(Unit const* attacker, Unit const* victim);
+
+/// The level a *viewer* is shown for an open-world creature: never lowered, and lifted to the viewer's
+/// level minus the offset. A view is told to nobody else, so it has no ceiling: the creature in front
+/// of a character comes all the way up to that character's band, which is the whole point of the
+/// feature (a starting-zone creature stays relevant to the character standing in front of it).
 inline std::uint8_t ScaleCreatureLevelForViewer(std::uint8_t originalLevel, std::uint8_t playerLevel,
-    std::uint8_t offset = 3)
+    std::uint8_t offset = 4)
 {
     std::uint8_t floor = playerLevel > offset ? playerLevel - offset : 1;
     return std::max(originalLevel, floor);
 }
 
-inline std::uint8_t ScaleQuestLevel(std::int32_t originalLevel, std::uint8_t playerLevel)
+/// The levels one classic dungeon is scaled within, as the dungeon finder lists it.
+struct LevelBand
 {
-    if (originalLevel <= 0)
-        return playerLevel;
-    std::uint8_t questLevel = static_cast<std::uint8_t>(std::min<std::int32_t>(originalLevel, UINT8_MAX));
-    return std::max(questLevel, playerLevel);
+    std::uint8_t Low;
+    std::uint8_t High;
+};
+
+/// The band of one dungeon finder entry. Entries the finder never offers carry placeholder levels
+/// (100/100 for Wailing Caverns, Gnomeregan and Uldaman), so a bound outside 1-60 falls back to
+/// 15-59, the range the finder's classic dungeons share.
+inline LevelBand DungeonBandFromFinder(std::uint32_t minLevel, std::uint32_t maxLevel)
+{
+    std::uint8_t const low = minLevel >= 1 && minLevel <= 60 ? static_cast<std::uint8_t>(minLevel) : 15;
+    std::uint8_t const high = maxLevel >= low && maxLevel <= 60 ? static_cast<std::uint8_t>(maxLevel) : 59;
+    return { low, high };
 }
 
-/// The share of a scaled reward a quest keeps: `floorPercent` at the far end of the level range,
-/// growing to 100% at the player's own level, in proportion to how much of that range the quest
-/// spans. A quest at or above the player's level - the case where scaling changes nothing - always
-/// keeps the whole reward.
-inline std::uint32_t RewardKeepPercent(std::uint32_t floorPercent, std::int32_t questLevel,
-    std::uint8_t effectiveLevel)
+/// One map can be listed by several finder entries (Scarlet Monastery's four wings, Maraudon's three):
+/// its band covers all of them.
+inline LevelBand MergeBands(LevelBand a, LevelBand b)
 {
-    if (floorPercent >= 100 || questLevel <= 0 || effectiveLevel == 0 ||
-        std::uint32_t(questLevel) >= effectiveLevel)
-        return 100;
-
-    std::uint32_t const sharePercent = std::uint32_t(questLevel) * 100 / effectiveLevel;
-    return floorPercent + (100 - floorPercent) * sharePercent / 100;
+    return { std::min(a.Low, b.Low), std::max(a.High, b.High) };
 }
 
-// coa-gameplay-test summons every fixture creature into this phase, then gives it the level and the
-// maximum health its scenario declared. Creature scaling does not assign a level, it rebuilds the
-// creature through SelectLevel(), which recomputes maximum health from the template and throws that
-// declared state away. The lift cap made this visible: a fixture declared at level 80 on a level 11
-// template is rescaled down to level 16, and the hit the scenario was measuring kills it.
-//
-// A fixture is therefore left alone, unless its scenario asked for the opposite by declaring
-// "level_scaling": true on the creature - which only the scenario that tests scaling itself does.
-inline constexpr std::uint32_t FixturePhaseMask = 1u << 30;
-
-inline std::mutex ScalableFixtureLock;
-inline std::unordered_set<std::uint64_t> ScalableFixtures;
-
-inline void AllowFixtureScaling(std::uint64_t guid)
+/// The viewer's rule inside a scaled five-player dungeon: every creature stands at the viewer's own
+/// level, held inside the dungeon's band on both sides. The dungeon finder admits a group well below a
+/// classic dungeon's authored level (Scarlet Monastery - Cathedral from 20 against creatures of 36-40),
+/// so a dungeon creature comes down as well as up.
+inline std::uint8_t ScaleDungeonCreatureLevelForViewer(std::uint8_t playerLevel, LevelBand band)
 {
-    std::lock_guard<std::mutex> guard(ScalableFixtureLock);
-    ScalableFixtures.insert(guid);
+    return std::clamp(playerLevel, band.Low, band.High);
 }
 
-inline void ForgetFixture(std::uint64_t guid)
+/// Item templates that are not in the world database: lifted copies of authored items, made when
+/// scaled content drops or rewards an item for a character above the content's level. Items already
+/// handed out keep pointing at their copy, so the owner serves every copy it ever made even while new
+/// lifts are switched off - an inventory whose template went missing would be deleted on login.
+using ScaledItemTemplateResolver = ItemTemplate const* (*)(std::uint32_t entry);
+inline std::atomic<ScaledItemTemplateResolver> ScaledItemTemplateOwner{nullptr};
+
+inline ItemTemplate const* ScaledItemTemplateFor(std::uint32_t entry)
 {
-    std::lock_guard<std::mutex> guard(ScalableFixtureLock);
-    ScalableFixtures.erase(guid);
+    ScaledItemTemplateResolver const owner = ScaledItemTemplateOwner.load(std::memory_order_relaxed);
+    return owner ? owner(entry) : nullptr;
 }
 
-// The phase test alone answers for every creature in the live world, so the lock is never taken
-// outside a harness run.
-inline bool IsUnscaledFixture(std::uint32_t phaseMask, std::uint64_t guid)
-{
-    if (!(phaseMask & FixturePhaseMask))
-        return false;
+/// The item one character is offered and given for a quest's reward slot: the authored item, or a
+/// copy lifted by as many levels as the quest itself is lifted for that character. The offer, the
+/// query response and the reward all ask here, so what is shown is what is received.
+using QuestRewardItemResolver = std::uint32_t (*)(Player const*, std::uint32_t itemId, Quest const* quest);
+inline std::atomic<QuestRewardItemResolver> QuestRewardItemOwner{nullptr};
 
-    std::lock_guard<std::mutex> guard(ScalableFixtureLock);
-    return ScalableFixtures.find(guid) == ScalableFixtures.end();
+inline std::uint32_t QuestRewardItemFor(Player const* player, std::uint32_t itemId, Quest const* quest)
+{
+    QuestRewardItemResolver const owner = QuestRewardItemOwner.load(std::memory_order_relaxed);
+    return owner && itemId && quest ? owner(player, itemId, quest) : itemId;
+}
+
+/// The template one item instance is built from. An item that was given a scaling level of its own keeps
+/// its authored entry, so the client still knows it, but its stats, damage, armor, required level, sell
+/// price and disenchant loot come from the row for that level. The paths that apply, check or price an item ask here;
+/// nullptr from the owner means the instance is the authored item.
+using ItemInstanceTemplateResolver = ItemTemplate const* (*)(Item const*);
+inline std::atomic<ItemInstanceTemplateResolver> ItemInstanceTemplateOwner{nullptr};
+
+inline ItemTemplate const* InstanceTemplateFor(Item const* item, ItemTemplate const* authored)
+{
+    ItemInstanceTemplateResolver const owner = ItemInstanceTemplateOwner.load(std::memory_order_relaxed);
+    if (!owner || !item)
+        return authored;
+
+    ItemTemplate const* scaled = owner(item);
+    return scaled ? scaled : authored;
+}
+
+/// The armor one character gets from wearing an item built from this template. The client shows the
+/// reborn armor column to every class but the classless Hero, so the owner of item ladders answers
+/// with that column for those classes; without an owner the template's own armor applies.
+using WornArmorResolver = std::uint32_t (*)(Player const*, ItemTemplate const*, std::uint32_t armor);
+inline std::atomic<WornArmorResolver> WornArmorOwner{nullptr};
+
+inline std::uint32_t WornArmorFor(Player const* player, ItemTemplate const* proto, std::uint32_t armor)
+{
+    WornArmorResolver const owner = WornArmorOwner.load(std::memory_order_relaxed);
+    return owner && player && proto ? owner(player, proto, armor) : armor;
+}
+
+/// An item instance moved into a character's inventory from somewhere the character's login did not
+/// cover: a trade, a mail. The owner of instance levels tells the client the level of such an item.
+using ItemArrivalResolver = void (*)(Player*, Item*);
+inline std::atomic<ItemArrivalResolver> ItemArrivalOwner{nullptr};
+
+inline void NotifyItemArrival(Player* player, Item* item)
+{
+    ItemArrivalResolver const owner = ItemArrivalOwner.load(std::memory_order_relaxed);
+    if (owner && player && item)
+        owner(player, item);
+}
+
+/// An item a master looter handed to `receiver`. That path never reaches the loot hooks, so the owner
+/// of instance levels is told here and gives the item the receiver's level like any other loot.
+using MasterLootResolver = void (*)(Player* receiver, Item* item);
+inline std::atomic<MasterLootResolver> MasterLootOwner{nullptr};
+
+inline void NotifyMasterLoot(Player* receiver, Item* item)
+{
+    MasterLootResolver const owner = MasterLootOwner.load(std::memory_order_relaxed);
+    if (owner && receiver && item)
+        owner(receiver, item);
+}
+
+/// A quest reward just stored for `player`, before the reward hooks run, so the owner of instance levels
+/// can give it the level the quest itself showed for it.
+using QuestRewardLevelResolver = void (*)(Player* player, Item* item, Quest const* quest);
+inline std::atomic<QuestRewardLevelResolver> QuestRewardLevelOwner{nullptr};
+
+inline void NotifyQuestRewardItem(Player* player, Item* item, Quest const* quest)
+{
+    QuestRewardLevelResolver const owner = QuestRewardLevelOwner.load(std::memory_order_relaxed);
+    if (owner && player && item && quest)
+        owner(player, item, quest);
+}
+
+/// The loot preview. The client shows a scaling item that has no level of its own yet (a loot slot, a
+/// roll, an inspected or auctioned item) at a level the server tells it beforehand, so each character
+/// sees the version they would receive. The owner of instance levels installs these hooks only while the
+/// preview is on; without them the client shows the authored items.
+struct ItemPreviewHooks
+{
+    /// Tells `roller` the level their next roll frame shows and returns it, zero for none.
+    std::uint32_t (*RollLevel)(Player* roller);
+    /// The level a lootable corpse shows `viewer`, zero for its usual one.
+    std::uint32_t (*CorpseLevel)(Player* viewer, Creature const* corpse);
+    /// Tells `inspector` the level of each item `target` wears.
+    void (*Inspected)(Player* inspector, Player* target);
+    /// Tells `player` the level of each item waiting in their mailbox.
+    void (*MailListed)(Player* player);
+    /// The level an auction of the instance `itemGuidLow` lists, zero for none.
+    std::uint32_t (*AuctionLevel)(std::uint32_t itemGuidLow, ItemTemplate const* proto);
+};
+inline std::atomic<ItemPreviewHooks const*> ItemPreviewOwner{nullptr};
+
+inline bool ItemPreviewActive()
+{
+    return ItemPreviewOwner.load(std::memory_order_relaxed) != nullptr;
+}
+
+inline std::uint32_t RollPreviewLevel(Player* roller)
+{
+    ItemPreviewHooks const* hooks = ItemPreviewOwner.load(std::memory_order_relaxed);
+    return hooks && roller ? hooks->RollLevel(roller) : 0;
+}
+
+inline std::uint32_t CorpsePreviewLevel(Player* viewer, Creature const* corpse)
+{
+    ItemPreviewHooks const* hooks = ItemPreviewOwner.load(std::memory_order_relaxed);
+    return hooks && viewer && corpse ? hooks->CorpseLevel(viewer, corpse) : 0;
+}
+
+inline void NotifyInspected(Player* inspector, Player* target)
+{
+    ItemPreviewHooks const* hooks = ItemPreviewOwner.load(std::memory_order_relaxed);
+    if (hooks && inspector && target)
+        hooks->Inspected(inspector, target);
+}
+
+inline void NotifyMailListed(Player* player)
+{
+    ItemPreviewHooks const* hooks = ItemPreviewOwner.load(std::memory_order_relaxed);
+    if (hooks && player)
+        hooks->MailListed(player);
+}
+
+inline std::uint32_t AuctionPreviewLevel(std::uint32_t itemGuidLow, ItemTemplate const* proto)
+{
+    ItemPreviewHooks const* hooks = ItemPreviewOwner.load(std::memory_order_relaxed);
+    return hooks && proto ? hooks->AuctionLevel(itemGuidLow, proto) : 0;
 }
 }
 

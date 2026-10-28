@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "name": "Ranger Masterful Archery: stacks only while in Elude and the next Precision Shot consumes them (#1318)",
+  "contract": "Masterful Archery 680469 reads 'While in Elude, gain a stack of Masterful Archery every $T1 sec.' and its buff 680471 reads 'Your next Precision Shot now deals $s2% increased damage for $d, stacking up to $u times.' 680469 is a permanent passive whose only effect is SPELL_AURA_PERIODIC_TRIGGER_SPELL, amplitude 2000, on 573450, which triggers 680471 on the caster; nothing in Spell.dbc ties the tick to Elude (801345, the Ranger's stealth form, aura 16 + shapeshift 30), so stacks accrued every 2 sec in and out of Elude. 680471 is a 10 sec (DurationIndex 1) self aura, StackAmount 5, SPELLMOD_DAMAGE +10% on EffectSpellClassMask (0,8388608,0) = Precision Shot, with Spell.dbc ProcCharges 0, so no Precision Shot ever used it up. Expected: no stacks while out of Elude; at least two stacks within 6 sec in Elude; none added after leaving Elude; the buff carries one charge; the next Precision Shot that lands removes a fresh 10 sec buff about 3.6 sec in. Before the fix the first assertion already sees stacks outside Elude.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80,
+      "ranged_hit_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "ranger",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 15
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 6000 },
+    { "action": "learn", "actor": "ranger", "spell": 264 },
+    { "action": "learn", "actor": "ranger", "spell": 500075 },
+    { "action": "learn", "actor": "ranger", "spell": 801345 },
+    { "action": "add_item", "actor": "ranger", "item": 2504 },
+    { "action": "equip", "actor": "ranger", "item": 2504, "slot": 17 },
+    { "action": "learn", "actor": "ranger", "spell": 680469 },
+    {
+      "action": "assert",
+      "label": "SETUP: Masterful Archery is active on the Ranger",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 680469,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    { "action": "wait", "label": "Two tick periods outside Elude", "ms": 5000 },
+    {
+      "action": "assert",
+      "label": "Outside Elude no Masterful Archery stack is gained",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 680471,
+      "equals": 0
+    },
+    { "action": "cast", "label": "Enter Elude", "actor": "ranger", "spell": 801345 },
+    {
+      "action": "assert",
+      "label": "SETUP: the Ranger is in Elude",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 801345,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "In Elude a stack is gained every 2 sec",
+      "actor": "ranger",
+      "metric": "aura_stacks",
+      "spell": 680471,
+      "min": 2,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "Masterful Archery is spent by one Precision Shot: it carries a single charge",
+      "actor": "ranger",
+      "metric": "aura_charges",
+      "spell": 680471,
+      "equals": 1
+    },
+    { "action": "cancel_aura", "label": "Leave Elude", "actor": "ranger", "spell": 801345 },
+    {
+      "action": "assert",
+      "label": "SETUP: the Ranger left Elude",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 801345,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    { "action": "snapshot", "actor": "ranger", "metric": "aura_stacks", "spell": 680471, "save_as": "stacks_after_elude" },
+    { "action": "wait", "label": "Two tick periods after leaving Elude", "ms": 4500 },
+    {
+      "action": "assert",
+      "label": "No stack is gained after leaving Elude",
+      "actor": "ranger",
+      "metric": "aura_stacks",
+      "spell": 680471,
+      "relative_to": "stacks_after_elude",
+      "equals": 0
+    },
+    { "action": "set_aura", "label": "Clear the aged buff", "actor": "ranger", "spell": 680471, "stacks": 0 },
+    { "action": "set_aura", "label": "A fresh 10 sec buff with three stacks", "actor": "ranger", "spell": 680471, "stacks": 3 },
+    { "action": "snapshot", "actor": "ranger", "metric": "spell_damage_count", "spell": 500075, "save_as": "precision_before" },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 100 },
+    { "action": "set_aura", "label": "Precision Shot needs Advantage", "actor": "ranger", "spell": 804329, "stacks": 1 },
+    { "action": "cast", "label": "The next Precision Shot", "actor": "ranger", "spell": 500075, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "SETUP: the Precision Shot landed",
+      "actor": "ranger",
+      "metric": "spell_damage_count",
+      "spell": 500075,
+      "relative_to": "precision_before",
+      "equals": 1,
+      "within_ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "The Precision Shot consumed Masterful Archery",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 680471,
+      "equals": 0,
+      "within_ms": 1000
+    }
+  ]
+}

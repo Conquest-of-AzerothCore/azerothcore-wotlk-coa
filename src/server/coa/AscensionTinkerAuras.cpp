@@ -148,6 +148,12 @@ class aura_ascension_tinker_lifecycle : public AuraScript
             PreventDefaultAction();
             Resource(player,Scrap,-1);
         }
+        if (GetId() == GatlingGun && effect->GetEffIndex() == EFFECT_0)
+        {
+            PreventDefaultAction();
+            if (Unit* enemy = GetTarget(); enemy->IsAlive() && player->IsInWorld())
+                player->CastSpell(enemy,500577,TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_DISALLOW_PROC_EVENTS));
+        }
         if (GetId() == 807635 && effect->GetEffIndex() == EFFECT_0)
         {
             PreventDefaultAction();
@@ -181,7 +187,7 @@ class aura_ascension_tinker_lifecycle : public AuraScript
         }
         if (GetId() == 560709 && effect->GetEffIndex() == EFFECT_0)
         {
-            amount += int32(GetTarget()->GetStat(STAT_STAMINA));
+            amount += int32(GetUnitOwner()->GetStat(STAT_STAMINA));
             recalculate = false;
         }
         if (GetId() == 808008 && effect->GetEffIndex() < EFFECT_2)
@@ -228,8 +234,34 @@ class aura_ascension_tinker_lifecycle : public AuraScript
             }
     }
 };
+class aura_ascension_tinker_arcanoreflector : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_tinker_arcanoreflector);
+    void Absorb(AuraEffect*, DamageInfo& damage, uint32& amount)
+    {
+        if (!damage.GetSpellInfo())
+            amount = 0;
+    }
+    void Explode(AuraEffect*, DamageInfo& damage, uint32& amount)
+    {
+        if (!amount || !damage.GetSpellInfo())
+            return;
+        for (uint8 slot = 0; slot < MAX_SPELL_EFFECTS; ++slot)
+            if (GetSpellInfo()->Effects[slot].IsAura(SPELL_AURA_DUMMY))
+                if (AuraEffect const* share = GetAura()->GetEffect(slot))
+                    GetTarget()->CastCustomSpell(578346,SPELLVALUE_BASE_POINT0,
+                        int32(uint64(amount) * std::max(0,share->GetAmount()) / 100),GetTarget(),true);
+        GetAura()->Remove();
+    }
+    void Register() override
+    {
+        OnEffectAbsorb += AuraEffectAbsorbFn(aura_ascension_tinker_arcanoreflector::Absorb,EFFECT_0);
+        AfterEffectAbsorb += AuraEffectAbsorbFn(aura_ascension_tinker_arcanoreflector::Explode,EFFECT_0);
+    }
+};
 }
 void AddSC_AscensionTinkerAuras()
 {
     RegisterSpellScript(aura_ascension_tinker_lifecycle);
+    RegisterSpellScript(aura_ascension_tinker_arcanoreflector);
 }

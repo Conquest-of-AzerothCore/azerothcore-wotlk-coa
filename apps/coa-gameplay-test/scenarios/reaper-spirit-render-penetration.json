@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Reaper Spirit Render grants spell penetration (#2156)",
+  "contract": [
+    "Spirit Render 570338 reads 'Increases your spell penetration by ${-($m1+0)}, scaling with your level.'",
+    "Spell.dbc gives it a single effect: aura 123 (SPELL_AURA_MOD_TARGET_RESISTANCE), MiscValue 126 (all magic schools), BasePoints -21, EffectRealPointsPerLevel -0.5, TargetA caster.",
+    "SPELL_AURA_MOD_TARGET_RESISTANCE is native and generic (AuraEffect::HandleModTargetResistance); the same aura backs the already-working #651 Forbidden Power spell-penetration clause.",
+    "Negative amount is spell penetration (Unit::CalcAbsorbResist subtracts the caster's own MOD_TARGET_RESISTANCE total from the victim's resistance). At level 80 the level-scaled amount must be at least as negative as the raw -21 base."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 2,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert",
+      "label": "Fixture precondition: aura absent before learning",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 570338,
+      "equals": 0
+    },
+    { "action": "learn", "actor": "reaper", "spell": 570338 },
+    {
+      "action": "assert",
+      "label": "Spirit Render aura is active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 570338,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Spirit Render grants spell penetration (negative target-resistance amount)",
+      "actor": "reaper",
+      "metric": "aura_amount",
+      "spell": 570338,
+      "effect": 0,
+      "max": -21,
+      "within_ms": 3000
+    }
+  ]
+}

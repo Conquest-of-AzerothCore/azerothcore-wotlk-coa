@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Worldforged Kul Tiras Armplates stands on the Tiragarde Keep floor, not buried under it (#9365)",
+  "contract": "The Broken Crate pickup (entry 90598, guid 6941894, item 521082) was lowered to the stock terrain by rev_20261006_65_worldforged_openworld_float_heights.sql, 4.18 yd under the Ruinedkeep.wmo floor it stands in. Restore it to the keep's own ground floor. The terrain-only ground probe cannot discriminate the two heights (both read as grounded), so reachability is proven by a successful Opening cast.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": -270.5, "y": -5134.0, "z": 24.5, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the Broken Crate stands in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 90598, "equals": 1 },
+    { "action": "assert", "label": "SETUP: the restored height is a real floor, not a float", "actor": "p", "metric": "point_ground_gap", "map": 1, "x": -271.2, "y": -5134.8, "z": 25.243, "min": -0.2, "max": 0.2 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 90598 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "DISCRIMINATING: the pickup is within reach of the keep floor and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

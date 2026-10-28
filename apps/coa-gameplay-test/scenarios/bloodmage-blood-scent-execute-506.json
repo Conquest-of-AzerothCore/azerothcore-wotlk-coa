@@ -1,0 +1,421 @@
+{
+  "schema": 1,
+  "name": "Blood Scent applies its Accursed Form execute damage and direct leech (#506)",
+  "contract": [
+    "The supplied active Blood Scent (804223) description and effect values specify 15% increased damage",
+    "in Accursed Form (562572) against enemies below 35% maximum health and a 10% direct-damage leech.",
+    "Exactly 35% is excluded. Native melee, spell and periodic damage hooks must return 1150 from a base",
+    "of 1000 only with the talent, the form and an eligible target. The leech paragraph has no form",
+    "requirement. A normal Mortal Form Valanar's Vengeance cast below the threshold must invoke the",
+    "existing Blood Scent leech helper 807300 and heal its caster; an above-threshold cast must not. The",
+    "target health pool is asserted, and ordinary fixture-player regeneration is disabled. This scenario",
+    "observes server calculations and combat logs, not rendered client behavior.",
+    "Resolved direct and periodic Reave copies retain their forwarded amount without a second execute bonus.",
+    "The leech helper uses the native melee damage class; both spell and melee hit and expertise are capped.",
+    "The target remains below the execute threshold when hit. Valanar consumes health, so the leech effective heal is measured independently of that cost."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "mage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "dummy",
+      "race": 2,
+      "class": 1,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "pvp",
+      "actor": "mage",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "dummy",
+      "enabled": true
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "learn",
+      "actor": "mage",
+      "spell": 804223
+    },
+    {
+      "action": "set_aura",
+      "actor": "mage",
+      "spell": 562572,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "mage",
+      "spell": 804223,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Accursed Form fixture is active",
+      "actor": "mage",
+      "metric": "aura",
+      "spell": 562572,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The talent fixture is active",
+      "actor": "mage",
+      "metric": "aura",
+      "spell": 804223,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The target has the declared health pool",
+      "actor": "dummy",
+      "metric": "max_health",
+      "equals": 1000000
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 350000
+    },
+    {
+      "action": "assert",
+      "label": "Exactly 35% health receives no execute bonus script_melee_damage_taken",
+      "actor": "dummy",
+      "metric": "script_melee_damage_taken",
+      "target": "mage",
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Exactly 35% health receives no execute bonus script_spell_damage_taken",
+      "actor": "dummy",
+      "metric": "script_spell_damage_taken",
+      "target": "mage",
+      "spell": 572795,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Exactly 35% health receives no execute bonus script_periodic_damage_taken",
+      "actor": "dummy",
+      "metric": "script_periodic_damage_taken",
+      "target": "mage",
+      "spell": 572795,
+      "equals": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 340000
+    },
+    {
+      "action": "assert",
+      "label": "Below 35% health receives the promised 15% damage bonus script_melee_damage_taken",
+      "actor": "dummy",
+      "metric": "script_melee_damage_taken",
+      "target": "mage",
+      "equals": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Below 35% health receives the promised 15% damage bonus script_spell_damage_taken",
+      "actor": "dummy",
+      "metric": "script_spell_damage_taken",
+      "target": "mage",
+      "spell": 572795,
+      "equals": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Resolved Reave copies retain the source execute bonus exactly once",
+      "actor": "dummy",
+      "metric": "script_spell_damage_taken",
+      "target": "mage",
+      "spell": 802884,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Resolved Reave copies retain the source execute bonus exactly once",
+      "actor": "dummy",
+      "metric": "script_periodic_damage_taken",
+      "target": "mage",
+      "spell": 802883,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Below 35% health receives the promised 15% damage bonus script_periodic_damage_taken",
+      "actor": "dummy",
+      "metric": "script_periodic_damage_taken",
+      "target": "mage",
+      "spell": 572795,
+      "equals": 1150
+    },
+    {
+      "action": "set_aura",
+      "actor": "mage",
+      "spell": 562572,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Outside Accursed Form receives no execute bonus script_melee_damage_taken",
+      "actor": "dummy",
+      "metric": "script_melee_damage_taken",
+      "target": "mage",
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Outside Accursed Form receives no execute bonus script_spell_damage_taken",
+      "actor": "dummy",
+      "metric": "script_spell_damage_taken",
+      "target": "mage",
+      "spell": 572795,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Outside Accursed Form receives no execute bonus script_periodic_damage_taken",
+      "actor": "dummy",
+      "metric": "script_periodic_damage_taken",
+      "target": "mage",
+      "spell": 572795,
+      "equals": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "mage",
+      "spell": 562572,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 340000
+    },
+    {
+      "action": "learn",
+      "actor": "mage",
+      "spell": 572795
+    },
+    {
+      "action": "set_aura",
+      "actor": "mage",
+      "spell": 562572,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "mage",
+      "maximum": 100000,
+      "value": 50000
+    },
+    {
+      "action": "set_power",
+      "actor": "mage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "mage",
+      "spell": 572795,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "The direct damage probe lands",
+      "actor": "mage",
+      "metric": "spell_damage_count",
+      "spell": 572795,
+      "target": "enemy",
+      "equals": 1,
+      "within_ms": 9000
+    },
+    {
+      "action": "assert",
+      "label": "The leech target remains below the execute threshold when the hit lands",
+      "actor": "enemy",
+      "metric": "health_pct",
+      "max": 34
+    },
+    {
+      "action": "assert",
+      "label": "Direct damage below 35% triggers the native Blood Scent leech",
+      "actor": "mage",
+      "metric": "spell_heal_count",
+      "spell": 807300,
+      "target": "mage",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The leech restores positive health",
+      "actor": "mage",
+      "metric": "spell_heal_total",
+      "spell": 807300,
+      "target": "mage",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The leech restores effective health",
+      "actor": "mage",
+      "metric": "spell_effective_heal_total",
+      "spell": 807300,
+      "target": "mage",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "spell_damage_total",
+      "spell": 572795,
+      "target": "enemy",
+      "save_as": "execute_damage"
+    },
+    {
+      "action": "assert",
+      "label": "Blood Scent leeches 10% of the observed direct damage",
+      "actor": "mage",
+      "metric": "spell_heal_total",
+      "spell": 807300,
+      "target": "mage",
+      "ratio_to": "execute_damage",
+      "min": 0.095,
+      "max": 0.105
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 500000
+    },
+    {
+      "action": "set_health",
+      "actor": "mage",
+      "value": 50000
+    },
+    {
+      "action": "set_power",
+      "actor": "mage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "mage",
+      "spell": 572795,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "The above-threshold damage probe lands",
+      "actor": "mage",
+      "metric": "spell_damage_count",
+      "spell": 572795,
+      "target": "enemy",
+      "equals": 2,
+      "within_ms": 9000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Damage above 35% does not trigger another leech",
+      "actor": "mage",
+      "metric": "spell_heal_count",
+      "spell": 807300,
+      "target": "mage",
+      "equals": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "mage",
+      "spell": 804223
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 340000
+    },
+    {
+      "action": "assert",
+      "label": "Removing Blood Scent removes the execute bonus script_melee_damage_taken",
+      "actor": "dummy",
+      "metric": "script_melee_damage_taken",
+      "target": "mage",
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Removing Blood Scent removes the execute bonus script_spell_damage_taken",
+      "actor": "dummy",
+      "metric": "script_spell_damage_taken",
+      "target": "mage",
+      "spell": 572795,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Removing Blood Scent removes the execute bonus script_periodic_damage_taken",
+      "actor": "dummy",
+      "metric": "script_periodic_damage_taken",
+      "target": "mage",
+      "spell": 572795,
+      "equals": 1000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "mage",
+      "entry": 36,
+      "level": 80,
+      "distance": 3,
+      "health": 1000000
+    }
+  ]
+}

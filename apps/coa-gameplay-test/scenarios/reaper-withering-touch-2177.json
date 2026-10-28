@@ -1,0 +1,382 @@
+{
+  "schema": 1,
+  "name": "Withering Touch magic vulnerability lifecycle (#2177)",
+  "contract": [
+    "Current CoA Spell.dbc 573071 and its description specify 20% armor reduction and 10% more magic damage taken",
+    "for one minute; the description names helper 573076. An ordinary cast with Soul Infusion must apply both",
+    "effects. Native SpellDamageBonusTaken for Fireball 133 must become 1100 for a 1000 base, while armor becomes",
+    "80% of its baseline. An ordinary cooldown-respecting recast must refresh the debuff without stacking magic",
+    "vulnerability. A triggered creature Remove Curse (475) exercises the native curse-dispel path without claiming",
+    "player-session dispel coverage. Dispel and natural expiration must restore both baseline calculations and",
+    "remove the helper belonging to the parent caster. Supply Soul Infusion anew for each ordinary cast because",
+    "the native Reaper cost path spends it. Runic Power generation remains observed without inventing an amount.",
+    "A separate ordinary Doomrend 800172 cast must generate positive Runic Power, and native maximum power",
+    "must permit generation. These controls distinguish Withering Touch from unavailable resource capacity",
+    "without assigning it an undocumented generation amount.",
+    "Cap spell and melee hit and expertise for ordinary cast controls, including the separate weapon-strike Doomrend."
+  ],
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 1,
+      "class": 30,
+      "level": 60,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "reaper",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 573071
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "armor",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "armor",
+      "save_as": "armor_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_damage_taken",
+      "spell": 133,
+      "target": "reaper",
+      "save_as": "magic_before"
+    },
+    {
+      "action": "set_power",
+      "actor": "reaper",
+      "power": 6,
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "power",
+      "power": 6,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 573071,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 573071,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 573071,
+      "caster": "reaper",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The ordinary debuff removes 20% of target armor",
+      "actor": "enemy",
+      "metric": "armor",
+      "ratio_to": "armor_before",
+      "min": 0.79,
+      "max": 0.81
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 573076,
+      "caster": "reaper",
+      "save_as": "magic_helper_present"
+    },
+    {
+      "action": "assert",
+      "label": "The ordinary debuff increases native magic damage taken by 10%",
+      "actor": "enemy",
+      "metric": "spell_damage_taken",
+      "spell": 133,
+      "target": "reaper",
+      "ratio_to": "magic_before",
+      "min": 1.099,
+      "max": 1.101
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 573076,
+      "caster": "reaper",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 573076,
+      "caster": "reaper",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Reaper has capacity for Runic Power generation",
+      "actor": "reaper",
+      "metric": "max_power",
+      "power": 6,
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "power",
+      "power": 6,
+      "save_as": "observed_runic_power_after"
+    },
+    {
+      "action": "wait",
+      "label": "Respect the ordinary 15-second cooldown before refreshing",
+      "ms": 16000
+    },
+    {
+      "action": "set_aura",
+      "label": "Supply a new Soul Infusion for the ordinary recast",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 573071,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 573071,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The normal recast refreshes the minute-long parent",
+      "actor": "enemy",
+      "metric": "aura_duration_ms",
+      "spell": 573071,
+      "caster": "reaper",
+      "min": 59000,
+      "max": 60000,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Refreshing does not stack vulnerability",
+      "actor": "enemy",
+      "metric": "spell_damage_taken",
+      "spell": 133,
+      "target": "reaper",
+      "ratio_to": "magic_before",
+      "min": 1.099,
+      "max": 1.101
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 573076,
+      "caster": "reaper",
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Native engine control: the creature dispels its own Curse",
+      "actor": "enemy",
+      "spell": 475,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 573071,
+      "caster": "reaper",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Curse dispel removes the caster-owned magic helper",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 573076,
+      "caster": "reaper",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "armor",
+      "ratio_to": "armor_before",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_damage_taken",
+      "spell": 133,
+      "target": "reaper",
+      "ratio_to": "magic_before",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "wait",
+      "ms": 16000
+    },
+    {
+      "action": "set_aura",
+      "label": "Supply a new Soul Infusion for the ordinary recast",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 573071,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 573071,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 573076,
+      "caster": "reaper",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Allow the original one-minute duration to expire naturally",
+      "ms": 60100
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 573071,
+      "caster": "reaper",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Natural expiration removes the permanent helper",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 573076,
+      "caster": "reaper",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "armor",
+      "ratio_to": "armor_before",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_damage_taken",
+      "spell": 133,
+      "target": "reaper",
+      "ratio_to": "magic_before",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 800172
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "reaper",
+      "power": 6,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 800172,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Runic Power generation is available to this Reaper",
+      "actor": "reaper",
+      "metric": "power",
+      "power": 6,
+      "min": 1,
+      "within_ms": 500
+    }
+  ]
+}

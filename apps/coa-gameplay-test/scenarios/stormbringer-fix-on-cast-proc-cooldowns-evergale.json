@@ -1,13 +1,13 @@
 {
   "schema": 1,
   "name": "Stormbringer: Evergale refreshes a Gale charge on Call Lightning (#2813)",
-  "contract": "Evergale 705717 (Spell.dbc: passive Attributes 448, Effect[0] APPLY_AURA / aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 705716, TARGET_UNIT_CASTER) promises \"Casting $?s707615[Aeroblast][Call Lightning] now refreshes a charge of Gale\". 705716 Unrelenting Gale has one SPELL_EFFECT_ASCENSION_RESTORE_SPELL_CHARGES with EffectMiscValue 189 and EffectBasePoints 0 + EffectDieSides 1 = 1 charge, handled by Spell::EffectAscensionRestoreSpellCharges -> Player::RestoreSpellChargeCategory(189, 1). SpellChargesCategory 189 is MaxCharges 3 with RecoveryTime 10000 and SpellCharges maps every Gale rank (804036, 570138-570141) to it, so the restore is rank-agnostic. 705717's DBC ProcFlags are 0, so SpellMgr::LoadSpellProcs skips proc-entry generation and, with no spell_proc row, the aura has no entry in mSpellProcMap and can never fire. Effect[1] of 705717 is aura 107 ADD_FLAT_MODIFIER with EffectBasePoints -1 + EffectDieSides 1 = 0, an inert modifier, so the charge restore is the whole promise. Call Lightning rank 13 (501399) carries SpellFamilyFlags1 0x10, the bit shared with Aeroblast; Arm of Thorim (SpellFamilyFlags1 0x2, no mana cost) is the negative control. Every charge assertion is taken well inside the 10000 ms natural recovery of the spent charges. Call Lightning and Arm of Thorim both carry StartRecoveryCategory 133 / StartRecoveryTime 1500 (the shared 1.5 s GCD), same as Gale, so every gap before a discriminating cast is 1701 ms to clear it.",
+  "contract": "Evergale 705717 (Spell.dbc: passive Attributes 448, Effect[0] APPLY_AURA / aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 705716, TARGET_UNIT_CASTER) promises \"Casting $?s707615[Aeroblast][Call Lightning] now refreshes a charge of Gale\". 705716 Unrelenting Gale has one SPELL_EFFECT_ASCENSION_RESTORE_SPELL_CHARGES with EffectMiscValue 189 and EffectBasePoints 0 + EffectDieSides 1 = 1 charge, handled by Spell::EffectAscensionRestoreSpellCharges -> Player::RestoreSpellChargeCategory(189, 1). SpellChargesCategory 189 is MaxCharges 3 with RecoveryTime 10000 and SpellCharges maps every Gale rank (804036, 570138-570141) to it, so the restore is rank-agnostic. 705717's DBC ProcFlags are 0, so SpellMgr::LoadSpellProcs skips proc-entry generation and, with no spell_proc row, the aura has no entry in mSpellProcMap and can never fire. Effect[1] of 705717 is aura 107 ADD_FLAT_MODIFIER with EffectBasePoints -1 + EffectDieSides 1 = 0, an inert modifier, so the charge restore is the whole promise. Call Lightning rank 13 (501399) carries SpellFamilyFlags1 0x10, the bit shared with Aeroblast; Arm of Thorim (SpellFamilyFlags1 0x2, no mana cost) is the negative control. Every charge assertion is taken well inside the 10000 ms natural recovery of the spent charges. Call Lightning and Arm of Thorim both carry StartRecoveryCategory 133 / StartRecoveryTime 1500 (the shared 1.5 s GCD), same as Gale, so every gap before a discriminating cast is 1701 ms to clear it. The dummy is Harvest Golem 36, which does not flee: a Rabbit 721 fixture runs CritterAI, which flees when engaged and then evades, so Gale was refused with UNIT_NOT_INFRONT while it fled and no step ran while it evaded, which stretched the 1701 ms wait after Arm of Thorim to 5-6 s, past the 10000 ms recovery of the first spent charge. Call Lightning requires the 50-Static threshold aura 707050 (CasterAuraSpell) and depletes 50 Static, and Arm of Thorim depletes all of it, so Static is refilled before the cap check; without the refill the third Call Lightning failed with NO_POWER and the cap check saw no proc.",
   "timeout_ms": 90000,
   "players": [
     { "id": "sb", "race": 2, "class": 16, "level": 80, "spell_hit_rating": 10000 }
   ],
   "creatures": [
-    { "id": "dummy", "owner": "sb", "entry": 721, "health": 1000000, "distance": 3 }
+    { "id": "dummy", "owner": "sb", "entry": 36, "health": 1000000, "distance": 3 }
   ],
   "steps": [
     { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
@@ -70,8 +70,14 @@
       "action": "assert", "label": "SETUP: the pool is full again before the cap check",
       "actor": "sb", "metric": "spell_charges", "spell": 570141, "equals": 3
     },
+    { "action": "set_aura", "actor": "sb", "spell": 803102, "stacks": 100 },
+    { "action": "snapshot", "actor": "sb", "metric": "spell_proc_count", "spell": 705717, "save_as": "procs_before_cap" },
     { "action": "cast", "actor": "sb", "spell": 501399, "target": "dummy" },
     { "action": "wait", "ms": 2600 },
+    {
+      "action": "assert", "label": "SETUP: the Call Lightning at full charges fired Evergale",
+      "actor": "sb", "metric": "spell_proc_count", "spell": 705717, "relative_to": "procs_before_cap", "min": 1
+    },
     {
       "action": "assert", "label": "DISCRIMINATING: a proc at full charges cannot exceed MaxCharges 3",
       "actor": "sb", "metric": "spell_charges", "spell": 570141, "equals": 3

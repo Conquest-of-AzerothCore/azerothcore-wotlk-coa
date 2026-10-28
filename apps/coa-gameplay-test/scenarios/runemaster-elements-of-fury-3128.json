@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Issue 3128: Elements of Fury lets Palm Sigil: Arcane affect one additional instance of damage",
+  "contract": [
+    "Elements of Fury 707413 reads 'Your Palm Sigils now affect $s1 additional instance of damage.' Effect 0 is a flat",
+    "SPELLMOD_CHARGES (4) of 1 on family 38 mask0 0x04000000 mask2 0x2000, which Palm Sigil: Arcane 805380 (mask2",
+    "0x2000) carries. The sigil has DBC ProcCharges 0 and spell_proc -805380 Charges 0, so Aura::CalcMaxCharges gives",
+    "0 charges without the talent and 1 with it, while aura_ascension_arcane_palm_sigil removes the aura on its first",
+    "proc either way: the talent changed nothing. Expected: the sigil holds 2 charges with the talent; the first",
+    "direct Magic hit (Fire Blast) applies Palm Sigil: Arcane 807819 and leaves the sigil with 1 charge; a second",
+    "direct Magic hit (Ice Lance) applies 807819 again and consumes the sigil."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80, "spell_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rm", "entry": 36, "level": 80, "health": 10000000, "distance": 5}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 805380},
+    {"action": "learn", "actor": "rm", "spell": 2136},
+    {"action": "learn", "actor": "rm", "spell": 30455},
+    {"action": "learn", "actor": "rm", "spell": 707413},
+    {"action": "assert", "label": "SETUP: Elements of Fury passive is active", "actor": "rm", "metric": "aura",
+      "spell": 707413, "equals": 1, "within_ms": 2000},
+    {"action": "set_aura", "label": "Runeshroud opens the Palm Sigil gate", "actor": "rm", "spell": 500288,
+      "stacks": 1},
+    {"action": "assert", "label": "SETUP: the Palm Sigil gate is open", "actor": "rm", "metric": "aura",
+      "spell": 808089, "equals": 1, "within_ms": 1000},
+    {"action": "cast", "actor": "rm", "spell": 805380},
+    {"action": "assert", "label": "SETUP: Palm Sigil: Arcane is active", "actor": "rm", "metric": "aura",
+      "spell": 805380, "equals": 1, "within_ms": 3000},
+    {"action": "set_aura", "label": "Leave Runeshroud before attacking", "actor": "rm", "spell": 500288,
+      "stacks": 0},
+    {"action": "assert", "label": "CONTRACT: Elements of Fury gives the sigil two instances", "actor": "rm",
+      "metric": "aura_charges", "spell": 805380, "equals": 2},
+    {"action": "snapshot", "actor": "rm", "metric": "spell_cast_count", "spell": 807819, "save_as": "sigil_dots"},
+    {"action": "wait", "label": "Let the global cooldown end", "ms": 1200},
+    {"action": "cast", "actor": "rm", "spell": 2136, "target": "dummy"},
+    {"action": "assert", "label": "SETUP: Fire Blast hits the target", "actor": "rm", "metric": "spell_damage_count",
+      "spell": 2136, "target": "dummy", "min": 1, "within_ms": 1000},
+    {"action": "assert", "label": "CONTRACT: the first hit triggers Palm Sigil: Arcane", "actor": "rm",
+      "metric": "spell_cast_count", "spell": 807819, "relative_to": "sigil_dots", "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "CONTRACT: the sigil survives the first instance", "actor": "rm",
+      "metric": "aura", "spell": 805380, "equals": 1},
+    {"action": "wait", "label": "Let the global cooldown end", "ms": 1600},
+    {"action": "cast", "actor": "rm", "spell": 30455, "target": "dummy"},
+    {"action": "assert", "label": "SETUP: Ice Lance hits the target", "actor": "rm", "metric": "spell_damage_count",
+      "spell": 30455, "target": "dummy", "min": 1, "within_ms": 1500},
+    {"action": "assert", "label": "CONTRACT: the second hit triggers Palm Sigil: Arcane again", "actor": "rm",
+      "metric": "spell_cast_count", "spell": 807819, "relative_to": "sigil_dots", "equals": 2, "within_ms": 1000},
+    {"action": "assert", "label": "CONTRACT: the second instance consumes the sigil", "actor": "rm",
+      "metric": "aura", "spell": 805380, "equals": 0, "within_ms": 1000}
+  ]
+}

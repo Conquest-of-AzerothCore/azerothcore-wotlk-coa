@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Glyphic Runemaster's first spec-row talent is a free node by design (#5269)",
+  "contract": "Issue #5269 ('War Knight of Xoroth and Gylphic Runemaster Get Their 1st Spec Talent for Free') already has knight-spec-tree-free-nodes.json proving the Knight of Xoroth half of this is CharacterAdvancement design, not a bug: a tree's identity passive and first-row node both carry AbilityEssenceCost 0 / TalentEssenceCost 0 and are granted automatically on specialization choice. This scenario proves the same thing for the Runemaster half. ChrSpecs.dbc id 62 (ClassToken SPIRITMAGE, TabToken ARCANE -- the Glyphic spec) has IdentityEntry 4061, CharacterAdvancement 4061 (RankSpell[0] 92152, AbilityEssenceCost 0, TalentEssenceCost 0): the Frost Glyph identity passive. CharacterAdvancement 66733 (RequiredEntry[0] 4061, RankSpell[0] 801179, AbilityEssenceCost 0, TalentEssenceCost 0) is the free first-row node hanging off that identity -- the Glyphic equivalent of Knight War's Warbringer. Both the identity and the first-row node must be granted automatically on choosing the Glyphic specialization, and switching away must remove both while granting the new spec's own identity (CharacterAdvancement 4062, RankSpell[0] 92153, for the Runic spec, ChrSpecs id 61).",
+  "players": [
+    { "id": "rm", "race": 1, "class": 32, "level": 40 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks and class synchronisation settle", "ms": 5000 },
+    { "action": "specialization", "actor": "rm", "id": 62 },
+    { "action": "assert", "label": "Glyphic grants its identity, Frost Glyph", "actor": "rm", "metric": "knows_spell", "spell": 92152, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "CONTRACT: Glyphic grants its free first row node (CharacterAdvancement 66733, cost 0/0)", "actor": "rm", "metric": "knows_spell", "spell": 801179, "equals": 1 },
+    { "action": "specialization", "actor": "rm", "id": 61 },
+    { "action": "assert", "label": "Switching to Runic grants its own identity", "actor": "rm", "metric": "knows_spell", "spell": 92153, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "The switch removed Glyphic's identity", "actor": "rm", "metric": "knows_spell", "spell": 92152, "equals": 0 },
+    { "action": "assert", "label": "The switch removed Glyphic's free first row node", "actor": "rm", "metric": "knows_spell", "spell": 801179, "equals": 0 }
+  ]
+}

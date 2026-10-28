@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Primalist Emerald Will successful poison and disease dispels",
-  "contract": "Soothing Touch heals 4% of target maximum health for each successfully dispelled poison/disease effect. Test either type, both together, a clean target, baseline and removal. Mere casts cannot heal.",
+  "contract": "Soothing Touch heals 4% of target maximum health for each successfully dispelled poison/disease effect. Test either type, both together, a clean target, baseline and removal. Mere casts cannot heal. Emerald Will 525015 is a DmgClass 1 heal of the Normal school, which AscensionPrimalistPhysicalCrit.cpp lets crit at the Primalist's Nature spell crit chance, so the heal crits at random. The Primalist therefore gets spell crit rating 10000, which puts that chance above 100%, and every heal is the native 150% magic critical heal (Unit::SpellCriticalHealingBonus): 4% of the ally's 100000 maximum is 4000, healed as 6000 per dispelled effect and 12000 for both. The positive cases count critical heals only, so a heal that did not crit cannot stand in for a larger percentage; the baseline, clean-target and removal controls count every heal and must stay at zero.",
   "players": [
     {
       "id": "primalist",
@@ -9,6 +9,7 @@
       "class": 31,
       "level": 80,
       "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000,
       "melee_hit_rating": 10000,
       "expertise_rating": 10000
     },
@@ -32,9 +33,9 @@
   "timeout_ms": 180000,
   "steps": [
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "primalist",
-      "command": ".localspec 58"
+      "id": 58
     },
     {
       "action": "learn",
@@ -135,6 +136,7 @@
       "metric": "spell_heal_total",
       "spell": 525015,
       "target": "ally",
+      "critical": true,
       "save_as": "poison"
     },
     {
@@ -161,8 +163,9 @@
       "metric": "spell_heal_total",
       "spell": 525015,
       "target": "ally",
+      "critical": true,
       "relative_to": "poison",
-      "equals": 4000
+      "equals": 6000
     },
     {
       "action": "wait",
@@ -193,6 +196,7 @@
       "metric": "spell_heal_total",
       "spell": 525015,
       "target": "ally",
+      "critical": true,
       "save_as": "disease"
     },
     {
@@ -219,8 +223,9 @@
       "metric": "spell_heal_total",
       "spell": 525015,
       "target": "ally",
+      "critical": true,
       "relative_to": "disease",
-      "equals": 4000
+      "equals": 6000
     },
     {
       "action": "wait",
@@ -264,6 +269,7 @@
       "metric": "spell_heal_total",
       "spell": 525015,
       "target": "ally",
+      "critical": true,
       "save_as": "both"
     },
     {
@@ -298,8 +304,9 @@
       "metric": "spell_heal_total",
       "spell": 525015,
       "target": "ally",
+      "critical": true,
       "relative_to": "both",
-      "equals": 8000
+      "equals": 12000
     },
     {
       "action": "wait",

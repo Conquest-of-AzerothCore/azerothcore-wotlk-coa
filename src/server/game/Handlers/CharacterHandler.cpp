@@ -36,6 +36,7 @@
 #include "InstanceSaveMgr.h"
 #include "Language.h"
 #include "Log.h"
+#include "MailMgr.h"
 #include "MapMgr.h"
 #include "Metric.h"
 #include "MotdMgr.h"
@@ -1146,6 +1147,8 @@ void WorldSession::HandlePlayerLoginFromDB(LoginQueryHolder const& holder)
         }
     }
 
+    _rafRewardSession = 0;
+    UpdateRecruitAFriendRewards(true);
     sScriptMgr->OnPlayerLogin(pCurrChar);
 
     if (pCurrChar->HasAtLoginFlag(AT_LOGIN_FIRST))
@@ -1234,18 +1237,18 @@ void WorldSession::HandlePlayerLoginToCharInWorld(Player* pCurrChar)
     pCurrChar->SetInGameTime(GameTime::GetGameTimeMS().count());
 
     // Xinef: we need to resend all spell mods
+    bool const useAscensionSpellModifierLayout = pCurrChar->UsesAscensionSpellModifierLayout();
+    uint32 const clientSpellModCount = pCurrChar->GetClientSpellModCount();
     for (uint16 Opcode = SMSG_SET_FLAT_SPELL_MODIFIER; Opcode <= SMSG_SET_PCT_SPELL_MODIFIER; ++Opcode) // PCT = FLAT+1
     {
         uint32 modType = (Opcode == SMSG_SET_FLAT_SPELL_MODIFIER) ? SPELLMOD_FLAT : SPELLMOD_PCT;
-        for (uint32 opType = SPELLMOD_DAMAGE; opType < MAX_CLIENT_SPELLMOD; ++opType)
+        for (uint32 opType = SPELLMOD_DAMAGE; opType < clientSpellModCount; ++opType)
         {
             int32 i = 0;
             flag96 _mask = 0;
             SpellModContainer const& spellMods = pCurrChar->GetSpellModList(opType);
             if (spellMods.empty())
                 continue;
-
-            bool const useAscensionSpellModifierLayout = IsAscensionCompatEnabled();
 
             if (useAscensionSpellModifierLayout)
             {
@@ -1284,17 +1287,7 @@ void WorldSession::HandlePlayerLoginToCharInWorld(Player* pCurrChar)
                         if (val == 0)
                             continue;
 
-                        // In Ascension's multi-class modifier engine, mode 0 (11 bytes) specifies
-                        // an individual modifier where the trailing uint32 is the SpellFamilyName
-                        // (e.g. 32 for Starcaller, 9 for Hunter), indexing client table slice:
-                        // SpellFamilyName * 0x11A0 + eff * 31 + opType.
-                        WorldPacket data(Opcode, 11);
-                        data << uint8(0);
-                        data << uint8(eff);
-                        data << uint8(opType);
-                        data << int32(val);
-                        data << uint32(family);
-                        SendPacket(&data);
+                        pCurrChar->SendSpellModifier(Opcode, eff, opType, val, family);
                     }
                 }
             }
@@ -1314,11 +1307,7 @@ void WorldSession::HandlePlayerLoginToCharInWorld(Player* pCurrChar)
                     if (val == 0)
                         continue;
 
-                    WorldPacket data(Opcode, 6);
-                    data << uint8(eff);
-                    data << uint8(opType);
-                    data << int32(val);
-                    SendPacket(&data);
+                    pCurrChar->SendSpellModifier(Opcode, eff, opType, val, 0);
                 }
             }
         }
@@ -2057,6 +2046,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
 
     CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHAR_RACE_OR_FACTION_CHANGE_INFOS);
     stmt->SetData(0, factionChangeInfo->Guid.GetCounter());
+    stmt->SetData(1, factionChangeInfo->Guid.GetCounter());
 
     _queryProcessor.AddCallback(CharacterDatabase.AsyncQuery(stmt)
         .WithPreparedCallback(std::bind(&WorldSession::HandleCharFactionOrRaceChangeCallback, this, factionChangeInfo, std::placeholders::_1)));
@@ -2094,6 +2084,7 @@ void WorldSession::HandleCharFactionOrRaceChangeCallback(std::shared_ptr<Charact
     uint32 atLoginFlags = fields[0].Get<uint16>();
     std::string knownTitlesStr = fields[1].Get<std::string>();
     uint32 money = fields[2].Get<uint32>();
+    uint64 actionableMail = fields[3].Get<uint64>();
 
     uint32 usedLoginFlag = (factionChangeInfo->FactionChange ? AT_LOGIN_CHANGE_FACTION : AT_LOGIN_CHANGE_RACE);
     if (!(atLoginFlags & usedLoginFlag))
@@ -2119,8 +2110,11 @@ void WorldSession::HandleCharFactionOrRaceChangeCallback(std::shared_ptr<Charact
             return;
         }
 
-        // check mailbox
-        if (playerData->MailCount)
+        // check mailbox: recount first, the cached count can drift from the real mailbox, then
+        // gate on mails the player can actually see and delete (in transit and expired mails are
+        // hidden by the inbox but still counted as mail rows)
+        sMailMgr->RecountMailCount(factionChangeInfo->Guid.GetCounter());
+        if (actionableMail)
         {
             SendCharFactionChange(CHAR_CREATE_CHARACTER_DELETE_MAIL, factionChangeInfo.get());
             return;

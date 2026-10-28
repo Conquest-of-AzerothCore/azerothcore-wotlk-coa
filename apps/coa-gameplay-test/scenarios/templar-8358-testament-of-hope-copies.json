@@ -1,0 +1,40 @@
+{
+ "schema": 1,
+ "name": "Testament of Hope summons copies that look like the Templar and cut damage taken 10% each (#8358)",
+ "contract": "Testament of Hope 1397742 reads \"Summons $s1 copies of yourself\" and \"each copy reduces all damage you take by 10%\". The copies are creature 50250. AscensionTemplarSummons.cpp adds the clone aura 49889 to each copy with the Templar as caster, so the copy takes the Templar's display instead of the template's model 775; casting 49889 on the copy targeted a nearby entry instead and left the generic model. The copies arrive hidden by Stealth 1784 (its slow neutralized, like the Necromancer's stealthed minions), one to each side behind the Templar, and stay put with a single follow order instead of re-issuing it every tick, which made them circle. They charge a hostile target the Templar selects or attacks, and the stealth breaks on their first strike. The clone aura sets only the display, so AscensionTemplarSummons.cpp copies the Templar's visible main-hand and off-hand entries, transmog included, into the copy's virtual item slots. Each copy carries the owner area aura 704409 (15 yd, 10% less damage taken, 15% with Spiritual Abdicator 803219) so the Templar shows one aura per copy; its unrelated flat-modifier effect 0 is neutralized. Two stacked 10% reductions multiply to a 0.81 ratio on incoming melee and spell damage, measured through the native damage-taken calculations.",
+ "timeout_ms": 90000,
+ "players": [
+  { "id": "hope", "race": 1, "class": 19, "level": 80, "melee_hit_rating": 10000, "spell_hit_rating": 10000, "expertise_rating": 10000, "allow_regeneration": false }
+ ],
+ "creatures": [
+  { "id": "foe", "owner": "hope", "entry": 36, "health": 1000000, "distance": 3 }
+ ],
+ "steps": [
+  { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+  { "action": "learn", "actor": "hope", "spell": 1397742 },
+  { "action": "add_item", "actor": "hope", "item": 2495 },
+  { "action": "equip", "actor": "hope", "item": 2495, "slot": 15 },
+  { "action": "set_power", "actor": "hope", "power": 3, "value": 100 },
+  { "action": "snapshot", "actor": "hope", "metric": "display_id", "save_as": "player_display" },
+  { "action": "snapshot", "actor": "hope", "metric": "melee_damage_taken", "save_as": "melee_before", "target": "foe" },
+  { "action": "snapshot", "actor": "hope", "metric": "spell_damage_taken", "save_as": "spell_before", "target": "foe", "spell": 133 },
+  { "action": "cast", "actor": "hope", "spell": 1397742, "target": "hope" },
+  { "action": "wait", "label": "let the copies spawn", "ms": 3000 },
+  { "action": "assert", "label": "Testament of Hope summons two copies", "actor": "hope", "metric": "owned_creature_count", "entry": 50250, "equals": 2 },
+  { "action": "assert", "label": "DISCRIMINATING: the Templar carries the copies' damage-reduction aura", "actor": "hope", "metric": "aura", "spell": 704409, "equals": 1 },
+  { "action": "assert", "label": "Each aura reads 10% in tooltip slot $w2", "actor": "hope", "metric": "aura_amount", "spell": 704409, "effect": 1, "equals": -10 },
+  { "action": "assert", "label": "Two copies cut incoming melee damage by 19% (two stacked 10% auras)", "actor": "hope", "metric": "melee_damage_taken", "target": "foe", "ratio_to": "melee_before", "min": 0.805, "max": 0.815 },
+  { "action": "assert", "label": "Two copies cut incoming spell damage by 19% (two stacked 10% auras)", "actor": "hope", "metric": "spell_damage_taken", "target": "foe", "spell": 133, "ratio_to": "spell_before", "min": 0.805, "max": 0.815 },
+  { "action": "assert", "label": "DISCRIMINATING: the copies wear the Templar's display", "actor": "hope", "metric": "owned_creature_display", "entry": 50250, "ratio_to": "player_display", "min": 0.999, "max": 1.001 },
+  { "action": "assert", "label": "DISCRIMINATING: the copies wield the Templar's main-hand weapon", "actor": "hope", "metric": "owned_creature_virtual_item", "entry": 50250, "slot": 0, "equals": 2495 },
+  { "action": "assert", "label": "DISCRIMINATING: both copies arrive hidden by Stealth", "actor": "hope", "metric": "owned_creature_count", "entry": 50250, "spell": 1784, "equals": 2 },
+  { "action": "assert", "label": "DISCRIMINATING: the copies stand apart from each other behind the Templar", "actor": "hope", "metric": "owned_creature_spacing", "entry": 50250, "min": 2.5 },
+  { "action": "wait", "label": "idle copies keep their place", "ms": 4000 },
+  { "action": "assert", "label": "DISCRIMINATING: idle copies still stand apart and stay hidden", "actor": "hope", "metric": "owned_creature_spacing", "entry": 50250, "min": 2.5 },
+  { "action": "assert", "label": "Idle copies keep their Stealth", "actor": "hope", "metric": "owned_creature_count", "entry": 50250, "spell": 1784, "equals": 2 },
+  { "action": "attack", "actor": "hope", "target": "foe" },
+  { "action": "wait", "label": "the copies charge and strike", "ms": 5000 },
+  { "action": "assert", "label": "DISCRIMINATING: the copies attack the Templar's target", "actor": "hope", "metric": "owned_creature_victim", "entry": 50250, "target": "foe", "equals": 1 },
+  { "action": "assert", "label": "DISCRIMINATING: striking drops the copies' Stealth", "actor": "hope", "metric": "owned_creature_count", "entry": 50250, "spell": 1784, "equals": 0 }
+ ]
+}

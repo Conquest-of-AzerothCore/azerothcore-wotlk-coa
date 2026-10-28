@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Echo Fragments: Artificer's Wand generates an Echo Fragment (#5270)",
+  "contract": "Artificer's Wand 561284 (and ranks 561354-561357, the rank ladder AscensionTalentReplacementData.h wires to the Unmake replacement at levels 22/32/42/52) reads 'Generates 1 Echo Fragment' in its own Spell.dbc Description[enUS], mirroring 92120's Wand of Time row. AscensionCustomResourceData.h had ResourceGainRule rows only for 520175/520702-520707 (Wand of Time); no row covered 561284/561354-561357 at all, so casting Artificer's Wand never granted 804455. Unlike Wand of Time, Artificer's Wand does not deal damage on its own cast: Effect[0] is SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE (227), pulsing the real damaging spell 561064 twice via Unit::CastSpell(..., TRIGGERED_FULL_MASK, ...), and both Spell::IsTriggered() checks in AscensionCompat's OnSpellCast/OnSpellHitResult reject triggered casts. A hit-gated rule on 561064 would therefore never fire, so the new rows use ResourceGainEvent::Cast on the outer cast id (561284/561354-561357) instead of EachSuccessfulDamagingHit, gated on knowing 92120 exactly like the Wand of Time rows.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "chronomancer", "entry": 36, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "chronomancer", "spell": 92120 },
+    { "action": "learn", "actor": "chronomancer", "spell": 561284 },
+    {
+      "action": "assert",
+      "label": "No Echo Fragment before any Artificer's Wand cast",
+      "actor": "chronomancer",
+      "metric": "aura_stacks",
+      "spell": 804455,
+      "caster": "chronomancer",
+      "equals": 0
+    },
+    { "action": "cast", "actor": "chronomancer", "spell": 561284, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "Casting Artificer's Wand generates an Echo Fragment",
+      "actor": "chronomancer",
+      "metric": "aura_stacks",
+      "spell": 804455,
+      "caster": "chronomancer",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

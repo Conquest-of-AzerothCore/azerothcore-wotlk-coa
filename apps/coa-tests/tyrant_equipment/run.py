@@ -37,16 +37,23 @@ def main():
     else:
         code += extract(core, 'enum CustomEquipmentSpells') + ';\n'
         code += extract(core, 'bool Player::HasBurningCommander() const') + '\n'
+        code += extract(core, 'bool Player::HasValkyrGrip() const') + '\n'
         code += extract(core, 'bool Player::CanTitanGrip(') + '\n'
         removed = extract(core, 'void Player::removeSpell(')
-        assert 'if (spell_id == SPELL_BURNING_COMMANDER)\n        AutoUnequipOffhandIfNeed();' in removed
+        assert 'if (spell_id == SPELL_BURNING_COMMANDER || spell_id == SPELL_VALKYR_GRIP' in removed
+        assert 'AutoUnequipOffhandIfNeed();' in removed
     code += extract(core, 'bool Player::CanUseTwoHandWithShield(') + '\n'
     code += extract(header, 'bool IsTwoHandUsed() const').replace('bool IsTwoHandUsed', 'bool Player::IsTwoHandUsed') + '\n'
     code += extract(updates, 'void Player::UpdateTitansGrip()') + '\n'
     find = extract(storage, 'uint8 Player::FindEquipSlot(')
-    case = find[find.index('case INVTYPE_2HWEAPON:'):find.index('case INVTYPE_TABARD:')]
+    case = find[find.index('case INVTYPE_WEAPON:'):find.index('case INVTYPE_TABARD:')]
     code += 'bool Player::FindTwoHandSlot(ItemTemplate const* proto)const{uint8 slots[2]={255,255};'
     code += 'switch(proto->InventoryType){' + case + '}return slots[1]==EQUIPMENT_SLOT_OFFHAND;}\n'
+    code += 'uint8 Player::FindSwapSlot(ItemTemplate const* proto)const{uint8 slots[4]={255,255,255,255};'
+    code += 'switch(proto->InventoryType){' + case + '}'
+    tail = find[find.index('// CoA dual two-handed builds'):find.index('// no free position')]
+    tail = tail.replace('\n    }\n', '\n', 1)
+    code += 'bool swap=true;' + tail + 'return NULL_SLOT;}\n'
     equip = extract(storage, 'InventoryResult Player::CanEquipItem(')
     checks = equip[equip.index('uint32 type = pProto->InventoryType;'):equip.index('dest = ((INVENTORY_SLOT_BAG_0')]
     code += 'InventoryResult Player::CheckEquip(ItemTemplate const* pProto,uint8 eslot,bool swap,bool not_loading){'

@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Runemaster Wizardry raises Intellect by 10% and adds mana equal to 10% of Intellect (#547)",
+  "contract": [
+    "Wizardry 705632 (Arcane talent, passive): 'Increases your Intellect by $s1% and increases the mana gained for",
+    "each point of Intellect by $s2%.' Effect 0 is aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue 3",
+    "(Intellect), BasePoints 9 + DieSides 1 = 10%. Effect 1 is aura 328 SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT,",
+    "MiscValue 0 (mana), MiscValueB 3 (Intellect), 10%. Aura 328 carries exactly the same encoding in Ancient Rites",
+    "301368 ('Increases your mana by $s2% of your Intellect'), Arcane Recovery 1112474 and Boon of Y'shaarj 560080, so",
+    "its amount is a percentage of Intellect added to maximum mana (sun-cleric-ancient-rites,",
+    "cultist-boon-of-yshaarj).",
+    "Expected: Intellect rises by 10%; maximum mana rises by the native 15 mana per point of the added Intellect plus",
+    "10% of the new Intellect, i.e. about 16.1 mana per added point (exactly 15 without effect 1, about 31.5 if",
+    "effect 1 multiplied the 15 mana per point). Unlearning restores both."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the character settle", "ms": 3000},
+    {"action": "assert", "label": "Wizardry is not active before it is learned", "actor": "rm", "metric": "aura",
+      "spell": 705632, "equals": 0},
+    {"action": "snapshot", "actor": "rm", "metric": "stat", "stat": 3, "save_as": "intellect_before"},
+    {"action": "snapshot", "actor": "rm", "metric": "max_power", "power": 0, "save_as": "mana_before"},
+    {"action": "assert", "label": "SETUP: the Runemaster has Intellect and mana", "actor": "rm", "metric": "stat",
+      "stat": 3, "min": 50},
+    {"action": "assert", "label": "SETUP: the Runemaster uses mana", "actor": "rm", "metric": "max_power",
+      "power": 0, "min": 1000},
+
+    {"action": "learn", "actor": "rm", "spell": 705632},
+    {"action": "assert", "label": "Wizardry is active", "actor": "rm", "metric": "aura", "spell": 705632,
+      "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "Intellect increases by 10%", "actor": "rm", "metric": "stat", "stat": 3,
+      "ratio_to": "intellect_before", "min": 1.09, "max": 1.11},
+    {"action": "snapshot", "actor": "rm", "metric": "stat", "stat": 3, "relative_to": "intellect_before",
+      "save_as": "intellect_gain"},
+    {"action": "assert", "label": "Mana gained per added Intellect includes 10% of Intellect as mana", "actor": "rm",
+      "metric": "max_power", "power": 0, "relative_to": "mana_before", "ratio_to": "intellect_gain",
+      "min": 15.6, "max": 16.6},
+
+    {"action": "unlearn", "actor": "rm", "spell": 705632},
+    {"action": "assert", "label": "Wizardry ends when unlearned", "actor": "rm", "metric": "aura", "spell": 705632,
+      "equals": 0, "within_ms": 2000},
+    {"action": "assert", "label": "Intellect returns to its baseline", "actor": "rm", "metric": "stat", "stat": 3,
+      "relative_to": "intellect_before", "equals": 0, "within_ms": 2000},
+    {"action": "assert", "label": "Maximum mana returns to its baseline", "actor": "rm", "metric": "max_power",
+      "power": 0, "relative_to": "mana_before", "equals": 0, "within_ms": 2000}
+  ]
+}

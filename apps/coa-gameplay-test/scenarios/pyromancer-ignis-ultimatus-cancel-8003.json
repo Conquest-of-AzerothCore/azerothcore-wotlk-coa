@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "name": "Ignis Ultimatus aura can be cancelled (#8003)",
+  "contract": "#8003: right-clicking Ignis Ultimatus 680369 never removes it. Cause: the aura outlives any channel (1 h duration) while HandleCancelAuraOpcode returned early for every channeled spell without a matching current channel, stranding it; the aura is additionally negative-marked by its intended self-root, which would still block the normal removal path. Fix: the channeled case only returns early when it actually interrupts a matching channel, and both Ignis ranks (680369/280586) clear the negative mark. Cast, wait out the cast time, cancel via the genuine CMSG path, and the aura must be gone. Fails pre-fix (aura stays).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "pyro",
+      "race": 1,
+      "class": 24,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "pyro",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "pyro",
+      "label": "Learn Ignis Ultimatus",
+      "spell": 680369
+    },
+    {
+      "action": "assert",
+      "label": "The mana fixture below stays inside the character's own pool",
+      "actor": "pyro",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1500
+    },
+    {
+      "action": "set_power",
+      "label": "Keep mana out of the experiment",
+      "actor": "pyro",
+      "power": 0,
+      "value": 1500
+    },
+    {
+      "action": "set_aura",
+      "label": "Caster aura Ignis Ultimatus requires",
+      "actor": "pyro",
+      "spell": 807533,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "pyro",
+      "label": "Cast Ignis Ultimatus at the dummy",
+      "spell": 680369,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "equals": 0,
+      "label": "SETUP: Ignis Ultimatus cast accepted",
+      "metric": "cast_failure",
+      "spell": 680369
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "equals": 1,
+      "label": "SETUP: the Ignis aura is up",
+      "metric": "aura",
+      "spell": 680369,
+      "within_ms": 2000
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "pyro",
+      "label": "Right-click the Ignis aura off",
+      "spell": 680369
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "equals": 0,
+      "label": "DISCRIMINATING: the Ignis aura can be cancelled",
+      "metric": "aura",
+      "spell": 680369,
+      "within_ms": 2000
+    }
+  ]
+}

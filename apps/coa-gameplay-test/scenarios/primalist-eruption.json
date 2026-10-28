@@ -53,9 +53,9 @@
   ],
   "steps": [
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "one",
-      "command": ".localspec 95"
+      "id": 95
     },
     {
       "action": "learn",
@@ -393,9 +393,9 @@
       "equals": 0
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "five",
-      "command": ".localspec 95"
+      "id": 95
     },
     {
       "action": "learn",
@@ -516,9 +516,9 @@
       "equals": 0
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "fifteen",
-      "command": ".localspec 95"
+      "id": 95
     },
     {
       "action": "learn",

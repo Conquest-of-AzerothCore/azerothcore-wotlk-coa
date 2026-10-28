@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: the server supplies the Solar Power buff and the Dawn spell the client's resource orb reads (#323)",
+  "contract": "The Solar Power orb is drawn by the CoA client, not the server. Interface/FrameXML/Ascension_CoAResources/ClassResources.lua (patch-B.MPQ) gives the SUNCLERIC branch ClassMixin.minLevel = 2 and its OnPlayerAura hides CoAResourceOrb unless IsSpellIDKnown(804584); when shown, the orb reads AuraUtil.GetBuff('player', 500149) stacks against GetSpellMaxStack(500149) (Ascension_SunClericResource.lua calls SetSpellID(500149)). Spell.dbc: 804584 is Dawn (BaseLevel 2), a level-2 Sun Cleric class grant (AscensionCustomClassData ClassSpells {27, 2, 804584}); 500149 Solar Power is a caster aura with StackAmount 20 and no negative attribute. Vow of Radiance 803489 (BaseLevel 2): 'Direct ability damage or healing generates 2 Solar Power'. Illumination 500143 (level 1) is a direct SPELL_EFFECT_HEAL on an ally; it is cast on a wounded second player so the heal is effective and the caster is not also its target. Expected server side: a new level-1 Sun Cleric does not know Dawn (so the client hides the orb at level 1, which is what #323 reports from a level-1 character); once a level-2 cleric knows Dawn and heals under Vow of Radiance, it holds exactly 2 stacks of a helpful 500149 aura, the one buff the orb reads. Rendering of the orb itself is client UI and outside this harness.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "novice", "race": 1, "class": 27, "level": 1 },
+    { "id": "cleric", "race": 1, "class": 27, "level": 2 },
+    { "id": "ally", "race": 1, "class": 1, "level": 2 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "A new level-1 Sun Cleric does not know Dawn, so the client's orb gate stays closed",
+      "actor": "novice", "metric": "knows_spell", "spell": 804584, "equals": 0
+    },
+    {
+      "action": "assert", "label": "SETUP: no Solar Power before any Vow",
+      "actor": "cleric", "metric": "aura", "spell": 500149, "equals": 0
+    },
+    { "action": "learn", "actor": "cleric", "spell": 804584 },
+    { "action": "learn", "actor": "cleric", "spell": 803489 },
+    { "action": "learn", "actor": "cleric", "spell": 500143 },
+    {
+      "action": "assert", "label": "The level-2 cleric knows Dawn, the spell the client's orb requires",
+      "actor": "cleric", "metric": "knows_spell", "spell": 804584, "equals": 1
+    },
+    { "action": "cast", "label": "Take Vow of Radiance", "actor": "cleric", "spell": 803489 },
+    {
+      "action": "assert", "label": "SETUP: Vow of Radiance is active",
+      "actor": "cleric", "metric": "aura", "spell": 803489, "equals": 1, "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let the Vow's global cooldown expire", "ms": 1500 },
+    { "action": "set_health", "label": "Leave room for an effective heal", "actor": "ally", "value": 10 },
+    { "action": "cast", "label": "Direct heal on an ally under Vow of Radiance", "actor": "cleric", "spell": 500143, "target": "ally" },
+    {
+      "action": "assert", "label": "Vow of Radiance: the direct heal generates 2 Solar Power",
+      "actor": "cleric", "metric": "aura_stacks", "spell": 500149, "equals": 2, "within_ms": 6000
+    },
+    {
+      "action": "assert", "label": "Solar Power is a helpful aura, which is what the orb's AuraUtil.GetBuff reads",
+      "actor": "cleric", "metric": "aura_positive", "spell": 500149, "equals": 1
+    }
+  ]
+}

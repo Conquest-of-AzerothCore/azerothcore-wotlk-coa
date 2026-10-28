@@ -1,10 +1,10 @@
 {
   "schema": 1,
   "name": "Dauntless refunds 2 Energy when Whirling Advance deals damage (#4359)",
-  "contract": "Tooltip: dealing damage with Whirling Advance dispels 1 movement slowing effect and refunds 2 Energy. Energy after the cast is the 60 set before it, minus the 50 cost, plus regeneration (5 in the measured window) plus the 2 refund.",
+  "contract": "Tooltip: dealing damage with Whirling Advance dispels 1 movement slowing effect and refunds 2 Energy. Energy after the cast is the 60 set before it, minus the 50 cost, plus regeneration (5 in the measured window) plus the 2 refund. Whirling Advance 504915 is DmgClass 2 (melee), so its hit rolls melee miss and dodge against the same-level golem; the Barbarian gets melee hit and expertise rating so a dodged or missed hit cannot fail the damage and refund assertions.",
   "timeout_ms": 120000,
   "players": [
-    { "id": "b", "race": 1, "class": 12, "level": 60 }
+    { "id": "b", "race": 1, "class": 12, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 }
   ],
   "creatures": [
     { "id": "e", "owner": "b", "entry": 36, "level": 60, "health": 500000, "distance": 15 }

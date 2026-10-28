@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "name": "Utgarde Pinnacle: Stasis Generator starts the Gortok Palehoof event",
+  "contract": "Using the Stasis Generator in Gortok Palehoof's room releases the orb that frees the frozen beasts and puts the player in combat with the encounter.",
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 575,
+    "x": 242.0,
+    "y": -460.8,
+    "z": 105.5,
+    "o": 3.14,
+    "ignore_access": true
+  },
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Utgarde Pinnacle",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 575
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Stasis Generator is within reach",
+      "actor": "hero",
+      "metric": "nearby_gameobject_count",
+      "entry": 188593,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no orb is released before the generator is used",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 22515,
+      "equals": 0
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Use the Stasis Generator",
+      "actor": "hero",
+      "entry": 188593
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the generator releases the orb",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 22515,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the encounter pulls the hero into combat",
+      "actor": "hero",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

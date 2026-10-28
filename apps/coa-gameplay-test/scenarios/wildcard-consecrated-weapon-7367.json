@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Wildcard Consecrated Weapon adds Holy damage to melee swings (#7367)",
+  "contract": [
+    "Consecrated Weapon 200809 applies hidden buff 200819 (DBC effect 0: SPELL_AURA_DUMMY, ProcFlags 0x14, EffectBasePoints 410, EffectDieSides 1, so CalcValue deterministically yields 411 once the aura's own BaseLevel/MaxLevel/SpellLevel clamp cancels RealPointsPerLevel).",
+    "It had no spell_proc row override needed (native ProcFlags already nonzero) but no script, so the Holy damage effect never fired even though its SP/AP flat bonuses (effects 1/2) already worked.",
+    "The tooltip's '$/77;200819m1 to $/25;200819M1' divisors are weapon-speed reference points (100/1.3 and 100/4.0): the actual per-swing formula is EffectBasePoints0(411) * weaponSpeedSeconds / 100. Item 506's 3000 ms main-hand speed gives the unresisted int32(411 * 3.0 / 100) = 12 Holy damage per swing, attributed in the combat log to 200819 itself (no separate damage spell exists in this family). Holy damage against NPCs still rolls the native per-level monster resist chance (Unit::GetEffectiveResistChance, CoA.MonsterResistance.PerLevel), so the scenario bounds the observed average instead of pinning an exact post-mitigation number."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "wild",
+      "name": "Wildimbue",
+      "race": 1,
+      "class": 10,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "wild",
+      "entry": 1601,
+      "level": 80,
+      "health": 10000000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "console", "command": "coa gamemode WildCard on Wildimbue" },
+    { "action": "add_item", "actor": "wild", "item": 506 },
+    { "action": "equip", "actor": "wild", "item": 506, "slot": 15 },
+    { "action": "learn", "actor": "wild", "spell": 200809 },
+    { "action": "cast", "actor": "wild", "spell": 200809, "target_item": 506 },
+    { "action": "assert", "label": "Consecrated Holy Weapon Hidden is up", "actor": "wild", "metric": "aura", "spell": 200819, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "Weapon speed is 3000 ms", "actor": "wild", "metric": "attack_time_ms", "hand": 0, "equals": 3000 },
+    { "action": "attack", "actor": "wild", "target": "e" },
+    { "action": "assert", "label": "Three swings land", "actor": "wild", "metric": "melee_damage_count", "target": "e", "min": 3, "within_ms": 15000 },
+    { "action": "snapshot", "label": "Swings landed", "actor": "wild", "metric": "melee_damage_count", "target": "e", "save_as": "swings" },
+    { "action": "assert", "label": "Every swing adds a Holy hit (proc count matches swing count)", "actor": "wild", "metric": "spell_damage_count", "spell": 200819, "target": "e", "ratio_to": "swings", "equals": 1 },
+    { "action": "assert", "label": "Average Holy damage per swing is at most the unresisted 12 (411 * 3.0s / 100) and at least 9 (level-based NPC Holy resistance can only reduce it)", "actor": "wild", "metric": "spell_damage_total", "spell": 200819, "target": "e", "ratio_to": "swings", "min": 9, "max": 12 }
+  ]
+}

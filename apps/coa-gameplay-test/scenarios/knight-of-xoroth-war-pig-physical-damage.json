@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "War Pig raises Physical damage dealt by 4% (#1074)",
+  "contract": "War Pig 705020 reads 'Increases your Physical damage dealt by 4%' (bindmysoul.com/conquest/talents.normalized.json, fetchedAt 2026-07-22T23:10:31.369Z). Effect 0 is the native aura 79 (SPELL_AURA_MOD_DAMAGE_PERCENT_DONE), MiscValue 1 (SPELL_SCHOOL_MASK_NORMAL), BasePoints 4. Unit::SpellPctDamageModsDone (used by the spell-damage path) folds this in directly; Unit::MeleeDamageBonusDone's simplified normal-school path instead relies on UpdateDamagePctDoneMods already having applied it to UNIT_FIELD_MINDAMAGE/MAXDAMAGE, so weapon_damage_min is used here rather than melee_damage_done, which is structurally blind to this aura for the normal school. At level 60 the owned Sever rank is 501505 (AscensionSpellProgressionData.h).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "knight",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "snapshot", "actor": "knight", "metric": "weapon_damage_min", "save_as": "wdm_before" },
+    {
+      "action": "snapshot", "label": "Sever's spell-damage bonus before",
+      "actor": "knight", "metric": "spell_damage_done", "spell": 501505, "target": "dummy", "save_as": "sever_before"
+    },
+    {
+      "action": "assert", "label": "SETUP: mainhand weapon damage is nonzero",
+      "actor": "knight", "metric": "weapon_damage_min", "min": 1
+    },
+    { "action": "learn", "actor": "knight", "spell": 705020 },
+    { "action": "set_aura", "actor": "knight", "spell": 705020, "stacks": 1, "label": "Force the War Pig passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the War Pig passive is active",
+      "actor": "knight", "metric": "aura", "spell": 705020, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: mainhand weapon damage rises by ~4%",
+      "actor": "knight", "metric": "weapon_damage_min", "ratio_to": "wdm_before", "min": 1.035, "max": 1.045
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Sever's spell-damage bonus rises by ~4%",
+      "actor": "knight", "metric": "spell_damage_done", "spell": 501505, "target": "dummy",
+      "ratio_to": "sever_before", "min": 1.035, "max": 1.045
+    }
+  ]
+}

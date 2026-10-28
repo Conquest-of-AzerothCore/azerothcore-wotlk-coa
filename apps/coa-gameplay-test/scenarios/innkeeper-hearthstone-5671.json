@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "name": "Making an inn your home replaces a destroyed Hearthstone (#5671)",
+  "contract": "A player who destroyed their Hearthstone (6948) and then confirms \"Make this inn your home\" at an innkeeper (CMSG_BINDER_ACTIVATE) is bound to that inn (at_homebind) and receives a new Hearthstone together with the bind. A player who still has one keeps exactly one: binding again does not hand out a second.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9458.0,
+    "y": 42.0,
+    "z": 55.5
+  },
+  "players": [
+    {
+      "id": "guest",
+      "race": 1,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "creatures": [
+    {
+      "id": "innkeeper",
+      "owner": "guest",
+      "entry": 295,
+      "faction": 12,
+      "level": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "assert",
+      "actor": "guest",
+      "metric": "item_count",
+      "item": 6948,
+      "equals": 1
+    },
+    {
+      "action": "destroy_item",
+      "actor": "guest",
+      "item": 6948
+    },
+    {
+      "action": "assert",
+      "actor": "guest",
+      "metric": "item_count",
+      "item": 6948,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guest",
+      "metric": "at_homebind",
+      "equals": 0
+    },
+    {
+      "action": "binder_activate",
+      "actor": "guest",
+      "target": "innkeeper"
+    },
+    {
+      "action": "assert",
+      "actor": "guest",
+      "metric": "at_homebind",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guest",
+      "metric": "item_count",
+      "item": 6948,
+      "equals": 1
+    },
+    {
+      "action": "binder_activate",
+      "actor": "guest",
+      "target": "innkeeper"
+    },
+    {
+      "action": "assert",
+      "actor": "guest",
+      "metric": "item_count",
+      "item": 6948,
+      "equals": 1
+    }
+  ]
+}

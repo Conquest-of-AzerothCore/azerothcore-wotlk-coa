@@ -1,0 +1,375 @@
+{
+  "schema": 1,
+  "name": "Profession Upgrade Kits raise a crafted item one quality tier per kit",
+  "contract": "Profession Upgrade Kits upgrade eligible crafted equipment through Refined and Superior under the default two-step cap while consuming one kit per successful upgrade. Wrong-profession targets and items with no next tier are refused without consuming kits. Bags are always refused, including empty inventory bags and equipped variants; their contents and slot remain intact.",
+  "players": [
+    {
+      "id": "smith",
+      "race": 1,
+      "class": 1,
+      "level": 10
+    },
+    {
+      "id": "tanner",
+      "race": 1,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_skill",
+      "actor": "smith",
+      "skill": 164,
+      "value": 1,
+      "maximum": 75
+    },
+    {
+      "action": "set_skill",
+      "actor": "smith",
+      "skill": 165,
+      "value": 1,
+      "maximum": 75
+    },
+    {
+      "action": "add_item",
+      "actor": "smith",
+      "item": 2851
+    },
+    {
+      "action": "add_item",
+      "actor": "smith",
+      "item": 88254,
+      "count": 4
+    },
+    {
+      "action": "add_item",
+      "actor": "smith",
+      "item": 85125
+    },
+    {
+      "action": "use_item",
+      "label": "Leatherworking kit on the Blacksmithing belt",
+      "actor": "smith",
+      "item": 85125,
+      "spell": 93789,
+      "target_item": 2851
+    },
+    {
+      "action": "assert",
+      "label": "the Leatherworking kit is refused as a bad target",
+      "actor": "smith",
+      "metric": "cast_failure",
+      "spell": 93789,
+      "equals": 12,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the refused kit is kept",
+      "actor": "smith",
+      "metric": "item_count",
+      "item": 85125,
+      "equals": 1
+    },
+    {
+      "action": "use_item",
+      "label": "Copper Bar kit on the base belt in the bags",
+      "actor": "smith",
+      "item": 88254,
+      "spell": 93801,
+      "target_item": 2851
+    },
+    {
+      "action": "assert",
+      "label": "the belt becomes the Refined belt",
+      "actor": "smith",
+      "metric": "item_count",
+      "item": 1152546,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "the base belt is gone",
+      "actor": "smith",
+      "metric": "item_count",
+      "item": 2851,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "one kit is consumed",
+      "actor": "smith",
+      "metric": "item_count",
+      "item": 88254,
+      "equals": 3,
+      "within_ms": 2000
+    },
+    {
+      "action": "equip",
+      "actor": "smith",
+      "item": 1152546,
+      "slot": 5
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "use_item",
+      "label": "Copper Bar kit on the equipped Refined belt",
+      "actor": "smith",
+      "item": 88254,
+      "spell": 93801,
+      "target_item": 1152546
+    },
+    {
+      "action": "assert",
+      "label": "the equipped belt becomes the Superior belt",
+      "actor": "smith",
+      "metric": "item_count",
+      "item": 1152547,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "the Refined belt is gone",
+      "actor": "smith",
+      "metric": "item_count",
+      "item": 1152546,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "use_item",
+      "label": "Copper Bar kit on the equipped Superior belt",
+      "actor": "smith",
+      "item": 88254,
+      "spell": 93801,
+      "target_item": 1152547
+    },
+    {
+      "action": "assert",
+      "label": "Default cap prevents Masterwork upgrade",
+      "actor": "smith",
+      "metric": "item_count",
+      "item": 1152548,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Only two successful upgrades consume kits",
+      "actor": "smith",
+      "metric": "item_count",
+      "item": 88254,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "smith",
+      "metric": "cast_failure",
+      "spell": 93801,
+      "equals": 12,
+      "within_ms": 2000,
+      "label": "Third upgrade refused at configured cap"
+    },
+    {
+      "action": "assert",
+      "actor": "smith",
+      "metric": "item_count",
+      "item": 1152547,
+      "equals": 1,
+      "label": "Superior belt retained"
+    },
+    {
+      "action": "add_item",
+      "actor": "smith",
+      "item": 1152548
+    },
+    {
+      "action": "use_item",
+      "label": "Copper Bar kit on the Masterwork belt",
+      "actor": "smith",
+      "item": 88254,
+      "spell": 93801,
+      "target_item": 1152548
+    },
+    {
+      "action": "assert",
+      "label": "a Masterwork belt has no further tier",
+      "actor": "smith",
+      "metric": "cast_failure",
+      "spell": 93801,
+      "equals": 12,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the kit is kept after the refusal",
+      "actor": "smith",
+      "metric": "item_count",
+      "item": 88254,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "the Masterwork belt stays",
+      "actor": "smith",
+      "metric": "item_count",
+      "item": 1152548,
+      "equals": 1
+    },
+    {
+      "action": "set_skill",
+      "actor": "tanner",
+      "skill": 165,
+      "value": 1,
+      "maximum": 75
+    },
+    {
+      "action": "add_item",
+      "actor": "tanner",
+      "item": 5081
+    },
+    {
+      "action": "add_item",
+      "actor": "tanner",
+      "item": 85125,
+      "count": 3
+    },
+    {
+      "action": "use_item",
+      "actor": "tanner",
+      "item": 85125,
+      "spell": 93789,
+      "target_item": 5081
+    },
+    {
+      "action": "assert",
+      "actor": "tanner",
+      "metric": "cast_failure",
+      "spell": 93789,
+      "equals": 12,
+      "within_ms": 2000,
+      "label": "Empty base bag is refused"
+    },
+    {
+      "action": "assert",
+      "actor": "tanner",
+      "metric": "item_count",
+      "item": 5081,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "tanner",
+      "metric": "item_count",
+      "item": 85125,
+      "equals": 3
+    },
+    {
+      "action": "add_item",
+      "actor": "tanner",
+      "item": 1154382
+    },
+    {
+      "action": "equip",
+      "actor": "tanner",
+      "item": 1154382,
+      "slot": 19
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "use_item",
+      "actor": "tanner",
+      "item": 85125,
+      "spell": 93789,
+      "target_item": 1154382
+    },
+    {
+      "action": "assert",
+      "actor": "tanner",
+      "metric": "cast_failure",
+      "spell": 93789,
+      "equals": 12,
+      "within_ms": 2000,
+      "label": "Equipped Refined bag is refused"
+    },
+    {
+      "action": "assert",
+      "actor": "tanner",
+      "metric": "item_count",
+      "item": 1154382,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "tanner",
+      "metric": "item_count",
+      "item": 85125,
+      "equals": 3
+    },
+    {
+      "action": "fill_bags",
+      "actor": "tanner"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "use_item",
+      "actor": "tanner",
+      "item": 85125,
+      "spell": 93789,
+      "target_item": 1154382
+    },
+    {
+      "action": "assert",
+      "actor": "tanner",
+      "metric": "cast_failure",
+      "spell": 93789,
+      "equals": 12,
+      "within_ms": 2000,
+      "label": "Nonempty bag is refused"
+    },
+    {
+      "action": "assert",
+      "actor": "tanner",
+      "metric": "free_inventory_slots",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "tanner",
+      "metric": "item_count",
+      "item": 85125,
+      "equals": 3
+    }
+  ]
+}

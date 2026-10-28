@@ -1,0 +1,50 @@
+{
+ "schema": 1,
+ "name": "Bloodmage: Eternal Curse multiplies armor from armor items by five (#9509)",
+ "contract": "Eternal Curse (800157) applies Eternal Curse Hidden (804320), whose effect 0 is SPELL_AURA_MOD_BASE_RESISTANCE_PCT on armor with BasePoints 399 + DieSides 1 = 400. Tooltip: \"your armor contribution from items is increased by 400%\". Armor items (cloth to plate, shields) add base armor, which that aura scales; Agility armor, bonus armor and non-armor items are added afterwards and stay unscaled, so total armor rises by less than 400%. Swapping a stat-free 65-armor chest (Layered Tunic 60) for a stat-free 260-armor chest (Shadowrend Leather Vest 399205) must therefore raise armor five times as much inside the form as outside it, independent of the starting outfit and Agility.",
+ "timeout_ms": 90000,
+ "players": [
+  {
+   "id": "b",
+   "race": 1,
+   "class": 20,
+   "level": 27
+  }
+ ],
+ "steps": [
+  {"action": "wait", "ms": 3000},
+  {"action": "add_item", "actor": "b", "item": 60},
+  {"action": "add_item", "actor": "b", "item": 399205},
+  {"action": "equip", "actor": "b", "item": 60, "slot": 4},
+  {"action": "wait", "ms": 1500},
+  {"action": "snapshot", "label": "Armor with the light chest", "save_as": "light", "actor": "b", "metric": "armor"},
+  {"action": "snapshot", "label": "Agility with the light chest", "save_as": "agility", "actor": "b",
+   "metric": "stat", "stat": 1},
+  {"action": "set_aura", "spell": 800157, "stacks": 1, "actor": "b"},
+  {"action": "assert", "label": "Eternal Curse Hidden 804320 is applied", "actor": "b", "metric": "aura",
+   "spell": 804320, "equals": 1, "within_ms": 3000},
+  {"action": "assert", "label": "Eternal Curse Hidden effect 0 resolves to 400", "actor": "b",
+   "metric": "aura_amount", "spell": 804320, "effect": 0, "equals": 400},
+  {"action": "wait", "ms": 1500},
+  {"action": "snapshot", "label": "Armor with the light chest in Cursed Form", "save_as": "light_form", "actor": "b",
+   "metric": "armor"},
+  {"action": "cancel_aura", "actor": "b", "spell": 800157},
+  {"action": "assert", "label": "Eternal Curse Hidden leaves with the form", "actor": "b", "metric": "aura",
+   "spell": 804320, "equals": 0, "within_ms": 3000},
+  {"action": "equip", "actor": "b", "item": 399205, "slot": 4},
+  {"action": "wait", "ms": 1500},
+  {"action": "snapshot", "label": "Armor gained from the heavier chest", "save_as": "item_gain", "actor": "b",
+   "metric": "armor", "relative_to": "light"},
+  {"action": "assert", "label": "The heavier chest adds at least 150 armor", "actor": "b", "metric": "armor",
+   "relative_to": "light", "min": 150},
+  {"action": "assert", "label": "The chest swap leaves Agility unchanged", "actor": "b", "metric": "stat",
+   "stat": 1, "relative_to": "agility", "equals": 0},
+  {"action": "set_aura", "spell": 800157, "stacks": 1, "actor": "b"},
+  {"action": "assert", "label": "Eternal Curse Hidden 804320 is applied again", "actor": "b", "metric": "aura",
+   "spell": 804320, "equals": 1, "within_ms": 3000},
+  {"action": "wait", "ms": 1500},
+  {"action": "assert", "label": "In Cursed Form the same chest swap adds five times the armor (+400%)", "actor": "b",
+   "metric": "armor", "relative_to": "light_form", "ratio_to": "item_gain", "min": 4.95, "max": 5.05,
+   "within_ms": 3000}
+ ]
+}

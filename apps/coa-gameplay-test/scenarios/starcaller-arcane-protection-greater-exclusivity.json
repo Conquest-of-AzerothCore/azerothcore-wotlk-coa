@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Arcane Protection and Greater Arcane Protection do not stack on the same target (#5167)",
+  "contract": "spell_group 1141 (rev_20260928_60) pairs Arcane Protection's first rank 573343 with Greater Arcane Protection 573348 under SPELL_GROUP_STACK_RULE_EXCLUSIVE_FROM_SAME_CASTER (2). CheckSpellGroupStackRules normalizes both casts through SpellInfo::GetFirstRankSpell, which walks any Arcane Protection rank's ChainEntry back to 573343 (spell_ranks first_spell_id), so casting Greater Arcane Protection 573348 on a target that already carries Arcane Protection rank 3 (573345) from the same caster must remove the single-target aura, leaving only the Greater one. Before the fix, no spell_group links these spells, so Unit::AddAura's stacking check finds no shared group and both auras coexist. Greater Arcane Protection's EffectImplicitTargetA[0] is TARGET_UNIT_CASTER_AREA_RAID (56, TARGET_CHECK_RAID), so Spell::SelectImplicitAreaTargets ignores the explicit cast target and instead requires Unit::IsInRaidWith(ally) to be true (WorldObjectSpellTargetCheck, Spell.cpp:9243-9251); the scenario groups caster and ally so the area effect actually reaches the ally.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 26, "level": 80 },
+    { "id": "ally", "race": 1, "class": 26, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000, "label": "Let spawn AI and level scaling settle" },
+    { "action": "group", "actor": "caster", "target": "ally", "label": "Greater Arcane Protection is TARGET_UNIT_CASTER_AREA_RAID; the ally must be in caster's raid to receive it" },
+
+    { "action": "learn", "actor": "caster", "spell": 573345 },
+    { "action": "learn", "actor": "caster", "spell": 573348 },
+    { "action": "set_power", "actor": "caster", "value": 5000 },
+
+    { "action": "cast", "actor": "caster", "spell": 573345, "target": "ally", "label": "Cast Arcane Protection rank 3 on the ally" },
+    { "action": "wait", "ms": 1600, "label": "Clear the GCD before the next cast" },
+    { "action": "assert", "label": "Arcane Protection reaches the ally", "actor": "ally", "metric": "aura", "spell": 573345, "equals": 1, "within_ms": 5000 },
+
+    { "action": "set_power", "actor": "caster", "value": 5000 },
+    { "action": "cast", "actor": "caster", "spell": 573348, "target": "ally", "label": "Cast Greater Arcane Protection on the same ally" },
+    { "action": "assert", "label": "Greater Arcane Protection reaches the ally", "actor": "ally", "metric": "aura", "spell": 573348, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "Greater Arcane Protection replaces Arcane Protection rank 3 instead of stacking", "actor": "ally", "metric": "aura", "spell": 573345, "equals": 0, "within_ms": 5000 }
+  ]
+}

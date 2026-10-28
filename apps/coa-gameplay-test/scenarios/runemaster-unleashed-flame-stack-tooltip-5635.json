@@ -1,0 +1,774 @@
+{
+  "schema": 1,
+  "name": "Normal Flame Glyph casts reach the authored cap and stream its stacking tooltip (#5635)",
+  "contract": "Elemental Burst 802202 is purchased normally from the Book of Ascension after selecting Glyphic. Glyphic identity 92152 is acquired through specialization 62; Flame Glyph 705625 through normal advancement entry 34664. Two normally trained Elemental Burst casts generate Frost and Flame glyphs, then the normally granted Glyphic Ruin consumes them and unleashes payload 520097. Its authored StackAmount is three and its periodic effect lasts ten seconds. Four ordinary generation-and-release cycles must reach stacks 1, 2, 3 and 3, with periodic aura amounts 1x, 2x, 3x and 3x the first application. An otherwise identical untalented Glyphic caster must never generate Flame or apply its periodic effect. The client text stream must disclose the existing periodic cap in both Flame Glyph 520091, which talent 705625 embeds, and Unleashed Flame 520097. The text change does not decide whether the authored stacking policy should change, separate direct and periodic combat-log identities, or prove graphical client rendering.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "runemaster",
+      "race": 1,
+      "class": 32,
+      "level": 60,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "control",
+      "race": 1,
+      "class": 32,
+      "level": 60,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "runemaster",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 10
+    },
+    {
+      "id": "control_target",
+      "owner": "control",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 7000
+    },
+    {
+      "action": "specialization",
+      "actor": "runemaster",
+      "id": 62
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "aura",
+      "spell": 92152,
+      "equals": 1
+    },
+    {
+      "action": "money",
+      "actor": "runemaster",
+      "copper": 2000000
+    },
+    {
+      "action": "learn",
+      "actor": "runemaster",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "runemaster",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 1800
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "runemaster"
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "spellbook_offers_spell",
+      "spell": 802202,
+      "equals": 1
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "runemaster",
+      "spell": 802202
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "spellbook_buy_succeeded",
+      "spell": 802202,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "knows_spell",
+      "spell": 802202,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "knows_spell",
+      "spell": 801179,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1000
+    },
+    {
+      "action": "specialization",
+      "actor": "control",
+      "id": 62
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 92152,
+      "equals": 1
+    },
+    {
+      "action": "money",
+      "actor": "control",
+      "copper": 2000000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 1800
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "control"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spellbook_offers_spell",
+      "spell": 802202,
+      "equals": 1
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "control",
+      "spell": 802202
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spellbook_buy_succeeded",
+      "spell": 802202,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "knows_spell",
+      "spell": 802202,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "knows_spell",
+      "spell": 801179,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1000
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "runemaster",
+      "entry": 34664,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "aura",
+      "spell": 705625,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 705625,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 802202,
+      "target": "control_target"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 520090,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 802202,
+      "target": "control_target"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "casting",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 520091,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 801179,
+      "target": "control_target"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "casting",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 801179,
+      "target": "control_target",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "control_target",
+      "metric": "aura_stacks",
+      "spell": 520097,
+      "caster": "control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 520091,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "runemaster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "runemaster",
+      "spell": 802202,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "aura",
+      "spell": 520090,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_power",
+      "actor": "runemaster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "runemaster",
+      "spell": 802202,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "casting",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "aura",
+      "spell": 520091,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "runemaster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "runemaster",
+      "spell": 801179,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "casting",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "spell_damage_count",
+      "spell": 801179,
+      "target": "target",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 520097,
+      "caster": "runemaster",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "aura",
+      "spell": 520091,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "aura_amount",
+      "spell": 520097,
+      "effect": 1,
+      "caster": "runemaster",
+      "save_as": "single_flame_tick"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_amount",
+      "spell": 520097,
+      "effect": 1,
+      "caster": "runemaster",
+      "ratio_to": "single_flame_tick",
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "runemaster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "runemaster",
+      "spell": 802202,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "aura",
+      "spell": 520090,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_power",
+      "actor": "runemaster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "runemaster",
+      "spell": 802202,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "casting",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "aura",
+      "spell": 520091,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "runemaster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "runemaster",
+      "spell": 801179,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "casting",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "spell_damage_count",
+      "spell": 801179,
+      "target": "target",
+      "min": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 520097,
+      "caster": "runemaster",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "aura",
+      "spell": 520091,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_amount",
+      "spell": 520097,
+      "effect": 1,
+      "caster": "runemaster",
+      "ratio_to": "single_flame_tick",
+      "equals": 2
+    },
+    {
+      "action": "set_power",
+      "actor": "runemaster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "runemaster",
+      "spell": 802202,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "aura",
+      "spell": 520090,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_power",
+      "actor": "runemaster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "runemaster",
+      "spell": 802202,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "casting",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "aura",
+      "spell": 520091,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "runemaster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "runemaster",
+      "spell": 801179,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "casting",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "spell_damage_count",
+      "spell": 801179,
+      "target": "target",
+      "min": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 520097,
+      "caster": "runemaster",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "aura",
+      "spell": 520091,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_amount",
+      "spell": 520097,
+      "effect": 1,
+      "caster": "runemaster",
+      "ratio_to": "single_flame_tick",
+      "equals": 3
+    },
+    {
+      "action": "set_power",
+      "actor": "runemaster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "runemaster",
+      "spell": 802202,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "aura",
+      "spell": 520090,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_power",
+      "actor": "runemaster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "runemaster",
+      "spell": 802202,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "casting",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "aura",
+      "spell": 520091,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "runemaster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "runemaster",
+      "spell": 801179,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "casting",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "spell_damage_count",
+      "spell": 801179,
+      "target": "target",
+      "min": 4,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 520097,
+      "caster": "runemaster",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "aura",
+      "spell": 520091,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_amount",
+      "spell": 520097,
+      "effect": 1,
+      "caster": "runemaster",
+      "ratio_to": "single_flame_tick",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "spell_damage_count",
+      "spell": 520097,
+      "target": "target",
+      "min": 5
+    },
+    {
+      "action": "assert",
+      "label": "The native spell-text stream is available",
+      "actor": "runemaster",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500639,
+      "text": "Requires Runeshroud",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 520091,
+      "text": "The periodic damage stacks up to $520097u times.",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 520097,
+      "text": "The periodic damage stacks up to $u times.",
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}

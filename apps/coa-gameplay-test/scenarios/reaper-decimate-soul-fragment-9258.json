@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Decimate grants Soul Fragment like the Reap rank it replaces (#9258)",
+  "contract": "Decimate 500523 is the Decimation talent's (704193) Reap-button swap target (AscensionReaperRedshade.cpp). The Reap ranks it replaces (500357, 504056-504058, 504557, 505151, 573302-573303) each grant 1 Soul Fragment stack (805077) on their first successful damaging hit via AscensionCustomResourceData.h's ResourceGainRules, but Decimate had no matching rule and forfeited that resource on every redirected cast. This builds the Decimation counter (573289) to its 6-stack cap with repeated Reap casts, then casts Reap again (redirected to Decimate by the existing swap) and checks the Soul Fragment stack actually increases.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "reaper", "race": 1, "class": 30, "level": 80, "melee_hit_rating": 10000, "spell_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "reaper", "entry": 36, "level": 80, "health": 1000000, "distance": 3, "reaction": 0, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "reaper", "spell": 354319 },
+    { "action": "learn", "actor": "reaper", "spell": 704193 },
+    { "action": "cast", "actor": "reaper", "spell": 354319, "target": "dummy" },
+    { "action": "wait", "label": "Respect the global cooldown", "ms": 1600 },
+    { "action": "cast", "actor": "reaper", "spell": 354319, "target": "dummy" },
+    { "action": "wait", "label": "Respect the global cooldown", "ms": 1600 },
+    { "action": "cast", "actor": "reaper", "spell": 354319, "target": "dummy" },
+    { "action": "wait", "label": "Respect the global cooldown", "ms": 1600 },
+    { "action": "cast", "actor": "reaper", "spell": 354319, "target": "dummy" },
+    { "action": "wait", "label": "Respect the global cooldown", "ms": 1600 },
+    { "action": "cast", "actor": "reaper", "spell": 354319, "target": "dummy" },
+    { "action": "wait", "label": "Respect the global cooldown", "ms": 1600 },
+    { "action": "cast", "actor": "reaper", "spell": 354319, "target": "dummy" },
+    { "action": "wait", "label": "Respect the global cooldown", "ms": 1600 },
+    {
+      "action": "assert", "label": "SETUP: the Decimation counter is capped",
+      "actor": "reaper", "metric": "aura_stacks", "spell": 573289, "caster": "reaper", "equals": 6, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "SETUP: Reap is swapped to Decimate",
+      "actor": "reaper", "metric": "temporary_spell_replacement", "spell": 354319, "equals": 500523, "within_ms": 2000
+    },
+    {
+      "action": "snapshot", "actor": "reaper", "metric": "aura_stacks", "spell": 805077, "caster": "reaper", "save_as": "soul_fragment_before"
+    },
+    { "action": "wait", "label": "Respect the global cooldown", "ms": 1600 },
+    { "action": "cast", "label": "Redirected to Decimate by the swap", "actor": "reaper", "spell": 354319, "target": "dummy" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Decimate grants a Soul Fragment stack like the Reap rank it replaced",
+      "actor": "reaper", "metric": "aura_stacks", "spell": 805077, "caster": "reaper", "relative_to": "soul_fragment_before", "min": 1, "within_ms": 3000
+    }
+  ]
+}

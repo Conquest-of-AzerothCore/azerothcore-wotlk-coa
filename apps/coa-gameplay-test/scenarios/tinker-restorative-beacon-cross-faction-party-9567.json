@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Tinker: Restorative Beacon respects cross-faction party membership (#9567)",
+  "contract": "npc_ascension_tinker_device::IsSummonedBy (AscensionTinkerSummons.cpp) only gave m_ControlledByPlayer/UNIT_FLAG_PLAYER_CONTROLLED/byte2 to Turret and Explosive summons, never to Beacon() devices (9 entries including 50037 Restorative Beacon, confirmed as spell 801801's EffectMiscValue[1] summon target). Unit::BuildValuesUpdate only patches cross-faction faction visibility for raid viewers when IsControlledByPlayer() is true, so a beacon stayed hostile-looking to an opposite-faction groupmate and became attackable, exactly like Witch Doctor's Serpent Ward before #1719. The fix adds Beacon(me->GetEntry()) to that condition so beacons get the same treatment as turrets and explosives.",
+  "timeout_ms": 30000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "tinker", "race": 1, "class": 28, "level": 21, "allow_regeneration": false },
+    { "id": "ally", "race": 2, "class": 13, "level": 21, "allow_regeneration": false },
+    { "id": "outsider", "race": 2, "class": 13, "level": 21, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "teleport", "actor": "tinker", "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+    { "action": "teleport", "actor": "ally", "map": 0, "x": -8916.41, "y": -115.853, "z": 82.3711, "o": 0 },
+    { "action": "teleport", "actor": "outsider", "map": 0, "x": -8915.41, "y": -115.853, "z": 82.3711, "o": 0 },
+    { "action": "pvp", "actor": "ally", "enabled": true },
+    { "action": "pvp", "actor": "outsider", "enabled": true },
+    { "action": "group", "actor": "ally", "target": "tinker" },
+    { "action": "learn", "actor": "tinker", "spell": 801801 },
+    { "action": "cast", "actor": "tinker", "spell": 801801 },
+    {
+      "action": "assert", "label": "SETUP: the beacon is summoned", "actor": "tinker",
+      "metric": "owned_creature_count", "entry": 50037, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "An opposite-faction party member cannot attack the beacon", "actor": "tinker",
+      "metric": "owned_creature_attackable", "entry": 50037, "target": "ally", "equals": 0
+    },
+    {
+      "action": "assert", "label": "An unflagged owner does not expose the beacon to outsider attacks", "actor": "tinker",
+      "metric": "owned_creature_attackable", "entry": 50037, "target": "outsider", "equals": 0
+    }
+  ]
+}

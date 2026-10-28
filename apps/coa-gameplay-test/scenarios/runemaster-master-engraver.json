@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "name": "Issue 1079: Master Engraver raises every Weapon Engraving's proc chance by 5%",
+  "contract": [
+    "Master Engraver 705605 (class talent) reads 'Increases the chance to trigger your Weapon Engravings by $s1%.'",
+    "Its only effect is aura 107, a flat SPELLMOD_CHANCE_OF_SUCCESS (18) of BasePoints 4 + DieSides 1 = 5 on",
+    "family 38 mask0 0x40000000, which the engraving proc auras carry: Fire 653211 and Water 653216 (ProcChance",
+    "30), Earth 653221 and Air 653225 (15), Ice 653266 and Arcane 653267 (40).",
+    "Aura::CalcProcChance applies the owner's SPELLMOD_CHANCE_OF_SUCCESS to every proc roll, the path the",
+    "spell_modifier query reads (as runemaster-fists-of-power does for Earthen Fists). Expected: each engraving's",
+    "chance rises by 5 points with the talent and returns without it; Glyphs of Power 520145 (10%) is unchanged."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the character settle", "ms": 3000},
+    {
+      "action": "assert", "label": "Fire Engraving 653211 rolls 30%", "actor": "rm", "metric": "spell_modifier",
+      "spell": 653211, "op": 18, "base": 30, "min": 29.99, "max": 30.01
+    },
+    {
+      "action": "assert", "label": "Water Engraving 653216 rolls 30%", "actor": "rm", "metric": "spell_modifier",
+      "spell": 653216, "op": 18, "base": 30, "min": 29.99, "max": 30.01
+    },
+    {
+      "action": "assert", "label": "Earth Engraving 653221 rolls 15%", "actor": "rm", "metric": "spell_modifier",
+      "spell": 653221, "op": 18, "base": 15, "min": 14.99, "max": 15.01
+    },
+    {
+      "action": "assert", "label": "Air Engraving 653225 rolls 15%", "actor": "rm", "metric": "spell_modifier",
+      "spell": 653225, "op": 18, "base": 15, "min": 14.99, "max": 15.01
+    },
+    {
+      "action": "assert", "label": "Ice Engraving 653266 rolls 40%", "actor": "rm", "metric": "spell_modifier",
+      "spell": 653266, "op": 18, "base": 40, "min": 39.99, "max": 40.01
+    },
+    {
+      "action": "assert", "label": "Arcane Engraving 653267 rolls 40%", "actor": "rm", "metric": "spell_modifier",
+      "spell": 653267, "op": 18, "base": 40, "min": 39.99, "max": 40.01
+    },
+    {"action": "learn", "actor": "rm", "spell": 705605},
+    {
+      "action": "assert", "label": "Master Engraver passive is active", "actor": "rm", "metric": "aura",
+      "spell": 705605, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Master Engraver raises Fire Engraving to 35%", "actor": "rm",
+      "metric": "spell_modifier", "spell": 653211, "op": 18, "base": 30, "min": 34.99, "max": 35.01
+    },
+    {
+      "action": "assert", "label": "Master Engraver raises Water Engraving to 35%", "actor": "rm",
+      "metric": "spell_modifier", "spell": 653216, "op": 18, "base": 30, "min": 34.99, "max": 35.01
+    },
+    {
+      "action": "assert", "label": "Master Engraver raises Earth Engraving to 20%", "actor": "rm",
+      "metric": "spell_modifier", "spell": 653221, "op": 18, "base": 15, "min": 19.99, "max": 20.01
+    },
+    {
+      "action": "assert", "label": "Master Engraver raises Air Engraving to 20%", "actor": "rm",
+      "metric": "spell_modifier", "spell": 653225, "op": 18, "base": 15, "min": 19.99, "max": 20.01
+    },
+    {
+      "action": "assert", "label": "Master Engraver raises Ice Engraving to 45%", "actor": "rm",
+      "metric": "spell_modifier", "spell": 653266, "op": 18, "base": 40, "min": 44.99, "max": 45.01
+    },
+    {
+      "action": "assert", "label": "Master Engraver raises Arcane Engraving to 45%", "actor": "rm",
+      "metric": "spell_modifier", "spell": 653267, "op": 18, "base": 40, "min": 44.99, "max": 45.01
+    },
+    {
+      "action": "assert", "label": "Other Runemaster proc chances are unchanged", "actor": "rm",
+      "metric": "spell_modifier", "spell": 520145, "op": 18, "base": 10, "min": 9.99, "max": 10.01
+    },
+    {"action": "unlearn", "actor": "rm", "spell": 705605},
+    {"action": "assert", "actor": "rm", "metric": "aura", "spell": 705605, "equals": 0, "within_ms": 2000},
+    {
+      "action": "assert", "label": "Removing Master Engraver restores Fire Engraving's 30%", "actor": "rm",
+      "metric": "spell_modifier", "spell": 653211, "op": 18, "base": 30, "min": 29.99, "max": 30.01
+    }
+  ]
+}

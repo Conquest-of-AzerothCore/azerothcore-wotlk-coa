@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Pale Reach: Windswept Sheep/Dairy Cow cannot be melee-attacked, Shears still credits wool",
+  "contract": [
+    "Issue #8773. Sheep 164156, Black Sheep 164157 and Dairy Cow 164158 used the stock 'Prey' faction with no",
+    "non-attackable flag: an ordinary melee attack (or the aggro it provoked) killed them before Almo's Bucket",
+    "(365040) or the Shears (365041) could land for Windswept Milk (175074) / To Shear and Return with Wool",
+    "(175076). Expected: the animals cannot be melee-attacked, while the item spell still lands and credits",
+    "Windswept Wool via the existing on-spellhit script."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -7717.61, "y": 17.277, "z": 450.585, "o": 0.5743},
+  "players": [
+    {"id": "p", "race": 1, "class": 20, "level": 25}
+  ],
+  "steps": [
+    {"action": "summon", "label": "Place a Windswept Sheep next to the player", "actor": "p", "entry": 164156, "as": "sheep"},
+    {"action": "summon", "label": "Place a Dairy Cow next to the player", "actor": "p", "entry": 164158, "as": "cow"},
+    {"action": "assert", "label": "the sheep cannot be melee-attacked", "actor": "p",
+     "metric": "nearby_creature_can_attack", "entry": 164156, "equals": 0, "within_ms": 2000},
+    {"action": "assert", "label": "the dairy cow cannot be melee-attacked", "actor": "p",
+     "metric": "nearby_creature_can_attack", "entry": 164158, "equals": 0, "within_ms": 2000},
+    {"action": "console", "label": "Accept To Shear and Return with Wool without pre-granting wool",
+     "command": "quest add 175076 Harnessa"},
+    {"action": "assert", "label": "the quest starts with no wool collected yet", "actor": "p",
+     "metric": "item_count", "item": 559895, "equals": 0, "within_ms": 0},
+    {"action": "use_item", "label": "Shear the sheep with the quest Shears", "actor": "p",
+     "item": 559955, "spell": 365041, "target": "sheep"},
+    {"action": "assert", "label": "shearing still credits wool", "actor": "p",
+     "metric": "item_count", "item": 559895, "min": 1, "within_ms": 5000},
+    {"action": "assert", "label": "the sheep still cannot be melee-attacked after shearing", "actor": "p",
+     "metric": "nearby_creature_can_attack", "entry": 164156, "equals": 0, "within_ms": 2000}
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "name": "Gavel of Light's self-heal coefficient matches its own tooltip's 50% (#9036)",
+  "contract": "Gavel of Light 800611's tooltip reads 'Smash an enemy for $s2% Weapon Damage plus ${$m1+0)} and heal yourself equal to $707521s1% of the damage dealt.' sun_cleric_spells::OnSpellHitResult (AscensionSunClericAbilities.cpp) computes the self-heal as CalculatePct(damage, Amount(707521)), where Amount() (AscensionSunCleric.cpp) returns info->Effects[slot].CalcValue(caster) for 707521 unmodified by any SpellMod. Spell.dbc gives 707521 EffectBasePoints[0] 49 and EffectDieSides[0] 1; SpellEffectInfo::CalcValue (SpellInfo.cpp) adds +1 for DieSides 1, so CalcValue() resolves to exactly 50 -- the same 50% the tooltip names, with no separate coefficient applied anywhere else (Arbiter of Light 302914's SPELLMOD_EFFECT1 on 707521 is inert here because Amount() never calls ApplySpellMod; a separate concern already covered by sun-cleric-arbiter-of-light.json). This scenario pins that same spell_effect_value path -- the exact value Amount(707521) reads at cast time -- to 50, and confirms the self-heal is live-wired by observing that casting Gavel of Light actually produces at least one 707522 heal on the caster, so the formula is not dead code. The reporter's '~20%' estimate was an unverified in-game impression with no combat-log excerpt (#9036 investigation); no code path was found applying any percentage other than this one.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 10
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "cleric",
+      "entry": 36,
+      "level": 10,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 800611
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Amount(707521) resolves to the tooltip's 50%, not a lower value",
+      "actor": "cleric",
+      "metric": "spell_effect_value",
+      "spell": 707521,
+      "effect": 0,
+      "equals": 50
+    },
+    {
+      "action": "add_item",
+      "actor": "cleric",
+      "item": 4901
+    },
+    {
+      "action": "equip",
+      "label": "Test Polearm in the main hand",
+      "actor": "cleric",
+      "item": 4901,
+      "slot": 15
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 800611,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Gavel of Light lands",
+      "actor": "cleric",
+      "metric": "spell_damage_count",
+      "spell": 800611,
+      "target": "dummy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The self-heal formula is live-wired, not dead code",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 707522,
+      "target": "cleric",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Kill XP applies only the SPELL_AURA_MOD_XP_PCT effects whose source mask includes creature kills (COA-4020)",
+  "contract": "CoA's SPELL_AURA_MOD_XP_PCT MiscValue is a mask of XP sources: 1 creature kills, 2 quests, 4 professions, 8 battlegrounds. Keeper's Scroll: Khaz'goroth 993955 is +25% with mask 4 (gathering and crafting only), so it must not change kill XP: a level 20 character with it gets the same XP for the same kill as one without it. Keeper's Scroll: Norgannon 993943 has a mask-1 kill effect (+10%), so it still raises kill XP.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "plain", "race": 1, "class": 1, "level": 20, "melee_hit_rating": 10000, "expertise_rating": 10000 },
+    { "id": "crafter", "race": 1, "class": 1, "level": 20, "melee_hit_rating": 10000, "expertise_rating": 10000 },
+    { "id": "scholar", "race": 1, "class": 1, "level": 20, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "a", "owner": "plain", "entry": 3098, "level": 20, "health": 1, "distance": 2, "stationary": true },
+    { "id": "b", "owner": "crafter", "entry": 3098, "level": 20, "health": 1, "distance": 2, "stationary": true },
+    { "id": "c", "owner": "scholar", "entry": 3098, "level": 20, "health": 1, "distance": 2, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "set_aura", "actor": "crafter", "spell": 993955, "stacks": 1 },
+    { "action": "set_aura", "actor": "scholar", "spell": 993943, "stacks": 1 },
+    { "action": "snapshot", "actor": "plain", "metric": "xp", "save_as": "plain_before" },
+    { "action": "snapshot", "actor": "crafter", "metric": "xp", "save_as": "crafter_before" },
+    { "action": "snapshot", "actor": "scholar", "metric": "xp", "save_as": "scholar_before" },
+    { "action": "attack", "actor": "plain", "target": "a" },
+    { "action": "attack", "actor": "crafter", "target": "b" },
+    { "action": "attack", "actor": "scholar", "target": "c" },
+    { "action": "assert", "label": "plain kill gives XP", "actor": "plain", "metric": "xp", "relative_to": "plain_before", "min": 1, "within_ms": 8000 },
+    { "action": "assert", "label": "crafter kill gives XP", "actor": "crafter", "metric": "xp", "relative_to": "crafter_before", "min": 1, "within_ms": 8000 },
+    { "action": "assert", "label": "scholar kill gives XP", "actor": "scholar", "metric": "xp", "relative_to": "scholar_before", "min": 1, "within_ms": 8000 },
+    { "action": "snapshot", "actor": "plain", "metric": "xp", "save_as": "plain_kill" },
+    { "action": "assert", "label": "DISCRIMINATING: the profession-only scroll does not change kill XP", "actor": "crafter", "metric": "xp", "relative_to": "plain_kill", "equals": 0 },
+    { "action": "assert", "label": "Control: the kill-mask scroll still raises kill XP", "actor": "scholar", "metric": "xp", "relative_to": "plain_kill", "min": 1 }
+  ]
+}

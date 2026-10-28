@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Eternal Curse teaches its active form and Dual Wield (#3363)",
-  "contract": "Issue #3363 was filed on Eternal Curse 804204, which no acquisition table grants; the obtainable Eternal Curse with the same shipped description is 92114 (CharacterAdvancement.dbc row 4027, class 20, plus the live-client capture and a module grant). Its tooltip is 'Teaches you |cffffffffEternal Curse|r and allows you to dual wield.@s:800157:0@', and its single Spell.dbc effect is an aura 4 dummy with BasePoints 0, which carries no LEARN_SPELL of its own. The contract is met by shipped module data rather than by the record: AscensionTaughtAbilityData.h:34-35 holds { 20, 99, 10, 92114, 800157 } and { 20, 99, 10, 92114, 674 }, and AscensionClassService::SynchronizeTaughtAbilities (AscensionCompat.cpp:729) grants both as temporary spells whenever the parent is learned - it is reached from OnPlayerLearnSpell and OnPlayerForgotSpell through AffectsTaughtAbilities, and it also flips Player::SetCanDualWield to match ownership of 674. The grant is gated on the active specialization being 99, which is why the scenario switches to it with the module's own .localspec player command before touching the spellbook. This scenario proves the tooltip contract on today's tree; it is a regression guard, not a fix test.",
+  "contract": "Issue #3363 was filed on Eternal Curse 804204, which no acquisition table grants; the obtainable Eternal Curse with the same shipped description is 92114 (CharacterAdvancement.dbc row 4027, class 20, plus the live-client capture and a module grant). Its tooltip is 'Teaches you |cffffffffEternal Curse|r and allows you to dual wield.@s:800157:0@', and its single Spell.dbc effect is an aura 4 dummy with BasePoints 0, which carries no LEARN_SPELL of its own. The contract is met by shipped module data rather than by the record: AscensionTaughtAbilityData.h:34-35 holds { 20, 99, 10, 92114, 800157 } and { 20, 99, 10, 92114, 674 }, and AscensionClassService::SynchronizeTaughtAbilities (AscensionCompat.cpp:729) grants both as temporary spells whenever the parent is learned - it is reached from OnPlayerLearnSpell and OnPlayerForgotSpell through AffectsTaughtAbilities, and it also flips Player::SetCanDualWield to match ownership of 674. The grant is gated on the active specialization being 99, which is why the scenario switches to it with the native specialization upload before touching the spellbook. This scenario proves the tooltip contract on today's tree; it is a regression guard, not a fix test.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -14,7 +14,7 @@
   "steps": [
     { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
     {
-      "action": "command", "actor": "bloodmage", "command": ".localspec 99",
+      "action": "specialization", "actor": "bloodmage", "id": 99,
       "label": "AscensionTaughtAbilityData.h gates the grant on specialization 99"
     },
     { "action": "wait", "ms": 1000 },

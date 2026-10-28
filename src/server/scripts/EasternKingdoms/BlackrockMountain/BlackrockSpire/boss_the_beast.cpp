@@ -23,23 +23,27 @@
 
 enum Spells
 {
-    SPELL_FLAMEBREAK                = 16785,
-    SPELL_IMMOLATE                  = 15570,
-    SPELL_TERRIFYINGROAR            = 14100,
-    SPELL_BERSERKER_CHARGE          = 16636,
-    SPELL_FIREBALL                  = 16788,
-    SPELL_FIREBLAST                 = 16144,
+    // Ascension's kit (db.exil.es/npc/10430), which records no timers
+    SPELL_BELLOWING_ROAR            = 2100439,
+    SPELL_BLAST_WAVE                = 2100205,
+    SPELL_FLAME_BREATH              = 2102192,
+    SPELL_IMMOLATE                  = 2100036,
+    SPELL_OVERRUN                   = 2102159,
+    SPELL_OVERRUN_TRAMPLE           = 2102160,
+    SPELL_FIERCE_BLOW               = 975011,
     SPELL_SUICIDE                   = 8329
 };
 
 enum Events
 {
-    EVENT_FLAME_BREAK               = 1,
-    EVENT_IMMOLATE                  = 2,
-    EVENT_TERRIFYING_ROAR           = 3,
-    EVENT_BERSERKER_CHARGE          = 4,
-    EVENT_FIREBALL                  = 5,
-    EVENT_FIREBLAST                 = 6
+    EVENT_BELLOWING_ROAR            = 1,
+    EVENT_BLAST_WAVE                = 2,
+    EVENT_FLAME_BREATH              = 3,
+    EVENT_IMMOLATE                  = 4,
+    EVENT_OVERRUN                   = 5,
+    EVENT_FIERCE_BLOW               = 6,
+    EVENT_OVERRUN_TRAMPLE           = 7,
+    EVENT_OVERRUN_END               = 8
 };
 
 enum BeastMisc
@@ -47,6 +51,7 @@ enum BeastMisc
     DATA_BEAST_REACHED              = 1,
     DATA_BEAST_ROOM                 = 2,
     BEAST_MOVEMENT_ID               = 1379690,
+    POINT_OVERRUN                   = 1,
 
     NPC_BLACKHAND_ELITE             = 10317,
 
@@ -89,14 +94,17 @@ private:
 
 // Used to make Hodir disengage whenever he leaves his room
 constexpr static float FirewalPositionY = -505.f;
+constexpr static float OverrunSpeed = 18.f;
 
 struct boss_the_beast : public BossAI
 {
-    boss_the_beast(Creature* creature) : BossAI(creature, DATA_THE_BEAST), _beastReached(false), _orcYelled(false) {}
+    boss_the_beast(Creature* creature) : BossAI(creature, DATA_THE_BEAST), _beastReached(false), _orcYelled(false), _overrunning(false) {}
 
     void Reset() override
     {
         _Reset();
+        _overrunning = false;
+        _overrunEvents.Reset();
 
         if (_beastReached)
             me->GetMotionMaster()->MoveWaypoint(BEAST_MOVEMENT_ID, true);
@@ -105,12 +113,76 @@ struct boss_the_beast : public BossAI
     void JustEngagedWith(Unit* /*who*/) override
     {
         _JustEngagedWith();
-        events.ScheduleEvent(EVENT_FLAME_BREAK, 12s);
         events.ScheduleEvent(EVENT_IMMOLATE, 3s);
-        events.ScheduleEvent(EVENT_TERRIFYING_ROAR, 23s);
-        events.ScheduleEvent(EVENT_BERSERKER_CHARGE, 2s);
-        events.ScheduleEvent(EVENT_FIREBALL, 8s, 21s);
-        events.ScheduleEvent(EVENT_FIREBLAST, 5s, 8s);
+        events.ScheduleEvent(EVENT_FIERCE_BLOW, 9s, 11s);
+        events.ScheduleEvent(EVENT_BLAST_WAVE, 10s);
+        events.ScheduleEvent(EVENT_FLAME_BREATH, 1s, 3s);
+        events.ScheduleEvent(EVENT_OVERRUN, 29s, 31s);
+        events.ScheduleEvent(EVENT_BELLOWING_ROAR, 23s);
+    }
+
+    void OnSpellFailed(SpellInfo const* spell) override
+    {
+        BossAI::OnSpellFailed(spell);
+        if (spell->Id == SPELL_FIERCE_BLOW)
+            events.RescheduleEvent(EVENT_FIERCE_BLOW, 1s);
+    }
+
+    void OnSpellCast(SpellInfo const* spell) override
+    {
+        if (spell->Id != SPELL_OVERRUN)
+            return;
+
+        Unit* target = ObjectAccessor::GetUnit(*me, _overrunTargetGUID);
+        if (!target)
+            return;
+
+        _overrunning = true;
+        float destinationY = std::min(target->GetPositionY(), FirewalPositionY - 2.f);
+        me->GetMotionMaster()->MoveCharge(target->GetPositionX(), destinationY, target->GetPositionZ(), OverrunSpeed,
+            POINT_OVERRUN, nullptr, true);
+        _overrunEvents.ScheduleEvent(EVENT_OVERRUN_TRAMPLE, 0ms);
+        _overrunEvents.ScheduleEvent(EVENT_OVERRUN_END, 3s);
+    }
+
+    void MovementInform(uint32 type, uint32 id) override
+    {
+        if (type == POINT_MOTION_TYPE && id == POINT_OVERRUN)
+            EndOverrun();
+    }
+
+    void Trample()
+    {
+        me->CastSpell(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), SPELL_OVERRUN_TRAMPLE, true);
+    }
+
+    void EndOverrun()
+    {
+        if (!_overrunning)
+            return;
+
+        _overrunning = false;
+        _overrunEvents.Reset();
+        Trample();
+    }
+
+    void UpdateOverrun(uint32 diff)
+    {
+        _overrunEvents.Update(diff);
+
+        while (uint32 eventId = _overrunEvents.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_OVERRUN_TRAMPLE:
+                    Trample();
+                    _overrunEvents.ScheduleEvent(EVENT_OVERRUN_TRAMPLE, 300ms);
+                    break;
+                case EVENT_OVERRUN_END:
+                    EndOverrun();
+                    return;
+            }
+        }
     }
 
     void SetData(uint32 type, uint32 /*data*/) override
@@ -176,6 +248,12 @@ struct boss_the_beast : public BossAI
             return;
         }
 
+        if (_overrunning)
+        {
+            UpdateOverrun(diff);
+            return;
+        }
+
         events.Update(diff);
 
         if (me->HasUnitState(UNIT_STATE_CASTING))
@@ -185,34 +263,40 @@ struct boss_the_beast : public BossAI
         {
             switch (eventId)
             {
-                case EVENT_FLAME_BREAK:
-                    DoCastVictim(SPELL_FLAMEBREAK);
-                    events.ScheduleEvent(EVENT_FLAME_BREAK, 10s);
+                case EVENT_BELLOWING_ROAR:
+                    DoCastAOE(SPELL_BELLOWING_ROAR);
+                    events.ScheduleEvent(EVENT_BELLOWING_ROAR, 20s);
+                    break;
+                case EVENT_BLAST_WAVE:
+                    me->CastSpell(me, SPELL_BLAST_WAVE, TRIGGERED_IGNORE_POWER_AND_REAGENT_COST);
+                    events.ScheduleEvent(EVENT_BLAST_WAVE, 12s, 16s);
+                    break;
+                case EVENT_FLAME_BREATH:
+                    if (Unit* victim = me->GetVictim())
+                        me->CastSpell(victim, SPELL_FLAME_BREATH, TRIGGERED_IGNORE_POWER_AND_REAGENT_COST);
+                    events.ScheduleEvent(EVENT_FLAME_BREATH, 20s, 22s);
                     break;
                 case EVENT_IMMOLATE:
-                    DoCastRandomTarget(SPELL_IMMOLATE, 0, 100.0f);
+                    if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 40.f, true))
+                        me->CastSpell(target, SPELL_IMMOLATE, TRIGGERED_IGNORE_POWER_AND_REAGENT_COST);
                     events.ScheduleEvent(EVENT_IMMOLATE, 8s);
                     break;
-                case EVENT_TERRIFYING_ROAR:
-                    DoCastVictim(SPELL_TERRIFYINGROAR);
-                    events.ScheduleEvent(EVENT_TERRIFYING_ROAR, 20s);
+                case EVENT_OVERRUN:
+                {
+                    Unit* target = SelectTarget(SelectTargetMethod::Random, 1, 40.f, true);
+                    if (!target)
+                        target = me->GetVictim();
+                    if (target)
+                    {
+                        _overrunTargetGUID = target->GetGUID();
+                        DoCast(target, SPELL_OVERRUN);
+                    }
+                    events.ScheduleEvent(EVENT_OVERRUN, 35s, 37s);
                     break;
-                case EVENT_BERSERKER_CHARGE:
-                    if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 38.f, true))
-                        DoCast(target, SPELL_BERSERKER_CHARGE);
-                    events.ScheduleEvent(EVENT_BERSERKER_CHARGE, 15s, 23s);
-                    break;
-                case EVENT_FIREBALL:
-                    DoCastVictim(SPELL_FIREBALL);
-                    events.ScheduleEvent(EVENT_FIREBALL, 8s, 21s);
-                    if (events.GetTimeUntilEvent(EVENT_FIREBLAST) < 3s)
-                        events.RescheduleEvent(EVENT_FIREBLAST, 3s);
-                    break;
-                case EVENT_FIREBLAST:
-                    DoCastVictim(SPELL_FIREBLAST);
-                    events.ScheduleEvent(EVENT_FIREBLAST, 5s, 8s);
-                    if (events.GetTimeUntilEvent(EVENT_FIREBALL) < 3s)
-                        events.RescheduleEvent(EVENT_FIREBALL, 3s);
+                }
+                case EVENT_FIERCE_BLOW:
+                    DoCastVictim(SPELL_FIERCE_BLOW);
+                    events.ScheduleEvent(EVENT_FIERCE_BLOW, 9s, 10s);
                     break;
             }
 
@@ -235,6 +319,9 @@ struct boss_the_beast : public BossAI
 private:
     bool _beastReached;
     bool _orcYelled;
+    bool _overrunning;
+    ObjectGuid _overrunTargetGUID;
+    EventMap _overrunEvents;
     GuidVector _nearbyOrcsGUIDs;
 };
 

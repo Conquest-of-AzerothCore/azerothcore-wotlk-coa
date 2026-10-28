@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "A new Hero (class 10) starts with the Darkmoon Season 10 baseline",
+  "contract": "Class 10 is Ascension's classless Hero. A level-1 Hero on Darkmoon - Season 10 Wildcard knew Auto Attack, Dodge, Parry, Block, Dual Wield, Shoot, Throw, Wand, Path of Duality 129243, Twin Flurry 129246, Resilient Constitution 979700 and both Stones of Retreat before its first roll. Heroes wear every armor type and wield every weapon type, and start with their race's Warrior outfit and a Hearthstone (for a Human the Recruit's clothes and a Worn Greatsword) plus a sword, a dagger, a staff, a bow and a shield, as a player remembers them (item IDs estimated).",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "hero", "race": 1, "class": 10, "level": 1}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 3000},
+    {"action": "assert", "label": "The character is a Hero", "actor": "hero", "metric": "player_class", "equals": 10},
+    {"action": "assert", "label": "Path of Duality is known", "actor": "hero", "metric": "knows_spell", "spell": 129243, "equals": 1},
+    {"action": "assert", "label": "Twin Flurry is known", "actor": "hero", "metric": "knows_spell", "spell": 129246, "equals": 1},
+    {"action": "assert", "label": "Resilient Constitution is known", "actor": "hero", "metric": "knows_spell", "spell": 979700, "equals": 1},
+    {"action": "assert", "label": "Shoot is known", "actor": "hero", "metric": "knows_spell", "spell": 3018, "equals": 1},
+    {"action": "assert", "label": "Parry is known", "actor": "hero", "metric": "knows_spell", "spell": 3127, "equals": 1},
+    {"action": "assert", "label": "Dual Wield is known", "actor": "hero", "metric": "knows_spell", "spell": 674, "equals": 1},
+    {"action": "assert", "label": "Plate Mail proficiency is known", "actor": "hero", "metric": "knows_spell", "spell": 750, "equals": 1},
+    {"action": "assert", "label": "Shield proficiency is known", "actor": "hero", "metric": "knows_spell", "spell": 9116, "equals": 1},
+    {"action": "assert", "label": "Two-Handed Swords proficiency is known", "actor": "hero", "metric": "knows_spell", "spell": 202, "equals": 1},
+    {"action": "assert", "label": "Bows proficiency is known", "actor": "hero", "metric": "knows_spell", "spell": 264, "equals": 1},
+    {"action": "assert", "label": "The Swords skill is trained", "actor": "hero", "metric": "skill_value", "skill": 43, "min": 1},
+    {"action": "assert", "label": "The starter sword is carried", "actor": "hero", "metric": "item_count", "item": 25, "equals": 1},
+    {"action": "assert", "label": "The starter dagger is carried", "actor": "hero", "metric": "item_count", "item": 2092, "equals": 1},
+    {"action": "assert", "label": "The Warrior's greatsword of its race is carried", "actor": "hero", "metric": "item_count", "item": 49778, "equals": 1},
+    {"action": "assert", "label": "The starter staff is carried", "actor": "hero", "metric": "item_count", "item": 35, "equals": 1},
+    {"action": "assert", "label": "The starter bow is carried", "actor": "hero", "metric": "item_count", "item": 2504, "equals": 1},
+    {"action": "assert", "label": "The starter shield is carried", "actor": "hero", "metric": "item_count", "item": 2362, "equals": 1},
+    {"action": "assert", "label": "The Hearthstone is carried", "actor": "hero", "metric": "item_count", "item": 6948, "equals": 1}
+  ]
+}

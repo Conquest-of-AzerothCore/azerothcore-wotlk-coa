@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "name": "Ember Blast 34341 hits within 8 yards, not the whole room (COA-6777)",
+  "contract": "Ember Blast 34341 (Al'ar and Kael'thas's Phoenix) and its Heroic 351392 and Mythic 351393 copies get back the stock 8 yard area around the caster. A player 30 yards away takes no damage; a player beside the caster still does.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 70, "allow_regeneration": false }
+  ],
+  "creatures": [
+    { "id": "far", "owner": "hero", "entry": 36, "level": 70, "faction": 14, "distance": 30 },
+    { "id": "near", "owner": "hero", "entry": 36, "level": 70, "faction": 14, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 4000 },
+    { "action": "snapshot", "actor": "hero", "metric": "health", "save_as": "full" },
+    { "action": "cast", "actor": "far", "spell": 34341 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "a player 30 yards away takes no damage", "actor": "hero",
+      "metric": "health", "relative_to": "full", "equals": 0 },
+    { "action": "cast", "actor": "near", "spell": 34341 },
+    { "action": "assert", "label": "a player beside the caster is still hit", "actor": "hero",
+      "metric": "health", "relative_to": "full", "max": -1, "within_ms": 3000 }
+  ]
+}

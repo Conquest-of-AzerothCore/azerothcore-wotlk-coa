@@ -1,6 +1,8 @@
 // mod-coa-challenges (review split): CoA.Challenges.Spells.cpp
 // Mechanical split of review-CoAChallenges.cpp; no logic changes.
 #include "CoA.Challenges.Review.h"
+#include "Pet.h"
+#include "TemporarySummon.h"
 
 namespace CoAChallenges
 {
@@ -121,10 +123,96 @@ namespace CoAChallenges
         return ParseSpellList(raw);
     }
 
+    Player* GetPlayerOwner(Creature* creature)
+    {
+        if (!creature)
+            return nullptr;
+
+        if (Player* owner = creature->GetCharmerOrOwnerPlayerOrPlayerItself())
+            return owner;
+
+        if (TempSummon* temp = creature->ToTempSummon())
+            if (Unit* summoner = temp->GetSummonerUnit())
+                if (Player* player = summoner->ToPlayer())
+                    return player;
+
+        if (ObjectGuid createdBy = creature->GetCreatorGUID())
+            if (createdBy.IsPlayer())
+                return ObjectAccessor::GetPlayer(*creature, createdBy);
+
+        return nullptr;
+    }
+
+    std::vector<Creature*> GetPlayerSummons(Player* player)
+    {
+        std::vector<Creature*> summons;
+        if (!player)
+            return summons;
+
+        if (Pet* pet = player->GetPet())
+            summons.push_back(pet);
+
+        for (Unit* u : player->m_Controlled)
+            if (Creature* c = u->ToCreature())
+                summons.push_back(c);
+
+        if (ObjectGuid critterGuid = player->GetCritterGUID())
+            if (Creature* critter = ObjectAccessor::GetCreature(*player, critterGuid))
+                summons.push_back(critter);
+
+        for (uint8 slot = 0; slot < MAX_SUMMON_SLOT; ++slot)
+        {
+            if (ObjectGuid slotGuid = player->m_SummonSlot[slot])
+                if (Creature* s = ObjectAccessor::GetCreature(*player, slotGuid))
+                    summons.push_back(s);
+        }
+
+        std::sort(summons.begin(), summons.end());
+        summons.erase(std::unique(summons.begin(), summons.end()), summons.end());
+        return summons;
+    }
+
+    void ApplyChallengeSpellToCreature(Creature* creature, uint32 spell)
+    {
+        if (!creature || !spell)
+            return;
+        if (!sSpellMgr->GetSpellInfo(spell))
+            return;
+        if (!creature->HasAura(spell))
+        {
+            creature->AddAura(spell, creature);
+            LOG_INFO("module.coa_challenges", "Applied challenge aura {} to summon {} (owner: {})",
+                spell, creature->GetName(), creature->GetOwnerGUID().ToString());
+        }
+    }
+
+    void ApplyActiveChallengeSpellsToCreature(Player* player, Creature* creature)
+    {
+        if (!player || !creature)
+            return;
+
+        uint32 const guid = player->GetGUID().GetCounter();
+        for (ActiveChallengeRow const& row : LoadActiveChallengeRows(guid))
+        {
+            for (uint32 spell : GetChallengeSpells(row.challengeId, row.level))
+                ApplyChallengeSpellToCreature(creature, spell);
+        }
+
+        uint32 modeMask = CachedGameModeMask(guid);
+        for (auto const& [bit, base] : GameModeBaseSnapshot())
+        {
+            if (!(modeMask & bit))
+                continue;
+            for (uint32 spell : GetChallengeSpells(base, 0))
+                ApplyChallengeSpellToCreature(creature, spell);
+        }
+    }
+
     void ApplyChallengeSpell(Player* player, uint32 challengeID, uint32 level)
     {
         if (!player)
             return;
+        std::vector<Creature*> summons = GetPlayerSummons(player);
         for (uint32 spell : GetChallengeSpells(challengeID, level))
         {
             if (!spell)
@@ -138,6 +226,9 @@ namespace CoAChallenges
             player->CastSpell(player, spell, true);
             LOG_INFO("module.coa_challenges", "Applied challenge aura {} to {} (challenge {} level {})",
                 spell, player->GetName(), challengeID, level);
+
+            for (Creature* summon : summons)
+                ApplyChallengeSpellToCreature(summon, spell);
         }
     }
 
@@ -185,6 +276,7 @@ namespace CoAChallenges
 
         std::sort(spells.begin(), spells.end());
         spells.erase(std::unique(spells.begin(), spells.end()), spells.end());
+        std::vector<Creature*> summons = GetPlayerSummons(player);
         for (uint32 spell : spells)
         {
             if (!spell || keep.count(spell))
@@ -192,22 +284,22 @@ namespace CoAChallenges
             player->RemoveAurasDueToSpell(spell);
             LOG_INFO("module.coa_challenges", "Removed challenge aura {} from {} (challenge {})",
                 spell, player->GetName(), challengeID);
+
+            for (Creature* summon : summons)
+                summon->RemoveAurasDueToSpell(spell);
         }
     }
 
     // Death strips auras; resurrect must restore active challenge auras.
     void ReapplyActiveSpells(Player* player)
     {
-        uint32 guid = player->GetGUID().GetCounter();
-        if (QueryResult actives = CharacterDatabase.Query(
-                "SELECT challengeId, level FROM coa_character_challenge WHERE guid = {}", guid))
-        {
-            do
-            {
-                Field* f = actives->Fetch();
-                ApplyChallengeSpell(player, f[0].Get<uint32>(), f[1].Get<uint32>());
-            } while (actives->NextRow());
-        }
+        ReapplyActiveSpells(player, LoadActiveChallengeRows(player->GetGUID().GetCounter()));
+    }
+
+    void ReapplyActiveSpells(Player* player, std::vector<ActiveChallengeRow> const& rows)
+    {
+        for (ActiveChallengeRow const& row : rows)
+            ApplyChallengeSpell(player, row.challengeId, row.level);
     }
 
     // Login reconciliation: drop challenge auras that have no backing active

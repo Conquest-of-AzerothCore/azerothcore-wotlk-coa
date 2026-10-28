@@ -1,0 +1,612 @@
+ItemID,Name,Quality,ItemLevel,RequiredLevel,Class,Subclass,InventoryType,DisplayID,SourceStatus,DumpLine
+11623,Spritecaster Cape,3,57,47,4,1,16,20604,Historical reward catalogue + AtlasLoot item ID,9967
+11624,Kentic Amice,3,57,47,4,1,3,22987,Historical reward catalogue + AtlasLoot item ID,9968
+11625,Enthralled Sphere,3,57,48,4,0,23,16833,Historical reward catalogue + AtlasLoot item ID,9969
+11626,Blackveil Cape,3,57,48,4,1,16,20745,Historical reward catalogue + AtlasLoot item ID,9970
+11627,Fleetfoot Greaves,3,57,48,4,3,8,22857,Historical reward catalogue + AtlasLoot item ID,9971
+11628,Houndmaster's Bow,3,57,48,2,2,15,22979,Historical reward catalogue + AtlasLoot item ID,9972
+11629,Houndmaster's Rifle,3,57,48,2,3,26,22980,Historical reward catalogue + AtlasLoot item ID,9973
+11631,Stoneshell Guard,3,57,47,4,6,14,16851,Historical reward catalogue + AtlasLoot item ID,9975
+11632,Earthslag Shoulders,3,57,47,4,4,3,22924,Historical reward catalogue + AtlasLoot item ID,9976
+11633,Spiderfang Carapace,3,57,49,4,4,5,16996,Historical reward catalogue + AtlasLoot item ID,9977
+11634,Silkweb Gloves,3,57,49,4,1,10,22940,Historical reward catalogue + AtlasLoot item ID,9978
+11635,Hookfang Shanker,3,57,49,2,15,13,22978,Historical reward catalogue + AtlasLoot item ID,9979
+11662,Ban'thok Sash,3,57,49,4,1,6,22841,Historical reward catalogue + AtlasLoot item ID,9996
+11665,Ogreseer Fists,3,57,49,4,2,10,13552,Historical reward catalogue + AtlasLoot item ID,9999
+11669,Naglering,3,57,54,4,0,11,6925,Historical reward catalogue + AtlasLoot item ID,10003
+11675,Shadefiend Boots,3,57,50,4,2,8,14863,Historical reward catalogue + AtlasLoot item ID,10009
+11677,Graverot Cape,3,57,50,4,1,16,22580,Historical reward catalogue + AtlasLoot item ID,10011
+11678,Carapace of Anub'shiah,3,57,50,4,4,5,21016,Historical reward catalogue + AtlasLoot item ID,10012
+11679,Rubicund Armguards,3,57,50,4,3,9,23019,Historical reward catalogue + AtlasLoot item ID,10013
+11684,Ironfoe,4,57,55,2,4,13,18417,Historical reward catalogue + AtlasLoot item ID,10017
+11685,Splinthide Shoulders,3,57,50,4,2,3,22903,Historical reward catalogue + AtlasLoot item ID,10018
+11686,Girdle of Beastial Fury,3,57,50,4,2,6,22962,Historical reward catalogue + AtlasLoot item ID,10019
+11702,Grizzle's Skinner,3,57,50,2,0,13,22964,Historical reward catalogue + AtlasLoot item ID,10024
+11703,Stonewall Girdle,3,57,50,4,4,6,22885,Historical reward catalogue + AtlasLoot item ID,10025
+11722,Dregmetal Spaulders,3,57,50,4,3,3,22920,Historical reward catalogue + AtlasLoot item ID,10030
+11726,Savage Gladiator Chain,4,57,52,4,3,5,22923,Historical reward catalogue + AtlasLoot item ID,10034
+11728,Savage Gladiator Leggings,3,57,52,4,3,7,16880,Historical reward catalogue + AtlasLoot item ID,10036
+11729,Savage Gladiator Helm,3,57,52,4,3,1,23025,Historical reward catalogue + AtlasLoot item ID,10037
+11730,Savage Gladiator Grips,3,57,52,4,3,10,22922,Historical reward catalogue + AtlasLoot item ID,10038
+11731,Savage Gladiator Greaves,3,57,52,4,3,8,22865,Historical reward catalogue + AtlasLoot item ID,10039
+11735,Ragefury Eyepatch,3,57,52,4,2,1,16887,Historical reward catalogue + AtlasLoot item ID,10043
+11744,Bloodfist,3,57,51,2,13,13,16892,Historical reward catalogue + AtlasLoot item ID,10048
+11745,Fists of Phalanx,3,57,51,4,4,10,22939,Historical reward catalogue + AtlasLoot item ID,10049
+11746,Golem Skull Helm,3,57,51,4,4,1,16894,Historical reward catalogue + AtlasLoot item ID,10050
+11747,Flamestrider Robes,3,57,48,4,2,20,16896,Historical reward catalogue + AtlasLoot item ID,10051
+11748,Pyric Caduceus,3,57,48,2,19,26,23006,Historical reward catalogue + AtlasLoot item ID,10052
+11749,Searingscale Leggings,3,57,48,4,3,7,22921,Historical reward catalogue + AtlasLoot item ID,10053
+11750,Kindling Stave,3,57,48,2,10,17,16900,Historical reward catalogue + AtlasLoot item ID,10054
+11755,Verek's Collar,3,57,51,4,0,2,16902,Historical reward catalogue + AtlasLoot item ID,10059
+11768,Incendic Bracers,3,57,52,4,1,9,22984,Historical reward catalogue + AtlasLoot item ID,10066
+11782,Boreal Mantle,3,57,52,4,1,3,16916,Historical reward catalogue + AtlasLoot item ID,10067
+11783,Chillsteel Girdle,3,57,52,4,3,6,22895,Historical reward catalogue + AtlasLoot item ID,10068
+11784,Arbiter's Blade,3,57,48,2,7,21,16918,Historical reward catalogue + AtlasLoot item ID,10069
+11785,Rock Golem Bulwark,3,57,53,4,6,14,14709,Historical reward catalogue + AtlasLoot item ID,10070
+11786,Stone of the Earth,3,57,51,2,8,17,16920,Historical reward catalogue + AtlasLoot item ID,10071
+11787,Shalehusk Boots,3,57,53,4,4,8,22868,Historical reward catalogue + AtlasLoot item ID,10072
+11802,Lavacrest Leggings,3,57,53,4,4,7,15550,Historical reward catalogue + AtlasLoot item ID,10083
+11803,Force of Magma,3,57,51,2,5,17,16923,Historical reward catalogue + AtlasLoot item ID,10084
+11805,Rubidium Hammer,3,57,51,2,4,13,23020,Historical reward catalogue + AtlasLoot item ID,10086
+11807,Sash of the Burning Heart,3,57,53,4,1,6,23024,Historical reward catalogue + AtlasLoot item ID,10088
+11808,Circle of Flame,4,57,54,4,1,1,22467,Historical reward catalogue + AtlasLoot item ID,10089
+11809,Flame Wrath,3,57,51,2,6,17,17096,Historical reward catalogue + AtlasLoot item ID,10090
+11810,Force of Will,3,57,55,4,0,12,15491,Historical reward catalogue + AtlasLoot item ID,10091
+11812,Cape of the Fire Salamander,3,57,53,4,1,16,17856,Historical reward catalogue + AtlasLoot item ID,10093
+11814,Molten Fists,3,57,53,4,3,10,16935,Historical reward catalogue + AtlasLoot item ID,10095
+11815,Hand of Justice,3,57,53,4,0,12,3807,Historical reward catalogue + AtlasLoot item ID,10096
+11816,Angerforge's Battle Axe,3,57,51,2,1,17,17227,Historical reward catalogue + AtlasLoot item ID,10097
+11817,Lord General's Sword,3,57,51,2,7,13,16939,Historical reward catalogue + AtlasLoot item ID,10098
+11819,Second Wind,3,57,54,4,0,12,14679,Historical reward catalogue + AtlasLoot item ID,10100
+11820,Royal Decorated Armor,3,57,53,4,3,5,23018,Historical reward catalogue + AtlasLoot item ID,10101
+11821,Warstrife Leggings,3,57,53,4,2,7,22822,Historical reward catalogue + AtlasLoot item ID,10102
+11822,Omnicast Boots,3,57,54,4,1,8,22859,Historical reward catalogue + AtlasLoot item ID,10103
+11823,Luminary Kilt,3,57,54,4,2,7,22927,Historical reward catalogue + AtlasLoot item ID,10104
+11824,Cyclopean Band,3,57,49,4,0,11,6935,Historical reward catalogue + AtlasLoot item ID,10105
+11832,Burst of Knowledge,3,57,53,4,0,12,15488,Historical reward catalogue + AtlasLoot item ID,10113
+11839,Chief Architect's Monocle,3,57,50,4,1,1,16951,Historical reward catalogue + AtlasLoot item ID,10120
+11841,Senior Designer's Pantaloons,3,57,50,4,1,7,22919,Historical reward catalogue + AtlasLoot item ID,10122
+11842,Lead Surveyor's Mantle,3,57,50,4,3,3,22991,Historical reward catalogue + AtlasLoot item ID,10123
+11920,Wraith Scythe,3,57,51,2,0,13,22878,Historical reward catalogue + AtlasLoot item ID,10187
+11921,Impervious Giant,3,57,52,2,5,17,20094,Historical reward catalogue + AtlasLoot item ID,10188
+11922,Blood-etched Blade,3,57,52,2,15,21,20078,Historical reward catalogue + AtlasLoot item ID,10189
+11923,The Hammer of Grace,3,57,52,2,4,21,17035,Historical reward catalogue + AtlasLoot item ID,10190
+11924,Robes of the Royal Crown,3,57,55,4,1,20,23013,Historical reward catalogue + AtlasLoot item ID,10191
+11925,Ghostshroud,3,57,52,4,2,1,22961,Historical reward catalogue + AtlasLoot item ID,10192
+11926,Deathdealer Breastplate,3,57,52,4,3,5,22911,Historical reward catalogue + AtlasLoot item ID,10193
+11927,Legplates of the Eternal Guardian,3,57,52,4,4,7,17040,Historical reward catalogue + AtlasLoot item ID,10194
+11928,Thaurissan's Royal Scepter,3,57,55,4,0,23,17041,Historical reward catalogue + AtlasLoot item ID,10195
+11929,Haunting Spectre Leggings,3,57,52,4,1,7,22935,Historical reward catalogue + AtlasLoot item ID,10196
+11930,The Emperor's New Cape,3,57,55,4,1,16,17044,Historical reward catalogue + AtlasLoot item ID,10197
+11931,Dreadforge Retaliator,3,57,54,2,1,17,22918,Historical reward catalogue + AtlasLoot item ID,10198
+11932,Guiding Stave of Wisdom,3,57,54,2,10,17,17047,Historical reward catalogue + AtlasLoot item ID,10199
+11933,Imperial Jewel,3,57,55,4,0,2,22983,Historical reward catalogue + AtlasLoot item ID,10200
+11935,Magmus Stone,3,57,53,4,0,23,22994,Historical reward catalogue + AtlasLoot item ID,10202
+12103,Star of Mystaria,3,57,58,4,0,2,18516,Historical reward catalogue + AtlasLoot item ID,10341
+12528,The Judge's Gavel,3,57,47,2,5,17,22872,Historical reward catalogue + AtlasLoot item ID,10696
+12531,Searing Needle,3,57,46,2,15,13,17640,Historical reward catalogue + AtlasLoot item ID,10699
+12532,Spire of the Stoneshaper,3,57,51,2,10,17,17641,Historical reward catalogue + AtlasLoot item ID,10700
+12535,Doomforged Straightedge,3,57,49,2,7,13,17652,Historical reward catalogue + AtlasLoot item ID,10703
+12542,Funeral Pyre Vestment,3,57,46,4,1,20,20520,Historical reward catalogue + AtlasLoot item ID,10704
+12546,Aristocratic Cuffs,3,57,49,4,1,9,22836,Historical reward catalogue + AtlasLoot item ID,10708
+12547,Mar Alom's Grip,3,57,51,4,2,10,22996,Historical reward catalogue + AtlasLoot item ID,10709
+12549,Braincage,3,57,47,4,3,1,12170,Historical reward catalogue + AtlasLoot item ID,10711
+12550,Runed Golem Shackles,3,57,48,4,4,9,23023,Historical reward catalogue + AtlasLoot item ID,10712
+12551,Stoneshield Cloak,3,57,51,4,1,16,22894,Historical reward catalogue + AtlasLoot item ID,10713
+12552,Blisterbane Wrap,3,57,50,4,1,16,17970,Historical reward catalogue + AtlasLoot item ID,10714
+12553,Swiftwalker Boots,3,57,54,4,2,8,22869,Historical reward catalogue only,10715
+12554,Hands of the Exalted Herald,3,57,54,4,1,10,22970,Historical reward catalogue only,10716
+12555,Battlechaser's Greaves,3,57,50,4,4,8,19727,Historical reward catalogue + AtlasLoot item ID,10717
+12556,High Priestess Boots,3,57,54,4,1,8,17678,Historical reward catalogue only,10718
+12557,Ebonsteel Spaulders,3,57,54,4,4,3,22926,Historical reward catalogue only,10719
+12582,Keris of Zul'Serak,3,57,55,2,15,13,22988,Historical reward catalogue + AtlasLoot item ID,10734
+12583,Blackhand Doomsaw,3,57,58,2,6,17,17689,Historical reward catalogue + AtlasLoot item ID,10735
+12587,Eye of Rend,3,57,58,4,2,1,17691,Historical reward catalogue + AtlasLoot item ID,10739
+12588,Bonespike Shoulder,3,57,58,4,3,3,17692,Historical reward catalogue + AtlasLoot item ID,10740
+12589,Dustfeather Sash,3,57,56,4,1,6,16926,Historical reward catalogue + AtlasLoot item ID,10741
+12590,Felstriker,4,57,58,2,15,13,20082,Historical reward catalogue + AtlasLoot item ID,10742
+12592,Blackblade of Shahram,4,57,58,2,8,17,17791,Historical reward catalogue + AtlasLoot item ID,10744
+12602,Draconian Deflector,3,57,58,4,6,14,18226,Historical reward catalogue + AtlasLoot item ID,10752
+12603,Nightbrace Tunic,3,57,56,4,2,5,6037,Historical reward catalogue + AtlasLoot item ID,10753
+12604,Starfire Tiara,3,57,55,4,1,1,17718,Historical reward catalogue + AtlasLoot item ID,10754
+12605,Serpentine Skuller,3,57,51,2,19,26,18853,Historical reward catalogue + AtlasLoot item ID,10755
+12606,Crystallized Girdle,3,57,56,4,2,6,17722,Historical reward catalogue + AtlasLoot item ID,10756
+12608,Butcher's Apron,3,57,53,4,1,16,22892,Historical reward catalogue + AtlasLoot item ID,10758
+12609,Polychromatic Visionwrap,3,57,56,4,1,5,17728,Historical reward catalogue + AtlasLoot item ID,10759
+12621,Demonfork,3,57,54,2,0,13,17770,Historical reward catalogue + AtlasLoot item ID,10771
+12626,Funeral Cuffs,3,57,54,4,1,9,11334,Historical reward catalogue + AtlasLoot item ID,10776
+12634,Chiselbrand Girdle,3,57,55,4,3,6,17792,Historical reward catalogue + AtlasLoot item ID,10784
+12637,Backusarian Gauntlets,3,57,55,4,4,10,17795,Historical reward catalogue + AtlasLoot item ID,10787
+12651,Blackcrow,3,57,54,2,18,26,17813,Historical reward catalogue + AtlasLoot item ID,10801
+12653,Riphook,3,57,54,2,2,15,23012,Historical reward catalogue + AtlasLoot item ID,10803
+12709,Finkle's Skinner,3,57,58,2,15,13,17836,Historical reward catalogue + AtlasLoot item ID,10843
+12791,Barman Shanker,3,57,50,2,15,13,18106,Historical reward catalogue + AtlasLoot item ID,10921
+12793,Mixologist's Tunic,3,57,50,4,2,5,18110,Historical reward catalogue + AtlasLoot item ID,10923
+12905,Wildfire Cape,3,57,56,4,1,16,22804,Historical reward catalogue + AtlasLoot item ID,11031
+12927,Truestrike Shoulders,3,57,56,4,2,3,22829,Historical reward catalogue + AtlasLoot item ID,11043
+12929,Emberfury Talisman,3,57,56,4,0,2,6754,Historical reward catalogue + AtlasLoot item ID,11045
+12930,Briarwood Reed,3,57,55,4,0,12,5555,Historical reward catalogue + AtlasLoot item ID,11046
+12935,Warmaster Legguards,3,57,58,4,4,7,22824,Historical reward catalogue + AtlasLoot item ID,11051
+12936,Battleborn Armbraces,3,57,58,4,4,9,17656,Historical reward catalogue + AtlasLoot item ID,11052
+12939,Dal'Rend's Tribal Guardian,3,57,58,2,7,22,20116,Historical reward catalogue + AtlasLoot item ID,11055
+12940,Dal'Rend's Sacred Charge,3,57,58,2,7,21,20117,Historical reward catalogue + AtlasLoot item ID,11056
+12963,Blademaster Leggings,3,57,58,4,2,7,18346,Historical reward catalogue + AtlasLoot item ID,11079
+12964,Tristam Legguards,3,57,58,4,3,7,18347,Historical reward catalogue + AtlasLoot item ID,11080
+12965,Spiritshroud Leggings,3,57,58,4,1,7,18350,Historical reward catalogue + AtlasLoot item ID,11081
+12966,Blackmist Armguards,3,57,58,4,2,9,18351,Historical reward catalogue + AtlasLoot item ID,11082
+12967,Bloodmoon Cloak,3,57,58,4,1,16,18352,Historical reward catalogue + AtlasLoot item ID,11083
+12968,Frostweaver Cape,3,57,58,4,1,16,18353,Historical reward catalogue + AtlasLoot item ID,11084
+12969,Seeping Willow,3,57,58,2,5,17,18356,Historical reward catalogue + AtlasLoot item ID,11085
+13098,Painweaver Band,3,57,58,4,0,11,18407,Historical reward catalogue + AtlasLoot item ID,11214
+13141,Tooth of Gnarr,3,57,58,4,0,2,6948,Historical reward catalogue + AtlasLoot item ID,11257
+13142,Brigam Girdle,3,57,58,4,4,6,18427,Historical reward catalogue + AtlasLoot item ID,11258
+13143,Mark of the Dragon Lord,4,57,56,4,0,11,18428,Historical reward catalogue + AtlasLoot item ID,11259
+13148,Chillpike,3,57,56,2,6,17,20100,Historical reward catalogue + AtlasLoot item ID,11264
+13161,Trindlehaven Staff,3,57,56,2,10,17,18472,Historical reward catalogue + AtlasLoot item ID,11277
+13162,Reiver Claws,3,57,56,4,4,10,18474,Historical reward catalogue + AtlasLoot item ID,11278
+13163,Relentless Scythe,3,57,57,2,8,17,18482,Historical reward catalogue + AtlasLoot item ID,11279
+13164,Heart of the Scale,3,57,56,4,0,12,3490,Historical reward catalogue + AtlasLoot item ID,11280
+13166,Slamshot Shoulders,3,57,55,4,4,3,18503,Historical reward catalogue + AtlasLoot item ID,11282
+13167,Fist of Omokk,3,57,55,2,5,17,19693,Historical reward catalogue + AtlasLoot item ID,11283
+13168,Plate of the Shaman King,3,57,55,4,4,5,18358,Historical reward catalogue + AtlasLoot item ID,11284
+13169,Tressermane Leggings,3,57,55,4,2,7,18509,Historical reward catalogue + AtlasLoot item ID,11285
+13170,Skyshroud Leggings,3,57,55,4,1,7,22912,Historical reward catalogue + AtlasLoot item ID,11286
+13177,Talisman of Evasion,3,57,55,4,0,2,3952,Historical reward catalogue + AtlasLoot item ID,11293
+13178,Rosewine Circle,3,57,55,4,0,11,18525,Historical reward catalogue + AtlasLoot item ID,11294
+13179,Brazecore Armguards,3,57,55,4,3,9,18527,Historical reward catalogue + AtlasLoot item ID,11295
+13181,Demonskin Gloves,3,57,52,4,1,10,18529,Historical reward catalogue + AtlasLoot item ID,11297
+13182,Phase Blade,3,57,52,2,7,13,18531,Historical reward catalogue + AtlasLoot item ID,11298
+13183,Venomspitter,3,57,55,2,4,13,19361,Historical reward catalogue + AtlasLoot item ID,11299
+13184,Fallbrush Handgrips,3,57,56,4,2,10,18533,Historical reward catalogue + AtlasLoot item ID,11300
+13185,Sunderseer Mantle,3,57,56,4,1,3,18534,Historical reward catalogue + AtlasLoot item ID,11301
+13198,Hurd Smasher,3,57,55,2,13,13,18538,Historical reward catalogue + AtlasLoot item ID,11314
+13203,Armswake Cloak,3,57,55,4,1,16,18543,Historical reward catalogue + AtlasLoot item ID,11318
+13204,Bashguuder,3,57,55,2,4,13,20088,Historical reward catalogue + AtlasLoot item ID,11319
+13205,Rhombeard Protector,3,57,56,4,6,14,18546,Historical reward catalogue + AtlasLoot item ID,11320
+13206,Wolfshear Leggings,3,57,56,4,1,7,18549,Historical reward catalogue + AtlasLoot item ID,11321
+13208,Bleak Howler Armguards,3,57,56,4,2,9,18556,Historical reward catalogue + AtlasLoot item ID,11323
+13210,Pads of the Dread Wolf,3,57,55,4,2,8,18561,Historical reward catalogue + AtlasLoot item ID,11325
+13211,Slashclaw Bracers,3,57,55,4,3,9,18565,Historical reward catalogue + AtlasLoot item ID,11326
+13212,Halycon's Spiked Collar,3,57,55,4,0,2,18562,Historical reward catalogue + AtlasLoot item ID,11327
+13213,Smolderweb's Eye,3,57,55,4,0,12,12697,Historical reward catalogue + AtlasLoot item ID,11328
+13218,Fang of the Crystal Spider,3,57,56,2,15,13,18587,Historical reward catalogue + AtlasLoot item ID,11333
+13244,Gilded Gauntlets,3,57,55,4,3,10,18615,Historical reward catalogue + AtlasLoot item ID,11354
+13252,Cloudrunner Girdle,3,57,55,4,2,6,18632,Historical reward catalogue + AtlasLoot item ID,11362
+13253,Hands of Power,3,57,55,4,1,10,18634,Historical reward catalogue + AtlasLoot item ID,11363
+13255,Trueaim Gauntlets,3,57,54,4,3,10,18636,Historical reward catalogue + AtlasLoot item ID,11365
+13257,Demonic Runed Spaulders,3,57,54,4,2,3,18639,Historical reward catalogue + AtlasLoot item ID,11367
+13259,Ribsteel Footguards,3,57,56,4,4,8,18643,Historical reward catalogue + AtlasLoot item ID,11369
+13261,Globe of D'sak,3,57,54,4,0,23,18654,Historical reward catalogue + AtlasLoot item ID,11371
+13282,Ogreseer Tower Boots,3,57,54,4,1,8,14792,Historical reward catalogue + AtlasLoot item ID,11379
+13283,Magus Ring,3,57,54,4,0,11,18235,Historical reward catalogue + AtlasLoot item ID,11380
+13284,Swiftdart Battleboots,3,57,53,4,3,8,18678,Historical reward catalogue + AtlasLoot item ID,11381
+13285,The Blackrock Slicer,3,57,53,2,1,17,18685,Historical reward catalogue + AtlasLoot item ID,11382
+13286,Rivenspike,3,57,53,2,0,13,18686,Historical reward catalogue + AtlasLoot item ID,11383
+13314,Alanna's Embrace,4,57,57,4,1,20,19381,Historical reward catalogue + AtlasLoot item ID,11408
+13340,Cape of the Black Baron,3,57,58,4,1,16,18764,Historical reward catalogue + AtlasLoot item ID,11434
+13344,Dracorian Gauntlets,3,57,58,4,3,10,23116,Historical reward catalogue + AtlasLoot item ID,11438
+13345,Seal of Rivendare,3,57,58,4,0,11,18771,Historical reward catalogue + AtlasLoot item ID,11439
+13346,Robes of the Exalted,3,57,58,4,1,20,18774,Historical reward catalogue + AtlasLoot item ID,11440
+13348,Demonshear,3,57,58,2,8,17,18797,Historical reward catalogue + AtlasLoot item ID,11442
+13349,Scepter of the Unholy,3,57,58,2,4,13,18781,Historical reward catalogue + AtlasLoot item ID,11443
+13353,Book of the Dead,4,57,58,4,0,23,18787,Historical reward catalogue + AtlasLoot item ID,11447
+13358,Wyrmtongue Shoulders,3,57,58,4,2,3,14855,Historical reward catalogue + AtlasLoot item ID,11452
+13359,Crown of Tyranny,3,57,58,4,3,1,18793,Historical reward catalogue + AtlasLoot item ID,11453
+13360,Gift of the Elven Magi,3,57,58,2,15,21,18794,Historical reward catalogue + AtlasLoot item ID,11454
+13361,Skullforge Reaver,3,57,58,2,7,13,19572,Historical reward catalogue + AtlasLoot item ID,11455
+13368,Bonescraper,3,57,57,2,15,13,20083,Historical reward catalogue + AtlasLoot item ID,11462
+13369,Fire Striders,3,57,58,4,1,8,18802,Historical reward catalogue + AtlasLoot item ID,11463
+13371,Father Flame,3,57,60,4,0,23,18807,Historical reward catalogue + AtlasLoot item ID,11465
+13372,Slavedriver's Cane,3,57,55,2,10,17,18809,Historical reward catalogue + AtlasLoot item ID,11466
+13373,Band of Flesh,3,57,55,4,0,11,268,Historical reward catalogue + AtlasLoot item ID,11467
+13374,Soulstealer Mantle,3,57,55,4,1,3,18810,Historical reward catalogue + AtlasLoot item ID,11468
+13375,Crest of Retribution,3,57,55,4,6,14,18613,Historical reward catalogue + AtlasLoot item ID,11469
+13376,Royal Tribunal Cloak,3,57,54,4,1,16,18811,Historical reward catalogue + AtlasLoot item ID,11470
+13378,Songbird Blouse,3,57,53,4,2,5,18812,Historical reward catalogue + AtlasLoot item ID,11472
+13379,Piccolo of the Flaming Fire,3,57,53,4,0,12,822,Historical reward catalogue + AtlasLoot item ID,11473
+13380,Willey's Portable Howitzer,3,57,56,2,3,26,14328,Historical reward catalogue + AtlasLoot item ID,11474
+13381,Master Cannoneer Boots,3,57,56,4,4,8,18814,Historical reward catalogue + AtlasLoot item ID,11475
+13382,Cannonball Runner,3,57,56,4,0,12,5243,Historical reward catalogue + AtlasLoot item ID,11476
+13383,Woollies of the Prancing Minstrel,3,57,53,4,3,7,18816,Historical reward catalogue + AtlasLoot item ID,11477
+13384,Rainbow Girdle,3,57,53,4,4,6,18817,Historical reward catalogue + AtlasLoot item ID,11478
+13385,Tome of Knowledge,3,57,56,4,0,23,18818,Historical reward catalogue + AtlasLoot item ID,11479
+13386,Archivist Cape,3,57,56,4,1,16,18819,Historical reward catalogue + AtlasLoot item ID,11480
+13394,Skul's Cold Embrace,3,57,54,4,4,5,18848,Historical reward catalogue + AtlasLoot item ID,11488
+13395,Skul's Fingerbone Claws,3,57,54,4,2,10,23124,Historical reward catalogue + AtlasLoot item ID,11489
+13396,Skul's Ghastly Touch,3,57,52,2,19,26,18852,Historical reward catalogue + AtlasLoot item ID,11490
+13397,Stoneskin Gargoyle Cape,3,57,56,4,1,16,18854,Historical reward catalogue + AtlasLoot item ID,11491
+13398,Boots of the Shrieker,3,57,57,4,2,8,6749,Historical reward catalogue + AtlasLoot item ID,11492
+13399,Gargoyle Shredder Talons,3,57,54,2,13,22,18855,Historical reward catalogue + AtlasLoot item ID,11493
+13400,Vambraces of the Sadist,3,57,54,4,4,9,18856,Historical reward catalogue + AtlasLoot item ID,11494
+13401,The Cruel Hand of Timmy,3,57,56,2,4,13,18857,Historical reward catalogue + AtlasLoot item ID,11495
+13402,Timmy's Galoshes,3,57,54,4,3,8,26428,Historical reward catalogue + AtlasLoot item ID,11496
+13403,Grimgore Noose,3,57,54,4,1,6,18859,Historical reward catalogue + AtlasLoot item ID,11497
+13404,Mask of the Unforgiven,3,57,52,4,2,1,34850,Historical reward catalogue + AtlasLoot item ID,11498
+13405,Wailing Nightbane Pauldrons,3,57,52,4,4,3,18861,Historical reward catalogue + AtlasLoot item ID,11499
+13408,Soul Breaker,3,57,52,2,0,13,18865,Historical reward catalogue + AtlasLoot item ID,11502
+13498,Handcrafted Mastersmith Leggings,3,57,55,4,4,7,18882,Historical reward catalogue + AtlasLoot item ID,11571
+13502,Handcrafted Mastersmith Girdle,3,57,58,4,4,6,18884,Historical reward catalogue + AtlasLoot item ID,11575
+13505,Runeblade of Baron Rivendare,4,57,58,2,8,17,18885,Historical reward catalogue + AtlasLoot item ID,11578
+13515,Ramstein's Lightning Bolts,3,57,55,4,0,12,271,Historical reward catalogue + AtlasLoot item ID,11588
+13524,Skull of Burning Shadows,3,57,57,4,0,23,18895,Historical reward catalogue only,11597
+13529,Husk of Nerub'enkan,3,57,56,4,6,14,1852,Historical reward catalogue + AtlasLoot item ID,11602
+13534,Banshee Finger,3,57,55,2,19,26,18905,Historical reward catalogue + AtlasLoot item ID,11607
+13937,Headmaster's Charge,4,57,57,2,10,17,38911,Historical reward catalogue + AtlasLoot item ID,11940
+13938,Bonecreeper Stylus,3,57,57,2,19,26,19364,Historical reward catalogue + AtlasLoot item ID,11941
+13944,Tombstone Breastplate,3,57,57,4,2,5,22831,Historical reward catalogue + AtlasLoot item ID,11947
+13950,Detention Strap,3,57,57,4,3,6,19369,Historical reward catalogue only,11953
+13951,Vigorsteel Vambraces,3,57,57,4,4,9,19370,Historical reward catalogue + AtlasLoot item ID,11954
+13952,Iceblade Hacker,3,57,57,2,0,13,22981,Historical reward catalogue + AtlasLoot item ID,11955
+13953,Silent Fang,3,57,57,2,7,13,19377,Historical reward catalogue + AtlasLoot item ID,11956
+13954,Verdant Footpads,3,57,56,4,2,8,22826,Historical reward catalogue + AtlasLoot item ID,11957
+13955,Stoneform Shoulders,3,57,56,4,4,3,19398,Historical reward catalogue + AtlasLoot item ID,11958
+13956,Clutch of Andros,3,57,56,4,1,6,19383,Historical reward catalogue + AtlasLoot item ID,11959
+13957,Gargoyle Slashers,3,57,56,4,2,10,19389,Historical reward catalogue + AtlasLoot item ID,11960
+13960,Heart of the Fiend,3,57,56,4,0,2,15509,Historical reward catalogue + AtlasLoot item ID,11963
+13964,Witchblade,3,57,57,2,15,21,19396,Historical reward catalogue + AtlasLoot item ID,11967
+13967,Windreaver Greaves,3,57,56,4,3,8,22803,Historical reward catalogue + AtlasLoot item ID,11970
+13969,Loomguard Armbraces,3,57,56,4,3,9,19414,Historical reward catalogue + AtlasLoot item ID,11972
+13983,Gravestone War Axe,3,57,57,2,1,17,19426,Historical reward catalogue + AtlasLoot item ID,11974
+14024,Frightalon,3,57,56,2,15,13,16081,Historical reward catalogue + AtlasLoot item ID,11999
+14340,Freezing Lich Robes,3,57,57,4,1,20,19574,Historical reward catalogue + AtlasLoot item ID,12275
+14487,Bonechill Hammer,3,57,57,2,4,13,19614,Historical reward catalogue + AtlasLoot item ID,12422
+14502,Frostbite Girdle,3,57,57,4,2,6,22956,Historical reward catalogue + AtlasLoot item ID,12437
+14503,Death's Clutch,3,57,57,4,2,3,19622,Historical reward catalogue + AtlasLoot item ID,12438
+14522,Maelstrom Leggings,3,57,57,4,3,7,19625,Historical reward catalogue + AtlasLoot item ID,12451
+14525,Boneclenched Gauntlets,3,57,57,4,4,10,19630,Historical reward catalogue + AtlasLoot item ID,12454
+14528,Rattlecage Buckler,3,57,57,4,6,14,19652,Historical reward catalogue + AtlasLoot item ID,12457
+14531,Frightskull Shaft,3,57,54,2,5,17,19662,Historical reward catalogue + AtlasLoot item ID,12460
+14536,Bonebrace Hauberk,3,57,56,4,3,5,19671,Historical reward catalogue only,12465
+14537,Corpselight Greaves,3,57,57,4,4,8,19674,Historical reward catalogue + AtlasLoot item ID,12466
+14538,Deadwalker Mantle,3,57,57,4,1,3,22904,Historical reward catalogue + AtlasLoot item ID,12467
+14539,Bone Ring Helm,3,57,57,4,2,1,19680,Historical reward catalogue + AtlasLoot item ID,12468
+14541,Barovian Family Sword,3,57,56,2,8,17,20118,Historical reward catalogue + AtlasLoot item ID,12470
+14543,Darkshade Gloves,3,57,57,4,1,10,22902,Historical reward catalogue only,12472
+14545,Ghostloom Leggings,3,57,57,4,2,7,19683,Historical reward catalogue + AtlasLoot item ID,12474
+14548,Royal Cap Spaulders,3,57,57,4,3,3,23016,Historical reward catalogue + AtlasLoot item ID,12477
+14576,Ebon Hilt of Marduk,3,57,54,2,7,13,19686,Historical reward catalogue only,12505
+14577,Skullsmoke Pants,3,57,56,4,1,7,22914,Historical reward catalogue + AtlasLoot item ID,12506
+14611,Bloodmail Hauberk,3,57,56,4,3,5,19735,Historical reward catalogue + AtlasLoot item ID,12540
+14612,Bloodmail Legguards,3,57,56,4,3,7,19736,Historical reward catalogue + AtlasLoot item ID,12541
+14614,Bloodmail Belt,3,57,56,4,3,6,19732,Historical reward catalogue + AtlasLoot item ID,12543
+14615,Bloodmail Gauntlets,3,57,56,4,3,10,19734,Historical reward catalogue + AtlasLoot item ID,12544
+14616,Bloodmail Boots,3,57,56,4,3,8,19733,Historical reward catalogue + AtlasLoot item ID,12545
+14620,Deathbone Girdle,3,57,56,4,4,6,12,Historical reward catalogue + AtlasLoot item ID,12549
+14621,Deathbone Sabatons,3,57,56,4,4,8,14,Historical reward catalogue + AtlasLoot item ID,12550
+14622,Deathbone Gauntlets,3,57,56,4,4,10,11,Historical reward catalogue + AtlasLoot item ID,12551
+14623,Deathbone Legguards,3,57,56,4,4,7,13,Historical reward catalogue + AtlasLoot item ID,12552
+14624,Deathbone Chestplate,3,57,56,4,4,5,9,Historical reward catalogue + AtlasLoot item ID,12553
+14626,Necropile Robe,3,57,56,4,1,20,19758,Historical reward catalogue + AtlasLoot item ID,12555
+14633,Necropile Mantle,3,57,56,4,1,3,19760,Historical reward catalogue + AtlasLoot item ID,12562
+14636,Cadaverous Belt,3,57,56,4,2,6,19761,Historical reward catalogue + AtlasLoot item ID,12565
+14637,Cadaverous Armor,3,57,56,4,2,5,19762,Historical reward catalogue + AtlasLoot item ID,12566
+14638,Cadaverous Leggings,3,57,56,4,2,7,21232,Historical reward catalogue + AtlasLoot item ID,12567
+14640,Cadaverous Gloves,3,57,56,4,2,10,19766,Historical reward catalogue + AtlasLoot item ID,12569
+14641,Cadaverous Walkers,3,57,56,4,2,8,8603,Historical reward catalogue + AtlasLoot item ID,12570
+16666,Vest of Elements,3,57,58,4,3,5,24848,Historical reward catalogue + AtlasLoot item ID,14434
+16667,Coif of Elements,3,57,57,4,3,1,38144,Historical reward catalogue + AtlasLoot item ID,14435
+16668,Kilt of Elements,3,57,56,4,3,7,24847,Historical reward catalogue + AtlasLoot item ID,14436
+16669,Pauldrons of Elements,3,57,55,4,3,3,24405,Historical reward catalogue + AtlasLoot item ID,14437
+16670,Boots of Elements,3,57,54,4,3,8,24844,Historical reward catalogue + AtlasLoot item ID,14438
+16671,Bindings of Elements,3,57,52,4,3,9,24843,Historical reward catalogue + AtlasLoot item ID,14439
+16672,Gauntlets of Elements,3,57,54,4,3,10,24846,Historical reward catalogue + AtlasLoot item ID,14440
+16673,Cord of Elements,3,57,53,4,3,6,24845,Historical reward catalogue + AtlasLoot item ID,14441
+16674,Beaststalker's Tunic,3,57,58,4,3,5,24834,Historical reward catalogue + AtlasLoot item ID,14442
+16675,Beaststalker's Boots,3,57,54,4,3,8,24840,Historical reward catalogue + AtlasLoot item ID,14443
+16676,Beaststalker's Gloves,3,57,54,4,3,10,24838,Historical reward catalogue + AtlasLoot item ID,14444
+16677,Beaststalker's Cap,3,57,57,4,3,1,24842,Historical reward catalogue + AtlasLoot item ID,14445
+16678,Beaststalker's Pants,3,57,56,4,3,7,24835,Historical reward catalogue + AtlasLoot item ID,14446
+16679,Beaststalker's Mantle,3,57,55,4,3,3,24841,Historical reward catalogue + AtlasLoot item ID,14447
+16680,Beaststalker's Belt,3,57,53,4,3,6,24836,Historical reward catalogue + AtlasLoot item ID,14448
+16681,Beaststalker's Bindings,3,57,52,4,3,9,24837,Historical reward catalogue + AtlasLoot item ID,14449
+16682,Magister's Boots,3,57,54,4,1,8,23476,Historical reward catalogue + AtlasLoot item ID,14450
+16683,Magister's Bindings,3,57,52,4,1,9,23479,Historical reward catalogue + AtlasLoot item ID,14451
+16684,Magister's Gloves,3,57,54,4,1,10,23475,Historical reward catalogue + AtlasLoot item ID,14452
+16685,Magister's Belt,3,57,53,4,1,6,23478,Historical reward catalogue + AtlasLoot item ID,14453
+16686,Magister's Crown,3,57,57,4,1,1,24532,Historical reward catalogue + AtlasLoot item ID,14454
+16687,Magister's Leggings,3,57,56,4,1,7,23309,Historical reward catalogue + AtlasLoot item ID,14455
+16688,Magister's Robes,3,57,58,4,1,20,23473,Historical reward catalogue + AtlasLoot item ID,14456
+16689,Magister's Mantle,3,57,55,4,1,3,23887,Historical reward catalogue + AtlasLoot item ID,14457
+16690,Devout Robe,3,57,58,4,1,20,24003,Historical reward catalogue + AtlasLoot item ID,14458
+16691,Devout Sandals,3,57,54,4,1,8,24011,Historical reward catalogue + AtlasLoot item ID,14459
+16692,Devout Gloves,3,57,54,4,1,10,24008,Historical reward catalogue + AtlasLoot item ID,14460
+16693,Devout Crown,3,57,57,4,1,1,24549,Historical reward catalogue + AtlasLoot item ID,14461
+16694,Devout Skirt,3,57,56,4,1,7,24005,Historical reward catalogue + AtlasLoot item ID,14462
+16695,Devout Mantle,3,57,55,4,1,3,24548,Historical reward catalogue + AtlasLoot item ID,14463
+16696,Devout Belt,3,57,53,4,1,6,24006,Historical reward catalogue + AtlasLoot item ID,14464
+16697,Devout Bracers,3,57,52,4,1,9,24007,Historical reward catalogue + AtlasLoot item ID,14465
+16698,Dreadmist Mask,3,57,57,4,1,1,24704,Historical reward catalogue + AtlasLoot item ID,14466
+16699,Dreadmist Leggings,3,57,56,4,1,7,23638,Historical reward catalogue + AtlasLoot item ID,14467
+16700,Dreadmist Robe,3,57,58,4,1,20,23633,Historical reward catalogue + AtlasLoot item ID,14468
+16701,Dreadmist Mantle,3,57,55,4,1,3,23639,Historical reward catalogue + AtlasLoot item ID,14469
+16702,Dreadmist Belt,3,57,53,4,1,6,23634,Historical reward catalogue + AtlasLoot item ID,14470
+16703,Dreadmist Bracers,3,57,52,4,1,9,23636,Historical reward catalogue + AtlasLoot item ID,14471
+16704,Dreadmist Sandals,3,57,54,4,1,8,23640,Historical reward catalogue + AtlasLoot item ID,14472
+16705,Dreadmist Wraps,3,57,54,4,1,10,23641,Historical reward catalogue + AtlasLoot item ID,14473
+16706,Wildheart Vest,3,57,58,4,2,5,23814,Historical reward catalogue + AtlasLoot item ID,14474
+16707,Shadowcraft Cap,3,57,57,4,2,1,22380,Historical reward catalogue + AtlasLoot item ID,14475
+16708,Shadowcraft Spaulders,3,57,55,4,2,3,22379,Historical reward catalogue + AtlasLoot item ID,14476
+16709,Shadowcraft Pants,3,57,56,4,2,7,22361,Historical reward catalogue + AtlasLoot item ID,14477
+16710,Shadowcraft Bracers,3,57,52,4,2,9,18909,Historical reward catalogue + AtlasLoot item ID,14478
+16711,Shadowcraft Boots,3,57,54,4,2,8,22362,Historical reward catalogue + AtlasLoot item ID,14479
+16712,Shadowcraft Gloves,3,57,54,4,2,10,22366,Historical reward catalogue + AtlasLoot item ID,14480
+16713,Shadowcraft Belt,3,57,53,4,2,6,22377,Historical reward catalogue + AtlasLoot item ID,14481
+16714,Wildheart Bracers,3,57,52,4,2,9,23817,Historical reward catalogue + AtlasLoot item ID,14482
+16715,Wildheart Boots,3,57,54,4,2,8,23821,Historical reward catalogue + AtlasLoot item ID,14483
+16716,Wildheart Belt,3,57,53,4,2,6,23816,Historical reward catalogue + AtlasLoot item ID,14484
+16717,Wildheart Gloves,3,57,54,4,2,10,23819,Historical reward catalogue + AtlasLoot item ID,14485
+16718,Wildheart Spaulders,3,57,55,4,2,3,23993,Historical reward catalogue + AtlasLoot item ID,14486
+16719,Wildheart Kilt,3,57,56,4,2,7,23815,Historical reward catalogue + AtlasLoot item ID,14487
+16720,Wildheart Cowl,3,57,57,4,2,1,24669,Historical reward catalogue + AtlasLoot item ID,14488
+16721,Shadowcraft Tunic,3,57,58,4,2,5,22360,Historical reward catalogue + AtlasLoot item ID,14489
+16722,Lightforge Bracers,3,57,52,4,4,9,23808,Historical reward catalogue + AtlasLoot item ID,14490
+16723,Lightforge Belt,3,57,53,4,4,6,23806,Historical reward catalogue + AtlasLoot item ID,14491
+16724,Lightforge Gauntlets,3,57,54,4,4,10,23810,Historical reward catalogue + AtlasLoot item ID,14492
+16725,Lightforge Boots,3,57,54,4,4,8,23807,Historical reward catalogue + AtlasLoot item ID,14493
+16726,Lightforge Breastplate,3,57,58,4,4,5,23809,Historical reward catalogue + AtlasLoot item ID,14494
+16727,Lightforge Helm,3,57,57,4,4,1,24649,Historical reward catalogue + AtlasLoot item ID,14495
+16728,Lightforge Legplates,3,57,56,4,4,7,23812,Historical reward catalogue + AtlasLoot item ID,14496
+16729,Lightforge Spaulders,3,57,55,4,4,3,23811,Historical reward catalogue + AtlasLoot item ID,14497
+16730,Breastplate of Valor,3,57,58,4,4,5,23798,Historical reward catalogue + AtlasLoot item ID,14498
+16731,Helm of Valor,3,57,57,4,4,1,35244,Historical reward catalogue + AtlasLoot item ID,14499
+16732,Legplates of Valor,3,57,56,4,4,7,23803,Historical reward catalogue + AtlasLoot item ID,14500
+16733,Spaulders of Valor,3,57,55,4,4,3,23804,Historical reward catalogue + AtlasLoot item ID,14501
+16734,Boots of Valor,3,57,54,4,4,8,23800,Historical reward catalogue + AtlasLoot item ID,14502
+16735,Bracers of Valor,3,57,52,4,4,9,23801,Historical reward catalogue + AtlasLoot item ID,14503
+16736,Belt of Valor,3,57,53,4,4,6,23799,Historical reward catalogue + AtlasLoot item ID,14504
+16737,Gauntlets of Valor,3,57,54,4,4,10,23802,Historical reward catalogue + AtlasLoot item ID,14505
+17061,Juno's Shadow,3,57,53,4,1,16,23074,Historical reward catalogue + AtlasLoot item ID,14801
+18043,Coal Miner Boots,3,57,52,4,2,8,680,Historical reward catalogue + AtlasLoot item ID,15269
+18044,Hurley's Tankard,3,57,52,2,4,13,24017,Historical reward catalogue + AtlasLoot item ID,15270
+18047,Flame Walkers,3,57,57,4,3,8,24020,Historical reward catalogue + AtlasLoot item ID,15273
+18048,Mastersmith's Hammer,3,57,55,2,4,21,24021,Historical reward catalogue + AtlasLoot item ID,15274
+18102,Dragonrider Boots,3,57,58,4,1,8,11333,Historical reward catalogue + AtlasLoot item ID,15286
+18103,Band of Rumination,3,57,58,4,0,11,18771,Historical reward catalogue + AtlasLoot item ID,15287
+18104,Feralsurge Girdle,3,57,58,4,3,6,24036,Historical reward catalogue + AtlasLoot item ID,15288
+18289,Barbed Thorn Necklace,3,57,51,4,0,2,6948,Historical reward catalogue + AtlasLoot item ID,15404
+18296,Marksman Bands,3,57,51,4,3,9,24149,Historical reward catalogue + AtlasLoot item ID,15411
+18298,Unbridled Leggings,3,57,51,4,2,7,24160,Historical reward catalogue + AtlasLoot item ID,15413
+18301,Lethtendris's Wand,3,57,53,2,19,26,24166,Historical reward catalogue + AtlasLoot item ID,15416
+18302,Band of Vigor,3,57,53,4,0,11,24167,Historical reward catalogue + AtlasLoot item ID,15417
+18305,Breakwater Legguards,3,57,53,4,4,7,24177,Historical reward catalogue + AtlasLoot item ID,15420
+18306,Gloves of Shadowy Mist,3,57,53,4,1,10,24175,Historical reward catalogue + AtlasLoot item ID,15421
+18307,Riptide Shoes,3,57,53,4,1,8,24173,Historical reward catalogue + AtlasLoot item ID,15422
+18308,Clever Hat,3,57,53,4,2,1,24176,Historical reward catalogue + AtlasLoot item ID,15423
+18309,Gloves of Restoration,3,57,54,4,2,10,24178,Historical reward catalogue + AtlasLoot item ID,15424
+18310,Fiendish Machete,3,57,54,2,7,13,24179,Historical reward catalogue + AtlasLoot item ID,15425
+18311,Quel'dorei Channeling Rod,3,57,53,2,10,17,22710,Historical reward catalogue + AtlasLoot item ID,15426
+18312,Energized Chestplate,3,57,54,4,4,5,24181,Historical reward catalogue + AtlasLoot item ID,15427
+18313,Helm of Awareness,3,57,53,4,4,1,34383,Historical reward catalogue + AtlasLoot item ID,15428
+18314,Ring of Demonic Guile,3,57,54,4,0,11,19268,Historical reward catalogue + AtlasLoot item ID,15429
+18315,Ring of Demonic Potency,3,57,54,4,0,11,23011,Historical reward catalogue + AtlasLoot item ID,15430
+18317,Tempest Talisman,3,57,53,4,0,2,6941,Historical reward catalogue + AtlasLoot item ID,15432
+18318,Merciful Greaves,3,57,54,4,3,8,24185,Historical reward catalogue + AtlasLoot item ID,15433
+18321,Energetic Rod,3,57,54,2,4,21,24395,Historical reward catalogue + AtlasLoot item ID,15436
+18322,Waterspout Boots,3,57,53,4,2,8,4213,Historical reward catalogue + AtlasLoot item ID,15437
+18323,Satyr's Bow,3,57,53,2,2,15,24189,Historical reward catalogue + AtlasLoot item ID,15438
+18324,Waveslicer,3,57,53,2,1,17,10319,Historical reward catalogue + AtlasLoot item ID,15439
+18325,Felhide Cap,3,57,53,4,2,1,24191,Historical reward catalogue + AtlasLoot item ID,15440
+18326,Razor Gauntlets,3,57,54,4,4,10,24192,Historical reward catalogue + AtlasLoot item ID,15441
+18327,Whipvine Cord,3,57,54,4,1,6,24194,Historical reward catalogue + AtlasLoot item ID,15442
+18328,Shadewood Cloak,3,57,54,4,1,16,24195,Historical reward catalogue + AtlasLoot item ID,15443
+18338,Wand of Arcane Potency,3,57,54,2,19,26,16401,Historical reward catalogue + AtlasLoot item ID,15453
+18340,Eidolon Talisman,3,57,54,4,0,2,24202,Historical reward catalogue + AtlasLoot item ID,15455
+18344,Stonebark Gauntlets,3,57,54,4,2,10,20175,Historical reward catalogue + AtlasLoot item ID,15459
+18345,Murmuring Ring,3,57,55,4,0,11,6928,Historical reward catalogue + AtlasLoot item ID,15460
+18346,Threadbare Trousers,3,57,55,4,1,7,24204,Historical reward catalogue + AtlasLoot item ID,15461
+18347,Well Balanced Axe,3,57,56,2,0,13,24205,Historical reward catalogue + AtlasLoot item ID,15462
+18349,Gauntlets of Accuracy,3,57,56,4,3,10,24208,Historical reward catalogue + AtlasLoot item ID,15464
+18350,Amplifying Cloak,3,57,56,4,1,16,11890,Historical reward catalogue + AtlasLoot item ID,15465
+18351,Magically Sealed Bracers,3,57,56,4,4,9,24210,Historical reward catalogue + AtlasLoot item ID,15466
+18352,Petrified Bark Shield,3,57,56,4,6,14,24212,Historical reward catalogue + AtlasLoot item ID,15467
+18353,Stoneflower Staff,3,57,56,2,10,17,24216,Historical reward catalogue + AtlasLoot item ID,15468
+18354,Pimgib's Collar,3,57,55,4,0,12,329,Historical reward catalogue + AtlasLoot item ID,15469
+18370,Vigilance Charm,3,57,57,4,0,12,24227,Historical reward catalogue + AtlasLoot item ID,15485
+18371,Mindtap Talisman,3,57,56,4,0,12,24228,Historical reward catalogue + AtlasLoot item ID,15486
+18372,Blade of the New Moon,3,57,57,2,15,21,24229,Historical reward catalogue + AtlasLoot item ID,15487
+18373,Chestplate of Tranquility,3,57,57,4,2,5,13408,Historical reward catalogue + AtlasLoot item ID,15488
+18374,Flamescarred Shoulders,3,57,57,4,2,3,14855,Historical reward catalogue + AtlasLoot item ID,15489
+18375,Bracers of the Eclipse,3,57,57,4,2,9,24232,Historical reward catalogue + AtlasLoot item ID,15490
+18376,Timeworn Mace,3,57,57,2,4,13,24233,Historical reward catalogue + AtlasLoot item ID,15491
+18377,Quickdraw Gloves,3,57,57,4,2,10,24234,Historical reward catalogue + AtlasLoot item ID,15492
+18378,Silvermoon Leggings,3,57,57,4,3,7,24235,Historical reward catalogue + AtlasLoot item ID,15493
+18379,Odious Greaves,3,57,57,4,3,8,24240,Historical reward catalogue + AtlasLoot item ID,15494
+18380,Eldritch Reinforced Legplates,3,57,57,4,4,7,24241,Historical reward catalogue + AtlasLoot item ID,15495
+18381,Evil Eye Pendant,3,57,57,4,0,2,24242,Historical reward catalogue + AtlasLoot item ID,15496
+18383,Force Imbued Gauntlets,3,57,56,4,4,10,24244,Historical reward catalogue + AtlasLoot item ID,15498
+18384,Bile-etched Spaulders,3,57,57,4,4,3,24245,Historical reward catalogue + AtlasLoot item ID,15499
+18385,Robe of Everlasting Night,3,57,57,4,1,20,24246,Historical reward catalogue + AtlasLoot item ID,15500
+18386,Padre's Trousers,3,57,56,4,1,7,17043,Historical reward catalogue + AtlasLoot item ID,15501
+18387,Brightspark Gloves,3,57,55,4,1,10,10543,Historical reward catalogue + AtlasLoot item ID,15502
+18388,Stoneshatter,3,57,57,2,18,26,24247,Historical reward catalogue + AtlasLoot item ID,15503
+18389,Cloak of the Cosmos,3,57,57,4,1,16,11920,Historical reward catalogue + AtlasLoot item ID,15504
+18390,Tanglemoss Leggings,3,57,57,4,2,7,14819,Historical reward catalogue + AtlasLoot item ID,15505
+18391,Eyestalk Cord,3,57,57,4,2,6,24248,Historical reward catalogue + AtlasLoot item ID,15506
+18392,Distracting Dagger,3,57,57,2,15,22,3901,Historical reward catalogue + AtlasLoot item ID,15507
+18393,Warpwood Binding,3,57,56,4,3,6,24250,Historical reward catalogue + AtlasLoot item ID,15508
+18394,Demon Howl Wristguards,3,57,57,4,3,9,24252,Historical reward catalogue + AtlasLoot item ID,15509
+18395,Emerald Flame Ring,3,57,57,4,0,11,6930,Historical reward catalogue + AtlasLoot item ID,15510
+18396,Mind Carver,3,57,57,2,7,21,24253,Historical reward catalogue + AtlasLoot item ID,15511
+18397,Elder Magus Pendant,3,57,56,4,0,2,6947,Historical reward catalogue + AtlasLoot item ID,15512
+18425,Kreeg's Mug,3,57,55,4,0,23,24294,Historical reward catalogue only,15540
+18450,Robe of Combustion,3,57,55,4,1,20,24300,Historical reward catalogue + AtlasLoot item ID,15565
+18451,Hyena Hide Belt,3,57,55,4,2,6,24301,Historical reward catalogue + AtlasLoot item ID,15566
+18458,Modest Armguards,3,57,55,4,3,9,20570,Historical reward catalogue + AtlasLoot item ID,15573
+18459,Gallant's Wristguards,3,57,55,4,4,9,24305,Historical reward catalogue + AtlasLoot item ID,15574
+18460,Unsophisticated Hand Cannon,3,57,55,2,3,26,24307,Historical reward catalogue + AtlasLoot item ID,15575
+18462,Jagged Bone Fist,3,57,55,2,13,13,24311,Historical reward catalogue + AtlasLoot item ID,15577
+18463,Ogre Pocket Knife,3,57,55,2,7,13,24312,Historical reward catalogue + AtlasLoot item ID,15578
+18464,Gordok Nose Ring,3,57,55,4,0,11,6937,Historical reward catalogue + AtlasLoot item ID,15579
+18475,Oddly Magical Belt,3,57,55,4,1,6,12070,Historical reward catalogue + AtlasLoot item ID,15590
+18476,Mud Stained Boots,3,57,55,4,2,8,24315,Historical reward catalogue only,15591
+18477,Shaggy Leggings,3,57,55,4,2,7,13446,Historical reward catalogue + AtlasLoot item ID,15592
+18478,Hyena Hide Jerkin,3,57,55,4,2,5,24316,Historical reward catalogue only,15593
+18479,Carrion Scorpid Helm,3,57,55,4,3,1,24317,Historical reward catalogue + AtlasLoot item ID,15594
+18480,Scarab Plate Helm,3,57,55,4,4,1,24318,Historical reward catalogue only,15595
+18481,Skullcracking Mace,3,57,55,2,5,17,2796,Historical reward catalogue only,15596
+18482,Ogre Toothpick Shooter,3,57,55,2,2,15,5431,Historical reward catalogue only,15597
+18483,Mana Channeling Wand,3,57,56,2,19,26,19594,Historical reward catalogue + AtlasLoot item ID,15598
+18484,Cho'Rush's Blade,3,57,56,2,7,13,24319,Historical reward catalogue + AtlasLoot item ID,15599
+18485,Observer's Shield,3,57,56,4,6,14,16325,Historical reward catalogue + AtlasLoot item ID,15600
+18490,Insightful Hood,3,57,56,4,2,1,26596,Historical reward catalogue + AtlasLoot item ID,15605
+18493,Bulky Iron Spaulders,3,57,55,4,4,3,24326,Historical reward catalogue + AtlasLoot item ID,15608
+18494,Denwatcher's Shoulders,3,57,55,4,3,3,24327,Historical reward catalogue + AtlasLoot item ID,15609
+18495,Redoubt Cloak,3,57,58,4,1,16,24328,Historical reward catalogue + AtlasLoot item ID,15610
+18496,Heliotrope Cloak,3,57,55,4,1,16,24329,Historical reward catalogue + AtlasLoot item ID,15611
+18497,Sublime Wristguards,3,57,55,4,1,9,24330,Historical reward catalogue + AtlasLoot item ID,15612
+18498,Hedgecutter,3,57,55,2,0,13,24331,Historical reward catalogue + AtlasLoot item ID,15613
+18499,Barrier Shield,3,57,57,4,6,14,24332,Historical reward catalogue + AtlasLoot item ID,15614
+18500,Tarnished Elven Ring,3,57,56,4,0,11,6912,Historical reward catalogue + AtlasLoot item ID,15615
+18502,Monstrous Glaive,3,57,57,2,6,17,24333,Historical reward catalogue + AtlasLoot item ID,15617
+18503,Kromcrush's Chestplate,3,57,57,4,4,5,24334,Historical reward catalogue + AtlasLoot item ID,15618
+18505,Mugger's Belt,3,57,57,4,2,6,24335,Historical reward catalogue + AtlasLoot item ID,15620
+18507,Boots of the Full Moon,3,57,57,4,1,8,15590,Historical reward catalogue + AtlasLoot item ID,15622
+18520,Barbarous Blade,3,57,58,2,8,17,24350,Historical reward catalogue + AtlasLoot item ID,15635
+18521,Grimy Metal Boots,3,57,58,4,4,8,24351,Historical reward catalogue + AtlasLoot item ID,15636
+18522,Band of the Ogre King,3,57,58,4,0,11,18674,Historical reward catalogue + AtlasLoot item ID,15637
+18523,Brightly Glowing Stone,3,57,58,4,0,23,24352,Historical reward catalogue + AtlasLoot item ID,15638
+18524,Leggings of Destruction,3,57,58,4,3,7,24354,Historical reward catalogue + AtlasLoot item ID,15639
+18525,Bracers of Prosperity,3,57,58,4,2,9,24356,Historical reward catalogue + AtlasLoot item ID,15640
+18526,Crown of the Ogre King,3,57,58,4,1,1,24357,Historical reward catalogue + AtlasLoot item ID,15641
+18527,Harmonious Gauntlets,3,57,58,4,3,10,24359,Historical reward catalogue + AtlasLoot item ID,15642
+18528,Cyclone Spaulders,3,57,56,4,2,3,24361,Historical reward catalogue + AtlasLoot item ID,15643
+18530,Ogre Forged Hauberk,3,57,57,4,3,5,24363,Historical reward catalogue + AtlasLoot item ID,15645
+18531,Unyielding Maul,3,57,57,2,5,17,24364,Historical reward catalogue + AtlasLoot item ID,15646
+18532,Mindsurge Robe,3,57,57,4,1,20,24365,Historical reward catalogue + AtlasLoot item ID,15647
+18533,Gordok Bracers of Power,3,57,58,4,4,9,24366,Historical reward catalogue + AtlasLoot item ID,15648
+18534,Rod of the Ogre Magi,3,57,58,2,10,17,24367,Historical reward catalogue + AtlasLoot item ID,15649
+18537,Counterattack Lodestone,3,57,58,4,0,12,16435,Historical reward catalogue + AtlasLoot item ID,15652
+18538,Treant's Bane,4,57,58,2,1,17,24378,Historical reward catalogue only,15653
+18680,Ancient Bone Bow,3,57,56,2,2,15,24406,Historical reward catalogue + AtlasLoot item ID,15774
+18681,Burial Shawl,3,57,56,4,1,3,7263,Historical reward catalogue + AtlasLoot item ID,15775
+18682,Ghoul Skin Leggings,3,57,56,4,2,7,7094,Historical reward catalogue + AtlasLoot item ID,15776
+18683,Hammer of the Vesper,3,57,56,2,4,13,24571,Historical reward catalogue + AtlasLoot item ID,15777
+18686,Bone Golem Shoulders,3,57,57,4,3,3,24574,Historical reward catalogue + AtlasLoot item ID,15780
+18689,Phantasmal Cloak,3,57,57,4,1,16,24575,Historical reward catalogue + AtlasLoot item ID,15783
+18690,Wraithplate Leggings,3,57,57,4,4,7,19739,Historical reward catalogue + AtlasLoot item ID,15784
+18691,Dark Advisor's Pendant,3,57,56,4,0,2,12091,Historical reward catalogue + AtlasLoot item ID,15785
+18692,Death Knight Sabatons,3,57,54,4,4,8,24577,Historical reward catalogue only,15786
+18693,Shivery Handwraps,3,57,57,4,1,10,24580,Historical reward catalogue + AtlasLoot item ID,15787
+18694,Shadowy Mail Greaves,3,57,57,4,3,8,4431,Historical reward catalogue + AtlasLoot item ID,15788
+18695,Spellbound Tome,3,57,57,4,0,23,24582,Historical reward catalogue + AtlasLoot item ID,15789
+18696,Intricately Runed Shield,3,57,57,4,6,14,14700,Historical reward catalogue + AtlasLoot item ID,15790
+18697,Coldstone Slippers,3,57,50,4,1,8,24583,Historical reward catalogue + AtlasLoot item ID,15791
+18698,Tattered Leather Hood,3,57,51,4,2,1,17037,Historical reward catalogue + AtlasLoot item ID,15792
+18699,Icy Tomb Spaulders,3,57,52,4,2,3,24586,Historical reward catalogue + AtlasLoot item ID,15793
+18700,Malefic Bracers,3,57,53,4,2,9,21314,Historical reward catalogue + AtlasLoot item ID,15794
+18701,Innervating Band,3,57,54,4,0,11,22932,Historical reward catalogue only,15795
+18702,Belt of the Ordained,3,57,55,4,4,6,24587,Historical reward catalogue only,15796
+18716,Ash Covered Boots,3,57,56,4,2,8,24609,Historical reward catalogue + AtlasLoot item ID,15810
+18717,Hammer of the Grand Crusader,3,57,58,2,5,17,18083,Historical reward catalogue + AtlasLoot item ID,15811
+18718,Grand Crusader's Helm,3,57,58,4,4,1,24610,Historical reward catalogue + AtlasLoot item ID,15812
+18720,Shroud of the Nathrezim,3,57,58,4,1,3,10558,Historical reward catalogue + AtlasLoot item ID,15814
+18721,Barrage Girdle,3,57,56,4,3,6,24614,Historical reward catalogue + AtlasLoot item ID,15815
+18722,Death Grips,3,57,57,4,4,10,24616,Historical reward catalogue + AtlasLoot item ID,15816
+18723,Animated Chain Necklace,3,57,57,4,0,2,3992,Historical reward catalogue + AtlasLoot item ID,15817
+18725,Peacemaker,3,57,54,2,6,17,24617,Historical reward catalogue + AtlasLoot item ID,15819
+18726,Magistrate's Cuffs,3,57,54,4,2,9,24618,Historical reward catalogue + AtlasLoot item ID,15820
+18727,Crimson Felt Hat,3,57,54,4,1,1,24620,Historical reward catalogue + AtlasLoot item ID,15821
+18728,Anastari Heirloom,3,57,55,4,0,2,6753,Historical reward catalogue + AtlasLoot item ID,15822
+18729,Screeching Bow,3,57,55,2,2,15,24681,Historical reward catalogue + AtlasLoot item ID,15823
+18730,Shadowy Laced Handwraps,3,57,55,4,1,10,24623,Historical reward catalogue + AtlasLoot item ID,15824
+18734,Pale Moon Cloak,3,57,57,4,1,16,24783,Historical reward catalogue + AtlasLoot item ID,15828
+18735,Maleki's Footwraps,3,57,57,4,1,8,24631,Historical reward catalogue + AtlasLoot item ID,15829
+18736,Plaguehound Leggings,3,57,57,4,2,7,12646,Historical reward catalogue + AtlasLoot item ID,15830
+18737,Bone Slicing Hatchet,3,57,57,2,0,13,24632,Historical reward catalogue + AtlasLoot item ID,15831
+18738,Carapace Spine Crossbow,3,57,56,2,18,26,24680,Historical reward catalogue + AtlasLoot item ID,15832
+18739,Chitinous Plate Legguards,3,57,56,4,4,7,24634,Historical reward catalogue + AtlasLoot item ID,15833
+18740,Thuzadin Sash,3,57,56,4,1,6,24635,Historical reward catalogue + AtlasLoot item ID,15834
+18741,Morlune's Bracer,3,57,56,4,4,9,24636,Historical reward catalogue + AtlasLoot item ID,15835
+18742,Stratholme Militia Shoulderguard,3,57,55,4,3,3,24637,Historical reward catalogue + AtlasLoot item ID,15836
+18743,Gracious Cape,3,57,54,4,1,16,11836,Historical reward catalogue + AtlasLoot item ID,15837
+18744,Plaguebat Fur Gloves,3,57,53,4,2,10,24639,Historical reward catalogue + AtlasLoot item ID,15838
+18745,Sacred Cloth Leggings,3,57,52,4,1,7,643,Historical reward catalogue + AtlasLoot item ID,15839
+18754,Fel Hardened Bracers,3,57,57,4,4,9,24655,Historical reward catalogue + AtlasLoot item ID,15848
+18755,Xorothian Firestick,3,57,57,2,3,26,24678,Historical reward catalogue + AtlasLoot item ID,15849
+18756,Dreadguard's Protector,3,57,57,4,6,14,24658,Historical reward catalogue + AtlasLoot item ID,15850
+18757,Diabolic Mantle,3,57,57,4,1,3,24659,Historical reward catalogue only,15851
+18758,Specter's Blade,3,57,57,2,15,13,16065,Historical reward catalogue + AtlasLoot item ID,15852
+18759,Malicious Axe,3,57,57,2,1,17,24661,Historical reward catalogue + AtlasLoot item ID,15853
+18760,Necromantic Band,3,57,57,4,0,11,6927,Historical reward catalogue + AtlasLoot item ID,15854
+18761,Oblivion's Touch,3,57,57,2,19,26,25073,Historical reward catalogue + AtlasLoot item ID,15855
+22204,Wristguards of Renown,3,57,55,4,2,9,27801,Historical reward catalogue + AtlasLoot item ID,19114
+22205,Black Steel Bindings,3,57,52,4,4,9,27802,Historical reward catalogue + AtlasLoot item ID,19115
+22207,Sash of the Grand Hunt,3,57,55,4,3,6,27807,Historical reward catalogue + AtlasLoot item ID,19117
+22208,Lavastone Hammer,3,57,53,2,5,17,27808,Historical reward catalogue + AtlasLoot item ID,19118
+22212,Golem Fitted Pauldrons,3,57,51,4,3,3,27810,Historical reward catalogue + AtlasLoot item ID,19122
+22223,Foreman's Head Protector,3,57,50,4,4,1,27815,Historical reward catalogue + AtlasLoot item ID,19133
+22231,Kayser's Boots of Precision,3,57,56,4,1,8,27842,Historical reward catalogue + AtlasLoot item ID,19141
+22232,Marksman's Girdle,3,57,56,4,3,6,27828,Historical reward catalogue + AtlasLoot item ID,19142
+22234,Mantle of Lost Hope,3,57,48,4,1,3,27829,Historical reward catalogue + AtlasLoot item ID,19144
+22240,Greaves of Withering Despair,3,57,48,4,3,8,27835,Historical reward catalogue + AtlasLoot item ID,19150
+22241,Dark Warder's Pauldrons,3,57,52,4,2,3,27839,Historical reward catalogue + AtlasLoot item ID,19151
+22242,Verek's Leash,3,57,51,4,3,6,27843,Historical reward catalogue + AtlasLoot item ID,19152
+22245,Soot Encrusted Footwear,3,57,51,4,1,8,27844,Historical reward catalogue + AtlasLoot item ID,19155
+22247,Faith Healer's Boots,3,57,58,4,1,8,27854,Historical reward catalogue + AtlasLoot item ID,19157
+22253,Tome of the Lost,3,57,58,4,0,23,24582,Historical reward catalogue + AtlasLoot item ID,19163
+22254,Wand of Eternal Light,3,57,52,2,19,26,27885,Historical reward catalogue + AtlasLoot item ID,19164
+22255,Magma Forged Band,3,57,52,4,0,11,6922,Historical reward catalogue + AtlasLoot item ID,19165
+22256,Mana Shaping Handwraps,3,57,52,4,1,10,24273,Historical reward catalogue + AtlasLoot item ID,19166
+22257,Bloodclot Band,3,57,52,4,0,11,25053,Historical reward catalogue + AtlasLoot item ID,19167
+22266,Flarethorn,3,57,52,2,15,21,4006,Historical reward catalogue + AtlasLoot item ID,19176
+22267,Spellweaver's Turban,3,57,60,4,1,1,27936,Historical reward catalogue + AtlasLoot item ID,19177
+22268,Draconic Infused Emblem,3,57,58,4,0,12,18512,Historical reward catalogue + AtlasLoot item ID,19178
+22269,Shadow Prowler's Cloak,3,57,58,4,1,16,18764,Historical reward catalogue + AtlasLoot item ID,19179
+22270,Entrenching Boots,3,57,50,4,4,8,27954,Historical reward catalogue + AtlasLoot item ID,19180
+22271,Leggings of Frenzied Magic,3,57,52,4,2,7,27956,Historical reward catalogue + AtlasLoot item ID,19181
+22275,Firemoss Boots,3,57,52,4,2,8,4196,Historical reward catalogue + AtlasLoot item ID,19185
+22301,Ironweave Robe,3,57,58,4,1,20,28043,Historical reward catalogue only,19211
+22302,Ironweave Cowl,3,57,58,4,1,1,28025,Historical reward catalogue + AtlasLoot item ID,19212
+22303,Ironweave Pants,3,57,57,4,1,7,28032,Historical reward catalogue + AtlasLoot item ID,19213
+22304,Ironweave Gloves,3,57,56,4,1,10,28033,Historical reward catalogue + AtlasLoot item ID,19214
+22305,Ironweave Mantle,3,57,56,4,1,3,28035,Historical reward catalogue + AtlasLoot item ID,19215
+22306,Ironweave Belt,3,57,56,4,1,6,28034,Historical reward catalogue + AtlasLoot item ID,19216
+22311,Ironweave Boots,3,57,56,4,1,8,28036,Historical reward catalogue + AtlasLoot item ID,19221
+22313,Ironweave Bracers,3,57,56,4,1,9,28037,Historical reward catalogue + AtlasLoot item ID,19223
+22314,Huntsman's Harpoon,3,57,56,2,6,17,28038,Historical reward catalogue + AtlasLoot item ID,19224
+22315,Hammer of Revitalization,3,57,56,2,4,21,4232,Historical reward catalogue + AtlasLoot item ID,19225
+22317,Lefty's Brass Knuckle,3,57,56,2,13,13,18538,Historical reward catalogue + AtlasLoot item ID,19227
+22318,Malgen's Long Bow,3,57,56,2,2,15,28044,Historical reward catalogue + AtlasLoot item ID,19228
+22319,Tome of Divine Right,3,57,56,4,0,23,28046,Historical reward catalogue + AtlasLoot item ID,19229
+22321,Heart of Wyrmthalak,3,57,56,4,0,12,3490,Historical reward catalogue + AtlasLoot item ID,19231
+22322,The Jaw Breaker,3,57,56,2,4,13,2762,Historical reward catalogue + AtlasLoot item ID,19232
+22325,Belt of the Trickster,3,57,56,4,2,6,11107,Historical reward catalogue + AtlasLoot item ID,19235
+22326,Amalgam's Band,3,57,58,4,0,11,20469,Historical reward catalogue + AtlasLoot item ID,19236
+22327,Amulet of the Redeemed,3,57,58,4,0,2,6945,Historical reward catalogue only,19237
+22328,Legplates of Vigilance,3,57,58,4,4,7,17040,Historical reward catalogue only,19238
+22329,Scepter of Interminable Focus,3,57,58,4,0,23,28051,Historical reward catalogue only,19239
+22330,Shroud of Arcane Mastery,3,57,56,4,1,16,28052,Historical reward catalogue + AtlasLoot item ID,19240
+22331,Band of the Steadfast Hero,3,57,57,4,0,11,19210,Historical reward catalogue + AtlasLoot item ID,19241
+22332,Blade of Necromancy,3,57,57,2,7,13,28054,Historical reward catalogue + AtlasLoot item ID,19242
+22333,Hammer of Divine Might,3,57,57,2,5,17,731,Historical reward catalogue + AtlasLoot item ID,19243
+22334,Band of Mending,3,57,57,4,0,11,6925,Historical reward catalogue only,19244
+22335,Lord Valthalak's Staff of Command,3,57,58,2,10,17,28112,Historical reward catalogue + AtlasLoot item ID,19245
+22336,Draconian Aegis of the Legion,3,57,58,4,6,14,14700,Historical reward catalogue + AtlasLoot item ID,19246
+22337,Shroud of Domination,3,57,58,4,1,16,28056,Historical reward catalogue + AtlasLoot item ID,19247
+22339,Rune Band of Wizardry,3,57,58,4,0,11,25015,Historical reward catalogue + AtlasLoot item ID,19249
+22340,Pendant of Celerity,3,57,58,4,0,2,6940,Historical reward catalogue + AtlasLoot item ID,19250
+22342,Leggings of Torment,3,57,58,4,1,7,19010,Historical reward catalogue + AtlasLoot item ID,19252
+22343,Handguards of Savagery,3,57,58,4,3,10,26467,Historical reward catalogue + AtlasLoot item ID,19253
+22345,Totem of Rebirth,3,57,57,4,9,28,28177,Historical reward catalogue + AtlasLoot item ID,19255
+22394,Staff of Metanoia,3,57,57,2,10,17,28115,Historical reward catalogue + AtlasLoot item ID,19304
+22395,Totem of Rage,3,57,52,4,9,28,28176,Historical reward catalogue + AtlasLoot item ID,19305
+22397,Idol of Ferocity,3,57,52,4,8,28,28174,Historical reward catalogue + AtlasLoot item ID,19307
+22398,Idol of Rejuvenation,3,57,57,4,8,28,28173,Historical reward catalogue + AtlasLoot item ID,19308
+22400,Libram of Truth,3,57,52,4,7,28,28180,Historical reward catalogue + AtlasLoot item ID,19310
+22401,Libram of Hope,3,57,57,4,7,28,28179,Historical reward catalogue + AtlasLoot item ID,19311
+22403,Diana's Pearl Necklace,3,57,56,4,0,2,6946,Historical reward catalogue + AtlasLoot item ID,19313
+22404,Willey's Back Scratcher,3,57,56,2,13,21,28116,Historical reward catalogue + AtlasLoot item ID,19314
+22405,Mantle of the Scarlet Crusade,3,57,56,4,1,3,28117,Historical reward catalogue + AtlasLoot item ID,19315
+22406,Redemption,3,57,56,2,10,17,15910,Historical reward catalogue + AtlasLoot item ID,19316
+22407,Helm of the New Moon,3,57,56,4,2,1,35211,Historical reward catalogue + AtlasLoot item ID,19317
+22408,Ritssyn's Wand of Bad Mojo,3,57,58,2,19,26,28119,Historical reward catalogue + AtlasLoot item ID,19318
+22409,Tunic of the Crescent Moon,3,57,58,4,2,5,28120,Historical reward catalogue + AtlasLoot item ID,19319
+22410,Gauntlets of Deftness,3,57,58,4,3,10,28121,Historical reward catalogue + AtlasLoot item ID,19320
+22411,Helm of the Executioner,3,57,58,4,4,1,28122,Historical reward catalogue + AtlasLoot item ID,19321
+22412,Thuzadin Mantle,3,57,58,4,1,3,11701,Historical reward catalogue + AtlasLoot item ID,19322
+22433,Don Mauricio's Band of Domination,3,57,58,4,0,11,18771,Historical reward catalogue + AtlasLoot item ID,19343
+22472,Boots of Ferocity,3,57,56,4,2,8,6749,Historical reward catalogue + AtlasLoot item ID,19382
+23198,Idol of Brutality,3,57,60,4,8,28,28174,Historical reward catalogue + AtlasLoot item ID,20108
+23200,Totem of Sustaining,3,57,60,4,9,28,28175,Historical reward catalogue + AtlasLoot item ID,20110
+23201,Libram of Divinity,3,57,60,4,7,28,28179,Historical reward catalogue + AtlasLoot item ID,20111
+28972,Flightblade Throwing Axe,3,57,55,2,16,25,7297,Historical reward catalogue + AtlasLoot item ID,25882

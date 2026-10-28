@@ -36,9 +36,9 @@
       "ms": 3000
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "r",
-      "command": ".localspec 56"
+      "id": 56
     },
     {
       "action": "command",

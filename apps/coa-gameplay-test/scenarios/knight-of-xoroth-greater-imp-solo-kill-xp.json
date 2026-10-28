@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "A creature killed only by the Greater Imp awards the knight experience (#252)",
+  "contract": "Issue #252 (core feb155c82c75, level 10, Mulgore) reports that a creature solo-killed by the Knight of Xoroth's Greater Imp gives the knight no experience, while assisting does. Summon: Greater Imp 520661 is SPELL_EFFECT_SUMMON_PET for creature 510100, taught by the level-10 Greater Imp passive 92101 (AscensionXoroth::Refresh learns 520661 while aura 92101 or 704993 is present), so the imp is a real Pet owned by the knight in the pet slot, and its own Burning Slap 630930 and Imp Rush 630931 are cast by the imp. Unit::Kill rewards the owner of the killer (GetCharmerOrOwnerPlayerOrPlayerItself) and Creature::SetLootRecipient tags the owner of the attacker, but the reward is only allowed when Creature::IsDamageEnoughForLootingAndReward holds, which since upstream AzerothCore #11969 also needs _damagedByPlayer. In the reported core Unit::DealDamage set it only for a player, a unit a player moves or a unit a player charms, so a pet-only kill gave no XP or loot. 7f7131c76 (#4221, after the report) counts damage from a player-controlled unit owned by a player, with the stated intent that a creature killed only by a player's minions is lootable and worth experience; the Greater Imp is such a unit. Expected on current main: the imp alone kills a level-10 Harvest Golem, the knight never swings, and the knight's XP rises while the knight stays level 10. The golem's 300 health exceeds its level 11-12 template health (at most 247), so the imp's damage clears the player damage requirement whichever health it was sized from.",
+  "timeout_ms": 180000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 10 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "knight", "entry": 36, "level": 10, "health": 300, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "knight", "spell": 92101 },
+    { "action": "set_aura", "actor": "knight", "spell": 92101, "stacks": 1, "label": "Force the Greater Imp passive aura" },
+    {
+      "action": "assert", "label": "SETUP: the Greater Imp passive teaches Summon: Greater Imp",
+      "actor": "knight", "metric": "knows_spell", "spell": 520661, "equals": 1, "within_ms": 3000
+    },
+    { "action": "cast", "actor": "knight", "spell": 520661 },
+    {
+      "action": "assert", "label": "SETUP: the Greater Imp is the knight's pet",
+      "actor": "knight", "metric": "pet_entry", "equals": 510100, "within_ms": 10000
+    },
+    { "action": "wait", "label": "Let the pet's spells and autocast settle", "ms": 1000 },
+    { "action": "snapshot", "actor": "knight", "metric": "xp", "save_as": "xp_before" },
+    { "action": "attack", "actor": "knight", "target": "dummy", "pet": true, "label": "Send only the imp to attack" },
+    {
+      "action": "assert", "label": "SETUP: the Greater Imp kills the golem",
+      "actor": "dummy", "metric": "alive", "equals": 0, "within_ms": 150000
+    },
+    {
+      "action": "assert", "label": "SETUP: the knight never swung at the golem, so the imp killed it alone",
+      "actor": "knight", "metric": "melee_attack_count", "equals": 0
+    },
+    {
+      "action": "assert", "label": "The imp's solo kill awards the knight experience",
+      "actor": "knight", "metric": "xp", "relative_to": "xp_before", "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The XP gain did not cross a level, so the XP delta is meaningful",
+      "actor": "knight", "metric": "level", "equals": 10
+    }
+  ]
+}

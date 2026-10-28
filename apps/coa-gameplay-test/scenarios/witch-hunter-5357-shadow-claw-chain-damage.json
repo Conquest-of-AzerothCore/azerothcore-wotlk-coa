@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Shadow Claw's initial hit chains like its debuff (#5357)",
+  "contract": "Shadow Claw 800697 (client Spell.dbc): Effect[0] is SPELL_EFFECT_APPLY_AURA (the periodic debuff, Amplitude 2000 ms, no SPELL_ATTR5_START_PERIODIC_AT_APPLY so the first tick lands 2 sec after cast) with EffectChainTarget[0]=3; Effect[1] is SPELL_EFFECT_SCHOOL_DAMAGE (the up-front hit the tooltip 'Deals X Shadow Damage to up to $i enemies' describes) but shipped with EffectChainTarget[1]=0, so only the explicit target ever took the initial hit while the debuff chained to up to 3 targets. AscensionWitchHunterCompletion.cpp's ApplyContracts now copies Effects[EFFECT_0].ChainTarget onto Effects[EFFECT_1] for id 800697, so both effects reach the same up-to-3 enemies. DmgClass 1 (magic) with no SPELL_ATTR4_BOUNCY_CHAIN_MISSILES makes Spell::SearchChainTargets use a 10 yd per-jump, bouncing-far radius (searchRadius = 10 * chainTargets), so three fixtures 1-2 yd apart are all in range from the explicit target. Checking spell_damage_count well before the first periodic tick (2000 ms) isolates the instant Effect[1] hit from the aura's own damage.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "wh",
+      "race": 1,
+      "class": 15,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "primary", "owner": "wh", "entry": 36, "level": 80, "health": 1000000, "distance": 3 },
+    { "id": "second", "owner": "wh", "entry": 36, "level": 80, "health": 1000000, "distance": 4 },
+    { "id": "third", "owner": "wh", "entry": 36, "level": 80, "health": 1000000, "distance": 5 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "wh", "spell": 800697 },
+    { "action": "cast", "actor": "wh", "spell": 800697, "target": "primary" },
+
+    { "action": "assert", "label": "CONTROL: the explicit target takes the up-front hit",
+      "actor": "wh", "metric": "spell_damage_count", "spell": 800697, "target": "primary", "min": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "CONTROL: the debuff already reaches the second chain target",
+      "actor": "second", "metric": "aura", "spell": 800697, "caster": "wh", "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "CONTROL: the debuff already reaches the third chain target",
+      "actor": "third", "metric": "aura", "spell": 800697, "caster": "wh", "equals": 1, "within_ms": 1500 },
+
+    { "action": "assert", "label": "DISCRIMINATING: the up-front hit also reaches the second chain target, before its first periodic tick",
+      "actor": "wh", "metric": "spell_damage_count", "spell": 800697, "target": "second", "min": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "DISCRIMINATING: the up-front hit also reaches the third chain target, before its first periodic tick",
+      "actor": "wh", "metric": "spell_damage_count", "spell": 800697, "target": "third", "min": 1, "within_ms": 1500 }
+  ]
+}

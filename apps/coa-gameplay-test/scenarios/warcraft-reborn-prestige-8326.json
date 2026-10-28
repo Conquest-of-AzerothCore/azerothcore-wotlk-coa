@@ -1,0 +1,343 @@
+{
+  "schema": 1,
+  "name": "Warcraft Reborn Prestige works like Conquest of Azeroth's and also resets the active talent spec and Mystic Enchant preset",
+  "contract": [
+    "Issue 8326: Chromie refused stock classes on Warcraft Reborn (Prestige Mode is only available to Conquest of Azeroth classes).",
+    "A Reborn character at the Prestige level activates Prestige like a CoA class: level 1, 0 experience, the Prestige aura, the rewards, the quest reset and the racial start.",
+    "The active talent spec's talents are reset, every Mystic Enchant in the active preset is removed, class spells above level 1 are forgotten and a lower rank becomes usable again.",
+    "The specialization is the talent spec: activating the other talent spec is refused until the Prestige level, then allowed."
+  ],
+  "timeout_ms": 240000,
+  "location": {
+    "map": 0,
+    "x": -8816.5,
+    "y": 627.0,
+    "z": 94.1,
+    "o": 3.8
+  },
+  "players": [
+    {
+      "id": "w",
+      "name": "Rebornprest",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "chromie",
+      "owner": "w",
+      "entry": 178081,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 3000
+    },
+    {
+      "action": "talent",
+      "label": "Spend a point in Reborn Improved Heroic Strike",
+      "actor": "w",
+      "talent": 110124,
+      "rank": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the talent is learned",
+      "actor": "w",
+      "metric": "has_talent",
+      "spell": 1112282,
+      "equals": 1
+    },
+    {
+      "action": "add_item",
+      "label": "A Mystic Scroll of Avatar",
+      "actor": "w",
+      "item": 200048,
+      "count": 1
+    },
+    {
+      "action": "client_packet",
+      "label": "Apply it to slot 0 of the active preset",
+      "actor": "w",
+      "opcode": 1552,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 0
+        },
+        {
+          "item_bag": 200048
+        },
+        {
+          "item_slot": 200048
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the apply is accepted",
+      "actor": "w",
+      "metric": "server_packet_contains",
+      "opcode": 1547,
+      "text": "RE_APPLY_OK",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the enchant is active",
+      "actor": "w",
+      "metric": "aura",
+      "spell": 1398158,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "w",
+      "spell": 1100078
+    },
+    {
+      "action": "learn",
+      "actor": "w",
+      "spell": 1100284
+    },
+    {
+      "action": "learn",
+      "actor": "w",
+      "spell": 1106343
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Heroic Strike rank 2 supersedes rank 1",
+      "actor": "w",
+      "metric": "spell_active",
+      "spell": 1100078,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "label": "Learn Dual Talent Specialization",
+      "actor": "w",
+      "spell": 63624
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "w",
+      "quest": 163
+    },
+    {
+      "action": "reward_quest",
+      "actor": "w",
+      "quest": 163
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "w",
+      "target": "chromie",
+      "label": "Speak to Chromie"
+    },
+    {
+      "action": "assert",
+      "label": "The activation option is offered",
+      "actor": "w",
+      "metric": "gossip_option_text",
+      "index": 0,
+      "text": "I would like to prestige!",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "w",
+      "metric": "item_count",
+      "item": 90004,
+      "save_as": "tokens_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "w",
+      "metric": "item_count",
+      "item": 1287330,
+      "save_as": "caches_before"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "w",
+      "option": 0,
+      "label": "I would like to prestige!"
+    },
+    {
+      "action": "assert",
+      "label": "The stock class is not refused",
+      "actor": "w",
+      "metric": "system_message_contains",
+      "text": "only available to Conquest of Azeroth",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: back to level 1",
+      "actor": "w",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "xp",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Prestige Challenge marks the character as prestiged",
+      "actor": "w",
+      "metric": "aura",
+      "spell": 9930831,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The active spec's talent is reset",
+      "actor": "w",
+      "metric": "has_talent",
+      "spell": 1112282,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Mystic Enchant is removed from the active preset",
+      "actor": "w",
+      "metric": "aura",
+      "spell": 1398158,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The level-4 class spell is forgotten",
+      "actor": "w",
+      "metric": "knows_spell",
+      "spell": 1106343,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Heroic Strike rank 2 is forgotten",
+      "actor": "w",
+      "metric": "knows_spell",
+      "spell": 1100284,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Heroic Strike rank 1 is usable again",
+      "actor": "w",
+      "metric": "spell_active",
+      "spell": 1100078,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The zone quest can be done again",
+      "actor": "w",
+      "metric": "quest_rewarded",
+      "quest": 163,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "One Prestigious Cache",
+      "actor": "w",
+      "metric": "item_count",
+      "item": 1287330,
+      "relative_to": "caches_before",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "100 Tokens of Prestige",
+      "actor": "w",
+      "metric": "item_count",
+      "item": 90004,
+      "relative_to": "tokens_before",
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Sent to the racial start, where the hearthstone is bound",
+      "actor": "w",
+      "metric": "at_homebind",
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "It earns Prestige 1",
+      "actor": "w",
+      "metric": "has_achievement",
+      "achievement": 13100,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Try to activate the secondary talent spec",
+      "actor": "w",
+      "spell": 63644
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the switch is refused with the lock's reason",
+      "actor": "w",
+      "metric": "system_message_contains",
+      "text": "prestige locked",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The primary spec stays active",
+      "actor": "w",
+      "metric": "active_talent_spec",
+      "equals": 0,
+      "within_ms": 6000
+    },
+    {
+      "action": "set_level",
+      "actor": "w",
+      "value": 60
+    },
+    {
+      "action": "assert",
+      "label": "Reaching level 60 completes the cycle",
+      "actor": "w",
+      "metric": "aura",
+      "spell": 9930831,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "Activate the secondary talent spec",
+      "actor": "w",
+      "spell": 63644
+    },
+    {
+      "action": "assert",
+      "label": "The spec is unlocked",
+      "actor": "w",
+      "metric": "active_talent_spec",
+      "equals": 1,
+      "within_ms": 8000
+    }
+  ]
+}

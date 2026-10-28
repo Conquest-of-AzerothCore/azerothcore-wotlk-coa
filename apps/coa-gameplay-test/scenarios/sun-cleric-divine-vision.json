@@ -1,12 +1,15 @@
 {
   "schema": 1,
   "name": "Divine Vision raises Holy/Physical damage and healing done by 4% or 8% (#1156)",
-  "contract": "Divine Vision has two rank spell IDs, both family 33: rank 1 (706735, EffectBasePoints 3 -> CalcValue 4) and rank 2 (707770, EffectBasePoints 7 -> CalcValue 8). Each carries two generic stat auras: effect 0 SPELL_AURA_MOD_HEALING_DONE_PERCENT (136, MiscValue 2), consumed by Unit::SpellPctHealingModsDone via GetTotalAuraMultiplier(SPELL_AURA_MOD_HEALING_DONE_PERCENT) with includeHealingDonePct defaulting true (Unit.h:1639, Unit.cpp:9959) inside Unit::SpellHealingBonusDone; effect 1 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (79, MiscValue 3 = Holy+Physical schoolmask), handled natively by AuraEffect::HandleModDamagePercentDone (SpellAuraEffects.cpp:144) via GetTotalAuraMultiplierByMiscMask. Both are engine-wide stat auras with no per-spell classmask -- once the passive is learned (auto-cast per Player::addSpell) every damage/healing calculation on the caster picks them up. Justice (572848, SchoolMask 1 = Physical) and Mercy (504848, SchoolMask 2 = Holy) are used as probes because their schools cover both bits of Divine Vision's damage-done mask; the healing-done aura is unmasked in this core and applies regardless of school. A third spell also named 'Divine Vision' (800234) is a structurally unrelated active heal ability (Effect 0 is a weapon-percent heal, DmgClass 1) and is out of scope for this issue's two listed spell IDs (706735, 707770); see observations.md.",
+  "contract": "Divine Vision has two rank spell IDs, both family 33: rank 1 (706735, EffectBasePoints 3 -> CalcValue 4) and rank 2 (707770, EffectBasePoints 7 -> CalcValue 8). Each carries two generic stat auras: effect 0 SPELL_AURA_MOD_HEALING_DONE_PERCENT (136, MiscValue 2), consumed by Unit::SpellPctHealingModsDone via GetTotalAuraMultiplier(SPELL_AURA_MOD_HEALING_DONE_PERCENT) with includeHealingDonePct defaulting true (Unit.h:1639, Unit.cpp:9959) inside Unit::SpellHealingBonusDone; effect 1 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (79, MiscValue 3 = Holy+Physical schoolmask), handled natively by AuraEffect::HandleModDamagePercentDone (SpellAuraEffects.cpp:144) via GetTotalAuraMultiplierByMiscMask. Both are engine-wide stat auras with no per-spell classmask -- once the passive is learned (auto-cast per Player::addSpell) every damage/healing calculation on the caster picks them up. Justice (572848, SchoolMask 1 = Physical) and Mercy (504848, SchoolMask 2 = Holy) are used as probes because their schools cover both bits of Divine Vision's damage-done mask; the healing-done aura is unmasked in this core and applies regardless of school. A third spell also named 'Divine Vision' (800234) is a structurally unrelated active heal ability (Effect 0 is a weapon-percent heal, DmgClass 1) and is out of scope for this issue's two listed spell IDs (706735, 707770); see observations.md. The Justice damage probes query a creature: the Sun Cleric class tuning 887015 has no PvE damage adjustment, while a player target would carry the -10% PvP class tuning 887115.",
   "timeout_ms": 90000,
   "players": [
     { "id": "control", "race": 1, "class": 27, "level": 80 },
     { "id": "rank_one", "race": 1, "class": 27, "level": 80 },
     { "id": "rank_two", "race": 1, "class": 27, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "control", "entry": 36, "level": 80, "distance": 5 }
   ],
   "steps": [
     { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
@@ -16,7 +19,7 @@
       "actor": "control",
       "metric": "spell_damage_done",
       "spell": 572848,
-      "target": "control",
+      "target": "dummy",
       "save_as": "justice_dmg_base"
     },
     {
@@ -36,7 +39,7 @@
       "actor": "rank_one",
       "metric": "spell_damage_done",
       "spell": 572848,
-      "target": "control",
+      "target": "dummy",
       "ratio_to": "justice_dmg_base",
       "min": 1.039,
       "max": 1.041
@@ -47,7 +50,7 @@
       "actor": "rank_two",
       "metric": "spell_damage_done",
       "spell": 572848,
-      "target": "control",
+      "target": "dummy",
       "ratio_to": "justice_dmg_base",
       "min": 1.079,
       "max": 1.081

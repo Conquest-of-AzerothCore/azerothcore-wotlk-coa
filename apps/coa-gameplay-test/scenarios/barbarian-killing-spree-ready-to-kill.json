@@ -1,0 +1,207 @@
+{
+  "schema": 1,
+  "name": "Barbarian: Killing Spree becomes usable after a killing blow or Born in Blood",
+  "contract": "Issue #5141: Killing Spree 850038 (rank 2 of 850021) has CasterAuraSpell 850025 'Ready to Kill' and its tooltip says it can only be used within the aura's duration of scoring a killing blow or applying Born in Blood. Ready to Kill is a self-applied dummy aura. A killing blow must grant it, and so must Born in Blood 560521, which Strength of Goria 705202 grants when Unbridled Rage 801761 is cast. Without either, the cast is refused.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "killer",
+      "race": 1,
+      "class": 12,
+      "level": 27,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "rager",
+      "race": 1,
+      "class": 12,
+      "level": 27,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "victim",
+      "owner": "killer",
+      "entry": 36,
+      "level": 27,
+      "health": 1,
+      "distance": 3
+    },
+    {
+      "id": "target",
+      "owner": "killer",
+      "entry": 36,
+      "level": 27,
+      "health": 500000,
+      "distance": 15
+    },
+    {
+      "id": "rage_target",
+      "owner": "rager",
+      "entry": 36,
+      "level": 27,
+      "health": 500000,
+      "distance": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "killer",
+      "spell": 850038
+    },
+    {
+      "action": "set_power",
+      "actor": "killer",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "killer",
+      "spell": 850038,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "label": "Killing Spree is refused before any killing blow",
+      "actor": "killer",
+      "metric": "cast_failure",
+      "spell": 850038,
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Killing Spree deals no damage while refused",
+      "actor": "target",
+      "metric": "health",
+      "equals": 500000
+    },
+    {
+      "action": "attack",
+      "actor": "killer",
+      "target": "victim"
+    },
+    {
+      "action": "assert",
+      "label": "the killer lands the killing blow",
+      "actor": "victim",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "the killing blow grants Ready to Kill",
+      "actor": "killer",
+      "metric": "aura",
+      "spell": 850025,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "killer",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "killer",
+      "spell": 850038,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "label": "Killing Spree is accepted after the killing blow",
+      "actor": "killer",
+      "metric": "cast_failure",
+      "spell": 850038,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Killing Spree damages its target after the killing blow",
+      "actor": "target",
+      "metric": "health",
+      "max": 499999,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "rager",
+      "spell": 850038
+    },
+    {
+      "action": "learn",
+      "actor": "rager",
+      "spell": 705202
+    },
+    {
+      "action": "learn",
+      "actor": "rager",
+      "spell": 801761
+    },
+    {
+      "action": "cast",
+      "actor": "rager",
+      "spell": 801761
+    },
+    {
+      "action": "assert",
+      "label": "Unbridled Rage with Strength of Goria applies Born in Blood",
+      "actor": "rager",
+      "metric": "aura",
+      "spell": 560521,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Born in Blood grants Ready to Kill",
+      "actor": "rager",
+      "metric": "aura",
+      "spell": 850025,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "rager",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "rager",
+      "spell": 850038,
+      "target": "rage_target"
+    },
+    {
+      "action": "assert",
+      "label": "Killing Spree is accepted after Born in Blood",
+      "actor": "rager",
+      "metric": "cast_failure",
+      "spell": 850038,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Killing Spree damages its target after Born in Blood",
+      "actor": "rage_target",
+      "metric": "health",
+      "max": 499999,
+      "within_ms": 3000
+    }
+  ]
+}

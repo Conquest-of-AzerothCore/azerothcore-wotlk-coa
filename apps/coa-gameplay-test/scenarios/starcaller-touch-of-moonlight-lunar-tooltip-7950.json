@@ -1,0 +1,175 @@
+{
+  "schema": 1,
+  "name": "Touch of Moonlight shows its Lunar Eclipse line once Lunar Eclipse is known (#7950)",
+  "contract": [
+    "Touch of Moonlight 574328 is a Lunar Phase spell (AscensionStarcaller.cpp Lunar()",
+    "lists it), so casting it under Lunar Eclipse 800386 refunds its mana cost and",
+    "grants a Lunar Phase stack (AscensionStarcallerAbilities.cpp, id == 574328 branch).",
+    "The client's Spell.dbc description already contains that Lunar Eclipse paragraph,",
+    "but gates it on $?s524781 (knowing the Lunar Phase passive), which Starcaller code",
+    "never teaches as a spell: Refresh() only applies 524781 as an aura to holders of",
+    "800386. The clause therefore never renders even while Eclipse works, which is the",
+    "#7950 report. The fix publishes 574328 in coa_client_spell_description with the",
+    "clause re-gated on $?s800386, mirroring Huntress Shot's $?s92134 gate, and streams",
+    "it via SMSG_PATCH_SPELL (opcode 2346). This scenario reads the streamed rows and",
+    "then proves the text is true: 574328 must arrive with the Lunar line, the",
+    "Soulrend row keeps its own line as the stream control, and an Eclipsed Touch",
+    "consumes the Eclipse, refunds its mana and leaves one Lunar Phase stack."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "star",
+      "race": 1,
+      "class": 26,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI, level scaling and the login patch stream settle",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Touch of Moonlight (574328) reaches the client with its Lunar Eclipse line",
+      "actor": "star",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 574328,
+      "text": "Lunar Eclipse",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: that row states the mana refund the report asked for",
+      "actor": "star",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 574328,
+      "text": "refunds its mana cost",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: the row no longer carries the old never-true Lunar Phase spell gate",
+      "actor": "star",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 574328,
+      "text": "524781",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the shared description table still streams Soulrend's own requirement line",
+      "actor": "star",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 573316,
+      "text": "Requires Soul Infusion",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Lunar Eclipse",
+      "actor": "star",
+      "spell": 800386
+    },
+    {
+      "action": "learn",
+      "label": "Learn Touch of Moonlight",
+      "actor": "star",
+      "spell": 574328
+    },
+    {
+      "action": "set_aura",
+      "label": "Four Lunar Phase stacks so Eclipse can activate",
+      "actor": "star",
+      "spell": 802985,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Eclipse-ready marker",
+      "actor": "star",
+      "spell": 704519,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Lunar Phase driver the refund path requires",
+      "actor": "star",
+      "spell": 524781,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "label": "Activate Lunar Eclipse",
+      "actor": "star",
+      "spell": 800386
+    },
+    {
+      "action": "assert",
+      "label": "Eclipse is active and spent the four phase stacks",
+      "actor": "star",
+      "metric": "aura",
+      "spell": 800386,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Activation consumed the Lunar Phase stacks",
+      "actor": "star",
+      "metric": "aura",
+      "spell": 802985,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "label": "Fix mana at a known value so the refund is visible",
+      "actor": "star",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "label": "Touch of Moonlight under Eclipse",
+      "actor": "star",
+      "spell": 574328
+    },
+    {
+      "action": "assert",
+      "label": "The Lunar Touch consumes the Eclipse, as the line promises an Eclipse effect",
+      "actor": "star",
+      "metric": "aura",
+      "spell": 800386,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The cast leaves the refunded Lunar Phase stack the line names",
+      "actor": "star",
+      "metric": "aura_stacks",
+      "spell": 802985,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Mana is refunded: never below the fixed value despite the 10% maximum-mana cost",
+      "actor": "star",
+      "metric": "power",
+      "power": 0,
+      "min": 5000,
+      "within_ms": 5000
+    }
+  ]
+}

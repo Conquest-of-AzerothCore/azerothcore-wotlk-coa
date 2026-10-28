@@ -15,11 +15,13 @@
     { "action": "learn", "actor": "rank2", "spell": 681470 },
     {
       "action": "assert", "label": "Rank 1 raises Holy spell crit chance by 2",
-      "actor": "rank1", "metric": "spell_crit_chance", "school": 1, "relative_to": "r1_crit_before", "equals": 2
+      "actor": "rank1", "metric": "spell_crit_chance", "school": 1, "relative_to": "r1_crit_before",
+      "min": 1.999, "max": 2.001
     },
     {
       "action": "assert", "label": "Rank 2 raises Holy spell crit chance by 4",
-      "actor": "rank2", "metric": "spell_crit_chance", "school": 1, "relative_to": "r2_crit_before", "equals": 4
+      "actor": "rank2", "metric": "spell_crit_chance", "school": 1, "relative_to": "r2_crit_before",
+      "min": 3.999, "max": 4.001
     },
     {
       "action": "assert", "label": "Rank 1's own crit-chance effect amount is 2",

@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "name": "Well of Eternity extends Spectral Scythe by 10 sec (#3097)",
+  "contract": [
+    "Spell 706793 (Well of Eternity) carries a native SPELL_AURA_ADD_FLAT_MODIFIER (SPELLMOD_DURATION) effect,",
+    "family 36, classmask 131072, matching Spectral Scythe's (500576) own SpellFamilyFlags[0] = 131072.",
+    "SPELLMOD_DURATION is applied generically by the core spell-duration path (Spell.cpp/SpellEffects.cpp",
+    "call ApplySpellMod(id, SPELLMOD_DURATION, duration)), so no CoA script is needed: learning the passive",
+    "talent alone should extend Spectral Scythe's duration by 10000 ms, matching the tooltip."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "creatures": [],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no duration modifier on Spectral Scythe before learning the talent",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 500576,
+      "op": 1,
+      "base": 100000,
+      "min": 99998,
+      "max": 100002
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 706793
+    },
+    {
+      "action": "assert",
+      "label": "Well of Eternity adds a flat +10000 ms duration modifier to Spectral Scythe",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 500576,
+      "op": 1,
+      "base": 100000,
+      "min": 109998,
+      "max": 110002
+    },
+    {
+      "action": "unlearn",
+      "actor": "reaper",
+      "spell": 706793
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning Well of Eternity removes the duration modifier",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 500576,
+      "op": 1,
+      "base": 100000,
+      "min": 99998,
+      "max": 100002
+    }
+  ]
+}

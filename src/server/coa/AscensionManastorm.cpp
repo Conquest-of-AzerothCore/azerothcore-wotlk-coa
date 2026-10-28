@@ -50,6 +50,8 @@
 #include "WorldPacket.h"
 #include "WorldScript.h"
 #include "WorldSession.h"
+#include <algorithm>
+#include <array>
 #include <atomic>
 #include <cmath>
 #include <deque>
@@ -57,6 +59,7 @@
 #include <map>
 #include <mutex>
 #include <set>
+#include <string_view>
 
 namespace
 {
@@ -71,8 +74,9 @@ namespace
     constexpr uint32 UnrelentingSpeed = 93353;
     constexpr uint32 TribalFury = 93422;
     constexpr uint32 PortalAura = 93338;
-    constexpr uint32 EventCapability = 1;
+    constexpr uint32 EventProgressRefresh = 1;
     constexpr uint32 EventCacheDelivery = 2;
+    constexpr std::array<uint32, 3> StarterItems = {254041, 97895, 254042};
 
     struct Request
     {
@@ -243,6 +247,8 @@ namespace
 
         SpellCastResult CheckUtility(Player* player, uint32 spell)
         {
+            if (!enabled.load())
+                return SPELL_CAST_OK;
             Gadget const* gadget = FindGadget(spell);
             if (!gadget && spell != 254440 && spell != 93309 && spell != 93311)
                 return SPELL_CAST_OK;
@@ -297,7 +303,7 @@ namespace
             auto& run = runs[player->GetGUID()];
             run.token = ++nextToken;
             run.uiEvents.Reset();
-            run.uiEvents.ScheduleEvent(EventCapability, 2s);
+            run.uiEvents.ScheduleEvent(EventProgressRefresh, 2s);
             run.cachesPending = true;
             run.cacheSpaceWarning = false;
             run.uiEvents.ScheduleEvent(EventCacheDelivery, 250ms);
@@ -321,8 +327,8 @@ namespace
                 } while (result->NextRow());
             }
             SendProgress(player, run, true);
+            run.progressDirty = run.databaseReady;
             LoadBonusAndSlots(player, run);
-            SendCapability(player, run.databaseReady);
             SendLoadout(player, run);
 
             if (run.encounter->depth && run.encounter->instanceId && GameTime::GetGameTime().count() - run.lastSeen <= ReconnectSeconds)
@@ -356,6 +362,8 @@ namespace
                 itr->second.token = 0;
                 itr->second.lastSeen = GameTime::GetGameTime().count();
             }
+            if (player->GetSession()->IsBot())
+                return;
             std::lock_guard<std::mutex> queueLock(queueMutex);
             requests.erase(player->GetSession()->GetAccountId());
         }
@@ -420,6 +428,7 @@ namespace
             if (!enabled.load())
                 return;
             std::deque<Request> incoming;
+            if (!player->GetSession()->IsBot())
             {
                 std::lock_guard<std::mutex> lock(queueMutex);
                 auto itr = requests.find(player->GetSession()->GetAccountId());
@@ -446,8 +455,14 @@ namespace
                     WorldPacket update(UpdateSlot, 8);
                     update << run.pendingSlot << run.slots[run.pendingSlot];
                     player->SendDirectMessage(&update);
+                    if (std::string_view(run.slotResult) == "SET_MANASTORM_LOADOUT_OK")
+                        sScriptMgr->OnPlayerCoAProgress(player, CoAProgressEvent::ManastormActiveSlot,
+                            run.slots[run.pendingSlot]);
                     run.slotResult = nullptr;
                 }
+                if (std::all_of(run.slots.begin(), run.slots.end(), [player](uint32 spell)
+                    { return spell && player->HasSpell(spell); }))
+                    sScriptMgr->OnPlayerCoAProgress(player, CoAProgressEvent::ManastormFullLoadout, 0);
             }
             auto delivered = readyMails.find(player->GetGUID());
             if (delivered != readyMails.end())
@@ -467,6 +482,9 @@ namespace
             {
                 run.progressDirty = false;
                 SendProgress(player, run, false);
+                for (auto const& depths : run.progress)
+                    for (uint32 depth : depths)
+                        sScriptMgr->OnPlayerCoAProgress(player, CoAProgressEvent::ManastormDepthCleared, depth);
             }
             if (run.databaseReady && run.pendingXP && !run.xpClaimPending && !player->IsBeingTeleported() && player->IsAlive()
                 && (run.encounter->phase == Phase::Idle || run.encounter->phase == Phase::Completed))
@@ -499,11 +517,10 @@ namespace
             run.uiEvents.Update(diff);
             while (uint32 event = run.uiEvents.ExecuteEvent())
             {
-                if (event == EventCapability)
+                if (event == EventProgressRefresh)
                 {
-                    SendCapability(player, run.databaseReady);
                     SendProgress(player, run, false);
-                    run.uiEvents.ScheduleEvent(EventCapability, 5s);
+                    run.uiEvents.ScheduleEvent(EventProgressRefresh, 5s);
                 }
                 else if (event == EventCacheDelivery && run.cachesPending)
                 {
@@ -531,6 +548,7 @@ namespace
             }
             if (run.encounter->phase == Phase::Leaving && !player->IsBeingTeleported() && !OwnsScene(player, run))
             {
+                ClearStarterItems(player);
                 run.encounter = std::make_shared<Encounter>();
                 run.needsTransfer = false;
                 player->ClearScriptedPrivateInstance();
@@ -567,7 +585,6 @@ namespace
                 run.encounter->guideAction = action == "next" ? 2 : 1;
             else
             {
-                SendCapability(player, run.databaseReady);
                 SendProgress(player, run, true);
                 SendActive(player, run);
                 ChatHandler(player->GetSession()).PSendSysMessage(
@@ -628,7 +645,7 @@ namespace
                 UpdateLink(player, run);
             SendProgress(player, run, false);
             SendResult(player, EnterResult, "ENTER_MANASTORM_OK");
-            SendCapability(player, run.databaseReady);
+            sScriptMgr->OnPlayerCoAProgress(player, CoAProgressEvent::ManastormEntered, 0);
             player->SaveToDB(false, false);
         }
 
@@ -786,8 +803,6 @@ namespace
             else if (run.encounter->guards.erase(unit->GetGUID()))
             {
                 UpdateLink(player, run);
-                if (GameObject* heart = map->SummonGameObject(80779, unit->GetPosition(), 0, 0, 0, 1, 60))
-                    run.encounter->hearts[heart->GetGUID()] = GameTime::GetGameTime().count() + 60;
                 if (!run.encounter->treasureSpawned && roll_chance_f(std::min(10.0f, 2.0f + run.encounter->depth * 0.015f)))
                 {
                     run.encounter->treasureSpawned = true;
@@ -948,6 +963,7 @@ namespace
                 return;
             player->DestroyItemCount(currency, price, true);
             player->SendNewItem(item, count, true, false);
+            sScriptMgr->OnPlayerCoAProgress(player, CoAProgressEvent::ManastormPurchase, entry);
             player->SaveToDB(false, false);
         }
 
@@ -1218,11 +1234,17 @@ namespace
 
         void GiveStarterItems(Player* player)
         {
-            for (uint32 item : {254041u, 97895u, 254042u})
+            for (uint32 item : StarterItems)
                 if (!player->HasItemCount(item, 1, true))
                     if (!player->AddItem(item, 1))
                         ChatHandler(player->GetSession()).SendSysMessage(
                             "Make room in your bags, then ask Cogsley to replace your missing starter potions.");
+        }
+
+        void ClearStarterItems(Player* player)
+        {
+            for (uint32 item : StarterItems)
+                player->DestroyItemCount(item, player->GetItemCount(item, true), true);
         }
 
         void HealFromHeart(Player* player)
@@ -1277,15 +1299,6 @@ namespace
         {
             WorldPacket packet(opcode, 64);
             packet << result;
-            player->SendDirectMessage(&packet);
-        }
-
-        void SendCapability(Player* player, bool ready)
-        {
-            WorldPacket packet;
-            std::string const message = ready ? "LOCAL_MANASTORM\t1:16384:10:80" : "LOCAL_MANASTORM\t0:0:0:0";
-            ChatHandler::BuildChatPacket(packet, CHAT_MSG_WHISPER, LANG_ADDON, player->GetGUID(), player->GetGUID(),
-                message, 0, player->GetName(), player->GetName(), 0, false);
             player->SendDirectMessage(&packet);
         }
 
@@ -1916,8 +1929,16 @@ namespace
                     result = utility;
             }
         }
-        void OnSpellHitResult(Spell* spell, Unit*, uint8 miss, uint32, uint32, bool) override
+        void OnSpellHitResult(Spell* spell, Unit* target, uint8 miss, uint32, uint32, bool) override
         {
+            uint32 const id = spell->GetSpellInfo()->Id;
+            if (!miss && target == spell->GetCaster() && spell->m_CastItem
+                && ((id == 254440 && spell->m_CastItem->GetEntry() == 254041)
+                    || (id == 93311 && spell->m_CastItem->GetEntry() == 254042)))
+                if (Player* player = target->ToPlayer(); player && player->IsInWorld()
+                    && ManastormService::Get().CheckUtility(player, id) == SPELL_CAST_OK)
+                    sScriptMgr->OnPlayerCoAProgress(player, id == 254440 ? CoAProgressEvent::ManastormPotion
+                        : CoAProgressEvent::ManastormEscape, id);
             if (!miss && spell->GetSpellInfo()->Id == 93309)
                 if (Player* player = spell->GetCaster()->ToPlayer())
                     ManastormService::Get().UsedResurrection(player);
@@ -2062,21 +2083,7 @@ namespace
     };
 }
 
-bool QueueAscensionManastormPacket(WorldSession* session, WorldPacket const& packet)
+void AddAscensionManastormItemScripts()
 {
-    return ManastormService::Get().Queue(session, packet);
-}
-
-void AddAscensionManastormScripts()
-{
-    new ManastormWorld();
-    new ManastormMaps();
-    new ManastormPlayers();
-    new ManastormUnits();
-    new ManastormSpells();
-    new ManastormLoot();
     new item_ascension_manastorm_cache();
-    RegisterSpellScript(spell_ascension_manastorm_potion);
-    new ManastormGuides();
-    new ManastormCommands();
 }

@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Runemaster Spellblade raises Agility and Intellect (#817)",
+  "contract": [
+    "Spellblade rank 1 705540 reads 'Increases your Agility and Intellect by $s1%.' Both effects are native",
+    "SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (137): effect 0 MiscValue 1 (Agility), effect 1 MiscValue 3 (Intellect),",
+    "BasePoints 4 plus DieSides 1, so 5%. Rank 2 707878 has the same effects with BasePoints 9 (10%). The report's",
+    "'no handler' premise does not apply to a native aura; expected: learning a rank multiplies the total Agility",
+    "and Intellect by 1.05 or 1.10 (the stat fields are truncated to whole points, so at",
+    "30 or more points the ratio stays within 1/30 of that), leaves Strength and Stamina unchanged, and",
+    "unlearning it restores both stats. Each rank is measured on its own character, so rank replacement is not",
+    "part of this check."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "rank1", "race": 1, "class": 32, "level": 80},
+    {"id": "rank2", "race": 1, "class": 32, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the characters settle", "ms": 3000},
+    {"action": "snapshot", "actor": "rank1", "metric": "stat", "stat": 1, "save_as": "rank1_agility"},
+    {"action": "snapshot", "actor": "rank1", "metric": "stat", "stat": 3, "save_as": "rank1_intellect"},
+    {"action": "snapshot", "actor": "rank1", "metric": "stat", "stat": 0, "save_as": "rank1_strength"},
+    {"action": "snapshot", "actor": "rank1", "metric": "stat", "stat": 2, "save_as": "rank1_stamina"},
+    {"action": "snapshot", "actor": "rank2", "metric": "stat", "stat": 1, "save_as": "rank2_agility"},
+    {"action": "snapshot", "actor": "rank2", "metric": "stat", "stat": 3, "save_as": "rank2_intellect"},
+    {"action": "assert", "label": "SETUP: Agility is large enough to resolve 5%", "actor": "rank1", "metric": "stat",
+      "stat": 1, "min": 30},
+    {"action": "assert", "label": "SETUP: Intellect is large enough to resolve 5%", "actor": "rank1", "metric": "stat",
+      "stat": 3, "min": 30},
+
+    {"action": "learn", "actor": "rank1", "spell": 705540},
+    {"action": "learn", "actor": "rank2", "spell": 707878},
+    {"action": "assert", "actor": "rank1", "metric": "aura", "spell": 705540, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "actor": "rank2", "metric": "aura", "spell": 707878, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "Rank 1 raises Agility by 5%", "actor": "rank1", "metric": "stat", "stat": 1,
+      "ratio_to": "rank1_agility", "min": 1.016, "max": 1.084},
+    {"action": "assert", "label": "Rank 1 raises Intellect by 5%", "actor": "rank1", "metric": "stat", "stat": 3,
+      "ratio_to": "rank1_intellect", "min": 1.016, "max": 1.084},
+    {"action": "assert", "label": "Rank 1 leaves Strength unchanged", "actor": "rank1", "metric": "stat", "stat": 0,
+      "relative_to": "rank1_strength", "equals": 0},
+    {"action": "assert", "label": "Rank 1 leaves Stamina unchanged", "actor": "rank1", "metric": "stat", "stat": 2,
+      "relative_to": "rank1_stamina", "equals": 0},
+    {"action": "assert", "label": "Rank 2 raises Agility by 10%", "actor": "rank2", "metric": "stat", "stat": 1,
+      "ratio_to": "rank2_agility", "min": 1.066, "max": 1.134},
+    {"action": "assert", "label": "Rank 2 raises Intellect by 10%", "actor": "rank2", "metric": "stat", "stat": 3,
+      "ratio_to": "rank2_intellect", "min": 1.066, "max": 1.134},
+
+    {"action": "unlearn", "actor": "rank1", "spell": 705540},
+    {"action": "assert", "actor": "rank1", "metric": "aura", "spell": 705540, "equals": 0, "within_ms": 1000},
+    {"action": "assert", "label": "Unlearning restores Agility", "actor": "rank1", "metric": "stat", "stat": 1,
+      "relative_to": "rank1_agility", "equals": 0},
+    {"action": "assert", "label": "Unlearning restores Intellect", "actor": "rank1", "metric": "stat", "stat": 3,
+      "relative_to": "rank1_intellect", "equals": 0}
+  ]
+}

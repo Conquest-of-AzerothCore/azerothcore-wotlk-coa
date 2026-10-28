@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Native character-advancement inspect returns the target's known entries",
+  "contract": "C_CharacterAdvancement.InspectUnit sends CMSG_INSPECT_CHARACTER_ADVANCEMENT (0x06E1) with the target's u64 guid. SMSG 0x06E2 answers with a CA_INSPECT_* C string; on CA_INSPECT_OK it carries the guid, the active specialization slot, the specialization count and each specialization's known entries in the SMSG 0x0726 layout, which the DLL stores for GetInspectInfo and GetInspectedBuild. Expected: a nearby player is inspected with CA_INSPECT_OK, and an unknown guid answers CA_INSPECT_TARGET_NOT_FOUND.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "inspector", "race": 1, "class": 1, "level": 10 },
+    { "id": "bloodmage", "race": 1, "class": 20, "level": 80 }
+  ],
+  "steps": [
+    { "action": "specialization", "label": "The target enters Eternal", "actor": "bloodmage", "id": 99 },
+    { "action": "advancement_rank", "label": "The target buys Rotclaw", "actor": "bloodmage", "entry": 30191, "rank": 1 },
+    {
+      "action": "client_packet", "label": "Inspect the target", "actor": "inspector", "opcode": 1761,
+      "fields": [ { "actor_guid": "bloodmage" } ]
+    },
+    {
+      "action": "assert", "label": "The inspect succeeds", "actor": "inspector", "metric": "server_packet_contains",
+      "opcode": 1762, "text": "CA_INSPECT_OK", "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "client_packet", "label": "Inspect an unknown guid", "actor": "inspector", "opcode": 1761,
+      "fields": [ { "u64": 4294967295 } ]
+    },
+    {
+      "action": "assert", "label": "An unknown guid is not found", "actor": "inspector",
+      "metric": "server_packet_contains", "opcode": 1762, "text": "CA_INSPECT_TARGET_NOT_FOUND", "equals": 1,
+      "within_ms": 1000
+    }
+  ]
+}

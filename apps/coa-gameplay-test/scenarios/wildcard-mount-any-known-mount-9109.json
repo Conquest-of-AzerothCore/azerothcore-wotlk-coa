@@ -1,0 +1,144 @@
+{
+  "schema": 1,
+  "name": "Wildcard mounts pick known mounts outside the collection wrappers (#9109)",
+  "contract": "Wildcard Mount 91944 and Wildcard Flying Mount 93539 summon a random mount the player knows. Live combat logs show Wildcard casts followed by Warhorse 13819 and Felsteed 5784, which are class mounts rather than collection wrappers. A level 21 player whose only mount is the vendor Brown Horse 458 (skill line 777, 1500 ms cast) must therefore cast Brown Horse from Wildcard Mount. With 300 riding in Outland, Wildcard Flying Mount must choose Red Drake 59570 (skill line 777, flight speed aura) over the known ground-only Brown Horse. CoA.UnlockAllVanity is off for this case, so the account collection teaches no other mount and both selections are deterministic. The Outland coordinates come from the world game_tele HellfirePeninsula row.",
+  "timeout_ms": 30000,
+  "vanity_ownership": {
+    "unlock_all": false
+  },
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "ground",
+      "race": 1,
+      "class": 1,
+      "level": 21
+    },
+    {
+      "id": "flying",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_skill",
+      "actor": "ground",
+      "skill": 762,
+      "value": 75,
+      "maximum": 75
+    },
+    {
+      "action": "learn",
+      "actor": "ground",
+      "spell": 458
+    },
+    {
+      "action": "learn",
+      "actor": "ground",
+      "spell": 91944
+    },
+    {
+      "action": "cast",
+      "actor": "ground",
+      "spell": 91944,
+      "target": "ground"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "ground",
+      "metric": "cast_remaining_ms",
+      "spell": 458,
+      "min": 1300,
+      "max": 1500,
+      "label": "Wildcard Mount casts the known vendor mount"
+    },
+    {
+      "action": "assert",
+      "actor": "ground",
+      "metric": "aura",
+      "spell": 458,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "The vendor mount applies after casting"
+    },
+    {
+      "action": "teleport",
+      "actor": "flying",
+      "map": 530,
+      "x": -211.237,
+      "y": 4278.54,
+      "z": 86.5678,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_skill",
+      "actor": "flying",
+      "skill": 762,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "flying",
+      "spell": 458
+    },
+    {
+      "action": "learn",
+      "actor": "flying",
+      "spell": 59570
+    },
+    {
+      "action": "learn",
+      "actor": "flying",
+      "spell": 93539
+    },
+    {
+      "action": "cast",
+      "actor": "flying",
+      "spell": 93539,
+      "target": "flying"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "flying",
+      "metric": "cast_remaining_ms",
+      "spell": 59570,
+      "min": 1300,
+      "max": 1500,
+      "label": "Flying selection casts the known flying mount, not the ground-only one"
+    },
+    {
+      "action": "assert",
+      "actor": "flying",
+      "metric": "aura",
+      "spell": 59570,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "The flying mount applies after casting"
+    }
+  ]
+}

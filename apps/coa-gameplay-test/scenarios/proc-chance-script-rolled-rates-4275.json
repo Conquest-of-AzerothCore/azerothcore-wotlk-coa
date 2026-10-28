@@ -1,0 +1,359 @@
+{
+  "schema": 1,
+  "name": "Script-rolled proc talents fire at their tooltip chance, not its square (#4275)",
+  "contract": "These auras roll their own proc chance in their AuraScript CheckProc, so their spell_proc.Chance must be 100. rev_20260919_20 set it to 0, which SpellMgr::LoadSpellProcs replaces with the DBC ProcChance, so Aura::GetProcEffectMask rolled the chance again after CheckProc and each proc fired at P x P (Umbral Glaive 10% became 1%, #4275). aura_proc_rate runs the aura's full proc decision (db filters, conditions, CheckProc and the native chance roll) 40000 times on a synthetic event of the shape the script expects; one talent per class event script. Each window is P +/- 1.5 points, at least 6 standard deviations wide, and excludes P x P. Deadly Neurotoxins rolls only for its Rotfang extension, so every qualifying crit must pass the decision.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "witchdoctor",
+      "race": 1,
+      "class": 13,
+      "level": 80
+    },
+    {
+      "id": "cultist",
+      "race": 1,
+      "class": 25,
+      "level": 80
+    },
+    {
+      "id": "felsworn",
+      "race": 1,
+      "class": 14,
+      "level": 80
+    },
+    {
+      "id": "pyromancer",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    },
+    {
+      "id": "starcaller",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "suncleric",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    },
+    {
+      "id": "venomancer",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "witchdoctor_dummy",
+      "owner": "witchdoctor",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "cultist_dummy",
+      "owner": "cultist",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "felsworn_dummy",
+      "owner": "felsworn",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "pyromancer_dummy",
+      "owner": "pyromancer",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "starcaller_dummy",
+      "owner": "starcaller",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "suncleric_dummy",
+      "owner": "suncleric",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "venomancer_dummy",
+      "owner": "venomancer",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "knight_dummy",
+      "owner": "knight",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000,
+      "label": "Let the characters settle"
+    },
+    {
+      "action": "learn",
+      "actor": "witchdoctor",
+      "spell": 681242
+    },
+    {
+      "action": "assert",
+      "actor": "witchdoctor",
+      "metric": "aura",
+      "spell": 681242,
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "SETUP: 681242 is active"
+    },
+    {
+      "action": "learn",
+      "actor": "cultist",
+      "spell": 300313
+    },
+    {
+      "action": "assert",
+      "actor": "cultist",
+      "metric": "aura",
+      "spell": 300313,
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "SETUP: 300313 is active"
+    },
+    {
+      "action": "learn",
+      "actor": "felsworn",
+      "spell": 300480
+    },
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "aura",
+      "spell": 300480,
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "SETUP: 300480 is active"
+    },
+    {
+      "action": "set_aura",
+      "actor": "pyromancer",
+      "spell": 707483,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "pyromancer",
+      "metric": "aura",
+      "spell": 707483,
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "SETUP: the Magmatic buff 707483 is active"
+    },
+    {
+      "action": "learn",
+      "actor": "starcaller",
+      "spell": 524642
+    },
+    {
+      "action": "assert",
+      "actor": "starcaller",
+      "metric": "aura",
+      "spell": 524642,
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "SETUP: 524642 is active"
+    },
+    {
+      "action": "learn",
+      "actor": "suncleric",
+      "spell": 806699
+    },
+    {
+      "action": "assert",
+      "actor": "suncleric",
+      "metric": "aura",
+      "spell": 806699,
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "SETUP: 806699 is active"
+    },
+    {
+      "action": "learn",
+      "actor": "venomancer",
+      "spell": 503856
+    },
+    {
+      "action": "assert",
+      "actor": "venomancer",
+      "metric": "aura",
+      "spell": 503856,
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "SETUP: 503856 is active"
+    },
+    {
+      "action": "learn",
+      "actor": "knight",
+      "spell": 573034
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura",
+      "spell": 573034,
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "SETUP: 573034 is active"
+    },
+    {
+      "action": "learn",
+      "actor": "venomancer",
+      "spell": 504375
+    },
+    {
+      "action": "assert",
+      "actor": "venomancer",
+      "metric": "aura",
+      "spell": 504375,
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "SETUP: 504375 is active"
+    },
+    {
+      "action": "assert",
+      "actor": "witchdoctor",
+      "metric": "aura_proc_rate",
+      "spell": 681242,
+      "target": "witchdoctor_dummy",
+      "type_mask": 64,
+      "min": 8.5,
+      "max": 11.5,
+      "label": "DISCRIMINATING: Umbral Glaive 681242: ranged auto attacks proc at its 10% (#4275)"
+    },
+    {
+      "action": "assert",
+      "actor": "cultist",
+      "metric": "aura_proc_rate",
+      "spell": 300313,
+      "target": "cultist_dummy",
+      "type_mask": 4,
+      "min": 4.5,
+      "max": 7.5,
+      "label": "DISCRIMINATING: Dark Revelation 300313: damage dealt procs at its 6%"
+    },
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "aura_proc_rate",
+      "spell": 300480,
+      "target": "felsworn_dummy",
+      "type_mask": 4,
+      "min": 3.5,
+      "max": 6.5,
+      "label": "DISCRIMINATING: Infernal Summoner 300480: direct damage procs at its 5%"
+    },
+    {
+      "action": "assert",
+      "actor": "pyromancer",
+      "metric": "aura_proc_rate",
+      "spell": 707483,
+      "target": "pyromancer_dummy",
+      "type_mask": 262144,
+      "min": 8.5,
+      "max": 11.5,
+      "label": "DISCRIMINATING: Magmatic 707483: periodic damage procs at its 10%"
+    },
+    {
+      "action": "assert",
+      "actor": "starcaller",
+      "metric": "aura_proc_rate",
+      "spell": 524642,
+      "target": "starcaller_dummy",
+      "type_mask": 65536,
+      "trigger_spell": 804995,
+      "min": 23.5,
+      "max": 26.5,
+      "label": "DISCRIMINATING: Star-Guided Arrows 524642: Scattered Star damage procs at its 25%"
+    },
+    {
+      "action": "assert",
+      "actor": "suncleric",
+      "metric": "aura_proc_rate",
+      "spell": 806699,
+      "target": "suncleric_dummy",
+      "type_mask": 4,
+      "min": 18.5,
+      "max": 21.5,
+      "label": "DISCRIMINATING: Odyn's Vanguard 806699: auto attacks proc at its 20%"
+    },
+    {
+      "action": "assert",
+      "actor": "venomancer",
+      "metric": "aura_proc_rate",
+      "spell": 503856,
+      "target": "venomancer_dummy",
+      "type_mask": 4,
+      "min": 8.5,
+      "max": 11.5,
+      "label": "DISCRIMINATING: Avatar of Shadra 503856: damage procs at its 10%"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_proc_rate",
+      "spell": 573034,
+      "target": "knight_dummy",
+      "type_mask": 8,
+      "incoming": true,
+      "min": 28.5,
+      "max": 31.5,
+      "label": "DISCRIMINATING: Demonfire Retaliation 573034: melee hits taken proc at its 30%"
+    },
+    {
+      "action": "assert",
+      "actor": "venomancer",
+      "metric": "aura_proc_rate",
+      "spell": 504375,
+      "target": "venomancer_dummy",
+      "type_mask": 65536,
+      "trigger_spell": 800880,
+      "hit_mask": 2,
+      "min": 99.99,
+      "max": 100,
+      "label": "Deadly Neurotoxins 504375: every Venom Fang crit deals the extra Nature damage"
+    }
+  ]
+}

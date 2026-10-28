@@ -89,9 +89,9 @@
       "enabled": true
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "primalist",
-      "command": ".localspec 60"
+      "id": 60
     },
     {
       "action": "learn",
@@ -105,9 +105,9 @@
       "value": 1000
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "empty",
-      "command": ".localspec 60"
+      "id": 60
     },
     {
       "action": "learn",
@@ -169,7 +169,7 @@
       "metric": "spell_damage_done",
       "spell": 806186,
       "effect": 1,
-      "target": "behind",
+      "target": "far",
       "save_as": "base_damage",
       "label": "base_damage"
     },
@@ -185,11 +185,11 @@
       "metric": "spell_damage_done",
       "spell": 806186,
       "effect": 1,
-      "target": "behind",
+      "target": "far",
       "relative_to": "base_damage",
       "label": "ap100",
-      "min": 16,
-      "max": 18
+      "min": 14,
+      "max": 16
     },
     {
       "action": "set_aura",
@@ -268,10 +268,10 @@
       "metric": "spell_damage_done",
       "spell": 806186,
       "effect": 1,
-      "target": "behind",
+      "target": "far",
       "relative_to": "base_damage",
       "label": "sp23",
-      "equals": 11
+      "equals": 10
     },
     {
       "action": "wait",
@@ -368,5 +368,5 @@
       "equals": 0
     }
   ],
-  "contract": "Mountain Fury uses 65% SP, 17% AP and 125% Stamina. At fixture level 80 the native level-58/max-60 helper retains its 64/80 downrank multiplier on SP: floor(23 * .65 * .8) = 11. AP and Stamina do not use that multiplier. A creature starts eight yards away and is pulled within four yards; normal creature combat movement can then close the remaining gap."
+  "contract": "Mountain Fury uses 65% SP, 17% AP and 125% Stamina. At fixture level 80 the native level-58/max-60 helper retains its 64/80 downrank multiplier on SP: floor(23 * .65 * .8) = 11. AP and Stamina do not use that multiplier. A creature starts eight yards away and is pulled within four yards; normal creature combat movement can then close the remaining gap. The coefficient probes query the unpulled creature 'far', so normal class 887019 (-15%) and Mountain King 887085 (+1%) tuning multiply them by 0.8585: the 100 AP increase of 16-18 reads 14-16 and the 11 SP increase reads 10 (1034 x 0.8585 = 887, 1045 x 0.8585 = 897)."
 }

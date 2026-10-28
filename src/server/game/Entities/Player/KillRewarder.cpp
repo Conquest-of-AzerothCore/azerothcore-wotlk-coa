@@ -25,6 +25,13 @@
 #include "SpellAuraDefines.h"
 #include "SpellAuraEffects.h"
 
+namespace
+{
+// CoA's SPELL_AURA_MOD_XP_PCT MiscValue is a mask of XP sources: 1 kills, 2 quests, 4 professions, 8 battlegrounds.
+constexpr int32 XP_SOURCE_MASK_KILL = 1;
+constexpr int32 XP_SOURCE_MASK_BATTLEGROUND = 8;
+}
+
 // KillRewarder incapsulates logic of rewarding player upon kill with:
 // * XP;
 // * honor;
@@ -180,12 +187,20 @@ void KillRewarder::_RewardXP(Player* player, float rate)
 
     if (xp)
     {
-        // 4.2.2. Apply auras modifying rewarded XP (SPELL_AURA_MOD_XP_PCT).
+        // 4.2.2. Apply auras modifying rewarded XP (SPELL_AURA_MOD_XP_PCT). A
+        // NO_BONUS_EXPERIENCE challenge drops the positive bonuses but keeps penalties
+        // (XP Lock, challenge drawbacks).
         bool const recruitAFriend = player->GetsRecruitAFriendBonus(true);
-        xp *= player->GetTotalAuraMultiplier(SPELL_AURA_MOD_XP_PCT, [recruitAFriend](AuraEffect const* effect)
+        bool const noBonusExperience = sScriptMgr->OnPlayerHasNoBonusExperience(player);
+        int32 const sourceMask = _victim->IsPlayer() ? XP_SOURCE_MASK_KILL | XP_SOURCE_MASK_BATTLEGROUND : XP_SOURCE_MASK_KILL;
+        xp *= player->GetTotalAuraMultiplier(SPELL_AURA_MOD_XP_PCT, [recruitAFriend, noBonusExperience, sourceMask](AuraEffect const* effect)
         {
+            if ((effect->GetMiscValue() & sourceMask) == 0)
+                return false;
             // CoA's party Aura of Experience explicitly excludes the recruit-a-friend bonus.
-            return effect->GetId() != 818059 || !recruitAFriend;
+            if (effect->GetId() == 818059 && recruitAFriend)
+                return false;
+            return !noBonusExperience || effect->GetAmount() <= 0;
         });
 
         // 4.2.3. Give XP to player.
@@ -316,7 +331,8 @@ void KillRewarder::Reward()
 
     // 5. Credit instance encounter.
     if (Creature* victim = _victim->ToCreature())
-        if (victim->IsDungeonBoss())
+        if (victim->IsDungeonBoss() ||
+            (!victim->GetOwnerGUID().IsPlayer() && sObjectMgr->IsRaidEncounterKillCredit(victim->GetEntry())))
             if (Map* map = _victim->FindMap())
                 map->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, _victim->GetEntry(), _victim);
 }

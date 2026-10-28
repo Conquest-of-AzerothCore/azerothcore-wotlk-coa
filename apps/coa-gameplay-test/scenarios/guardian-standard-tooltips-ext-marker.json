@@ -1,0 +1,466 @@
+{
+  "schema": 1,
+  "name": "No Guardian Standard tooltip ships the client's unprocessed @ext: marker",
+  "contract": "Every Guardian Standard's own cast tooltip text carries the client's shift-reveal extension marker around its closing sentence, and the marker arrives at the client as raw text instead of being stripped. The text each of these spells publishes is the spell's own Spell.dbc Description (column 170): for 500263, 500547, 706805, 800346 and 803931-803938 it reads '<the ability text>@ext:Only 1 |cffffffffStandard|r can be active at a time.:ext@'. AscensionCompat sends that string to the client verbatim as the description of a patched spell (SMSG_PATCH_SPELL, opcode 2346), so the client renders the marker literally - which is what the Standard of Spellwarding report shows. The same defect was already fixed for 500260 Standard of Recovery in rev_20261006_40_guardian_recovery_cast_tooltip.sql by publishing the spell's own text with the two markers removed and the sentence kept as plain text, and that row is the shape every Standard should have. rev_20261007_60_coa_guardian_standard_tooltips.sql applies exactly that to the remaining twelve learnable Standards: 500263 Rallying, 500547 Spellwarding, 706805 Might, 800346 Supremacy and the Standard of Valiance rank chain 803931-803938 (the spell_ranks chain whose rank 1 is 800319). Nothing else in any of those strings is changed. Deliberately not included: 500260, already published that way; 800319 Standard of Valiance rank 1, whose own text never carried the marker; 800335 STANDARD_VALIANCE_DAMAGE, the internal spell the field aura 501543 casts, which is absent from spell_ranks, trainer_spell and the class ability list. This scenario reads the login patch stream and requires every one of the twelve rows to arrive with its plain closing sentence, with no '@ext:' and no ':ext@' anywhere in it, and with its own clauses intact, using row 500639 (Runeshroud, published by the same table) as the control that the stream is captured at all and row 500260 as the control that an already-fixed Standard carries the shape being asserted. Expected before the SQL: each of the twelve rows still contains the marker and row 500260 does not. Expected after: none of them contains a marker and all of them carry the sentence.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "g",
+      "race": 1,
+      "class": 18,
+      "level": 1,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and the login spell patch stream settle",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the shared description table still streams Runeshroud's own row, so the patch stream is being captured",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500639,
+      "text": "Requires Runeshroud",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: 500260 Standard of Recovery is already published without the marker, and this is the shape every Standard is asserted against",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500260,
+      "text": "Only 1 |cffffffffStandard|r can be active at a time.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: that same already-fixed row carries no marker to begin with",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500260,
+      "text": "@ext:",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Standard of Rallying (500263) arrives with its closing sentence as plain text",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500263,
+      "text": "Only 1 |cffffffffStandard|r can be active at a time.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Standard of Rallying (500263) no longer ships the opening '@ext:' marker",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500263,
+      "text": "@ext:",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Standard of Rallying (500263) no longer ships the closing ':ext@' marker",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500263,
+      "text": ":ext@",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Standard of Spellwarding (500547) arrives with its closing sentence as plain text",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500547,
+      "text": "Only 1 |cffffffffStandard|r can be active at a time.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Standard of Spellwarding (500547) no longer ships the opening '@ext:' marker",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500547,
+      "text": "@ext:",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Standard of Spellwarding (500547) no longer ships the closing ':ext@' marker",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500547,
+      "text": ":ext@",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Standard of Might (706805) arrives with its closing sentence as plain text",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 706805,
+      "text": "Only 1 |cffffffffStandard|r can be active at a time.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Standard of Might (706805) no longer ships the opening '@ext:' marker",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 706805,
+      "text": "@ext:",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Standard of Might (706805) no longer ships the closing ':ext@' marker",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 706805,
+      "text": ":ext@",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Standard of Supremacy (800346) arrives with its closing sentence as plain text",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 800346,
+      "text": "Only 1 |cffffffffStandard|r can be active at a time.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Standard of Supremacy (800346) no longer ships the opening '@ext:' marker",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 800346,
+      "text": "@ext:",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Standard of Supremacy (800346) no longer ships the closing ':ext@' marker",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 800346,
+      "text": ":ext@",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Standard of Valiance rank 2 (803931) arrives with its closing sentence as plain text",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803931,
+      "text": "Only 1 |cffffffffStandard|r can be active at a time.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Standard of Valiance rank 2 (803931) no longer ships the opening '@ext:' marker",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803931,
+      "text": "@ext:",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Standard of Valiance rank 2 (803931) no longer ships the closing ':ext@' marker",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803931,
+      "text": ":ext@",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Standard of Valiance rank 3 (803932) arrives with its closing sentence as plain text",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803932,
+      "text": "Only 1 |cffffffffStandard|r can be active at a time.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Standard of Valiance rank 3 (803932) no longer ships the opening '@ext:' marker",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803932,
+      "text": "@ext:",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Standard of Valiance rank 3 (803932) no longer ships the closing ':ext@' marker",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803932,
+      "text": ":ext@",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Standard of Valiance rank 4 (803933) arrives with its closing sentence as plain text",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803933,
+      "text": "Only 1 |cffffffffStandard|r can be active at a time.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Standard of Valiance rank 4 (803933) no longer ships the opening '@ext:' marker",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803933,
+      "text": "@ext:",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Standard of Valiance rank 4 (803933) no longer ships the closing ':ext@' marker",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803933,
+      "text": ":ext@",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Standard of Valiance rank 5 (803934) arrives with its closing sentence as plain text",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803934,
+      "text": "Only 1 |cffffffffStandard|r can be active at a time.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Standard of Valiance rank 5 (803934) no longer ships the opening '@ext:' marker",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803934,
+      "text": "@ext:",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Standard of Valiance rank 5 (803934) no longer ships the closing ':ext@' marker",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803934,
+      "text": ":ext@",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Standard of Valiance rank 6 (803935) arrives with its closing sentence as plain text",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803935,
+      "text": "Only 1 |cffffffffStandard|r can be active at a time.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Standard of Valiance rank 6 (803935) no longer ships the opening '@ext:' marker",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803935,
+      "text": "@ext:",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Standard of Valiance rank 6 (803935) no longer ships the closing ':ext@' marker",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803935,
+      "text": ":ext@",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Standard of Valiance rank 7 (803936) arrives with its closing sentence as plain text",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803936,
+      "text": "Only 1 |cffffffffStandard|r can be active at a time.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Standard of Valiance rank 7 (803936) no longer ships the opening '@ext:' marker",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803936,
+      "text": "@ext:",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Standard of Valiance rank 7 (803936) no longer ships the closing ':ext@' marker",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803936,
+      "text": ":ext@",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Standard of Valiance rank 8 (803937) arrives with its closing sentence as plain text",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803937,
+      "text": "Only 1 |cffffffffStandard|r can be active at a time.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Standard of Valiance rank 8 (803937) no longer ships the opening '@ext:' marker",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803937,
+      "text": "@ext:",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Standard of Valiance rank 8 (803937) no longer ships the closing ':ext@' marker",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803937,
+      "text": ":ext@",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Standard of Valiance rank 9 (803938) arrives with its closing sentence as plain text",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803938,
+      "text": "Only 1 |cffffffffStandard|r can be active at a time.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Standard of Valiance rank 9 (803938) no longer ships the opening '@ext:' marker",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803938,
+      "text": "@ext:",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Standard of Valiance rank 9 (803938) no longer ships the closing ':ext@' marker",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803938,
+      "text": ":ext@",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Standard of Valiance text still bills the rank 7 field aura it names (803936)",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803936,
+      "text": "$501543m3",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Standard of Spellwarding text still names its own aura radius (500547)",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500547,
+      "text": "$500548a1",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Standard of Rallying text still bills its own aura (500263)",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500263,
+      "text": "$500265s1",
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

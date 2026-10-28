@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "name": "Dominator reduces Soul Strike Runic Power cost by ten (#1799)",
+  "contract": "Dominator 301213 cuts 100 units from Soul Strike rank costs of 400; Wraithblade stays unchanged.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 5,
+      "class": 30,
+      "level": 80
+    },
+    {
+      "id": "dominator",
+      "race": 5,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "control",
+      "spell": 301213
+    },
+    {
+      "action": "unlearn",
+      "actor": "dominator",
+      "spell": 301213
+    },
+    {
+      "action": "learn",
+      "actor": "dominator",
+      "spell": 301213
+    },
+    {
+      "action": "assert",
+      "label": "Dominator passive is active",
+      "actor": "dominator",
+      "metric": "aura",
+      "spell": 301213,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Untalented Soul Strike rank one costs forty",
+      "actor": "control",
+      "metric": "spell_power_cost",
+      "spell": 500517,
+      "equals": 400
+    },
+    {
+      "action": "assert",
+      "label": "Dominator reduces Soul Strike rank one cost by ten",
+      "actor": "dominator",
+      "metric": "spell_power_cost",
+      "spell": 500517,
+      "equals": 300
+    },
+    {
+      "action": "assert",
+      "label": "Untalented Soul Strike top rank costs forty",
+      "actor": "control",
+      "metric": "spell_power_cost",
+      "spell": 500646,
+      "equals": 400
+    },
+    {
+      "action": "assert",
+      "label": "Dominator reduces Soul Strike top rank cost by ten",
+      "actor": "dominator",
+      "metric": "spell_power_cost",
+      "spell": 500646,
+      "equals": 300
+    },
+    {
+      "action": "assert",
+      "label": "Dominator adds a negative hundred spell cost modifier",
+      "actor": "dominator",
+      "metric": "spell_modifier",
+      "spell": 500517,
+      "op": 14,
+      "base": 400,
+      "equals": 300
+    },
+    {
+      "action": "assert",
+      "label": "Wraithblade cost remains forty",
+      "actor": "dominator",
+      "metric": "spell_power_cost",
+      "spell": 805258,
+      "equals": 400
+    }
+  ]
+}

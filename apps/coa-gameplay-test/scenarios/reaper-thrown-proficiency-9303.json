@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Reaper: can equip thrown weapons (#9303)",
+  "contract": "The Reaper already learns Throw 2764 at creation, but had no Thrown proficiency (2567, skill 176), so thrown weapons could not be equipped. A Reaper knows Thrown, equips a thrown weapon in the ranged slot, and an existing Reaper without it gets it back on login.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "reaper", "race": 1, "class": 30, "level": 34 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "a Reaper knows the Thrown proficiency", "actor": "reaper",
+      "metric": "knows_spell", "spell": 2567, "equals": 1 },
+    { "action": "add_item", "actor": "reaper", "item": 466 },
+    { "action": "equip", "label": "the Reaper equips Pawned Headsplitter (thrown)", "actor": "reaper", "item": 466, "slot": 17 },
+    { "action": "assert", "label": "the thrown weapon is in the ranged slot", "actor": "reaper",
+      "metric": "equipped_item", "slot": 17, "equals": 466, "within_ms": 2000 },
+    { "action": "unlearn", "label": "an older Reaper without Thrown", "actor": "reaper", "spell": 2567 },
+    { "action": "relog", "actor": "reaper" },
+    { "action": "assert", "label": "Thrown comes back on login", "actor": "reaper",
+      "metric": "knows_spell", "spell": 2567, "equals": 1, "within_ms": 10000 }
+  ]
+}

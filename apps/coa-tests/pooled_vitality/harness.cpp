@@ -39,6 +39,7 @@ struct Unit
 {
     virtual ~Unit() = default;
     uint32 guid = 1, cls = CLASS_SON_OF_ARUGAL, health = 500, maxHealth = 1000;
+    uint8 level = 1;
     bool alive = true, inWorld = true;
     float spirit = 300;
     std::map<uint32, Aura> auras;
@@ -46,10 +47,12 @@ struct Unit
     virtual Player* ToPlayer() { return nullptr; }
     bool IsPlayer() const { return cls != 0; }
     uint32 getClass() const { return cls; }
+    uint8 GetLevel() const { return level; }
     bool IsAlive() const { return alive; }
     bool IsInWorld() const { return inWorld; }
     uint32 GetGUID() const { return guid; }
     bool HasAura(uint32 id) const { return auras.contains(id) && auras.at(id).stacks != 0; }
+    void RemoveAurasDueToSpell(uint32 spellId, uint32) { auras.erase(spellId); }
     Aura* GetAura(uint32 id, uint32 owner) { return HasAura(id) && auras[id].caster == owner ? &auras[id] : nullptr; }
     void CastSpell(Unit* target, uint32 id, bool triggered)
     {

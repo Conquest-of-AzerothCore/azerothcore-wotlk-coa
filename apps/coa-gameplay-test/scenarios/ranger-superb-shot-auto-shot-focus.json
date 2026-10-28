@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "name": "Ranger Superb Shot restores 4 Focus for each damaging Auto Shot (#1803)",
+  "contract": "Superb Shot 301249 (Ranger Archery talent, CharacterAdvancement 34155, SpellFamilyName 27, SPELL_ATTR0_PASSIVE) reads 'Damage dealt by Auto Shot now restores $561183s1 Focus.' Its only effect is SPELL_AURA_PROC_TRIGGER_SPELL on 561183 'Energize + 3 Focus', one SPELL_EFFECT_ENERGIZE with MiscValue 2 = POWER_FOCUS, BasePoints 3 + DieSides 1 = 4, on TARGET_UNIT_CASTER. Spell.dbc ProcFlags is 0; the spell_proc row from rev_20260921_40_ranger_dead_procs.sql (#4552) supplies ProcFlags 64 = PROC_FLAG_DONE_RANGED_AUTO_ATTACK, SpellTypeMask 1 (damage) and SpellPhaseMask 2 (hit), with no family filter because the Ranger's Auto Shot is stock spell 75 (SpellFamilyName 9, SPELL_ATTR2_AUTO_REPEAT). Custom classes need no ammunition. Expected: no 561183 energize while Superb Shot is unknown; once it is learned, every Auto Shot that deals damage restores exactly 4 Focus, so the energize total is four times the energize count and the energize count matches the damaging shots landed since the talent was learned (one boundary shot may land between the snapshot and the learn step).",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 80, "ranged_hit_rating": 10000, "allow_regeneration": false }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "ranger", "entry": 36, "level": 80, "health": 1000000, "distance": 15 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "ranger", "spell": 264 },
+    { "action": "learn", "actor": "ranger", "spell": 75 },
+    { "action": "add_item", "actor": "ranger", "item": 2504 },
+    { "action": "equip", "actor": "ranger", "item": 2504, "slot": 17 },
+    { "action": "cast", "label": "Start Auto Shot", "actor": "ranger", "spell": 75, "target": "dummy" },
+    {
+      "action": "assert", "label": "SETUP: Auto Shot lands repeatedly", "actor": "ranger",
+      "metric": "spell_damage_count", "spell": 75, "target": "dummy", "min": 3, "within_ms": 20000
+    },
+    {
+      "action": "assert", "label": "Control: without Superb Shot Auto Shot restores no Focus", "actor": "ranger",
+      "metric": "spell_energize_count", "spell": 561183, "equals": 0
+    },
+    {
+      "action": "snapshot", "actor": "ranger", "metric": "spell_damage_count", "spell": 75, "target": "dummy",
+      "save_as": "shots_before_talent"
+    },
+    { "action": "learn", "actor": "ranger", "spell": 301249 },
+    {
+      "action": "assert", "label": "SETUP: Superb Shot is active on the Ranger", "actor": "ranger",
+      "metric": "aura", "spell": 301249, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Damaging Auto Shots now restore Focus", "actor": "ranger",
+      "metric": "spell_energize_count", "spell": 561183, "power": 2, "min": 4, "within_ms": 20000
+    },
+    { "action": "set_health", "label": "Let the next shot end the stream", "actor": "dummy", "value": 1 },
+    {
+      "action": "assert", "label": "SETUP: the target died and Auto Shot stopped", "actor": "dummy",
+      "metric": "alive", "equals": 0, "within_ms": 10000
+    },
+    { "action": "wait", "label": "Let any projectile in flight land", "ms": 2000 },
+    {
+      "action": "snapshot", "actor": "ranger", "metric": "spell_energize_count", "spell": 561183,
+      "save_as": "focus_restores"
+    },
+    {
+      "action": "snapshot", "actor": "ranger", "metric": "spell_damage_count", "spell": 75, "target": "dummy",
+      "relative_to": "shots_before_talent", "save_as": "shots_with_talent"
+    },
+    {
+      "action": "assert", "label": "Every restore is exactly 4 Focus", "actor": "ranger",
+      "metric": "spell_energize_total", "spell": 561183, "power": 2, "ratio_to": "focus_restores",
+      "min": 3.999, "max": 4.001
+    },
+    {
+      "action": "assert", "label": "One restore per damaging Auto Shot since the talent was learned", "actor": "ranger",
+      "metric": "spell_energize_count", "spell": 561183, "ratio_to": "shots_with_talent", "min": 0.75, "max": 1.0
+    }
+  ]
+}

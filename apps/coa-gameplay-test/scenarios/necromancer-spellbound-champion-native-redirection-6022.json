@@ -1,0 +1,250 @@
+{
+  "schema": 1,
+  "name": "Spellbound Champion redirects repeated hostile spells until expiry (#6022)",
+  "contract": "807811 promises to redirect spells cast on the Necromancer to its Spellbound Champion (creature 500483) for its native duration. Existing helper 808017 effect 2 is an owner-only area aura with indefinite duration and no charges; its base remains on the summon so the native SPELL_MAGNET target is the Champion, and despawn removes owner protection. A controlled learned-spell fixture uses normal casts. Frostbolt deals positive logged damage before, during and after protection; during protection neither repeated hit reaches the owner. A second Necromancer receives no protection. Client rendering is not covered.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "n",
+      "race": 5,
+      "class": 23,
+      "level": 60
+    },
+    {
+      "id": "mage",
+      "race": 1,
+      "class": 8,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 5,
+      "class": 23,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "pvp",
+      "actor": "n",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "mage",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "ally",
+      "enabled": true
+    },
+    {
+      "action": "learn",
+      "actor": "n",
+      "spell": 807811
+    },
+    {
+      "action": "learn",
+      "actor": "n",
+      "spell": 500983
+    },
+    {
+      "action": "learn",
+      "actor": "mage",
+      "spell": 116
+    },
+    {
+      "action": "set_health",
+      "actor": "n",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_health",
+      "actor": "mage",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "cast",
+      "actor": "n",
+      "spell": 500983
+    },
+    {
+      "action": "cast",
+      "actor": "mage",
+      "spell": 116,
+      "target": "n"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Frostbolt hits the owner before the Champion exists",
+      "actor": "mage",
+      "metric": "spell_damage_count",
+      "spell": 116,
+      "target": "n",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "n",
+      "spell": 807811
+    },
+    {
+      "action": "assert",
+      "label": "The original Champion creature summons",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 500483,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Spellbound never summons the ordinary Skeletal Mage",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 50075,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Champion protects its owner",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 808017,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the owner-only protection does not reach another Necromancer",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 808017,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "mage",
+      "spell": 116,
+      "target": "n"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: redirected Frostbolt 1 still deals positive damage",
+      "actor": "mage",
+      "metric": "spell_damage_count",
+      "spell": 116,
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: redirected Frostbolt 1 does not damage the owner",
+      "actor": "mage",
+      "metric": "spell_damage_count",
+      "spell": 116,
+      "target": "n",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Protection survives repeated spells",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 808017,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "mage",
+      "spell": 116,
+      "target": "n"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: redirected Frostbolt 2 still deals positive damage",
+      "actor": "mage",
+      "metric": "spell_damage_count",
+      "spell": 116,
+      "equals": 3,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: redirected Frostbolt 2 does not damage the owner",
+      "actor": "mage",
+      "metric": "spell_damage_count",
+      "spell": 116,
+      "target": "n",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Protection survives repeated spells",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 808017,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 35000
+    },
+    {
+      "action": "assert",
+      "label": "Champion expires naturally",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 500483,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Protection ends with its source summon",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 808017,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "mage",
+      "spell": 116,
+      "target": "n"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Frostbolt reaches the owner after expiry",
+      "actor": "mage",
+      "metric": "spell_damage_count",
+      "spell": 116,
+      "target": "n",
+      "equals": 2,
+      "within_ms": 5000
+    }
+  ]
+}

@@ -1,0 +1,210 @@
+{
+  "schema": 1,
+  "name": "Wind level 60 aeroblast consumes its authored Static cost (#5837)",
+  "contract": [
+    "Spell.dbc 501455 explicitly depletes 50 Static and requires native threshold aura 707050.",
+    "Normal Wind specialization13 grants Tempest Calling707615. Learning the original ability through the player API models a previously purchased Book spell; the native replacement service must provide the level-appropriate replacement.",
+    "Only Static803102 is seeded; ordinary resource updates derive eligibility. Native ground/target casts must succeed and damage an enemy before testing an unfunded refusal and the existing Charged Conduit exemption."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "s",
+      "race": 1,
+      "class": 16,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "s",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "s",
+      "id": 13
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 707615,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 500040
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "knows_spell",
+      "spell": 501455,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "assert",
+      "label": "The native resource update derives the casting threshold",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 707050,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "e",
+      "metric": "health",
+      "save_as": "before_first"
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 501455,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "label": "The normal cast reaches SPELL_GO",
+      "actor": "s",
+      "metric": "spell_go_count",
+      "spell": 501455,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The successful aeroblast consumes exactly 50 Static",
+      "actor": "s",
+      "metric": "aura_stacks",
+      "spell": 803102,
+      "equals": 50
+    },
+    {
+      "action": "assert",
+      "label": "The accepted cast damages an enemy",
+      "actor": "e",
+      "metric": "health",
+      "relative_to": "before_first",
+      "max": -1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 707050,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 501455,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "label": "An unfunded cast is rejected",
+      "actor": "s",
+      "metric": "cast_failure",
+      "spell": 501455,
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "spell_go_count",
+      "spell": 501455,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "aura_stacks",
+      "spell": 803102,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 707050,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803790,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 501455,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "label": "Charged Conduit still permits the ordinary cast",
+      "actor": "s",
+      "metric": "spell_go_count",
+      "spell": 501455,
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Charged Conduit preserves Static instead of spending it",
+      "actor": "s",
+      "metric": "aura_stacks",
+      "spell": 803102,
+      "equals": 100
+    }
+  ]
+}

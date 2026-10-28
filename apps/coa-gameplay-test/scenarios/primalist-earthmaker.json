@@ -60,9 +60,9 @@
   ],
   "steps": [
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "baseline",
-      "command": ".localspec 60"
+      "id": 60
     },
     {
       "action": "learn",
@@ -459,9 +459,9 @@
       "ms": 1600
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "talented",
-      "command": ".localspec 60"
+      "id": 60
     },
     {
       "action": "learn",
@@ -863,9 +863,9 @@
       "ms": 1600
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "removed",
-      "command": ".localspec 60"
+      "id": 60
     },
     {
       "action": "learn",

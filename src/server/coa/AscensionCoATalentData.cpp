@@ -3,6 +3,7 @@
 #include "AscensionCoATalentData.h"
 #include "ClientDBC.h"
 #include "DBCStores.h"
+#include "ItemTemplate.h"
 #include "Log.h"
 #include <algorithm>
 #include <cctype>
@@ -18,6 +19,7 @@ namespace AscensionCompatData
 std::vector<CoATalentEntry> CoATalentEntries;
 std::vector<CoASelectableFreeEntry> CoASelectableFreeEntries;
 std::vector<CoAAutomaticDependency> CoAAutomaticDependencies;
+std::vector<CoASpecialization> CoASpecializations;
 std::vector<CoATalentBudget> CoATalentBudgets;
 
 namespace
@@ -25,14 +27,14 @@ namespace
 constexpr uint32 SHARED_CLASS_TAB_ID = 87;
 constexpr uint32 ADVANCEMENT_REQUIRED_COUNT = 3;
 constexpr uint32 ADVANCEMENT_RANK_COUNT = 5;
+constexpr uint32 ADVANCEMENT_FLAG_FREE_UNLEARN = 0x2000;
 
 constexpr std::array<uint32, 2> IDENTITY_PASSIVES_KEEPING_AUTHORED_GATES = { 4037, 4041 };
-
-constexpr std::array<uint32, 8> BARBARIAN_MANUAL_FREE_CHOICES = { 9172, 9861, 11172, 11257, 12112, 13111, 30764, 34257 };
 
 enum AdvancementDwordField : uint32
 {
     ADVANCEMENT_ID           = 0,
+    ADVANCEMENT_TYPE         = 1,
     ADVANCEMENT_REQUIRED     = 2,
     ADVANCEMENT_SPELLS       = 5,
     ADVANCEMENT_AE_COST      = 14,
@@ -41,6 +43,17 @@ enum AdvancementDwordField : uint32
     ADVANCEMENT_GROUP        = 29,
     ADVANCEMENT_CLASS_TYPE   = 32,
     ADVANCEMENT_TAB          = 33,
+    ADVANCEMENT_TAB_AE_INVESTMENT = 38,
+    ADVANCEMENT_TAB_TE_INVESTMENT = 39,
+    ADVANCEMENT_FLAGS        = 73,
+};
+
+enum ChrSpecsDwordField : uint32
+{
+    CHR_SPECS_ID              = 0,
+    CHR_SPECS_PRIMARY_STAT    = 8,
+    CHR_SPECS_SIGNATURE_SPELL = 24,
+    CHR_SPECS_IDENTITY_ENTRY  = 28,
 };
 
 enum EssenceDwordField : uint32
@@ -72,6 +85,32 @@ struct Node
     bool ClassTab;
 };
 
+std::array<uint8, 3> PrimaryStats(ClientDBC::Record const& record)
+{
+    static std::array<std::pair<std::string_view, uint8>, 5> const statByName = { {
+        { "Agility", ITEM_MOD_AGILITY },
+        { "Strength", ITEM_MOD_STRENGTH },
+        { "Intellect", ITEM_MOD_INTELLECT },
+        { "Spirit", ITEM_MOD_SPIRIT },
+        { "Stamina", ITEM_MOD_STAMINA },
+    } };
+
+    std::array<uint8, 3> stats{};
+    for (uint32 index = 0; index < stats.size(); ++index)
+    {
+        std::string_view const name = record.GetString(CHR_SPECS_PRIMARY_STAT + index);
+        for (auto const& [statName, stat] : statByName)
+            if (name == statName)
+                stats[index] = stat;
+    }
+    return stats;
+}
+
+bool IsFreeChoice(Node const& node)
+{
+    return !node.Entry.AECost && !node.Entry.TECost && node.Group;
+}
+
 struct AdvancementClassType
 {
     uint32 ClassId;
@@ -102,6 +141,7 @@ bool LoadCoATalentData()
     CoATalentEntries.clear();
     CoASelectableFreeEntries.clear();
     CoAAutomaticDependencies.clear();
+    CoASpecializations.clear();
     CoATalentBudgets.clear();
 
     ClientDBC classes, classTypes, tabTypes, specs, advancement, essence;
@@ -109,7 +149,7 @@ bool LoadCoATalentData()
         !classTypes.Load(GetClientDBCPath("CharacterAdvancementClassTypes.dbc"), 5) ||
         !tabTypes.Load(GetClientDBCPath("CharacterAdvancementTabTypes.dbc"), 2) ||
         !specs.Load(GetClientDBCPath("ChrSpecs.dbc"), 29) ||
-        !advancement.Load(GetClientDBCPath("CharacterAdvancement.dbc"), ADVANCEMENT_TAB + 1) ||
+        !advancement.Load(GetClientDBCPath("CharacterAdvancement.dbc"), ADVANCEMENT_FLAGS + 1) ||
         !essence.Load(GetClientDBCPath("CharacterAdvancementEssence.dbc"), ESSENCE_TE + 1))
         return false;
 
@@ -151,13 +191,19 @@ bool LoadCoATalentData()
 
     std::map<std::pair<std::string, std::string>, uint32> specByClassAndTab;
     std::unordered_map<uint32, uint32> identitySpecByEntry;
+    std::vector<std::tuple<uint32, uint32, uint32, std::array<uint8, 3>>> specIdentities;
     for (uint32 row = 0; row < specs.GetRecordCount(); ++row)
     {
         ClientDBC::Record record = specs.GetRecord(row);
         std::pair<std::string, std::string> key(record.GetString(1), record.GetString(2));
-        specByClassAndTab[key] = record.GetUInt32(0);
-        if (uint32 identity = record.GetUInt32(28))
-            identitySpecByEntry[identity] = record.GetUInt32(0);
+        uint32 const specId = record.GetUInt32(CHR_SPECS_ID);
+        specByClassAndTab[key] = specId;
+        if (uint32 identity = record.GetUInt32(CHR_SPECS_IDENTITY_ENTRY))
+        {
+            identitySpecByEntry[identity] = specId;
+            specIdentities.emplace_back(specId, identity, record.GetUInt32(CHR_SPECS_SIGNATURE_SPELL),
+                PrimaryStats(record));
+        }
     }
 
     std::vector<Node> nodes;
@@ -188,6 +234,10 @@ bool LoadCoATalentData()
         node.Entry.AECost = uint8(record.GetUInt32(ADVANCEMENT_AE_COST));
         node.Entry.TECost = uint8(record.GetUInt32(ADVANCEMENT_TE_COST));
         node.Entry.RequiredLevel = uint8(record.GetUInt32(ADVANCEMENT_LEVEL));
+        node.Entry.Talent = record.GetString(ADVANCEMENT_TYPE) == "Talent";
+        node.Entry.FreeUnlearn = (record.GetUInt32(ADVANCEMENT_FLAGS) & ADVANCEMENT_FLAG_FREE_UNLEARN) != 0;
+        node.Entry.TabAEInvestment = uint8(std::min<uint32>(record.GetUInt32(ADVANCEMENT_TAB_AE_INVESTMENT), 255));
+        node.Entry.TabTEInvestment = uint8(std::min<uint32>(record.GetUInt32(ADVANCEMENT_TAB_TE_INVESTMENT), 255));
         node.Group = record.GetUInt32(ADVANCEMENT_GROUP);
         node.ClassTab = tab == SHARED_CLASS_TAB_ID;
 
@@ -223,6 +273,9 @@ bool LoadCoATalentData()
             node.Required.clear();
         }
 
+        if (node.Entry.AECost || node.Entry.TECost)
+            std::copy(node.Required.begin(), node.Required.end(), node.Entry.RequiredEntryIds.begin());
+
         nodes.push_back(std::move(node));
     }
 
@@ -238,7 +291,7 @@ bool LoadCoATalentData()
     for (Node const& node : nodes)
     {
         CoATalentEntries.push_back(node.Entry);
-        if (Contains(BARBARIAN_MANUAL_FREE_CHOICES, node.Entry.EntryId))
+        if (IsFreeChoice(node))
             CoASelectableFreeEntries.push_back({ node.Entry.EntryId, node.Group });
 
         if (node.Entry.AECost || node.Entry.TECost || node.Required.empty())
@@ -250,7 +303,7 @@ bool LoadCoATalentData()
             auto requiredNode = nodeById.find(requiredId);
             bool const paidClassNode = requiredNode != nodeById.end() && requiredNode->second->ClassTab &&
                 (requiredNode->second->Entry.AECost || requiredNode->second->Entry.TECost);
-            if (!(node.Entry.SpecId && !Contains(BARBARIAN_MANUAL_FREE_CHOICES, node.Entry.EntryId) && paidClassNode))
+            if (!(node.Entry.SpecId && !IsFreeChoice(node) && paidClassNode))
                 required.push_back(requiredId);
         }
 
@@ -269,10 +322,29 @@ bool LoadCoATalentData()
         CoAAutomaticDependencies.push_back(dependency);
     }
 
+    for (auto const& [specId, identityId, signatureSpellId, primaryStats] : specIdentities)
+    {
+        auto identity = nodeById.find(identityId);
+        if (identity == nodeById.end() || identity->second->Entry.SpecId != specId)
+            continue;
+
+        uint32 signatureId = 0;
+        for (Node const& node : nodes)
+            if (signatureSpellId && node.Entry.ClassId == identity->second->Entry.ClassId &&
+                Contains(node.Entry.SpellIds, signatureSpellId))
+            {
+                signatureId = node.Entry.EntryId;
+                break;
+            }
+        CoASpecializations.push_back(
+            { uint16(specId), identity->second->Entry.ClassId, identityId, signatureId, primaryStats });
+    }
+
     LOG_INFO("coa",
-        "Loaded {} CoA talent entries ({} selectable free, {} automatic dependencies, {} budget rows)",
+        "Loaded {} CoA talent entries ({} selectable free, {} automatic dependencies, {} specializations, "
+        "{} budget rows)",
         CoATalentEntries.size(), CoASelectableFreeEntries.size(), CoAAutomaticDependencies.size(),
-        CoATalentBudgets.size());
+        CoASpecializations.size(), CoATalentBudgets.size());
     return true;
 }
 }

@@ -1,0 +1,926 @@
+{
+  "schema": 1,
+  "name": "Crimson Death recasts Slaughter on its stated 20% of casts (#2663)",
+  "contract": [
+    "Crimson Death 705414 reads: 'Your Slaughter now has a 20% chance to cast an additional time free of cost.'",
+    "Forty Slaughter 500373 casts on a target below 35% health expect eight free recasts. One to nineteen recasts is",
+    "consistent with 20% (false failure about 1.5e-4) and rejects both a 100% row (forty recasts) and a cast-phase row",
+    "whose recast has no target and fails (no recasts). A triggered recast cannot proc Crimson Death again,",
+    "because an aura never procs from a spell it triggered itself."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "crimson",
+      "race": 5,
+      "class": 30,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "crimson",
+      "entry": 299,
+      "level": 80,
+      "health": 1000000,
+      "distance": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "crimson",
+      "spell": 705414
+    },
+    {
+      "action": "assert",
+      "label": "Crimson Death aura is active",
+      "actor": "crimson",
+      "metric": "aura",
+      "spell": 705414,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 300000
+    },
+    {
+      "action": "wait",
+      "label": "Let the target's aura state catch up with its health",
+      "ms": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "set_power",
+      "actor": "crimson",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "crimson",
+      "spell": 500373,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "crimson",
+      "spell": 500373
+    },
+    {
+      "action": "assert",
+      "label": "Crimson Death recast Slaughter on roughly one cast in five",
+      "actor": "crimson",
+      "metric": "spell_proc_count",
+      "spell": 705414,
+      "min": 1,
+      "max": 19
+    },
+    {
+      "action": "assert",
+      "label": "Every recast is an additional completed Slaughter",
+      "actor": "crimson",
+      "metric": "spell_cast_count",
+      "spell": 500373,
+      "min": 41,
+      "max": 59
+    }
+  ]
+}

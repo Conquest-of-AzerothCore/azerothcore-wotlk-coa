@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "name": "Command Aura's ally buff 537248 procs once it has a spell_proc row (#3716, partial)",
+  "contract": [
+    "Original Command Aura 524600 effect 0 triggers the ally buff 537248 through",
+    "SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE and the nearby raid target. The original triggered buff uses the",
+    "Magic hit table and also triggers negative Exhaustion 573255, so native whole-spell positivity does not",
+    "bypass its hit roll on an ally. Fixture and assert spell hit on the Ranger without injecting the proc",
+    "aura. Effective spell_proc supplies flags 69972 and falls back to the original 100 percent chance;",
+    "aura_ascension_raid_damage_aura computes 35 percent of the source Ranger ranged attack power and",
+    "requires actual nonperiodic hostile damage before triggering 537249. The original helper uses the Ranged",
+    "damage class, separate from the ally white melee attacks that supply its proc events. Fixture both",
+    "physical hit tables and expertise on that ally; assert its native melee hit chance and ranged hit",
+    "rating, preserve the original six-second observation and native proc-count check, and require real melee",
+    "and helper damage. Original targeting, exhaustion filtering, probability, cooldowns and scaling remain",
+    "unchanged. This scenario proves the actual proc event and damaging helper, not its damage formula."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "ranged_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "ally",
+      "entry": 16542,
+      "level": 80,
+      "health": 500000,
+      "faction": 14
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "spell_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "melee_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "combat_rating",
+      "rating": 6,
+      "equals": 10000
+    },
+    {
+      "action": "group",
+      "actor": "ranger",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 524600
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 524600
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 524600,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally received the Command Aura buff",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 537248,
+      "caster": "ranger",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "spell_proc_count",
+      "spell": 537248,
+      "save_as": "command_aura_procs_before"
+    },
+    {
+      "action": "attack",
+      "actor": "ally",
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the revived 537248 proc fires on the ally's direct damage",
+      "actor": "ally",
+      "metric": "spell_proc_count",
+      "spell": 537248,
+      "relative_to": "command_aura_procs_before",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "melee_damage_count",
+      "target": "dummy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_damage_count",
+      "spell": 537249,
+      "target": "dummy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_damage_total",
+      "spell": 537249,
+      "target": "dummy",
+      "min": 1
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Dark Fate reduces Crow's Harvest cost and Reliquary of the Lost cooldown",
+  "contract": "Dark Fate 504037 is a passive SpellMod: Effect0 (SPELLMOD_COST) carries SpellFamilyFlags[1]=2097152, matching Crow's Harvest 504537's own SpellFamilyFlags[0]=2097152, base points -101 (raw -100). Effect1 (SPELLMOD_COOLDOWN) carries SpellFamilyFlags[1]=32 (dword index 3), matching Reliquary of the Lost 500631's SpellFamilyFlags[0]=32, base points -10001 (raw -10000). Both are native, generic SpellMod ops (Unit.cpp/Spell.cpp ApplySpellMod) requiring no CoA-specific code; issue #1909 reported no handler exists, which this proves false for both halves of the tooltip.",
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "Crow's Harvest cost unmodified before the talent", "actor": "reaper",
+      "metric": "spell_modifier", "spell": 504537, "op": 14, "base": 10000, "equals": 10000 },
+    { "action": "assert", "label": "Reliquary of the Lost cooldown unmodified before the talent", "actor": "reaper",
+      "metric": "spell_modifier", "spell": 500631, "op": 11, "base": 10000, "equals": 10000 },
+    { "action": "learn", "actor": "reaper", "spell": 504037 },
+    { "action": "assert", "label": "Dark Fate aura settles on the caster", "actor": "reaper",
+      "metric": "aura", "spell": 504037, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Crow's Harvest costs 100 less Runic Power", "actor": "reaper",
+      "metric": "spell_modifier", "spell": 504537, "op": 14, "base": 10000, "equals": 9900 },
+    { "action": "assert", "label": "Reliquary of the Lost cooldown is reduced by 10 seconds", "actor": "reaper",
+      "metric": "spell_modifier", "spell": 500631, "op": 11, "base": 10000, "equals": 0 }
+  ]
+}

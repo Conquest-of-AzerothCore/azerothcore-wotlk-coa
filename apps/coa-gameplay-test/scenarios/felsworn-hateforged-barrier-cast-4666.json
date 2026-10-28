@@ -1,0 +1,138 @@
+{
+  "schema": 1,
+  "name": "Hateforged Barrier casts, absorbs and reduces physical damage (#4666)",
+  "contract": "Hateforged Barrier 707527 absorbs at least its authored 752 base damage plus Stamina and supplies -10% physical damage taken. A normal level 60 cast must apply it, and a landed hostile Fireball must leave health unchanged while the barrier remains.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "felsworn",
+      "race": 1,
+      "class": 14,
+      "level": 60
+    },
+    {
+      "id": "mage",
+      "race": 5,
+      "class": 8,
+      "level": 14,
+      "spell_hit_rating": 100000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "pvp",
+      "actor": "felsworn",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "mage",
+      "enabled": true
+    },
+    {
+      "action": "learn",
+      "actor": "felsworn",
+      "spell": 707527
+    },
+    {
+      "action": "learn",
+      "actor": "mage",
+      "spell": 133
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 707527
+    },
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "aura",
+      "spell": 707527,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "aura_amount",
+      "spell": 707527,
+      "effect": 0,
+      "min": 752
+    },
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "aura_amount",
+      "spell": 707527,
+      "effect": 1,
+      "equals": -10
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "health",
+      "save_as": "shielded_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "aura_amount",
+      "spell": 707527,
+      "effect": 0,
+      "save_as": "barrier_before_hit"
+    },
+    {
+      "action": "cast",
+      "actor": "mage",
+      "spell": 133,
+      "target": "felsworn"
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "metric": "spell_cast_count",
+      "spell": 133,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "health",
+      "relative_to": "shielded_health",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "aura",
+      "spell": 707527,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "aura_amount",
+      "spell": 707527,
+      "effect": 0,
+      "relative_to": "barrier_before_hit",
+      "max": -1
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
+}

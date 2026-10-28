@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Celestial Shot raises the mana returned by consuming Scattered Stars by 40% (#500)",
-  "contract": "Celestial Shot 574348 (Spell.dbc, family 32) text: \"Increases the effectiveness of consuming Scattered Stars by $s2%\"; effect 2 (index 1) is SPELL_AURA_ADD_PCT_MODIFIER (108) SPELLMOD_EFFECT1 with EffectBasePoints 39 + DieSides 1 = +40, mask word1 0x800 (Scattered Star 804995 damage, native). Effect 3 is ADD_PCT_MODIFIER SPELLMOD_EFFECT2 +40 on mask word2 0x100000 = the CD Reduction helper 804994, which the module never casts: Consume() in AscensionStarcaller.cpp restores mana as MaxPower * 8% * effectiveness through EnergizeBySpell and reduces cooldowns from 804994's type-165 effects, and its effectiveness factor only knew 807659, 805524 and 574360, so the 40% never reached mana or cooldown reduction. Fixtures are the same race/class/level; both fire Fan of Knives 680703 (no weapon requirement, +1 Scattered Star 804378 per hit by the module) at their own dummy, set mana to 0, then cast Lunar Lance 801132 (cost 0, trigger 572315 -> StartConsume -> 804716 ticking every 500 ms) which consumes the single star for 8% of maximum mana times effectiveness. The talented fixture's final mana over the control's is therefore 1.40 (only equal mana regeneration over the identical four second window dilutes it), 1.00 before the fix; the assertion demands at least 1.2 and at most 1.6. Both fixtures have identical maximum mana, so the ratio does not depend on it. The first run failed with ratio 31.55: the control's Lunar Lance was cast about 160 ms after its own Fan of Knives, so it was refused (the control ended with regeneration only, 20 mana, while the talented fixture returned 631, 1.40 times the 456 that an untalented consume returned in the #4224 run), so both fixtures now wait 2.5 s and cast Lunar Lance together, mana emptied first, and the control's mana is snapshotted after the same 4 s window.",
+  "contract": "Celestial Shot 574348 (Spell.dbc, family 32) text: \"Increases the effectiveness of consuming Scattered Stars by $s2%\"; effect 2 (index 1) is SPELL_AURA_ADD_PCT_MODIFIER (108) SPELLMOD_EFFECT1 with EffectBasePoints 39 + DieSides 1 = +40, mask word1 0x800 (Scattered Star 804995 damage, native). Effect 3 is ADD_PCT_MODIFIER SPELLMOD_EFFECT2 +40 on mask word2 0x100000 = the CD Reduction helper 804994, which the module never casts: Consume() in AscensionStarcaller.cpp restores mana as MaxPower * 8% * effectiveness through EnergizeBySpell and reduces cooldowns from 804994's type-165 effects, and its effectiveness factor only knew 807659, 805524 and 574360, so the 40% never reached mana or cooldown reduction. Fixtures are the same race/class/level; both fire Fan of Knives 680703 (no weapon requirement, +1 Scattered Star 804378 per hit by the module) at their own dummy, set mana to 0, then cast Lunar Lance 801132 (cost 0, trigger 572315 -> StartConsume -> 804716 ticking every 500 ms) which consumes the single star for 8% of maximum mana times effectiveness. The talented fixture's final mana over the control's is therefore 1.40 (only equal mana regeneration over the identical four second window dilutes it), 1.00 before the fix; the assertion demands at least 1.2 and at most 1.6. Both fixtures have identical maximum mana, so the ratio does not depend on it. The first run failed with ratio 31.55: the control's Lunar Lance was cast about 160 ms after its own Fan of Knives, so it was refused (the control ended with regeneration only, 20 mana, while the talented fixture returned 631, 1.40 times the 456 that an untalented consume returned in the #4224 run), so both fixtures now wait 2.5 s and cast Lunar Lance together, mana emptied first, and the control's mana is snapshotted after the same 4 s window. Fan of Knives is a melee-class spell and Lunar Lance a ranged-class one, so a star or a consume could be lost to a miss, dodge or parry (a talent star missing at the 3 s poll, or the control returning regeneration only); both fixtures carry melee and ranged hit and expertise ratings.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -9,14 +9,20 @@
       "race": 1,
       "class": 26,
       "level": 80,
-      "spell_hit_rating": 10000
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "ranged_hit_rating": 10000
     },
     {
       "id": "talent",
       "race": 1,
       "class": 26,
       "level": 80,
-      "spell_hit_rating": 10000
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "ranged_hit_rating": 10000
     }
   ],
   "creatures": [

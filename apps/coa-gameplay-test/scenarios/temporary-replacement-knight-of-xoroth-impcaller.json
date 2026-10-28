@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Impcaller on the action bar is saved as Call: Hellfire Imp (#5469)",
+  "contract": "AscensionCompatData::TalentReplacements (AscensionTalentReplacementData.h:35) carries {17, 17, 706755, 804883, {{707666 at 0}}}: in Defiance specialization 17, knowing the Impcaller talent 706755 turns Call: Hellfire Imp 804883 into Impcaller 707666. AscensionClassService::SynchronizeTalentReplacements (AscensionCompat.cpp:884-953), run from OnPlayerLearnSpell (AscensionCompat.cpp:5782-5784), teaches 707666 with learnSpell(707666, true) (AscensionCompat.cpp:945), a temporary spell never written to character_spell, and registers it over Call: Hellfire Imp with Player::SetTemporarySpellReplacement (AscensionCompat.cpp:951). Before the fix Player::_SaveActions wrote 707666, and Player::_LoadActions at the next login runs before the class service teaches it again, so the button was refused and deleted. persisted_action_button reads Player::GetSavedActionButtonSpell, the id _SaveActions writes. A button holding Impcaller must be saved as Call: Hellfire Imp; a button holding Call: Hellfire Imp is saved unchanged.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 11 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login state settle", "ms": 3000 },
+    { "action": "specialization", "label": "Choose Defiance", "actor": "knight", "id": 17 },
+    { "action": "learn", "actor": "knight", "spell": 804883 },
+    { "action": "learn", "label": "Pick the Impcaller talent", "actor": "knight", "spell": 706755 },
+    {
+      "action": "assert",
+      "label": "The talent replaces Call: Hellfire Imp with Impcaller",
+      "actor": "knight",
+      "metric": "temporary_spell_replacement",
+      "spell": 804883,
+      "equals": 707666,
+      "within_ms": 3000
+    },
+    { "action": "set_action_button", "actor": "knight", "button": 2, "spell": 707666 },
+    { "action": "set_action_button", "actor": "knight", "button": 3, "spell": 804883 },
+    {
+      "action": "assert",
+      "label": "The bar holds Impcaller",
+      "actor": "knight",
+      "metric": "action_button",
+      "button": 2,
+      "equals": 707666
+    },
+    {
+      "action": "assert",
+      "label": "The Impcaller button is saved as Call: Hellfire Imp",
+      "actor": "knight",
+      "metric": "persisted_action_button",
+      "button": 2,
+      "equals": 804883
+    },
+    {
+      "action": "assert",
+      "label": "Control: an ordinary known spell is saved unchanged",
+      "actor": "knight",
+      "metric": "persisted_action_button",
+      "button": 3,
+      "equals": 804883
+    }
+  ]
+}

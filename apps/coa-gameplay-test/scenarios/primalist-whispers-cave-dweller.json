@@ -222,9 +222,9 @@
       "o": 3.14159265
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "base",
-      "command": ".localspec 95"
+      "id": 95
     },
     {
       "action": "learn",
@@ -357,9 +357,9 @@
       "o": 3.14159265
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "rank1",
-      "command": ".localspec 95"
+      "id": 95
     },
     {
       "action": "learn",
@@ -510,9 +510,9 @@
       "o": 3.14159265
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "rank2",
-      "command": ".localspec 95"
+      "id": 95
     },
     {
       "action": "learn",
@@ -663,9 +663,9 @@
       "o": 3.14159265
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "removed",
-      "command": ".localspec 95"
+      "id": 95
     },
     {
       "action": "learn",

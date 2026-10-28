@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "name": "Incarnation of Chaos raises damage dealt by 15% for 15 seconds (#765)",
+  "contract": "#765: Incarnation of Chaos 570067 reads '... In addition, your damage dealt is increased by $s3% for $d.' Effect 2 is SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (79) with EffectMiscValue 127 (every school) and EffectBasePoints 14 + DieSides 1 = 15; DurationIndex 8 is 15000 ms. Unit::SpellPctDamageModsDone applies aura 79 natively, so a Chromatic Shard 801292 damage query rises by exactly 15% once the buff is up. This pins the clause that already works. The Chromatic Shard cooldown reset, cast-while-moving and free-next-cast clauses have no carrier in the record (effects 0 and 1 resolve to 0, and their masks do not select Chromatic Shard); docs/coa/chronomancer-completion.md records them and they are not asserted here.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "chronomancer",
+      "entry": 36,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 570067
+    },
+    {
+      "action": "snapshot",
+      "label": "Chromatic Shard damage before Incarnation of Chaos",
+      "actor": "chronomancer",
+      "metric": "spell_damage_done",
+      "spell": 801292,
+      "target": "dummy",
+      "save_as": "shard_base"
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 570067
+    },
+    {
+      "action": "assert",
+      "label": "Incarnation of Chaos is active",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 570067,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "It lasts 15 seconds",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "caster": "chronomancer",
+      "min": 12000,
+      "max": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Damage dealt is 15% higher",
+      "actor": "chronomancer",
+      "metric": "spell_damage_done",
+      "spell": 801292,
+      "target": "dummy",
+      "ratio_to": "shard_base",
+      "min": 1.145,
+      "max": 1.155
+    }
+  ]
+}

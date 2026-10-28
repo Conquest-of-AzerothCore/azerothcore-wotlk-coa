@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "name": "Illidari Intuition and Greater Illidari Intuition cannot both be active (#4718)",
+  "contract": "Illidari Intuition (800212, +19 Agility) and Greater Illidari Intuition (680308, +76 Agility, raid radius) both apply SPELL_AURA_MOD_STAT/agility directly to the target with no shared party-buff-slot aura id, and neither had a spell_group exclusivity entry: rev_20260909_05_felsworn_completion.sql's spell_group 1078 covers the differently themed Man'ari Intuition pair (523478, 523495) instead. rev_20260928_97_felsworn_illidari_intuition_exclusivity.sql adds a fresh group (1143, confirmed unused) with SPELL_GROUP_STACK_RULE_EXCLUSIVE_FROM_SAME_CASTER (2), the same rule the Man'ari and Chronomancer Wisdom groups already use, so casting the second rank from the same caster replaces the first via Aura::CanStackWith rather than letting both sit on the target at once.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "felsworn",
+      "race": 1,
+      "class": 14,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "felsworn",
+      "spell": 800212
+    },
+    {
+      "action": "learn",
+      "actor": "felsworn",
+      "spell": 680308
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 800212,
+      "target": "felsworn"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Illidari Intuition is active",
+      "actor": "felsworn",
+      "metric": "aura",
+      "spell": 800212,
+      "caster": "felsworn",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Clear the 1000ms StartRecoveryCategory 133 shared by both ranks before casting the second one",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 680308,
+      "target": "felsworn"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Greater Illidari Intuition cast succeeded",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 680308,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Greater Illidari Intuition replaces the base rank instead of stacking alongside it",
+      "actor": "felsworn",
+      "metric": "aura",
+      "spell": 800212,
+      "caster": "felsworn",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Greater Illidari Intuition is the one active rank",
+      "actor": "felsworn",
+      "metric": "aura",
+      "spell": 680308,
+      "caster": "felsworn",
+      "equals": 1
+    }
+  ]
+}

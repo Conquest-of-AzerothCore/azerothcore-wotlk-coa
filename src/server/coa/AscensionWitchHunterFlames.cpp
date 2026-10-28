@@ -140,7 +140,7 @@ class spell_ascension_witch_hunter_flames_of_sin : public AuraScript
 
     bool Load() override
     {
-        return IsFlameCaster(GetCaster()) && GetCaster() == GetTarget();
+        return IsFlameCaster(GetCaster()) && GetCaster() == GetUnitOwner();
     }
 
     bool CheckProc(ProcEventInfo& eventInfo)
@@ -229,7 +229,7 @@ class spell_ascension_witch_hunter_flame_modifier_update : public AuraScript
 
     bool Load() override
     {
-        return IsFlameCaster(GetTarget());
+        return IsFlameCaster(GetUnitOwner());
     }
 
     void UpdateFlameAmount(AuraEffect const*, AuraEffectHandleModes)
@@ -265,7 +265,7 @@ void ApplyAscensionWitchHunterFlameContracts(SpellInfo* spellInfo)
     }
     else if (spellInfo->Id == SPELL_FLAMES_DAMAGE && spellInfo->SpellFamilyFlags == flag96(0, 0, 16384) &&
         spellInfo->Effects[EFFECT_0].Effect == SPELL_EFFECT_SCHOOL_DAMAGE && spellInfo->Effects[EFFECT_0].DieSides == 1 &&
-        !spellInfo->Effects[EFFECT_0].RealPointsPerLevel && spellInfo->Effects[EFFECT_0].BonusMultiplier == 0.25f)
+        !spellInfo->Effects[EFFECT_0].RealPointsPerLevel)
     {
         spellInfo->Effects[EFFECT_0].BonusMultiplier = 0.0f;
         spellInfo->Effects[EFFECT_0].ChainTarget = 1;

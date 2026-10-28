@@ -1,0 +1,349 @@
+{
+  "schema": 1,
+  "name": "Blood Binding strikes and roots after Scythe Rush follows Cull (#3493)",
+  "contract": [
+    "Blood Binding 805200 (live): 'Using Scythe Rush directly after Cull deals 388.8 Spellshadow Damage to",
+    "nearby",
+    "enemies and roots them for 3 sec.' Cull is 800930 (and its variant 800940), Scythe Rush is 500359, the",
+    "damage is",
+    "801334 (nearby enemies) and the root is 802752. Scythe Rush with no Cull before it triggers nothing.",
+    "The setup uses the shipped TheGreatArena game_tele position, with the rush victim at 20 yards, avoiding",
+    "the old too-close range and a ground-obstructed sight line.",
+    "Original Blood Binding 805200 has Attributes 262544 without PASSIVE and DurationIndex 0. The learned",
+    "talent cannot be gated on a persistent aura. Its benefit follows the active spellbook entry: the native",
+    "sequence must proc when learned and must not proc when absent. Costs, cooldowns, hit checks and normal",
+    "Cull/Scythe Rush casts remain enabled."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 10,
+      "class": 30,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "binder",
+      "race": 10,
+      "class": 30,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "untalented",
+      "race": 10,
+      "class": 30,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "control_cull",
+      "owner": "control",
+      "entry": 299,
+      "level": 80,
+      "health": 1000000,
+      "distance": 8
+    },
+    {
+      "id": "control_rush",
+      "owner": "control",
+      "entry": 299,
+      "level": 80,
+      "health": 1000000,
+      "distance": 20
+    },
+    {
+      "id": "binder_cull",
+      "owner": "binder",
+      "entry": 299,
+      "level": 80,
+      "health": 1000000,
+      "distance": 8
+    },
+    {
+      "id": "binder_rush",
+      "owner": "binder",
+      "entry": 299,
+      "level": 80,
+      "health": 1000000,
+      "distance": 20
+    },
+    {
+      "id": "untalented_cull",
+      "owner": "untalented",
+      "entry": 299,
+      "level": 80,
+      "health": 1000000,
+      "distance": 8
+    },
+    {
+      "id": "untalented_rush",
+      "owner": "untalented",
+      "entry": 299,
+      "level": 80,
+      "health": 1000000,
+      "distance": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 805200
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_active",
+      "spell": 805200,
+      "equals": 1,
+      "label": "The Blood Binding talent is an active learned spellbook entry"
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 800930
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 500359
+    },
+    {
+      "action": "learn",
+      "actor": "binder",
+      "spell": 805200
+    },
+    {
+      "action": "assert",
+      "actor": "binder",
+      "metric": "spell_active",
+      "spell": 805200,
+      "equals": 1,
+      "label": "The Blood Binding talent is an active learned spellbook entry"
+    },
+    {
+      "action": "learn",
+      "actor": "binder",
+      "spell": 800930
+    },
+    {
+      "action": "learn",
+      "actor": "binder",
+      "spell": 500359
+    },
+    {
+      "action": "set_health",
+      "actor": "control_cull",
+      "value": 150000
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "binder_cull",
+      "value": 150000
+    },
+    {
+      "action": "set_power",
+      "actor": "binder",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "control uses Scythe Rush with no Cull before it",
+      "actor": "control",
+      "spell": 500359,
+      "target": "control_rush"
+    },
+    {
+      "action": "assert",
+      "label": "control Scythe Rush was accepted",
+      "actor": "control",
+      "metric": "cast_failure",
+      "spell": 500359,
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "untalented",
+      "spell": 805200
+    },
+    {
+      "action": "assert",
+      "actor": "untalented",
+      "metric": "spell_active",
+      "spell": 805200,
+      "equals": 0,
+      "label": "The negative control has no learned Blood Binding talent"
+    },
+    {
+      "action": "learn",
+      "actor": "untalented",
+      "spell": 800930
+    },
+    {
+      "action": "learn",
+      "actor": "untalented",
+      "spell": 500359
+    },
+    {
+      "action": "set_power",
+      "actor": "untalented",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "untalented",
+      "spell": 800930,
+      "target": "untalented_cull"
+    },
+    {
+      "action": "assert",
+      "actor": "untalented",
+      "metric": "spell_cast_count",
+      "spell": 800930,
+      "min": 1,
+      "within_ms": 1000,
+      "label": "The untalented control completes a normal Cull"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "untalented",
+      "spell": 500359,
+      "target": "untalented_rush"
+    },
+    {
+      "action": "assert",
+      "actor": "untalented",
+      "metric": "spell_cast_count",
+      "spell": 500359,
+      "min": 1,
+      "within_ms": 1000,
+      "label": "The untalented control completes normal Scythe Rush"
+    },
+    {
+      "action": "assert",
+      "actor": "untalented",
+      "metric": "spell_damage_count",
+      "spell": 801334,
+      "equals": 0,
+      "label": "The sequence grants no Blood Binding damage without the talent"
+    },
+    {
+      "action": "cast",
+      "label": "binder uses Cull",
+      "actor": "binder",
+      "spell": 800930,
+      "target": "binder_cull"
+    },
+    {
+      "action": "assert",
+      "actor": "binder",
+      "metric": "spell_cast_count",
+      "spell": 800930,
+      "min": 1,
+      "within_ms": 1000,
+      "label": "Cull completed an actual native cast before the sequence check"
+    },
+    {
+      "action": "assert",
+      "label": "binder Cull was accepted",
+      "actor": "binder",
+      "metric": "cast_failure",
+      "spell": 800930,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the Cull leap land and the global cooldown pass",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "binder uses Scythe Rush directly after Cull",
+      "actor": "binder",
+      "spell": 500359,
+      "target": "binder_rush"
+    },
+    {
+      "action": "assert",
+      "label": "binder Scythe Rush was accepted",
+      "actor": "binder",
+      "metric": "cast_failure",
+      "spell": 500359,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "binder",
+      "metric": "spell_cast_count",
+      "spell": 500359,
+      "min": 1,
+      "within_ms": 1000,
+      "label": "The talented sequence completes an actual native Scythe Rush"
+    },
+    {
+      "action": "assert",
+      "label": "Blood Binding strikes the nearby enemy",
+      "actor": "binder",
+      "metric": "spell_damage_count",
+      "spell": 801334,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Blood Binding roots the enemies it strikes",
+      "actor": "binder_cull",
+      "metric": "aura",
+      "spell": 802752,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Absence window",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Scythe Rush without Cull first does not trigger Blood Binding",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 801334,
+      "equals": 0
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -13226.2,
+    "y": 228.625,
+    "z": 33.1421,
+    "o": 0
+  }
+}

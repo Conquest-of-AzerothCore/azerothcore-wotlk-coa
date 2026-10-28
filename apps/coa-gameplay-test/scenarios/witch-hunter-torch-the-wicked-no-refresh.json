@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "name": "Witch Hunter: Torch the Wicked stacks attack speed without refreshing its duration",
+  "contract": [
+    "Torch the Wicked! 560226 (talent, Inquisition tab) reads 'Dealing damage with Flames of Sin now grants",
+    "$560227s1% attack speed, stacking up to $560227u times for $560227d. Application of this effect does not",
+    "refresh the duration.' 560227 is SPELL_AURA_MOD_MELEE_HASTE, BasePoints 1 + DieSides 1 = 2%, StackAmount 12,",
+    "SpellDuration 32 = 6000 ms. So the first Flames of Sin hit 802850 creates the buff for 6 s, later hits only add",
+    "stacks, and the buff ends 6 s after it was created even while Fire hits continue. The stock aura re-cast",
+    "(Aura::ModStackAmount) refreshes the duration on every stack, which the text excludes.",
+    "spell_ascension_witch_hunter_torch_stacks adds the stack without a refresh, but its Load read GetTarget(),",
+    "which is null outside effect hooks (AuraScript::GetTarget), so the script never attached and the native",
+    "PROC_TRIGGER_SPELL re-cast refreshed the buff on every Fire hit. Flourish 805365 grants Flames of Sin for",
+    "$/1000;s2 = 10 s; the fixture dual-wields (Worn Shortsword 1.9 s, Worn Dagger 1.6 s), so hits are at most",
+    "1.6 s apart. Three seconds after the first stack about 3 s remain (a refresh leaves at least 4.4 s), and",
+    "6.1 s after it the buff has expired and holds at most the one or two newest stacks (a refresh keeps it",
+    "stacking). Ratings remove melee misses, dodges and parries and the Fire hit's spell miss."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hunter", "race": 1, "class": 15, "level": 60, "melee_hit_rating": 10000,
+      "expertise_rating": 10000, "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "hunter", "entry": 36, "level": 60, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 5000 },
+    { "action": "learn", "actor": "hunter", "spell": 201 },
+    { "action": "learn", "actor": "hunter", "spell": 1180 },
+    { "action": "learn", "actor": "hunter", "spell": 674 },
+    { "action": "learn", "actor": "hunter", "spell": 805365 },
+    { "action": "learn", "actor": "hunter", "spell": 560226 },
+    { "action": "add_item", "actor": "hunter", "item": 25 },
+    { "action": "equip", "actor": "hunter", "item": 25, "slot": 15 },
+    { "action": "add_item", "actor": "hunter", "item": 2092 },
+    { "action": "equip", "actor": "hunter", "item": 2092, "slot": 16 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "SETUP: Torch the Wicked is active", "actor": "hunter", "metric": "aura",
+      "spell": 560226, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: the off hand holds a weapon", "actor": "hunter",
+      "metric": "weapon_damage_min", "hand": 1, "min": 1
+    },
+    { "action": "attack", "actor": "hunter", "target": "enemy" },
+    {
+      "action": "assert", "label": "SETUP: auto attacks land", "actor": "hunter",
+      "metric": "melee_damage_count", "min": 2, "within_ms": 6000
+    },
+    {
+      "action": "assert", "label": "Control: auto attacks without Flames of Sin grant no attack speed",
+      "actor": "hunter", "metric": "aura_stacks", "spell": 560227, "equals": 0
+    },
+    { "action": "cast", "label": "Flourish grants Flames of Sin for 10 s", "actor": "hunter", "spell": 805365 },
+    {
+      "action": "assert", "label": "SETUP: Flames of Sin is active", "actor": "hunter", "metric": "aura",
+      "spell": 803422, "caster": "hunter", "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The first Flames of Sin hit grants the attack speed buff", "actor": "hunter",
+      "metric": "aura_stacks", "spell": 560227, "caster": "hunter", "min": 1, "within_ms": 3000
+    },
+    { "action": "wait", "label": "Keep hitting under Flames of Sin for 3 s", "ms": 3000 },
+    {
+      "action": "assert", "label": "SETUP: Flames of Sin is still active", "actor": "hunter", "metric": "aura",
+      "spell": 803422, "caster": "hunter", "equals": 1
+    },
+    {
+      "action": "assert", "label": "Later Flames of Sin hits add stacks", "actor": "hunter",
+      "metric": "aura_stacks", "spell": 560227, "caster": "hunter", "min": 2
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: added stacks do not refresh the 6 s duration",
+      "actor": "hunter", "metric": "aura_duration_ms", "spell": 560227, "caster": "hunter", "min": 1, "max": 3500
+    },
+    { "action": "wait", "label": "Pass the 6 s after the first stack", "ms": 3100 },
+    {
+      "action": "assert", "label": "SETUP: Flames of Sin is still active, so Fire hits continue", "actor": "hunter",
+      "metric": "aura", "spell": 803422, "caster": "hunter", "equals": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the buff expired 6 s after it was created and restarts",
+      "actor": "hunter", "metric": "aura_stacks", "spell": 560227, "caster": "hunter", "max": 2
+    },
+    { "action": "stop_attack", "actor": "hunter" },
+    { "action": "assert", "actor": "hunter", "metric": "alive", "equals": 1 }
+  ]
+}

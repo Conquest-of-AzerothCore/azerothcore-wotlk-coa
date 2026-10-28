@@ -1,0 +1,238 @@
+{
+  "schema": 1,
+  "name": "Venomancer: later Venom Bolts deal about the first one's damage, also against a Destiny Weaver-lifted creature (#5321)",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "v",
+      "race": 1,
+      "class": 29,
+      "level": 9,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "v",
+      "entry": 36,
+      "level": 9,
+      "health": 1000000,
+      "distance": 5
+    },
+    {
+      "id": "low",
+      "owner": "v",
+      "entry": 1501,
+      "level": 1,
+      "health": 100000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 502870,
+      "label": "Learn Venom Bolt rank 2"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 502870,
+      "target": "d",
+      "label": "First Venom Bolt"
+    },
+    {
+      "action": "assert",
+      "label": "The first Venom Bolt hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 502870,
+      "target": "d",
+      "within_ms": 6000,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "First Venom Bolt damage",
+      "actor": "v",
+      "metric": "spell_damage_total",
+      "spell": 502870,
+      "target": "d",
+      "save_as": "first"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 502870,
+      "target": "d",
+      "label": "Second Venom Bolt"
+    },
+    {
+      "action": "assert",
+      "label": "The second Venom Bolt hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 502870,
+      "target": "d",
+      "within_ms": 6000,
+      "equals": 2
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 502870,
+      "target": "d",
+      "label": "Third Venom Bolt"
+    },
+    {
+      "action": "assert",
+      "label": "The third Venom Bolt hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 502870,
+      "target": "d",
+      "within_ms": 6000,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Three Venom Bolts deal 1.5-6x the first one, not a 10x hit",
+      "actor": "v",
+      "metric": "spell_damage_total",
+      "spell": 502870,
+      "target": "d",
+      "ratio_to": "first",
+      "min": 1.5,
+      "max": 6
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 1000
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "label": "Destiny Weaver shows the level-1 creature lifted for the level-9 player",
+      "actor": "v",
+      "metric": "view_level",
+      "target": "low",
+      "min": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 502870,
+      "target": "low",
+      "label": "Venom Bolt 1 at the lifted creature"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 1 hits the lifted creature",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 502870,
+      "target": "low",
+      "within_ms": 6000,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Damage after Venom Bolt 1 at the lifted creature",
+      "actor": "v",
+      "metric": "spell_damage_total",
+      "spell": 502870,
+      "target": "low",
+      "save_as": "low1"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 502870,
+      "target": "low",
+      "label": "Venom Bolt 2 at the lifted creature"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 2 hits the lifted creature",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 502870,
+      "target": "low",
+      "within_ms": 6000,
+      "equals": 2
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 502870,
+      "target": "low",
+      "label": "Venom Bolt 3 at the lifted creature"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 3 hits the lifted creature",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 502870,
+      "target": "low",
+      "within_ms": 6000,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Three Venom Bolts at the lifted creature deal 1.5-6x the first one, not a 10x hit",
+      "actor": "v",
+      "metric": "spell_damage_total",
+      "spell": 502870,
+      "target": "low",
+      "ratio_to": "low1",
+      "min": 1.5,
+      "max": 6
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 1000
+    }
+  ]
+}

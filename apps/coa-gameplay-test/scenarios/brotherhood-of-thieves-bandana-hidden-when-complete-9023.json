@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "A finished Brotherhood of Thieves stops offering Red Burlap Bandanas on corpses killed earlier",
+  "contract": "Brotherhood of Thieves (quest 18) asks for 8 Red Burlap Bandanas (752); Defias Thug (38) drops one only for players who need it (creature_loot_template QuestRequired 1). A player holding 7 kills two Thugs before looting, so both corpses are assigned a bandana. The first corpse offers it and looting it completes the quest. The second corpse, opened after the quest is complete, must not offer a bandana the player can no longer take: before #9023 it was listed as a locked slot and clicking it closed the loot window.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 4 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "prepare_quest", "label": "Take Brotherhood of Thieves; the fixture hands over all 8 bandanas",
+      "actor": "hero", "quest": 18 },
+    { "action": "destroy_item", "actor": "hero", "item": 752 },
+    { "action": "add_item", "label": "Hold 7 of the 8 bandanas", "actor": "hero", "item": 752, "count": 7 },
+    { "action": "assert", "label": "The quest still needs a bandana", "actor": "hero", "metric": "quest_status",
+      "quest": 18, "equals": 3, "within_ms": 2000 },
+    { "action": "summon", "actor": "hero", "entry": 38, "as": "first", "distance": 3 },
+    { "action": "summon", "actor": "hero", "entry": 38, "as": "second", "distance": 4 },
+    { "action": "wait", "ms": 300 },
+    { "action": "attack_nearby", "actor": "hero", "entry": 38, "kill": true },
+    { "action": "attack_nearby", "actor": "hero", "entry": 38, "kill": true },
+    { "action": "assert", "actor": "first", "metric": "alive", "equals": 0, "within_ms": 5000 },
+    { "action": "assert", "actor": "second", "metric": "alive", "equals": 0, "within_ms": 5000 },
+    { "action": "loot_creature", "actor": "hero", "target": "first" },
+    {
+      "action": "assert", "label": "A corpse offers the bandana while the quest needs it",
+      "actor": "hero", "metric": "loot_offered_item_count", "item": 752, "equals": 1
+    },
+    { "action": "loot_slot", "actor": "hero", "item": 752 },
+    { "action": "close_loot", "actor": "hero" },
+    {
+      "action": "assert", "label": "The eighth bandana completes the quest",
+      "actor": "hero", "metric": "quest_status", "quest": 18, "equals": 1, "within_ms": 2000
+    },
+    { "action": "loot_creature", "actor": "hero", "target": "second" },
+    {
+      "action": "assert", "label": "The earlier corpse no longer offers a bandana",
+      "actor": "hero", "metric": "loot_offered_item_count", "item": 752, "equals": 0
+    },
+    {
+      "action": "assert", "label": "The player keeps exactly 8 bandanas",
+      "actor": "hero", "metric": "item_count", "item": 752, "equals": 8
+    }
+  ]
+}

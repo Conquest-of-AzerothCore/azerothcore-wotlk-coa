@@ -3,6 +3,7 @@
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
+#include "SpellAuraEffects.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
@@ -17,6 +18,8 @@ enum ReaperSecondarySpells : uint32
     SPELL_SPIRIT_WALKER = 561082,
     SPELL_SPIRIT_WALKER_SPEED = 561093,
     SPELL_ENDBRINGER = 800922,
+    SPELL_GRAVESITE = 572213,
+    SPELL_GRAVESITE_AREA = 804722,
     SPELL_ENDBRINGER_AMOUNT = 801341,
     SPELL_ENDBRINGER_HEAL = 520419,
     SPELL_DIRGE = 801328,
@@ -25,10 +28,18 @@ enum ReaperSecondarySpells : uint32
     SPELL_SPECTRE_HIT = 803742,
     SPELL_SPECTRE_ROOT = 803942,
     SPELL_MURDER = 500376,
+    SPELL_HARD_BARGAIN = 300569,
+    SPELL_TORMENTED_SOULS = 500481,
+    SPELL_HARD_BARGAIN_HELPER = 572300,
     SPELL_CRIMSON_THIRST = 807415,
     SPELL_CRIMSON_STACK = 807416,
     SPELL_CRIMSON_AMOUNT = 807417,
-    SPELL_CRIMSON_HEAL = 807545
+    SPELL_CRIMSON_HEAL = 807545,
+    SPELL_GHOSTLY_WEAPON = 803997,
+    SPELL_GHOSTLY_WEAPON_FROST = 804474,
+    SPELL_LAMENTING = 705397,
+    SPELL_LAMENTING_HEAL = 807420,
+    SPELL_SHADE = 573038
 };
 
 void HealFromDamage(Player* player, uint32 reference, uint32 helper, uint32 damage)
@@ -73,6 +84,39 @@ public:
     }
 };
 
+class reaper_hard_bargain : public UnitScript
+{
+public:
+    reaper_hard_bargain() : UnitScript("reaper_hard_bargain", true,
+        {UNITHOOK_ON_AURA_APPLY, UNITHOOK_ON_AURA_REMOVE}) { }
+
+    void OnAuraApply(Unit* unit, Aura* aura) override
+    {
+        Player* player = unit ? unit->ToPlayer() : nullptr;
+        if (!player || player->getClass() != CLASS_REAPER || !aura ||
+            aura->GetCasterGUID() != player->GetGUID() ||
+            (aura->GetId() != SPELL_HARD_BARGAIN && aura->GetId() != SPELL_TORMENTED_SOULS))
+            return;
+
+        if (player->HasAura(SPELL_HARD_BARGAIN, player->GetGUID()) &&
+            player->HasAura(SPELL_TORMENTED_SOULS, player->GetGUID()) &&
+            !player->HasAura(SPELL_HARD_BARGAIN_HELPER, player->GetGUID()))
+            player->CastSpell(player, SPELL_HARD_BARGAIN_HELPER, true);
+    }
+
+    void OnAuraRemove(Unit* unit, AuraApplication* application, AuraRemoveMode) override
+    {
+        Player* player = unit ? unit->ToPlayer() : nullptr;
+        if (!player || player->getClass() != CLASS_REAPER || !application)
+            return;
+
+        Aura* aura = application->GetBase();
+        if (aura->GetCasterGUID() == player->GetGUID() &&
+            (aura->GetId() == SPELL_HARD_BARGAIN || aura->GetId() == SPELL_TORMENTED_SOULS))
+            player->RemoveAurasDueToSpell(SPELL_HARD_BARGAIN_HELPER, player->GetGUID());
+    }
+};
+
 class reaper_secondary_hits : public AllSpellScript
 {
 public:
@@ -89,6 +133,10 @@ public:
 
     void OnSpellCast(Spell* spell, Unit* caster, SpellInfo const* info, bool) override
     {
+        if (info->Id == SPELL_ENDBRINGER && caster->IsPlayer() && caster->getClass() == CLASS_REAPER &&
+            !spell->IsTriggered() && caster->HasAura(SPELL_GRAVESITE, caster->GetGUID()))
+            caster->CastSpell(caster, SPELL_GRAVESITE_AREA, true);
+
         if (caster->IsPlayer() && caster->getClass() == CLASS_REAPER && !spell->IsTriggered() &&
             sSpellMgr->GetFirstSpellInChain(info->Id) == SPELL_MURDER &&
             spell->GetScriptValue(SPELL_CRIMSON_STACK))
@@ -104,6 +152,8 @@ public:
         uint32 id = spell->GetSpellInfo()->Id;
         if (id == SPELL_DIRGE_HIT && player->HasAura(SPELL_ENDBRINGER, player->GetGUID()))
             HealFromDamage(player, SPELL_ENDBRINGER_AMOUNT, SPELL_ENDBRINGER_HEAL, damage);
+        if (id == SPELL_GHOSTLY_WEAPON_FROST && player->HasAura(SPELL_LAMENTING, player->GetGUID()))
+            HealFromDamage(player, SPELL_LAMENTING, SPELL_LAMENTING_HEAL, damage);
         if (id == SPELL_SPECTRE_HIT && target->IsAlive())
             player->CastSpell(target, SPELL_SPECTRE_ROOT, true);
         if (spell->IsTriggered())
@@ -118,6 +168,30 @@ public:
         }
         if (root == SPELL_MURDER && spell->GetScriptValue(SPELL_CRIMSON_STACK) >= 5)
             HealFromDamage(player, SPELL_CRIMSON_AMOUNT, SPELL_CRIMSON_HEAL, damage);
+    }
+};
+
+class aura_ascension_gravesite : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_gravesite);
+
+    bool Check(ProcEventInfo& event)
+    {
+        Unit* player = GetTarget();
+        Unit* victim = event.GetActionTarget();
+        if (!player->IsPlayer() || player->getClass() != CLASS_REAPER || GetCaster() != player ||
+            event.GetActor() != player || !victim || victim == player || player->IsFriendlyTo(victim) ||
+            !event.GetDamageInfo() || !event.GetDamageInfo()->GetDamage() ||
+            !(event.GetHitMask() & PROC_HIT_CRITICAL) ||
+            (event.GetTypeMask() & (PROC_FLAG_DONE_PERIODIC | PROC_FLAG_TAKEN_PERIODIC)))
+            return false;
+
+        return victim->HasAura(SPELL_GRAVESITE_AREA);
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(aura_ascension_gravesite::Check);
     }
 };
 
@@ -155,6 +229,74 @@ class aura_ascension_crimson_thirst : public AuraScript
     }
 };
 
+class aura_ascension_reaper_shade : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_reaper_shade);
+
+    bool Validate(SpellInfo const* info) override
+    {
+        SpellEffectInfo const& effect = info->Effects[EFFECT_0];
+        return info->Id == SPELL_SHADE &&
+            effect.Effect == SPELL_EFFECT_APPLY_AURA && effect.ApplyAuraName == SPELL_AURA_TRANSFORM &&
+            effect.TargetA.GetTarget() == TARGET_UNIT_CASTER;
+    }
+
+    void RemoveImpairment(AuraEffect const*, AuraEffectHandleModes)
+    {
+        Unit* target = GetTarget();
+        if (target)
+            target->RemoveMovementImpairingAuras(true);
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(aura_ascension_reaper_shade::RemoveImpairment,
+            EFFECT_0, SPELL_AURA_TRANSFORM, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
+class aura_ascension_ghostly_weapon : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_ghostly_weapon);
+
+    bool Validate(SpellInfo const* info) override
+    {
+        SpellInfo const* frost = sSpellMgr->GetSpellInfo(SPELL_GHOSTLY_WEAPON_FROST);
+        return info->Id == SPELL_GHOSTLY_WEAPON && info->Effects[EFFECT_0].ApplyAuraName == 354 &&
+            frost && frost->SchoolMask == SPELL_SCHOOL_MASK_FROST &&
+            frost->Effects[EFFECT_0].Effect == SPELL_EFFECT_SCHOOL_DAMAGE;
+    }
+
+    bool Check(ProcEventInfo& event)
+    {
+        Unit* owner = GetTarget();
+        Unit* victim = event.GetActionTarget();
+        DamageInfo const* damage = event.GetDamageInfo();
+        SpellInfo const* spell = event.GetSpellInfo();
+        return owner->IsPlayer() && owner->getClass() == CLASS_REAPER && owner->IsAlive() &&
+            GetCasterGUID() == owner->GetGUID() && event.GetActor() == owner && victim &&
+            victim->IsAlive() && !owner->IsFriendlyTo(victim) && damage && damage->GetDamage() &&
+            damage->GetDamageType() != DOT && (!spell || spell->Id != SPELL_GHOSTLY_WEAPON_FROST) &&
+            (event.GetTypeMask() & (PROC_FLAG_DONE_MELEE_AUTO_ATTACK | PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS));
+    }
+
+    void Proc(AuraEffect const* effect, ProcEventInfo& event)
+    {
+        PreventDefaultAction();
+        uint64 amount = uint64(event.GetDamageInfo()->GetDamage()) * std::max(0, effect->GetAmount()) / 100;
+        if (amount)
+            GetTarget()->CastCustomSpell(SPELL_GHOSTLY_WEAPON_FROST, SPELLVALUE_BASE_POINT0,
+                int32(std::min<uint64>(amount, std::numeric_limits<int32>::max())),
+                event.GetActionTarget(), TRIGGERED_FULL_MASK);
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(aura_ascension_ghostly_weapon::Check);
+        OnEffectProc += AuraEffectProcFn(aura_ascension_ghostly_weapon::Proc, EFFECT_0, AuraType(354));
+    }
+};
+
 class reaper_secondary_metadata : public GlobalScript
 {
 public:
@@ -171,11 +313,14 @@ public:
         }
         if (info->Id == SPELL_ENDBRINGER_HEAL)
             info->DmgClass = SPELL_DAMAGE_CLASS_NONE;
-        if (info->Id == SPELL_SPIRIT_WALKER_SPEED || info->Id == SPELL_CRIMSON_STACK)
+        if (info->Id == SPELL_SPIRIT_WALKER_SPEED || info->Id == SPELL_CRIMSON_STACK ||
+            info->Id == SPELL_HARD_BARGAIN_HELPER)
         {
             info->AttributesCu &= ~SPELL_ATTR0_CU_FORCE_AURA_SAVING;
             info->AttributesCu |= SPELL_ATTR0_CU_AURA_CANNOT_BE_SAVED;
         }
+        if (info->Id == SPELL_GHOSTLY_WEAPON_FROST)
+            info->AscensionInheritsResolvedAmount = true;
     }
 };
 }
@@ -183,7 +328,11 @@ public:
 void AddSC_AscensionReaperSecondary()
 {
     new reaper_ghost_speed();
+    new reaper_hard_bargain();
     new reaper_secondary_hits();
     new reaper_secondary_metadata();
+    RegisterSpellScript(aura_ascension_gravesite);
     RegisterSpellScript(aura_ascension_crimson_thirst);
+    RegisterSpellScript(aura_ascension_reaper_shade);
+    RegisterSpellScript(aura_ascension_ghostly_weapon);
 }

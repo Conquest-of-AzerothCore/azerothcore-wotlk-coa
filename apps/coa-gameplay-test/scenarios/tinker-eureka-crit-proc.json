@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "name": "Eureka! grants its healing bonus on a critical heal (#4748)",
+  "contract": "Eureka! (503552, passive) is ProcFlags 0, ProcChance 100, effect 0 SPELL_AURA_PROC_TRIGGER_SPELL to 503553, whose driver's tooltip reads 'Direct healing critical strikes now increase the healing done by your next Repair Shot or Emergency Heal by $503553s1% for $503553d' (503552 Description[enUS]), a dynamic macro resolved from 503553's own effect value, not a literal percentage. spell_proc for 503552 keeps Chance=100 (rev_20260910_15_tinker_completion.sql; the parity migration's zero-out list does not include 503552), and AscensionTinkerEvents.cpp's aura_ascension_tinker_event::Check() matches 'case 503552: return healing && !periodic && critical;' with Proc() granting 503553 -- a complete, unconditional contract with no missing wiring, so this is a regression scenario, not a fix. spell_crit_rating 100000 makes the critical strike deterministic (the same technique the bloodmage crit-proc scenarios use) instead of relying on a real crit-chance roll. Emergency Heal 802691 is the rank a level 80 Tinker owns (AscensionSpellProgressionData.h: root 802684, this rank granted at level 60); 503553's EffectBasePoints[0]=29 with EffectDieSides[0]=1 resolves through SpellEffectInfo::CalcValue's DieSides==1 case (basePoints += 1) to an aura amount of 30, which AuraEffect::GetAmount() (the aura_amount metric) returns. Both fixtures start below max health so the heal is not pure overheal, which would report zero effective healing and never satisfy Check()'s healing condition regardless of the crit.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "eureka",
+      "race": 1,
+      "class": 28,
+      "level": 80,
+      "spell_crit_rating": 100000
+    },
+    {
+      "id": "plain",
+      "race": 1,
+      "class": 28,
+      "level": 80,
+      "spell_crit_rating": 100000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "eureka",
+      "spell": 503552
+    },
+    {
+      "action": "learn",
+      "actor": "eureka",
+      "spell": 802691
+    },
+    {
+      "action": "learn",
+      "actor": "plain",
+      "spell": 802691
+    },
+    {
+      "action": "set_health",
+      "actor": "eureka",
+      "value": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "plain",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "label": "Eureka! is not applied before any heal lands",
+      "actor": "eureka",
+      "metric": "aura",
+      "spell": 503553,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "eureka",
+      "spell": 802691
+    },
+    {
+      "action": "assert",
+      "label": "The forced-crit heal actually landed",
+      "actor": "eureka",
+      "metric": "health",
+      "min": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Eureka! grants its buff after a healing crit",
+      "actor": "eureka",
+      "metric": "aura",
+      "spell": 503553,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The buff carries the DBC's resolved 30 point healing bonus (EffectBasePoints 29, DieSides 1)",
+      "actor": "eureka",
+      "metric": "aura_amount",
+      "spell": 503553,
+      "effect": 0,
+      "equals": 30
+    },
+    {
+      "action": "cast",
+      "actor": "plain",
+      "spell": 802691
+    },
+    {
+      "action": "assert",
+      "label": "The forced-crit heal landed for the control too",
+      "actor": "plain",
+      "metric": "health",
+      "min": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Without Eureka! known, no buff is granted from the same crit",
+      "actor": "plain",
+      "metric": "aura",
+      "spell": 503553,
+      "equals": 0
+    }
+  ]
+}

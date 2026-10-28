@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Heroic Dextren Ward leaves one Heroic dungeon item on his corpse (#8260)",
+  "contract": [
+    "#8260: Dextren Ward on Heroic (101663) dropped only his quest items. On Ascension each Heroic kill also left one",
+    "random Heroic dungeon item (db.exil.es archive: 889 items at 0.112 % each). The corpse now rolls the Dungeon",
+    "Spoils (Heroic) item pool (reference 1202039) once, so nearly every fill holds a rare or better item, and a",
+    "Heroic kill leaves one Heroic gear item of item level 61 on the corpse."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8914.0, "y": -133.0, "z": 80.6},
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "label": "Heroic Dextren's loot list holds a rare or better item in nearly every fill",
+     "actor": "hero", "metric": "creature_loot_quality_rate", "entry": 101663, "min": 95, "max": 100},
+    {"action": "set_health", "actor": "hero", "value": 5000000, "maximum": 5000000},
+    {"action": "ascension_dungeon_difficulty_packet", "actor": "hero", "value": 1},
+    {"action": "wait", "ms": 250},
+    {"action": "teleport", "actor": "hero", "map": 34, "x": 54.23, "y": 0.28, "z": -18.34},
+    {"action": "wait", "ms": 1500},
+    {"action": "assert", "label": "CONTROL: The Stockade on Heroic", "actor": "hero", "metric": "map_difficulty",
+     "equals": 1},
+    {"action": "summon", "actor": "hero", "entry": 1663, "as": "dextren", "distance": 4},
+    {"action": "wait", "ms": 300},
+    {"action": "assert", "label": "CONTROL: the Heroic template", "actor": "hero",
+     "metric": "nearby_creature_template", "entry": 1663, "equals": 101663},
+    {"action": "attack_nearby", "actor": "hero", "entry": 1663, "kill": true},
+    {"action": "assert", "actor": "dextren", "metric": "alive", "equals": 0, "within_ms": 10000},
+    {"action": "loot_creature", "actor": "hero", "target": "dextren"},
+    {"action": "assert", "label": "One Heroic dungeon gear item on the corpse", "actor": "hero",
+     "metric": "loot_gear_item_level", "min": 61, "max": 61},
+    {"action": "close_loot", "actor": "hero"}
+  ]
+}

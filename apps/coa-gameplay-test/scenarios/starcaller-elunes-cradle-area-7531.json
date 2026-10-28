@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "name": "Elune's Cradle places its visible healing area around the enemy (#7531)",
+  "contract": "#7531: with Aspect of the Goddess, Warden's Blade casts Elune's Cradle 807992 on its target. Spell.dbc makes 807992 a persistent area aura (effect 27) with spell visual 2911, centred on the enemy (TargetA TARGET_UNIT_TARGET_ENEMY) and applying a periodic heal (aura 8, every 3 sec) to allies inside it (TargetB TARGET_UNIT_DEST_AREA_ALLY, radius index 13, 10 yd), lasting duration index 29 (12 sec). The client draws the area from that dynamic object, so the cast must create a dynamic object for 807992 that lives about 12 sec, and a wounded group member standing 5 yd from the enemy must receive 807992's periodic heal as a buff. Because TargetA is an enemy, the positivity heuristic classifies the heal as negative unless spell_custom_attr marks effect 0 positive. Warden's Blade itself only selects 807992 by aspect; this fixture casts 807992 directly on the enemy.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "star",
+      "race": 1,
+      "class": 26,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "golem",
+      "owner": "star",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "star",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "star",
+      "spell": 807992
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "label": "Wound the ally so the periodic heal has room",
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "label": "Elune's Cradle on the enemy",
+      "spell": 807992,
+      "target": "golem"
+    },
+    {
+      "action": "assert",
+      "actor": "star",
+      "label": "SETUP: Elune's Cradle cast accepted",
+      "metric": "cast_failure",
+      "spell": 807992,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "star",
+      "label": "DISCRIMINATING: the cast places the area the client draws",
+      "metric": "dynamic_object",
+      "spell": 807992,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "star",
+      "label": "The area lasts the spell's 12 sec",
+      "metric": "dynamic_object_duration_ms",
+      "spell": 807992,
+      "min": 10000,
+      "max": 12000,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "star",
+      "label": "CONTROL: the group member 5 yd from the enemy receives the periodic heal",
+      "metric": "spell_heal_count",
+      "spell": 807992,
+      "target": "ally",
+      "min": 1,
+      "within_ms": 7000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "label": "DISCRIMINATING: the healing aura reaches the ally as a buff, not a debuff",
+      "metric": "aura_positive",
+      "spell": 807992,
+      "equals": 1
+    }
+  ]
+}

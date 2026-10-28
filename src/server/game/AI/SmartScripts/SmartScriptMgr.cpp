@@ -1734,7 +1734,13 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
                 return false;
             }
 
-            return IsSAIBoolValid(e, e.action.summonCreature.attackInvoker);
+            if (e.action.summonCreature.attackInvoker > 2)
+            {
+                LOG_ERROR("sql.sql", "SmartAIMgr: Entry {} SourceType {} Event {} Action {} uses attackInvoker value {}, valid values are 0 (no attack), 1 (attack the action target) or 2 (attack the event invoker), skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.action.summonCreature.attackInvoker);
+                return false;
+            }
+
+            return true;
         case SMART_ACTION_CALL_KILLEDMONSTER:
             if (!IsCreatureValid(e, e.action.killedMonster.creature))
                 return false;

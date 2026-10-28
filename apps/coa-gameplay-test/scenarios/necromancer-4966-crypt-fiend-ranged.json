@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Crypt Fiend keeps firing Frozen Barbs from range instead of only meleeing (#4966)",
+  "contract": "Raise: Crypt Fiend 504859 reads 'occupying 2 Life Force. Command: Shoots barbs at your target that deal ... Frost damage and bounce to a nearby enemy', summoning creature 50323. AscensionNecromancerSummons.cpp's Ranged(entry) gated combat movement and the periodic 3 s auto-attack loop (event 2, 'if (Unit* victim = me->GetVictim()) if (uint32 ability = AttackSpell(me->GetEntry())) Cast(me, victim, ability)') and previously listed only 50076/50075, so a Crypt Fiend chased into melee and AttackSpell(50323) returned 0, never firing its own attack outside of an explicit Command. DoAction's dedicated 'case 50323: Cast(me, target, 822074)' already fires once per Command (#5236, already correct) independent of this bug, so the discriminator is the periodic loop: after one Command: Undead sets GetVictim() via AttackStart, a fixed Crypt Fiend keeps casting its live attack 803406 (Frozen Barbs, SpellVisual 989936; #5692) roughly every 3 s on its own, while an unfixed one only shows the single Command-triggered cast and then goes silent (or melees). Command 504868 forwards Order from an OnEffectHitTarget callback and can normally miss a same-level enemy. Cap the Necromancer caster spell hit so the one-command setup reliably exercises the pet autonomous-attack discriminator; retain every original step, deadline and assertion.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 60, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "n", "entry": 36, "level": 60, "health": 1000000, "distance": 15 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and the Life Force aura settle", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: Command accuracy is independent of the minion attack loop",
+      "actor": "n", "metric": "spell_hit_chance", "min": 100 },
+    { "action": "learn", "actor": "n", "spell": 504859 },
+    { "action": "learn", "actor": "n", "spell": 504868 },
+    { "action": "cast", "label": "Raise: Crypt Fiend", "actor": "n", "spell": 504859 },
+    {
+      "action": "assert", "label": "SETUP: Crypt Fiend raised", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50323, "min": 1, "within_ms": 8000
+    },
+    { "action": "wait", "label": "Let it take formation", "ms": 2000 },
+    {
+      "action": "assert", "label": "CONTROL: no Frost-Congealed Barbs cast yet", "actor": "n",
+      "metric": "spell_go_count", "spell": 822074, "entry": 50323, "equals": 0
+    },
+    { "action": "cast", "label": "Command: Undead on the golem", "actor": "n", "spell": 504868, "target": "golem" },
+    {
+      "action": "assert", "label": "SETUP: the Command itself fires one barb cast", "actor": "n",
+      "metric": "spell_go_count", "spell": 822074, "entry": 50323, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Crypt Fiend keeps firing Frozen Barbs on its own",
+      "actor": "n", "metric": "spell_go_count", "spell": 803406, "entry": 50323, "min": 1, "within_ms": 9000
+    },
+    {
+      "action": "assert", "label": "The golem was never approached into a melee kill", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50323, "equals": 1
+    }
+  ]
+}

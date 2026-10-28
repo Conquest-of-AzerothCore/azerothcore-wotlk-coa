@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "Chainwhip refunds 20% of its cooldown when it interrupts a cast (#5461)",
+  "contract": "Chainwhip (base 800081, level-80 rank 503367, confirmed via coa-dbc-viewer against /home/fab/CoaServer/dbc_clientset) has Effect0=2 (SCHOOL_DAMAGE), Effect1=63 (THREAT), Effect2=6/APPLY_AURA with EffectApplyAuraName[2]=27 (SPELL_AURA_MOD_SILENCE); InterruptFlags=0 and no effect is 68 (SPELL_EFFECT_INTERRUPT_CAST), RecoveryTime=20000ms, CastingTimeIndex=1 (SpellCastTimes row 1 = 0ms, instant). Its description reads 'If you successfully interrupt an enemy, this will refund $800835s1% of the cooldown', and 800835's EffectBasePoints[0]=19 (+1 = 20%). Because Chainwhip's own effects never trigger Spell::EffectInterruptCast (only SPELL_EFFECT_INTERRUPT_CAST spells raise sScriptMgr->OnSpellSuccessfulInterrupt, at src/server/game/Spells/SpellEffects.cpp:4133), the refund hook that used to live in OnSpellSuccessfulInterrupt (src/server/coa/AscensionXorothAbilities.cpp) could never fire for Chainwhip: its interrupt instead comes from AuraEffect::HandleAuraModSilence (src/server/game/Spells/Auras/SpellAuraEffects.cpp:3253) directly calling target->InterruptSpell on any of the target's current spells whose PreventionType is SPELL_PREVENTION_TYPE_SILENCE (1), which never calls that hook. The fix detects the same condition one step earlier, in OnSpellCalculatedTarget (fired once per hit target from Spell::DoAllEffectOnLaunchTarget, before the HIT-phase aura application that performs the actual silence/interrupt), by checking whether the target currently has any CURRENT_MELEE_SPELL..CURRENT_AUTOREPEAT_SPELL entry whose PreventionType is SPELL_PREVENTION_TYPE_SILENCE, and refunds 20% of RecoveryTime (4000ms) exactly once per cast via the same spell->GetScriptValue(800835) guard used before. Fixture: Scholomance Dark Summoner 11582 runs SmartAI casting Summon Risen Lackey 17618 (CastingTimeIndex 15, PreventionType SPELL_PREVENTION_TYPE_SILENCE, InterruptFlags 0x9, RecoveryTime 0) 2-5 sec after engaging and every 5-7 sec after, the same fixture used by bloodmage-aneurysm-interrupt-heal.json; cast_remaining_ms(spell=17618) names that exact cast so the scenario does not need to dodge the fixture's other, non-silence-preventable casts. Entry 36 (Harvest Golem, no smart_scripts rows) is a quiet hostile punching bag (creatures default to faction 14 in CoAGameplayTest.cpp) used for the non-interrupting baseline cast, since it never has a current spell for SilencedByHit to find.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "knight", "entry": 36, "level": 80, "health": 1000000, "distance": 3 },
+    { "id": "summoner", "owner": "knight", "entry": 11582, "faction": 14, "level": 80, "health": 1000000, "distance": 4 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "knight", "spell": 503367 },
+    { "action": "cast", "actor": "knight", "spell": 503367, "target": "dummy" },
+    { "action": "wait", "label": "Let the cooldown settle", "ms": 300 },
+    {
+      "action": "snapshot", "label": "Chainwhip's cooldown after a non-interrupting hit",
+      "actor": "knight", "metric": "cooldown_ms", "spell": 503367, "save_as": "cd_full"
+    },
+    {
+      "action": "assert", "label": "SETUP: no refund happened against a target with no current spell",
+      "actor": "knight", "metric": "cooldown_ms", "spell": 503367, "min": 19000
+    },
+    { "action": "reset_cooldown", "actor": "knight", "spell": 503367 },
+    { "action": "attack", "actor": "knight", "target": "summoner" },
+    {
+      "action": "assert", "label": "The fixture caster is engaged",
+      "actor": "summoner", "metric": "combat", "equals": 1, "within_ms": 10000
+    },
+    {
+      "action": "assert", "label": "DETERMINISTIC GATE: the fixture caster is mid Summon Risen Lackey, not another of its casts",
+      "actor": "summoner", "metric": "cast_remaining_ms", "spell": 17618, "min": 1, "within_ms": 30000
+    },
+    { "action": "wait", "label": "Let the detected cast run past its first update", "ms": 500 },
+    {
+      "action": "assert", "label": "The fixture caster is still mid Summon Risen Lackey",
+      "actor": "summoner", "metric": "cast_remaining_ms", "spell": 17618, "min": 1
+    },
+    { "action": "cast", "actor": "knight", "spell": 503367, "target": "summoner" },
+    {
+      "action": "assert", "label": "Regression guard: Chainwhip's silence interrupted Summon Risen Lackey",
+      "actor": "summoner", "metric": "cast_remaining_ms", "spell": 17618, "equals": 0, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Let the cooldown settle", "ms": 300 },
+    {
+      "action": "assert", "label": "CONTRACT: Chainwhip's cooldown is refunded by 20% (4000 ms) of its 20000 ms cooldown",
+      "actor": "knight", "metric": "cooldown_ms", "spell": 503367,
+      "relative_to": "cd_full", "min": -4800, "max": -3200
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "name": "Witch Hunter: Flames of Sin's Fire hit is an uncritical 40% copy that Flourish cleaves to 3 more enemies",
+  "contract": [
+    "Flames of Sin 803422 reads 'Your auto attacks now deal an additional ${$w1}% of the damage dealt as Fire",
+    "Damage.' (40%); its hit 802850 carries SPELL_ATTR6_IGNORE_CASTER_DAMAGE_MODIFIERS, so it is the swing's own",
+    "resolved amount, not a new hit that rolls a crit (a crit would deal 60% or more). Flourish 805365 reads",
+    "'...causing your Flames of Sin to cleave up to $s3 additional enemies' and grants Flames of Sin for",
+    "$/1000;s2 = 10 s; its effect 2 is SPELLMOD_JUMP_TARGETS +3 (BasePoints 2 + DieSides 1) on 802850 (family 21,",
+    "flags word 2 0x4000). 802850 has EffectChainTarget 0, so the stock chain holds 0 + 3 = 3 targets, the primary",
+    "and two more. ApplyAscensionWitchHunterFlameContracts sets ChainTarget 1 (1 + 3 = the primary and three more)",
+    "and SPELL_ATTR2_CANT_CRIT, and spell_ascension_witch_hunter_flame_damage requires that attribute. The contract",
+    "was guarded on EffectBonusMultiplier 0.25, but ascension_stock_coefficients registers first and clears that",
+    "field for 802850 in the same OnLoadSpellCustomAttr pass, so the contract never applied, the damage script",
+    "failed Validate ('did not pass Validate() ... spell_ascension_witch_hunter_flame_damage'), and 802850 used the",
+    "native path: it could crit and it chained to two extra enemies. With 10000 spell crit rating every Fire hit",
+    "that can crit does. Four Harvest Golems stand 2 yards apart in a line from the primary target, inside the",
+    "10 yard magic jump radius, so the chain reaches the farthest only with four targets. The Fire total on the",
+    "primary target must be 40% of the auto attack damage under the buff (floored per hit). Ratings remove melee",
+    "misses, dodges and parries and the Fire hit's spell miss."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hunter", "race": 1, "class": 15, "level": 60, "melee_hit_rating": 10000,
+      "expertise_rating": 10000, "spell_hit_rating": 10000, "spell_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "hunter", "entry": 36, "level": 60, "health": 1000000, "distance": 3 },
+    { "id": "near", "owner": "hunter", "entry": 36, "level": 60, "health": 1000000, "distance": 5 },
+    { "id": "middle", "owner": "hunter", "entry": 36, "level": 60, "health": 1000000, "distance": 7 },
+    { "id": "far", "owner": "hunter", "entry": 36, "level": 60, "health": 1000000, "distance": 9 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 5000 },
+    { "action": "learn", "actor": "hunter", "spell": 201 },
+    { "action": "learn", "actor": "hunter", "spell": 1180 },
+    { "action": "learn", "actor": "hunter", "spell": 674 },
+    { "action": "learn", "actor": "hunter", "spell": 805365 },
+    { "action": "add_item", "actor": "hunter", "item": 25 },
+    { "action": "equip", "actor": "hunter", "item": 25, "slot": 15 },
+    { "action": "add_item", "actor": "hunter", "item": 2092 },
+    { "action": "equip", "actor": "hunter", "item": 2092, "slot": 16 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "SETUP: the off hand holds a weapon", "actor": "hunter",
+      "metric": "weapon_damage_min", "hand": 1, "min": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Flames of Sin Fire hit cannot crit", "actor": "hunter",
+      "metric": "spell_done_crit_chance", "spell": 802850, "target": "enemy", "equals": 0
+    },
+    { "action": "attack", "actor": "hunter", "target": "enemy" },
+    {
+      "action": "assert", "label": "SETUP: auto attacks land", "actor": "hunter",
+      "metric": "melee_damage_count", "min": 2, "within_ms": 6000
+    },
+    {
+      "action": "assert", "label": "Control: auto attacks without the buff cause no Flames of Sin hit",
+      "actor": "hunter", "metric": "spell_damage_count", "spell": 802850, "equals": 0
+    },
+    { "action": "snapshot", "actor": "hunter", "metric": "melee_damage_total", "save_as": "melee_before" },
+    { "action": "cast", "label": "Flourish", "actor": "hunter", "spell": 805365 },
+    {
+      "action": "assert", "label": "SETUP: Flourish grants Flames of Sin", "actor": "hunter", "metric": "aura",
+      "spell": 803422, "caster": "hunter", "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "SETUP: Flourish's cleave is active", "actor": "hunter", "metric": "aura",
+      "spell": 805365, "caster": "hunter", "equals": 1
+    },
+    {
+      "action": "assert", "label": "Auto attacks under Flames of Sin are followed by Fire hits", "actor": "hunter",
+      "metric": "spell_damage_count", "spell": 802850, "target": "enemy", "min": 3, "within_ms": 6000
+    },
+    { "action": "stop_attack", "actor": "hunter" },
+    { "action": "wait", "label": "Let the last Fire hits land", "ms": 500 },
+    {
+      "action": "assert", "label": "The Fire hit cleaves to the nearest other enemy", "actor": "hunter",
+      "metric": "spell_damage_count", "spell": 802850, "target": "near", "min": 1
+    },
+    {
+      "action": "assert", "label": "The Fire hit cleaves to the second other enemy", "actor": "hunter",
+      "metric": "spell_damage_count", "spell": 802850, "target": "middle", "min": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Fire hit cleaves to a third additional enemy",
+      "actor": "hunter", "metric": "spell_damage_count", "spell": 802850, "target": "far", "min": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: no Fire hit crits despite certain spell crits",
+      "actor": "hunter", "metric": "spell_damage_count", "spell": 802850, "critical": true, "equals": 0
+    },
+    {
+      "action": "snapshot", "actor": "hunter", "metric": "melee_damage_total", "relative_to": "melee_before",
+      "save_as": "melee_under_flames"
+    },
+    {
+      "action": "assert", "label": "The Fire hits on the attacked enemy are 40% of the auto attacks",
+      "actor": "hunter", "metric": "spell_damage_total", "spell": 802850, "target": "enemy",
+      "ratio_to": "melee_under_flames", "min": 0.3, "max": 0.45
+    },
+    { "action": "assert", "actor": "hunter", "metric": "alive", "equals": 1 }
+  ]
+}

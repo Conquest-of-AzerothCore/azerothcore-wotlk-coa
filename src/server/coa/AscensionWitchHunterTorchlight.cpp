@@ -33,7 +33,7 @@ class spell_ascension_witch_hunter_torchlight_mark : public AuraScript
     {
         Unit* caster = GetCaster();
         return caster && caster->IsPlayer() && caster->getClass() == CLASS_WITCH_HUNTER &&
-            GetTarget() && GetTarget() != caster;
+            GetUnitOwner() && GetUnitOwner() != caster;
     }
 
     bool CheckProc(ProcEventInfo& eventInfo)

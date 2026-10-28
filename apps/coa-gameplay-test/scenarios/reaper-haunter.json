@@ -1,0 +1,179 @@
+{
+  "schema": 1,
+  "name": "Haunter lengthens Soulrend's armor-reduction aura (#861)",
+  "contract": "Haunter 705410 extends Soulrend aura 573320 from 15000 to 25000 ms.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 2,
+      "class": 30,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "haunter",
+      "race": 2,
+      "class": 30,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "control_target",
+      "owner": "control",
+      "entry": 36,
+      "level": 2,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "haunter_target",
+      "owner": "haunter",
+      "entry": 36,
+      "level": 2,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "control",
+      "spell": 705410
+    },
+    {
+      "action": "unlearn",
+      "actor": "haunter",
+      "spell": 705410
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 572342
+    },
+    {
+      "action": "learn",
+      "actor": "haunter",
+      "spell": 572342
+    },
+    {
+      "action": "learn",
+      "actor": "haunter",
+      "spell": 705410
+    },
+    {
+      "action": "assert",
+      "label": "Control Soulrend aura lasts fifteen seconds",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 573320,
+      "op": 1,
+      "base": 15000,
+      "equals": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Haunter extends the triggered Soulrend aura by ten seconds",
+      "actor": "haunter",
+      "metric": "spell_modifier",
+      "spell": 573320,
+      "op": 1,
+      "base": 15000,
+      "equals": 25000
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "haunter",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "haunter",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "label": "Control Soulrend",
+      "actor": "control",
+      "spell": 572342,
+      "target": "control_target"
+    },
+    {
+      "action": "assert",
+      "label": "Control Soulrend applies its armor-reduction aura",
+      "actor": "control_target",
+      "metric": "aura",
+      "spell": 573320,
+      "caster": "control",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Control armor-reduction aura lasts about fifteen seconds",
+      "actor": "control_target",
+      "metric": "aura_duration_ms",
+      "spell": 573320,
+      "caster": "control",
+      "min": 13000,
+      "max": 15000
+    },
+    {
+      "action": "cast",
+      "label": "Haunter Soulrend",
+      "actor": "haunter",
+      "spell": 572342,
+      "target": "haunter_target"
+    },
+    {
+      "action": "assert",
+      "label": "Haunter Soulrend applies its armor-reduction aura",
+      "actor": "haunter_target",
+      "metric": "aura",
+      "spell": 573320,
+      "caster": "haunter",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Haunter armor-reduction aura lasts about twenty five seconds",
+      "actor": "haunter_target",
+      "metric": "aura_duration_ms",
+      "spell": 573320,
+      "caster": "haunter",
+      "min": 23000,
+      "max": 25000
+    }
+  ]
+}

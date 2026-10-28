@@ -44,7 +44,15 @@ enum Spells
     SPELL_MASSIVE_ERUPTION              = 20483,    // Deals fire aoe damage, knockbacks nearby enemies and kills caster
     SPELL_ERUPTION_TRIGGER              = 20482,    // Removes banish auras and applied immunity to banish (server side)
     SPELL_ENRAGE_TRIGGER                = 19515,    // Server side. Triggers 19516 on hit
+    SPELL_FIERCE_BLOW_COA               = 975011,   // CoA addition
 };
+
+// CoA addition: Fierce Blow is drawn from a window so it cannot be predicted. First cast: interquartile
+// range of 46 logged first casts (7.6-17.0s). Repeat: 6-10s holds 79% of 86 logged repeats.
+constexpr uint32 FIERCE_BLOW_FIRST_MIN = 7600;
+constexpr uint32 FIERCE_BLOW_FIRST_MAX = 17000;
+constexpr uint32 FIERCE_BLOW_MIN = 6000;
+constexpr uint32 FIERCE_BLOW_MAX = 10000;
 
 enum Events
 {
@@ -155,6 +163,29 @@ struct npc_garr_firesworn : public ScriptedAI
 {
     npc_garr_firesworn(Creature* creature) : ScriptedAI(creature) {}
 
+    void Reset() override
+    {
+        fierceBlowTimer = urand(FIERCE_BLOW_FIRST_MIN, FIERCE_BLOW_FIRST_MAX);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        if (fierceBlowTimer <= diff)
+        {
+            DoCastVictim(SPELL_FIERCE_BLOW_COA);
+            fierceBlowTimer = urand(FIERCE_BLOW_MIN, FIERCE_BLOW_MAX);
+        }
+        else
+        {
+            fierceBlowTimer -= diff;
+        }
+
+        DoMeleeAttackIfReady();
+    }
+
     void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType /*damagetype*/, SpellSchoolMask /*damageSchoolMask*/ ) override
     {
         if (damage >= me->GetHealth())
@@ -165,6 +196,41 @@ struct npc_garr_firesworn : public ScriptedAI
 
             DoCastAOE(SPELL_ENRAGE_TRIGGER);
         }
+    }
+
+private:
+    uint32 fierceBlowTimer = 0;
+};
+
+// Firesworn's on-death Eruption (19497, Mythic/Ascended sibling 350126) is a self-centered AoE whose
+// DBC radius (SpellRadius.dbc id 12, 100 yd) covers effectively the whole Garr room; filtering it down
+// here keeps the vanilla radius id untouched (it is shared by other, unrelated spells) while matching
+// the encounter's own "dies, hits whoever is close to it" design. The radius is a flat, designed 12 yd
+// exact distance (not a measured value): the prior combat-reach-relative melee-range filter (~7-9 yd
+// for two average hitboxes) read as too small a zone per the user's own report.
+class spell_firesworn_eruption_melee_coa : public SpellScript
+{
+    PrepareSpellScript(spell_firesworn_eruption_melee_coa);
+
+    static constexpr float ERUPTION_RADIUS = 12.0f;
+
+    void FilterTargets(std::list<WorldObject*>& targets)
+    {
+        Unit* caster = GetCaster();
+        if (!caster)
+            return;
+
+        targets.remove_if([caster](WorldObject* target)
+        {
+            Unit* unit = target->ToUnit();
+            return !unit || caster->GetExactDist(unit) > ERUPTION_RADIUS;
+        });
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_firesworn_eruption_melee_coa::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_firesworn_eruption_melee_coa::FilterTargets, EFFECT_1, TARGET_UNIT_DEST_AREA_ENEMY);
     }
 };
 
@@ -197,4 +263,5 @@ void AddSC_boss_garr()
 
     // Spells
     RegisterSpellScript(spell_garr_frenzy);
+    RegisterSpellScript(spell_firesworn_eruption_melee_coa);
 }

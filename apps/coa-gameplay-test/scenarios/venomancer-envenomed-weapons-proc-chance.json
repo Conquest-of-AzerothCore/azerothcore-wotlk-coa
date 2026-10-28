@@ -1,0 +1,300 @@
+{
+  "schema": 1,
+  "name": "Venomancer Envenomed Weapons launches poison jets at its 5% chance",
+  "contract": [
+    "Envenomed Weapons 300855 applies aura 42 to the Venomancer and every raid member within 30 yards for 30 minutes; ProcChance 5 triggers Envenomed Weapons 803178, a single-target Nature hit.",
+    "The tooltip promises a 5% chance whenever an envenomed ally deals damage, so every damaging swing gets one 5% roll and a jet only follows from that ally's own damage.",
+    "Five unarmed level 60 fighters swing at one passive enemy for five minutes, about 650 damaging swings; at 5% that is about 33 jets, and 12 to 70 bounds a failure below 0.01%.",
+    "A second 5% roll on top of the first (0.25%) gives about 2 jets, which the lower bound rejects."
+  ],
+  "timeout_ms": 420000,
+  "players": [
+    {
+      "id": "venomancer",
+      "race": 1,
+      "class": 29,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally1",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally2",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally3",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally4",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "venomancer",
+      "entry": 36,
+      "faction": 14,
+      "level": 60,
+      "distance": 3,
+      "health": 10000000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "venomancer",
+      "target": "ally1"
+    },
+    {
+      "action": "group",
+      "actor": "venomancer",
+      "target": "ally2"
+    },
+    {
+      "action": "group",
+      "actor": "venomancer",
+      "target": "ally3"
+    },
+    {
+      "action": "group",
+      "actor": "venomancer",
+      "target": "ally4"
+    },
+    {
+      "action": "learn",
+      "actor": "venomancer",
+      "spell": 300855
+    },
+    {
+      "action": "cast",
+      "actor": "venomancer",
+      "spell": 300855
+    },
+    {
+      "action": "assert",
+      "label": "Envenomed Weapons reaches venomancer",
+      "actor": "venomancer",
+      "metric": "aura",
+      "spell": 300855,
+      "caster": "venomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Envenomed Weapons reaches ally1",
+      "actor": "ally1",
+      "metric": "aura",
+      "spell": 300855,
+      "caster": "venomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Envenomed Weapons reaches ally2",
+      "actor": "ally2",
+      "metric": "aura",
+      "spell": 300855,
+      "caster": "venomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Envenomed Weapons reaches ally3",
+      "actor": "ally3",
+      "metric": "aura",
+      "spell": 300855,
+      "caster": "venomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Envenomed Weapons reaches ally4",
+      "actor": "ally4",
+      "metric": "aura",
+      "spell": 300855,
+      "caster": "venomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "attack",
+      "actor": "venomancer",
+      "target": "enemy"
+    },
+    {
+      "action": "attack",
+      "actor": "ally1",
+      "target": "enemy"
+    },
+    {
+      "action": "attack",
+      "actor": "ally2",
+      "target": "enemy"
+    },
+    {
+      "action": "attack",
+      "actor": "ally3",
+      "target": "enemy"
+    },
+    {
+      "action": "attack",
+      "actor": "ally4",
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Five unarmed fighters swing for five minutes",
+      "ms": 300000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "venomancer"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ally1"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ally2"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ally3"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ally4"
+    },
+    {
+      "action": "wait",
+      "label": "Let the last poison jets land",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "venomancer lands at least one hundred damaging swings",
+      "actor": "venomancer",
+      "metric": "melee_damage_count",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "label": "ally1 lands at least one hundred damaging swings",
+      "actor": "ally1",
+      "metric": "melee_damage_count",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "label": "ally2 lands at least one hundred damaging swings",
+      "actor": "ally2",
+      "metric": "melee_damage_count",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "label": "ally3 lands at least one hundred damaging swings",
+      "actor": "ally3",
+      "metric": "melee_damage_count",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "label": "ally4 lands at least one hundred damaging swings",
+      "actor": "ally4",
+      "metric": "melee_damage_count",
+      "min": 100
+    },
+    {
+      "action": "snapshot",
+      "label": "Damaging swings by venomancer",
+      "actor": "venomancer",
+      "metric": "melee_damage_count",
+      "save_as": "venomancer_hits"
+    },
+    {
+      "action": "snapshot",
+      "label": "Damaging swings by ally1",
+      "actor": "ally1",
+      "metric": "melee_damage_count",
+      "save_as": "ally1_hits"
+    },
+    {
+      "action": "snapshot",
+      "label": "Damaging swings by ally2",
+      "actor": "ally2",
+      "metric": "melee_damage_count",
+      "save_as": "ally2_hits"
+    },
+    {
+      "action": "snapshot",
+      "label": "Damaging swings by ally3",
+      "actor": "ally3",
+      "metric": "melee_damage_count",
+      "save_as": "ally3_hits"
+    },
+    {
+      "action": "snapshot",
+      "label": "Damaging swings by ally4",
+      "actor": "ally4",
+      "metric": "melee_damage_count",
+      "save_as": "ally4_hits"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: poison jets fire at the tooltip's 5% of the damaging swings",
+      "actor": "venomancer",
+      "metric": "spell_damage_count",
+      "spell": 803178,
+      "target": "enemy",
+      "min": 12,
+      "max": 70
+    },
+    {
+      "action": "snapshot",
+      "label": "Poison jets on the enemy",
+      "actor": "venomancer",
+      "metric": "spell_damage_count",
+      "spell": 803178,
+      "target": "enemy",
+      "save_as": "jets"
+    }
+  ]
+}

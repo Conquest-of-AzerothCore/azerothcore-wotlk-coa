@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Runemaster Leyline Magician cuts Primordial Pulse's cooldown on Primordial Blast cast (#3100)",
+  "contract": [
+    "Leyline Magician 706823 Effect0 is SPELL_AURA_PROC_TRIGGER_SPELL, ProcChance 100, trigger 520146",
+    "(SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN, -5000ms on Primordial Pulse 300578, CategoryRecoveryTime 20000ms,",
+    "matching the tooltip exactly). Spell.dbc ProcFlags is 0 and, before the fix, no spell_proc row existed, so",
+    "casting Primordial Blast never reduced Primordial Pulse's cooldown. Primordial Blast (800732) is family 38,",
+    "SpellFamilyFlags0/1/2 4194304/1048576/64, DmgClass magic, a harmful SPELL_EFFECT_SCHOOL_DAMAGE hit: at cast",
+    "phase Spell.cpp sets PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG (0x10000), so the fix scopes the row to that",
+    "ProcFlags, cast phase, Primordial Blast's own family/classmask."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80, "spell_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rm", "entry": 36, "level": 80, "health": 5000000, "distance": 10}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 300578},
+    {"action": "learn", "actor": "rm", "spell": 800732},
+    {"action": "set_aura", "label": "Fixture: mana pool for the Primordial Blast casts", "actor": "rm",
+      "spell": 10040, "stacks": 3},
+    {"action": "assert", "label": "SETUP: the mana fixture landed", "actor": "rm", "metric": "max_power",
+      "power": 0, "min": 20000, "within_ms": 3000},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 20000},
+    {"action": "cast", "actor": "rm", "spell": 300578, "target": "dummy"},
+    {"action": "assert", "label": "SETUP: Primordial Pulse is cast", "actor": "rm", "metric": "spell_cast_count",
+      "spell": 300578, "equals": 1, "within_ms": 500},
+    {"action": "wait", "label": "Let the global cooldown pass", "ms": 1500},
+    {"action": "assert", "label": "SETUP: without the talent, casting Primordial Blast leaves the cooldown alone",
+      "actor": "rm", "metric": "cooldown_ms", "spell": 300578, "min": 17500},
+
+    {"action": "learn", "actor": "rm", "spell": 706823},
+    {"action": "assert", "label": "SETUP: Leyline Magician is active", "actor": "rm", "metric": "aura",
+      "spell": 706823, "equals": 1, "within_ms": 1500},
+    {"action": "snapshot", "actor": "rm", "metric": "cooldown_ms", "spell": 300578, "save_as": "pulse_before"},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 20000},
+    {"action": "cast", "actor": "rm", "spell": 800732, "target": "dummy"},
+    {"action": "assert", "label": "CONTRACT: casting Primordial Blast removes 5 sec from Primordial Pulse",
+      "actor": "rm", "metric": "cooldown_ms", "spell": 300578, "relative_to": "pulse_before", "min": -5700,
+      "max": -4700}
+  ]
+}

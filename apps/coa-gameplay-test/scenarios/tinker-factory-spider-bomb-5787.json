@@ -1,0 +1,161 @@
+{
+  "schema": 1,
+  "name": "Tinker factory Spider Bomb damages a distant target (#5787)",
+  "contract": [
+    "Original Build: Spider Bomb sends its device to a target and detonates. Original Spider Bomb Factory",
+    "creates three bombs when Bomb Toss or Rocket Launcher is used. Explosive Inventor also creates a slow",
+    "Heavy Spider Bomb.",
+    "The target is twenty yards away, selected through the normal session. Device explosions are observed",
+    "separately from the factory-triggering Bomb Toss. No attack or device movement is injected.",
+    "Require a landed Bomb Toss and measure its actual damage. The target must lose more health than that",
+    "throw alone can cause, after separately observing native device explosion packets. Allow up to ten",
+    "seconds for twenty-yard device travel; the target has passive fixture AI and no other damage source."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 802052
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 801005
+    },
+    {
+      "action": "client_packet",
+      "actor": "tinker",
+      "opcode": 317,
+      "fields": [
+        {
+          "actor_guid": "dummy"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy",
+      "metric": "health",
+      "save_as": "before_build"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 802052
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 467073,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801005,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 801005,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "The factory-triggering Bomb Toss actually lands"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_damage_total",
+      "spell": 801005,
+      "target": "dummy",
+      "save_as": "bomb_toss_damage"
+    },
+    {
+      "action": "assert",
+      "label": "Bomb Toss causes its own measured damage before the devices arrive",
+      "actor": "dummy",
+      "metric": "health",
+      "relative_to": "before_build",
+      "max": -1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The explosion is observed separately from Bomb Toss damage",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "health",
+      "relative_to": "before_build",
+      "ratio_to": "bomb_toss_damage",
+      "max": -1.01,
+      "within_ms": 1000,
+      "label": "Device explosions cause actual damage beyond the measured Bomb Toss hit"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 0,
+      "within_ms": 3000
+    }
+  ]
+}

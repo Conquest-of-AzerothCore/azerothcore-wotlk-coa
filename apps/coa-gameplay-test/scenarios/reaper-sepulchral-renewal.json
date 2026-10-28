@@ -1,0 +1,243 @@
+{
+  "schema": 1,
+  "name": "Sepulchral Renewal resets Limbo, Soulslam, and Shade cooldowns (#704)",
+  "contract": "Renewal resets Limbo, Soulslam, and Shade; Shadowfiend stays on cooldown; Renewal's cooldown starts.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "reaper",
+      "entry": 36,
+      "level": 80,
+      "distance": 3,
+      "health": 1000000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let creature AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 573038
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 800845
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 34433
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 561102
+    },
+    {
+      "action": "cast",
+      "label": "Start Shade cooldown",
+      "actor": "reaper",
+      "spell": 573038
+    },
+    {
+      "action": "assert",
+      "label": "Shade cast accepted",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 573038,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Shade has an active cooldown",
+      "actor": "reaper",
+      "metric": "cooldown_ms",
+      "spell": 573038,
+      "min": 170000
+    },
+    {
+      "action": "wait",
+      "label": "Clear Shade global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Start Limbo cooldown",
+      "actor": "reaper",
+      "spell": 800845
+    },
+    {
+      "action": "assert",
+      "label": "Limbo cast accepted",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 800845,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Limbo has an active cooldown",
+      "actor": "reaper",
+      "metric": "cooldown_ms",
+      "spell": 800845,
+      "min": 170000
+    },
+    {
+      "action": "wait",
+      "label": "Clear Limbo global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "label": "Supply Soulslam's Soul Infusion",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "label": "Start Soulslam cooldown",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Soulslam cast accepted",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Soulslam has an active cooldown",
+      "actor": "reaper",
+      "metric": "cooldown_ms",
+      "spell": 504014,
+      "min": 40000
+    },
+    {
+      "action": "assert",
+      "label": "Shade cooldown remains active before Renewal",
+      "actor": "reaper",
+      "metric": "cooldown_ms",
+      "spell": 573038,
+      "min": 160000
+    },
+    {
+      "action": "assert",
+      "label": "Limbo cooldown remains active before Renewal",
+      "actor": "reaper",
+      "metric": "cooldown_ms",
+      "spell": 800845,
+      "min": 160000
+    },
+    {
+      "action": "wait",
+      "label": "Clear Soulslam global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Start unrelated Shadowfiend cooldown",
+      "actor": "reaper",
+      "spell": 34433,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Shadowfiend cast accepted",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 34433,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Shadowfiend has an active cooldown",
+      "actor": "reaper",
+      "metric": "cooldown_ms",
+      "spell": 34433,
+      "min": 290000
+    },
+    {
+      "action": "wait",
+      "label": "Clear Shadowfiend global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Cast Sepulchral Renewal",
+      "actor": "reaper",
+      "spell": 561102
+    },
+    {
+      "action": "assert",
+      "label": "Sepulchral Renewal cast accepted",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 561102,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Shade cooldown reset",
+      "actor": "reaper",
+      "metric": "cooldown_ms",
+      "spell": 573038,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Limbo cooldown reset",
+      "actor": "reaper",
+      "metric": "cooldown_ms",
+      "spell": 800845,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Soulslam cooldown reset",
+      "actor": "reaper",
+      "metric": "cooldown_ms",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Unrelated Shadowfiend cooldown remains",
+      "actor": "reaper",
+      "metric": "cooldown_ms",
+      "spell": 34433,
+      "min": 280000
+    },
+    {
+      "action": "assert",
+      "label": "Renewal starts its own cooldown",
+      "actor": "reaper",
+      "metric": "cooldown_ms",
+      "spell": 561102,
+      "min": 470000
+    }
+  ]
+}

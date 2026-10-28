@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Ranger Book of Ascension sells Snapseed rank 6 at level 57 and the Bushcraft prerequisites (#4965, #4967)",
+  "contract": "Snapseed's chain (spell_ranks) is 804027, 503449-503454; Spell.dbc names 503453 'Rank 6' (BaseLevel 54) and 503454 'Rank 7' (BaseLevel 62), and AscensionSpellProgressionData sells them at 54 and 62. A level-57 Ranger holding ranks 1-5 is offered rank 6 as available (state 0) with rank 5 as its requirement, and buying it teaches it; rank 7 is unavailable (state 1) below level 62. The Bushcraft kit rows that name an ability as their requirement (Skinner's Grip 803866 needs 802809, Rider's Harness 803869 needs 800270) are unavailable until that ability is held, and the abilities themselves are sold as available rows, as are Bushcraft 573523 and Cure Light Leather 804790. A new Ranger holds skill 505 at 1. It does not test the client's window rendering.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 57 }
+  ],
+  "steps": [
+    { "action": "money", "actor": "ranger", "copper": 2000000 },
+    { "action": "learn", "actor": "ranger", "spell": 804027, "label": "fixture: Snapseed rank 1" },
+    { "action": "learn", "actor": "ranger", "spell": 503449, "label": "fixture: rank 2" },
+    { "action": "learn", "actor": "ranger", "spell": 503450, "label": "fixture: rank 3" },
+    { "action": "learn", "actor": "ranger", "spell": 503451, "label": "fixture: rank 4" },
+    { "action": "learn", "actor": "ranger", "spell": 503452, "label": "fixture: rank 5" },
+    { "action": "learn", "actor": "ranger", "spell": 97930, "label": "learn the book companion spell" },
+    { "action": "cast", "actor": "ranger", "spell": 97930, "label": "summon the Book of Ascension" },
+    { "action": "assert", "actor": "ranger", "metric": "owned_creature_count", "entry": 75115, "equals": 1, "within_ms": 5000 },
+    { "action": "gossip_hello", "actor": "ranger", "label": "open the book" },
+    { "action": "assert", "actor": "ranger", "metric": "trainer_list_packets", "equals": 1 },
+
+    { "action": "assert", "actor": "ranger", "metric": "trainer_window_state", "spell": 503452, "equals": 2, "label": "Snapseed rank 5 is a used row" },
+    { "action": "assert", "actor": "ranger", "metric": "trainer_window_state", "spell": 503453, "equals": 0, "label": "Snapseed rank 6 is available at 57" },
+    { "action": "assert", "actor": "ranger", "metric": "trainer_window_ability", "spell": 503453, "equals": 503452, "label": "rank 6 requires rank 5" },
+    { "action": "assert", "actor": "ranger", "metric": "trainer_window_state", "spell": 503454, "equals": 1, "label": "Snapseed rank 7 waits for level 62" },
+
+    { "action": "assert", "actor": "ranger", "metric": "trainer_window_state", "spell": 802809, "equals": 0, "label": "Skinner's Grip ability is sold" },
+    { "action": "assert", "actor": "ranger", "metric": "trainer_window_state", "spell": 803866, "equals": 1, "label": "the Skinner's Grip recipe needs the ability" },
+    { "action": "assert", "actor": "ranger", "metric": "trainer_window_ability", "spell": 803866, "equals": 802809, "label": "and names it as its requirement" },
+    { "action": "assert", "actor": "ranger", "metric": "trainer_window_state", "spell": 800270, "equals": 0, "label": "Rider's Harness ability is sold" },
+    { "action": "assert", "actor": "ranger", "metric": "trainer_window_state", "spell": 803869, "equals": 1, "label": "the Rider's Harness recipe needs the ability" },
+    { "action": "assert", "actor": "ranger", "metric": "trainer_window_state", "spell": 573523, "equals": 0, "label": "Bushcraft is sold" },
+    { "action": "assert", "actor": "ranger", "metric": "trainer_window_state", "spell": 804790, "equals": 0, "label": "Cure Light Leather is sold" },
+    { "action": "assert", "actor": "ranger", "metric": "skill_value", "skill": 505, "equals": 1, "label": "Bushcraft skill starts at 1" },
+
+    { "action": "trainer_buy", "actor": "ranger", "spell": 503453, "label": "buy Snapseed rank 6" },
+    { "action": "assert", "actor": "ranger", "metric": "spellbook_buy_succeeded", "spell": 503453, "equals": 1, "label": "rank 6 was granted" },
+    { "action": "assert", "actor": "ranger", "metric": "knows_spell", "spell": 503453, "equals": 1, "label": "rank 6 is learned" },
+
+    { "action": "trainer_buy", "actor": "ranger", "spell": 802809, "label": "buy the Skinner's Grip ability" },
+    { "action": "assert", "actor": "ranger", "metric": "knows_spell", "spell": 802809, "equals": 1 },
+    { "action": "assert", "actor": "ranger", "metric": "trainer_window_state", "spell": 803866, "equals": 0, "label": "the recipe turned available" },
+    { "action": "trainer_buy", "actor": "ranger", "spell": 803866, "label": "buy the Skinner's Grip recipe" },
+    { "action": "assert", "actor": "ranger", "metric": "knows_spell", "spell": 803866, "equals": 1, "label": "the recipe is learned" }
+  ]
+}

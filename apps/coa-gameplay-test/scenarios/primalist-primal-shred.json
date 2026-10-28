@@ -1,0 +1,663 @@
+{
+  "schema": 1,
+  "name": "Primalist Primal Shred: owner attack power scales the pet bleed",
+  "contract": [
+    "Primal Shred's nine bleed ranks add 5% of the owner's attack power to each tick's base, followed by native pet",
+    "damage modifiers. +100 owner AP adds 5 to every rank's base; extra pet AP and owner Spell Power add nothing.",
+    "A real cast applies the bleed with the amount its base and the pet modifier predict."
+  ],
+  "timeout_ms": 240000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "spirit",
+      "owner": "primalist",
+      "entry": 1188,
+      "level": 19,
+      "health": 100000,
+      "distance": 5
+    },
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 59
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 196
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 574301
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 574301,
+      "target": "spirit"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 1188,
+      "within_ms": 24000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 61017,
+      "effect": 0,
+      "min": 100,
+      "within_ms": 4000,
+      "label": "Native pet hit scaling has settled"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 61017,
+      "effect": 2,
+      "min": 100,
+      "within_ms": 4000,
+      "label": "Native pet expertise scaling has settled"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500940
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 502732
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "save_as": "base_ap",
+      "label": "base_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504669,
+      "effect": 0,
+      "pet": true,
+      "save_as": "base_504669"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504670,
+      "effect": 0,
+      "pet": true,
+      "save_as": "base_504670"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504671,
+      "effect": 0,
+      "pet": true,
+      "save_as": "base_504671"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504672,
+      "effect": 0,
+      "pet": true,
+      "save_as": "base_504672"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504673,
+      "effect": 0,
+      "pet": true,
+      "save_as": "base_504673"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504674,
+      "effect": 0,
+      "pet": true,
+      "save_as": "base_504674"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504675,
+      "effect": 0,
+      "pet": true,
+      "save_as": "base_504675"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504676,
+      "effect": 0,
+      "pet": true,
+      "save_as": "base_504676"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504684,
+      "effect": 0,
+      "pet": true,
+      "save_as": "base_504684"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 1,
+      "pet": false
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "relative_to": "base_ap",
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504669,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "base_504669",
+      "equals": 5,
+      "label": "Owner AP adds 5 to 504669"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504670,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "base_504670",
+      "equals": 5,
+      "label": "Owner AP adds 5 to 504670"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504671,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "base_504671",
+      "equals": 5,
+      "label": "Owner AP adds 5 to 504671"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504672,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "base_504672",
+      "equals": 5,
+      "label": "Owner AP adds 5 to 504672"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504673,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "base_504673",
+      "equals": 5,
+      "label": "Owner AP adds 5 to 504673"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504674,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "base_504674",
+      "equals": 5,
+      "label": "Owner AP adds 5 to 504674"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504675,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "base_504675",
+      "equals": 5,
+      "label": "Owner AP adds 5 to 504675"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504676,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "base_504676",
+      "equals": 5,
+      "label": "Owner AP adds 5 to 504676"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504684,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "base_504684",
+      "equals": 5,
+      "label": "Owner AP adds 5 to 504684"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504669,
+      "effect": 0,
+      "pet": true,
+      "save_as": "owner_ap_504669"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504670,
+      "effect": 0,
+      "pet": true,
+      "save_as": "owner_ap_504670"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504671,
+      "effect": 0,
+      "pet": true,
+      "save_as": "owner_ap_504671"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504672,
+      "effect": 0,
+      "pet": true,
+      "save_as": "owner_ap_504672"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504673,
+      "effect": 0,
+      "pet": true,
+      "save_as": "owner_ap_504673"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504674,
+      "effect": 0,
+      "pet": true,
+      "save_as": "owner_ap_504674"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504675,
+      "effect": 0,
+      "pet": true,
+      "save_as": "owner_ap_504675"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504676,
+      "effect": 0,
+      "pet": true,
+      "save_as": "owner_ap_504676"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504684,
+      "effect": 0,
+      "pet": true,
+      "save_as": "owner_ap_504684"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 1,
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504669,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "owner_ap_504669",
+      "equals": 0,
+      "label": "Pet AP adds nothing to 504669"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504670,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "owner_ap_504670",
+      "equals": 0,
+      "label": "Pet AP adds nothing to 504670"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504671,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "owner_ap_504671",
+      "equals": 0,
+      "label": "Pet AP adds nothing to 504671"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504672,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "owner_ap_504672",
+      "equals": 0,
+      "label": "Pet AP adds nothing to 504672"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504673,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "owner_ap_504673",
+      "equals": 0,
+      "label": "Pet AP adds nothing to 504673"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504674,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "owner_ap_504674",
+      "equals": 0,
+      "label": "Pet AP adds nothing to 504674"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504675,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "owner_ap_504675",
+      "equals": 0,
+      "label": "Pet AP adds nothing to 504675"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504676,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "owner_ap_504676",
+      "equals": 0,
+      "label": "Pet AP adds nothing to 504676"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504684,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "owner_ap_504684",
+      "equals": 0,
+      "label": "Pet AP adds nothing to 504684"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 26395,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504669,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "owner_ap_504669",
+      "equals": 0,
+      "label": "Spell Power adds nothing to 504669"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504670,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "owner_ap_504670",
+      "equals": 0,
+      "label": "Spell Power adds nothing to 504670"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504671,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "owner_ap_504671",
+      "equals": 0,
+      "label": "Spell Power adds nothing to 504671"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504672,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "owner_ap_504672",
+      "equals": 0,
+      "label": "Spell Power adds nothing to 504672"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504673,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "owner_ap_504673",
+      "equals": 0,
+      "label": "Spell Power adds nothing to 504673"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504674,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "owner_ap_504674",
+      "equals": 0,
+      "label": "Spell Power adds nothing to 504674"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504675,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "owner_ap_504675",
+      "equals": 0,
+      "label": "Spell Power adds nothing to 504675"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504676,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "owner_ap_504676",
+      "equals": 0,
+      "label": "Spell Power adds nothing to 504676"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504684,
+      "effect": 0,
+      "pet": true,
+      "relative_to": "owner_ap_504684",
+      "equals": 0,
+      "label": "Spell Power adds nothing to 504684"
+    },
+    {
+      "action": "attack",
+      "actor": "primalist",
+      "pet": true,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 2000,
+      "label": "Let the pet reach the target"
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502732,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 504684,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 504684,
+      "effect": 0,
+      "pet": true,
+      "save_as": "cast_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 504684,
+      "effect": 0,
+      "pet": true,
+      "target": "target",
+      "periodic": true,
+      "save_as": "cast_multiplier"
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "aura_amount",
+      "spell": 504684,
+      "effect": 0,
+      "save_as": "cast_amount",
+      "label": "cast_amount"
+    }
+  ]
+}

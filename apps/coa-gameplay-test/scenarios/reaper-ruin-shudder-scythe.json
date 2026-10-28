@@ -1,10 +1,10 @@
 {
  "schema": 1,
  "name": "Ruin marks what Shudder Scythe hits",
- "contract": "Ruin 805198 promises that damage dealt by Shudder Scythe applies Ruin to the enemy for 10 seconds. It is a SPELL_AURA_PROC_TRIGGER_SPELL for 805199 whose record carries ProcTypeMask 0, so spell_proc supplies the flags and spell_ascension_reaper_ruin decides the damage came from Shudder Scythe. The rank a player presses, 572382, is a transform whose aura triggers the damaging rank 801322 every 100 ms, so the proc arrives as a periodic one and the flags have to allow both. The transform route reaches the same rank, so the script on 801322 covers both; staging a melee engagement is outside what this scenario sets up. Learning the talent and its aura taking hold are not the same tick, so the aura is waited for before anything is cast.",
+ "contract": "Ruin 805198 promises that damage dealt by Shudder Scythe applies Ruin to the enemy for 10 seconds. It is a SPELL_AURA_PROC_TRIGGER_SPELL for 805199 whose record carries ProcTypeMask 0, so spell_proc supplies the flags and spell_ascension_reaper_ruin decides the damage came from Shudder Scythe. The rank a player presses, 572382, is a transform whose aura triggers the damaging rank 801322 every 100 ms, so the proc arrives as a periodic one and the flags have to allow both. The transform route reaches the same rank, so the script on 801322 covers both; staging a melee engagement is outside what this scenario sets up. Learning the talent and its aura taking hold are not the same tick, so the aura is waited for before anything is cast. The damaging rank is a melee-class weapon strike, so a miss, dodge or parry left Ruin unapplied; the reaper carries melee hit and expertise ratings.",
  "timeout_ms": 180000,
  "players": [
-  { "id": "reaper", "race": 10, "class": 30, "level": 80 }
+  { "id": "reaper", "race": 10, "class": 30, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000 }
  ],
  "creatures": [
   { "id": "enemy", "owner": "reaper", "entry": 1601, "level": 80 }

@@ -1,0 +1,290 @@
+{
+  "schema": 1,
+  "name": "Tinker: controlled mechanicals assist in Defensive mode (#4110)",
+  "contract": [
+    "Control Mechanical 807846 is granted at level 24 by AscensionCustomClassData and the class trainer.",
+    "Spell.dbc applies the native charm aura to a mechanical, plus 25% attack speed and 2% maximum-health damage",
+    "every three seconds. A level-27 Tinker must normally acquire and cast it on Harvest Reaper 115 (a mechanical",
+    "using SmartAI). An explicit native Attack command first proves the charm can deal damage, and Passive stops",
+    "that explicit attack; the cleared victim is asserted before Stay and a normal Defensive reaction request,",
+    "the controlled unit must assist the owner in combat, as PetAI OwnerAttacked and OwnerAttackedBy require for",
+    "a defensive charm. The owner starts a normal melee attack, then stops. Only the controlled mechanical can",
+    "continue reducing the passive enemy's health after that snapshot, while its short-circuit aura remains",
+    "active. Reaction changes use CMSG_PET_ACTION, never direct AI or threat fixtures. The client pet bar is not",
+    "rendered. The native Abandon command must release control, remove the short-circuit aura and stop attacking",
+    "the former owners enemy."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 27,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "mechanical",
+      "owner": "tinker",
+      "entry": 115,
+      "level": 27,
+      "health": 100000,
+      "distance": 3
+    },
+    {
+      "id": "enemy",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 27,
+      "health": 100000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 807846,
+      "label": "Grant the class ability available from level 24 at the reported level 27"
+    },
+    {
+      "action": "snapshot",
+      "actor": "mechanical",
+      "metric": "health",
+      "save_as": "before_control"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 807846,
+      "target": "mechanical"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "charm_entry",
+      "equals": 115,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "health",
+      "save_as": "before_explicit_command"
+    },
+    {
+      "action": "client_packet",
+      "actor": "tinker",
+      "opcode": 373,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "mechanical"
+        },
+        {
+          "u32": 117440514
+        },
+        {
+          "actor_guid": "enemy"
+        }
+      ],
+      "label": "Native Attack command proves that the charm can fight"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "health",
+      "relative_to": "before_explicit_command",
+      "max": -1,
+      "within_ms": 7000
+    },
+    {
+      "action": "client_packet",
+      "actor": "tinker",
+      "opcode": 373,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "mechanical"
+        },
+        {
+          "u32": 100663296
+        },
+        {
+          "u64": 0
+        }
+      ],
+      "label": "Native Passive stops the preceding explicit attack"
+    },
+    {
+      "action": "assert",
+      "actor": "mechanical",
+      "metric": "victim",
+      "target": "enemy",
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The earlier explicit target is cleared before testing Defensive assistance"
+    },
+    {
+      "action": "client_packet",
+      "actor": "tinker",
+      "opcode": 373,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "mechanical"
+        },
+        {
+          "u32": 117440512
+        },
+        {
+          "u64": 0
+        }
+      ],
+      "label": "Native Stay holds the mechanical within melee range"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "client_packet",
+      "actor": "tinker",
+      "opcode": 373,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "mechanical"
+        },
+        {
+          "u32": 100663297
+        },
+        {
+          "u64": 0
+        }
+      ],
+      "label": "Native Defensive reaction for the charmed mechanical"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "mechanical",
+      "metric": "victim",
+      "target": "enemy",
+      "equals": 0,
+      "label": "Defensive starts with no inherited explicit-attack victim"
+    },
+    {
+      "action": "attack",
+      "actor": "tinker",
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "stop_attack",
+      "actor": "tinker"
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "health",
+      "save_as": "after_owner_stops"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "health",
+      "relative_to": "after_owner_stops",
+      "max": -1,
+      "within_ms": 10000,
+      "label": "Only the controlled mechanical continues damaging the enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "mechanical",
+      "metric": "victim",
+      "target": "enemy",
+      "equals": 1,
+      "label": "The charm selected the owners target"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "charm_aura_stacks",
+      "spell": 807846,
+      "equals": 1,
+      "label": "The damage comes from the controlled mechanical before the charm expires"
+    },
+    {
+      "action": "assert",
+      "actor": "mechanical",
+      "metric": "health",
+      "relative_to": "before_control",
+      "max": -2000,
+      "within_ms": 5000,
+      "label": "Short-circuit damage still applies while the mechanical assists"
+    },
+    {
+      "action": "client_packet",
+      "actor": "tinker",
+      "opcode": 373,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "mechanical"
+        },
+        {
+          "u32": 117440515
+        },
+        {
+          "u64": 0
+        }
+      ],
+      "label": "Native Abandon releases the mechanical"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "charm_entry",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "mechanical",
+      "metric": "aura_stacks",
+      "spell": 807846,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "mechanical",
+      "metric": "victim",
+      "target": "enemy",
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The released mechanical stops attacking its former owners target"
+    }
+  ]
+}

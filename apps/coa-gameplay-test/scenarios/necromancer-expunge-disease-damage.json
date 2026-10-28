@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "name": "Expunge raises the Necromancer's disease damage by 10% per stack, up to 2 stacks (#529)",
+  "contract": "The Expunge talent 705754 (CharacterAdvancement 34982, Death tab) reads \"Casting Command spells on an enemy now applies Expunge if they are Diseased.\" and embeds 500343's Description: \"Increases the target's damage taken from your Necromancer diseases by $573233s1% for $573233d, stacking $573233u times.\" 500343 is the tooltip carrier (Rank \"Talent\", 999 Runic Power, no CharacterAdvancement row); the applied debuff is 573233: SPELL_AURA_MOD_DAMAGE_FROM_CASTER with EffectBasePoints 9 + DieSides 1 = 10, effect 0 EffectSpellClassMask (0, 0x800000, 0x20) inside SpellFamilyName 29, which covers Flesh to Worms 500338 (family flags 0x4000, 0, 0x20), SpellDuration 1 = 10000 ms, StackAmount 2. The talent casts the trigger 500443 on the Command target; 500443 carries TargetAuraSpell 802913 (Plagued), which nothing on this server applies (its applier 806457 has no acquisition), so SpellInfo::CheckTarget refused every Expunge and 573233 never landed. Unit::SpellDamageBonusTaken multiplies the caster's matching MOD_DAMAGE_FROM_CASTER amount, and the amount scales with stacks, so the Necromancer's Flesh to Worms is taken at x1.10 after one Command and x1.20 after two, and a third Command keeps two stacks. Command: Skeletal Mage's own frost bolt 801513 (family flags 0x100000, 0, 0) is not a disease and stays at x1.00. Only AscensionNecromancerAbilities.cpp's disease-gated cast may apply 573233, once per Expunge: 500443's own effect 2 (SPELL_EFFECT_TRIGGER_SPELL 573233) runs in the launch phase, which the script's hit-phase PreventHitDefaultEffect does not stop, so it would add an ungated second stack; a Command against an enemy without the Necromancer's disease applies nothing.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    { "id": "necromancer", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "necromancer", "entry": 36, "level": 80, "health": 1000000, "distance": 10 },
+    { "id": "clean_golem", "owner": "necromancer", "entry": 36, "level": 80, "health": 1000000, "distance": 12 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "necromancer", "spell": 705754 },
+    { "action": "learn", "actor": "necromancer", "spell": 500331 },
+    { "action": "learn", "actor": "necromancer", "spell": 504020 },
+    { "action": "learn", "actor": "necromancer", "spell": 500338 },
+    {
+      "action": "assert", "label": "SETUP: the Expunge talent is active", "actor": "necromancer",
+      "metric": "aura", "spell": 705754, "equals": 1
+    },
+    { "action": "cast", "label": "Raise a Skeletal Mage to command", "actor": "necromancer", "spell": 500331 },
+    {
+      "action": "assert", "label": "SETUP: the Skeletal Mage is raised", "actor": "necromancer",
+      "metric": "owned_creature_count", "entry": 50075, "min": 1, "within_ms": 8000
+    },
+    { "action": "set_power", "actor": "necromancer", "power": 6, "value": 500 },
+    {
+      "action": "cast", "label": "Command against an enemy that is not diseased", "actor": "necromancer",
+      "spell": 504020, "target": "clean_golem"
+    },
+    { "action": "wait", "label": "Let an Expunge application resolve", "ms": 1000 },
+    {
+      "action": "assert", "label": "CONTROL: no Expunge without the Necromancer's disease", "actor": "clean_golem",
+      "metric": "aura", "spell": 573233, "equals": 0
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 600 },
+    { "action": "cast", "label": "Disease the golem", "actor": "necromancer", "spell": 500338, "target": "golem" },
+    {
+      "action": "assert", "label": "SETUP: the golem carries Flesh to Worms", "actor": "golem",
+      "metric": "aura", "spell": 500338, "caster": "necromancer", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "snapshot", "actor": "golem", "metric": "spell_damage_taken", "target": "necromancer",
+      "spell": 500338, "save_as": "disease0"
+    },
+    {
+      "action": "snapshot", "actor": "golem", "metric": "spell_damage_taken", "target": "necromancer",
+      "spell": 801513, "save_as": "frost0"
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "set_power", "actor": "necromancer", "power": 6, "value": 500 },
+    { "action": "cast", "label": "First Command", "actor": "necromancer", "spell": 504020, "target": "golem" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: a Command on the diseased golem applies Expunge",
+      "actor": "golem", "metric": "aura_stacks", "spell": 573233, "caster": "necromancer", "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "One stack raises disease damage taken by 10%", "actor": "golem",
+      "metric": "spell_damage_taken", "target": "necromancer", "spell": 500338, "ratio_to": "disease0",
+      "min": 1.095, "max": 1.105
+    },
+    {
+      "action": "assert", "label": "Expunge lasts 10 sec", "actor": "golem", "metric": "aura_duration_ms",
+      "spell": 573233, "caster": "necromancer", "min": 8000, "max": 10000
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "set_power", "actor": "necromancer", "power": 6, "value": 500 },
+    { "action": "cast", "label": "Second Command", "actor": "necromancer", "spell": 504020, "target": "golem" },
+    {
+      "action": "assert", "label": "The second Command adds a stack", "actor": "golem",
+      "metric": "aura_stacks", "spell": 573233, "caster": "necromancer", "equals": 2, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Two stacks raise disease damage taken by 20%", "actor": "golem",
+      "metric": "spell_damage_taken", "target": "necromancer", "spell": 500338, "ratio_to": "disease0",
+      "min": 1.195, "max": 1.205
+    },
+    {
+      "action": "assert", "label": "A non-disease Necromancer spell is not increased", "actor": "golem",
+      "metric": "spell_damage_taken", "target": "necromancer", "spell": 801513, "ratio_to": "frost0",
+      "min": 0.995, "max": 1.005
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "set_power", "actor": "necromancer", "power": 6, "value": 500 },
+    { "action": "cast", "label": "Third Command", "actor": "necromancer", "spell": 504020, "target": "golem" },
+    { "action": "wait", "label": "Let a third application resolve", "ms": 1000 },
+    {
+      "action": "assert", "label": "Expunge stacks only 2 times", "actor": "golem",
+      "metric": "aura_stacks", "spell": 573233, "caster": "necromancer", "equals": 2
+    }
+  ]
+}

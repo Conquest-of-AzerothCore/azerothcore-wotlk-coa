@@ -1,0 +1,433 @@
+{
+  "schema": 1,
+  "name": "Corrupted Blade spreads owned Corruption on Sinister Strike and Gloomblade (#6469)",
+  "contract": [
+    "Original Corrupted Blade 281492 promises that Sinister Strike and Gloomblade casts spread the caster's",
+    "Corruption to enemies within ten yards of the struck target. Test ordinary native attacks, a no-talent",
+    "control, an unrelated-spell control, positive aura application within range, no application past ten yards,",
+    "preservation of the source, and refusal to spread another caster's dot. Finally test Gloomblade",
+    "independently. Spell 281493 points its two authored spread effects to Corruption 172 and 285710; original",
+    "radius 14 is ten yards. The fixture grants rolled spells directly and proves combat behavior, not",
+    "roll/acquisition or client rendering. Equip an original dagger for the native Gloomblade restriction, and",
+    "verify copied duration, amount and positive periodic damage."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "other",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "near",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 9,
+      "stationary": true
+    },
+    {
+      "id": "outside",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 16,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 1180
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 1752
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 760050
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 172
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 2136
+    },
+    {
+      "action": "learn",
+      "actor": "other",
+      "spell": 172
+    },
+    {
+      "action": "set_skill",
+      "actor": "hero",
+      "skill": 173,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 2092
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 2092,
+      "slot": 15
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 172,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the source carries Corruption",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 1752,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a real Sinister Strike landed without the talent",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 1752,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: ordinary Sinister Strike does not spread Corruption",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 281492
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Corrupted Blade is active",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 281492,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 2136,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: an unrelated spell lands",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "enemy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: an unrelated spell does not spread Corruption",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "aura_duration_ms",
+      "spell": 172,
+      "save_as": "source_remaining"
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "aura_amount",
+      "spell": 172,
+      "effect": 0,
+      "save_as": "source_amount"
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 1752,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "assert",
+      "label": "A second ordinary Sinister Strike landed",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 1752,
+      "target": "enemy",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Sinister Strike spreads the owned Corruption within ten yards",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "The source dot remains applied",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The recipient beyond ten yards is not corrupted",
+      "actor": "outside",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The copied dot retains the source amount",
+      "actor": "near",
+      "metric": "aura_amount",
+      "spell": 172,
+      "effect": 0,
+      "relative_to": "source_amount",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The copied dot keeps remaining duration instead of refreshing to full duration",
+      "actor": "near",
+      "metric": "aura_duration_ms",
+      "spell": 172,
+      "relative_to": "source_remaining",
+      "min": -700,
+      "max": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "The spread Corruption deals real periodic damage",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 172,
+      "target": "near",
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 21000,
+      "label": "Let the previous Corruption expire"
+    },
+    {
+      "action": "cast",
+      "actor": "other",
+      "spell": 172,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: another player owns the new source dot",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 1752,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "The third real Sinister Strike lands",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 1752,
+      "target": "enemy",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Corrupted Blade does not spread another caster's Corruption",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 21000,
+      "label": "Let the previous Corruption expire"
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 172,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 760050,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "assert",
+      "label": "An ordinary Gloomblade attack lands",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 760050,
+      "target": "enemy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Gloomblade also spreads the caster's Corruption",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Gloomblade keeps the ten-yard boundary",
+      "actor": "outside",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 0
+    }
+  ]
+}

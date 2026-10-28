@@ -112,7 +112,7 @@ void WorldSession::HandlePetAction(WorldPacket& recvData)
             if ((*itr)->GetEntry() == pet->GetEntry() && ((*itr)->IsAlive() || (flag == ACT_COMMAND && spellId == COMMAND_ABANDON)))
                 controlled.push_back(*itr);
             // xinef: mirror image blizzard
-            else if ((*itr)->GetEntry() == NPC_MIRROR_IMAGE && flag == ACT_COMMAND && spellId == COMMAND_FOLLOW)
+            else if (GetStockPetEntry((*itr)->GetEntry()) == NPC_MIRROR_IMAGE && flag == ACT_COMMAND && spellId == COMMAND_FOLLOW)
             {
                 (*itr)->InterruptNonMeleeSpells(false);
             }
@@ -620,7 +620,7 @@ void WorldSession::SendPetNameQuery(ObjectGuid petguid, uint32 petnumber)
     }
 
     std::string name;
-    if (pet->GetEntry() == NPC_WATER_ELEMENTAL_PERM)
+    if (GetStockPetEntry(pet->GetEntry()) == NPC_WATER_ELEMENTAL_PERM)
     {
         // Use localized creature name for the mage pet
         LocaleConstant loc_idx = GetSessionDbLocaleIndex();

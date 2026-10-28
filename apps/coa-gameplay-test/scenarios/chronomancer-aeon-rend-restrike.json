@@ -1,8 +1,27 @@
 {
   "schema": 1,
-  "name": "Aeon Rend makes Chromatic Shard strike again (#718)",
-  "contract": "Aeon Rend 583248 applies aura 42 (proc trigger spell) twice - on Chromatic Shard 801292 itself (\"strike again\") and on 583247, whose SPELL_EFFECT_ASCENSION_RESET_COOLDOWN clears 801292's cooldown - but Spell.dbc gives 583248 ProcFlags 0, so SpellMgr::LoadSpellProcs generated no entry and Aura::GetProcEffectMask returned 0 for every event. Its tooltip is \"Your Chromatic Shard now has a $h% chance to strike again and incur no cooldown\", with $h = the record's own ProcChance of 25, and Aura::GetProcEffectMask rolls that chance once per event for both effects together. The scenario counts the re-strikes with spell_proc_count, which reports how many spells the aura fired as their named trigger, rather than weighing the dummy's health: a health measurement needs every cast of a volley to land, and on this harness they do not. Measured on this tree, a 25-cast volley delivered 7166 damage at about 440 per critical hit - roughly sixteen casts, two thirds of what was submitted. Chromatic Shard carries CategoryRecoveryTime 30000, cleared per cast by fixturing the class's own Incarnation of Chaos buff 504723 (aura 108, MiscValue 11 = SPELLMOD_COOLDOWN, -100%, class-masked to Chromatic Shard's SpellFamilyFlags word1 4096); Player::AddSpellAndCategoryCooldowns applies SPELLMOD_COOLDOWN to catrec as well as rec, but the harness' set_aura does not report whether the buff actually reapplied, and a cast that meets the full category cooldown is rejected outright. A rejected cast costs the count nothing, so the assertion asks only for at least one re-strike out of forty casts: at the observed two thirds landing rate that is 0.75^26 = 0.07%, and even if only half of them landed it would be 0.75^20 = 0.3%. Before the volley the same counter must read zero, which is the state this issue reported: with no spell_proc row, Aura::GetProcEffectMask returns 0 for every event and the talent never fires. The fixture creature is a critter template (Dig Rat 3444, creature_template.type 8) rather than a levelled mob, and the scenario pins neither its level nor a maximum health it expects the server to produce. AscensionCompat's CanScaleCreature (AscensionCompat.cpp:6093-6099) excludes critters from local level scaling, so this fixture keeps the maximum health CoAGameplayTest asked for instead of having it rebuilt by Creature::SelectLevel, which on this tree leaves a levelled creature 36 at level 16 with 349 maximum health - not enough to survive a volley, and not a number a scenario may depend on, since upstream retunes it. Chromatic Shard's CastingTimeIndex 22 is 3500 ms (SpellCastTimes.dbc), so the casts are spaced 4500 ms. The count is a count of triggered spells, not of procs: Aeon Rend's two aura-42 effects fire together, so one roll records both 801292 and 583247 against this aura. The observed 14 over forty casts is therefore about seven rolls out of roughly twenty-eight landed casts, which is the record's 25%. The assertion asks only for one, so the factor does not matter to it.",
-  "timeout_ms": 300000,
+  "name": "Aeon Rend native eligible-cast cohort one (#718)",
+  "contract": [
+    "Original Aeon Rend 583248 has a 25 percent chance to fire both aura42 triggers: Chromatic Shard 801292",
+    "strikes again and helper 583247 resets its cooldown. Effective spell_proc permits ordinary negative magic",
+    "damage at the hit phase and excludes triggered chaining.",
+    "Two independently spawned 100-cast cohorts preserve the original talent, chance, ordinary casts, mana costs",
+    "and 3500 ms cast time. Original Incarnation of Chaos 504723 remains a separate cooldown fixture; it does not",
+    "inject the expected Aeon Rend aura or proc. Original Dig Rat 3444 preserves 5000000 health without local",
+    "level scaling.",
+    "Each cohort requires native passive application, dispatched casts, no cast failure and caster/target",
+    "survival. The registered companion check requires at least 100 actual Chromatic Shard damage events across",
+    "both cohorts before judging the proc. If the counter is zero there are no re-strikes, so those are at least",
+    "100 ordinary eligible trials; (0.75)^100 is below 3.3e-13.",
+    "The counter records both triggered spells per proc, so the combined check requires at least two native",
+    "trigger records and at least one extra dispatched Shard. This fixture does not independently measure",
+    "cooldown reset while Incarnation is active. A passing native cohort alone is insufficient; its registered",
+    "companion verification must pass.",
+    "The stationary target fixture disables movement without changing spell effects, health, hit or proc chance.",
+    "Original Dig Rat CritterAI flees when engaged; the prior strengthened cohort failed with UNIT_NOT_INFRONT",
+    "(134). Require its three-yard distance before every ordinary cast and after the volley."
+  ],
+  "timeout_ms": 600000,
   "players": [
     {
       "id": "chronomancer",
@@ -19,25 +38,14 @@
       "owner": "chronomancer",
       "entry": 3444,
       "health": 5000000,
-      "distance": 3
+      "distance": 3,
+      "stationary": true
     }
   ],
   "steps": [
-    {
-      "action": "wait",
-      "label": "Let spawn AI and level scaling settle",
-      "ms": 5000
-    },
-    {
-      "action": "learn",
-      "actor": "chronomancer",
-      "spell": 801292
-    },
-    {
-      "action": "learn",
-      "actor": "chronomancer",
-      "spell": 583248
-    },
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "actor": "chronomancer", "spell": 801292},
+    {"action": "learn", "actor": "chronomancer", "spell": 583248},
     {
       "action": "assert",
       "label": "Aeon Rend has not re-struck before the volley",
@@ -46,1181 +54,2133 @@
       "spell": 583248,
       "equals": 0
     },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 1 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 2 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 3 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 4 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 5 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 6 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 7 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 8 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 9 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 10 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 11 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 12 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 13 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 14 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 15 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 16 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 17 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 18 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 19 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 20 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 21 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 22 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 23 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 24 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 25 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 26 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 27 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 28 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 29 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 30 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 31 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 32 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 33 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 34 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 35 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 36 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 37 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 38 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 39 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 0
-    },
-    {
-      "action": "set_aura",
-      "actor": "chronomancer",
-      "spell": 504723,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Chromatic Shard 40 of 40",
-      "actor": "chronomancer",
-      "spell": 801292,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "ms": 4500
-    },
+    {"action": "assert", "actor": "chronomancer", "metric": "aura", "spell": 583248, "equals": 1},
+    {"action": "assert", "actor": "chronomancer", "metric": "alive", "equals": 1},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
     {
       "action": "assert",
-      "label": "The dummy survived the volley, so its casts had a target throughout",
-      "actor": "dummy",
-      "metric": "alive",
-      "equals": 1
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
     },
     {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 1 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
       "action": "assert",
-      "label": "Aeon Rend made Chromatic Shard strike again at least once",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 2 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 3 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 4 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 5 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 6 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 7 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 8 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 9 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 10 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 11 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 12 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 13 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 14 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 15 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 16 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 17 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 18 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 19 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 20 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 21 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 22 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 23 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 24 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 25 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 26 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 27 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 28 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 29 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 30 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 31 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 32 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 33 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 34 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 35 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 36 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 37 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 38 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 39 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 40 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 41 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 42 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 43 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 44 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 45 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 46 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 47 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 48 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 49 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 50 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 51 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 52 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 53 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 54 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 55 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 56 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 57 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 58 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 59 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 60 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 61 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 62 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 63 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 64 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 65 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 66 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 67 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 68 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 69 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 70 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 71 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 72 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 73 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 74 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 75 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 76 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 77 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 78 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 79 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 80 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 81 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 82 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 83 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 84 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 85 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 86 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 87 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 88 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 89 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 90 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 91 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 92 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 93 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 94 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 95 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 96 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 97 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 98 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 99 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 0},
+    {"action": "set_aura", "actor": "chronomancer", "spell": 504723, "stacks": 1},
+    {"action": "set_power", "actor": "chronomancer", "power": 0, "value": 2500},
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1,
+      "label": "The stationary native target stays in front at three yards"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801292,
+      "target": "dummy",
+      "label": "Ordinary Chromatic Shard 100 of 100"
+    },
+    {"action": "wait", "ms": 4500},
+    {"action": "assert", "actor": "chronomancer", "metric": "cast_failure", "spell": 801292, "equals": 0},
+    {"action": "assert", "actor": "chronomancer", "metric": "alive", "equals": 1},
+    {"action": "assert", "actor": "dummy", "metric": "alive", "equals": 1},
+    {"action": "assert", "actor": "chronomancer", "metric": "spell_go_count", "spell": 801292, "min": 100},
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "spell_damage_count",
+      "spell": 801292,
+      "target": "dummy",
+      "save_as": "eligible_damage_events"
+    },
+    {
+      "action": "snapshot",
       "actor": "chronomancer",
       "metric": "spell_proc_count",
       "spell": 583248,
-      "min": 1,
-      "within_ms": 6000
-    }
+      "save_as": "native_proc_triggers"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "spell_go_count",
+      "spell": 801292,
+      "save_as": "native_shard_dispatches"
+    },
+    {"action": "assert", "actor": "chronomancer", "metric": "distance", "target": "dummy", "min": 2.9, "max": 3.1}
   ]
 }

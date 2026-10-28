@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "Cutthroat's stun grows by 1 sec per stack of Advantage (#2502)",
+  "contract": "Cutthroat 800359 (acquirable rank; 705065 is not) reads 'Shoot a powerful arrow that deals Weapon Damage plus 40 and stuns the target for 1 sec. Duration increased by 1 sec per stack of Advantage.' Its effect 0 is SPELL_EFFECT_NORMALIZED_WEAPON_DMG (native), effect 1 is SPELL_EFFECT_TRIGGER_SPELL on 805958, and CasterAuraSpell 804329 (Advantage) natively gates the cast on the caster having at least one stack. 805958's effect 1 is SPELL_AURA_MOD_STUN, DurationIndex 36 = 1000 ms. aura_ascension_ranger_advantage::Sync (AscensionRangerSecondary.cpp:27-37) keeps the hidden companion 704337 'Advantage Hidden (Warmaster)' stacked to Advantage's own stack count; 704337 effect 0 is ADD_FLAT_MODIFIER/SPELLMOD_DURATION, BasePoints 999 (+1000 ms), classmask matching 805958, and AuraEffect::CalculateAmount (SpellAuraEffects.cpp:654) multiplies that base by the companion's own stack amount, so the live SPELLMOD_DURATION on 805958 is already 1000/2000/3000 ms at 1/2/3 Advantage stacks (confirmed with the spell_modifier probe, no cast needed) and Aura::CalcMaxDuration (SpellAuras.cpp:807-819) applies it when 805958 is freshly created, giving 1000 base + 1000 per stack with no extra script. 805958's Mechanic is 12 (MECHANIC_STUN), which Unit::ApplyDiminishingToDuration (Unit.cpp:12665, 'Some diminishings applies to mobs too (for example, Stun)') diminishes on repeat applications to the SAME target within its 15 s reset window (Unit.cpp:12589), at 100%/50%/25%; this scenario therefore measures each stack count against its OWN fresh dummy so Diminishing Returns never contaminates the raw per-stack measurement. Expected raw duration: ~2000 ms at 1 stack, ~3000 ms at 2 stacks, ~4000 ms at 3 stacks, already true on a native build with no #2502 fix script. 800359 has a 5-30 yd range (min range 5 yd); every fixture creature needs an explicit distance (default is 0, inside the minimum range, which fails the cast with SPELL_FAILED_TOO_CLOSE/128).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "dummy1", "owner": "ranger", "entry": 16542, "level": 80, "health": 500000, "faction": 14, "distance": 15 },
+    { "id": "dummy2", "owner": "ranger", "entry": 16542, "level": 80, "health": 500000, "faction": 14, "distance": 20 },
+    { "id": "dummy3", "owner": "ranger", "entry": 16542, "level": 80, "health": 500000, "faction": 14, "distance": 25 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "learn", "actor": "ranger", "spell": 800359 },
+    { "action": "add_item", "actor": "ranger", "item": 2504 },
+    { "action": "equip", "actor": "ranger", "item": 2504, "slot": 17 },
+    { "action": "wait", "label": "Let the equipment settle", "ms": 1500 },
+
+    { "action": "set_aura", "label": "1 stack of Advantage", "actor": "ranger", "spell": 804329, "stacks": 1 },
+    { "action": "cast", "label": "Cutthroat with 1 Advantage stack (fresh target)", "actor": "ranger", "spell": 800359, "target": "dummy1" },
+    {
+      "action": "assert", "label": "SETUP: the stun landed (1 stack)",
+      "actor": "dummy1", "metric": "aura", "spell": 805958, "caster": "ranger", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: 1 Advantage stack gives a ~2 sec stun (1000 base + 1000)",
+      "actor": "dummy1", "metric": "aura_duration_ms", "spell": 805958, "min": 1900, "max": 2100
+    },
+
+    { "action": "reset_cooldown", "actor": "ranger", "spell": 800359 },
+    { "action": "wait", "ms": 1100 },
+    { "action": "set_aura", "label": "2 stacks of Advantage", "actor": "ranger", "spell": 804329, "stacks": 2 },
+    { "action": "cast", "label": "Cutthroat with 2 Advantage stacks (fresh target)", "actor": "ranger", "spell": 800359, "target": "dummy2" },
+    {
+      "action": "assert", "label": "SETUP: the second stun landed (2 stacks)",
+      "actor": "dummy2", "metric": "aura", "spell": 805958, "caster": "ranger", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: 2 Advantage stacks give a ~3 sec stun (1000 base + 2000)",
+      "actor": "dummy2", "metric": "aura_duration_ms", "spell": 805958, "min": 2900, "max": 3100
+    },
+
+    { "action": "reset_cooldown", "actor": "ranger", "spell": 800359 },
+    { "action": "wait", "ms": 1100 },
+    { "action": "set_aura", "label": "3 stacks of Advantage", "actor": "ranger", "spell": 804329, "stacks": 3 },
+    { "action": "cast", "label": "Cutthroat with 3 Advantage stacks (fresh target)", "actor": "ranger", "spell": 800359, "target": "dummy3" },
+    {
+      "action": "assert", "label": "SETUP: the third stun landed (3 stacks)",
+      "actor": "dummy3", "metric": "aura", "spell": 805958, "caster": "ranger", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: 3 Advantage stacks give a ~4 sec stun (1000 base + 3000)",
+      "actor": "dummy3", "metric": "aura_duration_ms", "spell": 805958, "min": 3900, "max": 4100
+    }
+  ]
+}

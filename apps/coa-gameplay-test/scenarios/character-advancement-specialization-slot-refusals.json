@@ -1,0 +1,224 @@
+{
+  "schema": 1,
+  "name": "Native slot activation rejects locked, interrupted and unaffordable transitions atomically",
+  "contract": "Spell.dbc 979994 has effect 162, a five-second cast and interrupt flags 15. Unlocked slot ownership comes from the learned swap spell. The level-10 Bloodmage budget has zero specialization points, so an Eternal slot containing Rotclaw (one specialization point) cannot be restored until level 11. Rejection must preserve the active slot, archetype and purchases.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 11
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "actor": "bloodmage",
+      "opcode": 618,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "bloodmage"
+        }
+      ],
+      "label": "Initialize native advancement after the local player is ready"
+    },
+    {
+      "action": "specialization",
+      "actor": "bloodmage",
+      "id": 99
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "bloodmage",
+      "entry": 30191,
+      "rank": 1
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 979994
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "player_setting",
+      "source": "core.ascension_slot.active",
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 804197,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 979994
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 979994
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "client_packet",
+      "actor": "bloodmage",
+      "opcode": 303,
+      "early": true,
+      "fields": [
+        {
+          "u8": 1
+        },
+        {
+          "u32": 979994
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "player_setting",
+      "source": "core.ascension_slot.active",
+      "index": 0,
+      "equals": 0,
+      "label": "Interrupting the cast never changes slots"
+    },
+    {
+      "action": "set_moving",
+      "actor": "bloodmage",
+      "enabled": true
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 979994
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "player_setting",
+      "source": "core.ascension_slot.active",
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "set_moving",
+      "actor": "bloodmage",
+      "enabled": false
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 979994
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "specialization",
+      "actor": "bloodmage",
+      "id": 26
+    },
+    {
+      "action": "set_level",
+      "actor": "bloodmage",
+      "value": 10
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 979993
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "player_setting",
+      "source": "core.ascension_slot.active",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "player_setting",
+      "source": "core.ascension_active_spec",
+      "index": 0,
+      "equals": 26
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 801074,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 804197,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "bloodmage",
+      "value": 11
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 979993
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 804197,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "player_setting",
+      "source": "core.ascension_active_spec",
+      "index": 0,
+      "equals": 99
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Homebound Portal: the portal that was clicked sends whoever steps through to its owner's Hearthstone (#6101)",
+  "contract": [
+    "Report #6101: using the Homebound Portal item (97758) does nothing; no portal appears.",
+    "Item 97758 casts Summon Homebound Portal 93186, a 15 second cast with 5 yard range whose TRANS_DOOR effect places gameobject 80775 for 5 minutes and whose description reads 'Heroes that choose to step through are sent to the portal owner's Hearthstone'.",
+    "No gameobject_template row for 80775 existed, so nothing was placed.",
+    "A character who uses the item must therefore get a Homebound Portal object, and another character who uses that portal must arrive at the owner's bind point, a different continent from where both stood, while the owner stays put.",
+    "With two portals standing within reach of each other, the user must arrive at the bind point of the owner of the portal that was clicked, including when a different portal of another owner is nearer to the user."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    { "id": "owner", "race": 1, "class": 1, "level": 20 },
+    { "id": "elf", "race": 4, "class": 1, "level": 20 },
+    { "id": "traveller", "race": 2, "class": 1, "level": 20 }
+  ],
+  "location": { "map": 1, "x": 1629.36, "y": -4373.39, "z": 31.2, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "assert", "label": "All three stand in Orgrimmar on Kalimdor", "actor": "traveller", "metric": "map_id", "equals": 1 },
+    { "action": "add_item", "label": "The human owner receives the Homebound Portal", "actor": "owner", "item": 97758, "count": 1 },
+    { "action": "add_item", "label": "The night elf owner receives the Homebound Portal", "actor": "elf", "item": 97758, "count": 1 },
+    { "action": "use_item", "label": "The human owner places the portal two yards from the traveller", "actor": "owner", "item": 97758, "spell": 93186, "destination": { "x": 1631.4, "y": -4373.39, "z": 31.2 } },
+    { "action": "use_item", "label": "The night elf owner places the portal four yards from the traveller, on the other side", "actor": "elf", "item": 97758, "spell": 93186, "destination": { "x": 1625.4, "y": -4373.39, "z": 31.2 } },
+    { "action": "wait", "label": "Let the 15 second casts finish and the portals appear", "ms": 16000 },
+    { "action": "assert", "label": "Both Homebound Portal objects now stand within reach", "actor": "traveller", "metric": "nearby_gameobject_count", "entry": 80775, "equals": 2 },
+    { "action": "use_nearby_gameobject", "label": "The traveller steps through the farther portal, the night elf's", "actor": "traveller", "entry": 80775, "owner": "elf" },
+    { "action": "wait", "label": "Let the transfer finish", "ms": 5000 },
+    { "action": "assert", "label": "The traveller arrives at the night elf's bind point in Teldrassil, x", "actor": "traveller", "metric": "position_x", "min": 10300, "max": 10325, "within_ms": 10000 },
+    { "action": "assert", "label": "At the night elf's bind point in Teldrassil, y", "actor": "traveller", "metric": "position_y", "min": 825, "max": 840 },
+    { "action": "teleport", "label": "The traveller returns to the two portals", "actor": "traveller", "map": 1, "x": 1629.36, "y": -4373.39, "z": 31.2, "o": 0 },
+    { "action": "wait", "label": "Let the transfer finish", "ms": 5000 },
+    { "action": "assert", "label": "Both portals are within reach again", "actor": "traveller", "metric": "nearby_gameobject_count", "entry": 80775, "equals": 2, "within_ms": 10000 },
+    { "action": "use_nearby_gameobject", "label": "The traveller steps through the nearer portal, the human's", "actor": "traveller", "entry": 80775, "owner": "owner" },
+    { "action": "wait", "label": "Let the transfer finish", "ms": 5000 },
+    { "action": "assert", "label": "The traveller arrives on the human's bind map, Eastern Kingdoms", "actor": "traveller", "metric": "map_id", "equals": 0, "within_ms": 10000 },
+    { "action": "assert", "label": "At the human's bind point in Northshire, x", "actor": "traveller", "metric": "position_x", "min": -8955, "max": -8944 },
+    { "action": "assert", "label": "At the human's bind point in Northshire, y", "actor": "traveller", "metric": "position_y", "min": -138, "max": -127 },
+    { "action": "assert", "label": "The human owner is still in Orgrimmar", "actor": "owner", "metric": "map_id", "equals": 1 },
+    { "action": "assert", "label": "The night elf owner is still in Orgrimmar", "actor": "elf", "metric": "map_id", "equals": 1 }
+  ]
+}

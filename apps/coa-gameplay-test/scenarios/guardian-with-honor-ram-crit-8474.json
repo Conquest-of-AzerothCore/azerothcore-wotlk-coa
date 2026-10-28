@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Guardian: With Honor trades 25% of Ram's critical chance for its cooldown (#8474)",
+  "contract": "With Honor 504383 effect 1 is aura 107 SPELLMOD_CRITICAL_CHANCE with SpellClassMask word 1 0x80, which matches Ram 802284's SpellFamilyFlags word 1 0x10000080. Its tooltip reads 'reduces the cooldown of Ram by 4 sec and its critical strike chance by $s2%' and BasePoints -26 render as -25: the talent removes 25 points of Ram's critical chance. Learning the talent must lower Ram's scripted critical chance by exactly 25 points. The report expected an increase; the tooltip and the spell data agree on a reduction.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "guardian", "race": 1, "class": 18, "level": 20 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "guardian", "entry": 36, "faction": 14, "level": 20, "health": 100000, "distance": 4 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "guardian", "spell": 802284 },
+    {
+      "action": "snapshot", "label": "Ram's crit chance before the talent", "actor": "guardian",
+      "metric": "spell_done_crit_chance_scripted", "spell": 802284, "target": "enemy", "save_as": "before"
+    },
+    { "action": "learn", "actor": "guardian", "spell": 504383 },
+    {
+      "action": "assert", "label": "SETUP: With Honor is active",
+      "actor": "guardian", "metric": "aura", "spell": 504383, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the talent removes 25 points of critical chance from Ram",
+      "actor": "guardian", "metric": "spell_done_crit_chance_scripted", "spell": 802284, "target": "enemy",
+      "relative_to": "before", "min": -25.5, "max": -24.5
+    }
+  ]
+}

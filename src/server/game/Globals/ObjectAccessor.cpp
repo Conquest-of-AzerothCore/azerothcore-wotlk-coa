@@ -301,6 +301,22 @@ Player* ObjectAccessor::FindPlayerByName(std::string const& name, bool checkInWo
     return nullptr;
 }
 
+Player* ObjectAccessor::FindUniquePlayerByFirstName(std::string const& firstName)
+{
+    std::string const prefix = firstName + ' ';
+    Player* found = nullptr;
+    for (auto const& [name, player] : PlayerNameMapHolder::PlayerNameMap)
+    {
+        if (!name.starts_with(prefix))
+            continue;
+        if (found)
+            return nullptr;
+        found = player;
+    }
+
+    return found;
+}
+
 /**
  * @brief Get a spawned creature by DB `guid` column. MODULE USAGE ONLY - USE IT FOR CUSTOM CONTENT.
  *

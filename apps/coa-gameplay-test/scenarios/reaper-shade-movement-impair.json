@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "name": "Reaper Shade removes movement impairing effects (#2170)",
+  "contract": [
+    "Shade 573038 reads 'Become a shade, entering an improved stealth mode for $d and entering Underwalk. Removes all movement impairing effects.'",
+    "Spell.dbc gives it Transform (effect 0, aura 56, self), a delayed trigger of Underwalk 800797 (effect 1, SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DELAYED, native and implemented), and Mod Stealth (effect 2, aura 16, native).",
+    "None of those three effects, nor Underwalk's own Shapeshift/Stealth/Decrease Speed effects, dispel an existing root or slow, so the tooltip's 'Removes all movement impairing effects' clause had no handler anywhere in src/server/coa or the DBC chain.",
+    "aura_ascension_reaper_shade binds to the Transform effect (EFFECT_0) and calls the native Unit::RemoveMovementImpairingAuras(true) on real application.",
+    "Entangling Roots 339 and Frostbolt's own aura 116 are the codebase's established root/slow fixtures (see primalist-empowered-boons); both must be present before Shade and gone immediately after."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 2,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "reaper", "spell": 573038 },
+    { "action": "set_aura", "actor": "reaper", "spell": 339, "stacks": 1 },
+    { "action": "set_aura", "actor": "reaper", "spell": 116, "stacks": 1 },
+    {
+      "action": "assert",
+      "label": "Fixture precondition: root is present",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 339,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Fixture precondition: slow is present",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 116,
+      "equals": 1
+    },
+    { "action": "cast", "actor": "reaper", "spell": 573038, "target": "reaper" },
+    {
+      "action": "assert",
+      "label": "Shade's Transform aura is active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 573038,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The root is removed",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 339,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The slow is removed",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 116,
+      "equals": 0,
+      "within_ms": 3000
+    }
+  ]
+}

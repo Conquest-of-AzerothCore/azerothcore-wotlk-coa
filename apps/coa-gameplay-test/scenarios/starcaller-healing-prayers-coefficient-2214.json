@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "name": "Healing Prayers adds 20% bonus-healing scaling to Prayer of Elune (#2214)",
+  "contract": [
+    "The active tooltip promises an additional 20% of bonus healing for Prayer of Elune. At level 60 with",
+    "the highest Prayer of Elune rank 575334, without a downrank penalty, the native +1000 healing-power",
+    "fixture 10030, learning Healing Prayers must increase Prayer of Elune healing by 200. The stock",
+    "coefficient is zero because the class scaling hook already supplies the base coefficient; the talent",
+    "therefore needs an additive coefficient modifier. A separate heal remains unchanged, and unlearning",
+    "removes the bonus."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "s",
+      "race": 1,
+      "class": 26,
+      "level": 60
+    },
+    {
+      "id": "target",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 10030,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "s",
+      "metric": "spell_healing_done",
+      "spell": 575334,
+      "target": "target",
+      "save_as": "prayer_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "s",
+      "metric": "spell_healing_done",
+      "spell": 801990,
+      "target": "target",
+      "save_as": "other_before"
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 680805
+    },
+    {
+      "action": "assert",
+      "label": "Prayer gains an additive 20% coefficient",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 575334,
+      "op": 24,
+      "base": 0,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "label": "One thousand healing power adds two hundred Prayer healing",
+      "actor": "s",
+      "metric": "spell_healing_done",
+      "spell": 575334,
+      "target": "target",
+      "relative_to": "prayer_before",
+      "equals": 200
+    },
+    {
+      "action": "assert",
+      "label": "Hand of Elune receives no Prayer bonus",
+      "actor": "s",
+      "metric": "spell_healing_done",
+      "spell": 801990,
+      "target": "target",
+      "relative_to": "other_before",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "s",
+      "spell": 680805
+    },
+    {
+      "action": "assert",
+      "label": "Removing Healing Prayers restores baseline",
+      "actor": "s",
+      "metric": "spell_healing_done",
+      "spell": 575334,
+      "target": "target",
+      "relative_to": "prayer_before",
+      "equals": 0
+    }
+  ]
+}

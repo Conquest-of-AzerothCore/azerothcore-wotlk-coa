@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "name": "Issue 3560: Glacial Rune explodes after 1s, dealing Frost damage and rooting enemies",
+  "contract": [
+    "807842 (rank 2) eff0 is a native SPELL_EFFECT_PERSISTENT_AREA_AURA/SPELL_AURA_PERIODIC_TRIGGER_SPELL,",
+    "amplitude 1000ms (matching the tooltip's 'explodes after 1 sec'), radius index 14 (8 yd), triggering",
+    "805730",
+    "on enemies inside. 805730 applies SPELL_EFFECT_SCHOOL_DAMAGE (SchoolMask=16 Frost, matching the tooltip)",
+    "and SPELL_AURA_MOD_ROOT (native), both stock AzerothCore handlers. The Frost damage coefficient is",
+    "covered",
+    "by the merged spell_bonus_data row for 805730 (rev_20260919_10_coa_stock_coefficient_carryover.sql). No",
+    "CoA",
+    "code runs for either rank.",
+    "Verification note: 807842's own CastingTimeIndex 206 resolves to a real 1250ms cast time",
+    "(SpellCastTimes.dbc)",
+    "- the persistent area aura is not even applied until the cast finishes, and only then does its own",
+    "1000ms",
+    "amplitude start counting down to the first tick. The full delay before the explosion is therefore closer",
+    "to",
+    "1250+1000=2250ms after the cast starts, not the tooltip's '1 sec' alone; the draft's 1400ms wait plus",
+    "800ms",
+    "retry window (2200ms total) fell just short of that."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "rm",
+      "entry": 36,
+      "faction": 14,
+      "level": 60,
+      "health": 1000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 807842
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "save_as": "hp_base"
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 807842,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: target is not rooted before the 1s fuse",
+      "actor": "target",
+      "metric": "rooted",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: target takes Frost damage from the explosion",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "hp_base",
+      "max": -1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: target is rooted by the explosion",
+      "actor": "target",
+      "metric": "rooted",
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: target carries the root aura",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 805730,
+      "equals": 1,
+      "within_ms": 500
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Death and Tribute trails the character like the rest of its Three Totems chain (#9218)",
+  "contract": "Quest 1660030 (Death and Tribute, first quest of the Three Totems/Red Cloud Mesa narrative chain in Mulgore) is a level-6 quest. Its client QuestTemplateScaling.dbc row caps it at 20, same as the other six quests of its chain (1660031-1660035, 1660043), even though the chain is a substantive narrative arc (disguise, infiltration, a named boss), not a starting-hub errand, so AscensionQuestScaling corrects the row's maximum to 60 after loading, same as quest 45's Elwynn precedent. A level-49 character with open-world scaling on therefore plays the quest at 45 (49 - 4) instead of the row maximum of 20, and a level-60 character at 56 (60 - 4). QuestXP.dbc RewardXPDifficulty 5 gives 5540 at level 45 and 8450 at level 56, both well above the old capped value (155 at level 20); the exact award depends on the deployed Rate.XP.Quest, so the scenario asserts the quest level, a lower bound the old capped value cannot reach, and that the quest log preview and the award agree. A second level-49 character keeps scaling off: the quest stays at its authored level 6 and keeps the small stock level-difference reward. No prestige aura, experience aura or test zone is active. Client rendering is not tested.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "scaled49", "race": 1, "class": 20, "level": 49 },
+    { "id": "plain49", "race": 1, "class": 20, "level": 49 },
+    { "id": "scaled60", "race": 1, "class": 20, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the fixtures settle", "ms": 2000 },
+    { "action": "command", "actor": "scaled49", "command": ".xp 1" },
+    { "action": "command", "actor": "plain49", "command": ".xp 1" },
+    { "action": "command", "actor": "scaled60", "command": ".xp 1" },
+    { "action": "level_scaling_packet", "actor": "scaled49", "value": 1 },
+    { "action": "level_scaling_packet", "actor": "plain49", "value": 0 },
+    { "action": "level_scaling_packet", "actor": "scaled60", "value": 1 },
+    { "action": "wait", "ms": 1000 },
+
+    { "action": "prepare_quest", "actor": "scaled49", "quest": 1660030 },
+    { "action": "assert", "label": "At 49 the quest trails the character to 45", "actor": "scaled49", "metric": "quest_level", "quest": 1660030, "equals": 45 },
+    { "action": "assert", "label": "The quest log offers the level-45 reward", "actor": "scaled49", "metric": "quest_log_sent_xp", "quest": 1660030, "min": 4000, "within_ms": 1000 },
+    { "action": "snapshot", "actor": "scaled49", "metric": "quest_log_sent_xp", "quest": 1660030, "save_as": "shown49" },
+    { "action": "snapshot", "actor": "scaled49", "metric": "xp", "save_as": "before49" },
+    { "action": "reward_quest", "actor": "scaled49", "quest": 1660030 },
+    { "action": "assert", "actor": "scaled49", "metric": "quest_rewarded", "quest": 1660030, "equals": 1 },
+    { "action": "assert", "label": "The award does not cross a level", "actor": "scaled49", "metric": "level", "equals": 49 },
+    { "action": "assert", "label": "The award matches the offered reward", "actor": "scaled49", "metric": "xp", "relative_to": "before49", "ratio_to": "shown49", "equals": 1 },
+
+    { "action": "prepare_quest", "actor": "scaled60", "quest": 1660030 },
+    { "action": "assert", "label": "At 60 the quest trails the character to 56", "actor": "scaled60", "metric": "quest_level", "quest": 1660030, "equals": 56 },
+    { "action": "assert", "label": "The quest log offers the level-56 reward", "actor": "scaled60", "metric": "quest_log_sent_xp", "quest": 1660030, "min": 6000, "within_ms": 1000 },
+    { "action": "snapshot", "actor": "scaled60", "metric": "quest_log_sent_xp", "quest": 1660030, "save_as": "shown60" },
+    { "action": "snapshot", "actor": "scaled60", "metric": "xp", "save_as": "before60" },
+    { "action": "reward_quest", "actor": "scaled60", "quest": 1660030 },
+    { "action": "assert", "actor": "scaled60", "metric": "quest_rewarded", "quest": 1660030, "equals": 1 },
+    { "action": "assert", "label": "The award matches the offered reward", "actor": "scaled60", "metric": "xp", "relative_to": "before60", "ratio_to": "shown60", "equals": 1 },
+
+    { "action": "prepare_quest", "actor": "plain49", "quest": 1660030 },
+    { "action": "assert", "label": "Without scaling the quest keeps its authored level", "actor": "plain49", "metric": "quest_level", "quest": 1660030, "equals": 6 },
+    { "action": "assert", "label": "Without scaling the stock level difference still pays", "actor": "plain49", "metric": "quest_log_sent_xp", "quest": 1660030, "max": 150, "within_ms": 1000 },
+    { "action": "snapshot", "actor": "plain49", "metric": "quest_log_sent_xp", "quest": 1660030, "save_as": "shown_plain" },
+    { "action": "snapshot", "actor": "plain49", "metric": "xp", "save_as": "before_plain" },
+    { "action": "reward_quest", "actor": "plain49", "quest": 1660030 },
+    { "action": "assert", "actor": "plain49", "metric": "quest_rewarded", "quest": 1660030, "equals": 1 },
+    { "action": "assert", "label": "An unscaled quest keeps the stock reward", "actor": "plain49", "metric": "xp", "relative_to": "before_plain", "ratio_to": "shown_plain", "equals": 1 }
+  ]
+}

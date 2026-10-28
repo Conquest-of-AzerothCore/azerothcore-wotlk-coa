@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "name": "Necromancer: both Rotting Flesh passives work - hasted Flesh to Worms +25%, minion buff (#1814)",
+  "contract": "#1814 names two different spells called Rotting Flesh. (1) The Death talent 301304 (CharacterAdvancement 7808, Tab 59) reads 'Increases the damage of Flesh to Worms by $s1% and allows its periodic damage to scale with your spell haste.' In SpellFamilyName 29, effect 0 is SPELL_AURA_ADD_PCT_MODIFIER (108) MiscValue 22 (SPELLMOD_DOT), BasePoints 24 + DieSides 1 = +25%, and effect 1 is SPELL_AURA_PERIODIC_HASTE (316); both use class mask (0x4000, 0, 0), which selects every Flesh to Worms rank (500338, 501855-501861; family flags 0x4000, 0, 0x20). Flesh to Worms 500338 is a PERIODIC_DAMAGE aura ticking every 3000 ms with no SPELL_ATTR5_SPELL_HASTE_AFFECTS_PERIODIC. Both auras are native: Unit::SpellDamageBonusDone applies SPELLMOD_DOT to periodic damage, and AuraEffect::CalculatePeriodic multiplies the period by UNIT_MOD_CAST_SPEED when the caster has aura 316 for the spell; the Necromancer contracts dummy only auras 42 and 354. Icy Veins 12472 (SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK +20%) is the haste fixture: without the talent a Flesh to Worms still ticks every 3000 ms, with it a fresh one ticks every 3000 x cast speed multiplier (about 2500 ms), and the periodic damage bonus from a fixed base rises by exactly 25%. (2) The level 30 passive 574138 (CharacterAdvancement 9223, RequiredLevel 30) reads 'Applying Crypt Plague to an enemy now additionally adds Rotting Flesh to your Undead minions, increasing their damage dealt by $573131s1% per stack for $/1000;s1 sec.' Its gating and five-second duration were fixed by 55a017c7a (#295, scenario necromancer-rotting-flesh-level-passive), which checks the owner's aura only. The buff 573131's effect 0 is SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS (190) with SPELL_AURA_MOD_DAMAGE_PERCENT_DONE +2, so it reaches the owner's summons natively; with Crypt Plague 92121 (Crypt Swarm damage applies Crypt Plague 570131) a raised Lesser Skeletal Warrior 50065 must carry 573131. The audit's premise (no source reference to 301304 or 574138) does not apply: 301304 is native and 574138 is read in AscensionNecromancer::Plague.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "old_golem", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 8 },
+    { "id": "fresh_golem", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 11 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "necro", "spell": 500338 },
+    {
+      "action": "set_aura", "label": "Haste fixture: Icy Veins +20% casting speed", "actor": "necro",
+      "spell": 12472, "stacks": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: Icy Veins hastes the Necromancer", "actor": "necro",
+      "metric": "cast_speed_multiplier", "min": 0.8, "max": 0.87
+    },
+    {
+      "action": "snapshot", "label": "Untalented Flesh to Worms periodic damage", "actor": "necro",
+      "metric": "spell_damage_done", "spell": 500338, "target": "old_golem", "periodic": true, "save_as": "dot0"
+    },
+    {
+      "action": "cast", "label": "Flesh to Worms before the talent", "actor": "necro", "spell": 500338,
+      "target": "old_golem"
+    },
+    {
+      "action": "assert", "label": "SETUP: the first golem carries Flesh to Worms", "actor": "old_golem",
+      "metric": "aura", "spell": 500338, "caster": "necro", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTROL: without the talent haste leaves the 3 sec period", "actor": "old_golem",
+      "metric": "aura_amplitude_ms", "spell": 500338, "caster": "necro", "effect": 0, "equals": 3000
+    },
+    { "action": "learn", "actor": "necro", "spell": 301304 },
+    {
+      "action": "assert", "label": "SETUP: the Rotting Flesh talent is active", "actor": "necro",
+      "metric": "aura", "spell": 301304, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Flesh to Worms periodic damage rises by 25%", "actor": "necro",
+      "metric": "spell_damage_done", "spell": 500338, "target": "old_golem", "periodic": true,
+      "ratio_to": "dot0", "min": 1.24, "max": 1.26
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    {
+      "action": "cast", "label": "Flesh to Worms with the talent", "actor": "necro", "spell": 500338,
+      "target": "fresh_golem"
+    },
+    {
+      "action": "assert", "label": "SETUP: the second golem carries Flesh to Worms", "actor": "fresh_golem",
+      "metric": "aura", "spell": 500338, "caster": "necro", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The talented disease ticks faster with 20% haste (3000 / 1.2)",
+      "actor": "fresh_golem", "metric": "aura_amplitude_ms", "spell": 500338, "caster": "necro", "effect": 0,
+      "min": 2450, "max": 2550
+    },
+    { "action": "learn", "actor": "necro", "spell": 500970 },
+    { "action": "learn", "actor": "necro", "spell": 500965 },
+    { "action": "learn", "actor": "necro", "spell": 92121 },
+    { "action": "learn", "actor": "necro", "spell": 574138 },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "cast", "label": "Raise a Lesser Skeletal Warrior", "actor": "necro", "spell": 500970 },
+    {
+      "action": "assert", "label": "SETUP: the warrior is raised", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50065, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "SETUP: the warrior has no Rotting Flesh yet", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50065, "spell": 573131, "equals": 0
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    {
+      "action": "cast", "label": "Crypt Swarm applies Crypt Plague", "actor": "necro", "spell": 500965,
+      "target": "old_golem"
+    },
+    {
+      "action": "assert", "label": "SETUP: Crypt Swarm damage applies Crypt Plague", "actor": "old_golem",
+      "metric": "aura", "spell": 570131, "caster": "necro", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "Applying Crypt Plague gives the Undead minion Rotting Flesh", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50065, "spell": 573131, "equals": 1, "within_ms": 3000
+    }
+  ]
+}

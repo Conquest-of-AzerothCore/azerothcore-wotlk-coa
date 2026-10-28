@@ -1,15 +1,31 @@
 {
   "schema": 1,
-  "name": "Sacrificial Rite's haste clauses (#3188 - its attacker clause needs a Ghost test)",
-  "contract": "Sacrificial Rite 800785 reads 'Invoke a dark ritual, increasing your haste by $s1% for $d. While active, attackers are afflicted with Cursed Blood. Can only occur once per sec.' Spell.dbc gives it three effects: effect 0 is aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE and effect 2 is aura 216 SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK, both BasePoints 19 + DieSides 1 = +20%, over DurationIndex 8 = 15000 ms; effect 1 is aura 42 (proc trigger spell) on Cursed Blood 573250. This scenario covers the two haste clauses, which are native: AuraEffect::HandleModMeleeRangedSpeedPct divides UNIT_FIELD_BASEATTACKTIME by 1.20 and HandleModCastingSpeed divides UNIT_MOD_CAST_SPEED by 1.20, so both ratios must land on 1/1.2 = 0.8333. Frostbolt 116 is only a cast-time probe; spell_cast_time_ms submits no cast and does not require the spell to be known. NOT PROVABLE HERE - the attacker clause. Spell.dbc gives 800785 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped the record and no attacker was ever cursed; rev_20260920_44_bloodmage_melee_event_procs.sql adds the row with ProcFlags 139944 = 0x222a8, which is entirely TAKEN flags and so needs a unit that actually swings at the Bloodmage. CoAGameplayTest.cpp forces every fixture creature to REACT_PASSIVE at creation and again after CombatStop, and CreatureAI::UpdateVictim takes the passive branch for a creature in combat and calls me->AttackStop() (src/server/game/AI/CreatureAI.cpp:372-379); CreatureAI::AttackedBy is an empty stub (src/server/game/AI/CreatureAI.h:180). A fixture creature therefore never retaliates, whatever its faction, so the clause cannot be observed here. A Ghost e2e test would have to: put a class-20 character in a zone with an ordinary hostile world mob, cast Sacrificial Rite 800785, pull the mob so that it lands at least one melee swing on the character while the 15 s buff is up, and check that aura 573250 is on the mob with the character as caster. 800785 has ExcludeCasterAuraSpell 802877, so no Cursed Form marker is fixtured.",
+  "name": "Sacrificial Rite's haste, attacker proc, and expiry contract (#3188)",
+  "contract": "Sacrificial Rite 800785 applies native 20% melee and spell haste for 15 seconds. While active, its spell_proc row curses a unit that hits the Bloodmage with Cursed Blood 573250. On natural expiration, the tooltip grants the caster 15% increased healing and a 15-second periodic heal through aura 800786. This scenario verifies the attacker proc on an opposing player fixture, the end-aura amount, its periodic healing tick and that manual cancellation does not grant it.",
   "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
   "players": [
     {
       "id": "bloodmage",
       "race": 1,
       "class": 20,
       "level": 80,
-      "spell_hit_rating": 10000
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "attacker",
+      "race": 2,
+      "class": 1,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
     }
   ],
   "steps": [
@@ -17,6 +33,16 @@
       "action": "wait",
       "label": "Let level scaling settle",
       "ms": 5000
+    },
+    {
+      "action": "pvp",
+      "actor": "bloodmage",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "attacker",
+      "enabled": true
     },
     {
       "action": "learn",
@@ -78,6 +104,26 @@
       "max": 0.842
     },
     {
+      "action": "attack",
+      "label": "A hostile player fixture hits the active Sacrificial Rite",
+      "actor": "attacker",
+      "target": "bloodmage"
+    },
+    {
+      "action": "assert",
+      "label": "The attacker receives Cursed Blood from the Bloodmage",
+      "actor": "attacker",
+      "metric": "aura",
+      "spell": 573250,
+      "caster": "bloodmage",
+      "equals": 1,
+      "within_ms": 7000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "attacker"
+    },
+    {
       "action": "assert",
       "label": "Effect 2 grants 20% spell haste",
       "actor": "bloodmage",
@@ -86,6 +132,114 @@
       "ratio_to": "cast_before",
       "min": 0.825,
       "max": 0.842
+    },
+    {
+      "action": "wait",
+      "label": "Wait for Sacrificial Rite's 15-second duration to expire",
+      "ms": 15500
+    },
+    {
+      "action": "assert",
+      "label": "Sacrificial Rite has expired",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 800785,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Natural expiration applies the healing aura to its caster",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 800786,
+      "caster": "bloodmage",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The end aura grants 15% increased healing",
+      "actor": "bloodmage",
+      "metric": "aura_amount",
+      "spell": 800786,
+      "effect": 0,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "The end aura ticks every 1500 ms",
+      "actor": "bloodmage",
+      "metric": "aura_amplitude_ms",
+      "spell": 800786,
+      "effect": 1,
+      "equals": 1500
+    },
+    {
+      "action": "set_health",
+      "label": "Create room to observe the periodic heal",
+      "actor": "bloodmage",
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "label": "Health before the end aura ticks",
+      "actor": "bloodmage",
+      "metric": "health",
+      "save_as": "health_before_end_aura_tick"
+    },
+    {
+      "action": "assert",
+      "label": "The end aura heals the Bloodmage",
+      "actor": "bloodmage",
+      "metric": "health",
+      "relative_to": "health_before_end_aura_tick",
+      "min": 1,
+      "within_ms": 3500
+    },
+    {
+      "action": "set_aura",
+      "label": "Remove the completed healing aura",
+      "actor": "bloodmage",
+      "spell": 800786,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "bloodmage",
+      "spell": 800785
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown clear",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 800785
+    },
+    {
+      "action": "assert",
+      "label": "Sacrificial Rite can be cast again",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 800785,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "Cancel Sacrificial Rite before it expires",
+      "actor": "bloodmage",
+      "spell": 800785,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Cancellation does not grant the end aura",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 800786,
+      "equals": 0
     }
   ]
 }

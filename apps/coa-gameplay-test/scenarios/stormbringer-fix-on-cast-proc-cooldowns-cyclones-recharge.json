@@ -1,93 +1,587 @@
 {
   "schema": 1,
   "name": "Stormbringer: Cyclone's Recharge shortens Kiss of the Clouds on Shock, Gale and Electrocute (#1771)",
-  "contract": "Cyclone's Recharge 300827 (Spell.dbc: passive Attributes 448, Effect[0] APPLY_AURA / aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 300828, TARGET_UNIT_CASTER) promises \"Casting Shock, Gale or Electrocute now reduces the remaining cooldown of your Kiss of the Clouds by $/1000;300828s1 sec\". 300828 has one SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN with EffectBasePoints -1001 + EffectDieSides 1 = -1000 ms and EffectMiscValue 500039 Kiss of the Clouds. 300827's DBC ProcFlags are 0, so SpellMgr::LoadSpellProcs skips it (SpellMgr.cpp: \"if (!spellInfo->ProcFlags) continue;\") and no spell_proc row existed, leaving the aura with no entry in mSpellProcMap: it can never fire. Even once it fires, Player::ModifySpellCooldown keys the cooldown map by the exact EffectMiscValue id, so the named rank 1 (500039) is not the rank a level-80 player casts: Kiss of the Clouds is a 9-rank chain (spell_ranks first_spell_id 500039, rank 9 = 501449) with Category 56 and CategoryRecoveryTime 30000, and the category stores an entry for every rank. The three sources are identified by SpellFamilyName 22 masks over the 953 family-22 spells: Shock 0x800 (9 ranks), Gale 0x4000 (5 ranks), Electrocute 0x2000000 (13 ranks). An identical unarmed control player casts the same spells in lockstep so ordinary cooldown decay cancels out. A fourth clause asserting Call Lightning (SpellFamilyFlags1 0x10, outside all three masks) as a negative control was dropped: it consistently deals 0 damage against these fixtures for reasons unrelated to this proc (see .agents/plans/audit-stormbringer/observations.md), so it cannot be used to prove a silent-no-cast is not happening. All three ranks of Electrocute checked in this batch (501421, 501432, 801844) carry Spell.dbc TargetAuraState 13 (AURA_STATE_HEALTHLESS_35_PERCENT), so it only lands on a target already below 35% health; the fixture drops both dummies to 30% before the Electrocute casts so the spell is not rejected with SPELL_FAILED_TARGET_AURASTATE before the on-cast proc phase ever runs.",
+  "contract": [
+    "Cyclone's Recharge 300827 (Spell.dbc: passive Attributes 448, Effect[0] APPLY_AURA / aura 42",
+    "PROC_TRIGGER_SPELL, EffectTriggerSpell 300828, TARGET_UNIT_CASTER) promises \"Casting Shock, Gale or",
+    "Electrocute now reduces the remaining cooldown of your Kiss of the Clouds by $/1000;300828s1 sec\".",
+    "300828 has one SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN with EffectBasePoints -1001 + EffectDieSides 1 =",
+    "-1000 ms and EffectMiscValue 500039 Kiss of the Clouds. 300827's DBC ProcFlags are 0, so",
+    "SpellMgr::LoadSpellProcs skips it (SpellMgr.cpp: \"if (!spellInfo->ProcFlags) continue;\") and no",
+    "spell_proc row existed, leaving the aura with no entry in mSpellProcMap: it can never fire. Even once it",
+    "fires, Player::ModifySpellCooldown keys the cooldown map by the exact EffectMiscValue id, so the named",
+    "rank 1 (500039) is not the rank a level-80 player casts: Kiss of the Clouds is a 9-rank chain",
+    "(spell_ranks first_spell_id 500039, rank 9 = 501449) with Category 56 and CategoryRecoveryTime 30000,",
+    "and the category stores an entry for every rank. The three sources are identified by SpellFamilyName 22",
+    "masks over the 953 family-22 spells: Shock 0x800 (9 ranks), Gale 0x4000 (5 ranks), Electrocute 0x2000000",
+    "(13 ranks). An identical unarmed control player casts the same spells in lockstep so ordinary cooldown",
+    "decay cancels out. Call Lightning (SpellFamilyFlags1 0x10, outside all three masks) is the off-family",
+    "negative control. Both targets use Harvest Golem 36. Rabbit 721 runs native CritterAI and flees on",
+    "combat engagement, invalidating repeated facing-sensitive casts in a cooldown fixture; the related",
+    "Titanstorm scenario recorded UNIT_NOT_INFRONT. Each normal source cast must be accepted and complete",
+    "before comparing the original rank cooldown limits. Refill the original Static aura before Call",
+    "Lightning, require real direct damage, and verify no further cooldown reduction. All three ranks of",
+    "Electrocute checked in this batch (501421, 501432, 801844) carry Spell.dbc TargetAuraState 13",
+    "(AURA_STATE_HEALTHLESS_35_PERCENT), so it only lands on a target already below 35% health; the fixture",
+    "drops both dummies to 30% before the Electrocute casts so the spell is not rejected with",
+    "SPELL_FAILED_TARGET_AURASTATE before the on-cast proc phase ever runs.",
+    "DISCRIMINATING: the rank 1 entry named by EffectMiscValue also loses 1000 ms, proving the proc fired at",
+    "all",
+    "30% health: Electrocute's TargetAuraState 13 (AURA_STATE_HEALTHLESS_35_PERCENT) needs the target below",
+    "35%"
+  ],
   "timeout_ms": 90000,
   "players": [
-    { "id": "control", "race": 2, "class": 16, "level": 80, "spell_hit_rating": 10000 },
-    { "id": "armed", "race": 2, "class": 16, "level": 80, "spell_hit_rating": 10000 }
+    {
+      "id": "control",
+      "race": 2,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "armed",
+      "race": 2,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
   ],
   "creatures": [
-    { "id": "control_dummy", "owner": "control", "entry": 721, "health": 1000000, "distance": 3 },
-    { "id": "armed_dummy", "owner": "armed", "entry": 721, "health": 1000000, "distance": 3 }
+    {
+      "id": "control_dummy",
+      "owner": "control",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "armed_dummy",
+      "owner": "armed",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
   ],
   "steps": [
-    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
-    { "action": "learn", "actor": "control", "spell": 501449 },
-    { "action": "learn", "actor": "control", "spell": 504634 },
-    { "action": "learn", "actor": "control", "spell": 570141 },
-    { "action": "learn", "actor": "control", "spell": 501432 },
-    { "action": "learn", "actor": "armed", "spell": 501449 },
-    { "action": "learn", "actor": "armed", "spell": 504634 },
-    { "action": "learn", "actor": "armed", "spell": 570141 },
-    { "action": "learn", "actor": "armed", "spell": 501432 },
-    { "action": "learn", "actor": "armed", "spell": 300827 },
     {
-      "action": "assert", "label": "SETUP: Cyclone's Recharge is passive and self-applies on learn",
-      "actor": "armed", "metric": "aura", "spell": 300827, "equals": 1, "within_ms": 1000
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
     },
     {
-      "action": "assert", "label": "SETUP: the control never learns Cyclone's Recharge",
-      "actor": "control", "metric": "aura", "spell": 300827, "equals": 0
-    },
-    { "action": "set_aura", "actor": "control", "spell": 803102, "stacks": 100 },
-    { "action": "set_aura", "actor": "armed", "spell": 803102, "stacks": 100 },
-    { "action": "cast", "actor": "control", "spell": 501449 },
-    { "action": "cast", "actor": "armed", "spell": 501449 },
-    { "action": "wait", "ms": 1700 },
-    {
-      "action": "assert", "label": "SETUP: Kiss of the Clouds rank 9 runs its 30000 ms CategoryRecoveryTime",
-      "actor": "control", "metric": "cooldown_ms", "spell": 501449, "min": 26000, "max": 30000
+      "action": "learn",
+      "actor": "control",
+      "spell": 501449
     },
     {
-      "action": "assert", "label": "SETUP: Category 56 also stores the cooldown under rank 1 (500039), the id the tooltip names",
-      "actor": "control", "metric": "cooldown_ms", "spell": 500039, "min": 26000, "max": 30000
+      "action": "learn",
+      "actor": "control",
+      "spell": 504634
     },
-    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 501449, "save_as": "kiss_start" },
     {
-      "action": "assert", "label": "SETUP: both players start from the same Kiss of the Clouds cooldown",
-      "actor": "armed", "metric": "cooldown_ms", "spell": 501449,
-      "relative_to": "kiss_start", "min": -600, "max": 600
+      "action": "learn",
+      "actor": "control",
+      "spell": 570141
     },
-    { "action": "cast", "actor": "control", "spell": 504634, "target": "control_dummy" },
-    { "action": "cast", "actor": "armed", "spell": 504634, "target": "armed_dummy" },
-    { "action": "wait", "ms": 2600 },
-    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 501449, "save_as": "kiss_shock" },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 501432
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 501399
+    },
+    {
+      "action": "learn",
+      "actor": "armed",
+      "spell": 501449
+    },
+    {
+      "action": "learn",
+      "actor": "armed",
+      "spell": 504634
+    },
+    {
+      "action": "learn",
+      "actor": "armed",
+      "spell": 570141
+    },
+    {
+      "action": "learn",
+      "actor": "armed",
+      "spell": 501432
+    },
+    {
+      "action": "learn",
+      "actor": "armed",
+      "spell": 501399
+    },
+    {
+      "action": "learn",
+      "actor": "armed",
+      "spell": 300827
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Cyclone's Recharge is passive and self-applies on learn",
+      "actor": "armed",
+      "metric": "aura",
+      "spell": 300827,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the control never learns Cyclone's Recharge",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 300827,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "armed",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 501449
+    },
+    {
+      "action": "cast",
+      "actor": "armed",
+      "spell": 501449
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "label": "Normal cast is accepted with the non-fleeing combat fixture",
+      "actor": "control",
+      "metric": "cast_failure",
+      "spell": 501449,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Both normal casts complete before the matched cooldown comparison",
+      "actor": "control",
+      "metric": "spell_cast_count",
+      "spell": 501449,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Normal cast is accepted with the non-fleeing combat fixture",
+      "actor": "armed",
+      "metric": "cast_failure",
+      "spell": 501449,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Both normal casts complete before the matched cooldown comparison",
+      "actor": "armed",
+      "metric": "spell_cast_count",
+      "spell": 501449,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Kiss of the Clouds rank 9 runs its 30000 ms CategoryRecoveryTime",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 501449,
+      "min": 26000,
+      "max": 30000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Category 56 also stores the cooldown under rank 1 (500039), the id the tooltip names",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 500039,
+      "min": 26000,
+      "max": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 501449,
+      "save_as": "kiss_start"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: both players start from the same Kiss of the Clouds cooldown",
+      "actor": "armed",
+      "metric": "cooldown_ms",
+      "spell": 501449,
+      "relative_to": "kiss_start",
+      "min": -600,
+      "max": 600
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 504634,
+      "target": "control_dummy"
+    },
+    {
+      "action": "cast",
+      "actor": "armed",
+      "spell": 504634,
+      "target": "armed_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2600
+    },
+    {
+      "action": "assert",
+      "label": "Normal cast is accepted with the non-fleeing combat fixture",
+      "actor": "control",
+      "metric": "cast_failure",
+      "spell": 504634,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Both normal casts complete before the matched cooldown comparison",
+      "actor": "control",
+      "metric": "spell_cast_count",
+      "spell": 504634,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Normal cast is accepted with the non-fleeing combat fixture",
+      "actor": "armed",
+      "metric": "cast_failure",
+      "spell": 504634,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Both normal casts complete before the matched cooldown comparison",
+      "actor": "armed",
+      "metric": "spell_cast_count",
+      "spell": 504634,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 501449,
+      "save_as": "kiss_shock"
+    },
     {
       "action": "assert",
       "label": "DISCRIMINATING: Shock takes 1000 ms off the cast rank (300828 -1001 + 1 die side)",
-      "actor": "armed", "metric": "cooldown_ms", "spell": 501449,
-      "relative_to": "kiss_shock", "min": -1500, "max": -500
+      "actor": "armed",
+      "metric": "cooldown_ms",
+      "spell": 501449,
+      "relative_to": "kiss_shock",
+      "min": -1500,
+      "max": -500
     },
-    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 500039, "save_as": "rank1_shock" },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 500039,
+      "save_as": "rank1_shock"
+    },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: the rank 1 entry named by EffectMiscValue also loses 1000 ms, proving the proc fired at all",
-      "actor": "armed", "metric": "cooldown_ms", "spell": 500039,
-      "relative_to": "rank1_shock", "min": -1500, "max": -500
+      "label": "DISCRIMINATING: the rank 1 entry named by EffectMiscValue also loses 1000 ms, proving the proc…",
+      "actor": "armed",
+      "metric": "cooldown_ms",
+      "spell": 500039,
+      "relative_to": "rank1_shock",
+      "min": -1500,
+      "max": -500
     },
-    { "action": "cast", "actor": "control", "spell": 570141, "target": "control_dummy" },
-    { "action": "cast", "actor": "armed", "spell": 570141, "target": "armed_dummy" },
-    { "action": "wait", "ms": 1700 },
-    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 501449, "save_as": "kiss_gale" },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 570141,
+      "target": "control_dummy"
+    },
+    {
+      "action": "cast",
+      "actor": "armed",
+      "spell": 570141,
+      "target": "armed_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "label": "Normal cast is accepted with the non-fleeing combat fixture",
+      "actor": "control",
+      "metric": "cast_failure",
+      "spell": 570141,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Both normal casts complete before the matched cooldown comparison",
+      "actor": "control",
+      "metric": "spell_cast_count",
+      "spell": 570141,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Normal cast is accepted with the non-fleeing combat fixture",
+      "actor": "armed",
+      "metric": "cast_failure",
+      "spell": 570141,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Both normal casts complete before the matched cooldown comparison",
+      "actor": "armed",
+      "metric": "spell_cast_count",
+      "spell": 570141,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 501449,
+      "save_as": "kiss_gale"
+    },
     {
       "action": "assert",
       "label": "DISCRIMINATING: Gale is the second named source, so the total reduction is now 2000 ms",
-      "actor": "armed", "metric": "cooldown_ms", "spell": 501449,
-      "relative_to": "kiss_gale", "min": -2500, "max": -1500
+      "actor": "armed",
+      "metric": "cooldown_ms",
+      "spell": 501449,
+      "relative_to": "kiss_gale",
+      "min": -2500,
+      "max": -1500
     },
-    { "action": "set_health", "label": "30% health: Electrocute's TargetAuraState 13 (AURA_STATE_HEALTHLESS_35_PERCENT) needs the target below 35%", "actor": "control_dummy", "value": 300000 },
-    { "action": "set_health", "label": "30% health: same requirement on the armed dummy", "actor": "armed_dummy", "value": 300000 },
-    { "action": "wait", "label": "Let Unit::Update refresh the aura states", "ms": 1500 },
-    { "action": "cast", "actor": "control", "spell": 501432, "target": "control_dummy" },
-    { "action": "cast", "actor": "armed", "spell": 501432, "target": "armed_dummy" },
-    { "action": "wait", "ms": 1700 },
-    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 501449, "save_as": "kiss_electrocute" },
+    {
+      "action": "set_health",
+      "label": "30% health: Electrocute's TargetAuraState 13 (AURA_STATE_HEALTHLESS_35_PERCENT) needs the target…",
+      "actor": "control_dummy",
+      "value": 300000
+    },
+    {
+      "action": "set_health",
+      "label": "30% health: same requirement on the armed dummy",
+      "actor": "armed_dummy",
+      "value": 300000
+    },
+    {
+      "action": "wait",
+      "label": "Let Unit::Update refresh the aura states",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 501432,
+      "target": "control_dummy"
+    },
+    {
+      "action": "cast",
+      "actor": "armed",
+      "spell": 501432,
+      "target": "armed_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "label": "Normal cast is accepted with the non-fleeing combat fixture",
+      "actor": "control",
+      "metric": "cast_failure",
+      "spell": 501432,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Both normal casts complete before the matched cooldown comparison",
+      "actor": "control",
+      "metric": "spell_cast_count",
+      "spell": 501432,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Normal cast is accepted with the non-fleeing combat fixture",
+      "actor": "armed",
+      "metric": "cast_failure",
+      "spell": 501432,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Both normal casts complete before the matched cooldown comparison",
+      "actor": "armed",
+      "metric": "spell_cast_count",
+      "spell": 501432,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 501449,
+      "save_as": "kiss_electrocute"
+    },
     {
       "action": "assert",
       "label": "DISCRIMINATING: Electrocute is the third named source, so the total reduction is now 3000 ms",
-      "actor": "armed", "metric": "cooldown_ms", "spell": 501449,
-      "relative_to": "kiss_electrocute", "min": -3500, "max": -2500
+      "actor": "armed",
+      "metric": "cooldown_ms",
+      "spell": 501449,
+      "relative_to": "kiss_electrocute",
+      "min": -3500,
+      "max": -2500
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "armed",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 501399,
+      "target": "control_dummy"
+    },
+    {
+      "action": "cast",
+      "actor": "armed",
+      "spell": 501399,
+      "target": "armed_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2600
+    },
+    {
+      "action": "assert",
+      "label": "Off-family Call Lightning is accepted",
+      "actor": "control",
+      "metric": "cast_failure",
+      "spell": 501399,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Off-family Call Lightning completes normally",
+      "actor": "control",
+      "metric": "spell_cast_count",
+      "spell": 501399,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Off-family control really lands direct damage",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 501399,
+      "target": "control_dummy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Off-family Call Lightning is accepted",
+      "actor": "armed",
+      "metric": "cast_failure",
+      "spell": 501399,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Off-family Call Lightning completes normally",
+      "actor": "armed",
+      "metric": "spell_cast_count",
+      "spell": 501399,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Off-family control really lands direct damage",
+      "actor": "armed",
+      "metric": "spell_damage_count",
+      "spell": 501399,
+      "target": "armed_dummy",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 501449,
+      "save_as": "kiss_call_lightning"
+    },
+    {
+      "action": "assert",
+      "label": "Call Lightning is outside the talent masks and leaves the total reduction at 3000 ms",
+      "actor": "armed",
+      "metric": "cooldown_ms",
+      "spell": 501449,
+      "relative_to": "kiss_call_lightning",
+      "min": -3500,
+      "max": -2500
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 500039,
+      "save_as": "rank1_call_lightning"
+    },
+    {
+      "action": "assert",
+      "label": "Call Lightning is outside the talent masks and leaves the total reduction at 3000 ms",
+      "actor": "armed",
+      "metric": "cooldown_ms",
+      "spell": 500039,
+      "relative_to": "rank1_call_lightning",
+      "min": -3500,
+      "max": -2500
     }
   ]
 }

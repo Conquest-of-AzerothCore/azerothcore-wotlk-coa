@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "name": "Logging in does not offer the Warchief's Command zone orders again",
+  "contract": "Issue #7536: a level 60 Horde character was offered Warchief's Command pop-ups (SMSG 0x927 {quest, 0}) on every login, also for zones far below its level and orders it had dismissed many times. The client does not report a dismissed pop-up to the server, so a zone order is offered only on the level-up that unlocks it. Logging in twice at level 60 sends no further offer of the level 55 orders Warchief's Command: Winterspring! 14229 and Warchief's Command: Silithus! 14241 (the two a login offered before), nor of the level 10 order Warchief's Command: The Barrens! 14232.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "horde",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "horde",
+      "metric": "server_packets",
+      "opcode": 2343,
+      "row": 14229,
+      "save_as": "winterspring_before_login"
+    },
+    {
+      "action": "snapshot",
+      "actor": "horde",
+      "metric": "server_packets",
+      "opcode": 2343,
+      "row": 14241,
+      "save_as": "silithus_before_login"
+    },
+    {
+      "action": "snapshot",
+      "actor": "horde",
+      "metric": "server_packets",
+      "opcode": 2343,
+      "row": 14232,
+      "save_as": "barrens_before_login"
+    },
+    {
+      "label": "the level 60 character logs in again",
+      "action": "relog",
+      "actor": "horde"
+    },
+    {
+      "label": "the character logs in a third time",
+      "action": "relog",
+      "actor": "horde"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "label": "logging in does not offer Warchief's Command: Winterspring! again",
+      "action": "assert",
+      "actor": "horde",
+      "metric": "server_packets",
+      "opcode": 2343,
+      "row": 14229,
+      "relative_to": "winterspring_before_login",
+      "equals": 0
+    },
+    {
+      "label": "logging in does not offer Warchief's Command: Silithus! again",
+      "action": "assert",
+      "actor": "horde",
+      "metric": "server_packets",
+      "opcode": 2343,
+      "row": 14241,
+      "relative_to": "silithus_before_login",
+      "equals": 0
+    },
+    {
+      "label": "logging in does not offer the level 10 Warchief's Command: The Barrens! order",
+      "action": "assert",
+      "actor": "horde",
+      "metric": "server_packets",
+      "opcode": 2343,
+      "row": 14232,
+      "relative_to": "barrens_before_login",
+      "equals": 0
+    }
+  ]
+}

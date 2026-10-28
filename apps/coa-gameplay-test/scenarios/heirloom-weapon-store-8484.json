@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "The Heirloom Weapon Token opens custom store 7 and sells heirloom weapons for one token each",
+  "contract": "Issue #8484: item 414010 'Heirloom Weapon Token' ('Right-click to browse and purchase heirloom weapons!') is charged by ItemExtendedCost 5250 (1 x 414010) and the client's Enum.CustomStores.HeirloomWeapons is 7. The client queries a store with CMSG 0x6B9 {u32 store} and gets SMSG 0x6BA QUERY_CUSTOM_STORE_OK with 64-byte records; it buys with CMSG 0x6BB {u32 key, u32 quantity} and gets SMSG 0x6BC. Using the token opens the store with SMSG_OPEN_CUSTOM_STORE 0x73E. The Experience Heirloom Caches hand these tokens out (x3) and the store must let the player spend them: a weapon costs one token (the user's price; no capture of the store survives), and a player without a token keeps nothing and loses nothing.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "buyer", "race": 1, "class": 1, "level": 10}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 3000},
+    {"action": "add_item", "actor": "buyer", "item": 414010, "count": 3},
+
+    {"action": "snapshot", "actor": "buyer", "metric": "server_packets", "opcode": 1854, "save_as": "opened"},
+    {"action": "use_item", "label": "Use the token", "actor": "buyer", "item": 414010, "spell": 1},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The token opens a custom store", "actor": "buyer", "metric": "server_packets", "opcode": 1854, "relative_to": "opened", "equals": 1},
+    {"action": "assert", "label": "and is not used up", "actor": "buyer", "metric": "item_count", "item": 414010, "equals": 3},
+
+    {"action": "snapshot", "actor": "buyer", "metric": "server_packets", "opcode": 1722, "save_as": "store"},
+    {"action": "client_packet", "label": "Open the Heirloom Weapons store", "actor": "buyer", "opcode": 1721, "fields": [{"u32": 7}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The store answers", "actor": "buyer", "metric": "server_packets", "opcode": 1722, "relative_to": "store", "equals": 1},
+    {"action": "assert", "label": "with its weapons", "actor": "buyer", "metric": "server_packet_contains", "opcode": 1722, "text": "QUERY_CUSTOM_STORE_OK", "equals": 1},
+
+    {"action": "client_packet", "label": "Buy the Bloodied Arcanite Reaper", "actor": "buyer", "opcode": 1723, "fields": [{"u32": 1642943}, {"u32": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The weapon is sold", "actor": "buyer", "metric": "server_packet_contains", "opcode": 1724, "text": "PURCHASE_CUSTOM_STORE_ITEM_OK", "equals": 1},
+    {"action": "assert", "label": "as that heirloom", "actor": "buyer", "metric": "item_count", "item": 1642943, "equals": 1},
+    {"action": "assert", "label": "for one token", "actor": "buyer", "metric": "item_count", "item": 414010, "equals": 2},
+
+    {"action": "client_packet", "label": "Buy the second weapon", "actor": "buyer", "opcode": 1723, "fields": [{"u32": 1644092}, {"u32": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The second weapon is sold", "actor": "buyer", "metric": "item_count", "item": 1644092, "equals": 1},
+    {"action": "assert", "label": "for another token", "actor": "buyer", "metric": "item_count", "item": 414010, "equals": 1},
+
+    {"action": "client_packet", "label": "Buy the Polished Observer's Shield with the last token", "actor": "buyer", "opcode": 1723, "fields": [{"u32": 3148335}, {"u32": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The shield is sold", "actor": "buyer", "metric": "item_count", "item": 3148335, "equals": 1},
+    {"action": "assert", "label": "and the tokens are gone", "actor": "buyer", "metric": "item_count", "item": 414010, "equals": 0},
+
+    {"action": "client_packet", "label": "Buy a weapon without a token", "actor": "buyer", "opcode": 1723, "fields": [{"u32": 1648716}, {"u32": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "A token is required", "actor": "buyer", "metric": "server_packet_contains", "opcode": 1724, "text": "PURCHASE_CUSTOM_STORE_ITEM_NOT_ENOUGH_ITEMS", "equals": 1},
+    {"action": "assert", "label": "and nothing is handed out", "actor": "buyer", "metric": "item_count", "item": 1648716, "equals": 0}
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Runemaster audit #2722: Forbidden Engraving raises Weapon Engraving effect values by 20%",
+  "contract": [
+    "Forbidden Engraving 705543: 'Increases the effectiveness of your Weapon Engravings by 20%.' Re-verified in",
+    "Spell.dbc: Effect0 is SPELL_AURA_ADD_PCT_MODIFIER (108), MiscValue 8 = SPELLMOD_ALL_EFFECTS, EffectBasePoints0",
+    "19 with DieSides 1 = +20%, EffectSpellClassMask mask0 131072 (0x20000) and mask1 16 (0x10) on family 38.",
+    "Weapon Engraving: Fire 653210 carries SpellFamilyName 38, SpellFamilyFlags[0] 131072 and SpellFamilyFlags[1]",
+    "16 - an exact match. This is the native spellmod system (SPELLMOD_ALL_EFFECTS scales every effect base value",
+    "of the matched spell via SpellEffectInfo::CalcValue); no occurrence of 705543 exists in src/server/coa/.",
+    "Expected: before the talent Weapon Engraving: Fire's effect value spell_modifier (op 8) is unmodified; with",
+    "the talent it rises by 20% over a 1000 base to 1200; unlearning the talent restores the base value."
+  ],
+  "timeout_ms": 60000,
+  "players": [{"id": "rm", "race": 1, "class": 32, "level": 80}],
+  "steps": [
+    {"action": "wait", "label": "Let the character settle", "ms": 3000},
+    {"action": "assert", "label": "SETUP: no modifier before the talent", "actor": "rm",
+      "metric": "spell_modifier", "spell": 653210, "op": 8, "base": 1000, "equals": 1000},
+    {"action": "learn", "actor": "rm", "spell": 705543},
+    {"action": "assert", "label": "CONTRACT: Forbidden Engraving is active", "actor": "rm",
+      "metric": "aura", "spell": 705543, "equals": 1, "within_ms": 1500},
+    {"action": "assert", "label": "CONTRACT: Weapon Engraving: Fire effect value rises 20%", "actor": "rm",
+      "metric": "spell_modifier", "spell": 653210, "op": 8, "base": 1000, "equals": 1200},
+    {"action": "unlearn", "actor": "rm", "spell": 705543},
+    {"action": "assert", "label": "CONTRACT: unlearning restores the base value", "actor": "rm",
+      "metric": "spell_modifier", "spell": 653210, "op": 8, "base": 1000, "equals": 1000, "within_ms": 2000}
+  ]
+}

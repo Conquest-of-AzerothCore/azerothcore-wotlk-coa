@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "name": "Petrified Legions calls Shadow Bats from physical damage (#1839)",
-  "contract": "Petrified Legions 500012's single effect is SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) on Call of the Darkwing 801958, a native SPELL_EFFECT_SUMMON with MiscValue 50069 (Shadow Bat), MiscValueB 61 and DieSides 2. Spell.dbc gives 500012 ProcFlags 0 and no spell_proc row existed, so the aura was inert. The tooltip is 'Physical damage you deal or take now has a $h% chance to trigger a Call of the Darkwing' and the record's own ProcChance is 10, which this scenario does not change. Bloodfang Bite rank 572551 is SchoolMask 1 (Physical) and DmgClass 2, matching the row's SchoolMask 1 and its melee-damage-class bits; it needs a Cursed Form for its CasterAuraSpell 525031, supplied by Eternal Curse through the module's marker sync. Melee auto attacks against the same dummy add further physical events. KNOWN STATISTICAL LIMIT: the summoned bats live 15 s (DurationIndex 8), so only the events inside the last 15 s before the assertion can be observed - roughly ten Bloodfang Bites plus about seven white swings. At 10% per event that leaves about 0.9^17, near 17%, chance that a correctly fixed build still fails. That is above the 0.1% bar this repository's scenarios aim for, and the bat lifetime, not the action budget, is the binding constraint. Treat a single failure as inconclusive and re-run; a build without the fix fails every time.",
-  "timeout_ms": 90000,
+  "name": "Petrified Legions triggers Call of the Darkwing from physical damage (#1839)",
+  "contract": "Petrified Legions 500012's single effect is SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) on Call of the Darkwing 801958, a native SPELL_EFFECT_SUMMON with MiscValue 50069 (Shadow Bat), MiscValueB 61 and DieSides 2. Spell.dbc gives 500012 ProcFlags 0 and no spell_proc row existed, so the aura was inert. The tooltip is 'Physical damage you deal or take now has a $h% chance to trigger a Call of the Darkwing' and the record's own ProcChance is 10, which this scenario does not change. Bloodfang Bite rank 572551 is SchoolMask 1 (Physical) and DmgClass 2, matching the row's SchoolMask 1 and its melee-damage-class bits; it needs a Cursed Form for its CasterAuraSpell 525031, supplied by Eternal Curse through the module's marker sync. Each bite costs 300 rage units (30 Rage), so Rage is restored before every bite; a single 1000-unit fixture pays for only three and the rest fail with SPELL_FAILED_NO_POWER. The proc is counted with spell_proc_count, which records every Call of the Darkwing cast with Petrified Legions as its triggering aura, rather than with living Shadow Bats: the bats live 15 s (DurationIndex 8), so a bat count only sees the last 15 s of events, and whether the summoned bat appears is Call of the Darkwing's own behavior, covered by bloodmage-screech-of-the-darkwing. 66 connecting bites at 10% leave 0.9^66, about 0.096%, chance that a correctly fixed build records no proc; the melee auto attacks in both directions add further physical events and only lower it. A build without the spell_proc row records zero every time.",
+  "timeout_ms": 180000,
   "players": [
     {
       "id": "bloodmage",
@@ -40,12 +40,6 @@
       "spell": 500012
     },
     {
-      "action": "set_power",
-      "actor": "bloodmage",
-      "power": 1,
-      "value": 1000
-    },
-    {
       "action": "set_aura",
       "actor": "bloodmage",
       "spell": 800157,
@@ -53,144 +47,1080 @@
       "label": "Eternal Curse 800157: the Cursed Form Bloodfang Bite's CasterAuraSpell 525031 needs"
     },
     {
+      "action": "assert",
+      "label": "No Petrified Legions proc before any physical damage",
+      "actor": "bloodmage",
+      "metric": "spell_proc_count",
+      "spell": 500012,
+      "equals": 0
+    },
+    {
       "action": "attack",
       "actor": "bloodmage",
       "target": "dummy1"
     },
     {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
       "action": "assert",
-      "label": "No bats before any physical damage",
+      "label": "DISCRIMINATING: physical damage has triggered at least one Call of the Darkwing",
       "actor": "bloodmage",
-      "metric": "owned_creature_count",
-      "entry": 50069,
-      "equals": 0
-    },
-    {
-      "action": "cast",
-      "actor": "bloodmage",
-      "spell": 572551,
-      "target": "dummy1"
-    },
-    {
-      "action": "wait",
-      "ms": 1550
-    },
-    {
-      "action": "cast",
-      "actor": "bloodmage",
-      "spell": 572551,
-      "target": "dummy1"
-    },
-    {
-      "action": "wait",
-      "ms": 1550
-    },
-    {
-      "action": "cast",
-      "actor": "bloodmage",
-      "spell": 572551,
-      "target": "dummy1"
-    },
-    {
-      "action": "wait",
-      "ms": 1550
-    },
-    {
-      "action": "cast",
-      "actor": "bloodmage",
-      "spell": 572551,
-      "target": "dummy1"
-    },
-    {
-      "action": "wait",
-      "ms": 1550
-    },
-    {
-      "action": "cast",
-      "actor": "bloodmage",
-      "spell": 572551,
-      "target": "dummy1"
-    },
-    {
-      "action": "wait",
-      "ms": 1550
-    },
-    {
-      "action": "cast",
-      "actor": "bloodmage",
-      "spell": 572551,
-      "target": "dummy1"
-    },
-    {
-      "action": "wait",
-      "ms": 1550
-    },
-    {
-      "action": "cast",
-      "actor": "bloodmage",
-      "spell": 572551,
-      "target": "dummy1"
-    },
-    {
-      "action": "wait",
-      "ms": 1550
-    },
-    {
-      "action": "cast",
-      "actor": "bloodmage",
-      "spell": 572551,
-      "target": "dummy1"
-    },
-    {
-      "action": "wait",
-      "ms": 1550
-    },
-    {
-      "action": "cast",
-      "actor": "bloodmage",
-      "spell": 572551,
-      "target": "dummy1"
-    },
-    {
-      "action": "wait",
-      "ms": 1550
-    },
-    {
-      "action": "cast",
-      "actor": "bloodmage",
-      "spell": 572551,
-      "target": "dummy1"
-    },
-    {
-      "action": "wait",
-      "ms": 1550
-    },
-    {
-      "action": "cast",
-      "actor": "bloodmage",
-      "spell": 572551,
-      "target": "dummy1"
-    },
-    {
-      "action": "wait",
-      "ms": 1550
-    },
-    {
-      "action": "cast",
-      "actor": "bloodmage",
-      "spell": 572551,
-      "target": "dummy1"
-    },
-    {
-      "action": "wait",
-      "ms": 1550
-    },
-    {
-      "action": "assert",
-      "label": "DISCRIMINATING: physical damage has called at least one Shadow Bat",
-      "actor": "bloodmage",
-      "metric": "owned_creature_count",
-      "entry": 50069,
+      "metric": "spell_proc_count",
+      "spell": 500012,
       "min": 1,
       "within_ms": 2000
     }

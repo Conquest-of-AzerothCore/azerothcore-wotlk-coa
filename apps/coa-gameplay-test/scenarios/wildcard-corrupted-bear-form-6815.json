@@ -1,0 +1,192 @@
+{
+  "schema": 1,
+  "name": "Corrupted Bear Form applies its penalty only in Bear and procs Shadow damage from Swipe",
+  "contract": [
+    "Spell271403 promises twenty-percent reduced Physical damage in Bear Form and additional Shadow",
+    "damage on melee attacks. Helper271408 supplies the physical modifier;271411 supplies damage and",
+    "authored visual kit21784. Learning in an existing Bear form, exiting/reentering form, and passive",
+    "removal must update the penalty. Client shader rendering is untested.",
+    "The current helper271408 combines visual21850 with a twenty-percent Physical penalty.",
+    "Similarly named271391 is a flat damage aura and954340 belongs to the older thirty-percent variant.",
+    "Native Physical percent auras update the weapon damage field; the white-hit bonus query excludes it.",
+    "The form helper must be visible for client aura visuals; rendered shadow shading remains untested."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 25,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 25,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 5487
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 779
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 5487,
+      "target": "hero"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 5487,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "weapon_damage_min",
+      "save_as": "normal"
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 271403
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 271408,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura_visible",
+      "spell": 271408,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura_amount",
+      "spell": 271408,
+      "effect": 1,
+      "equals": -20
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "weapon_damage_min",
+      "ratio_to": "normal",
+      "min": 0.799,
+      "max": 0.801
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 779,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 779,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 271411,
+      "target": "enemy",
+      "min": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 5487,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 271408,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 5487,
+      "target": "hero"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 271408,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "unlearn",
+      "actor": "hero",
+      "spell": 271403,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 271408,
+      "equals": 0
+    }
+  ]
+}

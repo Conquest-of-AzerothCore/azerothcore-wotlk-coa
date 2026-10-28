@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Soul Marionette clones render as the doctor (#1426)",
+  "contract": "#1426 reports a Witch Doctor spell that spawns a copy of the caster, like a mage's Mirror Image, and the copy is untextured. Soul Marionette 704497 reads 'Root yourself for 8 sec and create 5 clones of yourself that channel on you'; its clones are Puppeteer's Grasp 300661. A creature renders as a specific player, customization and equipment included, only through the clone-caster aura (Clone Me! 45204, SPELL_AURA_CLONE_CASTER): it sets the caster's display and the mirror-image flag, so the client asks for the player's appearance (SMSG_MIRRORIMAGE_DATA). A bare player display id without it renders an uncustomized, untextured body, the fault witchdoctor-mirage-likeness fixed for Mirage's copy (#298). The five Marionette clones were given only SetDisplayId(player display). Each clone must now carry the doctor's Clone Me! aura and still wear the doctor's display, and the other Soul Marionette mechanics stay covered by witchdoctor-fools-play-and-marionette.",
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "doctor", "race": 1, "class": 13, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the character settle", "ms": 3000},
+    {"action": "learn", "actor": "doctor", "spell": 704497},
+    {"action": "cast", "label": "Soul Marionette", "actor": "doctor", "spell": 704497},
+    {"action": "assert", "label": "Soul Marionette creates five clones", "actor": "doctor", "metric": "owned_creature_count", "entry": 300661, "equals": 5, "within_ms": 2000},
+    {"action": "assert", "label": "#1426: every clone clones the doctor's appearance", "actor": "doctor", "metric": "owned_creature_count", "entry": 300661, "spell": 45204, "caster": "doctor", "equals": 5},
+    {"action": "assert", "label": "Every clone wears the doctor's display", "actor": "doctor", "metric": "owned_creature_count", "entry": 300661, "owner_display": true, "equals": 5}
+  ]
+}

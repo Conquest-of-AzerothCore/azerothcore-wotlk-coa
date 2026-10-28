@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Time Beacon extends the durations of Renewal and Protection (#1183)",
-  "contract": "Both Time Beacon ranks read \"Increases the duration of effects applied by your Aeons by $/1000;s1 sec\". Spell.dbc gives 574310 (Rank 1) and 574362 (Rank 2) a single effect, Aura=107 SPELL_AURA_ADD_FLAT_MODIFIER with EffectMiscValue 1 = SPELLMOD_DURATION and EffectSpellClassMask [0,0,32768], EffectBasePoints 3999 and 7999 with EffectDieSides 1, so +4000 ms and +8000 ms; both are DurationIndex 21 (permanent) passives with Stances 0, so learning them applies the modifier. The effects applied by the Aeons are Renewal 560355 and Protection 560374, the spells cast by Aeon of Renewal 806290 and Aeon of Protection 806292; both carry SpellFamilyName 28 and the word-2 bit 32768 the class mask selects (Renewal [0,0,32768], Protection [64,0,32768]). SpellDuration.dbc gives Renewal's DurationIndex 27 a duration of 3000 ms with no per-level scaling, and Protection's DurationIndex 31 a duration of 8000 ms, also unscaled. The contract is therefore Renewal at 3000 / 7000 / 11000 ms and Protection at 8000 / 12000 / 16000 ms for no beacon, Rank 1 and Rank 2 - Protection always 5000 ms longer than Renewal, which is the same expectation the CoA unit test in apps/coa-tests/chronomancer_time/cases.cpp asserts. The aura is fixtured with set_aura, which applies it through the ordinary Aura creation path, and aura_duration_ms reads the remaining duration, so the absolute bounds allow for real-time decay and each rank's assertion is also taken relative to the unbeaconed snapshot of the same aura.",
+  "contract": "Both Time Beacon ranks read \"Increases the duration of effects applied by your Aeons by $/1000;s1 sec\". Spell.dbc gives 574310 (Rank 1) and 574362 (Rank 2) a single effect, Aura=107 SPELL_AURA_ADD_FLAT_MODIFIER with EffectMiscValue 1 = SPELLMOD_DURATION and EffectSpellClassMask [0,0,32768], EffectBasePoints 3999 and 7999 with EffectDieSides 1, so +4000 ms and +8000 ms; both are DurationIndex 21 (permanent) passives with Stances 0, so learning them applies the modifier. The effects applied by the Aeons are Renewal 560355 and Protection 560374, the spells cast by Aeon of Renewal 806290 and Aeon of Protection 806292; both carry SpellFamilyName 28 and the word-2 bit 32768 the class mask selects (Renewal [0,0,32768], Protection [64,0,32768]). SpellDuration.dbc gives Renewal's DurationIndex 27 a duration of 3000 ms with no per-level scaling, and Protection's DurationIndex 31 a duration of 8000 ms, also unscaled. The contract is therefore Renewal at 3000 / 7000 / 11000 ms and Protection at 8000 / 12000 / 16000 ms for no beacon, Rank 1 and Rank 2 - Protection always 5000 ms longer than Renewal, which is the same expectation the CoA unit test in apps/coa-tests/chronomancer_time/cases.cpp asserts. Renewal carries the aura_ascension_epoch_renewal script (AscensionChronomancerRenewal.cpp), which sets the aura's duration to the time left on its positive per-tick contributions; Renewal's own Spell.dbc amount is 0 (EffectBasePoints -1, EffectDieSides 1), so a bare set_aura adds no contribution and lasts 0 ms. Renewal is therefore applied the way the game applies it: with Aeon of Renewal 806290 active, an Epoch 801270 heal on the Chronomancer makes ApplyEpochAeon (AscensionChronomancerTime.cpp) cast Renewal with a positive per-tick amount, and the aura's maximum duration still comes from SPELLMOD_DURATION. Protection has no such script and stays fixtured with set_aura, which applies it through the ordinary Aura creation path. aura_duration_ms reads the remaining duration, so the absolute bounds allow for real-time decay and each rank's assertion is also taken relative to the unbeaconed snapshot of the same aura.",
   "timeout_ms": 60000,
   "players": [
     {
@@ -18,11 +18,33 @@
       "ms": 5000
     },
     {
-      "action": "set_aura",
-      "label": "Renewal with no Time Beacon learned",
+      "action": "learn",
+      "label": "Fixture teaches Epoch, the heal Aeon of Renewal turns into Renewal",
       "actor": "chronomancer",
-      "spell": 560355,
+      "spell": 801270
+    },
+    {
+      "action": "set_aura",
+      "label": "Aeon of Renewal stays active for every Renewal application",
+      "actor": "chronomancer",
+      "spell": 806290,
       "stacks": 1
+    },
+    {
+      "action": "cast",
+      "label": "Epoch heals the Chronomancer with no Time Beacon learned",
+      "actor": "chronomancer",
+      "spell": 801270
+    },
+    {
+      "action": "assert",
+      "label": "Aeon of Renewal applies Renewal from the unbeaconed Epoch",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 560355,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 5000
     },
     {
       "action": "snapshot",
@@ -97,10 +119,20 @@
       "equals": 1
     },
     {
-      "action": "set_aura",
+      "action": "cast",
+      "label": "Epoch heals the Chronomancer with Time Beacon Rank 1 learned",
       "actor": "chronomancer",
+      "spell": 801270
+    },
+    {
+      "action": "assert",
+      "label": "Aeon of Renewal applies Renewal under Rank 1",
+      "actor": "chronomancer",
+      "metric": "aura",
       "spell": 560355,
-      "stacks": 1
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 5000
     },
     {
       "action": "assert",
@@ -193,10 +225,20 @@
       "equals": 1
     },
     {
-      "action": "set_aura",
+      "action": "cast",
+      "label": "Epoch heals the Chronomancer with Time Beacon Rank 2 learned",
       "actor": "chronomancer",
+      "spell": 801270
+    },
+    {
+      "action": "assert",
+      "label": "Aeon of Renewal applies Renewal under Rank 2",
+      "actor": "chronomancer",
+      "metric": "aura",
       "spell": 560355,
-      "stacks": 1
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 5000
     },
     {
       "action": "assert",

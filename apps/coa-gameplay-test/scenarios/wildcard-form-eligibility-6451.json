@@ -1,0 +1,989 @@
+{
+  "schema": 1,
+  "name": "Wildcard level rolls require an owned Cat or Bear Form (#6451)",
+  "contract": "A form-required spell must not consume a level roll or its guarantee card before its corresponding form is learned. The ordinary client card and dice packets choose Mystic Maul 904360 and Manaripper 904000 deterministically. Four native starter cards select known non-form starters for controls and the matching form for positive cases. Players remain in human form while rolling; owning the form, rather than currently being transformed, makes the card eligible. Both allowed abilities then cast normally in their forms.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "no_bear",
+      "race": 1,
+      "class": 10,
+      "level": 1,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "no_cat",
+      "race": 1,
+      "class": 10,
+      "level": 1,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "bear",
+      "race": 1,
+      "class": 10,
+      "level": 1,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "cat",
+      "race": 1,
+      "class": 10,
+      "level": 1,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "bear_enemy",
+      "owner": "bear",
+      "entry": 36,
+      "level": 10,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "cat_enemy",
+      "owner": "cat",
+      "entry": 36,
+      "level": 10,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "client_packet",
+      "actor": "no_bear",
+      "opcode": 1570,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "string": "SKILL_CARD_STARTER_NORMAL"
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 12259
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "no_bear",
+      "opcode": 1570,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "string": "SKILL_CARD_STARTER_NORMAL"
+        },
+        {
+          "u32": 1
+        },
+        {
+          "u32": 12266
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "no_bear",
+      "opcode": 1570,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "string": "SKILL_CARD_STARTER_GOLDEN"
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 24408
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "no_bear",
+      "opcode": 1570,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "string": "SKILL_CARD_STARTER_GOLDEN"
+        },
+        {
+          "u32": 1
+        },
+        {
+          "u32": 24322
+        }
+      ]
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessb"
+    },
+    {
+      "action": "client_packet",
+      "actor": "no_cat",
+      "opcode": 1570,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "string": "SKILL_CARD_STARTER_NORMAL"
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 12259
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "no_cat",
+      "opcode": 1570,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "string": "SKILL_CARD_STARTER_NORMAL"
+        },
+        {
+          "u32": 1
+        },
+        {
+          "u32": 12266
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "no_cat",
+      "opcode": 1570,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "string": "SKILL_CARD_STARTER_GOLDEN"
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 24408
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "no_cat",
+      "opcode": 1570,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "string": "SKILL_CARD_STARTER_GOLDEN"
+        },
+        {
+          "u32": 1
+        },
+        {
+          "u32": 24322
+        }
+      ]
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessc"
+    },
+    {
+      "action": "client_packet",
+      "actor": "bear",
+      "opcode": 1570,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "string": "SKILL_CARD_STARTER_NORMAL"
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 12259
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "bear",
+      "opcode": 1570,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "string": "SKILL_CARD_STARTER_NORMAL"
+        },
+        {
+          "u32": 1
+        },
+        {
+          "u32": 12266
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "bear",
+      "opcode": 1570,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "string": "SKILL_CARD_STARTER_GOLDEN"
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 26547
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "bear",
+      "opcode": 1570,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "string": "SKILL_CARD_STARTER_GOLDEN"
+        },
+        {
+          "u32": 1
+        },
+        {
+          "u32": 24322
+        }
+      ]
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessd"
+    },
+    {
+      "action": "client_packet",
+      "actor": "cat",
+      "opcode": 1570,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "string": "SKILL_CARD_STARTER_NORMAL"
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 12259
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "cat",
+      "opcode": 1570,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "string": "SKILL_CARD_STARTER_NORMAL"
+        },
+        {
+          "u32": 1
+        },
+        {
+          "u32": 12266
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "cat",
+      "opcode": 1570,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "string": "SKILL_CARD_STARTER_GOLDEN"
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 24588
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "cat",
+      "opcode": 1570,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "string": "SKILL_CARD_STARTER_GOLDEN"
+        },
+        {
+          "u32": 1
+        },
+        {
+          "u32": 24322
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "client_packet",
+      "actor": "no_bear",
+      "opcode": 1611
+    },
+    {
+      "action": "client_packet",
+      "actor": "no_cat",
+      "opcode": 1611
+    },
+    {
+      "action": "client_packet",
+      "actor": "bear",
+      "opcode": 1611
+    },
+    {
+      "action": "client_packet",
+      "actor": "cat",
+      "opcode": 1611
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: four native starter abilities",
+      "actor": "no_bear",
+      "metric": "wildcard_starter_spells_known",
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: matching form ownership",
+      "actor": "no_bear",
+      "metric": "knows_spell",
+      "spell": 5487,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "no_bear",
+      "item": 2205685,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "no_bear",
+      "item": 2205685,
+      "spell": 92657
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: four native starter abilities",
+      "actor": "no_cat",
+      "metric": "wildcard_starter_spells_known",
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: matching form ownership",
+      "actor": "no_cat",
+      "metric": "knows_spell",
+      "spell": 768,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "no_cat",
+      "item": 2205675,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "no_cat",
+      "item": 2205675,
+      "spell": 92657
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: four native starter abilities",
+      "actor": "bear",
+      "metric": "wildcard_starter_spells_known",
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: matching form ownership",
+      "actor": "bear",
+      "metric": "knows_spell",
+      "spell": 5487,
+      "equals": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "bear",
+      "item": 2205685,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "bear",
+      "item": 2205685,
+      "spell": 92657
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: four native starter abilities",
+      "actor": "cat",
+      "metric": "wildcard_starter_spells_known",
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: matching form ownership",
+      "actor": "cat",
+      "metric": "knows_spell",
+      "spell": 768,
+      "equals": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "cat",
+      "item": 2205675,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "cat",
+      "item": 2205675,
+      "spell": 92657
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: collected exact guarantee card",
+      "actor": "no_bear",
+      "metric": "wildcard_cards_collected",
+      "equals": 1
+    },
+    {
+      "action": "client_packet",
+      "actor": "no_bear",
+      "opcode": 1570,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "string": "SKILL_CARD_DEFAULT_NORMAL"
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 26766
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: collected exact guarantee card",
+      "actor": "no_cat",
+      "metric": "wildcard_cards_collected",
+      "equals": 1
+    },
+    {
+      "action": "client_packet",
+      "actor": "no_cat",
+      "opcode": 1570,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "string": "SKILL_CARD_DEFAULT_NORMAL"
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 26756
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: collected exact guarantee card",
+      "actor": "bear",
+      "metric": "wildcard_cards_collected",
+      "equals": 1
+    },
+    {
+      "action": "client_packet",
+      "actor": "bear",
+      "opcode": 1570,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "string": "SKILL_CARD_DEFAULT_NORMAL"
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 26766
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: collected exact guarantee card",
+      "actor": "cat",
+      "metric": "wildcard_cards_collected",
+      "equals": 1
+    },
+    {
+      "action": "client_packet",
+      "actor": "cat",
+      "opcode": 1570,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "string": "SKILL_CARD_DEFAULT_NORMAL"
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 26756
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: card is slotted",
+      "actor": "no_bear",
+      "metric": "wildcard_roll_cards_set",
+      "equals": 1
+    },
+    {
+      "action": "set_level",
+      "actor": "no_bear",
+      "value": 10
+    },
+    {
+      "action": "client_packet",
+      "actor": "no_bear",
+      "opcode": 1603,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: card is slotted",
+      "actor": "no_cat",
+      "metric": "wildcard_roll_cards_set",
+      "equals": 1
+    },
+    {
+      "action": "set_level",
+      "actor": "no_cat",
+      "value": 10
+    },
+    {
+      "action": "client_packet",
+      "actor": "no_cat",
+      "opcode": 1603,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: card is slotted",
+      "actor": "bear",
+      "metric": "wildcard_roll_cards_set",
+      "equals": 1
+    },
+    {
+      "action": "set_level",
+      "actor": "bear",
+      "value": 10
+    },
+    {
+      "action": "client_packet",
+      "actor": "bear",
+      "opcode": 1603,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: card is slotted",
+      "actor": "cat",
+      "metric": "wildcard_roll_cards_set",
+      "equals": 1
+    },
+    {
+      "action": "set_level",
+      "actor": "cat",
+      "value": 10
+    },
+    {
+      "action": "client_packet",
+      "actor": "cat",
+      "opcode": 1603,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Native level roll is accepted",
+      "actor": "no_bear",
+      "metric": "server_packet_contains",
+      "opcode": 1604,
+      "text": "ROLL_ABILITIES_OK",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Form-dependent card requires an owned form",
+      "actor": "no_bear",
+      "metric": "knows_spell",
+      "spell": 904360,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Unavailable card remains unspent",
+      "actor": "no_bear",
+      "metric": "wildcard_roll_cards_used",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Native level roll is accepted",
+      "actor": "no_cat",
+      "metric": "server_packet_contains",
+      "opcode": 1604,
+      "text": "ROLL_ABILITIES_OK",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Form-dependent card requires an owned form",
+      "actor": "no_cat",
+      "metric": "knows_spell",
+      "spell": 904000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Unavailable card remains unspent",
+      "actor": "no_cat",
+      "metric": "wildcard_roll_cards_used",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Native level roll is accepted",
+      "actor": "bear",
+      "metric": "server_packet_contains",
+      "opcode": 1604,
+      "text": "ROLL_ABILITIES_OK",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Form-dependent card requires an owned form",
+      "actor": "bear",
+      "metric": "knows_spell",
+      "spell": 904360,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Unavailable card remains unspent",
+      "actor": "bear",
+      "metric": "wildcard_roll_cards_used",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Native level roll is accepted",
+      "actor": "cat",
+      "metric": "server_packet_contains",
+      "opcode": 1604,
+      "text": "ROLL_ABILITIES_OK",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Form-dependent card requires an owned form",
+      "actor": "cat",
+      "metric": "knows_spell",
+      "spell": 904000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Unavailable card remains unspent",
+      "actor": "cat",
+      "metric": "wildcard_roll_cards_used",
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "bear",
+      "spell": 5487
+    },
+    {
+      "action": "assert",
+      "actor": "bear",
+      "metric": "aura",
+      "spell": 5487,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bear",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "bear",
+      "target": "bear_enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "bear",
+      "spell": 904360,
+      "target": "bear_enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Eligible spell casts in its owned form",
+      "actor": "bear",
+      "metric": "cast_failure",
+      "spell": 904360,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Eligible form ability deals native damage",
+      "actor": "bear",
+      "metric": "spell_damage_count",
+      "spell": 904360,
+      "target": "bear_enemy",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "cat",
+      "spell": 768
+    },
+    {
+      "action": "assert",
+      "actor": "cat",
+      "metric": "aura",
+      "spell": 768,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "cat",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "cat",
+      "spell": 1082,
+      "target": "cat_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "cat",
+      "metric": "combo_points",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "cat",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "cat",
+      "spell": 904000,
+      "target": "cat_enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Eligible spell casts in its owned form",
+      "actor": "cat",
+      "metric": "cast_failure",
+      "spell": 904000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Eligible form ability deals native damage",
+      "actor": "cat",
+      "metric": "spell_damage_count",
+      "spell": 904000,
+      "target": "cat_enemy",
+      "min": 1,
+      "within_ms": 5000
+    }
+  ]
+}

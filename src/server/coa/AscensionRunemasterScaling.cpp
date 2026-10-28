@@ -102,6 +102,9 @@ void ApplyAscensionRunemasterScalingContracts(SpellInfo* info)
     if (!info || info->SpellFamilyName != uint32(CLASS_SPIRIT_MAGE) + 6)
         return;
 
+    if (info->Id == 705557)
+        info->Attributes |= SPELL_ATTR0_PASSIVE;
+
     if (info->Id == 712299 && info->SpellFamilyFlags == flag96(0, 4096, 0) &&
         info->DmgClass == SPELL_DAMAGE_CLASS_MELEE && info->SchoolMask == (SPELL_SCHOOL_MASK_FIRE | SPELL_SCHOOL_MASK_ARCANE) &&
         info->SpellLevel == 11 && info->BaseLevel == 11 && info->MaxLevel == 16 &&

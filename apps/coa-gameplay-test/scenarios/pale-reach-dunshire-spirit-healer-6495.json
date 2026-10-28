@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "A ghost released in Dunshire finds the Spirit Healer (#8136)",
+  "contract": [
+    "Graveyard 6092 (Pale Reach, Scadeald - Dunshire) released ghosts at -7739.44 600.77, but the Spirit Healer",
+    "9995001 was moved to its in-game spot at -7728.94 684.04, 83 yd north. The release point now stands in front of",
+    "the Spirit Healer. A character who dies in Dunshire and releases appears within a few yards of it."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -7750.0, "y": 620.0, "z": 137.0 },
+  "players": [
+    { "id": "dead", "race": 1, "class": 1, "level": 24 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "die", "actor": "dead" },
+    { "action": "release_spirit", "actor": "dead" },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: the ghost appears by the Spirit Healer (x)", "actor": "dead", "metric": "position_x", "min": -7735, "max": -7720 },
+    { "action": "assert", "label": "DISCRIMINATING: the ghost appears by the Spirit Healer (y)", "actor": "dead", "metric": "position_y", "min": 678, "max": 695 }
+  ]
+}

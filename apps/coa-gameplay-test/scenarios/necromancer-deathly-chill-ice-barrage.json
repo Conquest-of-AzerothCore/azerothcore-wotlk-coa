@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "Necromancer Deathly Chill shortens Ice Barrage's cast and barrage by 25% (#1110)",
+  "contract": "Deathly Chill 805424 is a Necromancer Rime talent (CharacterAdvancement 30619, ClassType 25 = class 23, Tab 60 Rime, TalentEssenceCost 1). Its client description reads 'Reduces the channel and cast time of Ice Barrage by $s1%.' All three effects are SPELL_AURA_ADD_PCT_MODIFIER (108) with BasePoints -26 + DieSides 1 = -25 and EffectSpellClassMask (0, 0x40, 0) in SpellFamilyName 29: MiscValue 1 (SPELLMOD_DURATION), 19 (SPELLMOD_ACTIVATION_TIME) and 10 (SPELLMOD_CASTING_TIME). Ice Barrage (801760 and ranks 501992-501999, family flags 0, 0x40, 0) is a 2000 ms cast (CastingTimeIndex 5) that puts a 1000 ms aura (DurationIndex 36) on the enemy: effect 0 PERIODIC_TRIGGER_SPELL_WITH_VALUE every 250 ms (the volleys, 803779) and effect 1 PERIODIC_TRIGGER_SPELL every 999 ms (the entomb, 804328). Its 'channel' is that barrage aura. Unit::ModSpellCastTime, Aura::CalcMaxDuration and AuraEffect::CalculatePeriodic apply the caster's modifiers, so with the talent the cast takes 1500 ms and a fresh barrage aura lasts 750 ms with a 187 ms volley period (250 * 0.75, truncated to whole milliseconds), against 1000 ms and 250 ms without it. The first observation of a fresh aura is at most one world step after it lands.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000, "allow_regeneration": false }
+  ],
+  "creatures": [
+    { "id": "plain_golem", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 8 },
+    { "id": "chilled_golem", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 11 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "necro", "spell": 801760 },
+    {
+      "action": "assert", "label": "CONTROL: Ice Barrage is a 2 sec cast", "actor": "necro",
+      "metric": "spell_cast_time_ms", "spell": 801760, "equals": 2000
+    },
+    { "action": "set_power", "actor": "necro", "power": 6, "value": 500 },
+    {
+      "action": "cast", "label": "Ice Barrage without the talent", "actor": "necro", "spell": 801760,
+      "target": "plain_golem"
+    },
+    {
+      "action": "assert", "label": "CONTROL: the untalented cast lasts 2 sec", "actor": "necro",
+      "metric": "cast_remaining_ms", "spell": 801760, "min": 1800, "max": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: the barrage lands on the first golem", "actor": "plain_golem",
+      "metric": "aura", "spell": 801760, "caster": "necro", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTROL: the untalented volleys come every 250 ms", "actor": "plain_golem",
+      "metric": "aura_amplitude_ms", "spell": 801760, "caster": "necro", "effect": 0, "equals": 250
+    },
+    {
+      "action": "assert", "label": "CONTROL: the untalented barrage lasts 1 sec", "actor": "plain_golem",
+      "metric": "aura_duration_ms", "spell": 801760, "caster": "necro", "min": 900, "max": 1000
+    },
+    { "action": "wait", "label": "Let the barrage and the global cooldown finish", "ms": 2000 },
+    { "action": "reset_cooldown", "actor": "necro", "spell": 801760 },
+    { "action": "learn", "actor": "necro", "spell": 805424 },
+    {
+      "action": "assert", "label": "The talent aura is applied", "actor": "necro",
+      "metric": "aura", "spell": 805424, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Ice Barrage casts in 1.5 sec", "actor": "necro",
+      "metric": "spell_cast_time_ms", "spell": 801760, "min": 1499, "max": 1501
+    },
+    {
+      "action": "assert", "label": "The duration modifier makes a 1 sec barrage last 0.75 sec", "actor": "necro",
+      "metric": "spell_modifier", "spell": 801760, "op": 1, "base": 1000, "min": 749.99, "max": 750.01
+    },
+    {
+      "action": "assert", "label": "The period modifier makes a 250 ms volley period 187.5 ms", "actor": "necro",
+      "metric": "spell_modifier", "spell": 801760, "op": 19, "base": 250, "min": 187.49, "max": 187.51
+    },
+    {
+      "action": "assert", "label": "Higher ranks share the modifiers", "actor": "necro",
+      "metric": "spell_modifier", "spell": 501999, "op": 10, "base": 2000, "min": 1499.99, "max": 1500.01
+    },
+    { "action": "set_power", "actor": "necro", "power": 6, "value": 500 },
+    {
+      "action": "cast", "label": "Ice Barrage with Deathly Chill", "actor": "necro", "spell": 801760,
+      "target": "chilled_golem"
+    },
+    {
+      "action": "assert", "label": "The talented cast lasts 1.5 sec", "actor": "necro",
+      "metric": "cast_remaining_ms", "spell": 801760, "min": 1300, "max": 1500
+    },
+    {
+      "action": "assert", "label": "SETUP: the barrage lands on the second golem", "actor": "chilled_golem",
+      "metric": "aura", "spell": 801760, "caster": "necro", "equals": 1, "within_ms": 2500
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the volleys come every 187 ms", "actor": "chilled_golem",
+      "metric": "aura_amplitude_ms", "spell": 801760, "caster": "necro", "effect": 0, "min": 186, "max": 188
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the barrage lasts 0.75 sec", "actor": "chilled_golem",
+      "metric": "aura_duration_ms", "spell": 801760, "caster": "necro", "min": 600, "max": 750
+    }
+  ]
+}

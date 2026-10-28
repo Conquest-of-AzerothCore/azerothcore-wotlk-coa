@@ -1,20 +1,22 @@
 {
   "schema": 1,
   "name": "Prodigy of Lei Shen lets Stormflow critically strike natively (#885)",
-  "contract": "Spell.dbc gives Prodigy of Lei Shen 560023 a single self-targeted APPLY_AURA effect: aura 286 SPELL_AURA_ABILITY_PERIODIC_CRIT, SpellFamilyName 22, EffectSpellClassMask [0, 65536, 0]. Every Stormflow rank (567555, 572861-572867) carries SpellFamilyName 22 and SpellFamilyFlags [0, 65536, 0], so the mask matches. The aura type has a real consumer: AuraEffect::CalculatePeriodicData calls AuraEffect::CalcPeriodicCritChance (SpellAuraEffects.cpp:1175-1205), which returns 0.0 unless the caster's spell-mod owner holds a SPELL_AURA_ABILITY_PERIODIC_CRIT effect whose IsAffectedOnSpell (SpellAuraEffects.cpp:1207-1216, via SpellInfo::IsAffected, SpellInfo.cpp:1437-1449) matches the periodic spell; the resulting crit chance is snapshotted onto the periodic aura effect at application and rolled on every tick (SpellAuraEffects.cpp:6542). No module code touches aura 286 or family-22 class masks (grep for SpellFamilyName == 22 / CLASS_STORMBRINGER over src/server/coa/*.cpp: 23 hits, none on ApplyAuraName or SpellClassMask), and 560023 appears in zero source/SQL files, which is the false positive the audit's source-grep method produces for natively delivered passives. The control player never learns 560023 and keeps the same Static resource and cast setup as the talented player, so the only difference between the two is the passive; aura_crit_chance reads AuraEffect::GetCritChance(), the exact value CalcPeriodicCritChance stored, and spell_done_crit_chance reads the same Player::SpellDoneCritChance() the periodic path calls, confirming the two sources agree instead of asserting an invented constant.",
+  "contract": "Spell.dbc gives Prodigy of Lei Shen 560023 a single self-targeted APPLY_AURA effect: aura 286 SPELL_AURA_ABILITY_PERIODIC_CRIT, SpellFamilyName 22, EffectSpellClassMask [0, 65536, 0]. Every Stormflow rank (567555, 572861-572867) carries SpellFamilyName 22 and SpellFamilyFlags [0, 65536, 0], so the mask matches. The aura type has a real consumer: AuraEffect::CalculatePeriodicData calls AuraEffect::CalcPeriodicCritChance (SpellAuraEffects.cpp:1175-1205), which returns 0.0 unless the caster's spell-mod owner holds a SPELL_AURA_ABILITY_PERIODIC_CRIT effect whose IsAffectedOnSpell (SpellAuraEffects.cpp:1207-1216, via SpellInfo::IsAffected, SpellInfo.cpp:1437-1449) matches the periodic spell; the resulting crit chance is snapshotted onto the periodic aura effect at application and rolled on every tick (SpellAuraEffects.cpp:6542). No module code touches aura 286 or family-22 class masks (grep for SpellFamilyName == 22 / CLASS_STORMBRINGER over src/server/coa/*.cpp: 23 hits, none on ApplyAuraName or SpellClassMask), and 560023 appears in zero source/SQL files, which is the false positive the audit's source-grep method produces for natively delivered passives. The control player never learns 560023 and keeps the same Static resource and cast setup as the talented player, so the only difference between the two is the passive; aura_crit_chance reads AuraEffect::GetCritChance(), the exact value CalcPeriodicCritChance stored, and spell_done_crit_chance reads the same Player::SpellDoneCritChance() the periodic path calls, confirming the two sources agree instead of asserting an invented constant. Both players carry 10000 spell hit rating: a level 80 caster otherwise misses a level 80 target 4% of the time (Unit::MagicSpellHitResult), and a missed Stormflow leaves its channel without the periodic aura, so Spell::UpdateChanneledTargetList ends the channel on the next update and cast_remaining_ms reads 0.",
   "timeout_ms": 60000,
   "players": [
     {
       "id": "control",
       "race": 8,
       "class": 16,
-      "level": 80
+      "level": 80,
+      "spell_hit_rating": 10000
     },
     {
       "id": "talented",
       "race": 8,
       "class": 16,
-      "level": 80
+      "level": 80,
+      "spell_hit_rating": 10000
     }
   ],
   "creatures": [

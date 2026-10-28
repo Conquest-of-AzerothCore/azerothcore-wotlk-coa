@@ -1,0 +1,130 @@
+{
+  "schema": 1,
+  "name": "Issue 1062: Frozen Earth lengthens Ice Rune and Palm Sigil: Earth's stun by 1 sec",
+  "contract": [
+    "Frozen Earth 705592 (Riftblade talent) reads 'Increases the duration of Ice Rune and the stun effect from",
+    "Palm Sigil: Earth by $/1000;s1 sec.' Its only effect is aura 107, a flat SPELLMOD_DURATION (1) of BasePoints",
+    "999 + DieSides 1 = 1000 ms on family 38 mask0 0x82. Ice Rune 524930 carries mask0 0x1000002 and Palm Sigil:",
+    "Earth's stun 807824 mask0 0x80; both last SpellDuration 35 = 4000 ms. Aura::CalcMaxDuration applies the",
+    "caster's SPELLMOD_DURATION, so no script is needed. Expected: 4000 ms without the talent and 5000 ms with it",
+    "on both, read from the applied aura on a fresh enemy each time (no diminishing return), and back to 4000 when",
+    "the talent is removed. Ice Rune requires a Frozen target, supplied by a mage's Frost Nova 122. The stun is",
+    "cast directly: Palm Sigil: Earth 805382 itself has ProcFlags 0 and no spell_proc row, so it never casts it."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {
+      "id": "rm", "race": 1, "class": 32, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "mage", "race": 1, "class": 8, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {"id": "stun_plain", "owner": "rm", "entry": 36, "level": 80, "health": 1000000, "distance": 3},
+    {"id": "stun_talent", "owner": "rm", "entry": 36, "level": 80, "health": 1000000, "distance": 4},
+    {"id": "rune_plain", "owner": "rm", "entry": 36, "level": 80, "health": 1000000, "distance": 5},
+    {"id": "rune_talent", "owner": "rm", "entry": 36, "level": 80, "health": 1000000, "distance": 6}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 524930},
+    {"action": "learn", "actor": "rm", "spell": 807824},
+    {"action": "learn", "actor": "mage", "spell": 122},
+    {
+      "action": "assert", "label": "Ice Rune lasts 4 sec", "actor": "rm", "metric": "spell_modifier", "spell": 524930,
+      "op": 1, "base": 4000, "min": 3999.99, "max": 4000.01
+    },
+    {
+      "action": "assert", "label": "Palm Sigil: Earth's stun lasts 4 sec", "actor": "rm", "metric": "spell_modifier",
+      "spell": 807824, "op": 1, "base": 4000, "min": 3999.99, "max": 4000.01
+    },
+    {
+      "action": "cast", "label": "Palm Sigil: Earth stun without the talent", "actor": "rm", "spell": 807824,
+      "target": "stun_plain"
+    },
+    {
+      "action": "assert", "actor": "stun_plain", "metric": "aura", "spell": 807824, "caster": "rm", "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Without Frozen Earth the stun lasts 4 sec", "actor": "stun_plain",
+      "metric": "aura_duration_ms", "spell": 807824, "caster": "rm", "min": 3500, "max": 4000
+    },
+    {"action": "cast", "label": "Frost Nova freezes the enemies", "actor": "mage", "spell": 122},
+    {
+      "action": "assert", "label": "SETUP: the enemy is frozen", "actor": "rune_plain", "metric": "aura", "spell": 122,
+      "caster": "mage", "equals": 1, "within_ms": 2000
+    },
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "cast", "label": "Ice Rune without the talent", "actor": "rm", "spell": 524930, "target": "rune_plain"},
+    {
+      "action": "assert", "actor": "rune_plain", "metric": "aura", "spell": 524930, "caster": "rm", "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Without Frozen Earth Ice Rune lasts 4 sec", "actor": "rune_plain",
+      "metric": "aura_duration_ms", "spell": 524930, "caster": "rm", "min": 3500, "max": 4000
+    },
+    {"action": "learn", "actor": "rm", "spell": 705592},
+    {
+      "action": "assert", "label": "Frozen Earth passive is active", "actor": "rm", "metric": "aura", "spell": 705592,
+      "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Frozen Earth adds 1 sec to Ice Rune", "actor": "rm", "metric": "spell_modifier",
+      "spell": 524930, "op": 1, "base": 4000, "min": 4999.99, "max": 5000.01
+    },
+    {
+      "action": "assert", "label": "Frozen Earth adds 1 sec to Palm Sigil: Earth's stun", "actor": "rm",
+      "metric": "spell_modifier", "spell": 807824, "op": 1, "base": 4000, "min": 4999.99, "max": 5000.01
+    },
+    {
+      "action": "assert", "label": "Frozen Earth leaves other Runemaster durations alone", "actor": "rm",
+      "metric": "spell_modifier", "spell": 500288, "op": 1, "base": 4000, "min": 3999.99, "max": 4000.01
+    },
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {
+      "action": "cast", "label": "Palm Sigil: Earth stun with the talent", "actor": "rm", "spell": 807824,
+      "target": "stun_talent"
+    },
+    {
+      "action": "assert", "actor": "stun_talent", "metric": "aura", "spell": 807824, "caster": "rm", "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "With Frozen Earth the stun lasts 5 sec", "actor": "stun_talent",
+      "metric": "aura_duration_ms", "spell": 807824, "caster": "rm", "min": 4500, "max": 5000
+    },
+    {"action": "reset_cooldown", "actor": "mage", "spell": 122},
+    {"action": "cast", "label": "Frost Nova freezes the enemies again", "actor": "mage", "spell": 122},
+    {
+      "action": "assert", "label": "SETUP: the second enemy is frozen", "actor": "rune_talent", "metric": "aura",
+      "spell": 122, "caster": "mage", "equals": 1, "within_ms": 2000
+    },
+    {"action": "reset_cooldown", "actor": "rm", "spell": 524930},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "cast", "label": "Ice Rune with the talent", "actor": "rm", "spell": 524930, "target": "rune_talent"},
+    {
+      "action": "assert", "actor": "rune_talent", "metric": "aura", "spell": 524930, "caster": "rm", "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "With Frozen Earth Ice Rune lasts 5 sec", "actor": "rune_talent",
+      "metric": "aura_duration_ms", "spell": 524930, "caster": "rm", "min": 4500, "max": 5000
+    },
+    {"action": "unlearn", "actor": "rm", "spell": 705592},
+    {"action": "assert", "actor": "rm", "metric": "aura", "spell": 705592, "equals": 0, "within_ms": 2000},
+    {
+      "action": "assert", "label": "Removing Frozen Earth restores Ice Rune's 4 sec", "actor": "rm",
+      "metric": "spell_modifier", "spell": 524930, "op": 1, "base": 4000, "min": 3999.99, "max": 4000.01
+    },
+    {
+      "action": "assert", "label": "Removing Frozen Earth restores the stun's 4 sec", "actor": "rm",
+      "metric": "spell_modifier", "spell": 807824, "op": 1, "base": 4000, "min": 3999.99, "max": 4000.01
+    }
+  ]
+}

@@ -1,0 +1,316 @@
+{
+  "schema": 1,
+  "name": "Tinker: Mechsuit abilities keep the suit while Scrap lasts (#4797)",
+  "contract": [
+    "Build: Mechsuit (801384) drains 5 Scrap (801816) every second and ejects the Tinker only when Scrap runs",
+    "out, as its tooltip states. While Scrap lasts, Gatling Gun (500213) and Mechsuit: Laser Beam (805372)",
+    "keep the suit on and deal damage, at level 13 and at level 60, including the automatic dismount",
+    "(CMSG_CANCEL_MOUNT_AURA) the client sends with every cast from the suit's mount. Cancelling the Build:",
+    "Mechsuit aura leaves the suit, and at zero Scrap the suit is removed."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "t13",
+      "race": 1,
+      "class": 28,
+      "level": 13,
+      "ranged_hit_rating": 10000
+    },
+    {
+      "id": "t60",
+      "race": 1,
+      "class": 28,
+      "level": 60,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d13",
+      "owner": "t13",
+      "entry": 36,
+      "level": 13,
+      "distance": 5
+    },
+    {
+      "id": "d60",
+      "owner": "t60",
+      "entry": 36,
+      "level": 60,
+      "distance": 15
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "t13 fixture: Mechsuit talent",
+      "actor": "t13",
+      "spell": 92141
+    },
+    {
+      "action": "learn",
+      "label": "t13 fixture: Build: Mechsuit",
+      "actor": "t13",
+      "spell": 801384
+    },
+    {
+      "action": "set_aura",
+      "label": "t13 fixture: pre-fill Scrap",
+      "actor": "t13",
+      "spell": 801816,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "label": "t13 enters the Mechsuit",
+      "actor": "t13",
+      "spell": 801384
+    },
+    {
+      "action": "assert",
+      "label": "t13: the Mechsuit is on",
+      "actor": "t13",
+      "metric": "aura",
+      "spell": 801384,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "label": "t60 fixture: Mechsuit talent",
+      "actor": "t60",
+      "spell": 92141
+    },
+    {
+      "action": "learn",
+      "label": "t60 fixture: Build: Mechsuit",
+      "actor": "t60",
+      "spell": 801384
+    },
+    {
+      "action": "set_aura",
+      "label": "t60 fixture: pre-fill Scrap",
+      "actor": "t60",
+      "spell": 801816,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "label": "t60 enters the Mechsuit with ample Scrap",
+      "actor": "t60",
+      "spell": 801384
+    },
+    {
+      "action": "assert",
+      "label": "t60: the Mechsuit is on",
+      "actor": "t60",
+      "metric": "aura",
+      "spell": 801384,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "label": "t13 fixture: Gatling Gun",
+      "actor": "t13",
+      "spell": 500213
+    },
+    {
+      "action": "cast",
+      "label": "t13 casts Gatling Gun at its dummy",
+      "actor": "t13",
+      "spell": 500213,
+      "target": "d13"
+    },
+    {
+      "action": "cancel_mount",
+      "label": "t13's client dismounts with the Gatling Gun cast, as a real client does",
+      "actor": "t13"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "t13's suit survives Gatling Gun",
+      "actor": "t13",
+      "metric": "aura",
+      "spell": 801384,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "t13's Gatling Gun dealt damage (via its triggered shot 500577)",
+      "actor": "t13",
+      "metric": "spell_damage_total",
+      "spell": 500577,
+      "target": "d13",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "t60 fixture: Gatling Gun",
+      "actor": "t60",
+      "spell": 500213
+    },
+    {
+      "action": "cast",
+      "label": "t60 casts Gatling Gun at its dummy",
+      "actor": "t60",
+      "spell": 500213,
+      "target": "d60"
+    },
+    {
+      "action": "cancel_mount",
+      "label": "t60's client dismounts with the Gatling Gun cast, as a real client does",
+      "actor": "t60"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "t60's suit survives Gatling Gun with ample fuel",
+      "actor": "t60",
+      "metric": "aura",
+      "spell": 801384,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "t60's Gatling Gun dealt damage",
+      "actor": "t60",
+      "metric": "spell_damage_total",
+      "spell": 500577,
+      "target": "d60",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "t13 fixture: Mechsuit: Laser Beam",
+      "actor": "t13",
+      "spell": 805372
+    },
+    {
+      "action": "cast",
+      "label": "t13 casts Laser Beam at its dummy",
+      "actor": "t13",
+      "spell": 805372,
+      "target": "d13"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "t13's suit survives Laser Beam",
+      "actor": "t13",
+      "metric": "aura",
+      "spell": 801384,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "t13's Laser Beam dealt damage",
+      "actor": "t13",
+      "metric": "spell_damage_total",
+      "spell": 805372,
+      "target": "d13",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "t60 fixture: Mechsuit: Laser Beam",
+      "actor": "t60",
+      "spell": 805372
+    },
+    {
+      "action": "cast",
+      "label": "t60 casts Laser Beam at its dummy",
+      "actor": "t60",
+      "spell": 805372,
+      "target": "d60"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "t60's suit survives Laser Beam with ample fuel",
+      "actor": "t60",
+      "metric": "aura",
+      "spell": 801384,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "t60's Laser Beam dealt damage",
+      "actor": "t60",
+      "metric": "spell_damage_total",
+      "spell": 805372,
+      "target": "d60",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "t13 is nearly out of Scrap",
+      "actor": "t13",
+      "spell": 801816,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT running out of Scrap ejects the Tinker from the Mechsuit",
+      "actor": "t13",
+      "metric": "aura",
+      "spell": 801384,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "cancel_aura",
+      "label": "t60 cancels Build: Mechsuit",
+      "actor": "t60",
+      "spell": 801384
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT cancelling Build: Mechsuit ejects the Tinker",
+      "actor": "t60",
+      "metric": "aura",
+      "spell": 801384,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "t60's mount helper leaves with the suit",
+      "actor": "t60",
+      "metric": "aura",
+      "spell": 803451,
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}

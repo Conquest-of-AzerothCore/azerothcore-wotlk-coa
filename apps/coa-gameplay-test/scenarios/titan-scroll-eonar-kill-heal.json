@@ -1,0 +1,43 @@
+{
+ "schema": 1,
+ "name": "Titan Scroll: Eonar kill hook skips the kills of player-made summons in the open world",
+ "contract": "With aura 993957 active, mod-coa-titan-scrolls' OnPlayerCreatureKill hook returns for a summoned, critter or totem victim before its capital check and its 10% roll, so such a kill never casts 993963 (Eonar's Blessing). coa-gameplay-test fixtures are TempSummons the player summoned, so eight buffed one-hit kills in Elwynn Forest, which is not a capital, must complete Eonar's Blessing zero times whatever the roll. The positive proc, its 10% chance, the cast at the corpse and the heal of 5% of the maximum health the killer is shown (the real maximum when there is no per-character view) are covered by apps/coa-tests/titan_scroll_eonar, which forces the roll both ways.",
+ "timeout_ms": 120000,
+ "players": [
+  { "id": "killer", "race": 1, "class": 1, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+ ],
+ "location": { "map": 0, "x": -9095.0, "y": -105.0, "z": 71.0, "o": 0.0 },
+ "creatures": [
+  { "id": "prey1", "owner": "killer", "entry": 68, "health": 1, "level": 60 },
+  { "id": "prey2", "owner": "killer", "entry": 68, "health": 1, "level": 60 },
+  { "id": "prey3", "owner": "killer", "entry": 68, "health": 1, "level": 60 },
+  { "id": "prey4", "owner": "killer", "entry": 68, "health": 1, "level": 60 },
+  { "id": "prey5", "owner": "killer", "entry": 68, "health": 1, "level": 60 },
+  { "id": "prey6", "owner": "killer", "entry": 68, "health": 1, "level": 60 },
+  { "id": "prey7", "owner": "killer", "entry": 68, "health": 1, "level": 60 },
+  { "id": "prey8", "owner": "killer", "entry": 68, "health": 1, "level": 60 }
+ ],
+ "steps": [
+  { "action": "wait", "label": "Let login and zone updates settle before the fixture buff", "ms": 2000 },
+  { "action": "set_aura", "actor": "killer", "spell": 993957, "stacks": 1 },
+  { "action": "attack", "actor": "killer", "target": "prey1" },
+  { "action": "assert", "label": "Buffed kill 1 lands", "actor": "prey1", "metric": "alive", "equals": 0, "within_ms": 6000 },
+  { "action": "attack", "actor": "killer", "target": "prey2" },
+  { "action": "assert", "label": "Buffed kill 2 lands", "actor": "prey2", "metric": "alive", "equals": 0, "within_ms": 6000 },
+  { "action": "attack", "actor": "killer", "target": "prey3" },
+  { "action": "assert", "label": "Buffed kill 3 lands", "actor": "prey3", "metric": "alive", "equals": 0, "within_ms": 6000 },
+  { "action": "attack", "actor": "killer", "target": "prey4" },
+  { "action": "assert", "label": "Buffed kill 4 lands", "actor": "prey4", "metric": "alive", "equals": 0, "within_ms": 6000 },
+  { "action": "attack", "actor": "killer", "target": "prey5" },
+  { "action": "assert", "label": "Buffed kill 5 lands", "actor": "prey5", "metric": "alive", "equals": 0, "within_ms": 6000 },
+  { "action": "attack", "actor": "killer", "target": "prey6" },
+  { "action": "assert", "label": "Buffed kill 6 lands", "actor": "prey6", "metric": "alive", "equals": 0, "within_ms": 6000 },
+  { "action": "attack", "actor": "killer", "target": "prey7" },
+  { "action": "assert", "label": "Buffed kill 7 lands", "actor": "prey7", "metric": "alive", "equals": 0, "within_ms": 6000 },
+  { "action": "attack", "actor": "killer", "target": "prey8" },
+  { "action": "assert", "label": "Buffed kill 8 lands", "actor": "prey8", "metric": "alive", "equals": 0, "within_ms": 6000 },
+  { "action": "wait", "label": "Let any blessing cast from the last kill complete", "ms": 2000 },
+  { "action": "assert", "label": "The Eonar buff stayed on through every kill", "actor": "killer", "metric": "aura", "spell": 993957, "equals": 1 },
+  { "action": "assert", "label": "No kill of a player-made summon cast Eonar's Blessing", "actor": "killer", "metric": "spell_cast_count", "spell": 993963, "equals": 0 }
+ ]
+}

@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "name": "Brewfest: the Ironforge Brewfest Revelers are friendly to the Alliance",
+  "contract": "Brewfest Reveler 24484 spawns outside Ironforge (event 24) wear an Alliance disguise from creature_addon, Brewfest Reveler - Dwarf 43909 on guid 88858 and Brewfest Reveler - Gnome 43910 on guid 88875. A disguised Alliance Reveler takes Escortee faction 774 (FactionTemplate: our mask 3, friend mask 2), which is friendly to the Alliance and neutral to the Horde; the Horde escortee faction 775 (our mask 5, friend mask 4) that an Alliance player could attack belongs only to Horde disguises. SmartAI restores the template faction on the first update after spawning, so the faction must survive that respawn handling. With the event started, an Alliance level 29 player beside each spawn therefore cannot attack the nearest Reveler and a Horde level 29 player can (#4704). Rendering of the nameplate colour is untested.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -5210.18,
+    "y": -512.958,
+    "z": 389.592,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "alliance",
+      "race": 1,
+      "class": 1,
+      "level": 29
+    },
+    {
+      "id": "horde",
+      "race": 2,
+      "class": 1,
+      "level": 29
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Alliance player joins world phase 1, where the event spawns live",
+      "actor": "alliance",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "Horde player joins world phase 1",
+      "actor": "horde",
+      "value": 1
+    },
+    {
+      "action": "game_event",
+      "label": "Brewfest is running",
+      "event": 24,
+      "active": true
+    },
+    {
+      "action": "assert",
+      "label": "The dwarf Reveler 88858 has spawned beside the players",
+      "actor": "alliance",
+      "metric": "nearby_creature_count",
+      "entry": 24484,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "label": "Let the spawn addon auras apply",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Alliance player cannot attack the dwarf Reveler",
+      "actor": "alliance",
+      "metric": "nearby_creature_can_attack",
+      "entry": 24484,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Horde player can attack the dwarf Reveler",
+      "actor": "horde",
+      "metric": "nearby_creature_can_attack",
+      "entry": 24484,
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "label": "Alliance player walks to the gnome Reveler 88875",
+      "actor": "alliance",
+      "map": 0,
+      "x": -5207.01,
+      "y": -509.638,
+      "z": 388.825
+    },
+    {
+      "action": "teleport",
+      "label": "Horde player walks to the gnome Reveler 88875",
+      "actor": "horde",
+      "map": 0,
+      "x": -5207.01,
+      "y": -509.638,
+      "z": 388.825
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Alliance player cannot attack the gnome Reveler",
+      "actor": "alliance",
+      "metric": "nearby_creature_can_attack",
+      "entry": 24484,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Horde player can attack the gnome Reveler",
+      "actor": "horde",
+      "metric": "nearby_creature_can_attack",
+      "entry": 24484,
+      "equals": 1
+    }
+  ]
+}

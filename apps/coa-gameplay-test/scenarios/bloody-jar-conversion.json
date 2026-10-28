@@ -1,0 +1,1312 @@
+{
+  "schema": 1,
+  "name": "Bloody Jar item targeting, confirmation, conversion and persistence",
+  "contract": "The server sends an item-targeted Bloodforge spell without client file edits. Selecting supported gear sends one non-gossip action with the exact irreversible-conversion warning, which the existing Ascension UI auto-selects to open Accept/Cancel directly. Conversion and the three-second cast require acceptance for that exact item instance. Abandoned, expired, replaced or interrupted requests leave gear unchanged. Normal Bloodforged conversion preserves GUID, affixes and enchants through relog; the jar is reusable.",
+  "players": [
+    {
+      "id": "normal",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "heroic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "ascended",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "property",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "suffix",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "unsupported",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "cursor",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "timeout_ms": 180000,
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "client_cast_time_ms",
+      "spell": 9977999,
+      "equals": 3000,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "client_spell_targets",
+      "spell": 9977999,
+      "equals": 16,
+      "within_ms": 20000
+    },
+    {
+      "action": "add_item",
+      "actor": "normal",
+      "item": 16939,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "normal",
+      "item": 777999,
+      "count": 1
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "item_soulbound",
+      "item": 16939,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "normal",
+      "metric": "item_guid",
+      "item": 16939,
+      "save_as": "normal_guid"
+    },
+    {
+      "action": "use_item",
+      "actor": "normal",
+      "item": 777999,
+      "spell": 9977999,
+      "target_item": 16939
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "gossip_options",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "casting",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "item_count",
+      "item": 16939,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "item_count",
+      "item": 6016939,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "server_packet_u8",
+      "opcode": 381,
+      "offset": 24,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "server_packet_contains",
+      "opcode": 381,
+      "text": "Bloodforging an item transforms it into PvP Gear, removing the PvE Power and replacing it with PvP Power.\n\nHeroic, Mythic or Ascended items will be converted into Normal Bloodforged items.\n\nThis is IRREVERSIBLE.",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "casting",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "item_count",
+      "item": 16939,
+      "equals": 1
+    },
+    {
+      "action": "gossip_select",
+      "actor": "normal",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "casting",
+      "within_ms": 500,
+      "equals": 1
+    },
+    {
+      "action": "gossip_select",
+      "actor": "normal",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "casting",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "item_count",
+      "item": 6016939,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "item_count",
+      "item": 16939,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "item_guid",
+      "item": 6016939,
+      "equals": 0,
+      "relative_to": "normal_guid"
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "item_soulbound",
+      "item": 6016939,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "item_count",
+      "item": 777999,
+      "equals": 1
+    },
+    {
+      "action": "relog",
+      "actor": "normal"
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "item_guid",
+      "item": 6016939,
+      "equals": 0,
+      "relative_to": "normal_guid"
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "item_soulbound",
+      "item": 6016939,
+      "equals": 0
+    },
+    {
+      "action": "use_item",
+      "actor": "normal",
+      "item": 777999,
+      "spell": 9977999,
+      "target_item": 6016939
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "item_count",
+      "item": 6016939,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "item_count",
+      "item": 777999,
+      "equals": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "heroic",
+      "item": 316939,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "heroic",
+      "item": 777999,
+      "count": 1
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "item_soulbound",
+      "item": 316939,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "heroic",
+      "metric": "item_guid",
+      "item": 316939,
+      "save_as": "heroic_guid"
+    },
+    {
+      "action": "use_item",
+      "actor": "heroic",
+      "item": 777999,
+      "spell": 9977999,
+      "target_item": 316939
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "gossip_options",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "casting",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "item_count",
+      "item": 316939,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "item_count",
+      "item": 6016939,
+      "equals": 0
+    },
+    {
+      "action": "gossip_select",
+      "actor": "heroic",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "casting",
+      "within_ms": 500,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "item_count",
+      "item": 6016939,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "item_count",
+      "item": 316939,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "item_guid",
+      "item": 6016939,
+      "equals": 0,
+      "relative_to": "heroic_guid"
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "item_soulbound",
+      "item": 6016939,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "item_count",
+      "item": 777999,
+      "equals": 1
+    },
+    {
+      "action": "relog",
+      "actor": "heroic"
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "item_guid",
+      "item": 6016939,
+      "equals": 0,
+      "relative_to": "heroic_guid"
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "item_soulbound",
+      "item": 6016939,
+      "equals": 0
+    },
+    {
+      "action": "use_item",
+      "actor": "heroic",
+      "item": 777999,
+      "spell": 9977999,
+      "target_item": 6016939
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "item_count",
+      "item": 6016939,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "item_count",
+      "item": 777999,
+      "equals": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "mythic",
+      "item": 1316939,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "mythic",
+      "item": 777999,
+      "count": 1
+    },
+    {
+      "action": "assert",
+      "actor": "mythic",
+      "metric": "item_soulbound",
+      "item": 1316939,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "mythic",
+      "metric": "item_guid",
+      "item": 1316939,
+      "save_as": "mythic_guid"
+    },
+    {
+      "action": "use_item",
+      "actor": "mythic",
+      "item": 777999,
+      "spell": 9977999,
+      "target_item": 1316939
+    },
+    {
+      "action": "assert",
+      "actor": "mythic",
+      "metric": "gossip_options",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "mythic",
+      "metric": "casting",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "mythic",
+      "metric": "item_count",
+      "item": 1316939,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "mythic",
+      "metric": "item_count",
+      "item": 6016939,
+      "equals": 0
+    },
+    {
+      "action": "gossip_select",
+      "actor": "mythic",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "actor": "mythic",
+      "metric": "casting",
+      "within_ms": 500,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "mythic",
+      "metric": "item_count",
+      "item": 6016939,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "mythic",
+      "metric": "item_count",
+      "item": 1316939,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "mythic",
+      "metric": "item_guid",
+      "item": 6016939,
+      "equals": 0,
+      "relative_to": "mythic_guid"
+    },
+    {
+      "action": "assert",
+      "actor": "mythic",
+      "metric": "item_soulbound",
+      "item": 6016939,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "mythic",
+      "metric": "item_count",
+      "item": 777999,
+      "equals": 1
+    },
+    {
+      "action": "relog",
+      "actor": "mythic"
+    },
+    {
+      "action": "assert",
+      "actor": "mythic",
+      "metric": "item_guid",
+      "item": 6016939,
+      "equals": 0,
+      "relative_to": "mythic_guid"
+    },
+    {
+      "action": "assert",
+      "actor": "mythic",
+      "metric": "item_soulbound",
+      "item": 6016939,
+      "equals": 0
+    },
+    {
+      "action": "use_item",
+      "actor": "mythic",
+      "item": 777999,
+      "spell": 9977999,
+      "target_item": 6016939
+    },
+    {
+      "action": "assert",
+      "actor": "mythic",
+      "metric": "item_count",
+      "item": 6016939,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "mythic",
+      "metric": "item_count",
+      "item": 777999,
+      "equals": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "ascended",
+      "item": 216939,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "ascended",
+      "item": 777999,
+      "count": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ascended",
+      "metric": "item_soulbound",
+      "item": 216939,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "ascended",
+      "metric": "item_guid",
+      "item": 216939,
+      "save_as": "ascended_guid"
+    },
+    {
+      "action": "use_item",
+      "actor": "ascended",
+      "item": 777999,
+      "spell": 9977999,
+      "target_item": 216939
+    },
+    {
+      "action": "assert",
+      "actor": "ascended",
+      "metric": "gossip_options",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ascended",
+      "metric": "casting",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ascended",
+      "metric": "item_count",
+      "item": 216939,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ascended",
+      "metric": "item_count",
+      "item": 6016939,
+      "equals": 0
+    },
+    {
+      "action": "gossip_select",
+      "actor": "ascended",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ascended",
+      "metric": "casting",
+      "within_ms": 500,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ascended",
+      "metric": "item_count",
+      "item": 6016939,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "ascended",
+      "metric": "item_count",
+      "item": 216939,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ascended",
+      "metric": "item_guid",
+      "item": 6016939,
+      "equals": 0,
+      "relative_to": "ascended_guid"
+    },
+    {
+      "action": "assert",
+      "actor": "ascended",
+      "metric": "item_soulbound",
+      "item": 6016939,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ascended",
+      "metric": "item_count",
+      "item": 777999,
+      "equals": 1
+    },
+    {
+      "action": "relog",
+      "actor": "ascended"
+    },
+    {
+      "action": "assert",
+      "actor": "ascended",
+      "metric": "item_guid",
+      "item": 6016939,
+      "equals": 0,
+      "relative_to": "ascended_guid"
+    },
+    {
+      "action": "assert",
+      "actor": "ascended",
+      "metric": "item_soulbound",
+      "item": 6016939,
+      "equals": 0
+    },
+    {
+      "action": "use_item",
+      "actor": "ascended",
+      "item": 777999,
+      "spell": 9977999,
+      "target_item": 6016939
+    },
+    {
+      "action": "assert",
+      "actor": "ascended",
+      "metric": "item_count",
+      "item": 6016939,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ascended",
+      "metric": "item_count",
+      "item": 777999,
+      "equals": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "property",
+      "item": 13858,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "property",
+      "item": 777999,
+      "count": 1
+    },
+    {
+      "action": "set_item_random_property",
+      "actor": "property",
+      "item": 13858,
+      "property": 13202
+    },
+    {
+      "action": "snapshot",
+      "actor": "property",
+      "metric": "item_guid",
+      "item": 13858,
+      "save_as": "property_guid"
+    },
+    {
+      "action": "snapshot",
+      "actor": "property",
+      "metric": "item_suffix_factor",
+      "item": 13858,
+      "save_as": "property_seed"
+    },
+    {
+      "action": "snapshot",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 13858,
+      "save_as": "property_enchant_7",
+      "slot": 7
+    },
+    {
+      "action": "snapshot",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 13858,
+      "save_as": "property_enchant_8",
+      "slot": 8
+    },
+    {
+      "action": "snapshot",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 13858,
+      "save_as": "property_enchant_9",
+      "slot": 9
+    },
+    {
+      "action": "snapshot",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 13858,
+      "save_as": "property_enchant_10",
+      "slot": 10
+    },
+    {
+      "action": "snapshot",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 13858,
+      "save_as": "property_enchant_11",
+      "slot": 11
+    },
+    {
+      "action": "use_item",
+      "actor": "property",
+      "item": 777999,
+      "spell": 9977999,
+      "target_item": 13858
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "gossip_options",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "casting",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_count",
+      "item": 13858,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_count",
+      "item": 221578,
+      "equals": 0
+    },
+    {
+      "action": "gossip_select",
+      "actor": "property",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "casting",
+      "within_ms": 500,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_count",
+      "item": 221578,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_random_property",
+      "item": 221578,
+      "equals": 13202
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_guid",
+      "item": 221578,
+      "equals": 0,
+      "relative_to": "property_guid"
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_suffix_factor",
+      "item": 221578,
+      "equals": 0,
+      "relative_to": "property_seed"
+    },
+    {
+      "action": "relog",
+      "actor": "property"
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_random_property",
+      "item": 221578,
+      "equals": 13202
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_suffix_factor",
+      "item": 221578,
+      "equals": 0,
+      "relative_to": "property_seed"
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 221578,
+      "equals": 0,
+      "relative_to": "property_enchant_7",
+      "slot": 7
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 221578,
+      "equals": 0,
+      "relative_to": "property_enchant_8",
+      "slot": 8
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 221578,
+      "equals": 0,
+      "relative_to": "property_enchant_9",
+      "slot": 9
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 221578,
+      "equals": 0,
+      "relative_to": "property_enchant_10",
+      "slot": 10
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 221578,
+      "equals": 0,
+      "relative_to": "property_enchant_11",
+      "slot": 11
+    },
+    {
+      "action": "add_item",
+      "actor": "suffix",
+      "item": 13858,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "suffix",
+      "item": 777999,
+      "count": 1
+    },
+    {
+      "action": "set_item_random_property",
+      "actor": "suffix",
+      "item": 13858,
+      "property": -5
+    },
+    {
+      "action": "snapshot",
+      "actor": "suffix",
+      "metric": "item_guid",
+      "item": 13858,
+      "save_as": "suffix_guid"
+    },
+    {
+      "action": "snapshot",
+      "actor": "suffix",
+      "metric": "item_suffix_factor",
+      "item": 13858,
+      "save_as": "suffix_seed"
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_suffix_factor",
+      "item": 13858,
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 13858,
+      "save_as": "suffix_enchant_7",
+      "slot": 7
+    },
+    {
+      "action": "snapshot",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 13858,
+      "save_as": "suffix_enchant_8",
+      "slot": 8
+    },
+    {
+      "action": "snapshot",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 13858,
+      "save_as": "suffix_enchant_9",
+      "slot": 9
+    },
+    {
+      "action": "snapshot",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 13858,
+      "save_as": "suffix_enchant_10",
+      "slot": 10
+    },
+    {
+      "action": "snapshot",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 13858,
+      "save_as": "suffix_enchant_11",
+      "slot": 11
+    },
+    {
+      "action": "use_item",
+      "actor": "suffix",
+      "item": 777999,
+      "spell": 9977999,
+      "target_item": 13858
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "gossip_options",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "casting",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_count",
+      "item": 13858,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_count",
+      "item": 221578,
+      "equals": 0
+    },
+    {
+      "action": "gossip_select",
+      "actor": "suffix",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "casting",
+      "within_ms": 500,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "casting",
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_count",
+      "item": 13858,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_count",
+      "item": 221578,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_count",
+      "item": 221578,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_random_property",
+      "item": 221578,
+      "equals": -5
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_guid",
+      "item": 221578,
+      "equals": 0,
+      "relative_to": "suffix_guid"
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_suffix_factor",
+      "item": 221578,
+      "equals": 0,
+      "relative_to": "suffix_seed"
+    },
+    {
+      "action": "relog",
+      "actor": "suffix"
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_random_property",
+      "item": 221578,
+      "equals": -5
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_suffix_factor",
+      "item": 221578,
+      "equals": 0,
+      "relative_to": "suffix_seed"
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 221578,
+      "equals": 0,
+      "relative_to": "suffix_enchant_7",
+      "slot": 7
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 221578,
+      "equals": 0,
+      "relative_to": "suffix_enchant_8",
+      "slot": 8
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 221578,
+      "equals": 0,
+      "relative_to": "suffix_enchant_9",
+      "slot": 9
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 221578,
+      "equals": 0,
+      "relative_to": "suffix_enchant_10",
+      "slot": 10
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 221578,
+      "equals": 0,
+      "relative_to": "suffix_enchant_11",
+      "slot": 11
+    },
+    {
+      "action": "add_item",
+      "actor": "unsupported",
+      "item": 355242,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "unsupported",
+      "item": 777999,
+      "count": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "unsupported",
+      "metric": "item_guid",
+      "item": 355242,
+      "save_as": "unsupported_guid"
+    },
+    {
+      "action": "use_item",
+      "actor": "unsupported",
+      "item": 777999,
+      "spell": 9977999,
+      "target_item": 355242
+    },
+    {
+      "action": "assert",
+      "actor": "unsupported",
+      "metric": "item_count",
+      "item": 355242,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "unsupported",
+      "metric": "item_guid",
+      "item": 355242,
+      "equals": 0,
+      "relative_to": "unsupported_guid"
+    },
+    {
+      "action": "assert",
+      "actor": "unsupported",
+      "metric": "item_count",
+      "item": 777999,
+      "equals": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "cursor",
+      "item": 16939,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "cursor",
+      "item": 777999,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "cursor",
+      "item": 777999,
+      "spell": 9977999
+    },
+    {
+      "action": "assert",
+      "actor": "cursor",
+      "metric": "gossip_options",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cursor",
+      "metric": "item_count",
+      "item": 16939,
+      "equals": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "cursor",
+      "item": 777999,
+      "spell": 9977999,
+      "target_item": 16939
+    },
+    {
+      "action": "assert",
+      "actor": "cursor",
+      "metric": "gossip_options",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "cursor",
+      "metric": "casting",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cursor",
+      "metric": "item_count",
+      "item": 16939,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "cursor",
+      "metric": "item_count",
+      "item": 6016939,
+      "equals": 0
+    },
+    {
+      "action": "gossip_select",
+      "actor": "cursor",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cursor",
+      "metric": "casting",
+      "within_ms": 500,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "cursor",
+      "metric": "item_count",
+      "item": 6016939,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "cursor",
+      "metric": "item_count",
+      "item": 777999,
+      "equals": 1
+    }
+  ]
+}

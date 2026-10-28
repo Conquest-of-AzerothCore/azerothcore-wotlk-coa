@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "Empyrean Fortitude raises parry chance by 5% (#3098)",
+  "contract": [
+    "Spell 706795 ships a native SPELL_AURA_MOD_PARRY_PERCENT effect (BasePoints 4 -> 5) plus a",
+    "SPELL_AURA_PROC_TRIGGER_SPELL effect (EffectTriggerSpell 359019), gated by the spell_proc row",
+    "(ProcFlags 40 = TAKEN_MELEE_AUTO_ATTACK|TAKEN_SPELL_MELEE_DMG_CLASS, HitMask 32 = PROC_HIT_PARRY,",
+    "Chance 100) and spell_script_names entry spell_ascension_reaper_talent_proc (rev_20260921_20).",
+    "The parry% half of the tooltip is a plain native stat aura, so learning the passive alone should",
+    "raise parry_chance by 5. The Runic-Power-on-parry half needs an actual parried melee swing, which is",
+    "combat-RNG dependent even with Chance=100 (it still requires the defender to roll a parry); it is not",
+    "asserted deterministically here and is left as an observation."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "creatures": [],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "parry_chance",
+      "save_as": "parry_before"
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 706795
+    },
+    {
+      "action": "assert",
+      "label": "Empyrean Fortitude adds 5% parry chance",
+      "actor": "reaper",
+      "metric": "parry_chance",
+      "relative_to": "parry_before",
+      "min": 4.9,
+      "max": 5.1
+    },
+    {
+      "action": "unlearn",
+      "actor": "reaper",
+      "spell": 706795
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning removes the parry bonus",
+      "actor": "reaper",
+      "metric": "parry_chance",
+      "relative_to": "parry_before",
+      "min": -0.1,
+      "max": 0.1
+    }
+  ]
+}

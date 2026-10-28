@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Dawn can be canceled to bank remaining Solar Power (#5239)",
+  "contract": "The selected Spell.dbc gives Dawn 807440 SPELL_ATTR0_NO_AURA_CANCEL. The Sun Cleric runtime contract clears that flag so the native CMSG_CANCEL_AURA request must remove the active phase. This scenario checks aura removal; the dawn-refund scenarios separately check the owner's clarified one-to-one refund on cancellation and expiry.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "cleric", "spell": 804584 },
+    {
+      "action": "set_aura", "label": "Fixture: Dawn requires 20 Solar Power (500149) to cast (sun_cleric_spells::OnSpellCheckCast)",
+      "actor": "cleric", "spell": 500149, "stacks": 20
+    },
+    {
+      "action": "set_aura", "label": "Fixture: Dawn's own DBC CasterAuraSpell requires the 704396 readiness marker (normally set by AscensionSunCleric.cpp Resource(), which set_aura on 500149 bypasses)",
+      "actor": "cleric", "spell": 704396, "stacks": 1
+    },
+    { "action": "cast", "actor": "cleric", "spell": 804584 },
+    {
+      "action": "assert", "label": "SETUP: Dawn is active",
+      "actor": "cleric", "metric": "aura", "spell": 807440, "equals": 1, "within_ms": 2000
+    },
+    { "action": "cancel_aura", "actor": "cleric", "spell": 807440 },
+    {
+      "action": "assert", "label": "The cancel request actually removes Dawn",
+      "actor": "cleric", "metric": "aura", "spell": 807440, "equals": 0
+    }
+  ]
+}

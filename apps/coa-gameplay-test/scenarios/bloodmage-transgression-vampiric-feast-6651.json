@@ -1,0 +1,150 @@
+{
+  "schema": 1,
+  "name": "Transgression triggers Vampiric Feast on direct spell damage (#6651)",
+  "contract": [
+    "Transgression 801076 (Rank 'Cursed Form') reads: 'Enter a unique Cursed Form for $d that does not disable",
+    "the use of Mortal Form abilities. While active, direct spell damage triggers a Vampiric Feast, dealing",
+    "$801076s3% additional Shadow damage to enemies, healing you equal to 50% of the damage dealt.' Spell.dbc",
+    "gives effect 3 (EFFECT_2) SPELL_EFFECT_APPLY_AURA with aura 354, BasePoints 19 + DieSides 1 = the 20%",
+    "the tooltip renders, and TriggerSpell Vampiric Feast 804934 (SPELL_EFFECT_HEALTH_LEECH, EffectValueMultiplier",
+    "0.5 the '50% of the damage dealt' heal, SchoolMask 32 Shadow, SpellFamilyName 26). Aura 354 has no entry in",
+    "AuraEffectHandler and no case in AuraEffect::HandleProc, and 801076 carries ProcFlags 0, so no spell_proc",
+    "row was ever generated, Aura::GetProcEffectMask returned 0 and the clause never fired. This scenario casts",
+    "one direct damage spell without the form and then the same spell under it: the Feast must not exist before,",
+    "and must appear after. The 20% share and the 50% leech are the trigger's own data and are not re-derived here."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 0
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 686
+    },
+    {
+      "action": "cast",
+      "label": "Direct spell damage while Transgression is not active",
+      "actor": "bloodmage",
+      "spell": 686,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the control cast resolve",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "label": "Vampiric Feast damage before the form",
+      "actor": "bloodmage",
+      "metric": "spell_damage_count",
+      "spell": 804934,
+      "save_as": "feast_before"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Vampiric Feast without Transgression",
+      "actor": "bloodmage",
+      "metric": "spell_damage_count",
+      "spell": 804934,
+      "relative_to": "feast_before",
+      "max": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "bloodmage",
+      "spell": 801076,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Transgression is active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 801076,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Guard: Transgression still grants the Cursed ability marker",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 524861,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Guard: Transgression still grants the shared Cursed Form marker",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 525031,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Direct spell damage under Transgression",
+      "actor": "bloodmage",
+      "spell": 686,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "The cast is not refused",
+      "actor": "bloodmage",
+      "metric": "cast_failure",
+      "spell": 686,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the direct spell damage triggers Vampiric Feast",
+      "actor": "bloodmage",
+      "metric": "spell_damage_count",
+      "spell": 804934,
+      "relative_to": "feast_before",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The Feast deals Shadow damage to the enemy",
+      "actor": "bloodmage",
+      "metric": "spell_damage_total",
+      "spell": 804934,
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

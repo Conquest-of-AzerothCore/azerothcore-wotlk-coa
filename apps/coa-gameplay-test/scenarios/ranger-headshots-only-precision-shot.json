@@ -1,0 +1,118 @@
+{
+  "schema": 1,
+  "name": "Ranger Headshots Only: Serrated Shot ticks stack a buff the next Precision Shot consumes (#1299)",
+  "contract": "Headshots Only 680931 reads 'Periodic damage dealt with Serrated Shot and Toxic Dart now increases the damage of your next Precision Shot within $573202d by $573202s1%, stacking $573202u times.' and its buff 573202 reads 'Damage of your next Precision Shot increased by $S1%. Stacks $u times.' 680931's only effect is SPELL_AURA_PROC_TRIGGER_SPELL on 573202; Spell.dbc ProcFlags 0, revived by the spell_proc row in rev_20260921_40_ranger_dead_procs.sql (PROC_FLAG_DONE_PERIODIC, family 27 masks 32768/-/128 = Toxic Dart and Serrated Shot). 573202 is an 8 sec (DurationIndex 31) self aura, StackAmount 10, SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DAMAGE +10% on EffectSpellClassMask (0,8388608,0) = Precision Shot's SpellFamilyFlags. Its Spell.dbc ProcCharges is 0, so no Precision Shot ever used it up: the whole stack simply lasted 8 sec. Expected: a Serrated Shot tick grants 573202; a fresh 573202 carries one charge; the next Precision Shot that lands removes it (about 3.6 sec into its 8 sec duration, so natural expiry cannot explain the removal). Before the fix the charge assertion reads 0 and the buff is still present after the Precision Shot.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80,
+      "ranged_hit_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "ranger",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 15
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 6000 },
+    { "action": "learn", "actor": "ranger", "spell": 264 },
+    { "action": "learn", "actor": "ranger", "spell": 500073 },
+    { "action": "learn", "actor": "ranger", "spell": 500075 },
+    { "action": "learn", "actor": "ranger", "spell": 680931 },
+    { "action": "add_item", "actor": "ranger", "item": 2504 },
+    { "action": "equip", "actor": "ranger", "item": 2504, "slot": 17 },
+    { "action": "wait", "label": "Let the equipment settle", "ms": 1500 },
+    {
+      "action": "assert",
+      "label": "SETUP: Headshots Only is active on the Ranger",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 680931,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 100 },
+    { "action": "set_aura", "label": "Serrated Shot needs Advantage", "actor": "ranger", "spell": 804329, "stacks": 1 },
+    { "action": "cast", "label": "Serrated Shot applies its bleed", "actor": "ranger", "spell": 500073, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "SETUP: the Serrated Shot bleed is on the target",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 500073,
+      "caster": "ranger",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "A Serrated Shot tick grants Headshots Only",
+      "actor": "ranger",
+      "metric": "aura_stacks",
+      "spell": 573202,
+      "caster": "ranger",
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Serrated Shot bleed has run out",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 500073,
+      "caster": "ranger",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    { "action": "set_aura", "label": "Clear the proc's buff", "actor": "ranger", "spell": 573202, "stacks": 0 },
+    { "action": "set_aura", "label": "A fresh 8 sec buff with three stacks", "actor": "ranger", "spell": 573202, "stacks": 3 },
+    {
+      "action": "assert",
+      "label": "Headshots Only is spent by one Precision Shot: it carries a single charge",
+      "actor": "ranger",
+      "metric": "aura_charges",
+      "spell": 573202,
+      "equals": 1
+    },
+    { "action": "snapshot", "actor": "ranger", "metric": "spell_damage_count", "spell": 500075, "save_as": "precision_before" },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 100 },
+    { "action": "set_aura", "label": "Precision Shot needs Advantage", "actor": "ranger", "spell": 804329, "stacks": 1 },
+    { "action": "cast", "label": "The next Precision Shot", "actor": "ranger", "spell": 500075, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "SETUP: the Precision Shot landed",
+      "actor": "ranger",
+      "metric": "spell_damage_count",
+      "spell": 500075,
+      "relative_to": "precision_before",
+      "equals": 1,
+      "within_ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "The Precision Shot consumed Headshots Only",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 573202,
+      "equals": 0,
+      "within_ms": 1000
+    }
+  ]
+}

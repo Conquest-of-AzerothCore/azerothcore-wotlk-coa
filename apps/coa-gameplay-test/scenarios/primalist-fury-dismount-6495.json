@@ -1,0 +1,808 @@
+{
+  "schema": 1,
+  "name": "Fury of the Wild restores copied boons after dismount (#6495)",
+  "contract": [
+    "A Boon cast with Fury of the Wild applies to the current living pet at half strength. Normal mounting",
+    "temporarily unsummons that persistent pet; dismount must retain its copied permanent Boon without another",
+    "Boon cast. Exercise all five Boons with independently authored half-strength amounts before and after",
+    "mounting. Remove Fury while mounted as a negative control. Cancel the owner Boon while mounted to verify",
+    "its restoration link is cleared, then recast it on the living pet before testing Fury removal."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "spirit",
+      "owner": "primalist",
+      "entry": 1188,
+      "level": 19,
+      "health": 100000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 59
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 574301
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 574301,
+      "target": "spirit"
+    },
+    {
+      "action": "assert",
+      "label": "Tame a real persistent pet",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 1188,
+      "within_ms": 24000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 801234
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 34091
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 809917
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500935
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500935,
+      "target": "primalist"
+    },
+    {
+      "action": "assert",
+      "label": "The owner receives Boon 500935",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 500935,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Fury copies Boon 500935 before mounting",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 500935,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Copied Boon 500935 retains its half-strength amount",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 500935,
+      "effect": 2,
+      "equals": -5
+    },
+    {
+      "action": "assert",
+      "label": "The copied Boon is permanent",
+      "actor": "primalist",
+      "metric": "pet_aura_duration_ms",
+      "spell": 500935,
+      "equals": -1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 809917
+    },
+    {
+      "action": "assert",
+      "label": "The normal mount cast succeeds",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 809917,
+      "equals": 1,
+      "within_ms": 4500
+    },
+    {
+      "action": "assert",
+      "label": "Mounting actually unsummons the pet",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The owner retains its Boon while mounted",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 500935,
+      "equals": 1
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "primalist"
+    },
+    {
+      "action": "assert",
+      "label": "Dismount reloads the persistent pet",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 1188,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Dismount restores the copied Boon 500935",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 500935,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Copied Boon 500935 retains its half-strength amount",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 500935,
+      "effect": 2,
+      "equals": -5
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500939
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500939,
+      "target": "primalist"
+    },
+    {
+      "action": "assert",
+      "label": "The owner receives Boon 500939",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 500939,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Fury copies Boon 500939 before mounting",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 500939,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Copied Boon 500939 retains its half-strength amount",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 500939,
+      "effect": 0,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "The copied Boon is permanent",
+      "actor": "primalist",
+      "metric": "pet_aura_duration_ms",
+      "spell": 500939,
+      "equals": -1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 809917
+    },
+    {
+      "action": "assert",
+      "label": "The normal mount cast succeeds",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 809917,
+      "equals": 1,
+      "within_ms": 4500
+    },
+    {
+      "action": "assert",
+      "label": "Mounting actually unsummons the pet",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The owner retains its Boon while mounted",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 500939,
+      "equals": 1
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "primalist"
+    },
+    {
+      "action": "assert",
+      "label": "Dismount reloads the persistent pet",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 1188,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Dismount restores the copied Boon 500939",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 500939,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Copied Boon 500939 retains its half-strength amount",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 500939,
+      "effect": 0,
+      "equals": 5
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500943
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500943,
+      "target": "primalist"
+    },
+    {
+      "action": "assert",
+      "label": "The owner receives Boon 500943",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 500943,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Fury copies Boon 500943 before mounting",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 500943,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Copied Boon 500943 retains its half-strength amount",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 500943,
+      "effect": 0,
+      "equals": -5
+    },
+    {
+      "action": "assert",
+      "label": "The copied Boon is permanent",
+      "actor": "primalist",
+      "metric": "pet_aura_duration_ms",
+      "spell": 500943,
+      "equals": -1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 809917
+    },
+    {
+      "action": "assert",
+      "label": "The normal mount cast succeeds",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 809917,
+      "equals": 1,
+      "within_ms": 4500
+    },
+    {
+      "action": "assert",
+      "label": "Mounting actually unsummons the pet",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The owner retains its Boon while mounted",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 500943,
+      "equals": 1
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "primalist"
+    },
+    {
+      "action": "assert",
+      "label": "Dismount reloads the persistent pet",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 1188,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Dismount restores the copied Boon 500943",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 500943,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Copied Boon 500943 retains its half-strength amount",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 500943,
+      "effect": 0,
+      "equals": -5
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 800137
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 800137,
+      "target": "primalist"
+    },
+    {
+      "action": "assert",
+      "label": "The owner receives Boon 800137",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 800137,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Fury copies Boon 800137 before mounting",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 800137,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Copied Boon 800137 retains its half-strength amount",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 800137,
+      "effect": 1,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "The copied Boon is permanent",
+      "actor": "primalist",
+      "metric": "pet_aura_duration_ms",
+      "spell": 800137,
+      "equals": -1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 809917
+    },
+    {
+      "action": "assert",
+      "label": "The normal mount cast succeeds",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 809917,
+      "equals": 1,
+      "within_ms": 4500
+    },
+    {
+      "action": "assert",
+      "label": "Mounting actually unsummons the pet",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The owner retains its Boon while mounted",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 800137,
+      "equals": 1
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "primalist"
+    },
+    {
+      "action": "assert",
+      "label": "Dismount reloads the persistent pet",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 1188,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Dismount restores the copied Boon 800137",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 800137,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Copied Boon 800137 retains its half-strength amount",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 800137,
+      "effect": 1,
+      "equals": 4
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 504856
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 504856,
+      "target": "primalist"
+    },
+    {
+      "action": "assert",
+      "label": "The owner receives Boon 504856",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 504856,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Fury copies Boon 504856 before mounting",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 504856,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Copied Boon 504856 retains its half-strength amount",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 504856,
+      "effect": 0,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "label": "The copied Boon is permanent",
+      "actor": "primalist",
+      "metric": "pet_aura_duration_ms",
+      "spell": 504856,
+      "equals": -1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 809917
+    },
+    {
+      "action": "assert",
+      "label": "The normal mount cast succeeds",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 809917,
+      "equals": 1,
+      "within_ms": 4500
+    },
+    {
+      "action": "assert",
+      "label": "Mounting actually unsummons the pet",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The owner retains its Boon while mounted",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 504856,
+      "equals": 1
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "primalist"
+    },
+    {
+      "action": "assert",
+      "label": "Dismount reloads the persistent pet",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 1188,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Dismount restores the copied Boon 504856",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 504856,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Copied Boon 504856 retains its half-strength amount",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 504856,
+      "effect": 0,
+      "equals": 20
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 809917
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 4500
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 504856,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 504856,
+      "equals": 0
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "primalist"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 1188,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Cancelling the owner Boon while mounted clears the saved pet link",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 504856,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 504856
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 504856,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 504856,
+      "effect": 0,
+      "equals": 20
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 809917
+    },
+    {
+      "action": "assert",
+      "label": "Mount again for the passive-removal control",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 809917,
+      "equals": 1,
+      "within_ms": 4500
+    },
+    {
+      "action": "assert",
+      "label": "The pet is absent while the passive is removed",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 801234
+    },
+    {
+      "action": "assert",
+      "label": "Fury is removed while mounted",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 801234,
+      "equals": 0
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "primalist"
+    },
+    {
+      "action": "assert",
+      "label": "The pet still returns without Fury",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 1188,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Removing Fury prevents stale boon restoration",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 504856,
+      "equals": 0
+    }
+  ]
+}

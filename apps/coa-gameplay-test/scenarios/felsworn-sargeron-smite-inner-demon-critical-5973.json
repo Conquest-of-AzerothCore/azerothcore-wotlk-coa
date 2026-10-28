@@ -1,0 +1,218 @@
+{
+  "schema": 1,
+  "name": "Inner Demon repeats Sargeron Smite resolved critical damage (#5973)",
+  "contract": [
+    "501318 rank6 at level 44 consumes2 Felfury and grants20 Energy; its installed parent description promises one additional free cast while Inner Demon804216 is active.",
+    "Compare actual native primary and helper803467 damage on the same target, including a forced primary critical hit, and require no second cost, energy grant or critical roll. An ordinary cast without Inner Demon must have no copy."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "f",
+      "race": 1,
+      "class": 14,
+      "level": 44,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false,
+      "spell_crit_rating": 100000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "f",
+      "entry": 36,
+      "level": 44,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "f",
+      "spell": 501318
+    },
+    {
+      "action": "learn",
+      "actor": "f",
+      "spell": 804216
+    },
+    {
+      "action": "set_power",
+      "actor": "f",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "set_aura",
+      "actor": "f",
+      "spell": 800058,
+      "stacks": 2
+    },
+    {
+      "action": "cast",
+      "actor": "f",
+      "spell": 501318,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "spell_damage_count",
+      "spell": 501318,
+      "target": "e",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "spell_damage_count",
+      "spell": 803467,
+      "target": "e",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "f",
+      "spell": 800058,
+      "stacks": 2
+    },
+    {
+      "action": "cast",
+      "actor": "f",
+      "spell": 804216
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "aura",
+      "spell": 804216,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "f",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "set_aura",
+      "actor": "f",
+      "spell": 800058,
+      "stacks": 2
+    },
+    {
+      "action": "snapshot",
+      "actor": "f",
+      "metric": "spell_damage_total",
+      "save_as": "primary_before",
+      "spell": 501318,
+      "target": "e"
+    },
+    {
+      "action": "snapshot",
+      "actor": "f",
+      "metric": "spell_damage_total",
+      "save_as": "copy_before",
+      "spell": 803467,
+      "target": "e"
+    },
+    {
+      "action": "cast",
+      "actor": "f",
+      "spell": 501318,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "spell_damage_count",
+      "spell": 501318,
+      "target": "e",
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "spell_damage_count",
+      "spell": 803467,
+      "target": "e",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "f",
+      "metric": "spell_damage_total",
+      "save_as": "inner_primary",
+      "spell": 501318,
+      "target": "e",
+      "relative_to": "primary_before"
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "spell_damage_total",
+      "spell": 803467,
+      "target": "e",
+      "relative_to": "copy_before",
+      "ratio_to": "inner_primary",
+      "min": 1,
+      "max": 1,
+      "label": "The free Inner Demon copy equals the resolved primary hit"
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "spell_damage_count",
+      "spell": 803467,
+      "target": "e",
+      "critical": false,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "power",
+      "power": 3,
+      "equals": 70,
+      "label": "The free copy does not grant a second 20 Energy"
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "aura_stacks",
+      "spell": 800058,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "spell_damage_count",
+      "spell": 501318,
+      "target": "e",
+      "critical": true,
+      "equals": 2
+    }
+  ]
+}

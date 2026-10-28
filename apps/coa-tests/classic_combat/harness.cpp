@@ -27,7 +27,24 @@ enum AuraType
     SPELL_AURA_MOD_ENEMY_DODGE,
     SPELL_AURA_MOD_TARGET_RESISTANCE,
     SPELL_AURA_MOD_DODGE_PERCENT,
-    SPELL_AURA_MOD_PARRY_PERCENT
+    SPELL_AURA_MOD_PARRY_PERCENT,
+    SPELL_AURA_MOD_ABILITY_IGNORE_TARGET_RESIST,
+    SPELL_AURA_MOD_INCREASES_SPELL_PCT_TO_HIT,
+    SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE,
+    SPELL_AURA_MOD_AOE_AVOIDANCE,
+    SPELL_AURA_MOD_DEBUFF_RESISTANCE,
+    SPELL_AURA_DEFLECT_SPELLS,
+    SPELL_AURA_PERIODIC_DAMAGE,
+    SPELL_AURA_PERIODIC_LEECH,
+    SPELL_AURA_PERIODIC_DAMAGE_PERCENT,
+    SPELL_AURA_MOD_ROOT
+};
+enum SpellEffects
+{
+    SPELL_EFFECT_NONE,
+    SPELL_EFFECT_SCHOOL_DAMAGE,
+    SPELL_EFFECT_HEALTH_LEECH,
+    SPELL_EFFECT_APPLY_AURA
 };
 enum VictimState
 {
@@ -36,10 +53,19 @@ enum VictimState
 };
 enum ServerConfigs
 {
-    CONFIG_CLASSIC_PLUS_COMBAT_RULES
+    CONFIG_CLASSIC_PLUS_COMBAT_RULES,
+    CONFIG_MONSTER_RESISTANCE_ENABLE,
+    CONFIG_MONSTER_RESISTANCE_PER_LEVEL,
+    CONFIG_MONSTER_RESISTANCE_PER_PERCENT,
+    CONFIG_MONSTER_RESISTANCE_MAX_REDUCTION_PCT,
+    CONFIG_MISS_CHANCE_MULTIPLIER_ONLY_FOR_PLAYERS,
+    RATE_MISS_CHANCE_MULTIPLIER_TARGET_PLAYER,
+    RATE_MISS_CHANCE_MULTIPLIER_TARGET_CREATURE
 };
 enum SpellSchoolMask : uint32
 {
+    SPELL_SCHOOL_MASK_NORMAL = 1,
+    SPELL_SCHOOL_MASK_HOLY = 2,
     SPELL_SCHOOL_MASK_FIRE = 4
 };
 enum SpellModOp
@@ -61,11 +87,36 @@ constexpr uint32 CREATURE_FLAG_EXTRA_NO_DODGE = 0x8;
 constexpr uint32 CREATURE_FLAG_EXTRA_NO_CRIT = 0x10;
 constexpr int SPELL_ATTR0_CU_BINARY_SPELL = 1;
 constexpr int SPELL_ATTR7_NO_ATTACK_MISS = 2;
+constexpr int SPELL_ATTR4_NO_CAST_LOG = 4;
+constexpr int SPELL_ATTR0_CU_SCHOOLMASK_NORMAL_WITH_MAGIC = 8;
+constexpr int SPELL_ATTR3_ALWAYS_HIT = 16;
+constexpr uint32 UNIT_STATE_STUNNED = 2;
+constexpr uint8 MAX_SPELL_EFFECTS = 3;
+constexpr uint32 MAX_SPELL_SCHOOL = 7;
+constexpr uint8 CR_HIT_TAKEN_SPELL = 0;
 
 struct World
 {
     bool classicPlus = true;
-    bool getBoolConfig(ServerConfigs) const { return classicPlus; }
+    bool linearResistance = false;
+    float resistancePerLevel = 1.0f;
+    float resistancePerPercent = 5.0f;
+    float maxReductionPct = 75.0f;
+    bool getBoolConfig(ServerConfigs config) const
+    {
+        if (config == CONFIG_MISS_CHANCE_MULTIPLIER_ONLY_FOR_PLAYERS)
+            return false;
+        return config == CONFIG_MONSTER_RESISTANCE_ENABLE ? linearResistance : classicPlus;
+    }
+    float getFloatConfig(ServerConfigs config) const
+    {
+        if (config == CONFIG_MONSTER_RESISTANCE_PER_LEVEL)
+            return resistancePerLevel;
+        if (config == CONFIG_MONSTER_RESISTANCE_PER_PERCENT)
+            return resistancePerPercent;
+        return maxReductionPct;
+    }
+    float getRate(ServerConfigs) const { return 11.0f; }
 };
 World world;
 World* sWorld = &world;
@@ -74,6 +125,9 @@ int32 nextRoll = 0;
 bool chanceRoll = false;
 int32 urand(int32, int32) { return nextRoll; }
 bool roll_chance_i(int32) { return chanceRoll; }
+int32 irand(int32, int32) { return nextRoll; }
+float normalizedRoll = 0.5f;
+double rand_norm() { return normalizedRoll; }
 float frand(float low, float high)
 {
     if (low > high)
@@ -81,11 +135,49 @@ float frand(float low, float high)
     return (low + high) / 2.0f;
 }
 
+struct SpellEffectInfo
+{
+    SpellEffects Effect = SPELL_EFFECT_NONE;
+    AuraType ApplyAuraName = AuraType(0);
+    bool IsEffect() const { return Effect != SPELL_EFFECT_NONE; }
+};
+
 struct SpellInfo
 {
     uint32 Id = 0;
     bool binary = false;
-    bool HasAttribute(int attribute) const { return attribute == SPELL_ATTR0_CU_BINARY_SPELL && binary; }
+    bool AscensionIgnoreAbsorbAndResistance = false;
+    uint32 attributes = 0;
+    uint32 SpellLevel = 1;
+    uint32 Dispel = 0;
+    SpellSchoolMask school = SPELL_SCHOOL_MASK_FIRE;
+    std::array<SpellEffectInfo, MAX_SPELL_EFFECTS> Effects{{ {SPELL_EFFECT_SCHOOL_DAMAGE} }};
+    bool HasAttribute(int attribute) const
+    {
+        return (attribute == SPELL_ATTR0_CU_BINARY_SPELL && binary) || (attributes & uint32(attribute));
+    }
+    SpellSchoolMask GetSchoolMask() const { return school; }
+    bool HasEffect(SpellEffects effect) const
+    {
+        return std::any_of(Effects.begin(), Effects.end(), [effect](SpellEffectInfo const& info)
+        {
+            return info.Effect == effect;
+        });
+    }
+    bool HasAura(AuraType aura) const
+    {
+        return std::any_of(Effects.begin(), Effects.end(), [aura](SpellEffectInfo const& info)
+        {
+            return info.Effect == SPELL_EFFECT_APPLY_AURA && info.ApplyAuraName == aura;
+        });
+    }
+    bool IsAffectingArea() const { return false; }
+    bool IsPositive() const { return false; }
+};
+struct AuraEffect
+{
+    uint32 GetMiscValue() const { return SPELL_SCHOOL_MASK_FIRE; }
+    bool IsAffectedOnSpell(SpellInfo const*) const { return true; }
 };
 struct SpellMgr
 {
@@ -101,6 +193,28 @@ struct Spell
 struct Unit;
 using Creature = Unit;
 using Player = Unit;
+
+struct DamageInfo
+{
+    Unit* attacker;
+    Unit* victim;
+    uint32 damage;
+    SpellSchoolMask school;
+    SpellInfo const* spell;
+    DamageEffectType type = SPELL_DIRECT_DAMAGE;
+    uint32 resisted = 0;
+    Unit* GetAttacker() const { return attacker; }
+    Unit* GetVictim() const { return victim; }
+    uint32 GetDamage() const { return damage; }
+    SpellSchoolMask GetSchoolMask() const { return school; }
+    SpellInfo const* GetSpellInfo() const { return spell; }
+    DamageEffectType GetDamageType() const { return type; }
+    void ResistDamage(uint32 amount)
+    {
+        resisted = std::min(amount, damage);
+        damage -= resisted;
+    }
+};
 
 struct ScriptMgr
 {
@@ -144,24 +258,40 @@ struct Unit
     uint32 flagsExtra = 0;
     int32 resistance = 0;
     int32 penetration = 0;
+    int32 itemPenetration = 0;
+    float targetResistanceDebuff = 0.0f;
+    float resistanceMultiplier = 1.0f;
+    uint8 viewLevel = 0;
+    Player* spellModOwner = nullptr;
+    int32 mechanicResistance = 0;
+    bool alive = true;
+    uint32 armorReduction = 0;
     int32 avoidanceAura = 0;
     float m_modMeleeHitChance = 0.0f;
     float m_modRangedHitChance = 0.0f;
+    float m_modSpellHitChance = 0.0f;
     std::array<Spell*, 1> m_currentSpells{};
 
     bool IsPlayer() const { return player; }
     bool IsCreature() const { return !player; }
     bool IsPet() const { return pet; }
+    bool IsAlive() const { return alive; }
+    bool IsVehicle() const { return false; }
+    bool IsTrigger() const { return false; }
     bool IsTotem() const { return totem; }
     bool IsControlledByPlayer() const { return player || pet || controlled; }
     Creature const* ToCreature() const { return player ? nullptr : this; }
     Player const* ToPlayer() const { return player ? this : nullptr; }
-    Player* GetSpellModOwner() const { return player ? const_cast<Unit*>(this) : nullptr; }
+    Player* GetSpellModOwner() const { return spellModOwner ? spellModOwner : player ? const_cast<Unit*>(this) : nullptr; }
+    Unit* GetOwner() const { return spellModOwner; }
     bool IsEvadingAttacks() const { return false; }
     bool HasFlagsExtra(uint32 flag) const { return (flagsExtra & flag) != 0; }
     uint32 GetEntry() const { return 1; }
     uint8 GetLevel() const { return level; }
-    uint8 getLevelForTarget(Unit const* target) const { return worldBoss && target ? uint8(target->level + 3) : level; }
+    uint8 getLevelForTarget(Unit const* target) const
+    {
+        return worldBoss && target ? uint8(target->level + 3) : viewLevel ? viewLevel : level;
+    }
     uint8 getClass() const { return cls; }
     uint16 GetMaxSkillValueForLevel(Unit const* target = nullptr) const
     {
@@ -188,10 +318,29 @@ struct Unit
         return aura == SPELL_AURA_MOD_DODGE_PERCENT || aura == SPELL_AURA_MOD_PARRY_PERCENT ? avoidanceAura : 0;
     }
     int32 GetTotalAuraModifierByMiscValue(AuraType, int32) const { return 0; }
-    int32 GetTotalAuraModifierByMiscMask(AuraType, uint32) const { return penetration; }
+    int32 GetTotalAuraModifierByMiscMask(AuraType aura, uint32) const
+    {
+        return aura == SPELL_AURA_MOD_TARGET_RESISTANCE ? penetration : 0;
+    }
     float GetTotalAuraMultiplier(AuraType) const { return 1.0f; }
-    int32 GetResistance(SpellSchoolMask) const { return resistance; }
-    int32 GetSpellPenetrationItemMod() const { return 0; }
+    template<class Predicate> float GetTotalAuraMultiplier(AuraType, Predicate) const { return 1.0f; }
+    float GetRatingBonusValue(uint8) const { return 0.0f; }
+    int32 GetMechanicResistChance(SpellInfo const*) const { return mechanicResistance; }
+    int32 GetMaxPositiveAuraModifierByMiscValue(AuraType, int32) const { return 0; }
+    int32 GetMaxNegativeAuraModifierByMiscValue(AuraType, int32) const { return 0; }
+    int32 GetResistance(SpellSchoolMask) const
+    {
+        return std::max(0, int32((float(resistance) + targetResistanceDebuff) * resistanceMultiplier));
+    }
+    float GetFlatModifierValue(UnitMods, UnitModifierFlatType type) const
+    {
+        return type == BASE_VALUE ? float(resistance) : targetResistanceDebuff;
+    }
+    float GetPctModifierValue(UnitMods, UnitModifierPctType type) const
+    {
+        return type == TOTAL_PCT ? resistanceMultiplier : 1.0f;
+    }
+    int32 GetSpellPenetrationItemMod() const { return itemPenetration; }
     template<class T> void ApplySpellMod(uint32, SpellModOp, T&) const { }
     bool HasAura(uint32 id) const { return forgemaster && id == 560655; }
     bool CanBlock() const { return forgemaster; }
@@ -202,6 +351,13 @@ struct Unit
     float MeleeSpellMissChance(Unit const* victim, WeaponAttackType attType, int32 skillDiff, uint32 spellId) const;
     static float GetEffectiveResistChance(Unit const* owner, SpellSchoolMask schoolMask, Unit const* victim,
         SpellInfo const* spellInfo = nullptr);
+    static void CalcAbsorbResist(DamageInfo& damage, bool Splited = false);
+    static uint32 CalcArmorReducedDamage(Unit const*, Unit const* victim, uint32 damage, SpellInfo const*, uint8,
+        WeaponAttackType)
+    {
+        return damage - std::min(damage, victim->armorReduction);
+    }
+    SpellMissInfo MagicSpellHitResult(Unit* victim, SpellInfo const* spellInfo);
     float GlancingMultiplier(Unit* victim, WeaponAttackType attackType) const;
 };
 
@@ -657,6 +813,226 @@ void CheckMeleeTable()
     world.classicPlus = true;
 }
 
+void CheckLinearMonsterResistance()
+{
+    world.linearResistance = true;
+    Unit caster = PlayerAt(60);
+    Unit monster = CreatureAt(60);
+    auto reduction = [&](SpellSchoolMask school = SPELL_SCHOOL_MASK_FIRE)
+    {
+        return Unit::GetEffectiveResistChance(&caster, school, &monster);
+    };
+    Check(Near(reduction(), 0.12), "level 60 monster starts with 12% reduction");
+    monster.targetResistanceDebuff = -75.0f;
+    Check(Near(reduction(), 0.0), "target-side resistance debuffs can consume the full baseline");
+    monster.targetResistanceDebuff = -30.0f;
+    Check(Near(reduction(), 0.06), "target-side debuffs reduce the baseline before zero clamping");
+    monster.targetResistanceDebuff = 0.0f;
+    monster.resistanceMultiplier = 0.5f;
+    Check(Near(reduction(), 0.06), "percentage resistance modifiers apply to the baseline");
+    monster.resistanceMultiplier = 1.0f;
+    caster.itemPenetration = 30;
+    Check(Near(reduction(), 0.06), "30 item penetration leaves 6% reduction");
+    caster.itemPenetration = 60;
+    Check(Near(reduction(), 0.0), "60 penetration removes the level 60 baseline");
+    caster.itemPenetration = 1000;
+    Check(Near(reduction(), 0.0), "excess penetration never produces negative reduction");
+    caster.itemPenetration = 0;
+    monster.resistance = 20;
+    Check(Near(reduction(), 0.16), "authored resistance is added to the baseline");
+    caster.penetration = -30;
+    Check(Near(reduction(), 0.10), "resistance debuffs reduce the total including baseline");
+    caster.penetration = 0;
+    monster.resistance = 0;
+    Check(Near(reduction(SPELL_SCHOOL_MASK_HOLY), 0.12), "Holy uses the same monster baseline");
+    monster.level = 63;
+    Check(Near(reduction(), 0.126), "level 63 has no additional hidden level-difference penalty");
+    monster.viewLevel = 30;
+    Check(Near(reduction(), 0.06), "per-viewer scaled combat level supplies the baseline");
+    monster.viewLevel = 0;
+    monster.level = 83;
+    monster.worldBoss = true;
+    Check(Near(reduction(), 0.126), "world bosses use the existing relative combat level");
+    monster = CreatureAt(60);
+    monster.resistance = 1000;
+    Check(Near(reduction(), 0.75), "mitigation is capped at the configured 75%");
+    monster.resistance = 0;
+    world.resistancePerLevel = 2.0f;
+    world.resistancePerPercent = 10.0f;
+    Check(Near(reduction(), 0.12), "configured level and conversion rates are honored");
+    world.maxReductionPct = 5.0f;
+    Check(Near(reduction(), 0.05), "configured maximum reduction is honored");
+    world.resistancePerLevel = 1.0f;
+    world.resistancePerPercent = 5.0f;
+    world.maxReductionPct = 75.0f;
+    monster = PlayerAt(60);
+    Check(Near(reduction(), 0.0), "player targets do not receive the monster baseline");
+    monster = CreatureAt(60);
+    monster.pet = true;
+    Check(Near(reduction(), 0.0), "player pets do not receive the monster baseline");
+    monster.pet = false;
+    monster.controlled = true;
+    Check(Near(reduction(), 0.0), "player-controlled creatures do not receive the baseline");
+    monster.controlled = false;
+    world.classicPlus = false;
+    Check(Near(reduction(), 0.12), "linear monster resistance is independent of Classic+ combat");
+    world.classicPlus = true;
+    world.linearResistance = false;
+    Check(Near(reduction(), 0.0), "disabling the feature restores native resistance");
+}
+
+void CheckLinearMonsterDamage()
+{
+    world.linearResistance = true;
+    Unit caster = PlayerAt(60);
+    Unit monster = CreatureAt(60);
+    SpellInfo spell;
+    auto hit = [&](SpellSchoolMask school, DamageEffectType type = SPELL_DIRECT_DAMAGE)
+    {
+        DamageInfo damage{&caster, &monster, 1000, school, &spell, type};
+        Unit::CalcAbsorbResist(damage);
+        return damage;
+    };
+    auto meanDamage = [&](SpellSchoolMask school = SPELL_SCHOOL_MASK_FIRE,
+        DamageEffectType type = SPELL_DIRECT_DAMAGE)
+    {
+        constexpr int samples = 10000;
+        double total = 0.0;
+        for (int i = 0; i < samples; ++i)
+        {
+            normalizedRoll = (float(i) + 0.5f) / float(samples);
+            total += hit(school, type).damage;
+        }
+        normalizedRoll = 0.5f;
+        return total / samples;
+    };
+    for (DamageEffectType type : { SPELL_DIRECT_DAMAGE, DOT })
+    {
+        for (auto [roll, expected] : { std::pair{ 0.0f, 1000u }, { 0.19f, 1000u }, { 0.21f, 900u }, { 0.5f, 900u },
+                 { 0.9f, 800u }, { 0.99f, 700u } })
+        {
+            normalizedRoll = roll;
+            DamageInfo damage = hit(SPELL_SCHOOL_MASK_FIRE, type);
+            Check(damage.damage == expected && damage.resisted == 1000u - expected,
+                "12% average resistance rolls native 10% steps of 0/10/20/30% at 20/45/30/5%");
+        }
+        Check(std::fabs(meanDamage(SPELL_SCHOOL_MASK_FIRE, type) - 880.0) < 0.5,
+            "random 10% steps average the full 12% reduction without a DoT factor");
+    }
+    normalizedRoll = 0.5f;
+    Check(std::fabs(meanDamage(SPELL_SCHOOL_MASK_HOLY) - 880.0) < 0.5, "Holy damage averages the same 12%");
+    spell.binary = true;
+    Check(hit(SPELL_SCHOOL_MASK_FIRE).damage == 900 && std::fabs(meanDamage() - 880.0) < 0.5,
+        "binary damage receives partial resistance instead of a school full resist");
+    spell.binary = false;
+    caster.itemPenetration = 30;
+    Check(std::fabs(meanDamage() - 940.0) < 0.5, "30 penetration leaves 6% average mitigation");
+    normalizedRoll = 0.99f;
+    Check(hit(SPELL_SCHOOL_MASK_FIRE).damage == 800, "below 10% average resistance at most 20% is resisted");
+    normalizedRoll = 0.5f;
+    caster.itemPenetration = 60;
+    for (float roll : { 0.0f, 0.5f, 0.99f })
+    {
+        normalizedRoll = roll;
+        Check(hit(SPELL_SCHOOL_MASK_FIRE).damage == 1000, "60 penetration removes every partial resist");
+    }
+    normalizedRoll = 0.5f;
+    caster.itemPenetration = 1000;
+    Check(std::fabs(meanDamage() - 1000.0) < 0.5, "excess penetration never increases damage");
+    caster.itemPenetration = 0;
+    Check(hit(SPELL_SCHOOL_MASK_NORMAL).damage == 1000, "pure physical damage bypasses magic resistance");
+    spell.attributes = SPELL_ATTR4_NO_CAST_LOG;
+    Check(hit(SPELL_SCHOOL_MASK_FIRE).damage == 1000, "native no-resistance flag remains effective");
+    spell.attributes = 0;
+    spell.AscensionIgnoreAbsorbAndResistance = true;
+    Check(hit(SPELL_SCHOOL_MASK_FIRE).damage == 1000, "explicit Ascension resistance bypass is preserved");
+    spell.AscensionIgnoreAbsorbAndResistance = false;
+    spell.attributes = SPELL_ATTR0_CU_SCHOOLMASK_NORMAL_WITH_MAGIC;
+    monster.armorReduction = 50;
+    Check(hit(SPELL_SCHOOL_MASK_FIRE).damage == 950, "native mixed-school weakest-defense handling is preserved");
+    spell.attributes = 0;
+    monster.armorReduction = 0;
+    Unit pet = CreatureAt(60);
+    pet.pet = true;
+    pet.spellModOwner = &caster;
+    caster.itemPenetration = 60;
+    DamageInfo petDamage{&pet, &monster, 1000, SPELL_SCHOOL_MASK_FIRE, &spell};
+    Unit::CalcAbsorbResist(petDamage);
+    Check(petDamage.damage == 1000, "pet attacks inherit their owner's item penetration against monsters");
+    caster.itemPenetration = 0;
+    monster.resistance = 10000;
+    Check(std::fabs(meanDamage() - 250.0) < 0.5, "75% cap averages 25% of the damage");
+    normalizedRoll = 0.99f;
+    Check(hit(SPELL_SCHOOL_MASK_FIRE).damage == 100, "a capped hit can roll the native 90% partial resist");
+    world.maxReductionPct = 100.0f;
+    Check(hit(SPELL_SCHOOL_MASK_FIRE).damage == 0, "configured 100% cap cannot underflow damage");
+    normalizedRoll = 0.5f;
+    world.maxReductionPct = 75.0f;
+    monster.resistance = 0;
+    world.linearResistance = false;
+    Check(hit(SPELL_SCHOOL_MASK_FIRE).damage == 1000, "feature off restores native zero-resistance damage");
+}
+
+void CheckLinearMonsterSpellHit()
+{
+    world.linearResistance = true;
+    Unit caster = PlayerAt(60);
+    caster.m_modSpellHitChance = 100.0f;
+    Unit monster = CreatureAt(60);
+    monster.resistance = 100;
+    SpellInfo binary;
+    binary.binary = true;
+    nextRoll = 1000;
+    Check(caster.MagicSpellHitResult(&monster, &binary) == SPELL_MISS_NONE,
+        "binary damage spells are never fully resisted by a linear monster");
+    SpellInfo crowdControl;
+    crowdControl.binary = true;
+    crowdControl.Effects = {{ {SPELL_EFFECT_APPLY_AURA, SPELL_AURA_MOD_ROOT} }};
+    Check(caster.MagicSpellHitResult(&monster, &crowdControl) == SPELL_MISS_RESIST,
+        "binary crowd control keeps the school full-resist roll on a linear monster");
+    nextRoll = 3300;
+    Check(caster.MagicSpellHitResult(&monster, &crowdControl) == SPELL_MISS_NONE,
+        "crowd control full-resist chance follows the 32% linear resistance");
+    nextRoll = 1000;
+    for (AuraType periodic : { SPELL_AURA_PERIODIC_DAMAGE, SPELL_AURA_PERIODIC_LEECH,
+             SPELL_AURA_PERIODIC_DAMAGE_PERCENT })
+    {
+        SpellInfo periodicBinary;
+        periodicBinary.binary = true;
+        periodicBinary.Effects = {{ {SPELL_EFFECT_APPLY_AURA, SPELL_AURA_MOD_ROOT},
+            {SPELL_EFFECT_APPLY_AURA, periodic} }};
+        Check(caster.MagicSpellHitResult(&monster, &periodicBinary) == SPELL_MISS_NONE,
+            "binary spells with periodic damage are never fully resisted by a linear monster");
+    }
+    SpellInfo leech;
+    leech.binary = true;
+    leech.Effects = {{ {SPELL_EFFECT_HEALTH_LEECH} }};
+    Check(caster.MagicSpellHitResult(&monster, &leech) == SPELL_MISS_NONE,
+        "binary health leech is never fully resisted by a linear monster");
+    monster.mechanicResistance = 50;
+    Check(caster.MagicSpellHitResult(&monster, &binary) == SPELL_MISS_RESIST,
+        "explicit mechanic resistance still applies");
+    monster.mechanicResistance = 0;
+    caster.m_modSpellHitChance = 0.0f;
+    nextRoll = 100;
+    Check(caster.MagicSpellHitResult(&monster, &binary) == SPELL_MISS_MISS,
+        "spell accuracy misses remain independent of linear resistance");
+    caster.m_modSpellHitChance = 100.0f;
+    nextRoll = 1000;
+    world.linearResistance = false;
+    Check(caster.MagicSpellHitResult(&monster, &binary) == SPELL_MISS_RESIST,
+        "feature off preserves native binary school resistance");
+    world.linearResistance = true;
+    Unit player = PlayerAt(60);
+    player.resistance = 100;
+    Check(caster.MagicSpellHitResult(&player, &binary) == SPELL_MISS_RESIST,
+        "player targets keep binary school resistance");
+    monster.pet = true;
+    Check(caster.MagicSpellHitResult(&monster, &binary) == SPELL_MISS_RESIST,
+        "player pets keep binary school resistance");
+    world.linearResistance = false;
+}
+
 int main()
 {
     CheckFormulas();
@@ -665,6 +1041,9 @@ int main()
     CheckMissChance();
     CheckResistChance();
     CheckMeleeTable();
+    CheckLinearMonsterResistance();
+    CheckLinearMonsterDamage();
+    CheckLinearMonsterSpellHit();
     std::printf("PASS\n");
     return 0;
 }

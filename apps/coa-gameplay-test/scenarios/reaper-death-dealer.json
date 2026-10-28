@@ -1,0 +1,296 @@
+{
+  "schema": 1,
+  "name": "Death Dealer extends Ghostly Weapon and Soulrend by five seconds (#2656)",
+  "contract": [
+    "Death Dealer 705401 is a +5000 ms SPELLMOD_DURATION aura for Ghostly Weapon 803997.",
+    "It also modifies the Soulrend armor-ignore helper 573320.",
+    "Both target auras last 15000 ms without the talent and 20000 ms with it."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    {
+      "id": "control",
+      "race": 5,
+      "class": 30,
+      "level": 80,
+      "melee_hit_rating": 10000
+    },
+    {
+      "id": "dealer",
+      "race": 5,
+      "class": 30,
+      "level": 80,
+      "melee_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "control_target",
+      "owner": "control",
+      "entry": 1601,
+      "level": 80,
+      "health": 1000000,
+      "distance": 2
+    },
+    {
+      "id": "dealer_target",
+      "owner": "dealer",
+      "entry": 1601,
+      "level": 80,
+      "health": 1000000,
+      "distance": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "control",
+      "spell": 705401
+    },
+    {
+      "action": "learn",
+      "actor": "dealer",
+      "spell": 705401
+    },
+    {
+      "action": "assert",
+      "actor": "dealer",
+      "metric": "aura",
+      "spell": 705401,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "dealer",
+      "metric": "aura_amount",
+      "spell": 705401,
+      "effect": 0,
+      "equals": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 803997
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 573317
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "dealer",
+      "spell": 803997
+    },
+    {
+      "action": "learn",
+      "actor": "dealer",
+      "spell": 573317
+    },
+    {
+      "action": "set_power",
+      "actor": "dealer",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "control Ghostly Weapon duration modifier",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 803997,
+      "op": 1,
+      "base": 15000,
+      "equals": 15000
+    },
+    {
+      "action": "assert",
+      "label": "dealer Ghostly Weapon duration modifier",
+      "actor": "dealer",
+      "metric": "spell_modifier",
+      "spell": 803997,
+      "op": 1,
+      "base": 15000,
+      "equals": 20000
+    },
+    {
+      "action": "assert",
+      "label": "control Soulrend armor ignore duration modifier",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 573320,
+      "op": 1,
+      "base": 15000,
+      "equals": 15000
+    },
+    {
+      "action": "assert",
+      "label": "dealer Soulrend armor ignore duration modifier",
+      "actor": "dealer",
+      "metric": "spell_modifier",
+      "spell": 573320,
+      "op": 1,
+      "base": 15000,
+      "equals": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 803997
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "cast_failure",
+      "spell": 803997,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 803997,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "control Ghostly Weapon duration",
+      "actor": "control",
+      "metric": "aura_duration_ms",
+      "spell": 803997,
+      "min": 13000,
+      "max": 15000
+    },
+    {
+      "action": "cast",
+      "actor": "dealer",
+      "spell": 803997
+    },
+    {
+      "action": "assert",
+      "actor": "dealer",
+      "metric": "cast_failure",
+      "spell": 803997,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "dealer",
+      "metric": "aura",
+      "spell": 803997,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "dealer Ghostly Weapon duration",
+      "actor": "dealer",
+      "metric": "aura_duration_ms",
+      "spell": 803997,
+      "min": 18000,
+      "max": 20000
+    },
+    {
+      "action": "wait",
+      "label": "Let Ghostly Weapon global cooldown end",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 573317,
+      "target": "control_target"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "cast_failure",
+      "spell": 573317,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "control_target",
+      "metric": "aura",
+      "spell": 573320,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "control Soulrend debuff duration",
+      "actor": "control_target",
+      "metric": "aura_duration_ms",
+      "spell": 573320,
+      "min": 13000,
+      "max": 15000
+    },
+    {
+      "action": "set_power",
+      "actor": "dealer",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "dealer",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "dealer",
+      "spell": 573317,
+      "target": "dealer_target"
+    },
+    {
+      "action": "assert",
+      "actor": "dealer",
+      "metric": "cast_failure",
+      "spell": 573317,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "dealer_target",
+      "metric": "aura",
+      "spell": 573320,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "dealer Soulrend debuff duration",
+      "actor": "dealer_target",
+      "metric": "aura_duration_ms",
+      "spell": 573320,
+      "min": 18000,
+      "max": 20000
+    }
+  ]
+}

@@ -31,7 +31,7 @@ def main():
         return {r[0]: r for r in struct.iter_unpack('<' + str(fields) + 'I', blob[20:20 + count * size])}
 
     spells, xp = rows('Spell'), rows('QuestXP')
-    ids = (57353, 71354, 157353, 818046, 819046, 818059, 804821)
+    ids = (57353, 71354, 157353, 818046, 819046, 818059, 804821, 302053, 302882)
     init = []
     for sid in ids:
         r = spells[sid]
@@ -41,7 +41,8 @@ def main():
             init.append(f'    spells[{sid}].Effects[{i}]={{ {i},{r[71+i]},{r[95+i]},'
                         f'{base},{r[74+i]},{r[110+i]},{r[86+i]},{r[89+i]},{r[92+i]} }};')
     compat = source('src/server/coa/AscensionCompat.cpp')
-    correction = extract(compat, 'void ApplyAscensionExperienceContracts')
+    correction = (extract(compat, 'static bool IsAdventureModeTierAura')
+                  + extract(compat, 'void ApplyAscensionExperienceContracts'))
     assert 'ApplyAscensionExperienceContracts(spellInfo);' in compat
     quest_source = source('src/server/game/Entities/Player/PlayerQuest.cpp')
     quest = extract(quest_source, 'uint32 Player::CalculateQuestRewardXP')
@@ -93,10 +94,11 @@ struct Unit
 struct QuestXPEntry {std::array<uint32,10> Exp{};};
 struct XPStore {std::map<int,QuestXPEntry> data;QuestXPEntry const* LookupEntry(int id){return &data.at(id);}};
 XPStore sQuestXPStore;
-struct Quest {int Level=7;uint32 RewardXPDifficulty=5;uint32 XPValue(uint8)const;bool IsDFQuest()const{return false;}
+struct Quest {int Level=7;uint32 RewardXPDifficulty=5;uint32 XPValue(uint8,bool)const;bool IsDFQuest()const{return false;}
     int GetQuestLevel()const{return Level;}};
-struct Player:Unit
+class Player:public Unit
 {
+public:
     uint8 playerLevel=13;bool raf=false;
     uint8 GetLevel()const{return playerLevel;}float GetQuestRate(bool,int)const{return 1;}
     bool GetsRecruitAFriendBonus(bool)const{return raf;}
@@ -146,6 +148,8 @@ int main()
     assert(player.ManastormMultiplier()==1.0f);
     equip({818046,818059});assert(player.CalculateQuestRewardXP(&quest)==1125 && player.KillXP(100)==125);
     player.raf=false;equip({});assert(player.CalculateQuestRewardXP(&quest)==900);
+    equip({302053});assert(player.CalculateQuestRewardXP(&quest)==1800 && player.KillXP(100)==50);
+    equip({302882});assert(player.CalculateQuestRewardXP(&quest)==2250 && player.KillXP(100)==50);
     assert(spells[804821].Effects[0].ApplyAuraName==200); // Unrelated profession aura is unchanged.
 }
 '''
@@ -157,7 +161,8 @@ int main()
         subprocess.run([compiler, '/nologo', '/std:c++17', '/EHsc', '/W4', '/WX', '/wd4244', '/utf-8',
                         str(cpp), '/Fe' + str(exe)], cwd=out, check=True, timeout=60)
         subprocess.run([str(exe)], cwd=out, check=True, timeout=15)
-    print('PASS: scaled Pelt Collection XP; potions/heirlooms/party aura; separate kill/quest bonuses; RaF exclusion')
+    print('PASS: scaled Pelt Collection XP; potions/heirlooms/party aura; separate kill/quest bonuses; RaF exclusion; '
+          'Adventure Mode quest bonus and kill penalty')
 
 
 if __name__ == '__main__':

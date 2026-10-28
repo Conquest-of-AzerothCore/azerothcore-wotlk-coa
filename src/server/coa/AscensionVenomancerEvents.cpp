@@ -51,7 +51,7 @@ class aura_ascension_venomancer_event : public AuraScript
                 case 803210: return !player->HasAura(803211) && Chance(player,id);
                 case 503960: return !periodic && Chance(player,id,1000);
                 case 705998: return !periodic && Chance(player,id,3000);
-                case 805098: return !periodic && player->HasAura(Beetle) && Chance(player,id);
+                case 805098: return !periodic && player->HasAura(Beetle) && Chance(player,id,1000);
                 case 504406: return !periodic && Chance(player,id);
                 case 800892: return event.GetDamageInfo() &&
                     (event.GetDamageInfo()->GetSchoolMask() & SPELL_SCHOOL_MASK_NORMAL);
@@ -66,7 +66,7 @@ class aura_ascension_venomancer_event : public AuraScript
         Unit* target = event.GetActionTarget();
         switch (id)
         {
-            case 92142: return damage && !periodic && Chance(player,id);
+            case 92142: return damage && !periodic && !Any(info,{504543,503925}) && Chance(player,id);
             case 503812: return damage && Any(info,{803196,803208});
             case 503851: return damage && periodic && Chance(player,id);
             case 503854: return damage && Any(info,{800880,504705});
@@ -90,7 +90,7 @@ class aura_ascension_venomancer_event : public AuraScript
             case 705980: return damage && Named(info,803570);
             case 705982: return damage && critical && Any(info,{803570,803199,803193});
             case 705993: return (damage || healing) && Chance(player,id);
-            case 706001: return damage && Named(info,803199);
+            case 706001: return damage && Any(info,{803193,803199});
             case 706016: return healing && critical;
             case 706018: return healing && !periodic && Chance(player,id);
             case 706030: return damage && periodic && Chance(player,id);
@@ -101,7 +101,10 @@ class aura_ascension_venomancer_event : public AuraScript
             case 707233: return damage && periodic && (!info || info->Id != 707234) && Chance(player,id);
             case 707382: return damage && critical && info && info->Id == 504705;
             case 707620: return damage && critical && !periodic;
-            case 707668: return damage && critical && player->HasAura(Spider) && target->HasAura(712455,player->GetGUID());
+            case 707668:
+                return damage && critical && player->HasAura(Spider) &&
+                    target->HasAura(712455, player->GetGUID()) &&
+                    (!event.GetProcSpell() || !event.GetProcSpell()->GetScriptValue(SpiderlingVenomSource));
             case 804981: return damage && periodic && Chance(player,id);
             case 805884: return healing && periodic && critical;
             case 805933: return damage && target->GetHealthPct() < 35;
@@ -230,7 +233,7 @@ class aura_ascension_venomancer_event : public AuraScript
                 player->CastSpell(actor->GetPositionX(),actor->GetPositionY(),actor->GetPositionZ(),704347,true);
                 break;
             case 706001:
-                player->CastSpell(target->GetPositionX(),target->GetPositionY(),target->GetPositionZ(),704347,true);
+                player->CastSpell(target,704347,true);
                 break;
             case 706016: Cast(player,target,706017); break;
             case 706018:

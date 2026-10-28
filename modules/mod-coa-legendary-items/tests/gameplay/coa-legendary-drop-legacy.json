@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "name": "CoA Legendary Items: drop legacy",
+  "contract": "Requires CoALegendaryItems.Enable=1, DropChance=100, StopDropLevel=60, DestinyWeaver.Enable=1, LevelScaling=1, offset=5, CoA.SendDisplayPatches=1. An eligible corpse receives exactly one class-pool legendary. Required level equals its effective NPC level. Gray creatures, level-60 players and legacy classes receive none. Loot uses the native kill and corpse handlers.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "looter",
+      "race": 1,
+      "class": 8,
+      "level": 32
+    }
+  ],
+  "creatures": [
+    {
+      "id": "wolf",
+      "owner": "looter",
+      "entry": 1501,
+      "level": 10,
+      "health": 1000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_xp_enabled",
+      "actor": "looter",
+      "enabled": false
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "looter",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "actor": "looter",
+      "metric": "view_level",
+      "target": "wolf",
+      "within_ms": 2000,
+      "equals": 27
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "looter",
+      "entry": 1501,
+      "kill": true
+    },
+    {
+      "action": "loot_creature",
+      "actor": "looter",
+      "target": "wolf"
+    },
+    {
+      "action": "assert",
+      "actor": "looter",
+      "metric": "loot_count",
+      "quality": 5,
+      "equals": 0
+    }
+  ]
+}

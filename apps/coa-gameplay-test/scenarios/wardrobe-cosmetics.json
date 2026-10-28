@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Wardrobe cosmetics: apply, replace, share slots, clear and restore",
-  "contract": "Cosmetics persist until cleared. Invalid entries preserve selection. Login hooks only; no rendering.",
+  "contract": "Cosmetics persist until cleared. Invalid entries preserve selection. Login hooks only; no rendering. Appearances 1451 and 1452 resolve to cosmetic auras 286487 and 286489; 2992, 51444 and 52428 resolve to no cosmetic spell and are rejected before any save. Each valid selection is saved as one asynchronous DELETE-and-INSERT transaction, and login hooks reload the rows synchronously after removing every cosmetic aura, so the aura after login_hooks shows the saved row. The persistence checks run on the second character: it saves 1451 at the start and, after the wearer's checks, login hooks restore 286487, which also shows that save committed; it then replaces 1451 with 1452, tries invalid entries and the hooks must restore 286489 and not 286487. Each save is queued many world updates before the next read or save, because several character database workers can commit transactions queued close together out of order; the wearer's back-to-back saves are checked in memory only.",
   "timeout_ms": 120000,
   "players": [
     {
@@ -19,9 +19,21 @@
   ],
   "steps": [
     {
-      "action": "command",
+      "action": "apply_appearances",
+      "actor": "other",
+      "selection": {"56": 1451}
+    },
+    {
+      "action": "assert",
+      "actor": "other",
+      "metric": "aura",
+      "spell": 286487,
+      "equals": 1
+    },
+    {
+      "action": "apply_appearances",
       "actor": "wearer",
-      "command": ".localappearance 56 1451"
+      "selection": {"56": 1451}
     },
     {
       "action": "assert",
@@ -31,14 +43,14 @@
       "equals": 1
     },
     {
-      "action": "command",
+      "action": "apply_appearances",
       "actor": "wearer",
-      "command": ".localappearance 57 1451"
+      "selection": {"56": 1451, "57": 1451}
     },
     {
-      "action": "command",
+      "action": "apply_appearances",
       "actor": "wearer",
-      "command": ".localappearance 56 1452"
+      "selection": {"56": 1452, "57": 1451}
     },
     {
       "action": "assert",
@@ -55,9 +67,9 @@
       "equals": 1
     },
     {
-      "action": "command",
+      "action": "apply_appearances",
       "actor": "wearer",
-      "command": ".localappearance 57 0"
+      "selection": {"56": 1452, "57": 0}
     },
     {
       "action": "assert",
@@ -81,9 +93,9 @@
       "equals": 0
     },
     {
-      "action": "command",
+      "action": "apply_appearances",
       "actor": "wearer",
-      "command": ".localappearance 56 2992"
+      "selection": {"56": 2992, "57": 0}
     },
     {
       "action": "assert",
@@ -93,9 +105,9 @@
       "equals": 1
     },
     {
-      "action": "command",
+      "action": "apply_appearances",
       "actor": "wearer",
-      "command": ".localappearance 56 51444"
+      "selection": {"56": 51444, "57": 0}
     },
     {
       "action": "assert",
@@ -105,9 +117,9 @@
       "equals": 1
     },
     {
-      "action": "command",
+      "action": "apply_appearances",
       "actor": "wearer",
-      "command": ".localappearance 56 52428"
+      "selection": {"56": 52428, "57": 0}
     },
     {
       "action": "assert",
@@ -117,26 +129,79 @@
       "equals": 1
     },
     {
-      "action": "command",
+      "action": "apply_appearances",
       "actor": "wearer",
-      "command": ".localappearance 56 47520"
+      "selection": {"56": 47520, "57": 0}
     },
     {
       "action": "assert",
       "actor": "wearer",
+      "metric": "aura",
+      "spell": 286489,
+      "equals": 1
+    },
+    {
+      "action": "login_hooks",
+      "actor": "other"
+    },
+    {
+      "action": "assert",
+      "label": "The first saved selection is restored from the database",
+      "actor": "other",
+      "metric": "aura",
+      "spell": 286487,
+      "equals": 1
+    },
+    {
+      "action": "apply_appearances",
+      "actor": "other",
+      "selection": {"56": 1452}
+    },
+    {
+      "action": "assert",
+      "actor": "other",
+      "metric": "aura",
+      "spell": 286487,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "other",
+      "metric": "aura",
+      "spell": 286489,
+      "equals": 1
+    },
+    {
+      "action": "apply_appearances",
+      "actor": "other",
+      "selection": {"56": 51444}
+    },
+    {
+      "action": "apply_appearances",
+      "actor": "other",
+      "selection": {"56": 52428}
+    },
+    {
+      "action": "apply_appearances",
+      "actor": "other",
+      "selection": {"56": 47520}
+    },
+    {
+      "action": "assert",
+      "actor": "other",
       "metric": "aura",
       "spell": 286489,
       "equals": 1
     },
     {
       "action": "set_aura",
-      "actor": "wearer",
+      "actor": "other",
       "spell": 286489,
       "stacks": 0
     },
     {
       "action": "assert",
-      "actor": "wearer",
+      "actor": "other",
       "metric": "aura",
       "spell": 286489,
       "equals": 1,
@@ -144,19 +209,28 @@
     },
     {
       "action": "login_hooks",
-      "actor": "wearer"
+      "actor": "other"
     },
     {
       "action": "assert",
-      "actor": "wearer",
+      "label": "The replacement selection is restored from the database",
+      "actor": "other",
       "metric": "aura",
       "spell": 286489,
       "equals": 1
     },
     {
-      "action": "command",
+      "action": "assert",
+      "label": "The replaced selection is not restored",
+      "actor": "other",
+      "metric": "aura",
+      "spell": 286487,
+      "equals": 0
+    },
+    {
+      "action": "apply_appearances",
       "actor": "wearer",
-      "command": ".localappearance 56 1801"
+      "selection": {"56": 1801, "57": 0}
     },
     {
       "action": "assert",
@@ -180,9 +254,9 @@
       "equals": -1
     },
     {
-      "action": "command",
+      "action": "apply_appearances",
       "actor": "wearer",
-      "command": ".localappearance 56 1802"
+      "selection": {"56": 1802, "57": 0}
     },
     {
       "action": "assert",
@@ -206,9 +280,9 @@
       "equals": -1
     },
     {
-      "action": "command",
+      "action": "apply_appearances",
       "actor": "wearer",
-      "command": ".localappearance 56 2714"
+      "selection": {"56": 2714, "57": 0}
     },
     {
       "action": "assert",
@@ -232,9 +306,9 @@
       "equals": -1
     },
     {
-      "action": "command",
+      "action": "apply_appearances",
       "actor": "wearer",
-      "command": ".localappearance 56 42965"
+      "selection": {"56": 42965, "57": 0}
     },
     {
       "action": "assert",
@@ -258,9 +332,9 @@
       "equals": -1
     },
     {
-      "action": "command",
+      "action": "apply_appearances",
       "actor": "wearer",
-      "command": ".localappearance 56 52441"
+      "selection": {"56": 52441, "57": 0}
     },
     {
       "action": "assert",
@@ -284,9 +358,9 @@
       "equals": -1
     },
     {
-      "action": "command",
+      "action": "apply_appearances",
       "actor": "wearer",
-      "command": ".localappearance 56 52409"
+      "selection": {"56": 52409, "57": 0}
     },
     {
       "action": "assert",
@@ -310,9 +384,9 @@
       "equals": -1
     },
     {
-      "action": "command",
+      "action": "apply_appearances",
       "actor": "wearer",
-      "command": ".localappearance 56 52399"
+      "selection": {"56": 52399, "57": 0}
     },
     {
       "action": "assert",
@@ -336,9 +410,9 @@
       "equals": -1
     },
     {
-      "action": "command",
+      "action": "apply_appearances",
       "actor": "wearer",
-      "command": ".localappearance 56 52476"
+      "selection": {"56": 52476, "57": 0}
     },
     {
       "action": "assert",
@@ -362,9 +436,9 @@
       "equals": -1
     },
     {
-      "action": "command",
+      "action": "apply_appearances",
       "actor": "wearer",
-      "command": ".localappearance 56 1653"
+      "selection": {"56": 1653, "57": 0}
     },
     {
       "action": "assert",
@@ -388,9 +462,9 @@
       "equals": -1
     },
     {
-      "action": "command",
+      "action": "apply_appearances",
       "actor": "wearer",
-      "command": ".localappearance 56 0"
+      "selection": {"56": 0, "57": 0}
     },
     {
       "action": "assert",

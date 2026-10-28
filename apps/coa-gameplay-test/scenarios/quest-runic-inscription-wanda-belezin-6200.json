@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Runic Inscription: Wanda Belezin takes in the quest of the Runemaster class (#6200)",
+  "contract": [
+    "Report #6200: Wanda Belezin in Northshire Abbey is uninteractable, so 'Runic Inscription' cannot be completed.",
+    "Quest 49988 is for class mask 2147483648 (class 32), follows quest 7, is started by Marshal McBride (197), gives item 650023 on acceptance and requires it.",
+    "creature_questender names Wanda Belezin (50291, npcflag 51: gossip, quest giver, trainer) as its ender, and creature spawn 7500234 puts her at -8909.81, -216.7, 81.94, 2 yards from the report position.",
+    "A class 32 character with the item, standing in the world phase, must be able to hand the quest in to that spawned Wanda."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "hero", "race": 1, "class": 32, "level": 12 }
+  ],
+  "location": { "map": 0, "x": -8911.92, "y": -217.354, "z": 81.94, "o": 0 },
+  "creatures": [
+    { "id": "mcbride", "owner": "hero", "entry": 197, "level": 20, "distance": 4, "faction": 12 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "prepare_quest", "label": "Fixture: the prerequisite quest is done", "actor": "hero", "quest": 7 },
+    { "action": "reward_quest", "label": "Fixture: and rewarded", "actor": "hero", "quest": 7 },
+    { "action": "assert", "label": "Runic Inscription is available to class 32", "actor": "hero", "metric": "quest_takeable", "quest": 49988, "equals": 1 },
+    { "action": "quest_accept", "label": "Accept it from Marshal McBride", "actor": "hero", "quest": 49988, "entry": 197 },
+    { "action": "assert", "label": "The quest hands over its inscription item", "actor": "hero", "metric": "item_count", "item": 650023, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "With the item in hand the quest is complete", "actor": "hero", "metric": "quest_status", "quest": 49988, "equals": 1 },
+    { "action": "set_phase", "label": "Join the world phase Wanda is spawned in", "actor": "hero", "value": 1 },
+    { "action": "wait", "label": "Let the grid load", "ms": 3000 },
+    { "action": "assert", "label": "Wanda is the character's gossip partner", "actor": "hero", "metric": "nearby_creature_count", "entry": 50291, "equals": 1 },
+    { "action": "quest_turn_in", "label": "Hand it in to Wanda Belezin's spawn", "actor": "hero", "quest": 49988, "entry": 50291, "reward": 0 },
+    { "action": "assert", "label": "Wanda takes the quest in", "actor": "hero", "metric": "quest_status", "quest": 49988, "equals": 6, "within_ms": 3000 }
+  ]
+}

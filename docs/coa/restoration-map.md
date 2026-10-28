@@ -20,21 +20,19 @@ per-character system adds, and of what a port has to carry.
 | `src/server/coa/AscensionCompat.cpp` | includes `LocalLevelScaling.h`; hosts the realm-wide fallback lift that must stay **off** while this module owns scaling |
 | `modules/mod-destiny-weaver/src/destiny_weaver.h` | `CMSG_SET_LEVEL_SCALING = 0x0667`, claimed from CoA's client-opcode dispatch (`AscensionCompatOpcodes::Claim`), so a client can toggle scaling without a menu |
 | `src/server/coa/AscensionCompatOpcodes.h` | the client-opcode dispatch and the atlas ids it agrees with |
-| `docs/coa/level-scaling.md` | the implementation reference (formulas, group rules, notifications, the hook-dispatch trap) |
-| `docs/coa/level-scaling-vs-main.md` | the comparison against `main`, the answer on their fixes, the multi-player and notification audits |
+| `docs/coa/level-scaling.md` | the implementation reference (formulas, group rules, notifications, the hook-dispatch trap, the multi-player and notification audits) |
 
 ### Server, in the core (patches to stock AzerothCore files)
 
 | file | what was changed |
 |---|---|
-| `src/server/game/Miscellaneous/LocalLevelScaling.h` | the shared rules header: `CreatureOffset`, `CreatureMaxLift`, `ScaleCreatureLevel`, `ScaleQuestLevel`, `RewardKeepPercent`, the reward keep-shares, and the three resolver slots a module installs (`QuestScalingOwner`, `CreatureViewArmorOwner`, `CreatureViewLevelOwner`) with their accessors |
+| `src/server/game/Miscellaneous/LocalLevelScaling.h` | the shared rules header: `CreatureOffset`, `ScaleCreatureLevelForViewer`, the quest curve (`CurveLevel`, `OnCurve`, `EffectiveQuestLevel`), `ScalingBlocksFor`, and the resolver slots an owner installs (`QuestScalingOwner`, `QuestCurveOwner`, `ChallengeBlocksOwner`, `RulesetBlocksOwner`, `ScalingChangedOwner`, `CreatureViewArmorOwner`, `CreatureViewLevelOwner`) with their accessors |
 | `src/server/game/Entities/Unit/Unit.cpp` | `CalcArmorReducedDamage` asks the viewer's armor resolver; `getLevelForTarget` returns the view level for a creature, which is the single lever every level-derived roll hangs off |
-| `src/server/game/Entities/Creature/Creature.cpp` / `.h` | `Creature::RefreshLevelDependantStats()` — the level-dependent pass `UpdateEntry` runs after `SelectLevel`, exposed for anything that changes a creature's level at runtime |
 | `src/server/game/Entities/Player/Player.cpp` / `.h` | `Player::RefreshQuestLogQueries()`; `isHonorOrXPTarget` and `RewardReputation` read the view level |
 | `src/server/game/Entities/Player/PlayerQuest.cpp` | `Player::GetQuestLevel` asks the per-character resolver |
 | `src/server/game/Entities/Player/KillRewarder.cpp` | the gray check and the kill experience are per member, on that member's view level |
 | `src/server/game/Miscellaneous/Formulas.cpp` | `Acore::XP::BaseGain` is fed `getLevelForTarget(player)`, so a scaled kill pays |
-| `src/server/game/Quests/QuestDef.cpp` / `.h` | quest experience and quest money priced at the scaled level, with the keep-shares |
+| `src/server/game/Quests/QuestDef.cpp` / `.h` | quest experience and quest money priced at the level the quest's curve gives, never lowered |
 | `src/server/game/Entities/Creature/GossipDef.cpp` | the quest menu's money line and its display follow the asking character's choice |
 | `src/server/game/Handlers/LFGHandler.cpp` | the LFG quest-reward preview does the same |
 
@@ -45,12 +43,12 @@ per-character system adds, and of what a port has to carry.
 | `DestinyWeaver.Enable` | `destiny_weaver.conf` | 1 | master switch |
 | `DestinyWeaver.LevelScaling` | | 1 | the feature |
 | `DestinyWeaver.LevelScaling.Default` | | 1 | what a character who never chose gets |
-| `DestinyWeaver.Scaling.Offset` | | 3 | how far below the character a view sits |
-| `DestinyWeaver.Scaling.QuestMoneyKeepShare` | | 60 | money kept at the far end of the level range |
-| `DestinyWeaver.Scaling.QuestXpKeepShare` | | 100 | experience kept there — 100 puts no discount on levelling |
+| `DestinyWeaver.Scaling.Offset` | | 4 | how far below the character an open-world view sits |
+| `DestinyWeaver.Scaling.WorldMaps` | | "0 1" | the open-world maps whose creatures scale |
+| `DestinyWeaver.Scaling.DungeonIds` | | 19 classic finder entries | the dungeons that scale inside their LFGDungeons.dbc band |
+| `DestinyWeaver.Scaling.DungeonBands` | | "402:15-59" | bands that replace the LFGDungeons.dbc band of an entry; an entry listed here scales even without DungeonIds |
 | `DestinyWeaver.ExperienceBonusControl` | | 1 | exposes the second Weaver option |
 | `DestinyWeaver.DisplayStream.Enable` | | 1 | streams the Weavers' display rows (Part 2) |
-| `CoA.LevelScaling` | `coa.conf` | either | the realm-wide object lift; it stands aside by itself while the per-character module is on (see `CreatureScalingOwnedPerViewer`), so no configuration change is needed either way |
 
 Each key lives in its component's `*.conf.dist` (`src/server/coa/conf/coa.conf.dist` and
 `modules/mod-destiny-weaver/conf/destiny_weaver.conf.dist`).
@@ -75,14 +73,16 @@ Ascension-client code that the module drives over the wire:
 
 ### Database
 
-* **Nothing is required for scaling itself** — no table, no DBC row, no SQL. The rules are computed.
+* Creature scaling needs no table, no DBC row and no SQL: its rules are computed. Quest scaling reads
+  `QuestTemplateScaling.dbc` from the server's `dbc` folder (`src/server/coa/AscensionQuestScaling.cpp`).
 * The per-character choice is stored through the core's settings system, which persists to
   **`acore_characters.character_settings`** as one row per character: `source = 'core.destiny_weaver'`,
   `data` holding the serialised values (`0` = the scaling choice, `1` = Experience Bonus Control).
   Statements: `CHAR_SEL_CHAR_SETTINGS` / `CHAR_REP_CHAR_SETTINGS` in
   `src/server/database/Database/Implementation/CharacterDatabase.cpp`.
 * Quest rewards are read from the stock `quest_template` rows; scaling changes the level they are
-  priced at, never the rows.
+  priced at, never the rows. Challenge rules come from `ChallengeRuleTypes.dbc` through
+  `mod-coa-challenges`; the War Mode / High-Risk block is `CoA.Ruleset.DisableLevelScaling`.
 
 ---
 
@@ -166,7 +166,5 @@ has:
    installed, the core answers exactly as `main` does today).
 2. **`mod-destiny-weaver`** — scaling engine, the menu, the notifications, the display stream.
 3. **The SQL updates** — creatures, models, presets, spawns, gossip text.
-4. **Nothing about `CoA.LevelScaling`**: the realm-wide lift stands aside automatically
-   while the per-character module is enabled, and returns when it is not.
-5. **Nothing client-side**, which is the point of streaming the displays and of keeping the
+4. **Nothing client-side**, which is the point of streaming the displays and of keeping the
    per-recipient patch: the same build works on a stock CoA client.

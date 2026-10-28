@@ -1,0 +1,197 @@
+{
+  "schema": 1,
+  "name": "Gravesite does not trigger on critical strikes outside the area (#774)",
+  "contract": [
+    "A Gravesite elsewhere on the map does not empower a Reaper's critical strike outside its area.",
+    "The direct critical hit lands, but Gravesite helper 300979 must not cast or deal damage."
+  ],
+  "timeout_ms": 65000,
+  "players": [
+    {
+      "id": "striker",
+      "race": 10,
+      "class": 30,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "melee_crit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "owner",
+      "race": 10,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "victim",
+      "owner": "striker",
+      "entry": 299,
+      "level": 80,
+      "distance": 2,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "striker",
+      "spell": 572213
+    },
+    {
+      "action": "learn",
+      "actor": "striker",
+      "spell": 503286
+    },
+    {
+      "action": "learn",
+      "actor": "owner",
+      "spell": 572213
+    },
+    {
+      "action": "learn",
+      "actor": "owner",
+      "spell": 800922
+    },
+    {
+      "action": "set_power",
+      "actor": "striker",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Striker talent is active",
+      "actor": "striker",
+      "metric": "aura",
+      "spell": 572213,
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "label": "Move owner away from victim",
+      "actor": "owner",
+      "map": 0,
+      "x": -8917.41,
+      "y": -95.853,
+      "z": 82.3711,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let owner relocation settle",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Owner is far from victim",
+      "actor": "owner",
+      "metric": "distance",
+      "target": "victim",
+      "min": 15
+    },
+    {
+      "action": "cast",
+      "label": "Owner casts Endbringer",
+      "actor": "owner",
+      "spell": 800922
+    },
+    {
+      "action": "assert",
+      "label": "Owner Endbringer cast accepted",
+      "actor": "owner",
+      "metric": "cast_failure",
+      "spell": 800922,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Owner created Gravesite",
+      "actor": "owner",
+      "metric": "dynamic_object",
+      "spell": 804722,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Striker has no personal Gravesite",
+      "actor": "striker",
+      "metric": "dynamic_object",
+      "spell": 804722,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Victim is outside owner area aura",
+      "actor": "victim",
+      "metric": "aura",
+      "spell": 804722,
+      "caster": "owner",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Striker critically hits victim",
+      "actor": "striker",
+      "spell": 503286,
+      "target": "victim"
+    },
+    {
+      "action": "assert",
+      "label": "Dreadwake cast accepted",
+      "actor": "striker",
+      "metric": "cast_failure",
+      "spell": 503286,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Dreadwake critical hit landed",
+      "actor": "striker",
+      "metric": "spell_damage_count",
+      "spell": 503286,
+      "target": "victim",
+      "critical": true,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Allow the critical-hit proc window",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "No Gravesite helper cast outside area",
+      "actor": "striker",
+      "metric": "spell_cast_count",
+      "spell": 300979,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No Gravesite Shadow damage outside area",
+      "actor": "striker",
+      "metric": "spell_damage_total",
+      "spell": 300979,
+      "target": "victim",
+      "equals": 0
+    }
+  ]
+}

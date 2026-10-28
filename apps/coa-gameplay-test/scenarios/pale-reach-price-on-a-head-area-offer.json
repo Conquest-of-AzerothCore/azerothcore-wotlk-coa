@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "The Price On A Head is offered on entering the cavern spot past Raigh Anramor after the Ealdir Trial of Strength",
+  "contract": [
+    "Quest 175038 is no longer started by Raigh Anramor 164047. The invisible trigger 9920211 (spawn 9922300,",
+    "npc_coa_area_quest_offer) about 40 yd up the cavern starts it: a player who can take the quest and walks within",
+    "10 yd gets its quest window, again on every new entry until it is accepted, and accepting it adds the quest.",
+    "Expected: no offer stands before the player reaches the spot, and once there an accept request takes the",
+    "quest. The case joins world phase 1 to use the trigger's world spawn."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -7480.0, "y": 641.5, "z": 127.95, "o": 5.64},
+  "players": [
+    {"id": "p", "race": 1, "class": 1, "level": 20}
+  ],
+  "steps": [
+    {"action": "set_phase", "label": "Join world phase 1, where the trigger is spawned", "actor": "p", "value": 1},
+    {"action": "prepare_quest", "actor": "p", "quest": 175035},
+    {"action": "reward_quest", "actor": "p", "quest": 175035},
+    {"action": "prepare_quest", "actor": "p", "quest": 175036},
+    {"action": "reward_quest", "actor": "p", "quest": 175036},
+    {"action": "prepare_quest", "actor": "p", "quest": 175037},
+    {"action": "reward_quest", "label": "Turn in The Ealdir Trial of Strength", "actor": "p", "quest": 175037},
+    {"action": "wait", "label": "Stay beside Raigh", "ms": 2500},
+    {"action": "client_packet", "label": "An accept beside Raigh finds no offer", "actor": "p", "opcode": 393,
+     "fields": [{"actor_guid": "p"}, {"u32": 175038}, {"u32": 0}], "early": false, "consumed": false},
+    {"action": "assert", "label": "SETUP: the quest is not taken beside Raigh", "actor": "p", "metric": "quest_status",
+     "quest": 175038, "equals": 0},
+    {"action": "teleport", "label": "Walk up to the offer spot", "actor": "p", "map": 0, "x": -7452.0, "y": 623.0,
+     "z": 128.1, "o": 5.64},
+    {"action": "wait", "ms": 2500},
+    {"action": "teleport", "label": "Walk back to Raigh without accepting", "actor": "p", "map": 0, "x": -7480.0,
+     "y": 641.5, "z": 127.95, "o": 5.64},
+    {"action": "wait", "ms": 2500},
+    {"action": "teleport", "label": "Enter the spot again", "actor": "p", "map": 0, "x": -7452.0, "y": 623.0,
+     "z": 128.1, "o": 5.64},
+    {"action": "wait", "ms": 2500},
+    {"action": "client_packet", "label": "Accept the offered quest", "actor": "p", "opcode": 393,
+     "fields": [{"actor_guid": "p"}, {"u32": 175038}, {"u32": 0}], "early": false},
+    {"action": "assert", "label": "The Price On A Head is in the quest log", "actor": "p", "metric": "quest_status",
+     "quest": 175038, "equals": 3, "within_ms": 2000}
+  ]
+}

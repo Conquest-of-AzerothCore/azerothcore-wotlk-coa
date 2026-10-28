@@ -1,0 +1,252 @@
+{
+  "schema": 1,
+  "name": "Tracer mark below max explodes at expiry after attacks stop (#7959)",
+  "contract": [
+    "Tracer Augmentation (653245) marks a ranged target with Stack Damage (653247): five-second duration,",
+    "one periodic tick glued to expiry. Ranged hits below the five-stack cap refresh the duration AND the",
+    "tick together, so stopping at three marks must not explode early: exactly one explosion follows at the",
+    "refreshed expiry, then the mark is gone and never fires twice."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "tinker",
+      "item": 450265
+    },
+    {
+      "action": "equip",
+      "actor": "tinker",
+      "item": 450265,
+      "slot": 17
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "equipped_item",
+      "slot": 17,
+      "equals": 450265
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 801005
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 653245
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 653245
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 653246,
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "Tracer Augmentation is active on the gun"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "client_packet",
+      "actor": "tinker",
+      "opcode": 317,
+      "fields": [
+        {
+          "actor_guid": "dummy"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801005,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 801005,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "First Bomb Toss lands"
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura_stacks",
+      "spell": 653247,
+      "caster": "tinker",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "First hit applies one mark"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 801005
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801005,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 801005,
+      "target": "dummy",
+      "equals": 2,
+      "within_ms": 3000,
+      "label": "Second Bomb Toss lands"
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura_stacks",
+      "spell": 653247,
+      "caster": "tinker",
+      "equals": 2,
+      "within_ms": 1000,
+      "label": "Second hit refreshes to two marks"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 801005
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801005,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 801005,
+      "target": "dummy",
+      "equals": 3,
+      "within_ms": 3000,
+      "label": "Third Bomb Toss lands"
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura_stacks",
+      "spell": 653247,
+      "caster": "tinker",
+      "equals": 3,
+      "within_ms": 1000,
+      "label": "Third hit refreshes to three marks"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 653247,
+      "target": "dummy",
+      "equals": 0,
+      "label": "No early explosion while the refreshed window runs"
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 653247,
+      "caster": "tinker",
+      "equals": 1,
+      "label": "The three marks are still present"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 653247,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "The marks explode when the refreshed duration ends"
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 653247,
+      "caster": "tinker",
+      "equals": 0,
+      "within_ms": 1000,
+      "label": "No stuck marks after the explosion"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 653247,
+      "target": "dummy",
+      "equals": 1,
+      "label": "The marks explode only once"
+    }
+  ]
+}

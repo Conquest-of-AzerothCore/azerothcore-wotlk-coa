@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Eating or drinking applies the Rest buff (#4369)",
-  "contract": "While a player eats (Food, 433) the Rest buff (818011, spell_nature_sleep, 2% health and mana every 2 seconds) is on them, and it is gone once the food aura has ended.",
+  "contract": "While a player eats a Tough Hunk of Bread (item 4540, on-use Food 433) the Rest buff (818011, spell_nature_sleep, 2% health and mana every 2 seconds) is on them, and it is gone once the food aura has ended.",
   "timeout_ms": 90000,
   "players": [
     { "id": "p", "race": 1, "class": 1, "level": 20 }
@@ -9,7 +9,8 @@
   "steps": [
     { "action": "wait", "ms": 3000 },
     { "action": "assert", "actor": "p", "metric": "aura", "spell": 818011, "equals": 0 },
-    { "action": "cast", "actor": "p", "spell": 433 },
+    { "action": "add_item", "actor": "p", "item": 4540, "count": 1, "label": "fixture: a Tough Hunk of Bread, whose on-use spell is Food 433" },
+    { "action": "use_item", "actor": "p", "item": 4540, "spell": 433, "label": "eat the bread" },
     { "action": "assert", "label": "Food applies", "actor": "p", "metric": "aura", "spell": 433, "equals": 1, "within_ms": 3000 },
     { "action": "assert", "label": "Rest applies while eating", "actor": "p", "metric": "aura", "spell": 818011, "equals": 1, "within_ms": 3000 },
     { "action": "assert", "label": "Food ends", "actor": "p", "metric": "aura", "spell": 433, "equals": 0, "within_ms": 30000 },

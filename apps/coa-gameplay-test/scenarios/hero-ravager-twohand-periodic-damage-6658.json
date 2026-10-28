@@ -1,0 +1,349 @@
+{
+  "schema": 1,
+  "name": "Ravager damages with a two-handed main hand (#6658)",
+  "contract": "Ravager293180 original tooltip says offhand when wielding one-handed weapons. With a two-handed weapon1194, it must inflict native periodic damage via293181 without an offhand. The original offhand path must still deal eight ticks, and a single one-handed weapon without an offhand does not supply offhand damage.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "offhand",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "onehand",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 1194
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 202
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 1194,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 293180
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 293180,
+      "target": "enemy",
+      "destination": {
+        "x": -8914.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "cast_failure",
+      "spell": 293180,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "owned_creature_count",
+      "entry": 840082,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 293181,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "owned_creature_count",
+      "entry": 840082,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 293181,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 293181,
+      "min": 1,
+      "max": 8
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 293182,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "offhand",
+      "item": 25
+    },
+    {
+      "action": "learn",
+      "actor": "offhand",
+      "spell": 201
+    },
+    {
+      "action": "equip",
+      "actor": "offhand",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "offhand",
+      "spell": 293180
+    },
+    {
+      "action": "learn",
+      "actor": "offhand",
+      "spell": 674
+    },
+    {
+      "action": "learn",
+      "actor": "offhand",
+      "spell": 1180
+    },
+    {
+      "action": "add_item",
+      "actor": "offhand",
+      "item": 2092
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "equip",
+      "actor": "offhand",
+      "item": 2092,
+      "slot": 16
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "offhand",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "offhand",
+      "spell": 293180,
+      "target": "enemy",
+      "destination": {
+        "x": -8914.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "assert",
+      "actor": "offhand",
+      "metric": "cast_failure",
+      "spell": 293180,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "offhand",
+      "metric": "owned_creature_count",
+      "entry": 840082,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 9000
+    },
+    {
+      "action": "assert",
+      "actor": "offhand",
+      "metric": "spell_damage_count",
+      "spell": 293181,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "offhand",
+      "metric": "spell_cast_count",
+      "spell": 293182,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "actor": "offhand",
+      "metric": "spell_damage_count",
+      "spell": 293182,
+      "min": 1,
+      "max": 8
+    },
+    {
+      "action": "assert",
+      "actor": "offhand",
+      "metric": "owned_creature_count",
+      "entry": 840082,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "onehand",
+      "item": 25
+    },
+    {
+      "action": "learn",
+      "actor": "onehand",
+      "spell": 201
+    },
+    {
+      "action": "equip",
+      "actor": "onehand",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "onehand",
+      "spell": 293180
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "onehand",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "onehand",
+      "spell": 293180,
+      "target": "enemy",
+      "destination": {
+        "x": -8914.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "assert",
+      "actor": "onehand",
+      "metric": "cast_failure",
+      "spell": 293180,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "onehand",
+      "metric": "owned_creature_count",
+      "entry": 840082,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 9000
+    },
+    {
+      "action": "assert",
+      "actor": "onehand",
+      "metric": "spell_damage_count",
+      "spell": 293181,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "onehand",
+      "metric": "spell_damage_count",
+      "spell": 293182,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "onehand",
+      "metric": "owned_creature_count",
+      "entry": 840082,
+      "equals": 0
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "health": 100000,
+      "level": 60,
+      "distance": 3
+    }
+  ]
+}

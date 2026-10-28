@@ -18,6 +18,7 @@
 #include "WorldforgedUpgrades.h"
 
 #include "AscensionCompatOpcodes.h"
+#include "AscensionItemScaling.h"
 
 #include "Config.h"
 #include "DatabaseEnv.h"
@@ -32,12 +33,15 @@
 #include "WorldSession.h"
 
 #include <algorithm>
+#include <string>
+#include <unordered_set>
 
 namespace
 {
     std::unordered_map<uint32, Worldforged::Recipe> g_recipes;
     std::unordered_map<uint32, std::vector<Worldforged::Recipe const*>> g_byStore;
     std::vector<Worldforged::Recipe const*> const g_empty;
+    std::unordered_set<uint32> g_unlockCreatures;
 
     /// Multiplies every stored cost. The stored numbers are computed rather
     /// than recovered, so a server wants one knob to move them all at once
@@ -169,6 +173,15 @@ namespace
             return true;
         }
 
+        if (!Worldforged::IsUnlocked(session->GetAccountId(), recipe.unlockCreature))
+        {
+            CreatureTemplate const* boss = sObjectMgr->GetCreatureTemplate(recipe.unlockCreature);
+            std::string const message = Acore::StringFormat("Defeat {} to unlock this upgrade for your account.",
+                                                            boss ? boss->Name : "the raid's last boss");
+            SendPurchaseResult(session, message.c_str());
+            return true;
+        }
+
         if (!player->HasItemCount(Worldforged::CURRENCY_ITEM, cost, true))
         {
             SendPurchaseResult(session, "You do not have enough Runes of Ascension.");
@@ -222,9 +235,10 @@ namespace Worldforged
     {
         g_recipes.clear();
         g_byStore.clear();
+        g_unlockCreatures.clear();
 
         QueryResult result = WorldDatabase.Query(
-            "SELECT id, store, base_item, target_item, cost FROM worldforged_upgrade ORDER BY id");
+            "SELECT id, store, base_item, target_item, cost, unlock_creature FROM worldforged_upgrade ORDER BY id");
         if (!result)
         {
             LOG_WARN("module.worldforged", "Worldforged: no upgrade recipes defined.");
@@ -241,6 +255,7 @@ namespace Worldforged
             recipe.baseItem = field[2].Get<uint32>();
             recipe.targetItem = field[3].Get<uint32>();
             recipe.cost = field[4].Get<uint32>();
+            recipe.unlockCreature = field[5].Get<uint32>();
 
             if (!sObjectMgr->GetItemTemplate(recipe.baseItem) ||
                 !sObjectMgr->GetItemTemplate(recipe.targetItem))
@@ -253,11 +268,26 @@ namespace Worldforged
             g_byStore[recipe.store].push_back(&stored);
         } while (result->NextRow());
 
+        std::unordered_set<uint32> upgradeItems;
+        for (auto const& [key, recipe] : g_recipes)
+        {
+            upgradeItems.insert(recipe.baseItem);
+            upgradeItems.insert(recipe.targetItem);
+            if (recipe.unlockCreature)
+                g_unlockCreatures.insert(recipe.unlockCreature);
+        }
+        ItemScaling::SetUnliftableEntries(std::move(upgradeItems));
+
         LOG_INFO("module.worldforged",
                  "Worldforged: {} upgrades loaded, {} weapons and {} armour{}.",
                  g_recipes.size(), RecipesOfStore(STORE_WEAPONS).size(),
                  RecipesOfStore(STORE_ARMOUR).size(),
                  skipped ? Acore::StringFormat(", {} skipped as unknown", skipped) : "");
+    }
+
+    bool IsUnlockCreature(uint32 creature)
+    {
+        return g_unlockCreatures.contains(creature);
     }
 
     void OpenStore(Player* player, uint32 store)

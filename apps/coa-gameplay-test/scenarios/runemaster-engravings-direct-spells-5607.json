@@ -1,0 +1,1881 @@
+{
+  "schema": 1,
+  "name": "Runemaster: Earth and Ice Engravings proc from direct spells without auto attacks (#5607)",
+  "contract": "Current Earth and Ice descriptions promise procs from direct damage. Main PR5328 supplies Earth helper653221 through653219 and PR5850 supplies Ice653266's native proc entry. Normal Primordial Blast800732 casts must trigger their respective Nature653272 and Frost653217 payloads without any auto attacks. Twenty-four independent casts exercise65% Earth chance with five Earthen Fists stacks and40% Ice chance; no-proc probabilities are0.35^24 and0.6^24. Resetting Primordial Blast's cooldown and mana supplies samples without changing engraving proc chance. Fixture equip auras represent the enchant equip spells. Removal controls keep spell damage active and require no further engraving damage. Native world player_class_stats for class32 level60 has BaseMana1480 and Intellect95;1000 mana is within the resulting maximum and funds the22%-of-base-mana cast.",
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "earth",
+      "race": 1,
+      "class": 32,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ice",
+      "race": 1,
+      "class": 32,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "earth_enemy",
+      "owner": "earth",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "distance": 5
+    },
+    {
+      "id": "ice_enemy",
+      "owner": "ice",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "learn",
+      "actor": "earth",
+      "spell": 1180
+    },
+    {
+      "action": "add_item",
+      "actor": "earth",
+      "item": 2092
+    },
+    {
+      "action": "equip",
+      "actor": "earth",
+      "item": 2092,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "learn",
+      "actor": "ice",
+      "spell": 1180
+    },
+    {
+      "action": "add_item",
+      "actor": "ice",
+      "item": 2092
+    },
+    {
+      "action": "equip",
+      "actor": "ice",
+      "item": 2092,
+      "slot": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "earth",
+      "spell": 653219,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "aura",
+      "spell": 653221,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "ice",
+      "spell": 653266,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "aura",
+      "spell": 653266,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "earth",
+      "spell": 806982,
+      "stacks": 5
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "earth",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "earth",
+      "spell": 800732,
+      "target": "earth_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "earth_enemy",
+      "equals": 1,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "earth"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "ice",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ice",
+      "spell": 800732,
+      "target": "ice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "ice_enemy",
+      "equals": 1,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ice"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "earth",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "earth",
+      "spell": 800732,
+      "target": "earth_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "earth_enemy",
+      "equals": 2,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "earth"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "ice",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ice",
+      "spell": 800732,
+      "target": "ice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "ice_enemy",
+      "equals": 2,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ice"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "earth",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "earth",
+      "spell": 800732,
+      "target": "earth_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "earth_enemy",
+      "equals": 3,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "earth"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "ice",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ice",
+      "spell": 800732,
+      "target": "ice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "ice_enemy",
+      "equals": 3,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ice"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "earth",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "earth",
+      "spell": 800732,
+      "target": "earth_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "earth_enemy",
+      "equals": 4,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "earth"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "ice",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ice",
+      "spell": 800732,
+      "target": "ice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "ice_enemy",
+      "equals": 4,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ice"
+    },
+    {
+      "action": "set_aura",
+      "actor": "earth",
+      "spell": 806982,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "earth",
+      "spell": 806982,
+      "stacks": 5
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "earth",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "earth",
+      "spell": 800732,
+      "target": "earth_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "earth_enemy",
+      "equals": 5,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "earth"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "ice",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ice",
+      "spell": 800732,
+      "target": "ice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "ice_enemy",
+      "equals": 5,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ice"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "earth",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "earth",
+      "spell": 800732,
+      "target": "earth_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "earth_enemy",
+      "equals": 6,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "earth"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "ice",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ice",
+      "spell": 800732,
+      "target": "ice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "ice_enemy",
+      "equals": 6,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ice"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "earth",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "earth",
+      "spell": 800732,
+      "target": "earth_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "earth_enemy",
+      "equals": 7,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "earth"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "ice",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ice",
+      "spell": 800732,
+      "target": "ice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "ice_enemy",
+      "equals": 7,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ice"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "earth",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "earth",
+      "spell": 800732,
+      "target": "earth_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "earth_enemy",
+      "equals": 8,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "earth"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "ice",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ice",
+      "spell": 800732,
+      "target": "ice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "ice_enemy",
+      "equals": 8,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ice"
+    },
+    {
+      "action": "set_aura",
+      "actor": "earth",
+      "spell": 806982,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "earth",
+      "spell": 806982,
+      "stacks": 5
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "earth",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "earth",
+      "spell": 800732,
+      "target": "earth_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "earth_enemy",
+      "equals": 9,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "earth"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "ice",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ice",
+      "spell": 800732,
+      "target": "ice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "ice_enemy",
+      "equals": 9,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ice"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "earth",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "earth",
+      "spell": 800732,
+      "target": "earth_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "earth_enemy",
+      "equals": 10,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "earth"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "ice",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ice",
+      "spell": 800732,
+      "target": "ice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "ice_enemy",
+      "equals": 10,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ice"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "earth",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "earth",
+      "spell": 800732,
+      "target": "earth_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "earth_enemy",
+      "equals": 11,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "earth"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "ice",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ice",
+      "spell": 800732,
+      "target": "ice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "ice_enemy",
+      "equals": 11,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ice"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "earth",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "earth",
+      "spell": 800732,
+      "target": "earth_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "earth_enemy",
+      "equals": 12,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "earth"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "ice",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ice",
+      "spell": 800732,
+      "target": "ice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "ice_enemy",
+      "equals": 12,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ice"
+    },
+    {
+      "action": "set_aura",
+      "actor": "earth",
+      "spell": 806982,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "earth",
+      "spell": 806982,
+      "stacks": 5
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "earth",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "earth",
+      "spell": 800732,
+      "target": "earth_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "earth_enemy",
+      "equals": 13,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "earth"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "ice",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ice",
+      "spell": 800732,
+      "target": "ice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "ice_enemy",
+      "equals": 13,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ice"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "earth",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "earth",
+      "spell": 800732,
+      "target": "earth_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "earth_enemy",
+      "equals": 14,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "earth"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "ice",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ice",
+      "spell": 800732,
+      "target": "ice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "ice_enemy",
+      "equals": 14,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ice"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "earth",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "earth",
+      "spell": 800732,
+      "target": "earth_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "earth_enemy",
+      "equals": 15,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "earth"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "ice",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ice",
+      "spell": 800732,
+      "target": "ice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "ice_enemy",
+      "equals": 15,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ice"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "earth",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "earth",
+      "spell": 800732,
+      "target": "earth_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "earth_enemy",
+      "equals": 16,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "earth"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "ice",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ice",
+      "spell": 800732,
+      "target": "ice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "ice_enemy",
+      "equals": 16,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ice"
+    },
+    {
+      "action": "set_aura",
+      "actor": "earth",
+      "spell": 806982,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "earth",
+      "spell": 806982,
+      "stacks": 5
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "earth",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "earth",
+      "spell": 800732,
+      "target": "earth_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "earth_enemy",
+      "equals": 17,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "earth"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "ice",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ice",
+      "spell": 800732,
+      "target": "ice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "ice_enemy",
+      "equals": 17,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ice"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "earth",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "earth",
+      "spell": 800732,
+      "target": "earth_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "earth_enemy",
+      "equals": 18,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "earth"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "ice",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ice",
+      "spell": 800732,
+      "target": "ice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "ice_enemy",
+      "equals": 18,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ice"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "earth",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "earth",
+      "spell": 800732,
+      "target": "earth_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "earth_enemy",
+      "equals": 19,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "earth"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "ice",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ice",
+      "spell": 800732,
+      "target": "ice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "ice_enemy",
+      "equals": 19,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ice"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "earth",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "earth",
+      "spell": 800732,
+      "target": "earth_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "earth_enemy",
+      "equals": 20,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "earth"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "ice",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ice",
+      "spell": 800732,
+      "target": "ice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "ice_enemy",
+      "equals": 20,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ice"
+    },
+    {
+      "action": "set_aura",
+      "actor": "earth",
+      "spell": 806982,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "earth",
+      "spell": 806982,
+      "stacks": 5
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "earth",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "earth",
+      "spell": 800732,
+      "target": "earth_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "earth_enemy",
+      "equals": 21,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "earth"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "ice",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ice",
+      "spell": 800732,
+      "target": "ice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "ice_enemy",
+      "equals": 21,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ice"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "earth",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "earth",
+      "spell": 800732,
+      "target": "earth_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "earth_enemy",
+      "equals": 22,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "earth"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "ice",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ice",
+      "spell": 800732,
+      "target": "ice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "ice_enemy",
+      "equals": 22,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ice"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "earth",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "earth",
+      "spell": 800732,
+      "target": "earth_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "earth_enemy",
+      "equals": 23,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "earth"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "ice",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ice",
+      "spell": 800732,
+      "target": "ice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "ice_enemy",
+      "equals": 23,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ice"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "earth",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "earth",
+      "spell": 800732,
+      "target": "earth_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "earth_enemy",
+      "equals": 24,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "earth"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "ice",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ice",
+      "spell": 800732,
+      "target": "ice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "ice_enemy",
+      "equals": 24,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ice"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "melee_damage_count",
+      "hand": 0,
+      "equals": 0,
+      "label": "All damage came from spells; no auto attack can supply the proc"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_proc_count",
+      "spell": 653221,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 653272,
+      "target": "earth_enemy",
+      "min": 1,
+      "label": "Direct spell damage produced the engraving payload"
+    },
+    {
+      "action": "set_aura",
+      "actor": "earth",
+      "spell": 653219,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 653272,
+      "target": "earth_enemy",
+      "save_as": "earth_payload"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "melee_damage_count",
+      "hand": 0,
+      "equals": 0,
+      "label": "All damage came from spells; no auto attack can supply the proc"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_proc_count",
+      "spell": 653266,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 653217,
+      "target": "ice_enemy",
+      "min": 1,
+      "label": "Direct spell damage produced the engraving payload"
+    },
+    {
+      "action": "set_aura",
+      "actor": "ice",
+      "spell": 653266,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 653217,
+      "target": "ice_enemy",
+      "save_as": "ice_payload"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "earth",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "earth",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "earth",
+      "spell": 800732,
+      "target": "earth_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "earth_enemy",
+      "equals": 25,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "earth"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ice",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "ice",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ice",
+      "spell": 800732,
+      "target": "ice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "ice_enemy",
+      "equals": 25,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ice"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "earth",
+      "metric": "spell_damage_count",
+      "spell": 653272,
+      "target": "earth_enemy",
+      "relative_to": "earth_payload",
+      "equals": 0,
+      "label": "Removing the engraving stops its payload while spells still land"
+    },
+    {
+      "action": "assert",
+      "actor": "ice",
+      "metric": "spell_damage_count",
+      "spell": 653217,
+      "target": "ice_enemy",
+      "relative_to": "ice_payload",
+      "equals": 0,
+      "label": "Removing the engraving stops its payload while spells still land"
+    }
+  ]
+}

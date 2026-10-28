@@ -1,0 +1,344 @@
+{
+  "schema": 1,
+  "name": "Sunder keeps its forward explosions at swimming depth (#5972)",
+  "contract": [
+    "Sunder 705121 describes three successive explosions in front of the caster. It has no swimming prohibition. A submerged enemy in that forward line must receive the real damage helper 712399 rather than an explosion projected onto the seabed.",
+    "The liquid fixture is independently verified by Map::IsInWater and terrain height. An ordinary packed-GUID movement heartbeat sets the player swimming state through the session handler. The dry-land control retains the existing three explosions.",
+    "No client visual rendering is inferred from native damage or position observations."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 14,
+      "level": 43,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "enemy",
+      "race": 2,
+      "class": 1,
+      "level": 43,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "pvp",
+      "actor": "p",
+      "enabled": true
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy",
+      "map": 0,
+      "x": -9599.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 705121
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: caster is on dry land",
+      "actor": "p",
+      "metric": "terrain_in_water",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "health",
+      "save_as": "land_health"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "pvp",
+      "actor": "p",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 705121
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: dry-land Sunder is accepted",
+      "actor": "p",
+      "metric": "spell_go_count",
+      "spell": 705121,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Sunder launches all three explosions",
+      "actor": "p",
+      "metric": "spell_go_count",
+      "spell": 712399,
+      "equals": 3,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the forward land enemy takes Sunder damage",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 712399,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "health",
+      "relative_to": "land_health",
+      "max": -1
+    },
+    {
+      "action": "wait",
+      "ms": 1800
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -10650,
+      "y": 2200,
+      "z": -3,
+      "o": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: p is in actual liquid terrain",
+      "actor": "p",
+      "metric": "terrain_in_water",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the seabed is below explosion reach for p",
+      "actor": "p",
+      "metric": "ground_height",
+      "max": -14
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "position_z",
+      "equals": -3
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy",
+      "map": 0,
+      "x": -10632,
+      "y": 2200,
+      "z": -3,
+      "o": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: enemy is in actual liquid terrain",
+      "actor": "enemy",
+      "metric": "terrain_in_water",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the seabed is below explosion reach for enemy",
+      "actor": "enemy",
+      "metric": "ground_height",
+      "max": -14
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "position_z",
+      "equals": -3
+    },
+    {
+      "action": "client_packet",
+      "label": "Normal swimming heartbeat",
+      "actor": "p",
+      "opcode": 238,
+      "consumed": false,
+      "fields": [
+        {
+          "packed_actor_guid": "p"
+        },
+        {
+          "u32": 2097152
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 3324405760
+        },
+        {
+          "u32": 1158250496
+        },
+        {
+          "u32": 3225419776
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: normal movement marks the caster as swimming",
+      "actor": "p",
+      "metric": "in_water",
+      "equals": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "p",
+      "spell": 705121
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 712399,
+      "target": "enemy",
+      "save_as": "damage_before_water"
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "health",
+      "save_as": "water_health"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "pvp",
+      "actor": "p",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 705121
+    },
+    {
+      "action": "assert",
+      "label": "Swimming Sunder is accepted",
+      "actor": "p",
+      "metric": "spell_go_count",
+      "spell": 705121,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Swimming Sunder strikes the enemy at the caster depth",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 712399,
+      "target": "enemy",
+      "relative_to": "damage_before_water",
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The submerged forward target loses health",
+      "actor": "enemy",
+      "metric": "health",
+      "relative_to": "water_health",
+      "max": -1
+    }
+  ]
+}

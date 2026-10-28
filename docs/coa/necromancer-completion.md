@@ -59,8 +59,9 @@ per subsequent target. The current Raise: Warrior parent controls its helper coe
 older standalone command description disagrees. Native rank/base/level terms are preserved.
 
 Crypt Plague stacks without resetting duration or its next tick. Foul Contagion extends only the
-caster's Flesh to Worms across all ranks. Rotting Flesh grants its authored 2% army damage stacks,
-with a local finite ten-second refreshable duration and the native ten-stack cap.
+caster's Flesh to Worms across all ranks. Rotting Flesh requires its level 30 passive (574138), whose
+flat duration modifier supplies the authored five-second refreshable duration; it grants its authored 2%
+army damage stacks up to the native ten-stack cap.
 Virulency refreshes and copies owned diseases, including amounts, stacks, duration, tick timers and
 Permafrost state. Infest remains authorized for ten seconds even if the original enemy dies.
 Corpse Explosion claims each eligible corpse before dealing damage, so another cast cannot reuse it.

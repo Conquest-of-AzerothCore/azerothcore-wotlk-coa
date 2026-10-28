@@ -19,20 +19,20 @@
     { "action": "snapshot", "actor": "control", "metric": "spell_done_crit_chance", "spell": 500146, "target": "target", "save_as": "dawnsear_crit_base" },
     {
       "action": "assert", "label": "Rank 1: Sunflare crit chance rises 3 points",
-      "actor": "rank1", "metric": "spell_done_crit_chance", "spell": 800231, "target": "target", "relative_to": "sunflare_crit_base", "equals": 3
+      "actor": "rank1", "metric": "spell_done_crit_chance", "spell": 800231, "target": "target", "relative_to": "sunflare_crit_base", "min": 2.999, "max": 3.001
     },
     {
       "action": "assert", "label": "Rank 1: Dawnsear crit chance rises 3 points",
-      "actor": "rank1", "metric": "spell_done_crit_chance", "spell": 500146, "target": "target", "relative_to": "dawnsear_crit_base", "equals": 3
+      "actor": "rank1", "metric": "spell_done_crit_chance", "spell": 500146, "target": "target", "relative_to": "dawnsear_crit_base", "min": 2.999, "max": 3.001
     },
     { "action": "assert", "label": "Rank 1: pushback reduced by 50%", "actor": "rank1", "metric": "aura_amount", "spell": 301267, "effect": 1, "equals": 50 },
     {
       "action": "assert", "label": "Rank 2: Sunflare crit chance rises 6 points total",
-      "actor": "rank2", "metric": "spell_done_crit_chance", "spell": 800231, "target": "target", "relative_to": "sunflare_crit_base", "equals": 6
+      "actor": "rank2", "metric": "spell_done_crit_chance", "spell": 800231, "target": "target", "relative_to": "sunflare_crit_base", "min": 5.999, "max": 6.001
     },
     {
       "action": "assert", "label": "Rank 2: Dawnsear crit chance rises 6 points total",
-      "actor": "rank2", "metric": "spell_done_crit_chance", "spell": 500146, "target": "target", "relative_to": "dawnsear_crit_base", "equals": 6
+      "actor": "rank2", "metric": "spell_done_crit_chance", "spell": 500146, "target": "target", "relative_to": "dawnsear_crit_base", "min": 5.999, "max": 6.001
     },
     { "action": "assert", "label": "Rank 2: pushback reduced by 100%", "actor": "rank2", "metric": "aura_amount", "spell": 301343, "effect": 1, "equals": 100 }
   ]

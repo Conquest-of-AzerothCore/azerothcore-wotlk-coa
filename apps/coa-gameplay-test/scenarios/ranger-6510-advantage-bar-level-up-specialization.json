@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Ranger: Skullpiercer rank 1 stays client-known through buying rank 2, specialization and relog (#6510)",
+  "contract": "#6510 The Ascension client (patch-B ClassResources.lua) draws the Ranger Advantage bar only while IsSpellIDKnown(802036), Skullpiercer rank 1. The report: the bar vanished between level 9 and choosing talents at level 11, and a relog did not bring it back. Expected: after the Ranger reaches level 10 and buys rank 2 (501715) from the Book of Ascension, the client keeps 802036 through that purchase, through choosing a specialization at level 11, through switching to another specialization and through a relog after each.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 9 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "assert", "actor": "ranger", "metric": "client_knows_spell", "spell": 802036, "equals": 1, "label": "a level 9 Ranger's client knows Skullpiercer rank 1" },
+    { "action": "assert", "actor": "ranger", "metric": "knows_spell", "spell": 501715, "equals": 0, "label": "rank 2 is not known before level 10" },
+    { "action": "set_level", "actor": "ranger", "value": 10 },
+    { "action": "money", "actor": "ranger", "copper": 100000 },
+    { "action": "learn", "actor": "ranger", "spell": 97930, "label": "fixture: the Book of Ascension companion spell" },
+    { "action": "cast", "actor": "ranger", "spell": 97930, "label": "summon the Book of Ascension" },
+    { "action": "assert", "actor": "ranger", "metric": "owned_creature_count", "entry": 75115, "equals": 1, "within_ms": 5000 },
+    { "action": "gossip_hello", "actor": "ranger", "label": "open the book" },
+    { "action": "assert", "actor": "ranger", "metric": "trainer_window_state", "spell": 501715, "equals": 0, "label": "the book sells Skullpiercer rank 2 at level 10" },
+    { "action": "trainer_buy", "actor": "ranger", "spell": 501715, "label": "buy Skullpiercer rank 2" },
+    { "action": "assert", "actor": "ranger", "metric": "spell_active", "spell": 501715, "equals": 1, "label": "rank 2 is the active rank" },
+    { "action": "assert", "actor": "ranger", "metric": "client_knows_spell", "spell": 802036, "equals": 1, "label": "after buying rank 2 the client still knows rank 1" },
+    { "action": "set_level", "actor": "ranger", "value": 11 },
+    { "action": "specialization", "actor": "ranger", "id": 30 },
+    { "action": "assert", "actor": "ranger", "metric": "client_knows_spell", "spell": 802036, "equals": 1, "label": "after choosing a specialization the client still knows rank 1" },
+    { "action": "relog", "actor": "ranger" },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "actor": "ranger", "metric": "client_knows_spell", "spell": 802036, "equals": 1, "label": "after a relog the client still knows rank 1" },
+    { "action": "assert", "actor": "ranger", "metric": "client_knows_spell", "spell": 501715, "equals": 1, "label": "after a relog the client knows rank 2" },
+    { "action": "specialization", "actor": "ranger", "id": 29 },
+    { "action": "assert", "actor": "ranger", "metric": "client_knows_spell", "spell": 802036, "equals": 1, "label": "after switching specialization the client still knows rank 1" },
+    { "action": "relog", "actor": "ranger" },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "actor": "ranger", "metric": "client_knows_spell", "spell": 802036, "equals": 1, "label": "after switching specialization and a relog the client still knows rank 1" },
+    { "action": "assert", "actor": "ranger", "metric": "spell_active", "spell": 501715, "equals": 1, "label": "rank 2 stays the active rank" }
+  ]
+}

@@ -1,21 +1,84 @@
 {
- "schema": 1,
- "name": "Absolution taunts and hastens the Templar (#3181)",
- "contract": "Absolution 800424 promises to taunt nearby enemies for 4 seconds and to raise the Templar's movement speed by the amount of 520659 for its duration. The taunt is its own effect; the speed buff lives in 520659, which something must apply.",
- "timeout_ms": 120000,
- "players": [
-  { "id": "templar", "race": 1, "class": 19, "level": 80 }
- ],
- "creatures": [
-  { "id": "enemy", "owner": "templar", "entry": 1601, "level": 80 }
- ],
- "steps": [
-  { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 6000 },
-  { "action": "learn", "actor": "templar", "spell": 800424 },
-  { "action": "snapshot", "actor": "templar", "metric": "run_speed_rate", "save_as": "speed_base" },
-  { "action": "cast", "actor": "templar", "spell": 800424, "target": "enemy" },
-  { "action": "assert", "label": "The enemy is taunted", "actor": "enemy", "metric": "aura", "spell": 800424, "equals": 1, "within_ms": 3000 },
-  { "action": "assert", "label": "The Templar is hastened", "actor": "templar", "metric": "aura", "spell": 520659, "equals": 1, "within_ms": 3000 },
-  { "action": "assert", "label": "The haste reaches the movement rate", "actor": "templar", "metric": "run_speed_rate", "ratio_to": "speed_base", "min": 1.4 }
- ]
+  "schema": 1,
+  "name": "Absolution taunts and hastens the Templar (#3181)",
+  "contract": [
+    "Absolution 800424 promises to taunt nearby enemies for 4 seconds and to raise the Templar's movement",
+    "speed by the amount of 520659 for its duration. The taunt is its own effect; the speed buff lives in",
+    "520659, which something must apply. Absolution uses original MAGIC hit resolution. Native spell hit is",
+    "supplied and asserted before requiring its enemy taunt, independently of the unchanged self speed buff."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "templar",
+      "race": 1,
+      "class": 19,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "templar",
+      "entry": 1601,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "templar",
+      "spell": 800424
+    },
+    {
+      "action": "snapshot",
+      "actor": "templar",
+      "metric": "run_speed_rate",
+      "save_as": "speed_base"
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "spell_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 800424,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "The enemy is taunted",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 800424,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The Templar is hastened",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 520659,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The haste reaches the movement rate",
+      "actor": "templar",
+      "metric": "run_speed_rate",
+      "ratio_to": "speed_base",
+      "min": 1.4
+    }
+  ]
 }

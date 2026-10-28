@@ -13,7 +13,11 @@ namespace AscensionPyromancer
 {
 void ApplyContracts(SpellInfo* info)
 {
-    if (!info || info->SpellFamilyName != 30)
+    if (!info)
+        return;
+    if ((info->Id == 680369 || info->Id == 280586) && info->Effects[EFFECT_1].IsAura(SPELL_AURA_MOD_ROOT))
+        info->AttributesCu &= ~SPELL_ATTR0_CU_NEGATIVE;
+    if (info->SpellFamilyName != 30)
         return;
     uint32 id = info->Id;
     auto dummy = [info](uint8 slot)
@@ -213,7 +217,7 @@ class pyromancer_scaling : public UnitScript
             if (row.spell == info->Id && row.effect == index)
             {
                 float sp = row.sp;
-                if (Named(info, 803950))
+                if (Any(info, {803950, 800790}))
                 {
                     float percent = sp * 100;
                     player->ApplySpellMod(info->Id, SPELLMOD_BONUS_MULTIPLIER, percent);

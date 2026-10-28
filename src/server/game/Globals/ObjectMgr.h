@@ -41,6 +41,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <unordered_set>
 
 class Item;
 struct DungeonProgressionRequirements;
@@ -694,6 +695,11 @@ SkillRangeType GetSkillRangeType(SkillRaceClassInfoEntry const* rcEntry);
 
 bool normalizePlayerName(std::string& name);
 
+// The stock client splits typed names at the first space, so "/w "First Last" text" arrives as target "\"First".
+using PlayerNameByFirstName = std::function<std::string(std::string const&)>;
+bool joinQuotedPlayerName(std::string& name, std::string_view& rest);
+bool resolveWhisperTarget(std::string& to, std::string& msg, PlayerNameByFirstName const& uniqueNameByFirstName);
+
 struct LanguageDesc
 {
     Language lang_id;
@@ -960,6 +966,11 @@ public:
         return nullptr;
     }
 
+    [[nodiscard]] bool IsRaidEncounterKillCredit(uint32 creatureEntry) const
+    {
+        return _raidEncounterKillCreditStore.contains(creatureEntry);
+    }
+
     void LoadQuests();
     void LoadQuestMoneyRewards();
     void LoadQuestStartersAndEnders()
@@ -1037,6 +1048,8 @@ public:
     void LoadCreatureTemplate(Field* fields, bool triggerHook = false);
     void LoadCreatureTemplateModels();
     void LoadCreatureTemplateAddons();
+    void LoadAscensionNpcOverheadIcons();
+    void ApplyAscensionNpcOverheadIcon(Creature& creature) const;
     void LoadCreatureTemplateResistances();
     void LoadCreatureTemplateSpells();
     void LoadCreatureCustomIDs();
@@ -1418,6 +1431,7 @@ public:
     // profanity names
     void LoadProfanityNamesFromDB();
     void LoadProfanityNamesFromDBC();
+    void LoadCoANameFilter();
     [[nodiscard]] bool IsProfanityName(std::string_view name) const;
     void AddProfanityPlayerName(std::string const& name);
 
@@ -1451,6 +1465,7 @@ public:
         auto itr = _trainers.find(trainerId);
         return itr != _trainers.end() ? &itr->second : nullptr;
     }
+    [[nodiscard]] std::unordered_map<uint32, Trainer::Trainer> const& GetTrainers() const { return _trainers; }
     std::vector<Trainer::Trainer const*> const& GetClassTrainers(uint8 classId) const { return _classTrainers.at(classId); }
 
     [[nodiscard]] VendorItemData const* GetNpcVendorItemList(uint32 entry) const
@@ -1576,6 +1591,7 @@ private:
     AreaTriggerScriptContainer _areaTriggerScriptStore;
     DungeonProgressionRequirementsContainer _accessRequirementStore;
     DungeonEncounterContainer _dungeonEncounterStore;
+    std::unordered_set<uint32> _raidEncounterKillCreditStore;
 
     RepRewardRateContainer _repRewardRateStore;
     RepOnKillContainer _repOnKillStore;
@@ -1599,6 +1615,7 @@ private:
     //character profanity names
     typedef std::set<std::wstring> ProfanityNamesContainer;
     ProfanityNamesContainer _profanityNamesStore;
+    std::set<std::string> _coaNameFilterStore;
 
     //chat filter (Aho-Corasick automaton; matches any banned word as substring of input)
     std::unique_ptr<Acore::AhoCorasick<wchar_t>> _chatFilterAutomaton;
@@ -1670,6 +1687,7 @@ private:
     CreatureModelContainer _creatureModelStore;
     CreatureAddonContainer _creatureAddonStore;
     CreatureAddonContainer _creatureTemplateAddonStore;
+    std::unordered_map<uint32, uint32> _ascensionNpcOverheadIcons;
     std::unordered_map<ObjectGuid::LowType, CreatureMovementData> _creatureMovementOverrides;
     GameObjectAddonContainer _gameObjectAddonStore;
     GameObjectQuestItemMap _gameObjectQuestItemStore;

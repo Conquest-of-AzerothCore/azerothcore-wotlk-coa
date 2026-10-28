@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "name": "Hellwrath adds 5 Demon's Blood stacks and 1% Black Shield absorption per stack (#1130)",
+  "contract": "#1130: Hellwrath 804014 (family 23, CharacterAdvancement 30125, class 17 Defiance tab) reads 'Your Demon's Blood can now stack $s1 additional times and each stack now increases the absorption amount of Black Shield by $s2%' with $s1 = 5 and $s2 = 1. Black Shield 805679 reads 'Consume all of your Demon's Blood stacks to create a demonic shield that absorbs ${$805680m1+$805680ppl1} damage, increased by $800999s3% per Demon's Blood stack'; Demon's Blood 800999 effect 2 is +20 (BasePoints 19 + DieSides 1), so each consumed stack adds 20% of the base absorb, and with Hellwrath each stack adds 20% + 1% = 21%. Effect 0 of Hellwrath is the native aura 107 SPELLMOD_MAX_AURA_STACKS +5 with mask (0x20000000, 0, 0x10); Demon's Blood 800999 carries family flags (0, 0, 0x10) and StackAmount 10, so SpellInfo::CalcMaxAuraStacks reads 15 natively. Effect 1 is SPELLMOD_EFFECT1 +1 on mask (0x20000000, 0, 0), which only matches the helper 520298 'Demon's Blood SLS2' that nothing applies, while Black Shield's absorb is computed by aura_ascension_xoroth_lifecycle::Calculate as amount * (1 + 0.2 * consumed stacks); before the fix Hellwrath never reached it. Black Shield has no Rage cost and requires Demon's Blood (CasterAuraSpell 800999); its 120 s cooldown is reset between casts and each shield is removed before the next cast so every absorb is freshly calculated. Expected: with 10 consumed stacks the talented shield is 3.1/3.0 = 1.0333 times the untalented one (1.0000 before the fix), and with the 15 stacks Hellwrath allows it is 4.15/3.0 = 1.3833 times.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "knight", "spell": 805679 },
+    {
+      "action": "assert", "label": "SETUP: Demon's Blood's base cap is 10 stacks",
+      "actor": "knight", "metric": "spell_max_stacks", "spell": 800999, "equals": 10
+    },
+    { "action": "set_aura", "actor": "knight", "spell": 800999, "stacks": 10, "label": "Ten Demon's Blood stacks for the untalented shield" },
+    { "action": "cast", "actor": "knight", "spell": 805679, "label": "Black Shield without Hellwrath" },
+    {
+      "action": "assert", "label": "SETUP: the untalented Black Shield is up",
+      "actor": "knight", "metric": "aura", "spell": 805680, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: Black Shield consumed every Demon's Blood stack",
+      "actor": "knight", "metric": "aura", "spell": 800999, "equals": 0
+    },
+    {
+      "action": "snapshot", "label": "Untalented absorb with 10 consumed stacks",
+      "actor": "knight", "metric": "aura_amount", "spell": 805680, "effect": 0, "save_as": "shield_base"
+    },
+    {
+      "action": "assert", "label": "SETUP: the untalented shield absorbs something",
+      "actor": "knight", "metric": "aura_amount", "spell": 805680, "effect": 0, "min": 1
+    },
+    { "action": "set_aura", "actor": "knight", "spell": 805680, "stacks": 0, "label": "Remove the first shield so the next one is freshly calculated" },
+    { "action": "reset_cooldown", "actor": "knight", "spell": 805679 },
+    { "action": "learn", "actor": "knight", "spell": 804014 },
+    { "action": "set_aura", "actor": "knight", "spell": 804014, "stacks": 1, "label": "Force the Hellwrath passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Hellwrath passive is active",
+      "actor": "knight", "metric": "aura", "spell": 804014, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Demon's Blood can stack 5 additional times (10 -> 15)",
+      "actor": "knight", "metric": "spell_max_stacks", "spell": 800999, "equals": 15
+    },
+    { "action": "set_aura", "actor": "knight", "spell": 800999, "stacks": 10, "label": "The same ten stacks for the talented shield" },
+    { "action": "cast", "actor": "knight", "spell": 805679, "label": "Black Shield with Hellwrath, 10 stacks" },
+    {
+      "action": "assert", "label": "SETUP: the talented Black Shield is up",
+      "actor": "knight", "metric": "aura", "spell": 805680, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: each of the 10 stacks adds 21% instead of 20% (3.1 / 3.0)",
+      "actor": "knight", "metric": "aura_amount", "spell": 805680, "effect": 0,
+      "ratio_to": "shield_base", "min": 1.028, "max": 1.039
+    },
+    { "action": "set_aura", "actor": "knight", "spell": 805680, "stacks": 0, "label": "Remove the second shield" },
+    { "action": "reset_cooldown", "actor": "knight", "spell": 805679 },
+    { "action": "set_aura", "actor": "knight", "spell": 800999, "stacks": 15, "label": "Fill Demon's Blood to the talented cap" },
+    {
+      "action": "assert", "label": "CONTRACT: Demon's Blood holds 15 stacks",
+      "actor": "knight", "metric": "aura_stacks", "spell": 800999, "equals": 15
+    },
+    { "action": "cast", "actor": "knight", "spell": 805679, "label": "Black Shield with Hellwrath, 15 stacks" },
+    {
+      "action": "assert", "label": "SETUP: the 15-stack Black Shield is up",
+      "actor": "knight", "metric": "aura", "spell": 805680, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: 15 stacks at 21% each give 4.15 / 3.0 of the untalented 10-stack shield",
+      "actor": "knight", "metric": "aura_amount", "spell": 805680, "effect": 0,
+      "ratio_to": "shield_base", "min": 1.377, "max": 1.390
+    }
+  ]
+}

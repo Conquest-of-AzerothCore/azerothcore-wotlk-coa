@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Tiraxis: live menu order, Convenience Items and Consumables",
+  "contract": "Tiraxis (900007) offers his lists in the live order with an icon per option: Explore the Bazaar, Lost Caches, Convenience Items, Consumables, Heirlooms, Stones of Retreat, and How do I get Bazaar Tokens? - seven options. Convenience Items holds the live server's 52 items over six pages (Potion of Experience first at 35 tokens, ItemExtendedCost 41021); Consumables (900012) holds the 14 Keeper's Scrolls (Keeper's Scroll: Golganneth at 60 tokens, ItemExtendedCost 3017).",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8914, "y": -133, "z": 80.6, "o": 0 },
+  "players": [
+    { "id": "buyer", "race": 1, "class": 1, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "tiraxis", "owner": "buyer", "entry": 900007, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    { "action": "gossip_hello", "actor": "buyer", "target": "tiraxis", "label": "Speak to Tiraxis" },
+    { "action": "assert", "label": "seven options", "actor": "buyer", "metric": "gossip_options", "equals": 7, "within_ms": 2000 },
+    { "action": "gossip_select", "actor": "buyer", "option": 2, "label": "Convenience Items" },
+    { "action": "assert", "label": "Convenience Items: 52 items", "actor": "buyer", "metric": "vendor_items", "equals": 52, "within_ms": 2000 },
+    { "action": "assert", "label": "Potion of Experience at 35 tokens", "actor": "buyer", "metric": "vendor_extended_cost", "item": 818046, "equals": 41021 },
+    { "action": "gossip_hello", "actor": "buyer", "target": "tiraxis", "label": "Speak to Tiraxis again" },
+    { "action": "gossip_select", "actor": "buyer", "option": 3, "label": "Consumables" },
+    { "action": "assert", "label": "Consumables: 14 Keeper's Scrolls", "actor": "buyer", "metric": "vendor_items", "equals": 14, "within_ms": 2000 },
+    { "action": "assert", "label": "Keeper's Scroll: Golganneth at 60 tokens", "actor": "buyer", "metric": "vendor_extended_cost", "item": 696661, "equals": 3017 }
+  ]
+}

@@ -79,9 +79,10 @@ DatabaseWorkerPool<T>::~DatabaseWorkerPool()
 }
 
 template <class T>
-void DatabaseWorkerPool<T>::SetConnectionInfo(std::string_view infoString, uint8 const asyncThreads, uint8 const synchThreads)
+void DatabaseWorkerPool<T>::SetConnectionInfo(std::string_view infoString, uint8 const asyncThreads,
+    uint8 const synchThreads, std::string_view transactionIsolation)
 {
-    _connectionInfo = std::make_unique<MySQLConnectionInfo>(infoString);
+    _connectionInfo = std::make_unique<MySQLConnectionInfo>(infoString, transactionIsolation);
 
     _async_threads = asyncThreads;
     _synch_threads = synchThreads;

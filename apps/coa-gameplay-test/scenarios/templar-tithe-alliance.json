@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Templar Tithe teaches the Alliance holy-site auras",
-  "contract": "Tithe 804781 at a holy site charges 1 silver and teaches that site's party aura, keeping the hour-long cooldown; elsewhere, or at the other faction's site, nothing is learned and Reset Tithe 800981 cuts the cooldown to about 98 sec. Requires AC_START_PLAYER_MONEY >= 100 so the fixture can pay.",
+  "contract": "Tithe 804781 at a holy site charges 1 silver and teaches that site's party aura, keeping the hour-long cooldown; elsewhere, or at the other faction's site, nothing is learned and Reset Tithe 800981 cuts the cooldown to about 98 sec. Every fixture starts with exactly 1 silver (set_money), independent of StartPlayerMoney, so a paying Templar ends with none and one who learns nothing keeps it.",
   "timeout_ms": 180000,
   "players": [
     {
@@ -104,6 +104,54 @@
       "action": "learn",
       "actor": "h",
       "spell": 804781
+    },
+    {
+      "action": "set_money",
+      "label": "Give a exactly the 1 silver tithe",
+      "actor": "a",
+      "value": 100
+    },
+    {
+      "action": "set_money",
+      "label": "Give b exactly the 1 silver tithe",
+      "actor": "b",
+      "value": 100
+    },
+    {
+      "action": "set_money",
+      "label": "Give c exactly the 1 silver tithe",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_money",
+      "label": "Give d exactly the 1 silver tithe",
+      "actor": "d",
+      "value": 100
+    },
+    {
+      "action": "set_money",
+      "label": "Give e exactly the 1 silver tithe",
+      "actor": "e",
+      "value": 100
+    },
+    {
+      "action": "set_money",
+      "label": "Give f exactly the 1 silver tithe",
+      "actor": "f",
+      "value": 100
+    },
+    {
+      "action": "set_money",
+      "label": "Give g exactly the 1 silver tithe",
+      "actor": "g",
+      "value": 100
+    },
+    {
+      "action": "set_money",
+      "label": "Give h exactly the 1 silver tithe",
+      "actor": "h",
+      "value": 100
     },
     {
       "action": "console",
@@ -253,6 +301,13 @@
     },
     {
       "action": "assert",
+      "label": "a paid its 1 silver",
+      "actor": "a",
+      "metric": "carried_money",
+      "equals": 0
+    },
+    {
+      "action": "assert",
       "label": "b at CathedralOfLight learns 804820",
       "actor": "b",
       "metric": "knows_spell",
@@ -365,8 +420,15 @@
       "max": 100000
     },
     {
+      "action": "assert",
+      "label": "h learned nothing and keeps its 1 silver",
+      "actor": "h",
+      "metric": "carried_money",
+      "equals": 100
+    },
+    {
       "action": "console",
-      "label": "Record the money left after paying the tithe (1g -> 99s)",
+      "label": "Record the money left after paying the tithe (1s -> 0s)",
       "command": "pinfo Harnessa"
     }
   ]

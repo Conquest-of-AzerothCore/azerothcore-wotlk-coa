@@ -1,0 +1,232 @@
+{
+  "schema": 1,
+  "name": "Spectre's Call increases Deathwind, Murder, and Soul Strike damage by rank (#1078)",
+  "contract": "Spectre's Call adds 15% or 30% to Deathwind, Murder, and Soul Strike damage by rank.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 5,
+      "class": 30,
+      "level": 80
+    },
+    {
+      "id": "rank1",
+      "race": 5,
+      "class": 30,
+      "level": 80
+    },
+    {
+      "id": "rank2",
+      "race": 5,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "control",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "control",
+      "spell": 705386
+    },
+    {
+      "action": "unlearn",
+      "actor": "control",
+      "spell": 707802
+    },
+    {
+      "action": "unlearn",
+      "actor": "rank1",
+      "spell": 707802
+    },
+    {
+      "action": "unlearn",
+      "actor": "rank2",
+      "spell": 705386
+    },
+    {
+      "action": "learn",
+      "actor": "rank1",
+      "spell": 705386
+    },
+    {
+      "action": "learn",
+      "actor": "rank2",
+      "spell": 707802
+    },
+    {
+      "action": "assert",
+      "label": "Rank one adds fifteen percent to Deathwind periodic damage",
+      "actor": "rank1",
+      "metric": "spell_modifier",
+      "spell": 800174,
+      "op": 22,
+      "base": 1000,
+      "equals": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Rank two adds thirty percent to Deathwind periodic damage",
+      "actor": "rank2",
+      "metric": "spell_modifier",
+      "spell": 800174,
+      "op": 22,
+      "base": 1000,
+      "equals": 1300
+    },
+    {
+      "action": "assert",
+      "label": "Rank one adds fifteen percent to Murder direct damage",
+      "actor": "rank1",
+      "metric": "spell_modifier",
+      "spell": 500376,
+      "op": 0,
+      "base": 1000,
+      "equals": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Rank two adds thirty percent to Murder direct damage",
+      "actor": "rank2",
+      "metric": "spell_modifier",
+      "spell": 500376,
+      "op": 0,
+      "base": 1000,
+      "equals": 1300
+    },
+    {
+      "action": "assert",
+      "label": "Rank one adds fifteen percent to Soul Strike direct damage",
+      "actor": "rank1",
+      "metric": "spell_modifier",
+      "spell": 500517,
+      "op": 0,
+      "base": 1000,
+      "equals": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Rank two adds thirty percent to Soul Strike direct damage",
+      "actor": "rank2",
+      "metric": "spell_modifier",
+      "spell": 500517,
+      "op": 0,
+      "base": 1000,
+      "equals": 1300
+    },
+    {
+      "action": "snapshot",
+      "label": "Control Deathwind periodic calculation",
+      "actor": "control",
+      "metric": "spell_damage_done",
+      "spell": 800174,
+      "effect": 0,
+      "target": "target",
+      "periodic": true,
+      "save_as": "deathwind_base"
+    },
+    {
+      "action": "assert",
+      "label": "Rank one Deathwind periodic damage is fifteen percent higher",
+      "actor": "rank1",
+      "metric": "spell_damage_done",
+      "spell": 800174,
+      "effect": 0,
+      "target": "target",
+      "periodic": true,
+      "ratio_to": "deathwind_base",
+      "min": 1.14,
+      "max": 1.16
+    },
+    {
+      "action": "assert",
+      "label": "Rank two Deathwind periodic damage is thirty percent higher",
+      "actor": "rank2",
+      "metric": "spell_damage_done",
+      "spell": 800174,
+      "effect": 0,
+      "target": "target",
+      "periodic": true,
+      "ratio_to": "deathwind_base",
+      "min": 1.29,
+      "max": 1.31
+    },
+    {
+      "action": "snapshot",
+      "label": "Control Murder direct calculation",
+      "actor": "control",
+      "metric": "spell_damage_done",
+      "spell": 500376,
+      "target": "target",
+      "save_as": "murder_base"
+    },
+    {
+      "action": "assert",
+      "label": "Rank one Murder direct damage is fifteen percent higher",
+      "actor": "rank1",
+      "metric": "spell_damage_done",
+      "spell": 500376,
+      "target": "target",
+      "ratio_to": "murder_base",
+      "min": 1.14,
+      "max": 1.16
+    },
+    {
+      "action": "assert",
+      "label": "Rank two Murder direct damage is thirty percent higher",
+      "actor": "rank2",
+      "metric": "spell_damage_done",
+      "spell": 500376,
+      "target": "target",
+      "ratio_to": "murder_base",
+      "min": 1.29,
+      "max": 1.31
+    },
+    {
+      "action": "snapshot",
+      "label": "Control Soul Strike direct calculation",
+      "actor": "control",
+      "metric": "spell_damage_done",
+      "spell": 500517,
+      "target": "target",
+      "save_as": "soul_strike_base"
+    },
+    {
+      "action": "assert",
+      "label": "Rank one Soul Strike direct damage is fifteen percent higher",
+      "actor": "rank1",
+      "metric": "spell_damage_done",
+      "spell": 500517,
+      "target": "target",
+      "ratio_to": "soul_strike_base",
+      "min": 1.14,
+      "max": 1.16
+    },
+    {
+      "action": "assert",
+      "label": "Rank two Soul Strike direct damage is thirty percent higher",
+      "actor": "rank2",
+      "metric": "spell_damage_done",
+      "spell": 500517,
+      "target": "target",
+      "ratio_to": "soul_strike_base",
+      "min": 1.29,
+      "max": 1.31
+    }
+  ]
+}

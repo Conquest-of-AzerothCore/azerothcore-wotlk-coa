@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Call of the Mountain buff clears when Earth's Rage drops or expires",
+  "contract": "Call of the Mountain grants its buff (680472) at 5 stacks of Earth's Rage (806068). The buff must not outlive the threshold: it has to clear both when stacks fall back under 5 while Earth's Rage remains, and when Earth's Rage is removed outright.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "timeout_ms": 15000,
+  "steps": [
+    { "action": "learn", "actor": "primalist", "spell": 680406 },
+    { "action": "set_aura", "actor": "primalist", "spell": 806068, "stacks": 5 },
+    {
+      "action": "assert", "label": "Crossing 5 stacks grants the buff",
+      "actor": "primalist", "metric": "aura", "spell": 680472, "equals": 1, "within_ms": 1000
+    },
+    { "action": "set_aura", "actor": "primalist", "spell": 806068, "stacks": 4 },
+    {
+      "action": "assert", "label": "Dropping back under 5 stacks clears the buff, even though Earth's Rage remains",
+      "actor": "primalist", "metric": "aura", "spell": 680472, "equals": 0, "within_ms": 1000
+    },
+    { "action": "assert", "actor": "primalist", "metric": "aura", "spell": 806068, "equals": 1 },
+    { "action": "set_aura", "actor": "primalist", "spell": 806068, "stacks": 5 },
+    {
+      "action": "assert", "label": "Crossing 5 stacks again regrants the buff",
+      "actor": "primalist", "metric": "aura", "spell": 680472, "equals": 1, "within_ms": 1000
+    },
+    { "action": "set_aura", "actor": "primalist", "spell": 806068, "stacks": 0 },
+    {
+      "action": "assert", "label": "Earth's Rage expiring outright also clears the buff",
+      "actor": "primalist", "metric": "aura", "spell": 680472, "equals": 0, "within_ms": 1000
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Executioner grants crit rating and target-health armor penetration (#1878)",
+  "contract": "Executioner adds 20% Strength to crit rating and ignores 30% target armor below 35% health.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "reaper", "race": 10, "class": 30, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "target", "owner": "reaper", "entry": 36, "level": 80, "health": 100000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "set_health", "actor": "target", "value": 80000 },
+    { "action": "assert", "label": "Target begins above the health threshold", "actor": "target",
+      "metric": "health_pct", "min": 35.01 },
+    { "action": "assert", "label": "Target has armor", "actor": "target", "metric": "armor", "min": 1 },
+    {
+      "action": "snapshot", "actor": "reaper", "metric": "armor_reduced_damage",
+      "spell": 49998, "target": "target", "save_as": "above_base"
+    },
+    {
+      "action": "assert", "label": "Armor mitigates a physical strike", "actor": "reaper",
+      "metric": "armor_reduced_damage", "spell": 49998, "target": "target", "max": 999
+    },
+    { "action": "snapshot", "actor": "reaper", "metric": "stat", "stat": 0, "save_as": "strength" },
+    { "action": "snapshot", "actor": "reaper", "metric": "combat_rating", "rating": 8, "save_as": "crit_base" },
+    { "action": "assert", "label": "No baseline melee crit rating", "actor": "reaper",
+      "metric": "combat_rating", "rating": 8, "equals": 0 },
+    { "action": "learn", "actor": "reaper", "spell": 500542 },
+    { "action": "assert", "actor": "reaper", "metric": "aura", "spell": 500542, "equals": 1 },
+    {
+      "action": "assert", "label": "Executioner increases melee crit rating", "actor": "reaper",
+      "metric": "combat_rating", "rating": 8, "ratio_to": "strength", "min": 0.19, "max": 0.21
+    },
+    {
+      "action": "assert", "label": "No armor ignore above 35%", "actor": "reaper",
+      "metric": "armor_reduced_damage", "spell": 49998, "target": "target", "relative_to": "above_base", "equals": 0
+    },
+    { "action": "set_health", "actor": "target", "value": 34000 },
+    { "action": "assert", "label": "Target falls below the health threshold", "actor": "target",
+      "metric": "health_pct", "max": 34.99 },
+    {
+      "action": "assert", "label": "Thirty percent armor ignore below 35%", "actor": "reaper",
+      "metric": "armor_reduced_damage", "spell": 49998, "target": "target", "ratio_to": "above_base", "min": 1.001
+    },
+    { "action": "unlearn", "actor": "reaper", "spell": 500542 },
+    {
+      "action": "assert", "label": "Unlearning removes the Strength-to-crit conversion", "actor": "reaper",
+      "metric": "combat_rating", "rating": 8, "relative_to": "crit_base", "equals": 0
+    },
+    {
+      "action": "assert", "label": "Unlearning removes the low-health armor ignore", "actor": "reaper",
+      "metric": "armor_reduced_damage", "spell": 49998, "target": "target", "relative_to": "above_base", "equals": 0
+    }
+  ]
+}

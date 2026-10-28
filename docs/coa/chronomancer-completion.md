@@ -168,12 +168,18 @@ the decisive field.
 - **#894 Infinite Horizon 560528** — effect 1 is `SPELLMOD_BONUS_MULTIPLIER` +20% masked to Timerend and
   Unmake, but `Unit::SpellDamageBonusDone` applies that op only when the effect's `EffectBonusMultiplier` is
   nonzero. Unmake 503784 carries 0.0624; every Timerend rank carries 0.0, and the one that carried 0.1
-  (801291) is zeroed by `AscensionStockCoefficients.cpp`. The Timerend half is dead. 560528 also has no
-  `spell_group` / `spell_group_stack_rules` row, so "does not stack with similar effects" is unenforced.
+  (801291) is zeroed by `AscensionStockCoefficients.cpp`, and the Timerend descriptions state no spell power
+  term. The Timerend half is dead. The raid aura and the Unmake bonus work
+  (`chronomancer-infinite-horizon-raid-and-unmake-scaling`), and since 2026-09-22 raid damage group 2000184
+  enforces "does not stack with similar effects" (`stormbringer-fix-conductor-in-charge`).
 - **#786 Black Hole 707557, 707743** — aura 112 `SPELL_AURA_OVERRIDE_CLASS_SCRIPTS`, `EffectMiscValue` 20007,
-  `EffectMiscValueB` 26. No module converts it to the native aura 303, and `enum AuraStateType` has no state
-  26, so even a converted effect would test permanently false. The mask `[0,33554944,0]` also omits Chromatic
-  Shard, which the tooltip names.
+  `EffectMiscValueB` 26. Every other client record with selector 20007 and state 26 describes "slowed"
+  targets (Reckless Assault 804610, The Time Has Come 572879, Shard of True Ice 805425), and Felsworn's
+  Reckless Assault already reads it as `SPELL_AURA_MOD_DECREASE_SPEED`. Since 2026-09-27
+  `Unit::HasAuraState` computes `ASCENSION_TARGET_SLOWED` (26) that way and both ranks convert to aura 303,
+  so Melt Reality and Unmake gain the bonus
+  (`chronomancer-black-hole-slowed-damage`). The mask `[0,33554944,0]` still omits Chromatic Shard, which the
+  tooltip names; that half has no carrier.
 - **#1987 Timeblender 555737** — the crit half works; "gives it an additional charge" has no carrier.
   `SpellCharges.dbc` holds exactly one row for the Fabric of Time family, `(572378, 328)`, and none of the
   obtainable ranks (570177/570178/570179, 572361/572362/572363, 806299) has one.
@@ -193,15 +199,23 @@ the decisive field.
 - **#916 Shifting Chaos 706059** — its only effect is `Aura=354`, left `nullptr` in the handler table and
   absent from `isTriggerAura[]`; ~250 Ascension spells across every class use it. The same gap kills #807
   Chaotic Time's "Melt Reality replicates an additional 20%" clause, whose mask resolves to 504727, itself an
-  aura-354 record.
+  aura-354 record. Since 2026-09-27 706059's effect is a dummy and `chronomancer_secondary_hits` casts its
+  payload 801269 at every Chromatic Shard or Anomaly Spike hit for 20% of the damage dealt, as a resolved
+  amount over 801269's native 8 yd area around the struck enemy (`chronomancer-shifting-chaos-replication`).
 - **#534 Destabilize Time 680971** — effect 0 is aura 42 with `EffectTriggerSpell` **0**, and
   `AuraEffect::HandleProcTriggerSpellAuraProc` returns on a null trigger. Every number in the tooltip lives in
-  570761, which nothing casts.
+  570761, which nothing casts. Since 2026-09-26 `spell_ascension_destabilize_time` keeps 570761 on the target
+  at the debuff's stacks and remaining duration and adds a stack on each enemy cast
+  (`chronomancer-destabilize-time-cast-slow`).
 - **#3395 Roll Back 804490** — its single `SPELL_EFFECT_SCRIPT_EFFECT` falls through
   `Spell::EffectScriptEffect`, which handles only `SPELLFAMILY_GENERIC` and `SPELLFAMILY_ROGUE`, and no module
   script registers on the id.
 - **#1071 Unstable Chronoglass 503836** — `SPELL_EFFECT_SUMMON` with `EffectMiscValue` 506015, and creature
-  506015 exists neither in `data/sql/` nor in the repack's world dump.
+  506015 exists neither in `data/sql/` nor in the repack's world dump. The spell side of the mechanic is
+  shipped: 506638 "Unstable Chronoglass" is `SPELL_AURA_SPELL_MAGNET` on `TARGET_UNIT_MASTER` with
+  `ProcCharges` 3, the tooltip's "next 3", which `Unit::GetMagicHitRedirectTarget` consumes natively, and
+  503870 "[Aura]" (`SPELL_AURA_DUMMY` + `SPELL_AURA_MOD_STUN`, visual 19992) is the glass's own state. Only the
+  creature row is missing: its display id, faction, level, `unit_class` and flags are in no readable source.
 - **#765 Incarnation of Chaos 570067** — its Description promises resetting Chromatic Shard's cooldown and a
   free next cast; its three effects do none of it. 504723 is the record that does exactly that, and nothing in
   `Spell.dbc` triggers it.
@@ -223,24 +237,40 @@ the decisive field.
   100% of their total health, and heals it back at the end. Effect 0 is aura 69 `SPELL_AURA_SCHOOL_ABSORB`
   with `EffectBasePoints` 25 and `EffectMiscValueB` 100, which `Unit::CalcAbsorbResist` reads as a flat ~25
   shield; damage splitting in this core is a different aura, 300 `SPELL_AURA_SHARE_DAMAGE_PCT` in
-  `Unit::DealDamage`. The cap and the end-of-duration heal have no carrier, and effect 1 is an unscripted
-  `SPELL_AURA_DUMMY`.
+  `Unit::DealDamage`, and effect 1 is an unscripted `SPELL_AURA_DUMMY`. The payloads do exist: 707600
+  "The Vast Infinite [Damage]" ("Share damage.") and 707601 "[Heal]" ("Share heal."), both resolved-value
+  helpers. Since 2026-09-27 `spell_ascension_the_vast_infinite` absorbs 25% of each hit up to 100% of the
+  holder's maximum health, splits it evenly across the caster's linked group members through 707600 and heals
+  each of them through 707601 at expiry for the shared damage it took (`chronomancer-the-vast-infinite-share`).
+  The cap is not exercised by that scenario.
 - **#3152 Overcorrection 707657** — the tooltip promises a heal-over-time on the caster; the single effect is
   `APPLY_AURA` with `Aura=354`, `EffectBasePoints` 5 and `EffectTriggerSpell` 561231, and aura 354 is
   `nullptr` in the handler table. The HoT 561231 itself is ready (`SPELL_AURA_PERIODIC_HEAL`, 1000 ms
   amplitude, 5000 ms duration).
 - **#829 Infinite Keeper 806312** — the tooltip triggers the effect when Unmake hits an enemy affected by
   *your* Timerend. The record has no `spell_proc` row, and the caster half of the clause cannot be expressed
-  in data: `conditions` / `CONDITION_AURA` is satisfied by any caster's Timerend.
+  in data: `conditions` / `CONDITION_AURA` is satisfied by any caster's Timerend. Since 2026-09-27 806312's
+  effect is a dummy and `chronomancer_secondary_hits` casts its trigger 806314 when an Unmake rank lands on an
+  enemy carrying the same Chronomancer's Timerend, and the vortex 806313 carries its tooltip's 0.12 spell power
+  per tick (`chronomancer-infinite-keeper-timerend-vortex`).
 - **#449 Buy Time 520188** — the stasis package (520185, 520186 and its delayed 520205) is entirely native and
   correct; only "casting Unmake on a target will remove this effect" has no carrier. No Unmake rank has a
   `spell_linked_spell` or a `spell_script_names` row, no module script touches 520185/520186/520188, and
   `Unit::GetDispellableAuraList` only lets a spell with `SPELL_ATTR0_NO_IMMUNITIES` remove a
-  `MECHANIC_BANISH` aura.
+  `MECHANIC_BANISH` aura. Since 2026-09-26 every Unmake rank casts the client's own remover 807310
+  ("Unmake / Buy Time Remover", `SPELL_EFFECT_REMOVE_AURA` 520186 with `SPELL_ATTR0_NO_IMMUNITIES`) through
+  `spell_linked_spell` (`chronomancer-buy-time-unmake-removal`).
 - **#1163 Rapid Acceleration 570149** — the tooltip adds 15% bonus-healing scaling to Accelerated Recovery and
   an instant heal for 15% of the total periodic effect. Effect 0 is `SPELL_AURA_ADD_PCT_MODIFIER` with
   `EffectMiscValue` 40 while `MAX_SPELLMOD` is 32, so `AuraEffect::CalculateSpellMod` and
-  `Player::AddSpellMod` both discard it; effect 1 is an unscripted `SPELL_AURA_DUMMY`.
+  `Player::AddSpellMod` both discard it; effect 1 is an unscripted `SPELL_AURA_DUMMY`. The client names the
+  private index: Weapon Empowerment 92857 "[Spell Power Direct]" uses op 24 and 92858 "[Spell Power DoT]" op 40.
+  Since 2026-09-27 effect 0 loads as `SPELLMOD_BONUS_MULTIPLIER`, which scales Accelerated Recovery's periodic
+  coefficient in `Unit::SpellHealingBonusDone`, and each application casts the client's Accelerated Recovery
+  heal 804500 for 15% of the tick amount times the total ticks (`chronomancer-rapid-acceleration`). Accelerated
+  Recovery itself still has no bonus-healing coefficient in the repository (`EffectBonusMultiplier` 0, no
+  `spell_bonus_data` row) although its tooltip reads `$bh*0.23` per tick, so the 15% multiplies whatever the
+  world database supplies.
 - **Singularity Core 804438** (surfaced by #2984, out of its scope) — the tooltip says "Empower your **Wand
   attacks**", but its aura-42 effect has an empty `EffectSpellClassMask`, so the entry
   `SpellMgr::LoadSpellProcs` generates has
@@ -266,3 +296,8 @@ Records whose displayed text describes something their own effects do not, with 
 - **Waves of Time 801277, Shatter Echo 680374** — both carry an `AuraDescription` for an aura effect the
   record does not have; **524944** names "Empower Wand: Artillery" where its `EffectMiscValue` is 804435 Flux
   Emitter.
+- **The Bieko Effect 706099** (#1219) — Hasten 801304's `$?s706099` text and 707312's own description name
+  Dimensional Divergence, Backtrack and Timeguard, and 712371's names Mend Timeline and Temporal Focus; the
+  talent's description and 707312's `EffectMiscValue`s agree on Dimensional Divergence 802790, Temporal Anomaly
+  806315 and Temporal Focus 806165, and those are what `spell_ascension_the_bieko_effect` reduces
+  (`chronomancer-bieko-effect-cooldowns`).

@@ -1,0 +1,195 @@
+{
+  "schema": 1,
+  "name": "Arcane Engraving mark detonates 30% of the effective healing its target received",
+  "contract": "The Weapon Engraving: Arcane mark (653263) stores effective healing received by its target. When it expires naturally it deals 30% of the stored amount as Arcane Engraving: Stored Healing (712493); a mark that stored nothing deals nothing.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 32,
+      "level": 60,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "enemy",
+      "race": 2,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "pvp",
+      "actor": "p",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "learn",
+      "actor": "enemy",
+      "spell": 33373
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "p",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 653267,
+      "stacks": 1
+    },
+    {
+      "action": "attack",
+      "actor": "p",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the first mark lands",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 653263,
+      "caster": "p",
+      "equals": 1,
+      "within_ms": 40000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "p"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the first mark expires",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 653263,
+      "caster": "p",
+      "equals": 0,
+      "within_ms": 7000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: a mark without healing deals nothing",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 712493,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "attack",
+      "actor": "p",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the second mark lands",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 653263,
+      "caster": "p",
+      "equals": 1,
+      "within_ms": 40000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "p"
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 900000
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 33373
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the marked target is healed",
+      "actor": "enemy",
+      "metric": "spell_effective_heal_total",
+      "spell": 33373,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the heal lands while the mark is active",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 653263,
+      "caster": "p",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_effective_heal_total",
+      "spell": 33373,
+      "target": "enemy",
+      "save_as": "healed"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the mark detonates on expiry",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 712493,
+      "target": "enemy",
+      "equals": 1,
+      "within_ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the detonation deals 30% of the effective healing",
+      "actor": "p",
+      "metric": "spell_damage_total",
+      "spell": 712493,
+      "target": "enemy",
+      "ratio_to": "healed",
+      "min": 0.299,
+      "max": 0.301
+    }
+  ]
+}

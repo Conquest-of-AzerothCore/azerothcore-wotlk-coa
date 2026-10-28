@@ -9,6 +9,11 @@
 #include <algorithm>
 #include <cmath>
 
+namespace
+{
+constexpr uint32 SPELL_RECENTLY_PARRIED_OR_DODGED = 681170;
+}
+
 namespace AscensionTemplar
 {
 void ApplyContracts(SpellInfo* info)
@@ -62,7 +67,9 @@ void ApplyContracts(SpellInfo* info)
     if (id == 92109 || id == 803149)
     {
         for (auto& effect : info->Effects)
-            effect.Effect = 0;
+            if (effect.ApplyAuraName != SPELL_AURA_PROC_TRIGGER_SPELL ||
+                effect.TriggerSpell != SPELL_RECENTLY_PARRIED_OR_DODGED)
+                effect.Effect = 0;
         auto& effect = info->Effects[0];
         effect.Effect = SPELL_EFFECT_APPLY_AURA;
         effect.ApplyAuraName = SPELL_AURA_SCHOOL_ABSORB;
@@ -130,6 +137,10 @@ void ApplyContracts(SpellInfo* info)
         info->ProcFlags = 0;
         info->ProcCharges = 0;
     }
+    if (Named(info, 804929))
+        for (auto& effect : info->Effects)
+            if (effect.Effect == SPELL_EFFECT_TRIGGER_SPELL && effect.TriggerSpell == 801832)
+                effect.Effect = 0;
     if (id == 801832 || id == 807035 || Family(info, 0, 262144) || id == 807890)
         for (auto& effect : info->Effects)
             if (effect.Effect && effect.TargetA.GetTarget() == TARGET_UNIT_TARGET_ENEMY && !effect.ChainTarget)
@@ -194,6 +205,8 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[0].BasePoints = 64;
     if (id == 1397742)
         info->Effects[1].Effect = 0;
+    if (id == 704409)
+        info->Effects[0].Effect = 0;
     if (id == 524740 && info->Effects[1].TriggerSpell == 520842 &&
         info->Effects[0].TargetB.GetTarget() == TARGET_UNIT_DEST_AREA_ENEMY)
     {
@@ -235,21 +248,34 @@ float Mitigation(Player* player, Unit* attacker, uint32 school)
     if ((school & SPELL_SCHOOL_MASK_MAGIC) && player->HasAura(801202) &&
         (player->HealthAbovePct(80) || player->HealthBelowPct(20)))
         factor *= .8f;
-    uint32 copies = HopeCount(player);
-    factor *= std::max(0.0f, 1.0f - float(copies) * (player->HasAura(803219) ? .15f : .1f));
     return factor;
 }
+constexpr uint32 SPELL_TRANQUIL_STATE = 850010;
+constexpr int32 TRANQUIL_STATE_PLAYER_DURATION = 8000;
 class templar_scaling : public UnitScript
 {
   public:
     templar_scaling()
         : UnitScript("templar_scaling", true,
                      {UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE, UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN,
-                      UNITHOOK_MODIFY_MELEE_DAMAGE, UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK})
+                      UNITHOOK_MODIFY_MELEE_DAMAGE, UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK,
+                      UNITHOOK_ON_AURA_APPLY})
     {
+    }
+    void OnAuraApply(Unit* unit, Aura* aura) override
+    {
+        if (unit && unit->IsPlayer() && aura && aura->GetId() == SPELL_TRANQUIL_STATE &&
+            aura->GetMaxDuration() > TRANQUIL_STATE_PLAYER_DURATION)
+        {
+            aura->SetMaxDuration(TRANQUIL_STATE_PLAYER_DURATION);
+            aura->SetDuration(TRANQUIL_STATE_PLAYER_DURATION);
+        }
     }
     void ModifySpellEffectBaseValue(Unit const* caster, SpellInfo const* info, uint8 index, float& value) override
     {
+        if (info && info->Id == 704409 && index == 1 && caster)
+            if (Player* owner = Owner(caster->GetCharmerOrOwner()); owner && owner->HasAura(803219))
+                value = -15.0f;
         Player* player = Owner(caster);
         if (!player || !info)
             return;

@@ -10,10 +10,14 @@
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
+#include "Unit.h"
 #include <algorithm>
 namespace
 {
 using namespace AscensionSunCleric;
+constexpr uint32 ChosenKing = 707079;
+constexpr uint32 HammerOfKings = 804751;
+constexpr uint32 Anointed = 524998;
 bool Select(uint32 id, SpellInfo const* info)
 {
     switch (id)
@@ -44,6 +48,11 @@ bool Useful(SpellInfo const* info)
             return true;
     return Gavel(info) || Any(info, {800626, 520359, 520024, 800054, 804751,804249,572752});
 }
+constexpr uint32 ScorchMarks = 807059;
+constexpr uint32 BurnTheHeretics = 560857;
+constexpr uint32 BurnTheHereticsMagicDamage = 560856;
+constexpr uint32 SunStride = 680700;
+constexpr uint32 SunStrideVisual = 681434;
 void Finish(Player* player, Spell* spell)
 {
     for (uint32 id : SunClericFinite)
@@ -58,6 +67,8 @@ void Finish(Player* player, Spell* spell)
                     Cast(player, player, 524859);
                 if (id == 800722 && player->HasAura(680648))
                     StackWithoutRefresh(player, 681254);
+                if (id == ScorchMarks && player->HasAura(BurnTheHeretics))
+                    Cast(player, player, BurnTheHereticsMagicDamage);
             }
 }
 class sun_cleric_spells : public AllSpellScript
@@ -72,7 +83,7 @@ public:
         auto* info = spell->GetSpellInfo();
         if (!player || info->SpellFamilyName != 33 || spell->IsTriggered() || result != SPELL_CAST_OK)
             return;
-        if (info->Id == DawnCast && (Count(player, SolarPower) < 20 || player->HasAura(Dawn)))
+        if (info->Id == DawnCast && !player->HasAura(Dawn) && Count(player, SolarPower) < 20)
             result = SPELL_FAILED_NO_POWER;
         if (info->Id == 680630 && !player->HasAura(Dawn))
             result = SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
@@ -122,7 +133,7 @@ public:
                 spell->SetScriptValue(Dawn, 1);
                 State(player).timers.ScheduleEvent(Dawn, 1s);
             }
-            if (AuraEffect* choice = dawn->GetEffect(EFFECT_1); choice && choice->GetAmount() &&
+            if (AuraEffect* choice = dawn->GetEffect(EFFECT_0); choice && choice->GetAmount() &&
                 (player->HasSpell(92135) || player->HasAura(92135)))
             {
                 uint32 school = info->SchoolMask & (SPELL_SCHOOL_MASK_HOLY | SPELL_SCHOOL_MASK_FIRE);
@@ -166,6 +177,15 @@ public:
         if (!player || caster != player || info->SpellFamilyName != 33 || spell->IsTriggered())
             return;
         uint32 id = info->Id;
+        if (id == SunStride)
+            if (Aura* stride = player->GetAura(SunStride, player->GetGUID()))
+                if (Aura* visual = player->AddAura(SunStrideVisual, player))
+                {
+                    visual->SetMaxDuration(stride->GetMaxDuration());
+                    visual->SetDuration(stride->GetDuration());
+                }
+        if (id == HammerOfKings && player->HasAura(ChosenKing, player->GetGUID()))
+            Cast(player, player, Anointed);
         if (Invocation(info))
         {
             if (player->HasAura(681436))
@@ -224,6 +244,16 @@ public:
             return;
         if (info->Id == 707774 && damage)
             Copy(player,player,707522,damage / 10);
+        if (info->Id == 707522 && spell->GetCaster() == player && target == player && healing &&
+            State(player).gavelHealing && player->HasAura(301011))
+        {
+            auto allies = Allies(player, player, Radius(301012));
+            allies.remove(player);
+            if (allies.size() > 5)
+                allies.resize(5);
+            for (Unit* ally : allies)
+                Copy(player, ally, 301012, CalculatePct(healing, Amount(301011)));
+        }
         if (Derived(info) || State(player).event)
             return;
         (void)critical;
@@ -234,6 +264,10 @@ public:
         if (Named(info, 500154))
         {
             Cast(player, target, 572050);
+            if (!spell->IsTriggered())
+                for (Unit* enemy : Nearby(player, 8))
+                    if (enemy != target && player->IsValidAttackTarget(enemy) && player->isInFrontInMap(enemy, 8))
+                        Cast(player, enemy, 572050);
             if (damage && player->HasAura(680656))
                 Cast(player,player,1257670);
         }
@@ -244,7 +278,10 @@ public:
             if (Named(info, 800611))
             {
                 uint32 copied = CalculatePct(damage, Amount(707521));
+                bool const oldGavelHealing = State(player).gavelHealing;
+                State(player).gavelHealing = true;
                 Copy(player, player, 707522, copied);
+                State(player).gavelHealing = oldGavelHealing;
                 if (player->HasAura(HolyForm) && player->HasAura(300353))
                     Copy(player, player, 805489, copied);
             }
@@ -257,12 +294,19 @@ public:
                     uint32 count = 0;
                     for (Unit* enemy : Nearby(target, 8))
                         if (enemy != target && player->IsValidAttackTarget(enemy) && count++ < 5)
-                            Cast(player, enemy, info->Id);
+                        {
+                            SpellNonMeleeDamage extra(player, enemy, info, info->GetSchoolMask());
+                            player->CalculateSpellDamageTaken(&extra, int32(damage), info);
+                            Unit::DealDamageMods(enemy, extra.damage, &extra.absorb);
+                            player->SendSpellNonMeleeDamageLog(&extra);
+                            player->DealSpellDamage(&extra, true);
+                        }
                 }
             }
         }
-        if ((info->Id == 800691 || info->Id == 802566) && damage && player->HasAura(807451))
-            Mana(player, CalculatePct(damage, Amount(807451)));
+        if (info->Id == 800691 || info->Id == 802566)
+            if (uint32 const dealt = spell->GetScriptHealthLeechDamage())
+                Mana(player, CalculatePct(dealt, Amount(807451)));
         if (healing && player->HasAura(300344) && target->HasAura(Bless, player->GetGUID()) &&
             !spell->IsTriggered() && !spell->GetScriptValue(300344))
         {
@@ -357,7 +401,8 @@ class spell_ascension_sun_cleric_ability : public SpellScript
         uint32 id = GetSpellInfo()->Id;
         if (id == 807064 && index == EFFECT_1)
             PreventHitDefaultEffect(index);
-        if (id == DawnCast || id == 680630 || id == 802161 || id == 520024 || id == 520026 || id == 807441)
+        if (id == DawnCast || id == RadiantConversion || id == 680630 || id == 802161 || id == 520024 || id == 520026 ||
+            id == 807441)
             PreventHitDefaultEffect(index);
         if (id == 800764 && index == 1)
             PreventHitDefaultEffect(index);
@@ -366,14 +411,23 @@ class spell_ascension_sun_cleric_ability : public SpellScript
         if (id == DawnCast)
         {
             done = true;
-            ActivateDawn(player);
+            if (Aura* dawn = player->GetAura(Dawn))
+                dawn->Remove(AURA_REMOVE_BY_CANCEL);
+            else
+                ActivateDawn(player);
+        }
+        if (id == RadiantConversion)
+        {
+            done = true;
+            if (Aura* dawn = player->GetAura(Dawn))
+                dawn->Remove(AURA_REMOVE_BY_CANCEL);
         }
         if (id == 680630)
         {
             done = true;
             if (Aura* aura = player->GetAura(Dawn))
             {
-                aura->SetCharges(10);
+                aura->SetCharges(aura->CalcMaxCharges());
                 aura->SetDuration(aura->GetMaxDuration());
             }
         }

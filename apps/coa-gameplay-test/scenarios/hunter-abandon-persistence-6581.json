@@ -1,0 +1,191 @@
+{
+  "schema": 1,
+  "name": "Stock Hunter dismiss, recall, abandon and relog control (#6581)",
+  "contract": "Inherited Hunter pet persistence must preserve dismiss/recall and permanently delete an abandoned beast.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "tamer",
+      "race": 1,
+      "class": 3,
+      "level": 10
+    }
+  ],
+  "creatures": [
+    {
+      "id": "wolf",
+      "owner": "tamer",
+      "entry": 299,
+      "level": 1,
+      "distance": 8
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "tamer",
+      "spell": 1515
+    },
+    {
+      "action": "learn",
+      "actor": "tamer",
+      "spell": 883
+    },
+    {
+      "action": "learn",
+      "actor": "tamer",
+      "spell": 2641
+    },
+    {
+      "action": "assert",
+      "label": "The entry taught Tame Beast",
+      "actor": "tamer",
+      "metric": "knows_spell",
+      "spell": 1515,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The entry taught Call Pet",
+      "actor": "tamer",
+      "metric": "knows_spell",
+      "spell": 883,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The entry taught Dismiss Pet",
+      "actor": "tamer",
+      "metric": "knows_spell",
+      "spell": 2641,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Tame the Young Wolf",
+      "actor": "tamer",
+      "spell": 1515,
+      "target": "wolf"
+    },
+    {
+      "action": "wait",
+      "ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "The wolf is the Hero's pet",
+      "actor": "tamer",
+      "metric": "pet_entry",
+      "equals": 299
+    },
+    {
+      "action": "cast",
+      "actor": "tamer",
+      "spell": 2641
+    },
+    {
+      "action": "assert",
+      "actor": "tamer",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "tamer",
+      "spell": 883
+    },
+    {
+      "action": "assert",
+      "actor": "tamer",
+      "metric": "pet_entry",
+      "equals": 299,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "tamer",
+      "metric": "pet_loading",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "actor": "tamer",
+      "opcode": 374,
+      "fields": [
+        {
+          "pet_guid": "tamer"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "actor": "tamer",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "tamer",
+      "metric": "pet_rows",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "tamer",
+      "spell": 883
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "tamer",
+      "metric": "pet_entry",
+      "equals": 0
+    },
+    {
+      "action": "relog",
+      "actor": "tamer"
+    },
+    {
+      "action": "cast",
+      "actor": "tamer",
+      "spell": 883
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "tamer",
+      "metric": "pet_entry",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "tamer",
+      "metric": "pet_rows",
+      "equals": 0
+    }
+  ]
+}

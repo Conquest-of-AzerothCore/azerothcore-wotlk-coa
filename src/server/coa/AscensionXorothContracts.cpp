@@ -1,4 +1,5 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+#include "AscensionClientSpellPatches.h"
 #include "AscensionXoroth.h"
 #include "AscensionXorothData.h"
 #include "DBCStores.h"
@@ -15,7 +16,9 @@ namespace
 enum FleshHook : uint32
 {
     SPELL_FLESH_HOOK_PULL = 800605,
-    SPELL_RANGE_THIRTY_YARDS = 4
+    SPELL_RANGE_THIRTY_YARDS = 4,
+    SPELL_DRAG_THROUGH_HELL = 804773,
+    SPELL_RANGE_ANYWHERE = 13
 };
 }
 
@@ -31,6 +34,8 @@ void ApplyContracts(SpellInfo* info)
         info->DmgClass = SPELL_DAMAGE_CLASS_NONE;
         info->RangeEntry = sSpellRangeStore.LookupEntry(SPELL_RANGE_THIRTY_YARDS);
     }
+    if (id == SPELL_DRAG_THROUGH_HELL)
+        info->RangeEntry = sSpellRangeStore.LookupEntry(SPELL_RANGE_ANYWHERE);
     if (id == 520440 || id == 520441)
         for (auto& effect : info->Effects)
             effect.Effect = 0;
@@ -60,6 +65,8 @@ void ApplyContracts(SpellInfo* info)
             info->Effects[0].TargetA =
                 SpellImplicitTargetInfo(id == 681206 ? TARGET_UNIT_CASTER : TARGET_UNIT_TARGET_ENEMY);
             info->Effects[0].TargetB = SpellImplicitTargetInfo();
+            if (id == 681206)
+                info->DurationEntry = sSpellDurationStore.LookupEntry(27);
             if (id == 680204)
                 info->Effects[0].ValueMultiplier = 1;
         }
@@ -145,10 +152,20 @@ void ApplyContracts(SpellInfo* info)
                 e.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ALLY);
                 e.TargetB = SpellImplicitTargetInfo();
             }
-    if (id == 807671 || id == 707515 || id == 704988 || id == 560828 || id == 300375)
+    if (id == 807671 || id == 704988 || id == 560828 || id == 300375)
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             if (info->Effects[i].Effect)
                 dummy(i);
+    if (id == 707515)
+    {
+        SpellEffectInfo& cooldown = info->Effects[EFFECT_0];
+        cooldown.ApplyAuraName = SPELL_AURA_ADD_PCT_MODIFIER;
+        cooldown.MiscValue = SPELLMOD_COOLDOWN;
+        cooldown.BasePoints = -100;
+        cooldown.DieSides = 0;
+        cooldown.SpellClassMask = flag96(0, 32, 0);
+        dummy(1);
+    }
     if (id == 500003)
         info->Effects[0].MiscValue = ASCENSION_CREATURE_GLOBAL_CRIT, info->Effects[0].MiscValueB = 4;
     if (id == 805697 || id == 807899)
@@ -168,8 +185,11 @@ void ApplyContracts(SpellInfo* info)
         dummy(1);
         dummy(2);
     }
-    if (id == 805677)
+    if (id == SPELL_SACRIFICIAL_CIRCLE)
+    {
         info->CasterAuraSpell = 0;
+        Ascension::ClientSpellPatches::Instance().Register(id);
+    }
     if (id == 805965)
     {
         auto& e = info->Effects[0];
@@ -235,7 +255,8 @@ void ApplyContracts(SpellInfo* info)
     {
         info->AttributesEx2 |= SPELL_ATTR2_ALLOW_DEAD_TARGET;
         info->Effects[0].Effect = SPELL_EFFECT_DUMMY;
-        info->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
+        info->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+        info->Effects[0].TargetB = SpellImplicitTargetInfo();
         for (uint8 i = 1; i < MAX_SPELL_EFFECTS; ++i)
             if (info->Effects[i].Effect)
                 info->Effects[i].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
@@ -269,12 +290,248 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[1].Effect = 0;
         info->Effects[2].Effect = 0;
     }
+    if (id == 704953)
+    {
+        SpellEffectInfo& e = info->Effects[EFFECT_0];
+        e.Effect = SPELL_EFFECT_APPLY_AURA;
+        e.ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
+        e.BasePoints = 0;
+        e.DieSides = 0;
+        e.MiscValue = SPELLMOD_CRITICAL_CHANCE;
+        e.SpellClassMask = flag96(0, 2097152 | 8388608, 0);
+        e.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+        e.TargetB = SpellImplicitTargetInfo();
+        info->Effects[EFFECT_1].Effect = 0;
+        info->Effects[EFFECT_2].Effect = 0;
+    }
+    if (id == 704999)
+    {
+        SpellEffectInfo& intellect = info->Effects[EFFECT_0];
+        intellect.Effect = SPELL_EFFECT_APPLY_AURA;
+        intellect.ApplyAuraName = SPELL_AURA_MOD_PERCENT_STAT;
+        intellect.BasePoints = 5;
+        intellect.DieSides = 0;
+        intellect.MiscValue = STAT_INTELLECT;
+        intellect.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+        intellect.TargetB = SpellImplicitTargetInfo();
+        SpellEffectInfo& cost = info->Effects[EFFECT_1];
+        cost.Effect = SPELL_EFFECT_APPLY_AURA;
+        cost.ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
+        cost.BasePoints = -5;
+        cost.DieSides = 0;
+        cost.MiscValue = SPELLMOD_COST;
+        cost.SpellClassMask = flag96(0, 768, 0);
+        cost.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+        cost.TargetB = SpellImplicitTargetInfo();
+        info->Effects[EFFECT_2].Effect = 0;
+    }
+    if (id == 707388)
+    {
+        SpellEffectInfo& crit = info->Effects[EFFECT_0];
+        crit.Effect = SPELL_EFFECT_APPLY_AURA;
+        crit.ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
+        crit.BasePoints = 25;
+        crit.DieSides = 0;
+        crit.MiscValue = SPELLMOD_CRITICAL_CHANCE;
+        crit.SpellClassMask = flag96(0, 64, 0);
+        crit.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+        crit.TargetB = SpellImplicitTargetInfo();
+        SpellEffectInfo& expertise = info->Effects[EFFECT_1];
+        expertise.Effect = SPELL_EFFECT_APPLY_AURA;
+        expertise.ApplyAuraName = SPELL_AURA_MOD_EXPERTISE;
+        expertise.BasePoints = 5;
+        expertise.DieSides = 0;
+        expertise.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+        expertise.TargetB = SpellImplicitTargetInfo();
+        info->Effects[EFFECT_2].Effect = 0;
+    }
+    if (id == 804947)
+    {
+        SpellEffectInfo& e = info->Effects[EFFECT_0];
+        e.Effect = SPELL_EFFECT_APPLY_AURA;
+        e.ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
+        e.BasePoints = -15000;
+        e.DieSides = 0;
+        e.MiscValue = SPELLMOD_COOLDOWN;
+        e.SpellClassMask = flag96(0, 65536, 0);
+        e.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+        e.TargetB = SpellImplicitTargetInfo();
+        info->Effects[EFFECT_1].Effect = 0;
+        info->Effects[EFFECT_2].Effect = 0;
+    }
+    if (id == 706501)
+    {
+        SpellEffectInfo& e = info->Effects[EFFECT_0];
+        e.Effect = SPELL_EFFECT_APPLY_AURA;
+        e.ApplyAuraName = SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT;
+        e.BasePoints = 10;
+        e.DieSides = 0;
+        e.SpellClassMask = flag96(0, 8388608, 0);
+        e.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+        e.TargetB = SpellImplicitTargetInfo();
+        info->Effects[EFFECT_1].Effect = 0;
+        info->Effects[EFFECT_2].Effect = 0;
+    }
+    if (id == 705020)
+    {
+        SpellEffectInfo& e = info->Effects[EFFECT_0];
+        e.Effect = SPELL_EFFECT_APPLY_AURA;
+        e.ApplyAuraName = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
+        e.BasePoints = 4;
+        e.DieSides = 0;
+        e.MiscValue = SPELL_SCHOOL_MASK_NORMAL;
+        e.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+        e.TargetB = SpellImplicitTargetInfo();
+        info->Effects[EFFECT_1].Effect = 0;
+        info->Effects[EFFECT_2].Effect = 0;
+    }
+    if (id == 680723)
+    {
+        SpellEffectInfo& crit = info->Effects[EFFECT_0];
+        crit.Effect = SPELL_EFFECT_APPLY_AURA;
+        crit.ApplyAuraName = SPELL_AURA_MOD_CRIT_DAMAGE_BONUS;
+        crit.BasePoints = 10;
+        crit.DieSides = 0;
+        crit.MiscValue = SPELL_SCHOOL_MASK_NORMAL;
+        crit.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+        crit.TargetB = SpellImplicitTargetInfo();
+        SpellEffectInfo& range = info->Effects[EFFECT_1];
+        range.Effect = SPELL_EFFECT_APPLY_AURA;
+        range.ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
+        range.BasePoints = 5;
+        range.DieSides = 0;
+        range.MiscValue = SPELLMOD_RANGE;
+        range.SpellClassMask = flag96(4718592, 0, 1);
+        range.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+        range.TargetB = SpellImplicitTargetInfo();
+    }
+    if (id == 804354)
+    {
+        SpellEffectInfo& dmg = info->Effects[EFFECT_0];
+        dmg.Effect = SPELL_EFFECT_APPLY_AURA;
+        dmg.ApplyAuraName = SPELL_AURA_ADD_PCT_MODIFIER;
+        dmg.BasePoints = 25;
+        dmg.DieSides = 0;
+        dmg.MiscValue = SPELLMOD_DAMAGE;
+        dmg.SpellClassMask = flag96(0, 256, 0);
+        dmg.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+        dmg.TargetB = SpellImplicitTargetInfo();
+        SpellEffectInfo& cost = info->Effects[EFFECT_1];
+        cost.Effect = SPELL_EFFECT_APPLY_AURA;
+        cost.ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
+        cost.BasePoints = -5;
+        cost.DieSides = 0;
+        cost.MiscValue = SPELLMOD_COST;
+        cost.SpellClassMask = flag96(0, 256, 0);
+        cost.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+        cost.TargetB = SpellImplicitTargetInfo();
+        info->Effects[EFFECT_2].Effect = 0;
+    }
+    if (id == 704959)
+    {
+        SpellEffectInfo& crit = info->Effects[EFFECT_0];
+        crit.Effect = SPELL_EFFECT_APPLY_AURA;
+        crit.ApplyAuraName = SPELL_AURA_MOD_RATING_FROM_STAT;
+        crit.BasePoints = 20;
+        crit.DieSides = 0;
+        crit.MiscValue = (1 << CR_CRIT_MELEE) | (1 << CR_CRIT_RANGED) | (1 << CR_CRIT_SPELL);
+        crit.MiscValueB = STAT_INTELLECT;
+        crit.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+        crit.TargetB = SpellImplicitTargetInfo();
+        SpellEffectInfo& hit = info->Effects[EFFECT_1];
+        hit.Effect = SPELL_EFFECT_APPLY_AURA;
+        hit.ApplyAuraName = SPELL_AURA_MOD_SPELL_HIT_CHANCE;
+        hit.BasePoints = 6;
+        hit.DieSides = 0;
+        hit.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+        hit.TargetB = SpellImplicitTargetInfo();
+    }
+    if (id == 707232)
+        info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
+    if (id == 801063)
+    {
+        SpellEffectInfo& e = info->Effects[EFFECT_2];
+        e.Effect = SPELL_EFFECT_APPLY_AURA;
+        e.ApplyAuraName = SPELL_AURA_MOD_INCREASE_SPEED;
+        e.BasePoints = 0;
+        e.DieSides = 0;
+        e.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+        e.TargetB = SpellImplicitTargetInfo();
+    }
+    if (id == 704954)
+    {
+        info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
+        info->Effects[EFFECT_1].Effect = 0;
+    }
+    if (id == 704956)
+        info->Effects[EFFECT_0].SpellClassMask = flag96(0, 16, 0);
+    if (id == 520290)
+        info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
+    if (id == 680900)
+        info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
+    if (id == 300386)
+        info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
+    if (id == 300387)
+        info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
+    if (id == 300390)
+    {
+        SpellEffectInfo& e = info->Effects[EFFECT_0];
+        e.Effect = SPELL_EFFECT_APPLY_AURA;
+        e.ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
+        e.BasePoints = -100;
+        e.DieSides = 0;
+        e.MiscValue = SPELLMOD_COST;
+        e.SpellClassMask = flag96(0, 8389376, 4);
+        e.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+        e.TargetB = SpellImplicitTargetInfo();
+        info->Effects[EFFECT_1].Effect = 0;
+        info->Effects[EFFECT_2].Effect = 0;
+    }
+    if (id == 704980)
+        info->Effects[EFFECT_1].Effect = 0;
+    if (id == 705000)
+        info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
     info->_InitializeExplicitTargetMask();
 }
 }
 namespace
 {
 using namespace AscensionXoroth;
+constexpr uint32 SPELL_GROTESQUE = 707515;
+constexpr uint32 SPELL_HELLFIRE_FORM = 805696;
+class xoroth_grotesque : public UnitScript
+{
+  public:
+    xoroth_grotesque()
+        : UnitScript("xoroth_grotesque", true,
+                     {UNITHOOK_ON_AURA_APPLY, UNITHOOK_ON_AURA_REMOVE, UNITHOOK_ON_AFTER_AURA_EFFECT_CALCULATE_AMOUNT})
+    {
+    }
+    void OnAfterAuraEffectCalculateAmount(AuraEffect const* effect, Unit*, int32& amount) override
+    {
+        if (effect->GetId() == SPELL_GROTESQUE && effect->GetEffIndex() == EFFECT_0 &&
+            effect->GetBase()->GetType() == UNIT_AURA_TYPE &&
+            !effect->GetBase()->GetUnitOwner()->HasAura(SPELL_HELLFIRE_FORM))
+            amount = 0;
+    }
+    void OnAuraApply(Unit* unit, Aura* aura) override
+    {
+        if (aura && aura->GetId() == SPELL_HELLFIRE_FORM)
+            Synchronize(unit);
+    }
+    void OnAuraRemove(Unit* unit, AuraApplication* application, AuraRemoveMode) override
+    {
+        if (application && application->GetBase()->GetId() == SPELL_HELLFIRE_FORM)
+            Synchronize(unit);
+    }
+
+  private:
+    static void Synchronize(Unit* unit)
+    {
+        if (AuraEffect* cooldown = unit->GetAuraEffect(SPELL_GROTESQUE, EFFECT_0))
+            cooldown->RecalculateAmount(unit);
+    }
+};
 class xoroth_scaling : public UnitScript
 {
   public:
@@ -310,7 +567,7 @@ class xoroth_scaling : public UnitScript
             }
         if (Named(info, 801016) && index == 1 && player->HasAura(92100))
             value *= 2;
-        if (info->Id == 804353 && index == 1)
+        if (Named(info, 804353) && index == 1)
             value += player->GetShieldBlockValue();
         if (info->Id == 801064 && index == 0)
             value += player->GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_DEFENSE_SKILL) * .20f;
@@ -322,10 +579,10 @@ class xoroth_scaling : public UnitScript
             value = player->GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_BLOCK) * .5f;
         if (info->Id == 573066 && index == 0)
             value += State(player).imps.size() * Amount(805916, 2);
-        if (info->Id == 804788 && index == 0)
-            value *= 1 + .2f * Count(player, 804787);
         if (info->Id == 800999 && index == 1)
             value = player->HasAura(302581) ? float(Amount(302581)) : 0;
+        if (info->Id == 803334 && index == 1)
+            value = player->HasAura(680900) ? float(Amount(680900)) : 0;
         if (info->Id == 801055 || info->Id == 560817 || info->Id == 802855)
             value *= State(player).unleash;
         value = std::clamp(value, float(INT32_MIN / 2), float(INT32_MAX / 2));
@@ -367,6 +624,8 @@ class xoroth_scaling : public UnitScript
         }
         if (!pet && Sever(info) && player->HasAura(300375) && target->HasAuraState(AuraStateType(30), info, player))
             factor *= 1 + Amount(300375) / 100.0f;
+        if (!pet && Spender(info) && player->HasAura(520290))
+            factor *= 1 + Amount(520290) / 100.0f;
         if (info->Id == 806219 && target->GetCreatureType() == CREATURE_TYPE_HUMANOID)
             factor *= 1 + Amount(704987, 1) / 100.0f;
         return factor;
@@ -408,4 +667,5 @@ class xoroth_scaling : public UnitScript
 void AddSC_AscensionXorothContracts()
 {
     new xoroth_scaling();
+    new xoroth_grotesque();
 }

@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Gazlowe's Wisdom alone keeps Remote Detonation known",
+  "contract": [
+    "Gazlowe's Wisdom 803074 is a passive talent aura; with it, Sticky Bomb Explosion 801009 spawns Shrapnel Mines",
+    "(850020, creature 50600) under its target (spell_ascension_tinker_ability), so a Tinker who knows no mine spell",
+    "can still have a live mine. Remote Detonation 801798 is gated by CasterAuraSpell Bomb Ready 500354 from a live",
+    "mine, so AscensionTinker::Refresh keeps it known for every Tinker that can place a mine. Expected: with",
+    "Gazlowe's Wisdom and no Blast or Shrapnel Mine spell, Remote Detonation is known; once the talent is unlearned",
+    "it is removed."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "tinker", "race": 1, "class": 28, "level": 20}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login state settle", "ms": 3000},
+    {"action": "assert", "label": "SETUP: no mine spell is known", "actor": "tinker", "metric": "knows_spell",
+     "spell": 801718, "equals": 0},
+    {"action": "assert", "label": "SETUP: Remote Detonation is not known", "actor": "tinker", "metric": "knows_spell",
+     "spell": 801798, "equals": 0},
+    {"action": "learn", "label": "Gazlowe's Wisdom", "actor": "tinker", "spell": 803074},
+    {"action": "assert", "label": "SETUP: the talent aura is active", "actor": "tinker", "metric": "aura",
+     "spell": 803074, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "Remote Detonation is known with Gazlowe's Wisdom alone", "actor": "tinker",
+     "metric": "knows_spell", "spell": 801798, "equals": 1, "within_ms": 3000},
+    {"action": "unlearn", "label": "Drop Gazlowe's Wisdom", "actor": "tinker", "spell": 803074},
+    {"action": "assert", "label": "Remote Detonation is removed with the talent", "actor": "tinker",
+     "metric": "knows_spell", "spell": 801798, "equals": 0, "within_ms": 3000}
+  ]
+}

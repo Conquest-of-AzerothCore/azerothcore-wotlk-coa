@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Runemaster Granite Shield is granted every 20 sec only while Runic Tattoos: Earth is active (#883)",
+  "contract": [
+    "Granite Shield 806996 reads 'While Runic Tattoos: Earth is active, you now periodically gain Granite Shield",
+    "every $t1 sec.' Its only effect is native SPELL_AURA_PERIODIC_TRIGGER_SPELL, amplitude 20000 ms, triggering",
+    "Granite Shield 520822 (SCHOOL_ABSORB, 20 s, 'Absorbs ${$m1+$ppl1+$AP*.1+$SP*.3} damage'), with no caster aura",
+    "requirement, so the shield came every 20 s with or without the tattoo. Expected: no shield while no Earth",
+    "tattoo is active; with the caster's own Runic Tattoos: Earth 801094 (spell_ranks chain 801094, 803754-803758) a",
+    "shield absorbing at least $m1 (300) arrives at the next 20 s tick; after switching to Runic Tattoos: Fire 801106",
+    "the shield expires and is not renewed."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the character settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 801094},
+    {"action": "learn", "actor": "rm", "spell": 801106},
+    {"action": "learn", "actor": "rm", "spell": 806996},
+    {"action": "assert", "actor": "rm", "metric": "aura", "spell": 806996, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "SETUP: no tattoo is active", "actor": "rm", "metric": "aura", "spell": 801094,
+      "equals": 0},
+    {"action": "wait", "label": "Pass the first 20 s tick without a tattoo", "ms": 21000},
+    {"action": "assert", "label": "CONTRACT: no Granite Shield without Runic Tattoos: Earth", "actor": "rm",
+      "metric": "aura", "spell": 520822, "equals": 0},
+
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "actor": "rm", "spell": 801094},
+    {"action": "assert", "label": "Runic Tattoos: Earth is active", "actor": "rm", "metric": "aura", "spell": 801094,
+      "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "CONTRACT: the next tick grants Granite Shield", "actor": "rm", "metric": "aura",
+      "spell": 520822, "equals": 1, "within_ms": 21000},
+    {"action": "assert", "label": "The shield absorbs at least its base 300", "actor": "rm", "metric": "aura_amount",
+      "spell": 520822, "effect": 0, "min": 300},
+    {"action": "assert", "label": "The shield lasts 20 s", "actor": "rm", "metric": "aura_duration_ms",
+      "spell": 520822, "min": 18000, "max": 20000},
+
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "actor": "rm", "spell": 801106},
+    {"action": "assert", "label": "Runic Tattoos: Fire replaces Earth", "actor": "rm", "metric": "aura",
+      "spell": 801106, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "actor": "rm", "metric": "aura", "spell": 801094, "equals": 0, "within_ms": 2000},
+    {"action": "wait", "label": "Let the shield expire through the next tick", "ms": 23000},
+    {"action": "assert", "label": "CONTRACT: the shield is not renewed without Runic Tattoos: Earth", "actor": "rm",
+      "metric": "aura", "spell": 520822, "equals": 0}
+  ]
+}

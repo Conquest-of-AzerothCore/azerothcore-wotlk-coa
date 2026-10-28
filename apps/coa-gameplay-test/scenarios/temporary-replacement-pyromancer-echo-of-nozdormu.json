@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "An Echo of Nozdormu button is saved as Explode (#5469)",
+  "contract": "Echo of Nozdormu 520937 ('Transforms your Explode into Echo of Nozdormu. @s:802174') is a passive bound to aura_ascension_pyromancer_lifecycle, whose apply calls AscensionPyromancer::Refresh (AscensionPyromancerAuras.cpp:54-55); Refresh also runs periodically. While the aura is active, Refresh learns every PyromancerEchoRanks entry with SpellLevel at or below the player's level with learnSpell(..., true) (AscensionPyromancer.cpp:366-369) and replaces every known Explode rank (chain of 800792) with the highest learned Echo rank through SetTemporarySpellReplacement (lines 370-372). At level 15 that is only Echo of Nozdormu rank 1 802174 (SpellLevel 11; rank 2 803407 is level 18). 802174 is never written to character_spell, so a button holding it must be saved as Explode 800792, the spell persisted_action_button reads from Player::GetSavedActionButtonSpell; a button holding Explode itself is saved unchanged.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "pyro", "race": 1, "class": 24, "level": 15 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login state settle", "ms": 3000 },
+    { "action": "learn", "actor": "pyro", "spell": 800792 },
+    { "action": "learn", "actor": "pyro", "spell": 520937 },
+    {
+      "action": "assert",
+      "label": "Echo of Nozdormu replaces Explode",
+      "actor": "pyro",
+      "metric": "temporary_spell_replacement",
+      "spell": 800792,
+      "equals": 802174,
+      "within_ms": 3000
+    },
+    { "action": "set_action_button", "actor": "pyro", "button": 2, "spell": 802174 },
+    { "action": "set_action_button", "actor": "pyro", "button": 3, "spell": 800792 },
+    {
+      "action": "assert",
+      "label": "The bar holds Echo of Nozdormu",
+      "actor": "pyro",
+      "metric": "action_button",
+      "button": 2,
+      "equals": 802174
+    },
+    {
+      "action": "assert",
+      "label": "The Echo of Nozdormu button is saved as Explode",
+      "actor": "pyro",
+      "metric": "persisted_action_button",
+      "button": 2,
+      "equals": 800792
+    },
+    {
+      "action": "assert",
+      "label": "Control: the Explode button is saved unchanged",
+      "actor": "pyro",
+      "metric": "persisted_action_button",
+      "button": 3,
+      "equals": 800792
+    }
+  ]
+}

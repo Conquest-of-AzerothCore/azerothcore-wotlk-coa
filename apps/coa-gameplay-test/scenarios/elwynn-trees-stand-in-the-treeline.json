@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "name": "Elwynn woodcutting nodes stand on the zone's trees, not on herb anchors",
+  "contract": "Elwynn's 45 nodes are placed 3 yards from a real ELWYNNTREEMID01.M2 doodad instead of on a sample of the zone's herb and ore positions, so a node is in the world where a tree already stands and gone from the open ground it used to occupy. The scenario walks three of the new coordinates and checks that the old Earthroot anchor now holds nothing. The nodes are read from the world database, so the scenario also drives the phase the harness isolates players into back to 1, which is the phase the database rows carry.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9200.0,
+    "y": -1700.0,
+    "z": 258.915,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "lumberjack",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "lumberjack",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "actor": "lumberjack",
+      "metric": "nearby_gameobject_count",
+      "entry": 244614,
+      "equals": 0,
+      "label": "no Elwynn Tree stands within 20 yards of the open test hill"
+    },
+    {
+      "action": "teleport",
+      "actor": "lumberjack",
+      "map": 0,
+      "x": -9483.43,
+      "y": -1340.74,
+      "z": 46.04,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "lumberjack",
+      "metric": "nearby_gameobject_count",
+      "entry": 244614,
+      "equals": 1,
+      "label": "the node beside the Eastvale Logging Camp stands on its tree"
+    },
+    {
+      "action": "teleport",
+      "actor": "lumberjack",
+      "map": 0,
+      "x": -10230.35,
+      "y": 722.11,
+      "z": 23.95,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "lumberjack",
+      "metric": "nearby_gameobject_count",
+      "entry": 244614,
+      "equals": 1,
+      "label": "the north-west node stands on its tree"
+    },
+    {
+      "action": "teleport",
+      "actor": "lumberjack",
+      "map": 0,
+      "x": -10142.42,
+      "y": 661.34,
+      "z": 32.97,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "lumberjack",
+      "metric": "nearby_gameobject_count",
+      "entry": 244614,
+      "equals": 1,
+      "label": "the second north-west node stands on its tree"
+    },
+    {
+      "action": "teleport",
+      "actor": "lumberjack",
+      "map": 0,
+      "x": -9049.12,
+      "y": 138.53,
+      "z": 118.89,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "lumberjack",
+      "metric": "nearby_gameobject_count",
+      "entry": 244614,
+      "equals": 0,
+      "label": "the Earthroot anchor that used to hold a tree is empty ground again"
+    }
+  ]
+}

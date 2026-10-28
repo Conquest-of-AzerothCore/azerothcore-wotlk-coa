@@ -165,6 +165,19 @@ def main():
                 check(', '.join(exempt) + ' exempt, ' + label,
                       run(executable, config=1, **exempt, **decay, **case), expected)
 
+        for config in (0, 1):
+            for delay, expected_delay in ((375, 30), (25, 25), (10, 25)):
+                check(f'named quest target, config {config}, delay {delay}',
+                      run(executable, config=config, decay=300, delay=delay, named=1),
+                      {'corpse': DEATH + expected_delay, 'respawn': DEATH + expected_delay})
+        check('named flag does not shorten dungeon respawns',
+              run(executable, config=1, decay=60, delay=7200, dungeon=1, named=1),
+              {'corpse': DEATH + 60, 'death_save': DEATH + 7200})
+        for config in (0, 1):
+            check(f'named flag preserves world boss respawns, config {config}',
+                  run(executable, config=config, decay=300, delay=7200, named=1, worldboss=1),
+                  {'corpse': DEATH + 300, 'death_save': DEATH + 7200 + (0 if config else 300)})
+
         roll = dict(rank=1, delay=180, roll=1170, roll_ms=60000)
         check('group roll holds the corpse past the respawn time',
               run(executable, config=1, decay=300, **roll), vanilla(**roll))

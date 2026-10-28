@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "Rulesets: a new character starts in PvE Mode without War Mode (#4560)",
+  "contract": "CoA.RulesetLoginDefault=1 (conf/dist/coa.conf.dist) selects PvE for a character without a ruleset; AscensionRulesets.cpp ApplyRuleset removes every ruleset aura and casts PvE Mode 9931032 alone, so a fresh level 1 character must carry PvE Mode 9931032 and not War Mode 1004119. The PvP flag itself has no harness metric and is untested.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "fresh",
+      "race": 2,
+      "class": 29,
+      "level": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The new character carries PvE Mode",
+      "actor": "fresh",
+      "metric": "aura",
+      "spell": 9931032,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The new character has no War Mode",
+      "actor": "fresh",
+      "metric": "aura",
+      "spell": 1004119,
+      "equals": 0
+    },
+    {
+      "action": "login_hooks",
+      "label": "Log in again",
+      "actor": "fresh"
+    },
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "PvE Mode survives the next login",
+      "actor": "fresh",
+      "metric": "aura",
+      "spell": 9931032,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "War Mode stays off after the next login",
+      "actor": "fresh",
+      "metric": "aura",
+      "spell": 1004119,
+      "equals": 0
+    }
+  ]
+}

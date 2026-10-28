@@ -1,7 +1,18 @@
 {
   "schema": 1,
   "name": "Blood Bond pays the Bloodmage when the bonded ally is hit (#1930)",
-  "contract": "Blood Bond 504627 has two effects. Effect 1 (aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL on 505169, the out-of-combat +30% movement speed) is native and already works. Effect 0 is SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) on Blood Bond 505325, a SPELL_EFFECT_ENERGIZE of MiscValue 1 (Rage) BasePoints 9 plus SPELL_EFFECT_ASCENSION_RESTORE_BASE_HEALTH_PCT BasePoints 2, both TargetA 1 (caster). Spell.dbc gives 504627 ProcFlags 0 and no spell_proc row existed, so the aura was inert. The tooltip is 'causing direct damage taken by the ally to generate $/10;505325s1 Rage and ${$505325m2+$505325ppl2}% base health' - for the Bloodmage, not for the ally - but effect 0's TargetA is 57, so the aura lives on the ally and the default proc path would hand the Rage to the ally; the AuraScript redirects the cast to the aura's caster. The Bloodmage does nothing while the ally tanks, and an idle character has no other in-combat Rage source, so any increase comes from Blood Bond. NOT covered: the tooltip's third clause, 'redirect $s3% of their threat generated to you', has no effect slot on 504627 at all, so it is neither implemented nor asserted here. Harness constraint: fixture creatures are forced REACT_PASSIVE twice during setup (CoAGameplayTest.cpp) and CreatureAI::UpdateVictim never selects a victim for a passive creature, so a fixture can never strike a player, and the harness has no player-versus-player combat either. The only incoming damage available is therefore from creatures the fixture itself summons, which are ordinary spawns and not subject to the fixture's forced passivity. Scholomance Dark Summoner 11582 is used for that: its SmartAI casts Summon Risen Lackey 17618 on itself 2-5 s after engaging and again every 5-7 s, the self-targeted shape the harness can drive, and the Risen Lackeys then attack normally. QA Test +10000 HP/MP 10040 at 20 stacks raises maximum health by about 200000 so nobody in this scenario can be killed by them.",
+  "contract": [
+    "Blood Bond 504627 applies its aura to the ally. Its original trigger 505325 restores 10 internal Rage",
+    "and base health to the Bloodmage who cast the bond. The spell_proc row selects direct damage; the",
+    "AuraScript redirects the reward to the bond caster. This fixture uses a defensive Scholomance Dark",
+    "Summoner 11582 and ordinary attacks, with the Bloodmage twenty yards from the ally. A control requires",
+    "real ally damage before the bond and no reward. After a normal bond cast, actual 505325 energize events",
+    "must reach the caster and never the ally. Raw Rage alone is insufficient evidence because damage taken",
+    "can generate Rage independently. Native threat redirection and client presentation remain outside this",
+    "scenario.",
+    "The original periodic speed helper 505169 accepts only peaceful targets. Combat skips that tick so its",
+    "rejection cannot expire the thirty-minute parent bond."
+  ],
   "timeout_ms": 90000,
   "players": [
     {
@@ -11,7 +22,8 @@
       "level": 80,
       "spell_hit_rating": 10000,
       "melee_hit_rating": 10000,
-      "expertise_rating": 10000
+      "expertise_rating": 10000,
+      "allow_regeneration": false
     },
     {
       "id": "ally",
@@ -20,7 +32,8 @@
       "level": 80,
       "spell_hit_rating": 10000,
       "melee_hit_rating": 10000,
-      "expertise_rating": 10000
+      "expertise_rating": 10000,
+      "allow_regeneration": false
     }
   ],
   "creatures": [
@@ -31,19 +44,115 @@
       "faction": 14,
       "level": 80,
       "health": 1000000,
-      "distance": 3
+      "distance": 3,
+      "reaction": 1
     }
   ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
   "steps": [
     {
       "action": "wait",
-      "label": "Let spawn AI and level scaling settle",
+      "label": "Let spawn AI settle",
       "ms": 5000
     },
     {
       "action": "group",
       "actor": "bloodmage",
       "target": "ally"
+    },
+    {
+      "action": "set_aura",
+      "actor": "bloodmage",
+      "spell": 10040,
+      "stacks": 20
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 10040,
+      "stacks": 20
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "max_health",
+      "label": "Caster survives the normal combat window",
+      "min": 200000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "max_health",
+      "label": "Ally survives the normal combat window",
+      "min": 200000
+    },
+    {
+      "action": "teleport",
+      "actor": "bloodmage",
+      "map": 0,
+      "x": -8969.95,
+      "y": -132.493,
+      "z": 83.5312,
+      "o": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "health",
+      "save_as": "ally_before_control"
+    },
+    {
+      "action": "attack",
+      "actor": "ally",
+      "target": "summoner"
+    },
+    {
+      "action": "assert",
+      "actor": "summoner",
+      "metric": "victim",
+      "label": "Defensive NPC selects the attacking ally",
+      "target": "ally",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "health",
+      "label": "Control includes real damage to the ally",
+      "relative_to": "ally_before_control",
+      "max": -1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "spell_cast_count",
+      "label": "No reward without a bond",
+      "spell": 505325,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "spell_energize_count",
+      "label": "No reward energize without a bond",
+      "spell": 505325,
+      "target": "bloodmage",
+      "power": 1,
+      "equals": 0
     },
     {
       "action": "learn",
@@ -57,20 +166,6 @@
       "value": 1000
     },
     {
-      "action": "set_aura",
-      "actor": "ally",
-      "spell": 10040,
-      "stacks": 20
-    },
-    {
-      "action": "assert",
-      "label": "The ally cannot be killed by the adds",
-      "actor": "ally",
-      "metric": "max_health",
-      "min": 200000,
-      "within_ms": 3000
-    },
-    {
       "action": "cast",
       "actor": "bloodmage",
       "spell": 504627,
@@ -78,9 +173,17 @@
     },
     {
       "action": "assert",
-      "label": "The bond is on the ally",
+      "actor": "bloodmage",
+      "metric": "cast_failure",
+      "label": "Normal Blood Bond cast is accepted",
+      "spell": 504627,
+      "equals": 0
+    },
+    {
+      "action": "assert",
       "actor": "ally",
       "metric": "aura",
+      "label": "The original bond belongs to its caster",
       "spell": 504627,
       "caster": "bloodmage",
       "equals": 1,
@@ -90,39 +193,127 @@
       "action": "set_power",
       "actor": "bloodmage",
       "power": 1,
-      "value": 0,
-      "label": "Start the Bloodmage at zero Rage"
+      "value": 0
     },
     {
       "action": "snapshot",
-      "label": "Rage before the ally is hit",
-      "actor": "bloodmage",
-      "metric": "power",
-      "power": 1,
-      "save_as": "rage_before"
-    },
-    {
-      "action": "attack",
       "actor": "ally",
-      "target": "summoner"
+      "metric": "health",
+      "save_as": "ally_after_bond"
     },
     {
       "action": "assert",
-      "label": "The fixture caster is engaged and summoning",
-      "actor": "summoner",
-      "metric": "combat",
-      "equals": 1,
-      "within_ms": 10000
+      "actor": "ally",
+      "metric": "health",
+      "label": "Bonded ally takes another real hit",
+      "relative_to": "ally_after_bond",
+      "max": -1,
+      "within_ms": 15000
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: damage taken by the ally pays the Bloodmage, not the ally",
+      "actor": "bloodmage",
+      "metric": "spell_energize_count",
+      "label": "Direct ally damage energizes the bond caster",
+      "spell": 505325,
+      "target": "bloodmage",
+      "power": 1,
+      "min": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "spell_energize_total",
+      "label": "Reward carries the authored ten internal Rage",
+      "spell": 505325,
+      "target": "bloodmage",
+      "power": 1,
+      "min": 10
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "spell_cast_count",
+      "label": "The native reward spell actually cast",
+      "spell": 505325,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Native Blood Bond reward also performs its health-restoration effect",
+      "actor": "bloodmage",
+      "metric": "spell_heal_count",
+      "spell": 505325,
+      "target": "bloodmage",
+      "min": 1
+    },
+    {
+      "action": "assert",
       "actor": "bloodmage",
       "metric": "power",
+      "label": "Caster receives Rage from the observed reward",
       "power": 1,
-      "relative_to": "rage_before",
-      "min": 1,
-      "within_ms": 40000
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "spell_energize_count",
+      "label": "Caster reward never energizes the ally",
+      "spell": 505325,
+      "target": "ally",
+      "power": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_energize_count",
+      "label": "Ally never casts a reward on itself",
+      "spell": 505325,
+      "target": "ally",
+      "power": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "melee_damage_count",
+      "label": "Caster does not generate Rage by attacking",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Combat does not expire the original thirty-minute bond",
+      "actor": "ally",
+      "metric": "aura_duration_ms",
+      "spell": 504627,
+      "caster": "bloodmage",
+      "min": 1770000
+    },
+    {
+      "action": "assert",
+      "label": "The out-of-combat speed helper stays absent during combat",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 505169,
+      "caster": "bloodmage",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "alive",
+      "label": "Caster survives verification",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "alive",
+      "label": "Ally survives verification",
+      "equals": 1
     }
   ]
 }

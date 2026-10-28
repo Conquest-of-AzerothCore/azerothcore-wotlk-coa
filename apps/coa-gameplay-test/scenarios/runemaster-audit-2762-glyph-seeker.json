@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Runemaster audit #2762: Glyph Seeker raises Primordial Blast and Thaumaturgy damage",
+  "contract": [
+    "Glyph Seeker 705627: 'Increases the damage of Primordial Blast and Thaumaturgy by $s1%.' Re-verified in",
+    "Spell.dbc: single Effect0 SPELL_AURA_ADD_PCT_MODIFIER (108), MiscValue 0 = SPELLMOD_DAMAGE, EffectBasePoints0",
+    "19 with DieSides 1 = +20%, EffectSpellClassMask mask1 2097152 (0x200000) and mask2 64 (0x40) on family 38.",
+    "Thaumaturgy 520071 carries SpellFamilyName 38, SpellFamilyFlags[1] 2097152 - an exact match on mask1.",
+    "Primordial Blast 502823 carries SpellFamilyFlags[2] 64 - an exact match on mask2. The classmask OR-matches",
+    "across words, so a single spellmod correctly reaches both named spells; this is the native AzerothCore",
+    "spellmod system, no occurrence of 705627 exists in src/server/coa/. Expected: before the talent both damage",
+    "modifiers on a 100 base read unmodified; with the talent both rise to 120; unlearning restores Primordial",
+    "Blast's base modifier."
+  ],
+  "timeout_ms": 60000,
+  "players": [{"id": "rm", "race": 1, "class": 32, "level": 80}],
+  "steps": [
+    {"action": "wait", "label": "Let the character settle", "ms": 3000},
+    {"action": "assert", "label": "SETUP: Primordial Blast damage modifier starts at 100", "actor": "rm",
+      "metric": "spell_modifier", "spell": 502823, "op": 0, "base": 100, "equals": 100},
+    {"action": "assert", "label": "SETUP: Thaumaturgy damage modifier starts at 100", "actor": "rm",
+      "metric": "spell_modifier", "spell": 520071, "op": 0, "base": 100, "equals": 100},
+    {"action": "learn", "actor": "rm", "spell": 705627},
+    {"action": "assert", "label": "CONTRACT: Glyph Seeker is active", "actor": "rm", "metric": "aura",
+      "spell": 705627, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "CONTRACT: Primordial Blast rises to 120", "actor": "rm",
+      "metric": "spell_modifier", "spell": 502823, "op": 0, "base": 100, "min": 119.9, "max": 120.1},
+    {"action": "assert", "label": "CONTRACT: Thaumaturgy rises to 120", "actor": "rm", "metric": "spell_modifier",
+      "spell": 520071, "op": 0, "base": 100, "min": 119.9, "max": 120.1},
+    {"action": "unlearn", "actor": "rm", "spell": 705627},
+    {"action": "assert", "label": "CONTRACT: unlearning restores Primordial Blast's base modifier", "actor": "rm",
+      "metric": "spell_modifier", "spell": 502823, "op": 0, "base": 100, "equals": 100, "within_ms": 2000}
+  ]
+}

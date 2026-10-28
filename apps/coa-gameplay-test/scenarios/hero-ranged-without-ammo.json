@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "name": "A Hero shoots a bow without arrows; a stock warrior still needs them",
+  "contract": [
+    "Ascension removed projectile ammunition for its classes, including the classless Hero (class 10): a",
+    "Hero's Shoot (3018, a single shot, not auto-repeat in the client's Spell.dbc) fires from an equipped bow",
+    "with no arrows and consumes nothing. Stock WotLK classes keep the projectile requirement: without",
+    "ammunition in the ammo slot Shoot fails with SPELL_FAILED_NO_AMMO (75)."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 10,
+      "ranged_hit_rating": 10000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "warrior",
+      "race": 1,
+      "class": 1,
+      "level": 10,
+      "ranged_hit_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "hero_dummy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 10,
+      "health": 1000000,
+      "distance": 15
+    },
+    {
+      "id": "warrior_dummy",
+      "owner": "warrior",
+      "entry": 36,
+      "level": 10,
+      "health": 1000000,
+      "distance": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 264,
+      "label": "Prepare the weapon proficiency required by the equipped test weapon"
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 3018
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 2504
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 2504,
+      "slot": 17
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Hero carries no arrows",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 2512,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "The Hero shoots once",
+      "actor": "hero",
+      "spell": 3018,
+      "target": "hero_dummy"
+    },
+    {
+      "action": "assert",
+      "label": "The Hero's shot lands without arrows",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 3018,
+      "target": "hero_dummy",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "The Hero's shot is not refused",
+      "actor": "hero",
+      "metric": "cast_failure",
+      "spell": 3018,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "warrior",
+      "spell": 264
+    },
+    {
+      "action": "learn",
+      "actor": "warrior",
+      "spell": 3018
+    },
+    {
+      "action": "add_item",
+      "actor": "warrior",
+      "item": 2504
+    },
+    {
+      "action": "equip",
+      "actor": "warrior",
+      "item": 2504,
+      "slot": 17
+    },
+    {
+      "action": "cast",
+      "label": "The warrior tries to shoot with an empty ammo slot",
+      "actor": "warrior",
+      "spell": 3018,
+      "target": "warrior_dummy"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a stock warrior is refused with SPELL_FAILED_NO_AMMO",
+      "actor": "warrior",
+      "metric": "cast_failure",
+      "spell": 3018,
+      "equals": 75,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the warrior lands no shot",
+      "actor": "warrior",
+      "metric": "spell_damage_count",
+      "spell": 3018,
+      "target": "warrior_dummy",
+      "equals": 0
+    }
+  ]
+}

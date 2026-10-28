@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Xorothian Empowerment raises party and raid attack power by 5% (#1205)",
+  "contract": "Xorothian Empowerment 704994 reads 'Increases the attack power of all party and raid members $s1%. Does not stack with similar effects.' (installed moa_description: '5%'). Both effects use SPELL_EFFECT_APPLY_AREA_AURA_RAID (65), TargetA 1 (TARGET_UNIT_CASTER, auto-expanded to nearby group members by SpellAuras.cpp's area-aura handling via Acore::AnyGroupedUnitInObjectRangeCheck), RadiusIndex 287 (100 yards). Effect 0 is native aura 166 (SPELL_AURA_MOD_ATTACK_POWER_PCT), effect 1 is native aura 167 (SPELL_AURA_MOD_RANGED_ATTACK_POWER_PCT), both EffectBasePoints 4 with DieSides 1 -> resolved 5, verified via csv.DictReader against /home/fab/CoaServer/reference/snapshots/ascension-data/tables/spell.csv.gz. Their dispatch-table entries are AuraEffect::HandleAuraModAttackPowerPercent (SpellAuraEffects.cpp:231) and AuraEffect::HandleAuraModRangedAttackPowerPercent (:232) -- confirmed at exactly the cited lines, both real native generic AP-percent auras consumed by Unit::UpdateAttackPowerAndDamage. This is the same native effect/aura-type pair already used as the fix template for Hellbringer (apps/coa-gameplay-test/scenarios/knight-of-xoroth-hellbringer-raid-damage.json, #3911) -- nothing in AscensionXorothContracts.cpp touches 704994. NOT covered: the tooltip's 'does not stack with similar effects' clause needs a cross-spell spell_group exclusivity entry outside this single spell's scope, per the same documented limitation as Hellbringer.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "group", "actor": "knight", "target": "ally" },
+    {
+      "action": "assert", "label": "SETUP: attack power is nonzero",
+      "actor": "ally", "metric": "attack_power", "min": 1
+    },
+    { "action": "snapshot", "actor": "ally", "metric": "attack_power", "save_as": "ap_before" },
+    { "action": "snapshot", "actor": "ally", "metric": "ranged_attack_power", "save_as": "rap_before" },
+    {
+      "action": "assert", "label": "SETUP: the ally does not carry Xorothian Empowerment before the caster learns it",
+      "actor": "ally", "metric": "aura", "spell": 704994, "caster": "knight", "equals": 0
+    },
+    { "action": "learn", "actor": "knight", "spell": 704994 },
+    { "action": "set_aura", "actor": "knight", "spell": 704994, "stacks": 1, "label": "Force the Xorothian Empowerment raid aura" },
+    { "action": "wait", "label": "Let the area aura propagate to the grouped ally", "ms": 2000 },
+    {
+      "action": "assert", "label": "SETUP: the caster carries Xorothian Empowerment",
+      "actor": "knight", "metric": "aura", "spell": 704994, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the raid area aura reaches the grouped ally",
+      "actor": "ally", "metric": "aura", "spell": 704994, "caster": "knight", "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the ally's attack power rises by ~5%",
+      "actor": "ally", "metric": "attack_power", "ratio_to": "ap_before", "min": 1.045, "max": 1.055
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the ally's ranged attack power rises by ~5%",
+      "actor": "ally", "metric": "ranged_attack_power", "ratio_to": "rap_before", "min": 1.045, "max": 1.055
+    }
+  ]
+}

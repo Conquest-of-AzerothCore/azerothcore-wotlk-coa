@@ -1,0 +1,1533 @@
+{
+  "schema": 1,
+  "name": "Collection companions without a creature template can be summoned and are named",
+  "contract": "Companion spells from VanityCollection.dbc summon creatures that had no creature_template row; Creature::InitEntry refuses those, so the companion is never summoned, and 53 of the Sigil companions also had no collection model row, so the client's creature query went unanswered and the pet window showed no name or tooltip. Each summoned companion is its spell's creature, drawn with the display from the hertigservices/ascension-data creature cache at the companion scale of rev_20261009_60_companion_scale.sql (bounding box at most 1.2 yd tall and 1.8 yd long in the client's CreatureModelData/CreatureDisplayInfo). Dishu and Gilmorian already had a collection model row and are summon-only controls; the creature query for each of the 53 returns a response (rank 0) instead of the unknown-entry reply, which the metric ignores (-1). Stony Tark's display 14672 has other-gender display 14671 in creature_model_info, which the core picks half the time.",
+  "timeout_ms": 300000,
+  "location": {
+    "map": 0,
+    "x": -9458.0,
+    "y": 42.0,
+    "z": 55.5
+  },
+  "players": [
+    {
+      "id": "owner",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "learn",
+      "actor": "owner",
+      "spell": 81765
+    },
+    {
+      "action": "learn",
+      "actor": "owner",
+      "spell": 82126
+    },
+    {
+      "action": "learn",
+      "actor": "owner",
+      "spell": 81547
+    },
+    {
+      "action": "learn",
+      "actor": "owner",
+      "spell": 82017
+    },
+    {
+      "action": "learn",
+      "actor": "owner",
+      "spell": 84119
+    },
+    {
+      "action": "learn",
+      "actor": "owner",
+      "spell": 884319
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "owner",
+      "spell": 81765
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_entry",
+      "equals": 43536,
+      "within_ms": 4000,
+      "label": "81765 Sigil of Dishu summons Dishu (43536)"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_display",
+      "equals": 1043,
+      "within_ms": 4000,
+      "label": "Dishu draws as display 1043"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_scale",
+      "min": 0.5106,
+      "max": 0.5306,
+      "within_ms": 4000,
+      "label": "Dishu is summoned at companion scale 0.5206"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "owner",
+      "spell": 82126
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_entry",
+      "equals": 43898,
+      "within_ms": 4000,
+      "label": "82126 Sigil of Gilmorian summons Gilmorian (43898)"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_display",
+      "equals": 4920,
+      "within_ms": 4000,
+      "label": "Gilmorian draws as display 4920"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_scale",
+      "min": 0.6115,
+      "max": 0.6315,
+      "within_ms": 4000,
+      "label": "Gilmorian is summoned at companion scale 0.6215"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "owner",
+      "spell": 81547
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_entry",
+      "equals": 43317,
+      "within_ms": 4000,
+      "label": "81547 Sigil of Edwin VanCleef summons Edwin VanCleef (43317)"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_display",
+      "equals": 2029,
+      "within_ms": 4000,
+      "label": "Edwin VanCleef draws as display 2029"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_scale",
+      "min": 0.4595,
+      "max": 0.4795,
+      "within_ms": 4000,
+      "label": "Edwin VanCleef is summoned at companion scale 0.4695"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "owner",
+      "spell": 82017
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_entry",
+      "equals": 43788,
+      "within_ms": 4000,
+      "label": "82017 Sigil of Rattlegore summons Rattlegore (43788)"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_display",
+      "equals": 12073,
+      "within_ms": 4000,
+      "label": "Rattlegore draws as display 12073"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_scale",
+      "min": 0.2963,
+      "max": 0.3163,
+      "within_ms": 4000,
+      "label": "Rattlegore is summoned at companion scale 0.3063"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "owner",
+      "spell": 84119
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_entry",
+      "equals": 45883,
+      "within_ms": 4000,
+      "label": "84119 Sigil of High Priestess Jeklik summons High Priestess Jeklik (45883)"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_display",
+      "equals": 15219,
+      "within_ms": 4000,
+      "label": "High Priestess Jeklik draws as display 15219"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_scale",
+      "min": 0.3105,
+      "max": 0.3305,
+      "within_ms": 4000,
+      "label": "High Priestess Jeklik is summoned at companion scale 0.3205"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "owner",
+      "spell": 884319
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_entry",
+      "equals": 10157258,
+      "within_ms": 4000,
+      "label": "884319 Sigil of Stony Tark summons Stony Tark (10157258)"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_display",
+      "within_ms": 4000,
+      "label": "Stony Tark draws as display 14672 or its other-gender display 14671",
+      "min": 14671,
+      "max": 14672
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "pet_scale",
+      "min": 0.7317,
+      "max": 0.7517,
+      "within_ms": 4000,
+      "label": "Stony Tark is summoned at companion scale 0.7417"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Edwin VanCleef (43317)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43317
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Edwin VanCleef (43317) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43317,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Sneed (43318)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43318
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Sneed (43318) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43318,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Rhahk'Zor (43319)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43319
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Rhahk'Zor (43319) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43319,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Cookie (43320)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43320
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Cookie (43320) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43320,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Mr. Smite (43321)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43321
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Mr. Smite (43321) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43321,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Captain Greenskin (43323)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43323
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Captain Greenskin (43323) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43323,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Gilnid (43354)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43354
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Gilnid (43354) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43354,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Darkmaster Gandling (43366)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43366
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Darkmaster Gandling (43366) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43366,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Miner Johnson (43421)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43421
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Miner Johnson (43421) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43421,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Kresh (43424)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43424
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Kresh (43424) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43424,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Mutanus the Devourer (43425)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43425
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Mutanus the Devourer (43425) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43425,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Lord Cobrahn (43426)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43426
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Lord Cobrahn (43426) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43426,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Lord Pythas (43427)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43427
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Lord Pythas (43427) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43427,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Lady Anacondra (43428)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43428
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Lady Anacondra (43428) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43428,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Lord Serpentis (43430)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43430
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Lord Serpentis (43430) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43430,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Skum (43431)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43431
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Skum (43431) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43431,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Verdan the Everliving (43495)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43495
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Verdan the Everliving (43495) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43495,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Deviate Faerie Dragon (43537)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43537
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Deviate Faerie Dragon (43537) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43537,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Dark Iron Ambassador (43550)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43550
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Dark Iron Ambassador (43550) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43550,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Crowd Pummeler 9-60 (43551)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43551
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Crowd Pummeler 9-60 (43551) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43551,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Electrocutioner 6000 (43552)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43552
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Electrocutioner 6000 (43552) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43552,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Fallen Champion (43555)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43555
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Fallen Champion (43555) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43555,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Viscous Fallout (43576)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43576
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Viscous Fallout (43576) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43576,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Grubbis (43590)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43590
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Grubbis (43590) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43590,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Mekgineer Thermaplugg (43593)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43593
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Mekgineer Thermaplugg (43593) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43593,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Atal'alarion (43637)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43637
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Atal'alarion (43637) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43637,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Kashoch the Reaver (43691)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43691
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Kashoch the Reaver (43691) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43691,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Vectus (43714)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43714
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Vectus (43714) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43714,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Marduk Blackpool (43715)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43715
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Marduk Blackpool (43715) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43715,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Lady Illucia Barov (43722)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43722
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Lady Illucia Barov (43722) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43722,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Jandice Barov (43723)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43723
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Jandice Barov (43723) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43723,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Lord Alexei Barov (43724)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43724
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Lord Alexei Barov (43724) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43724,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Instructor Malicia (43725)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43725
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Instructor Malicia (43725) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43725,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Kirtonos the Herald (43726)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43726
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Kirtonos the Herald (43726) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43726,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query The Ravenian (43727)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43727
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The Ravenian (43727) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43727,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Ras Frostwhisper (43728)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43728
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Ras Frostwhisper (43728) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43728,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Lorekeeper Polkelt (43761)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43761
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Lorekeeper Polkelt (43761) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43761,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Doctor Theolen Krastinov (43765)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43765
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Doctor Theolen Krastinov (43765) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43765,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Oggleflint (43782)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43782
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Oggleflint (43782) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43782,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Jergosh the Invoker (43783)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43783
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Jergosh the Invoker (43783) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43783,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Bazzalan (43784)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43784
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Bazzalan (43784) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43784,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Taragaman the Hungerer (43785)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43785
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Taragaman the Hungerer (43785) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43785,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Rattlegore (43788)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43788
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Rattlegore (43788) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43788,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Renataki (43934)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43934
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Renataki (43934) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43934,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Maws (43977)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 43977
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Maws (43977) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 43977,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query High Priestess Jeklik (45883)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 45883
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "High Priestess Jeklik (45883) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 45883,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query High Priestess Arlokk (45887)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 45887
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "High Priestess Arlokk (45887) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 45887,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Gri'lek (46007)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 46007
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Gri'lek (46007) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 46007,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Hazza'rah (46008)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 46008
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Hazza'rah (46008) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 46008,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Gri'lek (46072)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 46072
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Gri'lek (46072) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 46072,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Kelivex Autumnvale (254515)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 254515
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Kelivex Autumnvale (254515) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 254515,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Captain Taveir (254517)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 254517
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Captain Taveir (254517) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 254517,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Stony Tark (10157258)",
+      "actor": "owner",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 10157258
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Stony Tark (10157258) is answered",
+      "actor": "owner",
+      "metric": "creature_query_rank",
+      "entry": 10157258,
+      "equals": 0,
+      "within_ms": 5000
+    }
+  ]
+}

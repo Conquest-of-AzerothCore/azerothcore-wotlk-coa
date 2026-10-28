@@ -1,0 +1,191 @@
+{
+  "schema": 1,
+  "name": "Soulrot follows Deathchaser damage and detonates on expiry (#1392)",
+  "contract": [
+    "A Reaper with Soulrot applies debuff 804660 when Deathchaser 805190 damages a hostile creature.",
+    "Successive Deathchaser ticks add stacks up to the DBC cap of 20.",
+    "The 15-second debuff deals one late damage event when it expires.",
+    "Deathchaser 805190 is DmgClass 2 (melee), so its application rolls melee miss and dodge against the same-level victim; the Reaper gets melee hit and expertise rating so that roll cannot leave the victim without the periodic aura. Soulrot 804660 is a magic spell covered by the spell hit rating."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "victim",
+      "owner": "reaper",
+      "entry": 299,
+      "level": 80,
+      "distance": 2,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 805196
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 805190
+    },
+    {
+      "action": "set_aura",
+      "label": "Supply Deathchaser's required Soul Infusion",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Soul Infusion satisfies Deathchaser's caster aura requirement",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Soulrot passive is active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 805196,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Victim has no Soulrot before Deathchaser",
+      "actor": "victim",
+      "metric": "aura",
+      "spell": 804660,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Deathchaser damages the hostile creature",
+      "actor": "reaper",
+      "spell": 805190,
+      "target": "victim"
+    },
+    {
+      "action": "assert",
+      "label": "Deathchaser cast was accepted",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 805190,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Deathchaser cast completed",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 805190,
+      "target": "victim",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Deathchaser periodic aura is active",
+      "actor": "victim",
+      "metric": "aura",
+      "spell": 805190,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Deathchaser damage occurred",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 805190,
+      "target": "victim",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Deathchaser applied Soulrot",
+      "actor": "victim",
+      "metric": "aura",
+      "spell": 804660,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Later Deathchaser ticks added Soulrot stacks",
+      "actor": "victim",
+      "metric": "aura_stacks",
+      "spell": 804660,
+      "min": 2,
+      "max": 20,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Soulrot has not detonated before expiry",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 804660,
+      "target": "victim",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let Soulrot reach its late damage tick",
+      "ms": 16500
+    },
+    {
+      "action": "assert",
+      "label": "Soulrot expired",
+      "actor": "victim",
+      "metric": "aura",
+      "spell": 804660,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Soulrot dealt one expiry damage event",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 804660,
+      "target": "victim",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Soulrot expiry damage was positive",
+      "actor": "reaper",
+      "metric": "spell_damage_total",
+      "spell": 804660,
+      "target": "victim",
+      "min": 1
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Necromancer Rotting Flesh needs its level 30 passive and lasts five seconds (#295)",
+  "contract": "Rotting Flesh 574138 is the Necromancer's level 30 passive (CharacterAdvancement 9223 RequiredLevel 30, class 23; description 'Level 30 Passive: Applying Crypt Plague to an enemy now additionally adds Rotting Flesh to your Undead minions ... for $/1000;s1 sec'). Its only effect is aura 107 (ADD_FLAT_MODIFIER) misc 1 (SPELLMOD_DURATION), BasePoints 4999 DieSides 1 (+5000 ms), class mask word 0 0x200, which matches the buff 573131 (family 29, SpellFamilyFlags word 0 0x200). The buff 573131 has DurationIndex 0 in Spell.dbc, so it has no duration of its own: the passive is both its gate and its five-second duration. Crypt Plague 92121 (level 10 passive) makes Crypt Swarm damage (800343) apply Crypt Plague 570131. A level 10 Necromancer without 574138 must get Crypt Plague on the target and no Rotting Flesh on itself (the buff reaches minions only through the owner's aura, effect 190). After reaching level 30 and learning 574138, the same Crypt Swarm must add Rotting Flesh with at most 5000 ms remaining, and it must lapse within five seconds of the channel's last tick.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 10, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "necro", "entry": 36, "level": 10, "health": 100000, "distance": 8 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "necro", "spell": 500965 },
+    { "action": "learn", "actor": "necro", "spell": 92121 },
+    {
+      "action": "assert", "label": "Level 10 fixture lacks the level 30 passive", "actor": "necro",
+      "metric": "knows_spell", "spell": 574138, "equals": 0
+    },
+    { "action": "cast", "actor": "necro", "spell": 500965, "target": "golem" },
+    {
+      "action": "assert", "label": "Crypt Swarm damage applies Crypt Plague", "actor": "golem",
+      "metric": "aura", "spell": 570131, "caster": "necro", "equals": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Let the whole channel tick", "ms": 3000 },
+    {
+      "action": "assert", "label": "No Rotting Flesh without the level 30 passive", "actor": "necro",
+      "metric": "aura", "spell": 573131, "equals": 0
+    },
+    { "action": "set_level", "actor": "necro", "value": 30 },
+    { "action": "assert", "actor": "necro", "metric": "level", "equals": 30 },
+    { "action": "learn", "actor": "necro", "spell": 574138 },
+    { "action": "assert", "actor": "necro", "metric": "knows_spell", "spell": 574138, "equals": 1 },
+    { "action": "cast", "actor": "necro", "spell": 500965, "target": "golem" },
+    {
+      "action": "assert", "label": "With the passive, Crypt Plague application adds Rotting Flesh", "actor": "necro",
+      "metric": "aura", "spell": 573131, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "The passive supplies the authored five-second duration", "actor": "necro",
+      "metric": "aura_duration_ms", "spell": 573131, "min": 1, "max": 5000
+    },
+    {
+      "action": "assert", "label": "Rotting Flesh lapses five seconds after the last tick", "actor": "necro",
+      "metric": "aura", "spell": 573131, "equals": 0, "within_ms": 9000
+    }
+  ]
+}

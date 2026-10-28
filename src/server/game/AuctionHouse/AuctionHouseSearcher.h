@@ -73,6 +73,7 @@ struct SearchableAuctionEntryItem
     uint32 count;
     int32 spellCharges;
     ItemTemplate const* itemTemplate;
+    ObjectGuid::LowType guidLow = 0;
 };
 
 struct SearchableAuctionEntry

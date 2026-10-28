@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "name": "Guardian Tower Formation: activation shows its shield visual (#321, #412)",
+  "contract": "Each Guardian formation has one client visual. Line Formation 803130 and Assault Formation 803417 carry it on the main spell (SpellVisual 1000211 and 1000, cast kits with a head effect and sound). Tower Formation 800317 has SpellVisual 0; its visual is the separate helper 803941 'Tower Formation (Visual)': a 1.5 s dummy aura (DurationIndex 65) whose SpellVisual 2011 state kit 3252 attaches cfx_warrior_spellreflect_impactplayername, a shield above the character's name, with a sound. No DBC effect triggers 803941, so selecting Tower Formation must cast it. The visual flashes once per activation, expires while the formation stays active, and is not cast by the other formations.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "guardian", "race": 1, "class": 18, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login state settle", "ms": 5000 },
+    { "action": "learn", "actor": "guardian", "spell": 800317 },
+    { "action": "learn", "actor": "guardian", "spell": 803130 },
+    { "action": "assert", "actor": "guardian", "metric": "aura", "spell": 803941, "equals": 0 },
+    {
+      "action": "snapshot", "actor": "guardian", "metric": "spell_cast_count", "spell": 803941,
+      "save_as": "before_tower"
+    },
+    { "action": "set_power", "actor": "guardian", "power": 3, "value": 100 },
+    { "action": "cast", "actor": "guardian", "spell": 800317 },
+    {
+      "action": "assert", "label": "Tower Formation becomes active", "actor": "guardian", "metric": "aura",
+      "spell": 800317, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Its stance helper applies", "actor": "guardian", "metric": "aura", "spell": 803907,
+      "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Selecting Tower Formation casts its visual once", "actor": "guardian",
+      "metric": "spell_cast_count", "spell": 803941, "relative_to": "before_tower", "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The shield visual aura is on the Guardian", "actor": "guardian", "metric": "aura",
+      "spell": 803941, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The visual is a brief flash", "actor": "guardian", "metric": "aura",
+      "spell": 803941, "equals": 0, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The formation outlasts its visual", "actor": "guardian", "metric": "aura",
+      "spell": 800317, "equals": 1
+    },
+    {
+      "action": "snapshot", "actor": "guardian", "metric": "spell_cast_count", "spell": 803941,
+      "save_as": "before_line"
+    },
+    { "action": "set_power", "actor": "guardian", "power": 3, "value": 100 },
+    { "action": "cast", "actor": "guardian", "spell": 803130 },
+    {
+      "action": "assert", "label": "Line Formation replaces Tower Formation", "actor": "guardian", "metric": "aura",
+      "spell": 800317, "equals": 0, "within_ms": 1000
+    },
+    { "action": "assert", "actor": "guardian", "metric": "aura", "spell": 803130, "equals": 1, "within_ms": 1000 },
+    { "action": "wait", "label": "Clear both formation category cooldowns", "ms": 1600 },
+    {
+      "action": "assert", "label": "Another formation does not cast the Tower visual", "actor": "guardian",
+      "metric": "spell_cast_count", "spell": 803941, "relative_to": "before_line", "equals": 0
+    },
+    { "action": "set_power", "actor": "guardian", "power": 3, "value": 100 },
+    { "action": "cast", "actor": "guardian", "spell": 800317 },
+    {
+      "action": "assert", "label": "Switching back to Tower Formation shows the visual again", "actor": "guardian",
+      "metric": "spell_cast_count", "spell": 803941, "relative_to": "before_line", "equals": 1, "within_ms": 1000
+    },
+    { "action": "assert", "actor": "guardian", "metric": "aura", "spell": 803941, "equals": 1, "within_ms": 1000 }
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "contract": "#8669: Rocket Boots (500241) dispels roots and launches the Tinker forward through 760384, a SPELL_EFFECT_LEAP_BACK knockback (15 yd/s forward, 9 yd/s up). A moving caster got a one-second run speed surge instead of the launch. The leap must fire for a moving caster too and leave the run speed rate alone; the knockback itself is client-acknowledged, so its displacement is outside this socketless harness.",
+  "creatures": [
+    {
+      "distance": 35,
+      "entry": 36,
+      "health": 1000000,
+      "id": "dummy",
+      "level": 80,
+      "owner": "tinker"
+    }
+  ],
+  "location": {
+    "map": 0,
+    "o": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711
+  },
+  "name": "Rocket Boots launches a moving caster instead of a run speed surge (#8669)",
+  "players": [
+    {
+      "class": 28,
+      "id": "tinker",
+      "level": 80,
+      "race": 1
+    }
+  ],
+  "schema": 1,
+  "timeout_ms": 90000,
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "label": "Learn Rocket Boots",
+      "spell": 500241
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "equals": 1,
+      "label": "SETUP: the Tinker knows Rocket Boots",
+      "metric": "knows_spell",
+      "spell": 500241
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "label": "Baseline run speed rate",
+      "metric": "run_speed_rate",
+      "save_as": "rate0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "label": "Baseline leap casts",
+      "metric": "spell_cast_count",
+      "save_as": "leaps0",
+      "spell": 760384
+    },
+    {
+      "action": "set_moving",
+      "actor": "tinker",
+      "enabled": true,
+      "label": "Start moving forward, as auto-run or a held key does"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "equals": 1,
+      "label": "SETUP: the Tinker is moving",
+      "metric": "moving"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "label": "Rocket Boots while moving",
+      "spell": 500241
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "label": "Rocket Boots triggers its leap 760384",
+      "metric": "spell_cast_count",
+      "min": 1,
+      "relative_to": "leaps0",
+      "spell": 760384,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Wait into the window the surge used to cover",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "label": "DISCRIMINATING: the moving cast does not trade the launch for a run speed surge",
+      "max": 0.05,
+      "metric": "run_speed_rate",
+      "min": -0.05,
+      "relative_to": "rate0"
+    },
+    {
+      "action": "set_moving",
+      "actor": "tinker",
+      "enabled": false,
+      "label": "Stop moving"
+    }
+  ]
+}

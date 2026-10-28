@@ -1,0 +1,127 @@
+{
+  "schema": 1,
+  "name": "The Wondrous Wisdomball offers each faction only its own Thunderbrew recipe (#7940)",
+  "contract": [
+    "Blackrock Depths quests 4126 (Hurley Blackbreath, AllowableRaces 1101, Alliance)",
+    "and 4134 (Lost Thunderbrew Recipe, Horde mirror, same recipe item 11312) are the",
+    "same objective for the two factions. 4134 shipped AllowableRaces 0, so the ball,",
+    "which bypasses the Horde-only giver, offered and granted both versions to anyone.",
+    "With 4134 gated to 690, an Alliance character must never be offered or granted",
+    "4134 while still taking 4126 normally, mirroring the Blackfathom Villainy",
+    "pair in wisdomball-quest-eligibility."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 230,
+    "x": 458.971,
+    "y": 23.8308,
+    "z": -70.7812,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let Blackrock Depths settle",
+      "ms": 8000
+    },
+    {
+      "action": "add_item",
+      "label": "Obtain the companion, as a purchase would",
+      "actor": "hero",
+      "item": 101169,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "label": "Using the item teaches its summon",
+      "actor": "hero",
+      "item": 101169,
+      "spell": 55884
+    },
+    {
+      "action": "assert",
+      "label": "The summon is learned",
+      "actor": "hero",
+      "metric": "knows_spell",
+      "spell": 83050,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "Summon the ball in Blackrock Depths",
+      "actor": "hero",
+      "spell": 83050
+    },
+    {
+      "action": "wait",
+      "label": "Let the summon land",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The cast produced a creature this Alliance hero owns",
+      "actor": "hero",
+      "metric": "owned_creature_count",
+      "entry": 79025,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The ball never offers the Horde turn-in of the Thunderbrew recipe",
+      "actor": "hero",
+      "metric": "ball_offers_quest",
+      "quest": 4134,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "quest_accept",
+      "label": "Try to take the Horde-only version anyway, as a hostile client would",
+      "actor": "hero",
+      "quest": 4134,
+      "entry": 79025
+    },
+    {
+      "action": "assert",
+      "label": "The ball refuses it outright - it never enters the log",
+      "actor": "hero",
+      "metric": "quest_status",
+      "quest": 4134,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The ball still offers this Alliance hero the Alliance turn-in",
+      "actor": "hero",
+      "metric": "ball_offers_quest",
+      "quest": 4126,
+      "equals": 1
+    },
+    {
+      "action": "quest_accept",
+      "label": "Take the Alliance version normally",
+      "actor": "hero",
+      "quest": 4126,
+      "entry": 79025
+    },
+    {
+      "action": "assert",
+      "label": "The character's own faction quest is granted",
+      "actor": "hero",
+      "metric": "quest_status",
+      "quest": 4126,
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

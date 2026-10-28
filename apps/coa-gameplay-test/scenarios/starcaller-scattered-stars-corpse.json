@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Scattered Stars consumers still hit and pay mana on a corpse (#4224)",
-  "contract": "Scattered Stars 804378 (Spell.dbc AttributesEx3 0x40140080 has SPELL_ATTR3_ALLOW_AURA_WHILE_DEAD 0x100000, so SpellInfo::IsDeathPersistent keeps the stacks through Unit::RemoveAllAurasOnDeath; Ex2 0x400005 has SPELL_ATTR2_ALLOW_DEAD_TARGET 0x1). The consumer 804716 (periodic dummy, amplitude 500, Ex3 0x40100000 death persistent, Ex2 0x5), 572315 (Ex2 0x5) and the hit helper 804995 (Ex2 0x80005) carry the same dead-target flag; the record is authored for corpses. Before the fix StartConsume() cast 804716 through Cast(), which requires target->IsAlive(), and Consume() called IsValidAttackTarget(target) without the spell, which rejects a dead target (Unit.cpp _IsValidAttackTarget), so a Lance that killed its target consumed nothing and paid no mana. Both fixtures are the same race/class/level: each applies one star with Fan of Knives 680703, sets mana to 0, and casts Lunar Lance 801132 (cost 0, trigger 572315 -> StartConsume). The control's target is healthy (the consume path that always worked); the test's target has 1 health so the Lance kills it and the consumer must run on the corpse. The consume returns 8% of maximum mana, so the test fixture's mana over the control's must be about 1.0; without the fix the corpse case returns only regeneration (near 0). The assertion demands at least 0.8. Known limit: the creature corpse must still exist about a second after death; it should, corpses last minutes.",
+  "contract": "Scattered Stars 804378 (Spell.dbc AttributesEx3 0x40140080 has SPELL_ATTR3_ALLOW_AURA_WHILE_DEAD 0x100000, so SpellInfo::IsDeathPersistent keeps the stacks through Unit::RemoveAllAurasOnDeath; Ex2 0x400005 has SPELL_ATTR2_ALLOW_DEAD_TARGET 0x1). The consumer 804716 (periodic dummy, amplitude 500, Ex3 0x40100000 death persistent, Ex2 0x5), 572315 (Ex2 0x5) and the hit helper 804995 (Ex2 0x80005) carry the same dead-target flag; the record is authored for corpses. Before the fix StartConsume() cast 804716 through Cast(), which requires target->IsAlive(), and Consume() called IsValidAttackTarget(target) without the spell, which rejects a dead target (Unit.cpp _IsValidAttackTarget), so a Lance that killed its target consumed nothing and paid no mana. Both fixtures are the same race/class/level: each applies one star with Fan of Knives 680703, sets mana to 0, and casts Lunar Lance 801132 (cost 0, trigger 572315 -> StartConsume). The control's target is healthy (the consume path that always worked); the test's target has 1 health so the Lance kills it and the consumer must run on the corpse. The consume returns 8% of maximum mana, so the test fixture's mana over the control's must be about 1.0; without the fix the corpse case returns only regeneration (near 0). The assertion demands at least 0.8. Known limit: the creature corpse must still exist about a second after death; it should, corpses last minutes. The control's Lunar Lance used to follow its Fan of Knives by a few steps and was refused with NOT_READY in every run, so the control returned regeneration only and the ratio passed without the fix as well; the control now waits out the global cooldown, the ratio has an upper bound, and both fixtures carry melee and ranged hit and expertise ratings because Fan of Knives is a melee-class and Lunar Lance a ranged-class spell.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -9,14 +9,20 @@
       "race": 1,
       "class": 26,
       "level": 80,
-      "spell_hit_rating": 10000
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "ranged_hit_rating": 10000
     },
     {
       "id": "test",
       "race": 1,
       "class": 26,
       "level": 80,
-      "spell_hit_rating": 10000
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "ranged_hit_rating": 10000
     }
   ],
   "creatures": [
@@ -102,6 +108,11 @@
       "within_ms": 3000
     },
     {
+      "action": "wait",
+      "label": "Let the global cooldown of Fan of Knives end so the control's Lunar Lance is accepted",
+      "ms": 2500
+    },
+    {
       "action": "set_power",
       "actor": "control",
       "value": 0
@@ -152,7 +163,8 @@
       "actor": "test",
       "metric": "power",
       "ratio_to": "alive_mana",
-      "min": 0.8
+      "min": 0.8,
+      "max": 1.25
     }
   ]
 }

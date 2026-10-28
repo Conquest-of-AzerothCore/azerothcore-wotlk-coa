@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Blood Covenant pays its health cost and places its ritual object (#3996)",
+  "contract": "#3996: 'not taking health, no rune, can't summon.' Blood Covenant 1200012 is a channeled ritual built like Ritual of Summoning 698: effect 0 SPELL_EFFECT_TRANS_DOOR (50) at TARGET_DEST_CASTER_FRONT summons gameobject 194111, a GAMEOBJECT_TYPE_SUMMONING_RITUAL whose completion spell 1200014 places the meeting-stone rune 194114. Its cost is PowerType -2 (health) with ManaCostPercentage 90, which SpellInfo::CalcPowerCost takes from create health: 90% of the level-40 Bloodmage base health 704 (player_class_stats) = 633, paid by Spell::TakePower when the channel starts. Neither 194111 nor 194114 has a gameobject_template row in coa_world or in any SQL file, so Spell::EffectTransmitted logs the missing template and returns and nothing appears. Expected: the cast costs 633 health and places gameobject 194111 in front of the Bloodmage. The health assert passes on main; the object assert fails on main (count 0) and passes once the templates exist.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "b", "race": 1, "class": 20, "level": 40, "allow_regeneration": false }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 4000 },
+    { "action": "learn", "actor": "b", "spell": 1200012 },
+    { "action": "assert", "label": "SETUP: no ritual object nearby", "actor": "b", "metric": "nearby_gameobject_count", "entry": 194111, "equals": 0 },
+    { "action": "snapshot", "actor": "b", "metric": "health", "save_as": "before_cast" },
+    { "action": "cast", "label": "Begin Blood Covenant", "actor": "b", "spell": 1200012 },
+    { "action": "assert", "label": "The cast was not refused", "actor": "b", "metric": "cast_failure", "spell": 1200012, "equals": 0 },
+    { "action": "assert", "label": "Blood Covenant takes 90% of base health (704 -> 633)", "actor": "b", "metric": "health", "relative_to": "before_cast", "equals": -633, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: the Blood Covenant object stands in front of the Bloodmage", "actor": "b", "metric": "nearby_gameobject_count", "entry": 194111, "equals": 1, "within_ms": 5000 }
+  ]
+}

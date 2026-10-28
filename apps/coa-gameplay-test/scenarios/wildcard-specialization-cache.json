@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "The first Wildcard character of an account finds one Specialization Cache instead of the CoA warchest",
+  "contract": "On Darkmoon - Season 10 Wildcard the first character an account created on the realm found a Specialization Cache (2977359, soulbound, 'Realm Bound') in its bags at level 1, once per account. Opening it granted Tome of Specialization II-VI (106954, 134980-134983) into the bags, or by mail where they are full, whose spells unlock specializations 2-6 in Character Advancement at any level. Its tooltip also lists 6x Mystic Enchanting: Specialization (1806961), but Mystic Enchanting did not exist in Season 10, so the cache holds none. The Conquest of Azeroth Elite Warchest (2977351, mailed at level 10, which also holds Tomes of Specialization) did not exist there, so a Wildcard Hero does not receive it; a Hero outside Wildcard still does.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "wild", "race": 1, "class": 10, "level": 1},
+    {"id": "plain", "race": 1, "class": 10, "level": 10}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 3000},
+    {"action": "console", "command": "coa gamemode WildCard on Harnessa"},
+    {"action": "console", "command": "coa gamemode WildCard off Harnessb"},
+    {"action": "login_hooks", "actor": "wild"},
+    {"action": "assert", "label": "The first Wildcard login brings the cache", "actor": "wild", "metric": "item_count", "item": 2977359, "equals": 1},
+    {"action": "login_hooks", "actor": "wild"},
+    {"action": "assert", "label": "only once per account", "actor": "wild", "metric": "item_count", "item": 2977359, "equals": 1},
+
+    {"action": "use_item", "label": "Open the cache", "actor": "wild", "item": 2977359, "spell": 93461},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "It holds no Mystic Enchanting: Specialization", "actor": "wild", "metric": "item_count", "item": 1806961, "equals": 0},
+    {"action": "assert", "label": "It holds a Tome of Specialization II", "actor": "wild", "metric": "item_count", "item": 106954, "equals": 1},
+    {"action": "assert", "label": "a Tome of Specialization III", "actor": "wild", "metric": "item_count", "item": 134980, "equals": 1},
+    {"action": "assert", "label": "a Tome of Specialization IV", "actor": "wild", "metric": "item_count", "item": 134981, "equals": 1},
+    {"action": "assert", "label": "a Tome of Specialization V", "actor": "wild", "metric": "item_count", "item": 134982, "equals": 1},
+    {"action": "assert", "label": "and a Tome of Specialization VI", "actor": "wild", "metric": "item_count", "item": 134983, "equals": 1},
+    {"action": "assert", "label": "The cache is used up", "actor": "wild", "metric": "item_count", "item": 2977359, "equals": 0},
+    {"action": "login_hooks", "actor": "wild"},
+    {"action": "assert", "label": "and does not come back", "actor": "wild", "metric": "item_count", "item": 2977359, "equals": 0},
+
+    {"action": "set_level", "actor": "wild", "value": 10},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "A Wildcard Hero gets no CoA warchest at level 10", "actor": "wild", "metric": "mail_has_item", "item": 2977351, "equals": 0},
+    {"action": "login_hooks", "label": "Log the Hero outside Wildcard in again", "actor": "plain"},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "A Hero outside Wildcard still does", "actor": "plain", "metric": "mail_has_item", "item": 2977351, "equals": 1}
+  ]
+}

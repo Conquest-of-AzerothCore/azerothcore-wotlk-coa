@@ -1,0 +1,48 @@
+{
+ "schema": 1,
+ "name": "Divine Strikes debuffs the enemy Scourgebane hits so Argent Blade deals more damage to it (#4439, #8362)",
+ "contract": "Divine Strikes 705255's Description reads \"Damage dealt by Scourgebane now increases the damage of Argent Blade by X% for Y, stacking N times.\" The triggered 803372 is an enemy-targeted stacking MOD_DAMAGE_FROM_CASTER debuff whose class mask is Argent Blade's family flags and whose ToolTip reads \"Damage taken from the Crusader's Argent Blade is increased\". AscensionTemplarAbilities.cpp's OnSpellHitResult adds 803372 to the enemy whenever Scourgebane 801832 (Argent Blade's own guaranteed trigger, per the existing templar-argent-blade-scourgebane.json scenario) deals damage and the player knows 705255 - no chance roll, so one Argent Blade cast is deterministic: one stack on the enemy, none on the Templar, and the next Argent Blade damage against that enemy is 5% higher. The debuff is added on any hit, so training dummy 32666, whose npc_training_dummy script zeroes every damage amount, receives it too. The debuff's ToolTip reads its percentage from $w2, the aura effect carrying the bonus, which is 5 with one stack.",
+ "timeout_ms": 90000,
+ "players": [
+  { "id": "control", "race": 1, "class": 19, "level": 80, "melee_hit_rating": 10000, "spell_hit_rating": 10000, "expertise_rating": 10000, "allow_regeneration": false },
+  { "id": "talent", "race": 1, "class": 19, "level": 80, "melee_hit_rating": 10000, "spell_hit_rating": 10000, "expertise_rating": 10000, "allow_regeneration": false },
+  { "id": "training", "race": 1, "class": 19, "level": 80, "melee_hit_rating": 10000, "spell_hit_rating": 10000, "expertise_rating": 10000, "allow_regeneration": false }
+ ],
+ "creatures": [
+  { "id": "dummy_control", "owner": "control", "entry": 36, "health": 1000000, "distance": 3 },
+  { "id": "dummy_talent", "owner": "talent", "entry": 36, "health": 1000000, "distance": 3 },
+  { "id": "dummy_training", "owner": "training", "entry": 32666, "health": 1000000, "distance": 3 }
+ ],
+ "steps": [
+  { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+  { "action": "learn", "actor": "control", "spell": 807268 },
+  { "action": "learn", "actor": "talent", "spell": 807268 },
+  { "action": "learn", "actor": "talent", "spell": 705255 },
+  { "action": "learn", "actor": "training", "spell": 807268 },
+  { "action": "learn", "actor": "training", "spell": 705255 },
+  { "action": "add_item", "actor": "training", "item": 2495 },
+  { "action": "equip", "actor": "training", "item": 2495, "slot": 15 },
+  { "action": "set_power", "actor": "training", "power": 3, "value": 100 },
+  { "action": "add_item", "actor": "control", "item": 2495 },
+  { "action": "equip", "actor": "control", "item": 2495, "slot": 15 },
+  { "action": "add_item", "actor": "talent", "item": 2495 },
+  { "action": "equip", "actor": "talent", "item": 2495, "slot": 15 },
+  { "action": "set_power", "actor": "control", "power": 3, "value": 100 },
+  { "action": "set_power", "actor": "talent", "power": 3, "value": 100 },
+  { "action": "snapshot", "actor": "dummy_talent", "metric": "melee_damage_taken", "save_as": "argent_blade_before", "spell": 807268, "target": "talent" },
+  { "action": "cast", "actor": "control", "spell": 807268, "target": "dummy_control" },
+  { "action": "cast", "actor": "talent", "spell": 807268, "target": "dummy_talent" },
+  { "action": "cast", "actor": "training", "spell": 807268, "target": "dummy_training" },
+  { "action": "wait", "label": "let hits land", "ms": 2000 },
+  { "action": "assert", "label": "SETUP: Scourgebane triggers for training", "actor": "training", "metric": "spell_cast_count", "spell": 801832, "min": 1 },
+  { "action": "assert", "label": "DISCRIMINATING: the debuff also lands on a training dummy that zeroes the damage", "actor": "dummy_training", "metric": "aura", "spell": 803372, "caster": "training", "equals": 1 },
+  { "action": "assert", "label": "SETUP: Scourgebane triggers for control", "actor": "control", "metric": "spell_cast_count", "spell": 801832, "min": 1 },
+  { "action": "assert", "label": "SETUP: Scourgebane triggers for talent", "actor": "talent", "metric": "spell_cast_count", "spell": 801832, "min": 1 },
+  { "action": "assert", "label": "Without Divine Strikes, the enemy carries no debuff", "actor": "dummy_control", "metric": "aura", "spell": 803372, "equals": 0 },
+  { "action": "assert", "label": "DISCRIMINATING: Divine Strikes' debuff lands on the enemy Scourgebane hit", "actor": "dummy_talent", "metric": "aura", "spell": 803372, "caster": "talent", "equals": 1 },
+  { "action": "assert", "label": "The debuff carries one stack", "actor": "dummy_talent", "metric": "aura_stacks", "spell": 803372, "caster": "talent", "equals": 1 },
+  { "action": "assert", "label": "The debuff's tooltip slot $w2 reads the 5% Argent Blade bonus", "actor": "dummy_talent", "metric": "aura_amount", "spell": 803372, "caster": "talent", "effect": 1, "equals": 5 },
+  { "action": "assert", "label": "The Templar is not given the debuff", "actor": "talent", "metric": "aura", "spell": 803372, "equals": 0 },
+  { "action": "assert", "label": "DISCRIMINATING: one stack raises Argent Blade's damage to that enemy by 5%", "actor": "dummy_talent", "metric": "melee_damage_taken", "spell": 807268, "target": "talent", "ratio_to": "argent_blade_before", "min": 1.049, "max": 1.051 }
+ ]
+}

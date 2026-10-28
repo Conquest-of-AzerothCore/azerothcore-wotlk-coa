@@ -18,6 +18,11 @@ constexpr std::uint32_t SPELL_CHRONOMANCER_INFINITE_SHIELD = 520457;
 constexpr std::uint32_t SPELL_CHRONOMANCER_INFINITE_SHIELD_HEAL = 520458;
 constexpr std::uint32_t SPELL_CHRONOMANCER_PARADOX_CANNON = 806203;
 constexpr std::uint32_t SPELL_CHRONOMANCER_ECHO_FRAGMENT = 804455;
+constexpr std::uint32_t SPELL_CHRONOMANCER_ENDLESS_SANDS = 806728;
+constexpr std::uint32_t SPELL_CHRONOMANCER_PARADOX = 680947;
+constexpr std::uint32_t CHRONOMANCER_REVERSE_WOUND_FAMILY_MASK_WORD1 = 131072;
+constexpr std::uint32_t CHRONOMANCER_UNMAKE_FAMILY_MASK_WORD1 = 33554432;
+constexpr std::uint32_t CHRONOMANCER_REVERSE_WOUND_FAMILY_MASK_WORD2 = 1;
 constexpr std::uint32_t SPELL_PYROMANCER_UNFATHOMABLY_HOT = 807404;
 constexpr std::uint32_t SPELL_PYROMANCER_CLEANSING_FLAMES_BONUS = 807405;
 constexpr std::uint32_t SPELL_PYROMANCER_ADD_FIVE_HEAT = 807392;
@@ -88,6 +93,50 @@ void ApplyAscensionClassMechanics19To25(SpellInfo* spellInfo)
                 "Skipped unexpected Paradox Cannon record {}",
                 spellInfo->Id);
         }
+        return;
+    }
+
+    if (spellInfo->Id == SPELL_CHRONOMANCER_ENDLESS_SANDS)
+    {
+        SpellEffectInfo const& effect = spellInfo->Effects[EFFECT_0];
+        if (spellInfo->SpellFamilyName == CHRONOMANCER_FAMILY &&
+            effect.Effect == SPELL_EFFECT_APPLY_AURA &&
+            effect.ApplyAuraName == SPELL_AURA_ADD_PCT_MODIFIER &&
+            effect.MiscValue == SPELLMOD_CASTING_TIME &&
+            effect.SpellClassMask.IsEqual(0,
+                CHRONOMANCER_REVERSE_WOUND_FAMILY_MASK_WORD1, 0))
+        {
+            spellInfo->ProcCharges = 1;
+        }
+        else
+        {
+            LOG_ERROR("coa",
+                "Skipped unexpected Endless Sands record {}",
+                spellInfo->Id);
+        }
+        return;
+    }
+
+    if (spellInfo->Id == SPELL_CHRONOMANCER_PARADOX)
+    {
+        SpellEffectInfo const& effect = spellInfo->Effects[EFFECT_0];
+        if (spellInfo->SpellFamilyName == CHRONOMANCER_FAMILY &&
+            effect.Effect == SPELL_EFFECT_APPLY_AURA &&
+            effect.ApplyAuraName == SPELL_AURA_ADD_PCT_MODIFIER &&
+            effect.MiscValue == SPELLMOD_COST &&
+            effect.SpellClassMask.IsEqual(0,
+                CHRONOMANCER_UNMAKE_FAMILY_MASK_WORD1,
+                CHRONOMANCER_REVERSE_WOUND_FAMILY_MASK_WORD2))
+        {
+            spellInfo->ProcCharges = 1;
+        }
+        else
+        {
+            LOG_ERROR("coa",
+                "Skipped unexpected Paradox record {}",
+                spellInfo->Id);
+        }
+        return;
     }
 }
 

@@ -1,7 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionRunemasterEchoes.h"
-#include "Chat.h"
 #include "DataMap.h"
 #include "GameTime.h"
 #include "Player.h"
@@ -293,7 +292,7 @@ void Synchronize(Player* player, Runtime& runtime)
         player->removeSpell(ECHOES_ZENITH, player->GetActiveSpecMask(), true);
     }
     runtime.WasVariant = variant;
-    SendAscensionRunemasterEchoesOwnership(player);
+    SendAscensionRunemasterEchoesCooldown(player);
     runtime.Busy = false;
 }
 
@@ -468,21 +467,14 @@ void SynchronizeAscensionRunemasterEchoes(Player* player, uint32 specializationI
     Synchronize(player, runtime);
 }
 
-void SendAscensionRunemasterEchoesOwnership(Player* player)
+void SendAscensionRunemasterEchoesCooldown(Player* player)
 {
     if (!IsRunemaster(player) || !player->GetSession())
         return;
     Runtime const* runtime = player->CustomData.Get<Runtime>(RUNTIME_KEY);
     uint32 const specialization = runtime ? runtime->Specialization : 0;
-    bool const owned = Owns(player, ZENITH);
-    bool const active = owned && specialization == RUNIC && Owns(player, ECHOES) &&
+    bool const active = Owns(player, ZENITH) && specialization == RUNIC && Owns(player, ECHOES) &&
         player->HasActiveSpell(ECHOES_ZENITH);
-    std::string const message = "ASC_LOCAL_ECHOES\t1:32:" + std::to_string(player->GetActiveSpec()) + ":" +
-        std::to_string(specialization) + ":" + (owned ? "1" : "0") + ":" + (active ? "1" : "0");
-    WorldPacket packet;
-    ChatHandler::BuildChatPacket(packet, CHAT_MSG_WHISPER, LANG_ADDON, player->GetGUID(), player->GetGUID(),
-        message, 0, player->GetName(), player->GetName(), 0, false);
-    player->GetSession()->SendPacket(&packet);
     SendCooldownProjection(player, active);
 }
 

@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "name": "Storm Slam native cast damages its target",
+  "contract": [
+    "Storm Slam 903140 promises 65% weapon damage plus its flat Stormstrike amount through helper 903246.",
+    "A proficient equipped weapon, native hit and expertise fixtures isolate the normal cast from",
+    "avoidance.",
+    "One cast must damage the enemy and execute its damage helper exactly once.",
+    "With Heavy Arms 285377 learned, its authored self-targeted helper 285381 must affect the caster, not",
+    "the enemy.",
+    "The native Heavy Arms caster exclusion must block the next Storm Slam while the self buff remains",
+    "active.",
+    "Ordinary Slam must retain its 50783 helper. Sinister Strike is a negative control for the Heavy Arms",
+    "trigger.",
+    "Heavy Arms is uncancellable and lasts 14 seconds; the negative control waits for expiry before",
+    "casting Sinister Strike."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "console", "command": "coa gamemode WildCard on Harnessa"},
+    {"action": "learn", "actor": "hero", "spell": 201},
+    {"action": "learn", "actor": "hero", "spell": 903140},
+    {"action": "add_item", "actor": "hero", "item": 25},
+    {"action": "equip", "actor": "hero", "item": 25, "slot": 15},
+    {"action": "set_power", "actor": "hero", "power": 1, "value": 1000},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "enemy_before"},
+    {"action": "cast", "actor": "hero", "spell": 903140, "target": "enemy"},
+    {"action": "assert", "actor": "hero", "metric": "cast_failure", "spell": 903140, "equals": 0},
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "health",
+      "relative_to": "enemy_before",
+      "max": -1,
+      "within_ms": 3000
+    },
+    {"action": "assert", "actor": "hero", "metric": "spell_cast_count", "spell": 903246, "equals": 1},
+    {"action": "assert", "actor": "enemy", "metric": "aura", "spell": 285381, "equals": 0},
+    {"action": "assert", "actor": "hero", "metric": "aura", "spell": 285381, "equals": 0},
+    {"action": "wait", "ms": 1600},
+    {"action": "learn", "actor": "hero", "spell": 1464},
+    {"action": "set_power", "actor": "hero", "power": 1, "value": 1000},
+    {"action": "cast", "actor": "hero", "spell": 1464, "target": "enemy"},
+    {"action": "assert", "actor": "hero", "metric": "spell_cast_count", "spell": 50783, "equals": 1, "within_ms": 3000},
+    {"action": "wait", "ms": 1600},
+    {"action": "learn", "actor": "hero", "spell": 285377},
+    {"action": "set_power", "actor": "hero", "power": 1, "value": 1000},
+    {"action": "cast", "actor": "hero", "spell": 903140, "target": "enemy"},
+    {
+      "action": "assert", "actor": "hero", "metric": "spell_cast_count",
+      "spell": 903246, "equals": 2, "within_ms": 3000
+    },
+    {"action": "assert", "actor": "enemy", "metric": "aura", "spell": 285381, "equals": 0},
+    {"action": "assert", "actor": "hero", "metric": "aura", "spell": 285381, "equals": 1},
+    {"action": "wait", "ms": 1600},
+    {"action": "cast", "actor": "hero", "spell": 903140, "target": "enemy"},
+    {"action": "assert", "actor": "hero", "metric": "cast_failure", "spell": 903140, "equals": 22, "within_ms": 500},
+    {"action": "assert", "actor": "hero", "metric": "spell_cast_count", "spell": 903246, "equals": 2},
+    {"action": "cancel_aura", "actor": "hero", "spell": 285381},
+    {"action": "assert", "actor": "hero", "metric": "aura", "spell": 285381, "equals": 1},
+    {"action": "wait", "ms": 14000},
+    {"action": "assert", "actor": "hero", "metric": "aura", "spell": 285381, "equals": 0},
+    {"action": "learn", "actor": "hero", "spell": 1752},
+    {"action": "set_power", "actor": "hero", "power": 3, "value": 100},
+    {"action": "cast", "actor": "hero", "spell": 1752, "target": "enemy"},
+    {"action": "assert", "actor": "hero", "metric": "cast_failure", "spell": 1752, "equals": 0},
+    {"action": "wait", "ms": 1500},
+    {"action": "assert", "actor": "hero", "metric": "aura", "spell": 285381, "equals": 0}
+  ]
+}

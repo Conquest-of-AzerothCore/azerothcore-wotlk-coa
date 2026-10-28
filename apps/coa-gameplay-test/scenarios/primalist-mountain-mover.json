@@ -35,6 +35,15 @@
       "expertise_rating": 10000
     }
   ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "primalist",
+      "entry": 36,
+      "level": 80,
+      "distance": 35
+    }
+  ],
   "steps": [
     {
       "action": "pvp",
@@ -56,9 +65,9 @@
       "o": 3.14159265
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "primalist",
-      "command": ".localspec 60"
+      "id": 60
     },
     {
       "action": "learn",
@@ -115,7 +124,7 @@
       "save_as": "base_damage",
       "label": "base_damage",
       "spell": 520566,
-      "target": "enemy"
+      "target": "dummy"
     },
     {
       "action": "snapshot",
@@ -234,9 +243,10 @@
       "actor": "primalist",
       "metric": "melee_spell_damage_done",
       "spell": 520566,
-      "target": "enemy",
+      "target": "dummy",
       "ratio_to": "base_damage",
-      "equals": 1.25
+      "min": 1.249,
+      "max": 1.251
     },
     {
       "action": "cast",
@@ -313,7 +323,7 @@
       "actor": "primalist",
       "metric": "melee_spell_damage_done",
       "spell": 520566,
-      "target": "enemy",
+      "target": "dummy",
       "ratio_to": "base_damage",
       "equals": 1
     },
@@ -454,5 +464,5 @@
       "equals": 0
     }
   ],
-  "contract": "Avoided attacks grant one stack up to five; each stack reduces Wildclaw cost by 10% and increases damage by 5%. One Wildclaw consumes the whole stack after applying its modifiers. Unrelated damage, successful incoming attacks, expiry and unlearning are controls."
+  "contract": "Avoided attacks grant one stack up to five; each stack reduces Wildclaw cost by 10% and increases damage by 5%. One Wildclaw consumes the whole stack after applying its modifiers. Unrelated damage, successful incoming attacks, expiry and unlearning are controls. The Wildclaw probe queries a creature: normal class 887019 (-15%) and Mountain King 887085 (+1%) tuning scale its 1000 base to 858, so the 25% increase reads 1073/858. The avoided attacks still come from the enemy player."
 }

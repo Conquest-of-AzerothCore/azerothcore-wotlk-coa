@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "name": "Necromancer Runic Reservoir raises Frost damage and maximum Runic Power at both ranks (#1243)",
+  "contract": "Runic Reservoir is the Rime-tab talent CharacterAdvancement 33720 (ClassType 25 = class 23, Tab 60, TalentEssenceCost 1) with two ranks, 704670 and 803850 (SpellFamilyName 29); AscensionClassService::SetTalentRank removes every rank spell of an entry before learning the selected one, so only one rank is ever held. Both descriptions read 'Increases your Frost damage by $s2% and your maximum Runic Power by $/10;s1.' Effect 0 is SPELL_AURA_MOD_INCREASE_ENERGY (35) MiscValue 6 (POWER_RUNIC_POWER), BasePoints 149/299 + DieSides 1 = 150/300 (Runic Power is stored x10: 15 and 30); effect 1 is SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (79) MiscValue 16 (Frost), BasePoints 4/9 + DieSides 1 = 5%/10%. Neither is aura 42/354, so the Necromancer load contract leaves them intact; AuraEffect::HandleAuraModIncreaseEnergy adds the amount to UNIT_MOD_RUNIC_POWER TOTAL_VALUE and Player::UpdateMaxPower recomputes the maximum, and HandleModDamagePercentDone multiplies Frost damage done. Rank 1's aura ToolTip about Deathchill (ProcChance 50) has no matching effect or proc flags and is not part of the talent's description. Expected: rank 1 raises maximum Runic Power by exactly 150 and Frost damage done (Ice Barrage 803779) by 5%, rank 2 by 300 and 10%, neither changes Shadow/Nature damage done (Corpse Explosion 533240), and removing the rank restores both values.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 8 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: neither rank is active yet", "actor": "necro",
+      "metric": "aura", "spell": 704670, "equals": 0
+    },
+    { "action": "assert", "actor": "necro", "metric": "aura", "spell": 803850, "equals": 0 },
+    {
+      "action": "assert", "label": "SETUP: the Necromancer has a Runic Power pool", "actor": "necro",
+      "metric": "max_power", "power": 6, "min": 1
+    },
+    { "action": "snapshot", "actor": "necro", "metric": "max_power", "power": 6, "save_as": "rp0" },
+    {
+      "action": "snapshot", "actor": "necro", "metric": "spell_damage_done", "spell": 803779, "target": "golem",
+      "save_as": "frost0"
+    },
+    {
+      "action": "snapshot", "actor": "necro", "metric": "spell_damage_done", "spell": 533240, "target": "golem",
+      "save_as": "shadow0"
+    },
+    { "action": "learn", "actor": "necro", "spell": 704670 },
+    {
+      "action": "assert", "label": "Rank 1 aura is applied", "actor": "necro",
+      "metric": "aura", "spell": 704670, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: rank 1 adds 15 maximum Runic Power", "actor": "necro",
+      "metric": "max_power", "power": 6, "relative_to": "rp0", "equals": 150
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: rank 1 raises Frost damage done by 5%", "actor": "necro",
+      "metric": "spell_damage_done", "spell": 803779, "target": "golem", "ratio_to": "frost0",
+      "min": 1.045, "max": 1.055
+    },
+    {
+      "action": "assert", "label": "CONTROL: rank 1 leaves Shadow damage done unchanged", "actor": "necro",
+      "metric": "spell_damage_done", "spell": 533240, "target": "golem", "ratio_to": "shadow0",
+      "min": 0.999, "max": 1.001
+    },
+    { "action": "unlearn", "actor": "necro", "spell": 704670 },
+    {
+      "action": "assert", "label": "Removing rank 1 removes its aura", "actor": "necro",
+      "metric": "aura", "spell": 704670, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Removing rank 1 restores maximum Runic Power", "actor": "necro",
+      "metric": "max_power", "power": 6, "relative_to": "rp0", "equals": 0
+    },
+    {
+      "action": "assert", "label": "Removing rank 1 restores Frost damage done", "actor": "necro",
+      "metric": "spell_damage_done", "spell": 803779, "target": "golem", "ratio_to": "frost0",
+      "min": 0.999, "max": 1.001
+    },
+    { "action": "learn", "actor": "necro", "spell": 803850 },
+    {
+      "action": "assert", "label": "Rank 2 aura is applied", "actor": "necro",
+      "metric": "aura", "spell": 803850, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: rank 2 adds 30 maximum Runic Power", "actor": "necro",
+      "metric": "max_power", "power": 6, "relative_to": "rp0", "equals": 300
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: rank 2 raises Frost damage done by 10%", "actor": "necro",
+      "metric": "spell_damage_done", "spell": 803779, "target": "golem", "ratio_to": "frost0",
+      "min": 1.095, "max": 1.105
+    },
+    {
+      "action": "assert", "label": "CONTROL: rank 2 leaves Shadow damage done unchanged", "actor": "necro",
+      "metric": "spell_damage_done", "spell": 533240, "target": "golem", "ratio_to": "shadow0",
+      "min": 0.999, "max": 1.001
+    },
+    { "action": "unlearn", "actor": "necro", "spell": 803850 },
+    {
+      "action": "assert", "label": "Removing rank 2 removes its aura", "actor": "necro",
+      "metric": "aura", "spell": 803850, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Removing rank 2 restores maximum Runic Power", "actor": "necro",
+      "metric": "max_power", "power": 6, "relative_to": "rp0", "equals": 0
+    }
+  ]
+}

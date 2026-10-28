@@ -1,0 +1,269 @@
+{
+  "schema": 1,
+  "name": "Tinker: Rocket Bombardment fires on the Sentry Turret's next attack after the Sticky Bomb, not only inside the mark's 500 ms window",
+  "contract": [
+    "Rocket Bombardment's tooltip (spell 706695) promises: 'Casting Sticky Bomb now causes your Sentry Turret to fire a",
+    "rocket cluster on its next attack'. The cluster 706696 is therefore owed once per Sticky Bomb 500232 cast, on the",
+    "Sentry Turret's next attack, whenever that attack happens - not only when the turret's shot lands inside some short",
+    "window after the cast.",
+    "The reported defect: with the turret already deployed and firing, a Sticky Bomb often produced no cluster at all.",
+    "The mark 706698 the cast plants on the turret carries DurationIndex 327, which SpellDuration.dbc resolves to 500 ms,",
+    "while the turret's Sentry Shot 706689 takes about two seconds between impacts, so a mark planted right after one",
+    "impact is gone long before the next one lands and the cluster never fires.",
+    "This scenario syncs the cast to just after a Sentry Shot impact, so the turret's next attack is a full cycle away, and",
+    "requires the cluster anyway. The turret must already be firing before the cast (a player melee request gives it a",
+    "focus target), which is the ordinary state in which the report was filed. It also requires that the cluster fires",
+    "once: the mark is consumed by the attack that reads it, so later attacks do not repeat it.",
+    "Not covered here: the cluster's client visual and the per-rocket travel are rendering."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 80,
+      "distance": 8,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the spawn and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Build: Sentry Turret",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "cast",
+      "label": "Build the Sentry Turret",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: a Sentry Turret stands",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50046,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Sticky Bomb",
+      "actor": "tinker",
+      "spell": 500232
+    },
+    {
+      "action": "learn",
+      "label": "Learn Rocket Bombardment",
+      "actor": "tinker",
+      "spell": 706695
+    },
+    {
+      "action": "attack",
+      "label": "SETUP: give the standing turret a focus target so it is already firing",
+      "actor": "tinker",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Sentry Turret is already landing Sentry Shots",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 706689,
+      "entry": 50046,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "snapshot",
+      "label": "SETUP: Sentry Shot impacts before the cast",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 706689,
+      "entry": 50046,
+      "target": "enemy",
+      "save_as": "shots_before_first"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500232
+    },
+    {
+      "action": "cast",
+      "label": "Cast Sticky Bomb immediately after that impact, so the turret's next attack is a full cycle away",
+      "actor": "tinker",
+      "spell": 500232,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Sticky Bomb cast was accepted",
+      "actor": "tinker",
+      "metric": "cast_failure",
+      "spell": 500232,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "SETUP: no cluster has fired yet",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 706696,
+      "entry": 50046,
+      "target": "enemy",
+      "save_as": "clusters_first"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the turret's next attack fires the rocket cluster",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 706696,
+      "entry": 50046,
+      "target": "enemy",
+      "relative_to": "clusters_first",
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the attack that fired the cluster consumed the mark",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50046,
+      "spell": 706698,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the turret attack several more times",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the cluster does not repeat on the following attacks",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 706696,
+      "entry": 50046,
+      "target": "enemy",
+      "relative_to": "clusters_first",
+      "max": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "SETUP: Sentry Shot impacts before the second cast",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 706689,
+      "entry": 50046,
+      "target": "enemy",
+      "save_as": "shots_before_second"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: sync to the next Sentry Shot impact",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 706689,
+      "entry": 50046,
+      "target": "enemy",
+      "relative_to": "shots_before_second",
+      "min": 1,
+      "within_ms": 12000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500232
+    },
+    {
+      "action": "cast",
+      "label": "Cast Sticky Bomb again, right after a Sentry Shot impact",
+      "actor": "tinker",
+      "spell": 500232,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the second Sticky Bomb cast was accepted",
+      "actor": "tinker",
+      "metric": "cast_failure",
+      "spell": 500232,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "SETUP: no cluster has fired yet in the second trial",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 706696,
+      "entry": 50046,
+      "target": "enemy",
+      "save_as": "clusters_second"
+    },
+    {
+      "action": "wait",
+      "label": "Well past the 500 ms mark duration, still before the turret's next attack",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the mark is still armed while waiting for the turret's next attack",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50046,
+      "spell": 706698,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: that waiting mark still fires the cluster on the turret's next attack",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 706696,
+      "entry": 50046,
+      "target": "enemy",
+      "relative_to": "clusters_second",
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "The fixture survived the trial",
+      "actor": "tinker",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

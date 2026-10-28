@@ -1,0 +1,311 @@
+{
+  "schema": 1,
+  "name": "Runemaster: Water Palm Sigil with Primordial Blast (#6087)",
+  "contract": [
+    "Original 500639 and db.exil.es/spell/500639 specify target mana drained equal to 50% of the next direct",
+    "Magic damage within six seconds. Helper 807818 is native POWER_DRAIN, with mana type 0 and transfer",
+    "multiplier 1.",
+    "Use the original level-80 mage creature 27747 with its native mana pool, passive fixture AI and ample",
+    "health. The caster has sufficient missing mana for a full transfer. Measure a normal actual magic hit, the",
+    "native drain/transfer, helper count and one-use consumption.",
+    "A following normal magic hit cannot repeat the helper or its native mana-transfer event. Creature mana",
+    "regeneration is not used to infer whether the helper repeats.",
+    "Primordial Blast 800732 is a normal direct magic probe. Reset its 8-second cooldown and restore caster mana",
+    "before each separate hit to isolate the one-use Sigil behavior.",
+    "POWER_DRAIN floors 50 percent of damage to whole mana. With a triggering hit of at least 100, the exact",
+    "ratio lies between 0.49 and 0.50; a 115-point hit must steal and transfer 57 mana."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "max_power",
+      "power": 0,
+      "min": 2500
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "power",
+      "power": 0,
+      "save_as": "control_mana"
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 500639
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 800732
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807818,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "label": "SETUP: enough mana for the repeated probe",
+      "actor": "rm",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "label": "SETUP: isolate the trigger from its 8-second cooldown",
+      "actor": "rm",
+      "spell": 800732
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "enemy",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "power",
+      "power": 0,
+      "label": "A direct magic hit without Water Sigil does not drain mana",
+      "relative_to": "control_mana",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 500469,
+      "stacks": 1,
+      "label": "Fixture: Waveforged opens the Palm casting gate"
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 500639
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 500639,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura_amount",
+      "spell": 500639,
+      "effect": 0,
+      "equals": 50
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "power",
+      "power": 0,
+      "save_as": "mana_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 800732,
+      "target": "enemy",
+      "save_as": "damage_before"
+    },
+    {
+      "action": "set_power",
+      "label": "SETUP: enough mana for the repeated probe",
+      "actor": "rm",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "label": "SETUP: isolate the trigger from its 8-second cooldown",
+      "actor": "rm",
+      "spell": 800732
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "enemy",
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807818,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 800732,
+      "target": "enemy",
+      "relative_to": "damage_before",
+      "save_as": "trigger_hit"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 800732,
+      "target": "enemy",
+      "relative_to": "damage_before",
+      "min": 100,
+      "label": "The probe hit bounds whole-mana rounding error to at most 1 percent"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "power",
+      "power": 0,
+      "relative_to": "mana_before",
+      "ratio_to": "trigger_hit",
+      "min": -0.5001,
+      "max": -0.49,
+      "label": "The enemy loses half of the measured triggering damage as mana"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_energize_total",
+      "spell": 807818,
+      "ratio_to": "trigger_hit",
+      "min": 0.49,
+      "max": 0.5001,
+      "label": "The native POWER_DRAIN transfer equals the measured mana stolen"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 500639,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_energize_total",
+      "save_as": "mana_after",
+      "spell": 807818
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "label": "SETUP: enough mana for the repeated probe",
+      "actor": "rm",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "label": "SETUP: isolate the trigger from its 8-second cooldown",
+      "actor": "rm",
+      "spell": 800732
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "enemy",
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807818,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_energize_total",
+      "relative_to": "mana_after",
+      "equals": 0,
+      "label": "The following magic hit cannot drain mana again",
+      "spell": 807818
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "rm",
+      "entry": 27747,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ]
+}

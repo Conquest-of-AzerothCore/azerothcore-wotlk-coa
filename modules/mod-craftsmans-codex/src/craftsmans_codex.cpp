@@ -61,6 +61,7 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 #include "World.h"
+#include "WorldSession.h"
 
 #include <array>
 #include <mutex>
@@ -154,6 +155,30 @@ void ApplyAllowance(Player* player, uint32 unlockedSlots)
     // The client reads the count from this field, and the trainer window prices every
     // profession against it, so it has to be re-sent rather than only stored.
     player->ForceValuesUpdateAtIndex(PLAYER_CHARACTER_POINTS2);
+}
+
+// What a codex says when it lands, in the two places a player looks: a line in the chat frame,
+// which stays there as a record, and a line across the middle of the screen, which is hard to
+// miss. Both are coloured - `|cffRRGGBB`...`|r` is the client's own escape, the same one an item
+// link is built from - and both use the same two: the thing the player just got in gold, the
+// change itself in green, over the channel's own base colour. A line that is one colour top to
+// bottom reads as a warning no matter which colour it is.
+//
+// Neither line counts anything. How many professions the character holds and how many slots they
+// have unlocked are both real numbers, and quoting them together is how a player ends up doing
+// subtraction over a toast they will read once: "3 of your 3 slots are still free" says the same
+// thing as "a new slot is unlocked" and takes twice as long to believe. The counters are what
+// `.codex status` is for.
+static void AnnounceUnlock(Player* player)
+{
+    ChatHandler(player->GetSession()).PSendSysMessage(
+        "|cffffd100Craftsman's Codex|r: a new |cff40ff40primary profession slot|r is unlocked.");
+
+    // Short on purpose: this one is drawn large, over whatever the player was doing, and it is
+    // gone again in a few seconds. Same palette as the chat line rather than one flat colour, so
+    // it reads as an announcement and not as an error.
+    player->GetSession()->SendAreaTriggerMessage(
+        "|cffffd100New profession slot|r |cff40ff40unlocked|r");
 }
 
 // The codexes each character has spent, backed by the characters database and remembered for
@@ -264,9 +289,7 @@ void UnlockSlot(Player* player)
 
     ApplyAllowance(player, slots);
 
-    ChatHandler(player->GetSession()).PSendSysMessage(
-        "Craftsman's Codex: {} primary profession slot(s) unlocked - {} still free of your {}.",
-        slots, player->GetFreePrimaryProfessionPoints(), BaseSlots() + slots);
+    AnnounceUnlock(player);
 
     LOG_INFO("module",
              "mod-craftsmans-codex: {} ({}) used a Craftsman's Codex - {} unlocked slot(s), allowance {}.",
@@ -538,7 +561,13 @@ public:
             slots = CodexStore::Instance().Add(characterGuid);
 
         if (online)
+        {
             ApplyAllowance(online, slots);
+
+            // The slot is the player's, not the game master's: a grant announces itself exactly
+            // the way the item does, so nobody is left with an allowance they were never told about.
+            AnnounceUnlock(online);
+        }
 
         handler->PSendSysMessage("{} now has {} unlocked slot(s): {} primary professions in total.",
                                  name, slots, BaseSlots() + slots);

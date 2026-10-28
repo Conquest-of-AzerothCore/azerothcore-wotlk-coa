@@ -1,0 +1,232 @@
+{
+  "schema": 1,
+  "name": "An Old History Book: the map and the in-world tracker both mark Milton Sheaf in the CoA Royal Library (#6444)",
+  "contract": "Quest 337 'An Old History Book' is ended by Milton Sheaf 1440. CoA moved him (guid 8704) into the rebuilt Royal Library at (-8279.309, 226.965, 155.447) in rev_20260923_03_coa_stormwind.sql, but the turn-in marker still points at the stock library spot (-8346, 384), about 171 yd away. Quest 337 has three POIs: ids 0 and 1 (ObjectiveIndex 4, the book's drop areas in Duskwood, 7 and 5 points) and id 2 (ObjectiveIndex -1, the turn-in, Stormwind City WorldMapAreaId 301, one point). This case asks the server for 337's points with the CMSG_QUEST_POI_QUERY a real client sends and reads SMSG_QUEST_POI_QUERY_RESPONSE: the turn-in POI starts at byte 172 and its single point must be Milton's spot rounded to the grid (-8279, 227). The in-world arrow and minimap pin are a second route: the client resolves them from QuestSuperTrack.dbc row 2300 (quest 337), whose completion node is SuperTrack.dbc 607, shipped at the stock spot (-8346.0, 383.928, 122.274) and shared only with quests 343 and 542, which Milton also ends. The core streams coa_client_super_track rows at login (SMSG_PATCH_SUPER_TRACK, 0x06BE); the last assertions require row 607 to stand on Milton with the client's own MapID 0, radius 5.5 and NextID 0. These are data assertions: the harness cannot see what the client draws.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8281.0,
+    "y": 229.0,
+    "z": 155.447,
+    "o": 5.4
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 1,
+      "level": 37
+    }
+  ],
+  "steps": [
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 337 'An Old History Book', the way the reporter did",
+      "actor": "c",
+      "quest": 337,
+      "complete": false
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 337, exactly what the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 337
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 337's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 337,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the map gets 337's three POIs",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The third POI is id 2",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 172,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "with ObjectiveIndex -1, the turn-in marker",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 176,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on the Eastern Kingdoms, MapID 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 180,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "drawn on the Stormwind City map, WorldMapAreaId 301",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 184,
+      "index": 0,
+      "equals": 301,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "as a single point",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 200,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: on Milton in the CoA Royal Library: x -8279, not the stock -8346",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 204,
+      "index": 0,
+      "equals": 4294959017,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: y 227, not the stock 384",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 208,
+      "index": 0,
+      "equals": 227,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The login patch stream carries the tracker's SuperTrack row 607, the node 337, 343 and 542 end at",
+      "actor": "c",
+      "metric": "server_packets",
+      "opcode": 1726,
+      "row": 607,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Row 607 stays on the Eastern Kingdoms, MapID 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 607,
+      "index": 1,
+      "within_ms": 8000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: row 607 x is Milton's -8279.309, where the client had -8346",
+      "actor": "c",
+      "metric": "server_packet_float",
+      "opcode": 1726,
+      "row": 607,
+      "index": 2,
+      "within_ms": 8000,
+      "min": -8279.32,
+      "max": -8279.3
+    },
+    {
+      "action": "assert",
+      "label": "Row 607 y is Milton's 226.965, where the client had 383.928",
+      "actor": "c",
+      "metric": "server_packet_float",
+      "opcode": 1726,
+      "row": 607,
+      "index": 3,
+      "within_ms": 8000,
+      "min": 226.96,
+      "max": 226.97
+    },
+    {
+      "action": "assert",
+      "label": "Row 607 z is the CoA library floor 155.447, where the client had 122.274",
+      "actor": "c",
+      "metric": "server_packet_float",
+      "opcode": 1726,
+      "row": 607,
+      "index": 4,
+      "within_ms": 8000,
+      "min": 155.44,
+      "max": 155.45
+    },
+    {
+      "action": "assert",
+      "label": "Row 607 keeps the client's own arrival radius of 5.5 yd",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 607,
+      "index": 5,
+      "within_ms": 8000,
+      "equals": 1085276160
+    },
+    {
+      "action": "assert",
+      "label": "Row 607 keeps the client's own end of the chain, NextID 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 607,
+      "index": 6,
+      "within_ms": 8000,
+      "equals": 0
+    }
+  ]
+}

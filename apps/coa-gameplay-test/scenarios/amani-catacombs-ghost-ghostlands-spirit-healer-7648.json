@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "name": "Ghostlands: a ghost released in the Amani Catacombs reaches a Spirit Healer (#7648)",
+  "contract": "A player who dies inside the Amani Catacombs (zone 10127, at the Mummified Headhunter spawn (7597.8,-7261,155.5)) releases at the nearest graveyard of Ghostlands (3433), graveyard 915 (7694.18,-6730.11,48.2907), instead of the default Westfall graveyard. Its Spirit Healer 6491 stands near it. Death and spirit release use the native handlers.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 530,
+    "x": 7597.8,
+    "y": -7261,
+    "z": 155.5,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 11
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "die",
+      "actor": "cleric"
+    },
+    {
+      "action": "release_spirit",
+      "actor": "cleric"
+    },
+    {
+      "action": "assert",
+      "label": "The released player is a ghost",
+      "actor": "cleric",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "map_id",
+      "equals": 530,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The ghost lands at the Ghostlands graveyard",
+      "actor": "cleric",
+      "metric": "position_x",
+      "min": 7679.2,
+      "max": 7709.2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "position_y",
+      "min": -6745.1,
+      "max": -6715.1
+    },
+    {
+      "action": "assert",
+      "label": "A Spirit Healer stands at the ghost's graveyard",
+      "actor": "cleric",
+      "metric": "nearby_creature_template",
+      "entry": 6491,
+      "equals": 6491
+    }
+  ]
+}

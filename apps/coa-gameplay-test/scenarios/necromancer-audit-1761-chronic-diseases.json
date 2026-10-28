@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Necromancer Chronic Diseases lengthens its masked diseases by 20% (#1761)",
+  "contract": "Chronic Diseases 300749 ('Rank 2', description 'Increases all diseases durations by $s1%') has no CharacterAdvancement entry: its only rank chain is the orphaned Talent.dbc row 27266 (TabID 0, rank 1 = Death Commander 300235) and its SkillLineAbility row 760268 has AcquireMethod 0, so the live catalog offers it to no player; this scenario learns it as a fixture. Its only effect is SPELL_AURA_ADD_PCT_MODIFIER (108) MiscValue 1 (SPELLMOD_DURATION), EffectBasePoints 19 + DieSides 1 = +20%, EffectSpellClassMask (0, 0, 0x20) in SpellFamilyName 29, which covers the diseases Flesh to Worms 500338, Harvest Plague 500968 and Plague of Undeath 801945 (family flags word 2 bit 0x20). Aura::CalcMaxDuration applies the caster's SPELLMOD_DURATION natively and the aura is not one of the family-29 aura 42/354 effects the Necromancer contract turns into dummies, so no script is required. Flesh to Worms has DurationIndex 85 = 18000 ms: an untalented control's application must last 18000 ms, the application of a Necromancer holding Chronic Diseases 21600 ms. The DBC mask does not include Blight 500217, Crypt Plague 570131 or Lichplague 802132, so this scenario does not claim 'all diseases'.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "control", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 },
+    { "id": "chronic", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "control", "entry": 36, "level": 80, "health": 1000000, "distance": 8 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "control", "spell": 500338 },
+    { "action": "learn", "actor": "chronic", "spell": 500338 },
+    { "action": "learn", "actor": "chronic", "spell": 300749 },
+    {
+      "action": "assert", "label": "The Chronic Diseases passive aura is applied", "actor": "chronic",
+      "metric": "aura", "spell": 300749, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Chronic Diseases resolves to +20% duration", "actor": "chronic",
+      "metric": "spell_modifier", "spell": 500338, "op": 1, "base": 18000, "min": 21599.99, "max": 21600.01
+    },
+    {
+      "action": "cast", "label": "Control applies Flesh to Worms", "actor": "control", "spell": 500338,
+      "target": "golem"
+    },
+    {
+      "action": "assert", "label": "SETUP: the control's Flesh to Worms lands", "actor": "golem",
+      "metric": "aura", "spell": 500338, "caster": "control", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTROL: Flesh to Worms keeps its 18 second duration", "actor": "golem",
+      "metric": "aura_duration_ms", "spell": 500338, "caster": "control", "min": 17000, "max": 18000
+    },
+    {
+      "action": "cast", "label": "Chronic Diseases applies Flesh to Worms", "actor": "chronic", "spell": 500338,
+      "target": "golem"
+    },
+    {
+      "action": "assert", "label": "SETUP: the talented Flesh to Worms lands", "actor": "golem",
+      "metric": "aura", "spell": 500338, "caster": "chronic", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Chronic Diseases extends Flesh to Worms to 21.6 seconds",
+      "actor": "golem", "metric": "aura_duration_ms", "spell": 500338, "caster": "chronic", "min": 20600, "max": 21600
+    }
+  ]
+}

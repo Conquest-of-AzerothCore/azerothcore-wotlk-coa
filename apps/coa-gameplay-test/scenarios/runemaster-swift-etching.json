@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Issue 463: Swift Etching hastes melee attacks and raises critical strike chance after Hurricane",
+  "contract": [
+    "Swift Etching 705600 (Riftblade passive, two dummy auras) reads 'After Hurricane ends, your melee attack speed",
+    "is increased by $500506s1% and critical strike chance by $500506s2% for $500506d.' Its buff 500506 is aura 138",
+    "SPELL_AURA_MOD_MELEE_HASTE BasePoints 14 (15%) and aura 290 SPELL_AURA_MOD_CRIT_PCT BasePoints 9 (10%), duration",
+    "index 1 (10 s). Nothing cast 500506 on main: the Hurricane aura's removal handler only served Waveforged.",
+    "Hurricane 645435 lasts 2 s. Expected: no buff without the talent or while Hurricane still strikes; with the",
+    "talent the buff appears when Hurricane ends, shortens the 3.8 s Arcanite Reaper swing to 3.8/1.15 s, adds 10",
+    "melee critical strike points and wears off after 10 s."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rm", "entry": 36, "level": 80, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 197},
+    {"action": "add_item", "actor": "rm", "item": 12784},
+    {"action": "equip", "actor": "rm", "item": 12784, "slot": 15},
+    {"action": "learn", "actor": "rm", "spell": 645435},
+    {"action": "snapshot", "actor": "rm", "metric": "attack_time_ms", "hand": 0, "save_as": "base_swing"},
+    {"action": "snapshot", "actor": "rm", "metric": "melee_crit_chance", "save_as": "base_crit"},
+
+    {"action": "cast", "label": "Control: Hurricane without the talent", "actor": "rm", "spell": 645435,
+      "target": "dummy"},
+    {"action": "assert", "actor": "rm", "metric": "aura", "spell": 645435, "equals": 1, "within_ms": 500},
+    {"action": "assert", "actor": "rm", "metric": "aura", "spell": 645435, "equals": 0, "within_ms": 4000},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "No buff without Swift Etching", "actor": "rm", "metric": "aura",
+      "spell": 500506, "equals": 0},
+
+    {"action": "learn", "actor": "rm", "spell": 705600},
+    {"action": "assert", "actor": "rm", "metric": "aura", "spell": 705600, "equals": 1, "within_ms": 1000},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 645435},
+    {"action": "wait", "ms": 1600},
+    {"action": "cast", "actor": "rm", "spell": 645435, "target": "dummy"},
+    {"action": "assert", "actor": "rm", "metric": "aura", "spell": 645435, "equals": 1, "within_ms": 500},
+    {"action": "assert", "label": "No buff while Hurricane is still striking", "actor": "rm", "metric": "aura",
+      "spell": 500506, "equals": 0},
+    {"action": "assert", "actor": "rm", "metric": "aura", "spell": 645435, "equals": 0, "within_ms": 4000},
+    {"action": "assert", "label": "Swift Etching follows the end of Hurricane", "actor": "rm", "metric": "aura",
+      "spell": 500506, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "actor": "rm", "metric": "aura_duration_ms", "spell": 500506, "min": 9000, "max": 10000},
+    {"action": "assert", "label": "Melee attack speed is 15% faster", "actor": "rm", "metric": "attack_time_ms",
+      "hand": 0, "ratio_to": "base_swing", "min": 0.868, "max": 0.871},
+    {"action": "assert", "label": "Critical strike chance rises by 10 points", "actor": "rm",
+      "metric": "melee_crit_chance", "relative_to": "base_crit", "min": 9.99, "max": 10.01},
+    {"action": "assert", "label": "The buff lasts 10 s", "actor": "rm", "metric": "aura", "spell": 500506,
+      "equals": 0, "within_ms": 11000},
+    {"action": "assert", "actor": "rm", "metric": "attack_time_ms", "hand": 0, "ratio_to": "base_swing",
+      "min": 0.999, "max": 1.001},
+    {"action": "assert", "actor": "rm", "metric": "melee_crit_chance", "relative_to": "base_crit",
+      "min": -0.01, "max": 0.01}
+  ]
+}

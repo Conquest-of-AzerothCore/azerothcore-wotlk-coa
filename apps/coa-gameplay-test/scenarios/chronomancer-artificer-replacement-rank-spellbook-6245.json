@@ -1,0 +1,179 @@
+{
+  "schema": 1,
+  "name": "Artificer keeps one client wand row across Unmake and replacement rank upgrades (6245)",
+  "contract": "Artificer804478 transforms active Unmake. Acquiring Unmake rank3 at level13 must rebind that active original to wand561284 without announcing the existing replacement twice. Wand rank2 SpellLevel22 is not promised atlevel13; after native level22 progression it must replace wandrank1 with561354, one client row and no oldwand row. Switching out restores Unmake, removes the wand, and switching back grants exactly one replacement row. Native spellbook packet tracking is distinct from rendering the client UI.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 22,
+      "level": 12
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "c",
+      "id": 33
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "temporary_spell_replacement",
+      "spell": 804418,
+      "equals": 561284
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "client_spellbook_copies",
+      "spell": 561284,
+      "equals": 1
+    },
+    {
+      "action": "set_level",
+      "actor": "c",
+      "value": 13
+    },
+    {
+      "action": "learn",
+      "actor": "c",
+      "spell": 503785
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_active",
+      "spell": 503785,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "temporary_spell_replacement",
+      "spell": 503785,
+      "equals": 561284
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "client_spellbook_copies",
+      "spell": 561284,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "client_knows_spell",
+      "spell": 503785,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "knows_spell",
+      "spell": 561354,
+      "equals": 0
+    },
+    {
+      "action": "specialization",
+      "actor": "c",
+      "id": 33
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "client_spellbook_copies",
+      "spell": 561284,
+      "equals": 1
+    },
+    {
+      "action": "set_level",
+      "actor": "c",
+      "value": 22
+    },
+    {
+      "action": "specialization",
+      "actor": "c",
+      "id": 33
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "temporary_spell_replacement",
+      "spell": 503785,
+      "equals": 561354
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "client_spellbook_copies",
+      "spell": 561284,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "client_spellbook_copies",
+      "spell": 561354,
+      "equals": 1
+    },
+    {
+      "action": "specialization",
+      "actor": "c",
+      "id": 32
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "temporary_spell_replacement",
+      "spell": 503785,
+      "equals": 503785
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "client_spellbook_copies",
+      "spell": 561354,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "client_spellbook_copies",
+      "spell": 503785,
+      "equals": 1
+    },
+    {
+      "action": "specialization",
+      "actor": "c",
+      "id": 33
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "temporary_spell_replacement",
+      "spell": 503785,
+      "equals": 561354
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "client_spellbook_copies",
+      "spell": 561354,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "client_spellbook_copies",
+      "spell": 503785,
+      "equals": 0
+    }
+  ]
+}

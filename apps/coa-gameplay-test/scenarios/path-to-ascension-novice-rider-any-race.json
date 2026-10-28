@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Path to Ascension: Novice Rider works for every race at its faction's riding trainers and from the book",
+  "contract": [
+    "Tester reports: Garion Hunter (97921, Goldshire) teaches Novice Riding but offers no Novice Rider quest, the book's start button adds nothing, and a Night Elf who started in Dun Morogh gets no training from Ultham Ironhorn (4772) or Binjy Featherwhistle.",
+    "QuestSuperTrack.dbc sends every Alliance race's Novice Rider quest (Human 4420430, Night Elf 4420433) to Garion Hunter, Binjy Featherwhistle and Aalun, so a riding trainer teaches every race of its faction.",
+    "Expected: Garion shows a Human the available quest marker (8); Ultham offers a Night Elf riding training with Novice Riding (33379) available (0); the book's accept packet (zero giver GUID) adds 4420430, completed at once for a Human who already knows Novice Riding (quest status 1)."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -9424.43, "y": 9.07, "z": 57.97, "o": 1.027 },
+  "players": [
+    { "id": "human", "race": 1, "class": 1, "level": 10 },
+    { "id": "night_elf", "race": 4, "class": 1, "level": 10 },
+    { "id": "reader", "race": 1, "class": 1, "level": 10 }
+  ],
+  "creatures": [
+    { "id": "garion", "owner": "human", "entry": 97921, "distance": 2, "faction": 35 },
+    { "id": "ultham", "owner": "night_elf", "entry": 4772, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Garion Hunter offers the Human the Novice Rider quest",
+      "actor": "human", "metric": "dialog_status", "entry": 97921, "equals": 8, "within_ms": 5000
+    },
+    { "action": "gossip_hello", "label": "Talk to Garion Hunter", "actor": "human", "target": "garion" },
+    {
+      "action": "assert", "label": "His quest menu lists the Human Novice Rider quest",
+      "actor": "human", "metric": "quest_menu_has", "quest": 4420430, "equals": 1
+    },
+    { "action": "gossip_hello", "label": "The Night Elf talks to Ultham Ironhorn", "actor": "night_elf", "target": "ultham" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Ultham offers the Night Elf riding training",
+      "actor": "night_elf", "metric": "gossip_option_text", "index": 0, "text": "I seek training to ride a steed.",
+      "equals": 1
+    },
+    { "action": "gossip_select", "label": "The Night Elf chooses riding training", "actor": "night_elf", "option": 0 },
+    {
+      "action": "assert", "label": "Novice Riding is available to the Night Elf",
+      "actor": "night_elf", "metric": "trainer_window_state", "spell": 33379, "equals": 0, "within_ms": 3000
+    },
+    { "action": "learn", "label": "The reader already knows Novice Riding", "actor": "reader", "spell": 33379 },
+    {
+      "action": "client_packet", "label": "Start the Novice Rider quest from the book", "actor": "reader",
+      "opcode": 393, "fields": [{"u64": 0}, {"u32": 4420430}, {"u32": 0}]
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the book adds the quest, already complete",
+      "actor": "reader", "metric": "quest_status", "quest": 4420430, "equals": 1, "within_ms": 3000
+    }
+  ]
+}

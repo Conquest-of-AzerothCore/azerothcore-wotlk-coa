@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "name": "Wardrobe cosmetics: cancelling the aura clears the selection",
+  "contract": "Issue #5482. Appearance 2030 (Blossom Gossamer Wings) resolves to cosmetic aura 286530. A removal that is not the player's own cancel, such as a fixture removal, is restored by the wardrobe refresh within 2 s. A player cancel through CMSG_CANCEL_AURA takes the cosmetic off: the aura stays absent past two refresh periods and, after login hooks reload the saved selection, it is still absent. Selecting the appearance again in the wardrobe applies the aura again. Login hooks only; no rendering.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "wearer",
+      "race": 1,
+      "class": 12,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "apply_appearances",
+      "actor": "wearer",
+      "selection": {"56": 2030}
+    },
+    {
+      "action": "assert",
+      "label": "The selected wings apply their cosmetic aura",
+      "actor": "wearer",
+      "metric": "aura",
+      "spell": 286530,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "wearer",
+      "spell": 286530,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "A removal other than a cancel is restored by the wardrobe",
+      "actor": "wearer",
+      "metric": "aura",
+      "spell": 286530,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "wearer",
+      "spell": 286530
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "Cancelled wings do not come back",
+      "actor": "wearer",
+      "metric": "aura",
+      "spell": 286530,
+      "equals": 0
+    },
+    {
+      "action": "login_hooks",
+      "actor": "wearer"
+    },
+    {
+      "action": "assert",
+      "label": "The cleared selection was saved",
+      "actor": "wearer",
+      "metric": "aura",
+      "spell": 286530,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Login does not restore cancelled wings",
+      "actor": "wearer",
+      "metric": "aura",
+      "spell": 286530,
+      "equals": 0
+    },
+    {
+      "action": "apply_appearances",
+      "actor": "wearer",
+      "selection": {"56": 2030}
+    },
+    {
+      "action": "assert",
+      "label": "The wardrobe can apply the wings again",
+      "actor": "wearer",
+      "metric": "aura",
+      "spell": 286530,
+      "equals": 1
+    }
+  ]
+}

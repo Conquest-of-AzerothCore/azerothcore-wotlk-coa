@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Necromancer Necrosis lengthens diseases by 25% (#1150)",
+  "contract": "Necrosis 802990 is a Necromancer Death talent (CharacterAdvancement 30835, ClassType 25 = class 23, Tab 59 Death, TalentEssenceCost 1). Its client description reads 'Increases the duration of your diseases by $s1%.' Effect 0 is SPELL_AURA_ADD_PCT_MODIFIER (108) MiscValue 1 (SPELLMOD_DURATION) with BasePoints 24 + DieSides 1 = 25 and EffectSpellClassMask (0, 0x800000, 0x420) in SpellFamilyName 29; no Necromancer contract rewrites it. Word 2 0x20 covers Flesh to Worms 500338 (family flags 0x4000, 0, 0x20; 18000 ms), Harvest Plague and Plague of Undeath, 0x400 covers Lichplague 802132 (18000 ms) and word 1 0x800000 covers Crypt Plague Damage 570131 (10000 ms). Ice Barrage 801760 (0, 0x40, 0; 1000 ms) is not a disease and is not covered. Aura::CalcMaxDuration applies the caster's SPELLMOD_DURATION when a disease lands, so a Flesh to Worms applied before the talent lasts 18 sec and one applied after it lasts 22.5 sec, and the same modifier turns 10 sec of Crypt Plague into 12.5 sec and 18 sec of Lichplague into 22.5 sec while Ice Barrage keeps 1 sec.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "plain_golem", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 8 },
+    { "id": "necrotic_golem", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 11 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "necro", "spell": 500338 },
+    {
+      "action": "cast", "label": "Flesh to Worms without the talent", "actor": "necro", "spell": 500338,
+      "target": "plain_golem"
+    },
+    {
+      "action": "assert", "label": "SETUP: the first golem carries Flesh to Worms", "actor": "plain_golem",
+      "metric": "aura", "spell": 500338, "caster": "necro", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTROL: without Necrosis Flesh to Worms lasts 18 sec", "actor": "plain_golem",
+      "metric": "aura_duration_ms", "spell": 500338, "caster": "necro", "min": 17000, "max": 18000
+    },
+    { "action": "learn", "actor": "necro", "spell": 802990 },
+    {
+      "action": "assert", "label": "The talent aura is applied", "actor": "necro",
+      "metric": "aura", "spell": 802990, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Crypt Plague lasts 12.5 sec", "actor": "necro",
+      "metric": "spell_modifier", "spell": 570131, "op": 1, "base": 10000, "min": 12499.99, "max": 12500.01
+    },
+    {
+      "action": "assert", "label": "Lichplague lasts 22.5 sec", "actor": "necro",
+      "metric": "spell_modifier", "spell": 802132, "op": 1, "base": 18000, "min": 22499.99, "max": 22500.01
+    },
+    {
+      "action": "assert", "label": "CONTROL: Ice Barrage is not a disease and keeps 1 sec", "actor": "necro",
+      "metric": "spell_modifier", "spell": 801760, "op": 1, "base": 1000, "min": 999.99, "max": 1000.01
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    {
+      "action": "cast", "label": "Flesh to Worms with Necrosis", "actor": "necro", "spell": 500338,
+      "target": "necrotic_golem"
+    },
+    {
+      "action": "assert", "label": "SETUP: the second golem carries Flesh to Worms", "actor": "necrotic_golem",
+      "metric": "aura", "spell": 500338, "caster": "necro", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: with Necrosis Flesh to Worms lasts 22.5 sec",
+      "actor": "necrotic_golem", "metric": "aura_duration_ms", "spell": 500338, "caster": "necro",
+      "min": 21500, "max": 22500
+    }
+  ]
+}

@@ -1,0 +1,1342 @@
+{
+  "schema": 1,
+  "name": "Reaper Harvest Time preserves Soul Infusion at 50%, not always",
+  "contract": [
+    "Harvest Time 803995 promises 50% Soul Infusion preservation during its 15-second buff (SpellDuration 8).",
+    "Soulslam 504014 requires Soul Infusion 803031 and uses native melee hit resolution. Melee hit and expertise",
+    "control avoided casts. CoA.AutoProgression is off by default, so Soulslam must be learned explicitly.",
+    "Four normal Harvest Time cast windows sample eight normal Soulslam casts each at 1600ms intervals.",
+    "Reset Harvest Time cooldown between windows only for bounded sampling. Assert the buff before every trial",
+    "so the sample never includes unbuffed casts after its 15-second expiry.",
+    "All 32 Soulslam casts must succeed and hit. Remover 561290 must occur between 1 and 31 times: always",
+    "preserving yields zero and always consuming yields 32. A 50% chance fails either bound with probability 2^-31."
+  ],
+  "players": [
+    {
+      "id": "reaper",
+      "race": 2,
+      "class": 30,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "reaper",
+      "entry": 36,
+      "level": 60,
+      "distance": 6,
+      "health": 1000000,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 803995
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 803995,
+      "target": "reaper",
+      "label": "Harvest Time is not DBC-flagged passive (Attributes 0), so learning it alone does not apply its aura"
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time aura active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 504014,
+      "label": "Soulslam is a class kit spell gated by CoA.AutoProgression (off by default); GiveLevel alone does not grant it"
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 803995
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 803995,
+      "target": "reaper"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 803995,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 803995
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 803995,
+      "target": "reaper"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 803995,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 803995
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 803995,
+      "target": "reaper"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 803995,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Harvest Time is active for every preservation trial",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803995,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 504014,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 803995,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_go_count",
+      "spell": 504014,
+      "equals": 32
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 504014,
+      "target": "enemy",
+      "equals": 32
+    },
+    {
+      "action": "assert",
+      "label": "Soul Infusion is both preserved and consumed across 32 buffed hits",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 561290,
+      "min": 1,
+      "max": 31
+    }
+  ]
+}

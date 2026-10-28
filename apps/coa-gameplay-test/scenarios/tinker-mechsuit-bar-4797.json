@@ -1,0 +1,180 @@
+{
+  "schema": 1,
+  "name": "Tinker: the Mechsuit fills its empty form bar with the suit's abilities (#4797)",
+  "contract": "Build: Mechsuit (801384) shapeshifts the Tinker into form 49, whose bonus action bar starts at button 72. Entering the suit with an empty form bar places Gatling Gun (500213) followed by the known Mechsuit abilities, as druid forms start with their own bar. A form bar the player has already arranged is left untouched.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "fresh",
+      "race": 1,
+      "class": 28,
+      "level": 60
+    },
+    {
+      "id": "arranged",
+      "race": 1,
+      "class": 28,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "fresh fixture: Scrap Shot",
+      "actor": "fresh",
+      "spell": 500549
+    },
+    {
+      "action": "learn",
+      "label": "fresh fixture: Mechsuit talent",
+      "actor": "fresh",
+      "spell": 92141
+    },
+    {
+      "action": "learn",
+      "label": "fresh fixture: Build: Mechsuit",
+      "actor": "fresh",
+      "spell": 801384
+    },
+    {
+      "action": "learn",
+      "label": "fresh fixture: Mechsuit: Laser Beam",
+      "actor": "fresh",
+      "spell": 805372
+    },
+    {
+      "action": "assert",
+      "label": "fresh's form bar starts empty",
+      "actor": "fresh",
+      "metric": "action_button",
+      "button": 72,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "fresh fixture: pre-fill Scrap",
+      "actor": "fresh",
+      "spell": 801816,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "label": "fresh enters the Mechsuit",
+      "actor": "fresh",
+      "spell": 801384
+    },
+    {
+      "action": "assert",
+      "label": "fresh: the Mechsuit is on",
+      "actor": "fresh",
+      "metric": "aura",
+      "spell": 801384,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT the form bar's first button is Gatling Gun",
+      "actor": "fresh",
+      "metric": "action_button",
+      "button": 72,
+      "equals": 500213,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT the known Laser Beam follows it",
+      "actor": "fresh",
+      "metric": "action_button",
+      "button": 73,
+      "equals": 805372
+    },
+    {
+      "action": "assert",
+      "label": "Unknown Mechsuit abilities leave no gap or button",
+      "actor": "fresh",
+      "metric": "action_button",
+      "button": 74,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "label": "arranged fixture: Scrap Shot",
+      "actor": "arranged",
+      "spell": 500549
+    },
+    {
+      "action": "learn",
+      "label": "arranged fixture: Mechsuit talent",
+      "actor": "arranged",
+      "spell": 92141
+    },
+    {
+      "action": "learn",
+      "label": "arranged fixture: Build: Mechsuit",
+      "actor": "arranged",
+      "spell": 801384
+    },
+    {
+      "action": "set_action_button",
+      "label": "arranged places Build: Mechsuit on its form bar",
+      "actor": "arranged",
+      "spell": 801384,
+      "button": 72
+    },
+    {
+      "action": "set_aura",
+      "label": "arranged fixture: pre-fill Scrap",
+      "actor": "arranged",
+      "spell": 801816,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "label": "arranged enters the Mechsuit",
+      "actor": "arranged",
+      "spell": 801384
+    },
+    {
+      "action": "assert",
+      "label": "arranged: the Mechsuit is on",
+      "actor": "arranged",
+      "metric": "aura",
+      "spell": 801384,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT an arranged form bar keeps its button",
+      "actor": "arranged",
+      "metric": "action_button",
+      "button": 72,
+      "equals": 801384
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT nothing is added to an arranged form bar",
+      "actor": "arranged",
+      "metric": "action_button",
+      "button": 73,
+      "equals": 0
+    }
+  ]
+}

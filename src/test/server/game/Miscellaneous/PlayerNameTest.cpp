@@ -2,6 +2,7 @@
 #include "SharedDefines.h"
 #include "WorldMock.h"
 #include "gtest/gtest.h"
+#include <vector>
 
 class PlayerNameTest : public ::testing::Test
 {
@@ -69,6 +70,95 @@ TEST_F(PlayerNameTest, RespectsNativeByteCapacity)
 {
     EXPECT_EQ(ObjectMgr::CheckPlayerName("Абвгдежзийкл Мнопрстуфхц", true), CHAR_NAME_SUCCESS);
     EXPECT_EQ(ObjectMgr::CheckPlayerName("Абвгдежзийкл Мнопрстуфхцч", true), CHAR_NAME_TOO_LONG);
+}
+
+namespace
+{
+    PlayerNameByFirstName OnlineByFirstName(std::vector<std::string> online)
+    {
+        return [online = std::move(online)](std::string const& first)
+        {
+            std::string found;
+            for (std::string const& name : online)
+                if (name.starts_with(first + ' '))
+                {
+                    if (!found.empty())
+                        return std::string();
+                    found = name;
+                }
+            return found;
+        };
+    }
+}
+
+TEST_F(PlayerNameTest, JoinsOnlyQuotedNames)
+{
+    std::string name = "\"arthas";
+    std::string_view rest = "menethil\" 80  extra";
+    EXPECT_TRUE(joinQuotedPlayerName(name, rest));
+    EXPECT_EQ(name, "arthas menethil");
+    EXPECT_EQ(rest, "80  extra");
+
+    name = "'Arthas";
+    rest = "Menethil'";
+    EXPECT_TRUE(joinQuotedPlayerName(name, rest));
+    EXPECT_EQ(name, "Arthas Menethil");
+    EXPECT_TRUE(rest.empty());
+
+    name = "\"Jaina\"";
+    rest = "hello";
+    EXPECT_TRUE(joinQuotedPlayerName(name, rest));
+    EXPECT_EQ(name, "Jaina");
+    EXPECT_EQ(rest, "hello");
+
+    for (auto const& [input, remainder] : {
+        std::pair{"Arthas", "Menethil 80"}, {"\"Arthas", "Menethil 80"}, {"'Arthas", "Menethil\" 80"},
+        {"\"Arthas", ""}, {"\"\"", "Menethil"}})
+    {
+        name = input;
+        rest = remainder;
+        EXPECT_FALSE(joinQuotedPlayerName(name, rest)) << input << ' ' << remainder;
+        EXPECT_EQ(rest, remainder);
+    }
+}
+
+TEST_F(PlayerNameTest, ResolvesQuotedWhisperToFullName)
+{
+    PlayerNameByFirstName const online = OnlineByFirstName({ "Arthas Menethil", "Arthas Storm" });
+
+    std::string to = "\"Arthas";
+    std::string msg = "Storm\" hello there";
+    EXPECT_TRUE(resolveWhisperTarget(to, msg, online));
+    EXPECT_EQ(to, "Arthas Storm");
+    EXPECT_EQ(msg, "hello there");
+
+    to = "\"Jaina\"";
+    msg = "hi";
+    EXPECT_TRUE(resolveWhisperTarget(to, msg, online));
+    EXPECT_EQ(to, "Jaina");
+    EXPECT_EQ(msg, "hi");
+}
+
+TEST_F(PlayerNameTest, KeepsUnquotedWhisperOnTheFirstWord)
+{
+    std::string to = "Arthas";
+    std::string msg = "Menethil hello";
+    EXPECT_FALSE(resolveWhisperTarget(to, msg, OnlineByFirstName({ "Arthas Menethil" })));
+    EXPECT_EQ(to, "Arthas");
+    EXPECT_EQ(msg, "Menethil hello");
+}
+
+TEST_F(PlayerNameTest, ResolvesStickyQuotedFirstNameOnlyWhenUnambiguous)
+{
+    std::string to = "\"uther";
+    std::string msg = "hello";
+    EXPECT_TRUE(resolveWhisperTarget(to, msg, OnlineByFirstName({ "Uther Light" })));
+    EXPECT_EQ(to, "Uther Light");
+    EXPECT_EQ(msg, "hello");
+
+    to = "\"Arthas";
+    EXPECT_FALSE(resolveWhisperTarget(to, msg, OnlineByFirstName({ "Arthas Menethil", "Arthas Storm" })));
+    EXPECT_EQ(to, "\"Arthas");
 }
 
 TEST_F(PlayerNameTest, ValidatesBothDeclinedNameComponents)

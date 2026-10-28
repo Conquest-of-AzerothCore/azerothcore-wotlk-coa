@@ -1,0 +1,132 @@
+{
+  "schema": 1,
+  "name": "Aftermath's two charges reach both Scrap Shots (#4642)",
+  "contract": "Aftermath (707260 driver, 707261 TinkerFinite buff) reads 'your next 2 Scrap Shots ... cast faster and deal more damage'. Its ProcCharges is patched to 2 in AscensionTinkerContracts.cpp, and aura_ascension_tinker_lifecycle::Apply() calls SetUsingCharges(false) so the custom Spend() path (AscensionTinker.cpp) is meant to be the sole consumer, matching the native workaround in Player::RemoveSpellMods that skips auras carrying a live spell_proc entry -- 707261 has none (ProcFlags forced to 0), so that skip does not fire for it. But Aura::SetCharges() unconditionally recomputes m_isUsingCharges = (charges != 0), so the first Spend() decrement (2 -> 1) flips IsUsingCharges() back to true, reopening the native spellmod-charge path (Player::RemoveSpellMods -> DropCharge) for 707261's own SPELLMOD_DAMAGE/SPELLMOD_CASTING_TIME effects on Scrap Shot 500549 (SpellClassMask 16 matches SpellFamilyFlags[0] 16), on top of the script's own decrement -- consuming both charges before the second Scrap Shot ever sees the buff. A fixture-applied Aftermath aura goes through the same Apply()/Select()/Snapshot()/Finish()/Spend() path as a real Sticky-Bomb-driven grant, so casting Scrap Shot twice against a real target exercises the exact native RemoveSpellMods interaction the fix closes: after the fix each real cast spends exactly one charge, and the 25 percent SPELLMOD_DAMAGE bonus (EffectBasePoints[1]=24 with DieSides 1 resolving to +25 per SpellEffectInfo::CalcValue's DieSides==1 case, on 707261, op 0 base 1000 -> 1250) stays live for both Scrap Shots.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 80,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "t",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 15
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 500549
+    },
+    {
+      "action": "set_aura",
+      "actor": "t",
+      "spell": 707261,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Aftermath applies with two charges",
+      "actor": "t",
+      "metric": "aura_charges",
+      "spell": 707261,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Aftermath's damage bonus is live before any Scrap Shot",
+      "actor": "t",
+      "metric": "spell_modifier",
+      "spell": 500549,
+      "op": 0,
+      "base": 1000,
+      "equals": 1250
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500549,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2700
+    },
+    {
+      "action": "assert",
+      "label": "Aftermath survives the first Scrap Shot with one charge left",
+      "actor": "t",
+      "metric": "aura_charges",
+      "spell": 707261,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Aftermath is still applied after the first Scrap Shot",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 707261,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The damage bonus still applies for the second Scrap Shot",
+      "actor": "t",
+      "metric": "spell_modifier",
+      "spell": 500549,
+      "op": 0,
+      "base": 1000,
+      "equals": 1250
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500549,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2700
+    },
+    {
+      "action": "assert",
+      "label": "Aftermath's second charge is spent by the second Scrap Shot",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 707261,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Both Scrap Shots actually landed on the target",
+      "actor": "t",
+      "metric": "spell_damage_count",
+      "spell": 500549,
+      "target": "d",
+      "min": 2
+    }
+  ]
+}

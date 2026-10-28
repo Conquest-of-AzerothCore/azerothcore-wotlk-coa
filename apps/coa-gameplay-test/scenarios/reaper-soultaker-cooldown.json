@@ -1,0 +1,164 @@
+{
+  "schema": 1,
+  "name": "Soultaker shortens Tormented Souls after Dreadwake damage (#1192)",
+  "contract": [
+    "Soultaker 704356 triggers helper 582751 on Dreadwake 503286 damage.",
+    "The helper reduces Tormented Souls 500483's active cooldown by one second.",
+    "Dreadwake must deal damage and cast the helper; a submitted cast alone proves neither effect."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "victim",
+      "owner": "reaper",
+      "entry": 299,
+      "level": 80,
+      "distance": 2,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 503286
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 704356
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_power",
+      "actor": "reaper",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Soultaker proc aura is active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 704356,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Tormented Souls prerequisite is present",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 500363,
+      "min": 1
+    },
+    {
+      "action": "cast",
+      "label": "Start Tormented Souls cooldown",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "assert",
+      "label": "Tormented Souls cast was accepted",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 500483,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Tormented Souls is cooling down",
+      "actor": "reaper",
+      "metric": "cooldown_ms",
+      "spell": 500483,
+      "min": 18000,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Cooldown before Dreadwake",
+      "actor": "reaper",
+      "metric": "cooldown_ms",
+      "spell": 500483,
+      "save_as": "before_dreadwake"
+    },
+    {
+      "action": "cast",
+      "label": "Dreadwake damages the enemy",
+      "actor": "reaper",
+      "spell": 503286,
+      "target": "victim"
+    },
+    {
+      "action": "assert",
+      "label": "Dreadwake cast was accepted",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 503286,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Dreadwake dealt damage",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 503286,
+      "target": "victim",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Soultaker cast its cooldown helper",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 582751,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Soultaker shortened Tormented Souls by about one second",
+      "actor": "reaper",
+      "metric": "cooldown_ms",
+      "spell": 500483,
+      "relative_to": "before_dreadwake",
+      "min": -1300,
+      "max": -900
+    }
+  ]
+}

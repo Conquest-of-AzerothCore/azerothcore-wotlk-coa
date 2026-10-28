@@ -41,9 +41,11 @@
 #include "ScriptMgr.h"
 #include "ScriptedGossip.h"
 #include "SpellMgr.h"
+#include "TemporarySummon.h"
 #include "WorldSession.h"
 
 #include <algorithm>
+#include <iterator>
 #include <map>
 #include <string>
 #include <utility>
@@ -53,7 +55,11 @@
 // They are plain generated data headers, so they are read rather than copied.
 #include "AscensionCoATalentData.h"
 #include "AscensionCustomClassData.h"
+#include "AscensionFelsworn.h"
+#include "AscensionGuardianCompletion.h"
+#include "AscensionPyromancerData.h"
 #include "AscensionSpellProgressionData.h"
+#include "AscensionTalentReplacementData.h"
 #include "SpellbookCostData.h"
 #include "SpellbookOfferData.h"
 #include "SpellbookRankData.h"
@@ -118,13 +124,38 @@ namespace
         return sConfigMgr->GetOption<bool>(COST_ENABLE_KEY, true);
     }
 
+    constexpr char const *PURCHASED_RANKS_KEY = "core.ascension_purchased_ranks";
+
+    bool PreviouslyLearned(Player const *player, uint32 spellId)
+    {
+        PlayerSettingVector const *values = player->FindPlayerSettings(PURCHASED_RANKS_KEY);
+        if (!values || values->empty())
+            return false;
+        std::size_t const count = std::min<std::size_t>((*values)[0].value, values->size() - 1);
+        for (std::size_t index = 1; index <= count; ++index)
+            if ((*values)[index].value == spellId)
+                return true;
+        return false;
+    }
+
+    void RememberLearned(Player *player, uint32 spellId)
+    {
+        if (!player->HasSpell(spellId) || PreviouslyLearned(player, spellId))
+            return;
+        PlayerSettingVector const *values = player->FindPlayerSettings(PURCHASED_RANKS_KEY);
+        uint32 const count = values && !values->empty()
+            ? uint32(std::min<std::size_t>((*values)[0].value, values->size() - 1)) : 0;
+        player->UpdatePlayerSetting(PURCHASED_RANKS_KEY, count + 1, spellId);
+        player->UpdatePlayerSetting(PURCHASED_RANKS_KEY, 0, count + 1);
+    }
+
     /// Copper this row costs this viewer: the band price for the level the window gates the row
     /// at, times the configured multiplier, times the viewer's reputation discount with the
     /// book. Trainer::SendSpells and Trainer::TeachSpell apply the same two steps, so the price
     /// the window shows and the price the Train button charges cannot drift apart.
     int32 RowPrice(Player *player, Creature *book, Row const &row)
     {
-        if (!Charging() || !row.Cost)
+        if (!Charging() || !row.Cost || PreviouslyLearned(player, row.SpellId))
             return 0;
 
         float price = float(row.Cost) * sConfigMgr->GetOption<float>(COST_MULTIPLIER_KEY, 1.0f);
@@ -203,6 +234,33 @@ namespace
         return itr != table.end() && itr->ClassId == classId && itr->SpellId == spellId;
     }
 
+    /// Whether Explode is currently replaced by Echo of Nozdormu for this character, in
+    /// which case the book lists no Explode rank at all: the conversion already covers the
+    /// whole chain on the action bars, so offering its ranks would only re-announce a spell
+    /// the character no longer casts. Keyed on the aura AscensionPyromancer::Refresh itself
+    /// uses, so the window and the conversion cannot disagree.
+    bool ReplacedByEchoOfNozdormu(Player* player, uint32 spellId)
+    {
+        return player && player->getClass() == CLASS_PYROMANCER && player->HasAura(520937) &&
+            sSpellMgr->GetFirstSpellInChain(spellId) == 800792;
+    }
+
+    bool CanLearnTalentReplacement(Player* player, uint32 spellId)
+    {
+        if (player->getClass() == CLASS_PYROMANCER &&
+            std::find(std::begin(PyromancerEchoRanks), std::end(PyromancerEchoRanks), spellId) !=
+                std::end(PyromancerEchoRanks))
+            return ActiveSpec(player) == 39 && player->HasSpell(520937);
+
+        for (auto const& replacement : AscensionCompatData::TalentReplacements)
+            if (replacement.ClassId == player->getClass() &&
+                std::any_of(replacement.Ranks.begin(), replacement.Ranks.end(),
+                    [spellId](auto const& rank) { return rank.SpellId == spellId; }))
+                return replacement.SpecId == ActiveSpec(player) && player->HasSpell(replacement.ParentSpellId);
+
+        return true;
+    }
+
     /// The row set behind both the window and the announcement push.
     ///
     /// The window view is what the player is shown, and it is the only view that gets
@@ -220,15 +278,32 @@ namespace
         uint8 const classId = uint8(player->getClass());
         uint32 const spec = ActiveSpec(player);
 
-        auto add = [&rows, classId, windowView](uint32 spellId, uint8 requiredLevel,
+        auto add = [&rows, classId, windowView, player, spec](uint32 spellId, uint8 requiredLevel,
                                                 uint32 requiredAbility)
         {
             if (!spellId || !sSpellMgr->GetSpellInfo(spellId))
+                return;
+            if (!AscensionFelsworn::CanLearnRift(player, spellId))
+                return;
+            if (windowView && classId == CLASS_FLESHWARDEN && player->HasAura(301302) &&
+                sSpellMgr->GetFirstSpellInChain(spellId) == 801016)
+                return;
+            if (windowView && classId == CLASS_GUARDIAN && AscensionGuardian::Ballad(spellId) &&
+                (spec != 20 || !player->HasAura(505344)))
                 return;
 
             // A spell the talent trees grant is the tree's to hand out, whatever source
             // below would otherwise reach it through.
             if (windowView && IsTreeSpell(classId, spellId))
+                return;
+
+            // Explode while Echo of Nozdormu replaces it: neither its known ranks nor its
+            // upgrades are listed, so the window cannot sell back a spell the conversion
+            // just took off the bars.
+            if (windowView && ReplacedByEchoOfNozdormu(player, spellId))
+                return;
+
+            if (windowView && !CanLearnTalentReplacement(player, spellId))
                 return;
 
             for (Row const &known : rows)
@@ -485,10 +560,40 @@ namespace
         return true;
     }
 
+    void RememberKnownBookSpells(Player *player)
+    {
+        if (!player || !IsAscensionClass(player->getClass()))
+            return;
+        for (Row const &row : BuildRows(player, false))
+            RememberLearned(player, row.SpellId);
+    }
+
+    void RestoreBookRanks(Player *player, Creature *book)
+    {
+        bool learned;
+        do
+        {
+            learned = false;
+            for (Row const &row : BuildRows(player))
+            {
+                if (row.State != RowState::Available || !row.RequiredAbility ||
+                    !PreviouslyLearned(player, row.SpellId))
+                    continue;
+                SpellbookNotify::Push(player, row.SpellId);
+                player->learnSpell(row.SpellId, false);
+                if (player->HasSpell(row.SpellId))
+                {
+                    learned = true;
+                    sScriptMgr->OnPlayerLearnTrainerSpell(player, book, row.SpellId);
+                }
+            }
+        } while (learned);
+    }
+
     /// Learns everything the window currently offers as available. This is the book's
     /// "catch me up" action, so a character who fell behind does not have to click through
     /// eighty rows after a fix or a level cap change.
-    uint32 LearnEverythingAvailable(Player *player)
+    uint32 LearnEverythingAvailable(Player *player, Creature *book)
     {
         uint32 learned = 0;
         for (Row const &row : BuildRows(player))
@@ -501,6 +606,8 @@ namespace
             SpellbookNotify::Push(player, row.SpellId);
 
             player->learnSpell(row.SpellId, false);
+            if (player->HasSpell(row.SpellId))
+                sScriptMgr->OnPlayerLearnTrainerSpell(player, book, row.SpellId);
             ++learned;
         }
 
@@ -556,8 +663,12 @@ namespace
         // client is never left waiting on a purchase nothing will handle.
         if (found == rows.end())
         {
-            if (IsTreeSpell(uint32(player->getClass()), wanted) ||
-                HasRankOrBetter(player, wanted))
+            if (!AscensionFelsworn::CanLearnRift(player, wanted) ||
+                !CanLearnTalentReplacement(player, wanted) ||
+                ReplacedByEchoOfNozdormu(player, wanted) ||
+                IsTreeSpell(uint32(player->getClass()), wanted) ||
+                HasRankOrBetter(player, wanted) ||
+                (player->getClass() == CLASS_GUARDIAN && AscensionGuardian::Ballad(wanted)))
             {
                 WorldPacket failed(SMSG_TRAINER_BUY_FAILED);
                 failed << book->GetGUID() << uint32(wanted)
@@ -616,6 +727,8 @@ namespace
         WorldPacket succeeded(SMSG_TRAINER_BUY_SUCCEEDED);
         succeeded << book->GetGUID() << uint32(wanted);
         player->SendDirectMessage(&succeeded);
+        if (player->HasSpell(wanted))
+            sScriptMgr->OnPlayerLearnTrainerSpell(player, book, wanted);
 
         // The row set belongs to the server, so the window on screen is stale the moment this is
         // learned: the rank just bought has to turn "used" and the rank above it has to turn
@@ -665,8 +778,15 @@ namespace
         bool OnGossipHello(Player *player, Creature *book) override
         {
             ClearGossipMenuFor(player);
-            if (!Enabled() || !IsAscensionClass(player->getClass()))
+            if (!Enabled())
                 return true;
+
+            // Any other class trains at the book what its realm's class trainers teach it.
+            if (!IsAscensionClass(player->getClass()))
+            {
+                player->GetSession()->SendTrainerList(book);
+                return true;
+            }
 
             // Right-clicking a book is a request for the trainer window: no gossip page in
             // between, which is how the books behaved on the live realm.
@@ -687,7 +807,7 @@ namespace
                 !Enabled() || !IsAscensionClass(player->getClass()))
                 return true;
 
-            uint32 const learned = LearnEverythingAvailable(player);
+            uint32 const learned = LearnEverythingAvailable(player, book);
             if (learned)
             {
                 ChatHandler(player->GetSession())
@@ -734,12 +854,64 @@ namespace
     };
 }
 
+/// SMSG_SUPERCEDED_SPELL is how a temporary spell replacement swaps the client's bars, and the client
+/// announces the spell it swaps in as "learned" when that spell is notable. A talent's variant (Spirit
+/// Volley, Falconstrike) carries no notable bit, but the book spell it hands back when it ends
+/// (Reclamation, Quick Shot) does, so every revert drew the "New Spell Learned" toast. The spell is
+/// muted for exactly that one notice and made notable again right after it.
+class spellbook_swap_notice final : public PlayerScript
+{
+public:
+    spellbook_swap_notice() : PlayerScript("spellbook_swap_notice",
+                                           {PLAYERHOOK_ON_TEMPORARY_SPELL_REPLACEMENT_NOTICE}) { }
+
+    void OnPlayerTemporarySpellReplacementNotice(Player *player, uint32 /*previous*/, uint32 replacement,
+                                                 bool sent) override
+    {
+        if (sent)
+            SpellbookNotify::Push(player, replacement);
+        else
+            SpellbookNotify::Mute(player, replacement);
+    }
+};
+
+/// A temporary spell (Remote Detonation while a mine is out, the Guardian's stomp, a talent's variant) is learned
+/// and dropped again with its owner, and every SMSG_LEARNED_SPELL printed "You have learned a new spell", could draw
+/// the "New Spell Learned" toast and, up to level 10, placed the spell on another empty button. Its row is sent quiet
+/// for exactly that packet and put back right after.
+class spellbook_temporary_learn_notice final : public PlayerScript
+{
+public:
+    spellbook_temporary_learn_notice() : PlayerScript("spellbook_temporary_learn_notice",
+                                                      {PLAYERHOOK_ON_TEMPORARY_SPELL_LEARN_NOTICE}) { }
+
+    void OnPlayerTemporarySpellLearnNotice(Player *player, uint32 spellId, bool sent) override
+    {
+        if (sent)
+            SpellbookNotify::Unquiet(player, spellId);
+        else
+            SpellbookNotify::Quiet(player, spellId);
+    }
+};
+
+class spellbook_notify_config final : public WorldScript
+{
+public:
+    spellbook_notify_config() : WorldScript("spellbook_notify_config", {WORLDHOOK_ON_AFTER_CONFIG_LOAD}) { }
+
+    void OnAfterConfigLoad(bool /*reload*/) override
+    {
+        SpellbookNotify::LoadConfig();
+    }
+};
+
 class spellbook_metric_provider final : public WorldScript
 {
 public:
     spellbook_metric_provider() : WorldScript("spellbook_metric_provider")
     {
-        CoASpellbook::SetProvider({Spellbook::RowCount, Spellbook::OffersSpell, Spellbook::CoversSpell});
+        CoASpellbook::SetProvider({Spellbook::RowCount, Spellbook::OffersSpell, Spellbook::CoversSpell,
+            Spellbook::UpgradeRanksAbove});
     }
 
     ~spellbook_metric_provider() override
@@ -748,9 +920,42 @@ public:
     }
 };
 
+class spellbook_purchased_ranks final : public PlayerScript
+{
+public:
+    spellbook_purchased_ranks() : PlayerScript("spellbook_purchased_ranks",
+        {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LEARN_TRAINER_SPELL,
+            PLAYERHOOK_ON_BEFORE_TEMP_SUMMON_INIT_STATS}) { }
+
+    void OnPlayerLogin(Player *player) override
+    {
+        RememberKnownBookSpells(player);
+    }
+
+    void OnPlayerLearnTrainerSpell(Player *player, Creature *trainer, uint32 spellId) override
+    {
+        if (player && IsAscensionClass(player->getClass()) && IsBook(trainer) &&
+            Spellbook::OffersSpell(player, spellId))
+            RememberLearned(player, spellId);
+    }
+
+    void OnPlayerBeforeTempSummonInitStats(Player *player, TempSummon *summon, uint32 & /*duration*/) override
+    {
+        if (Enabled() && player && IsAscensionClass(player->getClass()) && IsBook(summon))
+        {
+            RememberKnownBookSpells(player);
+            RestoreBookRanks(player, summon);
+        }
+    }
+};
+
 void AddSpellbookScripts()
 {
+    new spellbook_purchased_ranks();
+    new spellbook_notify_config();
     new spellbook_metric_provider();
+    new spellbook_swap_notice();
+    new spellbook_temporary_learn_notice();
     new SpellbookBookScript();
     new SpellbookServerScript();
 }
@@ -782,5 +987,22 @@ namespace Spellbook
         // The window drops what the character already holds, so membership alone would report
         // a bought spell as missing. Entitlement is the union of the two.
         return OffersSpell(player, spellId) || HasRankOrBetter(player, spellId);
+    }
+
+    std::vector<uint32> UpgradeRanksAbove(Player *player, uint8 level)
+    {
+        std::vector<uint32> spells;
+        if (!player)
+            return spells;
+
+        for (SpellbookOfferData::Offer const &offer : SpellbookOfferData::Offers)
+            if (offer.ClassId == player->getClass() && offer.FirstSpellId && offer.RequiredLevel > level)
+                spells.push_back(offer.SpellId);
+
+        for (SpellbookRankData::Rank const &rank : SpellbookRankData::Ranks)
+            if (rank.ClassId == player->getClass() && rank.RequiredLevel > level)
+                spells.push_back(rank.SpellId);
+
+        return spells;
     }
 }

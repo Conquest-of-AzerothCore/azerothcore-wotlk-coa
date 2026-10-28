@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "name": "The Lumber Axe is handed over when either wood trade is taken",
+  "contract": "Taking Woodcutting or Woodworking hands over the Lumber Axe (6954), which is what a gathering character works a tree with. The book sells each trade's Apprentice row as a trainer spell that carries a learn spell, so Trainer::TeachSpell casts it rather than learning it, and what the character keeps is the spell it teaches and the skill the cast raises - which is why the grant listens for the skill moving and for the taught spell, not for the Apprentice row itself. A later rank of the same trade raises the skill again and must not hand out a second axe.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9200.0,
+    "y": -1700.0,
+    "z": 258.915,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "woodcutter",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "woodworker",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "assert",
+      "actor": "woodcutter",
+      "metric": "item_count",
+      "item": 6954,
+      "equals": 0,
+      "label": "a character with no trade starts with no axe"
+    },
+    {
+      "action": "set_skill",
+      "actor": "woodcutter",
+      "skill": 732,
+      "value": 1,
+      "maximum": 75
+    },
+    {
+      "action": "assert",
+      "actor": "woodcutter",
+      "metric": "item_count",
+      "item": 6954,
+      "equals": 1,
+      "label": "taking Woodcutting hands the axe over"
+    },
+    {
+      "action": "set_skill",
+      "actor": "woodcutter",
+      "skill": 732,
+      "value": 65,
+      "maximum": 75
+    },
+    {
+      "action": "assert",
+      "actor": "woodcutter",
+      "metric": "item_count",
+      "item": 6954,
+      "equals": 1,
+      "label": "raising the same trade again does not hand out a second one"
+    },
+    {
+      "action": "set_skill",
+      "actor": "woodcutter",
+      "skill": 732,
+      "value": 230,
+      "maximum": 300
+    },
+    {
+      "action": "assert",
+      "actor": "woodcutter",
+      "metric": "item_count",
+      "item": 6954,
+      "equals": 1,
+      "label": "nor does the last rank of the ladder"
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "item_count",
+      "item": 6954,
+      "equals": 0,
+      "label": "the other character starts with no axe either"
+    },
+    {
+      "action": "set_skill",
+      "actor": "woodworker",
+      "skill": 757,
+      "value": 1,
+      "maximum": 75
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "item_count",
+      "item": 6954,
+      "equals": 1,
+      "label": "taking Woodworking hands the same axe over"
+    }
+  ]
+}

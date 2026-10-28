@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Runemaster audit: Expert Elementalist cuts cast time 0.5s and raises hit chance 3% (#3679)",
+  "contract": "Expert Elementalist 807505 effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 10 (SPELLMOD_CASTING_TIME), EffectBasePoints -501 + DieSides 1 = -500ms, EffectSpellClassMask (4096, 0, 131072). Word 0 bit 12 (4096) matches the Glyphic Ruin family (520067-520070, 572119-572122, 801179, all SpellFamilyFlags word 0 = 4096) and word 2 bit 17 (131072) matches the Elemental Burst family (520064-520066, 802202, all SpellFamilyFlags word 2 = 131072) - two disjoint target families, one bit each, matching the tooltip's two named spells. Effect 1 is SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT (333), a genuine implemented CoA aura calling both HandleModHitChance and HandleModSpellHitChance, BasePoints 2 + 1 = +3.",
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 40}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "snapshot", "actor": "rm", "metric": "spell_hit_chance", "save_as": "hit_before"},
+    {"action": "assert", "label": "before: Glyphic Ruin (801179) has no cast time modifier", "actor": "rm",
+      "metric": "spell_modifier", "spell": 801179, "op": 10, "base": 100000, "min": 99998, "max": 100002},
+    {"action": "assert", "label": "before: Elemental Burst (802202) has no cast time modifier", "actor": "rm",
+      "metric": "spell_modifier", "spell": 802202, "op": 10, "base": 100000, "min": 99998, "max": 100002},
+    {"action": "learn", "actor": "rm", "spell": 807505},
+    {"action": "assert", "label": "Expert Elementalist (807505) is active", "actor": "rm",
+      "metric": "aura", "spell": 807505, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "Hit chance rises by 3 points", "actor": "rm",
+      "metric": "spell_hit_chance", "relative_to": "hit_before", "min": 2.5, "max": 3.5},
+    {"action": "assert", "label": "807505 op 10 flat -500ms reaches Glyphic Ruin (word 0 bit 12)", "actor": "rm",
+      "metric": "spell_modifier", "spell": 801179, "op": 10, "base": 100000, "min": 99498, "max": 99502},
+    {"action": "assert", "label": "807505 op 10 flat -500ms reaches Elemental Burst (word 2 bit 17)", "actor": "rm",
+      "metric": "spell_modifier", "spell": 802202, "op": 10, "base": 100000, "min": 99498, "max": 99502}
+  ]
+}

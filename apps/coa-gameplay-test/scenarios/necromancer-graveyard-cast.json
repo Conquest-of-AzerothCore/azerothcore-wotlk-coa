@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "name": "Necromancer: casting Graveyard keeps the server up and raises its Tombstones (#322)",
+  "contract": "Graveyard 805197 (Spell.dbc; the Necromancer's level-60 ability, SkillLineAbility 23498, AscensionCustomClassData {23, 60, 805197}) is cast at a ground location (Targets 64, range index 4 = 30 yd). Effect 0 is SPELL_EFFECT_TRIGGER_SPELL 899900 (Tombstone Layout A: two Tombstone 542064 summons plus trigger 899901 with three more, all routed through spell_ascension_necromancer_summon). Effect 1 is SPELL_EFFECT_PERSISTENT_AREA_AURA (27) carrying SPELL_AURA_MOD_DECREASE_SPEED (33), BasePoints -41 (-40%), TARGET_UNIT_DEST_AREA_ENEMY, radius index 13 (10 yd), duration index 18 (20 s): the tooltip's 'slowing the movement speed of enemies inside by 40% ... Lasts 20 sec'. Each Tombstone's AI (npc_ascension_necromancer event 4, every 3 s from 2 s) makes its owner cast Graveyard 500365, the 'raising the Undead from the ground' step. The report came from a level-1 Necromancer on core revision a8b28faac: creating the persistent aura's DynObjAura runs Aura::CalcMaxDuration -> AllSpellScript::OnCalcMaxDuration, where necromancer_casts then called Aura::GetUnitOwner(), which ASSERTs GetType() == UNIT_AURA_TYPE, so every Graveyard cast aborted the worldserver. 38ba75a04 (#3083) checks the aura type first. Both the reported level 1 and the acquisition level 60 cast it at a Harvest Golem 20 yd away. 500365 raises its Ghoul and deals its 6 yd Plague damage within 8 yd of the Tombstone that raised it (necromancer-graveyard-raises-at-tombstones covers that placement). The case requires each ground effect, its slow on the golem, the Tombstones and their raise casts, each ground effect's expiry after 20 s and both casters alive afterwards.",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "low", "race": 5, "class": 23, "level": 1 },
+    { "id": "cap", "race": 5, "class": 23, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "low", "entry": 36, "level": 60, "health": 100000, "distance": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "low", "spell": 805197 },
+    { "action": "learn", "actor": "cap", "spell": 805197 },
+    {
+      "action": "assert", "label": "BASELINE: no Graveyard ground effect yet", "actor": "low",
+      "metric": "dynamic_object", "spell": 805197, "equals": 0
+    },
+    {
+      "action": "cast", "label": "Level-1 Necromancer casts Graveyard at the golem, as reported", "actor": "low",
+      "spell": 805197, "destination": { "x": -8897.41, "y": -115.853, "z": 82.3711 }
+    },
+    {
+      "action": "assert", "label": "The level-1 Graveyard ground effect exists", "actor": "low",
+      "metric": "dynamic_object", "spell": 805197, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The level-1 Graveyard slows the enemy inside it", "actor": "golem",
+      "metric": "aura", "spell": 805197, "caster": "low", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The level-1 Graveyard raises its Tombstones", "actor": "low",
+      "metric": "owned_creature_count", "entry": 542064, "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The level-1 Tombstones raise the dead (Graveyard 500365)", "actor": "low",
+      "metric": "spell_cast_count", "spell": 500365, "min": 1, "within_ms": 8000
+    },
+    {
+      "action": "cast", "label": "Level-60 Necromancer casts Graveyard at the golem", "actor": "cap",
+      "spell": 805197, "destination": { "x": -8897.41, "y": -115.853, "z": 82.3711 }
+    },
+    {
+      "action": "assert", "label": "The level-60 Graveyard ground effect exists", "actor": "cap",
+      "metric": "dynamic_object", "spell": 805197, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The level-60 Graveyard slows the enemy inside it", "actor": "golem",
+      "metric": "aura", "spell": 805197, "caster": "cap", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The level-60 Graveyard raises its Tombstones", "actor": "cap",
+      "metric": "owned_creature_count", "entry": 542064, "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The level-60 Tombstones raise the dead (Graveyard 500365)", "actor": "cap",
+      "metric": "spell_cast_count", "spell": 500365, "min": 1, "within_ms": 8000
+    },
+    {
+      "action": "assert", "label": "The level-1 ground effect expires after its 20 s", "actor": "low",
+      "metric": "dynamic_object", "spell": 805197, "equals": 0, "within_ms": 25000
+    },
+    {
+      "action": "assert", "label": "The level-60 ground effect expires after its 20 s", "actor": "cap",
+      "metric": "dynamic_object", "spell": 805197, "equals": 0, "within_ms": 25000
+    },
+    {
+      "action": "assert", "label": "The slow leaves the golem with the ground effect", "actor": "golem",
+      "metric": "aura", "spell": 805197, "caster": "cap", "equals": 0, "within_ms": 3000
+    },
+    { "action": "assert", "label": "The level-1 caster is alive", "actor": "low", "metric": "alive", "equals": 1 },
+    { "action": "assert", "label": "The level-60 caster is alive", "actor": "cap", "metric": "alive", "equals": 1 }
+  ]
+}

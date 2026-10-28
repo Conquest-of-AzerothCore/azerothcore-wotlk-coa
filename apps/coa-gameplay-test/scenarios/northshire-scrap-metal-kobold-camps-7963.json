@@ -1,0 +1,335 @@
+{
+  "schema": 1,
+  "name": "Northshire Scrap Metal: the kobold camp piles exist and pay out for Ingenuity At It's Finest! (#7963)",
+  "contract": "Ingenuity At It's Finest! (200065, Tinker, Norman Goldshire) asks for 3 Scrap Metal (item 663320). The metal is not a kobold drop: it is gameobject 9301104, a chest whose loot is 663320 at 100% with QuestRequired, spawned at guids 7912107-7912117 in the three kobold camps and at the Echo Ridge Mine mouth. rev_20260930_99_ASC_northshire_revamp.sql deletes those guids (and the rest of the class chain) as 'stray spawns'; rev_20261007_20 restores them on a new database, but a world database that re-applies the revamp after its content changed loses them again with rev_20261007_20 still recorded as applied, so the quest has nothing to loot (#7963). rev_20261017_40_coa_northshire_class_chain_respawn.sql writes them back. Expected before: no pile is found at any camp, every DISCRIMINATING read is 0. Expected after: 3 piles at each camp and 2 at the mine mouth light up as quest objects for a Tinker on 200065, and three looted piles complete the quest. The loot actions only open a gameobject the player summoned, so copies of the pile prove the loot path while the camp reads prove the world spawns.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8905.17,
+    "y": -105.17,
+    "z": 81.849,
+    "o": 5.53
+  },
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join the world phase the valley's CoA spawns live in",
+      "actor": "t",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the valley spawns and the login stream settle",
+      "ms": 6000
+    },
+    {
+      "action": "teleport",
+      "label": "Go to Norman Goldshire, the Tinker trainer in the yard west of the abbey",
+      "actor": "t",
+      "map": 0,
+      "x": -8905.17,
+      "y": -105.17,
+      "z": 81.849,
+      "o": 5.53
+    },
+    {
+      "action": "wait",
+      "label": "Let the grid load",
+      "ms": 2500
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Finish the prerequisite 49985 as a fixture",
+      "actor": "t",
+      "quest": 49985
+    },
+    {
+      "action": "reward_quest",
+      "label": "Hand it in so Ingenuity At It's Finest! is offered",
+      "actor": "t",
+      "quest": 49985
+    },
+    {
+      "action": "quest_accept",
+      "label": "Take Ingenuity At It's Finest! (200065) from Norman Goldshire the way a player does",
+      "actor": "t",
+      "quest": 200065,
+      "entry": 50287
+    },
+    {
+      "action": "assert",
+      "label": "The quest is in the log and incomplete, the state of a player looking for Scrap Metal",
+      "actor": "t",
+      "metric": "quest_status",
+      "quest": 200065,
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "teleport",
+      "label": "Go to the north kobold camp, by the campfire",
+      "actor": "t",
+      "map": 0,
+      "x": -8775.5,
+      "y": -121.5,
+      "z": 82.964,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the grid load",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the 3 Scrap Metal piles of the north kobold camp, by the campfire stand there (guids 7912107-7912109) and light up as quest objects for a Tinker on 200065",
+      "actor": "t",
+      "metric": "nearby_gameobject_quest_active",
+      "entry": 9301104,
+      "equals": 3,
+      "within_ms": 8000
+    },
+    {
+      "action": "teleport",
+      "label": "Go to the middle kobold camp, between its campfire and the tent",
+      "actor": "t",
+      "map": 0,
+      "x": -8762.6,
+      "y": -176.7,
+      "z": 86.0,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the grid load",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the 3 Scrap Metal piles of the middle kobold camp, between its campfire and the tent stand there (guids 7912110-7912112) and light up as quest objects for a Tinker on 200065",
+      "actor": "t",
+      "metric": "nearby_gameobject_quest_active",
+      "entry": 9301104,
+      "equals": 3,
+      "within_ms": 8000
+    },
+    {
+      "action": "teleport",
+      "label": "Go to the south kobold camp, north side of the fire",
+      "actor": "t",
+      "map": 0,
+      "x": -8797.8,
+      "y": -246.2,
+      "z": 82.4,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the grid load",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the 3 Scrap Metal piles of the south kobold camp, north side of the fire stand there (guids 7912113-7912115) and light up as quest objects for a Tinker on 200065",
+      "actor": "t",
+      "metric": "nearby_gameobject_quest_active",
+      "entry": 9301104,
+      "equals": 3,
+      "within_ms": 8000
+    },
+    {
+      "action": "teleport",
+      "label": "Go to the Echo Ridge Mine mouth",
+      "actor": "t",
+      "map": 0,
+      "x": -8674.8,
+      "y": -117.5,
+      "z": 91.554,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the grid load",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the 2 Scrap Metal piles of the Echo Ridge Mine mouth stand there (guids 7912116-7912117) and light up as quest objects for a Tinker on 200065",
+      "actor": "t",
+      "metric": "nearby_gameobject_quest_active",
+      "entry": 9301104,
+      "equals": 2,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the bags hold no Scrap Metal yet",
+      "actor": "t",
+      "metric": "item_count",
+      "item": 663320,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "summon_gameobject",
+      "label": "Stand in copy 1 of the Scrap Metal pile (entry 9301104) at the mine mouth: the loot actions only open a gameobject the player summoned, so the copies prove the pile's loot path while the reads above prove the world spawns",
+      "actor": "t",
+      "entry": 9301104,
+      "distance": 2,
+      "duration_s": 300
+    },
+    {
+      "action": "assert",
+      "label": "Copy 1 is the only pile the loot actions can see; a looted copy despawns first",
+      "actor": "t",
+      "metric": "owned_gameobject_count",
+      "entry": 9301104,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "label": "Let the copy become ready",
+      "ms": 1000
+    },
+    {
+      "action": "loot_gameobject",
+      "label": "Open copy 1's loot window",
+      "actor": "t",
+      "entry": 9301104
+    },
+    {
+      "action": "loot_slot",
+      "label": "Take the Scrap Metal (663320) out of copy 1 - a quest-required roll, so it is only there while 200065 needs it",
+      "actor": "t",
+      "item": 663320
+    },
+    {
+      "action": "close_loot",
+      "label": "Close copy 1's loot window",
+      "actor": "t"
+    },
+    {
+      "action": "assert",
+      "label": "The bags hold 1 Scrap Metal",
+      "actor": "t",
+      "metric": "item_count",
+      "item": 663320,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "summon_gameobject",
+      "label": "Stand in copy 2 of the Scrap Metal pile (entry 9301104) at the mine mouth: the loot actions only open a gameobject the player summoned, so the copies prove the pile's loot path while the reads above prove the world spawns",
+      "actor": "t",
+      "entry": 9301104,
+      "distance": 2,
+      "duration_s": 300
+    },
+    {
+      "action": "assert",
+      "label": "Copy 2 is the only pile the loot actions can see; a looted copy despawns first",
+      "actor": "t",
+      "metric": "owned_gameobject_count",
+      "entry": 9301104,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "label": "Let the copy become ready",
+      "ms": 1000
+    },
+    {
+      "action": "loot_gameobject",
+      "label": "Open copy 2's loot window",
+      "actor": "t",
+      "entry": 9301104
+    },
+    {
+      "action": "loot_slot",
+      "label": "Take the Scrap Metal (663320) out of copy 2 - a quest-required roll, so it is only there while 200065 needs it",
+      "actor": "t",
+      "item": 663320
+    },
+    {
+      "action": "close_loot",
+      "label": "Close copy 2's loot window",
+      "actor": "t"
+    },
+    {
+      "action": "assert",
+      "label": "The bags hold 2 Scrap Metal",
+      "actor": "t",
+      "metric": "item_count",
+      "item": 663320,
+      "equals": 2,
+      "within_ms": 8000
+    },
+    {
+      "action": "summon_gameobject",
+      "label": "Stand in copy 3 of the Scrap Metal pile (entry 9301104) at the mine mouth: the loot actions only open a gameobject the player summoned, so the copies prove the pile's loot path while the reads above prove the world spawns",
+      "actor": "t",
+      "entry": 9301104,
+      "distance": 2,
+      "duration_s": 300
+    },
+    {
+      "action": "assert",
+      "label": "Copy 3 is the only pile the loot actions can see; a looted copy despawns first",
+      "actor": "t",
+      "metric": "owned_gameobject_count",
+      "entry": 9301104,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "label": "Let the copy become ready",
+      "ms": 1000
+    },
+    {
+      "action": "loot_gameobject",
+      "label": "Open copy 3's loot window",
+      "actor": "t",
+      "entry": 9301104
+    },
+    {
+      "action": "loot_slot",
+      "label": "Take the Scrap Metal (663320) out of copy 3 - a quest-required roll, so it is only there while 200065 needs it",
+      "actor": "t",
+      "item": 663320
+    },
+    {
+      "action": "close_loot",
+      "label": "Close copy 3's loot window",
+      "actor": "t"
+    },
+    {
+      "action": "assert",
+      "label": "The bags hold 3 Scrap Metal",
+      "actor": "t",
+      "metric": "item_count",
+      "item": 663320,
+      "equals": 3,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: three Scrap Metal complete Ingenuity At It's Finest!",
+      "actor": "t",
+      "metric": "quest_status",
+      "quest": 200065,
+      "equals": 1,
+      "within_ms": 4000
+    }
+  ]
+}

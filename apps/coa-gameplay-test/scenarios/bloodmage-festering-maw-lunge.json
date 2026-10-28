@@ -1,7 +1,22 @@
 {
   "schema": 1,
   "name": "Festering Maw already shortens Lunge on auto attacks (#3091)",
-  "contract": "REGRESSION ONLY - nothing is changed for this issue. Festering Maw 706683 is the one record in this group that Spell.dbc gives a nonzero ProcFlags (0x4, PROC_FLAG_DONE_MELEE_AUTO_ATTACK) with ProcChance 100, so SpellMgr::LoadSpellProcs does NOT skip it at the 'Skip if no proc flags in DBC' guard: it generates a default SpellProcEntry, Aura::GetProcEffectMask returns a live mask and the aura-42 effect fires natively through AuraEffect::HandleProcTriggerSpellAuraProc. Its trigger Festering Maw 706718 is a SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN with BasePoints -1001 (-1000 ms) and MiscValue 500126 (Lunge), handled natively by Spell::EffectAscensionModifyCooldown. Lunge 500126 has RecoveryTime 25000 and CasterAuraSpell 525031, fixtured with set_aura. A control pair of adjacent steps proves that an idle step pair decays the cooldown by less than 600 ms, so the 900 ms drop asserted afterwards comes from the proc. KNOWN DIVERGENCE, not asserted here: ProcFlags 0x4 fires on every melee auto attack, while the tooltip gates the reduction on 'Healing with Bite Wound'.",
+  "contract": [
+    "REGRESSION ONLY - nothing is changed for this issue. Festering Maw 706683 is the one record in this group",
+    "that Spell.dbc gives a nonzero ProcFlags (0x4, PROC_FLAG_DONE_MELEE_AUTO_ATTACK) with ProcChance 100, so",
+    "SpellMgr::LoadSpellProcs does NOT skip it at the 'Skip if no proc flags in DBC' guard: it generates a",
+    "default SpellProcEntry, Aura::GetProcEffectMask returns a live mask and the aura-42 effect fires natively",
+    "through AuraEffect::HandleProcTriggerSpellAuraProc. Its trigger Festering Maw 706718 is a",
+    "SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN with BasePoints -1001 (-1000 ms) and MiscValue 500126 (Lunge),",
+    "handled natively by Spell::EffectAscensionModifyCooldown. Lunge 500126 has RecoveryTime 25000 and",
+    "CasterAuraSpell 525031, fixtured with set_aura. A control pair of adjacent steps proves that an idle step",
+    "pair decays the cooldown by less than 600 ms, so the 900 ms drop asserted afterwards comes from the proc.",
+    "KNOWN DIVERGENCE, not asserted here: ProcFlags 0x4 fires on every melee auto attack, while the tooltip",
+    "gates the reduction on 'Healing with Bite Wound'. Native white swings use melee hit and expertise, not the",
+    "existing spell-hit fixture. Assert the native melee hit prerequisite and count a new actual melee damage",
+    "event in the original three-second observation window; retain the idle control and original 3900 ms",
+    "minimum cooldown drop, with the authored 100 percent proc chance unchanged."
+  ],
   "timeout_ms": 90000,
   "players": [
     {
@@ -9,7 +24,9 @@
       "race": 1,
       "class": 20,
       "level": 80,
-      "spell_hit_rating": 10000
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
     }
   ],
   "creatures": [
@@ -27,6 +44,12 @@
       "action": "wait",
       "label": "Let spawn AI and level scaling settle",
       "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "melee_hit_chance",
+      "min": 100
     },
     {
       "action": "learn",
@@ -103,6 +126,13 @@
     },
     {
       "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "melee_damage_count",
+      "target": "dummy",
+      "save_as": "melee_before"
+    },
+    {
+      "action": "snapshot",
       "label": "Lunge cooldown before the next swings",
       "actor": "bloodmage",
       "metric": "cooldown_ms",
@@ -113,6 +143,15 @@
       "action": "wait",
       "label": "Land at least one more auto attack",
       "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The cooldown sample includes a real new melee hit",
+      "actor": "bloodmage",
+      "metric": "melee_damage_count",
+      "target": "dummy",
+      "relative_to": "melee_before",
+      "min": 1
     },
     {
       "action": "assert",

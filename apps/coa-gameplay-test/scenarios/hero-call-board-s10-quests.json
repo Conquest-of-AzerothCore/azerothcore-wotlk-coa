@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "The Call Boards offer Season 10's board quests up to level 60 and pay their Runes of Ascension",
+  "contract": "Darkmoon - Season 10 Wildcard's quest cache holds the Call Board quests of that realm. Those up to level 60 whose targets are spawned and whose items have a source here are on the Hero's Call Board (402000) and the Warchief's Command Board (402001): profession orders such as Making Ends Meat: Coyote Steak (1005646, 1500 Runes of Ascension) and True Artisan: A Bunch of Bars (1005689), PvE quests such as Gorilla Warfare (18065) and Hero's Call: Ruins of Ahn'Qiraj (77877), and City Siege: Battle for Thunder Bluff (81255) for the Alliance only. The wiki's Call Board page says the board shows every quest a max-level Hero can take; when a category exceeds the 32-entry menu limit, the quests with the highest minimum level stay listed. Turning an order in pays its runes.",
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -8822.9, "y": 628.4, "z": 93.8, "o": 2.4},
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 60}
+  ],
+  "steps": [
+    {"action": "set_phase", "label": "Join the world phase the board is spawned in", "actor": "hero", "value": 1},
+    {"action": "wait", "label": "Let the Stormwind board's grid load", "ms": 3000},
+    {"action": "use_nearby_gameobject", "label": "Click the board", "actor": "hero", "entry": 402000},
+    {"action": "gossip_select", "label": "Choose Profession Quests", "actor": "hero", "option": 1},
+    {"action": "assert", "label": "True Artisan: A Bunch of Bars is offered", "actor": "hero", "metric": "quest_menu_has", "quest": 1005689, "equals": 1},
+    {"action": "assert", "label": "and Short on Supplies: Mithril Blunderbuss", "actor": "hero", "metric": "quest_menu_has", "quest": 1005457, "equals": 1},
+    {"action": "gossip_select", "label": "Return", "actor": "hero", "option": 0},
+    {"action": "gossip_select", "label": "Choose PvE Quests", "actor": "hero", "option": 0},
+    {"action": "assert", "label": "Gorilla Warfare is offered", "actor": "hero", "metric": "quest_menu_has", "quest": 18065, "equals": 1},
+    {"action": "assert", "label": "and Hero's Call: Ruins of Ahn'Qiraj", "actor": "hero", "metric": "quest_menu_has", "quest": 77877, "equals": 1},
+    {"action": "assert", "label": "and Lead a Dungeon!", "actor": "hero", "metric": "quest_menu_has", "quest": 100078, "equals": 1},
+    {"action": "gossip_select", "label": "Return", "actor": "hero", "option": 0},
+    {"action": "gossip_select", "label": "Choose PvP Quests", "actor": "hero", "option": 2},
+    {"action": "assert", "label": "The Alliance board offers City Siege: Battle for Thunder Bluff", "actor": "hero", "metric": "quest_menu_has", "quest": 81255, "equals": 1},
+    {"action": "snapshot", "actor": "hero", "metric": "item_count", "item": 375250, "save_as": "runes"},
+    {"action": "prepare_quest", "label": "Bring 10 Coyote Steaks", "actor": "hero", "quest": 1005646},
+    {"action": "reward_quest", "label": "Turn the order in", "actor": "hero", "quest": 1005646},
+    {"action": "assert", "label": "The order pays 1500 Runes of Ascension", "actor": "hero", "metric": "item_count", "item": 375250, "relative_to": "runes", "equals": 1500}
+  ]
+}

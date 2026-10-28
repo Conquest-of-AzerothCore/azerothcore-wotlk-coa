@@ -1,0 +1,21 @@
+{
+ "schema": 1,
+ "name": "Ethereal Guard reduces party/raid damage taken and hastes the Reaper",
+ "contract": "Ethereal Guard 300969 promises party/raid members take 3% less damage, and the caster gains 10% melee haste. EFFECT_0 is native SPELL_EFFECT_APPLY_AREA_AURA_RAID (65) with EffectApplyAuraName SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN (87), EffectBasePoints -4 + DieSides 1 = -3 (3% reduction). EFFECT_1 is native SPELL_EFFECT_APPLY_AURA (6) with SPELL_AURA_MOD_MELEE_HASTE (138), EffectBasePoints 9 + DieSides 1 = 10. Both auras and their targeting are core-handled with no CoA registration required; #3913's zero-hits-in-source is expected here.",
+ "timeout_ms": 90000,
+ "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+ "players": [
+  {"id": "reaper", "race": 10, "class": 30, "level": 80},
+  {"id": "ally", "race": 1, "class": 1, "level": 80}
+ ],
+ "steps": [
+  {"action": "wait", "label": "Let the world settle", "ms": 6000},
+  {"action": "group", "actor": "reaper", "target": "ally"},
+  {"action": "learn", "actor": "reaper", "spell": 300969},
+  {"action": "cast", "actor": "reaper", "spell": 300969},
+  {"action": "assert", "label": "Cast was accepted", "actor": "reaper", "metric": "cast_failure", "spell": 300969, "equals": 0},
+  {"action": "assert", "label": "Ethereal Guard spread to the party member", "actor": "ally", "metric": "aura", "spell": 300969, "equals": 1, "within_ms": 3000},
+  {"action": "assert", "label": "The raid buff reduces damage taken by 3%", "actor": "ally", "metric": "aura_amount", "spell": 300969, "effect": 0, "equals": -3},
+  {"action": "assert", "label": "The caster also gains 10% melee haste", "actor": "reaper", "metric": "aura_amount", "spell": 300969, "effect": 1, "equals": 10}
+ ]
+}

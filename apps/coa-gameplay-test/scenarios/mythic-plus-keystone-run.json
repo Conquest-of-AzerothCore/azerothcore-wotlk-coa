@@ -1,0 +1,324 @@
+{
+  "schema": 1,
+  "name": "Mythic+: keystone socket, start, affixes and scaling",
+  "contract": "Using a keystone opens the socket anywhere in its own dungeon on Mythic difficulty, in any wing; otherwise the player is told why. Start Keystone starts that key and puts the group at its wing's start point. During the run creatures get +10 health and this week's creature affixes, the players this week's player affixes. The scenario fixes the affix week to 39 (.mythic week).",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "console",
+      "command": "mythic week 39"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000,
+      "maximum": 2000000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 189,
+      "x": 855.683,
+      "y": 1321.5,
+      "z": 18.6709
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Heroic Scarlet Monastery",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 1233407,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 400588,
+      "count": 1
+    },
+    {
+      "action": "command",
+      "actor": "hero",
+      "command": ".mythic clearkeys"
+    },
+    {
+      "action": "assert",
+      "label": ".mythic clearkeys destroys every keystone",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 1233407,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 1233407,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 400588,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "hero",
+      "item": 400588,
+      "spell": 161
+    },
+    {
+      "action": "assert",
+      "label": "A Razorfen Downs key in the Scarlet Monastery opens no socket",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 2310,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "... and says which dungeon it belongs to",
+      "actor": "hero",
+      "metric": "system_message_contains",
+      "text": "another dungeon",
+      "equals": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "hero",
+      "item": 1233407,
+      "spell": 161
+    },
+    {
+      "action": "assert",
+      "label": "The Cathedral key on Heroic opens no socket",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 2310,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "... and asks for Mythic",
+      "actor": "hero",
+      "metric": "system_message_contains",
+      "text": "Mythic difficulty",
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 0,
+      "x": -8914.0,
+      "y": -133.0,
+      "z": 80.6
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "hero",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 189,
+      "x": 255.346,
+      "y": -209.09,
+      "z": 18.6773
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mythic Scarlet Monastery",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "use_item",
+      "actor": "hero",
+      "item": 1233407,
+      "spell": 161
+    },
+    {
+      "action": "assert",
+      "label": "The Cathedral key opens the socket in the Library wing too",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 2310,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "client_packet",
+      "actor": "hero",
+      "opcode": 1319
+    },
+    {
+      "action": "assert",
+      "label": "Start Keystone puts the group at the Cathedral's start point",
+      "actor": "hero",
+      "metric": "position_x",
+      "min": 850,
+      "max": 861,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Players cannot move during the countdown",
+      "actor": "hero",
+      "metric": "rooted",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "assert",
+      "label": "... and can once the run starts",
+      "actor": "hero",
+      "metric": "rooted",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Start Keystone starts the run",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 2312,
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The used key is gone (replaced by the next lower one)",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 1233407,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The start message lists the week's affixes",
+      "actor": "hero",
+      "metric": "system_message_contains",
+      "text": "affixes",
+      "equals": 1
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 4295,
+      "as": "mob",
+      "distance": 6
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "A creature spawned during the run has +10 health (Mythic 107002 x 2.80)",
+      "actor": "mob",
+      "metric": "max_health",
+      "min": 290000,
+      "max": 310000
+    },
+    {
+      "action": "assert",
+      "label": "Week 39 +10: Tiny is replaced, the creature does not have it",
+      "actor": "mob",
+      "metric": "aura",
+      "spell": 80087,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Week 39 +10: Avenger (vanilla tier 2191077) takes Tiny's place, Horde is already there",
+      "actor": "mob",
+      "metric": "aura",
+      "spell": 2191077,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Week 39 +10: the creature has Horde",
+      "actor": "mob",
+      "metric": "aura",
+      "spell": 80046,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Week 39 +10: the creature has Resistant",
+      "actor": "mob",
+      "metric": "aura",
+      "spell": 80023,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Week 39 +10: the player has Pack Tactics",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 80054,
+      "equals": 1
+    },
+    {
+      "action": "console",
+      "command": "mythic week"
+    }
+  ]
+}

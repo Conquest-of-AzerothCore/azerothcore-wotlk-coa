@@ -55,6 +55,48 @@ void Bleed(Unit* owner, Unit* target, uint32 id, uint32 damage, uint32 percent)
         TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_NO_PERIODIC_RESET));
 }
 
+class aura_ascension_ancestral_evolution : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_ancestral_evolution);
+
+    bool Validate(SpellInfo const* info) override
+    {
+        return info->Id == 806229 && info->SpellFamilyName == 18 &&
+            info->Effects[EFFECT_0].IsAura(SPELL_AURA_DUMMY);
+    }
+
+    bool Check(ProcEventInfo& event)
+    {
+        Unit* owner = GetTarget();
+        Player* caster = Owner(GetCaster());
+        DamageInfo const* damage = event.GetDamageInfo();
+        Unit* attacker = damage ? damage->GetAttacker() : nullptr;
+        SpellInfo const* source = event.GetSpellInfo();
+        return caster && owner->IsAlive() && attacker && attacker->IsAlive() && attacker != owner &&
+            owner->IsValidAttackTarget(attacker) && damage->GetDamage() && (!source || source->Id != GetId());
+    }
+
+    void Reflect(AuraEffect const* effect, ProcEventInfo& event)
+    {
+        PreventDefaultAction();
+        Unit* owner = GetTarget();
+        DamageInfo const* damage = event.GetDamageInfo();
+        Unit* attacker = damage->GetAttacker();
+        uint32 const amount = uint32(uint64(damage->GetDamage()) * std::clamp(effect->GetAmount(), 0, 100) / 100);
+        if (!amount || attacker->IsImmunedToDamage(damage->GetSchoolMask()))
+            return;
+        uint32 const dealt = Unit::DealDamage(owner, attacker, amount, nullptr, SPELL_DIRECT_DAMAGE,
+            damage->GetSchoolMask(), GetSpellInfo(), false);
+        owner->SendSpellNonMeleeDamageLog(attacker, GetSpellInfo(), dealt, damage->GetSchoolMask(), 0, 0, false, 0);
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(aura_ascension_ancestral_evolution::Check);
+        OnEffectProc += AuraEffectProcFn(aura_ascension_ancestral_evolution::Reflect, EFFECT_0, SPELL_AURA_DUMMY);
+    }
+};
+
 class aura_ascension_barbarian_event : public AuraScript
 {
     PrepareAuraScript(aura_ascension_barbarian_event);
@@ -353,12 +395,31 @@ private:
             }
     }
 };
+
+class barbarian_killing_spree : public PlayerScript
+{
+public:
+    barbarian_killing_spree() : PlayerScript("barbarian_killing_spree",
+        {PLAYERHOOK_ON_PVP_KILL, PLAYERHOOK_ON_CREATURE_KILL}) { }
+
+    void OnPlayerPVPKill(Player* killer, Player*) override { Ready(killer); }
+    void OnPlayerCreatureKill(Player* killer, Creature*) override { Ready(killer); }
+
+private:
+    static void Ready(Player* player)
+    {
+        if (Player* barbarian = Owner(player))
+            ReadyToKill(barbarian);
+    }
+};
 }
 
 void AddAscensionBarbarianEventScripts()
 {
     RegisterSpellScript(aura_ascension_barbarian_event);
+    RegisterSpellScript(aura_ascension_ancestral_evolution);
     RegisterSpellScript(spell_ascension_barbarian_conversion);
     RegisterSpellScript(aura_ascension_barbarian_bleed);
     new barbarian_grisly_meal();
+    new barbarian_killing_spree();
 }

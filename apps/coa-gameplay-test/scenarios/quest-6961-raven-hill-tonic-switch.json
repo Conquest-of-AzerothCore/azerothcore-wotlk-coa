@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "name": "quest-6961-raven-hill-tonic-switch",
+  "contract": [
+    "Secret of Raven Hill 680513 promises drinking a tonic transforms Dawn Blade for the duration of 681499",
+    "(SpellDuration 9, 30 seconds) based on the last tonic consumed. Vampiric Tonic 802276 maps Dawn Blade 802024",
+    "to Vampiric Rage 686020 and Witchblood Tonic 802278 maps it to Witchblood Fever 684330. A second tonic after",
+    "the first transformation expired must transform Dawn Blade only, not the earlier transformation it learned,",
+    "and its expiry must restore Dawn Blade without announcing Vampiric Rage again."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "w",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "w",
+      "spell": 680513
+    },
+    {
+      "action": "learn",
+      "actor": "w",
+      "spell": 802276
+    },
+    {
+      "action": "learn",
+      "actor": "w",
+      "spell": 802278
+    },
+    {
+      "action": "learn",
+      "actor": "w",
+      "spell": 802024
+    },
+    {
+      "action": "cast",
+      "actor": "w",
+      "spell": 802276
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "temporary_spell_replacement",
+      "spell": 802024,
+      "equals": 686020,
+      "label": "Vampiric Tonic transforms Dawn Blade into Vampiric Rage"
+    },
+    {
+      "action": "wait",
+      "ms": 31000
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "aura",
+      "spell": 681499,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "temporary_spell_replacement",
+      "spell": 802024,
+      "equals": 802024,
+      "label": "Dawn Blade restored after the first transformation"
+    },
+    {
+      "action": "cast",
+      "actor": "w",
+      "spell": 802278
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "aura",
+      "spell": 681499,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "temporary_spell_replacement",
+      "spell": 802024,
+      "equals": 684330,
+      "label": "Witchblood Tonic transforms Dawn Blade into Witchblood Fever"
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "temporary_spell_replacement",
+      "spell": 686020,
+      "equals": 686020,
+      "label": "The earlier Vampiric Rage is not itself transformed"
+    },
+    {
+      "action": "wait",
+      "ms": 31000
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "aura",
+      "spell": 681499,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "temporary_spell_replacement",
+      "spell": 802024,
+      "equals": 802024,
+      "label": "Dawn Blade restored after the second transformation"
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "spellbook_superseded_for",
+      "spell": 802024,
+      "equals": 2,
+      "label": "Each expiry announces Dawn Blade once"
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "spellbook_superseded_for",
+      "spell": 686020,
+      "equals": 1,
+      "label": "Vampiric Rage is announced only by its own tonic"
+    }
+  ]
+}

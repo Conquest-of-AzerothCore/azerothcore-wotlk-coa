@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: base parry exists before Divine Right (#8038)",
+  "contract": "Every plate-capable class starts with the Parry passive (spell 3124, SPELL_EFFECT_PARRY) and therefore 5% parry; the Sun Cleric class grant omitted it, so the character panel read 0.00% until Divine Right 680631 added its own parry modifier. The class must grant Parry at level 1, and Divine Right must still add its 2 points on top.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "SETUP: character creation grants the Parry passive",
+      "actor": "cleric", "metric": "knows_spell", "spell": 3124, "equals": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: base parry is 5%",
+      "actor": "cleric", "metric": "parry_chance", "min": 4, "max": 6
+    },
+    { "action": "learn", "label": "Learn Divine Right", "actor": "cleric", "spell": 680631 },
+    {
+      "action": "assert", "label": "Divine Right adds its 2 points",
+      "actor": "cleric", "metric": "parry_chance", "min": 6.5, "max": 7.5
+    }
+  ]
+}

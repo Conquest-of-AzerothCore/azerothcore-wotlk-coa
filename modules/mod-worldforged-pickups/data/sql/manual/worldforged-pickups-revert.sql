@@ -8,7 +8,8 @@
 -- database.
 -- ----------------------------------------------------------------------------
 START TRANSACTION;
-DELETE FROM `gameobject`               WHERE `guid` BETWEEN 6900001 AND 6901526;
+DELETE FROM `gameobject`               WHERE `ScriptName` = 'worldforged_pickup';
+DELETE FROM `gameobject`               WHERE `guid` BETWEEN 6900001 AND 6929999;
 DELETE FROM `gameobject_loot_template` WHERE `Comment` LIKE 'AscensionWorldforged:%';
 DELETE FROM `gameobject_template`      WHERE `ScriptName` = 'worldforged_pickup';
 -- The superseded first pass (see the migration's header): by marker, and by the 56

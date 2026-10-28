@@ -566,6 +566,9 @@ void AchievementMgr::DeleteFromDB(ObjectGuid::LowType lowguid)
 
 void AchievementMgr::SaveToDB(CharacterDatabaseTransaction trans)
 {
+    if (WorldSession* session = GetPlayer()->GetSession(); session && session->IsBot())
+        return;
+
     if (!_completedAchievements.empty())
     {
         for (CompletedAchievementMap::iterator iter = _completedAchievements.begin(); iter != _completedAchievements.end(); ++iter)
@@ -1125,7 +1128,8 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                         if (achievIdByArenaSlot[j] == achievement->ID)
                         {
                             Battleground* bg = GetPlayer()->GetBattleground();
-                            if (!bg || !bg->isArena() || ArenaTeam::GetSlotByType(bg->GetArenaType()) != j)
+                            if (!bg || !bg->isArena() || !bg->GetArenaType()
+                                || ArenaTeam::GetSlotByType(bg->GetArenaType()) != j)
                                 notfit = true;
 
                             break;
@@ -1835,6 +1839,10 @@ bool AchievementMgr::IsCompletedCriteria(AchievementCriteriaEntry const* achieve
         // someone on this realm has already completed that achievement
         if (sAchievementMgr->IsRealmCompleted(achievement))
             return false;
+
+        if (sWorld->getBoolConfig(CONFIG_ACHIEVEMENT_REALM_FIRST_BLOCK_BOTS))
+            if (Player* owner = GetPlayer(); owner && owner->GetSession() && owner->GetSession()->IsBot())
+                return false;
 
         if (sWorld->getBoolConfig(CONFIG_ACHIEVEMENT_REALM_FIRST_RACE_LIMIT_ONE_PER_CHARACTER))
         {
@@ -2548,6 +2556,9 @@ AchievementGlobalMgr* AchievementGlobalMgr::instance()
 
 bool AchievementGlobalMgr::IsStatisticCriteria(AchievementCriteriaEntry const* achievementCriteria) const
 {
+    if (!achievementCriteria)
+        return false;
+
     return IsStatisticAchievement(sAchievementStore.LookupEntry(achievementCriteria->referredAchievement));
 }
 
@@ -2557,7 +2568,7 @@ bool AchievementGlobalMgr::IsStatisticAchievement(AchievementEntry const* achiev
         return false;
 
     AchievementCategoryEntry const* cat = sAchievementCategoryStore.LookupEntry(achievement->categoryId);
-    do
+    while (cat)
     {
         switch (cat->ID)
         {
@@ -2569,7 +2580,7 @@ bool AchievementGlobalMgr::IsStatisticAchievement(AchievementEntry const* achiev
                 cat = sAchievementCategoryStore.LookupEntry(cat->parentCategory);
                 break;
         }
-    } while (cat);
+    }
 
     return false;
 }

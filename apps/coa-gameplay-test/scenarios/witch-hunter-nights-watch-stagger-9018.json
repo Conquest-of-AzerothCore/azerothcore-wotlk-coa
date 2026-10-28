@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "name": "Night's Watch absorbs 25% of a physical hit and repays it as a self-DoT (#9018)",
+  "contract": [
+    "Night's Watch 807733's client tooltip only documents its threat bonus; the 25% physical-damage absorb and",
+    "its deferred self-inflicted repayment are a CoA-custom addition layered on top",
+    "(aura_ascension_witch_hunter_lifecycle, AscensionWitchHunterDefenses.cpp). Absorb() reduces a qualifying",
+    "hit's IMMEDIATE health loss to 75% of the raw amount on the spot: absorb = damage/4 (integer division), the",
+    "remaining 75% applies instantly, and the absorbed 25% is spread across a 5-slot ring buffer, paid back by",
+    "Tick() (1000 ms amplitude) at one slot per second over the next 5 seconds. Jeklik's Crushing Blow (24257) is",
+    "a fixed-size (200-220, DieSides 21) melee-class Physical hit a hostile creature can be forced to cast",
+    "directly via the harness's creature 'cast' action, giving a single, controlled, non-combat-RNG hit instead",
+    "of relying on live auto-attack timing or weapon rolls. For a hit in that range, absorb (floor(raw/4)) and",
+    "the resulting immediate/deferred split land within about 1% of an exact 1:3 ratio, so the deferred",
+    "repayment, measured once no further hit occurs, must equal roughly a third of the immediate loss. A control",
+    "repeats the same single hit with no Night's Watch active and confirms no repayment follows it."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "wh", "race": 1, "class": 15, "level": 60, "allow_regeneration": false }
+  ],
+  "creatures": [
+    { "id": "ctrl_mob", "owner": "wh", "entry": 36, "level": 83, "health": 1000000, "distance": 3 },
+    { "id": "buff_mob", "owner": "wh", "entry": 36, "level": 83, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "set_health", "actor": "wh", "value": 1000000, "maximum": 1000000 },
+
+    { "action": "snapshot", "label": "CONTROL: health before the unbuffed hit", "actor": "wh", "metric": "health", "save_as": "hp_ctrl_before" },
+    { "action": "cast", "label": "The control mob lands one fixed physical hit, no Night's Watch", "actor": "ctrl_mob", "spell": 24257, "target": "wh" },
+    { "action": "snapshot", "label": "CONTROL: health right after that one hit", "actor": "wh", "metric": "health", "save_as": "hp_ctrl_after" },
+    {
+      "action": "assert", "label": "CONTROL: the hit actually landed",
+      "actor": "wh", "metric": "health", "relative_to": "hp_ctrl_before", "max": -1
+    },
+    { "action": "wait", "label": "Past the 5 s window Night's Watch would use to repay a debt", "ms": 6500 },
+    {
+      "action": "assert", "label": "CONTROL: no further health loss follows without Night's Watch",
+      "actor": "wh", "metric": "health", "relative_to": "hp_ctrl_after", "equals": 0
+    },
+
+    { "action": "set_aura", "actor": "wh", "spell": 807733, "stacks": 1 },
+    { "action": "assert", "label": "Night's Watch is active", "actor": "wh", "metric": "aura", "spell": 807733, "equals": 1, "within_ms": 1000 },
+    { "action": "snapshot", "label": "Health before the buffed hit", "actor": "wh", "metric": "health", "save_as": "hp_buf_before" },
+    { "action": "cast", "label": "The buffed mob lands the same fixed physical hit", "actor": "buff_mob", "spell": 24257, "target": "wh" },
+    { "action": "snapshot", "label": "Health right after the buffed hit", "actor": "wh", "metric": "health", "save_as": "hp_buf_after" },
+    {
+      "action": "snapshot",
+      "label": "That hit's immediate loss, roughly 75% of the raw hit (a negative delta)",
+      "actor": "wh", "metric": "health", "relative_to": "hp_buf_before", "save_as": "buffed_immediate_delta"
+    },
+    { "action": "wait", "label": "Let all 5 debt-repayment ticks fire (5 s window, plus margin)", "ms": 6500 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the deferred repayment is roughly a third of that same hit's immediate loss (25/75)",
+      "actor": "wh", "metric": "health", "relative_to": "hp_buf_after", "ratio_to": "buffed_immediate_delta",
+      "min": 0.30, "max": 0.35
+    },
+    { "action": "assert", "actor": "wh", "metric": "alive", "equals": 1 }
+  ]
+}

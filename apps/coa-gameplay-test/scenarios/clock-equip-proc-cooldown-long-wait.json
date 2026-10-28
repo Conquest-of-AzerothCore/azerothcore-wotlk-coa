@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Clock probe: an item's 45 s equip proc cooldown expires by game time across long waits",
+  "contract": [
+    "Val'anyr, Hammer of Ancient Kings (item 46017 in item_template) is a level-80 main-hand mace with Flags 0, so it",
+    "lacks ITEM_FLAG_NO_EQUIP_COOLDOWN, and its first item spell is 64415 with spelltrigger 1 (on equip). Priests",
+    "start with Maces (playercreateinfo_skills class mask 1107); the skill fixture keeps the equip independent of",
+    "that. Equipping casts 64415 from the item, and Player::ApplyEquipCooldown then sets that aura's proc cooldown to",
+    "now + the spell_proc Cooldown 45000 ms (db_world 2026_02_18_01) on the steady game clock. 64415 procs Blessing",
+    "of Ancient Kings 64411 on a positive heal (DBC ProcChance 100, spell_proc Chance 0, SpellTypeMask 2,",
+    "SpellPhaseMask 2), and an attempt during the cooldown neither procs nor extends it. Flash Heal 2061 rank 1 is a",
+    "1500 ms direct heal; the priest's health is lowered before each heal. Heals landing about 1.5 s and 39.5 s",
+    "after equipping stay inside the equip cooldown and do not proc; one landing about 47.5 s after equipping procs.",
+    "The 5.5 s and 2.5 s margins dwarf a 25 ms world step. The 10 s wait before equipping fast-forwards on the",
+    "simulated clock, so game time leads the wall clock by up to 10 s. An equip cooldown set from the wall clock",
+    "then ends early by that lead and lets the 39.5 s heal proc once the lead exceeds 5.5 s; proc checks that read",
+    "the wall clock lag the game-time cooldown and miss the 47.5 s proc once the lead exceeds 2.5 s."
+  ],
+  "timeout_ms": 150000,
+  "players": [
+    { "id": "priest", "race": 1, "class": 5, "level": 80 }
+  ],
+  "steps": [
+    { "action": "learn", "actor": "priest", "spell": 2061 },
+    { "action": "add_item", "actor": "priest", "item": 46017 },
+    {
+      "action": "set_skill", "label": "Mace proficiency fixture", "actor": "priest",
+      "skill": 54, "value": 400, "maximum": 400
+    },
+    { "action": "wait", "label": "Fast-forward so game time leads the wall clock", "ms": 10000 },
+    { "action": "equip", "actor": "priest", "item": 46017, "slot": 15 },
+    {
+      "action": "assert", "label": "SETUP: equipping applied the Val'anyr aura", "actor": "priest",
+      "metric": "aura", "spell": 64415, "caster": "priest", "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: nothing has procced yet", "actor": "priest",
+      "metric": "spell_proc_count", "spell": 64415, "equals": 0
+    },
+    { "action": "set_health", "actor": "priest", "value": 1000 },
+    { "action": "cast", "label": "Heal landing about 1.5 s after equipping", "actor": "priest", "spell": 2061 },
+    {
+      "action": "assert", "label": "SETUP: the first heal landed", "actor": "priest",
+      "metric": "spell_heal_count", "spell": 2061, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "The equip cooldown suppresses the proc of a heal right after equipping",
+      "actor": "priest", "metric": "spell_proc_count", "spell": 64415, "equals": 0
+    },
+    { "action": "wait", "label": "Long wait inside the 45 s equip cooldown", "ms": 36500 },
+    { "action": "set_health", "actor": "priest", "value": 1000 },
+    { "action": "cast", "label": "Heal landing about 39.5 s after equipping", "actor": "priest", "spell": 2061 },
+    { "action": "wait", "label": "Let the second heal land", "ms": 3000 },
+    {
+      "action": "assert", "label": "SETUP: the second heal landed", "actor": "priest",
+      "metric": "spell_heal_count", "spell": 2061, "equals": 2
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: a heal inside the equip cooldown does not proc",
+      "actor": "priest", "metric": "spell_proc_count", "spell": 64415, "equals": 0
+    },
+    { "action": "wait", "label": "Wait past the end of the equip cooldown", "ms": 5000 },
+    { "action": "set_health", "actor": "priest", "value": 1000 },
+    { "action": "cast", "label": "Heal landing about 47.5 s after equipping", "actor": "priest", "spell": 2061 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: after the equip cooldown the next heal procs",
+      "actor": "priest", "metric": "spell_proc_count", "spell": 64415, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "Three heals landed in total", "actor": "priest",
+      "metric": "spell_heal_count", "spell": 2061, "equals": 3
+    }
+  ]
+}

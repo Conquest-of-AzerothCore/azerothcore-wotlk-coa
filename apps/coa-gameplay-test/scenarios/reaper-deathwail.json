@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "name": "Deathwail halves Wraithblade Runic Power cost (#1768)",
+  "contract": "Deathwail 300791 halves Wraithblade's 400-unit cost; Soul Strike stays unchanged.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 5,
+      "class": 30,
+      "level": 80
+    },
+    {
+      "id": "deathwail",
+      "race": 5,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "control",
+      "spell": 300791
+    },
+    {
+      "action": "unlearn",
+      "actor": "deathwail",
+      "spell": 300791
+    },
+    {
+      "action": "learn",
+      "actor": "deathwail",
+      "spell": 300791
+    },
+    {
+      "action": "assert",
+      "label": "Deathwail passive is active",
+      "actor": "deathwail",
+      "metric": "aura",
+      "spell": 300791,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Untalented Wraithblade rank one costs forty",
+      "actor": "control",
+      "metric": "spell_power_cost",
+      "spell": 805258,
+      "equals": 400
+    },
+    {
+      "action": "assert",
+      "label": "Deathwail halves Wraithblade rank one cost",
+      "actor": "deathwail",
+      "metric": "spell_power_cost",
+      "spell": 805258,
+      "equals": 200
+    },
+    {
+      "action": "assert",
+      "label": "Untalented Wraithblade top rank costs forty",
+      "actor": "control",
+      "metric": "spell_power_cost",
+      "spell": 806824,
+      "equals": 400
+    },
+    {
+      "action": "assert",
+      "label": "Deathwail halves Wraithblade top rank cost",
+      "actor": "deathwail",
+      "metric": "spell_power_cost",
+      "spell": 806824,
+      "equals": 200
+    },
+    {
+      "action": "assert",
+      "label": "Deathwail adds a negative fifty percent spell cost modifier",
+      "actor": "deathwail",
+      "metric": "spell_modifier",
+      "spell": 805258,
+      "op": 14,
+      "base": 400,
+      "equals": 200
+    },
+    {
+      "action": "assert",
+      "label": "Soul Strike cost remains forty",
+      "actor": "deathwail",
+      "metric": "spell_power_cost",
+      "spell": 500517,
+      "equals": 400
+    }
+  ]
+}

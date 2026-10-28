@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "name": "Necromancer Graverobber cuts Raise and Animate mana cost and cast time by 30% (#1038)",
+  "contract": "Graverobber 503757 is a Necromancer Animation talent (CharacterAdvancement 30022, ClassType 25 = class 23, Tab 61 Animation, TalentEssenceCost 1). Its client description reads 'Reduces the mana cost and cast time of your Raise and Animate spells by $s1%.' Both effects are SPELL_AURA_ADD_PCT_MODIFIER (108) with BasePoints -31 + DieSides 1 = -30 in SpellFamilyName 29: effect 0 MiscValue 14 (SPELLMOD_COST) with EffectSpellClassMask (0x8, 0x10000, 0x20000000) and effect 1 MiscValue 10 (SPELLMOD_CASTING_TIME) with (0x8, 0x10000, 0). No Necromancer contract rewrites aura 108, and every Raise/Animate summon carries family flag word 0 0x8: Raise: Ghoul 500971 (ManaCostPercentage 28, 1500 ms cast), Raise: Skeletal Mage 500331 (40%, 2000 ms) and Animate: Plaguefather 805048 (25%, 2000 ms). Flesh to Worms 500338 (12%, family flags 0x4000, 0, 0x20) is neither and keeps its cost. SpellInfo::CalcPowerCost and Unit::ModSpellCastTime apply the caster's modifiers, so with the talent the three casts take 1050/1400/1400 ms and cost 70% of their untalented mana (integer truncation keeps the ratio within 0.69-0.705). A real Raise: Ghoul cast must start a cast of at most 1050 ms, raise the Ghoul and spend 70% of the untalented cost; the fixture's regeneration is suppressed so the spend is exact.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and stat updates settle", "ms": 3000 },
+    { "action": "learn", "actor": "necro", "spell": 500971 },
+    { "action": "learn", "actor": "necro", "spell": 500331 },
+    { "action": "learn", "actor": "necro", "spell": 805048 },
+    { "action": "learn", "actor": "necro", "spell": 500338 },
+    {
+      "action": "assert", "label": "SETUP: Graverobber is not active yet", "actor": "necro",
+      "metric": "aura", "spell": 503757, "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTROL: Raise: Ghoul is a 1.5 sec cast", "actor": "necro",
+      "metric": "spell_cast_time_ms", "spell": 500971, "equals": 1500
+    },
+    {
+      "action": "assert", "label": "CONTROL: Raise: Skeletal Mage is a 2 sec cast", "actor": "necro",
+      "metric": "spell_cast_time_ms", "spell": 500331, "equals": 2000
+    },
+    {
+      "action": "assert", "label": "CONTROL: Animate: Plaguefather is a 2 sec cast", "actor": "necro",
+      "metric": "spell_cast_time_ms", "spell": 805048, "equals": 2000
+    },
+    { "action": "snapshot", "actor": "necro", "metric": "spell_power_cost", "spell": 500971, "save_as": "ghoul_cost" },
+    { "action": "snapshot", "actor": "necro", "metric": "spell_power_cost", "spell": 500331, "save_as": "mage_cost" },
+    {
+      "action": "snapshot", "actor": "necro", "metric": "spell_power_cost", "spell": 805048,
+      "save_as": "plaguefather_cost"
+    },
+    { "action": "snapshot", "actor": "necro", "metric": "spell_power_cost", "spell": 500338, "save_as": "worms_cost" },
+    {
+      "action": "assert", "label": "SETUP: Raise: Ghoul costs mana", "actor": "necro",
+      "metric": "spell_power_cost", "spell": 500971, "min": 100
+    },
+    {
+      "action": "assert", "label": "SETUP: Flesh to Worms costs mana", "actor": "necro",
+      "metric": "spell_power_cost", "spell": 500338, "min": 50
+    },
+    { "action": "learn", "actor": "necro", "spell": 503757 },
+    {
+      "action": "assert", "label": "The talent aura is applied", "actor": "necro",
+      "metric": "aura", "spell": 503757, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Raise: Ghoul casts in 1.05 sec", "actor": "necro",
+      "metric": "spell_cast_time_ms", "spell": 500971, "min": 1049, "max": 1051
+    },
+    {
+      "action": "assert", "label": "Raise: Skeletal Mage casts in 1.4 sec", "actor": "necro",
+      "metric": "spell_cast_time_ms", "spell": 500331, "min": 1399, "max": 1401
+    },
+    {
+      "action": "assert", "label": "Animate: Plaguefather casts in 1.4 sec", "actor": "necro",
+      "metric": "spell_cast_time_ms", "spell": 805048, "min": 1399, "max": 1401
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Raise: Ghoul costs 70% of its mana", "actor": "necro",
+      "metric": "spell_power_cost", "spell": 500971, "ratio_to": "ghoul_cost", "min": 0.69, "max": 0.705
+    },
+    {
+      "action": "assert", "label": "Raise: Skeletal Mage costs 70% of its mana", "actor": "necro",
+      "metric": "spell_power_cost", "spell": 500331, "ratio_to": "mage_cost", "min": 0.69, "max": 0.705
+    },
+    {
+      "action": "assert", "label": "Animate: Plaguefather costs 70% of its mana", "actor": "necro",
+      "metric": "spell_power_cost", "spell": 805048, "ratio_to": "plaguefather_cost", "min": 0.69, "max": 0.705
+    },
+    {
+      "action": "assert", "label": "A spell that is neither Raise nor Animate keeps its cost", "actor": "necro",
+      "metric": "spell_power_cost", "spell": 500338, "relative_to": "worms_cost", "equals": 0
+    },
+    { "action": "snapshot", "actor": "necro", "metric": "power", "power": 0, "save_as": "mana_before" },
+    { "action": "cast", "label": "Raise a Ghoul with Graverobber", "actor": "necro", "spell": 500971 },
+    {
+      "action": "assert", "label": "The real cast takes at most 1.05 sec", "actor": "necro",
+      "metric": "cast_remaining_ms", "spell": 500971, "min": 800, "max": 1050
+    },
+    {
+      "action": "assert", "label": "The Ghoul is raised", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50073, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The real cast spends 70% of the untalented mana cost", "actor": "necro",
+      "metric": "power", "power": 0, "relative_to": "mana_before", "ratio_to": "ghoul_cost",
+      "min": -0.705, "max": -0.69
+    }
+  ]
+}

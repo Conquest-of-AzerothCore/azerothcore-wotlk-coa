@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "name": "Chronomancer: The Bieko Effect cuts the named cooldowns by 10% every 2 sec while Hasten lasts (#1219)",
+  "contract": "The Bieko Effect 706099 (Spell.dbc, family 28, passive) reads 'While Hasten is active the cooldowns of Dimensional Divergence, Temporal Anomaly, and Temporal Focus are reduced by $707312s1% every $712371t1 sec.' Its only effect is aura 42 triggering 712371 (TARGET_UNIT_CASTER, aura 23 every 2000 ms for DurationIndex 29 = 12000 ms, the same duration as Hasten 801304), which triggers 707312. 707312 carries three effects of the custom type 192 with BasePoints 9 + DieSides 1 = 10 and MiscValue 802790 Dimensional Divergence, 806315 Temporal Anomaly and 806165 Temporal Focus. Effect 192 is 'reduce the remaining cooldown of MiscValue by BasePoints percent' (Profound Enlightenment 680953: 'reducing the remaining cooldown of Testaments by $s1%'). Before the fix 706099 had ProcFlags 0 and no spell_proc row, so casting Hasten applied nothing, and effect 192 was EffectNULL. Expected: casting Hasten applies 712371 to the Chronomancer (fails before the fix), and its six ticks each cut the remaining cooldown of Temporal Focus and Temporal Anomaly by 10%: with every cooldown started together, the talented caster's remaining cooldown ends at 0.9^6 of a remaining cooldown that already runs 12 sec behind, about 0.51 of the control's (5 ticks would give about 0.56, 7 about 0.46). Timeguard 804441 is a negative control: the stale Hasten text names it, but 707312 does not, so its cooldown must match the control's. Dimensional Divergence needs a second player to swap with and is not cast here.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "control", "race": 1, "class": 22, "level": 80 },
+    { "id": "talent", "race": 1, "class": 22, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "control", "spell": 806165 },
+    { "action": "learn", "actor": "control", "spell": 806315 },
+    { "action": "learn", "actor": "control", "spell": 804441 },
+    { "action": "learn", "actor": "control", "spell": 801304 },
+    { "action": "learn", "actor": "talent", "spell": 806165 },
+    { "action": "learn", "actor": "talent", "spell": 806315 },
+    { "action": "learn", "actor": "talent", "spell": 804441 },
+    { "action": "learn", "actor": "talent", "spell": 801304 },
+    { "action": "learn", "actor": "talent", "spell": 706099 },
+    {
+      "action": "assert", "label": "Learning The Bieko Effect applies its passive",
+      "actor": "talent", "metric": "aura", "spell": 706099, "equals": 1, "within_ms": 1000
+    },
+    { "action": "cast", "actor": "control", "spell": 806165 },
+    { "action": "cast", "actor": "talent", "spell": 806165 },
+    { "action": "cast", "actor": "control", "spell": 806315 },
+    { "action": "cast", "actor": "talent", "spell": 806315 },
+    { "action": "cast", "actor": "control", "spell": 804441 },
+    { "action": "cast", "actor": "talent", "spell": 804441 },
+    {
+      "action": "assert", "label": "SETUP: Temporal Focus is on its 120 sec cooldown for the talented caster",
+      "actor": "talent", "metric": "cooldown_ms", "spell": 806165, "min": 110000, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "SETUP: Temporal Anomaly is on its 120 sec cooldown for the talented caster",
+      "actor": "talent", "metric": "cooldown_ms", "spell": 806315, "min": 110000, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "SETUP: Timeguard is on its 120 sec cooldown for the talented caster",
+      "actor": "talent", "metric": "cooldown_ms", "spell": 804441, "min": 110000, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "SETUP: Timeguard is on its 120 sec cooldown for the control caster",
+      "actor": "control", "metric": "cooldown_ms", "spell": 804441, "min": 110000, "within_ms": 1000
+    },
+    { "action": "cast", "actor": "control", "spell": 801304 },
+    { "action": "cast", "actor": "talent", "spell": 801304 },
+    {
+      "action": "assert", "label": "Hasten is on the talented caster",
+      "actor": "talent", "metric": "aura", "spell": 801304, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: casting Hasten starts The Bieko Effect's periodic reduction",
+      "actor": "talent", "metric": "aura", "spell": 712371, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The control caster, without the talent, gets no periodic reduction",
+      "actor": "control", "metric": "aura", "spell": 712371, "equals": 0
+    },
+    { "action": "wait", "label": "Let all six 2 sec ticks of the 12 sec effect land", "ms": 13500 },
+    {
+      "action": "assert", "label": "The periodic reduction ends with Hasten's 12 sec",
+      "actor": "talent", "metric": "aura", "spell": 712371, "equals": 0
+    },
+    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 806165, "save_as": "control_focus" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: six 10% cuts leave Temporal Focus at about half the control's cooldown",
+      "actor": "talent", "metric": "cooldown_ms", "spell": 806165, "ratio_to": "control_focus", "min": 0.47, "max": 0.59
+    },
+    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 806315, "save_as": "control_anomaly" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: six 10% cuts leave Temporal Anomaly at about half the control's cooldown",
+      "actor": "talent", "metric": "cooldown_ms", "spell": 806315, "ratio_to": "control_anomaly", "min": 0.47, "max": 0.59
+    },
+    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 804441, "save_as": "control_timeguard" },
+    {
+      "action": "assert", "label": "Negative control: Timeguard is not in 707312's list and keeps the control's cooldown",
+      "actor": "talent", "metric": "cooldown_ms", "spell": 804441, "relative_to": "control_timeguard", "min": -1000, "max": 1000
+    }
+  ]
+}

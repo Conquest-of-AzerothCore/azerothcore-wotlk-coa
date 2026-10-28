@@ -1,0 +1,204 @@
+{
+  "schema": 1,
+  "name": "guardian-gladiator-book-refuses-ballads-4551",
+  "contract": [
+    "Inspiring Leader 505344 belongs to Inspiration specialization 20 and changes Guardian attacks into Ballads.",
+    "Gladiator 19 lacks that parent. The Book of Ascension must not offer or sell Conqueror 501068 or",
+    "Dragonslayer 501066 to a fresh level-18 Gladiator; a forged native purchase request must be refused without",
+    "teaching either spell. A native Inspiration character retains Inspiring Leader, the level-appropriate",
+    "Pulverize replacement and a working Ballad attack."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "g",
+      "race": 1,
+      "class": 18,
+      "level": 18
+    },
+    {
+      "id": "i",
+      "race": 1,
+      "class": 18,
+      "level": 18,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "g",
+      "id": 19
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "aura",
+      "spell": 505344,
+      "equals": 0
+    },
+    {
+      "action": "money",
+      "actor": "g",
+      "copper": 200000
+    },
+    {
+      "action": "learn",
+      "actor": "g",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "g",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "g"
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "spellbook_offers_spell",
+      "spell": 501068,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "spellbook_offers_spell",
+      "spell": 501066,
+      "equals": 0
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "g",
+      "spell": 501068
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "spellbook_buy_succeeded",
+      "spell": 501068,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "spellbook_buy_failed",
+      "spell": 501068,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "knows_spell",
+      "spell": 501068,
+      "equals": 0
+    },
+    {
+      "action": "specialization",
+      "actor": "i",
+      "id": 20
+    },
+    {
+      "action": "assert",
+      "actor": "i",
+      "metric": "aura",
+      "spell": 505344,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "i",
+      "spell": 800311
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "i",
+      "metric": "knows_spell",
+      "spell": 501068,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "i",
+      "metric": "temporary_spell_replacement",
+      "spell": 800311,
+      "equals": 501068
+    },
+    {
+      "action": "set_power",
+      "actor": "i",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "i",
+      "spell": 501068,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "i",
+      "metric": "cast_failure",
+      "spell": 501068,
+      "equals": 0,
+      "label": "Inspiration Ballad is accepted normally"
+    },
+    {
+      "action": "assert",
+      "actor": "i",
+      "metric": "spell_go_count",
+      "spell": 501068,
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Inspiration Ballad launches once"
+    },
+    {
+      "action": "assert",
+      "actor": "i",
+      "metric": "spell_damage_count",
+      "spell": 501068,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 2000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "i",
+      "entry": 36,
+      "level": 18,
+      "health": 1000000,
+      "distance": 5
+    }
+  ]
+}

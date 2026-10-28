@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Issue 3185: Glyphic Destruction doubles Glyphic Ruin's damage against Frozen targets",
+  "contract": [
+    "Glyphic Destruction 800758 reads 'Increases the damage of Glyphic Ruin by 100% against Frozen targets.'",
+    "Effect 0 is SPELL_AURA_OVERRIDE_CLASS_SCRIPTS (112), MiscValue 20007 (ASCENSION_CLASSMASK_AURASTATE_DAMAGE),",
+    "MiscValueB 4 (AURA_STATE_FROZEN), BasePoints 99 + DieSides 1 = 100, classmask family 38 word0 bit12 (4096),",
+    "TargetA caster. This is the established OVERRIDE_CLASS_SCRIPTS -> native aura 303",
+    "(MOD_DAMAGE_DONE_VERSUS_AURASTATE) conversion pattern already used for Cinderstorm Runes 706458; before this",
+    "fix no registration existed for 800758, so the raw selector 20007 did nothing (no handler reads it). Glyphic",
+    "Ruin 520067-520070/572119-572122/801179 are the only family 38 spells carrying word0 bit12 (4096). Frost Nova",
+    "122 (Frost school, SPELL_AURA_MOD_ROOT) always maps to AURA_STATE_FROZEN through the native",
+    "SpellInfo::GetAuraState(), the same fixture the sibling Frost Spectre scenario uses. Expected: once converted,",
+    "Glyphic Ruin deals double damage against a target frozen by Frost Nova and normal damage against an unfrozen",
+    "target."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80},
+    {"id": "mage", "race": 1, "class": 8, "level": 80, "spell_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rm", "entry": 36, "level": 80, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "mage", "spell": 122},
+    {"action": "snapshot", "label": "Glyphic Ruin damage before the talent, target not frozen", "actor": "rm",
+      "metric": "spell_damage_done", "spell": 520067, "target": "dummy", "save_as": "base"},
+    {"action": "learn", "actor": "rm", "spell": 800758},
+    {"action": "assert", "label": "SETUP: Glyphic Destruction is known", "actor": "rm", "metric": "aura",
+      "spell": 800758, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "Control: unfrozen target is unaffected", "actor": "rm",
+      "metric": "spell_damage_done", "spell": 520067, "target": "dummy", "ratio_to": "base", "min": 0.999,
+      "max": 1.001},
+    {"action": "cast", "label": "Frost Nova freezes the target", "actor": "mage", "spell": 122},
+    {"action": "assert", "label": "SETUP: the target is frozen", "actor": "dummy", "metric": "aura", "spell": 122,
+      "caster": "mage", "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "CONTRACT: Glyphic Ruin deals double damage to a Frozen target", "actor": "rm",
+      "metric": "spell_damage_done", "spell": 520067, "target": "dummy", "ratio_to": "base", "min": 1.98,
+      "max": 2.02},
+    {"action": "unlearn", "actor": "rm", "spell": 800758},
+    {"action": "assert", "actor": "rm", "metric": "aura", "spell": 800758, "equals": 0, "within_ms": 2000}
+  ]
+}

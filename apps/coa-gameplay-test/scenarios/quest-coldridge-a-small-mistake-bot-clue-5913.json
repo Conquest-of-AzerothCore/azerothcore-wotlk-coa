@@ -1,0 +1,224 @@
+{
+  "schema": 1,
+  "name": "Coldridge Valley 'A Small Mistake': only the Damaged Security Bot holds the clue, and its corpse completes the quest (#5913)",
+  "contract": [
+    "Report #5913: killing the security bot by the Frostmane troll cave did not complete 'A Small Mistake' (quest 254000), and the quest had no map marker.",
+    "quest_template 254000 requires item 254000, Security Bot AN-29, and nothing else; Efry Cogspark (254000) starts and ends it.",
+    "creature_loot_template 254004 (Damaged Security Bot, spawned at -6340.81, 802.589 beside the northern troll cave) pays item 254000 at 100% to a player on the quest.",
+    "creature_loot_template 254005 (Security Bot AN-32, spawned at -6416.3, 452.161 beside the western troll cave, where the report was filed) pays item 254001, the clue of the follow-up quest 254001 'We Found Her!', which needs this quest first.",
+    "So the bot beside the reporter belongs to the next quest and gives nothing for 254000, while the Damaged Security Bot completes it; quest_poi_points for 254000 point at -6341, 803 and the quest ends with Efry Cogspark."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 3,
+      "class": 16,
+      "level": 5
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -6111.03,
+    "y": 369.59,
+    "z": 395.542,
+    "o": 1.02
+  },
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "label": "Efry Cogspark is present at Anvilmar",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 254000,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The quest is available to a dwarf",
+      "actor": "hero",
+      "metric": "quest_takeable",
+      "quest": 254000,
+      "equals": 1
+    },
+    {
+      "action": "quest_accept",
+      "label": "Accept the quest from Efry Cogspark",
+      "actor": "hero",
+      "quest": 254000,
+      "entry": 254000
+    },
+    {
+      "action": "assert",
+      "label": "The quest is in progress",
+      "actor": "hero",
+      "metric": "quest_status",
+      "quest": 254000,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "teleport",
+      "label": "Visit the western cave near the reported location",
+      "actor": "hero",
+      "map": 0,
+      "x": -6416.3,
+      "y": 452.161,
+      "z": 383.113,
+      "o": 6.02
+    },
+    {
+      "action": "assert",
+      "label": "Security Bot AN-32 is present at the western cave",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 254005,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill the world spawn of Security Bot AN-32",
+      "actor": "hero",
+      "entry": 254005,
+      "kill": true
+    },
+    {
+      "action": "loot_nearby",
+      "actor": "hero",
+      "entry": 254005
+    },
+    {
+      "action": "loot_slot",
+      "label": "Take whatever its corpse offers this player",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "Its corpse gave no Security Bot AN-29 for this quest",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 254000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "And nothing of the follow-up quest's clue, AN-32, before that quest is taken",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 254001,
+      "equals": 0
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "The quest is still in progress",
+      "actor": "hero",
+      "metric": "quest_status",
+      "quest": 254000,
+      "equals": 3
+    },
+    {
+      "action": "teleport",
+      "label": "Visit the northern cave at the quest objective",
+      "actor": "hero",
+      "map": 0,
+      "x": -6340.81,
+      "y": 802.589,
+      "z": 390.731,
+      "o": 3
+    },
+    {
+      "action": "assert",
+      "label": "The Damaged Security Bot is present at the northern cave",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 254004,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill the world spawn of the Damaged Security Bot",
+      "actor": "hero",
+      "entry": 254004,
+      "kill": true
+    },
+    {
+      "action": "loot_nearby",
+      "actor": "hero",
+      "entry": 254004
+    },
+    {
+      "action": "loot_slot",
+      "label": "The Damaged Security Bot's corpse offers Security Bot AN-29",
+      "actor": "hero",
+      "item": 254000
+    },
+    {
+      "action": "assert",
+      "label": "The clue is in the bags",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 254000,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The quest is complete",
+      "actor": "hero",
+      "metric": "quest_status",
+      "quest": 254000,
+      "equals": 1
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "teleport",
+      "label": "Return to Efry Cogspark in Anvilmar",
+      "actor": "hero",
+      "map": 0,
+      "x": -6111.03,
+      "y": 369.59,
+      "z": 395.542,
+      "o": 1.02
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 254000,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "label": "Hand it in to Efry Cogspark",
+      "actor": "hero",
+      "quest": 254000,
+      "entry": 254000,
+      "reward": 0
+    },
+    {
+      "action": "assert",
+      "label": "The turn-in is accepted",
+      "actor": "hero",
+      "metric": "quest_status",
+      "quest": 254000,
+      "equals": 6,
+      "within_ms": 3000
+    }
+  ]
+}

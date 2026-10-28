@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Clock probe: a 180 s spell cooldown counts down by the game time of a 60 s wait",
+  "contract": [
+    "Icy Veins 12472 in the installed Spell.dbc is instant with RecoveryTime 180000 ms, Category 0 and",
+    "StartRecoveryCategory 0, so one cast starts a single 180 s player cooldown and no global cooldown. No script or",
+    "SQL row changes it. Player::_AddSpellCooldown stores the end in game milliseconds and GetSpellCooldownDelay",
+    "subtracts getMSTime(), so the reading falls by exactly the game time that passes. The Icy Veins aura shows that",
+    "the cast was accepted before any reading. Three step ticks after the cast it reads 179000..180000. After a",
+    "60000 ms wait it has fallen by 60000 ms plus the few step ticks around the wait (at most 500 ms, robust to a",
+    "25 ms world step), leaving 119000..120000. A cooldown clock that ignores fast-forwarded game time stays near",
+    "180000; one that runs ahead of it falls by more than 60.5 s."
+  ],
+  "timeout_ms": 150000,
+  "players": [
+    { "id": "mage", "race": 1, "class": 8, "level": 80 }
+  ],
+  "steps": [
+    { "action": "learn", "actor": "mage", "spell": 12472 },
+    {
+      "action": "assert", "label": "SETUP: Icy Veins starts off cooldown", "actor": "mage",
+      "metric": "cooldown_ms", "spell": 12472, "equals": 0
+    },
+    { "action": "cast", "actor": "mage", "spell": 12472 },
+    {
+      "action": "assert", "label": "SETUP: the cast applied Icy Veins", "actor": "mage",
+      "metric": "aura", "spell": 12472, "equals": 1
+    },
+    {
+      "action": "snapshot", "label": "Cooldown right after the cast", "actor": "mage",
+      "metric": "cooldown_ms", "spell": 12472, "save_as": "cooldown_after_cast"
+    },
+    {
+      "action": "assert", "label": "SETUP: the cast started the full 180 s cooldown", "actor": "mage",
+      "metric": "cooldown_ms", "spell": 12472, "min": 179000, "max": 180000
+    },
+    { "action": "wait", "label": "Long wait, fast-forwarded on the simulated clock", "ms": 60000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the cooldown fell by the 60 s of game time that passed",
+      "actor": "mage", "metric": "cooldown_ms", "spell": 12472, "relative_to": "cooldown_after_cast",
+      "min": -60500, "max": -59990
+    },
+    {
+      "action": "assert", "label": "120 s of the cooldown remain", "actor": "mage",
+      "metric": "cooldown_ms", "spell": 12472, "min": 119000, "max": 120000
+    }
+  ]
+}

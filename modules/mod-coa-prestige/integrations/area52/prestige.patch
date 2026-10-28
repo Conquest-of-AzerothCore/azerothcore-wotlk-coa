@@ -1,0 +1,274 @@
+--- a/modules/mod-coa-prestige/src/CoAPrestige.cpp
++++ b/modules/mod-coa-prestige/src/CoAPrestige.cpp
+@@ -22,6 +22,8 @@
+ #include "Battleground.h"
+ #include "CoA.Prestige.API.h"
+ #include "CoAPrestigeRules.h"
++#include "AscensionPrestigeReset.h"
++#include "World.h"
+ #include "CoASpellbook.h"
+ #include "Chat.h"
+ #include "Config.h"
+@@ -71,7 +73,7 @@
+     };
+ 
+     std::atomic<bool> g_enabled{ true };
+-    std::atomic<uint32> g_requiredLevel{ 60 };
++    std::atomic<uint32> g_requiredLevel{ 0 };
+     std::atomic<uint32> g_experienceBonusPercent{ 300 };
+ 
+     std::mutex g_rewardsLock;
+@@ -139,7 +141,7 @@
+     void LoadConfig()
+     {
+         g_enabled = sConfigMgr->GetOption<bool>("CoAPrestige.Enable", true);
+-        g_requiredLevel = std::max<uint32>(2, sConfigMgr->GetOption<uint32>("CoAPrestige.RequiredLevel", 60));
++        g_requiredLevel = std::max<uint32>(2, sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL));
+         g_experienceBonusPercent = sConfigMgr->GetOption<uint32>("CoAPrestige.ExperienceBonusPercent", 300);
+ 
+         std::string const text = sConfigMgr->GetOption<std::string>("CoAPrestige.Rewards", DefaultRewards);
+@@ -473,8 +475,17 @@
+         uint32 const requiredLevel = g_requiredLevel;
+         bool const wildcard = AscensionWildcard::IsWildcardHero(player);
+         bool const freePick = AscensionFreePick::Applies(player);
++        auto const* realmReset = AscensionPrestigeReset::Area52;
++        AscensionPrestigeReset::Plan resetPlan;
++        std::string resetError;
++        if (freePick && (!realmReset || !realmReset->Prepare(player, resetPlan, resetError)))
++        {
++            ChatHandler(player->GetSession()).SendSysMessage(resetError.empty() ?
++                "Area 52 Prestige reset is unavailable." : resetError);
++            return false;
++        }
+         bool const customClass = IsAscensionCustomClassId(player->getClass());
+-        uint32 const specialization = wildcard ? AscensionWildcard::ActiveSpec(player) + 1 :
++        uint32 const specialization = freePick ? resetPlan.Build + 1u : wildcard ? AscensionWildcard::ActiveSpec(player) + 1 :
+             customClass ? GetAscensionActiveSpecialization(player) : player->GetActiveSpec() + 1;
+ 
+         ActivationFacts facts;
+@@ -508,13 +519,13 @@
+         uint32 talents = 0;
+         if (freePick)
+         {
+-            talents = AscensionFreePick::KnownEntries(player).size();
+-            auto const result = AscensionFreePick::Apply(player, {}, false);
+-            if (!result)
+-            {
+-                chat.SendSysMessage("Chromie could not reset your advancement selections. Your level has not changed.");
++            AscensionPrestigeReset::Result result;
++            if (!realmReset->Reset(player, resetPlan, result, resetError))
++            {
++                chat.SendSysMessage(resetError);
+                 return false;
+             }
++            talents = result.Abilities;
+         }
+         else if (wildcard)
+             talents = AscensionWildcard::PrestigeSpecialization(player);
+--- /dev/null
++++ b/src/server/coa/Area52PrestigeEnchantReset.inc
+@@ -0,0 +1,27 @@
++bool PreparePrestigeReset(Player* player, std::uint32_t& specialization, std::string& error)
++{
++    auto const* state = player ? player->CustomData.Get<State>(StateKey) : nullptr;
++    if (!player || !CanChange(player, state) || ActivePreset(player) >= PresetCount(player))
++    {
++        error = "Your active enchant specialization is not unlocked or ready for Prestige.";
++        return false;
++    }
++    specialization = ActivePreset(player);
++    return true;
++}
++
++std::uint32_t ResetPrestigeSpecialization(Player* player)
++{
++    auto const before = ReadSlots(player);
++    auto const key = Setting(player);
++    std::uint32_t removed = 0;
++    for (std::uint32_t slot = 0; slot < before.size(); ++slot)
++        if (before[slot])
++        {
++            player->UpdatePlayerSetting(key, slot, 0);
++            ++removed;
++        }
++    Synchronize(player);
++    SendSlots(player);
++    return removed;
++}
+--- /dev/null
++++ b/src/server/coa/Area52PrestigeReset.inc
+@@ -0,0 +1,66 @@
++namespace
++{
++bool PreparePrestigeReset(Player* player, AscensionPrestigeReset::Plan& plan, std::string& error)
++{
++    if (!Applies(player) || !player->IsInWorld() || !player->FindMap() || !player->IsAlive() ||
++        player->IsInCombat() || player->InBattleground() || player->InArena() ||
++        player->IsBeingTeleported() || !Area52Build::CanSwitchSpecialization(player))
++    {
++        error = "Your active build is not ready for Prestige.";
++        return false;
++    }
++    auto const* saved = player->FindPlayerSettings(ActiveSlotSetting);
++    auto const build = saved && !saved->empty() ? (*saved)[0].value : 0;
++    if (build >= SpecializationSpells.size() || !player->HasSpell(SpecializationSpells[build]))
++    {
++        error = "Your active build specialization is not unlocked.";
++        return false;
++    }
++    if (!Validate(Data, player->GetLevel(), {}, {}))
++    {
++        error = "Your active build could not be prepared for Prestige.";
++        return false;
++    }
++    plan.Build = build;
++    return AscensionMysticEnchant::PreparePrestigeReset(player, plan.Enchants, error);
++}
++
++bool ResetPrestigeSpecialization(Player* player, AscensionPrestigeReset::Plan const& plan,
++    AscensionPrestigeReset::Result& result, std::string& error)
++{
++    AscensionPrestigeReset::Plan current;
++    if (!PreparePrestigeReset(player, current, error))
++        return false;
++    if (current.Build != plan.Build || current.Enchants != plan.Enchants)
++    {
++        error = "Your active specialization changed. Reopen Prestige and try again.";
++        return false;
++    }
++    auto const count = KnownEntries(player).size();
++    if (!Apply(player, {}, false, true))
++    {
++        error = "Your active build could not be reset.";
++        return false;
++    }
++    result.Abilities = std::uint32_t(count);
++    result.Enchants = AscensionMysticEnchant::ResetPrestigeSpecialization(player);
++    for (auto const& [spell, learned] : player->GetSpellMap())
++        if (!learned->specMask && learned->State != PLAYERSPELL_REMOVED && ClassSpells.contains(spell))
++            if (auto const* info = sSpellMgr->GetSpellInfo(spell); info && info->SpellLevel > 1)
++                learned->State = PLAYERSPELL_REMOVED;
++    Area52Build::PauseAutoLearnForReset(player);
++    StoreValues(player, ActiveBuildSetting, {});
++    for (auto suffix : {".entries", ".active_build", ".ranks", ".bars"})
++        StoreValues(player, SlotSetting(plan.Build, suffix), {});
++    if (auto* pending = player->CustomData.Get<PendingBars>(PendingBarsKey))
++        pending->Buttons.clear();
++    Area52Build::RestoreSpecialization(player);
++    SendArea52Advancement(player);
++    SendArea52Specialization(player);
++    return true;
++}
++
++AscensionPrestigeReset::Handler const PrestigeResetHandler{
++    Applies, PreparePrestigeReset, ResetPrestigeSpecialization
++};
++}
+--- a/src/server/coa/AscensionFreePick.cpp
++++ b/src/server/coa/AscensionFreePick.cpp
+@@ -1,5 +1,8 @@
+ /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+ #include "AscensionFreePick.h"
++#include "AscensionPrestigeReset.h"
++#include "AscensionSpecialization.h"
++#include "AscensionMysticEnchant.h"
+ #include "AscensionRemovedSpellActionBars.h"
+ #include "AscensionFreePickLinkedSpells.h"
+ #include "Area52CompanionTraining.h"
+@@ -453,7 +456,7 @@
+ 
+     if (SameSelection(before, wanted))
+     {
+-        if (SynchronizeTalentRanks(player))
++        if (SynchronizeTalentRanks(player) && !specializationChange)
+             player->SaveToDB(false, false);
+         return {};
+     }
+@@ -769,6 +772,9 @@
+         return false;
+     }
+     auto const previous = ActiveSpecialization(player);
++    error = AscensionSpecializationSwitchRefusal(player, previous + 1u, index + 1u);
++    if (!error.empty())
++        return false;
+     if (index == previous)
+         return true;
+     std::vector<KnownEntry> wanted;
+@@ -887,8 +893,11 @@
+ 
+ }
+ 
++#include "Area52PrestigeReset.inc"
++
+ void RegisterSpecializations()
+ {
++    AscensionPrestigeReset::Area52 = &PrestigeResetHandler;
+     RegisterSpellScriptWithArgs(SpecializationSwap, "spell_area52_specialization_swap");
+     new SpecializationPlayer();
+     RegisterSpellScript(spell_area52_improved_riposte);
+--- a/src/server/coa/AscensionMysticEnchant.cpp
++++ b/src/server/coa/AscensionMysticEnchant.cpp
+@@ -979,6 +979,8 @@
+     }
+ };
+ }
++
++#include "Area52PrestigeEnchantReset.inc"
+ 
+ bool GrantsActive(Player const* player, std::uint32_t enchant)
+ {
+--- a/src/server/coa/AscensionMysticEnchant.h
++++ b/src/server/coa/AscensionMysticEnchant.h
+@@ -3,10 +3,16 @@
+ #ifndef ASCENSION_MYSTIC_ENCHANT_H
+ #define ASCENSION_MYSTIC_ENCHANT_H
+ 
++#include <cstdint>
++#include <string>
++
+ class Unit;
++class Player;
+ 
+ namespace AscensionMysticEnchant
+ {
++bool PreparePrestigeReset(Player* player, std::uint32_t& specialization, std::string& error);
++std::uint32_t ResetPrestigeSpecialization(Player* player);
+ float NonstackingCostCorrection(Unit const* caster, std::uint32_t schoolMask);
+ }
+ 
+--- /dev/null
++++ b/src/server/coa/AscensionPrestigeReset.h
+@@ -0,0 +1,33 @@
++#ifndef ASCENSION_PRESTIGE_RESET_H
++#define ASCENSION_PRESTIGE_RESET_H
++
++#include <cstdint>
++#include <string>
++
++class Player;
++
++namespace AscensionPrestigeReset
++{
++struct Plan
++{
++    std::uint32_t Build = 0;
++    std::uint32_t Enchants = 0;
++};
++
++struct Result
++{
++    std::uint32_t Abilities = 0;
++    std::uint32_t Enchants = 0;
++};
++
++struct Handler
++{
++    bool (*Applies)(Player const*);
++    bool (*Prepare)(Player*, Plan&, std::string&);
++    bool (*Reset)(Player*, Plan const&, Result&, std::string&);
++};
++
++inline Handler const* Area52 = nullptr;
++}
++
++#endif

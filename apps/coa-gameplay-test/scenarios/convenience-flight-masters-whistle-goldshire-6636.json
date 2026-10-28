@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "name": "Convenience: Flight Master's Whistle retreats to a real flight master from Goldshire (#6636)",
+  "contract": [
+    "Flight Master's Whistle (item 10, spell 158) promises 'Call in a ride and Retreat to one of the nearest",
+    "Flightmasters!'. Reported from Goldshire (map 0, -9561.2 9.5 59.1), where the nearest taxi-node entries are",
+    "Ascension's own 'Filming' (168) and 'Goldshire, Elwynn Forest' (407), but no flight master creature stands within",
+    "reach of either node: the only flight masters in Elwynn Forest are Dungar Longdrink (352) at the Stormwind node",
+    "(-8835.8, 490.1, 109.7) and Thor (523) at Sentinel Hill. Retreating must land the player where a flight master",
+    "actually stands, so the whistle used in Goldshire arrives at the Stormwind flight master instead of leaving the",
+    "player standing in Goldshire. Node positions come from the client's TaxiNodes.dbc; the flight master creatures",
+    "come from the world database of the tested build."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 32,
+      "level": 18
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9561.2,
+    "y": 9.5,
+    "z": 59.1,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the spawn settle",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "label": "Learn the whistle",
+      "actor": "cleric",
+      "spell": 158
+    },
+    {
+      "action": "assert",
+      "label": "The player starts where the report was filed",
+      "actor": "cleric",
+      "metric": "position_x",
+      "min": -9562.2,
+      "max": -9560.2
+    },
+    {
+      "action": "cast",
+      "label": "Use the whistle in Goldshire",
+      "actor": "cleric",
+      "spell": 158
+    },
+    {
+      "action": "assert",
+      "label": "The whistle cast is accepted",
+      "actor": "cleric",
+      "metric": "cast_failure",
+      "spell": 158,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The whistle lands at the Stormwind flight master",
+      "actor": "cleric",
+      "metric": "position_x",
+      "min": -8900,
+      "max": -8780,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "The landing spot is the flight master's own ground",
+      "actor": "cleric",
+      "metric": "position_y",
+      "min": 440,
+      "max": 540,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Still on the same continent",
+      "actor": "cleric",
+      "metric": "map_id",
+      "equals": 0
+    }
+  ]
+}

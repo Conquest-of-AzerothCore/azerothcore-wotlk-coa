@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "name": "Guardian Footman's Call adds its flat damage to Pulverize and nothing else (COA-8471)",
+  "contract": "Footman's Call 705376 applies 707662, a flat first-effect modifier worth 15 plus 30% of shield block value, and its tooltip names only Pulverize. ApplyContracts replaced the authored class mask with (4, 0, 0), which only Shieldforge carries, so Pulverize got nothing. Every Pulverize rank must gain at least the authored 15, while Shield Toss (which shares Pulverize's flags[1] bits) and Shieldforge must stay untouched.",
+  "timeout_ms": 60000,
+  "players": [ { "id": "g", "race": 1, "class": 18, "level": 60 } ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "assert", "label": "Control: no talent, no Pulverize bonus", "actor": "g", "metric": "spell_modifier", "spell": 800311, "op": 3, "base": 0, "equals": 0 },
+    { "action": "learn", "actor": "g", "spell": 705376 },
+    { "action": "assert", "label": "Footman's Call applies its damage aura", "actor": "g", "metric": "aura", "spell": 707662, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: Pulverize gains the authored flat damage", "actor": "g", "metric": "spell_modifier", "spell": 800311, "op": 3, "base": 0, "min": 15 },
+    { "action": "assert", "label": "Top Pulverize rank gains the authored flat damage", "actor": "g", "metric": "spell_modifier", "spell": 802443, "op": 3, "base": 0, "min": 15 },
+    { "action": "assert", "label": "Shield Toss is not affected", "actor": "g", "metric": "spell_modifier", "spell": 500461, "op": 3, "base": 0, "equals": 0 },
+    { "action": "assert", "label": "Shieldforge is not affected", "actor": "g", "metric": "spell_modifier", "spell": 802195, "op": 3, "base": 0, "equals": 0 }
+  ]
+}

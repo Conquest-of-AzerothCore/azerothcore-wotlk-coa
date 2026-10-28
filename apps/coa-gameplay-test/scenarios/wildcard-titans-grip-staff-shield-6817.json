@@ -1,0 +1,357 @@
+{
+  "schema": 1,
+  "name": "Titan Grip equips a staff and shield together without removing either item",
+  "contract": [
+    "Ascension Titan Grip46917 explicitly allows a weapon or shield offhand while a Staff is equipped, in",
+    "addition to ordinary dual two-hand axes/maces/swords. Staff35 and shield2362 must equip normally",
+    "with the passive and remain equipped through a world update. This does not grant dual staffs or",
+    "fishing poles.",
+    "Staff penalty818047 reduces Magic damage and healing by ten percent and must disappear on unlearning.",
+    "The staff penalty depends on the equipped item, including while transformed; a shield removal in Bear Form",
+    "must not clear the penalty."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "mail_count",
+      "save_as": "initial_mail"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_damage_done",
+      "spell": 133,
+      "target": "enemy",
+      "save_as": "magic"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_healing_done",
+      "spell": 2050,
+      "target": "hero",
+      "save_as": "healing"
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 227
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 9116
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 46917
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 35
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 35,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 2362
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 2362,
+      "slot": 16
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "equipped_item",
+      "slot": 15,
+      "equals": 35
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "equipped_item",
+      "slot": 16,
+      "equals": 2362
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "block_value",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 35,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 2362,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 818047,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_done",
+      "spell": 133,
+      "target": "enemy",
+      "ratio_to": "magic",
+      "min": 0.899,
+      "max": 0.901
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_healing_done",
+      "spell": 2050,
+      "target": "hero",
+      "ratio_to": "healing",
+      "min": 0.899,
+      "max": 0.901
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 5487
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 5487
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 5487,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "destroy_item",
+      "actor": "hero",
+      "item": 2362
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "equipped_item",
+      "slot": 15,
+      "equals": 35
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 818047,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_done",
+      "spell": 133,
+      "target": "enemy",
+      "ratio_to": "magic",
+      "min": 0.899,
+      "max": 0.901
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_healing_done",
+      "spell": 2050,
+      "target": "hero",
+      "ratio_to": "healing",
+      "min": 0.899,
+      "max": 0.901
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "hero",
+      "spell": 5487
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 2362
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 2362,
+      "slot": 16
+    },
+    {
+      "action": "unlearn",
+      "actor": "hero",
+      "spell": 46917,
+      "all_specs": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "equipped_item",
+      "slot": 16,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 818047,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "mail_count",
+      "equals": 0,
+      "relative_to": "initial_mail"
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 1180
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 674
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 46917
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 2092
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 2092,
+      "slot": 16
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "equipped_item",
+      "slot": 16,
+      "equals": 2092
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 818047,
+      "equals": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "hero",
+      "spell": 46917,
+      "all_specs": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "equipped_item",
+      "slot": 16,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "mail_count",
+      "equals": 0,
+      "relative_to": "initial_mail"
+    }
+  ]
+}

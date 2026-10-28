@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "name": "CoA quest super-track patch: Poisoning the World's diamond points at each trainer (#8058)",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1.",
+    "The client resolves a tracked quest's diamond from QuestSuperTrack.dbc (quest -> SuperTrack nodes) and SuperTrack.dbc (node -> position). The start-zone class quest 200025 has no QuestSuperTrack row, so the client fell back to the height-less quest_poi area.",
+    "The login patch stream sends coa_client_quest_super_track rows as SMSG_PATCH_QUEST_SUPER_TRACK (0x06BF): ID, QuestID, then 20 SuperTrack ids for each of the 4 objectives (fields 2, 22, 42, 62) and 20 for completion (field 82). The opcode is the Extensions.dll handler-name table entry after SMSG_PATCH_SUPER_TRACK (0x06BE).",
+    "Row 33201 binds objective 0 to node 21083 at Exodite Telusaara's spawn on Aldrassil's upper floor (10458.2, 807.65, 1346.75), objective 1 to 21084 (Darkslayer Harrendor), objective 2 to 21085 (Baarelam) and completion to 21086 (Ko'rahl Fangshifter). The nodes are unused ids inside the client's SuperTrack range: in game, a node id above its max (21632) was not found and the diamond fell back to the quest_poi area. Socketless packet construction does not establish how the client renders the diamond."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": 10405.4,
+    "y": 717.75,
+    "z": 1321.65,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "client",
+      "race": 4,
+      "class": 1,
+      "level": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "The login stream sends QuestSuperTrack row 33201 once",
+      "actor": "client",
+      "metric": "server_packets",
+      "opcode": 1727,
+      "row": 33201,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Row 33201 belongs to quest 200025",
+      "actor": "client",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 33201,
+      "index": 1,
+      "equals": 200025
+    },
+    {
+      "action": "assert",
+      "label": "Objective 0 points at node 21083",
+      "actor": "client",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 33201,
+      "index": 2,
+      "equals": 21083
+    },
+    {
+      "action": "assert",
+      "label": "Objective 1 points at node 21084",
+      "actor": "client",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 33201,
+      "index": 22,
+      "equals": 21084
+    },
+    {
+      "action": "assert",
+      "label": "Objective 2 points at node 21085",
+      "actor": "client",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 33201,
+      "index": 42,
+      "equals": 21085
+    },
+    {
+      "action": "assert",
+      "label": "Completion points at node 21086",
+      "actor": "client",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 33201,
+      "index": 82,
+      "equals": 21086
+    },
+    {
+      "action": "assert",
+      "label": "Row 33201 carries all 102 fields",
+      "actor": "client",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 33201,
+      "index": 101,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Node 21083 z is Exodite Telusaara's 1346.75",
+      "actor": "client",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 21083,
+      "index": 4,
+      "equals": 1151883264
+    }
+  ]
+}

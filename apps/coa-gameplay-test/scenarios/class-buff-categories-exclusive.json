@@ -1,0 +1,267 @@
+{
+  "schema": 1,
+  "name": "Class buffs: the newest buff of a stat category replaces another class's buff on the same target",
+  "contract": [
+    "Brutal Shout 300886 (Barbarian, +77 Agility to the party) and Inquisitor's Edict 707355 (Witch Hunter, +77",
+    "Agility to one ally) are different classes' versions of one Agility buff. Ascension combat logs",
+    "from 2026-05 to 2026-08 show the newest buff of such a category replacing the previous",
+    "one whoever cast it, also when it is weaker. spell_group 2110001 (rule 1, SPELL_GROUP_STACK_RULE_EXCLUSIVE)",
+    "holds the Agility buffs, so on a grouped warrior ally each cast replaces the other and Agility rises by",
+    "77, not 154. Knight's Edict 523485 belongs to the armor and all attributes category and coexists with",
+    "Brutal Shout. Rank 1 Inquisitor's Edict 706741 (+3 Agility) from a third caster still replaces rank 6",
+    "Brutal Shout, because the rule is EXCLUSIVE, not EXCLUSIVE_HIGHEST."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "barbarian",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    },
+    {
+      "id": "witch_hunter",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    },
+    {
+      "id": "low_rank",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "barbarian",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "barbarian",
+      "target": "witch_hunter"
+    },
+    {
+      "action": "group",
+      "actor": "barbarian",
+      "target": "low_rank"
+    },
+    {
+      "action": "learn",
+      "actor": "barbarian",
+      "spell": 300886
+    },
+    {
+      "action": "learn",
+      "actor": "witch_hunter",
+      "spell": 707355
+    },
+    {
+      "action": "learn",
+      "actor": "witch_hunter",
+      "spell": 523485
+    },
+    {
+      "action": "learn",
+      "actor": "low_rank",
+      "spell": 706741
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 1,
+      "save_as": "agility_alone"
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Brutal Shout rank 6 on the party",
+      "actor": "barbarian",
+      "spell": 300886
+    },
+    {
+      "action": "assert",
+      "label": "The ally carries Brutal Shout",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300886,
+      "caster": "barbarian",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Brutal Shout adds 77 Agility",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 1,
+      "relative_to": "agility_alone",
+      "min": 70,
+      "max": 85
+    },
+    {
+      "action": "cast",
+      "label": "Inquisitor's Edict rank 6 from the Witch Hunter",
+      "actor": "witch_hunter",
+      "spell": 707355,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "The ally carries Inquisitor's Edict",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 707355,
+      "caster": "witch_hunter",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Inquisitor's Edict replaced Brutal Shout",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300886,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Agility is +77 from one buff, not +154 from both",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 1,
+      "relative_to": "agility_alone",
+      "min": 70,
+      "max": 85
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 2500
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Brutal Shout again",
+      "actor": "barbarian",
+      "spell": 300886
+    },
+    {
+      "action": "assert",
+      "label": "Brutal Shout is back on the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300886,
+      "caster": "barbarian",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Brutal Shout replaced Inquisitor's Edict",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 707355,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Agility is still +77",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 1,
+      "relative_to": "agility_alone",
+      "min": 70,
+      "max": 85
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Knight's Edict from the Witch Hunter",
+      "actor": "witch_hunter",
+      "spell": 523485,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "The ally carries Knight's Edict",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 523485,
+      "caster": "witch_hunter",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Knight's Edict is another category and leaves Brutal Shout alone",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300886,
+      "caster": "barbarian",
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Rank 1 Inquisitor's Edict from a third caster",
+      "actor": "low_rank",
+      "spell": 706741,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "The weaker rank 1 Edict lands",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 706741,
+      "caster": "low_rank",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The newest Agility buff replaced rank 6 Brutal Shout",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300886,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Knight's Edict stays",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 523485,
+      "caster": "witch_hunter",
+      "equals": 1
+    }
+  ]
+}

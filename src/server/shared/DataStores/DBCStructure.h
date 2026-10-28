@@ -772,7 +772,7 @@ struct CreatureDisplayInfoExtraEntry
     //uint32 HairStyleID;                                   // 5
     //uint32 HairColorID;                                   // 6
     //uint32 FacialHairID;                                  // 7
-    //uint32 NPCItemDisplay[11];                            // 8-18
+    uint32 NPCItemDisplay[11];                              // 8-18
     //uint32 Flags;                                         // 19
     //char const* BakeName;                                 // 20
 };
@@ -1689,7 +1689,9 @@ struct SpellEntry
     uint32    AttributesEx6;                                        // 10       m_attributesExF
     uint32    AttributesEx7;                                        // 11       m_attributesExG
     uint32    Stances;                                              // 12       m_shapeshiftMask
+    uint32    StancesHigh;                                          // 13       m_shapeshiftMask, forms 33-64
     uint32    StancesNot;                                           // 14       m_shapeshiftExclude
+    uint32    StancesNotHigh;                                       // 15       m_shapeshiftExclude, forms 33-64
     uint32    Targets;                                              // 16       m_targets
     uint32    TargetCreatureType;                                   // 17       m_targetCreatureType
     uint32    RequiresSpellFocus;                                   // 18       m_requiresSpellFocus
@@ -1802,6 +1804,14 @@ struct SpellCategoryEntry
 {
     uint32 Id;
     uint32 Flags;
+};
+
+// Ascension: named targets for spell modifiers with an empty class mask.
+struct SpellAffectEntry
+{
+    uint32 ID;                                              // 0
+    uint32 ModifierSpellID;                                 // 1
+    int32 AffectedSpellID;                                  // 2: negative means all ranks of the root
 };
 
 struct SpellDifficultyEntry
@@ -2267,9 +2277,9 @@ struct MapDifficulty
 struct TalentSpellPos
 {
     TalentSpellPos()  = default;
-    TalentSpellPos(uint16 _talent_id, uint8 _rank) : talent_id(_talent_id), rank(_rank) {}
+    TalentSpellPos(uint32 _talent_id, uint8 _rank) : talent_id(_talent_id), rank(_rank) {}
 
-    uint16 talent_id{0};
+    uint32 talent_id{0};
     uint8  rank{0};
 };
 

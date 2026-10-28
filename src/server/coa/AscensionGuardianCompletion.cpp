@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionGuardianCompletion.h"
+#include "AscensionClientSpellPatches.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
@@ -115,7 +116,7 @@ class aura_ascension_guardian_lifecycle : public AuraScript
     {
         if (effect->GetEffIndex() == EFFECT_0 && Dynamic(GetId()))
         {
-            amount = DynamicAmount(GetTarget(), GetId());
+            amount = DynamicAmount(GetUnitOwner(), GetId());
             recalculate = false;
         }
     }
@@ -277,9 +278,9 @@ void AscensionGuardian::ApplyContracts(SpellInfo* info)
         info->Effects[EFFECT_2].Effect = 0;
     }
     if (id == 707662)
-        info->Effects[EFFECT_0].SpellClassMask = flag96(4, 0, 0);
+        info->Effects[EFFECT_0].SpellClassMask = flag96(0, 0, 8388608);
     if (id == 807794)
-        info->Effects[EFFECT_0].SpellClassMask = flag96(0, 4194320, 0);
+        info->Effects[EFFECT_0].SpellClassMask = flag96(0, 4194320, 8192);
     if (id == 525043)
         for (uint8 i = 0; i < 2; ++i)
             info->Effects[i].BasePoints = 19;
@@ -300,6 +301,10 @@ void AscensionGuardian::ApplyContracts(SpellInfo* info)
     }
     if (id == 803721)
         info->Effects[EFFECT_1].BasePoints = 1;
+    if (id == 704159 || id == 707701)
+        info->PreventionType = SPELL_PREVENTION_TYPE_PACIFY;
+    if (id == 500266 && info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_PERIODIC_TRIGGER_SPELL)
+        info->Effects[EFFECT_0].BasePoints = 0;
     if (id == 803524)
         info->Effects[EFFECT_1].Effect = 0;
     if (id == 504145 && !info->ProcFlags)
@@ -321,6 +326,7 @@ void AscensionGuardian::ApplyContracts(SpellInfo* info)
 
 void AddAscensionGuardianCompletionScripts()
 {
+    Ascension::ClientSpellPatches::Instance().Register(500673);
     new guardian_scaling();
     RegisterSpellScript(aura_ascension_guardian_lifecycle);
 }

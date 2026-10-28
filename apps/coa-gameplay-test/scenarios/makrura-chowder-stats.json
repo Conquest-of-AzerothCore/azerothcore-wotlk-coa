@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "name": "Makrura Chowder grants Stamina instead of Spirit",
+  "contract": [
+    "Item 772073 uses Food 1144, whose client description promises Strength, Stamina and expertise rating.",
+    "After 10 seconds eating, Well Fed 19782 grants 10 Strength, 10 Stamina and 6 expertise rating, with no Spirit.",
+    "The food description references 19782 effect 3 for rating; the helper description's effect 2 reference is stale.",
+    "Removing Well Fed returns these stats and expertise rating to their pre-food values. Requires CoA.Enable=1."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "eater", "race": 7, "class": 8, "level": 60, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "actor": "eater", "metric": "combat", "equals": 0 },
+    { "action": "assert", "actor": "eater", "metric": "aura", "spell": 19782, "equals": 0 },
+    { "action": "set_health", "actor": "eater", "maximum": 100000, "value": 1000 },
+    { "action": "set_power", "actor": "eater", "power": 0, "value": 0 },
+    { "action": "snapshot", "actor": "eater", "metric": "stat", "stat": 0, "save_as": "strength_before" },
+    { "action": "snapshot", "actor": "eater", "metric": "stat", "stat": 2, "save_as": "stamina_before" },
+    { "action": "snapshot", "actor": "eater", "metric": "stat", "stat": 4, "save_as": "spirit_before" },
+    {
+      "action": "snapshot", "actor": "eater", "metric": "combat_rating", "rating": 23,
+      "save_as": "expertise_rating_before"
+    },
+    { "action": "add_item", "actor": "eater", "item": 772073 },
+    { "action": "assert", "actor": "eater", "metric": "item_count", "item": 772073, "equals": 1 },
+    { "action": "use_item", "actor": "eater", "item": 772073, "spell": 1144 },
+    {
+      "action": "assert", "label": "Item use starts eating", "actor": "eater",
+      "metric": "aura", "spell": 1144, "equals": 1, "within_ms": 1000
+    },
+    { "action": "assert", "actor": "eater", "metric": "item_count", "item": 772073, "equals": 0 },
+    { "action": "wait", "ms": 5000 },
+    {
+      "action": "assert", "label": "Five seconds of eating is not enough for Well Fed", "actor": "eater",
+      "metric": "aura", "spell": 19782, "equals": 0
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "stat", "stat": 0,
+      "relative_to": "strength_before", "equals": 0
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "stat", "stat": 2,
+      "relative_to": "stamina_before", "equals": 0
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "stat", "stat": 4,
+      "relative_to": "spirit_before", "equals": 0
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "combat_rating", "rating": 23,
+      "relative_to": "expertise_rating_before", "equals": 0
+    },
+    { "action": "wait", "ms": 5500 },
+    {
+      "action": "assert", "label": "Eating for ten seconds grants Well Fed", "actor": "eater",
+      "metric": "aura", "spell": 19782, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "snapshot", "label": "Record Strength gained from the food", "actor": "eater",
+      "metric": "stat", "stat": 0, "relative_to": "strength_before", "save_as": "strength_gain"
+    },
+    {
+      "action": "snapshot", "label": "Record Stamina gained from the food", "actor": "eater",
+      "metric": "stat", "stat": 2, "relative_to": "stamina_before", "save_as": "stamina_gain"
+    },
+    {
+      "action": "snapshot", "label": "Record Spirit gained from the food", "actor": "eater",
+      "metric": "stat", "stat": 4, "relative_to": "spirit_before", "save_as": "spirit_gain"
+    },
+    {
+      "action": "snapshot", "label": "Record expertise rating gained from the food", "actor": "eater",
+      "metric": "combat_rating", "rating": 23, "relative_to": "expertise_rating_before",
+      "save_as": "expertise_rating_gain"
+    },
+    {
+      "action": "assert", "label": "Makrura Chowder grants ten Strength", "actor": "eater",
+      "metric": "stat", "stat": 0, "relative_to": "strength_before", "equals": 10
+    },
+    {
+      "action": "assert", "label": "Makrura Chowder grants ten Stamina", "actor": "eater",
+      "metric": "stat", "stat": 2, "relative_to": "stamina_before", "equals": 10
+    },
+    {
+      "action": "assert", "label": "Makrura Chowder does not grant Spirit", "actor": "eater",
+      "metric": "stat", "stat": 4, "relative_to": "spirit_before", "equals": 0
+    },
+    {
+      "action": "assert", "label": "Makrura Chowder grants six expertise rating", "actor": "eater",
+      "metric": "combat_rating", "rating": 23, "relative_to": "expertise_rating_before", "equals": 6
+    },
+    { "action": "set_aura", "actor": "eater", "spell": 1144, "stacks": 0 },
+    { "action": "assert", "actor": "eater", "metric": "aura", "spell": 1144, "equals": 0 },
+    {
+      "action": "assert", "label": "Well Fed persists after eating stops", "actor": "eater",
+      "metric": "aura", "spell": 19782, "equals": 1
+    },
+    { "action": "set_aura", "actor": "eater", "spell": 19782, "stacks": 0 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "actor": "eater", "metric": "aura", "spell": 19782, "equals": 0 },
+    {
+      "action": "assert", "label": "Removing Well Fed restores Strength", "actor": "eater",
+      "metric": "stat", "stat": 0, "relative_to": "strength_before", "equals": 0
+    },
+    {
+      "action": "assert", "label": "Removing Well Fed restores Stamina", "actor": "eater",
+      "metric": "stat", "stat": 2, "relative_to": "stamina_before", "equals": 0
+    },
+    {
+      "action": "assert", "label": "Removing Well Fed leaves Spirit unchanged", "actor": "eater",
+      "metric": "stat", "stat": 4, "relative_to": "spirit_before", "equals": 0
+    },
+    {
+      "action": "assert", "label": "Removing Well Fed restores expertise rating", "actor": "eater",
+      "metric": "combat_rating", "rating": 23, "relative_to": "expertise_rating_before", "equals": 0
+    }
+  ]
+}

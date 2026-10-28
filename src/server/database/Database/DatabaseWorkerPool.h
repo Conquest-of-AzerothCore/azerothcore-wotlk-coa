@@ -60,7 +60,8 @@ public:
     DatabaseWorkerPool();
     ~DatabaseWorkerPool();
 
-    void SetConnectionInfo(std::string_view infoString, uint8 const asyncThreads, uint8 const synchThreads);
+    void SetConnectionInfo(std::string_view infoString, uint8 const asyncThreads, uint8 const synchThreads,
+        std::string_view transactionIsolation = {});
 
     uint32 Open();
     void Close();

@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Runemaster Runes of Quickness hastes the party's spells by 3% and extends Glyphic range by 6 yd (#564)",
+  "contract": [
+    "Runes of Quickness 560527 (Arcane talent, passive): 'Increases the spell haste of all party and raid members by",
+    "$s1%. Does not stack with similar effects. In addition, the range of your Glyphic spells is increased by $s2",
+    "yds.' Effect 0 is SPELL_EFFECT_APPLY_AREA_AURA_RAID (radius index 287, 100 yd) with aura 216",
+    "SPELL_AURA_HASTE_SPELLS, BasePoints 2 + DieSides 1 = 3%, so every party member's cast speed multiplier becomes",
+    "1/1.03 = 0.9709 of its baseline. Effect 1 is a caster-only aura 107 SPELL_AURA_ADD_FLAT_MODIFIER with MiscValue 5",
+    "(SPELLMOD_RANGE) and 6 yd over family 38 class mask (0x7001, 0x8300000, 0xA0011), which includes Glyphic Ruin",
+    "520067 (mask0 0x1000, 35 yd). An ungrouped player receives nothing. Non-stacking is the existing spell_group",
+    "2000182 (EXCLUSIVE_SAME_EFFECT) and is not exercised here. Unlearning removes the party aura."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80},
+    {"id": "ally", "race": 1, "class": 8, "level": 80},
+    {"id": "stranger", "race": 1, "class": 8, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the characters settle", "ms": 3000},
+    {"action": "group", "actor": "rm", "target": "ally"},
+    {"action": "snapshot", "actor": "rm", "metric": "cast_speed_multiplier", "save_as": "rm_cast_speed"},
+    {"action": "snapshot", "actor": "ally", "metric": "cast_speed_multiplier", "save_as": "ally_cast_speed"},
+    {"action": "snapshot", "actor": "stranger", "metric": "cast_speed_multiplier", "save_as": "stranger_cast_speed"},
+    {"action": "snapshot", "actor": "rm", "metric": "spell_max_range", "spell": 520067, "save_as": "glyphic_range"},
+    {"action": "snapshot", "actor": "ally", "metric": "spell_max_range", "spell": 520067, "save_as": "ally_range"},
+
+    {"action": "learn", "actor": "rm", "spell": 560527},
+    {"action": "assert", "label": "The Runemaster carries Runes of Quickness", "actor": "rm", "metric": "aura",
+      "spell": 560527, "caster": "rm", "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "The party member receives the Runemaster's aura", "actor": "ally",
+      "metric": "aura", "spell": 560527, "caster": "rm", "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "The Runemaster's spells are 3% hasted", "actor": "rm",
+      "metric": "cast_speed_multiplier", "ratio_to": "rm_cast_speed", "min": 0.968, "max": 0.9735},
+    {"action": "assert", "label": "The party member's spells are 3% hasted", "actor": "ally",
+      "metric": "cast_speed_multiplier", "ratio_to": "ally_cast_speed", "min": 0.968, "max": 0.9735},
+    {"action": "assert", "label": "Glyphic spells reach 6 yd further", "actor": "rm", "metric": "spell_max_range",
+      "spell": 520067, "relative_to": "glyphic_range", "min": 5.99, "max": 6.01},
+    {"action": "assert", "label": "The range bonus is the Runemaster's own", "actor": "ally",
+      "metric": "spell_max_range", "spell": 520067, "relative_to": "ally_range", "equals": 0},
+    {"action": "wait", "ms": 1500},
+    {"action": "assert", "label": "An ungrouped player is not affected", "actor": "stranger", "metric": "aura",
+      "spell": 560527, "equals": 0},
+    {"action": "assert", "label": "An ungrouped player's spells are not hasted", "actor": "stranger",
+      "metric": "cast_speed_multiplier", "ratio_to": "stranger_cast_speed", "min": 0.999, "max": 1.001},
+
+    {"action": "unlearn", "actor": "rm", "spell": 560527},
+    {"action": "assert", "label": "The party aura ends with the talent", "actor": "ally", "metric": "aura",
+      "spell": 560527, "equals": 0, "within_ms": 3000},
+    {"action": "assert", "label": "The party member's haste returns to baseline", "actor": "ally",
+      "metric": "cast_speed_multiplier", "ratio_to": "ally_cast_speed", "min": 0.999, "max": 1.001},
+    {"action": "assert", "label": "Glyphic range returns to baseline", "actor": "rm", "metric": "spell_max_range",
+      "spell": 520067, "relative_to": "glyphic_range", "equals": 0}
+  ]
+}

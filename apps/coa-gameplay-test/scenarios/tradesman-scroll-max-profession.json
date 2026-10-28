@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Tradesman's Scroll maxes a profession to the realm's top rank",
+  "contract": "Issue #5561: the scroll must raise a profession to its highest rank for the session's expansion, not only to the cap of the rank already known. An Apprentice blacksmith on a classic session ends at Artisan 300/300 without Master; on a Wrath session it ends at Grand Master 450/450. A profession already at its top is refused and keeps the scroll.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "classic", "race": 1, "class": 1, "level": 60, "expansion": 0 },
+    { "id": "wrath", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "learn", "actor": "classic", "spell": 2018, "label": "classic: Apprentice Blacksmithing" },
+    { "action": "assert", "actor": "classic", "metric": "skill_maximum", "skill": 164, "equals": 75, "label": "classic: blacksmithing starts capped at 75" },
+    { "action": "add_item", "actor": "classic", "item": 777998, "count": 2, "label": "classic: two Tradesman's Scrolls" },
+    { "action": "use_item", "actor": "classic", "item": 777998, "spell": 200165, "label": "classic: read the scroll" },
+    { "action": "gossip_select", "actor": "classic", "option": 1, "label": "classic: choose Blacksmithing" },
+    { "action": "assert", "actor": "classic", "metric": "knows_spell", "spell": 9785, "equals": 1, "label": "classic: Artisan Blacksmithing is learned" },
+    { "action": "assert", "actor": "classic", "metric": "knows_spell", "spell": 29844, "equals": 0, "label": "classic: Master is not granted on a classic session" },
+    { "action": "assert", "actor": "classic", "metric": "skill_maximum", "skill": 164, "equals": 300, "label": "classic: blacksmithing caps at 300" },
+    { "action": "assert", "actor": "classic", "metric": "skill_value", "skill": 164, "equals": 300, "label": "classic: blacksmithing is raised to 300" },
+    { "action": "assert", "actor": "classic", "metric": "item_count", "item": 777998, "equals": 1, "label": "classic: one scroll is consumed" },
+    { "action": "use_item", "actor": "classic", "item": 777998, "spell": 200165, "label": "classic: read the second scroll" },
+    { "action": "gossip_select", "actor": "classic", "option": 1, "label": "classic: choose Blacksmithing again" },
+    { "action": "assert", "actor": "classic", "metric": "item_count", "item": 777998, "equals": 1, "label": "classic: a maxed profession keeps the scroll" },
+
+    { "action": "learn", "actor": "wrath", "spell": 2018, "label": "wrath: Apprentice Blacksmithing" },
+    { "action": "add_item", "actor": "wrath", "item": 777998, "label": "wrath: a Tradesman's Scroll" },
+    { "action": "use_item", "actor": "wrath", "item": 777998, "spell": 200165, "label": "wrath: read the scroll" },
+    { "action": "gossip_select", "actor": "wrath", "option": 1, "label": "wrath: choose Blacksmithing" },
+    { "action": "assert", "actor": "wrath", "metric": "knows_spell", "spell": 51300, "equals": 1, "label": "wrath: Grand Master Blacksmithing is learned" },
+    { "action": "assert", "actor": "wrath", "metric": "skill_maximum", "skill": 164, "equals": 450, "label": "wrath: blacksmithing caps at 450" },
+    { "action": "assert", "actor": "wrath", "metric": "skill_value", "skill": 164, "equals": 450, "label": "wrath: blacksmithing is raised to 450" }
+  ]
+}

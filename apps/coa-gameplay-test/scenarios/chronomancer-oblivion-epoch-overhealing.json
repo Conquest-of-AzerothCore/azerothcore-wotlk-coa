@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Oblivion copies the full Epoch heal, including overhealing, as noncritical Frost/Arcane damage",
-  "contract": "Each fully overhealing Epoch deals its full logged heal as one 583921 hit within 15 yards.",
+  "contract": "Each fully overhealing Epoch deals its full logged heal as one 583921 hit within 15 yards. Spell.dbc gives 583921 AttributesEx2 0x20000000 (SPELL_ATTR2_CANT_CRIT), so its native per-spell crit chance is 0 even though the fixture's spell critical rating raises the character-sheet chance far above 100%. The targets are Harvest Golems (entry 36, a mechanical creature): a critter such as Dig Rat 3444 runs CritterAI, which flees from the first Oblivion hit and then evades home, leaving no valid enemy within 15 yards for the next Epoch.",
   "timeout_ms": 60000,
   "players": [
     {
@@ -18,7 +18,7 @@
     {
       "id": "near",
       "owner": "chrono",
-      "entry": 3444,
+      "entry": 36,
       "level": 1,
       "health": 1000000,
       "distance": 14
@@ -26,7 +26,7 @@
     {
       "id": "far",
       "owner": "chrono",
-      "entry": 3444,
+      "entry": 36,
       "level": 1,
       "health": 1000000,
       "distance": 26
@@ -50,8 +50,9 @@
     },
     {
       "action": "assert",
+      "label": "Oblivion cannot crit despite the fixture's spell critical rating",
       "actor": "chrono",
-      "metric": "spell_crit_chance",
+      "metric": "spell_done_crit_chance",
       "spell": 583921,
       "target": "near",
       "equals": 0
@@ -61,12 +62,6 @@
       "actor": "chrono",
       "value": 500000,
       "maximum": 500000
-    },
-    {
-      "action": "set_power",
-      "actor": "chrono",
-      "value": 100000,
-      "power": 0
     },
     {
       "action": "snapshot",
@@ -151,12 +146,6 @@
       "actor": "chrono",
       "value": 500000,
       "maximum": 500000
-    },
-    {
-      "action": "set_power",
-      "actor": "chrono",
-      "value": 100000,
-      "power": 0
     },
     {
       "action": "snapshot",
@@ -251,12 +240,6 @@
       "actor": "chrono",
       "spell": 806293,
       "stacks": 0
-    },
-    {
-      "action": "set_power",
-      "actor": "chrono",
-      "value": 100000,
-      "power": 0
     },
     {
       "action": "cast",

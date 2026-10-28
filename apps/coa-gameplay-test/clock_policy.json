@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "exclusive": {
+    "bloodforged-high-risk-drop": "set_phase 1 affects live creatures outside the case's lane phase",
+    "coa-prestige-chromie-spawns": "set_phase 1 affects live creatures outside the case's lane phase",
+    "who-custom-classes": "The Who list is process-global and would list players of other running cases",
+    "who-hides-bots": "The Who list is process-global and would list players of other running cases",
+    "who-lists-bots": "The Who list is process-global and would list players of other running cases",
+    "wildcard-season-event": "Stops the process-global Wildcard season event whose spawns and board quests other cases use",
+    "native-fixture-descendant-cleanup-producer": "Requires private phase reuse to observe native teardown",
+    "native-fixture-descendant-cleanup-consumer": "Requires private phase reuse to observe native teardown",
+    "vanilla-dungeons-normal": "Uses phase 1 for real dungeon database spawns and boss loot",
+    "vanilla-dungeons-heroic": "Uses phase 1 for real dungeon database spawns and boss loot",
+    "vanilla-dungeons-mythic": "Uses phase 1 for real dungeon database spawns and boss loot",
+    "vanilla-dungeons-health": "Uses phase 1 to inspect real database creature health in dungeon instances",
+    "molten-core-lucifron-encounter": "Uses phase 1 for the real Molten Core spawn of Lucifron and its encounter state",
+    "void-portal-capture": "Uses phase 1 for the real marker spawns and drives the process-global one-portal manager whose capture announces to every session",
+    "mythic-plus-keystone-run": "Sets the process-global Mythic+ affix week (.mythic week) that other running cases read",
+    "mythic-plus-client-data-at-login": "Sets the process-global Mythic+ affix week (.mythic week) that other running cases read",
+    "test-zone-bonus-command": "Changes the process-global test zone table that every running case's experience reads",
+    "test-zone-bonus-westfall": "Changes the process-global test zone table that every running case's experience reads",
+    "path-to-ascension-arena-solo-queue-tutorial": "Joins the process-global rated solo queues that other running cases match from"
+  }
+}

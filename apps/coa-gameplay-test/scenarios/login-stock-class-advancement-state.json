@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Login gives stock classes the Character Advancement state and every character the realm's game mode",
+  "contract": "The client creates its Character Advancement player record and pending build only from SMSG 0x0725 (u32 active spec, u32 spec count); without it the Character Advancement window of a Hero or stock-class character aborts its setup and shows an empty page. The server sends 0x0725 and the known-entries list 0x0726 once the client sets its active mover (CMSG_SET_ACTIVE_MOVER) after entering the world. SMSG 0x090B (u32 mask) sets what GetCustomGameMode reports and resets on every glue screen, so every login must send it, also on a realm without custom game modes. Expected: a Warrior and a CoA-class control each receive one 0x090B at login, nothing from Character Advancement before the active mover, then one 0x0725 and one 0x0726.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "warrior", "race": 1, "class": 1, "level": 10 },
+    { "id": "guardian", "race": 1, "class": 18, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 1000 },
+    {
+      "action": "assert", "label": "The Warrior learns the realm's game mode at login", "actor": "warrior",
+      "metric": "server_packets", "opcode": 2315, "equals": 1
+    },
+    {
+      "action": "assert", "label": "So does the CoA-class control", "actor": "guardian",
+      "metric": "server_packets", "opcode": 2315, "equals": 1
+    },
+    {
+      "action": "assert", "label": "No Character Advancement state before the active mover", "actor": "warrior",
+      "metric": "server_packets", "opcode": 1829, "equals": 0
+    },
+    {
+      "action": "client_packet", "label": "The Warrior's client sets its active mover", "actor": "warrior",
+      "opcode": 618, "fields": [{ "actor_guid": "warrior" }], "early": false, "consumed": false
+    },
+    {
+      "action": "client_packet", "label": "The control's client sets its active mover", "actor": "guardian",
+      "opcode": 618, "fields": [{ "actor_guid": "guardian" }], "early": false, "consumed": false
+    },
+    {
+      "action": "assert", "label": "The Warrior receives the active specialization", "actor": "warrior",
+      "metric": "server_packets", "opcode": 1829, "equals": 1
+    },
+    {
+      "action": "assert", "label": "and its known-entries list", "actor": "warrior",
+      "metric": "server_packets", "opcode": 1830, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The control receives the active specialization", "actor": "guardian",
+      "metric": "server_packets", "opcode": 1829, "equals": 1
+    },
+    {
+      "action": "assert", "label": "and its known-entries list", "actor": "guardian",
+      "metric": "server_packets", "opcode": 1830, "equals": 1
+    }
+  ]
+}

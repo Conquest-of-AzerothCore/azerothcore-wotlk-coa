@@ -1,0 +1,169 @@
+{
+  "schema": 1,
+  "name": "Rotation assistance: target aura conditions accept another caster",
+  "contract": [
+    "The imported playerbots target-has-aura trigger calls HasAura with checkIsOwner=false.",
+    "A Starcaller in specialization 45 must recognize Scattered Stars 804378 from another caster and",
+    "prefer Lunar Lance 801132 over the generic fallback. Fire Blast rank 2 (2137, SpellLevel 14) precedes",
+    "Lunar Lance (SpellLevel 1) in the fallback, so it distinguishes the two selection paths.",
+    "A second Starcaller applies Scattered Stars as a fixture. This tests condition ownership, not shared",
+    "resource consumption, spell acquisition or an optimized Starcaller rotation. Higher-priority abilities",
+    "are unlearned as fixtures and the target is outside melee range. CoA.RotationAssist.Enable must be 1."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 26,
+      "level": 14,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000
+    },
+    {
+      "id": "other",
+      "race": 1,
+      "class": 26,
+      "level": 14,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "caster",
+      "entry": 36,
+      "level": 14,
+      "health": 100000,
+      "distance": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "specialization",
+      "actor": "caster",
+      "id": 45
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 531756
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 531757
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 680822
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 680847
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 805563
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 805508
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 806812
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 806813
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 806814
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 806815
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 806816
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 801132
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 2137
+    },
+    {
+      "action": "learn",
+      "actor": "other",
+      "spell": 804378
+    },
+    {
+      "action": "cast",
+      "actor": "other",
+      "spell": 804378,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 804378,
+      "caster": "other",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "client_packet",
+      "actor": "caster",
+      "opcode": 317,
+      "fields": [
+        {
+          "actor_guid": "target"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "command",
+      "actor": "caster",
+      "command": ".rotation"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_go_count",
+      "spell": 801132,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_go_count",
+      "spell": 2137,
+      "equals": 0
+    }
+  ]
+}

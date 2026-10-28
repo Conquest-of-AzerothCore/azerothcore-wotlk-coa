@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "name": "Ravenous Thirst reduces Ghastly Screech and Soul Strike costs (#2661)",
+  "contract": [
+    "Ravenous Thirst 705409 applies -100 internal power units, equal to ten Runic Power, to two Reaper spell families.",
+    "Ghastly Screech costs 200->100 and Soul Strike costs 400->300 internal units across early and top ranks.",
+    "An unrelated Reaper melee spell retains its cost."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 5,
+      "class": 30,
+      "level": 80
+    },
+    {
+      "id": "ravenous",
+      "race": 5,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "control",
+      "spell": 705409
+    },
+    {
+      "action": "learn",
+      "actor": "ravenous",
+      "spell": 705409
+    },
+    {
+      "action": "assert",
+      "actor": "ravenous",
+      "metric": "aura",
+      "spell": 705409,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "ravenous",
+      "metric": "aura_amount",
+      "spell": 705409,
+      "effect": 0,
+      "equals": -100
+    },
+    {
+      "action": "assert",
+      "label": "Control Ghastly Screech rank one cost",
+      "actor": "control",
+      "metric": "spell_power_cost",
+      "spell": 806146,
+      "equals": 200
+    },
+    {
+      "action": "assert",
+      "label": "Ravenous Thirst Ghastly Screech rank one cost",
+      "actor": "ravenous",
+      "metric": "spell_power_cost",
+      "spell": 806146,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Control Ghastly Screech top rank cost",
+      "actor": "control",
+      "metric": "spell_power_cost",
+      "spell": 807721,
+      "equals": 200
+    },
+    {
+      "action": "assert",
+      "label": "Ravenous Thirst Ghastly Screech top rank cost",
+      "actor": "ravenous",
+      "metric": "spell_power_cost",
+      "spell": 807721,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Control Soul Strike rank one cost",
+      "actor": "control",
+      "metric": "spell_power_cost",
+      "spell": 500517,
+      "equals": 400
+    },
+    {
+      "action": "assert",
+      "label": "Ravenous Thirst Soul Strike rank one cost",
+      "actor": "ravenous",
+      "metric": "spell_power_cost",
+      "spell": 500517,
+      "equals": 300
+    },
+    {
+      "action": "assert",
+      "label": "Control Soul Strike top rank cost",
+      "actor": "control",
+      "metric": "spell_power_cost",
+      "spell": 500646,
+      "equals": 400
+    },
+    {
+      "action": "assert",
+      "label": "Ravenous Thirst Soul Strike top rank cost",
+      "actor": "ravenous",
+      "metric": "spell_power_cost",
+      "spell": 500646,
+      "equals": 300
+    },
+    {
+      "action": "assert",
+      "label": "Wraithblade cost remains unchanged",
+      "actor": "ravenous",
+      "metric": "spell_power_cost",
+      "spell": 805258,
+      "equals": 400
+    }
+  ]
+}

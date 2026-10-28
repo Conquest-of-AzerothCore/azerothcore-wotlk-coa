@@ -1,0 +1,193 @@
+{
+  "schema": 1,
+  "name": "Harvesting Grounds pulls departing enemies and expires cleanly (#473)",
+  "contract": [
+    "The active tooltip promises a fifteen-second ground and pulls departing enemies to its center. A",
+    "same-map movement fixture places an affected enemy twenty yards away, outside the fifteen-yard",
+    "radius; native area-aura removal must pull it back, while an allied relocation stays outside. After",
+    "expiry the enemy must also remain outside. The invisible anchor entry 300662, name Harvesting",
+    "Grounds and display 11686 come from the Exiles NPC catalog. The parent cast, area-aura removal,",
+    "movement generator and expiry are native; client walking is not simulated."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "r",
+      "race": 1,
+      "class": 30,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "enemy",
+      "race": 2,
+      "class": 8,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 8,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "pvp",
+      "actor": "r",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 705413
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 705413,
+      "destination": {
+        "x": -9617.06,
+        "y": -288.949,
+        "z": 57.3053
+      }
+    },
+    {
+      "action": "assert",
+      "label": "Harvesting Grounds creates its native zone",
+      "actor": "r",
+      "metric": "dynamic_object",
+      "spell": 705413,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The enemy is inside Harvesting Grounds",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 705413,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy",
+      "map": 0,
+      "x": -9597.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "An enemy leaving the active ground returns to its center",
+      "actor": "enemy",
+      "metric": "distance",
+      "target": "r",
+      "max": 3
+    },
+    {
+      "action": "assert",
+      "label": "The supplied invisible ground anchor exists",
+      "actor": "r",
+      "metric": "owned_creature_count",
+      "entry": 300662,
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -9597.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "An ally can leave the ground",
+      "actor": "ally",
+      "metric": "distance",
+      "target": "r",
+      "min": 17
+    },
+    {
+      "action": "wait",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "The movement slow remains active after ten seconds",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 707591,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "The ground expires after fifteen seconds",
+      "actor": "r",
+      "metric": "dynamic_object",
+      "spell": 705413,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The anchor expires with the ground",
+      "actor": "r",
+      "metric": "owned_creature_count",
+      "entry": 300662,
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy",
+      "map": 0,
+      "x": -9597.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "An enemy can leave after expiry",
+      "actor": "enemy",
+      "metric": "distance",
+      "target": "r",
+      "min": 17
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+-- Coldridge Ritual Circle (9301152, guid 7912200) for Call of Death (200043, #8140): the spawn
+-- sat 0.12 yd below the feet of a player standing beside it (z 386.548 against 386.666 measured live
+-- at -6245.9, 484.0) and sank its flat ground rune (display 6679, plane 0.001 yd thick, geobox
+-- +/-10.4 yd) under the terrain, leaving only the crystal tip exposed. Right-clicks could not land,
+-- so the circle never credited 685121 nor opened its turn-in, while mouseover status queries still
+-- reached the server (DIALOG_STATUS_INCOMPLETE). The chain placements in
+-- rev_20260923_07_coa_class_trainers_coldridge.sql were hand-placed (INFERRED) while the trainer
+-- positions came from surface.floor, so the circle never got a floor measurement.
+-- Server map data now measured at the spawn itself (GridTerrainData path on 0004331.map,
+-- same interpolation as the core): ground is 386.5, smooth, no hole, no cliff - so the
+-- original z was only ~0.05 under, and the decisive 387.0 test still produced zero USE
+-- packets. Burial is ruled out; the 6679 mesh itself never hit-tests (corroborated by its
+-- no-collision sibling model). Settle z at measured ground +0.1 and keep the original
+-- 6679 art per request; making it clickable requires the client-side interact bypass
+-- (see issue), as no server data changes which mesh the client raycasts.
+UPDATE `gameobject` SET `position_z` = 386.6 WHERE `guid` = 7912200 AND `id` = 9301152;

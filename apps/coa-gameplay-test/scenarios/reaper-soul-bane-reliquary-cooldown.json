@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "name": "Reaper Soul Bane rank 2 reduces Reliquary of the Lost's cooldown (#2149)",
+  "contract": [
+    "Soul Bane rank 705392 reads 'Reduces the cooldown of Reliquary of the Lost by 5 sec.' (only this rank is obtainable; rank 800935 is absent from the calibrated capture, see coa-obtainable).",
+    "Spell.dbc gives 705392 a single effect: aura 107 (SPELL_AURA_ADD_FLAT_MODIFIER) with MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -5001 and DieSides 1, family 36, EffectSpellClassMask[0] = 32.",
+    "Reliquary of the Lost's cast-cooldown rank 500631 carries SpellFamilyName 36 and SpellFamilyFlags[0] = 32, an exact class-mask match, and RecoveryTime 20000.",
+    "SPELL_AURA_ADD_FLAT_MODIFIER is a native, generic SpellMod (AuraEffect::CalculateSpellMod); no CoA-specific code is required.",
+    "A Reaper who learns 705392 must show a SPELLMOD_COOLDOWN modifier of exactly -5001 on 500631, while an untalented Reaper shows none."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 2,
+      "class": 30,
+      "level": 80
+    },
+    {
+      "id": "talented",
+      "race": 2,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert",
+      "label": "Control has no Soul Bane cooldown modifier",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 500631,
+      "op": 11,
+      "base": 0,
+      "equals": 0
+    },
+    { "action": "learn", "actor": "talented", "spell": 705392 },
+    {
+      "action": "assert",
+      "label": "Soul Bane rank 2 is known",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 705392,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Reliquary of the Lost cooldown modifier is exactly -5000",
+      "actor": "talented",
+      "metric": "spell_modifier",
+      "spell": 500631,
+      "op": 11,
+      "base": 0,
+      "equals": -5000,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Control remains unmodified",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 500631,
+      "op": 11,
+      "base": 0,
+      "equals": 0
+    }
+  ]
+}

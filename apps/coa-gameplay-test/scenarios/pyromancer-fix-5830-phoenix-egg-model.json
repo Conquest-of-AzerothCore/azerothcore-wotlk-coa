@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "name": "Pyromancer: Phoenix Egg summons the Phoenix model, not the Sunwell Phoenix Egg prop (#5830)",
+  "contract": "Phoenix Egg 800796 (client Spell.dbc) reads 'Summon a Phoenix at the target location that heals nearby party members...'. Its EffectMiscValue[0] summons creature 50258 through Summon() in AscensionPyromancerSummons.cpp, whose npc_ascension_pyromancer_summon AI only calls SetDisplayId(17765) while diving (action 1) and SetDisplayId(20245) once dormant (action 2); IsSummonedBy never sets a display, so the creature keeps whatever creature_template_model default rev_20260909_11_pyromancer_completion.sql gave entry 50258. Display 20245 is the stationary 'Phoenix Egg' prop from the base-game Sunwell Plateau encounter (creature_template.sql entries 21364/24675, both literally named 'Phoenix Egg'); display 17765 is that encounter's living 'Phoenix' (entry 21362). Before the fix the migration gave 50258 the borrowed egg identity (name 'Phoenix Egg', display 20245), so every fresh summon defaults to looking like the inert prop instead of the Phoenix the tooltip promises. The heal tick (707110 while active) already fires every ~5 s regardless of the model, per the existing #1317 coverage.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 24,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000,
+      "label": "Let spawn AI and level scaling settle"
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800796
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "health",
+      "save_as": "ally_hp"
+    },
+    {
+      "action": "assert",
+      "label": "No Phoenix before the cast",
+      "actor": "caster",
+      "metric": "owned_creature_count",
+      "entry": 50258,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800796,
+      "destination": {
+        "x": -8915.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "assert",
+      "label": "One Phoenix is owned by the caster",
+      "actor": "caster",
+      "metric": "owned_creature_count",
+      "entry": 50258,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The template's default model is the Phoenix (17765), not the stationary Sunwell Phoenix Egg prop (20245)",
+      "actor": "caster",
+      "metric": "creature_model_display",
+      "entry": 50258,
+      "equals": 17765
+    },
+    {
+      "action": "assert",
+      "label": "The Phoenix heals the injured party member",
+      "actor": "ally",
+      "metric": "health",
+      "relative_to": "ally_hp",
+      "min": 1,
+      "within_ms": 20000
+    }
+  ]
+}

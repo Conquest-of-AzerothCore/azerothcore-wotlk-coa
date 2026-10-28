@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Lich's Prodigy makes Glacial Tap restore 50 Runic Power for 25% more mana (#1832)",
+  "contract": "Lich's Prodigy 302519 (CharacterAdvancement 33772, Animation tab, class 23) reads 'Your Glacial Tap now generates an additional $/10;s1 Runic Power, but its cost is increased by $s3%.' It is a SpellFamilyName 29 passive with three modifiers on class mask (0, 0x40000, 0), which selects Glacial Tap 805369 (family flags 0, 0x40000, 0): effect 0 SPELL_AURA_ADD_FLAT_MODIFIER (107) MiscValue 3 (SPELLMOD_EFFECT1), BasePoints 199 + DieSides 1 = 200 (20 Runic Power in tenths); effect 1 flat MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -1 + DieSides 1 = 0; effect 2 SPELL_AURA_ADD_PCT_MODIFIER (108) MiscValue 14 (SPELLMOD_COST), BasePoints 24 + DieSides 1 = +25%. (The hidden helper tooltip about a reduced cost and longer cooldown is stale; the visible description and the effects agree.) Glacial Tap's effect 0 is SPELL_EFFECT_ENERGIZE of Runic Power (MiscValue 6), BasePoints 299 + DieSides 1 = 300; its cost is ManaCostPercentage 40 of base mana; RecoveryTime 12000. These are native modifiers: SpellEffectInfo::CalcValue applies SPELLMOD_EFFECT1 to the energize amount and SpellInfo::CalcPowerCost applies SPELLMOD_COST, and the Necromancer contracts leave auras 107/108 alone. With the talent the energize is 500 (50 Runic Power), the mana cost is 1.25 times the untalented cost and the cooldown stays 12 s. The audit's premise (no source reference to 302519) does not apply to native aura types.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "learn", "actor": "necro", "spell": 805369 },
+    {
+      "action": "assert", "label": "CONTROL: Glacial Tap restores 300 without the talent", "actor": "necro",
+      "metric": "spell_effect_value", "spell": 805369, "effect": 0, "equals": 300
+    },
+    {
+      "action": "snapshot", "label": "Untalented mana cost", "actor": "necro",
+      "metric": "spell_power_cost", "spell": 805369, "save_as": "cost0"
+    },
+    {
+      "action": "assert", "label": "SETUP: Glacial Tap has a mana cost to scale", "actor": "necro",
+      "metric": "spell_power_cost", "spell": 805369, "min": 1
+    },
+    { "action": "learn", "actor": "necro", "spell": 302519 },
+    {
+      "action": "assert", "label": "SETUP: the Lich's Prodigy passive is active", "actor": "necro",
+      "metric": "aura", "spell": 302519, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The talent adds 200 (20 Runic Power) to the energize", "actor": "necro",
+      "metric": "spell_effect_value", "spell": 805369, "effect": 0, "equals": 500
+    },
+    {
+      "action": "assert", "label": "The talent raises the mana cost by 25%", "actor": "necro",
+      "metric": "spell_power_cost", "spell": 805369, "ratio_to": "cost0", "min": 1.24, "max": 1.26
+    },
+    { "action": "set_power", "actor": "necro", "power": 6, "value": 0 },
+    {
+      "action": "assert", "label": "SETUP: Runic Power is empty", "actor": "necro",
+      "metric": "power", "power": 6, "equals": 0
+    },
+    { "action": "cast", "actor": "necro", "spell": 805369 },
+    {
+      "action": "assert", "label": "Glacial Tap energizes 50 Runic Power with the talent", "actor": "necro",
+      "metric": "spell_energize_total", "spell": 805369, "power": 6, "equals": 500, "within_ms": 1500
+    },
+    {
+      "action": "assert", "label": "The Runic Power bar gains the 50", "actor": "necro",
+      "metric": "power", "power": 6, "min": 470, "max": 500
+    },
+    {
+      "action": "assert", "label": "The cooldown stays 12 s (the cooldown modifier is 0)", "actor": "necro",
+      "metric": "cooldown_ms", "spell": 805369, "min": 10000, "max": 12000
+    }
+  ]
+}

@@ -1,0 +1,319 @@
+{
+  "schema": 1,
+  "name": "Runemaster: Wind Palm Sigil with Primordial Blast (#6087)",
+  "contract": [
+    "Original 807013 and db.exil.es/spell/807013 trigger 807826 on the next direct Magic hit. The helper has self",
+    "targets, root and snare immunity masks, effect 2 speed 20%, and duration index 32 (six seconds).",
+    "A normal qualifying damage hit must apply the helper to the caster and consume one charge. Probe native root",
+    "and snare effect immunity, compare live movement speed, then verify both bonuses expire and a later hit",
+    "cannot trigger again.",
+    "Primordial Blast 800732 is a normal direct magic probe. Reset its 8-second cooldown and restore caster mana",
+    "before each separate hit to isolate the one-use Sigil behavior."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 800732
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 807013
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807826,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "label": "SETUP: enough mana for the repeated probe",
+      "actor": "rm",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "label": "SETUP: isolate the trigger from its 8-second cooldown",
+      "actor": "rm",
+      "spell": 800732
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807826,
+      "equals": 0,
+      "label": "Without a sigil there is no extra Wind buff"
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "run_speed_rate",
+      "save_as": "plain_speed"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_effect_immune",
+      "spell": 12494,
+      "effect": 0,
+      "target": "dummy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_effect_immune",
+      "spell": 808022,
+      "effect": 0,
+      "target": "dummy",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 500469,
+      "stacks": 1,
+      "label": "Fixture: the alternative Waveforged window"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 808089,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 807013
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 807013,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_power",
+      "label": "SETUP: enough mana for the repeated probe",
+      "actor": "rm",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "label": "SETUP: isolate the trigger from its 8-second cooldown",
+      "actor": "rm",
+      "spell": 800732
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807826,
+      "equals": 1,
+      "within_ms": 1500,
+      "label": "The next direct spell produces one Wind buff"
+    },
+    {
+      "action": "assert",
+      "label": "The next magic hit grants Wind immunity to its caster",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 807826,
+      "caster": "rm",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura_amount",
+      "spell": 807826,
+      "effect": 2,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "run_speed_rate",
+      "ratio_to": "plain_speed",
+      "min": 1.1999,
+      "max": 1.2001
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_effect_immune",
+      "spell": 12494,
+      "effect": 0,
+      "target": "dummy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_effect_immune",
+      "spell": 808022,
+      "effect": 0,
+      "target": "dummy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 807013,
+      "equals": 0,
+      "label": "The one-use sigil is consumed"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "label": "SETUP: enough mana for the repeated probe",
+      "actor": "rm",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "label": "SETUP: isolate the trigger from its 8-second cooldown",
+      "actor": "rm",
+      "spell": 800732
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807826,
+      "equals": 1,
+      "label": "The following direct spell cannot reuse the consumed sigil"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 807826,
+      "equals": 0,
+      "within_ms": 6500
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "run_speed_rate",
+      "ratio_to": "plain_speed",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_effect_immune",
+      "spell": 12494,
+      "effect": 0,
+      "target": "dummy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_effect_immune",
+      "spell": 808022,
+      "effect": 0,
+      "target": "dummy",
+      "equals": 0
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "rm",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  }
+}

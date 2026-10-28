@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "name": "Venomancer: the Fungarian wears Ascension's fungarian model",
+  "contract": "Fungal Assailant (504344) summons the Fungarian (45896). Every live client capture of its creature cache in AscensionDB (2026-06-29 to 2026-09-09) and the Exiles DB give display 49116 and creature type 4 (Elemental). Display 49116 is Creature\\fungarian\\fungarian.mdx with the fungarian_green texture at DBC scale 1.0 in both the server and client CreatureDisplayInfo.dbc; the previous template used 18227, the purple Outland Fungal Giant, at 0.5 as a Beast.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "v",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "fungarian",
+      "owner": "v",
+      "entry": 45896,
+      "health": 10000,
+      "distance": 5
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Fungarian uses the fungarian display",
+      "actor": "fungarian",
+      "metric": "display_id",
+      "equals": 49116
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Fungarian is not shrunk",
+      "actor": "fungarian",
+      "metric": "unit_scale",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Fungarian is an Elemental",
+      "actor": "fungarian",
+      "metric": "creature_type",
+      "equals": 4
+    }
+  ]
+}

@@ -16,7 +16,10 @@
  */
 
 #include "InstanceMapScript.h"
+#include "Group.h"
 #include "InstanceScript.h"
+#include "LFGMgr.h"
+#include "Player.h"
 #include "wailing_caverns.h"
 
 class instance_wailing_caverns : public InstanceMapScript
@@ -85,6 +88,8 @@ public:
                 case TYPE_LADY_ANACONDRA:
                 case TYPE_LORD_SERPENTIS:
                     return _encounters[type];
+                case TYPE_NARALEX_EVENT_BLOCKED:
+                    return IsInWingWithoutNaralexEvent() ? 1 : 0;
             }
             return 0;
         }
@@ -108,6 +113,30 @@ public:
         }
 
     private:
+        bool IsInWingWithoutNaralexEvent() const
+        {
+            for (MapReference const& ref : instance->GetPlayers())
+            {
+                Player* player = ref.GetSource();
+                if (!player)
+                    continue;
+
+                Group* group = player->GetGroup();
+                if (!group || !group->isLFGGroup())
+                    continue;
+
+                if (sLFGMgr->inLfgDungeonMap(group->GetGUID(), instance->GetId(), instance->GetDifficulty()))
+                    return IsWingWithoutNaralexEvent(sLFGMgr->GetDungeon(group->GetGUID()));
+            }
+            return false;
+        }
+
+        static bool IsWingWithoutNaralexEvent(uint32 dungeonId)
+        {
+            // LFGDungeons.dbc: Wailing Caverns wings that end before Mutanus (Winding Chasm, Crag of the Everliving).
+            return dungeonId == 1031 || dungeonId == 1035 || dungeonId == 3319;
+        }
+
         uint32 _encounters[MAX_ENCOUNTERS];
         ObjectGuid DiscipleOfNaralexGUID;
         ObjectGuid SerpentisGUID;

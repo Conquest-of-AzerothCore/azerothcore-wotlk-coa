@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "PvE Power raises damage dealt to and lowers damage taken from creatures",
+  "contract": "A chestpiece with PvE Power (+38) adds 38 x 0.05% = 1.9% to a level 60 player's damage against a creature and removes 1.9% from the damage that creature deals to the player, in the open world. Requires PvePower.Enable = 1 in coa.conf.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "k", "race": 1, "class": 1, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "e", "owner": "k", "entry": 36, "level": 60, "health": 500000, "distance": 15 }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "Without PvE Power the player deals the base damage", "actor": "k", "metric": "script_melee_damage_dealt", "target": "e", "equals": 1000 },
+    { "action": "assert", "label": "Without PvE Power the creature deals the base damage", "actor": "k", "metric": "script_melee_damage_taken", "target": "e", "equals": 1000 },
+    { "action": "add_item", "actor": "k", "item": 1273, "count": 1 },
+    { "action": "equip", "actor": "k", "item": 1273, "slot": 4 },
+    { "action": "assert", "label": "PvE Power +38 raises damage dealt to the creature by 1.9%", "actor": "k", "metric": "script_melee_damage_dealt", "target": "e", "equals": 1019 },
+    { "action": "assert", "label": "PvE Power +38 lowers damage taken from the creature by 1.9%", "actor": "k", "metric": "script_melee_damage_taken", "target": "e", "equals": 981 }
+  ]
+}

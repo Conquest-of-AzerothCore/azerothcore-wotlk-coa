@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "Infernal Pummeling makes Melt raise Flames of Xoroth/Skulltaker damage taken by 10% (#1387)",
+  "contract": "Infernal Pummeling 680900 reads 'Melt now increases the damage your target takes from Flames of Xoroth and Skulltaker by 10%' (bindmysoul.com/conquest/talents.normalized.json, fetchedAt 2026-07-22T23:10:31.369Z). The client's own moa_description agrees on the 10% value but Melt's (803334) own description string names 'Blade of Xoroth and Flames of Xoroth' instead of Skulltaker - stale text: Melt's own inert EFFECT_1 (native aura 271, SPELL_AURA_MOD_DAMAGE_FROM_CASTER) carries SpellClassMask (0,3,0), which is exactly Skulltaker's (800168, dword1 bit0) and Flames of Xoroth's (801059, dword1 bit1) combined family flags, not Blade of Xoroth's (dword1 bit31); bindmysoul's text is what the classmask actually implements. Infernal Pummeling's own baked effect is a stray SPELLMOD_EFFECT2 flat modifier scoped to Melt's own classmask instead of a damage-taken bonus; AscensionXorothContracts.cpp nulls it and reads its 10 value directly via Amount(680900), applied to Melt's EFFECT_1 base value only while the caster has aura 680900 (ModifySpellEffectBaseValue, id == 803334, index == 1). Unit::CalculateSpellDamageTaken already folds SPELL_AURA_MOD_DAMAGE_FROM_CASTER in natively, matched by caster GUID and SpellClassMask. Flames of Xoroth 801059 is a DmgClass 1 Fire spell, so a random critical strike on only one of the two real hits decided the ratio (one run's baseline hit was a 136 crit against 91-93 normal hits, giving 0.75). The knight gets spell crit rating 10000, so both real hits crit and the shared crit multiplier cancels; the 14-15 base damage roll still needs the 1.03-1.18 window. The 10% is also measured exactly on the native path: spell_damage_taken runs the dummy's Unit::SpellDamageBonusTaken for Flames of Xoroth from the knight under the unenhanced and the enhanced Melt, with the same other auras present, and must give 1.10.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "knight",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "knight", "spell": 801059 },
+    { "action": "learn", "actor": "knight", "spell": 803334 },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 1, "label": "Melt and Flames of Xoroth are Spender abilities (AscensionXoroth::Spender); grant Demonfire so xoroth_casts::OnSpellCheckCast does not block the cast" },
+    { "action": "cast", "actor": "knight", "spell": 803334, "target": "dummy", "label": "Melt, without Infernal Pummeling" },
+    { "action": "wait", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: Melt's debuff is on the target",
+      "actor": "dummy", "metric": "aura", "spell": 803334, "equals": 1
+    },
+    { "action": "wait", "label": "Clear the global cooldown before the next cast", "ms": 1700 },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 1, "label": "Demonfire was consumed by the Melt cast; grant it again for Flames of Xoroth" },
+    { "action": "cast", "actor": "knight", "spell": 801059, "target": "dummy", "label": "Flames of Xoroth, Melt debuff has no bonus yet" },
+    { "action": "wait", "ms": 500 },
+    {
+      "action": "snapshot", "label": "Flames of Xoroth's damage with an unenhanced Melt debuff",
+      "actor": "knight", "metric": "spell_damage_total", "spell": 801059, "target": "dummy", "save_as": "total_before"
+    },
+    {
+      "action": "assert", "label": "SETUP: the baseline cast actually hit the target",
+      "actor": "knight", "metric": "spell_damage_total", "spell": 801059, "target": "dummy", "min": 1
+    },
+    {
+      "action": "snapshot", "label": "Flames of Xoroth damage taken multiplier under the unenhanced Melt debuff",
+      "actor": "dummy", "metric": "spell_damage_taken", "spell": 801059, "target": "knight", "save_as": "taken_before"
+    },
+    { "action": "learn", "actor": "knight", "spell": 680900 },
+    { "action": "set_aura", "actor": "knight", "spell": 680900, "stacks": 1, "label": "Force the Infernal Pummeling passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Infernal Pummeling passive is active",
+      "actor": "knight", "metric": "aura", "spell": 680900, "equals": 1
+    },
+    { "action": "wait", "label": "Clear the global cooldown from the first Flames of Xoroth cast", "ms": 1700 },
+    { "action": "reset_cooldown", "actor": "knight", "spell": 803334 },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 1, "label": "Grant Demonfire again for the enhanced Melt cast" },
+    { "action": "cast", "actor": "knight", "spell": 803334, "target": "dummy", "label": "Melt again, now enhanced by Infernal Pummeling" },
+    {
+      "action": "assert", "label": "SETUP: Melt's re-applied debuff is on the target",
+      "actor": "dummy", "metric": "aura", "spell": 803334, "equals": 1, "within_ms": 3000
+    },
+    { "action": "wait", "ms": 500 },
+    { "action": "wait", "label": "Clear the global cooldown before the next cast", "ms": 1700 },
+    {
+      "action": "assert", "label": "CONTRACT: the enhanced Melt raises the damage Flames of Xoroth deals to the target by 10%",
+      "actor": "dummy", "metric": "spell_damage_taken", "spell": 801059, "target": "knight",
+      "ratio_to": "taken_before", "min": 1.095, "max": 1.105
+    },
+    { "action": "reset_cooldown", "actor": "knight", "spell": 801059 },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 1, "label": "Grant Demonfire again for the enhanced Flames of Xoroth cast" },
+    { "action": "cast", "actor": "knight", "spell": 801059, "target": "dummy", "label": "Flames of Xoroth, with the enhanced Melt debuff" },
+    { "action": "wait", "ms": 500 },
+    {
+      "action": "assert", "label": "CONTRACT: the second hit deals ~10% more damage than the first",
+      "actor": "knight", "metric": "spell_damage_total", "spell": 801059, "target": "dummy",
+      "relative_to": "total_before", "ratio_to": "total_before", "min": 1.03, "max": 1.18
+    }
+  ]
+}

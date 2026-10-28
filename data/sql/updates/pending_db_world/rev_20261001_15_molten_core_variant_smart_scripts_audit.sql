@@ -1,0 +1,14 @@
+-- Audit follow-up to rev_20261001_14 (Ancient Core Hound fear): the same dead-row pattern -- a
+-- smart_scripts row keyed to a difficulty_entry_1..3 variant entry, which Creature::UpdateEntry never
+-- assigns to GetEntry() on a real spawn (Creature.cpp `SetEntry(Entry); // normal entry always`) -- was
+-- grepped across every pending Molten Core SQL file. One more instance: Reflection of Shazzrah
+-- (11504/111504/211504/311504, rev_20261001_05_molten_core_shazzrah_reflection.sql), a summon created
+-- by boss_shazzrah_coa.cpp's Blink with the base entry, which goes through the same Create()/
+-- UpdateEntry() path, so its summon likewise keeps GetEntry() == 11504 on every difficulty. The
+-- 111504/211504/311504 rows are byte-for-byte copies of the base entry's own "cast Mirrored Arcane
+-- Explosion on summon" row, already unconditional (event_flags = 0, applies on every difficulty) --
+-- pure dead duplicates, not a behaviour difference, so they are only deleted; nothing needs to move to
+-- the base entry. No other MC pending file keys smart_scripts on a variant entry. coa_boss_schedule,
+-- coa_boss_flex and the coa_boss_ai-scripted bosses were also checked and are all keyed on base
+-- entries already; no creature_formations rows exist for any MC creature in this branch.
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (111504, 211504, 311504) AND `source_type` = 0;

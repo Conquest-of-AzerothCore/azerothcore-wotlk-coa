@@ -230,7 +230,7 @@ void OpcodeTable::Initialize()
     /*0x063*/ DEFINE_SERVER_OPCODE_HANDLER(SMSG_WHO,                                                STATUS_NEVER);
     /*0x064*/ DEFINE_HANDLER(CMSG_WHOIS,                                                            STATUS_LOGGEDIN,   PROCESS_THREADUNSAFE,   &WorldSession::HandleWhoisOpcode                        );
     /*0x065*/ DEFINE_SERVER_OPCODE_HANDLER(SMSG_WHOIS,                                              STATUS_NEVER);
-    /*0x066*/ DEFINE_HANDLER(CMSG_CONTACT_LIST,                                                     STATUS_LOGGEDIN,   PROCESS_THREADSAFE,     &WorldSession::HandleContactListOpcode                  );
+    /*0x066*/ DEFINE_HANDLER(CMSG_CONTACT_LIST,                                                     STATUS_LOGGEDIN,   PROCESS_THREADUNSAFE,   &WorldSession::HandleContactListOpcode                  );
     /*0x067*/ DEFINE_SERVER_OPCODE_HANDLER(SMSG_CONTACT_LIST,                                       STATUS_NEVER);
     /*0x068*/ DEFINE_SERVER_OPCODE_HANDLER(SMSG_FRIEND_STATUS,                                      STATUS_NEVER);
     /*0x069*/ DEFINE_HANDLER(CMSG_ADD_FRIEND,                                                       STATUS_LOGGEDIN,   PROCESS_THREADUNSAFE,   &WorldSession::HandleAddFriendOpcode                    );
@@ -1460,21 +1460,27 @@ void OpcodeTable::Initialize()
     /*0x5C9*/ DEFINE_HANDLER(CMSG_COA_QUERY_TRIAL_COMPLETIONS,                                       STATUS_LOGGEDIN,   PROCESS_INPLACE,        &WorldSession::Handle_NULL                              );
     /*0x5A4*/ DEFINE_HANDLER(CMSG_COA_TOGGLE_GAME_MODE,                                              STATUS_LOGGEDIN,   PROCESS_INPLACE,        &WorldSession::Handle_NULL                              );
     /*0x61F*/ DEFINE_HANDLER(CMSG_RESET_DUNGEONS,                                                   STATUS_LOGGEDIN,   PROCESS_THREADUNSAFE,   &WorldSession::HandleResetDungeonsOpcode                );
+    /*0x544*/ DEFINE_HANDLER(CMSG_PORT_GRAVEYARD,                                                   STATUS_LOGGEDIN,   PROCESS_THREADUNSAFE,   &WorldSession::HandlePortGraveyardOpcode                );
+    /*0x5F2*/ DEFINE_HANDLER(CMSG_TAXI_REQUEST_EARLY_LANDING,                                       STATUS_LOGGEDIN,   PROCESS_THREADUNSAFE,   &WorldSession::HandleTaxiRequestEarlyLandingOpcode      );
+    /*0x67C*/ DEFINE_HANDLER(CMSG_STABLE_DELETE_PET,                                                STATUS_LOGGEDIN,   PROCESS_THREADUNSAFE,   &WorldSession::HandleStableDeletePet                    );
+    /*0x6FD*/ DEFINE_HANDLER(CMSG_QUERY_INSTANCE_BINDS,                                             STATUS_LOGGEDIN,   PROCESS_THREADUNSAFE,   &WorldSession::HandleQueryInstanceBindsOpcode           );
+    /*0x6FE*/ DEFINE_SERVER_OPCODE_HANDLER(SMSG_QUERY_INSTANCE_BINDS_RESULT,                        STATUS_NEVER);
+    /*0x58C*/ DEFINE_HANDLER(CMSG_RESET_INSTANCE,                                                   STATUS_LOGGEDIN,   PROCESS_THREADUNSAFE,   &WorldSession::HandleResetInstanceOpcode                );
 
     // Default every other extension slot to a safe NULL handler so an
     // unregistered custom opcode can never null-dereference opcodeTable[].
     for (uint32 i = 0x521; i < NUM_OPCODE_HANDLERS; ++i)
     {
-        if (i == CMSG_COA_START_CHALLENGE || i == CMSG_COA_STOP_CHALLENGE
-            || i == CMSG_COA_QUERY_FAILURES || i == CMSG_COA_QUERY_COMPLETIONS
-            || i == CMSG_COA_SYNC_RESPONSE || i == CMSG_COA_SAVE_TRIAL
-            || i == CMSG_COA_DELETE_TRIAL || i == CMSG_COA_QUERY_TRIALS
-            || i == CMSG_COA_ACTIVATE_TRIAL || i == CMSG_COA_DEACTIVATE_TRIAL
-            || i == CMSG_COA_QUERY_TRIAL_COMPLETIONS
-            || i == CMSG_COA_TOGGLE_GAME_MODE || i == CMSG_RESET_DUNGEONS)
+        if (_internalTableClient[i])
             continue;
+        // Native Manastorm gameplay runs on the world thread after login.
+        // The compatibility early hook can still route these to the donor when
+        // the SQL-backed module is disabled.
+        bool const manastorm = i == 0x651 || i == 0x665 || i == 0x689;
         ValidateAndSetClientOpcode<decltype(&WorldSession::Handle_NULL), &WorldSession::Handle_NULL>(
-            static_cast<OpcodeClient>(i), "UNKNOWN_EXTENSION_OPCODE", STATUS_NEVER, PROCESS_INPLACE);
+            static_cast<OpcodeClient>(i), manastorm ? "CMSG_MANASTORM" : "UNKNOWN_EXTENSION_OPCODE",
+            manastorm ? STATUS_LOGGEDIN : STATUS_NEVER,
+            manastorm ? PROCESS_THREADUNSAFE : PROCESS_INPLACE);
     }
 
 #undef DEFINE_HANDLER

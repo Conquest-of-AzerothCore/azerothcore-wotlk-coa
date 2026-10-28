@@ -1,0 +1,159 @@
+{
+  "schema": 1,
+  "name": "Red Wake grants a Soul Fragment after a direct critical hit (#839)",
+  "contract": "Red Wake 707707 procs Soul Fragment 805077 after a direct critical hit.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 5,
+      "class": 30,
+      "level": 80,
+      "spell_crit_rating": 100000,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "wake",
+      "race": 5,
+      "class": 30,
+      "level": 80,
+      "spell_crit_rating": 100000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "control_target",
+      "owner": "control",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "wake_target",
+      "owner": "wake",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "control",
+      "spell": 707707
+    },
+    {
+      "action": "unlearn",
+      "actor": "wake",
+      "spell": 707707
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 116
+    },
+    {
+      "action": "learn",
+      "actor": "wake",
+      "spell": 116
+    },
+    {
+      "action": "learn",
+      "actor": "wake",
+      "spell": 707707
+    },
+    {
+      "action": "assert",
+      "label": "Red Wake aura is active",
+      "actor": "wake",
+      "metric": "aura",
+      "spell": 707707,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "No Soul Fragment before the test hit",
+      "actor": "wake",
+      "metric": "aura",
+      "spell": 805077,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Control direct damage critical hit",
+      "actor": "control",
+      "spell": 116,
+      "target": "control_target"
+    },
+    {
+      "action": "assert",
+      "label": "Control hit critically",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 116,
+      "target": "control_target",
+      "critical": true,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "No Red Wake proc without the talent",
+      "actor": "control",
+      "metric": "spell_proc_count",
+      "spell": 707707,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Talented direct damage critical hit",
+      "actor": "wake",
+      "spell": 116,
+      "target": "wake_target"
+    },
+    {
+      "action": "assert",
+      "label": "Talented hit critically",
+      "actor": "wake",
+      "metric": "spell_damage_count",
+      "spell": 116,
+      "target": "wake_target",
+      "critical": true,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Red Wake procced on the direct critical hit",
+      "actor": "wake",
+      "metric": "spell_proc_count",
+      "spell": 707707,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Red Wake generated a Soul Fragment",
+      "actor": "wake",
+      "metric": "aura_stacks",
+      "spell": 805077,
+      "min": 1,
+      "within_ms": 5000
+    }
+  ]
+}

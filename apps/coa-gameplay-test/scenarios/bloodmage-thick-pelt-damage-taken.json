@@ -1,8 +1,15 @@
 {
   "schema": 1,
-  "name": "Thick Pelt no longer arms from the Bloodmage's own swings (#2325)",
-  "contract": "Thick Pelt 704626 reads 'Physical damage taken now reduces the Physical damage taken from the next attack within $556233d by ${($556233m1+$AP*0.2)}'. Its single effect is aura 42 (proc trigger spell) on Thick Pelt 556233 (MOD_DAMAGE_TAKEN, MiscValue 1 = physical, BasePoints -16 -> -15, ProcCharges 1, TargetA 1). Unlike the rest of this batch, Spell.dbc does give 704626 a proc flag - and it is the wrong one: ProcFlags 0x4 is PROC_FLAG_DONE_MELEE_AUTO_ATTACK, so the generated entry armed the buff on the Bloodmage's own outgoing swings. 556233 itself carries ProcFlags 0x2a8, the TAKEN melee/ranged set that matches the tooltip. This scenario proves the negative half only: after the fix the Bloodmage's own auto attacks must no longer arm 556233. NOT PROVABLE HERE - the positive half. CoAGameplayTest.cpp forces every fixture creature to REACT_PASSIVE at creation and again after CombatStop, and CreatureAI::UpdateVictim takes the passive branch for a creature in combat and calls me->AttackStop() (src/server/game/AI/CreatureAI.cpp:372-379); CreatureAI::AttackedBy is an empty stub (src/server/game/AI/CreatureAI.h:180, the real body is commented out at CreatureAI.cpp:317). A fixture creature therefore never swings back, whatever its faction, so no TAKEN-proc contract can be observed in this harness. A Ghost e2e test would have to: put a class-20 character with Thick Pelt 704626 in melee range of an ordinary world mob (not a harness fixture), let the mob land at least one physical auto attack on the character, and check that aura 556233 is on the character within its duration. NOTE: even with the proc condition corrected, #2325 is not settled - the tooltip's $AP*0.2 term is delivered by nothing (556233 has BasePoints -16 with EffectRealPointsPerLevel 0, no spell_bonus_data row, and its own text states $AP*0.25), and the amount is not asserted here.",
+  "name": "Thick Pelt scales its damage reduction with melee AP and ignores the Bloodmage's own swings (#2325, #4709)",
+  "contract": "Thick Pelt's active 704626 tooltip uses $556233m1 + 20% of melee AP. At AP 95, that reports reduction 4. Helper 556233 has a physical MOD_DAMAGE_TAKEN base amount of -15 (BasePoints -16 plus DieSides 1), so the server amount is the negative of that displayed reduction: 15 - 20% of the applying Bloodmage's BASE_ATTACK power, clamped at zero. The reported tooltip value and required negative damage-taken sign support that formula; the helper's own 25% tooltip conflicts. Spell.dbc gives 704626 ProcFlags 0x4 (PROC_FLAG_DONE_MELEE_AUTO_ATTACK), so the spell_proc override sets it to 680 (taken physical melee/ranged events). This scenario checks that a level-1 Bloodmage at 21 AP gets amount zero and a level-80 Bloodmage with at least 80 AP gets a negative reduction amount. The manifest-matched original DBC has no cooldown; a fan-maintained Build Hub snapshot adds a conflicting 5-second clause, so this change follows the shipped DBC. The aura amount is snapshotted when 556233 applies. The harness fixture creature is passive and cannot attack back, so the incoming proc itself is tested using a hostile player actor.",
   "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
   "players": [
     {
       "id": "bloodmage",
@@ -10,6 +17,20 @@
       "class": 20,
       "level": 80,
       "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "low_ap_bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 1
+    },
+    {
+      "id": "attacker",
+      "race": 2,
+      "class": 1,
+      "level": 80,
       "melee_hit_rating": 10000,
       "expertise_rating": 10000
     }
@@ -29,6 +50,56 @@
       "action": "wait",
       "label": "Let spawn AI and level scaling settle",
       "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the level-1 Bloodmage has less than 75 melee AP",
+      "actor": "low_ap_bloodmage",
+      "metric": "attack_power",
+      "max": 74
+    },
+    {
+      "action": "set_aura",
+      "actor": "low_ap_bloodmage",
+      "spell": 556233,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Thick Pelt does not increase damage taken below 75 AP",
+      "actor": "low_ap_bloodmage",
+      "metric": "aura_amount",
+      "spell": 556233,
+      "effect": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the level-80 Bloodmage has at least 80 melee AP",
+      "actor": "bloodmage",
+      "metric": "attack_power",
+      "equals": 309
+    },
+    {
+      "action": "set_aura",
+      "actor": "bloodmage",
+      "spell": 556233,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Thick Pelt scales to a negative amount at higher AP",
+      "actor": "bloodmage",
+      "metric": "aura_amount",
+      "spell": 556233,
+      "effect": 0,
+      "equals": -46
+    },
+    {
+      "action": "set_aura",
+      "actor": "bloodmage",
+      "spell": 556233,
+      "stacks": 0
     },
     {
       "action": "learn",
@@ -73,6 +144,52 @@
       "metric": "aura",
       "spell": 556233,
       "equals": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "bloodmage",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "attacker",
+      "enabled": true
+    },
+    {
+      "action": "attack",
+      "label": "A hostile player starts incoming melee attacks against the Bloodmage",
+      "actor": "attacker",
+      "target": "bloodmage"
+    },
+    {
+      "action": "wait",
+      "label": "Allow one incoming hit and another inside the cooldown window",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Thick Pelt procs on an incoming physical melee hit",
+      "actor": "bloodmage",
+      "metric": "spell_proc_count",
+      "spell": 704626,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The incoming proc applies the scaled one-hit helper aura",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 556233,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The proc helper keeps the Bloodmage's AP-scaled amount",
+      "actor": "bloodmage",
+      "metric": "aura_amount",
+      "spell": 556233,
+      "effect": 0,
+      "equals": -46
     }
   ]
 }

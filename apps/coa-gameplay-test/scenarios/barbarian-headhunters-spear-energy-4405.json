@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "name": "Headhunter's Spear restores 30% of maximum Energy on a hit (#4405)",
+  "contract": "Headhunter's Spear rank 5 (503405, the rank named in the report) reads \"restores $706816s2% of your maximum Energy\"; Collecting Heads (706816) effect 1 is SPELL_EFFECT_ENERGIZE_PCT with BasePoints 29 (30%) on the caster. With a thrown weapon equipped and an empty Energy bar, one spear that damages an enemy must energize the Barbarian through 706816 by 30 of 100 Energy.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "barbarian",
+      "race": 1,
+      "class": 12,
+      "level": 50,
+      "ranged_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "barbarian",
+      "entry": 36,
+      "level": 50,
+      "health": 500000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "barbarian",
+      "item": 585
+    },
+    {
+      "action": "equip",
+      "actor": "barbarian",
+      "item": 585,
+      "slot": 17
+    },
+    {
+      "action": "learn",
+      "actor": "barbarian",
+      "spell": 503405
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "health",
+      "save_as": "before"
+    },
+    {
+      "action": "cast",
+      "actor": "barbarian",
+      "spell": 503405,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "The spear damages the enemy",
+      "actor": "enemy",
+      "metric": "health",
+      "relative_to": "before",
+      "max": -1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Collecting Heads restores 30% of maximum Energy",
+      "actor": "barbarian",
+      "metric": "spell_energize_total",
+      "spell": 706816,
+      "power": 3,
+      "equals": 30,
+      "within_ms": 1000
+    }
+  ]
+}

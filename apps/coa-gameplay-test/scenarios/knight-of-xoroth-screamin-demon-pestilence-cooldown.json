@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Screamin' Demon cuts Unleash Pestilence's cooldown by 15 sec (#942)",
+  "contract": "Screamin' Demon 804947 reads 'Reduces the cooldown of Unleash Pestilence by -15 sec' (bindmysoul.com/conquest/talents.normalized.json, fetchedAt 2026-07-22T23:10:31.369Z). AscensionStockCoefficientData.h:130 already references 804947 for coefficient bookkeeping only; no effect existed before this fix. Effect 0 is aura 107 (SPELL_AURA_ADD_FLAT_MODIFIER), MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -15000 (ms), DieSides 0, classmask (0,65536,0) matching Unleash Pestilence's (801002) own family flags. Player::GetSpellRecoveryTime applies SPELLMOD_COOLDOWN to both the spell's own recovery and its category recovery at the moment of cast, so the reduction shows up on the cooldown set by the very next cast.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "knight", "spell": 801002 },
+    { "action": "cast", "actor": "knight", "spell": 801002 },
+    { "action": "wait", "ms": 500 },
+    {
+      "action": "snapshot", "label": "Unleash Pestilence's cooldown before the talent",
+      "actor": "knight", "metric": "cooldown_ms", "spell": 801002, "save_as": "cd_before"
+    },
+    {
+      "action": "assert", "label": "SETUP: Unleash Pestilence has a nonzero cooldown",
+      "actor": "knight", "metric": "cooldown_ms", "spell": 801002, "min": 1
+    },
+    { "action": "reset_cooldown", "actor": "knight", "spell": 801002 },
+    { "action": "learn", "actor": "knight", "spell": 804947 },
+    { "action": "set_aura", "actor": "knight", "spell": 804947, "stacks": 1, "label": "Force the Screamin' Demon passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Screamin' Demon passive is active",
+      "actor": "knight", "metric": "aura", "spell": 804947, "equals": 1
+    },
+    { "action": "cast", "actor": "knight", "spell": 801002 },
+    {
+      "action": "assert", "label": "CONTRACT: the new cooldown is at least 14 sec shorter",
+      "actor": "knight", "metric": "cooldown_ms", "spell": 801002,
+      "relative_to": "cd_before", "max": -14000, "within_ms": 2000
+    }
+  ]
+}

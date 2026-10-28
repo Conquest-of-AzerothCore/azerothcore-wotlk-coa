@@ -1,0 +1,276 @@
+{
+  "schema": 1,
+  "name": "Runemaster: Frost Palm Sigil with Primordial Blast (#6087)",
+  "contract": [
+    "Original 805381 explicitly applies 30% of the next direct Magic hit as Frost and the 808022 slow. Its helper",
+    "807825 already triggers that slow.",
+    "Normal casts must produce one copied hit, one slow, consume the base one-use sigil, and leave the following",
+    "direct spell unempowered.",
+    "Primordial Blast 800732 is a normal direct magic probe. Reset its 8-second cooldown and restore caster mana",
+    "before each separate hit to isolate the one-use Sigil behavior.",
+    "The 30 percent payload floors its magnitude to whole points. A triggering hit of at least 100 limits",
+    "the ratio error to less than 0.01; the percentage assertion includes only that integer-rounding interval."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 800732
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 805381
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 807825,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "label": "SETUP: enough mana for the repeated probe",
+      "actor": "rm",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "label": "SETUP: isolate the trigger from its 8-second cooldown",
+      "actor": "rm",
+      "spell": 800732
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 807825,
+      "equals": 0,
+      "label": "Without a sigil there is no extra Frost hit"
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 500469,
+      "stacks": 1,
+      "label": "Fixture: the alternative Waveforged window"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 808089,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 805381
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 805381,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura_amount",
+      "spell": 805381,
+      "effect": 0,
+      "equals": 30
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 800732,
+      "target": "dummy",
+      "save_as": "before_hit"
+    },
+    {
+      "action": "set_power",
+      "label": "SETUP: enough mana for the repeated probe",
+      "actor": "rm",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "label": "SETUP: isolate the trigger from its 8-second cooldown",
+      "actor": "rm",
+      "spell": 800732
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 807825,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 1500,
+      "label": "The next direct spell produces one Frost hit"
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 800732,
+      "target": "dummy",
+      "relative_to": "before_hit",
+      "save_as": "trigger_hit"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 800732,
+      "target": "dummy",
+      "relative_to": "before_hit",
+      "min": 100,
+      "label": "The probe hit bounds whole-point rounding error to at most 1 percent"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 807825,
+      "target": "dummy",
+      "ratio_to": "trigger_hit",
+      "min": 0.29,
+      "max": 0.3001,
+      "label": "The Frost hit copies 30% of the actual triggering damage"
+    },
+    {
+      "action": "assert",
+      "label": "The copied Frost hit applies its authored slow",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 808022,
+      "caster": "rm",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 805381,
+      "equals": 0,
+      "label": "The one-use sigil is consumed"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "label": "SETUP: enough mana for the repeated probe",
+      "actor": "rm",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "label": "SETUP: isolate the trigger from its 8-second cooldown",
+      "actor": "rm",
+      "spell": 800732
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 807825,
+      "equals": 1,
+      "label": "The following direct spell cannot reuse the consumed sigil"
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "rm",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  }
+}

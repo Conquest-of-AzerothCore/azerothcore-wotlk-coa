@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Cursed Field already suppresses melee crit chance, not just spell crit (#4109)",
+  "contract": "#4109 reports that enemies under Cursed Effigy's Cursed Field (506820, EffectApplyAuraName[0]=290 SPELL_AURA_MOD_CRIT_PCT, EffectBasePoints -101 + DieSides 1 = -100) still land crits, reproduced with a guaranteed-crit melee test ('/sit'). Re-investigation of the full crit path, not just AuraEffect::HandleAuraModCritPct's own explicit side effect, shows the debuff already works for melee: RollMeleeOutcomeAgainst (Unit.cpp) computes crit_chance via GetUnitCriticalChance(attackType, victim), whose non-player branch does 'crit = 5.0f; crit += GetTotalAuraModifier(SPELL_AURA_MOD_WEAPON_CRIT_PERCENT); crit += GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT);' -- a direct, unconditional sum of every active MOD_CRIT_PCT effect on the attacker, independent of what HandleAuraModCritPct's handler function does as a side effect (that handler's own m_baseSpellCritChance write only feeds spell crit; GetUnitCriticalChance's own separate aggregation is what melee reads, and it is comprehensive). For a player attacker the same aura type is folded into PLAYER_CRIT_PERCENTAGE by Player::UpdateWeaponDependentCritAuras, called from HandleAuraModCritPct's player branch, covering BASE_ATTACK/OFF_ATTACK/RANGED_ATTACK alike. GetUnitCriticalChance clamps its return to >= 0 (Unit.cpp: 'if (crit < 0.0f) crit = 0.0f;'), so an active -100 Cursed Field reliably drives melee crit chance to its floor. The report's specific reproduction is invalidated by an unrelated, deliberate core mechanic: Unit::CalculateMeleeDamage takes a pre-computed sittingVictim flag from AttackerStateUpdate ('CombatStart puts the target into stand state, so we need to cache sit state here') and, after the normal RollMeleeOutcomeAgainst roll, does 'If the victim was a sitting player and we didn't roll a miss, then crit' -- an unconditional override to MELEE_HIT_CRIT for any non-miss hit against a sitting/sleeping player, independent of crit_chance or any crit-suppressing aura on the attacker. Testing via /sit therefore always shows crits regardless of Cursed Field, which explains the report without any defect in Cursed Field's own aura effect. This is an ALREADY_WORKS regression guard on the aura effect itself: it cannot exercise a live creature attacker through this harness (melee_crit_chance only reads a declared player actor's own PLAYER_CRIT_PERCENTAGE, and a dynamic summon or fixture creature cannot be addressed by that metric), so it applies Cursed Field to the Witch Doctor's own character directly (set_aura, bypassing the already-proven-working Cursed Effigy application logic in AscensionWitchDoctorSummons.cpp) and reads the resulting PLAYER_CRIT_PERCENTAGE change -- the same field and the same HandleAuraModCritPct/UpdateWeaponDependentCritAuras path a debuffed enemy player would use, and the shared, class-agnostic GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT) sum a debuffed enemy creature's own melee roll reads directly in GetUnitCriticalChance. A prior revision asserted a relative drop of at least 90 points from the pre-debuff baseline; Player::UpdateCritPercentage (StatSystem.cpp) clamps the stored PLAYER_CRIT_PERCENTAGE to a floor of 0 ('value = value < 0.0f ? 0.0f : value;') before every recompute, so a level-80 fixture's un-buffed baseline melee crit chance can never produce a 90-point drop even though the debuff correctly floors it to exactly 0 - the fix was already correct, only the assertion's expected magnitude was unreachable. A native run then showed the un-buffed baseline itself is exactly 0 (this class's base agility/weapon-skill contribution nets to 0 for a fresh level-80 fixture with no gear), so a floor-based assertion could not discriminate either: with no crit rating, 'before' and 'after' are both 0 whether or not the aura does anything. This revision fixtures melee_crit_rating: 500 to give a genuine positive baseline, then asserts the post-debuff value hits the floor (<=0.01), rather than an unreachable large delta.",
+  "timeout_ms": 30000,
+  "players": [
+    {
+      "id": "witchdoctor",
+      "race": 1,
+      "class": 13,
+      "level": 80,
+      "melee_crit_rating": 500
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "witchdoctor",
+      "metric": "melee_crit_chance",
+      "save_as": "crit0"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: baseline melee crit chance is above zero, so a drop to the aura's floor is observable",
+      "actor": "witchdoctor",
+      "metric": "melee_crit_chance",
+      "min": 0.01
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Cursed Field before applying it",
+      "actor": "witchdoctor",
+      "metric": "aura",
+      "spell": 506820,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "witchdoctor",
+      "spell": 506820,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Cursed Field is applied",
+      "actor": "witchdoctor",
+      "metric": "aura",
+      "spell": 506820,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: melee crit chance is floored at 0 by the DBC's -100 EffectBasePoints (Player::UpdateCritPercentage clamps PLAYER_CRIT_PERCENTAGE at 0, StatSystem.cpp: 'value = value < 0.0f ? 0.0f : value;'), the same field RollMeleeOutcomeAgainst/GetUnitCriticalChance reads for the auto-attack crit roll -- if the handler only touched spell crit, this metric would stay at its nonzero baseline instead of hitting the floor",
+      "actor": "witchdoctor",
+      "metric": "melee_crit_chance",
+      "max": 0.01,
+      "within_ms": 2000
+    }
+  ]
+}

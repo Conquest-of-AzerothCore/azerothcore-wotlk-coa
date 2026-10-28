@@ -29,6 +29,8 @@
 #include "SpellMgr.h"
 #include <algorithm>
 #include <string_view>
+#include <unordered_map>
+#include <vector>
 
 uint32 GetTargetFlagMask(SpellTargetObjectTypes objType)
 {
@@ -367,6 +369,10 @@ uint32 SpellEffectInfo::GetItemArmorSubclassMask() const
     if (_spellInfo && _spellInfo->SpellFamilyName == 37 &&
         (_spellInfo->Id == 706161 || _spellInfo->Id == 707808))
         return EffectIndex == EFFECT_2 && IsAura(SPELL_AURA_MOD_BASE_RESISTANCE_PCT) &&
+            MiscValue == SPELL_SCHOOL_MASK_NORMAL && MiscValueB == 24 ? 24 : 0;
+    if (_spellInfo && _spellInfo->SpellFamilyName == 36 &&
+        (_spellInfo->Id == 300560 || _spellInfo->Id == 301352))
+        return EffectIndex == EFFECT_0 && IsAura(SPELL_AURA_MOD_BASE_RESISTANCE_PCT) &&
             MiscValue == SPELL_SCHOOL_MASK_NORMAL && MiscValueB == 24 ? 24 : 0;
     if (_spellInfo && _spellInfo->SpellFamilyName == 35 &&
         (_spellInfo->Id == 706955 || _spellInfo->Id == 707872))
@@ -845,13 +851,13 @@ std::array<SpellEffectInfo::StaticData, TOTAL_SPELL_EFFECTS> SpellEffectInfo::_d
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 165 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 166 SPELL_EFFECT_ASCENSION_RESTORE_BASE_MANA_PCT
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 167 unknown Ascension effect
-    {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 168 unknown Ascension effect
+    {EFFECT_IMPLICIT_TARGET_CASTER,   TARGET_OBJECT_TYPE_UNIT}, // 168 SPELL_EFFECT_ASCENSION_PLAY_SPELL_VISUAL_KIT
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 169 SPELL_EFFECT_ASCENSION_SPREAD_AURA
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 170 SPELL_EFFECT_ASCENSION_SPREAD_AURA_2
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 171 unknown Ascension effect
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 172 unknown Ascension effect
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 173 SPELL_EFFECT_ASCENSION_REFRESH_AURA
-    {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 174 unknown Ascension effect
+    {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 174 Ascension health-percentage damage
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 175 SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 176 SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS_2
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 177 SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION
@@ -870,11 +876,11 @@ std::array<SpellEffectInfo::StaticData, TOTAL_SPELL_EFFECTS> SpellEffectInfo::_d
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 190 SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 191 unknown Ascension effect
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 192 unknown Ascension effect
-    {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 193 unknown Ascension effect
+    {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 193 Ascension delayed trigger; DBC supplies targets
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 194 unknown Ascension effect
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 195 SPELL_EFFECT_ASCENSION_RESET_COOLDOWN
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 196 unknown Ascension effect
-    {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 197 unknown Ascension effect
+    {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 197 SPELL_EFFECT_ASCENSION_MODIFY_FAMILY_COOLDOWN
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 198 unknown Ascension effect
 } };
 
@@ -893,8 +899,9 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry)
     AttributesEx6 = spellEntry->AttributesEx6;
     AttributesEx7 = spellEntry->AttributesEx7;
     AttributesCu = 0;
-    Stances = spellEntry->Stances;
-    StancesNot = spellEntry->StancesNot;
+    // Form masks are 64-bit in the client (forms 33-64 in the high words); CoA's own forms are numbered above 32.
+    Stances = uint64(spellEntry->Stances) | (uint64(spellEntry->StancesHigh) << 32);
+    StancesNot = uint64(spellEntry->StancesNot) | (uint64(spellEntry->StancesNotHigh) << 32);
     Targets = spellEntry->Targets;
     TargetCreatureType = spellEntry->TargetCreatureType;
     RequiresSpellFocus = spellEntry->RequiresSpellFocus;
@@ -1417,6 +1424,16 @@ bool SpellInfo::IsBreakingStealth() const
     return !(AttributesEx & SPELL_ATTR1_ALLOW_WHILE_STEALTHED);
 }
 
+int32 SpellInfo::GetComboPointPowerBonus(Unit* caster, uint8 effIndex, uint32 comboPoints) const
+{
+    if (!caster || !HasComboPointPowerBonus(effIndex))
+        return 0;
+
+    float const power = caster->GetTotalAttackPowerValue(BASE_ATTACK) + caster->SpellBaseDamageBonusDone(GetSchoolMask());
+    float const cp = float(comboPoints);
+    return int32(power * (ComboPointPowerSquare[effIndex] * cp * cp + ComboPointPowerFlat[effIndex]));
+}
+
 bool SpellInfo::IsRangedWeaponSpell() const
 {
     return (SpellFamilyName == SPELLFAMILY_HUNTER && !(SpellFamilyFlags[1] & 0x10000000)) // for 53352, cannot find better way
@@ -1464,6 +1481,49 @@ uint8 SpellInfo::CalcMaxAuraStacks(Unit* caster) const
     return uint8(std::clamp(maximum, 1.0f, 255.0f));
 }
 
+namespace
+{
+    // Ascension names the targets of a modifier without a class mask in SpellAffect.dbc; a negative target
+    // stands for every rank of the chain that starts with that spell.
+    std::unordered_map<uint32, std::vector<int32>> const& SpellAffectTargets()
+    {
+        static std::unordered_map<uint32, std::vector<int32>> const targets = []
+        {
+            std::unordered_map<uint32, std::vector<int32>> byModifier;
+            for (SpellAffectEntry const* entry : sSpellAffectStore)
+                byModifier[entry->ModifierSpellID].push_back(int32(entry->AffectedSpellID));
+            return byModifier;
+        }();
+        return targets;
+    }
+
+    // DmgClass is an ability-roll category (melee/ranged/magic/none), not "does this deal damage" --
+    // a pure heal like Greater Heal is still SPELL_DAMAGE_CLASS_MAGIC. Flame Throwing's tooltip names
+    // damaging spells specifically, so look for an actual damage-dealing effect instead.
+    bool DealsDamage(SpellInfo const* info)
+    {
+        for (SpellEffectInfo const& effect : info->GetEffects())
+        {
+            switch (effect.Effect)
+            {
+                case SPELL_EFFECT_SCHOOL_DAMAGE:
+                case SPELL_EFFECT_WEAPON_DAMAGE:
+                case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
+                case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
+                case SPELL_EFFECT_HEALTH_LEECH:
+                    return true;
+                default:
+                    break;
+            }
+            if (effect.ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE ||
+                effect.ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE_PERCENT ||
+                effect.ApplyAuraName == SPELL_AURA_PERIODIC_LEECH)
+                return true;
+        }
+        return false;
+    }
+}
+
 bool SpellInfo::IsAffectedBySpellMods() const
 {
     return !(AttributesEx3 & SPELL_ATTR3_IGNORE_CASTER_MODIFIERS);
@@ -1478,11 +1538,21 @@ bool SpellInfo::IsAffectedBySpellMod(SpellModifier const* mod) const
         mod->spellId == 705780 && mod->op == SPELLMOD_JUMP_TARGETS && mod->type == SPELLMOD_FLAT &&
         mod->mask == flag96(128, 0, 0);
 
+    bool const windSurgeTargets = Id == 653226 && SpellFamilyName == 38 &&
+        mod->spellId == 805750 && mod->op == SPELLMOD_JUMP_TARGETS && mod->type == SPELLMOD_FLAT &&
+        mod->mask == flag96(0, 0x40000, 0);
+
     bool const bloodFueledAbsorb = Id == 560361 && mod->spellId == 705416 && mod->op == SPELLMOD_EFFECT1 &&
         mod->type == SPELLMOD_PCT;
 
+    // Spirit Eclipse's splash damage is snapshotted from its parent aura, so the splash ignores caster
+    // modifiers. Bwonsamdi's Edge names only the splash; the snapshot applies it explicitly.
+    bool const bwonsamdisEdgeSplash = Id == 802712 && mod->spellId == 712435 && mod->op == SPELLMOD_DAMAGE &&
+        mod->type == SPELLMOD_PCT;
+
     // xinef: dont check duration mod
-    if (mod->op != SPELLMOD_DURATION && !bandageGunTargets && !bloodFueledAbsorb)
+    if (mod->op != SPELLMOD_DURATION && !bandageGunTargets && !windSurgeTargets &&
+        !bloodFueledAbsorb && !bwonsamdisEdgeSplash)
         if (!IsAffectedBySpellMods())
             return false;
 
@@ -1493,6 +1563,12 @@ bool SpellInfo::IsAffectedBySpellMod(SpellModifier const* mod) const
 
     if (mod->targetSpellId && mod->targetSpellId != Id)
         return false;
+
+    // Flame Throwing has no SpellAffect.dbc row and a zero class mask, so the generic lookup below
+    // would match nothing for its range modifier; its tooltip names every damaging spell of its
+    // owner, not one spell family. Its other (undocumented) modifier effect is left alone.
+    if ((mod->spellId == 11100 || mod->spellId == 12353) && mod->op == SPELLMOD_RANGE)
+        return DealsDamage(this);
 
     if (SpellFamilyName == 31 && affectSpell->SpellFamilyName == 31)
     {
@@ -1554,7 +1630,24 @@ bool SpellInfo::IsAffectedBySpellMod(SpellModifier const* mod) const
         (mod->mask & flag96(0, 16384, 0)))
         return true;
 
-    return IsAffected(affectSpell->SpellFamilyName, mod->mask);
+    if (!mod->mask)
+    {
+        auto const& targets = SpellAffectTargets();
+        auto const named = targets.find(mod->spellId);
+        if (named != targets.end())
+        {
+            uint32 const firstRank = sSpellMgr->GetFirstSpellInChain(Id);
+            return std::any_of(named->second.begin(), named->second.end(), [&](int32 target)
+            {
+                // Widen before negating so even INT32_MIN cannot overflow.
+                return target < 0 ? uint32(-int64(target)) == firstRank : uint32(target) == Id;
+            });
+        }
+    }
+
+    bool affected = IsAffected(affectSpell->SpellFamilyName, mod->mask);
+    sScriptMgr->OnSpellModFamilyMask(affectSpell, this, mod, affected);
+    return affected;
 }
 
 bool SpellInfo::CanPierceImmuneAura(SpellInfo const* auraSpellInfo) const
@@ -1647,7 +1740,7 @@ SpellCastResult SpellInfo::CheckShapeshift(uint32 form) const
             (Effects[0].Effect == SPELL_EFFECT_LEARN_SPELL || Effects[1].Effect == SPELL_EFFECT_LEARN_SPELL || Effects[2].Effect == SPELL_EFFECT_LEARN_SPELL))
         return SPELL_CAST_OK;
 
-    uint32 stanceMask = (form ? 1 << (form - 1) : 0);
+    uint64 stanceMask = (form ? uint64(1) << (form - 1) : 0);
 
     if (stanceMask & StancesNot)                 // can explicitly not be casted in this stance
         return SPELL_FAILED_NOT_SHAPESHIFT;
@@ -1886,7 +1979,7 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, WorldObject const* ta
             if (caster->IsPlayer())
             {
                 // Do not allow these spells to target creatures not tapped by us (Banish, Polymorph, many quest spells)
-                if (AttributesEx2 & SPELL_ATTR2_CANNOT_CAST_ON_TAPPED)
+                if ((AttributesEx2 & SPELL_ATTR2_CANNOT_CAST_ON_TAPPED) && !HasEffect(SPELL_EFFECT_SKINNING))
                     if (Creature const* targetCreature = unitTarget->ToCreature())
                         if (targetCreature->hasLootRecipient() && !targetCreature->isTappedBy(caster->ToPlayer()))
                             return SPELL_FAILED_CANT_CAST_ON_TAPPED;
@@ -2251,6 +2344,10 @@ SpellSpecificType SpellInfo::GetSpellSpecific() const
 
 SpellSpecificType SpellInfo::LoadSpellSpecific() const
 {
+    // Frogduck Morph Machine keeps its generic gadget family but uses native Polymorph rules.
+    if (Id == 991576 && HasAura(SPELL_AURA_MOD_CONFUSE) && HasAura(SPELL_AURA_TRANSFORM))
+        return SPELL_SPECIFIC_MAGE_POLYMORPH;
+
     switch (SpellFamilyName)
     {
         case SPELLFAMILY_GENERIC:
@@ -2619,6 +2716,7 @@ void SpellInfo::_LoadImmunityInfo()
                     case 34471: // The Beast Within
                     case 19574: // Bestial Wrath
                     case 42292: // PvP trinket
+                    case 1142292: // PvP Trinket (Ascension)
                     case 46227: // Medallion of Immunity
                     case 59752: // Every Man for Himself
                     case 53490: // Bullheaded
@@ -2960,7 +3058,16 @@ uint32 SpellInfo::CalcCastTime(Unit* caster, Spell* spell) const
         return 0;
 
     int32 castTime = serpent ? 1000 : CastTimeEntry->CastTime;
-    if (HasAttribute(SPELL_ATTR0_USES_RANGED_SLOT) && (!IsAutoRepeatRangedSpell()))
+    // Ascension channels ranged-slot spells without a base cast time, such as Tinker's Gatling Gun, at once.
+    bool const artificersWand = SpellFamilyName == 28 && (Id == 561284 || (Id >= 561354 && Id <= 561357));
+    bool tinkerShot = false;
+    if (SpellFamilyName == 34)
+    {
+        uint32 const firstRank = GetFirstRankSpell()->Id;
+        tinkerShot = firstRank == 500549 || firstRank == 500235;
+    }
+    if (HasAttribute(SPELL_ATTR0_USES_RANGED_SLOT) && !artificersWand && !tinkerShot &&
+        (!IsAutoRepeatRangedSpell()) && (castTime || !IsChanneled()))
         castTime += 500;
 
     if (caster)
@@ -3040,9 +3147,11 @@ int32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask, S
             case POWER_MANA:
                 powerCost += int32(CalculatePct(UsesMaxManaForCost ? caster->GetMaxPower(POWER_MANA) : caster->GetCreateMana(), ManaCostPercentage));
                 break;
+            case POWER_ENERGY:
+                powerCost += int32(CalculatePct(caster->GetCreatePowers(POWER_ENERGY), ManaCostPercentage));
+                break;
             case POWER_RAGE:
             case POWER_FOCUS:
-            case POWER_ENERGY:
             case POWER_HAPPINESS:
                 powerCost += int32(CalculatePct(caster->GetMaxPower(Powers(PowerType)), ManaCostPercentage));
                 break;

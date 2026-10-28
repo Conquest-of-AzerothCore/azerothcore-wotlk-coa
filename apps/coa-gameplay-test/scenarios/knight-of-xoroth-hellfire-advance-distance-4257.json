@@ -1,0 +1,233 @@
+{
+  "schema": 1,
+  "name": "Hellfire Advance scales forward distance while keeping its low leap height (#4257)",
+  "contract": [
+    "Hellfire Advance 804788 promises forward distance scaled by Path of Hellfire stacks.",
+    "Leap effect 0 has horizontal MiscValue 254 (25.4 units/sec) and vertical BasePoints 85 + DieSides 1 (8.6).",
+    "Path of Hellfire 804787 effect 2 supplies +30% per stack via SPELLMOD_EFFECT1, family 23 flag word 1 8192.",
+    "Zero/one/five stacks send horizontal 25.4/33.02/63.5 while retaining vertical 8.6.",
+    "The loader makes the Path effect a dummy; the narrow launch handler reads its authored per-stack amount.",
+    "Native SMSG_MOVE_KNOCK_BACK carries horizontal and negated vertical speed.",
+    "Before the fix, hardcoded +20% per stack increases vertical speed: five stacks send 17.2 vertically.",
+    "Horizontal remains 25.4. This observes native trajectory instructions; client landing/input remain unverified."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "plain",
+      "race": 1,
+      "class": 17,
+      "level": 45
+    },
+    {
+      "id": "stacked",
+      "race": 1,
+      "class": 17,
+      "level": 45
+    },
+    {
+      "id": "one",
+      "race": 1,
+      "class": 17,
+      "level": 45
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "plain",
+      "spell": 804703
+    },
+    {
+      "action": "learn",
+      "actor": "plain",
+      "spell": 804788
+    },
+    {
+      "action": "cast",
+      "actor": "plain",
+      "spell": 804703
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "aura",
+      "spell": 804703,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "stacked",
+      "spell": 804703
+    },
+    {
+      "action": "learn",
+      "actor": "stacked",
+      "spell": 804788
+    },
+    {
+      "action": "cast",
+      "actor": "stacked",
+      "spell": 804703
+    },
+    {
+      "action": "assert",
+      "actor": "stacked",
+      "metric": "aura",
+      "spell": 804703,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "one",
+      "spell": 804703
+    },
+    {
+      "action": "learn",
+      "actor": "one",
+      "spell": 804788
+    },
+    {
+      "action": "cast",
+      "actor": "one",
+      "spell": 804703
+    },
+    {
+      "action": "assert",
+      "actor": "one",
+      "metric": "aura",
+      "spell": 804703,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "actor": "plain",
+      "spell": 804787,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "plain",
+      "spell": 804788
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "cast_failure",
+      "spell": 804788,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "0 stacks preserve the native low leap height",
+      "actor": "plain",
+      "metric": "server_packet_float",
+      "opcode": 239,
+      "from_end": true,
+      "index": 0,
+      "min": -8.61,
+      "max": -8.59,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "0 stacks scale horizontal distance using the authored effect modifier",
+      "actor": "plain",
+      "metric": "server_packet_float",
+      "opcode": 239,
+      "from_end": true,
+      "index": 1,
+      "min": 25.38,
+      "max": 25.42
+    },
+    {
+      "action": "set_aura",
+      "actor": "stacked",
+      "spell": 804787,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "stacked",
+      "spell": 804788
+    },
+    {
+      "action": "assert",
+      "actor": "stacked",
+      "metric": "cast_failure",
+      "spell": 804788,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "5 stacks preserve the native low leap height",
+      "actor": "stacked",
+      "metric": "server_packet_float",
+      "opcode": 239,
+      "from_end": true,
+      "index": 0,
+      "min": -8.61,
+      "max": -8.59,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "5 stacks scale horizontal distance using the authored effect modifier",
+      "actor": "stacked",
+      "metric": "server_packet_float",
+      "opcode": 239,
+      "from_end": true,
+      "index": 1,
+      "min": 63.48,
+      "max": 63.52
+    },
+    {
+      "action": "set_aura",
+      "actor": "one",
+      "spell": 804787,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "one",
+      "spell": 804788
+    },
+    {
+      "action": "assert",
+      "actor": "one",
+      "metric": "cast_failure",
+      "spell": 804788,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "1 stack preserves the native low leap height",
+      "actor": "one",
+      "metric": "server_packet_float",
+      "opcode": 239,
+      "from_end": true,
+      "index": 0,
+      "min": -8.61,
+      "max": -8.59,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "1 stack scales horizontal distance using the authored effect modifier",
+      "actor": "one",
+      "metric": "server_packet_float",
+      "opcode": 239,
+      "from_end": true,
+      "index": 1,
+      "min": 33.0,
+      "max": 33.04
+    }
+  ]
+}

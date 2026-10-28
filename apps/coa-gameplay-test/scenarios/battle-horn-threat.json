@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Battle Horn: teaches the horn, which pulls enemies within 30 yards only",
+  "contract": "Item 898070 casts Learning (55884), teaching spell 898070 and spending the item. Spell 898070 is an instant SPELL_EFFECT_THREAT on TARGET_UNIT_SRC_AREA_ENEMY around the caster with radius index 10 (30 yards) and a 45 second recovery, so an enemy 10 yards away enters combat with the caster and one 45 yards away does not.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "horn", "race": 1, "class": 12, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "near", "owner": "horn", "entry": 36, "level": 80, "health": 100000, "distance": 10 },
+    { "id": "far", "owner": "horn", "entry": 36, "level": 80, "health": 100000, "distance": 45 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 5000 },
+    { "action": "assert", "label": "The near enemy starts out of combat", "actor": "near", "metric": "combat",
+      "equals": 0 },
+    { "action": "assert", "label": "The far enemy starts out of combat", "actor": "far", "metric": "combat",
+      "equals": 0 },
+    { "action": "add_item", "actor": "horn", "item": 898070 },
+    { "action": "use_item", "actor": "horn", "item": 898070, "spell": 55884 },
+    { "action": "assert", "label": "The Battle Horn teaches its ability", "actor": "horn", "metric": "knows_spell",
+      "spell": 898070, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "The Battle Horn item is spent", "actor": "horn", "metric": "item_count",
+      "item": 898070, "equals": 0 },
+    { "action": "wait", "label": "Clear the global cooldown of the learning cast", "ms": 2000 },
+    { "action": "cast", "actor": "horn", "spell": 898070 },
+    { "action": "assert", "label": "The enemy inside 30 yards is pulled into combat", "actor": "near",
+      "metric": "combat", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "The horn starts its 45 second recovery", "actor": "horn",
+      "metric": "cooldown_ms", "spell": 898070, "min": 40000, "max": 45000 },
+    { "action": "wait", "label": "Give the far enemy the same window", "ms": 2000 },
+    { "action": "assert", "label": "The enemy outside 30 yards is left alone", "actor": "far", "metric": "combat",
+      "equals": 0 }
+  ]
+}

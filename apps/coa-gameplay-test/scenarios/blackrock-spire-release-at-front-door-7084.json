@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "name": "Releasing at the Blackwing Lair portal in Blackrock Spire revives the player at the front door",
+  "contract": [
+    "Blackrock Spire (map 229) is entered from Blackrock Mountain through areatrigger 1468, which lands at 78.5083,",
+    "-225.044 (Map.dbc entrance on map 0). Areatrigger 3728 also targets map 229, but it is the exit from inside",
+    "Blackwing Lair and lands at the BWL portal (174.74, -474.77). Upper Blackrock Spire (LFGDungeons 44) has no",
+    "Dungeon Finder start, so its start is the map's entrance trigger. A player who dies at the BWL portal and",
+    "releases is revived at the front door, about 270 yards away, and not at the BWL portal again."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 229,
+      "x": 165.118,
+      "y": -462.341,
+      "z": 118.974
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 229,
+      "within_ms": 15000,
+      "label": "the player is in Blackrock Spire"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "point_distance_2d",
+      "x": 174.74,
+      "y": -474.77,
+      "max": 20,
+      "label": "the player stands at the Blackwing Lair portal"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "die",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 0,
+      "label": "the player dies at the portal"
+    },
+    {
+      "action": "release_spirit",
+      "actor": "hero",
+      "label": "release the spirit inside the dungeon"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 229,
+      "within_ms": 5000,
+      "label": "the player stays in Blackrock Spire"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1,
+      "label": "the player is revived"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "point_distance_2d",
+      "x": 78.5083,
+      "y": -225.044,
+      "max": 3,
+      "label": "the player stands at the front door"
+    }
+  ]
+}

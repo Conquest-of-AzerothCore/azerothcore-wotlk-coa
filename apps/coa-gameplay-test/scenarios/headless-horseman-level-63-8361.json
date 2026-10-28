@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "name": "Headless Horseman: the Horseman, his head and his pumpkins are level 63 (#8361)",
+  "contract": [
+    "#8361: the Headless Horseman (23682) was level 80, so level-60 players missed him. Like the Heroic and Mythic",
+    "bosses he is level 63, and so are his head (23775), the Pulsing Pumpkin (23694) and the Pumpkin Fiend (23545).",
+    "The Horseman and his head keep their health modifier 40 on level-63 expansion-1 stats: 4422 x 40 = 176880 for",
+    "the Paladin-class Horseman and 5527 x 40 = 221080 for the Warrior-class head, not the 40 health that",
+    "creature_classlevelstats' empty expansion-2 level-63 row would give."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000,
+      "maximum": 2000000
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 23694,
+      "as": "pumpkin",
+      "distance": 10
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Pulsing Pumpkin is level 63 before it sprouts after 3 s",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 23694,
+      "min_level": 63,
+      "max_level": 63,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 23682,
+      "as": "horseman",
+      "distance": 6
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 23775,
+      "as": "head",
+      "distance": 8
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 23545,
+      "as": "fiend",
+      "distance": 12
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Headless Horseman is level 63",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 23682,
+      "min_level": 63,
+      "max_level": 63,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Head of the Horseman is level 63",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 23775,
+      "min_level": 63,
+      "max_level": 63,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Pumpkin Fiend is level 63, also one sprouted from the Pulsing Pumpkin",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 23545,
+      "min_level": 63,
+      "max_level": 63,
+      "within_ms": 5000,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Horseman has 176880 health from level-63 Paladin stats",
+      "actor": "hero",
+      "metric": "nearby_creature_max_health",
+      "entry": 23682,
+      "equals": 176880,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The head has 221080 health from level-63 Warrior stats",
+      "actor": "hero",
+      "metric": "nearby_creature_max_health",
+      "entry": 23775,
+      "equals": 221080,
+      "within_ms": 5000
+    }
+  ]
+}

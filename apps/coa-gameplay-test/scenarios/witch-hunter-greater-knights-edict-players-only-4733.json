@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Greater Knight's Edict buffs players but not the Shadowhound (#4733)",
+  "contract": [
+    "Issue #4733: Greater Knight's Edict 523510 is a 40 yard TARGET_UNIT_CASTER_AREA_RAID aura, so the caster's own Shadowhound (50124) satisfied the raid-target check and received the buff.",
+    "The spell is now bound to spell_ascension_witch_hunter_greater_knights_edict, which drops every non-player from the area target list. With the hound summoned, one cast must leave the Witch Hunter carrying 523510 while the Shadowhound carries none."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {"id": "hunter", "race": 1, "class": 15, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login and class synchronisation settle", "ms": 4000},
+    {"action": "learn", "actor": "hunter", "spell": 801343},
+    {"action": "cast", "actor": "hunter", "spell": 801343},
+    {"action": "assert", "label": "The Shadowhound is out", "actor": "hunter", "metric": "pet_entry", "equals": 50124, "within_ms": 15000},
+    {"action": "learn", "actor": "hunter", "spell": 523510},
+    {"action": "cast", "actor": "hunter", "spell": 523510},
+    {"action": "assert", "label": "The Witch Hunter keeps the edict", "actor": "hunter", "metric": "aura", "spell": 523510, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "The Shadowhound is not buffed", "actor": "hunter", "metric": "pet_aura_stacks", "spell": 523510, "equals": 0, "within_ms": 3000}
+  ]
+}

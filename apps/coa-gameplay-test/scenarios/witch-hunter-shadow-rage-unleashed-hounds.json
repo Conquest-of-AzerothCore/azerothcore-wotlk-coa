@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "name": "Shadow Rage reaches the Unleash the Hounds summons as well as the Shadowhound (#311)",
+  "contract": "Shadow Rage 705455 procs 804192 from Shadowblast. In the client Spell.dbc (2026-09-16) 804192 carries its haste (aura 138) and its auto-attack proc (aura 231) on effects 1 and 2 as SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS from TARGET_UNIT_CASTER with radius index 12 (100 yards): the caster's summons receive it, not one pet. Unleash the Hounds 807918 summons Lesser Shadowhound 50224 through SummonProperties 61 (category 1, type 2: a Guardian the owner controls), so it is one of those summons, like the Shadowhound 50124 from Houndmaster's Whistle 801343. Loksey's Journal 504903, a modifier of the same record (class mask B 0x1000), reads 'Shadow Rage now also grants your Shadow Hounds $s1% increased haste'. After Shadowblast every living hound the caster owns carries the caster's 804192, and the caster does not. Harvest Golem 36 is a non-fleeing target; the ratings keep Shadowblast from missing.",
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "wh", "race": 1, "class": 15, "level": 14, "spell_hit_rating": 10000, "ranged_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "target", "owner": "wh", "entry": 36, "level": 14, "health": 100000, "distance": 12}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "actor": "wh", "spell": 5011},
+    {"action": "add_item", "actor": "wh", "item": 15807},
+    {"action": "equip", "actor": "wh", "item": 15807, "slot": 17},
+    {"action": "wait", "label": "Let the weapon swap cooldown expire", "ms": 2000},
+    {"action": "learn", "actor": "wh", "spell": 680264},
+    {"action": "learn", "actor": "wh", "spell": 801343},
+    {"action": "learn", "actor": "wh", "spell": 807918},
+    {"action": "learn", "actor": "wh", "spell": 705455},
+    {"action": "assert", "label": "The Shadow Rage talent aura is applied", "actor": "wh", "metric": "aura", "spell": 705455, "equals": 1},
+    {"action": "cast", "label": "Houndmaster's Whistle", "actor": "wh", "spell": 801343},
+    {"action": "assert", "label": "The Shadowhound is out", "actor": "wh", "metric": "pet_entry", "equals": 50124, "within_ms": 5000},
+    {"action": "wait", "ms": 2000},
+    {"action": "set_power", "actor": "wh", "power": 1, "value": 1000},
+    {"action": "cast", "label": "Unleash the Hounds", "actor": "wh", "spell": 807918},
+    {
+      "action": "assert",
+      "label": "Unleash the Hounds summons a Lesser Shadowhound",
+      "actor": "wh",
+      "metric": "owned_creature_count",
+      "entry": 50224,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "No hound carries Shadow Rage before Shadowblast",
+      "actor": "wh",
+      "metric": "owned_creature_count",
+      "entry": 50224,
+      "spell": 804192,
+      "caster": "wh",
+      "equals": 0
+    },
+    {"action": "assert", "actor": "wh", "metric": "pet_aura_stacks", "spell": 804192, "caster": "wh", "equals": 0},
+    {"action": "wait", "label": "Let the global cooldown expire", "ms": 1600},
+    {"action": "set_power", "actor": "wh", "power": 1, "value": 1000},
+    {"action": "snapshot", "actor": "target", "metric": "health", "save_as": "target_before"},
+    {"action": "cast", "label": "Shadowblast", "actor": "wh", "spell": 680264, "target": "target"},
+    {
+      "action": "assert",
+      "label": "Shadowblast lands",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "target_before",
+      "max": -1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The Shadowhound carries Shadow Rage",
+      "actor": "wh",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "wh",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The Unleash the Hounds summon carries Shadow Rage too",
+      "actor": "wh",
+      "metric": "owned_creature_count",
+      "entry": 50224,
+      "spell": 804192,
+      "caster": "wh",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {"action": "assert", "label": "The Witch Hunter does not carry the hounds' Shadow Rage", "actor": "wh", "metric": "aura", "spell": 804192, "equals": 0}
+  ]
+}

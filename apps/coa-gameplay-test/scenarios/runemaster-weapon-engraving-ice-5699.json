@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "name": "Issue 5699: Weapon Engraving: Ice procs its Frost damage from direct damage",
+  "contract": [
+    "Weapon Engraving: Ice 653264 puts temporary enchant 1004 (type 3, equip spell 653266) on the weapon. Ice Engraving",
+    "653266 reads 'Your direct damage has a $h% chance to deal ... Frost damage': aura 42 triggering 653217, ProcChance",
+    "40, DBC ProcFlags 0 and no spell_proc row, so SpellMgr::LoadSpellProcs never gave it a proc entry and the aura",
+    "never procs. Fire 653211 and Earth 653221 proc through spell_proc (0x00010154, DAMAGE, HIT). 653266 is applied",
+    "as a fixture aura (the scenario format has no item target for cast). Expected: with Master Engraver 705605",
+    "(40 -> 45%) landed auto attacks proc 653266 and deal 653217 Frost damage to the target (about 20 swings over",
+    "27 sec, so no proc has probability 0.55^20 < 7e-6); removing 653266 stops further 653217 damage."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000,
+      "spell_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rm", "entry": 36, "level": 60, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 1180},
+    {"action": "add_item", "actor": "rm", "item": 2092},
+    {"action": "equip", "label": "A fast dagger lands many swings", "actor": "rm", "item": 2092, "slot": 15},
+    {"action": "learn", "actor": "rm", "spell": 705605},
+    {"action": "wait", "ms": 1000},
+    {"action": "set_aura", "label": "Ice Engraving, the equip spell of the Weapon Engraving: Ice enchant",
+      "actor": "rm", "spell": 653266, "stacks": 1},
+    {"action": "assert", "label": "SETUP: Ice Engraving is active", "actor": "rm", "metric": "aura",
+      "spell": 653266, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "SETUP: Master Engraver raises the proc chance to 45%", "actor": "rm",
+      "metric": "spell_modifier", "spell": 653266, "op": 18, "base": 40, "min": 44.99, "max": 45.01},
+    {"action": "snapshot", "actor": "rm", "metric": "melee_damage_count", "hand": 0, "save_as": "swings"},
+    {"action": "attack", "actor": "rm", "target": "dummy"},
+    {"action": "wait", "ms": 27000},
+    {"action": "assert", "label": "SETUP: auto attacks landed", "actor": "rm", "metric": "melee_damage_count",
+      "hand": 0, "relative_to": "swings", "min": 12},
+    {"action": "assert", "label": "CONTRACT: direct damage procs Ice Engraving", "actor": "rm",
+      "metric": "spell_proc_count", "spell": 653266, "min": 1},
+    {"action": "assert", "label": "CONTRACT: the proc deals Weapon Engraving: Ice Frost damage to the target",
+      "actor": "rm", "metric": "spell_damage_count", "spell": 653217, "target": "dummy", "min": 1},
+
+    {"action": "set_aura", "label": "The engraving ends", "actor": "rm", "spell": 653266, "stacks": 0},
+    {"action": "snapshot", "actor": "rm", "metric": "spell_cast_count", "spell": 653217, "save_as": "engraved_hits"},
+    {"action": "snapshot", "actor": "rm", "metric": "melee_damage_count", "hand": 0, "save_as": "plain_swings"},
+    {"action": "wait", "ms": 9000},
+    {"action": "stop_attack", "actor": "rm"},
+    {"action": "assert", "label": "SETUP: auto attacks continued", "actor": "rm", "metric": "melee_damage_count",
+      "hand": 0, "relative_to": "plain_swings", "min": 4},
+    {"action": "assert", "label": "CONTRACT: no Weapon Engraving: Ice damage without the engraving", "actor": "rm",
+      "metric": "spell_cast_count", "spell": 653217, "relative_to": "engraved_hits", "equals": 0}
+  ]
+}

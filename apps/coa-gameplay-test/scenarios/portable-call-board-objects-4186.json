@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Portable Call Boards (Hero's, Warchief's, Outlaw's) spawn when summoned (#4186, #7504, #9088, #9419)",
+  "contract": "Items 1913515/1913516/1913517 (Hero's/Warchief's/Outlaw's Portable Call Board) teach the item spells 995213/995214/995215, whose SPELL_EFFECT_TRANS_DOOR effect summons gameobject 412000/412001/422000 at the cast destination for 5 minutes. None of the three entries had a gameobject_template row, so Spell::EffectTransmitted logged 'not exist and not created' and returned without spawning anything, even though the placement cursor appeared. The item templates for 1913515-7 live only in the realm DB (not in this repo), so this casts the item spells directly rather than through add_item/use_item.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8824.9, "y": 630.397, "z": 93.8, "o": 0 },
+  "players": [
+    { "id": "ally", "race": 1, "class": 12, "level": 60 },
+    { "id": "horde", "race": 2, "class": 12, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    { "action": "learn", "actor": "ally", "spell": 995213 },
+    { "action": "learn", "actor": "ally", "spell": 995215 },
+    { "action": "learn", "actor": "horde", "spell": 995214 },
+
+    { "action": "assert", "label": "SETUP: no Hero's Call Board owned yet", "actor": "ally", "metric": "owned_gameobject_count", "entry": 412000, "equals": 0 },
+    { "action": "cast", "actor": "ally", "spell": 995213, "destination": { "x": -8824.9, "y": 630.397, "z": 93.8 } },
+    { "action": "wait", "ms": 16000 },
+    { "action": "assert", "label": "the cast succeeds", "actor": "ally", "metric": "cast_failure", "spell": 995213, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: the Hero's Call Board spawns", "actor": "ally", "metric": "owned_gameobject_count", "entry": 412000, "equals": 1 },
+    { "action": "assert", "label": "it dissipates after 5 minutes", "actor": "ally", "metric": "gameobject_remaining_ms", "entry": 412000, "min": 295000, "max": 300000 },
+
+    { "action": "assert", "label": "SETUP: no Warchief's Command Board owned yet", "actor": "horde", "metric": "owned_gameobject_count", "entry": 412001, "equals": 0 },
+    { "action": "cast", "actor": "horde", "spell": 995214, "destination": { "x": -8824.9, "y": 630.397, "z": 93.8 } },
+    { "action": "wait", "ms": 16000 },
+    { "action": "assert", "label": "the cast succeeds", "actor": "horde", "metric": "cast_failure", "spell": 995214, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: the Warchief's Command Board spawns", "actor": "horde", "metric": "owned_gameobject_count", "entry": 412001, "equals": 1 },
+
+    { "action": "assert", "label": "SETUP: no Outlaw's Contract Board owned yet", "actor": "ally", "metric": "owned_gameobject_count", "entry": 422000, "equals": 0 },
+    { "action": "cast", "actor": "ally", "spell": 995215, "destination": { "x": -8824.9, "y": 630.397, "z": 93.8 } },
+    { "action": "wait", "ms": 16000 },
+    { "action": "assert", "label": "the cast succeeds", "actor": "ally", "metric": "cast_failure", "spell": 995215, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: the Outlaw's Contract Board spawns", "actor": "ally", "metric": "owned_gameobject_count", "entry": 422000, "equals": 1 },
+
+    { "action": "use_gameobject", "actor": "horde", "entry": 412001 },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "clicking the board opens the Call Board categories, not an error", "actor": "horde", "metric": "gossip_options", "min": 1 }
+  ]
+}

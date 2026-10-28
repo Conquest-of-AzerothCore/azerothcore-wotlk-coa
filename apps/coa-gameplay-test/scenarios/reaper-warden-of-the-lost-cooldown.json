@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Warden of the Lost cuts Spectral Warden's cooldown on summon damage (#683)",
+  "contract": [
+    "Warden of the Lost 707116 promises: damage dealt by Spectral Scythes and Spectral Wardens reduces",
+    "Spectral Warden's cooldown by 500 ms. Effect 0 is SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS(190),",
+    "delivering a native SPELL_AURA_PROC_TRIGGER_SPELL(42) to the Reaper's owned summons that triggers",
+    "707128 (which force-casts 707127 at the master; 707127's SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN",
+    "targets 805716 with -500 ms). Spell.dbc carries ProcFlags=0 for 707116, so without a spell_proc row",
+    "the applied aura never saw a damage event. The Spectral Warden guardian (100481) is itself a valid",
+    "target of the aura, so casting 805716 and letting the guardian fight is enough to exercise it."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "reaper", "race": 5, "class": 30, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "reaper", "entry": 1601, "level": 80, "health": 4000000 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "reaper", "spell": 707116 },
+    { "action": "learn", "actor": "reaper", "spell": 805716 },
+    { "action": "cast", "actor": "reaper", "spell": 805716 },
+    { "action": "assert", "actor": "reaper", "metric": "cast_failure", "spell": 805716, "equals": 0 },
+    { "action": "assert", "label": "The guardian is summoned", "actor": "reaper", "metric": "owned_creature_count", "entry": 100481, "min": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Spectral Warden is on its full cooldown", "actor": "reaper", "metric": "cooldown_ms", "spell": 805716, "min": 170000 },
+    { "action": "snapshot", "actor": "reaper", "metric": "cooldown_ms", "spell": 805716, "save_as": "cooldown_before" },
+    { "action": "attack", "actor": "reaper", "target": "enemy" },
+    { "action": "assert", "label": "The Reaper is engaged, drawing the guardian into the fight", "actor": "reaper", "metric": "combat", "equals": 1, "within_ms": 4000 },
+    { "action": "wait", "label": "Let the guardian land several melee swings", "ms": 20000 },
+    { "action": "assert", "label": "Cooldown dropped by more than the 20 s that elapsed, proving Warden of the Lost fired at least once", "actor": "reaper", "metric": "cooldown_ms", "spell": 805716, "relative_to": "cooldown_before", "max": -20300, "within_ms": 4000 }
+  ]
+}

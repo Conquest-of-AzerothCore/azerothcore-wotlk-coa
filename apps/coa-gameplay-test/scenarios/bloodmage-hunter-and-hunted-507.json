@@ -1,0 +1,284 @@
+{
+  "schema": 1,
+  "name": "The Hunter and the Hunted charges a Cursed Form, roots the target, and swaps Accursed Form for Bloodgale (#507)",
+  "contract": "The Hunter and the Hunted 807487 is a level-50 Bloodmage passive whose single effect is a SPELL_AURA_DUMMY with no trigger and, before this change, no handler anywhere: its tooltip did nothing. It turns on two spells that already exist in the client data. Dark Embrace 804854 is an instant SPELL_EFFECT_CHARGE (effect 96) with a native 2 s SPELL_AURA_MOD_ROOT (aura 26, SpellDuration 39 = 2000 ms) on TARGET_UNIT_TARGET_ENEMY, range 20 yd (SpellRange 3); activating any Cursed Form while the passive is known now casts it at the selected enemy (or the attacked victim) when that enemy is inside the spell's own 20 yards. Accursed Form 562572 lasts 30 s with a 30 s cooldown and its description says the ability goes on cooldown on returning to Mortal Form, so at expiration it is ready again; the passive now arms a temporary spell replacement (562572 -> Bloodgale 681310, the same mechanism the Hemostasis contract uses) so reactivating the ability erupts through Bloodgale - a native 8 yd health leech plus a backward teleport - instead of re-entering the form. Casting Bloodgale, dying, losing the passive or entering another Cursed Form disarms the swap and removes the helper spell. The scenario proves the difference between the two activation paths: the first (control) form cast without the passive must leave the enemy unrooted; the second, with the passive, must root it. It then waits out the 30 s form, asserts the replacement is armed, casts the original Accursed Form id (which the server must redirect to Bloodgale), and checks the leech damage, the swap being consumed and the form not being re-entered. NOT asserted: the backward teleport distance (its direction depends on facing and is native to 681310), the friendly-target charge (Dark Embrace's data only supports enemy targets) and the client-side icon swap, which is the in-game check.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "victim",
+      "race": 5,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "pvp",
+      "actor": "bloodmage",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "victim",
+      "enabled": true
+    },
+    {
+      "action": "set_health",
+      "label": "Big pools so the burst cannot kill either side",
+      "actor": "bloodmage",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_health",
+      "actor": "victim",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 562572
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "attack",
+      "label": "Make the enemy the Bloodmage's attack target so the charge can resolve it",
+      "actor": "bloodmage",
+      "target": "victim"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the enemy is the Bloodmage's victim",
+      "actor": "bloodmage",
+      "metric": "victim",
+      "target": "victim",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: Accursed Form without the passive",
+      "actor": "bloodmage",
+      "spell": 562572
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the form is active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 562572,
+      "caster": "bloodmage",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Give a charge time to happen if it wrongly fired",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without the passive nothing charges or roots",
+      "actor": "victim",
+      "metric": "aura",
+      "spell": 804854,
+      "caster": "bloodmage",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Cancel the control form",
+      "actor": "bloodmage",
+      "spell": 562572,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "The control form is gone",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 562572,
+      "equals": 0
+    },
+    {
+      "action": "stop_attack",
+      "actor": "bloodmage"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "bloodmage",
+      "spell": 562572
+    },
+    {
+      "action": "learn",
+      "label": "Learn The Hunter and the Hunted",
+      "actor": "bloodmage",
+      "spell": 807487
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the passive is applied",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 807487,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "attack",
+      "label": "Re-seat the attack target for the charge",
+      "actor": "bloodmage",
+      "target": "victim"
+    },
+    {
+      "action": "cast",
+      "label": "Accursed Form with the passive",
+      "actor": "bloodmage",
+      "spell": 562572
+    },
+    {
+      "action": "assert",
+      "label": "The form is active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 562572,
+      "caster": "bloodmage",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: activating the form charges and roots the enemy",
+      "actor": "victim",
+      "metric": "aura",
+      "spell": 804854,
+      "caster": "bloodmage",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "bloodmage"
+    },
+    {
+      "action": "wait",
+      "label": "Wait out Accursed Form's 30 s duration",
+      "ms": 31500
+    },
+    {
+      "action": "assert",
+      "label": "Accursed Form expired",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 562572,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the expired ability is swapped to Bloodgale",
+      "actor": "bloodmage",
+      "metric": "temporary_spell_replacement",
+      "spell": 562572,
+      "equals": 681310
+    },
+    {
+      "action": "assert",
+      "label": "The helper spell is known while the swap is armed",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 681310,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Enemy health before the eruption",
+      "actor": "victim",
+      "metric": "health",
+      "save_as": "victim_hp_before"
+    },
+    {
+      "action": "cast",
+      "label": "Reactivate: the original id must be redirected to Bloodgale",
+      "actor": "bloodmage",
+      "spell": 562572
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the reactivation erupts and leeches the nearby enemy",
+      "actor": "victim",
+      "metric": "health",
+      "relative_to": "victim_hp_before",
+      "max": -1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "The burst is logged as Bloodgale",
+      "actor": "bloodmage",
+      "metric": "spell_damage_count",
+      "spell": 681310,
+      "target": "victim",
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "The swap is consumed (the cleared reading is the original id)",
+      "actor": "bloodmage",
+      "metric": "temporary_spell_replacement",
+      "spell": 562572,
+      "equals": 562572
+    },
+    {
+      "action": "assert",
+      "label": "The helper spell is removed again",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 681310,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Reactivating did not re-enter the form",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 562572,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Bloodmage survived the exchange",
+      "actor": "bloodmage",
+      "metric": "health",
+      "min": 1
+    }
+  ]
+}

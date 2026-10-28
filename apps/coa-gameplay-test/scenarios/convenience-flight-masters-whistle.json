@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Convenience: Flight Master's Whistle retreats to the nearest flight master",
+  "contract": "Flight Master's Whistle (item 10, spell 158): 'Call in a ride and Retreat to one of the nearest Flightmasters!'. Using it in Elwynn Forest must move an Alliance player to the nearest Alliance flight master on the continent.",
+  "timeout_ms": 60000,
+  "players": [{ "id": "p", "race": 1, "class": 1, "level": 80 }],
+  "creatures": [{ "id": "anchor", "owner": "p", "entry": 299, "level": 1, "distance": 1 }],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "p", "spell": 158 },
+    { "action": "assert", "label": "Starts next to the anchor", "actor": "p", "metric": "distance", "target": "anchor", "max": 5 },
+    { "action": "cast", "actor": "p", "spell": 158 },
+    { "action": "assert", "label": "Whistle cast accepted", "actor": "p", "metric": "cast_failure", "spell": 158, "equals": 0 },
+    { "action": "assert", "label": "The whistle carried the player to a flight master", "actor": "p", "metric": "distance", "target": "anchor", "min": 100, "within_ms": 8000 },
+    { "action": "assert", "label": "Still on the same continent", "actor": "p", "metric": "map_id", "equals": 0 }
+  ]
+}

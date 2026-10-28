@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Pyromancer Lighting the Fuse adds Intellect-based spell crit rating (#681)",
-  "contract": "#681: Lighting the Fuse raises spell crit rating by 15% of Intellect. The Blaze tick half of the tooltip is NOT asserted: AscensionPyromancerAuras.cpp forces Blaze's periodic crit chance to 0 unless Next-Blaze-crit or 520770 applies, so it is a maintainer decision (see PR).",
+  "contract": "#681: Lighting the Fuse raises spell crit rating by 15% of Intellect. The periodic-crit half is asserted for Blaze by pyromancer-lighting-the-fuse-blaze-crit.",
   "timeout_ms": 60000,
   "players": [
     {

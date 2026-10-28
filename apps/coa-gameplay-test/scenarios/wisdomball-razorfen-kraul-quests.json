@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "name": "The Wondrous Wisdomball offers and takes back every Razorfen Kraul quest tagged to the dungeon, not only the two a creature inside it hands out",
+  "contract": "AscensionWisdomball.cpp's AreasOfMap(mapId) collects the dungeon's own quests from three sources: creature_queststarter, gameobject_queststarter, and quest_template rows whose QuestSortID matches an AreaTable.dbc row whose own mapid equals the dungeon's map. For Blackfathom Deeps (map 48) and Ragefire Chasm (map 389) that third source works because their quests' QuestSortID (719 and 2437) is exactly the AreaTable row whose mapid is their own dungeon map, and Map.dbc's own MapEntry::linked_zone agrees (719 and 2437 respectively). Razorfen Kraul (map 47) breaks that assumption: AreaTable.dbc has exactly one row with mapid 47 (ID 491, 'Razorfen Kraul'), but none of Razorfen Kraul's six actual quest_template rows (1101, 1102, 1109, 1142, 1144, 1221) use QuestSortID 491 - all six use QuestSortID 1717, a different AreaTable row also named 'Razorfen Kraul' whose own mapid is 1 (Kalimdor, the overworld Barrens entry for the dungeon's entrance) and whose 'zone' field points at area 17. Map.dbc's linked_zone for map 47 is 0 (unset), so nothing in the DBC ties 491 back to 1717. AreasOfMap(47) therefore returns only [491], no quest_template row matches it, and LoadDungeonQuests(47) falls back to creature_queststarter alone: Willix the Importer (1144, starter creature 4508) and Mortality Wanes (1142, starter creature 4510, the pendant quest). The other four Razorfen Kraul quests (1101 The Crone of the Kraul, Alliance follow-up; 1102 A Vengeful Fate and 1109 Going, Going, Guano!, Horde; 1221 Blueleaf Tubers, both factions) are silently dropped from the offer list even though they carry the dungeon's own QuestSortID. The fix adds area 1717 to AreasOfMap's result specifically for map 47. The same area has to reach the list of quests a player carries, which LoadAllDungeonQuests() builds for the whole realm: it scans AreaTable for rows whose mapid is a dungeon map, so 1717 (mapid 1) and every quest it sorts were missing there even once the offer list had them, and a carried quest that is not in that list is never handed back by the ball - which is the reported symptom, Going, Going, Guano! being incompleteable (and, once complete, unhandidable) at the ball. This scenario proves a Horde character standing in Razorfen Kraul is offered its Horde-eligible zone quests (1102, 1109, 1221) alongside the always-working starter quest (1144), and, since #6443 the ball ignores a quest's AllowableRaces, the Alliance-only starter quest (1142) as well; that the character can take Going, Going, Guano! at the ball and find it in the carried half of the list; that picking up its Kraul Guano moves it to the ready-to-hand-in half; and that the ball then actually pays it out.",
+  "timeout_ms": 180000,
+  "players": [
+    { "id": "seeker", "race": 10, "class": 13, "level": 80 }
+  ],
+  "location": {
+    "map": 47,
+    "x": 1943,
+    "y": 1544.63,
+    "z": 82,
+    "o": 1.38,
+    "ignore_access": true
+  },
+  "steps": [
+    { "action": "wait", "label": "Let Razorfen Kraul settle", "ms": 8000 },
+    { "action": "add_item", "label": "Obtain the companion, as a purchase would", "actor": "seeker", "item": 101169, "count": 1 },
+    { "action": "use_item", "label": "Using the item teaches its summon", "actor": "seeker", "item": 101169, "spell": 55884 },
+    {
+      "action": "assert",
+      "label": "The summon is learned",
+      "actor": "seeker", "metric": "knows_spell", "spell": 83050, "equals": 1, "within_ms": 3000
+    },
+    { "action": "cast", "label": "Summon the ball in Razorfen Kraul", "actor": "seeker", "spell": 83050 },
+    { "action": "wait", "label": "Let the summon land", "ms": 3000 },
+    {
+      "action": "assert",
+      "label": "The cast produced a creature this character owns",
+      "actor": "seeker", "metric": "owned_creature_count", "entry": 79025, "min": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The always-working starter quest (Willix the Importer, neutral) is offered",
+      "actor": "seeker", "metric": "ball_offers_quest", "quest": 1144, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The Alliance-only starter quest (Mortality Wanes) is offered to a Horde character as well",
+      "actor": "seeker", "metric": "ball_offers_quest", "quest": 1142, "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "A Vengeful Fate (Horde, QuestSortID 1717 only, no in-dungeon starter) is offered",
+      "actor": "seeker", "metric": "ball_offers_quest", "quest": 1102, "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Going, Going, Guano! (Horde, QuestSortID 1717 only, no in-dungeon starter) is offered",
+      "actor": "seeker", "metric": "ball_offers_quest", "quest": 1109, "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Blueleaf Tubers (neutral, QuestSortID 1717 only, no in-dungeon starter) is offered",
+      "actor": "seeker", "metric": "ball_offers_quest", "quest": 1221, "equals": 1
+    },
+    {
+      "action": "quest_accept",
+      "label": "Take Going, Going, Guano! at the ball, then carry it",
+      "actor": "seeker", "quest": 1109, "entry": 79025
+    },
+    {
+      "action": "assert",
+      "label": "It is in the log, unfinished: the guano has not been picked up yet",
+      "actor": "seeker", "metric": "quest_status", "quest": 1109, "equals": 3, "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The list half a carried quest lives in holds it, so the ball offers it back for turn-in",
+      "actor": "seeker", "metric": "ball_carried_quest", "quest": 1109, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Unfinished, it is not counted as ready to hand in",
+      "actor": "seeker", "metric": "ball_turn_in_quest", "quest": 1109, "equals": 0
+    },
+    {
+      "action": "add_item",
+      "label": "Pick up the pile of Kraul Guano the quest asks for, as the bats drop it",
+      "actor": "seeker", "item": 5801, "count": 1
+    },
+    {
+      "action": "assert",
+      "label": "Carrying the item, the quest is complete",
+      "actor": "seeker", "metric": "quest_status", "quest": 1109, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "And the ball now lists it as one it can take back",
+      "actor": "seeker", "metric": "ball_turn_in_quest", "quest": 1109, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "quest_turn_in",
+      "label": "Hand Going, Going, Guano! in at the ball, nowhere near Master Apothecary Faranell",
+      "actor": "seeker", "quest": 1109, "entry": 79025, "reward": 0
+    },
+    {
+      "action": "assert",
+      "label": "The hand-in went through",
+      "actor": "seeker", "metric": "quest_status", "quest": 1109, "equals": 6, "within_ms": 3000
+    }
+  ]
+}

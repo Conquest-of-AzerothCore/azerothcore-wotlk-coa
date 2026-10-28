@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Widow's Kiss trigger does not clear Brood Mark or unlearn abilities (#5350, #5210)",
+  "contract": "#5350 and #5210 both report the same trigger: every 3rd Venom Fang cast (which becomes Widow's Kiss per 807600's 'every 3rd Venom Fang becomes Widow's Kiss' tooltip) re-learns Venom Fang/Widow's Kiss and clears all Brood Mark (804972) stacks. Traced mechanism (AscensionVenomancerAbilities.cpp): OnSpellCheckCast requires HasAura(807600) && Count(807244)>=2 for 504705 and blocks 800880 once that gate is reached; OnSpellCast casts 807244 (gate+1) when 800880 is cast with 807600 known, and removes all 807244 on casting 504705 (gate reset). Neither path touches Brood Mark: Spender(info) = Any(info,{804961,800871,804977}) does not include 800880 or 504705, so the only two call sites that adjust Brood (Resource(player,Brood,...) at lines 110 and 206) are gated behind Spender(info) and never run for this trigger. No SPELL_EFFECT_LEARN_SPELL was found on 807600, 504705, 800880 or 807244 in Spell.dbc. This scenario fixtures 3 Brood Mark stacks (StackAmount=5 per Spell.dbc id 804972) with set_aura, drives the gate to the 3rd cast (Widow's Kiss), and asserts the stacks and both spells' known state are unchanged. A prior revision cast 800880/504705 with target \"v\" (self): both are single-target Nature-school attacks with no self-castable effect, so the self-cast failed natively before OnSpellCast ever ran, the gate stayed 0, and the SETUP assertion failed regardless of the reported bug - a scenario setup defect, not evidence about Brood Mark. A second revision targeted a spawned hostile dummy but still failed cast_failure reason 22 (SPELL_FAILED_CASTER_AURASTATE): both 800880 and 504705 carry CasterAuraSpell=800841 (Spider Form, confirmed via coa-dbc-viewer), which Spell::CheckCast enforces natively (Spell.cpp: 'if (m_spellInfo->CasterAuraSpell && !m_caster->HasAura(...)) return SPELL_FAILED_CASTER_AURASTATE;') - neither ability is castable outside Spider Form. This revision learns and enters Spider Form (800841) before fixturing Brood Mark and driving the gate, targets a spawned hostile dummy (entry 36) with spell_hit_rating fixtured to avoid a miss, and asserts cast_failure == 0 after each of the three casts. With SETUP passing, a run surfaced a third, unrelated confound: AscensionVenomancerEvents.cpp's case 707382 ('return damage && critical && info && info->Id == 504705') grants +1 Brood Mark whenever 504705 (Widow's Kiss) itself crits - a separate, working, crit-gated resource mechanic that has nothing to do with #5350's report. An observed run crit on the 3rd cast and ended at 4 Brood Mark stacks (3 baseline + 1 from 707382), not 3, which a strict 'equals 3' assertion cannot distinguish from a partial clear. The DISCRIMINATING assertion now accepts [3,4]: it still fails hard against the reported bug (a clear to 0 or any other value outside that range) while tolerating the unrelated crit event.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "v", "race": 1, "class": 29, "level": 60, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "v", "entry": 36, "distance": 3, "health": 1000000 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn settle", "ms": 3000 },
+    { "action": "learn", "actor": "v", "spell": 807600 },
+    { "action": "learn", "actor": "v", "spell": 800880 },
+    { "action": "learn", "actor": "v", "spell": 504705 },
+    { "action": "learn", "actor": "v", "spell": 800841 },
+    { "action": "cast", "actor": "v", "spell": 800841, "label": "Enter Spider Form: 800880/504705 both require CasterAuraSpell 800841 (confirmed via coa-dbc-viewer)" },
+    { "action": "assert", "label": "SETUP: Spider Form is active", "actor": "v", "metric": "aura", "spell": 800841, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "label": "Clear the GCD from entering Spider Form", "ms": 1500 },
+    { "action": "set_aura", "actor": "v", "spell": 804972, "stacks": 3 },
+    { "action": "assert", "label": "SETUP: Widow's Kiss is known", "actor": "v", "metric": "knows_spell", "spell": 807600, "equals": 1 },
+    { "action": "assert", "label": "SETUP: Venom Fang is known", "actor": "v", "metric": "knows_spell", "spell": 800880, "equals": 1 },
+    { "action": "assert", "label": "SETUP: gate starts at 0", "actor": "v", "metric": "aura_stacks", "spell": 807244, "equals": 0 },
+    { "action": "assert", "label": "SETUP: Brood Mark starts at 3 stacks", "actor": "v", "metric": "aura_stacks", "spell": 804972, "equals": 3 },
+    { "action": "cast", "actor": "v", "spell": 800880, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: the 1st Venom Fang cast succeeded", "actor": "v", "metric": "cast_failure", "spell": 800880, "equals": 0 },
+    { "action": "wait", "label": "GCD", "ms": 1500 },
+    { "action": "assert", "label": "SETUP: gate at 1 after the 1st Venom Fang", "actor": "v", "metric": "aura_stacks", "spell": 807244, "equals": 1 },
+    { "action": "cast", "actor": "v", "spell": 800880, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: the 2nd Venom Fang cast succeeded", "actor": "v", "metric": "cast_failure", "spell": 800880, "equals": 0 },
+    { "action": "wait", "label": "GCD", "ms": 1500 },
+    { "action": "assert", "label": "SETUP: gate at 2 after the 2nd Venom Fang (Widow's Kiss is now forced)", "actor": "v", "metric": "aura_stacks", "spell": 807244, "equals": 2 },
+    { "action": "assert", "label": "SETUP: Brood Mark still 3 stacks before the trigger", "actor": "v", "metric": "aura_stacks", "spell": 804972, "equals": 3 },
+    { "action": "cast", "actor": "v", "spell": 504705, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: the 3rd cast (Widow's Kiss) succeeded", "actor": "v", "metric": "cast_failure", "spell": 504705, "equals": 0 },
+    { "action": "wait", "label": "GCD", "ms": 1500 },
+    { "action": "assert", "label": "SETUP: the 3rd cast (Widow's Kiss) reset the gate", "actor": "v", "metric": "aura_stacks", "spell": 807244, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: Brood Mark stacks are not cleared by the Widow's Kiss trigger (3, or 4 if the unrelated 707382 crit-on-Widow's-Kiss event fired)", "actor": "v", "metric": "aura_stacks", "spell": 804972, "min": 3, "max": 4 },
+    { "action": "assert", "label": "DISCRIMINATING: Venom Fang (800880) is still known after the Widow's Kiss trigger", "actor": "v", "metric": "knows_spell", "spell": 800880, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: Widow's Kiss (807600) is still known after the trigger", "actor": "v", "metric": "knows_spell", "spell": 807600, "equals": 1 }
+  ]
+}

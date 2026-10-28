@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "A successful Aneurysm interrupt heals the Bloodmage for 5% of maximum health (#3713)",
-  "contract": "Spell.dbc gives Aneurysm 806099 DurationIndex 35 (4000 ms school lockout), RecoveryTime 24000, Mechanic 26 (MECHANIC_INTERRUPT), RangeIndex 4 (30 yds), PowerType -2 with ManaCostPercentage 10, and a single effect 68 (SPELL_EFFECT_INTERRUPT_CAST) with TargetA 6. Its tooltip adds 'Successfully interrupting an enemy heals you for $520860s1% of your maximum health'. 520860 exists as a single SPELL_EFFECT_HEAL_PCT of 5% on the caster and nothing in the source or the world DB ever cast it, while Spell::EffectInterruptCast already raises OnSpellSuccessfulInterrupt only when an interrupt actually landed. Fixture: Scholomance Dark Summoner 11582 runs SmartAI with an in-combat event that casts Summon Risen Lackey 17618 on itself (4000 ms cast, PreventionType SPELL_PREVENTION_TYPE_SILENCE, InterruptFlags 0x9) 2-5 sec after engaging and again every 5-7 sec. Self-targeted is required because harness creatures are forced REACT_PASSIVE (CoAGameplayTest.cpp), so they never acquire a victim and SmartAI actions aimed at one never resolve; the same passivity means the fixture never strikes back, so no melee noise reaches the measurement. QA Test +10000 HP/MP 10040 at 20 stacks raises maximum health by about 200000 without touching create health, so Aneurysm's own cost (10% of create health, a few hundred) is negligible against the 5% heal, and health is then set to 50000 so the heal is not clipped by the cap. The contract is therefore a clearly positive health-percentage step across the interrupt, where the unhealed behaviour can only lose the cast's own health cost. The opening wait is 26000 ms rather than a short settle because the same creature also runs an out-of-combat SmartAI event (smart_scripts entry 11582 id 0, SMART_EVENT_UPDATE_OOC, initial 1000-20000 ms) casting Summon Frail Skeleton 16531 on itself, a 5000 ms cast whose PreventionType is SPELL_PREVENTION_TYPE_NONE and which Spell::EffectInterruptCast therefore never interrupts, while the harness's casting metric is Unit::IsNonMeleeSpellCast(false) and cannot tell the two casts apart. 20000 + 5000 bounds that cast, so 26000 ms clears it, and SmartScript::UpdateTimer freezes the out-of-combat timer while the creature is engaged, so it cannot recur once the attack lands; the only cast the mid-cast gate can then catch is Summon Risen Lackey 17618. timeout_ms is 120000 to cover the wait.",
+  "contract": "Spell.dbc gives Aneurysm 806099 DurationIndex 35 (4000 ms school lockout), RecoveryTime 24000, Mechanic 26 (MECHANIC_INTERRUPT), RangeIndex 4 (30 yds), PowerType -2 with ManaCostPercentage 10, and a single effect 68 (SPELL_EFFECT_INTERRUPT_CAST) with TargetA 6. Its tooltip adds 'Successfully interrupting an enemy heals you for $520860s1% of your maximum health'. 520860 exists as a single SPELL_EFFECT_HEAL_PCT of 5% on the caster and nothing in the source or the world DB ever cast it, while Spell::EffectInterruptCast already raises OnSpellSuccessfulInterrupt only when an interrupt actually landed. Fixture: Scholomance Dark Summoner 11582 runs SmartAI with an in-combat event (smart_scripts entry 11582 id 4, SMART_EVENT_UPDATE_IC) that casts Summon Risen Lackey 17618 on itself (4000 ms cast, PreventionType SPELL_PREVENTION_TYPE_SILENCE, InterruptFlags 0x9) 2-5 sec after engaging and again every 5-7 sec. Self-targeted is required because harness creatures are forced REACT_PASSIVE (CoAGameplayTest.cpp), so they never acquire a victim and SmartAI actions aimed at one never resolve; the same passivity means the fixture never strikes back, so no melee noise reaches the measurement. QA Test +10000 HP/MP 10040 at 20 stacks raises maximum health by about 200000 without touching create health, so Aneurysm's own cost (10% of create health, a few hundred) is negligible against the 5% heal, and health is then set to 50000 so the heal is not clipped by the cap. The contract is therefore a clearly positive health-percentage step across the interrupt, where the unhealed behaviour can only lose the cast's own health cost. The same creature also runs an out-of-combat event (id 0, SMART_EVENT_UPDATE_OOC, initial 1000-20000 ms) casting Summon Frail Skeleton 16531 on itself, a 5000 ms cast whose PreventionType is SPELL_PREVENTION_TYPE_NONE, and two more in-combat events casting Curse of Blood 12279 (id 5) and channeling Drain Life 17620 (id 6). The previous scenario read the generic casting = Unit::IsNonMeleeSpellCast(false) boolean, which cannot tell any of these four casts apart, and so dodged the OOC cast with a fixed 26000 ms wait timed to its own 20000 ms initial-delay ceiling plus its 5000 ms cast length: a timing coincidence, not a spell identity check, and it left the mid-cast gate exposed to whichever of the three in-combat spells happened to be running. cast_remaining_ms(spell) instead reads the exact spell ID of the unit's current generic or channeled spell (CoAGameplayTest.cpp: `current->GetSpellInfo()->Id == spell`), so gating on cast_remaining_ms(actor=summoner, spell=17618) names Summon Risen Lackey specifically: it is nonzero only while 17618 itself is the active cast, whether or not Frail Skeleton, Curse of Blood or Drain Life are also cycling on their own independent SmartAI timers, which removes the need to dodge or outlast any of them. SmartAI evaluates each event on its own repeat cycle, so a 30000 ms window comfortably covers 17618's first 2-5 s trigger even if an earlier Curse of Blood or Drain Life roll delays it by one cycle. Because Summon Risen Lackey has a real 4000 ms cast time rather than a channel's instantly-set current spell, the SPELL_STATE_PREPARING quirk noted for Drain Life (Spell::EffectInterruptCast skipping an interrupt that lands in a channel's first, cast-time-less update) does not apply here, but the scenario still lets the detected cast run 500 ms and re-checks cast_remaining_ms before interrupting, as a regression guard against any future change to that timing. timeout_ms is 120000 to leave ample margin.",
   "timeout_ms": 120000,
   "players": [
     {
@@ -24,7 +24,7 @@
     }
   ],
   "steps": [
-    { "action": "wait", "label": "Let the out-of-combat Summon Frail Skeleton cast finish", "ms": 26000 },
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
     { "action": "learn", "actor": "bloodmage", "spell": 806099 },
     { "action": "set_aura", "actor": "bloodmage", "spell": 10040, "stacks": 20 },
     {
@@ -47,11 +47,25 @@
     },
     {
       "action": "assert",
-      "label": "The fixture caster is mid-cast",
+      "label": "DETERMINISTIC GATE: the fixture caster is mid Summon Risen Lackey, not Frail Skeleton, Curse of Blood or Drain Life",
       "actor": "summoner",
-      "metric": "casting",
-      "equals": 1,
-      "within_ms": 25000
+      "metric": "cast_remaining_ms",
+      "spell": 17618,
+      "min": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "label": "Let the detected cast run past its first update",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "The fixture caster is still mid Summon Risen Lackey",
+      "actor": "summoner",
+      "metric": "cast_remaining_ms",
+      "spell": 17618,
+      "min": 1
     },
     {
       "action": "snapshot",
@@ -63,9 +77,10 @@
     { "action": "cast", "actor": "bloodmage", "spell": 806099, "target": "summoner" },
     {
       "action": "assert",
-      "label": "Regression guard: the native interrupt stopped the cast",
+      "label": "Regression guard: the native interrupt stopped Summon Risen Lackey",
       "actor": "summoner",
-      "metric": "casting",
+      "metric": "cast_remaining_ms",
+      "spell": 17618,
       "equals": 0,
       "within_ms": 2000
     },

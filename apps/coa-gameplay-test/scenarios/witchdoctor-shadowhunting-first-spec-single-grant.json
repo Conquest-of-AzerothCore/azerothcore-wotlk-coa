@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "name": "Choosing Shadowhunting announces Malefic Arrow and Auto Shot once and places no action button (#198)",
+  "contract": "A level 10 Witch Doctor holding Malefic Wrath ranks 1 and 2 (807037, 807211) who first selects Shadowhunting (specialization 4) gains the identity passive Shadowhunter 92086 ('Allows you to auto shoot with a ranged weapon') and the automatic Malefic Arrow passive 707854 ('Transforms your Malefic Wrath into Malefic Arrow'). Each Malefic Wrath rank is therefore joined by the matching Malefic Arrow rank (801674, 680908; spell_ranks chain 801674) and Auto Shot 75, all temporary grants, and Malefic Wrath rank 2 is replaced by Malefic Arrow rank 2. #198 and its comment showed each of these learned-ability lines two or three times on core feb155c82c75, where Player::learnSpell announced a temporary grant a second time after Player::_addSpell (removed by b2bdf72a5, #251). Each grant must now send exactly one SMSG_LEARNED_SPELL. Selecting a first specialization never touches the stored action bar: SwitchSpecialization only remembers and restores bar buttons when it leaves a previous specialization, and the client's own auto-placement (FrameXML/Util/C_Spell.lua PlaceSpellOnActionBar) is outside this server.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "doctor", "race": 1, "class": 13, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks and class synchronisation settle", "ms": 5000 },
+    { "action": "learn", "actor": "doctor", "spell": 807037 },
+    { "action": "learn", "actor": "doctor", "spell": 807211 },
+    { "action": "assert", "label": "No Malefic Arrow before a specialization", "actor": "doctor", "metric": "knows_spell", "spell": 801674, "equals": 0 },
+    { "action": "assert", "label": "No Auto Shot before a specialization", "actor": "doctor", "metric": "knows_spell", "spell": 75, "equals": 0 },
+    { "action": "snapshot", "actor": "doctor", "metric": "action_button", "button": 0, "save_as": "button_0" },
+    { "action": "snapshot", "actor": "doctor", "metric": "action_button", "button": 1, "save_as": "button_1" },
+    { "action": "snapshot", "actor": "doctor", "metric": "action_button", "button": 2, "save_as": "button_2" },
+    { "action": "snapshot", "actor": "doctor", "metric": "action_button", "button": 3, "save_as": "button_3" },
+    { "action": "snapshot", "actor": "doctor", "metric": "action_button", "button": 4, "save_as": "button_4" },
+    { "action": "snapshot", "actor": "doctor", "metric": "action_button", "button": 5, "save_as": "button_5" },
+    { "action": "snapshot", "actor": "doctor", "metric": "action_button", "button": 6, "save_as": "button_6" },
+    { "action": "snapshot", "actor": "doctor", "metric": "action_button", "button": 7, "save_as": "button_7" },
+    { "action": "snapshot", "actor": "doctor", "metric": "action_button", "button": 8, "save_as": "button_8" },
+    { "action": "snapshot", "actor": "doctor", "metric": "action_button", "button": 9, "save_as": "button_9" },
+    { "action": "snapshot", "actor": "doctor", "metric": "action_button", "button": 10, "save_as": "button_10" },
+    { "action": "snapshot", "actor": "doctor", "metric": "action_button", "button": 11, "save_as": "button_11" },
+
+    { "action": "specialization", "actor": "doctor", "id": 4 },
+    { "action": "assert", "label": "Shadowhunting grants its identity Shadowhunter", "actor": "doctor", "metric": "knows_spell", "spell": 92086, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Shadowhunting grants the automatic Malefic Arrow passive", "actor": "doctor", "metric": "knows_spell", "spell": 707854, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Malefic Arrow rank 1 joins Malefic Wrath rank 1", "actor": "doctor", "metric": "knows_spell", "spell": 801674, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Malefic Arrow rank 2 joins Malefic Wrath rank 2", "actor": "doctor", "metric": "knows_spell", "spell": 680908, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Shadowhunter teaches Auto Shot", "actor": "doctor", "metric": "knows_spell", "spell": 75, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Malefic Wrath rank 2 becomes Malefic Arrow rank 2", "actor": "doctor", "metric": "temporary_spell_replacement", "spell": 807211, "equals": 680908, "within_ms": 3000 },
+
+    { "action": "wait", "label": "Let the Witch Doctor update run several more passes", "ms": 3000 },
+    { "action": "assert", "label": "Malefic Arrow rank 1 is announced once", "actor": "doctor", "metric": "spellbook_learned_alerts", "spell": 801674, "equals": 1 },
+    { "action": "assert", "label": "Malefic Arrow rank 2 is announced once", "actor": "doctor", "metric": "spellbook_learned_alerts", "spell": 680908, "equals": 1 },
+    { "action": "assert", "label": "Auto Shot is announced once", "actor": "doctor", "metric": "spellbook_learned_alerts", "spell": 75, "equals": 1 },
+
+    { "action": "assert", "label": "Button 1 unchanged", "actor": "doctor", "metric": "action_button", "button": 0, "relative_to": "button_0", "equals": 0 },
+    { "action": "assert", "label": "Button 2 unchanged", "actor": "doctor", "metric": "action_button", "button": 1, "relative_to": "button_1", "equals": 0 },
+    { "action": "assert", "label": "Button 3 unchanged", "actor": "doctor", "metric": "action_button", "button": 2, "relative_to": "button_2", "equals": 0 },
+    { "action": "assert", "label": "Button 4 unchanged", "actor": "doctor", "metric": "action_button", "button": 3, "relative_to": "button_3", "equals": 0 },
+    { "action": "assert", "label": "Button 5 unchanged", "actor": "doctor", "metric": "action_button", "button": 4, "relative_to": "button_4", "equals": 0 },
+    { "action": "assert", "label": "Button 6 unchanged", "actor": "doctor", "metric": "action_button", "button": 5, "relative_to": "button_5", "equals": 0 },
+    { "action": "assert", "label": "Button 7 unchanged", "actor": "doctor", "metric": "action_button", "button": 6, "relative_to": "button_6", "equals": 0 },
+    { "action": "assert", "label": "Button 8 unchanged", "actor": "doctor", "metric": "action_button", "button": 7, "relative_to": "button_7", "equals": 0 },
+    { "action": "assert", "label": "Button 9 unchanged", "actor": "doctor", "metric": "action_button", "button": 8, "relative_to": "button_8", "equals": 0 },
+    { "action": "assert", "label": "Button 10 unchanged", "actor": "doctor", "metric": "action_button", "button": 9, "relative_to": "button_9", "equals": 0 },
+    { "action": "assert", "label": "Button 11 unchanged", "actor": "doctor", "metric": "action_button", "button": 10, "relative_to": "button_10", "equals": 0 },
+    { "action": "assert", "label": "Button 12 unchanged", "actor": "doctor", "metric": "action_button", "button": 11, "relative_to": "button_11", "equals": 0 }
+  ]
+}

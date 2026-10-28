@@ -17,8 +17,11 @@ constexpr uint32 Brood = 804972;
 constexpr uint32 Exposed = 805095;
 constexpr uint32 CharmOfWarding = 705967;
 constexpr uint32 Spider = 800841;
+constexpr uint32 SpiderlingVenomSource = 807702;
 constexpr uint32 Beetle = 803183;
 constexpr uint32 Skulk = 800843;
+constexpr uint32 SpiderLord = 704264;
+constexpr uint32 SpiderLordDisplay = 142811;
 struct VenomancerState
 {
     EventMap timers;
@@ -55,6 +58,7 @@ void Expose(Player* player, uint32 stacks, bool molt = false);
 uint32 ClearExposed(Player* player);
 float BroodMultiplier(uint32 count, int32 effectiveness);
 void Refresh(Player* player);
+void UpdateSpiderLordDisplay(Player* player);
 bool Chance(Player* player, uint32 id, uint32 cooldown = 0);
 std::list<Unit*> Nearby(Unit* center, float radius);
 std::list<Unit*> Allies(Player* player, Unit* center, float radius, uint32 count = 0);
@@ -65,7 +69,7 @@ void SetHelper(Player* player, uint32 id, bool enabled);
 void SetAmount(Player* player, uint32 id, uint8 slot, int32 amount);
 void ExtendOwned(Player* player, Unit* target, uint32 root, int32 milliseconds);
 void Spread(Player* player, Unit* source, Unit* target, uint32 root);
-void ApplyVenoms(Player* player, Unit* target);
+void ApplyVenoms(Player* player, Unit* target, bool fromSpiderling = false);
 void Mushroom(Player* player, Position const& position, float coefficient = .25f, bool big = false);
 void Summon(Player* player, Unit* target, uint32 spell, Position const* position = nullptr);
 void ExitParasite(Player* player);

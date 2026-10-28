@@ -1,0 +1,282 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Corpse Explosion explodes the corpses it is cast on into bloody remains (#6594)",
+  "contract": "Corpse Explosion 533236-533239 (family 29, ranks 1-4, Runic Power cost 400) is bound to spell_ascension_necromancer_ability, whose Hit calls AscensionNecromancer::CorpseExplosion(player, player): every eligible corpse within 15 yd explodes, dealing 533240 to each enemy within 10 yd of it. Each exploded corpse plays the stock Corpse Explosion 61614 visual (kits 10290 and 220: the DeathKnight_CorpseExplosion cloud and gibs and a BloodyExplosion) and is at once left as bloody meat: BloodyMeat02 (display 25538) or, half the time, BloodyMeat01 (display 25539) at half scale; a corpse whose display no longer matches its native display has already exploded and is not exploded again. Fixtures: a Necromancer raises two Lesser Skeletal Warriors 50065 with 500970 and sacrifices both with Sacrifice Undead 807938, which kills them and leaves two corpses beside the caster; a hostile creature 2 yd away is the explosion target, a Diseased Young Wolf 299 killed beside it is a third, observable corpse, and an eater with Cannibalize 20577 confirms the corpses (SPELL_FAILED_NO_EDIBLE_CORPSES 141 without one within 5 yd). Expected: Cannibalize is refused before the sacrifice and accepted after it, one cast explodes all three corpses and damages the enemy once per corpse, the wolf corpse shows the explosion and then the meat, and a second cast finds no corpse to explode.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "n",
+      "race": 5,
+      "class": 23,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "eater",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and the Life Force aura settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "n",
+      "spell": 500970
+    },
+    {
+      "action": "learn",
+      "actor": "n",
+      "spell": 807938
+    },
+    {
+      "action": "learn",
+      "actor": "n",
+      "spell": 533236
+    },
+    {
+      "action": "learn",
+      "actor": "eater",
+      "spell": 20577
+    },
+    {
+      "action": "cast",
+      "label": "Raise the first Lesser Skeletal Warrior",
+      "actor": "n",
+      "spell": 500970
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: one Lesser Skeletal Warrior is raised",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 50065,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "label": "Raise the second Lesser Skeletal Warrior",
+      "actor": "n",
+      "spell": 500970
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: two Lesser Skeletal Warriors are raised",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 50065,
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Let the minions take their places beside the Necromancer",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: Cannibalize while the minions live",
+      "actor": "eater",
+      "spell": 20577
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no edible corpse lies within reach before the sacrifice",
+      "actor": "eater",
+      "metric": "cast_failure",
+      "spell": 20577,
+      "equals": 141,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Sacrifice Undead",
+      "actor": "n",
+      "spell": 807938
+    },
+    {
+      "action": "assert",
+      "label": "Both minions are destroyed and leave corpses",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 50065,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the sacrificed minions settle as corpses",
+      "ms": 1000
+    },
+    {
+      "action": "cast",
+      "label": "SETUP: Cannibalize beside the corpses",
+      "actor": "eater",
+      "spell": 20577
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the sacrificed minions left corpses",
+      "actor": "eater",
+      "metric": "cast_failure",
+      "spell": 20577,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_power",
+      "label": "Give the Runic Power for one Corpse Explosion",
+      "actor": "n",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "wolf",
+      "metric": "display_id",
+      "save_as": "wolf_display"
+    },
+    {
+      "action": "learn",
+      "actor": "n",
+      "spell": 2136
+    },
+    {
+      "action": "cast",
+      "label": "Kill the wolf for a third corpse",
+      "actor": "n",
+      "spell": 2136,
+      "target": "wolf"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the wolf is a corpse",
+      "actor": "wolf",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Clear Fire Blast's global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "snapshot",
+      "label": "Count the Corpse Explosion payload hits before the cast",
+      "actor": "n",
+      "metric": "spell_damage_count",
+      "spell": 533240,
+      "target": "enemy",
+      "save_as": "explosions"
+    },
+    {
+      "action": "cast",
+      "label": "Corpse Explosion beside the two corpses",
+      "actor": "n",
+      "spell": 533236
+    },
+    {
+      "action": "assert",
+      "label": "Every claimed corpse explodes onto the enemy standing beside it",
+      "actor": "n",
+      "metric": "spell_damage_count",
+      "spell": 533240,
+      "target": "enemy",
+      "relative_to": "explosions",
+      "min": 3,
+      "max": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The exploding corpse is left as bloody meat",
+      "actor": "wolf",
+      "metric": "display_id",
+      "min": 25538,
+      "max": 25539,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_power",
+      "label": "Runic Power for a second cast",
+      "actor": "n",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "n",
+      "spell": 533236
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Corpse Explosion again beside the remains",
+      "actor": "n",
+      "spell": 533236
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the second cast is not refused",
+      "actor": "n",
+      "metric": "cast_failure",
+      "spell": 533236,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Exploded corpses are not exploded again",
+      "actor": "n",
+      "metric": "spell_damage_count",
+      "spell": 533240,
+      "target": "enemy",
+      "relative_to": "explosions",
+      "equals": 3
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "n",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 2
+    },
+    {
+      "id": "wolf",
+      "owner": "n",
+      "entry": 299,
+      "level": 80,
+      "health": 1,
+      "distance": 3
+    }
+  ]
+}

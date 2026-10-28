@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "name": "Spice of Life grants Pooled Vitality from periodic damage (#2219)",
-  "contract": "Spice of Life 680823 reads 'Your periodic damage and healing now has a $h% chance to grant a stack of Pooled Vitality'. Its single effect is aura 42 (proc trigger spell) on Pooled Vitality 680687, the Bloodmage's registered custom resource (StackAmount 10, TargetA 1). Spell.dbc gives 680823 ProcFlags 0, ProcChance 10, and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it and the stack count was identically zero forever. The chance is 10% per tick and the harness has no statistical test, so the scenario must run enough ticks that a false failure is under 0.1%: Taldaram's Torment 800772 ticks every 3 sec, and 66 ticks give 0.9^66 = 0.09% - the scenario therefore waits through about 200 sec of ticking, re-applying the DoT as needed. The proc chance itself is not lowered to make the test deterministic.",
-  "timeout_ms": 300000,
+  "contract": "Spice of Life 680823 reads 'Your periodic damage and healing now has a $h% chance to grant a stack of Pooled Vitality'. Its single effect is aura 42 (proc trigger spell) on Pooled Vitality 680687, the Bloodmage's registered custom resource (StackAmount 10, TargetA 1). Spell.dbc gives 680823 ProcFlags 0, ProcChance 10, and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it and the stack count was identically zero forever. The chance is 10% per tick and the harness has no statistical test, so the scenario must deliver enough ticks that a false failure is under 0.1%: 0.9^66 = 0.09%. Taldaram's Torment 800772 has EffectAmplitude 3000 and DurationIndex 8 (15 sec), so one application ticks only five times; the earlier layout of four casts 60 sec apart delivered at most 20 ticks, a 0.9^20 = 12% false-failure chance. The DoT is therefore re-applied 17 times, each after the previous application has expired (15.5 sec apart), and step 'PIN' counts the ticks with spell_damage_count before the discriminating assertion relies on them: at least 66 damaging ticks are required, and 17 applications of five ticks give 85. Each cast costs 10% of the Bloodmage's base health (PowerType -2, ManaCostPercentage 10), which 17 casts would exceed, so health is restored to 4000 before every cast as a fixture. The proc chance itself is not lowered to make the test deterministic.",
+  "timeout_ms": 420000,
   "players": [
     {
       "id": "bloodmage",
@@ -60,26 +60,18 @@
       "save_as": "pv_before"
     },
     {
-      "action": "cast",
+      "action": "snapshot",
+      "label": "Taldaram's Torment ticks before any cast",
       "actor": "bloodmage",
+      "metric": "spell_damage_count",
       "spell": 800772,
-      "target": "dummy"
+      "target": "dummy",
+      "save_as": "ticks_before"
     },
     {
-      "action": "wait",
-      "label": "Tick for the first stretch",
-      "ms": 60000
-    },
-    {
-      "action": "cast",
+      "action": "set_health",
       "actor": "bloodmage",
-      "spell": 800772,
-      "target": "dummy"
-    },
-    {
-      "action": "wait",
-      "label": "Tick for the second stretch",
-      "ms": 60000
+      "value": 4000
     },
     {
       "action": "cast",
@@ -89,24 +81,283 @@
     },
     {
       "action": "wait",
-      "label": "Tick for the third stretch",
-      "ms": 60000
+      "label": "Application 1 ticks out and expires",
+      "ms": 15500
+    },
+    {
+      "action": "set_health",
+      "actor": "bloodmage",
+      "value": 4000
     },
     {
       "action": "cast",
       "actor": "bloodmage",
       "spell": 800772,
       "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Application 2 ticks out and expires",
+      "ms": 15500
+    },
+    {
+      "action": "set_health",
+      "actor": "bloodmage",
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 800772,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Application 3 ticks out and expires",
+      "ms": 15500
+    },
+    {
+      "action": "set_health",
+      "actor": "bloodmage",
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 800772,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Application 4 ticks out and expires",
+      "ms": 15500
+    },
+    {
+      "action": "set_health",
+      "actor": "bloodmage",
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 800772,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Application 5 ticks out and expires",
+      "ms": 15500
+    },
+    {
+      "action": "set_health",
+      "actor": "bloodmage",
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 800772,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Application 6 ticks out and expires",
+      "ms": 15500
+    },
+    {
+      "action": "set_health",
+      "actor": "bloodmage",
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 800772,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Application 7 ticks out and expires",
+      "ms": 15500
+    },
+    {
+      "action": "set_health",
+      "actor": "bloodmage",
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 800772,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Application 8 ticks out and expires",
+      "ms": 15500
+    },
+    {
+      "action": "set_health",
+      "actor": "bloodmage",
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 800772,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Application 9 ticks out and expires",
+      "ms": 15500
+    },
+    {
+      "action": "set_health",
+      "actor": "bloodmage",
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 800772,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Application 10 ticks out and expires",
+      "ms": 15500
+    },
+    {
+      "action": "set_health",
+      "actor": "bloodmage",
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 800772,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Application 11 ticks out and expires",
+      "ms": 15500
+    },
+    {
+      "action": "set_health",
+      "actor": "bloodmage",
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 800772,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Application 12 ticks out and expires",
+      "ms": 15500
+    },
+    {
+      "action": "set_health",
+      "actor": "bloodmage",
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 800772,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Application 13 ticks out and expires",
+      "ms": 15500
+    },
+    {
+      "action": "set_health",
+      "actor": "bloodmage",
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 800772,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Application 14 ticks out and expires",
+      "ms": 15500
+    },
+    {
+      "action": "set_health",
+      "actor": "bloodmage",
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 800772,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Application 15 ticks out and expires",
+      "ms": 15500
+    },
+    {
+      "action": "set_health",
+      "actor": "bloodmage",
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 800772,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Application 16 ticks out and expires",
+      "ms": 15500
+    },
+    {
+      "action": "set_health",
+      "actor": "bloodmage",
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 800772,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Application 17 ticks out and expires",
+      "ms": 15500
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: periodic damage eventually grants Pooled Vitality",
+      "label": "PIN: the applications delivered at least 66 damaging ticks",
+      "actor": "bloodmage",
+      "metric": "spell_damage_count",
+      "spell": 800772,
+      "target": "dummy",
+      "relative_to": "ticks_before",
+      "min": 66
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: periodic damage grants Pooled Vitality",
       "actor": "bloodmage",
       "metric": "aura_stacks",
       "spell": 680687,
       "relative_to": "pv_before",
-      "min": 1,
-      "within_ms": 60000
+      "min": 1
     }
   ]
 }

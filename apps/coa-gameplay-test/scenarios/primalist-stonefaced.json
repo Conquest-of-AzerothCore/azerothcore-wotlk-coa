@@ -15,7 +15,9 @@
       "race": 1,
       "class": 31,
       "level": 80,
-      "spell_hit_rating": 10000
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
     },
     {
       "id": "enemy",
@@ -45,9 +47,9 @@
       "o": 0
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "primalist",
-      "command": ".localspec 95"
+      "id": 95
     },
     {
       "action": "learn",
@@ -567,6 +569,14 @@
       "save_as": "talented_300693"
     },
     {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_hit_chance",
+      "min": 100,
+      "within_ms": 1000,
+      "label": "The physical Seismic Smash fixture has native melee hit ready"
+    },
+    {
       "action": "cast",
       "actor": "primalist",
       "spell": 300693
@@ -941,5 +951,8 @@
       "equals": 0
     }
   ],
-  "contract": "Each completed Seismic ability grants two Earth's Rage stacks once, up to five. Each stack gives 4% speed and 3% haste for eight seconds. Periodic ticks, unrelated spells and unlearning do not add stacks."
+  "contract": [
+    "Each completed Seismic ability grants two Earth's Rage stacks once, up to five. Each stack gives 4%",
+    "speed and 3% haste for eight seconds. Periodic ticks, unrelated spells and unlearning do not add stacks."
+  ]
 }

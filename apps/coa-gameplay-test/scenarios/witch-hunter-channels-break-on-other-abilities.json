@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Twilight Frenzy and Sixfold Shot stop when another ability is cast, except Vault (#1473)",
+  "contract": "Twilight Frenzy 805751 (self channel, 5 s) reads 'Spin around for $d, firing shots at nearby enemies ... Can dodge and parry and move while active.' and Sixfold Shot 807364 (channel, 1.5 s) reads 'Unleash 6 quick shots across $d ... Usable while moving.' Both carry AttributesEx5 0x1, the 3.3.5 channel-while-moving bit that the tooltips describe; every channel in the installed Spell.dbc that carries it and says what it allows speaks of movement only. Abilities that CoA lets the player use during another cast or channel carry SPELL_ATTR4_ALLOW_CAST_WHILE_CASTING and say so ('Usable while casting or channeling': Remote Detonation, Sanity Tap, Grave March, Dilation, Firewall). In family 21 only Vault 500085 (and its directional copies) and the two stance swaps carry that attribute, which is the report's 'except Vault'. The server read the bit as SPELL_ATTR5_ALLOW_ACTION_DURING_CHANNEL (Unit::SetCurrentCastedSpell), so any other ability left both channels running. Shadowblast 680264 (instant, no cast-while-casting attribute) must now end the channel; Vault must not. The Sixfold Shot ready state (passive 500567 and five 500569 stacks) is fixture state here; witch-hunter-sixfold-shot-transform covers how the stacks are earned.",
+  "timeout_ms": 120000,
+  "players": [
+    {"id": "hunter", "race": 1, "class": 15, "level": 60, "spell_hit_rating": 10000, "ranged_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "golem", "owner": "hunter", "entry": 36, "level": 60, "distance": 12, "health": 1000000}
+  ],
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "label": "Crossbows skill", "actor": "hunter", "spell": 5011},
+    {"action": "add_item", "actor": "hunter", "item": 15807},
+    {"action": "equip", "actor": "hunter", "item": 15807, "slot": 17},
+    {"action": "wait", "label": "Let the weapon swap cooldown expire", "ms": 2000},
+    {"action": "learn", "label": "Shadowblast", "actor": "hunter", "spell": 680264},
+    {"action": "learn", "label": "Twilight Frenzy", "actor": "hunter", "spell": 805751},
+    {"action": "learn", "label": "Vault", "actor": "hunter", "spell": 500085},
+    {"action": "set_power", "actor": "hunter", "power": 1, "value": 1000},
+    {"action": "cast", "label": "Twilight Frenzy", "actor": "hunter", "spell": 805751},
+    {"action": "assert", "label": "Twilight Frenzy is channeling", "actor": "hunter", "metric": "cast_remaining_ms", "spell": 805751, "min": 1, "within_ms": 1000},
+    {"action": "snapshot", "actor": "hunter", "metric": "spell_damage_count", "spell": 680264, "target": "golem", "save_as": "blast_during_frenzy"},
+    {"action": "cast", "label": "Shadowblast during Twilight Frenzy", "actor": "hunter", "spell": 680264, "target": "golem"},
+    {"action": "assert", "label": "#1473: Shadowblast ends Twilight Frenzy", "actor": "hunter", "metric": "cast_remaining_ms", "spell": 805751, "equals": 0, "within_ms": 500},
+    {"action": "assert", "label": "#1473: the Twilight Frenzy aura is gone", "actor": "hunter", "metric": "aura", "spell": 805751, "equals": 0},
+    {"action": "assert", "label": "Shadowblast was cast", "actor": "hunter", "metric": "spell_damage_count", "spell": 680264, "target": "golem", "relative_to": "blast_during_frenzy", "min": 1, "within_ms": 2000},
+    {"action": "wait", "label": "Global cooldown", "ms": 2000},
+    {"action": "set_power", "actor": "hunter", "power": 1, "value": 1000},
+    {"action": "cast", "label": "Twilight Frenzy again", "actor": "hunter", "spell": 805751},
+    {"action": "assert", "label": "Twilight Frenzy is channeling again", "actor": "hunter", "metric": "cast_remaining_ms", "spell": 805751, "min": 1, "within_ms": 1000},
+    {"action": "cast", "label": "Vault during Twilight Frenzy", "actor": "hunter", "spell": 500085},
+    {"action": "assert", "label": "Vault was cast", "actor": "hunter", "metric": "cooldown_ms", "spell": 500085, "min": 1, "within_ms": 1000},
+    {"action": "assert", "label": "Vault leaves Twilight Frenzy channeling", "actor": "hunter", "metric": "cast_remaining_ms", "spell": 805751, "min": 1},
+    {"action": "assert", "label": "Vault leaves the Twilight Frenzy aura", "actor": "hunter", "metric": "aura", "spell": 805751, "equals": 1},
+    {"action": "wait", "label": "Let Twilight Frenzy end", "ms": 6000},
+    {"action": "learn", "label": "Sixfold Shot passive", "actor": "hunter", "spell": 500567},
+    {"action": "learn", "label": "Sixfold Shot", "actor": "hunter", "spell": 807364},
+    {"action": "set_aura", "label": "Five Sixfold Shot stacks", "actor": "hunter", "spell": 500569, "stacks": 5},
+    {"action": "set_power", "actor": "hunter", "power": 1, "value": 1000},
+    {"action": "cast", "label": "Sixfold Shot", "actor": "hunter", "spell": 807364, "target": "golem"},
+    {"action": "assert", "label": "Sixfold Shot is channeling", "actor": "hunter", "metric": "cast_remaining_ms", "spell": 807364, "min": 1, "within_ms": 500},
+    {"action": "snapshot", "actor": "hunter", "metric": "spell_damage_count", "spell": 680264, "target": "golem", "save_as": "blast_during_sixfold"},
+    {"action": "cast", "label": "Shadowblast during Sixfold Shot", "actor": "hunter", "spell": 680264, "target": "golem"},
+    {"action": "assert", "label": "#1473: Shadowblast ends Sixfold Shot", "actor": "hunter", "metric": "cast_remaining_ms", "spell": 807364, "equals": 0, "within_ms": 300},
+    {"action": "assert", "label": "Shadowblast was cast", "actor": "hunter", "metric": "spell_damage_count", "spell": 680264, "target": "golem", "relative_to": "blast_during_sixfold", "min": 1, "within_ms": 2000}
+  ]
+}

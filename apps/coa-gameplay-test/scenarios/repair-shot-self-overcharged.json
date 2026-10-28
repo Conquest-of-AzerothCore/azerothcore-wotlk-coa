@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Repair Shot on the caster does not lock out later casts (#4028)",
+  "contract": "A Tinker healing themself with Repair Shot keeps no Overcharged (560711) marker, so the next Repair Shot on themself still lands. A stale marker on the caster is cleared by a successful heal.",
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 10
+    }
+  ],
+  "location": {
+    "map": 530,
+    "x": 7633.86,
+    "y": -6810.22,
+    "z": 79.5987
+  },
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "learn", "actor": "tinker", "spell": 502573 },
+    { "action": "set_health", "actor": "tinker", "value": 50 },
+    { "action": "cast", "actor": "tinker", "spell": 502573, "target": "tinker" },
+    { "action": "assert", "label": "First self Repair Shot heals", "actor": "tinker", "metric": "health", "min": 125, "within_ms": 4000 },
+    { "action": "assert", "label": "Overcharged is not left on the caster", "actor": "tinker", "metric": "aura", "spell": 560711, "equals": 0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "set_health", "actor": "tinker", "value": 50 },
+    { "action": "cast", "actor": "tinker", "spell": 502573, "target": "tinker" },
+    { "action": "assert", "label": "Second self Repair Shot still heals", "actor": "tinker", "metric": "health", "min": 125, "within_ms": 4000 },
+    { "action": "assert", "actor": "tinker", "metric": "aura", "spell": 560711, "equals": 0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "set_health", "actor": "tinker", "value": 50 },
+    { "action": "set_aura", "actor": "tinker", "spell": 560711, "stacks": 1 },
+    { "action": "cast", "actor": "tinker", "spell": 502573, "target": "tinker" },
+    { "action": "assert", "label": "A stale marker does not block the self heal", "actor": "tinker", "metric": "health", "min": 125, "within_ms": 4000 },
+    { "action": "assert", "label": "The stale marker is cleared", "actor": "tinker", "metric": "aura", "spell": 560711, "equals": 0 }
+  ]
+}

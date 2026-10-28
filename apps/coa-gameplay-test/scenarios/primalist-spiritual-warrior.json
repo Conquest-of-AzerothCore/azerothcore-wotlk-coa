@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Primalist Spiritual Warrior: Spirit Charge critical strike chance",
-  "timeout_ms": 120000,
+  "timeout_ms": 180000,
   "location": {
     "map": 0,
     "x": -9617.06,
@@ -26,9 +26,9 @@
   ],
   "steps": [
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "primalist",
-      "command": ".localspec 58"
+      "id": 58
     },
     {
       "action": "teleport",
@@ -287,5 +287,5 @@
       "ms": 1600
     }
   ],
-  "contract": "The native critical chance calculation gains 25 percentage points for both active Spirit Charge ranks while learned, and returns to baseline after removal. An unrelated Geode is unchanged. Normal Spirit Charge casts must successfully heal the nearby ally."
+  "contract": "The native critical chance calculation gains 25 percentage points for both active Spirit Charge ranks while learned, and returns to baseline after removal. An unrelated Geode is unchanged. Normal Spirit Charge casts must successfully heal the nearby ally. timeout_ms counts the real setup time as well as the 100800 ms of waits, and setup took up to 20 s in a full simulated run, so it is 180000 ms."
 }

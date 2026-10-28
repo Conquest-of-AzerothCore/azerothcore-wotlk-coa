@@ -1,34 +1,40 @@
 {
   "schema": 1,
   "name": "Repro: the level-20 Witchhunter purchases that showed no popup",
-  "contract": "The three spells bought on the live realm by a level-20 Witchhunter (681095, 804432, 800162) must each be learned and announced with SMSG_LEARNED_SPELL exactly once.",
+  "contract": "The live realm report named three purchases by a level-20 Witchhunter (681095, 804432, 800162). Two of them are talent nodes of the class tree, which grants them: March of the Black King 681095 (CharacterAdvancement 7575, RankSpell[0] 681095, TalentEssenceCost 1) and Tormentor 800162 (CharacterAdvancement 6856, Boltslinger, TalentEssenceCost 1). The book neither lists nor sells a node's first rank, so buying either is refused, grants nothing and announces nothing. Guard Strike 804432 is a plain level-18 class spell the book sells: it must be offered, charged, learned and announced with SMSG_LEARNED_SPELL exactly once.",
   "timeout_ms": 180000,
   "players": [
     { "id": "c15", "race": 1, "class": 15, "level": 20 }
   ],
   "steps": [
+    { "action": "money", "actor": "c15", "copper": 10000, "label": "fixture: a purse for the ability the book sells" },
     { "action": "learn", "actor": "c15", "spell": 97930, "label": "learn the book companion spell" },
     { "action": "cast", "actor": "c15", "spell": 97930, "label": "summon the book" },
     { "action": "assert", "actor": "c15", "metric": "owned_creature_count", "entry": 75115, "equals": 1, "within_ms": 5000, "label": "the book is out" },
     { "action": "gossip_hello", "actor": "c15", "label": "open the book" },
     { "action": "assert", "actor": "c15", "metric": "gossip_options", "equals": 0, "label": "the book answered with a trainer window" },
 
-    { "action": "assert", "actor": "c15", "metric": "spellbook_offers_spell", "spell": 681095, "equals": 1, "label": "681095 is offered" },
+    { "action": "assert", "actor": "c15", "metric": "spellbook_offers_spell", "spell": 681095, "equals": 0, "label": "681095 is a talent node the book does not list" },
     { "action": "assert", "actor": "c15", "metric": "knows_spell", "spell": 681095, "equals": 0, "label": "681095 is not known yet" },
-    { "action": "trainer_buy", "actor": "c15", "spell": 681095, "label": "buy 681095" },
-    { "action": "assert", "actor": "c15", "metric": "spellbook_buy_succeeded", "spell": 681095, "equals": 1, "label": "681095 was granted" },
-    { "action": "assert", "actor": "c15", "metric": "knows_spell", "spell": 681095, "equals": 1, "label": "681095 was learned" },
-    { "action": "assert", "actor": "c15", "metric": "spellbook_learned_alerts", "spell": 681095, "equals": 1, "label": "681095 announced itself" },
+    { "action": "trainer_buy", "actor": "c15", "spell": 681095, "label": "try to buy 681095" },
+    { "action": "assert", "actor": "c15", "metric": "spellbook_buy_failed", "spell": 681095, "equals": 1, "label": "the book refused 681095" },
+    { "action": "assert", "actor": "c15", "metric": "spellbook_buy_succeeded", "spell": 681095, "equals": 0, "label": "681095 was not granted" },
+    { "action": "assert", "actor": "c15", "metric": "knows_spell", "spell": 681095, "equals": 0, "label": "681095 was not learned from the book" },
+    { "action": "assert", "actor": "c15", "metric": "spellbook_learned_alerts", "spell": 681095, "equals": 0, "label": "681095 announced nothing" },
 
+    { "action": "assert", "actor": "c15", "metric": "spellbook_offers_spell", "spell": 804432, "equals": 1, "label": "804432 is offered" },
     { "action": "trainer_buy", "actor": "c15", "spell": 804432, "label": "buy 804432" },
     { "action": "assert", "actor": "c15", "metric": "spellbook_buy_succeeded", "spell": 804432, "equals": 1, "label": "804432 was granted" },
     { "action": "assert", "actor": "c15", "metric": "knows_spell", "spell": 804432, "equals": 1, "label": "804432 was learned" },
     { "action": "assert", "actor": "c15", "metric": "spellbook_learned_alerts", "spell": 804432, "equals": 1, "label": "804432 announced itself" },
 
-    { "action": "trainer_buy", "actor": "c15", "spell": 800162, "label": "buy 800162" },
-    { "action": "assert", "actor": "c15", "metric": "spellbook_buy_succeeded", "spell": 800162, "equals": 1, "label": "800162 was granted" },
-    { "action": "assert", "actor": "c15", "metric": "knows_spell", "spell": 800162, "equals": 1, "label": "800162 was learned" },
-    { "action": "assert", "actor": "c15", "metric": "spellbook_learned_alerts", "spell": 800162, "equals": 1, "label": "800162 announced itself" },
+    { "action": "assert", "actor": "c15", "metric": "spellbook_offers_spell", "spell": 800162, "equals": 0, "label": "800162 is a talent node the book does not list" },
+    { "action": "assert", "actor": "c15", "metric": "knows_spell", "spell": 800162, "equals": 0, "label": "800162 is not known yet" },
+    { "action": "trainer_buy", "actor": "c15", "spell": 800162, "label": "try to buy 800162" },
+    { "action": "assert", "actor": "c15", "metric": "spellbook_buy_failed", "spell": 800162, "equals": 1, "label": "the book refused 800162" },
+    { "action": "assert", "actor": "c15", "metric": "spellbook_buy_succeeded", "spell": 800162, "equals": 0, "label": "800162 was not granted" },
+    { "action": "assert", "actor": "c15", "metric": "knows_spell", "spell": 800162, "equals": 0, "label": "800162 was not learned from the book" },
+    { "action": "assert", "actor": "c15", "metric": "spellbook_learned_alerts", "spell": 800162, "equals": 0, "label": "800162 announced nothing" },
 
     { "action": "assert", "actor": "c15", "metric": "spellbook_misannounced_buys", "equals": 0, "label": "no purchase was announced more than once" }
   ]

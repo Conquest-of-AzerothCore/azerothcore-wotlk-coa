@@ -1,0 +1,791 @@
+{
+  "schema": 1,
+  "name": "Vanilla dungeons: heroic entry, world spawns and VanCleef loot",
+  "contract": "The native dungeon difficulty handler selects the requested mode. Ordinary access-checked teleports reach all 19 Vanilla instance maps in that mode, with a real database spawn near each fixture. VanCleef uses the expected difficulty template and a native killing blow produces equipment at the evidenced item level. This tests server entry and loot generation, not client portal UI, a full clear or Ascension drop probabilities. Four independent player accounts keep every account within the normal five-instance hourly limit.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "seeker1",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "seeker2",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "seeker3",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "seeker4",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "seeker1",
+      "value": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "seeker1",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "set_phase",
+      "actor": "seeker1",
+      "value": 1
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "seeker2",
+      "value": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "seeker2",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "set_phase",
+      "actor": "seeker2",
+      "value": 1
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "seeker3",
+      "value": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "seeker3",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "set_phase",
+      "actor": "seeker3",
+      "value": 1
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "seeker4",
+      "value": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "seeker4",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "set_phase",
+      "actor": "seeker4",
+      "value": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "seeker1",
+      "map": 33,
+      "x": -217.8,
+      "y": 2183.5,
+      "z": 80.8493
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker1",
+      "metric": "map_id",
+      "equals": 33,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker1",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "seeker1",
+      "metric": "nearby_creature_count",
+      "entry": 36530,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "seeker1",
+      "map": 34,
+      "x": 117.7,
+      "y": -45.8883,
+      "z": -33.7729
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker1",
+      "metric": "map_id",
+      "equals": 34,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker1",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "seeker1",
+      "metric": "nearby_creature_count",
+      "entry": 1708,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "seeker1",
+      "map": 36,
+      "x": -50.2651,
+      "y": -401.198,
+      "z": 56.6811
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker1",
+      "metric": "map_id",
+      "equals": 36,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker1",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "seeker1",
+      "metric": "nearby_creature_count",
+      "entry": 598,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "seeker1",
+      "map": 43,
+      "x": -191.842,
+      "y": 61.3256,
+      "z": -46.7267
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker1",
+      "metric": "map_id",
+      "equals": 43,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker1",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "seeker1",
+      "metric": "nearby_creature_count",
+      "entry": 3840,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "seeker1",
+      "map": 47,
+      "x": 2020.39,
+      "y": 1493.41,
+      "z": 75.5037
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker1",
+      "metric": "map_id",
+      "equals": 47,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker1",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "seeker1",
+      "metric": "nearby_creature_count",
+      "entry": 4442,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "seeker2",
+      "map": 48,
+      "x": -324.953,
+      "y": 205.232,
+      "z": -67.6379
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker2",
+      "metric": "map_id",
+      "equals": 48,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker2",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "seeker2",
+      "metric": "nearby_creature_count",
+      "entry": 4805,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "seeker2",
+      "map": 70,
+      "x": 132.846,
+      "y": 259.723,
+      "z": -51.1213
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker2",
+      "metric": "map_id",
+      "equals": 70,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker2",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "seeker2",
+      "metric": "nearby_creature_count",
+      "entry": 7309,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "seeker2",
+      "map": 90,
+      "x": -474.927,
+      "y": 443.173,
+      "z": -229.518
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker2",
+      "metric": "map_id",
+      "equals": 90,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker2",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "seeker2",
+      "metric": "nearby_creature_count",
+      "entry": 7603,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "seeker2",
+      "map": 109,
+      "x": -506.616,
+      "y": 183.867,
+      "z": -146.307
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker2",
+      "metric": "map_id",
+      "equals": 109,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker2",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "seeker2",
+      "metric": "nearby_creature_count",
+      "entry": 8311,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "seeker2",
+      "map": 129,
+      "x": 2501.05,
+      "y": 1058.7,
+      "z": 48.6281
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker2",
+      "metric": "map_id",
+      "equals": 129,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker2",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "seeker2",
+      "metric": "nearby_creature_count",
+      "entry": 7346,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "seeker3",
+      "map": 189,
+      "x": 1754.17,
+      "y": 1244.0,
+      "z": 19.2407
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker3",
+      "metric": "map_id",
+      "equals": 189,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker3",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "seeker3",
+      "metric": "nearby_creature_count",
+      "entry": 4308,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "seeker3",
+      "map": 209,
+      "x": 1517.12,
+      "y": 823.743,
+      "z": 9.97511
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker3",
+      "metric": "map_id",
+      "equals": 209,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker3",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "seeker3",
+      "metric": "nearby_creature_count",
+      "entry": 7269,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "seeker3",
+      "map": 229,
+      "x": -1.88846,
+      "y": -585.643,
+      "z": 30.2742
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker3",
+      "metric": "map_id",
+      "equals": 229,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker3",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "seeker3",
+      "metric": "nearby_creature_count",
+      "entry": 9097,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "seeker3",
+      "map": 230,
+      "x": 654.28,
+      "y": 17.6029,
+      "z": -58.9755
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker3",
+      "metric": "map_id",
+      "equals": 230,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker3",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "seeker3",
+      "metric": "nearby_creature_count",
+      "entry": 8901,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "seeker3",
+      "map": 289,
+      "x": 74.3941,
+      "y": 140.642,
+      "z": 84.5827
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker3",
+      "metric": "map_id",
+      "equals": 289,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker3",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "seeker3",
+      "metric": "nearby_creature_count",
+      "entry": 4075,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "seeker4",
+      "map": 329,
+      "x": 3660.48,
+      "y": -3505.01,
+      "z": 137.699
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker4",
+      "metric": "map_id",
+      "equals": 329,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker4",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "seeker4",
+      "metric": "nearby_creature_count",
+      "entry": 10390,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "seeker4",
+      "map": 349,
+      "x": 358.876,
+      "y": 198.009,
+      "z": -102.59
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker4",
+      "metric": "map_id",
+      "equals": 349,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker4",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "seeker4",
+      "metric": "nearby_creature_count",
+      "entry": 11789,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "seeker4",
+      "map": 389,
+      "x": -157.268,
+      "y": -21.7249,
+      "z": -56.2708
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker4",
+      "metric": "map_id",
+      "equals": 389,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker4",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "seeker4",
+      "metric": "nearby_creature_count",
+      "entry": 11318,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "seeker4",
+      "map": 429,
+      "x": -148.843,
+      "y": -200.749,
+      "z": -3.2108299999999996
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker4",
+      "metric": "map_id",
+      "equals": 429,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "seeker4",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "seeker4",
+      "metric": "nearby_creature_count",
+      "entry": 13022,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "seeker1",
+      "map": 36,
+      "x": -87.369,
+      "y": -817,
+      "z": 39.3004
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "seeker1",
+      "metric": "nearby_creature_template",
+      "entry": 639,
+      "equals": 100639
+    },
+    {
+      "action": "set_health",
+      "actor": "seeker1",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "set_phase",
+      "actor": "seeker1",
+      "value": 1
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "seeker1",
+      "entry": 639,
+      "kill": true
+    },
+    {
+      "action": "loot_nearby",
+      "actor": "seeker1",
+      "entry": 639
+    },
+    {
+      "action": "assert",
+      "actor": "seeker1",
+      "metric": "loot_gear_item_level",
+      "min": 61,
+      "max": 61
+    },
+    {
+      "action": "close_loot",
+      "actor": "seeker1"
+    },
+    {
+      "action": "set_phase",
+      "actor": "seeker1"
+    }
+  ]
+}

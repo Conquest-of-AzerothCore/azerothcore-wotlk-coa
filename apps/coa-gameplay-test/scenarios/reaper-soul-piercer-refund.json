@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "name": "Soul Piercer fires when Soulslam strikes an enemy (#3164)",
+  "contract": [
+    "Spell 712484 (Soul Piercer) is a native SPELL_AURA_PROC_TRIGGER_SPELL aura (EffectTriggerSpell 575614),",
+    "gated by spell_proc (Chance 100) and spell_script_names entry spell_ascension_reaper_talent_proc",
+    "(rev_20260920_17), restricted by AscensionReaperTalentProcs::Rules[712484] to Soulslam's rank spells",
+    "(504014, 504685). 575614 is itself a native SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DELAYED effect that",
+    "casts 500363 (Reaped Soul) with a large positive stack amount, i.e. the refund. No CoA script names",
+    "712484 because none is needed: the whole chain is native DBC/SQL wiring."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "reaper",
+      "entry": 36,
+      "level": 80,
+      "distance": 5,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 712484
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 504014
+    },
+    {
+      "action": "set_power",
+      "actor": "reaper",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Soul Piercer's refund has not fired yet",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 575614,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 504014,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit and the proc resolve",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Striking the enemy with Soulslam procs Soul Piercer's refund",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 575614,
+      "min": 1
+    }
+  ]
+}

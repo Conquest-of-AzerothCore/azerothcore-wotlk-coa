@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Standard of Recovery's cast tooltip bills the aura's own amount and drops the client's unprocessed @ext: wrapper (#6604)",
+  "contract": "Spell 500260 (Standard of Recovery) is a cast spell with no effects of its own; it summons creature 50053, whose script has the standard cast the aura 500266. 500266's effect 0 is aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL with EffectBasePoints 79 (amount 80) and Amplitude 3000, triggering the direct heal 500248. So the number the standard actually restores is 500266's own amount, and the buff's own aura tooltip in the client's Spell.dbc column 187 already says exactly that: 'A nearby Standard of Recovery is causing you to regenerate ${$w1+$STR*.25} health every $t1 sec'. The cast tooltip, which is 500260's Spell.dbc Description (column 170), instead read '${$500248m1+$500248ppl1+$STR*.25}': 500248's effect 0 is EffectBasePoints 1 with EffectDieSides 1, so $500248m1 renders 2 and the cast text advertised 2 + 0.25 x Strength (33 at the reporter's 124 Strength) while the aura restored 80 + 0.25 x Strength (111). Every other Standard references its own aura spell rather than the heal it triggers, so this one term is the outlier. aura_ascension_guardian_recovery::Tick already applies the aura's own amount (fixed separately), leaving the cast text as the last place the spell advertises 33. The client's Spell.dbc cannot be edited from this repository, so the fix publishes 500260's own DBC text with that single term re-pointed at the aura, in coa_client_spell_description, which AscensionCompat already streams to the client as SMSG_PATCH_SPELL (opcode 2346) at login. The other change is the trailing sentence's '@ext:Only 1 ... :ext@' wrapper: the reporter's own client renders that wrapper literally in this tooltip, and no row CoA publishes in this table carries an '@ext:' or ':ext@' tag (0 of 47), so the tag is a visible defect rather than the shift-reveal it is meant to be; the sentence is kept as plain text. Every remaining clause of the published text is the number the spell really produces: '$d' is 500260's DurationIndex 608 (5 min, the summon's lifetime), '$500266a' the aura's EffectRadiusIndex 217 (30 yds), '$500266t1' its EffectAmplitude 3000 (3 sec), '${$500266m1+$STR*.25}' its effect 0 amount 80 plus the owner's Strength at 0.25, and '$500266s2' its effect 1 amount 6, aura 319 SPELL_AURA_ASCENSION_MOD_HEALING_RECEIVED_PCT, which Unit::SpellHealingBonusTaken applies to the ally as a healing-taken multiplier (Unit.cpp). This scenario reads the streamed row for 500260 and requires it to carry '${$500266m1+$STR*.25}' and that sentence, to have dropped every $500248m1 reference, and to carry no marker wrapper, with row 500639 (Runeshroud, published by the same table) as the control that the stream itself is captured. The numbers that text renders are pinned to the tick that produces them by scenarios/guardian-standard-recovery-strength-scaling-6604.json, which reads the same aura's own amount and the same Strength from a live tick. Expected before the SQL: the row arrives with $500248m1, no $500266m1 and the '@ext:' wrapper. Expected after: it carries $500266m1, no $500248m1 and no wrapper.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "players": [
+    { "id": "g", "race": 1, "class": 18, "level": 1, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and the login spell patch stream settle", "ms": 7000 },
+    { "action": "learn", "actor": "g", "spell": 500260 },
+    {
+      "action": "assert", "label": "SETUP: the starter Hearthstone satisfies 500260's TotemCategory 5, so the Standard is a spell this Guardian really has",
+      "actor": "g", "metric": "item_count", "item": 6948, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTROL: the shared description table still streams row 500639, so the patch stream is being captured",
+      "actor": "g", "metric": "server_packet_contains",
+      "opcode": 2346, "row": 500639, "text": "Requires Runeshroud", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "CONTROL: this table really does publish a row for 500260, so the absence checks below cannot pass vacuously",
+      "actor": "g", "metric": "server_packets",
+      "opcode": 2346, "row": 500260, "min": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "STREAM: the cast tooltip now bills the Standard aura's own amount",
+      "actor": "g", "metric": "server_packet_contains",
+      "opcode": 2346, "row": 500260, "text": "${$500266m1+$STR*.25}", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "THE FIX: the triggered heal's 2-point base is gone from the cast text",
+      "actor": "g", "metric": "server_packet_contains",
+      "opcode": 2346, "row": 500260, "text": "$500248m1", "equals": 0
+    },
+    {
+      "action": "assert", "label": "THE FIX: the trailing sentence survives as plain text, without the client's unprocessed wrapper",
+      "actor": "g", "metric": "server_packet_contains",
+      "opcode": 2346, "row": 500260, "text": "Only 1 |cffffffffStandard|r can be active at a time.", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "THE FIX: the opening '@ext:' marker is not published, because this client renders it literally",
+      "actor": "g", "metric": "server_packet_contains",
+      "opcode": 2346, "row": 500260, "text": "@ext:", "equals": 0
+    },
+    {
+      "action": "assert", "label": "THE FIX: the closing ':ext@' marker is not published either",
+      "actor": "g", "metric": "server_packet_contains",
+      "opcode": 2346, "row": 500260, "text": ":ext@", "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTROL: the cast text still names every other clause of the aura it bills",
+      "actor": "g", "metric": "server_packet_contains",
+      "opcode": 2346, "row": 500260, "text": "increasing all healing they receive by $500266s2%", "equals": 1
+    }
+  ]
+}

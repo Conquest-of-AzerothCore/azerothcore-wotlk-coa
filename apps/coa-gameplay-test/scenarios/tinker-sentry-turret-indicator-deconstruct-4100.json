@@ -1,0 +1,328 @@
+{
+  "schema": 1,
+  "name": "tinker-sentry-turret-indicator-deconstruct-4100",
+  "contract": [
+    "Original Spell.dbc Build: Sentry Turret 500239 says activate again to deconstruct, one turret at a time.",
+    "807293 has tooltip You have a Sentry Turret active! and 500470 is Deconstruct Sentry Turret. Normal",
+    "building must expose that indicator and replace the build button; using the replacement must remove the",
+    "turret, indicator and replacement, then permit rebuilding. The rebuilt turret is killed by a hostile",
+    "native area attack to check that death also restores the build button and removes the indicator.",
+    "The indicator is temporary summon state. Saving and reloading the character must retain an ordinary Arcane",
+    "Intellect aura but not a vanished Sentry or its indicator. Use the native save/logout/login action and",
+    "retain ordinary build and deconstruct casts.",
+    "A same-level native creature casts the original Decoy Explosive six times, preserving its real hit rolls.",
+    "The actual turret death must clear the indicator and restore Build while its owner remains alive."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 2
+    }
+  ],
+  "creatures": [
+    {
+      "id": "golem",
+      "owner": "tinker",
+      "entry": 16542,
+      "level": 2,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "set_health",
+      "actor": "tinker",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "assert",
+      "label": "A normal build creates one turret",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50046,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The active turret indicator is visible in server aura state",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 807293,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Build is replaced by Deconstruct Sentry Turret",
+      "actor": "tinker",
+      "metric": "temporary_spell_replacement",
+      "spell": 500239,
+      "equals": 500470
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500239,
+      "label": "Activate Build again through the native temporary replacement"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500470,
+      "min": 1,
+      "within_ms": 2000,
+      "label": "The native Build request executes Deconstruct"
+    },
+    {
+      "action": "assert",
+      "label": "Deconstruct removes the turret",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50046,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Deconstruct removes the indicator",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 807293,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Deconstruct restores the build button",
+      "actor": "tinker",
+      "metric": "temporary_spell_replacement",
+      "spell": 500239,
+      "equals": 500239
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "assert",
+      "label": "The turret can be rebuilt",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50046,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rebuilding restores its indicator",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 807293,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "golem",
+      "spell": 53273
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "golem",
+      "spell": 53273
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "golem",
+      "spell": 53273
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "golem",
+      "spell": 53273
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "golem",
+      "spell": 53273
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "golem",
+      "spell": 53273
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "label": "Lethal area damage kills the rebuilt turret",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50046,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Turret death removes its indicator",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 807293,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Turret death restores the build button",
+      "actor": "tinker",
+      "metric": "temporary_spell_replacement",
+      "spell": 500239,
+      "equals": 500239
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "alive",
+      "equals": 1,
+      "label": "The owner survives the actual turret-death control"
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "cooldown_ms",
+      "spell": 500239,
+      "equals": 0,
+      "label": "The original three-second Build cooldown has expired before the persistence control"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50046,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 807293,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "tinker",
+      "spell": 1459,
+      "stacks": 1,
+      "label": "An ordinary saved aura provides the persistence control"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 1459,
+      "equals": 1
+    },
+    {
+      "action": "relog",
+      "actor": "tinker",
+      "label": "Save, logout and reload the character through native handlers"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50046,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 807293,
+      "equals": 0,
+      "label": "A vanished turret cannot restore its indicator from saved auras"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 1459,
+      "equals": 1,
+      "label": "The native login retains the ordinary saved aura"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "temporary_spell_replacement",
+      "spell": 500239,
+      "equals": 500239,
+      "label": "With no restored turret, the original Build button has no replacement"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "knows_spell",
+      "spell": 500239,
+      "equals": 1
+    }
+  ]
+}

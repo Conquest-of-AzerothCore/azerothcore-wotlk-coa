@@ -28,7 +28,8 @@ enum PrimalistSecondarySpells : uint32
     SPELL_SAVAGE_FRENZY = 806549,
     SPELL_TOTEM_WARRIOR = 704099,
     SPELL_TOTEM_WARRIOR_HIT = 555732,
-    SPELL_BOON_OF_THE_BEAR = 500939
+    SPELL_BOON_OF_THE_BEAR = 500939,
+    SPELL_STONE_GRIP = 800145
 };
 
 class primalist_secondary_auras : public UnitScript
@@ -198,7 +199,7 @@ class aura_ascension_hammer_of_life : public AuraScript
             return;
         int32 value = int32(std::min<uint64>(amount, std::numeric_limits<int32>::max()));
         GetTarget()->CastCustomSpell(SPELL_HAMMER_OF_LIFE_HEAL, SPELLVALUE_BASE_POINT0, value, GetTarget(),
-            TRIGGERED_FULL_MASK);
+            TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_DISALLOW_PROC_EVENTS));
         GetTarget()->CastCustomSpell(SPELL_HAMMER_OF_LIFE_DAMAGE, SPELLVALUE_BASE_POINT0, value, GetTarget(),
             TRIGGERED_FULL_MASK);
     }
@@ -265,6 +266,22 @@ class spell_ascension_gaze_of_theradras : public SpellScript
     bool _newVictim = false;
 };
 
+class spell_ascension_seismic_wave : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_seismic_wave);
+
+    void AddHealingPower(SpellEffIndex)
+    {
+        int32 power = GetCaster()->SpellBaseHealingBonusDone(GetSpellInfo()->GetSchoolMask());
+        SetEffectValue(GetEffectValue() + int32(power * 0.3f));
+    }
+
+    void Register() override
+    {
+        OnEffectLaunchTarget += SpellEffectFn(spell_ascension_seismic_wave::AddHealingPower, EFFECT_0, SPELL_EFFECT_HEAL);
+    }
+};
+
 class primalist_secondary_metadata : public GlobalScript
 {
 public:
@@ -307,6 +324,11 @@ public:
             info->AttributesCu &= ~SPELL_ATTR0_CU_FORCE_AURA_SAVING;
             info->AttributesCu |= SPELL_ATTR0_CU_AURA_CANNOT_BE_SAVED;
         }
+        if (info->Id == SPELL_STONE_GRIP)
+        {
+            info->Effects[EFFECT_1].Effect = 0;
+            info->Mechanic = MECHANIC_SAPPED;
+        }
     }
 };
 
@@ -336,4 +358,5 @@ void AddSC_AscensionPrimalistSecondary()
     RegisterSpellScript(aura_ascension_natures_blessing);
     RegisterSpellScript(aura_ascension_hammer_of_life);
     RegisterSpellScript(spell_ascension_gaze_of_theradras);
+    RegisterSpellScript(spell_ascension_seismic_wave);
 }

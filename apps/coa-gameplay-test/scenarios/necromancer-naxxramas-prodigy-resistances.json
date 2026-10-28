@@ -1,0 +1,193 @@
+{
+  "schema": 1,
+  "name": "Necromancer Naxxramas Prodigy adds 0.5 Shadow and Frost resistance per level (#1369)",
+  "contract": [
+    "Naxxramas Prodigy 560622 is a Class-tab node (CharacterAdvancement 33780, ClassType 25 = class 23, AbilityEssenceCost 1, SpellFamilyName 29) whose description reads 'Increases your Shadow and Frost resistances by 0.5 per level.' Its only effect is SPELL_AURA_MOD_BASE_RESISTANCE (83) with MiscValue 48 (Frost 16 + Shadow 32), BasePoints -1 + DieSides 1 and EffectRealPointsPerLevel 0.5 (SpellLevel and BaseLevel 0, MaxLevel 60). It is not aura 42/354, so the Necromancer load contract leaves it intact. SpellEffectInfo::CalcValue adds int(level * 0.5) and AuraEffect::HandleModBaseResistance adds the amount to each school in the mask, so learning it must raise Frost and Shadow resistance by 30 at level 80 (capped at MaxLevel 60) and by 20 at level 40, leave Fire resistance unchanged, and unlearning it must remove exactly that bonus.",
+    "560622 has MaxLevel 60, so SpellEffectInfo::CalcValue caps the level term at 60: 0.5 x 60 = 30 at level 80 (the client tooltip uses the same cap) and 0.5 x 40 = 20 at level 40."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "necro80",
+      "race": 5,
+      "class": 23,
+      "level": 80
+    },
+    {
+      "id": "necro40",
+      "race": 5,
+      "class": 23,
+      "level": 40
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and stat updates settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the level 80 fixture lacks the passive",
+      "actor": "necro80",
+      "metric": "aura",
+      "spell": 560622,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the level 40 fixture lacks the passive",
+      "actor": "necro40",
+      "metric": "aura",
+      "spell": 560622,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "necro80",
+      "metric": "resistance",
+      "school": 4,
+      "save_as": "frost80"
+    },
+    {
+      "action": "snapshot",
+      "actor": "necro80",
+      "metric": "resistance",
+      "school": 5,
+      "save_as": "shadow80"
+    },
+    {
+      "action": "snapshot",
+      "actor": "necro80",
+      "metric": "resistance",
+      "school": 2,
+      "save_as": "fire80"
+    },
+    {
+      "action": "snapshot",
+      "actor": "necro40",
+      "metric": "resistance",
+      "school": 4,
+      "save_as": "frost40"
+    },
+    {
+      "action": "snapshot",
+      "actor": "necro40",
+      "metric": "resistance",
+      "school": 5,
+      "save_as": "shadow40"
+    },
+    {
+      "action": "learn",
+      "actor": "necro80",
+      "spell": 560622
+    },
+    {
+      "action": "learn",
+      "actor": "necro40",
+      "spell": 560622
+    },
+    {
+      "action": "assert",
+      "label": "The level 80 passive aura is applied",
+      "actor": "necro80",
+      "metric": "aura",
+      "spell": 560622,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The level 40 passive aura is applied",
+      "actor": "necro40",
+      "metric": "aura",
+      "spell": 560622,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Level 80: Frost resistance rises by 30 (the per-level growth stops at MaxLevel 60)",
+      "actor": "necro80",
+      "metric": "resistance",
+      "school": 4,
+      "relative_to": "frost80",
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Level 80: Shadow resistance rises by 30 (the per-level growth stops at MaxLevel 60)",
+      "actor": "necro80",
+      "metric": "resistance",
+      "school": 5,
+      "relative_to": "shadow80",
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Fire resistance is unchanged",
+      "actor": "necro80",
+      "metric": "resistance",
+      "school": 2,
+      "relative_to": "fire80",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Level 40: Frost resistance rises by 20",
+      "actor": "necro40",
+      "metric": "resistance",
+      "school": 4,
+      "relative_to": "frost40",
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "label": "Level 40: Shadow resistance rises by 20",
+      "actor": "necro40",
+      "metric": "resistance",
+      "school": 5,
+      "relative_to": "shadow40",
+      "equals": 20
+    },
+    {
+      "action": "unlearn",
+      "actor": "necro80",
+      "spell": 560622
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning removes the passive",
+      "actor": "necro80",
+      "metric": "aura",
+      "spell": 560622,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning restores the original Frost resistance",
+      "actor": "necro80",
+      "metric": "resistance",
+      "school": 4,
+      "relative_to": "frost80",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning restores the original Shadow resistance",
+      "actor": "necro80",
+      "metric": "resistance",
+      "school": 5,
+      "relative_to": "shadow80",
+      "equals": 0
+    }
+  ]
+}

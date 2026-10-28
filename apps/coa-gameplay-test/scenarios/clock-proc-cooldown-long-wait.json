@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "name": "Clock probe: a 45 s proc internal cooldown holds and then expires across long waits",
+  "contract": [
+    "Val'anyr's equip aura 64415 is SPELL_AURA_PROC_TRIGGER_SPELL on Blessing of Ancient Kings 64411 with",
+    "ProcChance 100 in the installed Spell.dbc. Its effective spell_proc row (db_world 2026_02_18_01) has Chance 0,",
+    "so the DBC 100% applies, ProcFlags 279552, SpellTypeMask 2 (heal), SpellPhaseMask 2 (hit) and Cooldown 45000;",
+    "spell_item_valanyr_hammer_of_ancient_kings only requires a positive heal. Aura::PrepareProcToTrigger sets the",
+    "aura's proc cooldown to now + 45000 ms on the steady game clock, and an attempt during it neither procs nor",
+    "extends it. Flash Heal 2061 rank 1 is a 1500 ms direct heal; the priest's health is lowered before each heal.",
+    "The first heal procs once. A heal landing about 39.5 s after that proc is inside the internal cooldown and",
+    "leaves the count at 1; a heal landing about 47.5 s after it procs again. The 5.5 s and 2.5 s margins dwarf a",
+    "25 ms world step. The fixture aura exercises the proc clock of Unit::GetProcAurasTriggeredOnEvent;",
+    "clock-equip-proc-cooldown-long-wait covers the equip cooldown. A proc clock that runs more than 14% ahead of",
+    "game time lets the 39.5 s heal proc. A proc cooldown timed on the wall clock misses the 47.5 s proc when game",
+    "time runs more than 5.6% faster than the wall clock between the first proc and that heal, and lets the 39.5 s",
+    "heal proc when it runs more than 12.2% slower; between those rates the probe cannot tell the clocks apart, so",
+    "a negative control needs a run that fast-forwards, such as one lane running only this case."
+  ],
+  "timeout_ms": 150000,
+  "players": [
+    { "id": "priest", "race": 1, "class": 5, "level": 80 }
+  ],
+  "steps": [
+    { "action": "learn", "actor": "priest", "spell": 2061 },
+    { "action": "set_aura", "label": "Val'anyr equip aura fixture", "actor": "priest", "spell": 64415, "stacks": 1 },
+    {
+      "action": "assert", "label": "SETUP: the proc aura is present", "actor": "priest",
+      "metric": "aura", "spell": 64415, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: nothing has procced yet", "actor": "priest",
+      "metric": "spell_proc_count", "spell": 64415, "equals": 0
+    },
+    { "action": "set_health", "actor": "priest", "value": 1000 },
+    { "action": "cast", "label": "First heal", "actor": "priest", "spell": 2061 },
+    {
+      "action": "assert", "label": "SETUP: the first heal procs Blessing of Ancient Kings", "actor": "priest",
+      "metric": "spell_proc_count", "spell": 64415, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "SETUP: the proc applied Blessing of Ancient Kings", "actor": "priest",
+      "metric": "aura", "spell": 64411, "caster": "priest", "equals": 1
+    },
+    { "action": "wait", "label": "Long wait inside the 45 s internal cooldown", "ms": 38000 },
+    { "action": "set_health", "actor": "priest", "value": 1000 },
+    { "action": "cast", "label": "Heal landing about 39.5 s after the proc", "actor": "priest", "spell": 2061 },
+    { "action": "wait", "label": "Let the second heal land", "ms": 3000 },
+    {
+      "action": "assert", "label": "SETUP: the second heal landed", "actor": "priest",
+      "metric": "spell_heal_count", "spell": 2061, "equals": 2
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: a heal inside the internal cooldown does not proc",
+      "actor": "priest", "metric": "spell_proc_count", "spell": 64415, "equals": 1
+    },
+    { "action": "wait", "label": "Wait past the end of the internal cooldown", "ms": 5000 },
+    { "action": "set_health", "actor": "priest", "value": 1000 },
+    { "action": "cast", "label": "Heal landing about 47.5 s after the proc", "actor": "priest", "spell": 2061 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: after the internal cooldown the next heal procs again",
+      "actor": "priest", "metric": "spell_proc_count", "spell": 64415, "equals": 2, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "Three heals landed in total", "actor": "priest",
+      "metric": "spell_heal_count", "spell": 2061, "equals": 3
+    }
+  ]
+}

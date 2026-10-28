@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Witch Doctor: Village Wisdom and Loa Empowerment already work (#1102, #1122)",
-  "contract": "REGRESSION ONLY - both issues report zero occurrences of these spell ids in the module, but neither needs module code. Village Wisdom 680882 (#1102) reads 'Increases your hit chance by 5% and the damage of Reclamation by 15%': effect 0 is aura 108 (SPELL_AURA_ADD_PCT_MODIFIER) MiscValue 0 (SPELLMOD_DAMAGE) BasePoints 14 (+15%, DieSides 1) with EffectSpellClassMask word 1 = 268435460, which equals Reclamation 806288's SpellFamilyFlags[1] exactly (both SpellFamilyName 19); effect 1 is the custom aura 333 (SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT) BasePoints 4 (+5 points). Spell::EffectWeaponDmg (Reclamation's SPELL_EFFECT_WEAPON_PERCENT_DAMAGE effect) calls Unit::MeleeDamageBonusDone, which unconditionally applies Player::ApplySpellMod(SPELLMOD_DAMAGE) - the classic generic spellmod path, no per-spell hook. StatSystem.cpp's UpdateMeleeHitChances/UpdateRangedHitChances/UpdateSpellHitChances each call GetTotalAuraModifier(MOD_HIT_CHANCE, ASCENSION_MOD_HIT_CHANCE_ALL_PCT), folding aura 333 into every hit stat generically. Loa Empowerment 706368 (#1122) reads 'Reduces the cost of your Wujus by 50% and increases the effectiveness of Power Wuju by 20%': effect 0 is aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -51 (-50%) over classmask (256,0,16777216); effect 1 is aura 108 MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 (+20%) over classmask (0,0,16777216). Power Wuju 707671 carries SpellFamilyFlags (0,0,16777216) (SpellFamilyName 19 too), an exact match on both effects' word-2 bit. SpellInfo::CalcPowerCost calls ApplySpellMod(SPELLMOD_COST) unconditionally, and Unit::ApplyEffectModifiers (used by every effect's CalcValue) calls ApplySpellMod(SPELLMOD_ALL_EFFECTS) before any per-effect mod - both generic, no per-spell hook. Neither spell's SpellFamilyName (19) is one of the families SpellInfo::IsAffectedBySpellMod special-cases (31/33/34), so both fall through to the plain family+classmask AND check in SpellInfo::IsAffected; neither target spell sets SPELL_ATTR3_IGNORE_CASTER_MODIFIERS. This is a regression guard for native behavior, not a fix: it must fail if the generic spellmod/classmask/hit-chance-aura plumbing ever breaks for family 19.",
+  "contract": "REGRESSION ONLY - both issues report zero occurrences of these spell ids in the module, but neither needs module code. Village Wisdom 680882 (#1102) reads 'Increases your hit chance by $s2% and the damage of Reclamation by $s1%': effect 0 is aura 108 (SPELL_AURA_ADD_PCT_MODIFIER) MiscValue 0 (SPELLMOD_DAMAGE) BasePoints 19 (+20%, DieSides 1; the live client DBC of 2026-09-16, older extractions carried 14 for +15%) with EffectSpellClassMask word 1 = 268435460, which equals Reclamation 806288's SpellFamilyFlags[1] exactly (both SpellFamilyName 19); effect 1 is the custom aura 333 (SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT) BasePoints 4 (+5 points). Spell::EffectWeaponDmg (Reclamation's SPELL_EFFECT_WEAPON_PERCENT_DAMAGE effect) calls Unit::MeleeDamageBonusDone, which unconditionally applies Player::ApplySpellMod(SPELLMOD_DAMAGE) - the classic generic spellmod path, no per-spell hook. StatSystem.cpp's UpdateMeleeHitChances/UpdateRangedHitChances/UpdateSpellHitChances each call GetTotalAuraModifier(MOD_HIT_CHANCE, ASCENSION_MOD_HIT_CHANCE_ALL_PCT), folding aura 333 into every hit stat generically. Loa Empowerment 706368 (#1122) reads 'Reduces the cost of your Wujus by 50% and increases the effectiveness of Power Wuju by 20%': effect 0 is aura 108 MiscValue 14 (SPELLMOD_COST) BasePoints -51 (-50%) over classmask (256,0,16777216); effect 1 is aura 108 MiscValue 8 (SPELLMOD_ALL_EFFECTS) BasePoints 19 (+20%) over classmask (0,0,16777216). Power Wuju 707671 carries SpellFamilyFlags (0,0,16777216) (SpellFamilyName 19 too), an exact match on both effects' word-2 bit. SpellInfo::CalcPowerCost calls ApplySpellMod(SPELLMOD_COST) unconditionally, and Unit::ApplyEffectModifiers (used by every effect's CalcValue) calls ApplySpellMod(SPELLMOD_ALL_EFFECTS) before any per-effect mod - both generic, no per-spell hook. Neither spell's SpellFamilyName (19) is one of the families SpellInfo::IsAffectedBySpellMod special-cases (31/33/34), so both fall through to the plain family+classmask AND check in SpellInfo::IsAffected; neither target spell sets SPELL_ATTR3_IGNORE_CASTER_MODIFIERS. This is a regression guard for native behavior, not a fix: it must fail if the generic spellmod/classmask/hit-chance-aura plumbing ever breaks for family 19.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -50,13 +50,14 @@
     },
     {
       "action": "assert",
-      "label": "#1102 CONTRACT: Village Wisdom raises Reclamation's SPELLMOD_DAMAGE by 15%",
+      "label": "#1102 CONTRACT: Village Wisdom raises Reclamation's SPELLMOD_DAMAGE by 20%",
       "actor": "doctor",
       "metric": "spell_modifier",
       "spell": 806288,
       "op": 0,
       "base": 100,
-      "equals": 115
+      "min": 119.999,
+      "max": 120.001
     },
     {
       "action": "assert",
@@ -147,7 +148,8 @@
       "spell": 707671,
       "op": 8,
       "base": 100,
-      "equals": 120
+      "min": 119.999,
+      "max": 120.001
     },
     {
       "action": "assert",

@@ -1,0 +1,1230 @@
+{
+  "schema": 1,
+  "name": "Dreadknight ranks affect mail and plate armor only (#1648)",
+  "contract": "Dreadknight ranks 300560/301352 have aura 142 with physical mask 1, armor subclass mask 24 (mail and plate), and 20%/40% amounts; aura 186 applies -2%/-4% attacker spell hit chance. A zero-armor cloth chest (49241) first replaces each level-60 Reaper starter chest. The rank gain on that common baseline is compared with the gain after a cloth, leather, mail or plate chest replaces it. Cloth and leather must add no armor; mail and plate must add their rank percentage of item armor.",
+  "players": [
+    {
+      "id": "cloth_r1",
+      "race": 10,
+      "class": 30,
+      "level": 60
+    },
+    {
+      "id": "leather_r1",
+      "race": 10,
+      "class": 30,
+      "level": 60
+    },
+    {
+      "id": "mail_r1",
+      "race": 10,
+      "class": 30,
+      "level": 60
+    },
+    {
+      "id": "plate_r1",
+      "race": 10,
+      "class": 30,
+      "level": 60
+    },
+    {
+      "id": "cloth_r2",
+      "race": 10,
+      "class": 30,
+      "level": 60
+    },
+    {
+      "id": "leather_r2",
+      "race": 10,
+      "class": 30,
+      "level": 60
+    },
+    {
+      "id": "mail_r2",
+      "race": 10,
+      "class": 30,
+      "level": 60
+    },
+    {
+      "id": "plate_r2",
+      "race": 10,
+      "class": 30,
+      "level": 60
+    }
+  ],
+  "timeout_ms": 600000,
+  "steps": [
+    {
+      "action": "unlearn",
+      "actor": "cloth_r1",
+      "spell": 300560,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "cloth_r1",
+      "spell": 301352,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "cloth_r1",
+      "spell": 9078
+    },
+    {
+      "action": "add_item",
+      "actor": "cloth_r1",
+      "item": 49241
+    },
+    {
+      "action": "equip",
+      "actor": "cloth_r1",
+      "item": 49241,
+      "slot": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "cloth_r1",
+      "metric": "armor",
+      "save_as": "cloth_r1_baseline"
+    },
+    {
+      "action": "learn",
+      "actor": "cloth_r1",
+      "spell": 300560
+    },
+    {
+      "action": "snapshot",
+      "actor": "cloth_r1",
+      "metric": "armor",
+      "relative_to": "cloth_r1_baseline",
+      "save_as": "cloth_r1_starter_gain"
+    },
+    {
+      "action": "assert",
+      "actor": "cloth_r1",
+      "metric": "armor",
+      "relative_to": "cloth_r1_baseline",
+      "min": 1,
+      "max": 20
+    },
+    {
+      "action": "unlearn",
+      "actor": "cloth_r1",
+      "spell": 300560,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "cloth_r1",
+      "metric": "armor",
+      "relative_to": "cloth_r1_baseline",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "cloth_r1",
+      "spell": 9078
+    },
+    {
+      "action": "add_item",
+      "actor": "cloth_r1",
+      "item": 2435
+    },
+    {
+      "action": "equip",
+      "actor": "cloth_r1",
+      "item": 2435,
+      "slot": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "cloth_r1",
+      "metric": "armor",
+      "relative_to": "cloth_r1_baseline",
+      "save_as": "cloth_r1_item_armor"
+    },
+    {
+      "action": "snapshot",
+      "actor": "cloth_r1",
+      "metric": "armor",
+      "save_as": "cloth_r1_equipped"
+    },
+    {
+      "action": "learn",
+      "actor": "cloth_r1",
+      "spell": 300560
+    },
+    {
+      "action": "assert",
+      "actor": "cloth_r1",
+      "metric": "aura",
+      "spell": 300560,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "cloth_r1",
+      "metric": "aura_amount",
+      "spell": 300560,
+      "effect": 0,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "cloth_r1",
+      "metric": "aura_amount",
+      "spell": 300560,
+      "effect": 1,
+      "equals": -2
+    },
+    {
+      "action": "assert",
+      "label": "cloth_r1 chest adds no talent armor beyond other equipped gear",
+      "actor": "cloth_r1",
+      "metric": "armor",
+      "relative_to": "cloth_r1_equipped",
+      "ratio_to": "cloth_r1_starter_gain",
+      "equals": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "leather_r1",
+      "spell": 300560,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "leather_r1",
+      "spell": 301352,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "leather_r1",
+      "spell": 9078
+    },
+    {
+      "action": "add_item",
+      "actor": "leather_r1",
+      "item": 49241
+    },
+    {
+      "action": "equip",
+      "actor": "leather_r1",
+      "item": 49241,
+      "slot": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "leather_r1",
+      "metric": "armor",
+      "save_as": "leather_r1_baseline"
+    },
+    {
+      "action": "learn",
+      "actor": "leather_r1",
+      "spell": 300560
+    },
+    {
+      "action": "snapshot",
+      "actor": "leather_r1",
+      "metric": "armor",
+      "relative_to": "leather_r1_baseline",
+      "save_as": "leather_r1_starter_gain"
+    },
+    {
+      "action": "assert",
+      "actor": "leather_r1",
+      "metric": "armor",
+      "relative_to": "leather_r1_baseline",
+      "min": 1,
+      "max": 20
+    },
+    {
+      "action": "unlearn",
+      "actor": "leather_r1",
+      "spell": 300560,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "leather_r1",
+      "metric": "armor",
+      "relative_to": "leather_r1_baseline",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "leather_r1",
+      "spell": 9077
+    },
+    {
+      "action": "add_item",
+      "actor": "leather_r1",
+      "item": 2470
+    },
+    {
+      "action": "equip",
+      "actor": "leather_r1",
+      "item": 2470,
+      "slot": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "leather_r1",
+      "metric": "armor",
+      "relative_to": "leather_r1_baseline",
+      "save_as": "leather_r1_item_armor"
+    },
+    {
+      "action": "snapshot",
+      "actor": "leather_r1",
+      "metric": "armor",
+      "save_as": "leather_r1_equipped"
+    },
+    {
+      "action": "learn",
+      "actor": "leather_r1",
+      "spell": 300560
+    },
+    {
+      "action": "assert",
+      "actor": "leather_r1",
+      "metric": "aura",
+      "spell": 300560,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "leather_r1",
+      "metric": "aura_amount",
+      "spell": 300560,
+      "effect": 0,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "leather_r1",
+      "metric": "aura_amount",
+      "spell": 300560,
+      "effect": 1,
+      "equals": -2
+    },
+    {
+      "action": "assert",
+      "label": "leather_r1 chest adds no talent armor beyond other equipped gear",
+      "actor": "leather_r1",
+      "metric": "armor",
+      "relative_to": "leather_r1_equipped",
+      "ratio_to": "leather_r1_starter_gain",
+      "equals": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "mail_r1",
+      "spell": 300560,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "mail_r1",
+      "spell": 301352,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "mail_r1",
+      "spell": 9078
+    },
+    {
+      "action": "add_item",
+      "actor": "mail_r1",
+      "item": 49241
+    },
+    {
+      "action": "equip",
+      "actor": "mail_r1",
+      "item": 49241,
+      "slot": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "mail_r1",
+      "metric": "armor",
+      "save_as": "mail_r1_baseline"
+    },
+    {
+      "action": "learn",
+      "actor": "mail_r1",
+      "spell": 300560
+    },
+    {
+      "action": "snapshot",
+      "actor": "mail_r1",
+      "metric": "armor",
+      "relative_to": "mail_r1_baseline",
+      "save_as": "mail_r1_starter_gain"
+    },
+    {
+      "action": "assert",
+      "actor": "mail_r1",
+      "metric": "armor",
+      "relative_to": "mail_r1_baseline",
+      "min": 1,
+      "max": 20
+    },
+    {
+      "action": "unlearn",
+      "actor": "mail_r1",
+      "spell": 300560,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "mail_r1",
+      "metric": "armor",
+      "relative_to": "mail_r1_baseline",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "mail_r1",
+      "spell": 8737
+    },
+    {
+      "action": "add_item",
+      "actor": "mail_r1",
+      "item": 2423
+    },
+    {
+      "action": "equip",
+      "actor": "mail_r1",
+      "item": 2423,
+      "slot": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "mail_r1",
+      "metric": "armor",
+      "relative_to": "mail_r1_baseline",
+      "save_as": "mail_r1_item_armor"
+    },
+    {
+      "action": "snapshot",
+      "actor": "mail_r1",
+      "metric": "armor",
+      "save_as": "mail_r1_equipped"
+    },
+    {
+      "action": "learn",
+      "actor": "mail_r1",
+      "spell": 300560
+    },
+    {
+      "action": "assert",
+      "actor": "mail_r1",
+      "metric": "aura",
+      "spell": 300560,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "mail_r1",
+      "metric": "aura_amount",
+      "spell": 300560,
+      "effect": 0,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "mail_r1",
+      "metric": "aura_amount",
+      "spell": 300560,
+      "effect": 1,
+      "equals": -2
+    },
+    {
+      "action": "assert",
+      "label": "mail_r1 mail or plate gains its rank armor bonus",
+      "actor": "mail_r1",
+      "metric": "armor",
+      "relative_to": "mail_r1_equipped",
+      "ratio_to": "mail_r1_item_armor",
+      "min": 0.19,
+      "max": 0.23
+    },
+    {
+      "action": "unlearn",
+      "actor": "plate_r1",
+      "spell": 300560,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "plate_r1",
+      "spell": 301352,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "plate_r1",
+      "spell": 9078
+    },
+    {
+      "action": "add_item",
+      "actor": "plate_r1",
+      "item": 49241
+    },
+    {
+      "action": "equip",
+      "actor": "plate_r1",
+      "item": 49241,
+      "slot": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "plate_r1",
+      "metric": "armor",
+      "save_as": "plate_r1_baseline"
+    },
+    {
+      "action": "learn",
+      "actor": "plate_r1",
+      "spell": 300560
+    },
+    {
+      "action": "snapshot",
+      "actor": "plate_r1",
+      "metric": "armor",
+      "relative_to": "plate_r1_baseline",
+      "save_as": "plate_r1_starter_gain"
+    },
+    {
+      "action": "assert",
+      "actor": "plate_r1",
+      "metric": "armor",
+      "relative_to": "plate_r1_baseline",
+      "min": 1,
+      "max": 20
+    },
+    {
+      "action": "unlearn",
+      "actor": "plate_r1",
+      "spell": 300560,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "plate_r1",
+      "metric": "armor",
+      "relative_to": "plate_r1_baseline",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "plate_r1",
+      "spell": 750
+    },
+    {
+      "action": "add_item",
+      "actor": "plate_r1",
+      "item": 8094
+    },
+    {
+      "action": "equip",
+      "actor": "plate_r1",
+      "item": 8094,
+      "slot": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "plate_r1",
+      "metric": "armor",
+      "relative_to": "plate_r1_baseline",
+      "save_as": "plate_r1_item_armor"
+    },
+    {
+      "action": "snapshot",
+      "actor": "plate_r1",
+      "metric": "armor",
+      "save_as": "plate_r1_equipped"
+    },
+    {
+      "action": "learn",
+      "actor": "plate_r1",
+      "spell": 300560
+    },
+    {
+      "action": "assert",
+      "actor": "plate_r1",
+      "metric": "aura",
+      "spell": 300560,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "plate_r1",
+      "metric": "aura_amount",
+      "spell": 300560,
+      "effect": 0,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "plate_r1",
+      "metric": "aura_amount",
+      "spell": 300560,
+      "effect": 1,
+      "equals": -2
+    },
+    {
+      "action": "assert",
+      "label": "plate_r1 mail or plate gains its rank armor bonus",
+      "actor": "plate_r1",
+      "metric": "armor",
+      "relative_to": "plate_r1_equipped",
+      "ratio_to": "plate_r1_item_armor",
+      "min": 0.19,
+      "max": 0.23
+    },
+    {
+      "action": "unlearn",
+      "actor": "cloth_r2",
+      "spell": 300560,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "cloth_r2",
+      "spell": 301352,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "cloth_r2",
+      "spell": 9078
+    },
+    {
+      "action": "add_item",
+      "actor": "cloth_r2",
+      "item": 49241
+    },
+    {
+      "action": "equip",
+      "actor": "cloth_r2",
+      "item": 49241,
+      "slot": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "cloth_r2",
+      "metric": "armor",
+      "save_as": "cloth_r2_baseline"
+    },
+    {
+      "action": "learn",
+      "actor": "cloth_r2",
+      "spell": 301352
+    },
+    {
+      "action": "snapshot",
+      "actor": "cloth_r2",
+      "metric": "armor",
+      "relative_to": "cloth_r2_baseline",
+      "save_as": "cloth_r2_starter_gain"
+    },
+    {
+      "action": "assert",
+      "actor": "cloth_r2",
+      "metric": "armor",
+      "relative_to": "cloth_r2_baseline",
+      "min": 1,
+      "max": 20
+    },
+    {
+      "action": "unlearn",
+      "actor": "cloth_r2",
+      "spell": 301352,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "cloth_r2",
+      "metric": "armor",
+      "relative_to": "cloth_r2_baseline",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "cloth_r2",
+      "spell": 9078
+    },
+    {
+      "action": "add_item",
+      "actor": "cloth_r2",
+      "item": 2435
+    },
+    {
+      "action": "equip",
+      "actor": "cloth_r2",
+      "item": 2435,
+      "slot": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "cloth_r2",
+      "metric": "armor",
+      "relative_to": "cloth_r2_baseline",
+      "save_as": "cloth_r2_item_armor"
+    },
+    {
+      "action": "snapshot",
+      "actor": "cloth_r2",
+      "metric": "armor",
+      "save_as": "cloth_r2_equipped"
+    },
+    {
+      "action": "learn",
+      "actor": "cloth_r2",
+      "spell": 301352
+    },
+    {
+      "action": "assert",
+      "actor": "cloth_r2",
+      "metric": "aura",
+      "spell": 301352,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "cloth_r2",
+      "metric": "aura_amount",
+      "spell": 301352,
+      "effect": 0,
+      "equals": 40
+    },
+    {
+      "action": "assert",
+      "actor": "cloth_r2",
+      "metric": "aura_amount",
+      "spell": 301352,
+      "effect": 1,
+      "equals": -4
+    },
+    {
+      "action": "assert",
+      "label": "cloth_r2 chest adds no talent armor beyond other equipped gear",
+      "actor": "cloth_r2",
+      "metric": "armor",
+      "relative_to": "cloth_r2_equipped",
+      "ratio_to": "cloth_r2_starter_gain",
+      "equals": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "leather_r2",
+      "spell": 300560,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "leather_r2",
+      "spell": 301352,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "leather_r2",
+      "spell": 9078
+    },
+    {
+      "action": "add_item",
+      "actor": "leather_r2",
+      "item": 49241
+    },
+    {
+      "action": "equip",
+      "actor": "leather_r2",
+      "item": 49241,
+      "slot": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "leather_r2",
+      "metric": "armor",
+      "save_as": "leather_r2_baseline"
+    },
+    {
+      "action": "learn",
+      "actor": "leather_r2",
+      "spell": 301352
+    },
+    {
+      "action": "snapshot",
+      "actor": "leather_r2",
+      "metric": "armor",
+      "relative_to": "leather_r2_baseline",
+      "save_as": "leather_r2_starter_gain"
+    },
+    {
+      "action": "assert",
+      "actor": "leather_r2",
+      "metric": "armor",
+      "relative_to": "leather_r2_baseline",
+      "min": 1,
+      "max": 20
+    },
+    {
+      "action": "unlearn",
+      "actor": "leather_r2",
+      "spell": 301352,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "leather_r2",
+      "metric": "armor",
+      "relative_to": "leather_r2_baseline",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "leather_r2",
+      "spell": 9077
+    },
+    {
+      "action": "add_item",
+      "actor": "leather_r2",
+      "item": 2470
+    },
+    {
+      "action": "equip",
+      "actor": "leather_r2",
+      "item": 2470,
+      "slot": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "leather_r2",
+      "metric": "armor",
+      "relative_to": "leather_r2_baseline",
+      "save_as": "leather_r2_item_armor"
+    },
+    {
+      "action": "snapshot",
+      "actor": "leather_r2",
+      "metric": "armor",
+      "save_as": "leather_r2_equipped"
+    },
+    {
+      "action": "learn",
+      "actor": "leather_r2",
+      "spell": 301352
+    },
+    {
+      "action": "assert",
+      "actor": "leather_r2",
+      "metric": "aura",
+      "spell": 301352,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "leather_r2",
+      "metric": "aura_amount",
+      "spell": 301352,
+      "effect": 0,
+      "equals": 40
+    },
+    {
+      "action": "assert",
+      "actor": "leather_r2",
+      "metric": "aura_amount",
+      "spell": 301352,
+      "effect": 1,
+      "equals": -4
+    },
+    {
+      "action": "assert",
+      "label": "leather_r2 chest adds no talent armor beyond other equipped gear",
+      "actor": "leather_r2",
+      "metric": "armor",
+      "relative_to": "leather_r2_equipped",
+      "ratio_to": "leather_r2_starter_gain",
+      "equals": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "mail_r2",
+      "spell": 300560,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "mail_r2",
+      "spell": 301352,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "mail_r2",
+      "spell": 9078
+    },
+    {
+      "action": "add_item",
+      "actor": "mail_r2",
+      "item": 49241
+    },
+    {
+      "action": "equip",
+      "actor": "mail_r2",
+      "item": 49241,
+      "slot": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "mail_r2",
+      "metric": "armor",
+      "save_as": "mail_r2_baseline"
+    },
+    {
+      "action": "learn",
+      "actor": "mail_r2",
+      "spell": 301352
+    },
+    {
+      "action": "snapshot",
+      "actor": "mail_r2",
+      "metric": "armor",
+      "relative_to": "mail_r2_baseline",
+      "save_as": "mail_r2_starter_gain"
+    },
+    {
+      "action": "assert",
+      "actor": "mail_r2",
+      "metric": "armor",
+      "relative_to": "mail_r2_baseline",
+      "min": 1,
+      "max": 20
+    },
+    {
+      "action": "unlearn",
+      "actor": "mail_r2",
+      "spell": 301352,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "mail_r2",
+      "metric": "armor",
+      "relative_to": "mail_r2_baseline",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "mail_r2",
+      "spell": 8737
+    },
+    {
+      "action": "add_item",
+      "actor": "mail_r2",
+      "item": 2423
+    },
+    {
+      "action": "equip",
+      "actor": "mail_r2",
+      "item": 2423,
+      "slot": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "mail_r2",
+      "metric": "armor",
+      "relative_to": "mail_r2_baseline",
+      "save_as": "mail_r2_item_armor"
+    },
+    {
+      "action": "snapshot",
+      "actor": "mail_r2",
+      "metric": "armor",
+      "save_as": "mail_r2_equipped"
+    },
+    {
+      "action": "learn",
+      "actor": "mail_r2",
+      "spell": 301352
+    },
+    {
+      "action": "assert",
+      "actor": "mail_r2",
+      "metric": "aura",
+      "spell": 301352,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "mail_r2",
+      "metric": "aura_amount",
+      "spell": 301352,
+      "effect": 0,
+      "equals": 40
+    },
+    {
+      "action": "assert",
+      "actor": "mail_r2",
+      "metric": "aura_amount",
+      "spell": 301352,
+      "effect": 1,
+      "equals": -4
+    },
+    {
+      "action": "assert",
+      "label": "mail_r2 mail or plate gains its rank armor bonus",
+      "actor": "mail_r2",
+      "metric": "armor",
+      "relative_to": "mail_r2_equipped",
+      "ratio_to": "mail_r2_item_armor",
+      "min": 0.39,
+      "max": 0.45
+    },
+    {
+      "action": "unlearn",
+      "actor": "plate_r2",
+      "spell": 300560,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "plate_r2",
+      "spell": 301352,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "plate_r2",
+      "spell": 9078
+    },
+    {
+      "action": "add_item",
+      "actor": "plate_r2",
+      "item": 49241
+    },
+    {
+      "action": "equip",
+      "actor": "plate_r2",
+      "item": 49241,
+      "slot": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "plate_r2",
+      "metric": "armor",
+      "save_as": "plate_r2_baseline"
+    },
+    {
+      "action": "learn",
+      "actor": "plate_r2",
+      "spell": 301352
+    },
+    {
+      "action": "snapshot",
+      "actor": "plate_r2",
+      "metric": "armor",
+      "relative_to": "plate_r2_baseline",
+      "save_as": "plate_r2_starter_gain"
+    },
+    {
+      "action": "assert",
+      "actor": "plate_r2",
+      "metric": "armor",
+      "relative_to": "plate_r2_baseline",
+      "min": 1,
+      "max": 20
+    },
+    {
+      "action": "unlearn",
+      "actor": "plate_r2",
+      "spell": 301352,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "plate_r2",
+      "metric": "armor",
+      "relative_to": "plate_r2_baseline",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "plate_r2",
+      "spell": 750
+    },
+    {
+      "action": "add_item",
+      "actor": "plate_r2",
+      "item": 8094
+    },
+    {
+      "action": "equip",
+      "actor": "plate_r2",
+      "item": 8094,
+      "slot": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "plate_r2",
+      "metric": "armor",
+      "relative_to": "plate_r2_baseline",
+      "save_as": "plate_r2_item_armor"
+    },
+    {
+      "action": "snapshot",
+      "actor": "plate_r2",
+      "metric": "armor",
+      "save_as": "plate_r2_equipped"
+    },
+    {
+      "action": "learn",
+      "actor": "plate_r2",
+      "spell": 301352
+    },
+    {
+      "action": "assert",
+      "actor": "plate_r2",
+      "metric": "aura",
+      "spell": 301352,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "plate_r2",
+      "metric": "aura_amount",
+      "spell": 301352,
+      "effect": 0,
+      "equals": 40
+    },
+    {
+      "action": "assert",
+      "actor": "plate_r2",
+      "metric": "aura_amount",
+      "spell": 301352,
+      "effect": 1,
+      "equals": -4
+    },
+    {
+      "action": "assert",
+      "label": "plate_r2 mail or plate gains its rank armor bonus",
+      "actor": "plate_r2",
+      "metric": "armor",
+      "relative_to": "plate_r2_equipped",
+      "ratio_to": "plate_r2_item_armor",
+      "min": 0.39,
+      "max": 0.45
+    },
+    {
+      "action": "unlearn",
+      "actor": "cloth_r1",
+      "spell": 300560,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "cloth_r1",
+      "metric": "armor",
+      "relative_to": "cloth_r1_equipped",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "leather_r1",
+      "spell": 300560,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "leather_r1",
+      "metric": "armor",
+      "relative_to": "leather_r1_equipped",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "mail_r1",
+      "spell": 300560,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "mail_r1",
+      "metric": "armor",
+      "relative_to": "mail_r1_equipped",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "plate_r1",
+      "spell": 300560,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "plate_r1",
+      "metric": "armor",
+      "relative_to": "plate_r1_equipped",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "cloth_r2",
+      "spell": 301352,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "cloth_r2",
+      "metric": "armor",
+      "relative_to": "cloth_r2_equipped",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "leather_r2",
+      "spell": 301352,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "leather_r2",
+      "metric": "armor",
+      "relative_to": "leather_r2_equipped",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "mail_r2",
+      "spell": 301352,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "mail_r2",
+      "metric": "armor",
+      "relative_to": "mail_r2_equipped",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "plate_r2",
+      "spell": 301352,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "plate_r2",
+      "metric": "armor",
+      "relative_to": "plate_r2_equipped",
+      "equals": 0
+    }
+  ]
+}

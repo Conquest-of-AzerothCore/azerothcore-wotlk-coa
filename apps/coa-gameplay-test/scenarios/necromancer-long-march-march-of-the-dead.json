@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "Necromancer Long March removes March of the Dead's cooldown and gives it a 1 sec cast (#1058)",
+  "contract": "Long March 704717 is a Necromancer Animation talent (CharacterAdvancement 30238, ClassType 25 = class 23, Tab 61 Animation, TalentEssenceCost 1). Its client description reads 'Removes the cooldown from March of the Dead, but gives it a $/1000;s2 sec cast time.' Effect 0 is SPELL_AURA_ADD_PCT_MODIFIER (108) MiscValue 11 (SPELLMOD_COOLDOWN) with BasePoints -101 + DieSides 1 = -100; effect 1 is SPELL_AURA_ADD_FLAT_MODIFIER (107) MiscValue 10 (SPELLMOD_CASTING_TIME) with BasePoints 999 + DieSides 1 = 1000. Both use EffectSpellClassMask (0x80000, 0, 0) in SpellFamilyName 29, which matches March of the Dead 707007 (family flags 0x80000, 0, 0; CastingTimeIndex 1 = instant, RecoveryTime 10000 ms, 400 Runic Power, 1500 ms global cooldown). Player::AddSpellAndCategoryCooldowns applies SPELLMOD_COOLDOWN to the recovery time and Unit::ModSpellCastTime lets a positive flat cast-time modifier give an instant spell a cast time. So without the talent March of the Dead is instant and goes on a 10 sec cooldown; with it the cast takes 1000 ms, completes, leaves no cooldown and can be cast again as soon as the global cooldown ends.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000, "allow_regeneration": false }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 12 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "necro", "spell": 707007 },
+    {
+      "action": "assert", "label": "CONTROL: March of the Dead is instant", "actor": "necro",
+      "metric": "spell_cast_time_ms", "spell": 707007, "equals": 0
+    },
+    { "action": "set_power", "actor": "necro", "power": 6, "value": 500 },
+    { "action": "snapshot", "actor": "necro", "metric": "spell_cast_count", "spell": 707007, "save_as": "casts" },
+    { "action": "cast", "label": "March without the talent", "actor": "necro", "spell": 707007, "target": "golem" },
+    {
+      "action": "assert", "label": "SETUP: the untalented March completes", "actor": "necro",
+      "metric": "spell_cast_count", "spell": 707007, "relative_to": "casts", "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "CONTROL: without Long March the spell goes on a 10 sec cooldown", "actor": "necro",
+      "metric": "cooldown_ms", "spell": 707007, "min": 9000, "max": 10000
+    },
+    { "action": "reset_cooldown", "actor": "necro", "spell": 707007 },
+    { "action": "learn", "actor": "necro", "spell": 704717 },
+    {
+      "action": "assert", "label": "The talent aura is applied", "actor": "necro",
+      "metric": "aura", "spell": 704717, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: March of the Dead now has a 1 sec cast", "actor": "necro",
+      "metric": "spell_cast_time_ms", "spell": 707007, "equals": 1000
+    },
+    {
+      "action": "assert", "label": "The cooldown modifier removes the whole 10 sec recovery", "actor": "necro",
+      "metric": "spell_modifier", "spell": 707007, "op": 11, "base": 10000, "min": -0.01, "max": 0.01
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "set_power", "actor": "necro", "power": 6, "value": 500 },
+    { "action": "cast", "label": "March with Long March", "actor": "necro", "spell": 707007, "target": "golem" },
+    {
+      "action": "assert", "label": "The talented March starts a 1 sec cast", "actor": "necro",
+      "metric": "cast_remaining_ms", "spell": 707007, "min": 800, "max": 1000
+    },
+    {
+      "action": "assert", "label": "The talented March completes", "actor": "necro",
+      "metric": "spell_cast_count", "spell": 707007, "relative_to": "casts", "equals": 2, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the completed March leaves no cooldown", "actor": "necro",
+      "metric": "cooldown_ms", "spell": 707007, "equals": 0
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "set_power", "actor": "necro", "power": 6, "value": 500 },
+    { "action": "cast", "label": "March again at once", "actor": "necro", "spell": 707007, "target": "golem" },
+    {
+      "action": "assert", "label": "The second March starts immediately after the global cooldown", "actor": "necro",
+      "metric": "cast_remaining_ms", "spell": 707007, "min": 800, "max": 1000
+    },
+    {
+      "action": "assert", "label": "The second March completes", "actor": "necro",
+      "metric": "spell_cast_count", "spell": 707007, "relative_to": "casts", "equals": 3, "within_ms": 2000
+    }
+  ]
+}

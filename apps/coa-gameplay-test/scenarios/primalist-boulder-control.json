@@ -72,9 +72,9 @@
       "o": 3.14159265
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "primalist",
-      "command": ".localspec 59"
+      "id": 59
     },
     {
       "action": "learn",
@@ -108,9 +108,9 @@
       "slot": 15
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "cancelled",
-      "command": ".localspec 59"
+      "id": 59
     },
     {
       "action": "learn",

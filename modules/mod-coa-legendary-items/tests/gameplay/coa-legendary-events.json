@@ -1,0 +1,247 @@
+{
+  "schema": 1,
+  "name": "CoA Legendary Items: immediate equipment and health events",
+  "contract": "Requires CoALegendaryItems.Enable=1 and CoA.SendDisplayPatches=1. Equipment changes and committed health or maximum-health changes immediately reconcile legendary powers without a periodic condition timer. Signature trinkets register a native 12% direct-damage modifier, including its client packet, and remove it when the item is destroyed.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 13,
+      "level": 32
+    },
+    {
+      "id": "hybrid",
+      "race": 1,
+      "class": 14,
+      "level": 32
+    },
+    {
+      "id": "barbarian",
+      "race": 1,
+      "class": 12,
+      "level": 32,
+      "ascension_client": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "maximum": 10000,
+      "value": 10000
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 9700329
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 9700329,
+      "slot": 10
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 9710003,
+      "equals": 41
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "maximum": 10000,
+      "value": 10000
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 7990
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 9710003,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 8000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 9710003,
+      "equals": 41
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "maximum": 20000,
+      "value": 8000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 9710003,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "maximum": 10000,
+      "value": 8000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 9710003,
+      "equals": 1
+    },
+    {
+      "action": "destroy_item",
+      "actor": "caster",
+      "item": 9700329
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 9710003,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "hybrid",
+      "maximum": 10000,
+      "value": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "hybrid",
+      "item": 9700629
+    },
+    {
+      "action": "equip",
+      "actor": "hybrid",
+      "item": 9700629,
+      "slot": 10
+    },
+    {
+      "action": "assert",
+      "actor": "hybrid",
+      "metric": "aura_amount",
+      "spell": 9710006,
+      "equals": 82
+    },
+    {
+      "action": "set_health",
+      "actor": "hybrid",
+      "maximum": 10000,
+      "value": 3500
+    },
+    {
+      "action": "set_health",
+      "actor": "hybrid",
+      "value": 3510
+    },
+    {
+      "action": "assert",
+      "actor": "hybrid",
+      "metric": "aura",
+      "spell": 9710006,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "hybrid",
+      "value": 3500
+    },
+    {
+      "action": "assert",
+      "actor": "hybrid",
+      "metric": "aura",
+      "spell": 9710006,
+      "equals": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "barbarian",
+      "item": 9700229
+    },
+    {
+      "action": "equip",
+      "actor": "barbarian",
+      "item": 9700229,
+      "slot": 12
+    },
+    {
+      "action": "assert",
+      "actor": "barbarian",
+      "metric": "spell_modifier",
+      "spell": 805808,
+      "op": 0,
+      "base": 1000,
+      "equals": 1120
+    },
+    {
+      "action": "assert",
+      "actor": "barbarian",
+      "metric": "server_packet_u32",
+      "opcode": 615,
+      "row": 201337344,
+      "offset": 3,
+      "equals": 12
+    },
+    {
+      "action": "assert",
+      "actor": "barbarian",
+      "metric": "server_packet_u32",
+      "opcode": 615,
+      "row": 201337344,
+      "offset": 7,
+      "equals": 18
+    },
+    {
+      "action": "destroy_item",
+      "actor": "barbarian",
+      "item": 9700229
+    },
+    {
+      "action": "assert",
+      "actor": "barbarian",
+      "metric": "spell_modifier",
+      "spell": 805808,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "barbarian",
+      "metric": "server_packet_u32",
+      "opcode": 615,
+      "row": 10752,
+      "offset": 3,
+      "equals": 0
+    }
+  ]
+}

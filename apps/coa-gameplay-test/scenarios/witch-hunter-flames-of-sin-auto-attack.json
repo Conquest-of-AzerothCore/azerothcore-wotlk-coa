@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "name": "Flames of Sin adds 40% of each auto attack as Fire damage (#265)",
+  "contract": [
+    "The Flames of Sin aura 803422 reads 'Your auto attacks now deal an additional ${$w1}% of the damage dealt as",
+    "Fire Damage.' Its effect 0 (BasePoints 39, 40%) names 802850 'Flames of Sin: Deals Fire Damage.' as its",
+    "trigger. Purifier's Edge 802019 'Grants Flames of Sin or increases the duration by $802845s2 sec'; helper",
+    "802845 effect 1 carries 2999 + 1 = 3000 ms. Purifier's Edge has SPELL_ATTR3_REQUIRES_MAIN_HAND_WEAPON and",
+    "SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON, so the fixture dual-wields and both hands auto attack. The first auto",
+    "attacks under the buff must be followed by 802850 hits worth 40% of those swings (floored per hit, at least",
+    "2/7 for swings of 5 or more; 60% if a Fire hit crits), and nothing before the grant or after the buff expires.",
+    "#265 reported 'AuraScript::GetTarget called in the wrong hook' for 803422: the proc",
+    "script's Load read GetTarget, which is null outside effect hooks, so the script never attached and the native",
+    "dummy proc cast 802850 at its DBC base value, 1 Fire damage per swing. Ratings remove melee misses, dodges and",
+    "parries and the Fire hit's spell miss."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hunter", "race": 1, "class": 15, "level": 60, "melee_hit_rating": 10000,
+      "expertise_rating": 10000, "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "hunter", "entry": 36, "level": 60, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 5000 },
+    { "action": "learn", "actor": "hunter", "spell": 201 },
+    { "action": "learn", "actor": "hunter", "spell": 1180 },
+    { "action": "learn", "actor": "hunter", "spell": 674 },
+    { "action": "learn", "actor": "hunter", "spell": 802019 },
+    { "action": "add_item", "actor": "hunter", "item": 25 },
+    { "action": "equip", "actor": "hunter", "item": 25, "slot": 15 },
+    { "action": "add_item", "actor": "hunter", "item": 2092 },
+    { "action": "equip", "actor": "hunter", "item": 2092, "slot": 16 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "SETUP: the off hand holds a weapon", "actor": "hunter",
+      "metric": "weapon_damage_min", "hand": 1, "min": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: no Flames of Sin before the grant", "actor": "hunter",
+      "metric": "aura", "spell": 803422, "equals": 0
+    },
+    { "action": "attack", "actor": "hunter", "target": "enemy" },
+    {
+      "action": "assert", "label": "SETUP: auto attacks land", "actor": "hunter",
+      "metric": "melee_damage_count", "min": 2, "within_ms": 6000
+    },
+    {
+      "action": "assert", "label": "Control: auto attacks without the buff cause no Flames of Sin hit",
+      "actor": "hunter", "metric": "spell_damage_count", "spell": 802850, "target": "enemy", "equals": 0
+    },
+    {
+      "action": "snapshot", "actor": "hunter", "metric": "melee_damage_total",
+      "save_as": "melee_before_grant"
+    },
+    { "action": "cast", "actor": "hunter", "spell": 802019, "target": "enemy" },
+    {
+      "action": "assert", "label": "Purifier's Edge grants Flames of Sin", "actor": "hunter",
+      "metric": "aura", "spell": 803422, "caster": "hunter", "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "An auto attack under Flames of Sin is followed by a Flames of Sin hit",
+      "actor": "hunter", "metric": "spell_damage_count", "spell": 802850, "target": "enemy", "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot", "actor": "hunter", "metric": "melee_damage_total",
+      "relative_to": "melee_before_grant", "save_as": "melee_under_flames"
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Fire hits are 40% of the auto attacks they follow",
+      "actor": "hunter", "metric": "spell_damage_total", "spell": 802850, "target": "enemy",
+      "ratio_to": "melee_under_flames", "min": 0.25, "max": 0.65
+    },
+    {
+      "action": "assert", "label": "Flames of Sin expires", "actor": "hunter", "metric": "aura",
+      "spell": 803422, "equals": 0, "within_ms": 4000
+    },
+    {
+      "action": "snapshot", "actor": "hunter", "metric": "spell_damage_count", "spell": 802850,
+      "target": "enemy", "save_as": "flames_after_expiry"
+    },
+    {
+      "action": "snapshot", "actor": "hunter", "metric": "melee_damage_count",
+      "save_as": "swings_after_expiry"
+    },
+    { "action": "wait", "ms": 4000 },
+    {
+      "action": "assert", "label": "SETUP: auto attacks continue after the buff", "actor": "hunter",
+      "metric": "melee_damage_count", "relative_to": "swings_after_expiry", "min": 1
+    },
+    {
+      "action": "assert", "label": "No Flames of Sin hit once the buff has expired", "actor": "hunter",
+      "metric": "spell_damage_count", "spell": 802850, "target": "enemy", "relative_to": "flames_after_expiry",
+      "equals": 0
+    },
+    { "action": "stop_attack", "actor": "hunter" },
+    { "action": "assert", "actor": "hunter", "metric": "alive", "equals": 1 }
+  ]
+}

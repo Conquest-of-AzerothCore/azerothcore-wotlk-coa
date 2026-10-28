@@ -212,8 +212,16 @@ class spell_dru_feral_swiftness : public AuraScript
 
     void AfterApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
     {
-        if (Player* player = GetTarget()->ToPlayer())
-            if (uint8 rank = player->HasTalent(SPELL_DRUID_FERAL_SWIFTNESS_R1, player->GetActiveSpec()) ? 1 : (player->HasTalent(SPELL_DRUID_FERAL_SWIFTNESS_R2, player->GetActiveSpec()) ? 2 : 0))
+        Player* player = GetTarget()->ToPlayer();
+        if (!player)
+            return;
+        auto const hasTalent = [player](uint32 talent)
+        {
+            std::vector<uint32> const ranks = sSpellMgr->GetSpellAndRelatives(talent);
+            return std::any_of(ranks.begin(), ranks.end(),
+                [player](uint32 spellId) { return player->HasTalent(spellId, player->GetActiveSpec()); });
+        };
+        if (uint8 rank = hasTalent(SPELL_DRUID_FERAL_SWIFTNESS_R1) ? 1 : (hasTalent(SPELL_DRUID_FERAL_SWIFTNESS_R2) ? 2 : 0))
                 player->CastSpell(player, rank == 1 ? SPELL_DRUID_FERAL_SWIFTNESS_PASSIVE_1 : SPELL_DRUID_FERAL_SWIFTNESS_PASSIVE_2, true, nullptr, aurEff, GetCasterGUID());
     }
 
@@ -522,7 +530,7 @@ class spell_dru_enrage : public AuraScript
     void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
     {
         Unit* target = GetTarget();
-        if (AuraEffect const* aurEff = target->GetAuraEffectOfRankedSpell(SPELL_DRUID_KING_OF_THE_JUNGLE, EFFECT_0))
+        if (AuraEffect const* aurEff = target->GetAuraEffectOfRankedSpellOrTwin(SPELL_DRUID_KING_OF_THE_JUNGLE, EFFECT_0))
         {
             target->CastCustomSpell(SPELL_DRUID_ENRAGE_MOD_DAMAGE, SPELLVALUE_BASE_POINT0, aurEff->GetAmount(), target, true);
         }
@@ -1108,7 +1116,7 @@ class spell_dru_tiger_s_fury : public SpellScript
 
     void OnHit()
     {
-        if (AuraEffect const* aurEff = GetHitUnit()->GetAuraEffectOfRankedSpell(SPELL_DRUID_KING_OF_THE_JUNGLE, EFFECT_1))
+        if (AuraEffect const* aurEff = GetHitUnit()->GetAuraEffectOfRankedSpellOrTwin(SPELL_DRUID_KING_OF_THE_JUNGLE, EFFECT_1))
             GetHitUnit()->CastCustomSpell(SPELL_DRUID_TIGER_S_FURY_ENERGIZE, SPELLVALUE_BASE_POINT0, aurEff->GetAmount(), GetHitUnit(), true);
     }
 
@@ -1126,7 +1134,7 @@ class spell_dru_typhoon : public SpellScript
     void HandleKnockBack(SpellEffIndex effIndex)
     {
         // Glyph of Typhoon
-        if (GetCaster()->HasAura(SPELL_DRUID_GLYPH_OF_TYPHOON))
+        if (GetCaster()->HasAuraOrTwin(SPELL_DRUID_GLYPH_OF_TYPHOON))
             PreventHitDefaultEffect(effIndex);
     }
 
@@ -1196,7 +1204,7 @@ class spell_dru_wild_growth : public SpellScript
     {
         targets.remove_if(Acore::RaidCheck(GetCaster(), false));
 
-        uint32 const maxTargets = GetCaster()->HasAura(SPELL_DRUID_GLYPH_OF_WILD_GROWTH) ? 6 : 5;
+        uint32 const maxTargets = GetCaster()->HasAuraOrTwin(SPELL_DRUID_GLYPH_OF_WILD_GROWTH) ? 6 : 5;
 
         if (targets.size() > maxTargets)
         {
@@ -1451,12 +1459,9 @@ class spell_dru_glyph_of_rejuvenation : public AuraScript
 
     bool CheckProc(ProcEventInfo& eventInfo)
     {
-        Unit* target = eventInfo.GetActionTarget();
-        if (!target)
-            return false;
-
-        // Only proc if target is below health threshold
-        return target->HealthBelowPct(GetSpellInfo()->Effects[EFFECT_0].CalcValue());
+        // Ascension: "a 33% chance to heal the target for an additional 50%, regardless of the target's health" (stock:
+        // below 50% health). Effect 0 is the heal's share only.
+        return eventInfo.GetActionTarget() && eventInfo.GetHealInfo();
     }
 
     void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
@@ -1803,7 +1808,7 @@ class spell_dru_glyph_of_shred : public AuraScript
 
             // Add possible auras' and Glyph of Shred's max duration
             countMax += 3 * aurEff->GetAmount() * IN_MILLISECONDS;                                          // Glyph of Shred -> +6 seconds
-            countMax += caster->HasAura(SPELL_DRUID_GLYPH_OF_RIP) ? 4 * IN_MILLISECONDS : 0;                // Glyph of Rip -> +4 seconds
+            countMax += caster->HasAuraOrTwin(SPELL_DRUID_GLYPH_OF_RIP) ? 4 * IN_MILLISECONDS : 0;                // Glyph of Rip -> +4 seconds
             countMax += caster->HasAura(SPELL_DRUID_RIP_DURATION_LACERATE_DMG) ? 4 * IN_MILLISECONDS : 0;   // T7 set bonus -> +4 seconds
 
             // If min < max that means caster didn't cast 3 shred yet
@@ -2033,7 +2038,7 @@ class spell_dru_nourish : public SpellScript
         int32 heal = GetHitHeal();
 
         // Glyph of Nourish
-        if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_DRUID_GLYPH_OF_NOURISH, EFFECT_0))
+        if (AuraEffect const* aurEff = caster->GetAuraEffectOfRankedSpellOrTwin(SPELL_DRUID_GLYPH_OF_NOURISH, EFFECT_0))
         {
             uint32 auraCount = 0;
 

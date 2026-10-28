@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "name": "Flames of Xoroth casts its fire-breath visual helper (#140)",
+  "contract": "Issue #140 reports that Flames of Xoroth 801059 plays no animation. In the live client Spell.dbc every Flames of Xoroth rank (801059, 802411-802415, 573448) carries SpellVisual 194027, whose SpellVisual.dbc row has no precast, cast or impact kit, only StateKit 194027 (ChestEffect 100366, the SlashingBlaze burning aura on an affected target). The cast visuals live on the hidden same-name helper 801003: SpellVisual 989851 with PrecastKit 963148, CastKit 963149 (AnimID 53, hand effects 53503 cfx_shaman_lavaburst_casthands, world effect 530510 8fx_toldagor_ignitionmage_cinderflame_cast, sound 306150) and ImpactKit 963150 (ChestEffect 100352 7fx_portalkeeper_playerimpact_chest_fire). 801003 shares 801059's implicit target 24 cone, radius index 32 and range index 2, and 801059's own description counts its targets as $801003i, so it is Flames of Xoroth's companion cast. Its only effect triggers 520440 'Demonfire Remover Delay' -> 520441 'Demonfire Remover', which AscensionXorothContracts.cpp already neutralises because BeginResources consumes Demonfire itself. No spell, SQL row or script ever cast 801003, so the client received SMSG_SPELL_GO only for 801059 and drew nothing. Expected: every player cast of Flames of Xoroth also sends one SMSG_SPELL_GO for 801003 from the knight; Flames still damages the target (#227), the helper deals no damage, and Demonfire gained right after the cast is not removed by the helper's legacy delayed remover. The knight is level 10 as in the report, with spell hit rating 10000 so the magic cone cannot miss and refund Demonfire; Flames of Xoroth is a Demonfire spender, so one Demonfire stack and Rage are fixtured.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 10, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "knight", "entry": 36, "level": 10, "health": 100000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "knight", "spell": 801059 },
+    { "action": "assert", "actor": "knight", "metric": "knows_spell", "spell": 801059, "equals": 1 },
+    { "action": "set_power", "actor": "knight", "power": 1, "value": 1000, "label": "Flames of Xoroth costs 15 Rage" },
+    {
+      "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 1,
+      "label": "Flames of Xoroth requires and spends Demonfire (CasterAuraSpell 500906, AscensionXoroth::Spender)"
+    },
+    { "action": "snapshot", "actor": "knight", "metric": "spell_go_count", "spell": 801059, "save_as": "flames_go" },
+    { "action": "snapshot", "actor": "knight", "metric": "spell_go_count", "spell": 801003, "save_as": "breath_go" },
+    { "action": "cast", "actor": "knight", "spell": 801059, "target": "dummy" },
+    {
+      "action": "assert", "label": "SETUP: the Flames of Xoroth cast went out", "actor": "knight",
+      "metric": "spell_go_count", "spell": 801059, "relative_to": "flames_go", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 2,
+      "label": "Demonfire gained right after the cast, inside the legacy remover's 120 ms delay"
+    },
+    {
+      "action": "assert", "label": "The cast sends the fire-breath visual helper 801003", "actor": "knight",
+      "metric": "spell_go_count", "spell": 801003, "relative_to": "breath_go", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Flames of Xoroth still damages the target", "actor": "knight",
+      "metric": "spell_damage_total", "spell": 801059, "target": "dummy", "min": 1, "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let any delayed trigger of the helper run", "ms": 1000 },
+    {
+      "action": "assert", "label": "The visual helper deals no damage of its own", "actor": "knight",
+      "metric": "spell_damage_count", "spell": 801003, "equals": 0
+    },
+    {
+      "action": "assert", "label": "The helper's legacy Demonfire remover stays inert", "actor": "knight",
+      "metric": "aura_stacks", "spell": 500906, "equals": 2
+    },
+    {
+      "action": "assert", "label": "One cast sends the helper exactly once", "actor": "knight",
+      "metric": "spell_go_count", "spell": 801003, "relative_to": "breath_go", "equals": 1
+    }
+  ]
+}

@@ -1,0 +1,214 @@
+{
+  "schema": 1,
+  "name": "Ranger Frenzy: Worn Out allies are skipped by a later Frenzy (#1952)",
+  "contract": "Frenzy 520492 (Ranger, SpellFamilyName 27) reads 'Enrage all nearby allies, increasing their haste by $s1% for $d. After being affected by this spell, allies cannot benefit from similar effects for $804457d.' Spell.dbc gives it three effects on TARGET_SRC_CASTER / TARGET_UNIT_CASTER_AREA_RAID: effect 0 SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK (65) and effect 1 SPELL_AURA_MOD_MELEE_RANGED_HASTE (192), both BasePoints 29 + DieSides 1 = 30, and effect 2 SPELL_EFFECT_TRIGGER_SPELL 804457 'Worn Out', a 5 min SPELL_AURA_DUMMY marker. Nothing read Worn Out, so every Frenzy in the window hasted the ally again. spell_ascension_ranger_frenzy removes units that already carry Worn Out from all three effects' target lists during target selection, before the launch-phase trigger applies this cast's Worn Out. Expected: the first Frenzy gives a grouped ally 30/30 and Worn Out; a second Frenzy while Worn Out is present gives the ally no Frenzy aura and leaves its Worn Out running rather than refreshing it; once Worn Out is gone a third Frenzy gives the ally 30/30 again.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the characters settle",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "ranger",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 520492
+    },
+    {
+      "action": "cast",
+      "label": "First Frenzy",
+      "actor": "ranger",
+      "spell": 520492
+    },
+    {
+      "action": "assert",
+      "label": "The grouped ally is enraged",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 520492,
+      "caster": "ranger",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "First Frenzy: 30% melee and ranged haste",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 520492,
+      "effect": 1,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "First Frenzy: 30% casting speed",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 520492,
+      "effect": 0,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "First Frenzy leaves the ally Worn Out",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 804457,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear the first Frenzy from the ally",
+      "actor": "ally",
+      "spell": 520492,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "aura_duration_ms",
+      "spell": 804457,
+      "save_as": "worn_out_left"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally no longer has Frenzy",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 520492,
+      "equals": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ranger",
+      "spell": 520492
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Second Frenzy while Worn Out",
+      "actor": "ranger",
+      "spell": 520492
+    },
+    {
+      "action": "wait",
+      "label": "Give the cast time to land",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The Worn Out ally gets no Frenzy",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 520492,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The ally's Worn Out was not refreshed",
+      "actor": "ally",
+      "metric": "aura_duration_ms",
+      "spell": 804457,
+      "relative_to": "worn_out_left",
+      "max": 0
+    },
+    {
+      "action": "assert",
+      "label": "The ally is still Worn Out",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 804457,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear Worn Out from the ally",
+      "actor": "ally",
+      "spell": 804457,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally is no longer Worn Out",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 804457,
+      "equals": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ranger",
+      "spell": 520492
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Third Frenzy after Worn Out ended",
+      "actor": "ranger",
+      "spell": 520492
+    },
+    {
+      "action": "assert",
+      "label": "The rested ally is enraged again",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 520492,
+      "caster": "ranger",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Rested ally: 30% melee and ranged haste again",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 520492,
+      "effect": 1,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Rested ally: 30% casting speed again",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 520492,
+      "effect": 0,
+      "equals": 30
+    }
+  ]
+}

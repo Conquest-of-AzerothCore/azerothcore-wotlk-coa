@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <iostream>
 #include <map>
+#include <mutex>
 #include <set>
 #include <unordered_map>
 #include <vector>
@@ -118,6 +119,12 @@ struct Session
     void SendPacket(WorldPacket* packet) { replacements.push_back(packet->values); }
 };
 
+struct Aura
+{
+    bool Removed = false;
+    bool IsRemoved() const { return Removed; }
+};
+
 struct Player
 {
     uint32 cls = 16, level = 80, learnPackets = 0;
@@ -126,6 +133,8 @@ struct Player
     uint8 m_activeSpec = 0;
     PlayerSpellMap m_spells;
     std::map<uint32, uint32> m_temporarySpellReplacements;
+    std::map<uint32, uint32> m_temporarySpellReplacementOrigins;
+    std::map<uint32, Aura> auras;
     Session session;
     Player() = default;
     Player(Player const&) = delete;
@@ -140,6 +149,11 @@ struct Player
     void SetCanDualWield(bool value) { dualWield = value; }
     void AutoUnequipOffhandIfNeed() { ++offhandChecks; }
     Guid GetGUID() const { return {}; }
+    Aura const* GetAura(uint32 id, Guid) const
+    {
+        auto const itr = auras.find(id);
+        return itr == auras.end() ? nullptr : &itr->second;
+    }
     auto const& GetSpellMap() const { return m_spells; }
     Session* GetSession() { return &session; }
     bool IsInWorld() const { return true; }
@@ -150,12 +164,14 @@ struct Player
     bool HasActiveSpell(uint32) const;
     bool _addSpell(uint32, uint8, bool, bool = false);
     void learnSpell(uint32, bool = false, bool = false);
+    void learnSpellWithoutAnnouncement(uint32, bool = true);
+    void _learnSpell(uint32, bool, bool, bool);
     void removeSpell(uint32, uint8, bool);
     bool addSpell(uint32 id, uint8 mask, bool, bool temporary, bool skill)
     {
         return _addSpell(id, mask, temporary, skill);
     }
-    void SendLearnPacket(uint32, bool) { ++learnPackets; }
+    void SendLearnPacket(uint32, bool, bool = false) { ++learnPackets; }
     void _SaveSpells(CharacterDatabaseTransaction);
     void SetTemporarySpellReplacement(uint32, uint32);
     uint32 GetTemporarySpellReplacement(uint32) const;
@@ -168,9 +184,15 @@ struct Player
 bool IsAscensionCustomClass(Player const* player) { return IsAscensionClass(player->getClass()); }
 void SynchronizeAscensionRunemasterEchoes(Player*, uint32) { }
 void RemoveAscensionPrimalistWeapons(Player*) { }
+namespace AscensionWildcard
+{
+constexpr std::array<uint32, 1> SPECIALIZATION_SWAP_SPELLS = { 979993 };
+bool IsWildcardHero(Player const*) { return false; }
+}
 
 struct AscensionClassService
 {
+    mutable std::mutex _stateLock;
     std::unordered_map<uint32, uint32> _activeSpecializations;
     static AscensionClassService& Instance()
     {
@@ -179,6 +201,7 @@ struct AscensionClassService
     }
     bool AffectsProficiencies(uint32) const { return false; }
     void SynchronizeProficiencies(Player*) { }
+    void SendActiveSlot(Player*) { }
     static void ReconcileRunemasterFists(Player*, uint32) { }
     // ACTUAL_SERVICE
 };
@@ -193,6 +216,9 @@ struct Config
 } ascensionCompatConfig;
 struct ScriptMgr
 {
+    void OnPlayerTemporarySpellLearnNotice(Player*, uint32, bool) { }
+    void OnPlayerTemporarySpellRemoveNotice(Player*, uint32, bool) { }
+    void OnPlayerTemporarySpellReplacementNotice(Player*, uint32, uint32, bool) { }
     // ACTUAL_HOOKS
 } scripts;
 auto sScriptMgr = &scripts;
@@ -212,6 +238,8 @@ void CheckReplacements()
     }
     for (auto const& entry : AscensionCompatData::TalentReplacements)
     {
+        if (entry.RequiresAura)
+            continue;
         uint32 const original = entry.OriginalSpellId, parent = entry.ParentSpellId;
         uint32 const base = entry.Ranks.front().SpellId;
         Player player;
@@ -322,6 +350,43 @@ void CheckReplacements()
         assert(!relog.m_temporarySpellReplacements.contains(originalRank));
         assert(relog.GetTemporarySpellReplacement(original) == base);
     }
+    for (auto const& entry : AscensionCompatData::TalentReplacements)
+    {
+        if (!entry.RequiresAura)
+            continue;
+        Player player;
+        player.cls = entry.ClassId;
+        uint32 const original = entry.OriginalSpellId, parent = entry.ParentSpellId;
+        uint32 const child = entry.Ranks.front().SpellId;
+        player.learnSpell(parent);
+        player.learnSpell(original);
+        assert(!player.HasSpell(child));
+        assert(player.GetTemporarySpellReplacement(original) == original);
+        player.auras[parent] = {};
+        service.SynchronizeTalentReplacements(&player);
+        assert(player.HasSpell(child));
+        assert(player.GetTemporarySpellReplacement(original) == child);
+        player.auras[parent].Removed = true;
+        service.SynchronizeTalentReplacements(&player);
+        assert(!player.HasSpell(child));
+        assert(player.GetTemporarySpellReplacement(original) == original);
+        player.auras[parent].Removed = false;
+        service.SynchronizeTalentReplacements(&player);
+        player.removeSpell(original, SPEC_MASK_ALL, false);
+        assert(!player.HasSpell(child));
+        player.learnSpell(original);
+        assert(player.HasSpell(child));
+        player.auras.erase(parent);
+        service.SynchronizeTalentReplacements(&player);
+        assert(!player.HasSpell(child));
+        player.Put(child);
+        player.auras[parent] = {};
+        service.SynchronizeTalentReplacements(&player);
+        player.auras.erase(parent);
+        service.SynchronizeTalentReplacements(&player);
+        assert(player.HasSpell(child));
+        assert(player.GetTemporarySpellReplacement(original) == original);
+    }
     Player blood;
     blood.cls = 20;
     blood.Put(562720);
@@ -336,7 +401,8 @@ void CheckReplacements()
             for (uint32 id : {680692u, 801076u, 562572u})
                 assert(blood.HasSpell(id) == (id == entry.Ranks.front().SpellId));
         }
-    std::cout << "PASS: 12 transformation routes, rank gates, callbacks, native routing and ownership cleanup\n";
+    std::cout << "PASS: " << AscensionCompatData::TalentReplacements.size()
+        << " transformation routes, rank gates, callbacks, native routing and ownership cleanup\n";
 }
 
 int main()

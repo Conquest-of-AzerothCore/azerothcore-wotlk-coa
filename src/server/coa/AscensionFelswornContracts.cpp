@@ -13,7 +13,12 @@ namespace AscensionFelsworn
 {
 void ApplyContracts(SpellInfo* info)
 {
-    if (!info || info->SpellFamilyName != 20)
+    if (!info)
+        return;
+    for (auto const& rift : FelswornRifts)
+        if (info->Id == rift.spell)
+            info->Effects[0].MiscValue = rift.entry;
+    if (info->SpellFamilyName != 20)
         return;
     uint32 id = info->Id;
     if (id == MannorothFelfury)
@@ -61,9 +66,6 @@ void ApplyContracts(SpellInfo* info)
         info->StartRecoveryCategory = 133;
         info->StartRecoveryTime = 1000;
     }
-    for (auto const& rift : FelswornRifts)
-        if (id == rift.spell)
-            info->Effects[0].MiscValue = rift.entry;
     if (id == 803465 || id == 807421 || id == 807428 || id == 807426)
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             if (info->Effects[i].Effect)
@@ -186,7 +188,10 @@ void ApplyContracts(SpellInfo* info)
     if (id == 560087)
         dummy(0);
     if (id == 807962)
+    {
         dummy(0), dummy(1);
+        info->AttributesEx3 |= SPELL_ATTR3_SUPPRESS_CASTER_PROCS;
+    }
     if (id == 555277)
         info->Effects[0].MiscValue = SPELLMOD_CASTING_TIME;
     if (id == 807163)

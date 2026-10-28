@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Ancestor's Call summons the Honored Ancestor and appears once in the spellbook (#168)",
+  "contract": "Issue #168: a Draenei Barbarian casting Ancestor's Call 804834 sees the cast animation but nothing is summoned, and the button appears twice. Ancestry talent 804729 (CharacterAdvancement 31153, spec 3 ANCESTRY) reads 'Teaches you Ancestor's Call.@s:804834:0@'; AscensionTaughtAbilityData.h { 12, 3, 0, 804729, 804834 } grants 804834 as a temporary spell through SynchronizeTaughtAbilities while spec 3 is active. 804834 (Rank 'Troll') describes 'Call an Honored Ancestor to aid you in battle until dismissed'; its only effect is SPELL_EFFECT_SUMMON_PET (56) with MiscValue 51265, and AscensionBarbarian::Ancestor accepts exactly that entry in the guardian pet slot. The CoA database mirror (hertigservices/ascension-data, supplemental/exiles-db npc 51265) lists 51265 as 'Honored Ancestor' with display 173031, a troll model, but no world SQL defined the entry, so Player::SummonPet failed with 'No such creature entry 51265'. Expected: one cast leaves one living Honored Ancestor 51265 owned by the Barbarian as its pet, for a Draenei as for any race (the client data has Troll, Human, Dwarf, Orc, Undead and Tauren variants 804834/804846/804869/804872/804901/804905 but none for Draenei, and the server teaches only 804834). The duplicate button came from Player::learnSpell announcing a temporary grant a second time after Player::_addSpell had already sent SMSG_LEARNED_SPELL, fixed by b2bdf72a5 (#436, #251): learning the talent must announce Ancestor's Call to the client exactly once.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "barbarian", "race": 11, "class": 12, "level": 30 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    {
+      "action": "specialization", "actor": "barbarian", "id": 3,
+      "label": "AscensionTaughtAbilityData.h gates Ancestor's Call on the Ancestry specialization 3"
+    },
+    { "action": "wait", "ms": 1000 },
+    { "action": "unlearn", "actor": "barbarian", "spell": 804729 },
+    { "action": "unlearn", "actor": "barbarian", "spell": 804834 },
+    { "action": "assert", "label": "Baseline: Ancestor's Call is not known", "actor": "barbarian", "metric": "knows_spell", "spell": 804834, "equals": 0 },
+    { "action": "snapshot", "actor": "barbarian", "metric": "spellbook_learned_alerts", "spell": 804834, "save_as": "alerts" },
+    { "action": "learn", "actor": "barbarian", "spell": 804729, "label": "Learn the Ancestry talent that teaches Ancestor's Call" },
+    {
+      "action": "assert", "label": "The talent teaches Ancestor's Call 804834", "actor": "barbarian",
+      "metric": "knows_spell", "spell": 804834, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The client is told about Ancestor's Call once, so the spellbook holds one button",
+      "actor": "barbarian", "metric": "spellbook_learned_alerts", "spell": 804834, "relative_to": "alerts", "equals": 1
+    },
+    { "action": "assert", "label": "Baseline: no Honored Ancestor", "actor": "barbarian", "metric": "owned_creature_count", "entry": 51265, "equals": 0 },
+    { "action": "snapshot", "actor": "barbarian", "metric": "spell_go_count", "spell": 804834, "save_as": "call_go" },
+    { "action": "cast", "actor": "barbarian", "spell": 804834 },
+    {
+      "action": "assert", "label": "SETUP: Ancestor's Call is cast", "actor": "barbarian",
+      "metric": "spell_go_count", "spell": 804834, "relative_to": "call_go", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Ancestor's Call summons one Honored Ancestor", "actor": "barbarian",
+      "metric": "owned_creature_count", "entry": 51265, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The Honored Ancestor is the Barbarian's pet, where AscensionBarbarian::Ancestor looks",
+      "actor": "barbarian", "metric": "pet_entry", "equals": 51265
+    }
+  ]
+}

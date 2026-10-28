@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Normal class and specialization tuning (#250)",
-  "contract": "Grant matching normal tuning only, keep copied native level scaling, repair missing auras, replace specialization tuning, and apply normal damage adjustments to creatures only. Damage metrics query native outgoing calculations; Epoch is cast normally.",
+  "contract": "Grant matching normal tuning with its PvP twin only, keep copied native level scaling, repair missing auras, replace specialization tuning, and apply normal damage adjustments to creatures only. Damage metrics query native outgoing calculations; Epoch is cast normally. Native level scaling follows SpellEffectInfo::CalcValue over Spell.dbc: Artificer tuning 887055 effect 0 has EffectBasePoints 4, EffectDieSides 1, EffectRealPointsPerLevel 0.32, BaseLevel and SpellLevel 10 and MaxLevel 60, so a level-60 Chronomancer holds 4 + 16 + 1 = 21.",
   "timeout_ms": 60000,
   "players": [
     {
@@ -124,15 +124,16 @@
     },
     {
       "action": "assert",
+      "label": "The PvP class twin accompanies normal tuning (pvp-class-tuning covers its effects)",
       "actor": "chrono",
       "metric": "aura",
       "spell": 887110,
-      "equals": 0
+      "equals": 1
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "chrono",
-      "command": ".localspec 33"
+      "id": 33
     },
     {
       "action": "assert",
@@ -143,16 +144,17 @@
     },
     {
       "action": "assert",
+      "label": "Artificer tuning keeps its native level-60 PvE damage bonus: 4 + floor(50 * 0.32) + 1",
       "actor": "chrono",
       "metric": "aura_amount",
       "spell": 887055,
       "effect": 0,
-      "equals": 13
+      "equals": 21
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "chrono",
-      "command": ".localspec 31"
+      "id": 31
     },
     {
       "action": "assert",

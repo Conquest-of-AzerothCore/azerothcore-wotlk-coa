@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Tradesman's Scroll offers Inscription and Jewelcrafting",
+  "contract": "Issue #5271: the scroll's profession list omitted Inscription and Jewelcrafting even though both are ordinary primary professions in this fork. Selecting either option must raise the profession the same way every other listed profession does.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "inscriber", "race": 1, "class": 1, "level": 60 },
+    { "id": "jeweler", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "learn", "actor": "inscriber", "spell": 45357, "label": "inscriber: Apprentice Inscription" },
+    { "action": "assert", "actor": "inscriber", "metric": "skill_maximum", "skill": 773, "equals": 75, "label": "inscriber: inscription starts capped at 75" },
+    { "action": "add_item", "actor": "inscriber", "item": 777998, "label": "inscriber: a Tradesman's Scroll" },
+    { "action": "use_item", "actor": "inscriber", "item": 777998, "spell": 200165, "label": "inscriber: read the scroll" },
+    { "action": "gossip_select", "actor": "inscriber", "option": 4, "label": "inscriber: choose Inscription" },
+    { "action": "assert", "actor": "inscriber", "metric": "knows_spell", "spell": 45363, "equals": 1, "label": "inscriber: Grand Master Inscription is learned" },
+    { "action": "assert", "actor": "inscriber", "metric": "skill_maximum", "skill": 773, "equals": 450, "label": "inscriber: inscription caps at 450" },
+    { "action": "assert", "actor": "inscriber", "metric": "skill_value", "skill": 773, "equals": 450, "label": "inscriber: inscription is raised to 450" },
+    { "action": "assert", "actor": "inscriber", "metric": "item_count", "item": 777998, "equals": 0, "label": "inscriber: the scroll is consumed" },
+
+    { "action": "learn", "actor": "jeweler", "spell": 25229, "label": "jeweler: Apprentice Jewelcrafting" },
+    { "action": "assert", "actor": "jeweler", "metric": "skill_maximum", "skill": 755, "equals": 75, "label": "jeweler: jewelcrafting starts capped at 75" },
+    { "action": "add_item", "actor": "jeweler", "item": 777998, "label": "jeweler: a Tradesman's Scroll" },
+    { "action": "use_item", "actor": "jeweler", "item": 777998, "spell": 200165, "label": "jeweler: read the scroll" },
+    { "action": "gossip_select", "actor": "jeweler", "option": 5, "label": "jeweler: choose Jewelcrafting" },
+    { "action": "assert", "actor": "jeweler", "metric": "knows_spell", "spell": 51311, "equals": 1, "label": "jeweler: Grand Master Jewelcrafting is learned" },
+    { "action": "assert", "actor": "jeweler", "metric": "skill_maximum", "skill": 755, "equals": 450, "label": "jeweler: jewelcrafting caps at 450" },
+    { "action": "assert", "actor": "jeweler", "metric": "skill_value", "skill": 755, "equals": 450, "label": "jeweler: jewelcrafting is raised to 450" },
+    { "action": "assert", "actor": "jeweler", "metric": "item_count", "item": 777998, "equals": 0, "label": "jeweler: the scroll is consumed" }
+  ]
+}

@@ -1,0 +1,361 @@
+{
+  "schema": 1,
+  "name": "Lethal Pursuit lets the Shadowhound's Shadow Rage reach 5 stacks from repeated Shadowblasts (#281)",
+  "contract": "The client Spell.dbc (2026-09-16) is the live reference. Lethal Pursuit 572530 (CharacterAdvancement 8005) reads 'Shadow Rage now stacks $s1 additional times' with E0 aura 107 MiscValue 31 (SPELLMOD_MAX_AURA_STACKS), BasePoints 3 / DieSides 1 = +4, class mask B 0x1000. Shadow Rage 804192 has StackAmount 1 and SpellFamilyFlags B 0x1000. Each Shadowblast with Shadow Rage 705455 reapplies the caster's 804192 to the Shadowhound, so it climbs to 1 + 4 = 5 stacks and a sixth cast stays at 5. Without Lethal Pursuit two Shadowblasts leave the DBC's single stack. Harvest Golem 36 is a non-fleeing target; the ratings keep Shadowblast from missing.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "wh",
+      "race": 1,
+      "class": 15,
+      "level": 14,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "wh",
+      "entry": 36,
+      "level": 14,
+      "health": 1000000,
+      "distance": 12
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 5011
+    },
+    {
+      "action": "add_item",
+      "actor": "wh",
+      "item": 15807
+    },
+    {
+      "action": "equip",
+      "actor": "wh",
+      "item": 15807,
+      "slot": 17
+    },
+    {
+      "action": "wait",
+      "label": "Let the weapon swap cooldown expire",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 680264
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 801343
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 705455
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 572530
+    },
+    {
+      "action": "assert",
+      "label": "Lethal Pursuit is applied",
+      "actor": "wh",
+      "metric": "aura",
+      "spell": 572530,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Houndmaster's Whistle",
+      "actor": "wh",
+      "spell": 801343
+    },
+    {
+      "action": "assert",
+      "label": "The Shadowhound is out",
+      "actor": "wh",
+      "metric": "pet_entry",
+      "equals": 50124,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Shadowblast 1",
+      "actor": "wh",
+      "spell": 680264,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "wh",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown expire",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Shadowblast 2",
+      "actor": "wh",
+      "spell": 680264,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "wh",
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown expire",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Shadowblast 3",
+      "actor": "wh",
+      "spell": 680264,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "wh",
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown expire",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Shadowblast 4",
+      "actor": "wh",
+      "spell": 680264,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "wh",
+      "equals": 4,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown expire",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Shadowblast 5",
+      "actor": "wh",
+      "spell": 680264,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "label": "Shadow Rage reaches 1 + 4 stacks",
+      "actor": "wh",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "wh",
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown expire",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "save_as": "before_sixth"
+    },
+    {
+      "action": "cast",
+      "label": "Shadowblast 6",
+      "actor": "wh",
+      "spell": 680264,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "label": "The sixth Shadowblast lands",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "before_sixth",
+      "max": -1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Five is the cap",
+      "actor": "wh",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "wh",
+      "equals": 5
+    },
+    {
+      "action": "unlearn",
+      "actor": "wh",
+      "spell": 572530,
+      "all_specs": true,
+      "label": "Remove Lethal Pursuit"
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "aura",
+      "spell": 572530,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The stacked Shadow Rage expires",
+      "actor": "wh",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "wh",
+      "equals": 0,
+      "within_ms": 20000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Shadowblast without Lethal Pursuit",
+      "actor": "wh",
+      "spell": 680264,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "wh",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown expire",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "save_as": "before_control"
+    },
+    {
+      "action": "cast",
+      "label": "Second Shadowblast without Lethal Pursuit",
+      "actor": "wh",
+      "spell": 680264,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "label": "The second control Shadowblast lands",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "before_control",
+      "max": -1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Without the talent Shadow Rage keeps the DBC's single stack",
+      "actor": "wh",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "wh",
+      "equals": 1
+    }
+  ]
+}

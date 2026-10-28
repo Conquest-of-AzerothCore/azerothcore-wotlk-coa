@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Lethal Wounds raises Serrated Shot's tick-rate modifier by 20% (#2498)",
+  "contract": "705055 'Lethal Wounds' reads 'Increases the tick rate of your periodic damage effects by 20%.' It is a single SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 19 = SPELLMOD_ACTIVATION_TIME, BasePoints -21+1=-20, class mask (134316032, 3321889792, 2147484896) = word0 bits {15,16,27}, word1 bits {10,25,26,30,31}, word2 bits {5,6,7,10,31}. Serrated Shot rank 1 (500073, SPELL_AURA_PERIODIC_DAMAGE) has SpellFamilyFlags (0,0,128) = word2 bit 7, one of the bits in Lethal Wounds' mask: a direct, confirmed match, not a guess. AuraEffect::CalculatePeriodic (src/server/game/Spells/Auras/SpellAuraEffects.cpp) unconditionally applies modOwner->ApplySpellMod(id, SPELLMOD_ACTIVATION_TIME, amplitude) for every periodic aura, so no script is needed: a -20% activation-time modifier turns a tick interval into 80% of its base. Before this passive the query returns the unmodified base; after learning it the same query must return 0.8x.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the character settle", "ms": 3000 },
+    {
+      "action": "snapshot", "actor": "ranger", "metric": "spell_modifier", "spell": 500073, "op": 19, "base": 1000,
+      "save_as": "tick_before"
+    },
+    { "action": "learn", "actor": "ranger", "spell": 705055 },
+    {
+      "action": "assert", "label": "SETUP: Lethal Wounds is active", "actor": "ranger",
+      "metric": "aura", "spell": 705055, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Serrated Shot's tick-interval modifier drops to 80%", "actor": "ranger",
+      "metric": "spell_modifier", "spell": 500073, "op": 19, "base": 1000, "ratio_to": "tick_before",
+      "min": 0.7999, "max": 0.8001
+    }
+  ]
+}

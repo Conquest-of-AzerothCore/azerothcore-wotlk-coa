@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Templar: dodging grants Recently Parried or Dodged so Sacred Swing is usable (#5715, #5853, #5855)",
+  "contract": "Sacred Swing 705293 reads 'Only usable after avoiding an attack.' Its Spell.dbc CasterAuraSpell is 681170 Recently Parried or Dodged (8 s dummy aura); the client reads the same Spell.dbc (identical sha256) and greys the button until that aura is present, so a server-only aura-state requirement (PR #5918) never makes it usable. Sacred Swing's only CharacterAdvancement entry 31173 requires Keeping the Oath 92109, whose effect 2 is SPELL_AURA_PROC_TRIGGER_SPELL for 681170 (AscensionDB/Exiles: 681170 'Procs from' Keeping the Oath). The Templar contract zeroed that effect. Expected: a dodged melee swing taken with Keeping the Oath grants 681170, and Sacred Swing then hits and applies its slow 301061. QA Test 100% Dodge 10020 makes every swing a dodge; the attacker's hit rating removes misses.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    { "id": "templar", "race": 1, "class": 19, "level": 80, "allow_regeneration": false },
+    { "id": "attacker", "race": 2, "class": 1, "level": 80, "melee_hit_rating": 10000 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 3000 },
+    { "action": "pvp", "actor": "templar", "enabled": true },
+    { "action": "pvp", "actor": "attacker", "enabled": true },
+    { "action": "learn", "label": "Keeping the Oath", "actor": "templar", "spell": 92109 },
+    { "action": "learn", "label": "Sacred Swing", "actor": "templar", "spell": 705293 },
+    { "action": "assert", "label": "SETUP: Keeping the Oath is active", "actor": "templar", "metric": "aura", "spell": 92109, "equals": 1 },
+    { "action": "set_aura", "label": "Every swing is dodged", "actor": "templar", "spell": 10020, "stacks": 1 },
+    { "action": "assert", "label": "SETUP: the Templar dodges every swing", "actor": "templar", "metric": "dodge_chance", "min": 90, "within_ms": 2000 },
+    { "action": "set_health", "actor": "templar", "maximum": 100000, "value": 100000 },
+    { "action": "set_health", "actor": "attacker", "maximum": 100000, "value": 100000 },
+    { "action": "teleport", "actor": "templar", "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "teleport", "actor": "attacker", "map": 0, "x": -9614.06, "y": -288.949, "z": 57.3053, "o": 3.14159 },
+    { "action": "set_power", "actor": "templar", "power": 3, "value": 100 },
+    { "action": "assert", "label": "CONTROL: no avoidance window before any attack", "actor": "templar", "metric": "aura", "spell": 681170, "equals": 0 },
+    { "action": "cast", "label": "Sacred Swing before avoiding an attack", "actor": "templar", "spell": 705293, "target": "attacker" },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "CONTROL: Sacred Swing is refused without the avoidance window", "actor": "attacker", "metric": "aura", "spell": 301061, "equals": 0 },
+    { "action": "snapshot", "actor": "attacker", "metric": "melee_attack_count", "save_as": "swings_start" },
+    { "action": "attack", "label": "Hostile player swings at the Templar", "actor": "attacker", "target": "templar" },
+    { "action": "wait", "label": "A few dodged swings", "ms": 5000 },
+    { "action": "stop_attack", "actor": "attacker" },
+    { "action": "assert", "label": "SETUP: the swings were made", "actor": "attacker", "metric": "melee_attack_count", "relative_to": "swings_start", "min": 1 },
+    { "action": "assert", "label": "CONTRACT: a dodge grants Recently Parried or Dodged", "actor": "templar", "metric": "aura", "spell": 681170, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTRACT: the window lasts at most 8 seconds", "actor": "templar", "metric": "aura_duration_ms", "spell": 681170, "min": 1, "max": 8000 },
+    { "action": "set_power", "actor": "templar", "power": 3, "value": 100 },
+    { "action": "cast", "label": "Sacred Swing after the dodge", "actor": "templar", "spell": 705293, "target": "attacker" },
+    { "action": "assert", "label": "CONTRACT: Sacred Swing hits and slows the attacker", "actor": "attacker", "metric": "aura", "spell": 301061, "equals": 1, "within_ms": 2000 }
+  ]
+}

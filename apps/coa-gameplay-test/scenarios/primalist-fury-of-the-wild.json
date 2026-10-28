@@ -1,7 +1,13 @@
 {
   "schema": 1,
   "name": "Primalist Fury of the Wild: half-strength Boons and lifetime",
-  "contract": "Active Boons copy to the current pet at half strength; Hawk preserves fractional healing and Lion uses the authored six-second pet dispel interval.",
+  "contract": [
+    "Active Boons copy to the current pet at half strength; Hawk preserves fractional healing and Lion uses the",
+    "authored six-second pet dispel interval.",
+    "Owner and pet keep separate native five-second Hawk timers. Observe the owner's first actual heal before",
+    "judging its exact 82-point amount; seeing the pet's first 34-point heal does not prove the owner has ticked.",
+    "Keep both original heal amounts and all Boon lifetime, stacking, health, movement and dispel assertions."
+  ],
   "timeout_ms": 120000,
   "players": [
     {
@@ -29,9 +35,9 @@
   ],
   "steps": [
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "primalist",
-      "command": ".localspec 59"
+      "id": 59
     },
     {
       "action": "group",
@@ -407,6 +413,24 @@
       "target_pet": true,
       "pet": true,
       "equals": 34
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 997800,
+      "target": "primalist",
+      "save_as": "owner_heals_at_pet_tick"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 997800,
+      "target": "primalist",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Observe the owner's first native Hawk tick before judging its amount"
     },
     {
       "action": "assert",

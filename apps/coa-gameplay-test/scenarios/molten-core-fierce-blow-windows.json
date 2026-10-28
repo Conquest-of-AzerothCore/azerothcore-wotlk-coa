@@ -1,0 +1,187 @@
+{
+  "schema": 1,
+  "name": "Molten Core: trash and bosses cast Fierce Blow inside their random windows",
+  "contract": [
+    "WoWCombatLog evidence (78744 Fierce Blow lines across the archive logs): Molten Core creatures cast Fierce Blow 975011 on",
+    "their tank, a first cast and then repeats drawn from a window (6-10s for most). Three creature paths must cast it: a Core Hound",
+    "(stock C++ script, first 6.9-13s, repeat 6-10s) and a Lava Annihilator (SmartAI, first 6-10s, repeat 6-10s) inside the window",
+    "upper bounds, and Gehennas (coa_boss_schedule, first 6-10s, repeat 6.8-10.4s) with generous bounds, because his",
+    "serialized kit casts delay a due Fierce Blow (logged first casts reach 16.3s). Boss damage and the rest of their kits stay unchanged."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 409,
+    "x": 1144.6,
+    "y": -1020.5,
+    "z": -185.6,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "hero",
+      "entry": 12259,
+      "health": 4000000,
+      "reaction": 2,
+      "distance": 4
+    },
+    {
+      "id": "hound",
+      "owner": "hero",
+      "entry": 11671,
+      "health": 4000000,
+      "reaction": 2,
+      "distance": 4
+    },
+    {
+      "id": "lava",
+      "owner": "hero",
+      "entry": 11665,
+      "health": 4000000,
+      "reaction": 2,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000,
+      "maximum": 2000000,
+      "label": "Configure the survival health before aggressive creatures can attack"
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Molten Core",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 409
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero survives the settling",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "attack",
+      "label": "Engage Gehennas",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Gehennas fights the hero",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Core Hound fights the hero",
+      "actor": "hound",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Lava Annihilator fights the hero",
+      "actor": "lava",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The Core Hound casts Fierce Blow inside the first-cast window",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11671,
+      "spell": 975011,
+      "min": 1,
+      "within_ms": 16000
+    },
+    {
+      "action": "assert",
+      "label": "The Lava Annihilator casts Fierce Blow inside the first-cast window",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11665,
+      "spell": 975011,
+      "min": 1,
+      "within_ms": 14000
+    },
+    {
+      "action": "assert",
+      "label": "Gehennas casts Fierce Blow",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 12259,
+      "spell": 975011,
+      "min": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000,
+      "maximum": 2000000
+    },
+    {
+      "action": "assert",
+      "label": "The Core Hound repeats Fierce Blow inside the repeat window",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11671,
+      "spell": 975011,
+      "min": 2,
+      "within_ms": 13000
+    },
+    {
+      "action": "assert",
+      "label": "The Lava Annihilator repeats Fierce Blow inside the repeat window",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11665,
+      "spell": 975011,
+      "min": 2,
+      "within_ms": 13000
+    },
+    {
+      "action": "assert",
+      "label": "Gehennas repeats Fierce Blow",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 12259,
+      "spell": 975011,
+      "min": 2,
+      "within_ms": 20000
+    }
+  ]
+}

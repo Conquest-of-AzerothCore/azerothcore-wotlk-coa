@@ -39,6 +39,7 @@
 #include "SpawnData.h"
 #include "Timer.h"
 #include "GridTerrainData.h"
+#include <atomic>
 #include <bitset>
 #include <list>
 #include <memory>
@@ -268,7 +269,35 @@ public:
     virtual void RemoveAllPlayers();
 
     [[nodiscard]] uint32 GetInstanceId() const { return i_InstanceId; }
+
+    // Generic opt-in ephemeral private-map metadata.
+    //
+    // Native map semantics remain unchanged: ordinary world maps still use
+    // instanceId=0. Only callers that explicitly prepare scripted-private
+    // state may create a nonzero private copy.
     bool IsScriptedPrivateInstance() const;
+    ObjectGuid GetScriptedPrivateOwner() const { return _scriptedPrivateOwner; }
+    void SetScriptedPrivateOwner(ObjectGuid owner, std::set<ObjectGuid> const& members = {},
+        bool databaseSpawns = false)
+    {
+        _scriptedPrivateDatabaseSpawns = databaseSpawns;
+        _scriptedPrivateOwner = owner;
+        _scriptedPrivateMembers = members;
+        if (_scriptedPrivateMembers.empty() && !owner.IsEmpty())
+            _scriptedPrivateMembers.insert(owner);
+
+        // Private maps are ephemeral even if the first transfer never arrives.
+        m_unloadTimer = _scriptedPrivateUnloadDelay;
+    }
+    bool LoadsScriptedPrivateDatabaseSpawns() const { return _scriptedPrivateDatabaseSpawns; }
+    bool IsScriptedPrivateMember(ObjectGuid guid) const { return _scriptedPrivateMembers.contains(guid); }
+    void RequestScriptedPrivateUnload()
+    {
+        _scriptedPrivateUnloadDelay = MIN_UNLOAD_DELAY;
+        if (!HavePlayers())
+            m_unloadTimer = MIN_UNLOAD_DELAY;
+    }
+
     [[nodiscard]] uint8 GetSpawnMode() const { return (i_spawnMode); }
 
     enum EnterState
@@ -287,7 +316,7 @@ public:
         CANNOT_ENTER_UNSPECIFIED_REASON
     };
 
-    virtual EnterState CannotEnter(Player* /*player*/, bool /*loginCheck = false*/) { return CAN_ENTER; }
+    virtual EnterState CannotEnter(Player* player, bool loginCheck = false);
 
     [[nodiscard]] char const* GetMapName() const;
 
@@ -544,6 +573,13 @@ public:
 
     size_t GetUpdatableObjectsCount() const { return _updatableObjectList.size(); }
 
+    // Only used while GameTime runs a simulated clock (gameplay test harness): objects that share no phase with
+    // these bits are invisible to every test player, so the fast-forwarded world skips their updates.
+    static void SetSimulatedUpdatePhases(uint32 phases)
+    {
+        _simulatedUpdatePhases.store(phases, std::memory_order_relaxed);
+    }
+
     virtual std::string GetDebugInfo() const;
 
     uint32 GetCreatedGridsCount();
@@ -610,6 +646,14 @@ protected:
     uint8 i_spawnMode;
     uint32 i_InstanceId;
     uint32 m_unloadTimer;
+
+    // Scripted-private ownership lives on Map rather than InstanceMap so the
+    // same isolation primitive can be used by opt-in open-world copies.
+    bool _scriptedPrivateDatabaseSpawns = false;
+    ObjectGuid _scriptedPrivateOwner;
+    std::set<ObjectGuid> _scriptedPrivateMembers;
+    uint32 _scriptedPrivateUnloadDelay = 120000;
+
     float m_VisibleDistance;
     time_t _instanceResetPeriod; // pussywizard
 
@@ -704,6 +748,7 @@ private:
     std::unordered_set<Object*> _updateObjects;
 
     UpdatableObjectList _updatableObjectList;
+    static inline std::atomic<uint32> _simulatedUpdatePhases{0};
     PendingAddUpdatableObjectList _pendingAddUpdatableObjectList;
     IntervalTimer _updatableObjectListRecheckTimer;
     ZoneWideVisibleWorldObjectsMap _zoneWideVisibleWorldObjectsMap;
@@ -737,16 +782,6 @@ public:
     [[nodiscard]] InstanceScript* GetInstanceScript() { return instance_data; }
     [[nodiscard]] InstanceScript const* GetInstanceScript() const { return instance_data; }
     void PermBindAllPlayers();
-    ObjectGuid GetScriptedPrivateOwner() const { return _scriptedPrivateOwner; }
-    void SetScriptedPrivateOwner(ObjectGuid owner, std::set<ObjectGuid> const& members = {})
-    {
-        _scriptedPrivateOwner = owner;
-        _scriptedPrivateMembers = members;
-        if (_scriptedPrivateMembers.empty())
-            _scriptedPrivateMembers.insert(owner);
-    }
-    bool IsScriptedPrivateMember(ObjectGuid guid) const { return _scriptedPrivateMembers.contains(guid); }
-    void RequestScriptedPrivateUnload() { _scriptedPrivateUnloadDelay = MIN_UNLOAD_DELAY; }
     void UnloadAll() override;
     EnterState CannotEnter(Player* player, bool loginCheck = false) override;
     void SendResetWarnings(uint32 timeLeft) const;
@@ -759,9 +794,6 @@ public:
     std::string GetDebugInfo() const override;
 
 private:
-    ObjectGuid _scriptedPrivateOwner;
-    std::set<ObjectGuid> _scriptedPrivateMembers;
-    uint32 _scriptedPrivateUnloadDelay = 120000;
     bool m_resetAfterUnload;
     bool m_unloadWhenEmpty;
     InstanceScript* instance_data;

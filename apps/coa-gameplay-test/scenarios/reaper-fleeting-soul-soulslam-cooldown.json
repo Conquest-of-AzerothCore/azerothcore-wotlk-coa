@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "Reaper Fleeting Soul reduces Soulslam cooldown natively",
+  "contract": [
+    "Fleeting Soul 712683 promises 'Reduces the cooldown of Soulslam by 15 sec'.",
+    "Its DBC effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 11 (SPELLMOD_COOLDOWN), EffectBasePoints",
+    "-15001 (value -15000 ms), EffectSpellClassMask[0] 67108864 with SpellFamilyName 36 (family 36).",
+    "Soulslam rank 1 (504014) has SpellFamilyName 36 and SpellFamilyFlags[0] 67108864, an exact match.",
+    "Player::GetSpellRecoveryTime calls ApplySpellMod(id, SPELLMOD_COOLDOWN, recovery) unconditionally for every",
+    "spell cast, so this native engine mechanism delivers the tooltip with no CoA-specific handler required."
+  ],
+  "players": [
+    {
+      "id": "reaper",
+      "race": 2,
+      "class": 30,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "No cooldown reduction without Fleeting Soul",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 504014,
+      "op": 11,
+      "base": 30000,
+      "equals": 30000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 712683
+    },
+    {
+      "action": "assert",
+      "label": "Fleeting Soul aura active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 712683,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Soulslam rank 1 cooldown reduced by exactly 15 sec",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 504014,
+      "op": 11,
+      "base": 30000,
+      "equals": 15000
+    }
+  ]
+}

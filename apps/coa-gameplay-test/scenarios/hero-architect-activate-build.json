@@ -1,0 +1,324 @@
+{
+  "schema": 1,
+  "name": "Hero Architect activates and deactivates a build for the active specialization",
+  "contract": "The Hero Architect Activate button calls C_BuildCreator.ActivateBuild(id, autoLearn, autoLearn), which sends CMSG 0x05C2 {id, u8, u8}; both bytes carry the \"Auto-Learn Spells\" checkbox (CVar heroArchitectAutoLearn). DeactivateBuild sends 0x05C4 {id}. The server answers 0x05C3 / 0x05C5 with an ACTIVATE_BUILD_* / DEACTIVATE_BUILD_* string, and sends the changed specialization's record as SMSG 0x0632 {u32 spec, id, u8, u8} before the result, so the UI's refresh reads the new state. At login it sends 0x0633 {u32 n, n records}, one per specialization (20). Active builds belong to the character and its active specialization; a missing build, the build already active, a build that needs repairs, another class's build and a Build Draft build are refused.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "author",
+      "race": 1,
+      "class": 10,
+      "level": 60
+    },
+    {
+      "id": "alt",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "account_of": "author"
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Login sends the active build of every specialization",
+      "actor": "author",
+      "metric": "server_packet_u32",
+      "opcode": 1587,
+      "index": 0,
+      "equals": 20,
+      "row": 20
+    },
+    {
+      "action": "assert",
+      "label": "and none is active yet",
+      "actor": "author",
+      "metric": "server_packet_contains",
+      "opcode": 1587,
+      "text": "cac04950-5c76-4ae9-80ed-c81553578d08",
+      "equals": 0,
+      "row": 20
+    },
+    {
+      "action": "client_packet",
+      "label": "Activate The Tankiest Bear with Auto-Learn ticked",
+      "actor": "author",
+      "opcode": 1474,
+      "fields": [
+        {
+          "string": "cac04950-5c76-4ae9-80ed-c81553578d08"
+        },
+        {
+          "u8": 1
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The build is activated",
+      "actor": "author",
+      "metric": "server_packet_contains",
+      "opcode": 1475,
+      "text": "ACTIVATE_BUILD_OK",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "for the active specialization",
+      "actor": "author",
+      "metric": "server_packet_u32",
+      "opcode": 1586,
+      "index": 0,
+      "equals": 0,
+      "row": 0
+    },
+    {
+      "action": "assert",
+      "label": "and the client is told which build it is",
+      "actor": "author",
+      "metric": "server_packet_contains",
+      "opcode": 1586,
+      "text": "cac04950-5c76-4ae9-80ed-c81553578d08",
+      "equals": 1,
+      "row": 0
+    },
+    {
+      "action": "client_packet",
+      "label": "Activate it again",
+      "actor": "author",
+      "opcode": 1474,
+      "fields": [
+        {
+          "string": "cac04950-5c76-4ae9-80ed-c81553578d08"
+        },
+        {
+          "u8": 1
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "An active build cannot be activated twice",
+      "actor": "author",
+      "metric": "server_packet_contains",
+      "opcode": 1475,
+      "text": "ACTIVATE_BUILD_ALREADY_ACTIVE",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "client_packet",
+      "label": "Activate a build that does not exist",
+      "actor": "author",
+      "opcode": 1474,
+      "fields": [
+        {
+          "string": "00000000-0000-4000-8000-000000000000"
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "A missing build is reported",
+      "actor": "author",
+      "metric": "server_packet_contains",
+      "opcode": 1475,
+      "text": "ACTIVATE_BUILD_NOT_FOUND",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "client_packet",
+      "label": "Deactivate a build that is not active",
+      "actor": "author",
+      "opcode": 1476,
+      "fields": [
+        {
+          "string": "e3ef4781-0365-4e98-a759-3a92fc5867b6"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Only the active build can be deactivated",
+      "actor": "author",
+      "metric": "server_packet_contains",
+      "opcode": 1477,
+      "text": "DEACTIVATE_BUILD_NOT_ACTIVE",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "client_packet",
+      "label": "Deactivate a build that does not exist",
+      "actor": "author",
+      "opcode": 1476,
+      "fields": [
+        {
+          "string": "00000000-0000-4000-8000-000000000000"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "A missing build is reported on deactivation",
+      "actor": "author",
+      "metric": "server_packet_contains",
+      "opcode": 1477,
+      "text": "DEACTIVATE_BUILD_NOT_FOUND",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "relog",
+      "actor": "alt"
+    },
+    {
+      "action": "assert",
+      "label": "Another character of the account has no active build",
+      "actor": "alt",
+      "metric": "server_packet_contains",
+      "opcode": 1587,
+      "text": "cac04950-5c76-4ae9-80ed-c81553578d08",
+      "equals": 0,
+      "within_ms": 5000,
+      "row": 20
+    },
+    {
+      "action": "relog",
+      "actor": "author"
+    },
+    {
+      "action": "assert",
+      "label": "The active build survives a relog",
+      "actor": "author",
+      "metric": "server_packet_contains",
+      "opcode": 1587,
+      "text": "cac04950-5c76-4ae9-80ed-c81553578d08",
+      "equals": 1,
+      "within_ms": 5000,
+      "row": 20
+    },
+    {
+      "action": "client_packet",
+      "label": "Activate Shadow Rogue instead, Auto-Learn unticked",
+      "actor": "author",
+      "opcode": 1474,
+      "fields": [
+        {
+          "string": "e3ef4781-0365-4e98-a759-3a92fc5867b6"
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Another build replaces the active one",
+      "actor": "author",
+      "metric": "server_packet_contains",
+      "opcode": 1475,
+      "text": "ACTIVATE_BUILD_OK",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "and the client is told about the new one",
+      "actor": "author",
+      "metric": "server_packet_contains",
+      "opcode": 1586,
+      "text": "e3ef4781-0365-4e98-a759-3a92fc5867b6",
+      "equals": 1,
+      "row": 0
+    },
+    {
+      "action": "client_packet",
+      "label": "Deactivate Shadow Rogue",
+      "actor": "author",
+      "opcode": 1476,
+      "fields": [
+        {
+          "string": "e3ef4781-0365-4e98-a759-3a92fc5867b6"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The build is deactivated",
+      "actor": "author",
+      "metric": "server_packet_contains",
+      "opcode": 1477,
+      "text": "DEACTIVATE_BUILD_OK",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "and the specialization's record is cleared",
+      "actor": "author",
+      "metric": "server_packet_u32",
+      "opcode": 1586,
+      "index": 0,
+      "equals": 0,
+      "row": 0
+    },
+    {
+      "action": "assert",
+      "label": "leaving no build named",
+      "actor": "author",
+      "metric": "server_packet_contains",
+      "opcode": 1586,
+      "text": "e3ef4781-0365-4e98-a759-3a92fc5867b6",
+      "equals": 0,
+      "row": 0
+    },
+    {
+      "action": "relog",
+      "actor": "author"
+    },
+    {
+      "action": "assert",
+      "label": "No build is active after the next relog",
+      "actor": "author",
+      "metric": "server_packet_contains",
+      "opcode": 1587,
+      "text": "e3ef4781-0365-4e98-a759-3a92fc5867b6",
+      "equals": 0,
+      "within_ms": 5000,
+      "row": 20
+    },
+    {
+      "action": "assert",
+      "label": "nor the earlier one",
+      "actor": "author",
+      "metric": "server_packet_contains",
+      "opcode": 1587,
+      "text": "cac04950-5c76-4ae9-80ed-c81553578d08",
+      "equals": 0,
+      "row": 20
+    }
+  ]
+}

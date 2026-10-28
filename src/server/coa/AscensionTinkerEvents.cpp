@@ -42,8 +42,8 @@ void DeviceEvent(Player* player, Creature* device, Unit* target, SpellInfo const
         Cast(player,player,707579);
         Cast(player,player,520276);
     }
-    if (Chance(player,503534))
-        Cast(player,player,503549);
+    if (Chance(player,503534) && player->IsAlive())
+        device->CastSpell(player,503549,true,nullptr,nullptr,player->GetGUID());
     if (critical && player->HasAura(705831))
     {
         Cast(player,player,503535);
@@ -127,7 +127,7 @@ class aura_ascension_tinker_event : public AuraScript
             case 806758: return damage && !periodic && info && info->DmgClass == SPELL_DAMAGE_CLASS_RANGED &&
                 Chance(player,806758);
             case 560785: return healing && Chance(player,560785);
-            case 705815: return damage && fire && Chance(player,705815);
+            case 705815: return damage && fire;
             case 680975: return damage && Shot(info) && Chance(player,680975);
             case 573247: return damage && info && !periodic && critical && target->HasAura(653247,player->GetGUID());
             case 806627: return (damage || healing) && critical && Chance(player,806627,10000);
@@ -193,7 +193,7 @@ class aura_ascension_tinker_event : public AuraScript
                 break;
             case 560785: PetCast(player,nullptr,808008); break;
             case 705815: Grant(player,537247); break;
-            case 680975: Grant(player,681245); Refresh(player); break;
+            case 680975: player->RestoreSpellCharge(504527); Grant(player,681245); Refresh(player); break;
             case 573247: Cast(player,target,653247); break;
             case 806627: Cast(player,player,806628); break;
             case 503552: Grant(player,503553); break;

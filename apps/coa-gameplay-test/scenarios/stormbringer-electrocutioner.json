@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Electrocutioner procs from spell damage (#4222)",
-  "contract": "A Stormbringer with the Electrocutioner passive gains Electrocutioner (804592) from damaging spells; one without the passive never does. Chance is 5% plus a fifth of a percent per Static, so 24 casts at full Static make a missed proc very unlikely (about 1%).",
+  "contract": "A Stormbringer with the Electrocutioner passive gains Electrocutioner (804592) from damaging spells; one without the passive never does. Chance is 5% plus a fifth of a percent per Static, so 24 casts at full Static (25% each) make a missed proc very unlikely (0.75^24, about 0.1%). The procs are counted as casts of 804592 over the whole scenario rather than read as the 15 second aura at the end, which only samples the last nine or so casts (a 7.5% false failure).",
   "timeout_ms": 150000,
   "players": [
     {
@@ -1216,15 +1216,17 @@
     },
     {
       "action": "assert",
+      "label": "Electrocutioner procced at least once over the 24 casts",
       "actor": "s",
-      "metric": "aura",
+      "metric": "spell_cast_count",
       "spell": 804592,
-      "equals": 1
+      "min": 1
     },
     {
       "action": "assert",
+      "label": "Without the passive it never procs",
       "actor": "c",
-      "metric": "aura",
+      "metric": "spell_cast_count",
       "spell": 804592,
       "equals": 0
     }

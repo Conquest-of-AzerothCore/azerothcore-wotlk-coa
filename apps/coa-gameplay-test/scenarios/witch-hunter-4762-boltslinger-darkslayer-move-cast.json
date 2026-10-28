@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Boltslinger lets a level-16 character's actual Darkslayer rank be cast while moving (#4762)",
+  "contract": "Boltslinger 92091 ('Level 10 Passive') reads 'You may now cast Darkslayer while moving.' AscensionWitchHunterDefenses.cpp casts helper 500570 while 92091 is applied; 500570 is SPELL_AURA_313 (SpellFamilyName 21, EffectSpellClassMask word2=32), which Unit::CanCastSpellWhileMoving consults through HasAuraTypeWithAffectMask before refusing a moving cast with SPELL_FAILED_MOVING. The only Darkslayer a Witch Hunter can ever hold comes from AscensionCustomClassData.h's class-15 starting grant {15, 1, 804179} and AscensionSpellProgressionData.h's rank chain keyed on FirstSpellId 804179 (680256@6, 680257@14, 680258@22, ... 681203@60): a level-16 character sits on rank 680257 (required level 14, next rank 22). Every id in that chain, including 804179 itself, carries SpellFamilyFlags word2=32 (confirmed in Spell.dbc), an exact match for 500570's mask, and InterruptFlags 3 (movement + pushback) with a real cast time (CastingTimeIndex 19 = 2500 ms for 680257), so the moving-cast refusal and Boltslinger's exemption are both live for it. Spell ids 524715 and 800164 are also named 'Darkslayer' in Spell.dbc, but neither appears in any CoA class-spell grant, live baseline or progression table (grep across src/server/coa/ and data/sql), and 524715 additionally carries SpellLevel/BaseLevel 0 and EquippedItemClass -1 (no weapon requirement, unlike every real rank) - they are unreferenced, unobtainable DBC rows, not spells any Witch Hunter, at level 16 or otherwise, is ever granted. The classmask therefore already covers the one Darkslayer a level-16 character can actually cast.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "wh", "race": 1, "class": 15, "level": 80, "spell_hit_rating": 10000, "ranged_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "wh", "entry": 36, "level": 80, "health": 1000000, "distance": 5 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "wh", "spell": 5011 },
+    { "action": "add_item", "actor": "wh", "item": 15807 },
+    { "action": "equip", "actor": "wh", "item": 15807, "slot": 17 },
+    { "action": "wait", "label": "Let the weapon swap cooldown expire", "ms": 2000 },
+
+    { "action": "learn", "label": "The Darkslayer rank a level-16 character actually holds (required level 14, next rank 22)", "actor": "wh", "spell": 680257 },
+    { "action": "assert", "label": "SETUP: the Witch Hunter knows this rank", "actor": "wh", "metric": "knows_spell", "spell": 680257, "equals": 1 },
+    { "action": "assert", "label": "SETUP: Boltslinger is not learned yet", "actor": "wh", "metric": "knows_spell", "spell": 92091, "equals": 0 },
+
+    { "action": "set_moving", "label": "Start moving forward", "actor": "wh", "enabled": true },
+    { "action": "assert", "label": "SETUP: the Witch Hunter is moving", "actor": "wh", "metric": "moving", "equals": 1 },
+    { "action": "cast", "label": "CONTROL: Darkslayer while moving, no Boltslinger", "actor": "wh", "spell": 680257, "target": "dummy" },
+    {
+      "action": "assert", "label": "CONTROL: Darkslayer (InterruptFlags 3) is refused with SPELL_FAILED_MOVING",
+      "actor": "wh", "metric": "cast_failure", "spell": 680257, "equals": 51, "within_ms": 1000
+    },
+    { "action": "wait", "label": "Let any refused cast state clear", "ms": 3000 },
+    {
+      "action": "assert", "label": "CONTROL: the refused Darkslayer deals nothing",
+      "actor": "wh", "metric": "spell_damage_count", "spell": 680257, "target": "dummy", "equals": 0
+    },
+
+    { "action": "learn", "label": "Boltslinger", "actor": "wh", "spell": 92091 },
+    { "action": "assert", "label": "SETUP: Boltslinger is active", "actor": "wh", "metric": "aura", "spell": 92091, "equals": 1 },
+    { "action": "assert", "label": "SETUP: the movement-exemption grant 500570 is applied", "actor": "wh", "metric": "aura", "spell": 500570, "equals": 1 },
+    { "action": "assert", "label": "SETUP: still moving", "actor": "wh", "metric": "moving", "equals": 1 },
+
+    { "action": "cast", "label": "DISCRIMINATING: Darkslayer while moving, with Boltslinger", "actor": "wh", "spell": 680257, "target": "dummy" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the moving Witch Hunter is casting Darkslayer, not refused",
+      "actor": "wh", "metric": "cast_remaining_ms", "spell": 680257, "min": 1, "within_ms": 500
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Darkslayer is not refused with SPELL_FAILED_MOVING",
+      "actor": "wh", "metric": "cast_failure", "spell": 680257, "equals": 0
+    },
+    { "action": "assert", "label": "SETUP: still moving throughout the cast", "actor": "wh", "metric": "moving", "equals": 1 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the cast completes while moving and damages the target",
+      "actor": "wh", "metric": "spell_damage_count", "spell": 680257, "target": "dummy", "min": 1, "within_ms": 4000
+    },
+    { "action": "set_moving", "label": "Stop moving", "actor": "wh", "enabled": false }
+  ]
+}

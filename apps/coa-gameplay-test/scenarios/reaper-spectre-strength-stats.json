@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "name": "Reaper Spectre Strength boosts Strength and Armor Penetration natively",
+  "contract": [
+    "Spectre Strength rank 1 (804671) and rank 2 (807886) promise 'Increases your Strength and Armor",
+    "penetration by 5%/10%'.",
+    "Their DBC effect 0 is SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (137) with EffectMiscValue 0 (STAT_STRENGTH),",
+    "and effect 1 is SPELL_AURA_MOD_ARMOR_PENETRATION_PCT (280). Both are generic native unit-stat auras applied",
+    "by Unit::UpdateStatBuffMod and the armor-penetration calculation whenever the aura is present, requiring no",
+    "CoA-specific handler. The harness exposes no metric for the armor-penetration percentage itself, so this",
+    "scenario only asserts the Strength half of the tooltip."
+  ],
+  "players": [
+    {
+      "id": "reaper",
+      "race": 2,
+      "class": 30,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Base Strength before the talent",
+      "actor": "reaper",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "base_strength"
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 804671
+    },
+    {
+      "action": "assert",
+      "label": "Spectre Strength rank 1 aura active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 804671,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises Strength above the untalented base",
+      "actor": "reaper",
+      "metric": "stat",
+      "stat": 0,
+      "relative_to": "base_strength",
+      "min": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "reaper",
+      "spell": 804671
+    },
+    {
+      "action": "assert",
+      "label": "Strength returns to the untalented base",
+      "actor": "reaper",
+      "metric": "stat",
+      "stat": 0,
+      "relative_to": "base_strength",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 807886
+    },
+    {
+      "action": "assert",
+      "label": "Spectre Strength rank 2 aura active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 807886,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Strength with rank 2 active",
+      "actor": "reaper",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "rank2_strength"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises Strength above the untalented base",
+      "actor": "reaper",
+      "metric": "stat",
+      "stat": 0,
+      "relative_to": "base_strength",
+      "min": 1
+    }
+  ]
+}

@@ -1,0 +1,167 @@
+{
+  "schema": 1,
+  "name": "Direct critical hits inside Gravesite trigger Shadow damage (#774)",
+  "contract": [
+    "A direct cast of Gravesite 804722 isolates the critical-hit clause from Endbringer's missing marker.",
+    "With talent 572213 active, a direct critical Dreadwake hit inside the area triggers damage helper 300979.",
+    "This fixture has no Soulrot, so it tests the damage clause separately from #1392."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "melee_crit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "victim",
+      "owner": "reaper",
+      "entry": 299,
+      "level": 80,
+      "distance": 2,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 572213
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 804722
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 503286
+    },
+    {
+      "action": "set_power",
+      "actor": "reaper",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Gravesite talent aura is active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 572213,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "No Gravesite damage occurred yet",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 300979,
+      "target": "victim",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Create Gravesite directly",
+      "actor": "reaper",
+      "spell": 804722
+    },
+    {
+      "action": "assert",
+      "label": "Gravesite cast was accepted",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 804722,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Gravesite ground effect exists",
+      "actor": "reaper",
+      "metric": "dynamic_object",
+      "spell": 804722,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Enemy is inside Gravesite",
+      "actor": "reaper",
+      "metric": "distance",
+      "target": "victim",
+      "max": 9
+    },
+    {
+      "action": "wait",
+      "label": "Let the Gravesite cast global cooldown expire",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Dreadwake directly strikes the enemy",
+      "actor": "reaper",
+      "spell": 503286,
+      "target": "victim"
+    },
+    {
+      "action": "assert",
+      "label": "Dreadwake cast was accepted",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 503286,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Dreadwake made one direct critical hit",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 503286,
+      "target": "victim",
+      "critical": true,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Critical hit triggered Gravesite damage helper",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 300979,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Gravesite dealt Shadow damage",
+      "actor": "reaper",
+      "metric": "spell_damage_total",
+      "spell": 300979,
+      "target": "victim",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

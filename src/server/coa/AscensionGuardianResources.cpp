@@ -87,6 +87,11 @@ void ApplyAscensionGuardianResourceContracts(SpellInfo* info)
     if (info->Id == 803417 && info->Effects[EFFECT_2].IsAura(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN) &&
         info->Effects[EFFECT_2].MiscValue == SPELL_SCHOOL_MASK_MAGIC)
         info->Effects[EFFECT_2].MiscValue = SPELL_SCHOOL_MASK_ALL;
+
+    if ((info->Id == 504177 || info->Id == 504178 || info->Id == 504179 || info->Id == 504180 ||
+            info->Id == 504181 || info->Id == 504182 || info->Id == 805150 || info->Id == 355781) &&
+        info->AttributesEx6 & SPELL_ATTR6_DO_NOT_CHAIN_TO_CROWD_CONTROLLED_TARGETS)
+        info->AttributesEx6 &= ~SPELL_ATTR6_DO_NOT_CHAIN_TO_CROWD_CONTROLLED_TARGETS;
 }
 
 void HandleAscensionGuardianResourceCast(Spell* spell)

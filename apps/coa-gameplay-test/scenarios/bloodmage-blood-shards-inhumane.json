@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Inhumane spends a stored Blood Shard per Aortic Assault hit, and launches none without one",
+  "contract": "Inhumane 807488: 'Dealing damage with Aortic Assault will now launch 1 Blood Shard, dealing ${$504115m1+$504115ppl1+$AP*0.15+$SP*.35} Spellshadow damage to your target.' The client wires the talent to 506639 'Bloodmage Blood Shard Consume 1', so each launch spends a stored shard (505366). Aortic Assault 806212 (requires Cursed Form 524861) is aura 227 with a 500 ms amplitude that triggers 806502 against every enemy in front of the caster, so with two dummies each tick is two hits. Expected: with no stored shard no 504115 hit at all; with shards stored by Bloodbolt beforehand, one shard hit per stored shard in total, after which the count is 0.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "b", "race": 1, "class": 20, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "d1", "owner": "b", "entry": 299, "level": 80, "distance": 2, "health": 1000000 },
+    { "id": "d2", "owner": "b", "entry": 299, "level": 80, "distance": 3, "health": 1000000 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "ms": 4000 },
+    { "action": "set_aura", "label": "Cursed Form, which Aortic Assault requires", "actor": "b", "spell": 524861, "stacks": 1 },
+    { "action": "set_aura", "label": "Inhumane", "actor": "b", "spell": 807488, "stacks": 1 },
+    { "action": "learn", "actor": "b", "spell": 806212 },
+    { "action": "cast", "label": "Aortic Assault with no stored shard", "actor": "b", "spell": 806212, "target": "d1" },
+    { "action": "assert", "label": "Aortic Assault hits", "actor": "b", "metric": "spell_damage_count", "spell": 806502, "target": "d1", "min": 2, "within_ms": 4000 },
+    { "action": "assert", "label": "With no shard, Inhumane launches nothing", "actor": "b", "metric": "spell_damage_count", "spell": 504115, "equals": 0 },
+    { "action": "wait", "ms": 12000 },
+    { "action": "assert", "label": "Aortic Assault has ended", "actor": "b", "metric": "aura", "spell": 806212, "equals": 0 },
+    { "action": "learn", "actor": "b", "spell": 804849 },
+    { "action": "learn", "actor": "b", "spell": 578304 },
+    { "action": "set_power", "actor": "b", "power": 1, "value": 1000 },
+    { "action": "cast", "label": "Bloodbolt stores shards", "actor": "b", "spell": 578304, "target": "d1" },
+    { "action": "assert", "label": "Shards are stored", "actor": "b", "metric": "aura_stacks", "spell": 505366, "min": 1, "within_ms": 5000 },
+    { "action": "snapshot", "actor": "b", "metric": "aura_stacks", "spell": 505366, "save_as": "stored" },
+    { "action": "snapshot", "actor": "b", "metric": "spell_damage_count", "spell": 806502, "target": "d1", "save_as": "aortic_before" },
+    { "action": "reset_cooldown", "actor": "b", "spell": 806212 },
+    { "action": "wait", "label": "Let the Bloodbolt global cooldown end", "ms": 1600 },
+    { "action": "set_aura", "label": "Cursed Form again for the second Aortic Assault", "actor": "b", "spell": 524861, "stacks": 1 },
+    { "action": "set_aura", "label": "Inhumane again", "actor": "b", "spell": 807488, "stacks": 1 },
+    { "action": "cast", "label": "Aortic Assault with stored shards", "actor": "b", "spell": 806212, "target": "d1" },
+    { "action": "assert", "label": "The second Aortic Assault was accepted", "actor": "b", "metric": "cast_failure", "spell": 806212, "equals": 0 },
+    { "action": "assert", "label": "and hits again", "actor": "b", "metric": "spell_damage_count", "spell": 806502, "target": "d1", "relative_to": "aortic_before", "min": 1, "within_ms": 3000 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "Every stored shard is spent", "actor": "b", "metric": "aura_stacks", "spell": 505366, "equals": 0 },
+    { "action": "assert", "label": "One shard hit per stored shard, across both dummies", "actor": "b", "metric": "spell_damage_count", "spell": 504115, "ratio_to": "stored", "min": 0.999, "max": 1.001 }
+  ]
+}

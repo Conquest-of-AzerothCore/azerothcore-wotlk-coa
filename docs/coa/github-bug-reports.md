@@ -1,8 +1,8 @@
 # In-game reports to GitHub
 
-The existing Ascension Help UI submits local-realm reports to
-`jealous-sound/azerothcore-wotlk-coa`. The adapter applies only to the exact realm
-`AzerothCore`. Other realms retain the original submit, events and link actions.
+The original Ascension Help UI (Help → Bug Report) submits reports to
+`jealous-sound/azerothcore-wotlk-coa` through its native bug tracker packet. No client
+change is needed.
 
 The local relay forwards reports to `https://coa-bug-report.up.railway.app/v1/reports`.
 The GitHub token stays in Railway. The distributed relay includes the separately
@@ -12,63 +12,49 @@ The feature is off by default (`CoABugReport.Enable = 0`); deployment must enabl
 
 ## Player experience
 
-Open Help → Bug Report and fill in the existing category, severity, title,
-description, expected/actual results and reproduction fields. Press **Send to GitHub**.
-The form names the repository and explains that repository readers can see reports.
-The original public/private checkbox is hidden locally: GitHub repository visibility
-determines access, and this feature does not offer private issues in a public repository.
+Fill in the category, severity, title, description and the category's fields, keep
+**Public** ticked (the form's default) and press Submit. Every report becomes a public
+GitHub issue, so a report with **Public** cleared is refused with an explanation rather
+than published. The form reports success once the server has queued the report; the
+number it shows is the server's report id, not a GitHub issue number, and its
+ascension.gg link does not apply to this realm.
 
-The server acknowledges a saved report first. The form displays **GitHub issue #N
-created** and a copyable GitHub URL only after the relay confirms creation. A queue
-acknowledgement, timeout or ambiguous response is not displayed as success.
-
-The payload includes all category fields (including spell/item identifiers where
-the selected layout provides them), selected severity and client version. The server
-adds class ID, level, map, coordinates and core Git revision. It does not automatically
-publish account IDs, character names, IP addresses, chat logs, credentials or saved settings.
-The core hash does not describe uncommitted source changes; retain the deployment receipt
-when diagnosing a locally modified build. Text explicitly typed into the form is submitted.
-
-One outstanding report is kept in `CoABugReportDB`, a normal account SavedVariables
-table. A normal logout/reload saves this draft; a client crash before that save can lose
-an unacknowledged draft. A completed upload is already on the server and does not depend
-on the client remaining open. Reopening the form resumes/checks the same request ID.
+The client composes the body from the form fields, location, class and client version.
+The server adds category and priority ids, class ID, level, map, coordinates and core
+Git revision. It does not automatically publish account IDs, character names, IP
+addresses, chat logs, credentials or saved settings. The core hash does not describe
+uncommitted source changes; retain the deployment receipt when diagnosing a locally
+modified build. Text explicitly typed into the form is submitted.
 
 ## Components
 
-The client adapter is supplied separately in the matching client overlay. Its
-archive member is
-`Interface/AddOns/Ascension_HelpUI/BugReport/LocalGitHubBugReport.lua`.
-`Ascension_HelpUI.toc` declares its SavedVariables and loads it after the original
-frames.
-
 Server and relay paths below are relative to the repository root:
 
-- `src/server/coa/CoABugReport.cpp`: authenticated self-whisper receiver registered by `CoAScriptLoader.cpp`.
-- `src/server/coa/CoABugReportService.h`: bounded upload protocol, persistent queue and status lookup.
+- `src/server/coa/CoABugReport.cpp`: claims `CMSG_CREATE_BUG_REPORT` (0x0562) from the
+  extension opcode dispatcher, queues it by account and answers on the player's update
+  with `SMSG_CREATE_BUG_REPORT_SUCCESS` (0x0566, `u32` report id) or
+  `SMSG_CREATE_BUG_REPORT_ERROR` (0x0565, `u32` length and text).
+- `src/server/coa/CoABugReportService.h`: validation, per-account cooldown and the spool writer.
 - `apps/coa-bugreport/relay.py`: a separate Python 3.10+ process using only the standard library.
 - `src/server/coa/conf/coa_bugreport.conf.dist`: disabled startup configuration.
 
-Messages use the `COABUG` addon prefix, 180-byte chunks and stop-and-wait acknowledgements.
-The full message fits the core's 255-byte limit. Chunk boundaries may split UTF-8;
-the receiver reassembles bytes before the relay validates UTF-8. Reports are limited
-to 12,000 bytes, including a title of 3–200 bytes. Idle uploads expire after 120 seconds;
-there are at most 128 partial uploads. The receiver limits protocol requests to 24 per
-second per authenticated account and defaults to one submitted report per 120 seconds.
-Account limits survive relogging but reset on worldserver restart.
+The request is `u32` realm field, `u32` category, `u32` priority, `u8` public, then the
+title and description, each as a `u32` length followed by its bytes. The server accepts
+titles of 3–128 bytes and descriptions up to 4,096 bytes, the client's own limits, and
+defaults to one submitted report per 120 seconds per account. Cooldowns survive
+relogging but reset on worldserver restart.
 
-The complete request is written to a temporary file, flushed/closed, then renamed to
-`<account>-<request>.report`. The relay ignores partial files. These are private service
-files: their filenames contain account IDs, which are not included in GitHub issues.
-The game server performs no HTTP calls, holds no GitHub credential and creates no new
-game database tables. The small amount of local file I/O happens in the world-thread
-chat hook; keep the spool on a local disk, not a network share.
+The complete report is written to a temporary file, flushed/closed, then renamed to
+`<account>-<report id as 16 hex digits>.report`. The relay ignores partial files. These
+are private service files: their filenames contain account IDs, which are not included in
+GitHub issues. The game server performs no HTTP calls, holds no GitHub credential and
+creates no new game database tables. The small amount of local file I/O happens on the
+world thread; keep the spool on a local disk, not a network share.
 
 ## Activation after an explicitly authorized build
 
 1. Build the matching server sources with the CoA loader entry and C++
-   receiver, preserving the other class implementations. Install the matching
-   server and client overlay together.
+   receiver, preserving the other class implementations.
 2. Create a private local spool directory outside the source checkout, accessible
    only to the worldserver and relay service identities. Grant those identities
    read/write access; do not expose the directory through a web server or
@@ -95,14 +81,9 @@ chat hook; keep the spool on a local disk, not a network share.
    Without `--send`, the command only validates current `.report` files, then exits;
    it does not read the intake key, contact Railway or write a journal. `--once --send` processes
    one pass, respecting any persisted delay; it does not drain a rate-limited queue.
-6. Package the matching TOC and adapter into a new overlay on the **current**
-   B archive. Verify changed member hashes and preservation of the realm-card
-   and character-creation changes. Synchronize with the client closed.
-   Client test launches require explicit authorization.
 
-The repository destination is fixed in the adapter and relay. Changing it requires a
+The repository destination is fixed in the relay. Changing it requires a
 coordinated source/configuration review; a player cannot choose an API URL or repository.
-Existing draft SavedVariables are created by normal client use, not by the installer.
 
 The relay sends title/body only to the fixed Railway endpoint: no player-controlled
 destination, assignees, labels or issue-management actions. The service neutralizes
@@ -137,7 +118,7 @@ automatically resend an uncertain report, because Railway's duplicate cache can 
 An administrator must check the exact report and repository before repairing its local
 journal/receipt. No automatic force-resend command is provided. The journal retains its
 legacy opaque marker column for compatibility, but markers are not added to issue bodies
-or used for network requests. Detailed API responses and credentials never reach the addon.
+or used for network requests. Detailed API responses and credentials never reach the client.
 
 Keep `.report`, `.status` and `relay.sqlite3` together and back them up. Do not delete the
 journal to clear an error: that discards duplicate protection. Completed records are retained;
@@ -147,24 +128,14 @@ not a claim of transactional durability across the game server, filesystem and G
 
 ## Verification
 
-Earlier offline validation exercised the real Lua 5.1 adapter, a small executable using
-the actual protocol header, and the previous direct-GitHub relay. Those historical checks
-do not validate the new Railway transport. The relay fixtures were updated for Railway,
-but were not run, following the owner's request to proceed to deployment without local tests.
-Read-only checks of the deployed service confirmed health, rejection without an intake key
-and authenticated method handling with the configured key. They did not submit a report.
-
-Standalone relay tests need only Python. Run from the repository root:
-
-```powershell
-python -B apps/coa-tests/bugreport/test_relay.py
-```
-
-Earlier actual-source MSVC `/Zs` checks covered `CoABugReport.cpp` and `CoAScriptLoader.cpp`
-against native project headers. Build and installation receipts are deployment-specific.
-Offline checks do not establish rendered UI, live packet delivery or successful issue creation.
+`python -B tools/verify_all.py --stages harness --harness bugreport` runs the relay tests and
+compiles `CoABugReportService.h` into a check of validation, cooldown and the spool file the
+relay reads. Read-only checks of the deployed Railway service confirmed health, rejection
+without an intake key and authenticated method handling with the configured key; they did
+not submit a report. Offline checks do not establish rendered UI, live packet delivery or
+successful issue creation.
 
 Live acceptance must exercise the normal Help entry point, all category fields, a normal
-player account, successful creation/link copy, close/reopen during delivery and normal
-relog. Confirm the issue in the target repository. Deliberate outage tests should use a
-controlled worker fixture or stopped worker, and preserve the request/journal for recovery.
+player account, the Public refusal, the cooldown and normal relog. Confirm the issue in the
+target repository. Deliberate outage tests should use a controlled worker fixture or stopped
+worker, and preserve the request/journal for recovery.

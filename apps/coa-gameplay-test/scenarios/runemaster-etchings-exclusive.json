@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "name": "One Runemaster Etching per caster, and one of each Etching type, on each recipient (#4039)",
+  "contract": "The Runemaster ally buffs are three Etchings with a single-target and a party version each (SpellFamilyName 38): Etching of the Dextrous 561237 (Agility, ranks 561238-561240) and Greater Etching of the Dextrous 561241, Etching of the Leylines 561236 and Greater 561242 (total stats %, aura 137), Etching of the Magi 560295 and Greater 561243 (cost reduction, aura 72). No spell_group listed them, so one Runemaster could keep all of them on a target. #4039 reports that casting one should remove the other, 'like paladin buff': a second Runemaster is needed for a second Etching. This mirrors the Witch Hunter Edicts (group 1139, stack rule 2): the six Etchings share group 1140 with SPELL_GROUP_STACK_RULE_EXCLUSIVE_FROM_SAME_CASTER, and each Etching and its Greater version share a rule 1 group (1042-1044) so the same buff from two casters does not stack either. Expected: a Runemaster's second Etching replaces its first, another Runemaster's different Etching coexists, and another Runemaster's same Etching replaces the first one's.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "rm", "race": 1, "class": 32, "level": 60 },
+    { "id": "rm2", "race": 1, "class": 32, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "rm", "spell": 561236 },
+    { "action": "learn", "actor": "rm", "spell": 561237 },
+    { "action": "learn", "actor": "rm2", "spell": 560295 },
+    { "action": "learn", "actor": "rm2", "spell": 561237 },
+    { "action": "cast", "label": "Etching of the Leylines on self", "actor": "rm", "spell": 561236 },
+    {
+      "action": "assert", "label": "Etching of the Leylines is applied",
+      "actor": "rm", "metric": "aura", "spell": 561236, "caster": "rm", "equals": 1, "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 2500 },
+    { "action": "cast", "label": "Etching of the Dextrous from the same caster", "actor": "rm", "spell": 561237 },
+    {
+      "action": "assert", "label": "Etching of the Dextrous is applied",
+      "actor": "rm", "metric": "aura", "spell": 561237, "caster": "rm", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "It replaced the same caster's Etching of the Leylines",
+      "actor": "rm", "metric": "aura", "spell": 561236, "caster": "rm", "equals": 0
+    },
+    { "action": "cast", "label": "A second Runemaster gives Etching of the Magi", "actor": "rm2", "spell": 560295, "target": "rm" },
+    {
+      "action": "assert", "label": "The other caster's different Etching coexists",
+      "actor": "rm", "metric": "aura", "spell": 560295, "caster": "rm2", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The first caster's Etching of the Dextrous is kept",
+      "actor": "rm", "metric": "aura", "spell": 561237, "caster": "rm", "equals": 1
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 2500 },
+    { "action": "cast", "label": "The second Runemaster gives Etching of the Dextrous", "actor": "rm2", "spell": 561237, "target": "rm" },
+    {
+      "action": "assert", "label": "The other caster's Etching of the Dextrous is applied",
+      "actor": "rm", "metric": "aura", "spell": 561237, "caster": "rm2", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "It replaced the same buff from the first caster",
+      "actor": "rm", "metric": "aura", "spell": 561237, "caster": "rm", "equals": 0
+    }
+  ]
+}

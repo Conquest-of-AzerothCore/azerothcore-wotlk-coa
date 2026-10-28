@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Ironman shows the PvP level-range notice only for players the core would let it fight",
+  "contract": "Ironman - Resolute 1x Experience (52) carries ONLY_PVP_IN_5_LEVEL_RANGE. An area spell tests every unit in its radius with IsValidAttackTarget, so a level 1 Human warrior on that challenge who casts Thunder Clap (6343) next to a level 10 Human of the same faction must not see 'Your challenge restricts who you may fight in PvP.': the core never lets them fight. Attacking a PvP-enabled level 10 Orc, whom the core would let them fight, is refused with that notice.",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053 },
+  "players": [
+    { "id": "ironman", "race": 1, "class": 1, "level": 1 },
+    { "id": "ally", "race": 1, "class": 1, "level": 10 },
+    { "id": "enemy", "race": 2, "class": 1, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "start_challenge", "actor": "ironman", "challenge": 52, "level": 1 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "assert", "label": "Ironman starts", "actor": "ironman", "metric": "challenge_start_code", "equals": 0 },
+    { "action": "teleport", "actor": "ironman", "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "teleport", "actor": "ally", "map": 0, "x": -9615.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "teleport", "actor": "enemy", "map": 0, "x": -9577.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "pvp", "actor": "ironman", "enabled": true },
+    { "action": "pvp", "actor": "enemy", "enabled": true },
+    { "action": "learn", "actor": "ironman", "spell": 6343 },
+    { "action": "set_power", "actor": "ironman", "power": 1, "value": 1000 },
+    { "action": "wait", "ms": 500 },
+    { "action": "cast", "actor": "ironman", "spell": 6343 },
+    { "action": "assert", "label": "Thunder Clap is cast", "actor": "ironman", "metric": "spell_cast_count",
+      "spell": 6343, "equals": 1, "within_ms": 2000 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "no level-range notice for the same-faction player", "actor": "ironman",
+      "metric": "system_message_contains", "text": "Your challenge restricts who you may fight", "equals": 0 },
+    { "action": "teleport", "actor": "enemy", "map": 0, "x": -9617.06, "y": -286.949, "z": 57.3053, "o": 0 },
+    { "action": "wait", "ms": 500 },
+    { "action": "client_packet", "actor": "ironman", "opcode": 321, "consumed": false,
+      "fields": [ { "actor_guid": "enemy" } ] },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "attacking the out-of-range Orc shows the level-range notice", "actor": "ironman",
+      "metric": "system_message_contains", "text": "Your challenge restricts who you may fight", "min": 1,
+      "within_ms": 2000 }
+  ]
+}

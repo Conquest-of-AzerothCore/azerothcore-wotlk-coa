@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Hex of Malice stays castable while Umbral Glaive Ready is up",
+  "contract": [
+    "Umbral Glaive Ready (504588) still publishes the action-bar alias Hex of Malice -> Umbral Glaive (501134), and",
+    "Umbral Glaive still needs the buff, but a cast of Hex of Malice must neither be refused nor silently rewritten",
+    "into Umbral Glaive: as with Reclamation and Spirit Volley, the player chooses which of the two to use (#7389).",
+    "Casting Hex of Malice keeps the buff, and casting Umbral Glaive consumes it as before."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy0",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "distance": 10,
+      "health": 200000
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks and class synchronisation settle", "ms": 4000 },
+    { "action": "learn", "actor": "caster", "spell": 501153 },
+    { "action": "learn", "actor": "caster", "spell": 681242 },
+    { "action": "learn", "actor": "caster", "spell": 501134 },
+    {
+      "action": "assert", "label": "SETUP: Hex of Malice is known",
+      "actor": "caster", "metric": "knows_spell", "spell": 501153, "equals": 1
+    },
+    { "action": "wait", "ms": 1500 },
+    { "action": "set_aura", "actor": "caster", "spell": 504588, "stacks": 1 },
+    {
+      "action": "assert", "label": "Umbral Glaive Ready publishes the action-bar alias",
+      "actor": "caster", "metric": "temporary_spell_replacement", "spell": 501153, "equals": 501134,
+      "within_ms": 4000
+    },
+    {
+      "action": "snapshot", "actor": "caster", "metric": "spell_go_count", "spell": 501153,
+      "save_as": "hex_before"
+    },
+    { "action": "cast", "actor": "caster", "spell": 501153, "target": "enemy0" },
+    {
+      "action": "assert", "label": "A cast of Hex of Malice is not refused while the buff is up",
+      "actor": "caster", "metric": "cast_failure", "spell": 501153, "equals": 0, "within_ms": 8000
+    },
+    {
+      "action": "assert", "label": "Hex of Malice fires instead of being rewritten into Umbral Glaive",
+      "actor": "caster", "metric": "spell_go_count", "spell": 501153, "relative_to": "hex_before",
+      "equals": 1, "within_ms": 8000
+    },
+    {
+      "action": "assert", "label": "Hex of Malice lands on the target",
+      "actor": "enemy0", "metric": "aura", "spell": 501153, "caster": "caster", "equals": 1, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "Casting Hex of Malice keeps Umbral Glaive Ready",
+      "actor": "caster", "metric": "aura", "spell": 504588, "equals": 1
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 2500 },
+    {
+      "action": "snapshot", "actor": "caster", "metric": "spell_go_count", "spell": 501134,
+      "save_as": "glaive_before"
+    },
+    { "action": "cast", "actor": "caster", "spell": 501134, "target": "enemy0" },
+    {
+      "action": "assert", "label": "Umbral Glaive is still castable while the buff is up",
+      "actor": "caster", "metric": "cast_failure", "spell": 501134, "equals": 0, "within_ms": 8000
+    },
+    {
+      "action": "assert", "label": "Umbral Glaive dispatches",
+      "actor": "caster", "metric": "spell_go_count", "spell": 501134, "relative_to": "glaive_before",
+      "equals": 1, "within_ms": 8000
+    },
+    {
+      "action": "assert", "label": "Umbral Glaive consumes the buff",
+      "actor": "caster", "metric": "aura", "spell": 504588, "equals": 0, "within_ms": 8000
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 2500 },
+    { "action": "cast", "actor": "caster", "spell": 501134, "target": "enemy0" },
+    {
+      "action": "assert", "label": "Umbral Glaive is still refused without the buff",
+      "actor": "caster", "metric": "cast_failure", "spell": 501134, "equals": 22, "within_ms": 4000
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "name": "Necromancer Lich Commander makes Command spells cost 5 less Runic Power (#725)",
+  "contract": "Lich Commander 704713 is a Class-tab node (CharacterAdvancement 5781, ClassType 25 = class 23, Tab 87, AbilityEssenceCost 1, choice group with Corpse Commander 707739) whose description reads 'Reduces the Runic Power cost of your Command spells by $/10;s1.' Its effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107) MiscValue 14 (SPELLMOD_COST), BasePoints -51 + DieSides 1 = -50 (Runic Power is stored x10, so 5 Runic Power), EffectSpellClassMask (0, 0, 0x1000000) in SpellFamilyName 29: the Command family flag that AscensionNecromancer::Command also tests. SpellInfo::CalcPowerCost applies the caster's SPELLMOD_COST, so Command: Skeletal Mage 504020 (PowerType 6, ManaCost 400) must cost 350 and Command: Ghouls 504021 (ManaCost 300) 250, while Corpse Explosion 533236 (ManaCost 400, family flags 0, 0x100, 0) is not a Command and stays at 400. A real Command: Skeletal Mage cast must spend 400 Runic Power before the talent and 350 after it; the fixture's ordinary regeneration and decay are suppressed so the spend is exact.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    {
+      "id": "necro", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "necro", "spell": 500331 },
+    { "action": "learn", "actor": "necro", "spell": 504020 },
+    {
+      "action": "assert", "label": "CONTROL: Command: Skeletal Mage costs 40 Runic Power", "actor": "necro",
+      "metric": "spell_power_cost", "spell": 504020, "equals": 400
+    },
+    {
+      "action": "assert", "label": "CONTROL: Command: Ghouls costs 30 Runic Power", "actor": "necro",
+      "metric": "spell_power_cost", "spell": 504021, "equals": 300
+    },
+    {
+      "action": "assert", "label": "CONTROL: Corpse Explosion costs 40 Runic Power", "actor": "necro",
+      "metric": "spell_power_cost", "spell": 533236, "equals": 400
+    },
+    { "action": "cast", "label": "Raise a Skeletal Mage to command", "actor": "necro", "spell": 500331 },
+    {
+      "action": "assert", "label": "SETUP: the Skeletal Mage is raised", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50075, "min": 1, "within_ms": 8000
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "set_power", "actor": "necro", "power": 6, "value": 500 },
+    { "action": "snapshot", "actor": "necro", "metric": "power", "power": 6, "save_as": "rp_before_plain" },
+    {
+      "action": "cast", "label": "Command without the talent", "actor": "necro", "spell": 504020, "target": "golem"
+    },
+    {
+      "action": "assert", "label": "CONTROL: the Command spends 40 Runic Power", "actor": "necro",
+      "metric": "power", "power": 6, "relative_to": "rp_before_plain", "min": -410, "max": -390, "within_ms": 1000
+    },
+    { "action": "learn", "actor": "necro", "spell": 704713 },
+    {
+      "action": "assert", "label": "The talent aura is applied", "actor": "necro",
+      "metric": "aura", "spell": 704713, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Command: Skeletal Mage costs 35 Runic Power", "actor": "necro",
+      "metric": "spell_power_cost", "spell": 504020, "equals": 350
+    },
+    {
+      "action": "assert", "label": "Command: Ghouls costs 25 Runic Power", "actor": "necro",
+      "metric": "spell_power_cost", "spell": 504021, "equals": 250
+    },
+    {
+      "action": "assert", "label": "A non-Command Runic Power spell keeps its cost", "actor": "necro",
+      "metric": "spell_power_cost", "spell": 533236, "equals": 400
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "set_power", "actor": "necro", "power": 6, "value": 500 },
+    { "action": "snapshot", "actor": "necro", "metric": "power", "power": 6, "save_as": "rp_before_talent" },
+    {
+      "action": "cast", "label": "Command with the talent", "actor": "necro", "spell": 504020, "target": "golem"
+    },
+    {
+      "action": "assert", "label": "The Command spends 35 Runic Power", "actor": "necro",
+      "metric": "power", "power": 6, "relative_to": "rp_before_talent", "min": -360, "max": -340,
+      "within_ms": 1000
+    }
+  ]
+}

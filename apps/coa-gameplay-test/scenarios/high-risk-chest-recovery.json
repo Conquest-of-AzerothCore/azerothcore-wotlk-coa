@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "High-Risk chest recovery",
-  "contract": "A High-Risk character who dies leaves a chest; another living High-Risk character next to it can open it and recover the gold and every stored item, which empties the chest. A character outside High-Risk cannot open it.",
+  "contract": "A High-Risk character who dies leaves a chest; another living High-Risk character next to it can open it and recover the gold and every stored item, which empties the chest. A character outside High-Risk cannot open it. Requires HighRisk.Losses = 1 and HighRisk.GearChance, HighRisk.ResourceChance and HighRisk.GoldChance = 100 in coa.conf.",
   "players": [
     {
       "id": "v",

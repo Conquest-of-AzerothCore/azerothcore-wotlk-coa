@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "XP: Ascension realm kill, elite and quest rates",
-  "contract": "Uses the live Ascension realm rates captured in PR #4128 (Rate.XP.Global 0.9295, Rate.XP.Kill 1.0909091, Rate.XP.Elite 1.44) with no source-config override of those keys. A level-20 player killing a level-20 creature in Elwynn Forest (level 1-60 content) has a base gain of ((20*5+45)*20/10+1)/2 = 145. The kill award truncates 145 * rank multiplier * 1.0909091, then Rate.XP.Global truncates again: normal 145 -> 158 -> 146, elite 145*1.44 -> 227 -> 210. Both creatures have no per-creature experience modifier. Stock AzerothCore awarded 145 and 290. Quest 163 Raven Hill (level 20, reward difficulty 2) rewards QuestXP.dbc level 20 column 2 = 390 for a level-20 player; Rate.XP.Quest 1.26 truncates 491.4 to 491 and Rate.XP.Global gives 456. Stock AzerothCore awarded 390.",
+  "contract": "Uses the live Ascension realm rates captured in PR #4128 (Rate.XP.Global 0.9295, Rate.XP.Kill 1.0909091, Rate.XP.Elite 1.44) with no source-config override of those keys. A level-20 player killing a level-20 creature in Elwynn Forest (level 1-60 content) has a base gain of ((20*5+45)*20/10+1)/2 = 145. The kill award truncates 145 * rank multiplier * 1.0909091, then Rate.XP.Global truncates again: normal 145 -> 158 -> 146, elite 145*1.44 -> 227 -> 210. Both creatures have no per-creature experience modifier. Stock AzerothCore awarded 145 and 290. Quest 163 Raven Hill (level 20, reward difficulty 2) rewards QuestXP.dbc level 20 column 2 = 390 for a level-20 player; Rate.XP.Quest 1.26 truncates 491.4 to 491 and Rate.XP.Global gives 456. Stock AzerothCore awarded 390. The kills are only the vehicle for the XP rates. The fixture warrior is created at level 1 with weapon skill 1 (Player::LearnDefaultSkill) and raised by GiveLevel with AlwaysMaxWeaponSkill and AlwaysMaxSkillForLevel off; unlike the custom classes, whose weapon skills AscensionCompat SynchronizeProficiencies maximizes on every level change, it keeps that skill against the level-20 defense of 100, and level 20 against level 20 is a Classic+ context (ClassicPlusCombat::IsClassicContext): the white swing from behind the fixture then rolls a 24.8% miss, a 14.9% dodge and a 40% glancing blow for 1-20% damage, leaving about 20% of swings as full hits, so recorded kills of the 20-health fixtures landed after 0 to 9 swings of the 2900 ms swing timer and one elite outlived the 30000 ms window. The warrior therefore carries melee_hit_rating and expertise_rating 10000, which remove the miss and dodge rolls, and melee_crit_rating 10000, because Unit::RollMeleeOutcomeAgainst skips the Classic+ glancing roll at a crit chance of 100% or more. None of these ratings enters the XP calculation.",
   "timeout_ms": 120000,
   "location": {
     "map": 0,
@@ -15,7 +15,10 @@
       "id": "hunter",
       "race": 1,
       "class": 1,
-      "level": 20
+      "level": 20,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "melee_crit_rating": 10000
     }
   ],
   "creatures": [

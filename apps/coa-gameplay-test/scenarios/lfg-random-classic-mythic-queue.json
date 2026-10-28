@@ -1,0 +1,589 @@
+{
+  "schema": 1,
+  "name": "A level 60 group queued for Random Classic Dungeon Mythic enters a vanilla dungeon on Mythic",
+  "contract": "The client lists Random Classic Dungeon Mythic (2258) at level 60. A level 60 group that queues for it and accepts the proposal is teleported into one of the vanilla dungeons on Mythic difficulty.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p1",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "p2",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "p3",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "p4",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "p5",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p2"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p3"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p4"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p5"
+    },
+    {
+      "action": "add_item",
+      "actor": "p1",
+      "item": 1008202
+    },
+    {
+      "action": "equip",
+      "label": "Every member is geared for the queue: Random Classic Dungeon Mythic needs average item level 58 and PvE Power 350; 1942 / 16 = 121.4 item level with the starting pants and boots, 6 x 45 + 96 = 366 PvE Power",
+      "actor": "p1",
+      "item": 1008202,
+      "slot": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "p1",
+      "item": 1008243
+    },
+    {
+      "action": "equip",
+      "actor": "p1",
+      "item": 1008243,
+      "slot": 14
+    },
+    {
+      "action": "add_item",
+      "actor": "p1",
+      "item": 1008280
+    },
+    {
+      "action": "equip",
+      "actor": "p1",
+      "item": 1008280,
+      "slot": 12
+    },
+    {
+      "action": "add_item",
+      "actor": "p1",
+      "item": 30394
+    },
+    {
+      "action": "equip",
+      "actor": "p1",
+      "item": 30394,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "p1",
+      "item": 1008283
+    },
+    {
+      "action": "equip",
+      "actor": "p1",
+      "item": 1008283,
+      "slot": 10
+    },
+    {
+      "action": "add_item",
+      "actor": "p1",
+      "item": 1008260
+    },
+    {
+      "action": "equip",
+      "actor": "p1",
+      "item": 1008260,
+      "slot": 11
+    },
+    {
+      "action": "add_item",
+      "actor": "p1",
+      "item": 1008240
+    },
+    {
+      "action": "equip",
+      "actor": "p1",
+      "item": 1008240,
+      "slot": 13
+    },
+    {
+      "action": "add_item",
+      "actor": "p2",
+      "item": 1008202
+    },
+    {
+      "action": "equip",
+      "actor": "p2",
+      "item": 1008202,
+      "slot": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "p2",
+      "item": 1008243
+    },
+    {
+      "action": "equip",
+      "actor": "p2",
+      "item": 1008243,
+      "slot": 14
+    },
+    {
+      "action": "add_item",
+      "actor": "p2",
+      "item": 1008280
+    },
+    {
+      "action": "equip",
+      "actor": "p2",
+      "item": 1008280,
+      "slot": 12
+    },
+    {
+      "action": "add_item",
+      "actor": "p2",
+      "item": 30394
+    },
+    {
+      "action": "equip",
+      "actor": "p2",
+      "item": 30394,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "p2",
+      "item": 1008283
+    },
+    {
+      "action": "equip",
+      "actor": "p2",
+      "item": 1008283,
+      "slot": 10
+    },
+    {
+      "action": "add_item",
+      "actor": "p2",
+      "item": 1008260
+    },
+    {
+      "action": "equip",
+      "actor": "p2",
+      "item": 1008260,
+      "slot": 11
+    },
+    {
+      "action": "add_item",
+      "actor": "p2",
+      "item": 1008240
+    },
+    {
+      "action": "equip",
+      "actor": "p2",
+      "item": 1008240,
+      "slot": 13
+    },
+    {
+      "action": "add_item",
+      "actor": "p3",
+      "item": 1008202
+    },
+    {
+      "action": "equip",
+      "actor": "p3",
+      "item": 1008202,
+      "slot": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "p3",
+      "item": 1008243
+    },
+    {
+      "action": "equip",
+      "actor": "p3",
+      "item": 1008243,
+      "slot": 14
+    },
+    {
+      "action": "add_item",
+      "actor": "p3",
+      "item": 1008280
+    },
+    {
+      "action": "equip",
+      "actor": "p3",
+      "item": 1008280,
+      "slot": 12
+    },
+    {
+      "action": "add_item",
+      "actor": "p3",
+      "item": 30394
+    },
+    {
+      "action": "equip",
+      "actor": "p3",
+      "item": 30394,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "p3",
+      "item": 1008283
+    },
+    {
+      "action": "equip",
+      "actor": "p3",
+      "item": 1008283,
+      "slot": 10
+    },
+    {
+      "action": "add_item",
+      "actor": "p3",
+      "item": 1008260
+    },
+    {
+      "action": "equip",
+      "actor": "p3",
+      "item": 1008260,
+      "slot": 11
+    },
+    {
+      "action": "add_item",
+      "actor": "p3",
+      "item": 1008240
+    },
+    {
+      "action": "equip",
+      "actor": "p3",
+      "item": 1008240,
+      "slot": 13
+    },
+    {
+      "action": "add_item",
+      "actor": "p4",
+      "item": 1008202
+    },
+    {
+      "action": "equip",
+      "actor": "p4",
+      "item": 1008202,
+      "slot": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "p4",
+      "item": 1008243
+    },
+    {
+      "action": "equip",
+      "actor": "p4",
+      "item": 1008243,
+      "slot": 14
+    },
+    {
+      "action": "add_item",
+      "actor": "p4",
+      "item": 1008280
+    },
+    {
+      "action": "equip",
+      "actor": "p4",
+      "item": 1008280,
+      "slot": 12
+    },
+    {
+      "action": "add_item",
+      "actor": "p4",
+      "item": 30394
+    },
+    {
+      "action": "equip",
+      "actor": "p4",
+      "item": 30394,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "p4",
+      "item": 1008283
+    },
+    {
+      "action": "equip",
+      "actor": "p4",
+      "item": 1008283,
+      "slot": 10
+    },
+    {
+      "action": "add_item",
+      "actor": "p4",
+      "item": 1008260
+    },
+    {
+      "action": "equip",
+      "actor": "p4",
+      "item": 1008260,
+      "slot": 11
+    },
+    {
+      "action": "add_item",
+      "actor": "p4",
+      "item": 1008240
+    },
+    {
+      "action": "equip",
+      "actor": "p4",
+      "item": 1008240,
+      "slot": 13
+    },
+    {
+      "action": "add_item",
+      "actor": "p5",
+      "item": 1008202
+    },
+    {
+      "action": "equip",
+      "actor": "p5",
+      "item": 1008202,
+      "slot": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "p5",
+      "item": 1008243
+    },
+    {
+      "action": "equip",
+      "actor": "p5",
+      "item": 1008243,
+      "slot": 14
+    },
+    {
+      "action": "add_item",
+      "actor": "p5",
+      "item": 1008280
+    },
+    {
+      "action": "equip",
+      "actor": "p5",
+      "item": 1008280,
+      "slot": 12
+    },
+    {
+      "action": "add_item",
+      "actor": "p5",
+      "item": 30394
+    },
+    {
+      "action": "equip",
+      "actor": "p5",
+      "item": 30394,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "p5",
+      "item": 1008283
+    },
+    {
+      "action": "equip",
+      "actor": "p5",
+      "item": 1008283,
+      "slot": 10
+    },
+    {
+      "action": "add_item",
+      "actor": "p5",
+      "item": 1008260
+    },
+    {
+      "action": "equip",
+      "actor": "p5",
+      "item": 1008260,
+      "slot": 11
+    },
+    {
+      "action": "add_item",
+      "actor": "p5",
+      "item": 1008240
+    },
+    {
+      "action": "equip",
+      "actor": "p5",
+      "item": 1008240,
+      "slot": 13
+    },
+    {
+      "action": "lfg_join",
+      "label": "The leader queues the group for Random Classic Dungeon Mythic",
+      "actor": "p1",
+      "dungeons": [
+        2258
+      ],
+      "roles": 3
+    },
+    {
+      "action": "lfg_set_roles",
+      "actor": "p2",
+      "roles": 4
+    },
+    {
+      "action": "lfg_set_roles",
+      "actor": "p3",
+      "roles": 8
+    },
+    {
+      "action": "lfg_set_roles",
+      "actor": "p4",
+      "roles": 8
+    },
+    {
+      "action": "lfg_set_roles",
+      "actor": "p5",
+      "roles": 8
+    },
+    {
+      "action": "wait",
+      "ms": 20000
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p1"
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p2"
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p3"
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p4"
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p5"
+    },
+    {
+      "action": "assert",
+      "label": "p1 enters the dungeon the proposal chose",
+      "actor": "p1",
+      "metric": "map_id",
+      "min": 33,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "p1 is in the Mythic instance",
+      "actor": "p1",
+      "metric": "map_difficulty",
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p2 enters the dungeon the proposal chose",
+      "actor": "p2",
+      "metric": "map_id",
+      "min": 33,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "p2 is in the Mythic instance",
+      "actor": "p2",
+      "metric": "map_difficulty",
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p3 enters the dungeon the proposal chose",
+      "actor": "p3",
+      "metric": "map_id",
+      "min": 33,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "p3 is in the Mythic instance",
+      "actor": "p3",
+      "metric": "map_difficulty",
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p4 enters the dungeon the proposal chose",
+      "actor": "p4",
+      "metric": "map_id",
+      "min": 33,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "p4 is in the Mythic instance",
+      "actor": "p4",
+      "metric": "map_difficulty",
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p5 enters the dungeon the proposal chose",
+      "actor": "p5",
+      "metric": "map_id",
+      "min": 33,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "p5 is in the Mythic instance",
+      "actor": "p5",
+      "metric": "map_difficulty",
+      "equals": 2,
+      "within_ms": 5000
+    }
+  ]
+}

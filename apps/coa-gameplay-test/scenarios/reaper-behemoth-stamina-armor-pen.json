@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "name": "Reaper Behemoth grants Stamina and Armor Penetration Rating (#2172)",
+  "contract": [
+    "Behemoth 573041 reads 'Increases your Stamina by 20% and your Armor penetration by 10% of your Strength.'",
+    "Spell.dbc gives it two effects: effect 0 is aura 137 (SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE) MiscValue 2 (Stamina); effect 1 is aura 220 (SPELL_AURA_MOD_RATING_FROM_STAT) MiscValue 16777216 (bit 24 = CR_ARMOR_PENETRATION).",
+    "Both auras are native and generic (AuraEffect::HandleModTotalPercentStat, AuraEffect::HandleModRatingFromStat -> Player::ApplyRatingMod); no CoA-specific code is required.",
+    "The same generic aura 220 already delivers the identical 'percent of a stat converted to a rating' tooltip clause for the closed #651 Forbidden Power passive.",
+    "A Reaper who learns 573041 must show a higher Stamina total and a nonzero Armor Penetration Rating than an untalented control."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 2,
+      "class": 30,
+      "level": 80
+    },
+    {
+      "id": "talented",
+      "race": 2,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert",
+      "label": "Fixture precondition: no Armor Penetration Rating yet",
+      "actor": "talented",
+      "metric": "combat_rating",
+      "rating": 24,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Control base Stamina",
+      "actor": "control",
+      "metric": "stat",
+      "stat": 2,
+      "save_as": "control_base_stamina"
+    },
+    {
+      "action": "snapshot",
+      "label": "Talented base Stamina",
+      "actor": "talented",
+      "metric": "stat",
+      "stat": 2,
+      "save_as": "talented_base_stamina"
+    },
+    { "action": "learn", "actor": "talented", "spell": 573041 },
+    {
+      "action": "assert",
+      "label": "Behemoth aura is active",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 573041,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Talented Stamina rises",
+      "actor": "talented",
+      "metric": "stat",
+      "stat": 2,
+      "relative_to": "talented_base_stamina",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Control Stamina is unaffected",
+      "actor": "control",
+      "metric": "stat",
+      "stat": 2,
+      "relative_to": "control_base_stamina",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Talented Armor Penetration Rating becomes nonzero",
+      "actor": "talented",
+      "metric": "combat_rating",
+      "rating": 24,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Control Armor Penetration Rating stays zero",
+      "actor": "control",
+      "metric": "combat_rating",
+      "rating": 24,
+      "equals": 0
+    }
+  ]
+}

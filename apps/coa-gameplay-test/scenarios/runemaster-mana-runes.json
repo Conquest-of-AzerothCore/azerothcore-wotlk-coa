@@ -1,0 +1,147 @@
+{
+  "schema": 1,
+  "name": "Runemaster Mana Runes raises maximum mana by 6% and critical strike chance by 3% (#1659)",
+  "contract": [
+    "Mana Runes 300577 reads 'Increases maximum mana by $s1% and critical strike chance by $s2%.' Effect 0 is",
+    "SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT on mana (MiscValue 0), BasePoints 5 with DieSides 1 = 6%; effect 1 is",
+    "SPELL_AURA_MOD_CRIT_PCT, BasePoints 2 = 3%. Both are native auras, so the passive needs no script. No",
+    "CharacterAdvancement entry grants 300577 (only SkillLineAbility 91165 with AcquireMethod 0 lists it), so it is",
+    "learned here as a fixture. Expected: maximum mana x1.06, melee and Fire spell critical strike chance +3",
+    "percentage points, and all of it removed with the passive."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Runemaster uses mana",
+      "actor": "rm",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1000
+    },
+    {
+      "action": "learn",
+      "label": "Prime the crit fields: the first melee crit read before any stat update is 0",
+      "actor": "rm",
+      "spell": 300577
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "unlearn",
+      "actor": "rm",
+      "spell": 300577
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "max_power",
+      "power": 0,
+      "save_as": "mana_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "melee_crit_chance",
+      "save_as": "melee_crit_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_crit_chance",
+      "school": 2,
+      "save_as": "fire_crit_base"
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 300577
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 300577,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: maximum mana rises by 6%",
+      "actor": "rm",
+      "metric": "max_power",
+      "power": 0,
+      "ratio_to": "mana_base",
+      "min": 1.059,
+      "max": 1.061
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: melee critical strike chance rises by 3",
+      "actor": "rm",
+      "metric": "melee_crit_chance",
+      "relative_to": "melee_crit_base",
+      "min": 2.99,
+      "max": 3.01
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: spell critical strike chance rises by 3",
+      "actor": "rm",
+      "metric": "spell_crit_chance",
+      "school": 2,
+      "relative_to": "fire_crit_base",
+      "min": 2.99,
+      "max": 3.01
+    },
+    {
+      "action": "unlearn",
+      "actor": "rm",
+      "spell": 300577
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 300577,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the bonuses leave with the passive",
+      "actor": "rm",
+      "metric": "max_power",
+      "power": 0,
+      "ratio_to": "mana_base",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "melee_crit_chance",
+      "relative_to": "melee_crit_base",
+      "min": -0.01,
+      "max": 0.01
+    }
+  ]
+}

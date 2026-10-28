@@ -1,0 +1,153 @@
+{
+  "schema": 1,
+  "name": "manastorm-companions-between-floors",
+  "contract": "A real boss kill and automatic floor transfer retain the Necromancer Crypt Fiend and all three Skeletal Archers. Arrival retries must not duplicate companions, the new floor restores entrance protection, and exit clears protection. Uses deterministic segment 1 and its native boss spawn.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "n",
+      "race": 5,
+      "class": 23,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "command",
+      "actor": "n",
+      "command": ".manastorm segment test 1"
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "n",
+      "spell": 504859
+    },
+    {
+      "action": "cast",
+      "actor": "n",
+      "spell": 504859
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 50323,
+      "within_ms": 8000,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "n",
+      "spell": 805040
+    },
+    {
+      "action": "cast",
+      "actor": "n",
+      "spell": 805040
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 50076,
+      "within_ms": 3000,
+      "equals": 3
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "n",
+      "guid": 48706
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "n",
+      "entry": 11520,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 12000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 50323,
+      "within_ms": 3000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 50076,
+      "within_ms": 3000,
+      "equals": 3
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 50076,
+      "equals": 3
+    },
+    {
+      "action": "client_packet",
+      "actor": "n",
+      "opcode": 1637
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 93307,
+      "equals": 0
+    }
+  ]
+}

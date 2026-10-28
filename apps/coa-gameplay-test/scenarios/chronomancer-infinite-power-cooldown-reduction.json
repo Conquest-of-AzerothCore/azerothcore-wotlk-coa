@@ -1,0 +1,168 @@
+{
+  "schema": 1,
+  "name": "Infinite Power reduces damaging spell cooldowns on cast (#5026)",
+  "contract": [
+    "Infinite Power 92118 reads \"Casting damaging spells now reduces your damaging spell cooldowns by",
+    "$528312s1% of their remaining cooldown\". Its effect 0 is aura 42 (SPELL_AURA_PROC_TRIGGER_SPELL)",
+    "triggering 503946, whose three effects are the custom effect 192 (EffectMiscValue 801291/801292/806335,",
+    "EffectBasePoints 9 + DieSides 1 = 10%). Spell.dbc gives 92118 ProcFlags 0 and no spell_proc row existed,",
+    "so it never fired; separately, effect 192 is EffectNULL core-wide, but the already-registered",
+    "spell_ascension_the_bieko_effect SpellScript implements it once attached via spell_script_names. The fix",
+    "adds both rows. Timerend 801291 (CategoryRecoveryTime 20000 ms) is one of 503946's named targets. Elapsed",
+    "time is removed from the measurement by an otherwise identical control Chronomancer who starts the same",
+    "Timerend cooldown at the same moment but never learns Infinite Power: both cooldowns decay in real time,",
+    "so the difference between them isolates the talent's contribution. Only the talented caster then casts",
+    "Wand of Time 520175 (a second damaging spell, unrelated to Timerend) to trigger the proc against",
+    "Timerend's already-running cooldown, so the trigger and the affected cooldown are cleanly separated in",
+    "time. 92118's own spell_proc row requires SpellPhaseMask PROC_SPELL_PHASE_HIT (2) and SpellTypeMask",
+    "PROC_SPELL_TYPE_DAMAGE (1): Spell::cast's unconditional pre-hit proc always fires PROC_SPELL_PHASE_CAST,",
+    "so only a spell whose Spell::DoAllEffectOnTarget hit phase classifies as an actual damage hit can satisfy",
+    "the row. Reverse Wound 501805 (TARGET_UNIT_TARGET_ALLY, SPELL_EFFECT_HEAL) and Unmake 804418",
+    "(TARGET_UNIT_TARGET_ENEMY, but only SPELL_EFFECT_APPLY_AURA/SPELL_EFFECT_DUMMY, no direct damage) both",
+    "fail SpellTypeMask; Wand of Time carries SPELL_EFFECT_NORMALIZED_WEAPON_DMG + SPELL_EFFECT_SCHOOL_DAMAGE",
+    "(DmgClass 3 = ranged, matching the PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS bit the fix's own SQL comment",
+    "adds for wand attacks) and is the only Chronomancer-accessible direct-damage spell of the three. Fails",
+    "before the fix (near-zero difference, only cast-timing skew); passes after (roughly a",
+    "10%-of-remaining-at-proc-time reduction, well beyond skew)."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy_control",
+      "owner": "control",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "dummy_talent",
+      "owner": "talent",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 801291
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 801291
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 92118
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 520175
+    },
+    {
+      "action": "assert",
+      "label": "Timerend is off cooldown for the control caster before any cast",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 801291,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Timerend is off cooldown for the talented caster before any cast",
+      "actor": "talent",
+      "metric": "cooldown_ms",
+      "spell": 801291,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 801291,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 801291,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "assert",
+      "label": "The control caster's Timerend cooldown has started",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 801291,
+      "min": 18000
+    },
+    {
+      "action": "assert",
+      "label": "The talented caster's Timerend cooldown has started",
+      "actor": "talent",
+      "metric": "cooldown_ms",
+      "spell": 801291,
+      "min": 18000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown from Timerend clear",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 520175,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "wait",
+      "label": "Let Wand of Time's cast resolve and the proc apply",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Control caster's remaining Timerend cooldown, with no talent contribution",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 801291,
+      "save_as": "control_cooldown"
+    },
+    {
+      "action": "assert",
+      "label": "Casting a damaging spell took more off Timerend's cooldown than elapsed time alone",
+      "actor": "talent",
+      "metric": "cooldown_ms",
+      "spell": 801291,
+      "relative_to": "control_cooldown",
+      "min": -3000,
+      "max": -500
+    }
+  ]
+}

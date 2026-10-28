@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Draenei and Blood Elves reaching level 20 are mailed a reachable riding pamphlet (#6586)",
+  "contract": [
+    "mail_level_reward (20, 1024) mailed Draenei template 227 from Aalun 20914: pamphlet 46879 starts Learn to Ride at",
+    "the Exodar 14082. (20, 512) mailed Blood Elves template 232 from Perascamin 16280: pamphlet 46882 starts Learn to",
+    "Ride in the Eversong Woods 14081. Both trainers stand on map 530, which a Classic account cannot enter, and both",
+    "races now start on the old continents (rev_20261003_30). Expected: a Draenei reaching level 20 gets the Night Elf",
+    "pamphlet 46876 (template 225, Jartsam 4753, Darnassus) and no 46879; a Blood Elf gets the Undead pamphlet 46881",
+    "(template 233, Velma Warnam 4773, Brill) and no 46882. Quests 14085 and 14089 take every race, and trainers 40",
+    "and 41 have no race requirement. The mailbox UI is not tested."
+  ],
+  "timeout_ms": 30000,
+  "players": [
+    {"id": "draenei", "race": 11, "class": 1, "level": 19},
+    {"id": "bloodelf", "race": 10, "class": 8, "level": 19}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login settle", "ms": 3000},
+    {"action": "set_level", "label": "The Draenei reaches level 20", "actor": "draenei", "value": 20},
+    {"action": "set_level", "label": "The Blood Elf reaches level 20", "actor": "bloodelf", "value": 20},
+    {"action": "assert", "label": "The Draenei receives the Darnassus riding pamphlet", "actor": "draenei",
+     "metric": "mail_has_item", "item": 46876, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "The Draenei receives no Exodar riding pamphlet", "actor": "draenei",
+     "metric": "mail_has_item", "item": 46879, "equals": 0},
+    {"action": "assert", "label": "The Blood Elf receives the Tirisfal riding pamphlet", "actor": "bloodelf",
+     "metric": "mail_has_item", "item": 46881, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "The Blood Elf receives no Eversong riding pamphlet", "actor": "bloodelf",
+     "metric": "mail_has_item", "item": 46882, "equals": 0}
+  ]
+}

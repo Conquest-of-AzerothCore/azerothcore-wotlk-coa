@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "Necromancer Dark Harvester adds 3% critical strike and hit chance (#1131)",
+  "contract": "Dark Harvester 807960 is a Necromancer Death talent (CharacterAdvancement 30821, ClassType 25 = class 23, Tab 59 Death, TalentEssenceCost 1). Its client description reads 'Increases your critical strike and hit chance by $s1%.' Effect 0 is SPELL_AURA_MOD_CRIT_PCT (290) and effect 1 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT (333), both BasePoints 2 + DieSides 1 = 3 on the caster; no Necromancer contract rewrites either. Aura 290 adds its amount to melee and ranged crit (Player::UpdateWeaponDependentCritAuras) and to every school's spell crit (Player::UpdateSpellCritChance); aura 333 is counted in m_modMeleeHitChance, m_modRangedHitChance and m_modSpellHitChance (Player::Update*HitChances). Learning it must raise Shadow and Frost spell crit, melee crit, melee hit and spell hit by exactly 3 percentage points, and unlearning it must restore them. Player::UpdateCritPercentage clamps melee crit at zero after a weapon-skill penalty, so a large fixture melee crit rating keeps that baseline well above the clamp.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80, "melee_crit_rating": 3000, "spell_crit_rating": 460 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and stat updates settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "SETUP: Dark Harvester is not active yet", "actor": "necro",
+      "metric": "aura", "spell": 807960, "equals": 0
+    },
+    { "action": "snapshot", "actor": "necro", "metric": "spell_crit_chance", "school": 5, "save_as": "shadow_crit" },
+    { "action": "snapshot", "actor": "necro", "metric": "spell_crit_chance", "school": 4, "save_as": "frost_crit" },
+    { "action": "snapshot", "actor": "necro", "metric": "melee_crit_chance", "save_as": "melee_crit" },
+    { "action": "snapshot", "actor": "necro", "metric": "melee_hit_chance", "save_as": "melee_hit" },
+    { "action": "snapshot", "actor": "necro", "metric": "spell_hit_chance", "save_as": "spell_hit" },
+    {
+      "action": "assert", "label": "SETUP: melee crit starts above zero", "actor": "necro",
+      "metric": "melee_crit_chance", "min": 1
+    },
+    { "action": "learn", "actor": "necro", "spell": 807960 },
+    {
+      "action": "assert", "label": "The talent aura is applied", "actor": "necro",
+      "metric": "aura", "spell": 807960, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Shadow spell crit rises by 3 points", "actor": "necro",
+      "metric": "spell_crit_chance", "school": 5, "relative_to": "shadow_crit", "min": 2.99, "max": 3.01
+    },
+    {
+      "action": "assert", "label": "Frost spell crit rises by 3 points", "actor": "necro",
+      "metric": "spell_crit_chance", "school": 4, "relative_to": "frost_crit", "min": 2.99, "max": 3.01
+    },
+    {
+      "action": "assert", "label": "Melee crit rises by 3 points", "actor": "necro",
+      "metric": "melee_crit_chance", "relative_to": "melee_crit", "min": 2.99, "max": 3.01
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: melee hit rises by 3 points", "actor": "necro",
+      "metric": "melee_hit_chance", "relative_to": "melee_hit", "min": 2.99, "max": 3.01
+    },
+    {
+      "action": "assert", "label": "Spell hit rises by 3 points", "actor": "necro",
+      "metric": "spell_hit_chance", "relative_to": "spell_hit", "min": 2.99, "max": 3.01
+    },
+    { "action": "unlearn", "actor": "necro", "spell": 807960 },
+    {
+      "action": "assert", "label": "Unlearning removes the aura", "actor": "necro",
+      "metric": "aura", "spell": 807960, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Unlearning restores Shadow spell crit", "actor": "necro",
+      "metric": "spell_crit_chance", "school": 5, "relative_to": "shadow_crit", "min": -0.01, "max": 0.01
+    },
+    {
+      "action": "assert", "label": "Unlearning restores melee crit", "actor": "necro",
+      "metric": "melee_crit_chance", "relative_to": "melee_crit", "min": -0.01, "max": 0.01
+    },
+    {
+      "action": "assert", "label": "Unlearning restores melee hit", "actor": "necro",
+      "metric": "melee_hit_chance", "relative_to": "melee_hit", "min": -0.01, "max": 0.01
+    },
+    {
+      "action": "assert", "label": "Unlearning restores spell hit", "actor": "necro",
+      "metric": "spell_hit_chance", "relative_to": "spell_hit", "min": -0.01, "max": 0.01
+    }
+  ]
+}

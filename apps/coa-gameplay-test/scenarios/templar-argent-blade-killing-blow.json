@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Argent Blade heals even when the hit kills the target (#4744)",
-  "contract": "Argent Blade 807263 heals the caster via 807414 for the damage dealt, even when that hit is the killing blow on the target.",
+  "contract": "Argent Blade 807263 heals the caster via 807414 for the damage dealt, even when that hit is the killing blow on the target. As the tooltip orders it, Scourgebane 801832 is unleashed after Argent Blade's own hit, so it cannot kill the 50-health target first and drop that hit.",
   "timeout_ms": 90000,
   "players": [
     {

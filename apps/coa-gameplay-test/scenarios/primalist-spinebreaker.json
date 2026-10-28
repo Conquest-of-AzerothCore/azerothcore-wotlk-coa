@@ -45,9 +45,9 @@
       "o": 0
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "primalist",
-      "command": ".localspec 95"
+      "id": 95
     },
     {
       "action": "learn",

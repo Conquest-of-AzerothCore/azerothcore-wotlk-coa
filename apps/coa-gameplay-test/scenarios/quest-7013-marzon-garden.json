@@ -1,0 +1,153 @@
+{
+  "schema": 1,
+  "name": "The Attack!: Marzon the Silent Blade joins Lescovar in the CoA keep roof garden (#7013)",
+  "contract": [
+    "Quest 434 'The Attack!' tells the player to remain in the garden until Lord Gregor Lescovar 1754 and Marzon the",
+    "Silent Blade 1755 have talked, then kill them both (RequiredNpcOrGo 1754 x1 and 1755 x1 in quest_template and in",
+    "the CoA client's quest cache). CoA moved Tyrion 7766, his Spybot 8856 and both escort paths to the keep roof garden",
+    "in rev_20260923_03_coa_stormwind.sql; Lescovar's escort now pauses at point 16 on that lawn. The player waits beside",
+    "Tyrion in the garden, so Marzon must appear within reach there (60 yd) and both must be killable once they turn",
+    "hostile, which completes both kill objectives. Lescovar is summoned at his CoA library spawn 10502 because the lane",
+    "phase hides world spawns from the Spybot."
+  ],
+  "timeout_ms": 420000,
+  "location": {
+    "map": 0,
+    "x": -8330.0,
+    "y": 279.5,
+    "z": 156.833,
+    "o": 5.864
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 31
+    },
+    {
+      "id": "librarian",
+      "race": 1,
+      "class": 1,
+      "level": 31
+    }
+  ],
+  "creatures": [
+    {
+      "id": "tyrion",
+      "owner": "hero",
+      "entry": 7766,
+      "distance": 2,
+      "faction": 64,
+      "level": 37
+    },
+    {
+      "id": "spybot",
+      "owner": "hero",
+      "entry": 8856,
+      "distance": 3.4,
+      "faction": 12,
+      "level": 25
+    }
+  ],
+  "steps": [
+    {
+      "action": "teleport_to_spawn",
+      "label": "SETUP: a second character stands at Lescovar's CoA library spawn 10502",
+      "actor": "librarian",
+      "guid": 10502
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "summon",
+      "label": "SETUP: Lescovar waits in the library within the Spybot's 10 yd reach at its point 17",
+      "actor": "librarian",
+      "as": "lescovar",
+      "entry": 1754,
+      "distance": 0.5
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: 2746 'Items of Some Consequence' is finished, the prerequisite of 434",
+      "actor": "hero",
+      "quest": 2746
+    },
+    {
+      "action": "reward_quest",
+      "actor": "hero",
+      "quest": 2746
+    },
+    {
+      "action": "quest_accept",
+      "label": "Accept 434 from Tyrion in the roof garden; his script sends the Spybot to the library",
+      "actor": "hero",
+      "entry": 7766,
+      "quest": 434
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "quest_status",
+      "quest": 434,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Marzon appears within reach of the player waiting in the CoA roof garden",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 1755,
+      "min": 1,
+      "within_ms": 360000
+    },
+    {
+      "action": "wait",
+      "label": "Marzon walks to Lescovar, they talk and both turn hostile",
+      "ms": 20000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill Marzon in the garden",
+      "actor": "hero",
+      "entry": 1755,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill Lescovar in the garden",
+      "actor": "hero",
+      "entry": 1754,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Lescovar objective is credited",
+      "actor": "hero",
+      "metric": "quest_objective_count",
+      "quest": 434,
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Marzon objective is credited",
+      "actor": "hero",
+      "metric": "quest_objective_count",
+      "quest": 434,
+      "index": 1,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "434 is ready to turn in",
+      "actor": "hero",
+      "metric": "quest_status",
+      "quest": 434,
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

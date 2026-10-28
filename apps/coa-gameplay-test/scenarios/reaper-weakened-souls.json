@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Reaper Weakened Souls applies a caster-specific debuff on Soulrend",
+  "contract": "With talent 92146, a landed Soulrend applies 803433 to its target, increasing Reaper Shadow and Frost damage from that caster by 10%. The installed debuff has permanent duration. Soulrend without the talent does not apply it. Frost is probed with Dreadwake 503286 (Frost, family 36, a weapon strike whose taken bonus comes from MeleeDamageBonusTaken); Ghostly Weapon's Frost child 804474 carries SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS in the client DBC, so it never gains taken modifiers and cannot show the debuff.",
+  "players": [
+    { "id": "baseline", "race": 2, "class": 30, "level": 60, "spell_hit_rating": 10000, "melee_hit_rating": 10000, "expertise_rating": 10000 },
+    { "id": "talented", "race": 2, "class": 30, "level": 60, "spell_hit_rating": 10000, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "plain_enemy", "owner": "baseline", "entry": 299, "level": 60, "distance": 3, "health": 1000000 },
+    { "id": "marked_enemy", "owner": "talented", "entry": 299, "level": 60, "distance": 3, "health": 1000000 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "learn", "actor": "baseline", "spell": 572342 },
+    { "action": "learn", "actor": "talented", "spell": 572342 },
+    { "action": "learn", "actor": "talented", "spell": 92146 },
+    { "action": "assert", "actor": "baseline", "metric": "aura", "spell": 92146, "equals": 0 },
+    { "action": "assert", "actor": "talented", "metric": "aura", "spell": 92146, "equals": 1 },
+    { "action": "set_aura", "actor": "baseline", "spell": 500363, "stacks": 3 },
+    { "action": "set_aura", "actor": "baseline", "spell": 803031, "stacks": 1 },
+    { "action": "set_aura", "actor": "talented", "spell": 500363, "stacks": 3 },
+    { "action": "set_aura", "actor": "talented", "spell": 803031, "stacks": 1 },
+    { "action": "snapshot", "actor": "marked_enemy", "metric": "spell_damage_taken", "spell": 500376, "target": "talented", "save_as": "shadow_before" },
+    { "action": "snapshot", "actor": "marked_enemy", "metric": "melee_damage_taken", "spell": 503286, "target": "talented", "save_as": "frost_before" },
+    { "action": "snapshot", "actor": "marked_enemy", "metric": "spell_damage_taken", "spell": 500376, "target": "baseline", "save_as": "other_caster_before" },
+    { "action": "snapshot", "actor": "marked_enemy", "metric": "spell_damage_taken", "spell": 500489, "target": "talented", "save_as": "physical_before" },
+    { "action": "snapshot", "actor": "plain_enemy", "metric": "health", "save_as": "plain_health" },
+    { "action": "snapshot", "actor": "marked_enemy", "metric": "health", "save_as": "marked_health" },
+    { "action": "cast", "actor": "baseline", "spell": 572342, "target": "plain_enemy" },
+    { "action": "cast", "actor": "talented", "spell": 572342, "target": "marked_enemy" },
+    { "action": "assert", "actor": "plain_enemy", "metric": "health", "relative_to": "plain_health", "max": -1, "within_ms": 2000, "label": "Soulrend without talent lands" },
+    { "action": "assert", "actor": "marked_enemy", "metric": "health", "relative_to": "marked_health", "max": -1, "within_ms": 2000, "label": "Soulrend with talent lands" },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "actor": "plain_enemy", "metric": "aura", "spell": 803433, "caster": "baseline", "equals": 0, "label": "No Weakened Souls without talent" },
+    { "action": "assert", "actor": "marked_enemy", "metric": "aura", "spell": 803433, "caster": "talented", "equals": 1, "within_ms": 2000, "label": "Weakened Souls applies after a landed Soulrend" },
+    { "action": "assert", "actor": "marked_enemy", "metric": "aura_amount", "spell": 803433, "caster": "talented", "equals": 10, "label": "Weakened Souls adds ten percent damage" },
+    { "action": "assert", "actor": "marked_enemy", "metric": "aura_duration_ms", "spell": 803433, "caster": "talented", "equals": -1, "label": "Weakened Souls uses its permanent DBC duration" },
+    { "action": "assert", "actor": "marked_enemy", "metric": "spell_damage_taken", "spell": 500376, "target": "talented", "ratio_to": "shadow_before", "min": 1.095, "max": 1.105, "label": "Reaper Shadow damage from the talented caster rises ten percent" },
+    { "action": "assert", "actor": "marked_enemy", "metric": "melee_damage_taken", "spell": 503286, "target": "talented", "ratio_to": "frost_before", "min": 1.095, "max": 1.105, "label": "Reaper Frost damage from the talented caster rises ten percent" },
+    { "action": "assert", "actor": "marked_enemy", "metric": "spell_damage_taken", "spell": 500376, "target": "baseline", "ratio_to": "other_caster_before", "min": 0.995, "max": 1.005, "label": "Other Reaper casters do not gain the bonus" },
+    { "action": "assert", "actor": "marked_enemy", "metric": "spell_damage_taken", "spell": 500489, "target": "talented", "ratio_to": "physical_before", "min": 0.995, "max": 1.005, "label": "Reaper Physical damage does not gain the bonus" }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "name": "Necromancer Touch of Death adds an Expunge stack and 20% Death spell range (#770)",
+  "contract": "Touch of Death 707113 is a Death talent (CharacterAdvancement 6965, ClassType 25 = class 23, Tab 59, TalentEssenceCost 1) whose description reads 'Allows Expunge to stack an additional time and increases the range of your Death spells by $s2%.' Effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107) MiscValue 31 (SPELLMOD_MAX_AURA_STACKS), BasePoints 0 + DieSides 1 = 1, EffectSpellClassMask (0, 0x10000000, 0) in SpellFamilyName 29, which matches the Expunge debuff 573233 (family flags 0, 0x10000000, 0; StackAmount 2); SpellInfo::CalcMaxAuraStacks leaves nonstacking flag holders (Expunge carriers 500343/500443, Refreshing Chill 800979, Foul Invocation 804371) at zero. Effect 1 is SPELL_AURA_ADD_PCT_MODIFIER (108) MiscValue 5 (SPELLMOD_RANGE), BasePoints 19 + DieSides 1 = 20, EffectSpellClassMask (2, 0x10, 0x2006028), which covers the Death spells Flesh to Worms 500338 (0x4000, 0, 0x20 via word 2 bit 0x20), Crypt Swarm 500965 (0x2, 0, 0) and Blight 500217 (0, 0, 0x2000), all SpellRange 4 = 30 yd; Lichfrost 801722 (0, 0, 0x8000000) is a Rime spell outside the mask. SpellInfo::GetMaxRange applies the caster's SPELLMOD_RANGE, so those Death spells must reach 36 yd while Lichfrost stays at 30 yd, and Expunge must accept 3 stacks instead of 2. The Expunge debuff is cast directly here so the stack cap is observed independently of the Expunge talent's Command trigger.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "necro", "spell": 573233 },
+    {
+      "action": "assert", "label": "CONTROL: Expunge stacks twice without the talent", "actor": "necro",
+      "metric": "spell_max_stacks", "spell": 573233, "equals": 2
+    },
+    {
+      "action": "assert", "label": "CONTROL: Flesh to Worms reaches 30 yd", "actor": "necro",
+      "metric": "spell_max_range", "spell": 500338, "equals": 30
+    },
+    {
+      "action": "assert", "label": "CONTROL: Crypt Swarm reaches 30 yd", "actor": "necro",
+      "metric": "spell_max_range", "spell": 500965, "equals": 30
+    },
+    { "action": "cast", "label": "First Expunge", "actor": "necro", "spell": 573233, "target": "golem" },
+    {
+      "action": "assert", "label": "SETUP: Expunge lands", "actor": "golem",
+      "metric": "aura_stacks", "spell": 573233, "caster": "necro", "equals": 1, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "cast", "label": "Second Expunge", "actor": "necro", "spell": 573233, "target": "golem" },
+    {
+      "action": "assert", "label": "The second Expunge adds a stack", "actor": "golem",
+      "metric": "aura_stacks", "spell": 573233, "caster": "necro", "equals": 2, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "cast", "label": "Third Expunge", "actor": "necro", "spell": 573233, "target": "golem" },
+    { "action": "wait", "label": "Let the third application resolve", "ms": 500 },
+    {
+      "action": "assert", "label": "CONTROL: Expunge caps at 2 stacks without the talent", "actor": "golem",
+      "metric": "aura_stacks", "spell": 573233, "caster": "necro", "equals": 2
+    },
+    { "action": "learn", "actor": "necro", "spell": 707113 },
+    {
+      "action": "assert", "label": "The talent aura is applied", "actor": "necro",
+      "metric": "aura", "spell": 707113, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Expunge may stack 3 times", "actor": "necro",
+      "metric": "spell_max_stacks", "spell": 573233, "equals": 3
+    },
+    {
+      "action": "assert", "label": "Flesh to Worms reaches 36 yd", "actor": "necro",
+      "metric": "spell_max_range", "spell": 500338, "min": 35.99, "max": 36.01
+    },
+    {
+      "action": "assert", "label": "Crypt Swarm reaches 36 yd", "actor": "necro",
+      "metric": "spell_max_range", "spell": 500965, "min": 35.99, "max": 36.01
+    },
+    {
+      "action": "assert", "label": "Blight reaches 36 yd", "actor": "necro",
+      "metric": "spell_max_range", "spell": 500217, "min": 35.99, "max": 36.01
+    },
+    {
+      "action": "assert", "label": "Lichfrost, a Rime spell, keeps 30 yd", "actor": "necro",
+      "metric": "spell_max_range", "spell": 801722, "equals": 30
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1100 },
+    { "action": "cast", "label": "Fourth Expunge", "actor": "necro", "spell": 573233, "target": "golem" },
+    {
+      "action": "assert", "label": "The talent lets a third stack land", "actor": "golem",
+      "metric": "aura_stacks", "spell": 573233, "caster": "necro", "equals": 3, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "cast", "label": "Fifth Expunge", "actor": "necro", "spell": 573233, "target": "golem" },
+    { "action": "wait", "label": "Let the fifth application resolve", "ms": 500 },
+    {
+      "action": "assert", "label": "Expunge caps at 3 stacks with the talent", "actor": "golem",
+      "metric": "aura_stacks", "spell": 573233, "caster": "necro", "equals": 3
+    }
+  ]
+}

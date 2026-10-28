@@ -1,0 +1,181 @@
+{
+  "schema": 1,
+  "name": "The Kobolds Have Her: a Shadewell Cave clue counts once for a character and then stays without its quest highlight (COA-9591)",
+  "contract": "Quest 175071 needs 5 credits of [TG] The Kobols Have Her 164520, given by the five Shadewell Cave clues 2300677-2300681 (type 10 goobers tied to the quest; each one's SmartAI says a clue line and gives one credit on use). A player reported that one clue could be clicked again and again until the quest showed 5/5. A cave clue must count once for a character and then stay in place without its quest highlight for that character, like the Ideals Are Poison clues, while the other clues still count. Removing the object from the character's world left the client's yellow highlight circle on the ground. The case joins world phase 1 and uses the world spawns of the Pickaxe (9996005) and the Kobold Skull (9996006).",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8149.5,
+    "y": -81.5,
+    "z": 288.6,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 42
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where the clues are spawned",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the cave's grid activate",
+      "ms": 2500
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 175071,
+      "complete": false
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Pickaxe is in the character's world before it is investigated",
+      "actor": "p",
+      "metric": "nearby_gameobject_at_client",
+      "entry": 2300677,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Pickaxe is active for the quest before it is investigated",
+      "actor": "p",
+      "metric": "nearby_gameobject_quest_active",
+      "entry": 2300677,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Investigate the Pickaxe",
+      "actor": "p",
+      "entry": 2300677
+    },
+    {
+      "action": "assert",
+      "label": "the Pickaxe counts once",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 175071,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "and is no longer active for the quest",
+      "actor": "p",
+      "metric": "nearby_gameobject_quest_active",
+      "entry": 2300677,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "but stays in the character's world",
+      "actor": "p",
+      "metric": "nearby_gameobject_at_client",
+      "entry": 2300677,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Try to investigate the Pickaxe again",
+      "actor": "p",
+      "entry": 2300677
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "the Pickaxe does not count a second time",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 175071,
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "label": "Walk to the Kobold Skull",
+      "actor": "p",
+      "map": 0,
+      "x": -8115.6,
+      "y": -97.1,
+      "z": 288.0,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Kobold Skull is still in the character's world",
+      "actor": "p",
+      "metric": "nearby_gameobject_at_client",
+      "entry": 2300678,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Kobold Skull is still active for the quest",
+      "actor": "p",
+      "metric": "nearby_gameobject_quest_active",
+      "entry": 2300678,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Investigate the Kobold Skull",
+      "actor": "p",
+      "entry": 2300678
+    },
+    {
+      "action": "assert",
+      "label": "a different clue still counts",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 175071,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "teleport",
+      "label": "Walk back to the Pickaxe",
+      "actor": "p",
+      "map": 0,
+      "x": -8149.5,
+      "y": -81.5,
+      "z": 288.6,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the Pickaxe is still inactive for this character",
+      "actor": "p",
+      "metric": "nearby_gameobject_quest_active",
+      "entry": 2300677,
+      "equals": 0
+    }
+  ]
+}

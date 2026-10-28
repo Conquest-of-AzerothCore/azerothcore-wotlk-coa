@@ -1,0 +1,30 @@
+{
+ "schema": 1,
+ "name": "Gift of Fervor and Gift of Zeal (and their raid versions) overwrite each other (#4449)",
+ "contract": "Gift of Fervor 572629, Greater Gift of Fervor 572630, Gift of Zeal 706634 and Greater Gift of Zeal 680306 share spell_group 1160 with an exclusive stack rule: casting a later one removes any earlier one already held, so a Templar never carries more than one of the four at once.",
+ "timeout_ms": 90000,
+ "players": [
+  { "id": "templar", "race": 1, "class": 19, "level": 80 }
+ ],
+ "steps": [
+  { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+  { "action": "learn", "actor": "templar", "spell": 572629 },
+  { "action": "learn", "actor": "templar", "spell": 572630 },
+  { "action": "learn", "actor": "templar", "spell": 706634 },
+  { "action": "learn", "actor": "templar", "spell": 680306 },
+  { "action": "cast", "actor": "templar", "spell": 572629, "target": "templar" },
+  { "action": "assert", "label": "Gift of Fervor applies", "actor": "templar", "metric": "aura", "spell": 572629, "equals": 1, "within_ms": 2000 },
+  { "action": "wait", "label": "Global cooldown", "ms": 1600 },
+  { "action": "cast", "actor": "templar", "spell": 572630, "target": "templar" },
+  { "action": "assert", "label": "Greater Gift of Fervor applies", "actor": "templar", "metric": "aura", "spell": 572630, "equals": 1, "within_ms": 2000 },
+  { "action": "assert", "label": "Gift of Fervor is overwritten, not stacked", "actor": "templar", "metric": "aura", "spell": 572629, "equals": 0 },
+  { "action": "wait", "label": "Global cooldown", "ms": 1600 },
+  { "action": "cast", "actor": "templar", "spell": 706634, "target": "templar" },
+  { "action": "assert", "label": "Gift of Zeal applies", "actor": "templar", "metric": "aura", "spell": 706634, "equals": 1, "within_ms": 2000 },
+  { "action": "assert", "label": "Greater Gift of Fervor is overwritten, not stacked", "actor": "templar", "metric": "aura", "spell": 572630, "equals": 0 },
+  { "action": "wait", "label": "Global cooldown", "ms": 1600 },
+  { "action": "cast", "actor": "templar", "spell": 680306, "target": "templar" },
+  { "action": "assert", "label": "Greater Gift of Zeal applies", "actor": "templar", "metric": "aura", "spell": 680306, "equals": 1, "within_ms": 2000 },
+  { "action": "assert", "label": "Gift of Zeal is overwritten, not stacked", "actor": "templar", "metric": "aura", "spell": 706634, "equals": 0 }
+ ]
+}

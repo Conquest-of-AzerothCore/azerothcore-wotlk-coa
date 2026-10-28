@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "name": "Barnabus whistle creates a saved, controllable Primalist pet (#5381)",
+  "contract": [
+    "Item 79567, Beastmaster's Whistle: Barnabus, uses spell 79347, whose captured description promises",
+    "'Use this whistle to tame a Barnabus.' Barnabus is the tameable wolf template 2753. A level-37",
+    "Wildwalker Primalist using the item normally must receive that controllable hunter pet, save it and",
+    "reload it on login. A second use must refuse an existing pet without replacing or duplicating it."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "primalist", "race": 1, "class": 31, "level": 37 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "specialization", "actor": "primalist", "id": 59 },
+    {
+      "action": "assert", "label": "The native Wildwalker build can keep a hunter pet",
+      "actor": "primalist", "metric": "knows_spell", "spell": 574301, "equals": 1
+    },
+    { "action": "add_item", "actor": "primalist", "item": 79567 },
+    { "action": "use_item", "actor": "primalist", "item": 79567, "spell": 79347 },
+    {
+      "action": "assert", "label": "The item cast succeeds",
+      "actor": "primalist", "metric": "cast_failure", "spell": 79347, "equals": 0
+    },
+    {
+      "action": "assert", "label": "The whistle tames the promised Barnabus",
+      "actor": "primalist", "metric": "pet_entry", "equals": 2753, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "Barnabus has native pet abilities",
+      "actor": "primalist", "metric": "pet_spell_bar_count", "min": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Taming saves exactly one pet",
+      "actor": "primalist", "metric": "pet_rows", "equals": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Let the item's thirty-second cooldown expire", "ms": 31000 },
+    { "action": "use_item", "actor": "primalist", "item": 79567, "spell": 79347 },
+    {
+      "action": "assert", "label": "An existing pet prevents another tame",
+      "actor": "primalist", "metric": "cast_failure", "spell": 79347, "equals": 7
+    },
+    {
+      "action": "assert", "label": "The existing Barnabus remains active",
+      "actor": "primalist", "metric": "pet_entry", "equals": 2753
+    },
+    {
+      "action": "assert", "label": "The refused use creates no duplicate pet",
+      "actor": "primalist", "metric": "pet_rows", "equals": 1
+    },
+    { "action": "relog", "actor": "primalist" },
+    {
+      "action": "assert", "label": "Barnabus survives the native save and login path",
+      "actor": "primalist", "metric": "pet_entry", "equals": 2753, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "Relog retains the same single saved pet",
+      "actor": "primalist", "metric": "pet_rows", "equals": 1
+    }
+  ]
+}

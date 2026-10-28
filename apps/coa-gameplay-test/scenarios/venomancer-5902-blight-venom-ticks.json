@@ -1,0 +1,487 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Blight Venom's poison and Rejuvenating Venom's heal are level-scaled once, so they tick at level 5 (#5902)",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "v",
+      "race": 1,
+      "class": 29,
+      "level": 5,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "v",
+      "entry": 36,
+      "level": 5,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Blight Venom's poison deals the tooltip's level-5 amount per tick, 137-140 x 0.0556",
+      "actor": "v",
+      "metric": "spell_effect_value",
+      "spell": 805896,
+      "effect": 0,
+      "min": 7,
+      "max": 8
+    },
+    {
+      "action": "assert",
+      "label": "Rejuvenating Venom's heal keeps its level-5 amount per tick, 67-72 x 0.0556 / 3",
+      "actor": "v",
+      "metric": "spell_effect_value",
+      "spell": 630869,
+      "effect": 0,
+      "min": 1,
+      "max": 2
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 805776,
+      "label": "Learn Blight Venom"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 805776,
+      "label": "Activate Blight Venom"
+    },
+    {
+      "action": "assert",
+      "label": "Blight Venom is active",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 805776,
+      "within_ms": 3000,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "v",
+      "value": 240,
+      "label": "Refill mana"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "target": "d",
+      "label": "Venom Bolt 1"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 1 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "target": "d",
+      "label": "Venom Bolt 2"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 2 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 2
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "target": "d",
+      "label": "Venom Bolt 3"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 3 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 3
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "target": "d",
+      "label": "Venom Bolt 4"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 4 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 4
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "target": "d",
+      "label": "Venom Bolt 5"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 5 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 5
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 200
+    },
+    {
+      "action": "set_power",
+      "actor": "v",
+      "value": 240,
+      "label": "Refill mana"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "target": "d",
+      "label": "Venom Bolt 6"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 6 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 6
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "target": "d",
+      "label": "Venom Bolt 7"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 7 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 7
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "target": "d",
+      "label": "Venom Bolt 8"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 8 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 8
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "target": "d",
+      "label": "Venom Bolt 9"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 9 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 9
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "target": "d",
+      "label": "Venom Bolt 10"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 10 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 10
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 200
+    },
+    {
+      "action": "set_power",
+      "actor": "v",
+      "value": 240,
+      "label": "Refill mana"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "target": "d",
+      "label": "Venom Bolt 11"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 11 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 11
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "target": "d",
+      "label": "Venom Bolt 12"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 12 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 12
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "target": "d",
+      "label": "Venom Bolt 13"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 13 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 13
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "target": "d",
+      "label": "Venom Bolt 14"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 14 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 14
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "target": "d",
+      "label": "Venom Bolt 15"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 15 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 15
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 200
+    },
+    {
+      "action": "set_power",
+      "actor": "v",
+      "value": 240,
+      "label": "Refill mana"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "target": "d",
+      "label": "Venom Bolt 16"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 16 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 16
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "label": "Blight Venom procs from Venom Bolt",
+      "actor": "v",
+      "metric": "spell_proc_count",
+      "spell": 805776,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Blight Venom's poison deals periodic damage",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 805896,
+      "target": "d",
+      "within_ms": 7000,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Blight Venom's poison deals damage",
+      "actor": "v",
+      "metric": "spell_damage_total",
+      "spell": 805896,
+      "target": "d",
+      "min": 1
+    }
+  ]
+}

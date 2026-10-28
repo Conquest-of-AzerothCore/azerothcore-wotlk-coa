@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "name": "runemaster-scrying-orb-possession-4188",
+  "contract": [
+    "Original Spell.dbc 804674 summons creature 50038 using SummonProperties 65 and promises direct control",
+    "and sight through the orb. A normal level 22 Runemaster cast must summon the orb, establish the native",
+    "charm and cease controlling the player; cancelling its channel must restore self-control. This probes",
+    "server possession state, not camera rendering. Public hertigservices/ascension-data",
+    "conquest-of-azeroth-creaturecache.tsv captures entry 50038 as Scrying Orb with display 30547, type 1 and",
+    "health/mana modifiers 1.0 (2026-09-04 capture). On clean main the normal cast failed because",
+    "Creature::Create reported that template 50038 does not exist."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "runemaster",
+      "race": 1,
+      "class": 32,
+      "level": 22
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "runemaster",
+      "spell": 804674
+    },
+    {
+      "action": "cast",
+      "actor": "runemaster",
+      "spell": 804674
+    },
+    {
+      "action": "assert",
+      "label": "Scrying Orb is summoned",
+      "actor": "runemaster",
+      "metric": "owned_creature_count",
+      "entry": 50038,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "The Runemaster possesses the Scrying Orb",
+      "actor": "runemaster",
+      "metric": "charm_entry",
+      "equals": 50038
+    },
+    {
+      "action": "assert",
+      "label": "The native mover is the orb",
+      "actor": "runemaster",
+      "metric": "controls_self",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "viewpoint_entry",
+      "equals": 50038,
+      "label": "Possession uses the Orb as native viewpoint_entry"
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "seer_entry",
+      "equals": 50038,
+      "label": "Possession uses the Orb as native seer_entry"
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "runemaster",
+      "spell": 804674
+    },
+    {
+      "action": "assert",
+      "label": "Cancelling the channel restores self-control",
+      "actor": "runemaster",
+      "metric": "controls_self",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "charm_entry",
+      "equals": 0,
+      "label": "The cancelled channel releases the charm"
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "owned_creature_count",
+      "entry": 50038,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The cancelled channel removes its Orb"
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "viewpoint_entry",
+      "equals": 0,
+      "label": "Cancellation restores the player native viewpoint_entry"
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "seer_entry",
+      "equals": 0,
+      "label": "Cancellation restores the player native seer_entry"
+    }
+  ]
+}

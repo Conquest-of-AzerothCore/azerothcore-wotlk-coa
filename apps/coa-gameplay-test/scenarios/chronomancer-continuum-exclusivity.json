@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "name": "Continuum spells are mutually exclusive (#5021)",
+  "contract": "Singularity Core 804438, Paradox Cannon 806203, Flux Emitter 804435 and Aether Compression 804436 all end their own Description[enUS] with the identical line 'Can only have 1 Continuum spell active at a time', but no spell_group row existed for any of them, so all four could be active together. The new group (id 1141, SPELL_GROUP_STACK_RULE_EXCLUSIVE_FROM_SAME_CASTER) makes each new cast remove the caster's previous one. All four require CasterAuraSpell 804455 (Echo Fragment) to cast, so the fixture re-applies one stack before each cast rather than relying on any one cast's own generation/consumption. Fails before the fix (all three stay up at once), passes after.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "chronomancer", "race": 1, "class": 22, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "chronomancer", "spell": 804438 },
+    { "action": "learn", "actor": "chronomancer", "spell": 806203 },
+    { "action": "learn", "actor": "chronomancer", "spell": 804435 },
+    { "action": "set_aura", "actor": "chronomancer", "spell": 804455, "stacks": 1 },
+    { "action": "cast", "actor": "chronomancer", "spell": 804438 },
+    {
+      "action": "assert",
+      "label": "Singularity Core is active",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 804438,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let Singularity Core's global cooldown pass", "ms": 1600 },
+    { "action": "set_aura", "actor": "chronomancer", "spell": 804455, "stacks": 1 },
+    { "action": "cast", "actor": "chronomancer", "spell": 806203 },
+    {
+      "action": "assert",
+      "label": "Singularity Core is removed by Paradox Cannon",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 804438,
+      "caster": "chronomancer",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Paradox Cannon is active",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 806203,
+      "caster": "chronomancer",
+      "equals": 1
+    },
+    { "action": "wait", "label": "Let Paradox Cannon's global cooldown pass", "ms": 1600 },
+    { "action": "set_aura", "actor": "chronomancer", "spell": 804455, "stacks": 1 },
+    { "action": "cast", "actor": "chronomancer", "spell": 804435 },
+    {
+      "action": "assert",
+      "label": "Paradox Cannon is removed by Flux Emitter",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 806203,
+      "caster": "chronomancer",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Flux Emitter is active",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 804435,
+      "caster": "chronomancer",
+      "equals": 1
+    }
+  ]
+}

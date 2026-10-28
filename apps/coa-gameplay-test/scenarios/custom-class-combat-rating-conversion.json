@@ -1,0 +1,224 @@
+{
+  "schema": 1,
+  "name": "Custom classes convert haste rating through the client's own class scalar rows",
+  "contract": [
+    "Batch 6 follow-up: Player::GetRatingMultiplier returns gtOCTClassCombatRatingScalar[(class - 1) * 32 + cr + 1] / gtCombatRatings[cr * 100 + level - 1] and falls back to 1.0 (1 rating = 1%) only when a row is missing. The worldserver loads the CoA client DBCs, and rev_20260917_00_client_dbc_overlays empties the stock *_dbc overlays, so the client rows decide. The client gtOCTClassCombatRatingScalar.dbc has 1024 rows, 32 classes x 32 ratings, so every custom class 12-32 has its own row: melee haste 1.3 (like the stock hybrids Paladin, Death Knight, Shaman and Druid), ranged and spell haste 1.0, all crit and hit 1.0, armor penetration 1.1. gtCombatRatings.dbc (3200 rows, one per rating and level) gives 32.79 haste rating and 45.906 crit rating per 1% at level 80, and 10 and 14 at level 60. Expected per +100 rating (QA Test +100 Haste Rating 10033: melee, ranged and spell haste; QA Test +100 All Crit Rating 10036: melee, ranged and spell crit): level 80 Barbarian (class 12) melee haste 3.965% (attack time x 0.9619) like the Paladin, Warrior 3.050% (x 0.9704), spell haste 3.050% for all (cast speed x 0.9704), crit +2.178 percentage points for all; level 60 Barbarian melee haste 13% (x 0.8850), Warrior 10% (x 0.9091), spell haste 10% (x 0.9091), crit +7.143. The 1.0 fallback would give 100% per 100 rating (x 0.5, +100 crit). Deltas and ratios around the fixture auras cancel racial and class base values.",
+    "Crit rating is not asserted: melee_crit_chance and spell_crit_chance snapshots taken before the fixture rating read 0 in this setup, so a delta cannot be formed (the same harness limitation runemaster-power-engraving works around)."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "barbarian80",
+      "race": 11,
+      "class": 12,
+      "level": 80
+    },
+    {
+      "id": "warrior80",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "paladin80",
+      "race": 1,
+      "class": 2,
+      "level": 80
+    },
+    {
+      "id": "barbarian60",
+      "race": 11,
+      "class": 12,
+      "level": 60
+    },
+    {
+      "id": "warrior60",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and class synchronisation settle",
+      "ms": 4000
+    },
+    {
+      "action": "snapshot",
+      "actor": "barbarian80",
+      "metric": "combat_rating",
+      "rating": 17,
+      "save_as": "b80_rating"
+    },
+    {
+      "action": "snapshot",
+      "actor": "barbarian80",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "save_as": "b80_attack"
+    },
+    {
+      "action": "snapshot",
+      "actor": "barbarian80",
+      "metric": "cast_speed_multiplier",
+      "save_as": "b80_cast"
+    },
+    {
+      "action": "snapshot",
+      "actor": "warrior80",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "save_as": "w80_attack"
+    },
+    {
+      "action": "snapshot",
+      "actor": "warrior80",
+      "metric": "cast_speed_multiplier",
+      "save_as": "w80_cast"
+    },
+    {
+      "action": "snapshot",
+      "actor": "paladin80",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "save_as": "p80_attack"
+    },
+    {
+      "action": "snapshot",
+      "actor": "barbarian60",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "save_as": "b60_attack"
+    },
+    {
+      "action": "snapshot",
+      "actor": "barbarian60",
+      "metric": "cast_speed_multiplier",
+      "save_as": "b60_cast"
+    },
+    {
+      "action": "snapshot",
+      "actor": "warrior60",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "save_as": "w60_attack"
+    },
+    {
+      "action": "set_aura",
+      "actor": "barbarian80",
+      "spell": 10033,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "warrior80",
+      "spell": 10033,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "paladin80",
+      "spell": 10033,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "barbarian60",
+      "spell": 10033,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "warrior60",
+      "spell": 10033,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the fixture adds 100 melee haste rating",
+      "actor": "barbarian80",
+      "metric": "combat_rating",
+      "rating": 17,
+      "relative_to": "b80_rating",
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Level 80 Barbarian: 100 melee haste rating is 3.965% (scalar 1.3)",
+      "actor": "barbarian80",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "ratio_to": "b80_attack",
+      "min": 0.9605,
+      "max": 0.9633
+    },
+    {
+      "action": "assert",
+      "label": "Level 80 Paladin: the same 1.3 melee haste scalar as the custom class",
+      "actor": "paladin80",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "ratio_to": "p80_attack",
+      "min": 0.9605,
+      "max": 0.9633
+    },
+    {
+      "action": "assert",
+      "label": "Level 80 Warrior: 100 melee haste rating is 3.050%",
+      "actor": "warrior80",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "ratio_to": "w80_attack",
+      "min": 0.969,
+      "max": 0.9718
+    },
+    {
+      "action": "assert",
+      "label": "Level 80 Barbarian: 100 spell haste rating is 3.050%",
+      "actor": "barbarian80",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "b80_cast",
+      "min": 0.969,
+      "max": 0.9718
+    },
+    {
+      "action": "assert",
+      "label": "Level 80 Warrior: 100 spell haste rating is 3.050%",
+      "actor": "warrior80",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "w80_cast",
+      "min": 0.969,
+      "max": 0.9718
+    },
+    {
+      "action": "assert",
+      "label": "Level 60 Barbarian: 100 melee haste rating is 13% (scalar 1.3)",
+      "actor": "barbarian60",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "ratio_to": "b60_attack",
+      "min": 0.8835,
+      "max": 0.8865
+    },
+    {
+      "action": "assert",
+      "label": "Level 60 Warrior: 100 melee haste rating is 10%",
+      "actor": "warrior60",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "ratio_to": "w60_attack",
+      "min": 0.9076,
+      "max": 0.9106
+    },
+    {
+      "action": "assert",
+      "label": "Level 60 Barbarian: 100 spell haste rating is 10%",
+      "actor": "barbarian60",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "b60_cast",
+      "min": 0.9076,
+      "max": 0.9106
+    }
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "name": "Guardian Advance: recast stomp and end-of-duration stomp (#408)",
+  "contract": "Advance 500170 (requires Line Formation 803130, 5 s duration, 90 s cooldown) says: after a short delay you can recast the ability to stomp the ground, dealing Physical damage to nearby enemies; if not recast, you stomp at the end of the duration. The stomp is Advance (Damage) 500673, an 8 yd enemy area. Once Advance has run at least 500 ms the button offers 500673; recasting it deals the stomp, ends Advance and restores the Advance button without leaving 500673 known. Letting Advance expire casts the stomp once and restores the button the same way. The learn/unlearn announcements #408 reports are recorded as snapshots only: their expected live presentation is unresolved.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "guardian", "race": 1, "class": 18, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "guardian", "entry": 36, "level": 80, "health": 100000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "guardian", "spell": 803130 },
+    { "action": "learn", "actor": "guardian", "spell": 500170 },
+    { "action": "set_power", "actor": "guardian", "power": 3, "value": 100 },
+    { "action": "cast", "actor": "guardian", "spell": 803130 },
+    { "action": "assert", "actor": "guardian", "metric": "aura", "spell": 803130, "equals": 1, "within_ms": 1000 },
+    {
+      "action": "assert", "label": "Advance offers no recast before it is used", "actor": "guardian",
+      "metric": "temporary_spell_replacement", "spell": 500170, "equals": 500170
+    },
+    {
+      "action": "snapshot", "actor": "guardian", "metric": "spell_cast_count", "spell": 500673,
+      "save_as": "stomps_before"
+    },
+    { "action": "cast", "actor": "guardian", "spell": 500170 },
+    { "action": "assert", "actor": "guardian", "metric": "aura", "spell": 500170, "equals": 1, "within_ms": 1000 },
+    { "action": "wait", "label": "Pass the recast delay and Advance's global cooldown", "ms": 1700 },
+    {
+      "action": "assert", "label": "Advance's button offers the stomp", "actor": "guardian",
+      "metric": "temporary_spell_replacement", "spell": 500170, "equals": 500673, "within_ms": 1000
+    },
+    { "action": "assert", "actor": "guardian", "metric": "knows_spell", "spell": 500673, "equals": 1 },
+    {
+      "action": "snapshot", "label": "Announced learns of the stomp after one Advance (#408 symptom)",
+      "actor": "guardian", "metric": "spellbook_learned_alerts", "spell": 500673, "save_as": "stomp_learn_alerts_first"
+    },
+    { "action": "cast", "actor": "guardian", "spell": 500673 },
+    {
+      "action": "assert", "label": "The recast stomps once", "actor": "guardian", "metric": "spell_cast_count",
+      "spell": 500673, "relative_to": "stomps_before", "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The stomp damages the nearby enemy", "actor": "guardian",
+      "metric": "spell_damage_count", "spell": 500673, "target": "golem", "min": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The recast ends Advance", "actor": "guardian", "metric": "aura", "spell": 500170,
+      "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The Advance button returns", "actor": "guardian",
+      "metric": "temporary_spell_replacement", "spell": 500170, "equals": 500170, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The stomp is not left in the spellbook", "actor": "guardian",
+      "metric": "knows_spell", "spell": 500673, "equals": 0, "within_ms": 1000
+    },
+    { "action": "wait", "label": "Ending by recast does not add an expiry stomp", "ms": 5000 },
+    {
+      "action": "assert", "actor": "guardian", "metric": "spell_cast_count", "spell": 500673,
+      "relative_to": "stomps_before", "equals": 1
+    },
+    { "action": "reset_cooldown", "actor": "guardian", "spell": 500170 },
+    {
+      "action": "snapshot", "actor": "guardian", "metric": "spell_cast_count", "spell": 500673,
+      "save_as": "stomps_before_expiry"
+    },
+    { "action": "cast", "actor": "guardian", "spell": 500170 },
+    { "action": "assert", "actor": "guardian", "metric": "aura", "spell": 500170, "equals": 1, "within_ms": 1000 },
+    {
+      "action": "assert", "label": "Advance expires after its duration", "actor": "guardian", "metric": "aura",
+      "spell": 500170, "equals": 0, "within_ms": 7000
+    },
+    {
+      "action": "assert", "label": "Expiry stomps once", "actor": "guardian", "metric": "spell_cast_count",
+      "spell": 500673, "relative_to": "stomps_before_expiry", "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The Advance button returns after expiry", "actor": "guardian",
+      "metric": "temporary_spell_replacement", "spell": 500170, "equals": 500170, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The stomp is not left in the spellbook after expiry", "actor": "guardian",
+      "metric": "knows_spell", "spell": 500673, "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "snapshot", "label": "Announced learns of the stomp after two Advances (#408 symptom)",
+      "actor": "guardian", "metric": "spellbook_learned_alerts", "spell": 500673,
+      "save_as": "stomp_learn_alerts_second"
+    },
+    {
+      "action": "snapshot", "label": "Button swap packets after two Advances (#408 symptom)", "actor": "guardian",
+      "metric": "spellbook_superseded_packets", "save_as": "swap_packets"
+    }
+  ]
+}

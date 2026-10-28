@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Animate: Frost Wyrm does not reuse Skeletal Mage's Command spell (#4536)",
+  "contract": "Animate: Frost Wyrm 805428 reads 'flies behind the Necromancer that blasts nearby enemies every 2 sec ... Frost damage', a periodic aura-driven attack (807339) with no Command effect of its own, unlike every other Raise/Animate line. AscensionNecromancerSummons.cpp's AttackSpell(entry) previously mapped creature 50177 (Frost Wyrm) to 801513, the exact same id as case 50075 (Skeletal Mage's own 'Command: Skeletal Mage'), so DoAction's default branch ('case 50177' fallthrough to 'default: if (uint32 ability = AttackSpell(entry)) Cast(me, target, ability)') cast 801513 on the Command target whenever Command: Undead (504868, which every non-stationary minion responds to) was used, even with no Skeletal Mage out. The fix removes the 50177 case so AttackSpell(50177) returns 0 and DoAction's default branch instead self-casts the harmless 504022, discriminated here by 801513's own SMSG_SPELL_GO (SpellVisual 1000228) never being sent by the Frost Wyrm.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "n", "entry": 36, "level": 60, "health": 1000000, "distance": 15 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and the Life Force aura settle", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 805428 },
+    { "action": "learn", "actor": "n", "spell": 504868 },
+    { "action": "cast", "label": "Animate: Frost Wyrm", "actor": "n", "spell": 805428 },
+    {
+      "action": "assert", "label": "SETUP: Frost Wyrm raised", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50177, "min": 1, "within_ms": 8000
+    },
+    { "action": "wait", "label": "Let it take formation", "ms": 2000 },
+    {
+      "action": "assert", "label": "CONTROL: no Command: Skeletal Mage cast yet", "actor": "n",
+      "metric": "spell_go_count", "spell": 801513, "entry": 50177, "equals": 0
+    },
+    {
+      "action": "cast", "label": "Command: Undead on the golem, only a Frost Wyrm is out", "actor": "n",
+      "spell": 504868, "target": "golem"
+    },
+    { "action": "wait", "label": "Allow any wrongly-triggered cast to arrive", "ms": 2000 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Frost Wyrm never casts Skeletal Mage's Command spell",
+      "actor": "n", "metric": "spell_go_count", "spell": 801513, "entry": 50177, "equals": 0
+    },
+    {
+      "action": "assert", "label": "The Frost Wyrm is still alive and out", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50177, "equals": 1
+    }
+  ]
+}

@@ -173,6 +173,7 @@ TEST_F(CustomClassAttackPowerTest, PreservesRogueMeleeAttackPowerAndOtherCompati
     EXPECT_EQ(rogue->GetInt32Value(UNIT_FIELD_ATTACK_POWER), 640);
     EXPECT_EQ(GetLegacyClassForCustomClass(CLASS_BARBARIAN), CLASS_ROGUE);
     EXPECT_EQ(GetLegacyClassForCustomClass(CLASS_SON_OF_ARUGAL), CLASS_DRUID);
+    EXPECT_EQ(GetLegacyClassForCustomClass(CLASS_HERO), CLASS_DRUID);
 }
 
 TEST_F(CustomClassAttackPowerTest, PreservesWarriorPriestAndDruidBaselines)
@@ -204,4 +205,13 @@ TEST_F(CustomClassAttackPowerTest, MeleeRecalculationDoesNotOverwriteRangedAttac
         player->UpdateAttackPowerAndDamage();
         EXPECT_EQ(player->GetInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER), rangedAttackPower);
     }
+}
+
+TEST(ClassProjectileAmmoTest, OnlyStockClassesUseProjectileAmmo)
+{
+    EXPECT_TRUE(UsesProjectileAmmo(CLASS_HUNTER));
+    EXPECT_TRUE(UsesProjectileAmmo(CLASS_WARRIOR));
+    EXPECT_FALSE(UsesProjectileAmmo(CLASS_HERO));
+    EXPECT_FALSE(UsesProjectileAmmo(CLASS_RANGER));
+    EXPECT_FALSE(UsesProjectileAmmo(CLASS_WITCH_HUNTER));
 }

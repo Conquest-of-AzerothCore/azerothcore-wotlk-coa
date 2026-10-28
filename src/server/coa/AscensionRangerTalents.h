@@ -6,6 +6,7 @@ class Player;
 class Spell;
 class SpellInfo;
 void HandleAscensionRangerStonemason(Spell* spell, Player* player);
+void HandleAscensionRangerPhoenixPlumes(Spell* spell, Player* player);
 void ApplyAscensionRangerTalentContracts(SpellInfo* info);
 void AddSC_AscensionRangerTalents();
 

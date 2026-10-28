@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Atmospheric Pressure can be learned and cast at the reporter's own level, and stays exclusive (#5218)",
+  "contract": "Issue #5218 (class 16 Stormbringer, lvl 23): 'I cant cast Atmospheric Pressure, but i can cast Crushing Pressure and Barometric Pressure both, i should only activate one Pressure spell.' stormbringer-5218-pressure-exclusivity.json already proves the stacking fix (#5640, spell_group 1170) at level 60; AscensionCustomClassData.h gates Barometric/Crushing/Atmospheric at levels 12/18/22, all below the reporter's level 23, and the trainer (rev_20260923_05_coa_class_trainer_core.sql, entry 900016) teaches all three there. This scenario repeats the castability and exclusivity checks at level 23 itself: Atmospheric Pressure must be learnable and must land a normal cast with no cast failure, and casting it must still remove whichever other Pressure aura is active, matching the already-fixed group 1170 stack rule.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "storm", "race": 1, "class": 16, "level": 23 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "storm", "spell": 803563 },
+    { "action": "learn", "actor": "storm", "spell": 803564 },
+    { "action": "learn", "actor": "storm", "spell": 803565 },
+    { "action": "assert", "label": "SETUP: Atmospheric Pressure is learnable at level 23", "actor": "storm", "metric": "knows_spell", "spell": 803565, "equals": 1 },
+
+    { "action": "set_power", "actor": "storm", "value": 200 },
+    { "action": "cast", "actor": "storm", "spell": 803563 },
+    { "action": "assert", "label": "SETUP: Barometric Pressure casts cleanly at level 23", "actor": "storm", "metric": "cast_failure", "spell": 803563, "equals": 0 },
+    { "action": "assert", "label": "SETUP: Barometric Pressure is applied", "actor": "storm", "metric": "aura", "spell": 803563, "equals": 1, "within_ms": 1500 },
+
+    { "action": "set_power", "actor": "storm", "value": 200 },
+    { "action": "cast", "actor": "storm", "spell": 803565 },
+    { "action": "assert", "label": "CONTRACT: Atmospheric Pressure casts cleanly at level 23, the reporter's own level", "actor": "storm", "metric": "cast_failure", "spell": 803565, "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: Atmospheric Pressure is applied", "actor": "storm", "metric": "aura", "spell": 803565, "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "CONTRACT: Atmospheric removes Barometric at level 23 too", "actor": "storm", "metric": "aura", "spell": 803563, "equals": 0 },
+
+    { "action": "set_power", "actor": "storm", "value": 200 },
+    { "action": "cast", "actor": "storm", "spell": 803564 },
+    { "action": "assert", "label": "SETUP: Crushing Pressure casts cleanly at level 23", "actor": "storm", "metric": "cast_failure", "spell": 803564, "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: Crushing removes Atmospheric at level 23", "actor": "storm", "metric": "aura", "spell": 803565, "equals": 0 },
+    { "action": "assert", "actor": "storm", "metric": "aura", "spell": 803564, "equals": 1 }
+  ]
+}

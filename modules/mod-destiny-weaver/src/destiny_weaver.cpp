@@ -10,13 +10,10 @@
 // restored here is the menu and the two settings behind it; the creatures and their gossip text
 // are in the module's SQL revision.
 //
-//   * Open World Scaling        - the quest levels this character reads and plays at. Creatures in
-//                                 the open world are scaled realm-wide by CoA
-//                                 (CoA.LevelScaling), because a creature carries one
-//                                 level that the server broadcasts to every client: it cannot be
-//                                 level 27 for one character and level 2 for the one beside them.
-//                                 A quest level, unlike a creature level, is sent to a single
-//                                 client, so it can genuinely follow this character's choice.
+//   * Open World Scaling        - the open-world creatures this character fights and the quest
+//                                 levels they read and play at. Each character is sent their own
+//                                 version of a creature (destiny_weaver_scaling.cpp), so a level-30
+//                                 and a level-20 character see one level-15 creature at 27 and 17.
 //   * Experience Bonus Control  - the bonus experience sources (potions, auras, recruit-a-friend)
 //                                 stop paying, so the character progresses at the base rate; the
 //                                 stripping itself is in destiny_weaver_xp.cpp.
@@ -60,12 +57,30 @@
 
 #include "AscensionCompatOpcodes.h"
 
+#include <atomic>
 #include <mutex>
 #include <optional>
 #include <unordered_map>
 
 namespace
 {
+    std::atomic<bool> g_moduleEnabled{true};
+    std::atomic<bool> g_levelScalingRealm{true};
+    std::atomic<bool> g_levelScalingDefault{true};
+    std::atomic<bool> g_experienceBonusControlRealm{true};
+
+    void LoadSwitches()
+    {
+        g_moduleEnabled.store(sConfigMgr->GetOption<bool>("DestinyWeaver.Enable", true),
+                              std::memory_order_relaxed);
+        g_levelScalingRealm.store(sConfigMgr->GetOption<bool>("DestinyWeaver.LevelScaling", true),
+                                  std::memory_order_relaxed);
+        g_levelScalingDefault.store(sConfigMgr->GetOption<bool>("DestinyWeaver.LevelScaling.Default", true),
+                                    std::memory_order_relaxed);
+        g_experienceBonusControlRealm.store(
+            sConfigMgr->GetOption<bool>("DestinyWeaver.ExperienceBonusControl", true), std::memory_order_relaxed);
+    }
+
     struct PendingScalingChoice
     {
         ObjectGuid PlayerGuid;
@@ -129,14 +144,14 @@ namespace
 
     bool ModuleEnabled()
     {
-        return sConfigMgr->GetOption<bool>("DestinyWeaver.Enable", true);
+        return g_moduleEnabled.load(std::memory_order_relaxed);
     }
 
     /// The character's own stored choice. While a character is grouped, the party's setting is the
     /// leader's instead - that is a separate question, asked in DestinyWeaver::LevelScalingEnabled.
     bool PersonalLevelScaling(Player* player)
     {
-        if (!ModuleEnabled() || !sConfigMgr->GetOption<bool>("DestinyWeaver.LevelScaling", true))
+        if (!ModuleEnabled() || !g_levelScalingRealm.load(std::memory_order_relaxed))
             return false;
 
         switch (StoredChoice(player, DestinyWeaver::SETTING_LEVEL_SCALING))
@@ -146,7 +161,7 @@ namespace
             case CHOICE_OFF:
                 return false;
             default:
-                return sConfigMgr->GetOption<bool>("DestinyWeaver.LevelScaling.Default", true);
+                return g_levelScalingDefault.load(std::memory_order_relaxed);
         }
     }
 
@@ -234,8 +249,7 @@ bool PersonalLevelScalingChoice(Player* player)
 
 bool ExperienceBonusControlEnabled(Player* player)
 {
-    if (!ModuleEnabled() ||
-        !sConfigMgr->GetOption<bool>("DestinyWeaver.ExperienceBonusControl", true))
+    if (!ModuleEnabled() || !g_experienceBonusControlRealm.load(std::memory_order_relaxed))
         return false;
 
     return StoredChoice(player, SETTING_EXPERIENCE_BONUS_CONTROL) == CHOICE_ON;
@@ -529,8 +543,27 @@ public:
     }
 };
 
+class destiny_weaver_config_script : public WorldScript
+{
+public:
+    destiny_weaver_config_script()
+        : WorldScript("destiny_weaver_config_script", { WORLDHOOK_ON_STARTUP, WORLDHOOK_ON_AFTER_CONFIG_LOAD }) { }
+
+    void OnAfterConfigLoad(bool /*reload*/) override
+    {
+        LoadSwitches();
+    }
+
+    void OnStartup() override
+    {
+        LoadSwitches();
+    }
+};
+
 void AddSC_destiny_weaver()
 {
+    LoadSwitches();
+
     // The opcode belongs to this module; the compat consumer hands over anything claimed here.
     AscensionCompatOpcodes::Claim(DestinyWeaver::CMSG_SET_LEVEL_SCALING,
                                   &DestinyWeaver::HandleClientLevelScalingPacket);
@@ -539,4 +572,5 @@ void AddSC_destiny_weaver()
     new destiny_weaver_choice_script();
     new destiny_weaver_group_script();
     new destiny_weaver_server_script();
+    new destiny_weaver_config_script();
 }

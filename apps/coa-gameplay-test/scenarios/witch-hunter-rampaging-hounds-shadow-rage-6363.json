@@ -1,0 +1,199 @@
+{
+  "schema": 1,
+  "name": "Rampaging Hounds cleave hits roll Shadow Rage on the cleaved enemy (#6363)",
+  "contract": [
+    "Rampaging Frenzy 562027 makes the Shadow Hound's auto attacks strike 1 additional nearby enemy, and Shadow Rage",
+    "804192 gives auto attacks a 50% chance to deal additional Shadow damage through 567570. The cleave strike is",
+    "part of that auto attack, so the cleaved enemy also rolls Shadow Rage. Cleave strikes are logged with the hound",
+    "as caster and Shadow Rage procs with the Witch Hunter as caster, which separates the two 567570 events. Three",
+    "Shadowblasts keep Shadow Rage up for about fifteen hound swings; at 50% per swing the chance of no proc on the",
+    "cleaved enemy is about 0.003%."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "primary",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 1,
+      "distance": 12,
+      "health": 1000000
+    },
+    {
+      "id": "cleaved",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 1,
+      "distance": 14,
+      "health": 1000000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 5011
+    },
+    {
+      "action": "add_item",
+      "actor": "hunter",
+      "item": 15807
+    },
+    {
+      "action": "equip",
+      "actor": "hunter",
+      "item": 15807,
+      "slot": 17
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 680264
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 801343
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 705455
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 801343
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_entry",
+      "equals": 50124,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 570726
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 562027,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "primary"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "attack",
+      "actor": "hunter",
+      "target": "primary",
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 567570,
+      "target": "cleaved",
+      "pet": true,
+      "min": 1,
+      "within_ms": 8000,
+      "label": "The hound's auto attacks cleave the second enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 9000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 567570,
+      "target": "primary",
+      "min": 1,
+      "label": "Shadow Rage procs on the hound's primary target"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 567570,
+      "target": "cleaved",
+      "min": 1,
+      "label": "Shadow Rage procs on the enemy struck by the cleave"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Searing Flames raises Lava Shard's spell power coefficient (#1904)",
-  "contract": "#1904: Searing Flames 503863 is ADD_PCT_MODIFIER (aura 108) on SPELLMOD_BONUS_MULTIPLIER (misc 24), base 29 -> +30%, class mask {0x10, 0, 0} = Lava Shard 803950 and 503231-503239. Lava Shard's spell_bonus_data direct_bonus is 0, so the stock bonus code never runs the modifier; the 0.95 spell power coefficient is added to effect 0's base value by the module (PyromancerCoefficients rows {803950,0,0.95} and {503231..503239,0,0.95}). The fix runs the caster's BONUS_MULTIPLIER modifier on that coefficient, so with 503863 the spell power term is 0.95 x 1.30 = 1.235 of spell power. spell_effect_value returns SpellEffectInfo::CalcValue for the caster including the module hook. Drink Fel Infusion 44505 supplies the spell power. The term is isolated as value minus the value with no spell power (v0), and the assertion is the ratio of the talented term to the untalented one, 1.30, so no assumption on the exact spell power or the base points is needed. Fails before the fix (ratio 1.00).",
+  "contract": "#1904: Searing Flames 503863 is ADD_PCT_MODIFIER (aura 108) on SPELLMOD_BONUS_MULTIPLIER (misc 24), base 29 -> +30%, class mask {0x10, 0, 0} = Lava Shard 803950 and 503231-503239. Lava Shard's spell_bonus_data direct_bonus is 0, so the stock bonus code never runs the modifier; the 0.95 spell power coefficient is added to effect 0's base value by the module (PyromancerCoefficients rows {803950,0,0.95} and {503231..503239,0,0.95}). The fix runs the caster's BONUS_MULTIPLIER modifier on that coefficient, so with 503863 the spell power term is 0.95 x 1.30 = 1.235 of spell power. spell_effect_value returns SpellEffectInfo::CalcValue for the caster including the module hook. Drink Fel Infusion 44505 supplies the spell power. The term is isolated as value minus the value with no spell power (v0), and the assertion is the ratio of the talented term to the untalented one, 1.30, so no assumption on the exact spell power or the base points is needed. Every spell_effect_value sample rolls the effect's die sides: 1..7 for 803950 keeps its ratio within 1.30 +/- 0.005, while 503239's 1..44 spreads its ratio over 1.25..1.35 at 2000 spell power, so the higher rank's bounds cover that roll and still exclude 1.00. Fails before the fix (ratio 1.00).",
   "timeout_ms": 60000,
   "players": [
     {
@@ -105,8 +105,8 @@
       "effect": 0,
       "relative_to": "v0_rank",
       "ratio_to": "d1_rank",
-      "min": 1.29,
-      "max": 1.31
+      "min": 1.24,
+      "max": 1.36
     }
   ]
 }

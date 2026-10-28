@@ -1158,9 +1158,10 @@ TEST_F(ThreatManagerIntegrationTest,
         if (ref->GetVictim() == _creatureB)
             EXPECT_TRUE(ref->IsOnline());
 
-    // Make B immune to physical damage (A's melee school is SPELL_SCHOOL_MASK_NORMAL)
+    // Make B immune to all damage, including A's melee school SPELL_SCHOOL_MASK_NORMAL
+    // (CoA ignores partial school damage immunity on NPCs)
     // This triggers ShouldBeSuppressed via IsImmunedToDamage
-    _creatureB->ApplySpellImmune(1, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, true);
+    _creatureB->ApplySpellImmune(1, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
 
     // EvaluateSuppressed checks each ref in _threatenedByMe
     _creatureB->TestGetThreatMgr().EvaluateSuppressed();
@@ -1181,7 +1182,7 @@ TEST_F(ThreatManagerIntegrationTest,
         _creatureA->TestGetThreatMgr().GetThreat(_creatureB), 100.0f);
 
     // Cleanup immunity
-    _creatureB->ApplySpellImmune(1, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, false);
+    _creatureB->ApplySpellImmune(1, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
 }
 
 TEST_F(ThreatManagerIntegrationTest,
@@ -1190,7 +1191,7 @@ TEST_F(ThreatManagerIntegrationTest,
     _creatureA->TestGetThreatMgr().AddThreat(_creatureB, 100.0f);
 
     // Apply immunity to suppress
-    _creatureB->ApplySpellImmune(1, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, true);
+    _creatureB->ApplySpellImmune(1, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
     _creatureB->TestGetThreatMgr().EvaluateSuppressed();
 
     // Verify suppressed
@@ -1199,7 +1200,7 @@ TEST_F(ThreatManagerIntegrationTest,
             EXPECT_TRUE(ref->IsSuppressed());
 
     // Remove immunity
-    _creatureB->ApplySpellImmune(1, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, false);
+    _creatureB->ApplySpellImmune(1, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
 
     // EvaluateSuppressed with canExpire=false should NOT restore to online
     _creatureB->TestGetThreatMgr().EvaluateSuppressed(false);
@@ -1229,7 +1230,7 @@ TEST_F(ThreatManagerIntegrationTest,
         _creatureB, ThreatReference::TAUNT_STATE_TAUNT);
 
     // Apply damage immunity — normally would suppress
-    _creatureB->ApplySpellImmune(1, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, true);
+    _creatureB->ApplySpellImmune(1, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
     _creatureB->TestGetThreatMgr().EvaluateSuppressed();
 
     // Taunted victims should never be suppressed (ShouldBeSuppressed returns false)
@@ -1240,7 +1241,7 @@ TEST_F(ThreatManagerIntegrationTest,
     // Cleanup
     _creatureA->TestGetThreatMgr().SetTauntStateForTesting(
         _creatureB, ThreatReference::TAUNT_STATE_NONE);
-    _creatureB->ApplySpellImmune(1, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, false);
+    _creatureB->ApplySpellImmune(1, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
 }
 
 TEST_F(ThreatManagerIntegrationTest,
@@ -1255,7 +1256,7 @@ TEST_F(ThreatManagerIntegrationTest,
     creatureC->TestGetThreatMgr().AddThreat(_creatureB, 200.0f);
 
     // Apply immunity on B
-    _creatureB->ApplySpellImmune(1, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, true);
+    _creatureB->ApplySpellImmune(1, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
     _creatureB->TestGetThreatMgr().EvaluateSuppressed();
 
     // Both refs should be suppressed
@@ -1267,7 +1268,7 @@ TEST_F(ThreatManagerIntegrationTest,
             EXPECT_TRUE(ref->IsSuppressed());
 
     // Remove immunity and expire
-    _creatureB->ApplySpellImmune(1, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, false);
+    _creatureB->ApplySpellImmune(1, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
     _creatureB->TestGetThreatMgr().EvaluateSuppressed(true);
 
     // Both should be online again
@@ -2068,7 +2069,7 @@ TEST_F(ThreatManagerIntegrationTest,
     _creatureA->TestGetThreatMgr().AddThreat(_creatureB, 100.0f);
 
     // Make B immune → suppress B's ref on A's list
-    _creatureB->ApplySpellImmune(1, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, true);
+    _creatureB->ApplySpellImmune(1, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
     _creatureB->TestGetThreatMgr().EvaluateSuppressed();
 
     // Verify B is SUPPRESSED
@@ -2077,7 +2078,7 @@ TEST_F(ThreatManagerIntegrationTest,
             EXPECT_TRUE(ref->IsSuppressed());
 
     // Remove immunity (but do NOT call EvaluateSuppressed)
-    _creatureB->ApplySpellImmune(1, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, false);
+    _creatureB->ApplySpellImmune(1, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
 
     // Add more threat — the AddThreat path should detect that the ref
     // no longer ShouldBeSuppressed() and transition it to ONLINE
@@ -2103,7 +2104,7 @@ TEST_F(ThreatManagerIntegrationTest,
     _creatureA->TestGetThreatMgr().AddThreat(_creatureB, 100.0f);
 
     // Make B immune → suppress
-    _creatureB->ApplySpellImmune(1, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, true);
+    _creatureB->ApplySpellImmune(1, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
     _creatureB->TestGetThreatMgr().EvaluateSuppressed();
 
     // Add more threat while B is still immune — should stay SUPPRESSED
@@ -2118,7 +2119,7 @@ TEST_F(ThreatManagerIntegrationTest,
     EXPECT_FLOAT_EQ(
         _creatureA->TestGetThreatMgr().GetThreat(_creatureB), 100.0f);
 
-    _creatureB->ApplySpellImmune(1, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, false);
+    _creatureB->ApplySpellImmune(1, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
 }
 
 // ============================================================================

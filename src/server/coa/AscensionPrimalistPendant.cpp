@@ -3,6 +3,7 @@
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "SpellAuraEffects.h"
+#include "SpellMgr.h"
 #include "SpellScript.h"
 
 #include <algorithm>
@@ -25,7 +26,8 @@ class aura_ascension_earthmother_pendant : public AuraScript
         DamageInfo const* damage = event.GetDamageInfo();
         return owner->IsPlayer() && owner->getClass() == CLASS_WILDWALKER && owner->IsAlive() &&
             GetCaster() == owner && event.GetActor() == owner && victim && victim != owner &&
-            !owner->IsFriendlyTo(victim) && damage && damage->GetDamage();
+            !owner->IsFriendlyTo(victim) && damage && damage->GetDamage() &&
+            !(event.GetTypeMask() & PROC_FLAG_DONE_PERIODIC);
     }
 
     void Heal(AuraEffect const* effect, ProcEventInfo& event)

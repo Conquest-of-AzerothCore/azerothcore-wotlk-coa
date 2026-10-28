@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "A level 16 Sun Cleric alchemist learns Mixology at Alchemy 50 (#9037)",
+  "contract": "#9037 reports a level 16 Sun Cleric at the Goldshire inn who sees Mixology (53042) offered but cannot learn it. Mixology is SkillLineAbility 7825 on Alchemy (171) with no class or race mask; Alchemist Mallory (1215, trainer 67) and the Book of Artisans (57500, trainer 200001) list it for 10000 copper at Alchemy 50 with no level requirement. Below skill 50 Mallory must show the row as unavailable, the Book of Artisans, which lists only trainable rows, must leave it out, and the purchase must be refused. At skill 50 the Book of Artisans must show it as available and teach it, the server and the client must know the spell, and both windows must then read it as known.",
+  "timeout_ms": 180000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 16 }
+  ],
+  "location": { "map": 0, "x": -9484.92, "y": -19.8784, "z": 56.9625, "o": 0 },
+  "creatures": [
+    { "id": "mallory", "owner": "cleric", "entry": 1215, "distance": 2, "faction": 35 },
+    { "id": "book", "owner": "cleric", "entry": 57500, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "money", "actor": "cleric", "copper": 100000 },
+    { "action": "trainer_buy", "actor": "cleric", "target": "mallory", "spell": 2275, "label": "learn Apprentice Alchemy" },
+    { "action": "assert", "actor": "cleric", "metric": "knows_spell", "spell": 2259, "equals": 1, "label": "Alchemy is known" },
+    { "action": "set_skill", "actor": "cleric", "skill": 171, "value": 49, "maximum": 75 },
+    { "action": "gossip_hello", "actor": "cleric", "target": "mallory" },
+    { "action": "gossip_select", "actor": "cleric", "option": 0, "label": "Train me." },
+    { "action": "assert", "actor": "cleric", "metric": "trainer_window_state", "spell": 53042, "equals": 1, "label": "Mallory shows Mixology as unavailable at skill 49" },
+    { "action": "gossip_hello", "actor": "cleric", "target": "book" },
+    { "action": "gossip_select", "actor": "cleric", "option": 0 },
+    { "action": "assert", "actor": "cleric", "metric": "trainer_window_state", "spell": 53042, "equals": -1, "label": "the Book of Artisans leaves Mixology out at skill 49" },
+    { "action": "trainer_buy", "actor": "cleric", "target": "book", "spell": 53042, "label": "try Mixology at skill 49" },
+    { "action": "assert", "actor": "cleric", "metric": "spellbook_buy_failed", "spell": 53042, "equals": 1 },
+    { "action": "assert", "actor": "cleric", "metric": "knows_spell", "spell": 53042, "equals": 0, "label": "Mixology is not learned at skill 49" },
+    { "action": "set_skill", "actor": "cleric", "skill": 171, "value": 50, "maximum": 75 },
+    { "action": "gossip_hello", "actor": "cleric", "target": "book" },
+    { "action": "gossip_select", "actor": "cleric", "option": 0 },
+    { "action": "assert", "actor": "cleric", "metric": "trainer_window_state", "spell": 53042, "equals": 0, "label": "the Book of Artisans shows Mixology as available at skill 50" },
+    { "action": "trainer_buy", "actor": "cleric", "target": "book", "spell": 53042, "label": "buy Mixology from the Book of Artisans" },
+    { "action": "assert", "actor": "cleric", "metric": "spellbook_buy_succeeded", "spell": 53042, "equals": 1 },
+    { "action": "assert", "actor": "cleric", "metric": "knows_spell", "spell": 53042, "equals": 1, "label": "the server knows Mixology" },
+    { "action": "assert", "actor": "cleric", "metric": "client_knows_spell", "spell": 53042, "equals": 1, "label": "the client was told about Mixology" },
+    { "action": "assert", "actor": "cleric", "metric": "trainer_window_state", "spell": 53042, "equals": 2, "label": "the republished book window reads known" },
+    { "action": "gossip_hello", "actor": "cleric", "target": "mallory" },
+    { "action": "gossip_select", "actor": "cleric", "option": 0, "label": "Train me." },
+    { "action": "assert", "actor": "cleric", "metric": "trainer_window_state", "spell": 53042, "equals": 2, "label": "Mallory reads Mixology as known" }
+  ]
+}

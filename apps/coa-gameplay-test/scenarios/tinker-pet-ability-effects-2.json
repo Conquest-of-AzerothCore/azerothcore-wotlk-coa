@@ -1,0 +1,1275 @@
+{
+  "schema": 1,
+  "name": "Tinker pet abilities: the other family abilities do what their tooltips say (#4741, #5412)",
+  "contract": [
+    "Spell.dbc descriptions of the Tinker pet abilities taught by #5412, cast by the pet through the native",
+    "pet cast handler. Mechano-Bear: Crash & Thrash 578340 damages and slows nearby enemies by 35%;",
+    "Mechano-Growl 806171 taunts nearby enemies and gives the bear 806199 (+100% threat). Rusthound: Manabite",
+    "578254 burns mana (POWER_BURN, Fire, 0.5 damage per mana); Rustbite 712423 deals Nature damage; Seek",
+    "581311 raises movement speed by 80%; Meltdown 581313 interrupts the cast, locks that school and lowers",
+    "Fire resistance and healing received by 20%. ZIGGI-6K: Minicopter-Z 801626 heals a party member and",
+    "pulls them to ZIGGI-6K; Recharge 808010 channels mana every 0.5 s with 50% less damage taken. Scrapmaw:",
+    "Drill Smash 806173 stuns and deals damage every second; Flamethrower 806168 burns through 807385 every",
+    "second; Missile Swarm 807386 hits nearby enemies through 807532/807387; Flame Jets 850023 leaves 850024",
+    "(Fire damage) and 850026 (slow) at the target. Clockwork Assistant: Capacity Expansion 578122 restores",
+    "20% of the Tinker's maximum mana; Throw Wrench 574359 deals damage after a 2 s cast; Crowd Controller",
+    "578123 disarms for 8 s; Surprise Dynamite 578124 knocks enemies back at the target location. The",
+    "original accuracy fixture aura 984948 contains only +1000 melee/ranged hit and +100000 expertise. Supply",
+    "and assert it on the pets whose ordinary physical casts must land while checking their ability effects;",
+    "preserve their damage, healing, mana, cooldown, stun and channel contracts. Owner ratings are not",
+    "substituted for pet hit.",
+    "Clockwork Assistant Crowd Controller 578123 uses the original magic hit table. Its pet gets the original",
+    "Krosh Hit Buff 2132158, whose sole aura adds 100 percentage points of spell hit. Assert that native amount",
+    "before normal pet casts; keep the disarm and its original eight-second expiry unchanged.",
+    "Krosh Hit Buff 2132158 uses SpellDuration.dbc index 1 (ten seconds). Earlier knockback, mana and Wrench checks can consume that duration. Renew and assert the unchanged native accuracy immediately before Crowd Controller; retain the normal cast, disarm and eight-second expiry checks."
+  ],
+  "timeout_ms": 240000,
+  "players": [
+    {
+      "id": "bear",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    },
+    {
+      "id": "hound",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    },
+    {
+      "id": "ziggi",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    },
+    {
+      "id": "scrap",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    },
+    {
+      "id": "clock",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    },
+    {
+      "id": "friend",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "orc",
+      "race": 2,
+      "class": 9,
+      "level": 70
+    }
+  ],
+  "creatures": [
+    {
+      "id": "g_bear",
+      "owner": "bear",
+      "entry": 36,
+      "level": 70,
+      "distance": 5,
+      "health": 1000000
+    },
+    {
+      "id": "wizard",
+      "owner": "hound",
+      "entry": 474,
+      "level": 70,
+      "distance": 2,
+      "health": 1000000
+    },
+    {
+      "id": "g_scrap",
+      "owner": "scrap",
+      "entry": 36,
+      "level": 70,
+      "distance": 5,
+      "health": 1000000
+    },
+    {
+      "id": "g_clock",
+      "owner": "clock",
+      "entry": 36,
+      "level": 70,
+      "distance": 5,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 530,
+    "x": 7633.86,
+    "y": -6810.22,
+    "z": 79.5987,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Build: Mechano-Bear",
+      "actor": "bear",
+      "spell": 803405
+    },
+    {
+      "action": "cast",
+      "label": "Build: Mechano-Bear",
+      "actor": "bear",
+      "spell": 803405
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Mechano-Bear is built",
+      "actor": "bear",
+      "metric": "pet_entry",
+      "equals": 60671,
+      "within_ms": 9000
+    },
+    {
+      "action": "wait",
+      "label": "Mechano-Bear settles beside the Tinker",
+      "ms": 2000
+    },
+    {
+      "action": "attack",
+      "label": "Mechano-Bear attacks",
+      "actor": "bear",
+      "target": "g_bear",
+      "pet": true
+    },
+    {
+      "action": "wait",
+      "label": "Mechano-Bear reaches melee range",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "save_as": "golem_speed",
+      "actor": "g_bear",
+      "metric": "run_speed_rate"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Mechano-Bear knows Crash & Thrash",
+      "actor": "bear",
+      "metric": "pet_knows_spell",
+      "spell": 578340,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast_charm",
+      "label": "Mechano-Bear casts Crash & Thrash",
+      "actor": "bear",
+      "spell": 578340,
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "label": "The pet cast is accepted",
+      "actor": "bear",
+      "metric": "cast_failure",
+      "spell": 578340,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Crash & Thrash hits the nearby enemy",
+      "actor": "bear",
+      "metric": "spell_damage_total",
+      "spell": 578340,
+      "target": "g_bear",
+      "pet": true,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Crash & Thrash slows the enemy",
+      "actor": "g_bear",
+      "metric": "aura",
+      "spell": 578340,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Crash & Thrash slows movement speed by 35%",
+      "actor": "g_bear",
+      "metric": "run_speed_rate",
+      "ratio_to": "golem_speed",
+      "min": 0.64,
+      "max": 0.66
+    },
+    {
+      "action": "wait",
+      "label": "Pet global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Mechano-Bear knows Mechano-Growl",
+      "actor": "bear",
+      "metric": "pet_knows_spell",
+      "spell": 806171,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast_charm",
+      "label": "Mechano-Bear casts Mechano-Growl",
+      "actor": "bear",
+      "spell": 806171,
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "label": "The pet cast is accepted",
+      "actor": "bear",
+      "metric": "cast_failure",
+      "spell": 806171,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mechano-Growl taunts the nearby enemy",
+      "actor": "g_bear",
+      "metric": "aura",
+      "spell": 806171,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Mechano-Growl raises the Mechano-Bear's threat",
+      "actor": "bear",
+      "metric": "pet_aura_stacks",
+      "spell": 806199,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Build: Rusthound",
+      "actor": "hound",
+      "spell": 803437
+    },
+    {
+      "action": "cast",
+      "label": "Build: Rusthound",
+      "actor": "hound",
+      "spell": 803437
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Rusthound is built",
+      "actor": "hound",
+      "metric": "pet_entry",
+      "equals": 60672,
+      "within_ms": 9000
+    },
+    {
+      "action": "set_aura",
+      "actor": "hound",
+      "spell": 984948,
+      "pet": true,
+      "stacks": 1,
+      "label": "Supply the original pet hit and expertise fixture"
+    },
+    {
+      "action": "assert",
+      "actor": "hound",
+      "metric": "pet_aura_amount",
+      "spell": 984948,
+      "effect": 0,
+      "equals": 1000,
+      "label": "The pet has the original melee and ranged hit prerequisite"
+    },
+    {
+      "action": "assert",
+      "actor": "hound",
+      "metric": "pet_aura_amount",
+      "spell": 984948,
+      "effect": 1,
+      "equals": 100000,
+      "label": "The pet has the original expertise prerequisite"
+    },
+    {
+      "action": "wait",
+      "label": "Rusthound settles beside the Tinker",
+      "ms": 2000
+    },
+    {
+      "action": "attack",
+      "label": "Rusthound attacks",
+      "actor": "hound",
+      "target": "wizard",
+      "pet": true
+    },
+    {
+      "action": "wait",
+      "label": "Rusthound reaches melee range",
+      "ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Rusthound settles into melee with the caster",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "save_as": "wizard_mana",
+      "actor": "wizard",
+      "metric": "power"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the enemy has mana",
+      "actor": "wizard",
+      "metric": "power",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Rusthound knows Manabite",
+      "actor": "hound",
+      "metric": "pet_knows_spell",
+      "spell": 578254,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast_charm",
+      "label": "Rusthound casts Manabite",
+      "actor": "hound",
+      "spell": 578254,
+      "pet": true,
+      "target": "wizard"
+    },
+    {
+      "action": "assert",
+      "label": "The pet cast is accepted",
+      "actor": "hound",
+      "metric": "cast_failure",
+      "spell": 578254,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Manabite burns the enemy's mana as Fire damage",
+      "actor": "hound",
+      "metric": "spell_damage_total",
+      "spell": 578254,
+      "target": "wizard",
+      "pet": true,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Manabite destroys the enemy's mana",
+      "actor": "wizard",
+      "metric": "power",
+      "relative_to": "wizard_mana",
+      "max": -1
+    },
+    {
+      "action": "wait",
+      "label": "Pet global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Rusthound knows Rustbite",
+      "actor": "hound",
+      "metric": "pet_knows_spell",
+      "spell": 712423,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast_charm",
+      "label": "Rusthound casts Rustbite",
+      "actor": "hound",
+      "spell": 712423,
+      "pet": true,
+      "target": "wizard"
+    },
+    {
+      "action": "assert",
+      "label": "The pet cast is accepted",
+      "actor": "hound",
+      "metric": "cast_failure",
+      "spell": 712423,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Rustbite deals Nature damage",
+      "actor": "hound",
+      "metric": "spell_damage_total",
+      "spell": 712423,
+      "target": "wizard",
+      "pet": true,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Pet global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "snapshot",
+      "save_as": "hound_speed",
+      "actor": "hound",
+      "metric": "pet_run_speed_rate"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Rusthound knows Seek",
+      "actor": "hound",
+      "metric": "pet_knows_spell",
+      "spell": 581311,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast_charm",
+      "label": "Rusthound casts Seek",
+      "actor": "hound",
+      "spell": 581311,
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "label": "The pet cast is accepted",
+      "actor": "hound",
+      "metric": "cast_failure",
+      "spell": 581311,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Seek is up on the Rusthound",
+      "actor": "hound",
+      "metric": "pet_aura_stacks",
+      "spell": 581311,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Seek raises movement speed by 80%",
+      "actor": "hound",
+      "metric": "pet_run_speed_rate",
+      "ratio_to": "hound_speed",
+      "min": 1.79,
+      "max": 1.81
+    },
+    {
+      "action": "wait",
+      "label": "Pet global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "pvp",
+      "label": "The Tinker flags for PvP",
+      "actor": "hound",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "label": "The warlock flags for PvP",
+      "actor": "orc",
+      "enabled": true
+    },
+    {
+      "action": "attack",
+      "label": "Rusthound attacks",
+      "actor": "hound",
+      "target": "orc",
+      "pet": true
+    },
+    {
+      "action": "wait",
+      "label": "Rusthound reaches melee range",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Summon Imp",
+      "actor": "orc",
+      "spell": 688
+    },
+    {
+      "action": "cast",
+      "label": "The warlock starts a 10 second Shadow cast",
+      "actor": "orc",
+      "spell": 688
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the warlock is casting",
+      "actor": "orc",
+      "metric": "casting",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Rusthound knows Meltdown",
+      "actor": "hound",
+      "metric": "pet_knows_spell",
+      "spell": 581313,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast_charm",
+      "label": "Rusthound casts Meltdown",
+      "actor": "hound",
+      "spell": 581313,
+      "pet": true,
+      "target": "orc"
+    },
+    {
+      "action": "assert",
+      "label": "The pet cast is accepted",
+      "actor": "hound",
+      "metric": "cast_failure",
+      "spell": 581313,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Meltdown interrupts the cast",
+      "actor": "orc",
+      "metric": "casting",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Meltdown is on the warlock",
+      "actor": "orc",
+      "metric": "aura",
+      "spell": 581313,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Meltdown lowers Fire resistance by 20%",
+      "actor": "orc",
+      "metric": "aura_amount",
+      "spell": 581313,
+      "effect": 1,
+      "equals": -20
+    },
+    {
+      "action": "assert",
+      "label": "Meltdown lowers healing received by 20%",
+      "actor": "orc",
+      "metric": "aura_amount",
+      "spell": 581313,
+      "effect": 2,
+      "equals": -20
+    },
+    {
+      "action": "cast",
+      "label": "The warlock tries the Shadow school again",
+      "actor": "orc",
+      "spell": 688
+    },
+    {
+      "action": "assert",
+      "label": "Meltdown locks out the interrupted school",
+      "actor": "orc",
+      "metric": "cast_failure",
+      "spell": 688,
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "learn",
+      "label": "Build: ZIGGI-6K",
+      "actor": "ziggi",
+      "spell": 524840
+    },
+    {
+      "action": "cast",
+      "label": "Build: ZIGGI-6K",
+      "actor": "ziggi",
+      "spell": 524840
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: ZIGGI-6K is built",
+      "actor": "ziggi",
+      "metric": "pet_entry",
+      "equals": 500481,
+      "within_ms": 9000
+    },
+    {
+      "action": "wait",
+      "label": "ZIGGI-6K settles beside the Tinker",
+      "ms": 2000
+    },
+    {
+      "action": "group",
+      "label": "The ally joins the Tinker's party",
+      "actor": "ziggi",
+      "target": "friend"
+    },
+    {
+      "action": "teleport",
+      "label": "The ally stands 12 yd away",
+      "actor": "friend",
+      "map": 530,
+      "x": 7621.86,
+      "y": -6810.22,
+      "z": 80.6
+    },
+    {
+      "action": "wait",
+      "label": "The ally lands",
+      "ms": 1500
+    },
+    {
+      "action": "set_health",
+      "label": "The ally is wounded",
+      "actor": "friend",
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally is away from ZIGGI-6K",
+      "actor": "friend",
+      "metric": "distance",
+      "target": "ziggi",
+      "min": 8
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: ZIGGI-6K knows Minicopter-Z",
+      "actor": "ziggi",
+      "metric": "pet_knows_spell",
+      "spell": 801626,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast_charm",
+      "label": "ZIGGI-6K casts Minicopter-Z",
+      "actor": "ziggi",
+      "spell": 801626,
+      "pet": true,
+      "target": "friend"
+    },
+    {
+      "action": "assert",
+      "label": "The pet cast is accepted",
+      "actor": "ziggi",
+      "metric": "cast_failure",
+      "spell": 801626,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Minicopter-Z heals the ally",
+      "actor": "ziggi",
+      "metric": "spell_heal_total",
+      "spell": 801626,
+      "target": "friend",
+      "pet": true,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Minicopter-Z pulls the ally to ZIGGI-6K",
+      "actor": "friend",
+      "metric": "distance",
+      "target": "ziggi",
+      "max": 5,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "label": "Pet global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "label": "ZIGGI-6K is out of mana",
+      "actor": "ziggi",
+      "value": 0,
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: ZIGGI-6K knows Recharge",
+      "actor": "ziggi",
+      "metric": "pet_knows_spell",
+      "spell": 808010,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast_charm",
+      "label": "ZIGGI-6K casts Recharge",
+      "actor": "ziggi",
+      "spell": 808010,
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "label": "The pet cast is accepted",
+      "actor": "ziggi",
+      "metric": "cast_failure",
+      "spell": 808010,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Recharge is channelled on ZIGGI-6K",
+      "actor": "ziggi",
+      "metric": "pet_aura_stacks",
+      "spell": 808010,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Recharge halves the damage ZIGGI-6K takes",
+      "actor": "ziggi",
+      "metric": "pet_aura_amount",
+      "spell": 808010,
+      "effect": 2,
+      "equals": -50
+    },
+    {
+      "action": "assert",
+      "label": "Recharge restores ZIGGI-6K's mana every 0.5 seconds",
+      "actor": "ziggi",
+      "metric": "spell_energize_count",
+      "spell": 808010,
+      "pet": true,
+      "target": "ziggi",
+      "target_pet": true,
+      "min": 3,
+      "within_ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "ZIGGI-6K regains mana",
+      "actor": "ziggi",
+      "metric": "pet_power",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "label": "Build: Scrapmaw",
+      "actor": "scrap",
+      "spell": 500242
+    },
+    {
+      "action": "cast",
+      "label": "Build: Scrapmaw",
+      "actor": "scrap",
+      "spell": 500242
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Scrapmaw is built",
+      "actor": "scrap",
+      "metric": "pet_entry",
+      "equals": 50048,
+      "within_ms": 9000
+    },
+    {
+      "action": "set_aura",
+      "actor": "scrap",
+      "spell": 984948,
+      "pet": true,
+      "stacks": 1,
+      "label": "Supply the original pet hit and expertise fixture"
+    },
+    {
+      "action": "assert",
+      "actor": "scrap",
+      "metric": "pet_aura_amount",
+      "spell": 984948,
+      "effect": 0,
+      "equals": 1000,
+      "label": "The pet has the original melee and ranged hit prerequisite"
+    },
+    {
+      "action": "assert",
+      "actor": "scrap",
+      "metric": "pet_aura_amount",
+      "spell": 984948,
+      "effect": 1,
+      "equals": 100000,
+      "label": "The pet has the original expertise prerequisite"
+    },
+    {
+      "action": "wait",
+      "label": "Scrapmaw settles beside the Tinker",
+      "ms": 2000
+    },
+    {
+      "action": "attack",
+      "label": "Scrapmaw attacks",
+      "actor": "scrap",
+      "target": "g_scrap",
+      "pet": true
+    },
+    {
+      "action": "wait",
+      "label": "Scrapmaw reaches melee range",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Scrapmaw knows Drill Smash",
+      "actor": "scrap",
+      "metric": "pet_knows_spell",
+      "spell": 806173,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast_charm",
+      "label": "Scrapmaw casts Drill Smash",
+      "actor": "scrap",
+      "spell": 806173,
+      "pet": true,
+      "target": "g_scrap"
+    },
+    {
+      "action": "assert",
+      "label": "The pet cast is accepted",
+      "actor": "scrap",
+      "metric": "cast_failure",
+      "spell": 806173,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Drill Smash stuns the enemy",
+      "actor": "g_scrap",
+      "metric": "stunned",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Drill Smash drills every second",
+      "actor": "scrap",
+      "metric": "spell_damage_count",
+      "spell": 806173,
+      "target": "g_scrap",
+      "pet": true,
+      "min": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Pet global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Scrapmaw knows Flamethrower",
+      "actor": "scrap",
+      "metric": "pet_knows_spell",
+      "spell": 806168,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast_charm",
+      "label": "Scrapmaw casts Flamethrower",
+      "actor": "scrap",
+      "spell": 806168,
+      "pet": true,
+      "target": "g_scrap"
+    },
+    {
+      "action": "assert",
+      "label": "The pet cast is accepted",
+      "actor": "scrap",
+      "metric": "cast_failure",
+      "spell": 806168,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Flamethrower burns the enemy every second for 5 seconds",
+      "actor": "scrap",
+      "metric": "spell_damage_count",
+      "spell": 807385,
+      "target": "g_scrap",
+      "pet": true,
+      "min": 5,
+      "within_ms": 6000
+    },
+    {
+      "action": "wait",
+      "label": "Flamethrower channel ends",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Scrapmaw knows Missile Swarm",
+      "actor": "scrap",
+      "metric": "pet_knows_spell",
+      "spell": 807386,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast_charm",
+      "label": "Scrapmaw casts Missile Swarm",
+      "actor": "scrap",
+      "spell": 807386,
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "label": "The pet cast is accepted",
+      "actor": "scrap",
+      "metric": "cast_failure",
+      "spell": 807386,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Missile Swarm hits a nearby enemy",
+      "actor": "scrap",
+      "metric": "spell_damage_total",
+      "spell": 807387,
+      "target": "g_scrap",
+      "pet": true,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Pet global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Scrapmaw knows Flame Jets",
+      "actor": "scrap",
+      "metric": "pet_knows_spell",
+      "spell": 850023,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast_charm",
+      "label": "Scrapmaw casts Flame Jets",
+      "actor": "scrap",
+      "spell": 850023,
+      "pet": true,
+      "target": "g_scrap"
+    },
+    {
+      "action": "assert",
+      "label": "The pet cast is accepted",
+      "actor": "scrap",
+      "metric": "cast_failure",
+      "spell": 850023,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Flame Jets burns enemies in the target area",
+      "actor": "scrap",
+      "metric": "spell_damage_total",
+      "spell": 850024,
+      "target": "g_scrap",
+      "pet": true,
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Flame Jets slows enemies in the target area",
+      "actor": "g_scrap",
+      "metric": "aura",
+      "spell": 850026,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "label": "Build: Clockwork Assistant",
+      "actor": "clock",
+      "spell": 803436
+    },
+    {
+      "action": "cast",
+      "label": "Build: Clockwork Assistant",
+      "actor": "clock",
+      "spell": 803436
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Clockwork Assistant is built",
+      "actor": "clock",
+      "metric": "pet_entry",
+      "equals": 60070,
+      "within_ms": 9000
+    },
+    {
+      "action": "set_aura",
+      "actor": "clock",
+      "pet": true,
+      "spell": 2132158,
+      "stacks": 1,
+      "label": "Supply original native NPC spell accuracy on Clockwork Assistant"
+    },
+    {
+      "action": "assert",
+      "actor": "clock",
+      "metric": "pet_aura_amount",
+      "spell": 2132158,
+      "effect": 0,
+      "equals": 100,
+      "label": "Original Krosh Hit Buff supplies exactly 100 percentage points of native spell hit"
+    },
+    {
+      "action": "wait",
+      "label": "Clockwork Assistant settles beside the Tinker",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "save_as": "golem_near",
+      "actor": "g_clock",
+      "metric": "distance",
+      "target": "clock"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Clockwork Assistant knows Surprise Dynamite",
+      "actor": "clock",
+      "metric": "pet_knows_spell",
+      "spell": 578124,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast_charm",
+      "label": "Clockwork Assistant casts Surprise Dynamite",
+      "actor": "clock",
+      "spell": 578124,
+      "pet": true,
+      "target": "g_clock",
+      "destination": {
+        "x": 7636.86,
+        "y": -6810.22,
+        "z": 79.5987
+      }
+    },
+    {
+      "action": "assert",
+      "label": "The pet cast is accepted",
+      "actor": "clock",
+      "metric": "cast_failure",
+      "spell": 578124,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Surprise Dynamite knocks the enemy back",
+      "actor": "g_clock",
+      "metric": "distance",
+      "target": "clock",
+      "relative_to": "golem_near",
+      "min": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Pet global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "snapshot",
+      "save_as": "tinker_mana",
+      "actor": "clock",
+      "metric": "max_power"
+    },
+    {
+      "action": "set_power",
+      "label": "The Tinker is out of mana",
+      "actor": "clock",
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Clockwork Assistant knows Capacity Expansion",
+      "actor": "clock",
+      "metric": "pet_knows_spell",
+      "spell": 578122,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast_charm",
+      "label": "Clockwork Assistant casts Capacity Expansion",
+      "actor": "clock",
+      "spell": 578122,
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "label": "The pet cast is accepted",
+      "actor": "clock",
+      "metric": "cast_failure",
+      "spell": 578122,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Capacity Expansion restores 20% of the Tinker's maximum mana",
+      "actor": "clock",
+      "metric": "spell_energize_total",
+      "spell": 578122,
+      "pet": true,
+      "target": "clock",
+      "ratio_to": "tinker_mana",
+      "min": 0.19,
+      "max": 0.21,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Pet global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Clockwork Assistant knows Throw Wrench",
+      "actor": "clock",
+      "metric": "pet_knows_spell",
+      "spell": 574359,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast_charm",
+      "label": "Clockwork Assistant casts Throw Wrench",
+      "actor": "clock",
+      "spell": 574359,
+      "pet": true,
+      "target": "g_clock"
+    },
+    {
+      "action": "assert",
+      "label": "The pet cast is accepted",
+      "actor": "clock",
+      "metric": "cast_failure",
+      "spell": 574359,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Throw Wrench hits after its 2 second cast",
+      "actor": "clock",
+      "metric": "spell_damage_total",
+      "spell": 574359,
+      "target": "g_clock",
+      "pet": true,
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "label": "Pet global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Clockwork Assistant knows Crowd Controller",
+      "actor": "clock",
+      "metric": "pet_knows_spell",
+      "spell": 578123,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "actor": "clock",
+      "pet": true,
+      "spell": 2132158,
+      "stacks": 1,
+      "label": "Renew the original ten-second spell accuracy buff immediately before Crowd Controller"
+    },
+    {
+      "action": "assert",
+      "actor": "clock",
+      "metric": "pet_aura_amount",
+      "spell": 2132158,
+      "effect": 0,
+      "equals": 100,
+      "label": "Crowd Controller has its native 100-percentage-point spell hit prerequisite"
+    },
+    {
+      "action": "assert",
+      "actor": "clock",
+      "metric": "pet_aura_duration_ms",
+      "spell": 2132158,
+      "min": 2000,
+      "label": "The original accuracy buff covers the normal disarm cast"
+    },
+    {
+      "action": "cast_charm",
+      "label": "Clockwork Assistant casts Crowd Controller",
+      "actor": "clock",
+      "spell": 578123,
+      "pet": true,
+      "target": "g_clock"
+    },
+    {
+      "action": "assert",
+      "label": "The pet cast is accepted",
+      "actor": "clock",
+      "metric": "cast_failure",
+      "spell": 578123,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Crowd Controller disarms the enemy",
+      "actor": "g_clock",
+      "metric": "aura",
+      "spell": 578123,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Crowd Controller ends after 8 seconds",
+      "actor": "g_clock",
+      "metric": "aura",
+      "spell": 578123,
+      "equals": 0,
+      "within_ms": 10000
+    }
+  ]
+}

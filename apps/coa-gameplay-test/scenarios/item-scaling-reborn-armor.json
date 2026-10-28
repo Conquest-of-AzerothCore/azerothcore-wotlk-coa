@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Item scaling: every class but Hero wears the reborn armor its tooltip shows",
+  "contract": "Requires CoA.ItemScaling.Native=1 and CoA.ItemScaling.Native.RebornArmor=1 with ItemStat.dbc and ItemAddon.dbc in the data directory, and CoA.QuestLevelScaling=1 for the quest reward. The client shows a scaled item's second ItemStat armor column (reborn armor) to every class but the classless Hero (10), and an unscaled item's ItemAddon.dbc reborn armor; the server applies the same value. Footman Tunic 6085 (leather) given by Wanted: Hogger 176 to a level 30 character stores key 26, whose ItemStat row carries 174 armor and 65 reborn armor, plus 2 agility. Every actor learns Leather 9077, which a Hero lacks; each Hero learns it only after receiving its item, so the item stays in its bags instead of being equipped at once. Tribal Vest 3288 (leather, 128 armor, 2 agility) has no scaling level when added directly; its ItemAddon.dbc reborn armor is 57. Guardians start wearing Fortified Hauberk 2000027 in the chest slot, so it is destroyed first and every chest slot is checked empty before the bare armor is taken. Each point of agility adds 2 armor, so equipping the tunic adds 65 + 4 to a Guardian (18) and 174 + 4 to a Hero; the vest adds 57 + 4 and 128 + 4. Tooltips themselves are not rendered here.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "guardian", "race": 1, "class": 18, "level": 30 },
+    { "id": "hero", "race": 1, "class": 10, "level": 30 },
+    { "id": "guardian_authored", "race": 1, "class": 18, "level": 60 },
+    { "id": "hero_authored", "race": 1, "class": 10, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the fixture settle", "ms": 2000 },
+    { "action": "learn", "actor": "guardian", "spell": 9077 },
+    { "action": "learn", "actor": "guardian_authored", "spell": 9077 },
+    { "action": "level_scaling_packet", "actor": "guardian", "value": 1 },
+    { "action": "level_scaling_packet", "actor": "hero", "value": 1 },
+    { "action": "wait", "ms": 1000 },
+
+    { "action": "prepare_quest", "actor": "guardian", "quest": 176 },
+    { "action": "reward_quest", "actor": "guardian", "quest": 176, "choice": 0 },
+    { "action": "assert", "label": "The Guardian's tunic stores level 26", "actor": "guardian", "metric": "carried_item_scaling_level", "item": 6085, "equals": 26 },
+    { "action": "destroy_item", "actor": "guardian", "item": 2000027 },
+    { "action": "assert", "label": "The Guardian's chest slot is empty", "actor": "guardian", "metric": "equipped_item", "slot": 4, "equals": 0 },
+    { "action": "snapshot", "actor": "guardian", "metric": "armor", "save_as": "guardian_bare" },
+    { "action": "equip", "actor": "guardian", "item": 6085, "slot": 4 },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "The scaled tunic gives a Guardian its 65 reborn armor plus 4 from agility", "actor": "guardian", "metric": "armor", "relative_to": "guardian_bare", "equals": 69 },
+
+    { "action": "prepare_quest", "actor": "hero", "quest": 176 },
+    { "action": "reward_quest", "actor": "hero", "quest": 176, "choice": 0 },
+    { "action": "assert", "label": "The Hero's tunic stores level 26", "actor": "hero", "metric": "carried_item_scaling_level", "item": 6085, "equals": 26 },
+    { "action": "learn", "actor": "hero", "spell": 9077 },
+    { "action": "assert", "label": "The Hero's chest slot is empty", "actor": "hero", "metric": "equipped_item", "slot": 4, "equals": 0 },
+    { "action": "snapshot", "actor": "hero", "metric": "armor", "save_as": "hero_bare" },
+    { "action": "equip", "actor": "hero", "item": 6085, "slot": 4 },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "The scaled tunic gives a Hero its full 174 armor plus 4 from agility", "actor": "hero", "metric": "armor", "relative_to": "hero_bare", "equals": 178 },
+
+    { "action": "add_item", "actor": "guardian_authored", "item": 3288 },
+    { "action": "assert", "label": "The added vest has no scaling level", "actor": "guardian_authored", "metric": "carried_item_scaling_level", "item": 3288, "equals": 0 },
+    { "action": "destroy_item", "actor": "guardian_authored", "item": 2000027 },
+    { "action": "assert", "label": "The level 60 Guardian's chest slot is empty", "actor": "guardian_authored", "metric": "equipped_item", "slot": 4, "equals": 0 },
+    { "action": "snapshot", "actor": "guardian_authored", "metric": "armor", "save_as": "guardian_authored_bare" },
+    { "action": "equip", "actor": "guardian_authored", "item": 3288, "slot": 4 },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "The authored vest gives a Guardian its ItemAddon reborn armor 57 plus 4 from agility", "actor": "guardian_authored", "metric": "armor", "relative_to": "guardian_authored_bare", "equals": 61 },
+
+    { "action": "add_item", "actor": "hero_authored", "item": 3288 },
+    { "action": "assert", "label": "The level 60 Hero's chest slot is empty", "actor": "hero_authored", "metric": "equipped_item", "slot": 4, "equals": 0 },
+    { "action": "learn", "actor": "hero_authored", "spell": 9077 },
+    { "action": "snapshot", "actor": "hero_authored", "metric": "armor", "save_as": "hero_authored_bare" },
+    { "action": "equip", "actor": "hero_authored", "item": 3288, "slot": 4 },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "The authored vest gives a Hero its own 128 armor plus 4 from agility", "actor": "hero_authored", "metric": "armor", "relative_to": "hero_authored_bare", "equals": 132 }
+  ]
+}

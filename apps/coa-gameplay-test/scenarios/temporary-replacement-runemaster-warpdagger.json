@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "A Warp button left on the bar is saved as Warpdagger (#5469)",
+  "contract": "Casting Warpdagger 500287 runs StartTravel (AscensionRunemasterTravel.cpp:119, called from spell_ascension_runemaster_travel::SummonDagger), which learns Warp 500587 as a temporary spell (learnSpell(child, true), line 142) and replaces Warpdagger with it through SetTemporarySpellReplacement (line 143) while the dagger is out. Echo Rune 500270 -> Echo Return 500272 shares the same lines. A temporary spell is never written to character_spell, and Player::_LoadActions runs before the dagger could be thrown again, so a saved Warp button would be refused and deleted at login. persisted_action_button reads Player::GetSavedActionButtonSpell, the spell id _SaveActions writes: a button holding Warp must be saved as Warpdagger, and a button holding Warpdagger itself is saved unchanged.",
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login state settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 1180},
+    {"action": "add_item", "actor": "rm", "item": 2092},
+    {"action": "equip", "actor": "rm", "item": 2092, "slot": 15},
+    {"action": "learn", "actor": "rm", "spell": 500287},
+    {"action": "cast", "label": "Toss Warpdagger", "actor": "rm", "spell": 500287},
+    {
+      "action": "assert", "label": "The thrown dagger replaces Warpdagger with Warp", "actor": "rm",
+      "metric": "temporary_spell_replacement", "spell": 500287, "equals": 500587, "within_ms": 2000
+    },
+    {"action": "set_action_button", "actor": "rm", "button": 2, "spell": 500587},
+    {"action": "set_action_button", "actor": "rm", "button": 3, "spell": 500287},
+    {
+      "action": "assert", "label": "The bar holds Warp", "actor": "rm", "metric": "action_button", "button": 2,
+      "equals": 500587
+    },
+    {
+      "action": "assert", "label": "The Warp button is saved as Warpdagger", "actor": "rm",
+      "metric": "persisted_action_button", "button": 2, "equals": 500287
+    },
+    {
+      "action": "assert", "label": "Control: an ordinary known spell is saved unchanged", "actor": "rm",
+      "metric": "persisted_action_button", "button": 3, "equals": 500287
+    }
+  ]
+}

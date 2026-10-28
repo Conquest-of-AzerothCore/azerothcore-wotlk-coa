@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Winds of Northrend deepens Lichfrost's slow from 35% to 50% (#1823)",
+  "contract": "Winds of Northrend 301333 (CharacterAdvancement 33733, Class tab, class 23) reads 'Increases the amount slowed by Lichfrost by $s1%.' Its only effect is SPELL_AURA_ADD_FLAT_MODIFIER (107), MiscValue 23 (SPELLMOD_EFFECT3), EffectBasePoints -16 + DieSides 1 = -15, class mask (0, 0, 0x8000000) in SpellFamilyName 29, which matches every Lichfrost rank (801722 and 501969-501980, family flags 0, 0, 0x8000000). Lichfrost rank 1 801722 has no SPELL_ATTR3_IGNORE_CASTER_MODIFIERS; its effect 2 is SPELL_AURA_MOD_DECREASE_SPEED (33) with EffectBasePoints -36 + DieSides 1 = -35 ('slowing their movement speed by $s3%'). SpellEffectInfo::CalcValue applies the caster's SPELLMOD_EFFECT3 to effect 2, and the Necromancer contracts leave aura 107 alone, so the slow becomes -35 + -15 = -50. The audit's premise (no source reference to 301333) does not apply to native aura types. Lichfrost's slow must be -35 on the target before the talent and -50 after it.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "necro", "spell": 801722 },
+    {
+      "action": "assert", "label": "CONTROL: Lichfrost's slow effect is -35 without the talent", "actor": "necro",
+      "metric": "spell_effect_value", "spell": 801722, "effect": 2, "equals": -35
+    },
+    { "action": "cast", "label": "Lichfrost without the talent", "actor": "necro", "spell": 801722, "target": "golem" },
+    {
+      "action": "assert", "label": "SETUP: Lichfrost slows the golem", "actor": "golem",
+      "metric": "aura", "spell": 801722, "caster": "necro", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "CONTROL: the landed slow is 35%", "actor": "golem",
+      "metric": "aura_amount", "spell": 801722, "caster": "necro", "effect": 2, "equals": -35
+    },
+    {
+      "action": "assert", "label": "The first slow expires", "actor": "golem",
+      "metric": "aura", "spell": 801722, "caster": "necro", "equals": 0, "within_ms": 4000
+    },
+    { "action": "learn", "actor": "necro", "spell": 301333 },
+    {
+      "action": "assert", "label": "SETUP: the Winds of Northrend passive is active", "actor": "necro",
+      "metric": "aura", "spell": 301333, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The talent deepens Lichfrost's slow effect to -50", "actor": "necro",
+      "metric": "spell_effect_value", "spell": 801722, "effect": 2, "equals": -50
+    },
+    { "action": "cast", "label": "Lichfrost with the talent", "actor": "necro", "spell": 801722, "target": "golem" },
+    {
+      "action": "assert", "label": "SETUP: the second Lichfrost slows the golem", "actor": "golem",
+      "metric": "aura", "spell": 801722, "caster": "necro", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the landed slow is 50%", "actor": "golem",
+      "metric": "aura_amount", "spell": 801722, "caster": "necro", "effect": 2, "equals": -50
+    }
+  ]
+}

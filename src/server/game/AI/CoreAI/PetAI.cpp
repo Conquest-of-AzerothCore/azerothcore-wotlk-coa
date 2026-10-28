@@ -100,7 +100,7 @@ void PetAI::_doMeleeAttack()
 bool PetAI::_canMeleeAttack()
 {
     combatRange = 0.f;
-    switch (me->GetEntry())
+    switch (GetStockPetEntry(me->GetEntry()))
     {
         case ENTRY_IMP:
         case ENTRY_WATER_ELEMENTAL:

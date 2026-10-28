@@ -1,0 +1,44 @@
+###################################################################################################
+#  mod-coa-change-potions
+#
+#  The change potions of the Ethereal Bazaar family: race, faction and appearance customs and
+#  the class change potion.  See modules/mod-coa-change-potions/README.md.
+###################################################################################################
+
+[worldserver]
+
+###################################################################################################
+#  ChangePotions.ClassChangeEnable
+#        Enable the class change potion (97858).
+#        The class change is the one part of this module that is not a restoration: the client and
+#        the core have no class-change contract at all, so the module supplies the class menu and
+#        the swap itself (see the README).  Set to 0 to have the potion answer that class changes
+#        are unavailable instead of opening the menu.
+#        Default:     1 - enabled
+#                     0 - disabled
+###################################################################################################
+ChangePotions.ClassChangeEnable = 1
+
+###################################################################################################
+#  ChangePotions.NoticeAccent
+#        The colour a potion notice paints the words the player is meant to act on: the ten
+#        seconds of the countdown and the name of the button (or the class) the potion is about.
+#        Those two share one colour on purpose - a line that carries two "look here" colours next
+#        to the realm's notice yellow reads as two different instructions.
+#        A bare six-digit RGB, no leading # or 0x.  Read when a notice is sent, so
+#        `.reload config` retunes it without a restart; anything that is not six hex digits falls
+#        back to the default instead of breaking the line.
+#        Each of these was rendered over the notice's own background before it was chosen:
+#          ffb340  amber - chosen
+#          00ff9a  the teal the client's own class pages use for a clickable word
+#          00e0ff  bright cyan
+#          40c4ff  sky blue
+#          7fd8ff  pale ice blue
+#          a8e6ff  near-white ice
+#          00ffd0  mint
+#          66ff66  bright green
+#          b6ff4d  lime
+#          ffd100  gold, which is what the countdown used to be - too close to the yellow
+#        Default:     "ffb340"
+###################################################################################################
+ChangePotions.NoticeAccent = "ffb340"

@@ -1,0 +1,231 @@
+{
+  "schema": 1,
+  "name": "Beyond the Veil grants speed and water walking only in Underwalk (#729)",
+  "contract": "804053 grants helper 560591 during Underwalk 800797: 30% more run speed and water walking.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 30,
+      "level": 80
+    },
+    {
+      "id": "talented",
+      "race": 1,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 800797
+    },
+    {
+      "action": "learn",
+      "actor": "talented",
+      "spell": 800797
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 804053,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "talented",
+      "spell": 804053,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Talent alone grants no form buff",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 560591,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Talent alone grants no water walking",
+      "actor": "talented",
+      "metric": "water_walk",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 800797
+    },
+    {
+      "action": "cast",
+      "actor": "talented",
+      "spell": 800797
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 800797,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 800797,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Untalented Underwalk grants no Beyond the Veil buff",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 560591,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "run_speed_rate",
+      "save_as": "control_underwalk_speed"
+    },
+    {
+      "action": "assert",
+      "label": "Entering Underwalk grants the helper buff",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 560591,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Beyond the Veil adds 30% run speed",
+      "actor": "talented",
+      "metric": "run_speed_rate",
+      "ratio_to": "control_underwalk_speed",
+      "min": 1.29,
+      "max": 1.31
+    },
+    {
+      "action": "assert",
+      "label": "Beyond the Veil grants native water walking",
+      "actor": "talented",
+      "metric": "water_walk",
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "talented",
+      "spell": 800797,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Leaving Underwalk removes the helper",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 560591,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Leaving Underwalk removes water walking",
+      "actor": "talented",
+      "metric": "water_walk",
+      "equals": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "talented",
+      "spell": 800797
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "talented",
+      "spell": 800797
+    },
+    {
+      "action": "assert",
+      "label": "Reentering Underwalk applies the form",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 800797,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Reentering Underwalk restores the helper",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 560591,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "talented",
+      "spell": 804053,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Losing the talent removes the helper",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 560591,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Losing the talent removes water walking",
+      "actor": "talented",
+      "metric": "water_walk",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Losing the talent restores normal Underwalk speed",
+      "actor": "talented",
+      "metric": "run_speed_rate",
+      "ratio_to": "control_underwalk_speed",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "set_aura",
+      "actor": "talented",
+      "spell": 804053,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Gaining the talent during Underwalk grants the helper",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 560591,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Gaining the talent during Underwalk grants water walking",
+      "actor": "talented",
+      "metric": "water_walk",
+      "equals": 1
+    }
+  ]
+}

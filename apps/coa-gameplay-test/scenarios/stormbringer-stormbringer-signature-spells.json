@@ -62,9 +62,9 @@
       "equals": 501398
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "stormbringer",
-      "command": ".localspec 14"
+      "id": 14
     },
     {
       "action": "assert",

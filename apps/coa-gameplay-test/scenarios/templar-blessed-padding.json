@@ -1,7 +1,7 @@
 {
  "schema": 1,
  "name": "Blessed Padding raises mail armor and cuts area damage (#1817)",
- "contract": "Blessed Padding rank 2 (301360) promises +100% Armor contribution from mail items and -20% damage taken from area attacks. The mail chest 1065932 carries 2248 armor, so equipping it and learning the talent must add about that much armor on top of the unmodified total.",
+ "contract": "Blessed Padding rank 2 (301360) promises +100% Armor contribution from mail items and -20% damage taken from area attacks. The mail chest 1065932 carries 2248 armor, of which a Templar (19), like every class but Hero, wears the ItemAddon.dbc reborn armor 1604, so equipping it and learning the talent must add at least that much armor on top of the unmodified total.",
  "timeout_ms": 120000,
  "players": [
   { "id": "padded", "race": 1, "class": 19, "level": 80 }
@@ -12,7 +12,7 @@
   { "action": "equip", "actor": "padded", "item": 1065932, "slot": 4 },
   { "action": "snapshot", "actor": "padded", "metric": "armor", "save_as": "armor_with_mail" },
   { "action": "learn", "actor": "padded", "spell": 301360 },
-  { "action": "assert", "label": "Blessed Padding doubles the mail chest's armor", "actor": "padded", "metric": "armor", "relative_to": "armor_with_mail", "min": 2000 },
+  { "action": "assert", "label": "Blessed Padding doubles the mail chest's armor", "actor": "padded", "metric": "armor", "relative_to": "armor_with_mail", "min": 1600 },
   { "action": "assert", "label": "Area damage taken drops by 20", "actor": "padded", "metric": "aura_amount", "spell": 301360, "effect": 1, "equals": -20 }
  ]
 }

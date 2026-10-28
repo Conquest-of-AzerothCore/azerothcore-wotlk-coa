@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "name": "The Westbrook crossroads Wanted Poster offers Wanted: \"Hogger\"",
+  "contract": "Issue #4496: on Ascension both Wanted Posters in Elwynn offer quest 176, the one at Eastvale road (68) and the one on the Westbrook Garrison crossroads signpost (156561, spawn 26846). Here 156561 offered nothing. The case summons a 156561 poster for the character and accepts quest 176 from it through the native accept request, which the server grants only from a gameobject that starts the quest.",
+  "timeout_ms": 30000,
+  "location": {
+    "map": 0,
+    "x": -9748.0,
+    "y": 682.0,
+    "z": 27.4,
+    "o": 3.1
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 12
+    }
+  ],
+  "steps": [
+    {
+      "action": "summon_gameobject",
+      "actor": "p",
+      "entry": 156561,
+      "distance": 2,
+      "duration_s": 0
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Wanted: \"Hogger\" is not in the quest log",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 176,
+      "equals": 0
+    },
+    {
+      "action": "client_packet",
+      "label": "Accept Wanted: \"Hogger\" from the crossroads poster",
+      "actor": "p",
+      "opcode": 393,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 156561
+        },
+        {
+          "u32": 176
+        },
+        {
+          "u32": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "the poster gives the quest (status 3, in the log)",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 176,
+      "equals": 3,
+      "within_ms": 3000
+    }
+  ]
+}

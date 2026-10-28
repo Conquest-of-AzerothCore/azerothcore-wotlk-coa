@@ -1,0 +1,262 @@
+{
+  "schema": 1,
+  "name": "Ghostly Strike grants its advertised dodge buff (#6572)",
+  "contract": "Spell 14278 description independently promises the ten percent dodge buff described by 965819 effect1. Native damage must succeed and grant that timed buff. A single two-handed weapon switches the same ten-point bonus to parry and leaves dodge unchanged; expiry restores both stats.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_skill",
+      "actor": "hero",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 5277,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 5277,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "hero",
+      "spell": 5277
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 5277,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 25
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 201
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 14278
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "dodge_chance",
+      "save_as": "dodge_before"
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 14278,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "cast_failure",
+      "spell": 14278,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "cast_failure",
+      "spell": 14278,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 965819,
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura_amount",
+      "spell": 965819,
+      "effect": 1,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "dodge_chance",
+      "relative_to": "dodge_before",
+      "min": 1,
+      "max": 10
+    },
+    {
+      "action": "wait",
+      "ms": 9000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "dodge_chance",
+      "relative_to": "dodge_before",
+      "equals": 0
+    },
+    {
+      "action": "destroy_item",
+      "actor": "hero",
+      "item": 25
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 1194
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 202
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 3127
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 1194,
+      "slot": 15
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "parry_chance",
+      "save_as": "parry_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "dodge_chance",
+      "save_as": "twohand_dodge"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 14278
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 14278,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "cast_failure",
+      "spell": 14278,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 965819,
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura_amount",
+      "spell": 965819,
+      "effect": 2,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "parry_chance",
+      "relative_to": "parry_before",
+      "min": 1,
+      "max": 10
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "dodge_chance",
+      "relative_to": "twohand_dodge",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 9000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "parry_chance",
+      "relative_to": "parry_before",
+      "equals": 0
+    }
+  ]
+}

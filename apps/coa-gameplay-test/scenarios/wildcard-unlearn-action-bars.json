@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "name": "wildcard-unlearn-action-bars",
+  "contract": "Generic spell unlearning on a Wildcard Hero clears its spell button while unrelated learned spells remain. Requires WildCard mode and native spell-forgotten hooks; no reset-list helper is called.",
+  "timeout_ms": 20000,
+  "players": [
+    {
+      "id": "wild",
+      "race": 1,
+      "class": 10,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "learn",
+      "actor": "wild",
+      "spell": 6603
+    },
+    {
+      "action": "learn",
+      "actor": "wild",
+      "spell": 7266
+    },
+    {
+      "action": "set_action_button",
+      "actor": "wild",
+      "spell": 6603,
+      "button": 0
+    },
+    {
+      "action": "set_action_button",
+      "actor": "wild",
+      "spell": 7266,
+      "button": 1
+    },
+    {
+      "action": "assert",
+      "actor": "wild",
+      "metric": "action_button",
+      "button": 0,
+      "equals": 6603
+    },
+    {
+      "action": "unlearn",
+      "actor": "wild",
+      "spell": 6603,
+      "all_specs": true
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "actor": "wild",
+      "metric": "knows_spell",
+      "spell": 6603,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "wild",
+      "metric": "action_button",
+      "button": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "wild",
+      "metric": "action_button",
+      "button": 1,
+      "equals": 7266
+    }
+  ]
+}

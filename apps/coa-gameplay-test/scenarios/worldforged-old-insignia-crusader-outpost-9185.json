@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "name": "Worldforged Old Insignia stands on the Crusader Outpost floor, Tirisfal Glades (#9185)",
+  "contract": "Pickup template 515377 (item 515020 Scarlet Insignia, guid 6941016) is the only Tirisfal copy left after #8904. A later LootCollector-alignment pass overwrote its 2026-09-26 in-game audited spot with a terrain-level position about 4.4 yd below the Crusader Outpost floor the player walks (Captain Perrine and Scarlet Neophyte both stand near z 49.09, 5 yd away). Restore the audited spot (1803.41, 727.664, 49.4158), guarded on the current LootCollector-alignment coordinates so a newer correction is never overwritten. The outpost floor is a WMO platform, not a vmap-recognized ground model there (confirmed: the harness reads the open terrain underneath, +5.44 yd below the restored spot), so the gap check below only tells the restored height apart from the sunken one, not the exact floor.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": 1803.41, "y": 727.664, "z": 51.0, "o": 0 },
+  "players": [ { "id": "p", "race": 5, "class": 12, "level": 10 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "the Old Insignia is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 515377, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: it stands at the audited outpost-floor height, not sunk to terrain", "actor": "p", "metric": "spawn_ground_gap", "guid": 6941016, "spawn_type": "gameobject", "min": 3.0, "max": 8.0 }
+  ]
+}

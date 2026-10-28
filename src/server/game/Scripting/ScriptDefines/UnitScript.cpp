@@ -60,6 +60,11 @@ void ScriptMgr::ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& damage)
     CALL_ENABLED_HOOKS(UnitScript, UNITHOOK_MODIFY_MELEE_DAMAGE, script->ModifyMeleeDamage(target, attacker, damage));
 }
 
+void ScriptMgr::ModifyMeleeDamageRange(Unit* target, Unit* attacker, float& minDamage, float& maxDamage)
+{
+    CALL_ENABLED_HOOKS(UnitScript, UNITHOOK_MODIFY_MELEE_DAMAGE_RANGE, script->ModifyMeleeDamageRange(target, attacker, minDamage, maxDamage));
+}
+
 void ScriptMgr::ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* spellInfo)
 {
     CALL_ENABLED_HOOKS(UnitScript, UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN, script->ModifySpellDamageTaken(target, attacker, damage, spellInfo));
@@ -72,12 +77,18 @@ void ScriptMgr::ModifySpellEffectBaseValue(Unit const* caster, SpellInfo const* 
         script->ModifySpellEffectBaseValue(caster, spellInfo, effectIndex, value));
 }
 
+void ScriptMgr::ResolveSpellCast(Unit* caster, SpellInfo const*& spellInfo)
+{
+    CALL_ENABLED_HOOKS(UnitScript, UNITHOOK_RESOLVE_SPELL_CAST, script->ResolveSpellCast(caster, spellInfo));
+}
+
 void ScriptMgr::ModifyHealReceived(Unit* target, Unit* healer, uint32& heal, SpellInfo const* spellInfo)
 {
     CALL_ENABLED_HOOKS(UnitScript, UNITHOOK_MODIFY_HEAL_RECEIVED, script->ModifyHealReceived(target, healer, heal, spellInfo));
 }
 
-uint32 ScriptMgr::DealDamage(Unit* AttackerUnit, Unit* pVictim, uint32 damage, DamageEffectType damagetype)
+uint32 ScriptMgr::DealDamage(Unit* AttackerUnit, Unit* pVictim, uint32 damage, DamageEffectType damagetype,
+    std::optional<uint32>* scriptHealthLeechDamage)
 {
     if (ScriptRegistry<UnitScript>::ScriptPointerList.empty())
     {
@@ -86,7 +97,8 @@ uint32 ScriptMgr::DealDamage(Unit* AttackerUnit, Unit* pVictim, uint32 damage, D
 
     for (auto const& [scriptID, script] : ScriptRegistry<UnitScript>::ScriptPointerList)
     {
-        damage = script->DealDamage(AttackerUnit, pVictim, damage, damagetype);
+        damage = script->DealDamage(AttackerUnit, pVictim, damage, damagetype,
+                                    scriptHealthLeechDamage);
     }
 
     return damage;
@@ -184,6 +196,11 @@ void ScriptMgr::OnUnitDeath(Unit* unit, Unit* killer)
 void ScriptMgr::OnUnitSetShapeshiftForm(Unit* unit, uint8 form)
 {
     CALL_ENABLED_HOOKS(UnitScript, UNITHOOK_ON_UNIT_SET_SHAPESHIFT_FORM, script->OnUnitSetShapeshiftForm(unit, form));
+}
+
+void ScriptMgr::OnHealthChanged(Unit* unit)
+{
+    CALL_ENABLED_HOOKS(UnitScript, UNITHOOK_ON_HEALTH_CHANGED, script->OnHealthChanged(unit));
 }
 
 UnitScript::UnitScript(char const* name, bool addToScripts, std::vector<uint16> enabledHooks)

@@ -3,6 +3,7 @@
 
 #include <array>
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 
 namespace Bloodforged
@@ -22,18 +23,9 @@ constexpr bool ValidRates(Rates const& rates)
         && rates[0] + rates[1] + rates[2] <= 10000;
 }
 
-constexpr unsigned RollQuality(unsigned roll, Rates const& rates)
+constexpr float EntryChance(unsigned rate, std::size_t poolSize)
 {
-    if (!ValidRates(rates) || roll >= 10000)
-        return 0;
-    unsigned boundary = 0;
-    for (unsigned index = 0; index < rates.size(); ++index)
-    {
-        boundary += rates[index];
-        if (roll < boundary)
-            return index + 2;
-    }
-    return 0;
+    return poolSize ? static_cast<float>(rate) / 100.0f / static_cast<float>(poolSize) : 0.0f;
 }
 
 constexpr bool EligibleItem(unsigned requiredLevel, unsigned itemLevel, unsigned targetLevel)

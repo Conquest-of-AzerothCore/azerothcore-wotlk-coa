@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Felsworn: Twin Slice needs an off-hand weapon, so a staff is refused for its empty off hand and two one-handers strike with both (#400)",
+  "contract": "Twin Slice rank 2 501257 (Spell.dbc; every rank 801901, 501257-501261 alike) has EquippedItemClass 2 with EquippedItemSubClassMask 173555 (axe, 2H axe, mace, 2H mace, polearm, sword, 2H sword, staff, fist, dagger, spear: every melee weapon, which the client prints as 'Requires Melee Weapon') and AttributesEx3 SPELL_ATTR3_REQUIRES_MAIN_HAND_WEAPON | SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON. Its description is 'Strike with both weapons for $808305s2% Weapon Damage plus $s1 with each strike'; its effects trigger 808305 (main-hand strike, SPELL_ATTR3_REQUIRES_MAIN_HAND_WEAPON) and 808306 (off-hand strike, SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON). A staff is a melee weapon that fits the class mask, but it is two-handed and leaves the off hand empty. Expected: with only a staff the cast is refused with SPELL_FAILED_EQUIPPED_ITEM_CLASS_OFFHAND (31), not SPELL_FAILED_EQUIPPED_ITEM_CLASS (29) or _MAINHAND (30), and deals no damage; with a one-handed sword and a dagger it is accepted and both the main-hand and the off-hand strike deal damage. The Felsworn live baseline includes Staves 227, One-Handed Swords 201, Daggers 1180 and Dual Wield 674; they are learned here as fixture setup.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "felsworn", "race": 4, "class": 14, "level": 11, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "felsworn", "entry": 36, "level": 11, "health": 100000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "felsworn", "spell": 227 },
+    { "action": "learn", "actor": "felsworn", "spell": 201 },
+    { "action": "learn", "actor": "felsworn", "spell": 1180 },
+    { "action": "learn", "actor": "felsworn", "spell": 674 },
+    { "action": "learn", "actor": "felsworn", "spell": 501257 },
+    { "action": "add_item", "actor": "felsworn", "item": 35 },
+    { "action": "equip", "label": "Bent Staff in the main hand", "actor": "felsworn", "item": 35, "slot": 15 },
+    { "action": "add_item", "actor": "felsworn", "item": 25 },
+    { "action": "add_item", "actor": "felsworn", "item": 2092 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "set_power", "actor": "felsworn", "power": 3, "value": 100 },
+    { "action": "cast", "actor": "felsworn", "spell": 501257, "target": "dummy" },
+    {
+      "action": "assert", "label": "With a staff Twin Slice is refused for the empty off hand (SPELL_FAILED_EQUIPPED_ITEM_CLASS_OFFHAND)",
+      "actor": "felsworn", "metric": "cast_failure", "spell": 501257, "equals": 31, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The refused cast deals no damage",
+      "actor": "dummy", "metric": "health", "equals": 100000
+    },
+    { "action": "equip", "label": "Worn Shortsword in the main hand", "actor": "felsworn", "item": 25, "slot": 15 },
+    { "action": "equip", "label": "Worn Dagger in the off hand", "actor": "felsworn", "item": 2092, "slot": 16 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "set_power", "actor": "felsworn", "power": 3, "value": 100 },
+    { "action": "cast", "actor": "felsworn", "spell": 501257, "target": "dummy" },
+    {
+      "action": "assert", "label": "With two one-handed weapons Twin Slice is accepted",
+      "actor": "felsworn", "metric": "cast_failure", "spell": 501257, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The main-hand strike deals damage",
+      "actor": "felsworn", "metric": "spell_damage_count", "spell": 808305, "target": "dummy", "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The off-hand strike deals damage",
+      "actor": "felsworn", "metric": "spell_damage_count", "spell": 808306, "target": "dummy", "min": 1, "within_ms": 3000
+    }
+  ]
+}

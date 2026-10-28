@@ -113,9 +113,9 @@
       "o": 0
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "primalist",
-      "command": ".localspec 60"
+      "id": 60
     },
     {
       "action": "learn",
@@ -144,9 +144,9 @@
       "slot": 15
     },
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "empty",
-      "command": ".localspec 60"
+      "id": 60
     },
     {
       "action": "learn",
@@ -180,7 +180,7 @@
       "metric": "spell_damage_done",
       "spell": 681089,
       "periodic": true,
-      "target": "enemy",
+      "target": "far",
       "save_as": "base_damage"
     },
     {
@@ -195,10 +195,10 @@
       "metric": "spell_damage_done",
       "spell": 681089,
       "periodic": true,
-      "target": "enemy",
+      "target": "far",
       "relative_to": "base_damage",
-      "min": 7,
-      "max": 9
+      "min": 6,
+      "max": 7
     },
     {
       "action": "set_aura",
@@ -218,7 +218,7 @@
       "metric": "spell_damage_done",
       "spell": 681089,
       "periodic": true,
-      "target": "enemy",
+      "target": "far",
       "relative_to": "base_damage",
       "equals": 0
     },
@@ -401,5 +401,6 @@
       "spell": 681089,
       "equals": 0
     }
-  ]
+  ],
+  "contract": "The fissure coefficient probe queries the unhit creature 'far', so normal class 887019 (-15%) and Mountain King 887085 (+1%) tuning multiply it by 0.8585: the 100 AP increase of 7-9 before tuning reads 6-7 (1016 x 0.8585 = 872, 1024 x 0.8585 = 879)."
 }

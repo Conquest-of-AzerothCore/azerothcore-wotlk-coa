@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Burn Impurities cleanses the target and one nearby ally (#3731)",
-  "contract": "#3731: Burn Impurities 520149 has two SPELL_EFFECT_DISPEL effects (magic and disease, one dispel each) on TARGET_UNIT_TARGET_ALLY with EffectChainTarget 2, so Spell::SelectImplicitChainTargets adds one more ally within the 10 yd jump radius; nothing in src/ or modules/ references the id and no script is needed. The fixture debuffs are Polymorph 118 (DISPEL_MAGIC, negative) and Ghoul Rot 83985 (DISPEL_DISEASE, negative), both applied with set_aura. Assertions: the cast target and the chained ally each lose both, and a third ally 20 yd away keeps both. The one-dispel-per-effect count is not asserted (which of several auras goes is not deterministic). Chain targets are picked by SearchChainTargets as the closest valid ally to the previous target, and the caster is itself a candidate, so the fixture places a at the spawn point, the caster 8 yd behind it and b 3 yd ahead: b is then the unambiguous single chain jump (the first run failed because caster, a and b shared one position and the tie went to the caster).",
+  "contract": "#3731: Burn Impurities 520149 has two SPELL_EFFECT_DISPEL effects (magic and disease, one dispel each) on TARGET_UNIT_TARGET_ALLY with EffectChainTarget 2, so Spell::SelectImplicitChainTargets adds one more ally within the 10 yd jump radius; nothing in src/ or modules/ references the id and no script is needed. The fixture debuffs are Polymorph 118 (DISPEL_MAGIC, negative) and Ghoul Rot 83985 (DISPEL_DISEASE, negative), both applied with set_aura. Assertions: the cast target and the chained ally each lose both, and a third ally 20 yd away keeps both. The one-dispel-per-effect count is not asserted (which of several auras goes is not deterministic). Chain targets are picked by SearchChainTargets as the closest valid ally to the previous target, and the caster is itself a candidate, so the fixture places a at the spawn point, the caster 20 yd behind it and b 3 yd ahead: b is then the only chain candidate (the first run failed because caster, a and b shared one position and the tie went to the caster). Polymorph is SPELL_AURA_MOD_CONFUSE, so every polymorphed ally wanders up to 2 yd along each axis (ConfusedMovementGenerator wander_distance 4) around the point where it was polymorphed, and the jump test adds both combat reaches (1.5 yd each for a player) to the 10 yd radius: with the caster 8 yd behind, a and b could wander apart until the unmoving caster was the nearer candidate, and b kept both debuffs. From 20 yd the caster stays beyond 13 yd of a, b stays within 8.7 yd and far (20 yd ahead) stays beyond 14.3 yd.",
   "timeout_ms": 60000,
   "location": {
     "map": 0,
@@ -69,10 +69,10 @@
       "action": "teleport",
       "actor": "caster",
       "map": 0,
-      "x": -8925.41,
+      "x": -8937.41,
       "y": -115.853,
       "z": 82.3711,
-      "label": "Caster 8 yd behind the primary target so the chained ally is strictly nearer to it"
+      "label": "Caster 20 yd behind the primary target, outside the chain jump reach, so the chained ally is the only candidate"
     },
     {
       "action": "teleport",

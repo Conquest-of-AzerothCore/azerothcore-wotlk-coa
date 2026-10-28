@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Primalist Journey to the Core delayed fixed ground and proc rate",
-  "contract": "One hundred first/highest Tremor direct hits and separate native periodic ticks sample 20% Crag generation. Each proc produces one burst after three seconds. Moving away avoids it; the ground burst hits at most five of six enemies and grants only its caster 20% Earthquake damage for five seconds. Native SP/Nature coefficients add 100% and AP adds nothing.",
+  "contract": "One hundred first/highest Tremor direct hits and separate native periodic ticks sample 20% Crag generation. Each proc produces one burst after three seconds. Moving away avoids it; the ground burst hits at most five of six enemies and grants only its caster 20% Earthquake damage for five seconds. Native SP/Nature coefficients add 100% and AP adds nothing. The coefficient probes query the unhit creature 'outside', so normal class 887019 (-15%) and Geomancy 887086 (+23%) tuning multiply them by 1.0455: the SP increases of 71-73 and 65-67 before tuning read 74-76 and 68-70.",
   "players": [
     {
       "id": "primalist",
@@ -80,15 +80,15 @@
       "entry": 28168,
       "level": 80,
       "health": 500000,
-      "distance": 36.2
+      "distance": 37.5
     }
   ],
   "timeout_ms": 600000,
   "steps": [
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "primalist",
-      "command": ".localspec 95"
+      "id": 95
     },
     {
       "action": "pvp",
@@ -7984,7 +7984,7 @@
       "actor": "primalist",
       "metric": "spell_damage_done",
       "spell": 302590,
-      "target": "enemy",
+      "target": "outside",
       "save_as": "coefficient_base"
     },
     {
@@ -7998,10 +7998,10 @@
       "actor": "primalist",
       "metric": "spell_damage_done",
       "spell": 302590,
-      "target": "enemy",
+      "target": "outside",
       "relative_to": "coefficient_base",
-      "min": 71,
-      "max": 73
+      "min": 74,
+      "max": 76
     },
     {
       "action": "set_aura",
@@ -8020,10 +8020,10 @@
       "actor": "primalist",
       "metric": "spell_damage_done",
       "spell": 302590,
-      "target": "enemy",
+      "target": "outside",
       "relative_to": "coefficient_base",
-      "min": 65,
-      "max": 67
+      "min": 68,
+      "max": 70
     },
     {
       "action": "set_aura",
@@ -8042,7 +8042,7 @@
       "actor": "primalist",
       "metric": "spell_damage_done",
       "spell": 302590,
-      "target": "enemy",
+      "target": "outside",
       "relative_to": "coefficient_base",
       "min": -1,
       "max": 1

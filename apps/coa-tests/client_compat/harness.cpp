@@ -145,15 +145,12 @@ struct Config
 {
     bool Enabled = false;
     bool AllowRemote = false;
-    bool Plaintext = true;
     template<class T> T GetOption(char const* name, T fallback, bool = true) const
     {
         if (std::strcmp(name, "CoA.Enable") == 0)
             return T(Enabled);
         if (std::strcmp(name, "CoA.AllowRemoteClients") == 0)
             return T(AllowRemote);
-        if (std::strcmp(name, "CoA.PlaintextWorldHeaders") == 0)
-            return T(Plaintext);
         return fallback;
     }
 } config;
@@ -227,8 +224,8 @@ void TestPing(bool enabled, bool loopback, bool gm, bool expected, bool allowRem
         enabled && (loopback || allowRemote) && !gm ?
         "ordinary Ascension account accepts two minutes of five-second pings" :
         gm ? "existing GM permission remains effective" : "unconfigured sessions retain the 27-second limit");
-    Check(socket._usePlaintextWorldHeaders == (loopback || allowRemote),
-        "plaintext headers require loopback or explicit remote configuration");
+    Check(socket._ascensionCompatEnabled == (enabled && (loopback || allowRemote)),
+        "the Ascension protocol requires loopback or explicit remote configuration");
 }
 
 void TestFlood(bool loopback = true)

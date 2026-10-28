@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "name": "An ordinary group finishing a final boss receives no Dungeon Finder reward",
+  "contract": "A group that was not formed by the Dungeon Finder and finishes the final boss of Scarlet Monastery - Graveyard does not receive the Classic Random completion quest.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 189,
+    "x": 1688.99,
+    "y": 1053.48,
+    "z": 18.6775
+  },
+  "players": [
+    {
+      "id": "p1",
+      "race": 1,
+      "class": 1,
+      "level": 59
+    },
+    {
+      "id": "p2",
+      "race": 1,
+      "class": 1,
+      "level": 59
+    },
+    {
+      "id": "p3",
+      "race": 1,
+      "class": 1,
+      "level": 59
+    },
+    {
+      "id": "p4",
+      "race": 1,
+      "class": 1,
+      "level": 59
+    },
+    {
+      "id": "p5",
+      "race": 1,
+      "class": 1,
+      "level": 59
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p2"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p3"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p4"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p5"
+    },
+    {
+      "action": "encounter_credit",
+      "label": "Bloodmage Thalnos is credited",
+      "actor": "p1",
+      "entry": 4543
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "p1 is not rewarded the Classic Random 56-60 quest",
+      "actor": "p1",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "p2 is not rewarded the Classic Random 56-60 quest",
+      "actor": "p2",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "p3 is not rewarded the Classic Random 56-60 quest",
+      "actor": "p3",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "p4 is not rewarded the Classic Random 56-60 quest",
+      "actor": "p4",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "p5 is not rewarded the Classic Random 56-60 quest",
+      "actor": "p5",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 0
+    }
+  ]
+}

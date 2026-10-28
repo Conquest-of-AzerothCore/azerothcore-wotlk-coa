@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Call of the Storm and Call of the Wind do not stack (#5498)",
+  "contract": "Call of the Storm (578311) tooltips 'Does not stack with Call of the Wind.'; Call of the Wind (804018) tooltips the mirrored clause. PR #4952 fixed Aegis-vs-Aegis and Aegis-vs-Call exclusivity but explicitly scoped Calls out; no spell_group row existed for either Call family, so both stayed active together, matching the report. The new spell_group 1171 (stack rule 2, exclusive from same caster) makes casting one remove the other on the same recipient.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "storm", "race": 1, "class": 16, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "storm", "spell": 578311 },
+    { "action": "learn", "actor": "storm", "spell": 804018 },
+    { "action": "assert", "actor": "storm", "metric": "spell_power_cost", "spell": 578311, "max": 1000 },
+    { "action": "assert", "actor": "storm", "metric": "spell_power_cost", "spell": 804018, "max": 1000 },
+
+    { "action": "set_power", "actor": "storm", "value": 1000 },
+    { "action": "cast", "actor": "storm", "spell": 578311, "target": "storm" },
+    { "action": "assert", "label": "SETUP: Call of the Storm is applied",
+      "actor": "storm", "metric": "aura", "spell": 578311, "equals": 1, "within_ms": 1500 },
+
+    { "action": "set_power", "actor": "storm", "value": 1000 },
+    { "action": "wait", "label": "Clear the GCD from Call of the Storm", "ms": 1600 },
+    { "action": "cast", "actor": "storm", "spell": 804018, "target": "storm" },
+    { "action": "assert", "label": "SETUP: Call of the Wind is applied",
+      "actor": "storm", "metric": "aura", "spell": 804018, "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "DISCRIMINATING: Call of the Wind removes Call of the Storm (fails today: both stay at 1)",
+      "actor": "storm", "metric": "aura", "spell": 578311, "equals": 0 },
+
+    { "action": "set_power", "actor": "storm", "value": 1000 },
+    { "action": "wait", "label": "Clear the GCD from Call of the Wind", "ms": 1600 },
+    { "action": "cast", "actor": "storm", "spell": 578311, "target": "storm" },
+    { "action": "assert", "label": "SETUP: Call of the Storm is cast a second time",
+      "actor": "storm", "metric": "spell_cast_count", "spell": 578311, "equals": 2, "within_ms": 1500 },
+    { "action": "assert", "label": "DISCRIMINATING: casting Call of the Storm again removes Call of the Wind",
+      "actor": "storm", "metric": "aura", "spell": 804018, "equals": 0 },
+    { "action": "assert", "actor": "storm", "metric": "aura", "spell": 578311, "equals": 1 }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Darkcasting spawns a Blood Orb on an ability critical strike (#3042)",
+  "contract": "Darkcasting 706247: \"Critical strikes with abilities now spawn a Blood Orb near you for $707434d.\" 706247 is aura 42 SPELL_AURA_PROC_TRIGGER_SPELL -> 707434 with ProcFlags 0 and no spell_proc row, so it never procs. 707434 is SPELL_EFFECT_SUMMON of creature 315303 (SummonProperties 61, 15 s), and coa_world has no creature_template 315303. Picking the orb up should apply Darkcasting 712383, which spell_ascension_animated_blood already consumes. The probe is Bloodmoon Blast 500125 with maximum spell crit rating. The orb pulses 712418 every 200 ms, whose 712419 (2 yd) is the pickup. DISCRIMINATING: after the talent, a critical Bloodmoon Blast spawns a Blood Orb that casts 712418. The orb spawns anywhere within 707434's 6 yd, so it may be collected at once; the orb's own cast is asserted instead of its presence. The pickup half (712383, 712385) is not asserted because the runner cannot walk to a random point.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 100000
+    }
+  ],
+  "creatures": [
+    { "id": "d", "owner": "b", "entry": 36, "health": 1000000, "distance": 15 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "b", "spell": 500125 },
+    { "action": "learn", "actor": "b", "spell": 706247 },
+    { "action": "assert", "actor": "b", "metric": "aura", "spell": 706247, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Baseline: no Blood Orb", "actor": "b", "metric": "owned_creature_count", "entry": 315303, "equals": 0 },
+    { "action": "snapshot", "actor": "b", "metric": "spell_damage_count", "spell": 500125, "target": "d", "save_as": "hits" },
+    { "action": "cast", "actor": "b", "spell": 500125, "target": "d" },
+    {
+      "action": "assert", "label": "SETUP: Bloodmoon Blast lands",
+      "actor": "b", "metric": "spell_damage_count", "spell": 500125, "target": "d",
+      "relative_to": "hits", "min": 1, "within_ms": 8000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the critical strike spawns a Blood Orb that starts its pickup pulse",
+      "actor": "b", "metric": "spell_go_count", "entry": 315303, "spell": 712418, "min": 1, "within_ms": 3000
+    }
+  ]
+}

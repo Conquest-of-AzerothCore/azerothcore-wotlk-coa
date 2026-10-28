@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "name": "Blood Frenzy fires from Harvest Time against a nearby hostile target (#3161)",
+  "contract": [
+    "Talent 707899 (Blood Frenzy, rank 1) is registered via spell_proc (ProcFlags 69652, Chance 100) and",
+    "spell_script_names aura_ascension_reaper_blood_frenzy (rev_20260921_21). Casting Harvest Time (803995)",
+    "with a hostile target within 20 yds procs the aura, which casts 803039 (Blood Frenzy, rank 2, the raw",
+    "Shadow damage-over-time) at that target.",
+    "coa-obtainable confirms 707899 is in the calibrated live capture (advancement-granted) while 803039 is",
+    "not directly acquirable but is trigger_reachable through 707899's proc -- both ranks are proved by the",
+    "same scenario rather than by separately learning 803039."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "reaper",
+      "entry": 36,
+      "level": 80,
+      "distance": 5,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 707899
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 803995
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Blood Frenzy has not fired yet",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 803039,
+      "equals": 0
+    },
+    {
+      "action": "attack",
+      "actor": "reaper",
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let combat and target selection settle",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 803995,
+      "target": "reaper"
+    },
+    {
+      "action": "wait",
+      "label": "Let the proc resolve",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Casting Harvest Time near a hostile target procs Blood Frenzy (803039)",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 803039,
+      "min": 1
+    },
+    {
+      "action": "stop_attack",
+      "actor": "reaper"
+    }
+  ]
+}

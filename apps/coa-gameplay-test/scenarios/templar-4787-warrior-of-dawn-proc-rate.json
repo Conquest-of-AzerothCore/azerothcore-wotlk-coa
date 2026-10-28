@@ -1,0 +1,23 @@
+{
+ "schema": 1,
+ "name": "Warrior of Dawn procs at its authored 10% chance, not never (#4787)",
+ "contract": "Warrior of Dawn 560648's Description reads \"Melee damage dealt now has a $h% chance to...\", rendered from its own DBC ProcChance = 10. Its spell_proc row (rev_20260909_04_templar_completion.sql) sets Chance to 0, which SpellMgr::LoadSpellProcs defers to the DBC ProcChance (rev_20260919_20_coa_proc_chance_parity.sql's documented intent), so the effective proc chance is 10%, not 0%. Over enough real melee hits the proc (561156, cast directly by the aura's own Proc() handler, so spell_cast_count is the metric per the README) must fire at least once.",
+ "timeout_ms": 180000,
+ "players": [
+  { "id": "t", "race": 1, "class": 19, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000, "allow_regeneration": false }
+ ],
+ "creatures": [
+  { "id": "dummy", "owner": "t", "entry": 36, "health": 100000000, "distance": 3 }
+ ],
+ "steps": [
+  { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+  { "action": "learn", "actor": "t", "spell": 560648 },
+  { "action": "add_item", "actor": "t", "item": 2495 },
+  { "action": "equip", "actor": "t", "item": 2495, "slot": 15 },
+  { "action": "attack", "actor": "t", "target": "dummy" },
+  { "action": "assert", "label": "SETUP: melee combat engaged", "actor": "t", "metric": "combat", "equals": 1, "within_ms": 5000 },
+  { "action": "wait", "label": "Accumulate roughly 60 auto-attack swings at a ~2 sec weapon speed", "ms": 130000 },
+  { "action": "assert", "label": "SETUP: enough real melee hits landed to trust a 10% chance over ~60 trials", "actor": "t", "metric": "melee_damage_count", "min": 50 },
+  { "action": "assert", "label": "DISCRIMINATING: Warrior of Dawn's proc (561156) fired at least once, not zero", "actor": "t", "metric": "spell_cast_count", "spell": 561156, "min": 1 }
+ ]
+}

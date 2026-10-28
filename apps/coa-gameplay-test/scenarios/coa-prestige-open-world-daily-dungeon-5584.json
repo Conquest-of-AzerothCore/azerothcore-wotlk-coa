@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "name": "Prestige Open World daily ignores quests turned in inside a dungeon",
+  "contract": "Issue #5584: the Open World Prestige daily 80956 counts quests turned in in the open world only. Turning in Kobold Camp Cleanup 7 inside the Stockade (map 34) leaves its \"World Quests Completed\" counter at 0.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 34,
+    "x": 54.23,
+    "y": 0.28,
+    "z": -18.34,
+    "o": 6.26,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "prestiger",
+      "race": 1,
+      "class": 20,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 2000
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "prestiger",
+      "quest": 80956,
+      "complete": false
+    },
+    {
+      "action": "assert",
+      "label": "The Open World daily starts with no turned-in quests",
+      "actor": "prestiger",
+      "metric": "quest_objective_count",
+      "quest": 80956,
+      "index": 1,
+      "equals": 0
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "prestiger",
+      "quest": 7
+    },
+    {
+      "action": "reward_quest",
+      "actor": "prestiger",
+      "quest": 7
+    },
+    {
+      "action": "assert",
+      "label": "Kobold Camp Cleanup is turned in",
+      "actor": "prestiger",
+      "metric": "quest_rewarded",
+      "quest": 7,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "A quest turned in inside a dungeon does not count",
+      "actor": "prestiger",
+      "metric": "quest_objective_count",
+      "quest": 80956,
+      "index": 1,
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "name": "Astral Archer grants ranged critical strike rating equal to 10% of Intellect (#1321)",
+  "contract": [
+    "Astral Archer 681330 (Spell.dbc, SpellFamilyName 32, Rank 'Specialization', passive, CharacterAdvancement 12142,",
+    "Moonbow tab, RequiredLevel 20) reads 'Increases your ranged critical strike rating by $s1% of your Intellect. In",
+    "addition, gaining mana no longer generates threat.' Its only effect is effect 0: SPELL_AURA_MOD_RATING_FROM_STAT",
+    "(220), EffectBasePoints 9 with DieSides 1 = 10, EffectMiscValue 512 = bit 9 = CR_CRIT_RANGED, EffectMiscValueB 3 =",
+    "STAT_INTELLECT. The report's premise (the id is absent from the source, so nothing applies it) does not hold for",
+    "this clause: Player::UpdateRating adds int32(CalculatePct(GetStat(miscValueB), amount)) to every rating in the",
+    "mask and Player::UpdateStats re-runs it whenever Intellect changes; no contract or script touches 681330. The",
+    "threat clause has no DBC effect; starcaller-astral-archer-mana-threat covers it. Both fixtures are the",
+    "same race, class and level with no gear, so archer minus control is the talent's contribution: 10% of the",
+    "archer's Intellect, truncated (at most one point below, so 0.085..0.1001 for Intellect of 67 or more). Arcane",
+    "Intellect 42995 (+60 Intellect in effect 0) is then applied to both: the archer's ranged crit rating follows",
+    "the Intellect gain at 10% (6 of 60, 0.083..0.117 with truncation on both readings) while the control, which",
+    "gains the same Intellect, gains no ranged crit rating at all, so the rating comes from the passive."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "archer",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "archer",
+      "spell": 681330
+    },
+    {
+      "action": "assert",
+      "label": "Learning Astral Archer applies its passive aura",
+      "actor": "archer",
+      "metric": "aura",
+      "spell": 681330,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The passive's rating-from-Intellect effect resolves to 10",
+      "actor": "archer",
+      "metric": "aura_amount",
+      "spell": 681330,
+      "effect": 0,
+      "equals": 10
+    },
+    {
+      "action": "snapshot",
+      "label": "Ranged crit rating without the passive",
+      "actor": "control",
+      "metric": "combat_rating",
+      "rating": 9,
+      "save_as": "control_rating"
+    },
+    {
+      "action": "snapshot",
+      "label": "Archer Intellect",
+      "actor": "archer",
+      "metric": "stat",
+      "stat": 3,
+      "save_as": "archer_int"
+    },
+    {
+      "action": "assert",
+      "label": "The passive adds some ranged crit rating",
+      "actor": "archer",
+      "metric": "combat_rating",
+      "rating": 9,
+      "relative_to": "control_rating",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The added ranged crit rating is 10% of Intellect",
+      "actor": "archer",
+      "metric": "combat_rating",
+      "rating": 9,
+      "relative_to": "control_rating",
+      "ratio_to": "archer_int",
+      "min": 0.085,
+      "max": 0.1001
+    },
+    {
+      "action": "snapshot",
+      "label": "Archer ranged crit rating before the Intellect buff",
+      "actor": "archer",
+      "metric": "combat_rating",
+      "rating": 9,
+      "save_as": "archer_rating"
+    },
+    {
+      "action": "set_aura",
+      "label": "Arcane Intellect on the archer",
+      "actor": "archer",
+      "spell": 42995,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Arcane Intellect on the control",
+      "actor": "control",
+      "spell": 42995,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "The archer gains Intellect from the buff",
+      "actor": "archer",
+      "metric": "stat",
+      "stat": 3,
+      "relative_to": "archer_int",
+      "min": 59,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "label": "Archer Intellect gained from the buff",
+      "actor": "archer",
+      "metric": "stat",
+      "stat": 3,
+      "relative_to": "archer_int",
+      "save_as": "int_gain"
+    },
+    {
+      "action": "assert",
+      "label": "The archer's ranged crit rating follows the Intellect gain at 10%",
+      "actor": "archer",
+      "metric": "combat_rating",
+      "rating": 9,
+      "relative_to": "archer_rating",
+      "ratio_to": "int_gain",
+      "min": 0.083,
+      "max": 0.117,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The control's ranged crit rating does not follow its Intellect gain",
+      "actor": "control",
+      "metric": "combat_rating",
+      "rating": 9,
+      "relative_to": "control_rating",
+      "equals": 0
+    }
+  ]
+}

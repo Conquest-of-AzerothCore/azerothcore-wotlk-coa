@@ -9,11 +9,12 @@ namespace
 {
 
 constexpr uint32 BLOODMAGE_SPELL_FAMILY = 26;
+constexpr uint32 BLOODMAGE_BLOOD_CRAVING = 800780;
 
 constexpr uint32 GRIM_OMEN_STRIKE_MASK1 = 1 | 8388608;
 
-constexpr uint32 GRIM_OMEN_HOWL_MASK1 = 4;
-constexpr uint32 GRIM_OMEN_HOWL_MASK2 = 128 | 2048 | 131072;
+constexpr uint32 BLOODMAGE_HOWL_MASK1 = 4;
+constexpr uint32 BLOODMAGE_HOWL_MASK2 = 128 | 2048 | 131072;
 
 class aura_ascension_bloodmage_infection : public AuraScript
 {
@@ -41,7 +42,7 @@ class aura_ascension_bloodmage_grim_omen : public AuraScript
         if (!spellInfo || spellInfo->SpellFamilyName != BLOODMAGE_SPELL_FAMILY)
             return false;
 
-        if (spellInfo->SpellFamilyFlags.HasFlag(0, GRIM_OMEN_HOWL_MASK1, GRIM_OMEN_HOWL_MASK2))
+        if (spellInfo->SpellFamilyFlags.HasFlag(0, BLOODMAGE_HOWL_MASK1, BLOODMAGE_HOWL_MASK2))
             return (event.GetSpellPhaseMask() & PROC_SPELL_PHASE_CAST) != 0;
 
         if (spellInfo->SpellFamilyFlags.HasFlag(0, GRIM_OMEN_STRIKE_MASK1, 0))
@@ -54,6 +55,25 @@ class aura_ascension_bloodmage_grim_omen : public AuraScript
     void Register() override
     {
         DoCheckProc += AuraCheckProcFn(aura_ascension_bloodmage_grim_omen::CheckProc);
+    }
+};
+
+class aura_ascension_bloodmage_packleader : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_bloodmage_packleader);
+
+    bool CheckProc(ProcEventInfo& event)
+    {
+        SpellInfo const* spellInfo = event.GetSpellInfo();
+        return spellInfo && spellInfo->Id != BLOODMAGE_BLOOD_CRAVING &&
+            spellInfo->SpellFamilyName == BLOODMAGE_SPELL_FAMILY &&
+            spellInfo->SpellFamilyFlags.HasFlag(0, BLOODMAGE_HOWL_MASK1, BLOODMAGE_HOWL_MASK2) &&
+            (event.GetSpellPhaseMask() & PROC_SPELL_PHASE_CAST) != 0;
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(aura_ascension_bloodmage_packleader::CheckProc);
     }
 };
 
@@ -78,5 +98,6 @@ void AddSC_AscensionBloodmageProcs()
 {
     RegisterSpellScript(aura_ascension_bloodmage_infection);
     RegisterSpellScript(aura_ascension_bloodmage_grim_omen);
+    RegisterSpellScript(aura_ascension_bloodmage_packleader);
     RegisterSpellScript(aura_ascension_bloodmage_malediction);
 }

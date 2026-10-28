@@ -1,0 +1,31 @@
+{
+ "schema": 1,
+ "name": "Tranquil Circle sleeps player targets for 8 sec, not 40 sec (#4325)",
+ "contract": "Tranquil Circle 801205's own Description reads \"Every $t2 sec, enemies within the radius enter a tranquil state, falling asleep for $850010d (8 sec vs players).\" Tranquil State 850010 has SpellDuration row 64 = 40000 ms with no lower value anywhere in that row for a player-specific cap, so the 8 sec the tooltip promises against players must be enforced in code (mirroring the existing Permafrost player-duration cap in AscensionRunemasterTalents.cpp): a hostile player hit by the circle gets an 8000 ms Tranquil State, not 40000 ms.",
+ "timeout_ms": 90000,
+ "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+ "players": [
+  { "id": "templar", "race": 1, "class": 19, "level": 19, "spell_hit_rating": 10000 },
+  { "id": "enemy", "race": 8, "class": 8, "level": 19 }
+ ],
+ "steps": [
+  { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+  { "action": "learn", "actor": "templar", "spell": 801205 },
+  { "action": "pvp", "actor": "templar", "enabled": true },
+  { "action": "pvp", "actor": "enemy", "enabled": true },
+  { "action": "set_power", "actor": "templar", "power": 3, "value": 100 },
+  {
+    "action": "cast", "actor": "templar", "spell": 801205,
+    "destination": { "x": -9617.06, "y": -288.949, "z": 57.3053 }
+  },
+  { "action": "wait", "label": "Let the circle's first periodic tick land", "ms": 2500 },
+  {
+    "action": "assert", "label": "SETUP: Tranquil State lands on the hostile player", "actor": "enemy",
+    "metric": "aura", "spell": 850010, "equals": 1
+  },
+  {
+    "action": "assert", "label": "DISCRIMINATING: Tranquil State is capped to 8 sec against a player, not 40 sec",
+    "actor": "enemy", "metric": "aura_duration_ms", "spell": 850010, "min": 6500, "max": 8000
+  }
+ ]
+}

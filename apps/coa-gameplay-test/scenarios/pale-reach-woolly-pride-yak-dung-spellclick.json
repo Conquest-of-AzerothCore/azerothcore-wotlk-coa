@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Woolly Pride: a Yak Dung pile in the Nivelarn stables is cleaned by spell click for Stables cleaned",
+  "contract": [
+    "Issue #7994. The Yak Dung 165503 (display 131060) piles in the Nivelarn stables are creatures; cleaning one is",
+    "the Clean Stable spell click 9978002, gated on Woolly Pride 175133 in progress. Expected: the pile is not",
+    "clickable before the quest, becomes clickable once it is taken, and a click credits Stables cleaned (index 1)."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -6399.5, "y": 124.5, "z": 514.0, "o": 1.62},
+  "players": [
+    {"id": "p", "race": 3, "class": 1, "level": 25}
+  ],
+  "steps": [
+    {"action": "set_phase", "label": "Join world phase 1, where the piles are", "actor": "p", "value": 1},
+    {"action": "wait", "label": "Let the stable pile reach the client", "ms": 2500},
+    {"action": "assert", "label": "the pile is not clickable without the quest", "actor": "p",
+     "metric": "nearby_creature_sent_spellclick", "entry": 165503, "equals": 0, "within_ms": 2000},
+    {"action": "prepare_quest", "label": "Take Woolly Pride", "actor": "p", "quest": 175133, "complete": false},
+    {"action": "assert", "label": "the client is told the pile can be clicked", "actor": "p",
+     "metric": "nearby_creature_sent_spellclick", "entry": 165503, "equals": 1, "within_ms": 3000},
+    {"action": "spell_click_nearby", "label": "Clean the pile", "actor": "p", "entry": 165503},
+    {"action": "assert", "label": "Stables cleaned counts one pile", "actor": "p",
+     "metric": "quest_objective_count", "quest": 175133, "index": 1, "equals": 1, "within_ms": 5000}
+  ]
+}

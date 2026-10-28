@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "name": "Hero Valkyr's Calling deals its Holy damage on the charge-down, scaling with attack power (#7442)",
+  "contract": [
+    "Valkyr's Calling 280650 tooltip (Spell.dbc Description[enUS]): 'leap into the air, becoming immune ... At the",
+    "end of the duration, you charge back down, dealing ${$280654m1+$280654ppl1+$AP*0.225+$SP*.225} Holy damage to",
+    "all enemies within $280654a1 yds.' The whole chain is native: 280650 Effect1 triggers the leap (280651,",
+    "LEAP_BACK), its Effect0 (ASCENSION_TRIGGER_SPELL_DELAYED) schedules 280652 after ~1.8s; 280652's Effect0",
+    "(JUMP_DEST) lands the caster and its Effect1 (delayed-trigger amplitude) fires 280654; 280654's Effect0 is a",
+    "plain SPELL_EFFECT_SCHOOL_DAMAGE with EffectBasePoints[0]=123 (non-zero) and a non-zero area radius. The",
+    "expected non-zero, AP-scaling Holy hit is read from this DBC data and the tooltip formula, independent of",
+    "whether the reported zero-damage symptom is reproduced."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    { "id": "hero", "race": 1, "class": 10, "level": 60, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "hero", "entry": 36, "level": 60, "health": 2000000, "distance": 5, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "hero", "spell": 280650 },
+    {
+      "action": "snapshot", "actor": "hero", "metric": "spell_damage_count", "spell": 280654, "target": "enemy",
+      "save_as": "holy_hits_before"
+    },
+    {
+      "action": "snapshot", "actor": "hero", "metric": "spell_damage_total", "spell": 280654, "target": "enemy",
+      "save_as": "holy_damage_before"
+    },
+    { "action": "cast", "actor": "hero", "spell": 280650, "target": "enemy" },
+    { "action": "wait", "label": "Let the ~1.8 s airborne delay and the charge-down trigger chain complete", "ms": 3000 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the charge-down's Holy damage actually lands on the target, not zero as reported",
+      "actor": "hero", "metric": "spell_damage_count", "spell": 280654, "target": "enemy",
+      "relative_to": "holy_hits_before", "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The landed hit deals non-zero Holy damage",
+      "actor": "hero", "metric": "spell_damage_total", "spell": 280654, "target": "enemy",
+      "relative_to": "holy_damage_before", "min": 1
+    }
+  ]
+}

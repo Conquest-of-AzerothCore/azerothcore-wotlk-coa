@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Issue 3370: Solemn Priest converts Intellect into attack power at the tooltip's 125% rate",
+  "contract": [
+    "804269 eff0 is native SPELL_AURA_MOD_ATTACK_POWER_OF_STAT_PERCENT",
+    "(AuraEffect::HandleAuraModAttackPowerOfStatPercent, SpellAuraEffects.cpp:333), EffectBasePoints[0]=124,",
+    "misc=3 (Intellect). WotLK EffectBasePoints store the displayed value minus one, so this applies a 125%",
+    "conversion, matching the tooltip 'Increases your melee AP by 125% of your Intellect'. No CoA code runs at",
+    "804269 for this effect."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [{"id": "rm", "race": 1, "class": 32, "level": 60}],
+  "steps": [
+    {"action": "wait", "ms": 500},
+    {"action": "snapshot", "actor": "rm", "metric": "stat", "stat": 3, "save_as": "int_base"},
+    {"action": "snapshot", "actor": "rm", "metric": "attack_power", "save_as": "ap_base"},
+    {"action": "learn", "actor": "rm", "spell": 804269},
+    {"action": "assert", "label": "CONTRACT: attack power rises by 125% of current Intellect", "actor": "rm",
+     "metric": "attack_power", "relative_to": "ap_base", "ratio_to": "int_base", "min": 1.20, "max": 1.30,
+     "within_ms": 1500}
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "name": "A summoned companion leaves the Greater Imp in the pet slot and the imp logs its own damage (#236)",
+  "contract": "Issue #236 reports that Recount's pet damage section shows the Knight of Xoroth's companion dealing 0 damage instead of the Greater Imp. Server side, Summon: Greater Imp 520661 is SPELL_EFFECT_SUMMON_PET for creature 510100 (a Pet: Unit::SetMinion puts it in the pet slot and UNIT_FIELD_SUMMON and marks it player-controlled and owned by the knight), while a companion such as Mechanical Squirrel 4055 is SPELL_EFFECT_SUMMON with SummonProperties 41, a SUMMON_TYPE_MINIPET that only fills UNIT_FIELD_CRITTER, so it never takes the pet slot. The imp casts its own Burning Slap 630930, and the combat log packets (SMSG_SPELLNONMELEEDAMAGELOG) name the imp as the caster. Recount 3.3.5 (Tracker.lua Recount:DetectPet, Recount.lua Recount:SetOwner/AddPetCombatant, GUI_Detail.lua) builds its per-owner pet list from client-computed combat log flags (TYPE_PET or TYPE_GUARDIAN with AFFILIATION_MINE) and from SPELL_SUMMON events: the companion's summon logs SPELL_SUMMON (Spell::EffectSummonType calls ExecuteLogEffectSummonObject) and is registered as a pet at once, while the imp joins the list at its first damage event, and the detail window's Pet Damage panel shows one pet at a time starting with the first ('Click for next Pet'). The companion with 0 damage is therefore Recount's first listed pet, not a server attribution error. Expected: after the imp and then the companion are summoned, the imp is still the knight's pet and both are present; the imp's Burning Slap damage is logged with the imp as the caster and none with the knight as the caster.",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 27 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "knight", "entry": 36, "level": 27, "health": 100000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "knight", "spell": 92101 },
+    { "action": "set_aura", "actor": "knight", "spell": 92101, "stacks": 1, "label": "Force the Greater Imp passive aura" },
+    {
+      "action": "assert", "label": "SETUP: the Greater Imp passive teaches Summon: Greater Imp",
+      "actor": "knight", "metric": "knows_spell", "spell": 520661, "equals": 1, "within_ms": 3000
+    },
+    { "action": "cast", "actor": "knight", "spell": 520661 },
+    {
+      "action": "assert", "label": "SETUP: the Greater Imp is the knight's pet",
+      "actor": "knight", "metric": "pet_entry", "equals": 510100, "within_ms": 10000
+    },
+    { "action": "learn", "actor": "knight", "spell": 4055 },
+    { "action": "cast", "actor": "knight", "spell": 4055, "label": "Summon the Mechanical Squirrel companion" },
+    {
+      "action": "assert", "label": "SETUP: the companion is out",
+      "actor": "knight", "metric": "owned_creature_count", "entry": 2671, "equals": 1, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "The companion does not take the pet slot: the Greater Imp is still the knight's pet",
+      "actor": "knight", "metric": "pet_entry", "equals": 510100
+    },
+    {
+      "action": "assert", "label": "The Greater Imp was not dismissed by the companion",
+      "actor": "knight", "metric": "owned_creature_count", "entry": 510100, "equals": 1
+    },
+    { "action": "attack", "actor": "knight", "target": "dummy", "pet": true, "label": "Send the imp to attack" },
+    {
+      "action": "assert", "label": "The imp's Burning Slap damage is logged with the imp as the caster",
+      "actor": "knight", "metric": "spell_damage_count", "spell": 630930, "pet": true, "target": "dummy",
+      "min": 1, "within_ms": 20000
+    },
+    {
+      "action": "assert", "label": "None of the imp's Burning Slap damage is logged with the knight as the caster",
+      "actor": "knight", "metric": "spell_damage_count", "spell": 630930, "target": "dummy", "equals": 0
+    },
+    {
+      "action": "assert", "label": "The companion stays out beside the fighting imp",
+      "actor": "knight", "metric": "owned_creature_count", "entry": 2671, "equals": 1
+    }
+  ]
+}

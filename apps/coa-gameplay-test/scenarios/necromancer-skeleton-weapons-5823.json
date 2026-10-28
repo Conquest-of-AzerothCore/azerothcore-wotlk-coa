@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "name": "Necromancer: raised Skeletal Warriors hold their weapons (COA-5823)",
+  "contract": [
+    "Raise: Lesser Skeletal Warrior (500970) summons 50065 and Raise: Greater Skeletal Warrior (504901) summons 51065.",
+    "Neither creature had a creature_equip_template row, so both fought bare-handed. A summon has no creature row and",
+    "Creature::UpdateEntry loads equipment ID 1 from the template, which now holds a Worn Shortsword (25) for the",
+    "Lesser Skeletal Warrior and a Worn Battleaxe (12282) for the Greater one. The metric reads the creature's",
+    "UNIT_VIRTUAL_ITEM_SLOT_ID main-hand slot, which the client draws."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "lesser",
+      "race": 5,
+      "class": 23,
+      "level": 60
+    },
+    {
+      "id": "greater",
+      "race": 5,
+      "class": 23,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "lesser",
+      "spell": 500970
+    },
+    {
+      "action": "learn",
+      "actor": "greater",
+      "spell": 504901
+    },
+    {
+      "action": "cast",
+      "label": "Raise: Lesser Skeletal Warrior",
+      "actor": "lesser",
+      "spell": 500970
+    },
+    {
+      "action": "cast",
+      "label": "Raise: Greater Skeletal Warrior",
+      "actor": "greater",
+      "spell": 504901
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Lesser Skeletal Warrior is raised",
+      "actor": "lesser",
+      "metric": "owned_creature_count",
+      "entry": 50065,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Greater Skeletal Warrior is raised",
+      "actor": "greater",
+      "metric": "owned_creature_count",
+      "entry": 51065,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Lesser Skeletal Warrior holds a Worn Shortsword",
+      "actor": "lesser",
+      "metric": "owned_creature_virtual_item",
+      "entry": 50065,
+      "slot": 0,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Greater Skeletal Warrior holds a Worn Battleaxe",
+      "actor": "greater",
+      "metric": "owned_creature_virtual_item",
+      "entry": 51065,
+      "slot": 0,
+      "equals": 12282
+    }
+  ]
+}

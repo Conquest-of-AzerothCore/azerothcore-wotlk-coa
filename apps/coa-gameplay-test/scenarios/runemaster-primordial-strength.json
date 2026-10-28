@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Runemaster Primordial Strength converts attack power and Agility into spell damage and hit (#1796)",
+  "contract": [
+    "Primordial Strength 301149 (automatic level 20 Runic entry, CharacterAdvancement 4201): 'Increases your",
+    "spell damage by $s1% of your attack power, your hit rating by $s2% of your Agility and your spell hit rating",
+    "by an additional $s3% of your Agility.' Effect 0 is SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER 30 on the magic",
+    "schools (MiscValue 126); effects 1 and 2 are SPELL_AURA_MOD_RATING_FROM_STAT 3 of Agility (MiscValueB 1) on",
+    "melee, ranged and spell hit (MiscValue 224) and on spell hit alone (MiscValue 128). All three are native auras:",
+    "SpellBaseDamageBonusDone adds int(AP x 30%) and Player::UpdateRating adds int(Agility x 3%) per effect.",
+    "Expected (QA Test +1000 Agility 984582 and +1000 Melee and Ranged AP 10031 make the truncation negligible):",
+    "melee and ranged hit rating rise by 3% of Agility, spell hit rating by 6%, and Fire and Arcane spell power",
+    "by 30% of attack power; unlearning the passive removes all of it."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "set_aura", "label": "QA Test +1000 Agility", "actor": "rm", "spell": 984582, "stacks": 1},
+    {"action": "set_aura", "label": "QA Test +1000 Melee and Ranged AP", "actor": "rm", "spell": 10031, "stacks": 1},
+    {"action": "assert", "label": "SETUP: at least 1000 Agility", "actor": "rm", "metric": "stat", "stat": 1,
+      "min": 1000},
+    {"action": "assert", "label": "SETUP: at least 1000 attack power", "actor": "rm", "metric": "attack_power",
+      "min": 1000},
+    {"action": "snapshot", "actor": "rm", "metric": "stat", "stat": 1, "save_as": "agility"},
+    {"action": "snapshot", "actor": "rm", "metric": "attack_power", "save_as": "attack_power"},
+    {"action": "snapshot", "actor": "rm", "metric": "combat_rating", "rating": 5, "save_as": "melee_hit_base"},
+    {"action": "snapshot", "actor": "rm", "metric": "combat_rating", "rating": 6, "save_as": "ranged_hit_base"},
+    {"action": "snapshot", "actor": "rm", "metric": "combat_rating", "rating": 7, "save_as": "spell_hit_base"},
+    {"action": "snapshot", "actor": "rm", "metric": "spell_power", "school": 2, "save_as": "fire_power_base"},
+    {"action": "snapshot", "actor": "rm", "metric": "spell_power", "school": 6, "save_as": "arcane_power_base"},
+
+    {"action": "learn", "actor": "rm", "spell": 301149},
+    {"action": "assert", "label": "SETUP: Primordial Strength is active", "actor": "rm", "metric": "aura",
+      "spell": 301149, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "CONTRACT: melee hit rating rises by 3% of Agility", "actor": "rm",
+      "metric": "combat_rating", "rating": 5, "relative_to": "melee_hit_base", "ratio_to": "agility",
+      "min": 0.029, "max": 0.0301},
+    {"action": "assert", "label": "CONTRACT: ranged hit rating rises by 3% of Agility", "actor": "rm",
+      "metric": "combat_rating", "rating": 6, "relative_to": "ranged_hit_base", "ratio_to": "agility",
+      "min": 0.029, "max": 0.0301},
+    {"action": "assert", "label": "CONTRACT: spell hit rating rises by 3% plus an additional 3% of Agility",
+      "actor": "rm", "metric": "combat_rating", "rating": 7, "relative_to": "spell_hit_base",
+      "ratio_to": "agility", "min": 0.058, "max": 0.0601},
+    {"action": "assert", "label": "CONTRACT: Fire spell power rises by 30% of attack power", "actor": "rm",
+      "metric": "spell_power", "school": 2, "relative_to": "fire_power_base", "ratio_to": "attack_power",
+      "min": 0.2985, "max": 0.3001},
+    {"action": "assert", "label": "CONTRACT: Arcane spell power rises by 30% of attack power", "actor": "rm",
+      "metric": "spell_power", "school": 6, "relative_to": "arcane_power_base", "ratio_to": "attack_power",
+      "min": 0.2985, "max": 0.3001},
+
+    {"action": "unlearn", "actor": "rm", "spell": 301149},
+    {"action": "assert", "actor": "rm", "metric": "aura", "spell": 301149, "equals": 0, "within_ms": 1000},
+    {"action": "assert", "label": "CONTRACT: the hit rating leaves with the passive", "actor": "rm",
+      "metric": "combat_rating", "rating": 7, "relative_to": "spell_hit_base", "equals": 0},
+    {"action": "assert", "label": "CONTRACT: the spell power leaves with the passive", "actor": "rm",
+      "metric": "spell_power", "school": 2, "relative_to": "fire_power_base", "equals": 0}
+  ]
+}

@@ -592,7 +592,7 @@ public:
     * @param args the search string which either contains a player GUID or a part fo the character-name
     */
 
-    static bool HandleCharacterDeletedListCommand(ChatHandler* handler, Optional<std::string_view> needleStr)
+    static bool HandleCharacterDeletedListCommand(ChatHandler* handler, Optional<QuotedString> needleStr)
     {
         std::string needle;
         if (needleStr)
@@ -631,7 +631,7 @@ public:
      *
      * @param args the search string which either contains a player GUID or a part of the character-name
      */
-    static bool HandleCharacterDeletedRestoreCommand(ChatHandler* handler, std::string needle, Optional<std::string_view> newCharName, Optional<AccountIdentifier> newAccount)
+    static bool HandleCharacterDeletedRestoreCommand(ChatHandler* handler, QuotedString needle, Optional<std::string_view> newCharName, Optional<AccountIdentifier> newAccount)
     {
         DeletedInfoList foundList;
         if (!GetDeletedCharacterInfoList(foundList, needle))
@@ -687,7 +687,7 @@ public:
      *
      * @param args the search string which either contains a player GUID or a part fo the character-name
      */
-    static bool HandleCharacterDeletedDeleteCommand(ChatHandler* handler, std::string needle)
+    static bool HandleCharacterDeletedDeleteCommand(ChatHandler* handler, QuotedString needle)
     {
         DeletedInfoList foundList;
         if (!GetDeletedCharacterInfoList(foundList, needle))

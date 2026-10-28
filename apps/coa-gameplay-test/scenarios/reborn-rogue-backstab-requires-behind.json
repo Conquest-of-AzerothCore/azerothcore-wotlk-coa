@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "Warcraft Reborn Rogue Backstab requires being behind the target",
+  "contract": "Backstab reads 'Backstab the target ... Must be behind the target. Requires a dagger in the main hand.' Stock Backstab 53 and its Warcraft Reborn copy 1100053 both carry SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET (0x20000) in the client's SpellCustomAttr.dbc; the server takes it from spell_custom_attr (53, the table's first row) and its Reborn twin. Spell::CheckCast refuses such a spell with SPELL_FAILED_NOT_BEHIND (57) while the caster is inside the target's front arc. The dummy is summoned facing the Rogue (both start at o = pi, the dummy on the +x side); the Rogue turns to face it, so it stands in the dummy's front arc and both Backstabs must fail with 57. Moved to the dummy's back, facing it, the same Backstabs must hit.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "r", "race": 1, "class": 4, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "d", "owner": "r", "entry": 32666, "level": 60, "distance": 2.5, "health": 1000000, "stationary": true }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 3.14159 },
+  "steps": [
+    { "action": "wait", "ms": 4000 },
+    { "action": "add_item", "actor": "r", "item": 2092 },
+    { "action": "equip", "actor": "r", "item": 2092, "slot": 15 },
+    { "action": "learn", "actor": "r", "spell": 1100053 },
+    { "action": "learn", "actor": "r", "spell": 53 },
+    { "action": "teleport", "label": "Face the dummy from its front", "actor": "r", "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "set_power", "actor": "r", "power": 3, "value": 100 },
+    { "action": "cast", "label": "Backstab from the front", "actor": "r", "spell": 1100053, "target": "d" },
+    { "action": "assert", "label": "DISCRIMINATING: Backstab from the front fails with SPELL_FAILED_NOT_BEHIND", "actor": "r", "metric": "cast_failure", "spell": 1100053, "equals": 57, "within_ms": 1000 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "set_power", "actor": "r", "power": 3, "value": 100 },
+    { "action": "cast", "label": "Stock Backstab from the front", "actor": "r", "spell": 53, "target": "d" },
+    { "action": "assert", "label": "DISCRIMINATING: stock Backstab from the front fails with SPELL_FAILED_NOT_BEHIND", "actor": "r", "metric": "cast_failure", "spell": 53, "equals": 57, "within_ms": 1000 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "teleport", "label": "Step behind the dummy, facing its back", "actor": "r", "map": 0, "x": -8913.41, "y": -115.853, "z": 82.3711, "o": 3.14159 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "set_power", "actor": "r", "power": 3, "value": 100 },
+    { "action": "cast", "label": "Backstab from behind", "actor": "r", "spell": 1100053, "target": "d" },
+    { "action": "assert", "label": "Backstab from behind hits the dummy", "actor": "r", "metric": "spell_damage_count", "spell": 1100053, "target": "d", "min": 1, "within_ms": 3000 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "set_power", "actor": "r", "power": 3, "value": 100 },
+    { "action": "cast", "label": "Stock Backstab from behind", "actor": "r", "spell": 53, "target": "d" },
+    { "action": "assert", "label": "Stock Backstab from behind hits the dummy", "actor": "r", "metric": "spell_damage_count", "spell": 53, "target": "d", "min": 1, "within_ms": 3000 }
+  ]
+}

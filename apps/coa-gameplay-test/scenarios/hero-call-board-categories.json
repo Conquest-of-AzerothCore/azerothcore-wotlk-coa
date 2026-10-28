@@ -1,0 +1,159 @@
+{
+  "schema": 1,
+  "name": "Hero's Call Board: categories list their dailies and accepting keeps the category open",
+  "contract": "The Hero's Call Board (gameobject 402000, Stormwind) answers a click with the three category options CallBoardUI binds to: PvE, Profession and PvP Quests. Choosing PvE replaces them with a single Return option and lists the PvE dailies a level-60 Human may take, among them 18017 (Culling the Felpaw, QuestSortID -380), and none of the PvP ones. Accepting 18017 through the ordinary accept packet adds it to the log and re-sends the PvE category instead of closing the window: the Return option stays and 18017 is still listed, now as a quest in progress. Return shows the three categories again, and PvP lists the battleground (81260) and duel (80651) dailies. Opening the board also verifies Path to Ascension tutorial 81, the Alliance Call Board visit.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8822.9,
+    "y": 628.4,
+    "z": 93.8,
+    "o": 2.4
+  },
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join the world phase the board is spawned in",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the Stormwind board's grid load",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The Hero's Call Board is within reach",
+      "actor": "hero",
+      "metric": "nearby_gameobject_count",
+      "entry": 402000,
+      "equals": 1
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Click the board",
+      "actor": "hero",
+      "entry": 402000
+    },
+    {
+      "action": "assert",
+      "label": "The board answers with its three categories",
+      "actor": "hero",
+      "metric": "gossip_options",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Opening the board verifies the Alliance Call Board tutorial",
+      "actor": "hero",
+      "metric": "player_setting",
+      "source": "core.ascension.tutorial_verified",
+      "index": 81,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "gossip_select",
+      "label": "Choose PvE Quests",
+      "actor": "hero",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "label": "The category replaces the options with Return",
+      "actor": "hero",
+      "metric": "gossip_options",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Culling the Felpaw is offered",
+      "actor": "hero",
+      "metric": "quest_menu_has",
+      "quest": 18017,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The PvP dailies are not in the PvE category",
+      "actor": "hero",
+      "metric": "quest_menu_has",
+      "quest": 81260,
+      "equals": 0
+    },
+    {
+      "action": "quest_accept",
+      "label": "Accept Culling the Felpaw from the board",
+      "actor": "hero",
+      "gameobject": 402000,
+      "quest": 18017
+    },
+    {
+      "action": "assert",
+      "label": "The quest is in the log",
+      "actor": "hero",
+      "metric": "quest_status",
+      "quest": 18017,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "The category stays open after accepting",
+      "actor": "hero",
+      "metric": "gossip_options",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "and still lists the quest, now in progress",
+      "actor": "hero",
+      "metric": "quest_menu_has",
+      "quest": 18017,
+      "equals": 1
+    },
+    {
+      "action": "gossip_select",
+      "label": "Return",
+      "actor": "hero",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "label": "Return shows the three categories again",
+      "actor": "hero",
+      "metric": "gossip_options",
+      "equals": 3
+    },
+    {
+      "action": "gossip_select",
+      "label": "Choose PvP Quests",
+      "actor": "hero",
+      "option": 2
+    },
+    {
+      "action": "assert",
+      "label": "The battleground daily is offered",
+      "actor": "hero",
+      "metric": "quest_menu_has",
+      "quest": 81260,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "and the duel daily",
+      "actor": "hero",
+      "metric": "quest_menu_has",
+      "quest": 80651,
+      "equals": 1
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Chop Shop: Demon's Blood stacks add crit chance to Sever and Meatsaw (#486)",
+  "contract": "Chop Shop 704953 reads 'Each stack of Demon's Blood now increases the critical strike chance of Sever and Meatsaw by 1%' (bindmysoul.com/conquest/talents.normalized.json, fetchedAt 2026-07-22T23:10:31.369Z). Its effect 0 is aura 107 (SPELL_AURA_ADD_FLAT_MODIFIER), MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), classmask (0,10485760,0) covering Sever 500904/Brimstone Bludgeon 520005 (shared family bit 0,2097152) and Meatsaw 800340 root (family bit 0,8388608). Demon's Blood is aura 500906, StackAmount capped at 6 by AscensionXoroth::Gain. AscensionXoroth::Refresh keeps the modifier amount equal to the current Demon's Blood stack count; Refresh runs on the class's periodic 250ms OnPlayerUpdate tick, so a short wait after set_aura is enough to observe the sync. At level 60 the character's currently owned ranks are Sever 501505 and Meatsaw 578119 (AscensionSpellProgressionData.h).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: no crit bonus on Sever before Chop Shop",
+      "actor": "knight", "metric": "spell_modifier", "spell": 501505, "op": 7, "base": 0, "equals": 0
+    },
+    {
+      "action": "assert", "label": "SETUP: no crit bonus on Meatsaw before Chop Shop",
+      "actor": "knight", "metric": "spell_modifier", "spell": 578119, "op": 7, "base": 0, "equals": 0
+    },
+    { "action": "learn", "actor": "knight", "spell": 704953 },
+    { "action": "set_aura", "actor": "knight", "spell": 704953, "stacks": 1, "label": "Force the Chop Shop passive aura" },
+    { "action": "wait", "label": "Let the periodic Refresh sync with zero Demon's Blood stacks", "ms": 500 },
+    {
+      "action": "assert", "label": "Zero Demon's Blood stacks give zero crit bonus",
+      "actor": "knight", "metric": "spell_modifier", "spell": 501505, "op": 7, "base": 0, "equals": 0
+    },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 4, "label": "Set Demon's Blood to 4 stacks" },
+    { "action": "wait", "label": "Let the periodic Refresh sync the modifier amount", "ms": 500 },
+    {
+      "action": "assert", "label": "CONTRACT: 4 stacks add 4 crit percentage points to Sever",
+      "actor": "knight", "metric": "spell_modifier", "spell": 501505, "op": 7, "base": 0, "equals": 4
+    },
+    {
+      "action": "assert", "label": "CONTRACT: 4 stacks add 4 crit percentage points to Meatsaw",
+      "actor": "knight", "metric": "spell_modifier", "spell": 578119, "op": 7, "base": 0, "equals": 4
+    },
+    {
+      "action": "assert", "label": "REGRESSION: an unrelated family spell is untouched",
+      "actor": "knight", "metric": "spell_modifier", "spell": 801002, "op": 7, "base": 0, "equals": 0
+    },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 6, "label": "Raise Demon's Blood to the 6-stack cap" },
+    { "action": "wait", "label": "Let the periodic Refresh sync the modifier amount", "ms": 500 },
+    {
+      "action": "assert", "label": "CONTRACT: 6 stacks add 6 crit percentage points to Sever",
+      "actor": "knight", "metric": "spell_modifier", "spell": 501505, "op": 7, "base": 0, "equals": 6
+    },
+    {
+      "action": "assert", "label": "CONTRACT: 6 stacks add 6 crit percentage points to Meatsaw",
+      "actor": "knight", "metric": "spell_modifier", "spell": 578119, "op": 7, "base": 0, "equals": 6
+    }
+  ]
+}

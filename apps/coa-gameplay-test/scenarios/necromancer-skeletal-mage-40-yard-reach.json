@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Necromancer: a Skeletal Mage only casts at targets within 40 yards",
+  "contract": "A Skeletal Mage (50075) is a ranged minion without combat movement: it adopts its owner's target and casts its 801513 frost bolt every 3 s. 801513 is instant with SpellRange 13 'Anywhere' (50000 yd), so the engine sets no limit; like the 40 yd 'Command: Skeletal Mages' and the Frost Wyrm's breath targeting, the mage engages only an enemy within 40 yards and in line of sight, and drops a target that leaves that reach so it can follow its owner's next target. The owner first attacks a golem 46 yards away: the mage does not adopt it and casts nothing. The owner then attacks a golem 30 yards away: the mage adopts it and damages it.",
+  "timeout_ms": 90000,
+  "location": { "map": 1, "x": -2712.6, "y": 19.0, "z": 14.5, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 60, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "far", "owner": "n", "entry": 36, "level": 60, "health": 1000000, "distance": 46 },
+    { "id": "near", "owner": "n", "entry": 36, "level": 60, "health": 1000000, "distance": 30 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and the Life Force aura settle", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 500331 },
+    { "action": "cast", "label": "Raise a Skeletal Mage", "actor": "n", "spell": 500331 },
+    {
+      "action": "assert", "label": "SETUP: a Skeletal Mage is raised", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50075, "equals": 1, "within_ms": 8000
+    },
+    { "action": "snapshot", "actor": "far", "metric": "health", "save_as": "far0" },
+    { "action": "attack", "label": "The owner attacks the golem 46 yards away", "actor": "n", "target": "far" },
+    { "action": "wait", "label": "Two of the mage's 3 s attack cycles pass", "ms": 7000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the mage cast nothing at the golem 46 yards away", "actor": "n",
+      "metric": "spell_go_count", "spell": 801513, "entry": 50075, "equals": 0
+    },
+    {
+      "action": "assert", "label": "The golem 46 yards away took no damage", "actor": "far",
+      "metric": "health", "relative_to": "far0", "equals": 0
+    },
+    {
+      "action": "assert", "label": "The mage does not hold the golem out of reach", "actor": "n",
+      "metric": "owned_creature_victim", "entry": 50075, "target": "far", "equals": 0
+    },
+    { "action": "snapshot", "actor": "near", "metric": "health", "save_as": "near0" },
+    { "action": "attack", "label": "The owner switches to the golem 30 yards away", "actor": "n", "target": "near" },
+    {
+      "action": "assert", "label": "CONTROL: the mage casts at a target within 40 yards", "actor": "n",
+      "metric": "spell_go_count", "spell": 801513, "entry": 50075, "min": 1, "within_ms": 7000
+    },
+    {
+      "action": "assert", "label": "CONTROL: the golem 30 yards away takes the mage's damage", "actor": "near",
+      "metric": "health", "relative_to": "near0", "max": -1, "within_ms": 3000
+    }
+  ]
+}

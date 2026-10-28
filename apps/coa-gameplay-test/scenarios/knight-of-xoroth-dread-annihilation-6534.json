@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "name": "Dread exposes Annihilation over Meatsaw (#6534)",
+  "contract": "Dread706502 tooltip explicitly transforms Meatsaw into Annihilation504581 when ten Dread707131 stacks grant ready aura712294. The reported ready aura alone must expose a usable replacement.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "knight",
+      "item": 629951
+    },
+    {
+      "action": "learn",
+      "actor": "knight",
+      "spell": 201
+    },
+    {
+      "action": "equip",
+      "actor": "knight",
+      "item": 629951,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "knight",
+      "spell": 800340
+    },
+    {
+      "action": "learn",
+      "actor": "knight",
+      "spell": 706502
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 712294,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura",
+      "spell": 712294,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "knows_spell",
+      "spell": 504581,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "temporary_spell_replacement",
+      "spell": 800340,
+      "equals": 504581
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 800340,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 504581,
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura",
+      "spell": 712294,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "temporary_spell_replacement",
+      "spell": 800340,
+      "equals": 800340
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 712294,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "temporary_spell_replacement",
+      "spell": 800340,
+      "equals": 800340
+    },
+    {
+      "action": "unlearn",
+      "actor": "knight",
+      "spell": 706502
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "knows_spell",
+      "spell": 504581,
+      "equals": 0,
+      "within_ms": 1000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "knight",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ]
+}

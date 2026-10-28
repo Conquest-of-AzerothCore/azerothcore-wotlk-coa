@@ -1,0 +1,565 @@
+PoolID,Family,ItemID,Name,ItemLevel,RequiredLevel,Quality,Class,Subclass,InventoryType,DisplayID,Description,DumpLine
+9002040,Normal MC + Onyxia,647,Destiny,57,52,4,2,8,17,15764,,701
+9002040,Normal MC + Onyxia,811,Axe of the Deep Woods,57,52,4,2,0,13,14969,,786
+9002040,Normal MC + Onyxia,833,Lifestone,56,51,4,4,0,12,17837,,800
+9002040,Normal MC + Onyxia,944,Elemental Mage Staff,61,56,4,2,10,17,15804,,901
+9002040,Normal MC + Onyxia,1168,Skullflame Shield,59,54,4,4,6,14,24438,,1053
+9002040,Normal MC + Onyxia,1263,Brain Hacker,60,55,4,2,1,17,17230,,1132
+9002040,Normal MC + Onyxia,1443,Jeweled Amulet of Cainwyn,60,55,4,4,0,2,3978,,1275
+9002040,Normal MC + Onyxia,1728,Teebu's Blazing Longsword,64,60,4,2,7,13,15612,,1466
+9002040,Normal MC + Onyxia,2099,Dwarven Hand Cannon,58,53,4,2,3,26,22835,,1757
+9002040,Normal MC + Onyxia,2243,Hand of Edward the Odd,62,57,4,2,4,13,15453,,1886
+9002040,Normal MC + Onyxia,2244,Krol Blade,56,51,4,2,7,13,5416,,1887
+9002040,Normal MC + Onyxia,2245,Helm of Narv,59,54,4,4,3,1,12175,,1888
+9002040,Normal MC + Onyxia,2246,Myrmidon's Signet,58,53,4,4,0,11,6929,,1889
+9002040,Normal MC + Onyxia,2801,Blade of Hanna,64,59,4,2,8,17,2756,,2358
+9002040,Normal MC + Onyxia,3475,Cloak of Flames,64,60,4,4,1,16,18228,,3024
+9002040,Normal MC + Onyxia,10470,Eternal Flame Artifact,65,60,4,4,0,12,28931,,8915
+9002040,Normal MC + Onyxia,10529,Elemental Attuned Blade,63,58,4,2,7,21,26458,,8971
+9002040,Normal MC + Onyxia,10531,Stoneclad Libram,65,60,4,4,7,28,139535,,8973
+9002040,Normal MC + Onyxia,10532,Codex of War Arts,65,60,4,4,7,28,139540,,8974
+9002040,Normal MC + Onyxia,10533,Tome of Burning Passion,65,60,4,4,7,28,140165,,8975
+9002040,Normal MC + Onyxia,12572,Veil of Flame Worshipper,70,60,4,4,1,1,145750,,10732
+9002040,Normal MC + Onyxia,12573,Corebound Shoulders,65,60,4,4,2,3,8314,,10733
+9002040,Normal MC + Onyxia,12594,Flamewalker Shoulderguards,65,60,4,4,4,3,21125,,10746
+9002040,Normal MC + Onyxia,12595,Flamebound Harness,65,60,4,4,2,5,36673,,10747
+9002040,Normal MC + Onyxia,12597,Embercloth Robe,65,60,4,4,1,20,13029,,10749
+9002040,Normal MC + Onyxia,12598,Flametouched Leggings,65,60,4,4,3,7,21460,,10750
+9002040,Normal MC + Onyxia,12599,Flameguard Legguards,65,60,4,4,4,7,25034,,10751
+9002040,Normal MC + Onyxia,12872,Blazing Slippers,65,60,4,4,1,8,154343,,11002
+9002040,Normal MC + Onyxia,12908,Magma Forged Walkers,65,60,4,4,3,8,36248,,11034
+9002040,Normal MC + Onyxia,12909,Embercloth Wraps,65,60,4,4,1,9,36213,,11035
+9002040,Normal MC + Onyxia,12910,Molten Slugtosser,65,60,4,2,3,26,57331,,11036
+9002040,Normal MC + Onyxia,12911,Magma-forged Throwing Knife,65,60,4,2,16,25,32793,,11037
+9002040,Normal MC + Onyxia,14552,Stockade Pauldrons,55,50,4,4,4,3,22481,,12481
+9002040,Normal MC + Onyxia,14553,Sash of Mercy,61,56,4,4,2,6,22585,,12482
+9002040,Normal MC + Onyxia,14554,Cloudkeeper Legplates,62,57,4,4,4,7,19856,,12483
+9002040,Normal MC + Onyxia,14555,Alcor's Sunrazor,63,58,4,2,15,13,20081,,12484
+9002040,Normal MC + Onyxia,14557,The Lion Horn of Stormwind,63,58,4,4,0,12,3808,,12486
+9002040,Normal MC + Onyxia,14558,Lady Maye's Pendant,64,59,4,4,0,2,6945,,12487
+9002040,Normal MC + Onyxia,15712,Pyroclasmic Longbow,70,60,4,2,2,15,71262,,13611
+9002040,Normal MC + Onyxia,15816,Firelord Totem,72,60,4,4,9,28,139811,,13711
+9002040,Normal MC + Onyxia,15956,Heavy Boulder Totem,65,60,4,4,9,28,57388,,13844
+9002040,Normal MC + Onyxia,15957,Overloaded Totem,65,60,4,4,9,28,139335,,13845
+9002040,Normal MC + Onyxia,15958,The Water Duke's Stolen Totem,65,60,4,4,9,28,139654,,13846
+9002040,Normal MC + Onyxia,15959,Idol of the Magma Beast,65,60,4,4,8,28,140157,,13847
+9002040,Normal MC + Onyxia,16010,Eclipsing Rune of the Herald,65,60,4,4,8,28,139643,,13896
+9002040,Normal MC + Onyxia,16011,Burned Idol of the Earth,65,60,4,4,8,28,139014,,13897
+9002040,Normal MC + Onyxia,17063,Band of Accuria,72,60,4,4,0,11,6928,,14803
+9002040,Normal MC + Onyxia,17065,Medallion of Steadfast Might,65,60,4,4,0,2,2433,,14805
+9002040,Normal MC + Onyxia,17066,Drillborer Disk,65,60,4,4,6,14,27392,,14806
+9002040,Normal MC + Onyxia,17069,Striker's Mark,65,60,4,2,2,15,24407,,14809
+9002040,Normal MC + Onyxia,17071,Gutgore Ripper,65,60,4,2,15,13,27393,,14811
+9002040,Normal MC + Onyxia,17072,Blastershot Launcher,65,60,4,2,3,26,23235,,14812
+9002040,Normal MC + Onyxia,17073,Earthshaker,65,60,4,2,5,17,25517,,14813
+9002040,Normal MC + Onyxia,17074,Shadowstrike,65,60,4,2,6,17,23248,,14814
+9002040,Normal MC + Onyxia,17076,Bonereaver's Edge,70,60,4,2,8,17,25550,,14816
+9002040,Normal MC + Onyxia,17077,Crimson Shocker,65,60,4,2,19,26,23252,,14817
+9002040,Normal MC + Onyxia,17082,Shard of the Flame,72,60,4,4,0,12,23566,,14819
+9002040,Normal MC + Onyxia,17083,Blade of Dragon Bone,70,60,4,2,7,21,38765,,14820
+9002040,Normal MC + Onyxia,17102,Cloak of the Shrouded Mists,70,60,4,4,1,16,23665,,14823
+9002040,Normal MC + Onyxia,17103,Azuresong Mageblade,65,60,4,2,7,21,23523,,14824
+9002040,Normal MC + Onyxia,17104,Spinal Reaper,70,60,4,2,1,17,25551,,14825
+9002040,Normal MC + Onyxia,17105,Aurastone Hammer,65,60,4,2,4,21,27391,,14826
+9002040,Normal MC + Onyxia,17106,Malistar's Defender,70,60,4,4,6,14,23547,,14827
+9002040,Normal MC + Onyxia,17107,Dragon's Blood Cape,70,60,4,4,1,16,23668,,14828
+9002040,Normal MC + Onyxia,17109,Choker of Enlightenment,65,60,4,4,0,2,6946,,14830
+9002040,Normal MC + Onyxia,17110,Seal of the Archmagus,65,60,4,4,0,11,23542,,14831
+9002040,Normal MC + Onyxia,18203,Eskhandar's Right Claw,65,60,4,2,13,21,24104,,15337
+9002040,Normal MC + Onyxia,18608,Benediction,68,60,4,2,10,17,24779,,15706
+9002040,Normal MC + Onyxia,18609,Anathema,68,60,4,2,10,17,24778,,15707
+9002040,Normal MC + Onyxia,18803,Finkle's Lava Dredger,68,60,4,2,5,17,24706,"Property of Finkle Einhorn, Grandmaster Adventurer",15897
+9002040,Normal MC + Onyxia,18805,Core Hound Tooth,68,60,4,2,15,13,26912,,15899
+9002040,Normal MC + Onyxia,18806,Core Forged Greaves,68,60,4,4,4,8,24711,,15900
+9002040,Normal MC + Onyxia,18808,Gloves of the Hypnotic Flame,68,60,4,4,1,10,24715,,15902
+9002040,Normal MC + Onyxia,18809,Sash of Whispered Secrets,68,60,4,4,1,6,24717,,15903
+9002040,Normal MC + Onyxia,18810,Wild Growth Spaulders,68,60,4,4,2,3,12906,,15904
+9002040,Normal MC + Onyxia,18811,Fireproof Cloak,68,60,4,4,1,16,18879,,15905
+9002040,Normal MC + Onyxia,18812,Wristguards of True Flight,68,60,4,4,3,9,24718,,15906
+9002040,Normal MC + Onyxia,18814,Choker of the Fire Lord,70,60,4,4,0,2,329,,15908
+9002040,Normal MC + Onyxia,18815,Essence of the Pure Flame,70,60,4,4,0,12,24719,,15909
+9002040,Normal MC + Onyxia,18816,Perdition's Blade,70,60,4,2,15,13,26901,,15910
+9002040,Normal MC + Onyxia,18817,Crown of Destruction,70,60,4,4,3,1,24723,,15911
+9002040,Normal MC + Onyxia,18820,Talisman of Ephemeral Power,65,60,4,4,0,12,24724,,15914
+9002040,Normal MC + Onyxia,18821,Quick Strike Ring,65,60,4,4,0,11,6923,,15915
+9002040,Normal MC + Onyxia,18822,Obsidian Edged Blade,65,60,4,2,8,17,27394,,15916
+9002040,Normal MC + Onyxia,18823,Aged Core Leather Gloves,65,60,4,4,2,10,24727,,15917
+9002040,Normal MC + Onyxia,18824,Magma Tempered Boots,65,60,4,4,4,8,24732,,15918
+9002040,Normal MC + Onyxia,18829,Deep Earth Spaulders,65,60,4,4,3,3,24882,,15923
+9002040,Normal MC + Onyxia,18832,Brutality Blade,65,60,4,2,7,13,24744,,15926
+9002040,Normal MC + Onyxia,18842,Staff of Dominance,65,60,4,2,10,17,27396,,15936
+9002040,Normal MC + Onyxia,18861,Flamewaker Legplates,65,60,4,4,4,7,24753,,15955
+9002040,Normal MC + Onyxia,18870,Helm of the Lifegiver,65,60,4,4,3,1,24760,,15964
+9002040,Normal MC + Onyxia,18872,Manastorm Leggings,65,60,4,4,1,7,24764,,15966
+9002040,Normal MC + Onyxia,18875,Salamander Scale Pants,65,60,4,4,2,7,24766,,15969
+9002040,Normal MC + Onyxia,18878,Sorcerous Dagger,65,60,4,2,15,21,24769,,15972
+9002040,Normal MC + Onyxia,18879,Heavy Dark Iron Ring,65,60,4,4,0,11,6924,,15973
+9002040,Normal MC + Onyxia,19136,Mana Igniting Cord,65,60,4,4,1,6,25051,,16183
+9002040,Normal MC + Onyxia,19137,Onslaught Girdle,72,60,4,4,4,6,25052,,16184
+9002040,Normal MC + Onyxia,19138,Band of Sulfuras,70,60,4,4,0,11,25053,,16185
+9002040,Normal MC + Onyxia,19139,Fireguard Shoulders,68,60,4,4,2,3,21864,,16186
+9002040,Normal MC + Onyxia,19140,Cauterizing Band,68,60,4,4,0,11,25054,,16187
+9002040,Normal MC + Onyxia,19142,Fire Runed Grimoire,65,60,4,4,0,23,18146,,16189
+9002040,Normal MC + Onyxia,19143,Flameguard Gauntlets,65,60,4,4,4,10,25057,,16190
+9002040,Normal MC + Onyxia,19144,Sabatons of the Flamewalker,65,60,4,4,3,8,25058,,16191
+9002040,Normal MC + Onyxia,19145,Robe of Volatile Power,65,60,4,4,1,20,25059,,16192
+9002040,Normal MC + Onyxia,19146,Wristguards of Stability,65,60,4,4,2,9,4197,,16193
+9002040,Normal MC + Onyxia,19147,Ring of Spell Power,65,60,4,4,0,11,25060,,16194
+9002040,Normal MC + Onyxia,11571,Flame-Infused Sceptre,70,60,4,2,4,21,24564,,9929
+9002040,Normal MC + Onyxia,12596,Charred Breastplate,70,60,4,4,4,5,44403,,10748
+9002040,Normal MC + Onyxia,17064,Shard of the Scale,70,60,4,4,0,12,138504,,14804
+9002040,Normal MC + Onyxia,17067,Ancient Cornerstone Grimoire,70,60,4,4,0,23,23562,,14807
+9002040,Normal MC + Onyxia,17068,Deathbringer,70,60,4,2,0,13,23233,,14808
+9002040,Normal MC + Onyxia,17075,Vis'kag the Bloodletter,70,60,4,2,7,13,25548,,14815
+9002040,Normal MC + Onyxia,17078,Sapphiron Drape,70,60,4,4,1,16,23564,,14818
+9002040,Normal MC + Onyxia,17084,Mace of the Dragon Knight,70,60,4,2,5,17,57581,,14821
+9002040,Normal MC + Onyxia,18205,Eskhandar's Collar,70,60,4,4,0,2,12645,,15339
+9002040,Normal MC + Onyxia,18211,Wand of the Noble,70,60,4,2,19,26,26098,,15345
+9002040,Normal MC + Onyxia,18212,Band of Nyxondra,70,60,4,4,0,11,19268,,15346
+9002040,Normal MC + Onyxia,18215,Insignia of the Dragon,72,60,4,4,0,12,138276,,15347
+9002040,Normal MC + Onyxia,18216,Neltharion's Badge,72,60,4,4,0,12,138277,,15348
+9002040,Normal MC + Onyxia,18813,Ring of Binding,70,60,4,4,0,11,6912,,15907
+9002004,Ascended MC,200647,Destiny,70,60,4,2,8,17,15764,@Ascended Raid@,175760
+9002004,Ascended MC,200811,Axe of the Deep Woods,70,60,4,2,0,13,14969,@Ascended Raid@,175924
+9002004,Ascended MC,200833,Lifestone,70,60,4,4,0,12,17837,@Ascended Raid@,175946
+9002004,Ascended MC,200944,Elemental Mage Staff,70,56,4,2,10,17,15804,@Ascended Raid@,176057
+9002004,Ascended MC,201168,Skullflame Shield,70,60,4,4,6,14,24438,@Ascended Raid@,176277
+9002004,Ascended MC,201263,Brain Hacker,70,60,4,2,1,17,17230,@Ascended Raid@,176367
+9002004,Ascended MC,201443,Jeweled Amulet of Cainwyn,70,60,4,4,0,2,3978,@Ascended Raid@,176541
+9002004,Ascended MC,201728,Teebu's Blazing Longsword,72,60,4,2,7,13,15612,@Ascended Raid@,176813
+9002004,Ascended MC,202099,Dwarven Hand Cannon,70,60,4,2,3,26,22835,@Ascended Raid@,177160
+9002004,Ascended MC,202243,Hand of Edward the Odd,70,60,4,2,4,13,15453,@Ascended Raid@,177297
+9002004,Ascended MC,202244,Krol Blade,70,60,4,2,7,13,5416,@Ascended Raid@,177298
+9002004,Ascended MC,202245,Helm of Narv,70,60,4,4,3,1,12175,@Ascended Raid@,177299
+9002004,Ascended MC,202246,Myrmidon's Signet,70,60,4,4,0,11,6929,@Ascended Raid@,177300
+9002004,Ascended MC,202801,Blade of Hanna,70,60,4,2,8,17,2756,@Ascended Raid@,177823
+9002004,Ascended MC,203475,Cloak of Flames,70,60,4,4,1,16,18228,@Ascended Raid@,178114
+9002004,Ascended MC,210470,Eternal Flame Artifact,75,60,4,4,0,12,28931,@Ascended Molten Core@,179327
+9002004,Ascended MC,210529,Elemental Attuned Blade,72,58,4,2,7,21,26458,@Ascended Raid@,179354
+9002004,Ascended MC,210531,Stoneclad Libram,75,60,4,4,7,28,139535,@Ascended Raid@,179356
+9002004,Ascended MC,210532,Codex of War Arts,75,60,4,4,7,28,139540,@Ascended Raid@,179357
+9002004,Ascended MC,210533,Tome of Burning Passion,75,60,4,4,7,28,140165,@Ascended Raid@,179358
+9002004,Ascended MC,212572,Veil of Flame Worshipper,81,60,4,4,1,1,145750,@Ascended Raid@,180000
+9002004,Ascended MC,212573,Corebound Shoulders,75,60,4,4,2,3,8314,@Ascended Raid@,180001
+9002004,Ascended MC,212594,Flamewalker Shoulderguards,75,60,4,4,4,3,21125,@Ascended Raid@,180008
+9002004,Ascended MC,212595,Flamebound Harness,75,60,4,4,2,5,36673,@Ascended Raid@,180009
+9002004,Ascended MC,212597,Embercloth Robe,75,60,4,4,1,20,13029,@Ascended Raid@,180011
+9002004,Ascended MC,212598,Flametouched Leggings,75,60,4,4,3,7,21460,@Ascended Raid@,180012
+9002004,Ascended MC,212599,Flameguard Legguards,75,60,4,4,4,7,25034,@Ascended Raid@,180013
+9002004,Ascended MC,212872,Blazing Slippers,75,60,4,4,1,8,154343,@Ascended Raid@,180176
+9002004,Ascended MC,212908,Magma Forged Walkers,75,60,4,4,3,8,36248,@Ascended Raid@,180182
+9002004,Ascended MC,212909,Embercloth Wraps,75,60,4,4,1,9,36213,@Ascended Raid@,180183
+9002004,Ascended MC,212910,Molten Slugtosser,75,60,4,2,3,26,57331,@Ascended Raid@,180184
+9002004,Ascended MC,212911,Magma-forged Throwing Knife,75,60,4,2,16,25,32793,@Ascended Raid@,180185
+9002004,Ascended MC,214553,Sash of Mercy,70,60,4,4,2,6,22585,@Ascended Raid@,181167
+9002004,Ascended MC,214554,Cloudkeeper Legplates,70,60,4,4,4,7,19856,@Ascended Raid@,181168
+9002004,Ascended MC,214555,Alcor's Sunrazor,70,60,4,2,15,13,20081,@Ascended Raid@,181169
+9002004,Ascended MC,214557,The Lion Horn of Stormwind,70,60,4,4,0,12,3808,@Ascended Raid@,181171
+9002004,Ascended MC,214558,Lady Maye's Pendant,70,60,4,4,0,2,6945,@Ascended Raid@,181172
+9002004,Ascended MC,215712,Pyroclasmic Longbow,81,60,4,2,2,15,71262,@Ascended Raid@,181665
+9002004,Ascended MC,215816,Firelord Totem,83,60,4,4,9,28,139811,@Ascended Raid@,181683
+9002004,Ascended MC,215956,Heavy Boulder Totem,75,60,4,4,9,28,57388,@Ascended Raid@,181726
+9002004,Ascended MC,215957,Overloaded Totem,75,60,4,4,9,28,139335,@Ascended Raid@,181727
+9002004,Ascended MC,215958,The Water Duke's Stolen Totem,75,60,4,4,9,28,139654,@Ascended Raid@,181728
+9002004,Ascended MC,215959,Idol of the Magma Beast,75,60,4,4,8,28,140157,@Ascended Raid@,181729
+9002004,Ascended MC,216010,Eclipsing Rune of the Herald,75,60,4,4,8,28,139643,@Ascended Raid@,181738
+9002004,Ascended MC,216011,Burned Idol of the Earth,75,60,4,4,8,28,139014,@Ascended Raid@,181739
+9002004,Ascended MC,217063,Band of Accuria,83,60,4,4,0,11,6928,@Ascended Molten Core@,182076
+9002004,Ascended MC,217065,Medallion of Steadfast Might,75,60,4,4,0,2,2433,@Ascended Molten Core@,182078
+9002004,Ascended MC,217066,Drillborer Disk,75,60,4,4,6,14,27392,@Ascended Molten Core@,182079
+9002004,Ascended MC,217069,Striker's Mark,75,60,4,2,2,15,24407,@Ascended Molten Core@,182082
+9002004,Ascended MC,217071,Gutgore Ripper,75,60,4,2,15,13,27393,@Ascended Molten Core@,182084
+9002004,Ascended MC,217072,Blastershot Launcher,75,60,4,2,3,26,23235,@Ascended Molten Core@,182085
+9002004,Ascended MC,217073,Earthshaker,75,60,4,2,5,17,25517,@Ascended Molten Core@,182086
+9002004,Ascended MC,217074,Shadowstrike,75,60,4,2,6,17,23248,@Ascended Molten Core@,182087
+9002004,Ascended MC,217076,Bonereaver's Edge,81,60,4,2,8,17,25550,@Ascended Molten Core@,182089
+9002004,Ascended MC,217077,Crimson Shocker,75,60,4,2,19,26,23252,@Ascended Molten Core@,182090
+9002004,Ascended MC,217082,Shard of the Flame,83,60,4,4,0,12,23566,@Ascended Molten Core@,182093
+9002004,Ascended MC,217083,Blade of Dragon Bone,81,60,4,2,7,21,38765,@Ascended Molten Core@,182094
+9002004,Ascended MC,217102,Cloak of the Shrouded Mists,81,60,4,4,1,16,23665,@Ascended Molten Core@,182099
+9002004,Ascended MC,217103,Azuresong Mageblade,75,60,4,2,7,21,23523,@Ascended Molten Core@,182100
+9002004,Ascended MC,217104,Spinal Reaper,81,60,4,2,1,17,25551,@Ascended Molten Core@,182101
+9002004,Ascended MC,217105,Aurastone Hammer,75,60,4,2,4,21,27391,@Ascended Molten Core@,182102
+9002004,Ascended MC,217106,Malistar's Defender,81,60,4,4,6,14,23547,@Ascended Molten Core@,182103
+9002004,Ascended MC,217107,Dragon's Blood Cape,81,60,4,4,1,16,23668,@Ascended Molten Core@,182104
+9002004,Ascended MC,217109,Choker of Enlightenment,75,60,4,4,0,2,6946,@Ascended Molten Core@,182105
+9002004,Ascended MC,217110,Seal of the Archmagus,75,60,4,4,0,11,23542,@Ascended Molten Core@,182106
+9002004,Ascended MC,218203,Eskhandar's Right Claw,75,60,4,2,13,21,24104,@Ascended Molten Core@,182614
+9002004,Ascended MC,218608,Benediction,78,60,4,2,10,17,24779,@Ascended Molten Core@,182809
+9002004,Ascended MC,218609,Anathema,78,60,4,2,10,17,24778,@Ascended Molten Core@,182810
+9002004,Ascended MC,218803,Finkle's Lava Dredger,78,60,4,2,5,17,24706,"@Ascended Molten Core@Property of Finkle Einhorn, Grandmaster Adventurer",182880
+9002004,Ascended MC,218805,Core Hound Tooth,78,60,4,2,15,13,26912,@Ascended Molten Core@,182881
+9002004,Ascended MC,218806,Core Forged Greaves,78,60,4,4,4,8,24711,@Ascended Molten Core@,182882
+9002004,Ascended MC,218808,Gloves of the Hypnotic Flame,78,60,4,4,1,10,24715,@Ascended Molten Core@,182883
+9002004,Ascended MC,218809,Sash of Whispered Secrets,78,60,4,4,1,6,24717,@Ascended Molten Core@,182884
+9002004,Ascended MC,218810,Wild Growth Spaulders,78,60,4,4,2,3,12906,@Ascended Molten Core@,182885
+9002004,Ascended MC,218811,Fireproof Cloak,78,60,4,4,1,16,18879,@Ascended Molten Core@,182886
+9002004,Ascended MC,218812,Wristguards of True Flight,78,60,4,4,3,9,24718,@Ascended Molten Core@,182887
+9002004,Ascended MC,218814,Choker of the Fire Lord,81,60,4,4,0,2,329,@Ascended Molten Core@,182889
+9002004,Ascended MC,218815,Essence of the Pure Flame,81,60,4,4,0,12,24719,@Ascended Molten Core@,182890
+9002004,Ascended MC,218816,Perdition's Blade,81,60,4,2,15,13,26901,@Ascended Molten Core@,182891
+9002004,Ascended MC,218817,Crown of Destruction,81,60,4,4,3,1,24723,@Ascended Molten Core@,182892
+9002004,Ascended MC,218820,Talisman of Ephemeral Power,75,60,4,4,0,12,24724,@Ascended Molten Core@,182893
+9002004,Ascended MC,218821,Quick Strike Ring,75,60,4,4,0,11,6923,@Ascended Molten Core@,182894
+9002004,Ascended MC,218822,Obsidian Edged Blade,75,60,4,2,8,17,27394,@Ascended Molten Core@,182895
+9002004,Ascended MC,218823,Aged Core Leather Gloves,75,60,4,4,2,10,24727,@Ascended Molten Core@,182896
+9002004,Ascended MC,218824,Magma Tempered Boots,75,60,4,4,4,8,24732,@Ascended Molten Core@,182897
+9002004,Ascended MC,218829,Deep Earth Spaulders,75,60,4,4,3,3,24882,@Ascended Molten Core@,182899
+9002004,Ascended MC,218832,Brutality Blade,75,60,4,2,7,13,24744,@Ascended Molten Core@,182900
+9002004,Ascended MC,218842,Staff of Dominance,75,60,4,2,10,17,27396,@Ascended Molten Core@,182902
+9002004,Ascended MC,218861,Flamewaker Legplates,75,60,4,4,4,7,24753,@Ascended Molten Core@,182906
+9002004,Ascended MC,218870,Helm of the Lifegiver,75,60,4,4,3,1,24760,@Ascended Molten Core@,182908
+9002004,Ascended MC,218872,Manastorm Leggings,75,60,4,4,1,7,24764,@Ascended Molten Core@,182909
+9002004,Ascended MC,218875,Salamander Scale Pants,75,60,4,4,2,7,24766,@Ascended Molten Core@,182910
+9002004,Ascended MC,218878,Sorcerous Dagger,75,60,4,2,15,21,24769,@Ascended Molten Core@,182911
+9002004,Ascended MC,218879,Heavy Dark Iron Ring,75,60,4,4,0,11,6924,@Ascended Molten Core@,182912
+9002004,Ascended MC,219136,Mana Igniting Cord,75,60,4,4,1,6,25051,@Ascended Molten Core@,182962
+9002004,Ascended MC,219137,Onslaught Girdle,83,60,4,4,4,6,25052,@Ascended Molten Core@,182963
+9002004,Ascended MC,219138,Band of Sulfuras,83,60,4,4,0,11,25053,@Ascended Molten Core@,182964
+9002004,Ascended MC,219139,Fireguard Shoulders,78,60,4,4,2,3,21864,@Ascended Molten Core@,182965
+9002004,Ascended MC,219140,Cauterizing Band,78,60,4,4,0,11,25054,@Ascended Molten Core@,182966
+9002004,Ascended MC,219142,Fire Runed Grimoire,75,60,4,4,0,23,18146,@Ascended Molten Core@,182967
+9002004,Ascended MC,219143,Flameguard Gauntlets,75,60,4,4,4,10,25057,@Ascended Molten Core@,182968
+9002004,Ascended MC,219144,Sabatons of the Flamewalker,75,60,4,4,3,8,25058,@Ascended Molten Core@,182969
+9002004,Ascended MC,219145,Robe of Volatile Power,75,60,4,4,1,20,25059,@Ascended Molten Core@,182970
+9002004,Ascended MC,219146,Wristguards of Stability,75,60,4,4,2,9,4197,@Ascended Molten Core@,182971
+9002004,Ascended MC,219147,Ring of Spell Power,75,60,4,4,0,11,25060,@Ascended Molten Core@,182972
+9002041,Heroic MC + Onyxia,300944,Elemental Mage Staff,64,56,4,2,10,17,15804,@Heroic Raid@,214879
+9002041,Heroic MC + Onyxia,310470,Eternal Flame Artifact,68,60,4,4,0,12,28931,@Heroic Molten Core@,217017
+9002041,Heroic MC + Onyxia,310529,Elemental Attuned Blade,66,58,4,2,7,21,26458,@Heroic Raid@,217049
+9002041,Heroic MC + Onyxia,310531,Stoneclad Libram,68,60,4,4,7,28,139535,@Heroic Raid@,217051
+9002041,Heroic MC + Onyxia,310532,Codex of War Arts,68,60,4,4,7,28,139540,@Heroic Raid@,217052
+9002041,Heroic MC + Onyxia,310533,Tome of Burning Passion,68,60,4,4,7,28,140165,@Heroic Raid@,217053
+9002041,Heroic MC + Onyxia,312572,Veil of Flame Worshipper,74,60,4,4,1,1,145750,@Heroic Raid@,217755
+9002041,Heroic MC + Onyxia,312573,Corebound Shoulders,68,60,4,4,2,3,8314,@Heroic Raid@,217756
+9002041,Heroic MC + Onyxia,312594,Flamewalker Shoulderguards,68,60,4,4,4,3,21125,@Heroic Raid@,217763
+9002041,Heroic MC + Onyxia,312595,Flamebound Harness,68,60,4,4,2,5,36673,@Heroic Raid@,217764
+9002041,Heroic MC + Onyxia,312597,Embercloth Robe,68,60,4,4,1,20,13029,@Heroic Raid@,217766
+9002041,Heroic MC + Onyxia,312598,Flametouched Leggings,68,60,4,4,3,7,21460,@Heroic Raid@,217767
+9002041,Heroic MC + Onyxia,312599,Flameguard Legguards,68,60,4,4,4,7,25034,@Heroic Raid@,217768
+9002041,Heroic MC + Onyxia,312872,Blazing Slippers,68,60,4,4,1,8,154343,@Heroic Raid@,217832
+9002041,Heroic MC + Onyxia,312908,Magma Forged Walkers,68,60,4,4,3,8,36248,@Heroic Raid@,217846
+9002041,Heroic MC + Onyxia,312909,Embercloth Wraps,68,60,4,4,1,9,36213,@Heroic Raid@,217847
+9002041,Heroic MC + Onyxia,312910,Molten Slugtosser,68,60,4,2,3,26,57331,@Heroic Raid@,217848
+9002041,Heroic MC + Onyxia,312911,Magma-forged Throwing Knife,68,60,4,2,16,25,32793,@Heroic Raid@,217849
+9002041,Heroic MC + Onyxia,315712,Pyroclasmic Longbow,74,60,4,2,2,15,71262,@Heroic Raid@,218602
+9002041,Heroic MC + Onyxia,315816,Firelord Totem,76,60,4,4,9,28,139811,@Heroic Raid@,218628
+9002041,Heroic MC + Onyxia,315956,Heavy Boulder Totem,68,60,4,4,9,28,57388,@Heroic Raid@,218682
+9002041,Heroic MC + Onyxia,315957,Overloaded Totem,68,60,4,4,9,28,139335,@Heroic Raid@,218683
+9002041,Heroic MC + Onyxia,315958,The Water Duke's Stolen Totem,68,60,4,4,9,28,139654,@Heroic Raid@,218684
+9002041,Heroic MC + Onyxia,315959,Idol of the Magma Beast,68,60,4,4,8,28,140157,@Heroic Raid@,218685
+9002041,Heroic MC + Onyxia,316010,Eclipsing Rune of the Herald,68,60,4,4,8,28,139643,@Heroic Raid@,218698
+9002041,Heroic MC + Onyxia,316011,Burned Idol of the Earth,68,60,4,4,8,28,139014,@Heroic Raid@,218699
+9002041,Heroic MC + Onyxia,317063,Band of Accuria,76,60,4,4,0,11,6928,@Heroic Molten Core@,219060
+9002041,Heroic MC + Onyxia,317065,Medallion of Steadfast Might,68,60,4,4,0,2,2433,@Heroic Molten Core@,219062
+9002041,Heroic MC + Onyxia,317066,Drillborer Disk,68,60,4,4,6,14,27392,@Heroic Molten Core@,219063
+9002041,Heroic MC + Onyxia,317069,Striker's Mark,68,60,4,2,2,15,24407,@Heroic Molten Core@,219066
+9002041,Heroic MC + Onyxia,317071,Gutgore Ripper,68,60,4,2,15,13,27393,@Heroic Molten Core@,219067
+9002041,Heroic MC + Onyxia,317072,Blastershot Launcher,68,60,4,2,3,26,23235,@Heroic Molten Core@,219068
+9002041,Heroic MC + Onyxia,317073,Earthshaker,68,60,4,2,5,17,25517,@Heroic Molten Core@,219069
+9002041,Heroic MC + Onyxia,317074,Shadowstrike,68,60,4,2,6,17,23248,@Heroic Molten Core@,219070
+9002041,Heroic MC + Onyxia,317076,Bonereaver's Edge,74,60,4,2,8,17,25550,@Heroic Molten Core@,219072
+9002041,Heroic MC + Onyxia,317077,Crimson Shocker,68,60,4,2,19,26,23252,@Heroic Molten Core@,219073
+9002041,Heroic MC + Onyxia,317082,Shard of the Flame,76,60,4,4,0,12,23566,@Heroic Molten Core@,219075
+9002041,Heroic MC + Onyxia,317083,Blade of Dragon Bone,74,60,4,2,7,21,38765,@Heroic Molten Core@,219076
+9002041,Heroic MC + Onyxia,317102,Cloak of the Shrouded Mists,74,60,4,4,1,16,23665,@Heroic Molten Core@,219083
+9002041,Heroic MC + Onyxia,317103,Azuresong Mageblade,68,60,4,2,7,21,23523,@Heroic Molten Core@,219084
+9002041,Heroic MC + Onyxia,317104,Spinal Reaper,74,60,4,2,1,17,25551,@Heroic Molten Core@,219085
+9002041,Heroic MC + Onyxia,317105,Aurastone Hammer,68,60,4,2,4,21,27391,@Heroic Molten Core@,219086
+9002041,Heroic MC + Onyxia,317106,Malistar's Defender,74,60,4,4,6,14,23547,@Heroic Molten Core@,219087
+9002041,Heroic MC + Onyxia,317107,Dragon's Blood Cape,74,60,4,4,1,16,23668,@Heroic Molten Core@,219088
+9002041,Heroic MC + Onyxia,317109,Choker of Enlightenment,68,60,4,4,0,2,6946,@Heroic Molten Core@,219089
+9002041,Heroic MC + Onyxia,317110,Seal of the Archmagus,68,60,4,4,0,11,23542,@Heroic Molten Core@,219090
+9002041,Heroic MC + Onyxia,318203,Eskhandar's Right Claw,68,60,4,2,13,21,24104,@Heroic Molten Core@,219379
+9002041,Heroic MC + Onyxia,318608,Benediction,71,60,4,2,10,17,24779,@Heroic Molten Core@,219473
+9002041,Heroic MC + Onyxia,318609,Anathema,71,60,4,2,10,17,24778,@Heroic Molten Core@,219474
+9002041,Heroic MC + Onyxia,318803,Finkle's Lava Dredger,71,60,4,2,5,17,24706,"@Heroic Molten Core@ Property of Finkle Einhorn, Grandmaster Adventurer",219513
+9002041,Heroic MC + Onyxia,318805,Core Hound Tooth,71,60,4,2,15,13,26912,@Heroic Molten Core@,219515
+9002041,Heroic MC + Onyxia,318806,Core Forged Greaves,71,60,4,4,4,8,24711,@Heroic Molten Core@,219516
+9002041,Heroic MC + Onyxia,318808,Gloves of the Hypnotic Flame,71,60,4,4,1,10,24715,@Heroic Molten Core@,219517
+9002041,Heroic MC + Onyxia,318809,Sash of Whispered Secrets,71,60,4,4,1,6,24717,@Heroic Molten Core@,219518
+9002041,Heroic MC + Onyxia,318810,Wild Growth Spaulders,71,60,4,4,2,3,12906,@Heroic Molten Core@,219519
+9002041,Heroic MC + Onyxia,318811,Fireproof Cloak,71,60,4,4,1,16,18879,@Heroic Molten Core@,219520
+9002041,Heroic MC + Onyxia,318812,Wristguards of True Flight,71,60,4,4,3,9,24718,@Heroic Molten Core@,219521
+9002041,Heroic MC + Onyxia,318814,Choker of the Fire Lord,74,60,4,4,0,2,329,@Heroic Molten Core@,219523
+9002041,Heroic MC + Onyxia,318815,Essence of the Pure Flame,74,60,4,4,0,12,24719,@Heroic Molten Core@,219524
+9002041,Heroic MC + Onyxia,318816,Perdition's Blade,74,60,4,2,15,13,26901,@Heroic Molten Core@,219525
+9002041,Heroic MC + Onyxia,318817,Crown of Destruction,74,60,4,4,3,1,24723,@Heroic Molten Core@,219526
+9002041,Heroic MC + Onyxia,318820,Talisman of Ephemeral Power,68,60,4,4,0,12,24724,@Heroic Molten Core@,219527
+9002041,Heroic MC + Onyxia,318821,Quick Strike Ring,68,60,4,4,0,11,6923,@Heroic Molten Core@,219528
+9002041,Heroic MC + Onyxia,318822,Obsidian Edged Blade,68,60,4,2,8,17,27394,@Heroic Molten Core@,219529
+9002041,Heroic MC + Onyxia,318823,Aged Core Leather Gloves,68,60,4,4,2,10,24727,@Heroic Molten Core@,219530
+9002041,Heroic MC + Onyxia,318824,Magma Tempered Boots,68,60,4,4,4,8,24732,@Heroic Molten Core@,219531
+9002041,Heroic MC + Onyxia,318829,Deep Earth Spaulders,68,60,4,4,3,3,24882,@Heroic Molten Core@,219532
+9002041,Heroic MC + Onyxia,318832,Brutality Blade,68,60,4,2,7,13,24744,@Heroic Molten Core@,219533
+9002041,Heroic MC + Onyxia,318842,Staff of Dominance,68,60,4,2,10,17,27396,@Heroic Molten Core@,219536
+9002041,Heroic MC + Onyxia,318861,Flamewaker Legplates,68,60,4,4,4,7,24753,@Heroic Molten Core@,219541
+9002041,Heroic MC + Onyxia,318870,Helm of the Lifegiver,68,60,4,4,3,1,24760,@Heroic Molten Core@,219542
+9002041,Heroic MC + Onyxia,318872,Manastorm Leggings,68,60,4,4,1,7,24764,@Heroic Molten Core@,219543
+9002041,Heroic MC + Onyxia,318875,Salamander Scale Pants,68,60,4,4,2,7,24766,@Heroic Molten Core@,219544
+9002041,Heroic MC + Onyxia,318878,Sorcerous Dagger,68,60,4,2,15,21,24769,@Heroic Molten Core@,219547
+9002041,Heroic MC + Onyxia,318879,Heavy Dark Iron Ring,68,60,4,4,0,11,6924,@Heroic Molten Core@,219548
+9002041,Heroic MC + Onyxia,319136,Mana Igniting Cord,68,60,4,4,1,6,25051,@Heroic Molten Core@,219606
+9002041,Heroic MC + Onyxia,319137,Onslaught Girdle,76,60,4,4,4,6,25052,@Heroic Molten Core@,219607
+9002041,Heroic MC + Onyxia,319138,Band of Sulfuras,75,60,4,4,0,11,25053,@Heroic Molten Core@,219608
+9002041,Heroic MC + Onyxia,319139,Fireguard Shoulders,71,60,4,4,2,3,21864,@Heroic Molten Core@,219609
+9002041,Heroic MC + Onyxia,319140,Cauterizing Band,71,60,4,4,0,11,25054,@Heroic Molten Core@,219610
+9002041,Heroic MC + Onyxia,319142,Fire Runed Grimoire,68,60,4,4,0,23,18146,@Heroic Molten Core@,219611
+9002041,Heroic MC + Onyxia,319143,Flameguard Gauntlets,68,60,4,4,4,10,25057,@Heroic Molten Core@,219612
+9002041,Heroic MC + Onyxia,319144,Sabatons of the Flamewalker,68,60,4,4,3,8,25058,@Heroic Molten Core@,219613
+9002041,Heroic MC + Onyxia,319145,Robe of Volatile Power,68,60,4,4,1,20,25059,@Heroic Molten Core@,219614
+9002041,Heroic MC + Onyxia,319146,Wristguards of Stability,68,60,4,4,2,9,4197,@Heroic Molten Core@,219615
+9002041,Heroic MC + Onyxia,319147,Ring of Spell Power,68,60,4,4,0,11,25060,@Heroic Molten Core@,219616
+9002041,Heroic MC + Onyxia,311571,Flame-Infused Sceptre,74,60,4,2,4,21,24564,@Heroic Raid@,217403
+9002041,Heroic MC + Onyxia,312596,Charred Breastplate,74,60,4,4,4,5,44403,@Heroic Raid@,217765
+9002041,Heroic MC + Onyxia,317064,Shard of the Scale,74,60,4,4,0,12,138504,@Heroic Onyxia@,219061
+9002041,Heroic MC + Onyxia,317067,Ancient Cornerstone Grimoire,74,60,4,4,0,23,23562,@Heroic Onyxia@,219064
+9002041,Heroic MC + Onyxia,317068,Deathbringer,74,60,4,2,0,13,23233,@Heroic Onyxia@,219065
+9002041,Heroic MC + Onyxia,317075,Vis'kag the Bloodletter,74,60,4,2,7,13,25548,@Heroic Onyxia@,219071
+9002041,Heroic MC + Onyxia,317078,Sapphiron Drape,74,60,4,4,1,16,23564,@Heroic Onyxia@,219074
+9002041,Heroic MC + Onyxia,317084,Mace of the Dragon Knight,74,60,4,2,5,17,57581,@Heroic Onyxia@,219077
+9002041,Heroic MC + Onyxia,318205,Eskhandar's Collar,74,60,4,4,0,2,12645,@Heroic Onyxia@,219380
+9002041,Heroic MC + Onyxia,318211,Wand of the Noble,74,60,4,2,19,26,26098,@Heroic Raid@,219382
+9002041,Heroic MC + Onyxia,318212,Band of Nyxondra,74,60,4,4,0,11,19268,@Heroic Onyxia@,219383
+9002041,Heroic MC + Onyxia,318215,Insignia of the Dragon,76,60,4,4,0,12,138276,@Heroic Onyxia@,219386
+9002041,Heroic MC + Onyxia,318216,Neltharion's Badge,76,60,4,4,0,12,138277,@Heroic Onyxia@,219387
+9002041,Heroic MC + Onyxia,318813,Ring of Binding,74,60,4,4,0,11,6912,@Heroic Onyxia@,219522
+9002042,Mythic MC + Onyxia,1300647,Destiny,67,60,4,2,8,17,15764,@Mythic Raid@,440084
+9002042,Mythic MC + Onyxia,1300811,Axe of the Deep Woods,67,60,4,2,0,13,14969,@Mythic Raid@,440085
+9002042,Mythic MC + Onyxia,1300833,Lifestone,67,60,4,4,0,12,17837,@Mythic Raid@,440086
+9002042,Mythic MC + Onyxia,1300944,Elemental Mage Staff,67,56,4,2,10,17,15804,@Mythic Raid@,440087
+9002042,Mythic MC + Onyxia,1301168,Skullflame Shield,67,60,4,4,6,14,24438,@Mythic Raid@,440089
+9002042,Mythic MC + Onyxia,1301263,Brain Hacker,67,60,4,2,1,17,17230,@Mythic Raid@,440090
+9002042,Mythic MC + Onyxia,1301443,Jeweled Amulet of Cainwyn,67,60,4,4,0,2,3978,@Mythic Raid@,440091
+9002042,Mythic MC + Onyxia,1301728,Teebu's Blazing Longsword,69,60,4,2,7,13,15612,@Mythic Raid@,440094
+9002042,Mythic MC + Onyxia,1302099,Dwarven Hand Cannon,67,60,4,2,3,26,22835,@Mythic Raid@,440097
+9002042,Mythic MC + Onyxia,1302243,Hand of Edward the Odd,67,60,4,2,4,13,15453,@Mythic Raid@,440098
+9002042,Mythic MC + Onyxia,1302244,Krol Blade,67,60,4,2,7,13,5416,@Mythic Raid@,440099
+9002042,Mythic MC + Onyxia,1302245,Helm of Narv,67,60,4,4,3,1,12175,@Mythic Raid@,440100
+9002042,Mythic MC + Onyxia,1302246,Myrmidon's Signet,67,60,4,4,0,11,6929,@Mythic Raid@,440101
+9002042,Mythic MC + Onyxia,1302801,Blade of Hanna,67,60,4,2,8,17,2756,@Mythic Raid@,440102
+9002042,Mythic MC + Onyxia,1403475,Cloak of Flames,67,60,4,4,1,16,18228,@Mythic Raid@,478158
+9002042,Mythic MC + Onyxia,1310470,Eternal Flame Artifact,72,60,4,4,0,12,28931,@Mythic Molten Core@,440394
+9002042,Mythic MC + Onyxia,1310529,Elemental Attuned Blade,69,58,4,2,7,21,26458,@Mythic Raid@,440415
+9002042,Mythic MC + Onyxia,1310531,Stoneclad Libram,72,60,4,4,7,28,139535,@Mythic Raid@,440417
+9002042,Mythic MC + Onyxia,1310532,Codex of War Arts,72,60,4,4,7,28,139540,@Mythic Raid@,440418
+9002042,Mythic MC + Onyxia,1310533,Tome of Burning Passion,72,60,4,4,7,28,140165,@Mythic Raid@,440419
+9002042,Mythic MC + Onyxia,1312572,Veil of Flame Worshipper,77,60,4,4,1,1,145750,@Mythic Raid@,440639
+9002042,Mythic MC + Onyxia,1312573,Corebound Shoulders,72,60,4,4,2,3,8314,@Mythic Raid@,440640
+9002042,Mythic MC + Onyxia,1312594,Flamewalker Shoulderguards,72,60,4,4,4,3,21125,@Mythic Raid@,440641
+9002042,Mythic MC + Onyxia,1312595,Flamebound Harness,72,60,4,4,2,5,36673,@Mythic Raid@,440642
+9002042,Mythic MC + Onyxia,1312597,Embercloth Robe,72,60,4,4,1,20,13029,@Mythic Raid@,440644
+9002042,Mythic MC + Onyxia,1312598,Flametouched Leggings,72,60,4,4,3,7,21460,@Mythic Raid@,440645
+9002042,Mythic MC + Onyxia,1312599,Flameguard Legguards,72,60,4,4,4,7,25034,@Mythic Raid@,440646
+9002042,Mythic MC + Onyxia,1312872,Blazing Slippers,72,60,4,4,1,8,154343,@Mythic Raid@,440647
+9002042,Mythic MC + Onyxia,1312908,Magma Forged Walkers,72,60,4,4,3,8,36248,@Mythic Raid@,440652
+9002042,Mythic MC + Onyxia,1312909,Embercloth Wraps,72,60,4,4,1,9,36213,@Mythic Raid@,440653
+9002042,Mythic MC + Onyxia,1312910,Molten Slugtosser,72,60,4,2,3,26,57331,@Mythic Raid@,440654
+9002042,Mythic MC + Onyxia,1312911,Magma-forged Throwing Knife,72,60,4,2,16,25,32793,@Mythic Raid@,440655
+9002042,Mythic MC + Onyxia,1314552,Stockade Pauldrons,67,60,4,4,4,3,22481,@Mythic Raid@,440733
+9002042,Mythic MC + Onyxia,1314553,Sash of Mercy,67,60,4,4,2,6,22585,@Mythic Raid@,440734
+9002042,Mythic MC + Onyxia,1314554,Cloudkeeper Legplates,67,60,4,4,4,7,19856,@Mythic Raid@,440735
+9002042,Mythic MC + Onyxia,1314555,Alcor's Sunrazor,67,60,4,2,15,13,20081,@Mythic Raid@,440736
+9002042,Mythic MC + Onyxia,1314557,The Lion Horn of Stormwind,67,60,4,4,0,12,3808,@Mythic Raid@,440737
+9002042,Mythic MC + Onyxia,1314558,Lady Maye's Pendant,67,60,4,4,0,2,6945,@Mythic Raid@,440738
+9002042,Mythic MC + Onyxia,1315712,Pyroclasmic Longbow,77,60,4,2,2,15,71262,@Mythic Raid@,440773
+9002042,Mythic MC + Onyxia,1315816,Firelord Totem,79,60,4,4,9,28,139811,@Mythic Raid@,440775
+9002042,Mythic MC + Onyxia,1315956,Heavy Boulder Totem,72,60,4,4,9,28,57388,@Mythic Raid@,440801
+9002042,Mythic MC + Onyxia,1315957,Overloaded Totem,72,60,4,4,9,28,139335,@Mythic Raid@,440802
+9002042,Mythic MC + Onyxia,1315958,The Water Duke's Stolen Totem,72,60,4,4,9,28,139654,@Mythic Raid@,440803
+9002042,Mythic MC + Onyxia,1315959,Idol of the Magma Beast,72,60,4,4,8,28,140157,@Mythic Raid@,440804
+9002042,Mythic MC + Onyxia,1316010,Eclipsing Rune of the Herald,72,60,4,4,8,28,139643,@Mythic Raid@,440805
+9002042,Mythic MC + Onyxia,1316011,Burned Idol of the Earth,72,60,4,4,8,28,139014,@Mythic Raid@,440806
+9002042,Mythic MC + Onyxia,1317063,Band of Accuria,79,60,4,4,0,11,6928,@Mythic Molten Core@,440967
+9002042,Mythic MC + Onyxia,1317065,Medallion of Steadfast Might,72,60,4,4,0,2,2433,@Mythic Molten Core@,440969
+9002042,Mythic MC + Onyxia,1317066,Drillborer Disk,72,60,4,4,6,14,27392,@Mythic Molten Core@,440970
+9002042,Mythic MC + Onyxia,1317069,Striker's Mark,72,60,4,2,2,15,24407,@Mythic Molten Core@,440973
+9002042,Mythic MC + Onyxia,1317071,Gutgore Ripper,72,60,4,2,15,13,27393,@Mythic Molten Core@,440974
+9002042,Mythic MC + Onyxia,1317072,Blastershot Launcher,72,60,4,2,3,26,23235,@Mythic Molten Core@,440975
+9002042,Mythic MC + Onyxia,1317073,Earthshaker,72,60,4,2,5,17,25517,@Mythic Molten Core@,440976
+9002042,Mythic MC + Onyxia,1317074,Shadowstrike,72,60,4,2,6,17,23248,@Mythic Molten Core@,440977
+9002042,Mythic MC + Onyxia,1317076,Bonereaver's Edge,77,60,4,2,8,17,25550,@Mythic Molten Core@,440979
+9002042,Mythic MC + Onyxia,1317077,Crimson Shocker,72,60,4,2,19,26,23252,@Mythic Molten Core@,440980
+9002042,Mythic MC + Onyxia,1317082,Shard of the Flame,79,60,4,4,0,12,23566,@Mythic Molten Core@,440982
+9002042,Mythic MC + Onyxia,1317083,Blade of Dragon Bone,77,60,4,2,7,21,38765,@Mythic Molten Core@,440983
+9002042,Mythic MC + Onyxia,1317102,Cloak of the Shrouded Mists,77,60,4,4,1,16,23665,@Mythic Molten Core@,440986
+9002042,Mythic MC + Onyxia,1317103,Azuresong Mageblade,72,60,4,2,7,21,23523,@Mythic Molten Core@,440987
+9002042,Mythic MC + Onyxia,1317104,Spinal Reaper,77,60,4,2,1,17,25551,@Mythic Molten Core@,440988
+9002042,Mythic MC + Onyxia,1317105,Aurastone Hammer,72,60,4,2,4,21,27391,@Mythic Molten Core@,440989
+9002042,Mythic MC + Onyxia,1317106,Malistar's Defender,77,60,4,4,6,14,23547,@Mythic Molten Core@,440990
+9002042,Mythic MC + Onyxia,1317107,Dragon's Blood Cape,77,60,4,4,1,16,23668,@Mythic Molten Core@,440991
+9002042,Mythic MC + Onyxia,1317109,Choker of Enlightenment,72,60,4,4,0,2,6946,@Mythic Molten Core@,440992
+9002042,Mythic MC + Onyxia,1317110,Seal of the Archmagus,72,60,4,4,0,11,23542,@Mythic Molten Core@,440993
+9002042,Mythic MC + Onyxia,1318203,Eskhandar's Right Claw,72,60,4,2,13,21,24104,@Mythic Molten Core@,441067
+9002042,Mythic MC + Onyxia,1318608,Benediction,75,60,4,2,10,17,24779,@Mythic Molten Core@,441087
+9002042,Mythic MC + Onyxia,1318609,Anathema,75,60,4,2,10,17,24778,@Mythic Molten Core@,441088
+9002042,Mythic MC + Onyxia,1318803,Finkle's Lava Dredger,75,60,4,2,5,17,24706,"@Mythic Molten Core@Property of Finkle Einhorn, Grandmaster Adventurer",441098
+9002042,Mythic MC + Onyxia,1318805,Core Hound Tooth,75,60,4,2,15,13,26912,@Mythic Molten Core@,441099
+9002042,Mythic MC + Onyxia,1318806,Core Forged Greaves,75,60,4,4,4,8,24711,@Mythic Molten Core@,441100
+9002042,Mythic MC + Onyxia,1318808,Gloves of the Hypnotic Flame,75,60,4,4,1,10,24715,@Mythic Molten Core@,441101
+9002042,Mythic MC + Onyxia,1318809,Sash of Whispered Secrets,75,60,4,4,1,6,24717,@Mythic Molten Core@,441102
+9002042,Mythic MC + Onyxia,1318810,Wild Growth Spaulders,75,60,4,4,2,3,12906,@Mythic Molten Core@,441103
+9002042,Mythic MC + Onyxia,1318811,Fireproof Cloak,75,60,4,4,1,16,18879,@Mythic Molten Core@,441104
+9002042,Mythic MC + Onyxia,1318812,Wristguards of True Flight,75,60,4,4,3,9,24718,@Mythic Molten Core@,441105
+9002042,Mythic MC + Onyxia,1318814,Choker of the Fire Lord,77,60,4,4,0,2,329,@Mythic Molten Core@,441107
+9002042,Mythic MC + Onyxia,1318815,Essence of the Pure Flame,77,60,4,4,0,12,24719,@Mythic Molten Core@,441108
+9002042,Mythic MC + Onyxia,1318816,Perdition's Blade,77,60,4,2,15,13,26901,@Mythic Molten Core@,441109
+9002042,Mythic MC + Onyxia,1318817,Crown of Destruction,77,60,4,4,3,1,24723,@Mythic Molten Core@,441110
+9002042,Mythic MC + Onyxia,1318820,Talisman of Ephemeral Power,72,60,4,4,0,12,24724,@Mythic Molten Core@,441111
+9002042,Mythic MC + Onyxia,1318821,Quick Strike Ring,72,60,4,4,0,11,6923,@Mythic Molten Core@,441112
+9002042,Mythic MC + Onyxia,1318822,Obsidian Edged Blade,72,60,4,2,8,17,27394,@Mythic Molten Core@,441113
+9002042,Mythic MC + Onyxia,1318823,Aged Core Leather Gloves,72,60,4,4,2,10,24727,@Mythic Molten Core@,441114
+9002042,Mythic MC + Onyxia,1318824,Magma Tempered Boots,72,60,4,4,4,8,24732,@Mythic Molten Core@,441115
+9002042,Mythic MC + Onyxia,1318829,Deep Earth Spaulders,72,60,4,4,3,3,24882,@Mythic Molten Core@,441116
+9002042,Mythic MC + Onyxia,1318832,Brutality Blade,72,60,4,2,7,13,24744,@Mythic Molten Core@,441117
+9002042,Mythic MC + Onyxia,1318842,Staff of Dominance,72,60,4,2,10,17,27396,@Mythic Molten Core@,441118
+9002042,Mythic MC + Onyxia,1318861,Flamewaker Legplates,72,60,4,4,4,7,24753,@Mythic Molten Core@,441119
+9002042,Mythic MC + Onyxia,1318870,Helm of the Lifegiver,72,60,4,4,3,1,24760,@Mythic Molten Core@,441120
+9002042,Mythic MC + Onyxia,1318872,Manastorm Leggings,72,60,4,4,1,7,24764,@Mythic Molten Core@,441121
+9002042,Mythic MC + Onyxia,1318875,Salamander Scale Pants,72,60,4,4,2,7,24766,@Mythic Molten Core@,441122
+9002042,Mythic MC + Onyxia,1318878,Sorcerous Dagger,72,60,4,2,15,21,24769,@Mythic Molten Core@,441123
+9002042,Mythic MC + Onyxia,1318879,Heavy Dark Iron Ring,72,60,4,4,0,11,6924,@Mythic Molten Core@,441124
+9002042,Mythic MC + Onyxia,1319136,Mana Igniting Cord,72,60,4,4,1,6,25051,@Mythic Molten Core@,441141
+9002042,Mythic MC + Onyxia,1319137,Onslaught Girdle,79,60,4,4,4,6,25052,@Mythic Molten Core@,441142
+9002042,Mythic MC + Onyxia,1319138,Band of Sulfuras,79,60,4,4,0,11,25053,@Mythic Molten Core@,441143
+9002042,Mythic MC + Onyxia,1319139,Fireguard Shoulders,75,60,4,4,2,3,21864,@Mythic Molten Core@,441144
+9002042,Mythic MC + Onyxia,1319140,Cauterizing Band,75,60,4,4,0,11,25054,@Mythic Molten Core@,441145
+9002042,Mythic MC + Onyxia,1319142,Fire Runed Grimoire,72,60,4,4,0,23,18146,@Mythic Molten Core@,441146
+9002042,Mythic MC + Onyxia,1319143,Flameguard Gauntlets,72,60,4,4,4,10,25057,@Mythic Molten Core@,441147
+9002042,Mythic MC + Onyxia,1319144,Sabatons of the Flamewalker,72,60,4,4,3,8,25058,@Mythic Molten Core@,441148
+9002042,Mythic MC + Onyxia,1319145,Robe of Volatile Power,72,60,4,4,1,20,25059,@Mythic Molten Core@,441149
+9002042,Mythic MC + Onyxia,1319146,Wristguards of Stability,72,60,4,4,2,9,4197,@Mythic Molten Core@,441150
+9002042,Mythic MC + Onyxia,1319147,Ring of Spell Power,72,60,4,4,0,11,25060,@Mythic Molten Core@,441151
+9002042,Mythic MC + Onyxia,1311571,Flame-Infused Sceptre,77,60,4,2,4,21,24564,@Mythic Raid@,440536
+9002042,Mythic MC + Onyxia,1312596,Charred Breastplate,77,60,4,4,4,5,44403,@Mythic Raid@,440643
+9002042,Mythic MC + Onyxia,1317064,Shard of the Scale,77,60,4,4,0,12,138504,@Mythic Onyxia@,440968
+9002042,Mythic MC + Onyxia,1317067,Ancient Cornerstone Grimoire,77,60,4,4,0,23,23562,@Mythic Onyxia@,440971
+9002042,Mythic MC + Onyxia,1317068,Deathbringer,77,60,4,2,0,13,23233,@Mythic Onyxia@,440972
+9002042,Mythic MC + Onyxia,1317075,Vis'kag the Bloodletter,77,60,4,2,7,13,25548,@Mythic Onyxia@,440978
+9002042,Mythic MC + Onyxia,1317078,Sapphiron Drape,77,60,4,4,1,16,23564,@Mythic Onyxia@,440981
+9002042,Mythic MC + Onyxia,1317084,Mace of the Dragon Knight,77,60,4,2,5,17,57581,@Mythic Onyxia@,440984
+9002042,Mythic MC + Onyxia,1318205,Eskhandar's Collar,77,60,4,4,0,2,12645,@Mythic Onyxia@,441068
+9002042,Mythic MC + Onyxia,1318211,Wand of the Noble,77,60,4,2,19,26,26098,@Mythic Raid@,441070
+9002042,Mythic MC + Onyxia,1318212,Band of Nyxondra,77,60,4,4,0,11,19268,@Mythic Onyxia@,441071
+9002042,Mythic MC + Onyxia,1318215,Insignia of the Dragon,79,60,4,4,0,12,138276,@Mythic Onyxia@,441072
+9002042,Mythic MC + Onyxia,1318216,Neltharion's Badge,79,60,4,4,0,12,138277,@Mythic Onyxia@,441073
+9002042,Mythic MC + Onyxia,1318813,Ring of Binding,77,60,4,4,0,11,6912,@Mythic Onyxia@,441106
+9002043,Ascended MC + Onyxia,200647,Destiny,70,60,4,2,8,17,15764,@Ascended Raid@,175760
+9002043,Ascended MC + Onyxia,200811,Axe of the Deep Woods,70,60,4,2,0,13,14969,@Ascended Raid@,175924
+9002043,Ascended MC + Onyxia,200833,Lifestone,70,60,4,4,0,12,17837,@Ascended Raid@,175946
+9002043,Ascended MC + Onyxia,200944,Elemental Mage Staff,70,56,4,2,10,17,15804,@Ascended Raid@,176057
+9002043,Ascended MC + Onyxia,201168,Skullflame Shield,70,60,4,4,6,14,24438,@Ascended Raid@,176277
+9002043,Ascended MC + Onyxia,201263,Brain Hacker,70,60,4,2,1,17,17230,@Ascended Raid@,176367
+9002043,Ascended MC + Onyxia,201443,Jeweled Amulet of Cainwyn,70,60,4,4,0,2,3978,@Ascended Raid@,176541
+9002043,Ascended MC + Onyxia,201728,Teebu's Blazing Longsword,72,60,4,2,7,13,15612,@Ascended Raid@,176813
+9002043,Ascended MC + Onyxia,202099,Dwarven Hand Cannon,70,60,4,2,3,26,22835,@Ascended Raid@,177160
+9002043,Ascended MC + Onyxia,202243,Hand of Edward the Odd,70,60,4,2,4,13,15453,@Ascended Raid@,177297
+9002043,Ascended MC + Onyxia,202244,Krol Blade,70,60,4,2,7,13,5416,@Ascended Raid@,177298
+9002043,Ascended MC + Onyxia,202245,Helm of Narv,70,60,4,4,3,1,12175,@Ascended Raid@,177299
+9002043,Ascended MC + Onyxia,202246,Myrmidon's Signet,70,60,4,4,0,11,6929,@Ascended Raid@,177300
+9002043,Ascended MC + Onyxia,202801,Blade of Hanna,70,60,4,2,8,17,2756,@Ascended Raid@,177823
+9002043,Ascended MC + Onyxia,203475,Cloak of Flames,70,60,4,4,1,16,18228,@Ascended Raid@,178114
+9002043,Ascended MC + Onyxia,210470,Eternal Flame Artifact,75,60,4,4,0,12,28931,@Ascended Molten Core@,179327
+9002043,Ascended MC + Onyxia,210529,Elemental Attuned Blade,72,58,4,2,7,21,26458,@Ascended Raid@,179354
+9002043,Ascended MC + Onyxia,210531,Stoneclad Libram,75,60,4,4,7,28,139535,@Ascended Raid@,179356
+9002043,Ascended MC + Onyxia,210532,Codex of War Arts,75,60,4,4,7,28,139540,@Ascended Raid@,179357
+9002043,Ascended MC + Onyxia,210533,Tome of Burning Passion,75,60,4,4,7,28,140165,@Ascended Raid@,179358
+9002043,Ascended MC + Onyxia,212572,Veil of Flame Worshipper,81,60,4,4,1,1,145750,@Ascended Raid@,180000
+9002043,Ascended MC + Onyxia,212573,Corebound Shoulders,75,60,4,4,2,3,8314,@Ascended Raid@,180001
+9002043,Ascended MC + Onyxia,212594,Flamewalker Shoulderguards,75,60,4,4,4,3,21125,@Ascended Raid@,180008
+9002043,Ascended MC + Onyxia,212595,Flamebound Harness,75,60,4,4,2,5,36673,@Ascended Raid@,180009
+9002043,Ascended MC + Onyxia,212597,Embercloth Robe,75,60,4,4,1,20,13029,@Ascended Raid@,180011
+9002043,Ascended MC + Onyxia,212598,Flametouched Leggings,75,60,4,4,3,7,21460,@Ascended Raid@,180012
+9002043,Ascended MC + Onyxia,212599,Flameguard Legguards,75,60,4,4,4,7,25034,@Ascended Raid@,180013
+9002043,Ascended MC + Onyxia,212872,Blazing Slippers,75,60,4,4,1,8,154343,@Ascended Raid@,180176
+9002043,Ascended MC + Onyxia,212908,Magma Forged Walkers,75,60,4,4,3,8,36248,@Ascended Raid@,180182
+9002043,Ascended MC + Onyxia,212909,Embercloth Wraps,75,60,4,4,1,9,36213,@Ascended Raid@,180183
+9002043,Ascended MC + Onyxia,212910,Molten Slugtosser,75,60,4,2,3,26,57331,@Ascended Raid@,180184
+9002043,Ascended MC + Onyxia,212911,Magma-forged Throwing Knife,75,60,4,2,16,25,32793,@Ascended Raid@,180185
+9002043,Ascended MC + Onyxia,214553,Sash of Mercy,70,60,4,4,2,6,22585,@Ascended Raid@,181167
+9002043,Ascended MC + Onyxia,214554,Cloudkeeper Legplates,70,60,4,4,4,7,19856,@Ascended Raid@,181168
+9002043,Ascended MC + Onyxia,214555,Alcor's Sunrazor,70,60,4,2,15,13,20081,@Ascended Raid@,181169
+9002043,Ascended MC + Onyxia,214557,The Lion Horn of Stormwind,70,60,4,4,0,12,3808,@Ascended Raid@,181171
+9002043,Ascended MC + Onyxia,214558,Lady Maye's Pendant,70,60,4,4,0,2,6945,@Ascended Raid@,181172
+9002043,Ascended MC + Onyxia,215712,Pyroclasmic Longbow,81,60,4,2,2,15,71262,@Ascended Raid@,181665
+9002043,Ascended MC + Onyxia,215816,Firelord Totem,83,60,4,4,9,28,139811,@Ascended Raid@,181683
+9002043,Ascended MC + Onyxia,215956,Heavy Boulder Totem,75,60,4,4,9,28,57388,@Ascended Raid@,181726
+9002043,Ascended MC + Onyxia,215957,Overloaded Totem,75,60,4,4,9,28,139335,@Ascended Raid@,181727
+9002043,Ascended MC + Onyxia,215958,The Water Duke's Stolen Totem,75,60,4,4,9,28,139654,@Ascended Raid@,181728
+9002043,Ascended MC + Onyxia,215959,Idol of the Magma Beast,75,60,4,4,8,28,140157,@Ascended Raid@,181729
+9002043,Ascended MC + Onyxia,216010,Eclipsing Rune of the Herald,75,60,4,4,8,28,139643,@Ascended Raid@,181738
+9002043,Ascended MC + Onyxia,216011,Burned Idol of the Earth,75,60,4,4,8,28,139014,@Ascended Raid@,181739
+9002043,Ascended MC + Onyxia,217063,Band of Accuria,83,60,4,4,0,11,6928,@Ascended Molten Core@,182076
+9002043,Ascended MC + Onyxia,217065,Medallion of Steadfast Might,75,60,4,4,0,2,2433,@Ascended Molten Core@,182078
+9002043,Ascended MC + Onyxia,217066,Drillborer Disk,75,60,4,4,6,14,27392,@Ascended Molten Core@,182079
+9002043,Ascended MC + Onyxia,217069,Striker's Mark,75,60,4,2,2,15,24407,@Ascended Molten Core@,182082
+9002043,Ascended MC + Onyxia,217071,Gutgore Ripper,75,60,4,2,15,13,27393,@Ascended Molten Core@,182084
+9002043,Ascended MC + Onyxia,217072,Blastershot Launcher,75,60,4,2,3,26,23235,@Ascended Molten Core@,182085
+9002043,Ascended MC + Onyxia,217073,Earthshaker,75,60,4,2,5,17,25517,@Ascended Molten Core@,182086
+9002043,Ascended MC + Onyxia,217074,Shadowstrike,75,60,4,2,6,17,23248,@Ascended Molten Core@,182087
+9002043,Ascended MC + Onyxia,217076,Bonereaver's Edge,81,60,4,2,8,17,25550,@Ascended Molten Core@,182089
+9002043,Ascended MC + Onyxia,217077,Crimson Shocker,75,60,4,2,19,26,23252,@Ascended Molten Core@,182090
+9002043,Ascended MC + Onyxia,217082,Shard of the Flame,83,60,4,4,0,12,23566,@Ascended Molten Core@,182093
+9002043,Ascended MC + Onyxia,217083,Blade of Dragon Bone,81,60,4,2,7,21,38765,@Ascended Molten Core@,182094
+9002043,Ascended MC + Onyxia,217102,Cloak of the Shrouded Mists,81,60,4,4,1,16,23665,@Ascended Molten Core@,182099
+9002043,Ascended MC + Onyxia,217103,Azuresong Mageblade,75,60,4,2,7,21,23523,@Ascended Molten Core@,182100
+9002043,Ascended MC + Onyxia,217104,Spinal Reaper,81,60,4,2,1,17,25551,@Ascended Molten Core@,182101
+9002043,Ascended MC + Onyxia,217105,Aurastone Hammer,75,60,4,2,4,21,27391,@Ascended Molten Core@,182102
+9002043,Ascended MC + Onyxia,217106,Malistar's Defender,81,60,4,4,6,14,23547,@Ascended Molten Core@,182103
+9002043,Ascended MC + Onyxia,217107,Dragon's Blood Cape,81,60,4,4,1,16,23668,@Ascended Molten Core@,182104
+9002043,Ascended MC + Onyxia,217109,Choker of Enlightenment,75,60,4,4,0,2,6946,@Ascended Molten Core@,182105
+9002043,Ascended MC + Onyxia,217110,Seal of the Archmagus,75,60,4,4,0,11,23542,@Ascended Molten Core@,182106
+9002043,Ascended MC + Onyxia,218203,Eskhandar's Right Claw,75,60,4,2,13,21,24104,@Ascended Molten Core@,182614
+9002043,Ascended MC + Onyxia,218608,Benediction,78,60,4,2,10,17,24779,@Ascended Molten Core@,182809
+9002043,Ascended MC + Onyxia,218609,Anathema,78,60,4,2,10,17,24778,@Ascended Molten Core@,182810
+9002043,Ascended MC + Onyxia,218803,Finkle's Lava Dredger,78,60,4,2,5,17,24706,"@Ascended Molten Core@Property of Finkle Einhorn, Grandmaster Adventurer",182880
+9002043,Ascended MC + Onyxia,218805,Core Hound Tooth,78,60,4,2,15,13,26912,@Ascended Molten Core@,182881
+9002043,Ascended MC + Onyxia,218806,Core Forged Greaves,78,60,4,4,4,8,24711,@Ascended Molten Core@,182882
+9002043,Ascended MC + Onyxia,218808,Gloves of the Hypnotic Flame,78,60,4,4,1,10,24715,@Ascended Molten Core@,182883
+9002043,Ascended MC + Onyxia,218809,Sash of Whispered Secrets,78,60,4,4,1,6,24717,@Ascended Molten Core@,182884
+9002043,Ascended MC + Onyxia,218810,Wild Growth Spaulders,78,60,4,4,2,3,12906,@Ascended Molten Core@,182885
+9002043,Ascended MC + Onyxia,218811,Fireproof Cloak,78,60,4,4,1,16,18879,@Ascended Molten Core@,182886
+9002043,Ascended MC + Onyxia,218812,Wristguards of True Flight,78,60,4,4,3,9,24718,@Ascended Molten Core@,182887
+9002043,Ascended MC + Onyxia,218814,Choker of the Fire Lord,81,60,4,4,0,2,329,@Ascended Molten Core@,182889
+9002043,Ascended MC + Onyxia,218815,Essence of the Pure Flame,81,60,4,4,0,12,24719,@Ascended Molten Core@,182890
+9002043,Ascended MC + Onyxia,218816,Perdition's Blade,81,60,4,2,15,13,26901,@Ascended Molten Core@,182891
+9002043,Ascended MC + Onyxia,218817,Crown of Destruction,81,60,4,4,3,1,24723,@Ascended Molten Core@,182892
+9002043,Ascended MC + Onyxia,218820,Talisman of Ephemeral Power,75,60,4,4,0,12,24724,@Ascended Molten Core@,182893
+9002043,Ascended MC + Onyxia,218821,Quick Strike Ring,75,60,4,4,0,11,6923,@Ascended Molten Core@,182894
+9002043,Ascended MC + Onyxia,218822,Obsidian Edged Blade,75,60,4,2,8,17,27394,@Ascended Molten Core@,182895
+9002043,Ascended MC + Onyxia,218823,Aged Core Leather Gloves,75,60,4,4,2,10,24727,@Ascended Molten Core@,182896
+9002043,Ascended MC + Onyxia,218824,Magma Tempered Boots,75,60,4,4,4,8,24732,@Ascended Molten Core@,182897
+9002043,Ascended MC + Onyxia,218829,Deep Earth Spaulders,75,60,4,4,3,3,24882,@Ascended Molten Core@,182899
+9002043,Ascended MC + Onyxia,218832,Brutality Blade,75,60,4,2,7,13,24744,@Ascended Molten Core@,182900
+9002043,Ascended MC + Onyxia,218842,Staff of Dominance,75,60,4,2,10,17,27396,@Ascended Molten Core@,182902
+9002043,Ascended MC + Onyxia,218861,Flamewaker Legplates,75,60,4,4,4,7,24753,@Ascended Molten Core@,182906
+9002043,Ascended MC + Onyxia,218870,Helm of the Lifegiver,75,60,4,4,3,1,24760,@Ascended Molten Core@,182908
+9002043,Ascended MC + Onyxia,218872,Manastorm Leggings,75,60,4,4,1,7,24764,@Ascended Molten Core@,182909
+9002043,Ascended MC + Onyxia,218875,Salamander Scale Pants,75,60,4,4,2,7,24766,@Ascended Molten Core@,182910
+9002043,Ascended MC + Onyxia,218878,Sorcerous Dagger,75,60,4,2,15,21,24769,@Ascended Molten Core@,182911
+9002043,Ascended MC + Onyxia,218879,Heavy Dark Iron Ring,75,60,4,4,0,11,6924,@Ascended Molten Core@,182912
+9002043,Ascended MC + Onyxia,219136,Mana Igniting Cord,75,60,4,4,1,6,25051,@Ascended Molten Core@,182962
+9002043,Ascended MC + Onyxia,219137,Onslaught Girdle,83,60,4,4,4,6,25052,@Ascended Molten Core@,182963
+9002043,Ascended MC + Onyxia,219138,Band of Sulfuras,83,60,4,4,0,11,25053,@Ascended Molten Core@,182964
+9002043,Ascended MC + Onyxia,219139,Fireguard Shoulders,78,60,4,4,2,3,21864,@Ascended Molten Core@,182965
+9002043,Ascended MC + Onyxia,219140,Cauterizing Band,78,60,4,4,0,11,25054,@Ascended Molten Core@,182966
+9002043,Ascended MC + Onyxia,219142,Fire Runed Grimoire,75,60,4,4,0,23,18146,@Ascended Molten Core@,182967
+9002043,Ascended MC + Onyxia,219143,Flameguard Gauntlets,75,60,4,4,4,10,25057,@Ascended Molten Core@,182968
+9002043,Ascended MC + Onyxia,219144,Sabatons of the Flamewalker,75,60,4,4,3,8,25058,@Ascended Molten Core@,182969
+9002043,Ascended MC + Onyxia,219145,Robe of Volatile Power,75,60,4,4,1,20,25059,@Ascended Molten Core@,182970
+9002043,Ascended MC + Onyxia,219146,Wristguards of Stability,75,60,4,4,2,9,4197,@Ascended Molten Core@,182971
+9002043,Ascended MC + Onyxia,219147,Ring of Spell Power,75,60,4,4,0,11,25060,@Ascended Molten Core@,182972
+9002043,Ascended MC + Onyxia,211571,Flame-Infused Sceptre,81,60,4,2,4,21,24564,@Ascended Raid@,179633
+9002043,Ascended MC + Onyxia,212596,Charred Breastplate,81,60,4,4,4,5,44403,@Ascended Raid@,180010
+9002043,Ascended MC + Onyxia,217064,Shard of the Scale,81,60,4,4,0,12,138504,@Ascended Onyxia@,182077
+9002043,Ascended MC + Onyxia,217067,Ancient Cornerstone Grimoire,81,60,4,4,0,23,23562,@Ascended Onyxia@,182080
+9002043,Ascended MC + Onyxia,217068,Deathbringer,81,60,4,2,0,13,23233,@Ascended Onyxia@,182081
+9002043,Ascended MC + Onyxia,217075,Vis'kag the Bloodletter,81,60,4,2,7,13,25548,@Ascended Onyxia@,182088
+9002043,Ascended MC + Onyxia,217078,Sapphiron Drape,81,60,4,4,1,16,23564,@Ascended Onyxia@,182091
+9002043,Ascended MC + Onyxia,217084,Mace of the Dragon Knight,81,60,4,2,5,17,57581,@Ascended Onyxia@,182095
+9002043,Ascended MC + Onyxia,218205,Eskhandar's Collar,81,60,4,4,0,2,12645,@Ascended Onyxia@,182615
+9002043,Ascended MC + Onyxia,218211,Wand of the Noble,81,60,4,2,19,26,26098,@Ascended Raid@,182617
+9002043,Ascended MC + Onyxia,218212,Band of Nyxondra,81,60,4,4,0,11,19268,@Ascended Onyxia@,182618
+9002043,Ascended MC + Onyxia,218215,Insignia of the Dragon,83,60,4,4,0,12,138276,@Ascended Onyxia@,182620
+9002043,Ascended MC + Onyxia,218216,Neltharion's Badge,83,60,4,4,0,12,138277,@Ascended Onyxia@,182621
+9002043,Ascended MC + Onyxia,218813,Ring of Binding,81,60,4,4,0,11,6912,@Ascended Onyxia@,182888

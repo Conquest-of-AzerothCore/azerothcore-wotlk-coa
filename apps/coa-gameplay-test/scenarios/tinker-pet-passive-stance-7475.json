@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Tinker pets stay passive when the player picks Passive (#7475)",
+  "contract": "#7475 reports Tinker pets treat Passive like Defensive: they keep attacking and casting after the player sets Passive. The pet AI (npc_ascension_tinker_pet) promoted a passive spawn to defensive on its first update and wrote that into the pet bar, destroying a player-chosen Passive. A level 80 Tinker builds a Mechano-Bear (803405), which must still spawn defensive (#4074): pet_react_state is 1 (defensive). The player then issues the native Passive command (pet_stance 0): both the creature react state and the pet bar stored stance must stay 0 (passive), and while the Tinker attacks a dummy for ten seconds the dummy health must not move, proving the pet neither attacked nor cast. Setting Defensive again (pet_stance 1) must restore the #4074 behavior: the pet rejoins the fight and the dummy loses health.",
+  "timeout_ms": 120000,
+  "players": [ { "id": "t", "race": 1, "class": 28, "level": 80 } ],
+  "creatures": [ { "id": "d", "owner": "t", "entry": 299, "level": 80, "distance": 3 } ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let login hooks and class synchronisation settle", "ms": 3000 },
+    { "action": "learn", "label": "Build: Mechano-Bear", "actor": "t", "spell": 803405 },
+    { "action": "cast", "label": "Build: Mechano-Bear", "actor": "t", "spell": 803405 },
+    { "action": "assert", "label": "SETUP: Mechano-Bear is built", "actor": "t", "metric": "pet_entry", "equals": 60671, "within_ms": 9000 },
+    { "action": "assert", "label": "#4074: a fresh pet still spawns defensive", "actor": "t", "metric": "pet_react_state", "equals": 1, "within_ms": 3000 },
+    { "action": "pet_stance", "label": "The player picks Passive", "actor": "t", "stance": 0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "#7475: the pet react state stays passive after the player picks it", "actor": "t", "metric": "pet_react_state", "equals": 0 },
+    { "action": "assert", "label": "#7475: the pet bar keeps the player-chosen Passive", "actor": "t", "metric": "pet_player_react_state", "equals": 0 },
+    { "action": "snapshot", "label": "Dummy health before the Tinker attacks", "actor": "d", "metric": "health", "save_as": "h0" },
+    { "action": "attack", "label": "The Tinker attacks the dummy", "actor": "t", "target": "d" },
+    { "action": "wait", "ms": 10000 },
+    { "action": "assert", "label": "#7475: a passive pet never joins the fight or casts", "actor": "d", "metric": "health", "relative_to": "h0", "equals": 0 },
+    { "action": "stop_attack", "actor": "t" },
+    { "action": "pet_stance", "label": "The player picks Defensive again", "actor": "t", "stance": 1 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "#4074: the pet returns to defensive when the player picks it", "actor": "t", "metric": "pet_react_state", "equals": 1 },
+    { "action": "snapshot", "label": "Dummy health before the defensive re-check", "actor": "d", "metric": "health", "save_as": "h1" },
+    { "action": "attack", "actor": "t", "target": "d" },
+    { "action": "wait", "ms": 10000 },
+    { "action": "assert", "label": "#4074: a defensive pet joins the fight again", "actor": "d", "metric": "health", "relative_to": "h1", "max": -150 }
+  ]
+}

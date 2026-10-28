@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Captain Gerogg Hammertoe scales for the Horde he is hostile to (#7487)",
+  "contract": "#7487 reported the rare Captain Gerogg Hammertoe 5851 (level 27, rank 2, npcflag 2 QUESTGIVER, faction template 122 Ironforge) staying level 27 for a level 47 character with open-world scaling on. A questgiver flag must not stop a creature from scaling for viewers it is hostile to; FactionTemplate 122 is hostile to the Horde and friendly to the Alliance. Requires DestinyWeaver.Enable=1, DestinyWeaver.LevelScaling=1 and offset 4. Expected: a level 47 Horde viewer sees him at 43 (47 minus the offset); a level 47 Alliance viewer, who cannot attack him, sees his authored 27.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": -4040.98, "y": -2383.34, "z": 125.3, "o": 0 },
+  "players": [
+    { "id": "horde", "race": 2, "class": 1, "level": 47 },
+    { "id": "alliance", "race": 1, "class": 1, "level": 47 }
+  ],
+  "creatures": [
+    { "id": "horde_gerogg", "owner": "horde", "entry": 5851, "distance": 25, "level": 27, "faction": 122 },
+    { "id": "alliance_gerogg", "owner": "alliance", "entry": 5851, "distance": 25, "level": 27, "faction": 122 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and spawns settle", "ms": 3000 },
+    { "action": "level_scaling_packet", "actor": "horde", "value": 1 },
+    { "action": "level_scaling_packet", "actor": "alliance", "value": 1 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the hostile questgiver rare is viewed at 47 minus the offset",
+      "actor": "horde", "metric": "view_level", "target": "horde_gerogg", "equals": 43, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "the friendly questgiver rare keeps his authored level for the Alliance",
+      "actor": "alliance", "metric": "view_level", "target": "alliance_gerogg", "equals": 27
+    }
+  ]
+}

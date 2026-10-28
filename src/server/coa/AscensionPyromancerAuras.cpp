@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionPyromancer.h"
+#include "AscensionPyromancerData.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "SpellAuraEffects.h"
@@ -41,12 +42,8 @@ class aura_ascension_pyromancer_lifecycle : public AuraScript
         }
         if (Named(GetSpellInfo(), 805500))
             if (AuraEffect* periodic = GetEffect(EFFECT_0))
-            {
                 if (GetEffect(EFFECT_1) && GetEffect(EFFECT_1)->GetAmount() > 0)
                     periodic->SetCritChance(100);
-                else if (!player->HasAura(520770))
-                    periodic->SetCritChance(0);
-            }
         if (GetTarget() != player)
             return;
         if (id == 524707 && (mode & AURA_EFFECT_HANDLE_REAPPLY))
@@ -223,8 +220,33 @@ class aura_ascension_pyromancer_phoenix : public AuraScript
     }
 };
 }
+class aura_ascension_pyromancer_draconic_form : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_pyromancer_draconic_form);
+    bool Validate(SpellInfo const* info) override { return info->Id == 802117; }
+    void Apply(AuraEffect const*, AuraEffectHandleModes)
+    {
+        if (Player* player = Owner(GetTarget()))
+            player->SetDisplayId(PyromancerDraconicDisplay);
+    }
+    void Remove(AuraEffect const*, AuraEffectHandleModes)
+    {
+        if (Player* player = Owner(GetTarget()))
+            player->RestoreDisplayId();
+    }
+    void Register() override
+    {
+        if (SpellInfo const* info = sSpellMgr->GetSpellInfo(m_scriptSpellId))
+            const_cast<SpellInfo*>(info)->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_MOUNT;
+        AfterEffectApply += AuraEffectApplyFn(aura_ascension_pyromancer_draconic_form::Apply, EFFECT_ALL,
+                                              SPELL_AURA_ANY, AURA_EFFECT_HANDLE_REAL);
+        AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_pyromancer_draconic_form::Remove, EFFECT_ALL,
+                                                SPELL_AURA_ANY, AURA_EFFECT_HANDLE_REAL);
+    }
+};
 void AddSC_AscensionPyromancerAuras()
 {
     RegisterSpellScript(aura_ascension_pyromancer_lifecycle);
     RegisterSpellScript(aura_ascension_pyromancer_phoenix);
+    RegisterSpellScript(aura_ascension_pyromancer_draconic_form);
 }

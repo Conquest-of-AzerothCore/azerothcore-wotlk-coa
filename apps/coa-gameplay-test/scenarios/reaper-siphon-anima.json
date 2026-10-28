@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Siphon Anima heals after Spectral Scythe and Murder damage (#1210)",
+  "contract": "Summoning Spectral Scythe with Siphon Anima 504309 applies 572768 for ten seconds; during it, a landed Murder hit heals the Reaper for five percent of damage dealt.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "reaper", "race": 2, "class": 30, "level": 60,
+      "spell_hit_rating": 10000, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "creatures": [
+    { "id": "scythe_target", "owner": "reaper", "entry": 36, "level": 2,
+      "health": 1000000, "distance": 3 },
+    { "id": "damage_target", "owner": "reaper", "entry": 1601, "level": 60,
+      "health": 1000000, "distance": 4 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "learn", "actor": "reaper", "spell": 504309 },
+    { "action": "learn", "actor": "reaper", "spell": 500576 },
+    { "action": "learn", "actor": "reaper", "spell": 504622 },
+    { "action": "assert", "label": "Siphon Anima talent active", "actor": "reaper",
+      "metric": "aura", "spell": 504309, "equals": 1 },
+    { "action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3 },
+    { "action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1 },
+    { "action": "cast", "actor": "reaper", "spell": 500576, "target": "scythe_target" },
+    { "action": "assert", "label": "Scythe summon triggers Siphon Anima buff", "actor": "reaper",
+      "metric": "aura", "spell": 572768, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "Buff carries five percent", "actor": "reaper",
+      "metric": "aura_amount", "spell": 572768, "effect": 0, "equals": 5 },
+    { "action": "wait", "ms": 1800 },
+    { "action": "set_power", "actor": "reaper", "power": 6, "value": 1000 },
+    { "action": "set_health", "actor": "reaper", "value": 1000 },
+    { "action": "snapshot", "actor": "reaper", "metric": "health", "save_as": "before_damage" },
+    { "action": "snapshot", "actor": "damage_target", "metric": "health", "save_as": "target_before" },
+    { "action": "cast", "actor": "reaper", "spell": 504622, "target": "damage_target" },
+    { "action": "assert", "label": "Murder cast is accepted", "actor": "reaper",
+      "metric": "cast_failure", "spell": 504622, "equals": 0 },
+    { "action": "assert", "label": "Murder sends a damage event", "actor": "reaper",
+      "metric": "spell_damage_count", "spell": 504622, "target": "damage_target", "equals": 1,
+      "within_ms": 3000 },
+    { "action": "assert", "label": "Murder damages the target", "actor": "damage_target",
+      "metric": "health", "relative_to": "target_before", "max": -100, "within_ms": 3000 },
+    { "action": "assert", "label": "Five percent of Murder damage heals the Reaper", "actor": "reaper",
+      "metric": "health", "relative_to": "before_damage", "min": 10, "within_ms": 1000 }
+  ]
+}

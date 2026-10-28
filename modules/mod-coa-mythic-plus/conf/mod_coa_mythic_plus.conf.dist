@@ -1,0 +1,174 @@
+###################################################################################################
+#  mod-coa-mythic-plus
+#
+#  Mythic+ keystone runs in Ascension's own protocol, so the client's Mythic+ tracker, timer,
+#  banner and keystone socket work unchanged. Time limits, enemy forces totals, required
+#  encounters, keystones and scaling come from the client tables in DataDir/dbc
+#  (TimedDungeons, MythicKeystones, MythicPlusScaling).
+###################################################################################################
+
+[worldserver]
+
+#    MythicPlus.Enable
+#        Description: Turn keystone runs on or off.
+#        Default:     1
+
+MythicPlus.Enable = 1
+
+#    MythicPlus.RequiredDifficulty
+#        Description: Dungeon difficulty a keystone can be started on (0 Normal, 1 Heroic,
+#                     2 Mythic). -1 allows any, for testing.
+#        Default:     2
+
+MythicPlus.RequiredDifficulty = 2
+
+#    MythicPlus.AllowInDungeonFinder
+#        Description: Whether a Dungeon Finder group can start a keystone. Keystones are meant for
+#                     groups that enter on their own; on for now, to test the wing start points.
+#        Default:     1
+
+MythicPlus.AllowInDungeonFinder = 1
+
+#    MythicPlus.Champion.MinLevel
+#        Description: Keystone level from which a Mythic Champion walks every path set with
+#                     .mythic setchampionpos (coa_mythic_champion_path).
+#        Default:     14
+
+MythicPlus.Champion.MinLevel = 14
+
+#    MythicPlus.Champion.Required
+#    MythicPlus.Champion.RequiredCount
+#        Description: Whether a key from Champion.MinLevel on needs champions killed to finish, and how many
+#                     (at most as many as the dungeon has paths). The tracker shows "Defeat Champions" with it.
+#        Default:     1, 1
+
+MythicPlus.Champion.Required = 1
+MythicPlus.Champion.RequiredCount = 1
+
+#    MythicPlus.Champion.HealthTrashFactor
+#        Description: A champion's health as a multiple of the median elite trash health of the instance.
+#        Default:     10
+
+MythicPlus.Champion.HealthTrashFactor = 10
+
+#    MythicPlus.Week
+#        Description: Affix week (0-52) for new runs, for testing. -1 follows the calendar
+#                     (day of the year / 7), the week the client shows.
+#        Default:     -1
+
+MythicPlus.Week = -1
+
+#    MythicPlus.MaxExpansion
+#        Description: New keys only point at dungeons up to this expansion (0 Classic, 1 TBC,
+#                     2 WotLK).
+#        Default:     0
+
+MythicPlus.MaxExpansion = 0
+
+#    MythicPlus.FirstKey.Enable
+#    MythicPlus.FirstKey.Difficulty
+#        Description: The final boss of a dungeon on this difficulty gives every player without
+#                     a keystone a random +1 key.
+#        Default:     1, 2
+
+MythicPlus.FirstKey.Enable = 1
+MythicPlus.FirstKey.Difficulty = 2
+
+#    MythicPlus.DefaultForces.Normal
+#    MythicPlus.DefaultForces.Elite
+#        Description: Enemy forces for a creature that has no row in coa_mythic_forces. Only
+#                     creatures placed in the database count; summons need a row.
+#        Default:     1, 2
+
+MythicPlus.DefaultForces.Normal = 1
+MythicPlus.DefaultForces.Elite = 2
+
+#    MythicPlus.NoCreatureLoot
+#        Description: Creatures drop no loot during a run.
+#        Default:     1
+
+MythicPlus.NoCreatureLoot = 1
+
+#    MythicPlus.CoinItem
+#    MythicPlus.CoinItem.TBC
+#    MythicPlus.CoinItem.WotLK
+#    MythicPlus.CoinsPerLevel
+#    MythicPlus.Coins.WeeklyCap
+#        Description: Mythic Coins for a finished run: CoinsPerLevel x keystone level, up to WeeklyCap
+#                     per character and week (weeks start Tuesday 00:00 UTC). The coin follows the
+#                     dungeon's expansion.
+#        Default:     1414500, 1414529, 1414530, 50, 5500
+
+MythicPlus.CoinItem = 1414500
+MythicPlus.CoinItem.TBC = 1414529
+MythicPlus.CoinItem.WotLK = 1414530
+MythicPlus.CoinsPerLevel = 50
+MythicPlus.Coins.WeeklyCap = 5500
+
+#
+#    MythicPlus.Caches.WeeklyCap
+#        Description: Mythical Caches a character can open per week.
+#        Default:     80
+
+MythicPlus.Caches.WeeklyCap = 80
+
+#
+#    MythicPlus.Spoils.MythicDungeonFinderOnly
+#        Description: Dungeon Spoils (Mythic) only for groups from the Dungeon Finder. Heroic
+#                     Dungeon Spoils come with every finished Heroic vanilla dungeon.
+#        Default:     1
+
+MythicPlus.Spoils.MythicDungeonFinderOnly = 1
+
+#
+#    MythicPlus.ExcludedDungeons
+#        Description: LFG dungeons new keys never point at (space or comma separated).
+#        Default:     "2045 2046" (Blackrock Caverns, not restored yet)
+
+MythicPlus.ExcludedDungeons = "2045 2046"
+
+#
+#    MythicPlus.Forces.ClearShare
+#        Description: Share of a wing's trash that reaches 100 % enemy forces; kills are scaled up
+#                     when the wing has less than needed for that. Never scaled down.
+#        Default:     0.58
+
+MythicPlus.Forces.ClearShare = 0.58
+
+#    MythicPlus.Forces.WingFactor
+#        Description: Per wing, "lfgId:factor" pairs (space separated) multiplied onto each kill's forces
+#                     after ClearShare, for wings live videos show differently.
+#                     3320 Shadowfang Keep - Halls of the Damned: 18.63 % up to Rethilgore live, 29.75 % here.
+#        Default:     "3320:0.626"
+
+MythicPlus.Forces.WingFactor = "3320:0.626"
+
+#    MythicPlus.Health.Basis
+#    MythicPlus.Health.Offset
+#        Description: Creature health on a key, relative to Mythic:
+#                     +1 keeps the Mythic health, from +2 on
+#                     Basis x (1 + health % of MythicPlusScaling.dbc) + Offset.
+#                     Fitted to videos and combat logs of the live server.
+#        Default:     1.1245, -0.02
+
+MythicPlus.Health.Basis = 1.1245
+MythicPlus.Health.Offset = -0.02
+
+#    MythicPlus.BossCastLog
+#        Description: Write every spell a boss of a vanilla dungeon casts on Heroic or Mythic once per
+#                     instance to Server.log (BOSSCAST / BOSSKILL lines) for the mechanics check.
+#        Default:     1
+
+MythicPlus.BossCastLog = 1
+#
+#    MythicPlus.DisabledAffixes
+#    MythicPlus.AffixSubstitutes
+#        Description: Affixes left out of every week (MythicAffixes.dbc ids, space or comma separated).
+#                     Each takes the first substitute its row does not have yet. Empty keeps
+#                     Ascension's rotation. The server sends the changed MythicAffixes.dbc rows at
+#                     login, so the client shows the same affixes.
+#        Default:     "80087" (Tiny), "80046 80044 80026 80024 80032" (Horde, Avenger, Life Stealing,
+#                     Fast, True Sight)
+
+MythicPlus.DisabledAffixes = "80087"
+MythicPlus.AffixSubstitutes = "80046 80044 80026 80024 80032"

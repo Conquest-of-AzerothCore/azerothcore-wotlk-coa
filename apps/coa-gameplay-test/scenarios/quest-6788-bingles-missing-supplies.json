@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "name": "Quest 6788: Bingles offers Bingles' Missing Supplies once Find Bingles is done",
+  "contract": "Issue 6788: Bingles Blastenheimer (6577) in Loch Modan offered no quest to a level 18 character. Bingles' Missing Supplies (2038, levels 15/12, Alliance) has PrevQuestID 2039 in quest_template_addon (ACDB base, as in vanilla), so it opens only after Find Bingles (2039), which Gnoarn (6569) gives in Ironforge and Bingles takes back. Expected: before Find Bingles, 2039 is takeable and 2038 is not; after Find Bingles is rewarded, 2038 is takeable and Bingles' quest menu lists it. Client rendering is not tested.",
+  "timeout_ms": 30000,
+  "location": { "map": 0, "x": -5366.0, "y": -3746.0, "z": 304.8, "o": 0 },
+  "players": [
+    { "id": "explorer", "race": 3, "class": 1, "level": 18 }
+  ],
+  "creatures": [
+    { "id": "bingles", "owner": "explorer", "entry": 6577, "distance": 2, "faction": 55, "level": 16 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "assert", "label": "Find Bingles is open to a fresh character", "actor": "explorer", "metric": "quest_takeable", "quest": 2039, "equals": 1 },
+    { "action": "assert", "label": "Bingles' Missing Supplies waits for Find Bingles", "actor": "explorer", "metric": "quest_takeable", "quest": 2038, "equals": 0 },
+    { "action": "prepare_quest", "label": "Finish Find Bingles", "actor": "explorer", "quest": 2039 },
+    { "action": "reward_quest", "label": "Hand Find Bingles to Bingles", "actor": "explorer", "quest": 2039 },
+    { "action": "assert", "label": "Find Bingles is rewarded", "actor": "explorer", "metric": "quest_rewarded", "quest": 2039, "equals": 1 },
+    { "action": "assert", "label": "Bingles' Missing Supplies is now open", "actor": "explorer", "metric": "quest_takeable", "quest": 2038, "equals": 1 },
+    { "action": "gossip_hello", "label": "Talk to Bingles", "actor": "explorer", "target": "bingles" },
+    { "action": "assert", "label": "Bingles offers Bingles' Missing Supplies", "actor": "explorer", "metric": "quest_menu_has", "quest": 2038, "equals": 1 }
+  ]
+}

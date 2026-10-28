@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Primalist Verdant Chase remaining cooldown recovery",
-  "contract": "The native 2.5-second pulse subtracts 5% of each remaining Spirit Charge/Primal Rush cooldown. Real first/highest casts start both cooldowns; two measurement windows distinguish remaining cooldown from full duration. Baseline and removal recover only elapsed time.",
+  "contract": "The native 2.5-second pulse subtracts 5% of each remaining Spirit Charge/Primal Rush cooldown. Real first/highest casts start both cooldowns; two measurement windows distinguish remaining cooldown from full duration. Baseline and removal recover only elapsed time. Each Spirit Charge (16% base Mana) and Primal Rush (10% base Mana) pair costs about 915 Mana at level 80 (base Mana about 3,520), so the sixth pair ran out of Mana; Mana is restored before every pair so a failed cast cannot hide the cooldown behavior.",
   "players": [
     {
       "id": "primalist",
@@ -32,9 +32,9 @@
   "timeout_ms": 240000,
   "steps": [
     {
-      "action": "command",
+      "action": "specialization",
       "actor": "primalist",
-      "command": ".localspec 58"
+      "id": 58
     },
     {
       "action": "unlearn",
@@ -157,6 +157,13 @@
       "action": "reset_cooldown",
       "actor": "primalist",
       "spell": 500696
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000,
+      "label": "Restore Mana spent by the earlier Spirit Charge and Primal Rush casts"
     },
     {
       "action": "snapshot",
@@ -388,6 +395,13 @@
       "spell": 502724
     },
     {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000,
+      "label": "Restore Mana spent by the earlier Spirit Charge and Primal Rush casts"
+    },
+    {
       "action": "snapshot",
       "actor": "primalist",
       "metric": "spell_heal_count",
@@ -615,6 +629,13 @@
       "action": "reset_cooldown",
       "actor": "primalist",
       "spell": 500696
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000,
+      "label": "Restore Mana spent by the earlier Spirit Charge and Primal Rush casts"
     },
     {
       "action": "snapshot",
@@ -859,6 +880,13 @@
       "spell": 502724
     },
     {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000,
+      "label": "Restore Mana spent by the earlier Spirit Charge and Primal Rush casts"
+    },
+    {
       "action": "snapshot",
       "actor": "primalist",
       "metric": "spell_heal_count",
@@ -1101,6 +1129,13 @@
       "spell": 500696
     },
     {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000,
+      "label": "Restore Mana spent by the earlier Spirit Charge and Primal Rush casts"
+    },
+    {
       "action": "snapshot",
       "actor": "primalist",
       "metric": "spell_heal_count",
@@ -1328,6 +1363,13 @@
       "action": "reset_cooldown",
       "actor": "primalist",
       "spell": 502724
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000,
+      "label": "Restore Mana spent by the earlier Spirit Charge and Primal Rush casts"
     },
     {
       "action": "snapshot",

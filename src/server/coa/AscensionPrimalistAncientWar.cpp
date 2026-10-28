@@ -10,8 +10,7 @@ namespace
 enum AncientWarSpells : uint32
 {
     AncientOfWar = 504222,
-    AncientMovement = 504369,
-    AncientCreature = 3469
+    AncientMovement = 504369
 };
 
 class primalist_ancient_war_metadata : public GlobalScript
@@ -22,13 +21,9 @@ public:
 
     void OnLoadSpellCustomAttr(SpellInfo* info) override
     {
-        if (info->Id != AncientOfWar || info->SpellFamilyName != 37)
-            return;
-        if (info->Effects[EFFECT_1].IsAura(SPELL_AURA_ADD_FLAT_MODIFIER))
+        if (info->Id == AncientOfWar && info->SpellFamilyName == 37 &&
+            info->Effects[EFFECT_1].IsAura(SPELL_AURA_ADD_FLAT_MODIFIER))
             info->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_ADD_PCT_MODIFIER;
-        if (info->Effects[EFFECT_2].IsAura(SPELL_AURA_TRANSFORM) &&
-            info->Effects[EFFECT_2].MiscValue == 346922)
-            info->Effects[EFFECT_2].MiscValue = AncientCreature;
     }
 };
 

@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Graveyard raises its Undead and their Plague at the Tombstones, not around the caster",
+  "contract": "Graveyard 805197 reads 'Create a graveyard at target location, slowing the movement speed of enemies inside by 40% and periodically raising the Undead from the ground, dealing ${$500365m2+$SP*.33} Plague damage to nearby enemies and creating a corpse.' It is cast at a ground location up to 30 yd away (Targets 64, range index 4) and its effect 0 triggers the Tombstone layouts 899900/899901 at that location (TARGET_DEST_DEST, 5 yd offsets), so the Tombstones 542064 stand in the graveyard. Each Tombstone's AI makes its owner cast the raise step 500365 at the Tombstone's position every 3 s. 500365 effect 0 summons the Risen Ghoul 542065 at its destination moved by up to 8 yd (TargetB TARGET_DEST_DEST_RANDOM, radius index 14) and effect 1 deals the Plague damage to enemies within 6 yd of that point (TARGET_UNIT_DEST_AREA_ENEMY, radius index 29); its TargetA TARGET_DEST_CASTER takes the destination from the unit raising it, which in the data is the Tombstone. With the Necromancer as the caster, Spell::InitExplicitTargets drops the Tombstone position (the spell has no explicit destination) and TARGET_DEST_CASTER puts every Ghoul and every Plague burst within 8 yd of the Necromancer. The Necromancer here stands 20 yd from a Harvest Golem and casts Graveyard on it: the Tombstones land about 25 yd away, so a Ghoul raised at a Tombstone is at least about 15 yd from the Necromancer, while one raised around the Necromancer is at most 9.5 yd away (8 yd offset plus the 1.5 yd summon step), and a Plague burst centred within 8 yd of the Necromancer cannot reach an enemy 20 yd away through its 6 yd radius. Expected: a Risen Ghoul appears more than 12 yd from the Necromancer, and the Plague damage of 500365 hits the golem inside the graveyard.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necromancer", "race": 5, "class": 23, "level": 60, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "necromancer", "entry": 36, "level": 60, "health": 1000000, "distance": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "necromancer", "spell": 805197 },
+    {
+      "action": "assert", "label": "BASELINE: no Risen Ghoul yet", "actor": "necromancer",
+      "metric": "owned_creature_count", "entry": 542065, "equals": 0
+    },
+    {
+      "action": "cast", "label": "Cast Graveyard on the golem 20 yd away", "actor": "necromancer",
+      "spell": 805197, "destination": { "x": -8897.41, "y": -115.853, "z": 82.3711 }
+    },
+    {
+      "action": "assert", "label": "SETUP: the Graveyard ground effect exists", "actor": "necromancer",
+      "metric": "dynamic_object", "spell": 805197, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: the Tombstones stand in the graveyard, far from the Necromancer",
+      "actor": "necromancer", "metric": "owned_creature_count", "entry": 542064, "min_distance": 15, "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: the Tombstones raise the dead (Graveyard 500365)", "actor": "necromancer",
+      "metric": "spell_cast_count", "spell": 500365, "min": 1, "within_ms": 8000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: a Risen Ghoul rises at a Tombstone, more than 12 yd from the Necromancer",
+      "actor": "necromancer", "metric": "owned_creature_count", "entry": 542065, "min_distance": 12, "min": 1,
+      "within_ms": 12000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the raised Undead's Plague damage hits the enemy inside the graveyard",
+      "actor": "necromancer", "metric": "spell_damage_count", "spell": 500365, "target": "golem", "min": 1,
+      "within_ms": 18000
+    },
+    { "action": "assert", "label": "The Necromancer is alive", "actor": "necromancer", "metric": "alive", "equals": 1 }
+  ]
+}
