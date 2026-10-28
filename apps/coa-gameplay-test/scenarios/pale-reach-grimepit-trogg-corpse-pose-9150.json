@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "Pale Reach battlefield Grimepit Trogg corpses stay down (#9150)",
+  "contract": "The Snowsong Valley Paladins-vs-Troggs battlefield decoration (rev_20261009_62_pale_reach_spawns) spawns Grimepit Troggs (entry 164206 guids 9960530-9960539, entry 164209 guids 9962102-9962106) with curhealth = 1 (live, not dead) and creature_addon bytes1 = 7 (UNIT_STAND_STATE_DEAD) so they lie as corpses. rev_20261017_77_pale_reach_npc_looks_poses's blanket creature_addon cleanup deleted all of them but only reinserted a handful of unrelated guids, so these guids lost their bytes1 = 7 row and reverted to the bytes1 = 0 (UNIT_STAND_STATE_STAND) default, standing upright with idle animation instead of lying dead.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "auditor", "race": 1, "class": 12, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Trogg corpse guid 9960530 (entry 164206) lies dead",
+      "actor": "auditor",
+      "metric": "spawn_stand_state",
+      "guid": 9960530,
+      "spawn_type": "creature",
+      "equals": 7
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Trogg corpse guid 9960538 (entry 164206) lies dead",
+      "actor": "auditor",
+      "metric": "spawn_stand_state",
+      "guid": 9960538,
+      "spawn_type": "creature",
+      "equals": 7
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Trogg corpse guid 9962104 (entry 164209) lies dead",
+      "actor": "auditor",
+      "metric": "spawn_stand_state",
+      "guid": 9962104,
+      "spawn_type": "creature",
+      "equals": 7
+    }
+  ]
+}
