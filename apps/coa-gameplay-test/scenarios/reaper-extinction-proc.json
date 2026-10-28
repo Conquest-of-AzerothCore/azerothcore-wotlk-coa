@@ -2,19 +2,33 @@
   "schema": 1,
   "name": "Reaper Extinction procs off direct Physical damage and grants the buff (#2171)",
   "contract": [
-    "Extinction 573039 reads 'Direct Physical damage dealt now has a 5% chance to grant you Extinction for $560414d. Chance to trigger this effect is increased by 10% for each Reaped Soul active.'",
-    "Its only DBC effect is aura 42 (SPELL_AURA_PROC_TRIGGER_SPELL) triggering the Stack Adder 520501, but the record's ProcTypeMask is 0, so without spell_proc/spell_script_names rows the proc has no event to hook.",
-    "rev_20260920_11_reaper_extinction_proc.sql (already on origin/main via merged PR #4280, commit 85b231bc0) supplies ProcFlags 20 (melee auto attack | melee-class spell damage), SchoolMask 1 (Physical), SpellPhaseMask 2 (hit) and binds spell_ascension_reaper_extinction, which rolls BaseChance 5 + ChancePerSoul 10 per Reaped Soul 500363 stack.",
-    "Reaped Soul 500363's own DBC StackAmount is 3 (not 10, corrected from the original commit's premise), so the roll is 5 + 10*3 = 35%. Repeated melee auto attacks give many independent trials: over a 45 s window at roughly one swing every ~2 s (~22 swings), the false-failure probability is 0.65^22, well under 0.1%."
+    "Extinction 573039 reads 'Direct Physical damage dealt now has a 5% chance to grant you Extinction for",
+    "$560414d. Chance to trigger this effect is increased by 10% for each Reaped Soul active.'",
+    "Its only DBC effect is aura 42 (SPELL_AURA_PROC_TRIGGER_SPELL) triggering the Stack Adder 520501, but",
+    "the record's ProcTypeMask is 0, so without spell_proc/spell_script_names rows the proc has no event to",
+    "hook.",
+    "rev_20260920_11_reaper_extinction_proc.sql (already on origin/main via merged PR #4280, commit",
+    "85b231bc0) supplies ProcFlags 20 (melee auto attack | melee-class spell damage), SchoolMask 1",
+    "(Physical), SpellPhaseMask 2 (hit) and binds spell_ascension_reaper_extinction, which rolls BaseChance 5",
+    "+ ChancePerSoul 10 per Reaped Soul 500363 stack.",
+    "Original Reaped Soul 500363 has a maximum of three stacks and uses original SpellDuration entry 2,",
+    "300000010 ms. Assert three souls and sufficient native duration before attacking, and three souls",
+    "afterward. Effective spell_proc sets its preliminary chance to 100 percent, leaving the original script",
+    "roll at 5 + 10*3 = 35 percent. Preserve that probability while collecting at least 40 actual Physical",
+    "melee damage events, with native hit and expertise fixtures that exclude missed or avoided submissions.",
+    "Observe the actual granted Extinction aura without injecting it, count native Stack Adder casts, and",
+    "check the fixed cohort against 35 percent with an exact binomial test. Zero successes have probability",
+    "0.65^40, about 3.3e-8, instead of the previous assumed 22 swings."
   ],
-  "timeout_ms": 90000,
+  "timeout_ms": 180000,
   "players": [
     {
       "id": "reaper",
       "race": 2,
       "class": 30,
       "level": 60,
-      "melee_hit_rating": 10000
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
     }
   ],
   "creatures": [
@@ -28,8 +42,29 @@
     }
   ],
   "steps": [
-    { "action": "wait", "label": "Let level scaling and login settle", "ms": 5000 },
-    { "action": "learn", "actor": "reaper", "spell": 573039 },
+    {
+      "action": "wait",
+      "label": "Let level scaling and login settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "melee_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "attack_time_ms",
+      "save_as": "native_swing_ms",
+      "hand": 0
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 573039
+    },
     {
       "action": "assert",
       "label": "Extinction talent is known",
@@ -39,7 +74,12 @@
       "equals": 1,
       "within_ms": 3000
     },
-    { "action": "set_aura", "actor": "reaper", "spell": 500363, "stacks": 3 },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
     {
       "action": "assert",
       "label": "Fixture precondition: no Extinction buff yet",
@@ -48,7 +88,32 @@
       "spell": 560414,
       "equals": 0
     },
-    { "action": "attack", "actor": "reaper", "target": "enemy" },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_duration_ms",
+      "spell": 500363,
+      "min": 160000
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 520501,
+      "save_as": "stack_adders_before"
+    },
+    {
+      "action": "attack",
+      "actor": "reaper",
+      "target": "enemy"
+    },
     {
       "action": "assert",
       "label": "A melee auto attack lands on the hostile target",
@@ -59,12 +124,58 @@
     },
     {
       "action": "assert",
-      "label": "Extinction buff is granted from repeated direct Physical hits (~22 trials at 35% each, false-failure well under 0.1%)",
+      "label": "Actual direct Physical hits grant the native Extinction aura",
       "actor": "reaper",
       "metric": "aura",
       "spell": 560414,
       "equals": 1,
-      "within_ms": 45000
+      "within_ms": 140000
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "melee_damage_count",
+      "target": "enemy",
+      "min": 40,
+      "within_ms": 140000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "reaper"
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "melee_damage_count",
+      "target": "enemy",
+      "save_as": "physical_hits"
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 520501,
+      "save_as": "stack_adders_after"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_proc_count",
+      "spell": 573039,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "alive",
+      "equals": 1
     }
   ]
 }

@@ -1,0 +1,513 @@
+{
+  "schema": 1,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "other",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "name": "Corrupted Blade survives lethal Sinister Strike hits (#6469)",
+  "contract": [
+    "Corrupted Blade 281492 promises to spread the caster's Corruption from the struck target; it does not",
+    "require that target to survive the attack. Ordinary landed killing blows must copy the pre-damage aura",
+    "after the source dies and its auras are removed. Preserve rank, remaining duration and effect amounts",
+    "for both authored spread roots, 172 and 285710, and the ten-yard range. A lethal foreign-caster control",
+    "must not spread. The fixture grants rolled abilities directly and proves native combat behavior."
+  ],
+  "timeout_ms": 180000,
+  "creatures": [
+    {
+      "id": "foreign_source",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "source",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "variant_source",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "near",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 9,
+      "stationary": true
+    },
+    {
+      "id": "outside",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 16,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 1180
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 1752
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 172
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 285710
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 281492
+    },
+    {
+      "action": "learn",
+      "actor": "other",
+      "spell": 172
+    },
+    {
+      "action": "set_skill",
+      "actor": "hero",
+      "skill": 173,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 2092
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 2092,
+      "slot": 15
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 281492,
+      "equals": 1,
+      "label": "SETUP: Corrupted Blade is active"
+    },
+    {
+      "action": "cast",
+      "actor": "other",
+      "spell": 172,
+      "target": "foreign_source"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: another caster owns the control Corruption",
+      "actor": "foreign_source",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "foreign_source",
+      "value": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 1752,
+      "target": "foreign_source"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the ordinary attack lands",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 1752,
+      "target": "foreign_source",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the attack kills the foreign-aura source",
+      "actor": "foreign_source",
+      "metric": "health",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a killing blow does not spread another caster's Corruption",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 172,
+      "target": "source"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the source carries the owned aura",
+      "actor": "source",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the source is alive before the blade attack",
+      "actor": "source",
+      "metric": "health",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "source",
+      "metric": "aura_duration_ms",
+      "spell": 172,
+      "save_as": "duration_172"
+    },
+    {
+      "action": "snapshot",
+      "actor": "source",
+      "metric": "aura_amount",
+      "spell": 172,
+      "effect": 0,
+      "save_as": "amount_172_0"
+    },
+    {
+      "action": "set_health",
+      "actor": "source",
+      "value": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 1752,
+      "target": "source"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "assert",
+      "label": "The ordinary Sinister Strike lands on the afflicted source",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 1752,
+      "target": "source",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The blade attack kills the afflicted source",
+      "actor": "source",
+      "metric": "health",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Death removes the source aura before spreading is observed",
+      "actor": "source",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The killing blow spreads the owned aura within ten yards",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The copied aura preserves its pre-damage effect amount",
+      "actor": "near",
+      "metric": "aura_amount",
+      "spell": 172,
+      "effect": 0,
+      "relative_to": "amount_172_0",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The copied aura preserves its remaining duration",
+      "actor": "near",
+      "metric": "aura_duration_ms",
+      "spell": 172,
+      "relative_to": "duration_172",
+      "min": -700,
+      "max": 0
+    },
+    {
+      "action": "assert",
+      "label": "The killing blow keeps the ten-yard boundary",
+      "actor": "outside",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 21000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the previous copied aura has expired",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 285710,
+      "target": "variant_source"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the source carries the owned aura",
+      "actor": "variant_source",
+      "metric": "aura",
+      "spell": 285710,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the source is alive before the blade attack",
+      "actor": "variant_source",
+      "metric": "health",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "variant_source",
+      "metric": "aura_duration_ms",
+      "spell": 285710,
+      "save_as": "duration_285710"
+    },
+    {
+      "action": "snapshot",
+      "actor": "variant_source",
+      "metric": "aura_amount",
+      "spell": 285710,
+      "effect": 0,
+      "save_as": "amount_285710_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "variant_source",
+      "metric": "aura_amount",
+      "spell": 285710,
+      "effect": 1,
+      "save_as": "amount_285710_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "variant_source",
+      "metric": "aura_amount",
+      "spell": 285710,
+      "effect": 2,
+      "save_as": "amount_285710_2"
+    },
+    {
+      "action": "set_health",
+      "actor": "variant_source",
+      "value": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 1752,
+      "target": "variant_source"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "assert",
+      "label": "The ordinary Sinister Strike lands on the afflicted source",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 1752,
+      "target": "variant_source",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The blade attack kills the afflicted source",
+      "actor": "variant_source",
+      "metric": "health",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Death removes the source aura before spreading is observed",
+      "actor": "variant_source",
+      "metric": "aura",
+      "spell": 285710,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The killing blow spreads the owned aura within ten yards",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 285710,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The copied aura preserves its pre-damage effect amount",
+      "actor": "near",
+      "metric": "aura_amount",
+      "spell": 285710,
+      "effect": 0,
+      "relative_to": "amount_285710_0",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The copied aura preserves its pre-damage effect amount",
+      "actor": "near",
+      "metric": "aura_amount",
+      "spell": 285710,
+      "effect": 1,
+      "relative_to": "amount_285710_1",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The copied aura preserves its pre-damage effect amount",
+      "actor": "near",
+      "metric": "aura_amount",
+      "spell": 285710,
+      "effect": 2,
+      "relative_to": "amount_285710_2",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The copied aura preserves its remaining duration",
+      "actor": "near",
+      "metric": "aura_duration_ms",
+      "spell": 285710,
+      "relative_to": "duration_285710",
+      "min": -700,
+      "max": 0
+    },
+    {
+      "action": "assert",
+      "label": "The killing blow keeps the ten-yard boundary",
+      "actor": "outside",
+      "metric": "aura",
+      "spell": 285710,
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Icehide 76555 can be skinned (COA-7138)",
+  "contract": [
+    "Requires CoALegendaryItems.DropChance=0: this scenario checks skinning an otherwise empty corpse.",
+    "Icehide 76555 is a level 14 elite cat beast with no skinning table, so its corpse could never be skinned.",
+    "It now uses the level 10-15 leather table 100015. Icehide has no creature loot or money, so its corpse is",
+    "skinnable as soon as it dies, and Skinning 75 opens a skinning loot window on it."
+  ],
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -10285, "y": 800, "z": 53, "o": 0, "ignore_access": true },
+  "players": [
+    { "id": "hunter", "race": 1, "class": 21, "level": 15, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "icehide", "owner": "hunter", "entry": 76555, "level": 14, "health": 1, "distance": 2, "reaction": 2 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 2000 },
+    { "action": "learn", "actor": "hunter", "spell": 8613 },
+    { "action": "set_skill", "actor": "hunter", "skill": 393, "value": 75, "maximum": 150 },
+    { "action": "attack", "actor": "hunter", "target": "icehide" },
+    { "action": "assert", "actor": "icehide", "metric": "alive", "equals": 0, "within_ms": 30000 },
+    { "action": "wait", "ms": 500 },
+    { "action": "cast", "actor": "hunter", "spell": 8613, "target": "icehide" },
+    { "action": "assert", "label": "The skinning loot window opens on Icehide",
+      "actor": "hunter", "metric": "loot_count", "min": 1, "within_ms": 5000 }
+  ]
+}

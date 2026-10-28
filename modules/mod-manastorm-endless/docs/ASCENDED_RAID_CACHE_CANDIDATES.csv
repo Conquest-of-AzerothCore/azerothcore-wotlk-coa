@@ -1,0 +1,614 @@
+PoolID,Family,BaseItemID,ItemID,Name,ItemLevel,RequiredLevel,Quality,Class,Subclass,InventoryType,DisplayID,Description,DumpLine
+9003901,Ascended ZG,1728,201728,Teebu's Blazing Longsword,72,60,4,2,7,13,15612,@Ascended Raid@,176813
+9003901,Ascended ZG,3475,203475,Cloak of Flames,70,60,4,4,1,16,18228,@Ascended Raid@,178114
+9003901,Ascended ZG,12390,212390,Battleweaver's Spaulders,72,60,4,4,3,3,20267,@Ascended Zul'Gurub@,179957
+9003901,Ascended ZG,12391,212391,Battleweaver's Armor,72,60,4,4,3,5,20734,@Ascended Zul'Gurub@,179958
+9003901,Ascended ZG,12473,212473,Battleweaver's Wristguards,72,60,4,4,3,9,20265,@Ascended Zul'Gurub@,179971
+9003901,Ascended ZG,12503,212503,Battleweaver's Necklace,72,60,4,4,0,2,138349,@Ascended Zul'Gurub@,179976
+9003901,Ascended ZG,19822,219822,Zandalar Vindicator's Breastplate,72,60,4,4,4,5,25755,@Ascended Zul'Gurub@,183176
+9003901,Ascended ZG,19823,219823,Zandalar Vindicator's Belt,72,60,4,4,4,6,25756,@Ascended Zul'Gurub@,183177
+9003901,Ascended ZG,19824,219824,Zandalar Vindicator's Armguards,72,60,4,4,4,9,25757,@Ascended Zul'Gurub@,183178
+9003901,Ascended ZG,19825,219825,Zandalar Freethinker's Breastplate,72,60,4,4,4,5,25603,@Ascended Zul'Gurub@,183179
+9003901,Ascended ZG,19826,219826,Zandalar Freethinker's Belt,72,60,4,4,4,6,25604,@Ascended Zul'Gurub@,183180
+9003901,Ascended ZG,19827,219827,Zandalar Freethinker's Armguards,72,60,4,4,4,9,25605,@Ascended Zul'Gurub@,183181
+9003901,Ascended ZG,19828,219828,Zandalar Augur's Hauberk,72,60,4,4,3,5,26072,@Ascended Zul'Gurub@,183182
+9003901,Ascended ZG,19829,219829,Zandalar Augur's Belt,72,60,4,4,3,6,26074,@Ascended Zul'Gurub@,183183
+9003901,Ascended ZG,19830,219830,Zandalar Augur's Bracers,72,60,4,4,3,9,26073,@Ascended Zul'Gurub@,183184
+9003901,Ascended ZG,19831,219831,Zandalar Predator's Mantle,72,60,4,4,3,3,25610,@Ascended Zul'Gurub@,183185
+9003901,Ascended ZG,19832,219832,Zandalar Predator's Belt,72,60,4,4,3,6,25612,@Ascended Zul'Gurub@,183186
+9003901,Ascended ZG,19833,219833,Zandalar Predator's Bracers,72,60,4,4,3,9,23005,@Ascended Zul'Gurub@,183187
+9003901,Ascended ZG,19834,219834,Zandalar Madcap's Tunic,72,60,4,4,2,5,25613,@Ascended Zul'Gurub@,183188
+9003901,Ascended ZG,19835,219835,Zandalar Madcap's Mantle,72,60,4,4,2,3,25614,@Ascended Zul'Gurub@,183189
+9003901,Ascended ZG,19836,219836,Zandalar Madcap's Bracers,72,60,4,4,2,9,25615,@Ascended Zul'Gurub@,183190
+9003901,Ascended ZG,19838,219838,Zandalar Haruspex's Tunic,72,60,4,4,2,5,25625,@Ascended Zul'Gurub@,183191
+9003901,Ascended ZG,19839,219839,Zandalar Haruspex's Belt,72,60,4,4,2,6,25626,@Ascended Zul'Gurub@,183192
+9003901,Ascended ZG,19840,219840,Zandalar Haruspex's Bracers,72,60,4,4,2,9,25627,@Ascended Zul'Gurub@,183193
+9003901,Ascended ZG,19841,219841,Zandalar Confessor's Mantle,72,60,4,4,1,3,25896,@Ascended Zul'Gurub@,183194
+9003901,Ascended ZG,19842,219842,Zandalar Confessor's Bindings,72,60,4,4,1,6,25629,@Ascended Zul'Gurub@,183195
+9003901,Ascended ZG,19843,219843,Zandalar Confessor's Wraps,72,60,4,4,1,9,25630,@Ascended Zul'Gurub@,183196
+9003901,Ascended ZG,19845,219845,Zandalar Illusionist's Mantle,72,60,4,4,1,3,25632,@Ascended Zul'Gurub@,183197
+9003901,Ascended ZG,19846,219846,Zandalar Illusionist's Wraps,72,60,4,4,1,9,25630,@Ascended Zul'Gurub@,183198
+9003901,Ascended ZG,19848,219848,Zandalar Demoniac's Wraps,72,60,4,4,1,9,25630,@Ascended Zul'Gurub@,183200
+9003901,Ascended ZG,19849,219849,Zandalar Demoniac's Mantle,72,60,4,4,1,3,25895,@Ascended Zul'Gurub@,183201
+9003901,Ascended ZG,19852,219852,Ancient Hakkari Manslayer,76,60,4,2,0,13,27964,@Ascended Zul'Gurub@,183202
+9003901,Ascended ZG,19853,219853,Gurubashi Dwarf Destroyer,78,60,4,2,3,26,25905,@Ascended Zul'Gurub@,183203
+9003901,Ascended ZG,19854,219854,"Zin'rokh, Destroyer of Worlds",76,60,4,2,8,17,25930,@Ascended Zul'Gurub@,183204
+9003901,Ascended ZG,19855,219855,Bloodsoaked Legplates,76,60,4,4,4,7,25636,@Ascended Zul'Gurub@,183205
+9003901,Ascended ZG,19856,219856,The Eye of Hakkar,78,60,4,4,0,2,25637,@Ascended Zul'Gurub@,183206
+9003901,Ascended ZG,19857,219857,Cloak of Consumption,78,60,4,4,1,16,25638,@Ascended Zul'Gurub@,183207
+9003901,Ascended ZG,19859,219859,Fang of the Faceless,76,60,4,2,15,13,25903,@Ascended Zul'Gurub@,183208
+9003901,Ascended ZG,19861,219861,Touch of Chaos,78,60,4,2,19,26,25922,@Ascended Zul'Gurub@,183209
+9003901,Ascended ZG,19862,219862,Aegis of the Blood God,78,60,4,4,6,14,25890,@Ascended Zul'Gurub@,183210
+9003901,Ascended ZG,19863,219863,Primalist's Seal,72,60,4,4,0,11,25645,@Ascended Zul'Gurub@,183211
+9003901,Ascended ZG,19864,219864,Bloodcaller,76,60,4,2,7,21,25654,@Ascended Zul'Gurub@,183212
+9003901,Ascended ZG,19865,219865,Warblade of the Hakkari,76,60,4,2,7,21,26048,@Ascended Zul'Gurub@Forged in...,183213
+9003901,Ascended ZG,19866,219866,Warblade of the Hakkari,72,60,4,2,7,22,25313,@Ascended Zul'Gurub@The seething flames of hatred.,183214
+9003901,Ascended ZG,19867,219867,Bloodlord's Defender,72,60,4,2,7,13,25909,@Ascended Zul'Gurub@,183215
+9003901,Ascended ZG,19869,219869,Blooddrenched Grips,72,60,4,4,2,10,25680,@Ascended Zul'Gurub@,183216
+9003901,Ascended ZG,19870,219870,Hakkari Loa Cloak,72,60,4,4,1,16,25660,@Ascended Zul'Gurub@,183217
+9003901,Ascended ZG,19871,219871,Talisman of Protection,72,60,4,4,0,2,25661,@Ascended Zul'Gurub@,183218
+9003901,Ascended ZG,19873,219873,Overlord's Crimson Band,72,60,4,4,0,11,25663,@Ascended Zul'Gurub@,183219
+9003901,Ascended ZG,19874,219874,Halberd of Smiting,72,60,4,2,6,17,25931,@Ascended Zul'Gurub@,183220
+9003901,Ascended ZG,19875,219875,Bloodstained Coif,72,60,4,4,3,1,25753,@Ascended Zul'Gurub@,183221
+9003901,Ascended ZG,19876,219876,Soul Corrupter's Necklace,76,60,4,4,0,2,25666,@Ascended Zul'Gurub@,183222
+9003901,Ascended ZG,19877,219877,Animist's Leggings,72,60,4,4,2,7,25745,@Ascended Zul'Gurub@,183223
+9003901,Ascended ZG,19878,219878,Bloodsoaked Pauldrons,72,60,4,4,4,3,25749,@Ascended Zul'Gurub@,183224
+9003901,Ascended ZG,19884,219884,Jin'do's Judgement,72,60,4,2,10,17,25940,@Ascended Zul'Gurub@,183225
+9003901,Ascended ZG,19885,219885,Jin'do's Evil Eye,72,60,4,4,0,2,25675,@Ascended Zul'Gurub@,183226
+9003901,Ascended ZG,19886,219886,The Hexxer's Cover,72,60,4,4,1,1,26060,@Ascended Zul'Gurub@,183227
+9003901,Ascended ZG,19887,219887,Bloodstained Legplates,72,60,4,4,3,7,25677,@Ascended Zul'Gurub@,183228
+9003901,Ascended ZG,19888,219888,Overlord's Embrace,72,60,4,4,1,16,25679,@Ascended Zul'Gurub@,183229
+9003901,Ascended ZG,19889,219889,Blooddrenched Leggings,72,60,4,4,2,7,26096,@Ascended Zul'Gurub@,183230
+9003901,Ascended ZG,19890,219890,Jin'do's Hexxer,72,60,4,2,4,21,25916,@Ascended Zul'Gurub@,183231
+9003901,Ascended ZG,19891,219891,Jin'do's Bag of Whammies,72,60,4,4,0,23,25684,@Ascended Zul'Gurub@,183232
+9003901,Ascended ZG,19892,219892,Animist's Boots,72,60,4,4,2,8,25746,@Ascended Zul'Gurub@,183233
+9003901,Ascended ZG,19893,219893,Zanzil's Seal,72,60,4,4,0,11,25687,@Ascended Zul'Gurub@,183234
+9003901,Ascended ZG,19894,219894,Bloodsoaked Gauntlets,72,60,4,4,4,10,25688,@Ascended Zul'Gurub@,183235
+9003901,Ascended ZG,19895,219895,Bloodtinged Kilt,72,60,4,4,1,7,25741,@Ascended Zul'Gurub@,183236
+9003901,Ascended ZG,19896,219896,Thekal's Grasp,72,60,4,2,13,21,26100,@Ascended Zul'Gurub@,183237
+9003901,Ascended ZG,19897,219897,Betrayer's Boots,72,60,4,4,1,8,25892,@Ascended Zul'Gurub@,183238
+9003901,Ascended ZG,19898,219898,Seal of Jin,72,60,4,4,0,11,25693,@Ascended Zul'Gurub@,183239
+9003901,Ascended ZG,19899,219899,Ritualistic Legguards,72,60,4,4,1,7,25747,@Ascended Zul'Gurub@,183240
+9003901,Ascended ZG,19900,219900,Zulian Stone Axe,72,60,4,2,1,17,27761,@Ascended Zul'Gurub@Bears the mark of Jin.,183241
+9003901,Ascended ZG,19901,219901,Zulian Slicer,72,60,4,2,7,13,25696,@Ascended Zul'Gurub@Also serves as a skinning knife.,183242
+9003901,Ascended ZG,19903,219903,Fang of Venoxis,72,60,4,2,15,21,25904,@Ascended Zul'Gurub@,183243
+9003901,Ascended ZG,19904,219904,Runed Bloodstained Hauberk,72,60,4,4,3,5,25700,@Ascended Zul'Gurub@,183244
+9003901,Ascended ZG,19905,219905,Zanzil's Band,72,60,4,4,0,11,25687,@Ascended Zul'Gurub@,183245
+9003901,Ascended ZG,19906,219906,Blooddrenched Footpads,72,60,4,4,2,8,26097,@Ascended Zul'Gurub@,183246
+9003901,Ascended ZG,19907,219907,Zulian Tigerhide Cloak,72,60,4,4,1,16,25711,@Ascended Zul'Gurub@,183247
+9003901,Ascended ZG,19908,219908,Sceptre of Smiting,72,60,4,2,4,13,25927,@Ascended Zul'Gurub@,183248
+9003901,Ascended ZG,19909,219909,Will of Arlokk,72,60,4,2,10,17,25939,@Ascended Zul'Gurub@,183249
+9003901,Ascended ZG,19910,219910,Arlokk's Grasp,72,60,4,2,13,22,25942,@Ascended Zul'Gurub@,183250
+9003901,Ascended ZG,19912,219912,Overlord's Onyx Band,72,60,4,4,0,11,25663,@Ascended Zul'Gurub@,183251
+9003901,Ascended ZG,19913,219913,Bloodsoaked Greaves,72,60,4,4,4,8,25719,@Ascended Zul'Gurub@,183252
+9003901,Ascended ZG,19915,219915,Zulian Defender,72,60,4,4,6,14,25889,@Ascended Zul'Gurub@,183253
+9003901,Ascended ZG,19918,219918,Jeklik's Crusher,72,60,4,2,5,17,26106,@Ascended Zul'Gurub@,183254
+9003901,Ascended ZG,19919,219919,Bloodstained Greaves,72,60,4,4,3,8,25729,@Ascended Zul'Gurub@,183255
+9003901,Ascended ZG,19920,219920,Primalist's Band,72,60,4,4,0,11,25645,@Ascended Zul'Gurub@,183256
+9003901,Ascended ZG,19921,219921,Zulian Hacker,72,60,4,2,0,13,20933,@Ascended Raid@,183257
+9003901,Ascended ZG,19922,219922,Arlokk's Hoodoo Stick,72,60,4,4,0,23,26108,@Ascended Zul'Gurub@,183258
+9003901,Ascended ZG,19923,219923,Jeklik's Opaline Talisman,72,60,4,4,0,2,25735,@Ascended Zul'Gurub@,183259
+9003901,Ascended ZG,19925,219925,Band of Jin,72,60,4,4,0,11,25693,@Ascended Zul'Gurub@,183260
+9003901,Ascended ZG,19927,219927,Mar'li's Touch,72,60,4,2,19,26,25910,@Ascended Zul'Gurub@,183261
+9003901,Ascended ZG,19928,219928,Animist's Spaulders,72,60,4,4,2,3,25744,@Ascended Zul'Gurub@,183262
+9003901,Ascended ZG,19929,219929,Bloodtinged Gloves,72,60,4,4,1,10,25750,@Ascended Zul'Gurub@,183263
+9003901,Ascended ZG,19930,219930,Mar'li's Eye,72,60,4,4,0,12,26069,@Ascended Zul'Gurub@,183264
+9003901,Ascended ZG,19944,219944,Nat Pagle's Fish Terminator,72,60,4,2,10,17,25788,@Ascended Zul'Gurub@The inscription reads: Fishin's fer sissies -Nat Pagle,183266
+9003901,Ascended ZG,19945,219945,Foror's Eyepatch,72,60,4,4,2,1,16887,@Ascended Zul'Gurub@,183267
+9003901,Ascended ZG,19946,219946,Tigule's Harpoon,72,60,4,2,6,17,25769,@Ascended Zul'Gurub@,183268
+9003901,Ascended ZG,19947,219947,Nat Pagle's Broken Reel,72,60,4,4,0,12,16111,@Ascended Zul'Gurub@The inscription reads: Fer really long castin'.,183269
+9003901,Ascended ZG,20032,220032,Flowing Ritual Robes,72,60,4,4,1,20,9679,@Ascended Zul'Gurub@,183294
+9003901,Ascended ZG,20033,220033,Zandalar Demoniac's Robe,72,60,4,4,1,20,25893,@Ascended Zul'Gurub@,183295
+9003901,Ascended ZG,20034,220034,Zandalar Illusionist's Robe,72,60,4,4,1,20,25894,@Ascended Zul'Gurub@,183296
+9003901,Ascended ZG,20038,220038,Mandokir's Sting,72,60,4,2,2,15,25899,@Ascended Zul'Gurub@,183297
+9003901,Ascended ZG,20257,220257,Seafury Gauntlets,76,60,4,4,3,10,26075,@Ascended Zul'Gurub@,183314
+9003901,Ascended ZG,20258,220258,Zulian Ceremonial Staff,72,60,4,2,10,17,25915,@Ascended Raid@,183315
+9003901,Ascended ZG,20259,220259,Shadow Panther Hide Gloves,72,60,4,4,2,10,26076,@Ascended Raid@,183316
+9003901,Ascended ZG,20260,220260,Seafury Leggings,72,60,4,4,3,7,26077,@Ascended Zul'Gurub@,183317
+9003901,Ascended ZG,20261,220261,Shadow Panther Hide Belt,72,60,4,4,2,6,24248,@Ascended Raid@,183318
+9003901,Ascended ZG,20262,220262,Seafury Boots,72,60,4,4,3,8,26079,@Ascended Zul'Gurub@,183319
+9003901,Ascended ZG,20263,220263,Gurubashi Helm,72,60,4,4,4,1,26219,@Ascended Zul'Gurub@,183320
+9003901,Ascended ZG,20264,220264,Peacekeeper Gauntlets,76,60,4,4,4,10,26081,@Ascended Zul'Gurub@,183321
+9003901,Ascended ZG,20265,220265,Peacekeeper Boots,72,60,4,4,4,8,26082,@Ascended Zul'Gurub@,183322
+9003901,Ascended ZG,20266,220266,Peacekeeper Leggings,72,60,4,4,4,7,26080,@Ascended Zul'Gurub@,183323
+9003901,Ascended ZG,22711,222711,Cloak of the Hakkari Worshippers,72,60,4,4,1,16,28325,@Ascended Zul'Gurub@,184797
+9003901,Ascended ZG,22712,222712,Might of the Tribe,72,60,4,4,1,16,28326,@Ascended Zul'Gurub@,184798
+9003901,Ascended ZG,22713,222713,Zulian Scepter of Rites,72,60,4,2,4,21,28327,@Ascended Zul'Gurub@,184799
+9003901,Ascended ZG,22714,222714,Sacrificial Gauntlets,72,60,4,4,4,10,28329,@Ascended Zul'Gurub@,184800
+9003901,Ascended ZG,22715,222715,Gloves of the Tormented,72,60,4,4,3,10,28330,@Ascended Zul'Gurub@,184801
+9003901,Ascended ZG,22716,222716,Belt of Untapped Power,72,60,4,4,1,6,28331,@Ascended Zul'Gurub@,184802
+9003901,Ascended ZG,22718,222718,Blooddrenched Mask,72,60,4,4,2,1,34857,@Ascended Zul'Gurub@,184803
+9003901,Ascended ZG,22720,222720,Zulian Headdress,72,60,4,4,1,1,28336,@Ascended Zul'Gurub@,184804
+9003901,Ascended ZG,22721,222721,Band of Servitude,72,60,4,4,0,11,18771,@Ascended Zul'Gurub@,184805
+9003901,Ascended ZG,22722,222722,Seal of the Gurubashi Berserker,72,60,4,4,0,11,24167,@Ascended Zul'Gurub@,184806
+9003902,Ascended BWL,13635,213635,Dragonrider's Crown,82,60,4,4,1,1,32420,@Ascended Raid@,180467
+9003902,Ascended BWL,13636,213636,Dragonsbane Headguard,89,60,4,4,3,1,37714,@Ascended Raid@,180468
+9003902,Ascended BWL,13826,213826,Dragon Hunter's Mantle,82,60,4,4,3,3,36995,@Ascended Raid@,180493
+9003902,Ascended BWL,13827,213827,Robes of the Blackwing Apprentice,89,60,4,4,1,20,14941,@Ascended Raid@,180494
+9003902,Ascended BWL,14000,214000,Ring of Trinity Force,82,60,4,4,0,11,138888,@Ascended Blackwing Lair@,180624
+9003902,Ascended BWL,14001,214001,Archimtiros' Ring of Armageddon,89,60,4,4,0,11,138887,@Ascended Blackwing Lair@Such a mortal like yourself shouldn't harness such power.,180625
+9003902,Ascended BWL,14995,214995,Death Talon Tunic,89,60,4,4,2,5,26290,@Ascended Raid@,181424
+9003902,Ascended BWL,14996,214996,Shadow Flame Legguards,89,60,4,4,3,7,28283,@Ascended Raid@,181425
+9003902,Ascended BWL,14997,214997,Bindings of the Sand Keepers,82,60,4,4,1,9,37057,@Ascended Raid@,181426
+9003902,Ascended BWL,15026,215026,Living Blood Gem,91,60,4,4,0,12,7509,@Ascended Blackwing Lair@,181434
+9003902,Ascended BWL,15319,215319,Taut Dragonhide Bracers,82,60,4,4,2,9,156411,@Ascended Raid@,181490
+9003902,Ascended BWL,15320,215320,Black Brood Wristguards,82,60,4,4,3,9,22103,@Ascended Raid@,181491
+9003902,Ascended BWL,19334,219334,The Untamed Blade,82,60,4,2,8,17,25359,@Ascended Blackwing Lair@,183003
+9003902,Ascended BWL,19335,219335,Spineshatter,82,60,4,2,4,13,25241,@Ascended Blackwing Lair@,183004
+9003902,Ascended BWL,19336,219336,Arcane Infused Gem,82,60,4,4,0,12,25218,@Ascended Blackwing Lair@,183005
+9003902,Ascended BWL,19337,219337,The Black Book,82,60,4,4,0,12,25227,@Ascended Blackwing Lair@,183006
+9003902,Ascended BWL,19339,219339,Mind Quickening Gem,82,60,4,4,0,12,25220,@Ascended Blackwing Lair@,183007
+9003902,Ascended BWL,19340,219340,Rune of Metamorphosis,82,60,4,4,0,12,25221,@Ascended Blackwing Lair@,183008
+9003902,Ascended BWL,19341,219341,Lifegiving Gem,82,60,4,4,0,12,25222,@Ascended Blackwing Lair@,183009
+9003902,Ascended BWL,19342,219342,Venomous Totem,82,60,4,4,0,12,25225,@Ascended Blackwing Lair@,183010
+9003902,Ascended BWL,19343,219343,Scrolls of Blinding Light,82,60,4,4,0,12,25226,@Ascended Blackwing Lair@,183011
+9003902,Ascended BWL,19344,219344,Natural Alignment Crystal,82,60,4,4,0,12,25224,@Ascended Blackwing Lair@,183012
+9003902,Ascended BWL,19345,219345,Aegis of Preservation,82,60,4,4,0,12,25223,@Ascended Blackwing Lair@,183013
+9003902,Ascended BWL,19346,219346,Dragonfang Blade,82,60,4,2,15,13,25243,@Ascended Blackwing Lair@,183014
+9003902,Ascended BWL,19347,219347,Claw of Chromaggus,89,60,4,2,15,21,25244,@Ascended Blackwing Lair@,183015
+9003902,Ascended BWL,19348,219348,Red Dragonscale Protector,82,60,4,4,6,14,25230,@Ascended Blackwing Lair@,183016
+9003902,Ascended BWL,19349,219349,Elementium Reinforced Bulwark,89,60,4,4,6,14,25231,@Ascended Blackwing Lair@,183017
+9003902,Ascended BWL,19350,219350,Heartstriker,82,60,4,2,2,15,25440,@Ascended Blackwing Lair@,183018
+9003902,Ascended BWL,19351,219351,"Maladath, Runed Blade of the Black Flight",82,60,4,2,7,13,25245,@Ascended Blackwing Lair@,183019
+9003902,Ascended BWL,19352,219352,Chromatically Tempered Sword,89,60,4,2,7,13,25246,@Ascended Blackwing Lair@,183020
+9003902,Ascended BWL,19353,219353,Drake Talon Cleaver,82,60,4,2,1,17,25236,@Ascended Blackwing Lair@,183021
+9003902,Ascended BWL,19355,219355,Shadow Wing Focus Staff,82,60,4,2,10,17,25326,@Ascended Blackwing Lair@,183023
+9003902,Ascended BWL,19356,219356,Staff of the Shadow Flame,89,60,4,2,10,17,25322,@Ascended Blackwing Lair@,183024
+9003902,Ascended BWL,19357,219357,Herald of Woe,82,60,4,2,5,17,25257,@Ascended Blackwing Lair@,183025
+9003902,Ascended BWL,19360,219360,Lok'amir il Romathis,89,60,4,2,4,21,25242,@Ascended Blackwing Lair@The Hand of Nefarius,183027
+9003902,Ascended BWL,19361,219361,"Ashjre'thul, Crossbow of Smiting",89,60,4,2,18,26,26087,@Ascended Blackwing Lair@,183028
+9003902,Ascended BWL,19363,219363,"Crul'shorukh, Edge of Chaos",89,60,4,2,0,13,25249,@Ascended Blackwing Lair@,183030
+9003902,Ascended BWL,19364,219364,"Ashkandi, Greatsword of the Brotherhood",89,60,4,2,8,17,25360,@Ascended Blackwing Lair@The initials A.L. are etched on the hilt.,183031
+9003902,Ascended BWL,19365,219365,Claw of the Black Drake,82,60,4,2,13,21,25259,@Ascended Blackwing Lair@,183032
+9003902,Ascended BWL,19367,219367,Dragon's Touch,82,60,4,2,19,26,26098,@Ascended Blackwing Lair@,183034
+9003902,Ascended BWL,19368,219368,Dragonbreath Hand Cannon,82,60,4,2,3,26,25255,@Ascended Blackwing Lair@,183035
+9003902,Ascended BWL,19369,219369,Gloves of Rapid Evolution,82,60,4,4,1,10,25267,@Ascended Blackwing Lair@,183036
+9003902,Ascended BWL,19370,219370,Mantle of the Blackwing Cabal,82,60,4,4,1,3,14752,@Ascended Blackwing Lair@,183037
+9003902,Ascended BWL,19371,219371,Pendant of the Fallen Dragon,82,60,4,4,0,2,25268,@Ascended Blackwing Lair@,183038
+9003902,Ascended BWL,19372,219372,Helm of Endless Rage,82,60,4,4,4,1,25828,@Ascended Blackwing Lair@,183039
+9003902,Ascended BWL,19373,219373,Black Brood Pauldrons,82,60,4,4,3,3,24637,@Ascended Blackwing Lair@,183040
+9003902,Ascended BWL,19374,219374,Bracers of Arcane Accuracy,82,60,4,4,1,9,25270,@Ascended Blackwing Lair@,183041
+9003902,Ascended BWL,19375,219375,"Mish'undare, Circlet of the Mind Flayer",91,60,4,4,1,1,25276,@Ascended Blackwing Lair@,183042
+9003902,Ascended BWL,19376,219376,Archimtiros' Ring of Reckoning,89,60,4,4,0,11,24911,@Ascended Blackwing Lair@Such a mortal like yourself shouldn't harness such power.,183043
+9003902,Ascended BWL,19377,219377,Prestor's Talisman of Connivery,91,60,4,4,0,2,25277,@Ascended Blackwing Lair@,183044
+9003902,Ascended BWL,19378,219378,Cloak of the Brood Lord,89,60,4,4,1,16,23074,@Ascended Blackwing Lair@The threading is unlike anything you have ever seen. It appears metallic in origin.,183045
+9003902,Ascended BWL,19379,219379,Neltharion's Tear,91,60,4,4,0,12,25278,@Ascended Blackwing Lair@A silver liquid flows within the impenetrable ebony shell. The item feels pure. It radiates an essence of extreme power.,183046
+9003902,Ascended BWL,19380,219380,Therazane's Link,89,60,4,4,3,6,25279,@Ascended Blackwing Lair@The metal is warm to the touch. The links connecting the belt together appear to be fashioned out of Elementium.,183047
+9003902,Ascended BWL,19381,219381,Boots of the Shadow Flame,89,60,4,4,2,8,25281,@Ascended Blackwing Lair@,183048
+9003902,Ascended BWL,19382,219382,Pure Elementium Band,89,60,4,4,0,11,25283,@Ascended Blackwing Lair@Flawless. Indestructible. You cannot comprehend the craftsmanship involved with the creation of this ring.,183049
+9003902,Ascended BWL,19385,219385,Empowered Leggings,91,60,4,4,1,7,25288,@Ascended Blackwing Lair@,183052
+9003902,Ascended BWL,19386,219386,Elementium Threaded Cloak,89,60,4,4,1,16,25289,@Ascended Blackwing Lair@,183053
+9003902,Ascended BWL,19387,219387,Drakeadon's Stompers,91,60,4,4,4,8,25291,@Ascended Blackwing Lair@,183054
+9003902,Ascended BWL,19388,219388,Angelista's Grasp,89,60,4,4,1,6,25292,@Ascended Blackwing Lair@,183055
+9003902,Ascended BWL,19389,219389,Taut Dragonhide Shoulderpads,89,60,4,4,2,3,25442,"@Ascended Blackwing Lair@The hides of several different dragon flights appear to be stitched together, comprising the top of the shoulders.",183056
+9003902,Ascended BWL,19390,219390,Taut Dragonhide Gloves,89,60,4,4,2,10,25296,@Ascended Blackwing Lair@A cold chill passes through your spine as you place your hands on these gloves. They appear to be made from the skin of whelplings - a lot of whelplings.,183057
+9003902,Ascended BWL,19391,219391,Shimmering Geta,89,60,4,4,1,8,25297,@Ascended Blackwing Lair@,183058
+9003902,Ascended BWL,19392,219392,Girdle of the Fallen Crusader,89,60,4,4,4,6,25299,@Ascended Blackwing Lair@,183059
+9003902,Ascended BWL,19393,219393,Primalist's Linked Waistguard,89,60,4,4,3,6,25300,@Ascended Blackwing Lair@,183060
+9003902,Ascended BWL,19394,219394,Drake Talon Pauldrons,82,60,4,4,4,3,25301,@Ascended Blackwing Lair@,183061
+9003902,Ascended BWL,19395,219395,Rejuvenating Gem,82,60,4,4,0,12,16374,@Ascended Blackwing Lair@,183062
+9003902,Ascended BWL,19396,219396,Taut Dragonhide Belt,82,60,4,4,2,6,25302,@Ascended Blackwing Lair@The flesh from different dragon flights has been sewn together to make this belt.,183063
+9003902,Ascended BWL,19397,219397,Ring of Blackrock,82,60,4,4,0,11,25282,@Ascended Blackwing Lair@,183064
+9003902,Ascended BWL,19398,219398,Cloak of Firemaw,82,60,4,4,1,16,18229,@Ascended Blackwing Lair@,183065
+9003902,Ascended BWL,19399,219399,Black Ash Robe,82,60,4,4,1,20,25305,@Ascended Blackwing Lair@,183066
+9003902,Ascended BWL,19400,219400,Firemaw's Clutch,82,60,4,4,1,6,25306,@Ascended Blackwing Lair@,183067
+9003902,Ascended BWL,19401,219401,Primalist's Linked Legguards,82,60,4,4,3,7,25307,@Ascended Blackwing Lair@,183068
+9003902,Ascended BWL,19402,219402,Legguards of the Fallen Crusader,82,60,4,4,4,7,25308,@Ascended Blackwing Lair@,183069
+9003902,Ascended BWL,19403,219403,Band of Forced Concentration,82,60,4,4,0,11,25181,@Ascended Blackwing Lair@,183070
+9003902,Ascended BWL,19405,219405,Malfurion's Blessed Bulwark,82,60,4,4,2,5,25309,@Ascended Blackwing Lair@,183071
+9003902,Ascended BWL,19406,219406,Drake Fang Talisman,91,60,4,4,0,12,25311,@Ascended Blackwing Lair@,183072
+9003902,Ascended BWL,19407,219407,Ebony Flame Gloves,82,60,4,4,1,10,14745,@Ascended Blackwing Lair@,183073
+9003902,Ascended BWL,19408,219408,"Kirasath'Dargonax, Fate of the Devourer",82,60,4,2,6,17,1,@Ascended Blackwing Lair@,183074
+9003902,Ascended BWL,19430,219430,Shroud of Pure Thought,82,60,4,4,1,16,13223,@Ascended Blackwing Lair@,183078
+9003902,Ascended BWL,19431,219431,Styleen's Impeding Scarab,91,60,4,4,0,12,25329,@Ascended Blackwing Lair@,183079
+9003902,Ascended BWL,19432,219432,Circle of Applied Force,82,60,4,4,0,11,24989,@Ascended Blackwing Lair@,183080
+9003902,Ascended BWL,19433,219433,Emberweave Leggings,91,60,4,4,3,7,25330,@Ascended Blackwing Lair@... Pants on Fire,183081
+9003903,Ascended AQ20,647,200647,Destiny,70,60,4,2,8,17,15764,@Ascended Raid@,175760
+9003903,Ascended AQ20,811,200811,Axe of the Deep Woods,70,60,4,2,0,13,14969,@Ascended Raid@,175924
+9003903,Ascended AQ20,833,200833,Lifestone,70,60,4,4,0,12,17837,@Ascended Raid@,175946
+9003903,Ascended AQ20,944,200944,Elemental Mage Staff,70,56,4,2,10,17,15804,@Ascended Raid@,176057
+9003903,Ascended AQ20,1168,201168,Skullflame Shield,70,60,4,4,6,14,24438,@Ascended Raid@,176277
+9003903,Ascended AQ20,1263,201263,Brain Hacker,70,60,4,2,1,17,17230,@Ascended Raid@,176367
+9003903,Ascended AQ20,1443,201443,Jeweled Amulet of Cainwyn,70,60,4,4,0,2,3978,@Ascended Raid@,176541
+9003903,Ascended AQ20,1728,201728,Teebu's Blazing Longsword,72,60,4,2,7,13,15612,@Ascended Raid@,176813
+9003903,Ascended AQ20,2099,202099,Dwarven Hand Cannon,70,60,4,2,3,26,22835,@Ascended Raid@,177160
+9003903,Ascended AQ20,2243,202243,Hand of Edward the Odd,70,60,4,2,4,13,15453,@Ascended Raid@,177297
+9003903,Ascended AQ20,2244,202244,Krol Blade,70,60,4,2,7,13,5416,@Ascended Raid@,177298
+9003903,Ascended AQ20,2245,202245,Helm of Narv,70,60,4,4,3,1,12175,@Ascended Raid@,177299
+9003903,Ascended AQ20,2246,202246,Myrmidon's Signet,70,60,4,4,0,11,6929,@Ascended Raid@,177300
+9003903,Ascended AQ20,2801,202801,Blade of Hanna,70,60,4,2,8,17,2756,@Ascended Raid@,177823
+9003903,Ascended AQ20,3475,203475,Cloak of Flames,70,60,4,4,1,16,18228,@Ascended Raid@,178114
+9003903,Ascended AQ20,14553,214553,Sash of Mercy,70,60,4,4,2,6,22585,@Ascended Raid@,181167
+9003903,Ascended AQ20,14554,214554,Cloudkeeper Legplates,70,60,4,4,4,7,19856,@Ascended Raid@,181168
+9003903,Ascended AQ20,14555,214555,Alcor's Sunrazor,70,60,4,2,15,13,20081,@Ascended Raid@,181169
+9003903,Ascended AQ20,14557,214557,The Lion Horn of Stormwind,70,60,4,4,0,12,3808,@Ascended Raid@,181171
+9003903,Ascended AQ20,14558,214558,Lady Maye's Pendant,70,60,4,4,0,2,6945,@Ascended Raid@,181172
+9003903,Ascended AQ20,15028,1706050,Time-Lost Pocketwatch,87,60,4,4,0,12,167947,@Ascended Ruins of Ahn'Qiraj@ This unique watch is distorting time.,481166
+9003903,Ascended AQ20,21392,221392,Sickle of Unyielding Strength,92,60,4,2,0,13,27012,@Ascended Ruins of Ahn'Qiraj@,184109
+9003903,Ascended AQ20,21393,221393,Signet of Unyielding Strength,85,60,4,4,0,11,27139,@Ascended Ruins of Ahn'Qiraj@,184110
+9003903,Ascended AQ20,21394,221394,Drape of Unyielding Strength,85,60,4,4,1,16,18764,@Ascended Ruins of Ahn'Qiraj@,184111
+9003903,Ascended AQ20,21395,221395,Blade of Eternal Justice,92,60,4,2,7,13,27122,@Ascended Ruins of Ahn'Qiraj@,184112
+9003903,Ascended AQ20,21396,221396,Ring of Eternal Justice,85,60,4,4,0,11,27139,@Ascended Ruins of Ahn'Qiraj@,184113
+9003903,Ascended AQ20,21397,221397,Cape of Eternal Justice,85,60,4,4,1,16,27015,@Ascended Ruins of Ahn'Qiraj@,184114
+9003903,Ascended AQ20,21398,221398,Hammer of the Gathering Storm,92,60,4,2,4,21,27016,@Ascended Ruins of Ahn'Qiraj@,184115
+9003903,Ascended AQ20,21399,221399,Ring of the Gathering Storm,85,60,4,4,0,11,27139,@Ascended Ruins of Ahn'Qiraj@,184116
+9003903,Ascended AQ20,21400,221400,Cloak of the Gathering Storm,85,60,4,4,1,16,27017,@Ascended Ruins of Ahn'Qiraj@,184117
+9003903,Ascended AQ20,21401,221401,Scythe of the Unseen Path,92,60,4,2,0,13,27012,@Ascended Ruins of Ahn'Qiraj@,184118
+9003903,Ascended AQ20,21402,221402,Signet of the Unseen Path,85,60,4,4,0,11,27139,@Ascended Ruins of Ahn'Qiraj@,184119
+9003903,Ascended AQ20,21403,221403,Cloak of the Unseen Path,85,60,4,4,1,16,27018,@Ascended Ruins of Ahn'Qiraj@,184120
+9003903,Ascended AQ20,21404,221404,Dagger of Veiled Shadows,92,60,4,2,15,13,27019,@Ascended Ruins of Ahn'Qiraj@,184121
+9003903,Ascended AQ20,21405,221405,Band of Veiled Shadows,85,60,4,4,0,11,27139,@Ascended Ruins of Ahn'Qiraj@,184122
+9003903,Ascended AQ20,21406,221406,Cloak of Veiled Shadows,85,60,4,4,1,16,27020,@Ascended Ruins of Ahn'Qiraj@,184123
+9003903,Ascended AQ20,21407,221407,Mace of Unending Life,92,60,4,2,4,21,27016,@Ascended Ruins of Ahn'Qiraj@,184124
+9003903,Ascended AQ20,21408,221408,Band of Unending Life,85,60,4,4,0,11,27139,@Ascended Ruins of Ahn'Qiraj@,184125
+9003903,Ascended AQ20,21409,221409,Cloak of Unending Life,85,60,4,4,1,16,27021,@Ascended Ruins of Ahn'Qiraj@,184126
+9003903,Ascended AQ20,21410,221410,Gavel of Infinite Wisdom,92,60,4,2,4,21,27016,@Ascended Ruins of Ahn'Qiraj@,184127
+9003903,Ascended AQ20,21411,221411,Ring of Infinite Wisdom,85,60,4,4,0,11,27139,@Ascended Ruins of Ahn'Qiraj@,184128
+9003903,Ascended AQ20,21412,221412,Shroud of Infinite Wisdom,85,60,4,4,1,16,27022,@Ascended Ruins of Ahn'Qiraj@,184129
+9003903,Ascended AQ20,21413,221413,Blade of Vaulted Secrets,92,60,4,2,7,21,27122,@Ascended Ruins of Ahn'Qiraj@,184130
+9003903,Ascended AQ20,21414,221414,Band of Vaulted Secrets,85,60,4,4,0,11,27139,@Ascended Ruins of Ahn'Qiraj@,184131
+9003903,Ascended AQ20,21415,221415,Drape of Vaulted Secrets,85,60,4,4,1,16,26457,@Ascended Ruins of Ahn'Qiraj@,184132
+9003903,Ascended AQ20,21416,221416,Kris of Unspoken Names,92,60,4,2,15,21,27019,@Ascended Ruins of Ahn'Qiraj@,184133
+9003903,Ascended AQ20,21417,221417,Ring of Unspoken Names,85,60,4,4,0,11,27139,@Ascended Ruins of Ahn'Qiraj@,184134
+9003903,Ascended AQ20,21418,221418,Shroud of Unspoken Names,85,60,4,4,1,16,20669,@Ascended Ruins of Ahn'Qiraj@,184135
+9003903,Ascended AQ20,21452,221452,Staff of the Ruins,92,60,4,2,10,17,27092,@Ascended Ruins of Ahn'Qiraj@,184142
+9003903,Ascended AQ20,21453,221453,Mantle of the Horusath,92,60,4,4,4,3,27093,@Ascended Ruins of Ahn'Qiraj@,184143
+9003903,Ascended AQ20,21454,221454,Runic Stone Shoulders,92,60,4,4,3,3,27095,@Ascended Ruins of Ahn'Qiraj@,184144
+9003903,Ascended AQ20,21455,221455,Southwind Helm,85,60,4,4,2,1,27163,@Ascended Ruins of Ahn'Qiraj@,184145
+9003903,Ascended AQ20,21456,221456,Sandstorm Cloak,93,60,4,4,1,16,27097,@Ascended Ruins of Ahn'Qiraj@,184146
+9003903,Ascended AQ20,21457,221457,Bracers of Brutality,93,60,4,4,4,9,27101,@Ascended Ruins of Ahn'Qiraj@,184147
+9003903,Ascended AQ20,21458,221458,Gauntlets of New Life,92,60,4,4,2,10,27102,@Ascended Ruins of Ahn'Qiraj@,184148
+9003903,Ascended AQ20,21459,221459,Crossbow of Imminent Doom,92,60,4,2,18,26,27111,@Ascended Ruins of Ahn'Qiraj@,184149
+9003903,Ascended AQ20,21460,221460,Helm of Domination,93,60,4,4,4,1,27105,@Ascended Ruins of Ahn'Qiraj@,184150
+9003903,Ascended AQ20,21461,221461,Leggings of the Black Blizzard,92,60,4,4,1,7,27106,@Ascended Ruins of Ahn'Qiraj@,184151
+9003903,Ascended AQ20,21462,221462,Gloves of Dark Wisdom,92,60,4,4,1,10,14960,@Ascended Ruins of Ahn'Qiraj@,184152
+9003903,Ascended AQ20,21463,221463,Ossirian's Binding,92,60,4,4,3,6,27107,@Ascended Ruins of Ahn'Qiraj@,184153
+9003903,Ascended AQ20,21464,221464,Shackles of the Unscarred,93,60,4,4,1,9,27108,@Ascended Ruins of Ahn'Qiraj@,184154
+9003903,Ascended AQ20,21466,221466,Stinger of Ayamiss,85,60,4,2,4,21,27121,@Ascended Ruins of Ahn'Qiraj@,184155
+9003903,Ascended AQ20,21467,221467,Thick Silithid Chestguard,85,60,4,4,2,5,27123,@Ascended Ruins of Ahn'Qiraj@,184156
+9003903,Ascended AQ20,21468,221468,Mantle of Maz'Nadir,85,60,4,4,1,3,27124,@Ascended Ruins of Ahn'Qiraj@,184157
+9003903,Ascended AQ20,21469,221469,Gauntlets of Southwind,85,60,4,4,2,10,27125,@Ascended Ruins of Ahn'Qiraj@,184158
+9003903,Ascended AQ20,21470,221470,Cloak of the Savior,85,60,4,4,1,16,23084,@Ascended Ruins of Ahn'Qiraj@,184159
+9003903,Ascended AQ20,21471,221471,Talon of Furious Concentration,85,60,4,4,0,23,27128,@Ascended Ruins of Ahn'Qiraj@,184160
+9003903,Ascended AQ20,21472,221472,Dustwind Turban,85,60,4,4,1,1,27131,@Ascended Ruins of Ahn'Qiraj@,184161
+9003903,Ascended AQ20,21473,221473,Eye of Moam,85,60,4,4,0,12,27256,@Ascended Ruins of Ahn'Qiraj@,184162
+9003903,Ascended AQ20,21474,221474,Chitinous Shoulderguards,85,60,4,4,2,3,27135,@Ascended Ruins of Ahn'Qiraj@,184163
+9003903,Ascended AQ20,21475,221475,Legplates of the Destroyer,85,60,4,4,4,7,27136,@Ascended Ruins of Ahn'Qiraj@,184164
+9003903,Ascended AQ20,21476,221476,Obsidian Scaled Leggings,85,60,4,4,3,7,27137,@Ascended Ruins of Ahn'Qiraj@,184165
+9003903,Ascended AQ20,21477,221477,Ring of Fury,85,60,4,4,0,11,27138,@Ascended Ruins of Ahn'Qiraj@,184166
+9003903,Ascended AQ20,21478,221478,Bow of Taut Sinew,85,60,4,2,2,15,27140,@Ascended Ruins of Ahn'Qiraj@,184167
+9003903,Ascended AQ20,21479,221479,Gauntlets of the Immovable,85,60,4,4,4,10,27186,@Ascended Ruins of Ahn'Qiraj@,184168
+9003903,Ascended AQ20,21480,221480,Scaled Silithid Gauntlets,85,60,4,4,3,10,23674,@Ascended Ruins of Ahn'Qiraj@,184169
+9003903,Ascended AQ20,21481,221481,Boots of the Desert Protector,85,60,4,4,4,8,17661,@Ascended Ruins of Ahn'Qiraj@,184170
+9003903,Ascended AQ20,21482,221482,Boots of the Fiery Sands,85,60,4,4,3,8,27146,@Ascended Ruins of Ahn'Qiraj@,184171
+9003903,Ascended AQ20,21483,221483,Ring of the Desert Winds,85,60,4,4,0,11,27147,@Ascended Ruins of Ahn'Qiraj@,184172
+9003903,Ascended AQ20,21484,221484,Helm of Regrowth,85,60,4,4,2,1,27184,@Ascended Ruins of Ahn'Qiraj@,184173
+9003903,Ascended AQ20,21485,221485,Buru's Skull Fragment,85,60,4,4,6,14,27150,@Ascended Ruins of Ahn'Qiraj@,184174
+9003903,Ascended AQ20,21486,221486,Gloves of the Swarm,85,60,4,4,4,10,27151,@Ascended Ruins of Ahn'Qiraj@,184175
+9003903,Ascended AQ20,21487,221487,Slimy Scaled Gauntlets,85,60,4,4,3,10,27153,@Ascended Ruins of Ahn'Qiraj@,184176
+9003903,Ascended AQ20,21488,221488,Fetish of Chitinous Spikes,85,60,4,4,0,12,27132,@Ascended Ruins of Ahn'Qiraj@Ouch,184177
+9003903,Ascended AQ20,21489,221489,Quicksand Waders,85,60,4,4,1,8,27156,@Ascended Ruins of Ahn'Qiraj@,184178
+9003903,Ascended AQ20,21490,221490,Slime Kickers,85,60,4,4,4,8,27159,@Ascended Ruins of Ahn'Qiraj@,184179
+9003903,Ascended AQ20,21491,221491,Scaled Bracers of the Gorger,85,60,4,4,2,9,27162,@Ascended Ruins of Ahn'Qiraj@,184180
+9003903,Ascended AQ20,21492,221492,Manslayer of the Qiraji,85,60,4,2,8,17,27165,@Ascended Ruins of Ahn'Qiraj@,184181
+9003903,Ascended AQ20,21493,221493,Boots of the Vanguard,85,60,4,4,2,8,24609,@Ascended Ruins of Ahn'Qiraj@,184182
+9003903,Ascended AQ20,21494,221494,Southwind's Grasp,85,60,4,4,2,6,27168,@Ascended Ruins of Ahn'Qiraj@,184183
+9003903,Ascended AQ20,21495,221495,Legplates of the Qiraji Command,85,60,4,4,4,7,27171,@Ascended Ruins of Ahn'Qiraj@,184184
+9003903,Ascended AQ20,21496,221496,Bracers of Qiraji Command,85,60,4,4,4,9,27172,@Ascended Ruins of Ahn'Qiraj@,184185
+9003903,Ascended AQ20,21497,221497,Boots of the Qiraji General,85,60,4,4,3,8,27175,@Ascended Ruins of Ahn'Qiraj@,184186
+9003903,Ascended AQ20,21498,221498,Qiraji Sacrificial Dagger,85,60,4,2,15,13,27177,@Ascended Ruins of Ahn'Qiraj@Still dripping with blood,184187
+9003903,Ascended AQ20,21499,221499,Vestments of the Shifting Sands,92,60,4,4,1,20,27178,@Ascended Ruins of Ahn'Qiraj@,184188
+9003903,Ascended AQ20,21500,221500,Belt of the Inquisition,85,60,4,4,1,6,10894,@Ascended Ruins of Ahn'Qiraj@,184189
+9003903,Ascended AQ20,21501,221501,Toughened Silithid Hide Gloves,85,60,4,4,2,10,27180,@Ascended Ruins of Ahn'Qiraj@,184190
+9003903,Ascended AQ20,21502,221502,Sand Reaver Wristguards,85,60,4,4,3,9,27185,@Ascended Ruins of Ahn'Qiraj@,184191
+9003903,Ascended AQ20,21503,221503,Belt of the Sand Reaver,85,60,4,4,4,6,27188,@Ascended Ruins of Ahn'Qiraj@,184192
+9003903,Ascended AQ20,21715,221715,Sand Polished Hammer,92,60,4,2,4,13,27620,@Ascended Ruins of Ahn'Qiraj@,184307
+9003903,Ascended AQ20,21800,221800,Silithid Husked Launcher,87,60,4,2,3,26,27742,@Ascended Raid@,184320
+9003903,Ascended AQ20,21801,221801,Antenna of Invigoration,87,60,4,2,19,26,28235,@Ascended Raid@,184321
+9003903,Ascended AQ20,21802,221802,The Lost Kris of Zedd,87,60,4,2,15,21,27736,@Ascended Raid@,184322
+9003903,Ascended AQ20,21803,221803,Helm of the Holy Avenger,87,60,4,4,4,1,28431,@Ascended Raid@,184323
+9003903,Ascended AQ20,21804,221804,Coif of Elemental Fury,85,60,4,4,3,1,29869,@Ascended Raid@,184324
+9003903,Ascended AQ20,21805,221805,Polished Obsidian Pauldrons,87,60,4,4,4,3,27740,@Ascended Raid@,184325
+9003903,Ascended AQ20,21806,221806,Gavel of Qiraji Authority,85,60,4,2,5,17,27732,@Ascended Ruins of Ahn'Qiraj@,184326
+9003903,Ascended AQ20,21809,221809,Fury of the Forgotten Swarm,85,60,4,4,0,2,25368,@Ascended Ruins of Ahn'Qiraj@,184328
+9003903,Ascended AQ20,21810,221810,Treads of the Wandering Nomad,85,60,4,4,1,8,27737,@Ascended Ruins of Ahn'Qiraj@,184329
+9003903,Ascended AQ20,1506017,1706017,Locket of Unending Life,85,60,4,4,0,2,27189,@Ascended Ruins of Ahn'Qiraj@,481133
+9003903,Ascended AQ20,1506018,1706018,Choker of the Unseen Path,85,60,4,4,0,2,27189,@Ascended Ruins of Ahn'Qiraj@,481134
+9003903,Ascended AQ20,1506019,1706019,Pendant of Roaring Earth,85,60,4,4,0,2,27585,@Ascended Ruins of Ahn'Qiraj@,481135
+9003903,Ascended AQ20,1506020,1706020,Medallion of Eternal Justice,85,60,4,4,0,2,27585,@Ascended Ruins of Ahn'Qiraj@,481136
+9003903,Ascended AQ20,1506021,1706021,Charm of Vaulted Secrets,85,60,4,4,0,2,27556,@Ascended Ruins of Ahn'Qiraj@,481137
+9003903,Ascended AQ20,1506022,1706022,Lariat of Veiled Shadows,85,60,4,4,0,2,27556,@Ascended Ruins of Ahn'Qiraj@,481138
+9003903,Ascended AQ20,1506023,1706023,Bayadere of Infinite Wisdom,92,60,4,4,0,2,25268,@Ascended Ruins of Ahn'Qiraj@,481139
+9003903,Ascended AQ20,1506024,1706024,Necklace of the Gathering Storm,85,60,4,4,0,2,25268,@Ascended Ruins of Ahn'Qiraj@,481140
+9003903,Ascended AQ20,1506025,1706025,Collar of Unyielding Strength,85,60,4,4,0,2,27486,@Ascended Ruins of Ahn'Qiraj@,481141
+9003903,Ascended AQ20,1506026,1706026,Bayadere of Unspoken Names,92,60,4,4,0,2,27486,@Ascended Ruins of Ahn'Qiraj@,481142
+9003903,Ascended AQ20,1506027,1706027,Choker of Endless Machinations,85,60,4,4,0,2,27556,@Ascended Ruins of Ahn'Qiraj@,481143
+9003903,Ascended AQ20,1506028,1706028,Shroud of Endless Machinations,85,60,4,4,1,16,26457,@Ascended Ruins of Ahn'Qiraj@,481144
+9003903,Ascended AQ20,1506029,1706029,Loop of Endless Machinations,85,60,4,4,0,11,27139,@Ascended Ruins of Ahn'Qiraj@,481145
+9003903,Ascended AQ20,1506030,1706030,Signet of Roaring Earth,85,60,4,4,0,11,27139,@Ascended Ruins of Ahn'Qiraj@,481146
+9003903,Ascended AQ20,1506031,1706031,Drape of Roaring Earth,85,60,4,4,1,16,27015,@Ascended Ruins of Ahn'Qiraj@,481147
+9003903,Ascended AQ20,1506032,1706032,Signet of Ferocious Vigor,85,60,4,4,0,11,27139,@Ascended Ruins of Ahn'Qiraj@,481148
+9003903,Ascended AQ20,1506033,1706033,Cape of Ferocious Vigor,85,60,4,4,1,16,27020,@Ascended Ruins of Ahn'Qiraj@,481149
+9003903,Ascended AQ20,1506034,1706034,Choker of Ferocious Vigor,85,60,4,4,0,2,27556,@Ascended Ruins of Ahn'Qiraj@,481150
+9003903,Ascended AQ20,1506035,1706035,Band of the Faithful Zealot,85,60,4,4,0,11,27139,@Ascended Ruins of Ahn'Qiraj@,481151
+9003903,Ascended AQ20,1506036,1706036,Shroud of the Faithful Zealot,85,60,4,4,1,16,27017,@Ascended Ruins of Ahn'Qiraj@,481152
+9003903,Ascended AQ20,1506037,1706037,Locket of the Faithful Zealot,85,60,4,4,0,2,25268,@Ascended Ruins of Ahn'Qiraj@,481153
+9003903,Ascended AQ20,1506038,1706038,Band of Masterful Technique,85,60,4,4,0,11,27139,@Ascended Ruins of Ahn'Qiraj@,481154
+9003903,Ascended AQ20,1506039,1706039,Drape of Masterful Technique,85,60,4,4,1,16,27015,@Ascended Ruins of Ahn'Qiraj@,481155
+9003903,Ascended AQ20,1506040,1706040,Locket of Masterful Technique,85,60,4,4,0,2,27585,@Ascended Ruins of Ahn'Qiraj@,481156
+9003903,Ascended AQ20,1506041,1706041,Ring of Martial Prowess,85,60,4,4,0,11,27139,@Ascended Ruins of Ahn'Qiraj@,481157
+9003903,Ascended AQ20,1506042,1706042,Cloak of Martial Prowess,85,60,4,4,1,16,27015,@Ascended Ruins of Ahn'Qiraj@,481158
+9003903,Ascended AQ20,1506043,1706043,Lariat of Martial Prowess,85,60,4,4,0,2,27585,@Ascended Ruins of Ahn'Qiraj@,481159
+9003903,Ascended AQ20,1506044,1706044,Signet of Unrivaled Rage,85,60,4,4,0,11,27139,@Ascended Ruins of Ahn'Qiraj@,481160
+9003903,Ascended AQ20,1506045,1706045,Cloak of Unrivaled Rage,85,60,4,4,1,16,27021,@Ascended Ruins of Ahn'Qiraj@,481161
+9003903,Ascended AQ20,1506046,1706046,Collar of Unrivaled Rage,85,60,4,4,0,2,27189,@Ascended Ruins of Ahn'Qiraj@,481162
+9003903,Ascended AQ20,1506047,1706047,Loop of Expansive Research,85,60,4,4,0,11,27139,@Ascended Ruins of Ahn'Qiraj@,481163
+9003903,Ascended AQ20,1506048,1706048,Drape of Expansive Research,85,60,4,4,1,16,27017,@Ascended Ruins of Ahn'Qiraj@,481164
+9003903,Ascended AQ20,1506049,1706049,Bayadere of Expansive Research,92,60,4,4,0,2,25268,@Ascended Ruins of Ahn'Qiraj@,481165
+9003903,Ascended AQ20,1506054,1706054,Sword of the Ruins,92,60,4,2,8,17,33,@Ascended Ruins of Ahn'Qiraj@,481170
+9003904,Ascended AQ40,647,200647,Destiny,70,60,4,2,8,17,15764,@Ascended Raid@,175760
+9003904,Ascended AQ40,811,200811,Axe of the Deep Woods,70,60,4,2,0,13,14969,@Ascended Raid@,175924
+9003904,Ascended AQ40,833,200833,Lifestone,70,60,4,4,0,12,17837,@Ascended Raid@,175946
+9003904,Ascended AQ40,944,200944,Elemental Mage Staff,70,56,4,2,10,17,15804,@Ascended Raid@,176057
+9003904,Ascended AQ40,1168,201168,Skullflame Shield,70,60,4,4,6,14,24438,@Ascended Raid@,176277
+9003904,Ascended AQ40,1263,201263,Brain Hacker,70,60,4,2,1,17,17230,@Ascended Raid@,176367
+9003904,Ascended AQ40,1443,201443,Jeweled Amulet of Cainwyn,70,60,4,4,0,2,3978,@Ascended Raid@,176541
+9003904,Ascended AQ40,1728,201728,Teebu's Blazing Longsword,72,60,4,2,7,13,15612,@Ascended Raid@,176813
+9003904,Ascended AQ40,2099,202099,Dwarven Hand Cannon,70,60,4,2,3,26,22835,@Ascended Raid@,177160
+9003904,Ascended AQ40,2243,202243,Hand of Edward the Odd,70,60,4,2,4,13,15453,@Ascended Raid@,177297
+9003904,Ascended AQ40,2244,202244,Krol Blade,70,60,4,2,7,13,5416,@Ascended Raid@,177298
+9003904,Ascended AQ40,2245,202245,Helm of Narv,70,60,4,4,3,1,12175,@Ascended Raid@,177299
+9003904,Ascended AQ40,2246,202246,Myrmidon's Signet,70,60,4,4,0,11,6929,@Ascended Raid@,177300
+9003904,Ascended AQ40,2801,202801,Blade of Hanna,70,60,4,2,8,17,2756,@Ascended Raid@,177823
+9003904,Ascended AQ40,3475,203475,Cloak of Flames,70,60,4,4,1,16,18228,@Ascended Raid@,178114
+9003904,Ascended AQ40,14553,214553,Sash of Mercy,70,60,4,4,2,6,22585,@Ascended Raid@,181167
+9003904,Ascended AQ40,14554,214554,Cloudkeeper Legplates,70,60,4,4,4,7,19856,@Ascended Raid@,181168
+9003904,Ascended AQ40,14555,214555,Alcor's Sunrazor,70,60,4,2,15,13,20081,@Ascended Raid@,181169
+9003904,Ascended AQ40,14557,214557,The Lion Horn of Stormwind,70,60,4,4,0,12,3808,@Ascended Raid@,181171
+9003904,Ascended AQ40,14558,214558,Lady Maye's Pendant,70,60,4,4,0,2,6945,@Ascended Raid@,181172
+9003904,Ascended AQ40,15029,215029,Aera's Poison Gland,90,60,4,2,19,26,28235,@Ascended Raid@,181437
+9003904,Ascended AQ40,21126,221126,Death's Sting,94,60,4,2,15,13,27767,@Ascended Temple of Ahn'Qiraj@,183954
+9003904,Ascended AQ40,21128,221128,Staff of the Qiraji Prophets,90,60,4,2,10,17,26728,@Ascended Temple of Ahn'Qiraj@,183955
+9003904,Ascended AQ40,21134,221134,Dark Edge of Insanity,98,60,4,2,1,17,26734,@Ascended Temple of Ahn'Qiraj@,183957
+9003904,Ascended AQ40,21242,221242,Blessed Qiraji War Axe,90,60,4,2,0,13,27460,@Ascended Temple of Ahn'Qiraj@The weapon is infused and reinforced with Elementium.,184020
+9003904,Ascended AQ40,21244,221244,Blessed Qiraji Pugio,90,60,4,2,15,13,27424,@Ascended Temple of Ahn'Qiraj@The weapon is infused and reinforced with Elementium.,184021
+9003904,Ascended AQ40,21268,221268,Blessed Qiraji War Hammer,90,60,4,2,4,13,27113,@Ascended Temple of Ahn'Qiraj@The weapon is infused and reinforced with Elementium.,184027
+9003904,Ascended AQ40,21269,221269,Blessed Qiraji Bulwark,86,60,4,4,6,14,27419,@Ascended Temple of Ahn'Qiraj@The shield is infused and reinforced with Elementium.,184028
+9003904,Ascended AQ40,21272,221272,Blessed Qiraji Musket,90,60,4,2,3,26,27421,@Ascended Temple of Ahn'Qiraj@The weapon is infused and reinforced with Elementium.,184031
+9003904,Ascended AQ40,21273,221273,Blessed Qiraji Acolyte Staff,86,60,4,2,10,17,27416,@Ascended Temple of Ahn'Qiraj@The weapon is infused and reinforced with Elementium.,184032
+9003904,Ascended AQ40,21275,221275,Blessed Qiraji Augur Staff,86,60,4,2,10,17,27417,@Ascended Temple of Ahn'Qiraj@The weapon is infused and reinforced with Elementium.,184034
+9003904,Ascended AQ40,21579,221579,Vanquished Tentacle of C'Thun,94,60,4,4,0,12,27414,@Ascended Temple of Ahn'Qiraj@,184208
+9003904,Ascended AQ40,21581,221581,Gauntlets of Annihilation,94,60,4,4,4,10,27447,@Ascended Temple of Ahn'Qiraj@,184210
+9003904,Ascended AQ40,21582,221582,Grasp of the Old God,94,60,4,4,1,6,27458,@Ascended Temple of Ahn'Qiraj@,184211
+9003904,Ascended AQ40,21583,221583,Cloak of Clarity,94,60,4,4,1,16,27461,@Ascended Temple of Ahn'Qiraj@,184212
+9003904,Ascended AQ40,21585,221585,Dark Storm Gauntlets,94,60,4,4,1,10,27465,@Ascended Temple of Ahn'Qiraj@,184213
+9003904,Ascended AQ40,21586,221586,Belt of Never-ending Agony,94,60,4,4,2,6,27466,@Ascended Temple of Ahn'Qiraj@,184214
+9003904,Ascended AQ40,21596,221596,Ring of the Godslayer,98,60,4,4,0,11,27471,@Ascended Temple of Ahn'Qiraj@,184215
+9003904,Ascended AQ40,21597,221597,Royal Scepter of Vek'lor,98,60,4,4,0,23,27472,@Ascended Temple of Ahn'Qiraj@,184216
+9003904,Ascended AQ40,21598,221598,Royal Qiraji Belt,90,60,4,4,4,6,27473,@Ascended Temple of Ahn'Qiraj@,184217
+9003904,Ascended AQ40,21599,221599,Vek'lor's Gloves of Devastation,90,60,4,4,3,10,27475,@Ascended Temple of Ahn'Qiraj@,184218
+9003904,Ascended AQ40,21600,221600,Boots of Epiphany,90,60,4,4,1,8,27477,@Ascended Temple of Ahn'Qiraj@,184219
+9003904,Ascended AQ40,21601,221601,Ring of Emperor Vek'lor,90,60,4,4,0,11,27091,@Ascended Temple of Ahn'Qiraj@,184220
+9003904,Ascended AQ40,21602,221602,Qiraji Execution Bracers,90,60,4,4,2,9,27479,@Ascended Temple of Ahn'Qiraj@,184221
+9003904,Ascended AQ40,21603,221603,Wand of Qiraji Nobility,90,60,4,2,19,26,27480,@Ascended Temple of Ahn'Qiraj@,184222
+9003904,Ascended AQ40,21604,221604,Bracelets of Royal Redemption,90,60,4,4,1,9,27481,@Ascended Temple of Ahn'Qiraj@,184223
+9003904,Ascended AQ40,21605,221605,Gloves of the Hidden Temple,90,60,4,4,2,10,27542,@Ascended Temple of Ahn'Qiraj@,184224
+9003904,Ascended AQ40,21606,221606,Belt of the Fallen Emperor,90,60,4,4,4,6,27484,@Ascended Temple of Ahn'Qiraj@,184225
+9003904,Ascended AQ40,21607,221607,Grasp of the Fallen Emperor,90,60,4,4,3,6,27485,@Ascended Temple of Ahn'Qiraj@,184226
+9003904,Ascended AQ40,21608,221608,Amulet of Vek'nilash,90,60,4,4,0,2,27486,@Ascended Temple of Ahn'Qiraj@,184227
+9003904,Ascended AQ40,21609,221609,Regenerating Belt of Vek'nilash,90,60,4,4,2,6,27487,@Ascended Temple of Ahn'Qiraj@,184228
+9003904,Ascended AQ40,21610,221610,Wormscale Blocker,90,60,4,4,6,14,27488,@Ascended Temple of Ahn'Qiraj@,184229
+9003904,Ascended AQ40,21611,221611,Burrower Bracers,90,60,4,4,1,9,27489,@Ascended Temple of Ahn'Qiraj@,184230
+9003904,Ascended AQ40,21615,221615,Don Rigoberto's Lost Hat,90,60,4,4,1,1,24176,@Ascended Temple of Ahn'Qiraj@,184233
+9003904,Ascended AQ40,21616,221616,Huhuran's Stinger,90,60,4,2,2,15,27505,@Ascended Temple of Ahn'Qiraj@,184234
+9003904,Ascended AQ40,21617,221617,Wasphide Gauntlets,90,60,4,4,2,10,27508,@Ascended Temple of Ahn'Qiraj@,184235
+9003904,Ascended AQ40,21618,221618,Hive Defiler Wristguards,90,60,4,4,4,9,27509,@Ascended Temple of Ahn'Qiraj@,184236
+9003904,Ascended AQ40,21619,221619,Gloves of the Messiah,90,60,4,4,1,10,27512,@Ascended Temple of Ahn'Qiraj@,184237
+9003904,Ascended AQ40,21620,221620,Ring of the Martyr,90,60,4,4,0,11,27091,@Ascended Temple of Ahn'Qiraj@,184238
+9003904,Ascended AQ40,21621,221621,Cloak of the Golden Hive,90,60,4,4,1,16,27513,@Ascended Temple of Ahn'Qiraj@,184239
+9003904,Ascended AQ40,21622,221622,Sharpened Silithid Femur,90,60,4,2,7,21,34498,@Ascended Temple of Ahn'Qiraj@Recently devoured,184240
+9003904,Ascended AQ40,21623,221623,Gauntlets of the Righteous Champion,90,60,4,4,4,10,27517,@Ascended Temple of Ahn'Qiraj@,184241
+9003904,Ascended AQ40,21624,221624,Gauntlets of Kalimdor,90,60,4,4,3,10,27518,@Ascended Temple of Ahn'Qiraj@,184242
+9003904,Ascended AQ40,21625,221625,Scarab Brooch,98,60,4,4,0,12,27519,@Ascended Temple of Ahn'Qiraj@,184243
+9003904,Ascended AQ40,21626,221626,Slime-coated Leggings,90,60,4,4,3,7,27520,@Ascended Temple of Ahn'Qiraj@,184244
+9003904,Ascended AQ40,21627,221627,Cloak of Untold Secrets,90,60,4,4,1,16,27521,@Ascended Temple of Ahn'Qiraj@,184245
+9003904,Ascended AQ40,21635,221635,Barb of the Sand Reaver,90,60,4,2,6,17,27532,@Ascended Temple of Ahn'Qiraj@,184246
+9003904,Ascended AQ40,21639,221639,Pauldrons of the Unrelenting,90,60,4,4,4,3,27534,@Ascended Temple of Ahn'Qiraj@,184247
+9003904,Ascended AQ40,21645,221645,Hive Tunneler's Boots,90,60,4,4,2,8,27541,@Ascended Temple of Ahn'Qiraj@,184250
+9003904,Ascended AQ40,21647,221647,Fetish of the Sand Reaver,90,60,4,4,0,12,27543,@Ascended Temple of Ahn'Qiraj@,184251
+9003904,Ascended AQ40,21648,221648,Recomposed Boots,90,60,4,4,1,8,27545,@Ascended Temple of Ahn'Qiraj@,184252
+9003904,Ascended AQ40,21650,221650,Ancient Qiraji Ripper,90,60,4,2,7,13,34499,@Ascended Temple of Ahn'Qiraj@,184253
+9003904,Ascended AQ40,21651,221651,Scaled Sand Reaver Leggings,90,60,4,4,3,7,27548,@Ascended Temple of Ahn'Qiraj@,184254
+9003904,Ascended AQ40,21652,221652,Silithid Carapace Chestguard,90,60,4,4,4,5,27550,@Ascended Temple of Ahn'Qiraj@,184255
+9003904,Ascended AQ40,21663,221663,Robes of the Guardian Saint,90,60,4,4,1,20,27552,@Ascended Temple of Ahn'Qiraj@,184258
+9003904,Ascended AQ40,21664,221664,Barbed Choker,90,60,4,4,0,2,27556,@Ascended Temple of Ahn'Qiraj@,184259
+9003904,Ascended AQ40,21665,221665,Mantle of Wicked Revenge,90,60,4,4,2,3,27560,@Ascended Temple of Ahn'Qiraj@,184260
+9003904,Ascended AQ40,21666,221666,Sartura's Might,90,60,4,4,0,23,27570,@Ascended Temple of Ahn'Qiraj@,184261
+9003904,Ascended AQ40,21667,221667,Legplates of Blazing Light,90,60,4,4,4,7,27574,@Ascended Temple of Ahn'Qiraj@,184262
+9003904,Ascended AQ40,21668,221668,Scaled Leggings of Qiraji Fury,90,60,4,4,3,7,26084,@Ascended Temple of Ahn'Qiraj@,184263
+9003904,Ascended AQ40,21669,221669,Creeping Vine Helm,90,60,4,4,2,1,27957,@Ascended Temple of Ahn'Qiraj@,184264
+9003904,Ascended AQ40,21670,221670,Badge of the Swarmguard,98,60,4,4,0,12,27134,@Ascended Temple of Ahn'Qiraj@,184265
+9003904,Ascended AQ40,21671,221671,Robes of the Battleguard,90,60,4,4,1,20,27576,@Ascended Temple of Ahn'Qiraj@,184266
+9003904,Ascended AQ40,21672,221672,Gloves of Enforcement,90,60,4,4,2,10,27577,@Ascended Temple of Ahn'Qiraj@,184267
+9003904,Ascended AQ40,21673,221673,Silithid Claw,90,60,4,2,13,21,27578,@Ascended Temple of Ahn'Qiraj@,184268
+9003904,Ascended AQ40,21674,221674,Gauntlets of Steadfast Determination,90,60,4,4,4,10,27580,@Ascended Temple of Ahn'Qiraj@,184269
+9003904,Ascended AQ40,21675,221675,Thick Qirajihide Belt,90,60,4,4,2,6,27581,@Ascended Temple of Ahn'Qiraj@,184270
+9003904,Ascended AQ40,21676,221676,Leggings of the Festering Swarm,90,60,4,4,1,7,27584,@Ascended Temple of Ahn'Qiraj@,184271
+9003904,Ascended AQ40,21677,221677,Ring of the Qiraji Fury,90,60,4,4,0,11,27091,@Ascended Temple of Ahn'Qiraj@,184272
+9003904,Ascended AQ40,21678,221678,Necklace of Purity,90,60,4,4,0,2,27585,@Ascended Temple of Ahn'Qiraj@,184273
+9003904,Ascended AQ40,21679,221679,Kalimdor's Revenge,90,60,4,2,8,17,27586,@Ascended Temple of Ahn'Qiraj@,184274
+9003904,Ascended AQ40,21680,221680,Vest of Swift Execution,90,60,4,4,2,5,27587,@Ascended Temple of Ahn'Qiraj@,184275
+9003904,Ascended AQ40,21681,221681,Ring of the Devoured,90,60,4,4,0,11,27147,@Ascended Temple of Ahn'Qiraj@,184276
+9003904,Ascended AQ40,21682,221682,Bile-Covered Gauntlets,90,60,4,4,2,10,27588,@Ascended Temple of Ahn'Qiraj@,184277
+9003904,Ascended AQ40,21683,221683,Mantle of the Desert Crusade,90,60,4,4,4,3,27592,@Ascended Temple of Ahn'Qiraj@,184278
+9003904,Ascended AQ40,21684,221684,Mantle of the Desert's Fury,90,60,4,4,3,3,27594,@Ascended Temple of Ahn'Qiraj@,184279
+9003904,Ascended AQ40,21685,221685,Petrified Scarab,90,60,4,4,0,12,27154,@Ascended Temple of Ahn'Qiraj@,184280
+9003904,Ascended AQ40,21686,221686,Mantle of Phrenic Power,90,60,4,4,1,3,27596,@Ascended Temple of Ahn'Qiraj@,184281
+9003904,Ascended AQ40,21687,221687,Ukko's Ring of Darkness,90,60,4,4,0,11,22932,@Ascended Temple of Ahn'Qiraj@,184282
+9003904,Ascended AQ40,21688,221688,Boots of the Fallen Hero,90,60,4,4,4,8,27597,@Ascended Temple of Ahn'Qiraj@,184283
+9003904,Ascended AQ40,21689,221689,Gloves of Ebru,90,60,4,4,2,10,27599,@Ascended Temple of Ahn'Qiraj@,184284
+9003904,Ascended AQ40,21690,221690,Angelista's Charm,90,60,4,4,0,2,27600,@Ascended Temple of Ahn'Qiraj@,184285
+9003904,Ascended AQ40,21691,221691,Ooze-ridden Gauntlets,90,60,4,4,4,10,27601,@Ascended Temple of Ahn'Qiraj@,184286
+9003904,Ascended AQ40,21692,221692,Triad Girdle,90,60,4,4,4,6,27602,@Ascended Temple of Ahn'Qiraj@,184287
+9003904,Ascended AQ40,21693,221693,Guise of the Devourer,90,60,4,4,2,1,27856,@Ascended Temple of Ahn'Qiraj@,184288
+9003904,Ascended AQ40,21694,221694,Ternary Mantle,90,60,4,4,1,3,27605,@Ascended Temple of Ahn'Qiraj@,184289
+9003904,Ascended AQ40,21695,221695,Angelista's Touch,90,60,4,4,0,11,27138,@Ascended Temple of Ahn'Qiraj@,184290
+9003904,Ascended AQ40,21696,221696,Robes of the Triumvirate,90,60,4,4,1,20,27607,@Ascended Temple of Ahn'Qiraj@,184291
+9003904,Ascended AQ40,21697,221697,Cape of the Trinity,90,60,4,4,1,16,14832,@Ascended Temple of Ahn'Qiraj@,184292
+9003904,Ascended AQ40,21698,221698,Leggings of Immersion,90,60,4,4,2,7,27608,@Ascended Temple of Ahn'Qiraj@,184293
+9003904,Ascended AQ40,21699,221699,Barrage Shoulders,90,60,4,4,3,3,27686,@Ascended Temple of Ahn'Qiraj@,184294
+9003904,Ascended AQ40,21700,221700,Pendant of the Qiraji Guardian,90,60,4,4,0,2,27486,@Ascended Temple of Ahn'Qiraj@,184295
+9003904,Ascended AQ40,21701,221701,Cloak of Concentrated Hatred,90,60,4,4,1,16,27610,@Ascended Temple of Ahn'Qiraj@,184296
+9003904,Ascended AQ40,21702,221702,Amulet of Foul Warding,90,60,4,4,0,2,25268,@Ascended Temple of Ahn'Qiraj@,184297
+9003904,Ascended AQ40,21703,221703,Hammer of Ji'zhi,90,60,4,2,5,17,27612,@Ascended Temple of Ahn'Qiraj@,184298
+9003904,Ascended AQ40,21704,221704,Boots of the Redeemed Prophecy,90,60,4,4,4,8,27613,@Ascended Temple of Ahn'Qiraj@,184299
+9003904,Ascended AQ40,21705,221705,Boots of the Fallen Prophet,90,60,4,4,3,8,27614,@Ascended Temple of Ahn'Qiraj@,184300
+9003904,Ascended AQ40,21706,221706,Boots of the Unwavering Will,90,60,4,4,4,8,27615,@Ascended Temple of Ahn'Qiraj@,184301
+9003904,Ascended AQ40,21707,221707,Ring of Swarming Thought,90,60,4,4,0,11,27138,@Ascended Temple of Ahn'Qiraj@,184302
+9003904,Ascended AQ40,21708,221708,Beetle Scaled Wristguards,90,60,4,4,2,9,27616,@Ascended Temple of Ahn'Qiraj@,184303
+9003904,Ascended AQ40,21814,221814,Breastplate of Annihilation,90,60,4,4,4,5,27741,@Ascended Temple of Ahn'Qiraj@,184331
+9003904,Ascended AQ40,21836,221836,Ritssyn's Ring of Chaos,86,60,4,4,0,11,25181,@Ascended Temple of Ahn'Qiraj@,184336
+9003904,Ascended AQ40,21837,221837,Anubisath Warhammer,90,60,4,2,4,13,27726,@Ascended Temple of Ahn'Qiraj@,184337
+9003904,Ascended AQ40,21838,221838,Garb of Royal Ascension,86,60,4,4,1,20,27727,@Ascended Temple of Ahn'Qiraj@,184338
+9003904,Ascended AQ40,21839,221839,Scepter of the False Prophet,94,60,4,2,4,21,27743,@Ascended Temple of Ahn'Qiraj@,184339
+9003904,Ascended AQ40,21856,221856,"Neretzek, The Blood Drinker",90,60,4,2,1,17,27739,@Ascended Temple of Ahn'Qiraj@,184356
+9003904,Ascended AQ40,21888,221888,Gloves of the Immortal,86,60,4,4,1,10,23577,@Ascended Temple of Ahn'Qiraj@,184388
+9003904,Ascended AQ40,21889,221889,Gloves of the Redeemed Prophecy,87,60,4,4,4,10,27724,@Ascended Temple of Ahn'Qiraj@,184389
+9003904,Ascended AQ40,21891,221891,Shard of the Fallen Star,90,60,4,4,0,12,27729,@Ascended Temple of Ahn'Qiraj@,184391
+9003904,Ascended AQ40,22396,222396,Totem of Life,90,60,4,4,9,28,28175,@Ascended Temple of Ahn'Qiraj@,184657
+9003904,Ascended AQ40,22399,222399,Idol of Health,90,60,4,4,8,28,28172,@Ascended Temple of Ahn'Qiraj@,184658
+9003904,Ascended AQ40,22402,222402,Libram of Grace,90,60,4,4,7,28,28178,@Ascended Temple of Ahn'Qiraj@,184660
+9003904,Ascended AQ40,22730,222730,Eyestalk Waist Cord,94,60,4,4,1,6,28349,@Ascended Temple of Ahn'Qiraj@,184811
+9003904,Ascended AQ40,22731,222731,Cloak of the Devoured,98,60,4,4,1,16,28350,@Ascended Temple of Ahn'Qiraj@,184812
+9003904,Ascended AQ40,22732,222732,Mark of C'Thun,94,60,4,4,0,2,27585,@Ascended Temple of Ahn'Qiraj@,184813
+9003904,Ascended AQ40,23557,223557,Larvae of the Great Worm,90,60,4,2,3,26,27742,@Ascended Temple of Ahn'Qiraj@,185183
+9003904,Ascended AQ40,23558,223558,The Burrower's Shell,90,60,4,4,0,12,29458,@Ascended Temple of Ahn'Qiraj@,185184
+9003904,Ascended AQ40,23570,223570,Jom Gabbar,90,60,4,4,0,12,29506,@Ascended Temple of Ahn'Qiraj@,185187
+9003905,Ascended Naxx,647,200647,Destiny,70,60,4,2,8,17,15764,@Ascended Raid@,175760
+9003905,Ascended Naxx,811,200811,Axe of the Deep Woods,70,60,4,2,0,13,14969,@Ascended Raid@,175924
+9003905,Ascended Naxx,833,200833,Lifestone,70,60,4,4,0,12,17837,@Ascended Raid@,175946
+9003905,Ascended Naxx,944,200944,Elemental Mage Staff,70,56,4,2,10,17,15804,@Ascended Raid@,176057
+9003905,Ascended Naxx,1168,201168,Skullflame Shield,70,60,4,4,6,14,24438,@Ascended Raid@,176277
+9003905,Ascended Naxx,1263,201263,Brain Hacker,70,60,4,2,1,17,17230,@Ascended Raid@,176367
+9003905,Ascended Naxx,1443,201443,Jeweled Amulet of Cainwyn,70,60,4,4,0,2,3978,@Ascended Raid@,176541
+9003905,Ascended Naxx,1728,201728,Teebu's Blazing Longsword,72,60,4,2,7,13,15612,@Ascended Raid@,176813
+9003905,Ascended Naxx,2099,202099,Dwarven Hand Cannon,70,60,4,2,3,26,22835,@Ascended Raid@,177160
+9003905,Ascended Naxx,2243,202243,Hand of Edward the Odd,70,60,4,2,4,13,15453,@Ascended Raid@,177297
+9003905,Ascended Naxx,2244,202244,Krol Blade,70,60,4,2,7,13,5416,@Ascended Raid@,177298
+9003905,Ascended Naxx,2245,202245,Helm of Narv,70,60,4,4,3,1,12175,@Ascended Raid@,177299
+9003905,Ascended Naxx,2246,202246,Myrmidon's Signet,70,60,4,4,0,11,6929,@Ascended Raid@,177300
+9003905,Ascended Naxx,2801,202801,Blade of Hanna,70,60,4,2,8,17,2756,@Ascended Raid@,177823
+9003905,Ascended Naxx,3475,203475,Cloak of Flames,70,60,4,4,1,16,18228,@Ascended Raid@,178114
+9003905,Ascended Naxx,14553,214553,Sash of Mercy,70,60,4,4,2,6,22585,@Ascended Raid@,181167
+9003905,Ascended Naxx,14554,214554,Cloudkeeper Legplates,70,60,4,4,4,7,19856,@Ascended Raid@,181168
+9003905,Ascended Naxx,14555,214555,Alcor's Sunrazor,70,60,4,2,15,13,20081,@Ascended Raid@,181169
+9003905,Ascended Naxx,14557,214557,The Lion Horn of Stormwind,70,60,4,4,0,12,3808,@Ascended Raid@,181171
+9003905,Ascended Naxx,14558,214558,Lady Maye's Pendant,70,60,4,4,0,2,6945,@Ascended Raid@,181172
+9003905,Ascended Naxx,15030,215030,Jagged Cold Steel Knife,99,60,4,2,16,25,33226,@Ascended Raid@,181438
+9003905,Ascended Naxx,15032,215032,Dislocated Spine,99,60,4,2,2,15,6,@Ascended Raid@,181439
+9003905,Ascended Naxx,15033,215033,Staff of Twisted Dreams,104,60,4,2,10,17,2,@Ascended Raid@,181440
+9003905,Ascended Naxx,15036,215036,Lordaeron's Lament,104,60,4,2,7,21,5,@Ascended Raid@,181443
+9003905,Ascended Naxx,19761,219761,Fang of the Frost Wyrm,101,60,4,2,13,21,47691,@Ascended Naxxramas@,183170
+9003905,Ascended Naxx,22691,222691,Corrupted Ashbringer,99,60,4,2,8,17,28308,@Ascended Naxxramas@Blade of the Scarlet Highlord,184792
+9003905,Ascended Naxx,22798,222798,Might of Menethil,104,60,4,2,5,17,28447,@Ascended Naxxramas@,184827
+9003905,Ascended Naxx,22799,222799,Soulseeker,104,60,4,2,10,17,28448,@Ascended Naxxramas@,184828
+9003905,Ascended Naxx,22800,222800,Brimstone Staff,99,60,4,2,10,17,28449,@Ascended Naxxramas@,184829
+9003905,Ascended Naxx,22802,222802,Kingsfall,104,60,4,2,15,13,29008,@Ascended Naxxramas@,184831
+9003905,Ascended Naxx,22803,222803,Midnight Haze,99,60,4,2,15,21,28452,@Ascended Naxxramas@,184832
+9003905,Ascended Naxx,22804,222804,Maexxna's Fang,99,60,4,2,15,13,28904,@Ascended Naxxramas@,184833
+9003905,Ascended Naxx,22806,222806,Widow's Remorse,99,60,4,2,7,13,28455,@Ascended Naxxramas@,184834
+9003905,Ascended Naxx,22807,222807,Wraith Blade,99,60,4,2,7,21,29538,@Ascended Naxxramas@,184835
+9003905,Ascended Naxx,22808,222808,The Castigator,99,60,4,2,4,13,28458,@Ascended Naxxramas@,184836
+9003905,Ascended Naxx,22809,222809,Maul of the Redeemed Crusader,99,60,4,2,5,17,29678,@Ascended Naxxramas@,184837
+9003905,Ascended Naxx,22810,222810,Toxin Injector,99,60,4,2,3,26,28572,@Ascended Naxxramas@,184838
+9003905,Ascended Naxx,22811,222811,Soulstring,99,60,4,2,2,15,29053,@Ascended Naxxramas@,184839
+9003905,Ascended Naxx,22812,222812,Nerubian Slavemaker,104,60,4,2,18,26,28461,@Ascended Naxxramas@,184840
+9003905,Ascended Naxx,22813,222813,Claymore of Unholy Might,99,60,4,2,8,17,28463,@Ascended Naxxramas@,184841
+9003905,Ascended Naxx,22815,222815,Severance,99,60,4,2,1,17,28573,@Ascended Naxxramas@,184842
+9003905,Ascended Naxx,22816,222816,Hatchet of Sundered Bone,99,60,4,2,0,13,28466,@Ascended Naxxramas@,184843
+9003905,Ascended Naxx,22818,222818,The Plague Bearer,99,60,4,4,6,14,28776,@Ascended Naxxramas@,184844
+9003905,Ascended Naxx,22819,222819,Shield of Condemnation,104,60,4,4,6,14,28772,@Ascended Naxxramas@,184845
+9003905,Ascended Naxx,22820,222820,Wand of Fates,99,60,4,2,19,26,28470,@Ascended Naxxramas@,184846
+9003905,Ascended Naxx,22821,222821,Doomfinger,104,60,4,2,19,26,28471,@Ascended Naxxramas@,184847
+9003905,Ascended Naxx,22935,222935,Touch of Frost,101,60,4,4,0,2,15487,@Ascended Naxxramas@,184932
+9003905,Ascended Naxx,22936,222936,Wristguards of Vengeance,99,60,4,4,4,9,28513,@Ascended Naxxramas@,184933
+9003905,Ascended Naxx,22937,222937,Gem of Nerubis,99,60,4,4,0,23,29006,@Ascended Naxxramas@,184934
+9003905,Ascended Naxx,22938,222938,Cryptfiend Silk Cloak,99,60,4,4,1,16,28515,@Ascended Naxxramas@,184935
+9003905,Ascended Naxx,22939,222939,Band of Unanswered Prayers,99,60,4,4,0,11,28516,@Ascended Naxxramas@,184936
+9003905,Ascended Naxx,22940,222940,Icebane Pauldrons,101,60,4,4,4,3,28527,@Ascended Naxxramas@,184937
+9003905,Ascended Naxx,22941,222941,Polar Shoulder Pads,101,60,4,4,2,3,28528,@Ascended Naxxramas@,184938
+9003905,Ascended Naxx,22942,222942,The Widow's Embrace,99,60,4,2,4,21,28839,@Ascended Naxxramas@,184939
+9003905,Ascended Naxx,22943,222943,Malice Stone Pendant,99,60,4,4,0,2,28561,@Ascended Naxxramas@,184940
+9003905,Ascended Naxx,22947,222947,Pendant of Forgotten Names,99,60,4,4,0,2,28562,@Ascended Naxxramas@,184941
+9003905,Ascended Naxx,22954,222954,Kiss of the Spider,99,60,4,4,0,12,28564,@Ascended Naxxramas@,184944
+9003905,Ascended Naxx,22960,222960,Cloak of Suturing,99,60,4,4,1,16,28569,@Ascended Naxxramas@,184945
+9003905,Ascended Naxx,22961,222961,Band of Reanimation,99,60,4,4,0,11,28570,@Ascended Naxxramas@,184946
+9003905,Ascended Naxx,22967,222967,Icy Scale Spaulders,101,60,4,4,3,3,29598,@Ascended Naxxramas@,184948
+9003905,Ascended Naxx,22968,222968,Glacial Mantle,101,60,4,4,1,3,28571,@Ascended Naxxramas@,184949
+9003905,Ascended Naxx,22981,222981,Gluth's Missing Collar,99,60,4,4,0,2,28575,@Ascended Naxxramas@,184951
+9003905,Ascended Naxx,22983,222983,Rime Covered Mantle,99,60,4,4,1,3,29588,@Ascended Naxxramas@,184953
+9003905,Ascended Naxx,22988,222988,The End of Dreams,99,60,4,2,4,21,28905,@Ascended Naxxramas@,184955
+9003905,Ascended Naxx,22994,222994,Digested Hand of Power,99,60,4,4,0,23,28585,@Ascended Naxxramas@,184956
+9003905,Ascended Naxx,23000,223000,Plated Abomination Ribcage,99,60,4,4,4,5,28600,@Ascended Raid@,184958
+9003905,Ascended Naxx,23001,223001,Eye of the Scourge,99,60,4,4,0,12,28602,@Ascended Naxxramas@,184959
+9003905,Ascended Naxx,23004,223004,Idol of Longevity,99,60,4,4,8,28,28172,@Ascended Naxxramas@,184960
+9003905,Ascended Naxx,23005,223005,Totem of Flowing Water,99,60,4,4,9,28,28175,@Ascended Naxxramas@,184961
+9003905,Ascended Naxx,23006,223006,Libram of Light,99,60,4,4,7,28,28178,@Ascended Naxxramas@,184962
+9003905,Ascended Naxx,23009,223009,Wand of the Whispering Dead,99,60,4,2,19,26,28470,@Ascended Naxxramas@,184963
+9003905,Ascended Naxx,23014,223014,"Iblis, Blade of the Fallen Seraph",99,60,4,2,7,13,29543,@Ascended Naxxramas@,184964
+9003905,Ascended Naxx,23017,223017,Veil of Eclipse,99,60,4,4,1,16,28610,@Ascended Naxxramas@,184965
+9003905,Ascended Naxx,23018,223018,Signet of the Fallen Defender,99,60,4,4,0,11,28516,@Ascended Naxxramas@,184966
+9003905,Ascended Naxx,23019,223019,Icebane Helmet,101,60,4,4,4,1,28621,@Ascended Naxxramas@,184967
+9003905,Ascended Naxx,23020,223020,Polar Helmet,101,60,4,4,2,1,28623,@Ascended Naxxramas@,184968
+9003905,Ascended Naxx,23021,223021,The Soul Harvester's Bindings,99,60,4,4,1,9,28624,@Ascended Naxxramas@,184969
+9003905,Ascended Naxx,23023,223023,Sadist's Collar,99,60,4,4,0,2,28561,@Ascended Naxxramas@,184970
+9003905,Ascended Naxx,23025,223025,Seal of the Damned,99,60,4,4,0,11,28625,@Ascended Naxxramas@,184971
+9003905,Ascended Naxx,23027,223027,Warmth of Forgiveness,99,60,4,4,0,12,28630,@Ascended Naxxramas@,184972
+9003905,Ascended Naxx,23028,223028,Hailstone Band,101,60,4,4,0,11,25015,@Ascended Naxxramas@,184973
+9003905,Ascended Naxx,23029,223029,Noth's Frigid Heart,99,60,4,4,0,23,29002,@Ascended Naxxramas@,184974
+9003905,Ascended Naxx,23030,223030,Cloak of the Scourge,99,60,4,4,1,16,28631,@Ascended Naxxramas@,184975
+9003905,Ascended Naxx,23031,223031,Band of the Inevitable,99,60,4,4,0,11,28632,@Ascended Naxxramas@,184976
+9003905,Ascended Naxx,23032,223032,Glacial Headdress,101,60,4,4,1,1,28633,@Ascended Naxxramas@,184977
+9003905,Ascended Naxx,23033,223033,Icy Scale Coif,101,60,4,4,3,1,29597,@Ascended Naxxramas@,184978
+9003905,Ascended Naxx,23035,223035,Preceptor's Hat,99,60,4,4,1,1,35765,@Ascended Naxxramas@,184979
+9003905,Ascended Naxx,23036,223036,Necklace of Necropsy,99,60,4,4,0,2,28638,@Ascended Naxxramas@,184980
+9003905,Ascended Naxx,23037,223037,Ring of Spiritual Fervor,99,60,4,4,0,11,28639,@Ascended Naxxramas@,184981
+9003905,Ascended Naxx,23038,223038,Band of Unnatural Forces,99,60,4,4,0,11,28625,@Ascended Naxxramas@,184982
+9003905,Ascended Naxx,23039,223039,The Eye of Nerub,99,60,4,2,6,17,28467,@Ascended Naxxramas@,184983
+9003905,Ascended Naxx,23040,223040,Glyph of Deflection,101,60,4,4,0,12,28640,@Ascended Naxxramas@,184984
+9003905,Ascended Naxx,23041,223041,Slayer's Crest,101,60,4,4,0,12,28643,@Ascended Naxxramas@,184985
+9003905,Ascended Naxx,23042,223042,Loatheb's Reflection,99,60,4,4,0,12,28640,@Ascended Naxxramas@,184986
+9003905,Ascended Naxx,23043,223043,The Face of Death,101,60,4,4,6,14,28775,@Ascended Naxxramas@,184987
+9003905,Ascended Naxx,23044,223044,Harbinger of Doom,99,60,4,2,15,13,28454,@Ascended Naxxramas@,184988
+9003905,Ascended Naxx,23045,223045,Shroud of Dominion,101,60,4,4,1,16,28645,@Ascended Naxxramas@,184989
+9003905,Ascended Naxx,23046,223046,The Restrained Essence of Sapphiron,101,60,4,4,0,12,28646,@Ascended Naxxramas@,184990
+9003905,Ascended Naxx,23047,223047,Eye of the Dead,101,60,4,4,0,12,28630,@Ascended Naxxramas@,184991
+9003905,Ascended Naxx,23048,223048,Sapphiron's Right Eye,101,60,4,4,0,23,29005,@Ascended Naxxramas@,184992
+9003905,Ascended Naxx,23049,223049,Sapphiron's Left Eye,101,60,4,4,0,23,28981,@Ascended Naxxramas@,184993
+9003905,Ascended Naxx,23050,223050,Cloak of the Necropolis,101,60,4,4,1,16,28647,@Ascended Naxxramas@,184994
+9003905,Ascended Naxx,23053,223053,Stormrage's Talisman of Seething,104,60,4,4,0,2,28562,@Ascended Naxxramas@,184995
+9003905,Ascended Naxx,23054,223054,"Gressil, Dawn of Ruin",104,60,4,2,7,13,29545,@Ascended Naxxramas@,184996
+9003905,Ascended Naxx,23056,223056,Hammer of the Twisting Nether,104,60,4,2,4,21,28773,@Ascended Naxxramas@,184998
+9003905,Ascended Naxx,23057,223057,Gem of Trapped Innocents,104,60,4,4,0,2,28561,@Ascended Naxxramas@,184999
+9003905,Ascended Naxx,23068,223068,Legplates of Carnage,99,60,4,4,4,7,28708,@Ascended Naxxramas@,185009
+9003905,Ascended Naxx,23069,223069,Necro-Knight's Garb,99,60,4,4,1,20,29537,@Ascended Naxxramas@,185010
+9003905,Ascended Naxx,23070,223070,Leggings of Polarity,99,60,4,4,1,7,28714,@Ascended Naxxramas@,185011
+9003905,Ascended Naxx,23071,223071,Leggings of Apocalypse,99,60,4,4,2,7,29642,@Ascended Naxxramas@,185012
+9003905,Ascended Naxx,23072,223072,Fists of the Unrelenting,101,60,4,4,4,10,29447,@Ascended Naxxramas@,185013
+9003905,Ascended Naxx,23073,223073,Boots of Displacement,99,60,4,4,2,8,4155,@Ascended Naxxramas@,185014
+9003905,Ascended Naxx,23075,223075,Death's Bargain,99,60,4,4,6,14,28851,@Ascended Naxxramas@,185015
+9003905,Ascended Naxx,23219,223219,Girdle of the Mentor,99,60,4,4,4,6,24048,@Ascended Naxxramas@,185115
+9003905,Ascended Naxx,23220,223220,Crystal Webbed Robe,99,60,4,4,1,20,29536,@Ascended Naxxramas@,185116
+9003905,Ascended Naxx,23221,223221,Misplaced Servo Arm,99,60,4,2,4,13,28840,@Ascended Naxxramas@,185117
+9003905,Ascended Naxx,23226,223226,Ghoul Skin Tunic,99,60,4,4,2,5,28907,@Ascended Naxxramas@,185120
+9003905,Ascended Naxx,23237,223237,Ring of the Eternal Flame,99,60,4,4,0,11,28625,@Ascended Naxxramas@,185129
+9003905,Ascended Naxx,23238,223238,Stygian Buckler,99,60,4,4,6,14,28913,@Ascended Naxxramas@,185130
+9003905,Ascended Naxx,23242,223242,Claw of the Frost Wyrm,101,60,4,2,13,22,29007,@Ascended Naxxramas@,185133
+9003905,Ascended Naxx,23328,223328,The Unholy Blade,99,60,4,2,8,17,29027,@Ascended Raid@,185146
+9003905,Ascended Naxx,23577,223577,The Hungering Cold,104,60,4,2,7,13,28774,@Ascended Naxxramas@,185188
+9003905,Ascended Naxx,23663,223663,Girdle of Elemental Fury,99,60,4,4,3,6,27485,@Ascended Naxxramas@,185203
+9003905,Ascended Naxx,23664,223664,Pauldrons of Elemental Fury,99,60,4,4,3,3,29589,@Ascended Naxxramas@,185204
+9003905,Ascended Naxx,23665,223665,Leggings of Elemental Fury,99,60,4,4,3,7,29590,@Ascended Naxxramas@,185205
+9003905,Ascended Naxx,23666,223666,Belt of the Grand Crusader,99,60,4,4,4,6,29594,@Ascended Naxxramas@,185206
+9003905,Ascended Naxx,23667,223667,Spaulders of the Grand Crusader,99,60,4,4,4,3,29593,@Ascended Naxxramas@,185207
+9003905,Ascended Naxx,23668,223668,Leggings of the Grand Crusader,99,60,4,4,4,7,17844,@Ascended Naxxramas@,185208

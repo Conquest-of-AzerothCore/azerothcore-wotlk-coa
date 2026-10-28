@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Malgorm stands neutral to a disguised player, and the disguise lasts through combat",
+  "contract": [
+    "Malgorm Hollowhoof 161816 is faction template 1842, hostile to players; spell_coa_grimtotem_disguise forces its",
+    "faction 1027 neutral while the Grimtotem Disguise 256709 lasts. Expected: a disguised player 6 yd from an",
+    "aggressive Malgorm is not pulled; attacking him starts the fight and the disguise stays on."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 1, "x": -3615.0, "y": -1010.0, "z": 203.6, "o": 0},
+  "players": [{"id": "hero", "race": 6, "class": 1, "level": 10}],
+  "creatures": [
+    {"id": "malgorm", "owner": "hero", "entry": 161816, "faction": 1842, "level": 7, "health": 100000, "reaction": 2,
+     "stationary": true, "distance": 30}
+  ],
+  "steps": [
+    {"action": "set_aura", "actor": "hero", "spell": 2156414, "stacks": 1},
+    {"action": "set_health", "actor": "hero", "value": 5000000},
+    {"action": "set_aura", "actor": "hero", "spell": 256709, "stacks": 1},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The hero wears the Grimtotem Disguise", "actor": "hero", "metric": "aura",
+     "spell": 256709, "equals": 1},
+    {"action": "teleport", "actor": "hero", "map": 1, "x": -3591.0, "y": -1010.0, "z": 203.6, "o": 0},
+    {"action": "wait", "ms": 3000},
+    {"action": "assert", "label": "Malgorm leaves the disguised hero alone at 6 yd", "actor": "malgorm",
+     "metric": "combat", "equals": 0},
+    {"action": "attack", "actor": "hero", "target": "malgorm"},
+    {"action": "assert", "label": "Malgorm fights back", "actor": "malgorm", "metric": "combat", "equals": 1,
+     "within_ms": 3000},
+    {"action": "assert", "label": "The disguise stays on through combat", "actor": "hero", "metric": "aura",
+     "spell": 256709, "equals": 1}
+  ]
+}

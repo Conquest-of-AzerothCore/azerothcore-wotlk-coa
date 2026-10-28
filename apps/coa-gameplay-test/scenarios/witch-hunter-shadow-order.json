@@ -1,7 +1,15 @@
 {
   "schema": 1,
-  "name": "Shadow Order raises Shadow Brand damage and converts Agility into hit rating (#980)",
-  "contract": "Shadow Order rank 2 681486 (installed Spell.dbc, client set of 2026-09-17) is a passive family-21 spell with effect 0 SPELL_AURA_ADD_PCT_MODIFIER (108) op 22 (SPELLMOD_DOT) mask [1] 0x10000400 base 39 die 1 -> +40%, effect 1 SPELL_AURA_MOD_RATING_FROM_STAT (220) misc 224 (bits 5, 6, 7 = CR_HIT_MELEE, CR_HIT_RANGED, CR_HIT_SPELL) MiscValueB 1 (Agility) base 5 die 1 -> 6%, and effect 2 which is a second copy of effect 0 (op 22, the same mask). The Description reads 'Increases the damage of Shadow Brand and Dawn Blade by 40% and your hit rating by 6% of your Agility.' Shadow Brand 680517 carries SpellFamilyFlags[1] 0x10000000, so the DOT modifier reaches it; the duplicate effect means it is applied twice and, because op 22 percent modifiers multiply (Player::ApplySpellMod), Shadow Brand gets about +96% instead of +40% (Dawn Blade, family flag [0] 0x400, is not matched by either copy). This scenario therefore asserts only what is unambiguous: the periodic-damage modifier must be at least the promised +40% (min 1400 from a base of 1000) and the control must stay at 1000, and the hit-rating half is measured as a slope: Increased Agility 40 (14404, +40 Agility) must add 6% of 40 = 2.4 hit rating, so 2 or 3, on all three hit ratings. The exact modifier value and the Dawn Blade half are reported to the maintainer instead of asserted.",
+  "name": "Shadow Order grants exactly one damage bonus to Shadow Brand and Dawn Blade (#980)",
+  "contract": [
+    "Shadow Order rank 2 (681486) promises 40% more Shadow Brand and Dawn Blade damage and hit rating",
+    "equal to 6% of Agility. Each named ability receives the bonus once: Shadow Brand through",
+    "SPELLMOD_DOT and Dawn Blade through SPELLMOD_DAMAGE. The raw rank-2 DBC duplicates its periodic",
+    "modifier while neither copy selects Dawn Blade. The regression requires exactly 1400 from a native",
+    "1000-base query for each named damage path, checks that their other damage paths remain unmodified,",
+    "and retains the Agility-to-hit-rating control. Spell-modifier queries exercise native calculations;",
+    "the hit-rating observations exercise the live player stat update."
+  ],
   "timeout_ms": 90000,
   "players": [
     {
@@ -83,13 +91,43 @@
     },
     {
       "action": "assert",
-      "label": "Shadow Brand periodic damage rises by at least the promised 40%",
+      "label": "Shadow Brand receives exactly one 40% periodic damage bonus",
       "actor": "so",
       "metric": "spell_modifier",
       "spell": 680517,
       "op": 22,
       "base": 1000,
-      "min": 1400
+      "equals": 1400
+    },
+    {
+      "action": "assert",
+      "label": "Dawn Blade receives its promised 40% direct damage bonus",
+      "actor": "so",
+      "metric": "spell_modifier",
+      "spell": 802024,
+      "op": 0,
+      "base": 1000,
+      "equals": 1400
+    },
+    {
+      "action": "assert",
+      "label": "Dawn Blade does not receive a second periodic modifier",
+      "actor": "so",
+      "metric": "spell_modifier",
+      "spell": 802024,
+      "op": 22,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Shadow Brand does not receive a second direct modifier",
+      "actor": "so",
+      "metric": "spell_modifier",
+      "spell": 680517,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
     },
     {
       "action": "snapshot",

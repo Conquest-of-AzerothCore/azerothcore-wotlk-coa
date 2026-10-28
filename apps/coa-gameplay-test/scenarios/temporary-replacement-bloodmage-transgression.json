@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Transgression on the action bar is saved as Blood Curse (#5469)",
+  "contract": "AscensionCompatData::TalentReplacements (AscensionTalentReplacementData.h:54) carries {20, 26, 504728, 562720, {{801076 at 0}}}: in Sanguine specialization 26, knowing the Transgression talent 504728 turns Blood Curse 562720 into Transgression 801076. AscensionClassService::SynchronizeTalentReplacements (AscensionCompat.cpp:884-953), run from OnPlayerLearnSpell (AscensionCompat.cpp:5782-5784) when Blood Curse or the talent is learned, teaches 801076 with learnSpell(801076, true) (AscensionCompat.cpp:945), so it is a temporary spell never written to character_spell, and registers it over Blood Curse with Player::SetTemporarySpellReplacement (AscensionCompat.cpp:951). The #5469 server log drops a Transgression button at login: Player::_SaveActions wrote 801076 and Player::_LoadActions runs before the class service teaches it again. persisted_action_button reads Player::GetSavedActionButtonSpell, the id _SaveActions writes. A button holding Transgression must be saved as Blood Curse; a button holding Blood Curse is saved unchanged.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "bloodmage", "race": 1, "class": 20, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login state settle", "ms": 3000 },
+    { "action": "specialization", "label": "Choose Sanguine", "actor": "bloodmage", "id": 26 },
+    { "action": "learn", "actor": "bloodmage", "spell": 562720 },
+    { "action": "learn", "label": "Pick the Transgression talent", "actor": "bloodmage", "spell": 504728 },
+    {
+      "action": "assert",
+      "label": "The talent replaces Blood Curse with Transgression",
+      "actor": "bloodmage",
+      "metric": "temporary_spell_replacement",
+      "spell": 562720,
+      "equals": 801076,
+      "within_ms": 3000
+    },
+    { "action": "set_action_button", "actor": "bloodmage", "button": 2, "spell": 801076 },
+    { "action": "set_action_button", "actor": "bloodmage", "button": 3, "spell": 562720 },
+    {
+      "action": "assert",
+      "label": "The bar holds Transgression",
+      "actor": "bloodmage",
+      "metric": "action_button",
+      "button": 2,
+      "equals": 801076
+    },
+    {
+      "action": "assert",
+      "label": "The Transgression button is saved as Blood Curse",
+      "actor": "bloodmage",
+      "metric": "persisted_action_button",
+      "button": 2,
+      "equals": 562720
+    },
+    {
+      "action": "assert",
+      "label": "Control: an ordinary known spell is saved unchanged",
+      "actor": "bloodmage",
+      "metric": "persisted_action_button",
+      "button": 3,
+      "equals": 562720
+    }
+  ]
+}

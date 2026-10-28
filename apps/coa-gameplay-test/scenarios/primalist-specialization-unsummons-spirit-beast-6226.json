@@ -1,0 +1,153 @@
+{
+  "schema": 1,
+  "name": "primalist-specialization-unsummons-spirit-beast-6226",
+  "contract": [
+    "Wildwalker specialization 59 acquires Spirit Beast Master and tames a level-19 beast through the normal twenty-second channel. Native specialization upload to Mountain King 60 must unsummon that live hunter pet and remove the taming parent. The saved beast must survive for a future eligible build without appearing after relog in the incompatible build."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 31,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "p",
+      "id": 59
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 92148,
+      "equals": 1,
+      "label": "p: knows_spell 92148 1"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 574301,
+      "equals": 1,
+      "label": "p: knows_spell 574301 1"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 570335,
+      "equals": 1,
+      "label": "Selecting Wildwalker teaches Mend Animal Spirit"
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 574301,
+      "target": "beast"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "pet_entry",
+      "equals": 1188,
+      "within_ms": 24000,
+      "label": "p: pet_entry 1188"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 15000,
+      "label": "p: combat 0"
+    },
+    {
+      "action": "specialization",
+      "actor": "p",
+      "id": 60
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 92148,
+      "equals": 0,
+      "label": "p: knows_spell 92148 0"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "p: pet_entry 0"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "pet_rows",
+      "equals": 1,
+      "within_ms": 5000,
+      "label": "p: pet_rows 1"
+    },
+    {
+      "action": "relog",
+      "actor": "p"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "pet_entry",
+      "equals": 0,
+      "label": "p: pet_entry 0"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 92148,
+      "equals": 0,
+      "label": "p: knows_spell 92148 0"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "pet_rows",
+      "equals": 1,
+      "label": "p: pet_rows 1"
+    }
+  ],
+  "creatures": [
+    {
+      "id": "beast",
+      "owner": "p",
+      "entry": 1188,
+      "level": 19,
+      "health": 100000,
+      "distance": 5
+    }
+  ]
+}

@@ -39,7 +39,8 @@ def run_registered(args, scenario, native_execute, directory=catalog.DIRECTORY):
                          '--native-only for exploratory execution without combined verification.')
     cases = catalog.companion_cases([exact[0]['id']], catalog.bindings(directory))
     from run import validate
-    definitions = {case: validate(catalog.read_json(directory / 'scenarios' / (case + '.json'))) for case in cases}
+    paths = {row['id']: catalog.ROOT / row['path'] for row in rows}
+    definitions = {case: validate(catalog.read_json(paths[case])) for case in cases}
     outputs, execution_failures = [], []
     for case in cases:
         parameters = copy.copy(args)

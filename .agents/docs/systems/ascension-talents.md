@@ -49,21 +49,45 @@ joining tables, use field 2.
 
 `SetTalentRank` is the one owner of the rules: class, active specialization, rank count, level, automatic entries
 immutable, budget. A rank above the held one must fit the tree's budget (`Spent` over the known entries versus
-`GetCoATalentBudget`); rank 0 and lower ranks always go through, so an over-budget character can always come back
-under it. `SwitchSpecialization` removes every class talent spell when the specialization changes, then grants the
-new specialization's automatic entries. `ResetPaidTalents` removes every paid rank of the class; automatic grants
+`GetCoATalentBudget`). A native upload must also pay for omitted ranks before any state changes;
+`IsUnpricedRemoval` excludes automatic entries and archetype signatures, while original FREE_UNLEARN entries
+and characters at level 10 or below have no removal charge. `SwitchSpecialization` removes every class talent
+spell when the specialization changes, then grants the new specialization's automatic entries. `ResetPaidTalents` removes every paid rank of the class; automatic grants
 and the specialization stay. Clients reach them only through the native packets below; there is no chat command.
 
 ## Stored builds
 
-Ascension keeps a build per specialization and swaps between them. A switch here removes every talent spell,
-so `SwitchSpecialization` first writes down the build being left (`StoreBuilds`: the shared class tree and the
-specialization's own tree, paid and free-choice ranks read from the spellbook as `entryId * 10 + rank`) in the
-player settings `core.ascension_build.<spec>` (0 for the class tree, index 0 = count), then puts back the build
-of the specialization being entered (`RestoreBuilds`), each rank through `SetTalentRank` so a stored rank the
-character can no longer afford is skipped, then runs the progression pass. Entering a specialization from
-none restores the same way. While a specialization is active the spellbook stays the truth; the record is
-only read on entry, never at login, so a rank the player removed is not resurrected. Idea from #4031.
+Native uploads are complete wanted builds, including archetype switches. They do not restore omitted purchases
+from an archetype's history after budget validation. `ApplyKnownEntriesUpload` uses
+`SwitchSpecialization(..., restoreStoredBuild = false)` and applies the validated uploaded ranks. Saved
+specialization slots remain independent presets and restore their complete validated entries and action bars.
+Legacy archetype records in `core.ascension_build.<spec>` are separate from those slot records; they cannot
+inject additional ranks into a native upload. The active spellbook remains the truth at login.
+
+## Specialization slots and Tomes
+
+CoA classes use the original 20-slot client container. Slot I is unlocked on login; Tomes II–XX teach the
+remaining spells in `AscensionWildcard::SPECIALIZATION_SWAP_SPELLS`. Reading a Tome requires the previous
+unlock, consumes the item on success and leaves the active build untouched. Already-owned unlocks refuse
+item use. The pending world migration restores the original `ItemAddon.dbc` / `ItemSpells.dbc` mappings,
+creates the four missing server templates for Tomes IX–XII and stocks the existing Bazaar vendor.
+
+Casting an unlocked slot's original spell runs its normal five-second cast and interruptions. The server
+intercepts `SPELL_EFFECT_TALENT_SPEC_SELECT`, validates the target build with the native upload rules, then
+saves the outgoing archetype, purchased/free-choice ranks and all packed action buttons. New slots have no
+archetype or purchases. Saved builds must fit the character's current level and point budget; a refusal
+preserves the active slot. Archetype switching guards also apply when entering an empty slot.
+
+`core.ascension_slot.active` stores the active index. `core.ascension_slot.<index>` holds a versioned record
+with class, archetype, entries and actions, without a fixed entry cap. The active slot is refreshed on every
+player save. A slot switch saves spells, action buttons and settings through the normal character transaction;
+login reads the active spellbook and action bar rather than reapplying a stale snapshot. Slot I retains the
+legacy `core.ascension_build.<spec>` / `core.ascension_bar.<spec>` archetype histories; the other slots use
+`core.ascension_slot.<index>.build.<spec>` / `.bar.<spec>` so histories cannot leak between slots. Class
+changes invalidate all these records and reset the active slot, preserving purchased unlock spells.
+
+These slots use the existing native packets and client spells. They do not implement named loadout requests
+`0x0778`–`0x077A` or the Mystic Enchant profiles also mentioned in the original Tome descriptions.
 
 ## The client's character-advancement service (Extensions.dll)
 
@@ -71,7 +95,8 @@ Opcodes and layouts come from the reconstructed `Extensions.dll` (`firstoni-dev/
 `docs/DLL_REFERENCE.md`, module `AscCAMgr`); the client build is the authority.
 
 - `SMSG 0x0725` active specialization: `u32 slotIndex, u32 slotCount`. Its first arrival builds the
-  per-character container the next packet needs, so it always goes first. The server sends slot 0 of 1. The
+  per-character container the next packet needs, so it always goes first. CoA classes receive the active index
+  and capacity 20; the original learned spells gate access to locked slots. The
   client does not read the specialization from it: `GetActiveChrSpec` is the first `ChrSpecs` row whose identity
   entry (+0x70, `CoASpecialization::IdentityEntryId`) the build holds.
 - `SMSG 0x0726` known entries: `u32 count`, then `u32 entryId, u32 rank, u32 0, u8 0, u32 0, u32 0` per record.
@@ -84,24 +109,31 @@ Opcodes and layouts come from the reconstructed `Extensions.dll` (`firstoni-dev/
   it drops the old specialization's entries and adds the new identity entry and the entry of the
   specialization's signature spell (`ChrSpecs` +0x60, `SignatureEntryId`). `SpecializationOf` reads the
   specialization from the upload's ranked specialization entries; entries of two specializations refuse it.
-  A specialization other than the active one, with no paid or free-choice entry of it, is a switch:
-  `SwitchSpecialization` runs, restores that specialization's stored build, and the rest of the upload is
-  ignored. With such entries the switch runs first and the upload then applies as the complete set. Otherwise
-  `ApplyKnownEntriesUpload` checks every entry, prices the state the set leads to (including ranks the
+  `ApplyKnownEntriesUpload` validates every row, the budget and removal payment before switching, then applies
+  the complete uploaded set. An identity-and-signature-only upload leaves other purchases absent, including
+  when returning to a previously used archetype. A saved slot supplies its own complete build and skips
+  ordinary unlearn charges. The native switch
+  helper also removes the departed specialization's shared signature, matching the DLL's `LeaveSpec`.
+  The server prices the state the set leads to (including ranks the
   progression pass hands back to omitted entries) and applies removals before additions through
   `SetTalentRank`; an upload that changes nothing still runs the progression pass. Any failure refuses the
   whole upload. 0x0726 always follows, then `SMSG 0x072C` {result, learn result, u32 entry, u32 rank}
   (`CHARACTER_ADVANCEMENT_UPDATE_ENTRIES_RESULT`): `CA_UPDATE_ENTRIES_OK`, or `_BAD_ENTRY` (unknown or
   foreign entry, rank past the entry, missing server spell, mixed or invalid specialization),
-  `_NOT_TRAVERSIBLE` (`CA_LEARN_LOW_LEVEL`, `CA_LEARN_MISSING_AE` / `_TE` over budget) or `_UNKNOWN`
+  `_NOT_TRAVERSIBLE` (`CA_LEARN_LOW_LEVEL`, `CA_LEARN_GROUP` for mutually exclusive free choices,
+  `CA_LEARN_MISSING_AE` / `_TE` over budget) or `_UNKNOWN`
   (malformed upload, missing budget row). The CoA frame plays its apply sound on success; the general CA
   frame shows a refusal as a red error.
 - `CMSG_UNLEARN_TALENTS` (0x0213, `C_CharacterAdvancement.UnlearnAllTalents`): queued with the uploads in
   arrival order and handled by `ResetPaidTalents`, then 0x0726 and `SMSG 0x072B` with `CA_PURGE_TALENTS_OK`,
-  or `CA_PURGE_TALENTS_NO_KNOWN_TALENTS` when nothing was removed. The CoA talent frame resets through
+  `CA_PURGE_TALENTS_NO_PURGE_ITEM` when the original item, mark or gold price cannot be paid,
+  or `CA_PURGE_TALENTS_NO_KNOWN_TALENTS` when nothing was removed. Successful paid removals and purges raise
+  the reset counters sent in SMSG 0x0926; an unaffordable upload answers `CA_UPDATE_ENTRIES_BAD_UPDATE_COSTS`
+  without modifying the build. The CoA talent frame resets through
   `ClearPendingBuild` and an upload instead.
 - `CMSG 0x06E1` inspect (`C_CharacterAdvancement.InspectUnit`, u64 guid): `SMSG 0x06E2` answers a `CA_INSPECT_*`
-  string; on `CA_INSPECT_OK` the guid, active slot 0, one slot and the target's known entries in the 0x0726 layout.
+  string; on `CA_INSPECT_OK` the guid, active slot index, slot capacity and the target's known entries in the
+  0x0726 layout.
   Missing, not-in-world and out-of-range (`INSPECT_DISTANCE`) targets get their own results.
 - Timing: the client keys this state off its local player object, which does not exist during the loading
   screen. `OnPlayerLogin` only queues the state; the first `CMSG_SET_ACTIVE_MOVER` of the session sends it
@@ -118,8 +150,10 @@ Opcodes and layouts come from the reconstructed `Extensions.dll` (`firstoni-dev/
 
 - `python -B tools/verify_all.py --stages harness --harness talent_state`: budgets, rank derivation, point
   accounting, packet layout, upload parsing and the specialization each upload selects, compiled against the
-  real catalog.
+  real catalog, plus uncapped slot record serialization and malformed-record rejection.
 - Gameplay scenarios pick specializations and ranks with the `specialization` and `advancement_rank` actions,
   which inject the same 0x0727 upload through the early packet hook.
+- `character-advancement-specialization-*` scenarios cover independent builds, full action bars, native
+  cast refusals, all Tome unlocks, large saved builds, real database relogs and class-change invalidation.
 - Ghost `e2e/coa/talents/authority_test.go`: persistence across a relog, budget refusal, reset, the 0x0725/0x0726
   sequence and the 0x0727 upload against a running slot.

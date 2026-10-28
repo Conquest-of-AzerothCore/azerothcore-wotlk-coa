@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Skeletal Archers only shoot targets within 40 yards",
+  "contract": "Animate: Skeletal Archer 805040 triggers 500330, which raises three Skeletal Archers (50076) for 15 s. A Skeletal Archer is a ranged minion without combat movement: it adopts its owner's target and fires its 800609 'Skeletal Arrow' every 3 s. Like the 40 yd 'Command: Skeletal Archers' 504319 (SpellRange 5) and the Frost Wyrm's breath targeting, an archer engages only an enemy within 40 yards and in line of sight, and it drops a target that leaves that reach so it can follow its owner's next target. The arrow's own 45 yd SpellRange 36 (plus the engine's 10 % cast leeway) does not set that reach. Players reported that archers kept shooting their old target at any distance until given a new one. The owner first attacks a golem 46 yards away: the archers do not adopt it and fire no arrow. The owner then attacks a golem 30 yards away: the archers adopt it and shoot it.",
+  "timeout_ms": 90000,
+  "location": { "map": 1, "x": -2712.6, "y": 19.0, "z": 14.5, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 60, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "far", "owner": "n", "entry": 36, "level": 60, "health": 1000000, "distance": 46 },
+    { "id": "near", "owner": "n", "entry": 36, "level": 60, "health": 1000000, "distance": 30 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and the Life Force aura settle", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 805040 },
+    { "action": "snapshot", "actor": "far", "metric": "health", "save_as": "far0" },
+    { "action": "attack", "label": "The owner attacks the golem 46 yards away", "actor": "n", "target": "far" },
+    { "action": "cast", "label": "Animate: Skeletal Archer", "actor": "n", "spell": 805040 },
+    {
+      "action": "assert", "label": "SETUP: three Skeletal Archers raised", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50076, "equals": 3, "within_ms": 3000
+    },
+    { "action": "wait", "label": "Two of the archers' 3 s attack cycles pass", "ms": 6500 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: no archer shot the golem 46 yards away", "actor": "n",
+      "metric": "spell_go_count", "spell": 800609, "entry": 50076, "equals": 0
+    },
+    {
+      "action": "assert", "label": "The golem 46 yards away took no damage", "actor": "far",
+      "metric": "health", "relative_to": "far0", "equals": 0
+    },
+    {
+      "action": "assert", "label": "The archer does not hold the golem out of reach", "actor": "n",
+      "metric": "owned_creature_victim", "entry": 50076, "target": "far", "equals": 0
+    },
+    { "action": "snapshot", "actor": "near", "metric": "health", "save_as": "near0" },
+    { "action": "attack", "label": "The owner switches to the golem 30 yards away", "actor": "n", "target": "near" },
+    {
+      "action": "assert", "label": "CONTROL: the archers shoot a target within 40 yards", "actor": "n",
+      "metric": "spell_go_count", "spell": 800609, "entry": 50076, "min": 1, "within_ms": 7000
+    },
+    {
+      "action": "assert", "label": "CONTROL: the golem 30 yards away takes the archers' damage", "actor": "near",
+      "metric": "health", "relative_to": "near0", "max": -1, "within_ms": 3000
+    }
+  ]
+}

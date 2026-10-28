@@ -1,0 +1,160 @@
+{
+  "schema": 1,
+  "name": "Level-10 Necromancer accounts for the third skeletal warrior in Life Force (#5856)",
+  "contract": [
+    "Original Scourge Apprentice Training 680283 increases Life Force by one at level 10. Each Lesser Skeletal",
+    "Warrior 500970 occupies one Life Force.",
+    "Normal raises must leave capacity 3 and reduce free Life Force from 3 to 2, 1 and 0 while retaining three",
+    "warriors. This observes server aura state; it does not establish client HUD rendering."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "n",
+      "race": 5,
+      "class": 23,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "n",
+      "spell": 680283
+    },
+    {
+      "action": "learn",
+      "actor": "n",
+      "spell": 500970
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "aura_stacks",
+      "spell": 805011,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "aura_stacks",
+      "spell": 525004,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "n",
+      "spell": 500970
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "label": "1 warriors occupy 1 Life Force",
+      "entry": 50065,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "aura_stacks",
+      "spell": 805011,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "aura_stacks",
+      "label": "Free Life Force is 2",
+      "spell": 525004,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "n",
+      "spell": 500970
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "label": "2 warriors occupy 2 Life Force",
+      "entry": 50065,
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "aura_stacks",
+      "spell": 805011,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "aura_stacks",
+      "label": "Free Life Force is 1",
+      "spell": 525004,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "n",
+      "spell": 500970
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "label": "3 warriors occupy 3 Life Force",
+      "entry": 50065,
+      "equals": 3,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "aura_stacks",
+      "spell": 805011,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "aura_stacks",
+      "label": "Free Life Force is 0",
+      "spell": 525004,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    }
+  ]
+}

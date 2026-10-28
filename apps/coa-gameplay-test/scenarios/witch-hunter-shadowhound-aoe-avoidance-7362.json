@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Witch Hunter Shadowhounds wear Pet Avoidance (#7362)",
+  "contract": "Live parity: in live CoA combat logs (2026-06-06 and 2026-06-08) one creature area cast hit players for 31-74 and the Shadowhound and Lesser Shadowhounds beside them for 2-5, the -90% creature area damage that 32233 'Pet Avoidance' (aura 310 -90% creature area damage, aura 229 -20%) gives the stock guardians. Neither hound gets it from its data: CreatureFamily 551 'Shadowhound' lists only skill line 11805, not 'Pet - Generic Hunter' 270 that teaches hunter pets 65220 'Avoidance'. Houndmaster's Whistle 801343 summons the Shadowhound 50124 as the pet; Unleash the Hounds 807933 summons Lesser Shadowhounds 50224 as guardians. Expected: both wear 32233. Before the fix neither did.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "wh", "race": 1, "class": 15, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "learn", "actor": "wh", "spell": 801343 },
+    { "action": "learn", "actor": "wh", "spell": 807933 },
+    { "action": "cast", "label": "Houndmaster's Whistle", "actor": "wh", "spell": 801343 },
+    {
+      "action": "assert", "label": "SETUP: the Shadowhound is the pet", "actor": "wh",
+      "metric": "pet_entry", "equals": 50124, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the Shadowhound wears Pet Avoidance", "actor": "wh",
+      "metric": "owned_creature_count", "entry": 50124, "spell": 32233, "equals": 1, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 2000 },
+    { "action": "set_power", "actor": "wh", "power": 1, "value": 1000 },
+    { "action": "cast", "label": "Unleash the Hounds", "actor": "wh", "spell": 807933 },
+    {
+      "action": "assert", "label": "SETUP: the Lesser Shadowhounds are summoned", "actor": "wh",
+      "metric": "owned_creature_count", "entry": 50224, "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the Lesser Shadowhounds wear Pet Avoidance", "actor": "wh",
+      "metric": "owned_creature_count", "entry": 50224, "spell": 32233, "min": 1, "within_ms": 2000
+    }
+  ]
+}

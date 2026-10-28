@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "name": "Targetless Unleash the Hounds uses the selected facing enemy (#5801)",
+  "contract": [
+    "Original 807933 is a self/destination summon with no explicit enemy target; it must be castable without a selected unit.",
+    "The report independently describes original hounds engaging a selected enemy in front. Exercise core CMSG_SET_SELECTION and a normal cast without a target.",
+    "Without a selection, the same summon must stay idle. The hostile passive dummy is in front, outside melee range, and no hunter attack is injected."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 807933
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "client_packet",
+      "actor": "hunter",
+      "opcode": 317,
+      "fields": [
+        {
+          "u64": 0
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy",
+      "metric": "health",
+      "save_as": "before_no_selection"
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 807933
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "owned_creature_count",
+      "entry": 50224,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "health",
+      "relative_to": "before_no_selection",
+      "equals": 0,
+      "label": "Without a selected target idle hounds cause no incidental attack"
+    },
+    {
+      "action": "wait",
+      "ms": 18000
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "owned_creature_count",
+      "entry": 50224,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "client_packet",
+      "actor": "hunter",
+      "opcode": 317,
+      "fields": [
+        {
+          "actor_guid": "dummy"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hunter",
+      "spell": 807933
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy",
+      "metric": "health",
+      "save_as": "before_selected"
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 807933
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "owned_creature_count",
+      "entry": 50224,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "health",
+      "relative_to": "before_selected",
+      "max": -1,
+      "within_ms": 8000,
+      "label": "With a selected enemy in front the targetless summon engages it"
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 12
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  }
+}

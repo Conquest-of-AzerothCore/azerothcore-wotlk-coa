@@ -17,6 +17,7 @@
 
 #include "Common.h"
 #include "GameTime.h"
+#include "GossipDef.h"
 #include "Log.h"
 #include "MapMgr.h"
 #include "NPCHandler.h"
@@ -25,6 +26,7 @@
 #include "Pet.h"
 #include "Player.h"
 #include "QueryPackets.h"
+#include "ScriptMgr.h"
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -47,6 +49,8 @@ void WorldSession::SendNameQueryOpcode(ObjectGuid guid)
     nameQueryResponse.NameUnknown = false;
     nameQueryResponse.Name = playerData->Name;
     nameQueryResponse.Race = player ? player->getRace() : playerData->Race;
+    if (player)
+        sScriptMgr->OnPlayerGetNameQueryRace(player, nameQueryResponse.Race);
     nameQueryResponse.Sex = player ? player->getGender() : playerData->Sex;
     nameQueryResponse.Class = player ? player->getClass() : playerData->Class;
 
@@ -280,6 +284,9 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recvData)
     LOG_DEBUG("network", "WORLD: CMSG_NPC_TEXT_QUERY TextId: {}", textID);
 
     recvData >> guid;
+
+    if (GetPlayer()->PlayerTalkClass->SendDynamicGossipText(textID, guid))
+        return;
 
     GossipText const* gossip = sObjectMgr->GetGossipText(textID);
 

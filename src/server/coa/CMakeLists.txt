@@ -8,6 +8,10 @@ add_library(coa STATIC ${COA_SOURCES})
 target_link_libraries(coa PRIVATE acore-core-interface mysql PUBLIC coa-interface)
 set_target_properties(coa PROPERTIES FOLDER "server")
 
+if(USE_COREPCH AND CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND NOT MSVC)
+  set_target_properties(coa PROPERTIES PRECOMPILE_HEADERS_REUSE_FROM game)
+endif()
+
 get_target_property(COA_BOOST_INCLUDE_DIRS boost INTERFACE_INCLUDE_DIRECTORIES)
 find_path(COA_PROPERTY_TREE_INCLUDE_DIR
   NAMES boost/property_tree/json_parser.hpp
@@ -20,7 +24,7 @@ if(NOT COA_PROPERTY_TREE_INCLUDE_DIR)
 endif()
 
 set(COA_CONFIG_FILE_LIST "")
-foreach(COA_CONFIG coa_bugreport.conf.dist coa.conf.dist)
+foreach(COA_CONFIG coa_bugreport.conf.dist coa.conf.dist wildcard.conf.dist)
   CopyModuleConfig("${CMAKE_CURRENT_SOURCE_DIR}/conf/${COA_CONFIG}" coa)
   string(REGEX REPLACE "\\.dist$" "" COA_CONFIG_FILE ${COA_CONFIG})
   string(APPEND COA_CONFIG_FILE_LIST "${COA_CONFIG_FILE},")

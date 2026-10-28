@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Barrier of Light releases the threat redirect on every ally when its 15 second aura ends (#8885)",
+  "contract": "Barrier of Light 805417 applies an APPLY_AREA_AURA_RAID aura with a 15 second duration whose periodic trigger 807698 makes each affected player cast 807694 (SPELL_EFFECT_REDIRECT_THREAT, no aura) at the caster. The redirect lives only in the ally's threat manager, so it must be released when the ally's Barrier of Light application ends; otherwise the ally keeps feeding threat to the caster after the aura has gone.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "monk", "race": 1, "class": 19, "level": 60 },
+    { "id": "ally", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 6000 },
+    { "action": "group", "label": "Party the monk and the ally", "actor": "monk", "target": "ally" },
+    { "action": "learn", "actor": "monk", "spell": 805417 },
+    { "action": "wait", "label": "Clear the global cooldown of the learn", "ms": 1700 },
+    { "action": "cast", "actor": "monk", "spell": 805417 },
+    { "action": "assert", "label": "The ally carries the aura", "actor": "ally", "metric": "aura", "spell": 805417,
+      "caster": "monk", "equals": 1, "within_ms": 4000 },
+    { "action": "assert", "label": "The ally redirects threat to the monk", "actor": "ally",
+      "metric": "has_redirects", "equals": 1, "within_ms": 4000 },
+    { "action": "wait", "label": "Let the 15 second aura run out", "ms": 12000 },
+    { "action": "assert", "label": "The ally lost the aura", "actor": "ally", "metric": "aura", "spell": 805417,
+      "caster": "monk", "equals": 0, "within_ms": 3000 },
+    { "action": "assert", "label": "The ally no longer redirects threat", "actor": "ally",
+      "metric": "has_redirects", "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "label": "The monk no longer redirects threat", "actor": "monk",
+      "metric": "has_redirects", "equals": 0, "within_ms": 2000 }
+  ]
+}

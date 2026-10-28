@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Blast Mine stays armed under an enemy until Remote Detonation (#9155)",
+  "contract": [
+    "Deploy Blast Mine 801718 names exactly two triggers: 'When the mine is destroyed, or upon using Remote",
+    "Detonation, up to $802336i nearby targets are blasted away and enemies take a minor amount of Fire damage.'",
+    "The mine passive 572376 adds only 'Upon being killed this mine will explode', and the live mine 50045 casts only",
+    "Bomb Ready 500354, Remote Bomb Explosion 802336 and its trigger 802786. #8642 made the mine explode whenever a",
+    "valid enemy came within 2 yd, so a level 6 Tinker fighting next to their mine saw it fire on its own and its",
+    "Remote Bomb Knockback 804306 (TARGET_UNIT_DEST_AREA_PARTY, 8 yd) launch them. Expected: a hostile golem 1 yd",
+    "from the mine, with the Tinker 3 yd from it, leaves the mine armed for five seconds, takes no damage and sends",
+    "the Tinker no SMSG_MOVE_KNOCK_BACK (239); Remote Detonation 801798 then explodes it and damages the golem."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "tinker", "race": 1, "class": 28, "level": 6}
+  ],
+  "creatures": [
+    {"id": "golem", "owner": "tinker", "entry": 36, "level": 6, "distance": 4, "health": 1000000}
+  ],
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "label": "Deploy Blast Mine", "actor": "tinker", "spell": 801718},
+    {"action": "assert", "label": "Remote Detonation is known with Deploy Blast Mine", "actor": "tinker",
+     "metric": "knows_spell", "spell": 801798, "equals": 1, "within_ms": 2000},
+    {"action": "snapshot", "actor": "golem", "metric": "health", "save_as": "golem_start"},
+    {"action": "snapshot", "actor": "tinker", "metric": "server_packets", "opcode": 239,
+     "save_as": "knockbacks_start"},
+    {"action": "cast", "label": "Deploy the mine 1 yd from the golem", "actor": "tinker", "spell": 801718,
+     "destination": {"x": -8914.41, "y": -115.853, "z": 82.3711}},
+    {"action": "assert", "label": "One Blast Mine is placed", "actor": "tinker", "metric": "owned_creature_count",
+     "entry": 50045, "equals": 1, "within_ms": 2000},
+    {"action": "wait", "label": "The golem stands on the mine next to the Tinker", "ms": 5000},
+    {"action": "assert", "label": "The mine does not fire on its own", "actor": "tinker",
+     "metric": "owned_creature_count", "entry": 50045, "equals": 1},
+    {"action": "assert", "label": "The golem took no explosion damage", "actor": "golem", "metric": "health",
+     "relative_to": "golem_start", "equals": 0},
+    {"action": "assert", "label": "The Tinker was not launched", "actor": "tinker", "metric": "server_packets",
+     "opcode": 239, "relative_to": "knockbacks_start", "equals": 0},
+    {"action": "assert", "label": "SETUP: the mine grants Bomb Ready", "actor": "tinker", "metric": "aura",
+     "spell": 500354, "equals": 1},
+    {"action": "snapshot", "actor": "golem", "metric": "health", "save_as": "golem_before_detonation"},
+    {"action": "cast", "label": "Remote Detonation", "actor": "tinker", "spell": 801798},
+    {"action": "assert", "label": "The detonated mine is gone", "actor": "tinker", "metric": "owned_creature_count",
+     "entry": 50045, "equals": 0, "within_ms": 2000},
+    {"action": "assert", "label": "Remote Detonation damages the golem", "actor": "golem", "metric": "health",
+     "relative_to": "golem_before_detonation", "max": -1, "within_ms": 3000},
+    {"action": "assert", "label": "Remote Detonation stays known", "actor": "tinker", "metric": "knows_spell",
+     "spell": 801798, "equals": 1}
+  ]
+}

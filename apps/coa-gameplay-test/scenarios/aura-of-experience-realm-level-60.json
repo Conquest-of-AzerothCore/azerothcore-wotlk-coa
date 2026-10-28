@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Aura of Experience needs a level 60 character on the realm",
+  "contract": "Item 818059 Aura of Experience is refused, and kept, while no character on the account has reached level 60, as its CoA tooltip states (This item requires you to have a level 60 on this realm to be able to consume). A level 59 character on the account is not enough. Once another character of the account is saved at level 60, the same alt consumes one item and receives aura 818059.",
+  "players": [
+    {
+      "id": "alt",
+      "race": 1,
+      "class": 1,
+      "level": 10
+    },
+    {
+      "id": "main",
+      "race": 1,
+      "class": 1,
+      "level": 59,
+      "account_of": "alt"
+    }
+  ],
+  "steps": [
+    { "action": "relog", "actor": "main" },
+    { "action": "add_item", "actor": "alt", "item": 818059, "count": 2 },
+    { "action": "use_item", "actor": "alt", "item": 818059, "spell": 818059 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert",
+      "actor": "alt",
+      "metric": "aura",
+      "spell": 818059,
+      "equals": 0,
+      "label": "A level 59 character on the account does not unlock the aura"
+    },
+    {
+      "action": "assert",
+      "actor": "alt",
+      "metric": "cast_failure",
+      "spell": 818059,
+      "equals": 27,
+      "label": "The refused use answers SPELL_FAILED_DONT_REPORT beside the tooltip text"
+    },
+    { "action": "assert", "actor": "alt", "metric": "item_count", "item": 818059, "equals": 2 },
+    { "action": "set_level", "actor": "main", "value": 60 },
+    { "action": "relog", "actor": "main" },
+    { "action": "use_item", "actor": "alt", "item": 818059, "spell": 818059 },
+    {
+      "action": "assert",
+      "actor": "alt",
+      "metric": "aura",
+      "spell": 818059,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "A saved level 60 character on the account unlocks the aura"
+    },
+    { "action": "assert", "actor": "alt", "metric": "item_count", "item": 818059, "equals": 1 }
+  ]
+}

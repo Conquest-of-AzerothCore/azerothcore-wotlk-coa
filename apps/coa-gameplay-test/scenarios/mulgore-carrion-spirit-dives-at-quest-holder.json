@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Cruel Carrion Spirit dives at a Fighting Over Carrion holder and ignores other players",
+  "contract": [
+    "Cruel Carrion Spirit 161834 is faction template 7, neutral to players, and circles out of melee reach.",
+    "Its SmartAI line-of-sight event attacks a player within 30 yd who has quest 1660043 in progress.",
+    "Expected: a player without the quest 20 yd away is left alone; a quest holder arriving there is attacked and",
+    "alone is sent the spirit's raid boss whisper (creature_text type 42), the yellow centre-screen line."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 1, "x": -2712.6, "y": 19.0, "z": 14.5, "o": 0},
+  "players": [
+    {"id": "bystander", "race": 6, "class": 1, "level": 6},
+    {"id": "hunter", "race": 6, "class": 1, "level": 6}
+  ],
+  "creatures": [
+    {"id": "spirit", "owner": "bystander", "entry": 161834, "faction": 7, "level": 4, "health": 100000,
+     "reaction": 2, "distance": 20}
+  ],
+  "steps": [
+    {"action": "teleport", "actor": "hunter", "map": 1, "x": -2712.6, "y": -81.0, "z": 14.5, "o": 0},
+    {"action": "prepare_quest", "actor": "hunter", "quest": 1660043, "complete": false},
+    {"action": "assert", "label": "The hunter has Fighting Over Carrion in progress", "actor": "hunter", "metric": "quest_status", "quest": 1660043,
+     "equals": 3},
+    {"action": "wait", "ms": 3000},
+    {"action": "assert", "label": "The spirit leaves a player without the quest alone at 20 yd", "actor": "spirit",
+     "metric": "combat", "equals": 0},
+    {"action": "snapshot", "actor": "hunter", "metric": "system_messages", "save_as": "hunter_chat"},
+    {"action": "snapshot", "actor": "bystander", "metric": "system_messages", "save_as": "bystander_chat"},
+    {"action": "teleport", "actor": "hunter", "map": 1, "x": -2712.6, "y": 19.0, "z": 14.5, "o": 0},
+    {"action": "assert", "label": "The hunter stands within the 30 yd dive range", "actor": "spirit", "metric": "distance", "target": "hunter",
+     "max": 30, "within_ms": 2000},
+    {"action": "assert", "label": "The spirit attacks the quest holder", "actor": "spirit", "metric": "victim",
+     "target": "hunter", "equals": 1, "within_ms": 8000},
+    {"action": "assert", "label": "The hunter is told the spirit senses their soul", "actor": "hunter",
+     "metric": "system_messages", "relative_to": "hunter_chat", "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "The bystander is told nothing", "actor": "bystander", "metric": "system_messages",
+     "relative_to": "bystander_chat", "equals": 0}
+  ]
+}

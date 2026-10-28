@@ -1,7 +1,28 @@
 {
   "schema": 1,
-  "name": "Ranger Adaptation: the strongest Footpad's and Woodsman's Adaptation wins per target, any caster (#5000, #5011)",
-  "contract": "Footpad's Adaptation (523489, ranks 523490-523493) and Greater Footpad's Adaptation 523513 grant armor (SPELL_AURA_MOD_RESISTANCE) and all primary attributes (SPELL_AURA_MOD_STAT); rank 5 523493 and 523513 both grant 285 armor and 12 of each attribute, and the single-target tooltip says 'Does not stack with other similar effects'. Woodsman's Adaptation (800266, ranks up to 803666) and Greater Woodsman's Adaptation 680294 grant melee and ranged attack power; rank 7 803666 and 680294 both grant 232. spell_group 2100002 (523489, 523513) and 2100003 (800266, 680294) with SPELL_GROUP_STACK_RULE_EXCLUSIVE_HIGHEST (4) make each pair one buff per target: Unit::IsHighestExclusiveAuraEffect refuses a weaker cast, an equal or stronger cast replaces the older one whoever cast it, and the two pairs stay independent. Rule 1 (EXCLUSIVE) would let a rank 1 cast (523489: 105 armor, 4 of each attribute; 800266: 30 attack power) replace a raid member's Greater buff. Expected on a grouped warrior ally: max-rank Footpad's from one Ranger gives +309 armor (285 plus 2 armor per point of its +12 Agility); Greater Footpad's from a second Ranger replaces it (still +309, not +618); the first Ranger's max rank replaces the Greater again; the second Ranger's copy of the same rank replaces the first Ranger's; Woodsman's rank 7 (+232 attack power over the Footpad's-buffed value) sits beside Footpad's, and Greater Woodsman's replaces it (still +232) without touching Footpad's. A rank 1 Footpad's or Woodsman's cast on a target carrying the Greater buff is refused and leaves the Greater buff and the stat totals unchanged; with the Greater buff removed, rank 1 lands, and a Greater cast then replaces it.",
+  "name": "Ranger Adaptation: the strongest Footpad's and Woodsman's Adaptation wins per target, any caster…",
+  "contract": [
+    "Footpad's Adaptation (523489, ranks 523490-523493) and Greater Footpad's Adaptation 523513 grant armor",
+    "(SPELL_AURA_MOD_RESISTANCE) and all primary attributes (SPELL_AURA_MOD_STAT); rank 5 523493 and 523513",
+    "both grant 285 armor and 12 of each attribute, and the single-target tooltip says 'Does not stack with",
+    "other similar effects'. Woodsman's Adaptation (800266, ranks up to 803666) and Greater Woodsman's",
+    "Adaptation 680294 grant melee and ranged attack power; rank 7 803666 and 680294 both grant 232.",
+    "spell_group 2100002 (523489, 523513) and 2100003 (800266, 680294) with",
+    "SPELL_GROUP_STACK_RULE_EXCLUSIVE_HIGHEST (4) make each pair one buff per target:",
+    "Unit::IsHighestExclusiveAuraEffect refuses a weaker cast, an equal or stronger cast replaces the older",
+    "one whoever cast it, and the two pairs stay independent. Rule 1 (EXCLUSIVE) would let a rank 1 cast",
+    "(523489: 105 armor, 4 of each attribute; 800266: 30 attack power) replace a raid member's Greater buff.",
+    "Expected on a grouped warrior ally: max-rank Footpad's from one Ranger gives +309 armor (285 plus 2",
+    "armor per point of its +12 Agility); Greater Footpad's from a second Ranger replaces it (still +309, not",
+    "+618); the first Ranger's max rank replaces the Greater again; the second Ranger's copy of the same rank",
+    "replaces the first Ranger's; Woodsman's rank 7 (+232 attack power over the Footpad's-buffed value) sits",
+    "beside Footpad's, and Greater Woodsman's replaces it (still +232) without touching Footpad's. A rank 1",
+    "Footpad's or Woodsman's cast on a target carrying the Greater buff is refused and leaves the Greater",
+    "buff and the stat totals unchanged; with the Greater buff removed, rank 1 lands, and a Greater cast then",
+    "replaces it.",
+    "Ranger Adaptation: the strongest Footpad's and Woodsman's Adaptation wins per target, any caster (#5000,",
+    "#5011)"
+  ],
   "timeout_ms": 90000,
   "location": {
     "map": 0,
@@ -324,9 +345,45 @@
       "within_ms": 2000
     },
     {
+      "action": "unlearn",
+      "actor": "ranger",
+      "spell": 523493,
+      "all_specs": true,
+      "label": "Remove higher ranks so the rank-one cast is active"
+    },
+    {
+      "action": "unlearn",
+      "actor": "ranger",
+      "spell": 523492,
+      "all_specs": true,
+      "label": "Remove higher ranks so the rank-one cast is active"
+    },
+    {
+      "action": "unlearn",
+      "actor": "ranger",
+      "spell": 523491,
+      "all_specs": true,
+      "label": "Remove higher ranks so the rank-one cast is active"
+    },
+    {
+      "action": "unlearn",
+      "actor": "ranger",
+      "spell": 523490,
+      "all_specs": true,
+      "label": "Remove higher ranks so the rank-one cast is active"
+    },
+    {
       "action": "learn",
       "actor": "ranger",
       "spell": 523489
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "spell_active",
+      "spell": 523489,
+      "equals": 1,
+      "label": "The lower-rank control is an active spell"
     },
     {
       "action": "wait",
@@ -449,9 +506,59 @@
       "equals": 309
     },
     {
+      "action": "unlearn",
+      "actor": "ranger",
+      "spell": 803666,
+      "all_specs": true,
+      "label": "Remove higher ranks so the rank-one cast is active"
+    },
+    {
+      "action": "unlearn",
+      "actor": "ranger",
+      "spell": 803324,
+      "all_specs": true,
+      "label": "Remove higher ranks so the rank-one cast is active"
+    },
+    {
+      "action": "unlearn",
+      "actor": "ranger",
+      "spell": 803323,
+      "all_specs": true,
+      "label": "Remove higher ranks so the rank-one cast is active"
+    },
+    {
+      "action": "unlearn",
+      "actor": "ranger",
+      "spell": 803322,
+      "all_specs": true,
+      "label": "Remove higher ranks so the rank-one cast is active"
+    },
+    {
+      "action": "unlearn",
+      "actor": "ranger",
+      "spell": 803321,
+      "all_specs": true,
+      "label": "Remove higher ranks so the rank-one cast is active"
+    },
+    {
+      "action": "unlearn",
+      "actor": "ranger",
+      "spell": 803320,
+      "all_specs": true,
+      "label": "Remove higher ranks so the rank-one cast is active"
+    },
+    {
       "action": "learn",
       "actor": "ranger",
       "spell": 800266
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "spell_active",
+      "spell": 800266,
+      "equals": 1,
+      "label": "The lower-rank control is an active spell"
     },
     {
       "action": "wait",

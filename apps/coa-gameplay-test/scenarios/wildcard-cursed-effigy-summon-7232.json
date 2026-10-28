@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Cursed Effigy summons its device instead of nothing",
+  "contract": [
+    "Cursed Effigy 280915 is SPELL_EFFECT_SUMMON with EffectMiscValue[0] = 50134, a creature entry with no",
+    "creature_template row anywhere in data/sql, so Spell::EffectSummonType silently no-ops: cooldown fires,",
+    "nothing spawns. The sibling Witch Doctor ability (creature 50121, same name, same AI pattern) already",
+    "periodically casts Cursed Field (506820, -100% crit chance) on nearby enemies, matching the tooltip",
+    "('Enemies within X yds are unable to critically strike'), but that AI is gated to CLASS_WITCH_DOCTOR. A new",
+    "creature_template for 50134 (cloned stats/model from 50121) with its own, non-gated ScriptName gives the",
+    "Wildcard version the same working behaviour. Expected: casting it spawns a 50134 effigy near the caster, and",
+    "a nearby enemy loses all melee crit chance while it stands near the effigy."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "hero", "race": 1, "class": 10, "level": 40, "melee_crit_rating": 2000}
+  ],
+  "creatures": [
+    {"id": "enemy", "owner": "hero", "entry": 36, "level": 40, "health": 1000000, "distance": 3, "reaction": 0, "stationary": true}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "label": "Learn Cursed Effigy", "actor": "hero", "spell": 280915},
+    {"action": "cast", "label": "Drop a Cursed Effigy", "actor": "hero", "spell": 280915, "target": "hero"},
+    {"action": "assert", "label": "The effigy spawns (entry 50134, not the missing one)", "actor": "hero", "metric": "owned_creature_count", "entry": 50134, "min": 1, "within_ms": 2000},
+    {"action": "wait", "ms": 2500},
+    {"action": "assert", "label": "Cursed Field lands on the nearby enemy", "actor": "enemy", "metric": "aura", "spell": 506820, "equals": 1, "within_ms": 500}
+  ]
+}

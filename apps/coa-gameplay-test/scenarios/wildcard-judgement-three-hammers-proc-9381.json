@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "name": "Wildcard: Judgement of The Three Hammers triggers on direct damage (#9381)",
+  "contract": [
+    "Judgement of The Three Hammers (280210) is a self-cast 15 second buff (120s cooldown) with a native",
+    "SPELL_AURA_PROC_TRIGGER_SPELL aura carrying raw DBC ProcChance 20 and ProcFlags 0. Without a spell_proc",
+    "row the aura never procs (Aura::GetProcEffectMask always returns 0), regardless of how much damage is",
+    "dealt while it is active. Six independent 15 second windows of ordinary 1900ms sword swings (about",
+    "seven to eight swings per window, roughly forty-eight total) at a 20% chance give the proc about",
+    "0.0023% odds of never firing once; before the fix it never fires regardless of sample size."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "h",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "h",
+      "entry": 36,
+      "level": 60,
+      "health": 500000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "learn", "label": "h fixture: Judgement of The Three Hammers", "actor": "h", "spell": 280210 },
+    { "action": "add_item", "label": "h fixture: weapon", "actor": "h", "item": 25 },
+    { "action": "equip", "actor": "h", "item": 25, "slot": 15 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "h knows Judgement of The Three Hammers", "actor": "h", "metric": "knows_spell", "spell": 280210, "equals": 1 },
+    { "action": "attack", "actor": "h", "target": "d" },
+    { "action": "reset_cooldown", "actor": "h", "spell": 280210 },
+    { "action": "cast", "actor": "h", "spell": 280210, "label": "window 1" },
+    { "action": "wait", "ms": 15200 },
+    { "action": "reset_cooldown", "actor": "h", "spell": 280210 },
+    { "action": "cast", "actor": "h", "spell": 280210, "label": "window 2" },
+    { "action": "wait", "ms": 15200 },
+    { "action": "reset_cooldown", "actor": "h", "spell": 280210 },
+    { "action": "cast", "actor": "h", "spell": 280210, "label": "window 3" },
+    { "action": "wait", "ms": 15200 },
+    { "action": "reset_cooldown", "actor": "h", "spell": 280210 },
+    { "action": "cast", "actor": "h", "spell": 280210, "label": "window 4" },
+    { "action": "wait", "ms": 15200 },
+    { "action": "reset_cooldown", "actor": "h", "spell": 280210 },
+    { "action": "cast", "actor": "h", "spell": 280210, "label": "window 5" },
+    { "action": "wait", "ms": 15200 },
+    { "action": "reset_cooldown", "actor": "h", "spell": 280210 },
+    { "action": "cast", "actor": "h", "spell": 280210, "label": "window 6" },
+    { "action": "wait", "ms": 15200 },
+    { "action": "stop_attack", "actor": "h" },
+    { "action": "wait", "ms": 4000, "label": "let any trailing hammer ticks resolve" },
+    {
+      "action": "assert",
+      "label": "CONTRACT ordinary melee swings landed",
+      "actor": "h",
+      "metric": "melee_attack_count",
+      "min": 30
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT Judgement of The Three Hammers triggered its hammer-throw aura (280211) at least once",
+      "actor": "h",
+      "metric": "spell_cast_count",
+      "spell": 280211,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT at least one hammer (280212) actually hit the target",
+      "actor": "h",
+      "metric": "spell_damage_count",
+      "spell": 280212,
+      "target": "d",
+      "min": 1
+    }
+  ]
+}

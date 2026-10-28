@@ -16,7 +16,10 @@
  */
 
 #include "CreatureScript.h"
+#include "Item.h"
+#include "ObjectMgr.h"
 #include "Player.h"
+#include "PlayerScript.h"
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
 
@@ -185,7 +188,38 @@ public:
     };
 };
 
+class quest_the_half_detailed_report : public PlayerScript
+{
+public:
+    quest_the_half_detailed_report() : PlayerScript("quest_the_half_detailed_report") { }
+
+    void OnPlayerQuestRewardItem(Player* player, Item* item, uint32 /*count*/) override
+    {
+        if (!player || !item || item->GetEntry() != 999920)
+            return;
+
+        if (player->GetQuestStatus(999914) != QUEST_STATUS_NONE)
+            return;
+
+        if (Quest const* quest = sObjectMgr->GetQuestTemplate(999914))
+            player->AddQuestAndCheckCompletion(quest, nullptr);
+    }
+
+    void OnPlayerLogin(Player* player) override
+    {
+        if (!player || !player->HasItemCount(999920, 1, false))
+            return;
+
+        if (player->GetQuestStatus(999914) != QUEST_STATUS_NONE)
+            return;
+
+        if (Quest const* quest = sObjectMgr->GetQuestTemplate(999914))
+            player->AddQuestAndCheckCompletion(quest, nullptr);
+    }
+};
+
 void AddSC_westfall()
 {
     new npc_daphne_stilwell();
+    new quest_the_half_detailed_report();
 }

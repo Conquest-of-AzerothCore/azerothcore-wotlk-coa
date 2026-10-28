@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "name": "A Wildcard Hero chooses and switches its stat path through the character advancement build",
+  "contract": "On Darkmoon - Season 10 Wildcard a Hero without a stat path saw the Choose Your Path frame until it picked Strength, Agility, Intellect, Healing or Duality. The frame adds the path's character advancement entry (1149, 1150, 1151, 1152 or 18149) to the build and uploads it (CMSG 0x727); the server learned the path spell (84864, 84865, 84866, 84867 or 129243), sent the build back (SMSG 0x726) and answered CA_UPDATE_ENTRIES_OK (SMSG 0x72C). A later pick replaced the path. The upload could not learn or drop rolled entries: those came only from the dice.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "wild", "race": 1, "class": 10, "level": 1}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 3000},
+    {"action": "console", "command": "coa gamemode WildCard on Harnessa"},
+    {"action": "client_packet", "label": "Roll the starting abilities", "actor": "wild", "opcode": 1611},
+    {"action": "wait", "ms": 1500},
+    {"action": "assert", "label": "Four starters are known", "actor": "wild", "metric": "server_packets", "opcode": 1569, "equals": 4},
+
+    {"action": "client_packet", "label": "Pick the Agility path", "actor": "wild", "opcode": 1831, "fields": [
+      {"u32": 5},
+      {"wildcard_entry": 0}, {"u32": 1}, {"u32": 1}, {"u8": 0}, {"u32": 1}, {"u32": 0},
+      {"wildcard_entry": 1}, {"u32": 1}, {"u32": 1}, {"u8": 0}, {"u32": 2}, {"u32": 0},
+      {"wildcard_entry": 2}, {"u32": 1}, {"u32": 1}, {"u8": 0}, {"u32": 3}, {"u32": 0},
+      {"wildcard_entry": 3}, {"u32": 1}, {"u32": 1}, {"u8": 0}, {"u32": 4}, {"u32": 0},
+      {"u32": 1150}, {"u32": 1}, {"u32": 1}, {"u8": 0}, {"u32": 0}, {"u32": 0}
+    ]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The build is accepted", "actor": "wild", "metric": "server_packet_contains", "opcode": 1836, "text": "CA_UPDATE_ENTRIES_OK", "equals": 1},
+    {"action": "assert", "label": "Path of Agility is learned", "actor": "wild", "metric": "knows_spell", "spell": 84865, "equals": 1},
+    {"action": "assert", "label": "The path is stored", "actor": "wild", "metric": "player_setting", "source": "core.wildcard.path", "index": 0, "equals": 1150},
+    {"action": "assert", "label": "The character window sees Agility", "actor": "wild", "metric": "aura", "spell": 954688, "equals": 1},
+
+    {"action": "client_packet", "label": "Switch to the Intellect path", "actor": "wild", "opcode": 1831, "fields": [
+      {"u32": 6},
+      {"wildcard_entry": 0}, {"u32": 1}, {"u32": 1}, {"u8": 0}, {"u32": 1}, {"u32": 0},
+      {"wildcard_entry": 1}, {"u32": 1}, {"u32": 1}, {"u8": 0}, {"u32": 2}, {"u32": 0},
+      {"wildcard_entry": 2}, {"u32": 1}, {"u32": 1}, {"u8": 0}, {"u32": 3}, {"u32": 0},
+      {"wildcard_entry": 3}, {"u32": 1}, {"u32": 1}, {"u8": 0}, {"u32": 4}, {"u32": 0},
+      {"u32": 1150}, {"u32": 1}, {"u32": 1}, {"u8": 0}, {"u32": 0}, {"u32": 0},
+      {"u32": 1151}, {"u32": 1}, {"u32": 1}, {"u8": 0}, {"u32": 0}, {"u32": 0}
+    ]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "Path of Intelligence is learned", "actor": "wild", "metric": "knows_spell", "spell": 84866, "equals": 1},
+    {"action": "assert", "label": "Path of Agility is gone", "actor": "wild", "metric": "knows_spell", "spell": 84865, "equals": 0},
+    {"action": "assert", "label": "The new path is stored", "actor": "wild", "metric": "player_setting", "source": "core.wildcard.path", "index": 0, "equals": 1151},
+    {"action": "assert", "label": "The character window sees Intellect", "actor": "wild", "metric": "aura", "spell": 954689, "equals": 1},
+    {"action": "assert", "label": "and no longer Agility", "actor": "wild", "metric": "aura", "spell": 954688, "equals": 0},
+
+    {"action": "client_packet", "label": "Try to learn an ability through the build", "actor": "wild", "opcode": 1831, "fields": [
+      {"u32": 6},
+      {"wildcard_entry": 0}, {"u32": 1}, {"u32": 1}, {"u8": 0}, {"u32": 1}, {"u32": 0},
+      {"wildcard_entry": 1}, {"u32": 1}, {"u32": 1}, {"u8": 0}, {"u32": 2}, {"u32": 0},
+      {"wildcard_entry": 2}, {"u32": 1}, {"u32": 1}, {"u8": 0}, {"u32": 3}, {"u32": 0},
+      {"wildcard_entry": 3}, {"u32": 1}, {"u32": 1}, {"u8": 0}, {"u32": 4}, {"u32": 0},
+      {"u32": 1151}, {"u32": 1}, {"u32": 1}, {"u8": 0}, {"u32": 0}, {"u32": 0},
+      {"u32": 40069}, {"u32": 1}, {"u32": 1}, {"u8": 0}, {"u32": 5}, {"u32": 0}
+    ]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "Rolled entries come only from the dice", "actor": "wild", "metric": "server_packet_contains", "opcode": 1836, "text": "CA_UPDATE_ENTRIES_BAD_ENTRY", "equals": 1},
+    {"action": "assert", "label": "The path stays", "actor": "wild", "metric": "player_setting", "source": "core.wildcard.path", "index": 0, "equals": 1151}
+  ]
+}

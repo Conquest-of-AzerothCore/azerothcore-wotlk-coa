@@ -672,7 +672,8 @@ void MotionMaster::MoveJumpTo(float angle, float speedXY, float speedZ)
 /**
  * @brief The unit will jump to a specific point
  */
-void MotionMaster::MoveJump(float x, float y, float z, float speedXY, float speedZ, uint32 id, Unit const* target)
+void MotionMaster::MoveJump(float x, float y, float z, float speedXY, float speedZ, uint32 id, Unit const* target,
+    std::optional<float> finalOrientation)
 {
     LOG_DEBUG("movement.motionmaster", "Unit ({}) jump to point (X: {} Y: {} Z: {})", _owner->GetGUID().ToString(), x, y, z);
 
@@ -688,6 +689,30 @@ void MotionMaster::MoveJump(float x, float y, float z, float speedXY, float spee
     init.SetVelocity(speedXY);
     if (target)
         init.SetFacing(target);
+    else if (finalOrientation)
+        init.SetFacing(*finalOrientation);
+
+    Mutate(new EffectMovementGenerator(init, id), MOTION_SLOT_CONTROLLED);
+}
+
+/**
+ * @brief Jump to a specific point like MoveJump, but without letting the spline drive the unit's
+ * rotation: the client keeps control of the facing for the whole flight. MoveKnockbackFrom already
+ * builds this spline for units that are not client controlled.
+ */
+void MotionMaster::MoveJumpFixedFacing(float x, float y, float z, float speedXY, float speedZ, uint32 id)
+{
+    if (speedXY <= 0.1f)
+        return;
+
+    float moveTimeHalf = speedZ / Movement::gravity;
+    float max_height = -Movement::computeFallElevation(moveTimeHalf, false, -speedZ);
+
+    Movement::MoveSplineInit init(_owner);
+    init.MoveTo(x, y, z);
+    init.SetParabolic(max_height, 0);
+    init.SetOrientationFixed(true);
+    init.SetVelocity(speedXY);
 
     Mutate(new EffectMovementGenerator(init, id), MOTION_SLOT_CONTROLLED);
 }

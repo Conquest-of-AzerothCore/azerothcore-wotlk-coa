@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "To Find a Cure: the Strange Flower is marked on the world map (#6523)",
+  "contract": "Quest 254008 asks for one Strange Flower 254005 (RequiredItemId1, ObjectiveIndex 4), which only the Strange Flower chest 254001 at gameobject guid 7917201 (-320.429, -4121.06, under the tree at Zeb'Goro) holds. The report saw only the turn-in pin on Sakari, so with the quest incomplete the map showed nothing for the flower. rev_20261009_30_coa_quest_poi_restore.sql (#7024) gives the flower spot its own objective 4 POI. Expected: with the quest in the log, CMSG_QUEST_POI_QUERY (0x1E3) for 254008 answers SMSG_QUEST_POI_QUERY_RESPONSE (0x1E4) carrying quest 254008 with two POIs: the flower area and the turn-in.",
+  "timeout_ms": 30000,
+  "location": { "map": 1, "x": -324.45, "y": -4126.57, "z": 51.2, "o": 0 },
+  "players": [
+    { "id": "grunt", "race": 2, "class": 1, "level": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "prepare_quest", "label": "Take To Find a Cure", "actor": "grunt", "quest": 254008, "complete": false },
+    {
+      "action": "client_packet", "label": "Query the quest map POIs", "actor": "grunt", "opcode": 483, "consumed": false,
+      "fields": [{ "u32": 1 }, { "u32": 254008 }]
+    },
+    {
+      "action": "assert", "label": "The POI response names quest 254008", "actor": "grunt",
+      "metric": "server_packet_u32", "opcode": 484, "row": 1, "index": 1, "equals": 254008, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the flower area is marked beside the turn-in pin", "actor": "grunt",
+      "metric": "server_packet_u32", "opcode": 484, "row": 1, "index": 2, "equals": 2, "within_ms": 3000
+    }
+  ]
+}

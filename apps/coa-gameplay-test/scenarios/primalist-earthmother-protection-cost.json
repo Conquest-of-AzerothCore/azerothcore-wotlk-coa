@@ -1,7 +1,12 @@
 {
   "schema": 1,
   "name": "Earthmother's Protection cuts Hand of the Earthmother's Rage cost by a genuine 50 percent",
-  "contract": "Earthmother's Protection's tooltip: the Rage cost of Hand of the Earthmother is reduced by $s1%. Its raw effect is a flat -50 SpellMod on the wrong op and the wrong classmask (Rock Barrier's own, not Hand of the Earthmother's), so it never touched the cost at all. Fixed, it is a genuine -50% multiplicative cost modifier.",
+  "contract": [
+    "Original Earthmother's Protection 560298 explicitly reduces Hand's Rage cost by 50 percent while Rock",
+    "Barrier is active. Rank 502802 costs 350 without the barrier, 175 with both talent and barrier, and 350",
+    "after barrier removal. The linked cost modifier retains the authored amount when other barrier effects",
+    "scale."
+  ],
   "players": [
     {
       "id": "primalist",
@@ -10,22 +15,89 @@
       "level": 80
     }
   ],
-  "timeout_ms": 15000,
+  "timeout_ms": 30000,
   "steps": [
-    { "action": "learn", "actor": "primalist", "spell": 502802 },
     {
-      "action": "assert", "label": "Baseline Rage cost before the talent",
-      "actor": "primalist", "metric": "spell_power_cost", "spell": 502802, "equals": 350
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 502802
     },
     {
-      "action": "snapshot", "actor": "primalist", "metric": "spell_power_cost", "spell": 502802,
+      "action": "assert",
+      "label": "Baseline Rage cost before the talent",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 502802,
+      "equals": 350
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 502802,
       "save_as": "cost_before"
     },
-    { "action": "learn", "actor": "primalist", "spell": 560298 },
     {
-      "action": "assert", "label": "The talent cuts the cost by exactly half, not a flat -50",
-      "actor": "primalist", "metric": "spell_power_cost", "spell": 502802,
-      "relative_to": "cost_before", "equals": -175
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 560298
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 502802,
+      "equals": 350,
+      "label": "The talent alone does not discount Hand"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 503630
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 503630,
+      "target": "primalist"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cast_failure",
+      "spell": 503630,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 503630,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 502802,
+      "relative_to": "cost_before",
+      "equals": -175,
+      "label": "Rock Barrier activates exactly the authored 50 percent Rage discount"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 503630,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 502802,
+      "equals": 350,
+      "label": "Removing Rock Barrier removes the cost discount"
     }
   ]
 }

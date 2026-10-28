@@ -104,7 +104,7 @@ class aura_ascension_sun_cleric_event : public AuraScript
             case 582832: return damage && melee && critical;
             case 805647: return damage && info && info->Id == 800691 && Chance(player,id);
             case 300349: return healing && critical && Chance(player,id,1000);
-            case 806058: return damage && info && info->SpellFamilyFlags[2] == 134217728 && Chance(player,id);
+            case 806058: return damage && Named(info,520359) && Chance(player,id);
             case 301266: return damage && ((Named(info,500154) && player->HasAura(Sunrise)) ||
                 (Named(info,806477) && player->HasAura(Sunset)));
             case 680643: return damage && automatic && State(player).firstAttacks.insert(event.GetActionTarget()->GetGUID()).second;
@@ -126,7 +126,8 @@ class aura_ascension_sun_cleric_event : public AuraScript
             return;
         uint32 id = GetId();
         auto* info = event.GetSpellInfo();
-        Spell* spell = Origin(player,const_cast<Spell*>(event.GetProcSpell()));
+        Spell* raw = const_cast<Spell*>(event.GetProcSpell());
+        Spell* spell = Origin(player,raw);
         uint32 damage = event.GetDamageInfo() ? event.GetDamageInfo()->GetDamage() : 0;
         uint32 healing = event.GetHealInfo() ? event.GetHealInfo()->GetEffectiveHeal() : 0;
         Unit* target = event.GetActionTarget();
@@ -141,7 +142,7 @@ class aura_ascension_sun_cleric_event : public AuraScript
             bool automatic = event.GetTypeMask() & PROC_FLAG_DONE_MELEE_AUTO_ATTACK;
             bool compatible = id != 807749 || !automatic;
             if (fulfillment && compatible)
-                Fulfill(player, spell, target);
+                Fulfill(player, spell, raw && raw->GetSpellInfo()->Id == 805639 ? raw : spell, target);
             if (!State(player).dawnEvent)
             {
                 int32 gain = (id == 803489) ? 2 : (id == 803719 || (id == 807749 && !automatic)) ? 0 : 1;
@@ -192,7 +193,6 @@ class aura_ascension_sun_cleric_event : public AuraScript
             if (id == 807547)
             {
                 auto allies = Allies(player, player, Radius(505197));
-                allies.remove(player);
                 allies.sort([player](Unit* a, Unit* b) { return player->GetDistance(a) < player->GetDistance(b); });
                 if (!allies.empty())
                     Copy(player, allies.front(), 505197, CalculatePct(amount, Amount(807750) *
@@ -332,7 +332,9 @@ class aura_ascension_sun_cleric_event : public AuraScript
                 uint32 amount=std::max(0,GetEffect(EFFECT_0)->GetAmount());
                 Unit* ally=GetTarget();
                 GetAura()->Remove();
-                Copy(player,ally,707522,amount);
+                if (amount && ally->IsAlive())
+                    ally->CastCustomSpell(301004,SPELLVALUE_BASE_POINT0,int32(amount),ally,true,nullptr,nullptr,
+                        player->GetGUID());
                 break;
             }
             case 680911:

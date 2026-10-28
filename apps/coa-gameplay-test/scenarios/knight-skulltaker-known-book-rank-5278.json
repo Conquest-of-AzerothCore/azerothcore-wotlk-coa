@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "name": "knight-skulltaker-known-book-rank-5278",
+  "contract": "Knight of Xoroth class17 starts with Skulltaker800168. The current book uses HasRankOrBetter and keeps owned starter abilities in its window with the Known state2. Opening the normal book must not offer a duplicate first-rank purchase, and a direct purchase request must be refused.",
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "k",
+      "race": 1,
+      "class": 17,
+      "level": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "knows_spell",
+      "spell": 800168,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "trainer_list_packets",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "trainer_window_state",
+      "spell": 800168,
+      "equals": 2
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "k",
+      "spell": 800168
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spellbook_buy_failed",
+      "spell": 800168,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "knows_spell",
+      "spell": 800168,
+      "equals": 1
+    }
+  ]
+}

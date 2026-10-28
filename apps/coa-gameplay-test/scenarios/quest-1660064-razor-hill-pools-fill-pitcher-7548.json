@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "Durotar's Dire Drought: Collect Water fills Dirgran's Pitcher in both pools outside Razor Hill (#7548, #7542)",
+  "contract": [
+    "Reports #7548, #7542 and #6521: using Empty Dirgran's Pitcher (558973) in the pool south of Razor Hill, by the bridge, answers 'You can't do this here'. #7548 was filed at map 1, 215.83, -4750.88, 6.63 and #6521 at 215.43, -4751.65, 6.63; #6037 says on live the pitcher filled at 214.13, -4753.89, 6.64.",
+    "The quest text sends the player to 'one of the pools outside Razor Hill'. The server terrain has two pools there: the west pool around 209, -4693 (water 12.78) and the south pool around 216, -4755 (water 7.40).",
+    "The pitcher casts Collect Water (267033), whose spell_scripts row creates Full Dirgran's Pitcher (558974). A conditions row lets it work only within 6 yards of a [TG] Water Tauren (162949) trigger, and before the fix only the west pool and the kennel trough had one.",
+    "A fill in either pool must give Full Dirgran's Pitcher. In Razor Hill itself, where #7542 was filed (367.34, -4728.41), there is no water and the pitcher must stay empty."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "orc", "race": 2, "class": 1, "level": 12 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "prepare_quest", "label": "Fixture: orc is on Durotar's Dire Drought, objectives not done", "actor": "orc", "quest": 1660064, "complete": false },
+    { "action": "destroy_item", "label": "Fixture: drop the delivery pitcher the quest fixture grants", "actor": "orc", "item": 558974 },
+    { "action": "assert", "label": "Accepting the quest gives the empty pitcher", "actor": "orc", "metric": "item_count", "item": 558973, "equals": 1 },
+    { "action": "assert", "label": "The orc starts without a full pitcher", "actor": "orc", "metric": "item_count", "item": 558974, "equals": 0 },
+    { "action": "set_phase", "label": "orc joins the world phase the water triggers are spawned in", "actor": "orc", "value": 1 },
+
+    { "action": "teleport", "label": "orc stands in the south pool where #7548 was filed", "actor": "orc", "map": 1, "x": 215.826, "y": -4750.88, "z": 6.628 },
+    { "action": "wait", "label": "Let the grid load", "ms": 4000 },
+    { "action": "use_item", "label": "orc uses the empty pitcher in the south pool", "actor": "orc", "item": 558973, "spell": 267033 },
+    { "action": "assert", "label": "The south pool fills the pitcher", "actor": "orc", "metric": "item_count", "item": 558974, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "Filling used up the empty pitcher", "actor": "orc", "metric": "item_count", "item": 558973, "equals": 0 },
+    { "action": "destroy_item", "label": "Empty the hands for the next fill", "actor": "orc", "item": 558974 },
+    { "action": "add_item", "label": "Fixture: hand the empty pitcher back for the next fill", "actor": "orc", "item": 558973 },
+
+    { "action": "teleport", "label": "orc stands in the south pool where #6037 filled it on live", "actor": "orc", "map": 1, "x": 214.129, "y": -4753.89, "z": 6.639 },
+    { "action": "wait", "label": "Wait out the pitcher's 5 s cooldown", "ms": 6000 },
+    { "action": "use_item", "label": "orc uses the empty pitcher at the #6037 spot", "actor": "orc", "item": 558973, "spell": 267033 },
+    { "action": "assert", "label": "The #6037 spot fills the pitcher", "actor": "orc", "metric": "item_count", "item": 558974, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "Filling used up the empty pitcher", "actor": "orc", "metric": "item_count", "item": 558973, "equals": 0 },
+    { "action": "destroy_item", "label": "Empty the hands for the west pool", "actor": "orc", "item": 558974 },
+    { "action": "add_item", "label": "Fixture: hand the empty pitcher back for the next fill", "actor": "orc", "item": 558973 },
+
+    { "action": "teleport", "label": "orc stands in the west pool", "actor": "orc", "map": 1, "x": 209.0, "y": -4693.4, "z": 12.0 },
+    { "action": "wait", "label": "Let the grid load and the pitcher's 5 s cooldown pass", "ms": 6000 },
+    { "action": "use_item", "label": "orc uses the empty pitcher in the west pool", "actor": "orc", "item": 558973, "spell": 267033 },
+    { "action": "assert", "label": "The west pool still fills the pitcher", "actor": "orc", "metric": "item_count", "item": 558974, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "Filling used up the empty pitcher", "actor": "orc", "metric": "item_count", "item": 558973, "equals": 0 },
+    { "action": "destroy_item", "label": "Empty the hands for the inn pool", "actor": "orc", "item": 558974 },
+    { "action": "add_item", "label": "Fixture: hand the empty pitcher back for the next fill", "actor": "orc", "item": 558973 },
+    { "action": "teleport", "label": "orc stands at the pool outside the Razor Hill inn (#8507)", "actor": "orc", "map": 1, "x": 334.521, "y": -4715.389, "z": 13.729 },
+    { "action": "wait", "label": "Let the grid load and the pitcher's 5 s cooldown pass", "ms": 6000 },
+    { "action": "use_item", "label": "orc uses the empty pitcher at the inn pool", "actor": "orc", "item": 558973, "spell": 267033 },
+    { "action": "assert", "label": "The inn pool fills the pitcher", "actor": "orc", "metric": "item_count", "item": 558974, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "Filling used up the empty pitcher", "actor": "orc", "metric": "item_count", "item": 558973, "equals": 0 },
+    { "action": "destroy_item", "label": "Empty the hands for the dry check", "actor": "orc", "item": 558974 },
+    { "action": "add_item", "label": "Fixture: hand the empty pitcher back for the next fill", "actor": "orc", "item": 558973 },
+
+    { "action": "teleport", "label": "orc stands in Razor Hill where #7542 was filed, away from any water", "actor": "orc", "map": 1, "x": 367.339, "y": -4728.41, "z": 10.366 },
+    { "action": "wait", "label": "Let the grid load and the pitcher's 5 s cooldown pass", "ms": 6000 },
+    { "action": "use_item", "label": "orc tries the empty pitcher in town", "actor": "orc", "item": 558973, "spell": 267033 },
+    { "action": "wait", "label": "Wait past the 2 s cast", "ms": 4000 },
+    { "action": "assert", "label": "Town has no water, so the pitcher stays empty", "actor": "orc", "metric": "item_count", "item": 558974, "equals": 0 },
+    { "action": "assert", "label": "The empty pitcher is kept for later fills", "actor": "orc", "metric": "item_count", "item": 558973, "equals": 1 }
+  ]
+}

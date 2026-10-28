@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Wanted: Hogger is handed in to Marshal Dughan, not Deputy Rainer (#4416)",
+  "contract": "Quest 176 Wanted: Hogger ends at Marshal Dughan 240 only (base creature_questender), its objective text says to bring the claw to Marshal Dughan, and the client's turn-in point QuestSuperTrack 409 is Dughan's spot. Deputy Rainer 963 ends quests 11 and 239, not 176. No repository, client or archive source lists Rainer as an ender of 176. Expected: with the quest complete, Dughan's quest menu lists 176 and Rainer's does not.",
+  "timeout_ms": 30000,
+  "location": { "map": 0, "x": -9461.8, "y": 44.434, "z": 56.526, "o": 0 },
+  "players": [
+    { "id": "hunter", "race": 1, "class": 1, "level": 12 }
+  ],
+  "creatures": [
+    { "id": "dughan", "owner": "hunter", "entry": 240, "distance": 2, "faction": 12 },
+    { "id": "rainer", "owner": "hunter", "entry": 963, "distance": 4, "faction": 12 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "prepare_quest", "label": "Finish Wanted: Hogger", "actor": "hunter", "quest": 176 },
+    { "action": "gossip_hello", "label": "Talk to Deputy Rainer", "actor": "hunter", "target": "rainer" },
+    {
+      "action": "assert", "label": "Rainer does not take Wanted: Hogger", "actor": "hunter",
+      "metric": "quest_menu_has", "quest": 176, "equals": 0
+    },
+    { "action": "gossip_hello", "label": "Talk to Marshal Dughan", "actor": "hunter", "target": "dughan" },
+    {
+      "action": "assert", "label": "Dughan offers Wanted: Hogger for turn-in", "actor": "hunter",
+      "metric": "quest_menu_has", "quest": 176, "equals": 1
+    }
+  ]
+}

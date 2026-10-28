@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "name": "Elwynn: a ghost released in Fargodeep Mine reaches the Goldshire Spirit Healer (#7648)",
+  "contract": "A player who dies inside Fargodeep Mine (zone 10124 or 10125, at the Kobold Miner spawn (-9823.76,122.362,4.11124)) releases at the nearest graveyard linked to the mine, as zone 12 links it: Goldshire 106 (-9339.46,171.408,61.5618), about 490 yards, ahead of Northshire 105, instead of the default Westfall graveyard. Its Spirit Healer 6491 stands near it. Death and spirit release use the native handlers.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9823.76,
+    "y": 122.362,
+    "z": 4.11124,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 11
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "die",
+      "actor": "cleric"
+    },
+    {
+      "action": "release_spirit",
+      "actor": "cleric"
+    },
+    {
+      "action": "assert",
+      "label": "The released player is a ghost",
+      "actor": "cleric",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The ghost lands at the Goldshire graveyard",
+      "actor": "cleric",
+      "metric": "position_x",
+      "min": -9355,
+      "max": -9325,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "position_y",
+      "min": 155,
+      "max": 185
+    },
+    {
+      "action": "assert",
+      "label": "A Spirit Healer stands at the ghost's graveyard",
+      "actor": "cleric",
+      "metric": "nearby_creature_template",
+      "entry": 6491,
+      "equals": 6491
+    }
+  ]
+}

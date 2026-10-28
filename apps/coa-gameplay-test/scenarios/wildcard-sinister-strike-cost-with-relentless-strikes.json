@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "name": "Relentless Strikes leaves the Energy cost of Sinister Strike to Improved Sinister Strike",
+  "contract": [
+    "Ascension's Relentless Strikes (58422) carries a +67 first-effect modifier without a class mask, which",
+    "SpellAffect.dbc routes to spells 275324 and 979705 only. It must not reach Improved Sinister Strike",
+    "(13863, -5 Energy), so a Wildcard Hero with both pays 40 Energy for Sinister Strike (1752, 45 Energy)",
+    "and can strike at 100 Energy."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "wild",
+      "race": 1,
+      "class": 10,
+      "level": 10,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "wild",
+      "entry": 36,
+      "level": 10,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "learn",
+      "label": "A rolled Sinister Strike",
+      "actor": "wild",
+      "spell": 1752
+    },
+    {
+      "action": "learn",
+      "label": "Improved Sinister Strike rank 2",
+      "actor": "wild",
+      "spell": 13863
+    },
+    {
+      "action": "learn",
+      "label": "Relentless Strikes rank 2",
+      "actor": "wild",
+      "spell": 58422
+    },
+    {
+      "action": "learn",
+      "actor": "wild",
+      "spell": 201,
+      "label": "Prepare the weapon proficiency required by the equipped test weapon"
+    },
+    {
+      "action": "add_item",
+      "actor": "wild",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "wild",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "set_power",
+      "actor": "wild",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "health",
+      "save_as": "before_strike"
+    },
+    {
+      "action": "cast",
+      "label": "Sinister Strike at 100 Energy",
+      "actor": "wild",
+      "spell": 1752,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Improved Sinister Strike costs exactly 40 Energy with regeneration disabled",
+      "actor": "wild",
+      "metric": "power",
+      "power": 3,
+      "within_ms": 300,
+      "equals": 60
+    },
+    {
+      "action": "assert",
+      "label": "The strike hit the enemy",
+      "actor": "enemy",
+      "metric": "health",
+      "relative_to": "before_strike",
+      "max": -1,
+      "within_ms": 1000
+    }
+  ]
+}

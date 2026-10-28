@@ -100,6 +100,13 @@
       "args": []
     },
     {
+      "script": "check_primalist_primal_shred.py",
+      "scenarios": [
+        "primalist-primal-shred"
+      ],
+      "args": []
+    },
+    {
       "script": "check_primalist_protector_grove.py",
       "scenarios": [
         "primalist-protector-grove"
@@ -484,6 +491,127 @@
       "script": "check_chronomancer_oblivion.py",
       "scenarios": [
         "chronomancer-oblivion-epoch-overhealing"
+      ],
+      "args": []
+    },
+    {
+      "script": "check_sanguine_essence_mend.py",
+      "scenarios": [
+        "bloodmage-sanguine-essence-mend-replication"
+      ],
+      "args": []
+    },
+    {
+      "script": "check_reaper_crimson_death.py",
+      "scenarios": [
+        "reaper-crimson-death"
+      ],
+      "args": []
+    },
+    {
+      "script": "check_witch_hunter_shadow_rage.py",
+      "scenarios": [
+        "witch-hunter-shadow-rage-damage-stacks-3939"
+      ],
+      "args": []
+    },
+    {
+      "script": "check_chronomancer_reverse_engineering.py",
+      "scenarios": [
+        "chronomancer-reverse-engineering-haste"
+      ],
+      "args": []
+    },
+    {
+      "script": "check_barbarian_crusher.py",
+      "scenarios": [
+        "barbarian-audit-1257-crusher"
+      ],
+      "args": []
+    },
+    {
+      "script": "check_chronomancer_hourglass.py",
+      "scenarios": [
+        "chronomancer-hourglass-of-eternity-haste"
+      ],
+      "args": []
+    },
+    {
+      "script": "check_runemaster_runeslinger.py",
+      "scenarios": [
+        "runemaster-audit-2727-runeslinger"
+      ],
+      "args": []
+    },
+    {
+      "script": "check_reaper_extinction.py",
+      "scenarios": [
+        "reaper-extinction-proc"
+      ],
+      "args": []
+    },
+    {
+      "script": "check_venomancer_carapace.py",
+      "scenarios": [
+        "venomancer-5374-carapace-crash-scarab-summon"
+      ],
+      "args": []
+    },
+    {
+      "script": "check_runemaster_runic_obliteration.py",
+      "scenarios": [
+        "runemaster-audit-2734-runic-obliteration"
+      ],
+      "args": []
+    },
+    {
+      "script": "check_chronomancer_pure_chaos.py",
+      "scenarios": [
+        "chronomancer-pure-chaos-time-loop"
+      ],
+      "args": []
+    },
+    {
+      "script": "check_chronomancer_aeon_rend.py",
+      "scenarios": [
+        "chronomancer-aeon-rend-restrike",
+        "chronomancer-aeon-rend-restrike-second-cohort"
+      ],
+      "args": []
+    },
+    {
+      "script": "check_native_fixture_cleanup.py",
+      "scenarios": [
+        "native-fixture-descendant-cleanup-producer",
+        "native-fixture-descendant-cleanup-consumer"
+      ],
+      "args": []
+    },
+    {
+      "script": "check_wildcard_spell_payoffs.py",
+      "scenarios": [
+        "wildcard-elemental-blast-secondary-6782"
+      ],
+      "args": []
+    },
+    {
+      "script": "check_wildcard_spell_payoffs.py",
+      "scenarios": [
+        "wildcard-bloodbath-physical-proc-6814"
+      ],
+      "args": []
+    },
+    {
+      "script": "check_wildcard_spell_payoffs.py",
+      "scenarios": [
+        "wildcard-cremation-all-dots-6791"
+      ],
+      "args": []
+    },
+    {
+      "script": "check_wildcard_spell_payoffs.py",
+      "scenarios": [
+        "wildcard-solar-strike-five-points-6806"
       ],
       "args": []
     }

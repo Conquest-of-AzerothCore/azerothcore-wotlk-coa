@@ -8,7 +8,8 @@ using uint8 = std::uint8_t;
 using ObjectGuid = uint32;
 using AuraEffectHandleModes = uint32;
 // ENUMS
-constexpr uint32 EFFECT_0 = 0, EFFECT_1 = 1, SPELL_AURA_DUMMY = 4, AURA_EFFECT_HANDLE_REAL = 1;
+constexpr uint32 EFFECT_0 = 0, EFFECT_1 = 1, SPELL_AURA_DUMMY = 4, SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN = 87,
+    AURA_EFFECT_HANDLE_REAL = 1;
 constexpr uint32 GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR = 1;
 struct ThreatManager
 {
@@ -17,6 +18,7 @@ struct ThreatManager
     bool HasRedirects() const { return !_redirectRegistry.empty(); }
     void RegisterRedirectThreat(uint32 spellId, ObjectGuid const& victim, uint32 pct);
     void UnregisterRedirectThreat(uint32 spellId);
+    void UnregisterRedirectThreat(uint32 spellId, ObjectGuid const& victim);
 };
 struct AuraEffect { };
 struct Unit
@@ -54,6 +56,7 @@ struct AuraScript
 {
     Unit* owner = nullptr;
     uint32 id = 0;
+    ObjectGuid caster = 0;
     Application application;
     bool removed = false, prevented = false;
     Hook DoCheckProc, OnEffectProc, AfterEffectRemove;
@@ -61,6 +64,7 @@ struct AuraScript
     virtual void Register() { }
     Unit* GetTarget() const { return owner; }
     uint32 GetId() const { return id; }
+    ObjectGuid GetCasterGUID() const { return caster; }
     Application* GetTargetApplication() { return &application; }
     bool ValidateSpellInfo(std::initializer_list<uint32>) { return true; }
     void PreventDefaultAction() { prevented = true; }
@@ -139,4 +143,23 @@ int main()
         metadata.OnLoadSpellCustomAttr(&unrelated);
         assert(!unrelated.AttributesCu);
     }
+    Unit ally;
+    AuraEffect effect;
+    ally.threat.RegisterRedirectThreat(807694, 42, 99);
+    ally.threat.RegisterRedirectThreat(807694, 44, 99);
+    ally.threat.RegisterRedirectThreat(999, 42, 20);
+    aura_ascension_barrier_of_light barrier;
+    barrier.owner = &ally;
+    barrier.id = 805417;
+    barrier.caster = 42;
+    barrier.OnRemove(&effect, 1);
+    assert(!ally.threat._redirectRegistry.at(807694).contains(42));
+    assert(ally.threat._redirectRegistry.at(807694).at(44) == 99);
+    assert(ally.threat._redirectRegistry.at(999).at(42) == 20);
+    barrier.caster = 44;
+    barrier.OnRemove(&effect, 1);
+    assert(!ally.threat._redirectRegistry.contains(807694));
+    assert(ally.threat._redirectRegistry.at(999).at(42) == 20);
+    barrier.OnRemove(&effect, 1);
+    assert(ally.threat.HasRedirects());
 }

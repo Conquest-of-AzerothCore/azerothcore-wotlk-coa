@@ -52,24 +52,202 @@ class LabelIssuesTests(unittest.TestCase):
         self.assertTrue(set(expected.values()).issubset(label_issues.MANAGED_LABELS))
         for class_id, label in expected.items():
             with self.subTest(class_id=class_id):
-                self.assertEqual(label_issues.determine_labels({"body": f"Class ID: {class_id}"}), [label])
+                body = f"#### Spell\nFireball\n\nClass ID: {class_id}"
+                self.assertEqual(label_issues.determine_labels({"body": body}), [label])
+
+    def test_reborn_class_ids_match_server_definitions(self):
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "src/server/shared/SharedDefines.h").read_text(encoding="utf-8")
+        classes = source.split("enum Classes\n{", 1)[1].split("};", 1)[0]
+        expected = {
+            int(class_id): title.strip()
+            for class_id, title in re.findall(r"CLASS_\w+\s*=\s*(\d+),?\s*// TITLE ([^\n]+)", classes)
+            if 1 <= int(class_id) <= 11 and title.strip() not in {"Death Knight", "Hero"}
+        }
+        self.assertEqual(label_issues.REBORN_CLASS_ID_LABELS, expected)
+        self.assertTrue(set(expected.values()).issubset(label_issues.MANAGED_LABELS))
+        for class_id, label in expected.items():
+            with self.subTest(class_id=class_id):
+                body = f"#### Spell\nFireball\n\nClass ID: {class_id}"
+                self.assertEqual(label_issues.determine_labels({"body": body}), [label, "WarcraftReborn"])
+
+    def test_reborn_class_from_website_spell_report(self):
+        for character, expected in (
+            ("level 12 Rogue", ["Rogue", "WarcraftReborn"]),
+            ("level 60 Witch Hunter", ["Witch Hunter"]),
+        ):
+            with self.subTest(character=character):
+                issue = {
+                    "title": "[Spell/Class] Ambush",
+                    "body": f"**Category:** Spell/Class\n**Character:** [Ing](https://example.invalid) — {character}\n",
+                }
+                self.assertEqual(label_issues.determine_labels(issue), expected)
+
+    def test_reborn_class_names_in_free_text_do_not_add_labels(self):
+        for issue, expected in (
+            ({"title": "Rogue Flame Spirits in Stonetalon Mountains are Small"}, []),
+            ({"title": "Necromancer - Skeletal Mage"}, ["Necromancer"]),
+            ({"title": 'Witch Hunter: "Bounty Hunter" aura'}, ["Witch Hunter"]),
+            ({"title": "Starter weapons", "body": "#### Item\nWorn Axe\nClass: HUNTER\nClass ID: 3"}, ["Item"]),
+        ):
+            with self.subTest(issue=issue):
+                self.assertEqual(label_issues.determine_labels(issue), expected)
+
+    def test_reborn_class_adds_warcraft_reborn_label(self):
+        issue = {"body": "#### Spell\nSinister Strike\nClass ID: 4", "labels": [{"name": "Bug"}]}
+        with patch.object(label_issues, "gh") as gh:
+            label_issues.update_issue("42", issue, label_issues.determine_labels(issue))
+        gh.assert_called_once_with(
+            "issue", "edit", "42", "--add-label", "Rogue,WarcraftReborn", "--repo", "owner/repo",
+        )
 
     def test_class_id_field_whitespace_and_line_endings(self):
-        body = "### Server context\r\n  class ID :\t22 \r\nLevel: 11\r\n"
+        body = "#### Spell\r\nFireball\r\n### Server context\r\n  class ID :\t22 \r\nLevel: 11\r\n"
         self.assertEqual(label_issues.determine_labels({"body": body}), ["Chronomancer"])
 
     def test_witch_hunter_name_and_id(self):
         for issue in (
             {"title": "Witch Hunter"},
             {"body": "witch hunter"},
-            {"body": "### Server context\nClass ID: 15\nLevel: 11"},
+            {"body": "#### Spell\nDusk Blade\n### Server context\nClass ID: 15\nLevel: 11"},
             {"title": "Witch Hunter", "body": "Class ID: 15"},
         ):
             with self.subTest(issue=issue):
                 self.assertEqual(label_issues.determine_labels(issue), ["Witch Hunter"])
 
+    def test_reporter_class_is_ignored_outside_spell_reports(self):
+        issue = {
+            "title": "Path to Ascension: Capital of the Alliance!",
+            "body": (
+                "Submitted from the in-game bug-report form.\n\n"
+                "#### Quest\nSpeak to Stephanie Turner in Stormwind\n\n"
+                "#### Issue\nI spoke to her and nothing progressed further.\n\n"
+                "Location: -8832.79 617.92 93.78 0\nClass: NECROMANCER\n\n"
+                "### Server context\nCategory ID: 5\nClass ID: 23\nLevel: 12\nMap ID: 0"
+            ),
+        }
+        self.assertEqual(label_issues.determine_labels(issue), ["Quest", "Bug"])
+
+    def test_website_report_category_without_reporter_class(self):
+        issue = {
+            "title": "[Quest] Meat for the Plucked Rook",
+            "body": (
+                "**Category:** Quest\n"
+                "**Character:** [Demonicsun](https://example.invalid) — level 60 Sun Cleric\n"
+                "**Location:** map 0, zone 10302\n\n"
+                "### Description\n\n```text\nCant loot more meat.\n```\n\n"
+                "<sub>Sent from the website bug report form."
+            ),
+        }
+        self.assertEqual(label_issues.determine_labels(issue), ["Quest", "Bug"])
+
+    def test_website_spell_report_uses_reporter_class(self):
+        issue = {
+            "title": "[Spell/Class] Sanguine Rupture",
+            "body": "**Category:** Spell/Class\n**Character:** [Ing](https://example.invalid) — level 42 Bloodmage\n",
+        }
+        self.assertEqual(label_issues.determine_labels(issue), ["Bloodmage"])
+
+    def test_report_sections_add_category_labels(self):
+        for body, expected in (
+            ("#### Item\nA Thousand Eyes of Misfortune [ID: 560481]", ["Item"]),
+            ("#### Dungeon\nScarlet Monastery - Cathedral", ["Dungeon"]),
+            ("#### Raid\nZul'Gurub", ["Raid"]),
+            ("**Category:** Dungeon/Raid", ["Dungeon", "Raid"]),
+            ("**Category:** Crash", ["Crash Fix", "Bug"]),
+            ("#### Window / AddOn / Interface\nLootCollector", []),
+        ):
+            with self.subTest(body=body):
+                self.assertEqual(label_issues.determine_labels({"body": body}), expected)
+
+    def test_title_categories(self):
+        for title, expected in (
+            ("[Item] Electrosaw U.02", ["Item"]),
+            ("Yojamba Isle/ZG Raid Tokens have no turn in", ["Raid"]),
+            ("Gnomeregan dungeon door", ["Dungeon"]),
+            ("Ornate Bank Voucher crashes realm", ["Crash Fix", "Bug"]),
+            ("Instant Crash at Uther Tomb", ["Crash Fix", "Bug"]),
+            ("Carapace Crash hits one enemy", ["Bug"]),
+            ("Crashing Out has no aura handler", ["Bug"]),
+        ):
+            with self.subTest(title=title):
+                self.assertEqual(label_issues.determine_labels({"title": title}), expected)
+
+    def test_manastorm_and_wildcard_from_title_or_report_description(self):
+        for issue, expected in (
+            ({"title": "Wildcard: Ability Scrolls from Manastorm bugged"}, ["Manastorm", "Wildcard"]),
+            ({"title": "Release point", "body": "#### Issue\nIn manastorm I respawn outside\n\nLocation: 1 2 3 0"},
+             ["Manastorm"]),
+            ({"title": "Realm list", "body": "### Description\n\n```text\nOnly vol'jin and wildcard show.\n```"},
+             ["Wildcard"]),
+            ({"title": "Racials", "body": "Only local change: manastorm disabled"}, []),
+        ):
+            with self.subTest(issue=issue):
+                self.assertEqual(label_issues.determine_labels(issue), expected)
+
+    def test_creature_and_object_from_report_category_or_title_prefix(self):
+        for issue, expected in (
+            ({"title": "[Creature/NPC] NPC placed in tree, Tarren Mill"}, ["Creature"]),
+            ({"title": "[NPC] Meven Korgal stands in the wrong spot"}, ["Creature"]),
+            ({"title": "Honon", "body": "**Category:** Creature/NPC\n"}, ["Creature"]),
+            ({"body": "#### Creature\nDisciple of Naralex [ID: 3678]"}, ["Creature"]),
+            ({"title": "[Object] Voodoo Cauldron"}, ["Object"]),
+            ({"title": "Keg", "body": "**Category:** GameObject\n"}, ["Object"]),
+            ({"title": "Wardrobe has no effect on tamed creatures"}, []),
+            ({"title": "Missing environment object"}, []),
+        ):
+            with self.subTest(issue=issue):
+                self.assertEqual(label_issues.determine_labels(issue), expected)
+
+    def test_warcraft_reborn_from_title_or_report_description(self):
+        for issue, expected in (
+            ({"title": "Warcraft Reborn Warlock spells that did nothing"}, ["WarcraftReborn", "Warlock"]),
+            ({"title": "Reborn Druid abilities ignore their tooltips"}, ["WarcraftReborn", "Druid"]),
+            ({"title": "Soul Fire", "body": "#### Issue\nOn WarcraftReborn the cast never finishes\n\nLocation: 1 2 3 0"},
+             ["WarcraftReborn"]),
+            ({"title": "[WarcraftReborn] Holy Nova"}, ["WarcraftReborn"]),
+            ({"title": "Reborn Guardian ignores AoE avoidance"}, ["Guardian"]),
+            ({"title": "Racials", "body": "Only local change: Warcraft Reborn disabled"}, []),
+        ):
+            with self.subTest(issue=issue):
+                self.assertEqual(label_issues.determine_labels(issue), expected)
+
+    def test_pull_request_title_scope_and_type(self):
+        for title, expected in (
+            ("feat(CoA/Manastorm): add loadouts", ["Feature", "Manastorm"]),
+            ("fix(CoA/WitchDoctor): Big Bad Voodoo ally aura", ["Witch Doctor"]),
+            ("fix(CoA/KnightOfXoroth): restore Xoroth aura", ["Knight of Xoroth"]),
+            ("fix(CoA/Xoroth): restore aura", ["Knight of Xoroth"]),
+            ("fix(CoA/Quests): draw objective areas", ["Quest"]),
+            ("fix(CoA/Items): stream item rows", ["Item"]),
+            ("fix(CoA/Dungeons): boss kits", ["Dungeon"]),
+            ("fix(CoA/Wildcard): form eligibility", ["Wildcard"]),
+            ("fix(CoA/Creature): Bael'dun Excavator model", ["Creature"]),
+            ("fix(CoA/Creatures/NPC): boss ranks", ["Creature"]),
+            ("fix(CoA/GameObject): Brumbof barrel", ["Object"]),
+            ("fix(CoA/WarcraftReborn): Rogue talents", ["WarcraftReborn"]),
+            ("fix(CoA): Warcraft Reborn Shaman spells that did nothing", ["WarcraftReborn", "Shaman"]),
+            ("fix(CoA/Rogue): Sinister Strike combo points", ["Rogue", "WarcraftReborn"]),
+            ("fix(Core): prevent a crash on logout", ["Crash Fix", "Bug"]),
+        ):
+            with self.subTest(title=title):
+                issue = {"title": title, "pull_request": {"url": "fixture"}}
+                self.assertEqual(label_issues.determine_labels(issue), expected)
+
+    def test_pull_request_body_mentions_do_not_add_area_labels(self):
+        issue = {"title": "fix(Core): adjust timers", "body": "Tested with Manastorm and Wildcard.",
+                 "pull_request": {"url": "fixture"}}
+        self.assertEqual(label_issues.determine_labels(issue), [])
+
+    def test_every_determined_label_is_managed(self):
+        produced = set(label_issues.CLASS_PATTERNS) | set(label_issues.REPORT_SECTION_LABELS.values())
+        produced |= set(label_issues.SCOPE_LABELS.values()) | set(label_issues.TITLE_PATTERNS)
+        produced |= set(label_issues.DESCRIPTION_PATTERNS) | set(label_issues.CATEGORY_PATTERNS)
+        produced |= {"Feature", "Tested", "Not Tested"}
+        self.assertEqual(produced, set(label_issues.MANAGED_LABELS))
+
     def test_witch_hunter_label_is_added_without_removing_existing_labels(self):
-        issue = {"body": "Class ID: 15", "labels": [{"name": "Bug"}]}
+        issue = {"body": "#### Spell\nDusk Blade\nClass ID: 15", "labels": [{"name": "Bug"}]}
         with patch.object(label_issues, "gh") as gh:
             label_issues.update_issue("42", issue, label_issues.determine_labels(issue))
         gh.assert_called_once_with(

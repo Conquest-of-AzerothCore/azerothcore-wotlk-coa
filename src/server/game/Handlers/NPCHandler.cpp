@@ -96,7 +96,7 @@ void WorldSession::SendTrainerList(Creature* npc, bool onlyTrainable)
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
-    Trainer::Trainer const* trainer = sObjectMgr->GetTrainer(npc->GetEntry());
+    Trainer::Trainer const* trainer = Trainer::GetTrainerFor(npc, _player);
     if (!trainer)
     {
         LOG_DEBUG("network", "WorldSession: SendTrainerList - trainer spells not found for {}", npc->GetGUID().ToString().c_str());
@@ -129,11 +129,13 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPackets::NPC::TrainerBuySpel
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
-    Trainer::Trainer* trainer = sObjectMgr->GetTrainer(npc->GetEntry());
+    Trainer::Trainer* trainer = Trainer::GetTrainerFor(npc, _player);
     if (!trainer)
         return;
 
     trainer->TeachSpell(npc, _player, packet.SpellID);
+    if (trainer->RepublishesAfterPurchase())
+        SendTrainerList(npc);
 }
 
 void WorldSession::HandleGossipHelloOpcode(WorldPacket& recvData)

@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Wailing Caverns: the Disciple of Naralex still starts Mutanus in Pit of Fangs (#8037)",
+  "contract": [
+    "Decision on #8037: the Disciple of Naralex 3678 offers 'Let the event begin!' (gossip menu 201) in Dreamer's",
+    "Rock, full runs and Pit of Fangs, but not in a wing whose final boss is not Mutanus 3654. Pit of Fangs",
+    "(LFGDungeons 1003) is a decided exception, so a Dungeon Finder group assigned it keeps the option."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 43, "x": -132.0, "y": 125.4, "z": -78.1, "o": 3.14},
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 20},
+    {"id": "mate", "race": 1, "class": 1, "level": 20}
+  ],
+  "creatures": [
+    {"id": "disciple", "owner": "hero", "entry": 3678, "distance": 3, "faction": 35, "level": 20}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 2000},
+    {"label": "SETUP: the hero is in Wailing Caverns", "action": "assert", "actor": "hero", "metric": "map_id",
+     "equals": 43},
+    {"label": "SETUP: the instance is Normal", "action": "assert", "actor": "hero", "metric": "map_difficulty",
+     "equals": 0},
+    {"action": "group", "actor": "hero", "target": "mate"},
+    {"label": "the group is assigned Wailing Caverns - Pit of Fangs", "action": "lfg_dungeon", "actor": "hero",
+     "dungeon": 1003},
+    {"label": "the hero opens the Disciple's gossip", "action": "gossip_hello", "actor": "hero",
+     "target": "disciple"},
+    {"label": "Pit of Fangs keeps the Mutanus event", "action": "assert", "actor": "hero",
+     "metric": "gossip_options", "equals": 1},
+    {"label": "the option starts the event", "action": "assert", "actor": "hero", "metric": "gossip_option_text",
+     "index": 0, "text": "Let the event begin!", "equals": 1}
+  ]
+}

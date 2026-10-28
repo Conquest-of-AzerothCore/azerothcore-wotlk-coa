@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "Knight of Xoroth: Sacrificial Circle client patch drops the Hellfire Imp caster aura (#7607)",
+  "contract": "Requires CoA.SendDisplayPatches=1. Raw Sacrificial Circle 805677 requires caster aura 805916 (Hellfire Imp) in Spell.dbc, which no imp applies in CoA; the server clears it (#1489) and checks the caster's own living imps instead. The client evaluates CasterAuraSpell against its own Spell.dbc, so the login SMSG_PATCH_SPELL stream (opcode 2346) must carry the 805677 row with numeric field 24 (CasterAuraSpell) equal to 0 and field 26 (ExcludeCasterAuraSpell) equal to 0. Runeshroud 500639 is the control proving the login patch stream is present. This verifies emitted client data; client rendering and input remain outside the native harness.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "The existing login spell patch stream reaches this session",
+      "actor": "knight",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 500639,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Sacrificial Circle is included in the client patch stream",
+      "actor": "knight",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 805677,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Sacrificial Circle no longer requires the Hellfire Imp caster aura on the client",
+      "actor": "knight",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 805677,
+      "index": 24,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Sacrificial Circle carries no excluded caster aura on the client",
+      "actor": "knight",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 805677,
+      "index": 26,
+      "equals": 0
+    }
+  ]
+}

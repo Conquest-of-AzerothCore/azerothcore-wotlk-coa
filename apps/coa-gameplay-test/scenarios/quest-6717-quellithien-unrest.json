@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "name": "Quel'Lithien Unrest: Alliance heroes on quest 18044 can kill the Quel'Lithien Lodge elves",
+  "contract": "Quest 18044 Quel'Lithien Unrest is offered by both the Hero's Call Board 402000 and the Warchief's Command Board 402001 with AllowableRaces 0 (Exiles DB: Side Neutral, Daily) and asks for Woodsman 8563 x8, Ranger 8564 x8 and Pathstrider 8565 x4. Their faction template 1576 (faction 269 Silvermoon Remnant, friendMask Alliance, enemyMask Horde) makes them friendly to every Alliance character, so issue #6717 could not be completed by the Alliance. User decision 2026-10-14: they are attackable while the character has the quest. In Eastern Plaguelands an Alliance hero with 18044 incomplete kills a Woodsman (template faction 1576) for objective credit and may still attack one after a relog; with 18044 complete but not turned in the elves stay attackable, and once it is turned in they are friendly again. An Alliance hero without the quest still cannot attack them: a hostile spell on them is refused with SPELL_FAILED_BAD_TARGETS (12).",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": 3313.58,
+    "y": -4275.27,
+    "z": 159.223,
+    "o": 0
+  },
+  "players": [
+    { "id": "p", "race": 1, "class": 1, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 },
+    { "id": "r", "race": 1, "class": 1, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 },
+    { "id": "c", "race": 1, "class": 1, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "p1", "owner": "p", "entry": 8563, "faction": 1576, "level": 58, "health": 1, "distance": 3 },
+    { "id": "p2", "owner": "p", "entry": 8563, "faction": 1576, "level": 58, "distance": 3 },
+    { "id": "r1", "owner": "r", "entry": 8563, "faction": 1576, "level": 58, "distance": 3 },
+    { "id": "r2", "owner": "r", "entry": 8563, "faction": 1576, "level": 58, "distance": 3 },
+    { "id": "c1", "owner": "c", "entry": 8563, "faction": 1576, "level": 58, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "learn", "actor": "r", "spell": 2136 },
+    { "action": "learn", "actor": "c", "spell": 2136 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "prepare_quest", "actor": "p", "quest": 18044, "complete": false },
+    { "action": "assert", "label": "Quest 18044 is in the log", "actor": "p", "metric": "quest_status", "quest": 18044, "equals": 3 },
+    { "action": "attack", "actor": "p", "target": "p1" },
+    { "action": "wait", "ms": 2500 },
+    { "action": "assert", "label": "The Alliance hero kills the Woodsman", "actor": "p1", "metric": "alive", "equals": 0, "within_ms": 3000 },
+    { "action": "assert", "label": "The kill credits the Woodsman objective", "actor": "p", "metric": "quest_objective_count", "quest": 18044, "index": 0, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "ms": 6000 },
+    { "action": "relog", "actor": "p" },
+    { "action": "wait", "ms": 3000 },
+    { "action": "attack", "actor": "p", "target": "p2" },
+    { "action": "assert", "label": "After a relog the hero may still attack a Woodsman", "actor": "p", "metric": "victim", "target": "p2", "equals": 1, "within_ms": 1000 },
+    { "action": "prepare_quest", "actor": "r", "quest": 18044 },
+    { "action": "assert", "label": "Quest 18044 is complete but not turned in", "actor": "r", "metric": "quest_status", "quest": 18044, "equals": 1 },
+    { "action": "set_health", "actor": "r1", "value": 1 },
+    { "action": "attack", "actor": "r", "target": "r1" },
+    { "action": "wait", "ms": 2500 },
+    { "action": "assert", "label": "A completed but unrewarded quest keeps the elves attackable", "actor": "r1", "metric": "alive", "equals": 0, "within_ms": 3000 },
+    { "action": "wait", "ms": 6000 },
+    { "action": "reward_quest", "actor": "r", "quest": 18044 },
+    { "action": "assert", "label": "Quest 18044 left the log", "actor": "r", "metric": "quest_status", "quest": 18044, "equals": 0 },
+    { "action": "cast", "actor": "r", "spell": 2136, "target": "r2" },
+    { "action": "assert", "label": "After the turn-in the elves are friendly again", "actor": "r", "metric": "cast_failure", "spell": 2136, "equals": 12, "within_ms": 1000 },
+    { "action": "cast", "actor": "c", "spell": 2136, "target": "c1" },
+    { "action": "assert", "label": "An Alliance hero without the quest cannot attack the elves", "actor": "c", "metric": "cast_failure", "spell": 2136, "equals": 12, "within_ms": 1000 }
+  ]
+}

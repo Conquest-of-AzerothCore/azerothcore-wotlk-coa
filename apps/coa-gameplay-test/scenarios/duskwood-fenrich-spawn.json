@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Duskwood: Quartermaster Fenrich stands in his Darkshire house",
+  "contract": [
+    "MatodanDLC's recording 6QNRME4U5pY (2026-07-19, 1:01:48) shows Quartermaster Fenrich 751501 inside the small",
+    "patch-WB1 farmhouse north of Eleanor Zemille's house in Darkshire. Expected: one living Fenrich stands within",
+    "60 yards of that house, so players can reach his shop and quest 255074. His tooltip there reads Level 39; with",
+    "the level-39 warrior base health 1459 (creature_classlevelstats) and his WDB HealthModifier 8 he has 11672 health.",
+    "A level-30 template would give 7640."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -10560.0, "y": -1240.0, "z": 30.0, "o": 0},
+  "players": [{"id": "hero", "race": 1, "class": 1, "level": 27}],
+  "steps": [
+    {"action": "set_phase", "label": "Join the world phase Darkshire's spawns live in", "actor": "hero", "value": 1},
+    {"action": "wait", "label": "Let Darkshire's spawns settle", "ms": 3000},
+    {"action": "assert", "label": "DISCRIMINATING: Fenrich stands in Darkshire", "actor": "hero",
+     "metric": "nearby_creature_count", "entry": 751501, "equals": 1, "within_ms": 10000},
+    {"action": "assert", "label": "DISCRIMINATING: Fenrich is level 39 with HealthModifier 8", "actor": "hero",
+     "metric": "nearby_creature_max_health", "entry": 751501, "equals": 11672}
+  ]
+}

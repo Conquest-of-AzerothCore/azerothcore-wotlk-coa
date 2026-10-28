@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "name": "Equipped gear loot never drops a placeholder item (#7624)",
+  "contract": "Issue #7624 reports that killing Defias in Westfall yields 'UNUSED - Sneaky Devil's Throwing Knives' (58987), an item that should not drop. LootMgr.cpp:729 hands every ordinary creature corpse to AscensionEquippedGearLoot::AddLoot (CoA.EquippedGearLoot default 1, CoA.EquippedGearLootChance default 5), which picks an item whose DisplayInfoID and inventory slot match a piece the creature visibly wears, preferring the best role score at the highest item level at or below the creature's level. Defias Smuggler 95 wears 5281 (display 3901, dagger) and 6886 (display 13097, InventoryType 25, throwing) - both nameless placeholders. On display 13097/25 the only candidate inside the Smuggler's level 11-12 band is 58987 itself, a placeholder whose name says UNUSED and whose ItemLevel is 12; the next is 65695 at ItemLevel 21, out of band. Wearable() (AscensionEquippedGearLoot.cpp:56-66) rejects ITEM_FLAG_DEPRECATED (0x10) and names beginning 'Monster -', but 58987 carries Flags 0x400000 and its name begins 'UNUSED -', so it is admitted. The same gap admits 11,585 'MISSING ITEM NAME' rows, 2,299 '***Name Not Available***' rows and 277 'UNUSED...' rows. equipped_gear_loot_rate rolls the real corpse-loot path 5000 times per assertion, so the reported item must never appear on any roll while genuine gear still drops.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "looter", "race": 1, "class": 1, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the character settle", "ms": 2000 },
+    { "action": "assert", "label": "SETUP: the generator still produces gear for the Defias Smuggler", "actor": "looter", "metric": "equipped_gear_loot_rate", "entry": 95, "min": 1, "max": 9 },
+    { "action": "assert", "label": "DISCRIMINATING: the reported UNUSED placeholder never drops from the Defias Smuggler", "actor": "looter", "metric": "equipped_gear_loot_rate", "entry": 95, "item": 58987, "min": 0, "max": 0 },
+    { "action": "assert", "label": "REGRESSION: the Smuggler's real dagger still drops from the same appearance", "actor": "looter", "metric": "equipped_gear_loot_rate", "entry": 95, "item": 53452, "min": 0.02, "max": 9 },
+    { "action": "assert", "label": "REGRESSION: a genuine named staff still drops from the Defias Pillager", "actor": "looter", "metric": "equipped_gear_loot_rate", "entry": 589, "item": 60219, "min": 0.02, "max": 9 },
+    { "action": "assert", "label": "CONTROL: an unrelated UNUSED item is unaffected by this creature", "actor": "looter", "metric": "equipped_gear_loot_rate", "entry": 95, "item": 65695, "min": 0, "max": 0 }
+  ]
+}

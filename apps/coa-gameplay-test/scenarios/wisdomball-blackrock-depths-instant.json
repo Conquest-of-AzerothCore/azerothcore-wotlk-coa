@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "name": "The Wondrous Wisdomball withholds Blackrock Depths quests that complete the moment the ball grants them",
+  "contract": "AscensionWisdomball.cpp lists a dungeon's quests by map alone. some twenty Blackrock Depths quests carry no kill, item-fetch or player-kill objective at all - dialog steps (3801 Dark Iron Legacy, 3981 Commander Gor'shak, 3982 and 4001 What Is Going On, 4002 The Eastern Kingdoms, 4004 The Princess Saved, 4128 Ragnar Thunderbrew, 4133 Vivian Lagrave, 4324 Yuka Screwspigot, 4341 Kharan Mighthammer, 4342 Kharan's Tale, 4361 The Bearer of Bad News, 4363 The Princess's Surprise), a StartItem with nothing else (4122 Grark Lorkrub), a StartItem that is itself the fetch (4264 A Crumpled Up Note, 11486 and 11487 The Best of Brews), or event and emote quests with no tracked objective (8619 Morndeep the Elder, 11454 Seek the Saboteurs, 12062 Insult Coren Direbrew) - so AddQuestAndCheckCompletion marks them complete on accept and the ball pays them straight back out. Until a real per-quest fix exists the ball must stop offering exactly these twenty quest IDs, the same treatment 5722, 5724 and the Dire Maul books already have. Repeatable quests are withheld from the ball in every dungeon on top of that: the Thorium Brotherhood turn-in 6642 Favor Amongst the Brotherhood, Dark Iron Ore must never be offered either. Quest 4081 KILL ON SIGHT: Dark Iron Dwarves is Horde-only with real kill objectives and stays offered to a Horde character as a control that the exclusion does not over-block. The escort 4322 Jail Break stays offered too: it cannot complete without its escort event.",
+  "timeout_ms": 180000,
+  "players": [
+    { "id": "delver", "race": 10, "class": 26, "level": 60 }
+  ],
+  "location": {
+    "map": 230,
+    "x": 457.2,
+    "y": 27.6789,
+    "z": -70.6265,
+    "o": 1.0,
+    "ignore_access": true
+  },
+  "steps": [
+    { "action": "wait", "label": "Let Blackrock Depths settle", "ms": 8000 },
+    { "action": "add_item", "label": "Obtain the companion, as a purchase would", "actor": "delver", "item": 101169, "count": 1 },
+    { "action": "use_item", "label": "Using the item teaches its summon", "actor": "delver", "item": 101169, "spell": 55884 },
+    {
+      "action": "assert",
+      "label": "The summon is learned",
+      "actor": "delver", "metric": "knows_spell", "spell": 83050, "equals": 1, "within_ms": 3000
+    },
+    { "action": "cast", "label": "Summon the ball in Blackrock Depths", "actor": "delver", "spell": 83050 },
+    { "action": "wait", "label": "Let the summon land", "ms": 3000 },
+    {
+      "action": "assert",
+      "label": "The cast produced a creature this Blood Elf owns",
+      "actor": "delver", "metric": "owned_creature_count", "entry": 79025, "min": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "A Horde character is never offered the dialog step What Is Going On",
+      "actor": "delver", "metric": "ball_offers_quest", "quest": 4001, "equals": 0, "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Nor Commander Gor'shak, another dialog step",
+      "actor": "delver", "metric": "ball_offers_quest", "quest": 3981, "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Nor Grark Lorkrub, a StartItem with no objective",
+      "actor": "delver", "metric": "ball_offers_quest", "quest": 4122, "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Nor the Alliance crumpled note, whose StartItem is the fetch",
+      "actor": "delver", "metric": "ball_offers_quest", "quest": 4264, "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Nor the Lunar elder visit",
+      "actor": "delver", "metric": "ball_offers_quest", "quest": 8619, "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Nor the Horde Brewfest brew, granted complete on accept",
+      "actor": "delver", "metric": "ball_offers_quest", "quest": 11487, "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Nor the repeatable Brotherhood ore turn-in, withheld in every dungeon",
+      "actor": "delver", "metric": "ball_offers_quest", "quest": 6642, "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Nor the insult emote quest",
+      "actor": "delver", "metric": "ball_offers_quest", "quest": 12062, "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "A Horde kill quest with real objectives is still offered",
+      "actor": "delver", "metric": "ball_offers_quest", "quest": 4081, "equals": 1
+    },
+    { "action": "quest_accept", "label": "Try to take the dialog step anyway, as a hostile client would", "actor": "delver", "quest": 4001, "entry": 79025 },
+    {
+      "action": "assert",
+      "label": "The ball refuses it outright - it never enters the log",
+      "actor": "delver", "metric": "quest_status", "quest": 4001, "equals": 0
+    },
+    { "action": "quest_accept", "label": "Try the StartItem-only quest too", "actor": "delver", "quest": 4122, "entry": 79025 },
+    {
+      "action": "assert",
+      "label": "It is refused as well",
+      "actor": "delver", "metric": "quest_status", "quest": 4122, "equals": 0
+    }
+  ]
+}

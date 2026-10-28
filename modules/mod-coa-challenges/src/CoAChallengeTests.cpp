@@ -800,6 +800,21 @@ namespace CoAChallenges
                     Unit::Kill(killer, c);   // CreditKill shares it with the group
             }
             for (Player* p : players)
+            {
+                if (p->GetLevel() >= maxLevel)
+                    continue;
+                uint32 guid = p->GetGUID().GetCounter();
+                bool completedEarly = (bool)CharacterDatabase.Query(
+                    "SELECT 1 FROM coa_challenge_completion WHERE guid = {} AND challengeId = {}",
+                    guid, challengeId);
+                if (completedEarly)
+                {
+                    BroadcastTestLine(players, "  [{}] completed before level cap at level {} (unexpected)",
+                        p->GetName(), p->GetLevel());
+                    pass = false;
+                }
+            }
+            for (Player* p : players)
                 if (p->GetLevel() < level)
                     p->GiveLevel(static_cast<uint8>(level));
         }
@@ -1335,6 +1350,8 @@ namespace CoAChallenges
             "CHALLENGE_RULES_TYPE_NO_PORTALS",
             "CHALLENGE_RULES_TYPE_NO_LEAVE_CONTINENT",
             "CHALLENGE_RULES_TYPE_HIGH_RISK_ONLY",
+            "CHALLENGE_RULES_TYPE_NO_CREATURE_LEVEL_SCALING",
+            "CHALLENGE_RULES_TYPE_NO_QUEST_LEVEL_SCALING",
             // NOTE: FLOOR_IS_LAVA (165 "The Floor is Lava!") is NOT modelled here:
             // its About is "Don't. Stop. Jumping." (damage while grounded), not
             // lava/fire environmental damage, and 165 is challenge-only (custom
@@ -1496,9 +1513,14 @@ namespace CoAChallenges
 
         // ---- 5. XP / profession XP ----
         RUN("CHALLENGE_RULES_TYPE_NO_PROFESSION_EXPERIENCE", [](Player* p) {
-            uint32 gain = 100;
-            sScriptMgr->OnPlayerUpdateCraftingSkill(p, nullptr, 0, gain);
-            return gain == 0; });
+            uint32 craftGain = 1;
+            sScriptMgr->OnPlayerUpdateCraftingSkill(p, nullptr, 0, craftGain);
+            uint32 gatherGain = 1;
+            sScriptMgr->OnPlayerUpdateGatheringSkill(p, SKILL_MINING, 1, 25, 50, 75, gatherGain);
+            uint32 amtProfession = 1000; sScriptMgr->OnPlayerGiveXP(p, amtProfession, nullptr, XPSOURCE_PROFESSION);
+            uint32 amtSkill = 1000; sScriptMgr->OnPlayerGiveXP(p, amtSkill, nullptr, XPSOURCE_PROFESSION_SKILL);
+            uint32 amtKill = 1000; sScriptMgr->OnPlayerGiveXP(p, amtKill, nullptr, XPSOURCE_KILL);
+            return craftGain == 1 && gatherGain == 1 && amtProfession == 0 && amtSkill == 0 && amtKill == 1000; });
         RUN("CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_QUESTS", [](Player* p) {
             uint32 amt = 1000; sScriptMgr->OnPlayerGiveXP(p, amt, nullptr, XPSOURCE_KILL); return amt == 0; });
         RUN("CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_CREATURES", [](Player* p) {
@@ -1843,6 +1865,8 @@ namespace CoAChallenges
                 "CHALLENGE_RULES_TYPE_PVE_ONLY",                          // `.coa ruletestparty`
                 "CHALLENGE_RULES_TYPE_COSMETIC_ELITE_ENEMIES",            // challenges-adventure-mode scenario
                 "CHALLENGE_RULES_TYPE_STRICT_CHALLENGE_RESTRICTED_TAPPING", // challenges-adventure-mode scenario
+                "CHALLENGE_RULES_TYPE_NO_CREATURE_LEVEL_SCALING", // challenges-level-scaling-rules scenario
+                "CHALLENGE_RULES_TYPE_NO_QUEST_LEVEL_SCALING",    // challenges-level-scaling-rules scenario
             };
             std::set<std::string> const& impl = ImplementedRules();
             uint32 missing = 0;
@@ -2282,15 +2306,10 @@ namespace CoAChallenges
         std::set<std::string> const& conds = KnownConditions();
 
         // Rules intentionally not enforced server-side, each with the reason.
-        // IMPORTANT: the *_LEVEL_SCALING ones are NOT confirmed covered by the
-        // client - Extensions.dll was not fully reversed beyond the 35 C_Challenge
-        // functions, and the client Lua only reads 4 UI rules. Treat as
-        // "needs further DLL RE" before assuming the client handles them.
         static std::map<std::string, char const*> const kNotApplicable = {
             {"CHALLENGE_RULES_TYPE_NONE", "client export sentinel (empty slot)"},
             {"CHALLENGE_RULES_TYPE_NO_REALM_BANK", "no realm bank feature on this fork"},
-            {"CHALLENGE_RULES_TYPE_NO_QUEST_LEVEL_SCALING", "no server scaling; needs DLL RE"},
-            {"CHALLENGE_RULES_TYPE_NO_PLAYER_LEVEL_SCALING", "no server scaling; needs DLL RE"},
+            {"CHALLENGE_RULES_TYPE_NO_PLAYER_LEVEL_SCALING", "no player level sync on this fork"},
         };
         std::set<std::string> naSeen;
         uint32 ruleCount = 0, unenforced = 0;

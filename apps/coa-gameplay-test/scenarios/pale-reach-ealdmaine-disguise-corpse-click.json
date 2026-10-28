@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Ealdmaine Caverns: the disguise corpse becomes clickable for a player who takes the quest beside it",
+  "contract": [
+    "Issue #8273. Dead Ealdmaine Ealdir 164225 stands next to Randec, who gives Ealdmaine Caverns 175036. Its",
+    "spell-click rows (365016/365017 attire by gender, 365094 Ealdmaine reaction) are gated on CONDITION_QUESTSTATE",
+    "175036-175038, so a client that saw the corpse before taking the quest received it without the spell-click flag.",
+    "Expected: taking the quest re-sends the corpse's NPC flags with spell-click, and a click applies the Ealdir",
+    "reaction aura and credits the Ealdir Disguise objective. The case joins world phase 1 to use spawn 9960047."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -7631.0, "y": 767.2, "z": 144.4, "o": 3.37},
+  "players": [
+    {"id": "p", "race": 1, "class": 1, "level": 20}
+  ],
+  "steps": [
+    {"action": "set_phase", "label": "Join world phase 1, where the corpse is spawned", "actor": "p", "value": 1},
+    {"action": "wait", "label": "Let the corpse reach the client", "ms": 2500},
+    {"action": "prepare_quest", "actor": "p", "quest": 175035},
+    {"action": "reward_quest", "actor": "p", "quest": 175035},
+    {"action": "prepare_quest", "label": "Take Ealdmaine Caverns beside the corpse", "actor": "p", "quest": 175036,
+     "complete": false},
+    {"action": "assert", "label": "the client is told the corpse can be clicked", "actor": "p",
+     "metric": "nearby_creature_sent_spellclick", "entry": 164225, "equals": 1, "within_ms": 2000},
+    {"action": "spell_click_nearby", "label": "Click the corpse", "actor": "p", "entry": 164225},
+    {"action": "assert", "label": "the Ealdmaine Caverns reaction is applied", "actor": "p", "metric": "aura",
+     "spell": 365094, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "and the Ealdir Disguise objective counts", "actor": "p",
+     "metric": "quest_objective_count", "quest": 175036, "equals": 1, "within_ms": 2000}
+  ]
+}

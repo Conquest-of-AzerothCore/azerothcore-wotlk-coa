@@ -1,34 +1,109 @@
 {
- "schema": 1,
- "name": "Warrior of Tyr generates Energy from any periodic damage tick (#5163, #4432)",
- "contract": "Warrior of Tyr 301253's Description reads \"Periodic damage dealt now generates $524987s1 Energy\" (10). NativePowerGainRules has {ClassId 19, FirstSpellId 0, LastSpellId 0, PowerType 3, InternalAmount 10, Event PeriodicDamageTick, RequiredAuraSpellId 301253}; FirstSpellId=LastSpellId=0 means MatchesNativePowerRule treats it as matching any spell (AscensionCompat.cpp's MatchesNativePowerRule), not only Condemn or Blade of Faith specifically. Condemn 567541 (EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DAMAGE, tick every 3000 ms) is used here as a real periodic-damage source: one tick against a hostile target with 301253 known must add 10 to power type 3.",
- "timeout_ms": 90000,
- "players": [
-  { "id": "t", "race": 1, "class": 19, "level": 80, "spell_hit_rating": 10000, "allow_regeneration": false }
- ],
- "creatures": [
-  { "id": "dummy", "owner": "t", "entry": 36, "health": 1000000, "distance": 3 }
- ],
- "steps": [
-  { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
-  { "action": "learn", "actor": "t", "spell": 301253 },
-  { "action": "learn", "actor": "t", "spell": 567541 },
-  { "action": "add_item", "actor": "t", "item": 2495 },
-  { "action": "equip", "actor": "t", "item": 2495, "slot": 15 },
-  {
-   "action": "set_power", "actor": "t", "power": 3, "value": 30,
-   "label": "Fixture: Condemn itself costs 30 Energy to cast (Spell.dbc PowerType 3, ManaCost 30)"
-  },
-  { "action": "cast", "actor": "t", "spell": 567541, "target": "dummy" },
-  { "action": "assert", "label": "SETUP: Condemn's DoT applies", "actor": "dummy", "metric": "aura", "spell": 567541, "caster": "t", "equals": 1, "within_ms": 1000 },
-  {
-   "action": "snapshot", "actor": "t", "metric": "power", "power": 3, "save_as": "power_before",
-   "label": "Baseline taken after Condemn's own cast cost is paid, so only the periodic tick can raise Energy"
-  },
-  { "action": "wait", "label": "Let one 3 sec periodic tick land", "ms": 3300 },
-  {
-    "action": "assert", "label": "DISCRIMINATING: one periodic damage tick generates 10 Energy",
-    "actor": "t", "metric": "power", "power": 3, "relative_to": "power_before", "min": 10, "max": 19
-  }
- ]
+  "schema": 1,
+  "name": "Warrior of Tyr generates Energy from any periodic damage tick (#5163, #4432)",
+  "contract": [
+    "Warrior of Tyr 301253's Description reads \"Periodic damage dealt now generates $524987s1 Energy\" (10).",
+    "NativePowerGainRules has {ClassId 19, FirstSpellId 0, LastSpellId 0, PowerType 3, InternalAmount 10,",
+    "Event PeriodicDamageTick, RequiredAuraSpellId 301253}; FirstSpellId=LastSpellId=0 means",
+    "MatchesNativePowerRule treats it as matching any spell (AscensionCompat.cpp's MatchesNativePowerRule),",
+    "not only Condemn or Blade of Faith specifically. Condemn 567541 (EffectApplyAuraName[0] =",
+    "SPELL_AURA_PERIODIC_DAMAGE, tick every 3000 ms) is used here as a real periodic-damage source: one tick",
+    "against a hostile target with 301253 known must add 10 to power type 3."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 19,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "t",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 301253
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 567541
+    },
+    {
+      "action": "add_item",
+      "actor": "t",
+      "item": 2495
+    },
+    {
+      "action": "equip",
+      "actor": "t",
+      "item": 2495,
+      "slot": 15
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 30,
+      "label": "Fixture: Condemn itself costs 30 Energy to cast (Spell.dbc PowerType 3, ManaCost 30)"
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 567541,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Condemn's DoT applies",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 567541,
+      "caster": "t",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "t",
+      "metric": "power",
+      "power": 3,
+      "save_as": "power_before",
+      "label": "Baseline taken after Condemn's own cast cost is paid, so only the periodic tick can raise Energy"
+    },
+    {
+      "action": "wait",
+      "label": "Let one 3 sec periodic tick land",
+      "ms": 3300
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: one periodic damage tick generates 10 Energy",
+      "actor": "t",
+      "metric": "power",
+      "power": 3,
+      "relative_to": "power_before",
+      "min": 10,
+      "max": 19
+    }
+  ]
 }

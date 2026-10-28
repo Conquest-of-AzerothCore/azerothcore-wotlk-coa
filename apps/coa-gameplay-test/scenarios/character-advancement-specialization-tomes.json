@@ -1,0 +1,735 @@
+{
+  "schema": 1,
+  "name": "Original Tomes unlock the native specialization slots without changing the active build",
+  "contract": "ItemSpells.dbc maps Tome of Specialization II (106954) to generic learning spell 55884 and learning trigger 6 for slot spell 979994. ItemAddon.dbc names the Tome and requires the previous slot spell for later Tomes. A normal item use must consume the Tome, teach the unlock and preserve the active archetype and purchased ranks.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 11
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "server_packets",
+      "opcode": 1829,
+      "equals": 0,
+      "label": "No advancement state is sent during login before the active mover"
+    },
+    {
+      "action": "client_packet",
+      "actor": "bloodmage",
+      "opcode": 618,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "bloodmage"
+        }
+      ],
+      "label": "Initialize native advancement after the local player is ready"
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "server_packet_u32",
+      "opcode": 1829,
+      "index": 1,
+      "equals": 20,
+      "label": "Original native client receives the full slot capacity"
+    },
+    {
+      "action": "specialization",
+      "actor": "bloodmage",
+      "id": 99
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "bloodmage",
+      "entry": 30191,
+      "rank": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "bloodmage",
+      "item": 106956,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "bloodmage",
+      "item": 106956,
+      "spell": 55884
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 979995,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "item_count",
+      "item": 106956,
+      "equals": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "bloodmage",
+      "item": 106954,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "bloodmage",
+      "item": 106954,
+      "spell": 55884
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The Tome teaches the native slot spell",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 979994,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "item_count",
+      "item": 106954,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 804197,
+      "equals": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "bloodmage",
+      "item": 106956,
+      "spell": 55884
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 979995,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "item_count",
+      "item": 106956,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "bloodmage",
+      "item": 106957,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "bloodmage",
+      "item": 106957,
+      "spell": 55884
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 979996,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "item_count",
+      "item": 106957,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "bloodmage",
+      "item": 106958,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "bloodmage",
+      "item": 106958,
+      "spell": 55884
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 979997,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "item_count",
+      "item": 106958,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "bloodmage",
+      "item": 106959,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "bloodmage",
+      "item": 106959,
+      "spell": 55884
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 979986,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "item_count",
+      "item": 106959,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "bloodmage",
+      "item": 106960,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "bloodmage",
+      "item": 106960,
+      "spell": 55884
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 979987,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "item_count",
+      "item": 106960,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "bloodmage",
+      "item": 106961,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "bloodmage",
+      "item": 106961,
+      "spell": 55884
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 979988,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "item_count",
+      "item": 106961,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "bloodmage",
+      "item": 752030,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "bloodmage",
+      "item": 752030,
+      "spell": 55884
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 84874,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "item_count",
+      "item": 752030,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "bloodmage",
+      "item": 752031,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "bloodmage",
+      "item": 752031,
+      "spell": 55884
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 84876,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "item_count",
+      "item": 752031,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "bloodmage",
+      "item": 752032,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "bloodmage",
+      "item": 752032,
+      "spell": 55884
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 84878,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "item_count",
+      "item": 752032,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "bloodmage",
+      "item": 752033,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "bloodmage",
+      "item": 752033,
+      "spell": 55884
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 84880,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "item_count",
+      "item": 752033,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "bloodmage",
+      "item": 97400,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "bloodmage",
+      "item": 97400,
+      "spell": 55884
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 84882,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "item_count",
+      "item": 97400,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "bloodmage",
+      "item": 97401,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "bloodmage",
+      "item": 97401,
+      "spell": 55884
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 84884,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "item_count",
+      "item": 97401,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "bloodmage",
+      "item": 97402,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "bloodmage",
+      "item": 97402,
+      "spell": 55884
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 84886,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "item_count",
+      "item": 97402,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "bloodmage",
+      "item": 97403,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "bloodmage",
+      "item": 97403,
+      "spell": 55884
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 84888,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "item_count",
+      "item": 97403,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "bloodmage",
+      "item": 97404,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "bloodmage",
+      "item": 97404,
+      "spell": 55884
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 84890,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "item_count",
+      "item": 97404,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "bloodmage",
+      "item": 97405,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "bloodmage",
+      "item": 97405,
+      "spell": 55884
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 84892,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "item_count",
+      "item": 97405,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "bloodmage",
+      "item": 97406,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "bloodmage",
+      "item": 97406,
+      "spell": 55884
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 84894,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "item_count",
+      "item": 97406,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "bloodmage",
+      "item": 97407,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "bloodmage",
+      "item": 97407,
+      "spell": 55884
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 84896,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "item_count",
+      "item": 97407,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "player_setting",
+      "source": "core.ascension_active_spec",
+      "index": 0,
+      "equals": 99
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 804197,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "server_packet_u32",
+      "opcode": 1829,
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "bloodmage",
+      "item": 106954,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "bloodmage",
+      "item": 106954,
+      "spell": 55884
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "item_count",
+      "item": 106954,
+      "equals": 1,
+      "label": "Reading an already unlocked Tome does not consume it"
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 84896
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "player_setting",
+      "source": "core.ascension_slot.active",
+      "index": 0,
+      "equals": 19
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "player_setting",
+      "source": "core.ascension_active_spec",
+      "index": 0,
+      "equals": 0
+    }
+  ]
+}

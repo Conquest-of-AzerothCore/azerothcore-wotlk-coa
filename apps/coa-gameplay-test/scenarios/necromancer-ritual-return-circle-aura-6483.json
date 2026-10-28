@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Ritual Return works while the Summoning Ritual circle is out (#6483, #6692)",
+  "contract": "Summoning Ritual 805038 summons the circle 575091 and teaches Ritual Return 807098, whose CasterAuraSpell is the circle's owner area aura 807317 (40 yd). The circle must apply 807317 to its Necromancer, or the client greys Ritual Return out and the server refuses it. Walking away from the circle and casting Ritual Return must teleport the Necromancer back onto it.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and the Life Force aura settle", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 805038 },
+    { "action": "cast", "label": "Summoning Ritual", "actor": "n", "spell": 805038 },
+    {
+      "action": "assert", "label": "SETUP: the ritual circle is out", "actor": "n",
+      "metric": "owned_creature_count", "entry": 575091, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "SETUP: Ritual Return is taught", "actor": "n",
+      "metric": "knows_spell", "spell": 807098, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The circle gives its Necromancer the Summoning Ritual aura", "actor": "n",
+      "metric": "aura", "spell": 807317, "equals": 1, "within_ms": 3000
+    },
+    { "action": "snapshot", "actor": "n", "metric": "position_x", "save_as": "circle_x" },
+    { "action": "snapshot", "actor": "n", "metric": "position_y", "save_as": "circle_y" },
+    {
+      "action": "teleport", "label": "Walk 15 yards away", "actor": "n",
+      "map": 0, "x": -8902.41, "y": -115.853, "z": 82.3711, "o": 0
+    },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "SETUP: the Necromancer is away from the circle", "actor": "n",
+      "metric": "position_x", "relative_to": "circle_x", "min": 10
+    },
+    {
+      "action": "assert", "label": "The aura holds within 40 yards", "actor": "n",
+      "metric": "aura", "spell": 807317, "equals": 1, "within_ms": 2000
+    },
+    { "action": "cast", "label": "Ritual Return", "actor": "n", "spell": 807098 },
+    { "action": "wait", "ms": 1500 },
+    {
+      "action": "assert", "label": "Ritual Return is not refused", "actor": "n",
+      "metric": "cast_failure", "spell": 807098, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Ritual Return lands on the circle (x)", "actor": "n",
+      "metric": "position_x", "relative_to": "circle_x", "min": -3, "max": 3
+    },
+    {
+      "action": "assert", "label": "Ritual Return lands on the circle (y)", "actor": "n",
+      "metric": "position_y", "relative_to": "circle_y", "min": -3, "max": 3
+    }
+  ]
+}

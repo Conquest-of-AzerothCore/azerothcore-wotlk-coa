@@ -1,0 +1,232 @@
+{
+  "schema": 1,
+  "name": "Finishing the final boss of the assigned Dungeon Finder dungeon rewards the Classic Random completion (#5249, #5851)",
+  "contract": "The Dungeon Finder client queues Random Classic Dungeon as a list of specific dungeons, so the group's selected dungeon is never of the random type. Finishing the final boss of a normal classic dungeon the group was assigned still pays every member the Classic Random completion quest of their level bracket (56-60 at level 59).",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p1",
+      "race": 1,
+      "class": 1,
+      "level": 59
+    },
+    {
+      "id": "p2",
+      "race": 1,
+      "class": 1,
+      "level": 59
+    },
+    {
+      "id": "p3",
+      "race": 1,
+      "class": 1,
+      "level": 59
+    },
+    {
+      "id": "p4",
+      "race": 1,
+      "class": 1,
+      "level": 59
+    },
+    {
+      "id": "p5",
+      "race": 1,
+      "class": 1,
+      "level": 59
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p2"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p3"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p4"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p5"
+    },
+    {
+      "action": "lfg_dungeon",
+      "label": "The group is assigned Scarlet Monastery - Graveyard",
+      "actor": "p1",
+      "dungeon": 18
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p1"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p2"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p3"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p4"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p5"
+    },
+    {
+      "action": "assert",
+      "label": "p1 enters Scarlet Monastery",
+      "actor": "p1",
+      "metric": "map_id",
+      "equals": 189,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "p2 enters Scarlet Monastery",
+      "actor": "p2",
+      "metric": "map_id",
+      "equals": 189,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "p3 enters Scarlet Monastery",
+      "actor": "p3",
+      "metric": "map_id",
+      "equals": 189,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "p4 enters Scarlet Monastery",
+      "actor": "p4",
+      "metric": "map_id",
+      "equals": 189,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "p5 enters Scarlet Monastery",
+      "actor": "p5",
+      "metric": "map_id",
+      "equals": 189,
+      "within_ms": 15000
+    },
+    {
+      "action": "encounter_credit",
+      "label": "Bloodmage Thalnos, final boss of Scarlet Monastery - Graveyard, is credited",
+      "actor": "p1",
+      "entry": 4543
+    },
+    {
+      "action": "assert",
+      "label": "p1 is rewarded the Classic Random 56-60 quest",
+      "actor": "p1",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p2 is rewarded the Classic Random 56-60 quest",
+      "actor": "p2",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p3 is rewarded the Classic Random 56-60 quest",
+      "actor": "p3",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p4 is rewarded the Classic Random 56-60 quest",
+      "actor": "p4",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p5 is rewarded the Classic Random 56-60 quest",
+      "actor": "p5",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p1 holds the Adventurer's Cache from the completion",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 1397886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p2 holds the Adventurer's Cache from the completion",
+      "actor": "p2",
+      "metric": "item_count",
+      "item": 1397886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p3 holds the Adventurer's Cache from the completion",
+      "actor": "p3",
+      "metric": "item_count",
+      "item": 1397886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p4 holds the Adventurer's Cache from the completion",
+      "actor": "p4",
+      "metric": "item_count",
+      "item": 1397886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p5 holds the Adventurer's Cache from the completion",
+      "actor": "p5",
+      "metric": "item_count",
+      "item": 1397886,
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

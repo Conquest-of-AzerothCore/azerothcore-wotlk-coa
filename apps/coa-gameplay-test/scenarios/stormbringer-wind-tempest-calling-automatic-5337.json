@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "stormbringer-wind-tempest-calling-automatic-5337",
+  "contract": "Tempest Calling707615 is automatic CharacterAdvancement31164 with zero AE/TE cost, requiring Wind identity4014 (92097), itself requiring class root31263 (801838). At the reported level11, normal Wind selection must acquire the dependency chain and grant Tempest Calling without treating its automatic node as a paid talent. This observes server acquisition, not the rendered talent window.",
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 11
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "s",
+      "id": 13
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "knows_spell",
+      "spell": 801838,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "knows_spell",
+      "spell": 92097,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "knows_spell",
+      "spell": 707615,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 707615,
+      "equals": 1
+    }
+  ]
+}

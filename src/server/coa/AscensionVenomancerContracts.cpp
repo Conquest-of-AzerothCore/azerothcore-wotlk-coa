@@ -70,7 +70,10 @@ void ApplyContracts(SpellInfo* info)
     if (id == 805102)
         info->Effects[0].Effect = SPELL_EFFECT_DUMMY;
     if (id == 504705)
+    {
         info->Effects[2].Effect = 0;
+        info->Effects[2].TriggerSpell = 0;
+    }
     if (id == 704264)
         dummy(0);
     if (id == 803196 || id == 803192 || id == 800910 || id == 681056 || id == 681417 || id == 706453 ||
@@ -298,6 +301,8 @@ void ApplyContracts(SpellInfo* info)
                 effect.Effect = SPELL_EFFECT_DUMMY;
     if (id == 800848)
         info->StackAmount = 3;
+    if (id == 805777 || id == 805778)
+        info->StackAmount = 1;
     if (id == 706014)
         for (uint8 slot = 0; slot < MAX_SPELL_EFFECTS; ++slot)
             dummy(slot);
@@ -342,7 +347,7 @@ public:
     {
         if (attacker && attacker->HasAura(800921))
             return false;
-        return (info && info->IsAffectingArea()) || !CrossesLair(attacker,target);
+        return !info || info->IsAffectingArea() || !CrossesLair(attacker,target);
     }
     void ModifySpellEffectBaseValue(Unit const* caster, SpellInfo const* info, uint8 index, float& value) override
     {

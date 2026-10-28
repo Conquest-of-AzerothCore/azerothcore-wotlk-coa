@@ -39,7 +39,8 @@ enum draeneiSurvivor
     SPELL_STUNNED       = 28630,
     SPELL_GIFT_OF_THE_NAARU_COA_SPELL_POWER  = 814280,
     SPELL_GIFT_OF_THE_NAARU_COA_ATTACK_POWER = 814281,
-    SPELL_GIFT_OF_THE_NAARU_COA_HYBRID       = 814282
+    SPELL_GIFT_OF_THE_NAARU_COA_HYBRID       = 814282,
+    SPELL_GIFT_OF_THE_NAARU_COA_HERO         = 59542
 };
 
 class npc_draenei_survivor : public CreatureScript
@@ -96,7 +97,8 @@ public:
             if ((Spell->SpellFamilyFlags[2] & 0x080000000) ||
                 Spell->Id == SPELL_GIFT_OF_THE_NAARU_COA_SPELL_POWER ||
                 Spell->Id == SPELL_GIFT_OF_THE_NAARU_COA_ATTACK_POWER ||
-                Spell->Id == SPELL_GIFT_OF_THE_NAARU_COA_HYBRID)
+                Spell->Id == SPELL_GIFT_OF_THE_NAARU_COA_HYBRID ||
+                Spell->Id == SPELL_GIFT_OF_THE_NAARU_COA_HERO)
             {
                 me->RemoveUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
                 me->SetStandState(UNIT_STAND_STATE_STAND);

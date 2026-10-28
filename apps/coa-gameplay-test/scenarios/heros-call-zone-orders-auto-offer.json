@@ -1,0 +1,215 @@
+{
+  "schema": 1,
+  "name": "Reaching a level offers the Hero's Call or Warchief's Command zone orders it unlocks as a pop-up",
+  "contract": "The Ascension client shows a \"Quest Discovered!\" pop-up for SMSG 0x927 {quest, 0} (OFFER) and accepts it with CMSG_QUESTGIVER_ACCEPT_QUEST carrying no quest giver. Reaching a level offers every zone order of the faction whose minimum level was just reached: the fixture's level-up from 1 to 19 offers the three level 10 orders 14204, 14212 and 14220, and reaching 20 offers Hero's Call: Redridge Mountains! 14209 and Hero's Call: Duskwood! 14208, not the level 10 orders again nor the Horde order 14243; a Horde character reaching 10 is offered Warchief's Command: The Barrens! 14232, not the level 15 order 14233. Accepting the pop-up adds the order to the quest log; an order above the character's level is refused. The client does not report a dismissed pop-up, so each order is offered only on the level-up that unlocks it: logging in again at 20 offers neither the dismissed 14208 and 14222, nor the level 10 orders, nor the accepted 14209 (#7536).",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "alliance",
+      "race": 1,
+      "class": 1,
+      "level": 19
+    },
+    {
+      "id": "horde",
+      "race": 2,
+      "class": 1,
+      "level": 9
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "label": "the Alliance character reaches level 20",
+      "action": "set_level",
+      "actor": "alliance",
+      "value": 20
+    },
+    {
+      "label": "Hero's Call: Redridge Mountains! is offered",
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "opcode": 2343,
+      "row": 14209,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "label": "the offer is an OFFER pop-up",
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packet_u32",
+      "opcode": 2343,
+      "row": 14209,
+      "index": 1,
+      "equals": 0
+    },
+    {
+      "label": "Hero's Call: Duskwood! is offered",
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "opcode": 2343,
+      "row": 14208,
+      "equals": 1
+    },
+    {
+      "label": "the level 10 order offered on the fixture's level-up to 19 is not offered again at 20",
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "opcode": 2343,
+      "row": 14204,
+      "equals": 1
+    },
+    {
+      "label": "a level-up offers every order it unlocks",
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "opcode": 2343,
+      "row": 14220,
+      "equals": 1
+    },
+    {
+      "label": "the Horde level 20 order is not offered to the Alliance",
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "opcode": 2343,
+      "row": 14243,
+      "equals": 0
+    },
+    {
+      "label": "accept the Redridge pop-up",
+      "action": "client_packet",
+      "actor": "alliance",
+      "opcode": 393,
+      "early": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 14209
+        },
+        {
+          "u32": 0
+        }
+      ]
+    },
+    {
+      "label": "the order is in the quest log",
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "quest_status",
+      "quest": 14209,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "label": "try to accept the level 25 Westfall order from a pop-up",
+      "action": "client_packet",
+      "actor": "alliance",
+      "opcode": 393,
+      "early": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 14213
+        },
+        {
+          "u32": 0
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "label": "an order above the character's level is refused",
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "quest_status",
+      "quest": 14213,
+      "equals": 0
+    },
+    {
+      "label": "the Alliance character logs in again",
+      "action": "relog",
+      "actor": "alliance"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "label": "logging in does not offer the dismissed Duskwood order again",
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "opcode": 2343,
+      "row": 14208,
+      "equals": 1
+    },
+    {
+      "label": "logging in does not offer the other level 20 order again",
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "opcode": 2343,
+      "row": 14222,
+      "equals": 1
+    },
+    {
+      "label": "the accepted Redridge order is not offered again",
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "opcode": 2343,
+      "row": 14209,
+      "equals": 1
+    },
+    {
+      "label": "logging in does not offer the level 10 orders again",
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "opcode": 2343,
+      "row": 14204,
+      "equals": 1
+    },
+    {
+      "label": "the Horde character reaches level 10",
+      "action": "set_level",
+      "actor": "horde",
+      "value": 10
+    },
+    {
+      "label": "Warchief's Command: The Barrens! is offered",
+      "action": "assert",
+      "actor": "horde",
+      "metric": "server_packets",
+      "opcode": 2343,
+      "row": 14232,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "label": "the level 15 order waits for level 15",
+      "action": "assert",
+      "actor": "horde",
+      "metric": "server_packets",
+      "opcode": 2343,
+      "row": 14233,
+      "equals": 0
+    }
+  ]
+}

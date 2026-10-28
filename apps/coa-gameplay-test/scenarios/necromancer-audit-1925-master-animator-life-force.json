@@ -12,8 +12,7 @@
     "to the capacity. A level-8 Necromancer (below Scourge Apprentice Training's level 10) without Life Force",
     "passives has capacity 2; learning Master Animator makes it 3 (805011 stacks 3, 525004 free stacks 3). Raise:",
     "Lesser Skeletal Warrior 500970 occupies 1 Life Force and costs 32% of base mana, so three warriors fit, which",
-    "a capacity of 2 refuses, and a fourth is refused with SPELL_FAILED_ALREADY_HAVE_SUMMON (7) while the three",
-    "stay up."
+    "a capacity of 2 cannot hold, and a fourth replaces the oldest (#5889) so exactly three stay up."
   ],
   "timeout_ms": 90000,
   "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
@@ -59,14 +58,14 @@
     },
     { "action": "wait", "label": "Clear the global cooldown", "ms": 500 },
     { "action": "cast", "label": "Raise a fourth with no free Life Force", "actor": "n", "spell": 500970 },
-    {
-      "action": "assert", "label": "The capacity is exactly 3: the fourth raise is refused (7)", "actor": "n",
-      "metric": "cast_failure", "spell": 500970, "equals": 7, "within_ms": 2000
-    },
     { "action": "wait", "label": "Outlast the 2 s cast time", "ms": 2500 },
     {
-      "action": "assert", "label": "The three raised warriors stay and no fourth appears", "actor": "n",
-      "metric": "owned_creature_count", "entry": 50065, "equals": 3
+      "action": "assert", "label": "The capacity is exactly 3: the fourth replaces the oldest", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50065, "equals": 3, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The Life Force stays full", "actor": "n",
+      "metric": "aura_stacks", "spell": 525004, "equals": 0, "within_ms": 2000
     }
   ]
 }

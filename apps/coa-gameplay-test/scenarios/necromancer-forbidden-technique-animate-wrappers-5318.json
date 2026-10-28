@@ -1,0 +1,215 @@
+{
+  "schema": 1,
+  "name": "necromancer-forbidden-technique-animate-wrappers-5318",
+  "contract": "Forbidden Technique 561215 explicitly reduces Animate cooldowns by 1000 ms on Command casts. Its data helper 302910 names 805040 Skeletal Archer and 504315 Zombies, both visible trigger wrappers with their own cooldowns. Purchase the Animation talent normally. The same Command must remove 1000 ms from each wrapper after talent acquisition, while the untalented control only advances time. The small clock allowance cannot hide a missing reduction or a doubled reduction.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "n",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "n",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "n",
+      "id": 35
+    },
+    {
+      "action": "learn",
+      "actor": "n",
+      "spell": 805040
+    },
+    {
+      "action": "learn",
+      "actor": "n",
+      "spell": 504315
+    },
+    {
+      "action": "learn",
+      "actor": "n",
+      "spell": 504868
+    },
+    {
+      "action": "cast",
+      "actor": "n",
+      "spell": 805040
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "cooldown_ms",
+      "spell": 805040,
+      "min": 5000,
+      "within_ms": 7000
+    },
+    {
+      "action": "cast",
+      "actor": "n",
+      "spell": 504315
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "cooldown_ms",
+      "spell": 504315,
+      "min": 5000,
+      "within_ms": 7000
+    },
+    {
+      "action": "snapshot",
+      "actor": "n",
+      "metric": "cooldown_ms",
+      "spell": 805040,
+      "save_as": "control_805040"
+    },
+    {
+      "action": "snapshot",
+      "actor": "n",
+      "metric": "cooldown_ms",
+      "spell": 504315,
+      "save_as": "control_504315"
+    },
+    {
+      "action": "set_power",
+      "actor": "n",
+      "power": 6,
+      "value": 500
+    },
+    {
+      "action": "cast",
+      "actor": "n",
+      "spell": 504868,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "cast_failure",
+      "spell": 504868,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "cooldown_ms",
+      "spell": 805040,
+      "relative_to": "control_805040",
+      "min": -600,
+      "max": 0,
+      "label": "Command without Forbidden Technique only advances the clock"
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "cooldown_ms",
+      "spell": 504315,
+      "relative_to": "control_504315",
+      "min": -600,
+      "max": 0,
+      "label": "Command without Forbidden Technique only advances the clock"
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "n",
+      "entry": 30497,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 561215,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "n",
+      "metric": "cooldown_ms",
+      "spell": 805040,
+      "save_as": "talented_805040"
+    },
+    {
+      "action": "snapshot",
+      "actor": "n",
+      "metric": "cooldown_ms",
+      "spell": 504315,
+      "save_as": "talented_504315"
+    },
+    {
+      "action": "set_power",
+      "actor": "n",
+      "power": 6,
+      "value": 500
+    },
+    {
+      "action": "cast",
+      "actor": "n",
+      "spell": 504868,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "cast_failure",
+      "spell": 504868,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "cooldown_ms",
+      "spell": 805040,
+      "relative_to": "talented_805040",
+      "min": -1600,
+      "max": -1000,
+      "label": "One Command removes one second from the visible Animate cooldown"
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "cooldown_ms",
+      "spell": 504315,
+      "relative_to": "talented_504315",
+      "min": -1600,
+      "max": -1000,
+      "label": "One Command removes one second from the visible Animate cooldown"
+    }
+  ]
+}

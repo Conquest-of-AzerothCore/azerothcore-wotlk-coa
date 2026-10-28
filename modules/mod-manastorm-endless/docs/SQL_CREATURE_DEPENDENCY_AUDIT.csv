@@ -1,0 +1,39 @@
+CreatureID,Reference,DatabaseName,HasModel,RepositoryTemplateFiles,RepositoryModelFiles
+5709,NPC_SHADE_OF_ERANIKUS,Shade of Eranikus,True,,
+5710,NPC_JAMMALAN_THE_PROPHET,Jammal'an the Prophet,True,,
+5912,NPC_BRIGHTWING,Deviate Faerie Dragon,True,,
+7665,NPC_GROL_THE_DESTROYER,Grol the Destroyer,True,,
+7666,NPC_ARCHMAGE_ALLISTARJ,Archmage Allistarj,True,,
+8443,NPC_AVATAR_OF_HAKKAR,Avatar of Hakkar,True,,
+8580,NPC_ATAL_ALARION,Atal'alarion,True,,
+9218,NPC_SPIRESTONE_BATTLE_LORD,Spirestone Battle Lord,True,,
+9219,NPC_SPIRESTONE_BUTCHER,Spirestone Butcher,True,,
+9816,NPC_PYROGUARD_EMBERSEER,Pyroguard Emberseer,True,,
+10263,NPC_BURNING_FELGUARD,Burning Felguard,True,,
+10264,NPC_SOLAKAR_FLAMEWREATH,Solakar Flamewreath,True,,
+10316,NPC_BLACKHAND_INCARCERATOR,Blackhand Incarcerator,True,,
+10376,NPC_CRYSTAL_FANG,Crystal Fang,True,,
+10429,NPC_WARCHIEF_REND_BLACKHAND,Warchief Rend Blackhand,True,,
+11671,NPC_ANCIENT_CORE_HOUND,Core Hound,True,,
+11982,NPC_MAGMADAR,Magmadar,True,,
+12018,NPC_MAJORDOMO_EXECUTUS,Majordomo Executus,True,,
+12056,NPC_BARON_GEDDON,Baron Geddon,True,,
+12118,NPC_LUCIFRON,Lucifron,True,,
+12264,NPC_SHAZZRAH,Shazzrah,True,,
+80910,NPC_STAGE_PORTAL,The Manastorm,True,13_manastorm_stage_portal.sql,13_manastorm_stage_portal.sql
+80911,EmitterCreatureEntry,Voice of Millhouse Manastorm,True,25_manastorm_voice_of_millhouse.sql,25_manastorm_voice_of_millhouse.sql
+80913,Affix helper 61,Bonestorm,True,04_manastorm_affix_helper_creatures.sql,04_manastorm_affix_helper_creatures.sql
+80914,Affix helper 31,Mushroom,True,04_manastorm_affix_helper_creatures.sql,04_manastorm_affix_helper_creatures.sql
+80916,Affix helper 93341,Creeping Frost,True,22_manastorm_affix_helper_completion.sql,04_manastorm_affix_helper_creatures.sql;22_manastorm_affix_helper_completion.sql
+80917,Affix helper 101,Overwhelming Energy,True,04_manastorm_affix_helper_creatures.sql,04_manastorm_affix_helper_creatures.sql
+80919,NPC_COGSLEY,Cogsley,True,11_manastorm_hub_vendors.sql,11_manastorm_hub_vendors.sql
+80922,Affix helper 33,Wild Magics,True,04_manastorm_affix_helper_creatures.sql,04_manastorm_affix_helper_creatures.sql;04_manastorm_affix_helper_creatures.sql;04_manastorm_affix_helper_creatures.sql;04_manastorm_affix_helper_creatures.sql
+80923,Affix helper 33,Wild Magics Cosmetic Dummy,True,04_manastorm_affix_helper_creatures.sql,04_manastorm_affix_helper_creatures.sql
+80924,Affix helper 21,Cold Snap,True,04_manastorm_affix_helper_creatures.sql,04_manastorm_affix_helper_creatures.sql
+80925,Affix helper 21,Cold Snap Effect,True,04_manastorm_affix_helper_creatures.sql,04_manastorm_affix_helper_creatures.sql
+663025,Affix helper 93316,Manastorm Meteor Dummy,True,04_manastorm_affix_helper_creatures.sql;22_manastorm_affix_helper_completion.sql,04_manastorm_affix_helper_creatures.sql;22_manastorm_affix_helper_completion.sql
+663026,Affix helper 93403,Shards of Magic,True,22_manastorm_affix_helper_completion.sql,04_manastorm_affix_helper_creatures.sql;22_manastorm_affix_helper_completion.sql
+663028,Affix helper 11,Manabomb,True,Creature_template.sql,Creature_template.sql
+663029,Affix helper 26,Vortex,True,22_manastorm_affix_helper_completion.sql,04_manastorm_affix_helper_creatures.sql;22_manastorm_affix_helper_completion.sql
+900025,NPC_MANASTORM_HEART,Manastorm Heart,True,Creature_template.sql,Creature_template.sql
+900027,NPC_EMPTY_HEART_CONTAINER,Empty Heart Container,True,31_manastorm_empty_heart_toy.sql,

@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Malgorm enrages once at half health for ten seconds",
+  "contract": [
+    "npc_coa_malgorm_hollowhoof enrages (256756) when he falls below half health, for 10 seconds, once per fight.",
+    "Expected: the enrage starts at half health, lasts no more than 10 seconds, ends, and lower health does not bring",
+    "it back. He also casts Thunderclap 8078 every 14-18 s from 7-9 s into the fight, and Slam 11430 every 10-14 s",
+    "from 4-6 s.",
+    "Stop the player's auto-attack and drive both low-health checks with one percent native direct damage.",
+    "Setting health alone does not invoke DamageTaken, and a random melee miss must not decide this AI test."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 1, "x": -2712.6, "y": 19.0, "z": 14.5, "o": 0},
+  "players": [{"id": "hero", "race": 6, "class": 1, "level": 10}],
+  "creatures": [
+    {"id": "malgorm", "owner": "hero", "entry": 161816, "faction": 16, "level": 7, "health": 100000, "reaction": 2,
+     "distance": 3}
+  ],
+  "steps": [
+    {"action": "set_aura", "actor": "hero", "spell": 2156414, "stacks": 1},
+    {"action": "set_health", "actor": "hero", "value": 5000000},
+    {"action": "attack", "actor": "hero", "target": "malgorm"},
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "label": "No enrage above half health", "actor": "malgorm", "metric": "aura", "spell": 256756,
+     "equals": 0},
+    {"action": "stop_attack", "actor": "hero"},
+    {"action": "set_health", "actor": "malgorm", "value": 45000},
+    {"action": "attack_nearby", "actor": "hero", "entry": 161816, "damage_pct": 1},
+    {"action": "assert", "label": "He enrages at half health", "actor": "malgorm", "metric": "aura", "spell": 256756,
+     "equals": 1, "within_ms": 5000},
+    {"action": "assert", "label": "The enrage lasts ten seconds", "actor": "malgorm", "metric": "aura_duration_ms",
+     "spell": 256756, "min": 8000, "max": 10000},
+    {"action": "assert", "label": "The enrage ends", "actor": "malgorm", "metric": "aura", "spell": 256756, "equals": 0,
+     "within_ms": 11000},
+    {"action": "set_health", "actor": "malgorm", "value": 30000},
+    {"action": "attack_nearby", "actor": "hero", "entry": 161816, "damage_pct": 1},
+    {"action": "wait", "ms": 4000},
+    {"action": "assert", "label": "He does not enrage again", "actor": "malgorm", "metric": "aura", "spell": 256756,
+     "equals": 0},
+    {"action": "assert", "label": "He thunderclaps during the fight", "actor": "hero", "metric": "spell_go_count",
+     "spell": 8078, "entry": 161816, "min": 1},
+    {"action": "assert", "label": "He slams during the fight", "actor": "hero", "metric": "spell_go_count",
+     "spell": 11430, "entry": 161816, "min": 1}
+  ]
+}

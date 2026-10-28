@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CoA · Legendary items</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --background: #111315;
+      --surface: #191c1f;
+      --line: #303438;
+      --text: #e4e5e7;
+      --muted: #989da3;
+      --legendary: #ff8000;
+      --equip: #75ce65;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--background);
+      color: var(--text);
+      font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    button, input, select { border-radius: 3px; }
+    button:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 2px solid #c5c9ce;
+      outline-offset: 3px;
+    }
+    .masthead {
+      height: 62px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 28px;
+    }
+    .brand { font-weight: 750; font-size: 19px; letter-spacing: -.5px; }
+    .masthead .divider { width: 1px; height: 18px; background: var(--line); }
+    .masthead span { color: var(--muted); font-size: 13px; }
+    main { max-width: 1600px; margin: auto; padding: 25px 28px 40px; }
+    .page-heading { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+    h1 { font-size: 25px; line-height: 1.25; letter-spacing: -.6px; font-weight: 600; margin: 0; }
+    .page-heading p { color: var(--muted); font-size: 13px; margin: 0; }
+    .toolbar { display: flex; align-items: center; gap: 22px; margin-bottom: 22px; }
+    .search-wrap { flex: 1; max-width: 520px; position: relative; }
+    .search-wrap svg {
+      position: absolute;
+      top: 11px;
+      left: 12px;
+      width: 16px;
+      height: 16px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+    input[type=search], input[type=number], select {
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid #3c4248;
+      height: 38px;
+    }
+    input[type=search] { width: 100%; padding: 7px 12px 7px 37px; }
+    input::placeholder { color: #858b92; }
+    .level-control { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+    .level-control label { font-size: 12px; color: var(--muted); }
+    input[type=number] { width: 61px; padding: 6px 7px; font-variant-numeric: tabular-nums; }
+    input[type=range] { width: 105px; accent-color: #c4c8ce; }
+    .level-context { margin-left: auto; color: var(--muted); font-size: 12px; white-space: nowrap; }
+    .level-context strong { color: var(--text); font-weight: 500; }
+    .browser-layout { display: grid; grid-template-columns: 180px minmax(0, 1fr) 280px; gap: 28px; }
+    .class-nav { position: sticky; top: 20px; align-self: start; max-height: calc(100vh - 40px); overflow-y: auto; }
+    .nav-label { color: #80878f; font-size: 11px; font-weight: 600; margin: 0 10px 12px; }
+    .class-nav button {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: #adb2b8;
+      text-align: left;
+      padding: 7px 10px;
+      font-size: 13px;
+    }
+    .class-nav button:hover { background: #202429; color: var(--text); }
+    .class-nav button[aria-pressed=true] { background: #2a2e33; color: #fff; }
+    .class-nav button span { font-size: 11px; color: #858d96; font-variant-numeric: tabular-nums; }
+    .nav-rule { height: 1px; background: var(--line); margin: 12px 10px; }
+    .mobile-class { display: none; }
+    .results { min-width: 0; }
+    .results-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+      min-height: 39px;
+      margin-bottom: 3px;
+    }
+    .slot-filter { display: flex; align-items: stretch; gap: 18px; }
+    .slot-filter button {
+      position: relative;
+      padding: 0 0 11px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      border-radius: 0;
+    }
+    .slot-filter button:hover { color: var(--text); }
+    .slot-filter button[aria-pressed=true] { color: var(--text); }
+    .slot-filter button[aria-pressed=true]::after {
+      content: "";
+      height: 2px;
+      background: #d1d4d8;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+    }
+    #count { color: #80878f; font-size: 11px; white-space: nowrap; padding-bottom: 10px; }
+    .class-group { margin: 0 0 10px; }
+    .group-heading {
+      font-size: 12px;
+      color: #b4bac1;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      padding: 18px 0 8px;
+    }
+    .group-heading span { color: #6f7882; font-size: 11px; font-weight: 400; }
+    .item-row {
+      display: block;
+      width: 100%;
+      text-align: left;
+      color: inherit;
+      border: 0;
+      border-bottom: 1px solid #282c31;
+      border-left: 2px solid transparent;
+      background: transparent;
+      border-radius: 0;
+      padding: 13px 14px 13px 12px;
+    }
+    .item-row:hover { background: #1b1e22; }
+    .item-row[aria-pressed=true] { background: #202328; border-left-color: var(--legendary); }
+    .row-top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+    .item-name { color: var(--legendary); font-size: 14px; font-weight: 500; line-height: 1.4; }
+    .row-slot { color: #858d96; font-size: 11px; white-space: nowrap; }
+    .row-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px 13px;
+      margin-top: 6px;
+      color: #adb3ba;
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+    }
+    .row-effect { display: block; margin-top: 6px; color: #c0c5cb; font-size: 12px; line-height: 1.55; }
+    .details { position: sticky; top: 20px; align-self: start; padding-top: 5px; }
+    .detail-label { color: #858d96; font-size: 11px; margin: 0 0 13px; font-weight: 500; }
+    .item-tooltip {
+      border: 1px solid #59616c;
+      border-radius: 3px;
+      background: #0b0d11;
+      padding: 15px 16px;
+      font: 13px/1.6 "Trebuchet MS", Arial, sans-serif;
+      color: #eee;
+    }
+    .item-tooltip h3 {
+      color: var(--legendary);
+      font-size: 17px;
+      line-height: 1.35;
+      font-weight: 600;
+      margin: 0 0 4px;
+    }
+    .tooltip-level { color: #8e969f; font-size: 11px; }
+    .tooltip-slot { display: flex; justify-content: space-between; gap: 12px; }
+    .tooltip-stats { padding: 0; margin: 0; list-style: none; }
+    .tooltip-requirements { margin-top: 10px; }
+    .tooltip-power { color: var(--equip); margin: 10px 0 0; line-height: 1.55; }
+    .detail-notes { color: #858d96; font-size: 11px; line-height: 1.65; margin: 15px 1px 0; }
+    .detail-notes p { margin: 0 0 10px; }
+    .empty { padding: 40px 12px; color: var(--muted); font-size: 13px; }
+    .clear-filters {
+      display: block;
+      margin-top: 14px;
+      background: #242930;
+      border: 1px solid #424a54;
+      color: var(--text);
+      padding: 7px 12px;
+      font-size: 12px;
+    }
+    footer { color: #747d87; font-size: 11px; margin-top: 30px; padding-top: 15px; border-top: 1px solid var(--line); }
+    dialog { max-width: 340px; width: calc(100vw - 32px); border: 0; padding: 0; background: transparent; }
+    dialog::backdrop { background: #000b; }
+    .dialog-close { margin: 12px 0 0 auto; }
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+      border: 0;
+    }
+    @media (max-width: 1190px) {
+      .browser-layout { grid-template-columns: 155px minmax(0, 1fr) 250px; gap: 20px; }
+      .level-context { display: none; }
+    }
+    @media (max-width: 1010px) {
+      .browser-layout { grid-template-columns: minmax(0, 1fr) 260px; gap: 24px; }
+      .class-nav { display: none; }
+      .mobile-class { display: block; margin-bottom: 16px; }
+      .mobile-class select { width: 100%; padding: 6px 10px; }
+      .mobile-class label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 5px; }
+      .details { padding-top: 83px; }
+    }
+    @media (max-width: 740px) {
+      main { padding: 20px 18px 30px; }
+      .masthead { padding: 0 18px; height: 54px; }
+      .page-heading { gap: 6px; display: block; }
+      .page-heading p { margin-top: 7px; }
+      h1 { font-size: 23px; }
+      .toolbar { flex-wrap: wrap; gap: 13px; margin-bottom: 18px; }
+      .search-wrap { flex-basis: 100%; max-width: none; }
+      .level-control { flex: 1; }
+      input[type=range] { flex: 1; max-width: 180px; }
+      .level-context { display: block; font-size: 11px; }
+      .browser-layout { display: block; }
+      .details { display: none; }
+      .slot-filter { gap: 17px; }
+      .results-toolbar { gap: 8px; }
+      .item-row { padding-right: 10px; }
+    }
+    @media (max-width: 380px) {
+      .level-context { display: none; }
+      .slot-filter { gap: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="masthead">
+    <div class="brand">CoA</div>
+    <div class="divider" aria-hidden="true"></div>
+    <span>Item catalog</span>
+  </header>
+  <main>
+    <div class="page-heading">
+      <h1>Legendary items</h1>
+      <p>64 non-set items · 21 custom classes</p>
+    </div>
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5"></path>
+        </svg>
+        <label class="visually-hidden" for="search">Search items</label>
+        <input id="search" type="search" placeholder="Search name, class or effect…" autocomplete="off">
+      </div>
+      <div class="level-control">
+        <label for="level-input">Creature level</label>
+        <input id="level-input" type="number" min="1" max="60" value="29" aria-label="Creature level">
+        <input id="level" type="range" min="1" max="60" value="29" aria-label="Adjust creature level">
+      </div>
+      <div id="level-context" class="level-context"></div>
+    </div>
+    <div class="browser-layout">
+      <nav class="class-nav" aria-label="Filter by class">
+        <div class="nav-label">CLASS</div>
+        <div id="class-list"></div>
+      </nav>
+      <section class="results" aria-label="Legendary items">
+        <div class="mobile-class">
+          <label for="class-filter">Class</label>
+          <select id="class-filter" aria-label="Filter by class">
+            <option value="all">All custom classes</option>
+            <option value="shared">Shared items</option>
+          </select>
+        </div>
+        <div class="results-toolbar">
+          <div id="slot-filter" class="slot-filter" role="group" aria-label="Filter by slot">
+            <button type="button" data-slot="all" aria-pressed="true">All</button>
+            <button type="button" data-slot="11" aria-pressed="false">Rings</button>
+            <button type="button" data-slot="8" aria-pressed="false">Boots</button>
+            <button type="button" data-slot="12" aria-pressed="false">Trinkets</button>
+            <button type="button" data-slot="16" aria-pressed="false">Cloaks</button>
+          </div>
+          <span id="count" role="status"></span>
+        </div>
+        <div id="items"></div>
+      </section>
+      <aside class="details" aria-label="Selected item">
+        <h2 class="detail-label">ITEM PREVIEW</h2>
+        <div id="item-detail"></div>
+        <div class="detail-notes">
+          <p>Required level matches the creature’s level for you. Item level is 12 higher.</p>
+          <p>New drops stop at player level 60. Items you already own keep working.</p>
+        </div>
+      </aside>
+    </div>
+    <footer>Movement bonuses are exclusive to boots. Gray creatures give no legendary drops.</footer>
+  </main>
+  <dialog id="item-dialog" aria-label="Item details">
+    <div id="dialog-detail"></div>
+    <form method="dialog"><button class="clear-filters dialog-close">Close</button></form>
+  </dialog>
+  <script>
+    const catalog = __CATALOG__;
+    const slots = {8: 'Feet', 11: 'Finger', 12: 'Trinket', 16: 'Back'};
+    const profiles = {
+      Strength: ['Strength', 'Attack Power'], Agility: ['Agility', 'Attack Power'],
+      Caster: ['Intellect', 'Spell Power'], StrengthHybrid: ['Strength', 'Attack Power'],
+      AgilityHybrid: ['Agility', 'Attack Power'], IntellectHybrid: ['Intellect', 'Attack Power'],
+      Universal: ['Stamina', 'Critical Strike Rating']
+    };
+    const abbreviations = {
+      Strength: 'Str', Agility: 'Agi', Intellect: 'Int', Stamina: 'Sta',
+      'Attack Power': 'AP', 'Spell Power': 'SP', 'Critical Strike Rating': 'Crit', Armor: 'Armor'
+    };
+    const conditions = {
+      Always: '', Healthy: ' while at or above 80% health', Wounded: ' while at or below 35% health',
+      AfterKill: ' for 8 sec after killing a non-gray creature', OutOfCombat: ' while out of combat',
+      InCombat: ' while in combat'
+    };
+    const state = {classId: 'all', slot: 'all', query: '', level: 29, selectedId: 0};
+    const classFilter = document.getElementById('class-filter');
+    const classList = document.getElementById('class-list');
+    const level = document.getElementById('level');
+    const levelInput = document.getElementById('level-input');
+    const search = document.getElementById('search');
+    const items = document.getElementById('items');
+    const slotFilter = document.getElementById('slot-filter');
+    const dialog = document.getElementById('item-dialog');
+    const classes = new Map(catalog.filter(item => item.class_id).map(item => [item.class_id, item.class_name]));
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, character => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[character]));
+    }
+
+    function power(item, ilvl) {
+      if (item.power === 'Signature') {
+        return `Your ${item.signature_name}'s main hit deals ${item.magnitude}% more damage (all ranks).`;
+      }
+      let benefit;
+      if (item.power === 'Movement') benefit = `${item.magnitude}% movement speed`;
+      else if (item.power === 'Armor') benefit = `${item.magnitude}% armor`;
+      else if (item.profile === 'Caster') benefit = `${ilvl} spell power`;
+      else if (item.profile.endsWith('Hybrid')) benefit = `${ilvl * 2} attack power and ${ilvl} spell power`;
+      else benefit = `${ilvl * 2} melee and ranged attack power`;
+      return `Gain ${benefit}${conditions[item.condition]}.`;
+    }
+
+    function stats(item, ilvl) {
+      const profile = profiles[item.profile];
+      const ap = profile[1] === 'Attack Power';
+      const result = item.profile === 'Universal'
+        ? [['Stamina', Math.max(1, Math.floor(ilvl * .6))]]
+        : [[profile[0], Math.max(1, Math.floor(ilvl * .35))], ['Stamina', Math.max(1, Math.floor(ilvl * .45))]];
+      result.push([profile[1], Math.max(1, Math.floor(ilvl * (ap ? 1 : .55)))]);
+      if (item.profile.endsWith('Hybrid')) result.push(['Spell Power', Math.max(1, Math.floor(ilvl * .35))]);
+      if (item.inventory_type === 16) result.unshift(['Armor', ilvl * 2]);
+      if (item.inventory_type === 8) result.unshift(['Armor', Math.floor(ilvl * 1.5)]);
+      return result;
+    }
+
+    function tooltip(item) {
+      const ilvl = state.level + 12;
+      const armorType = [8, 16].includes(item.inventory_type) ? 'Cloth' : '';
+      return `
+        <div class="item-tooltip">
+          <h3>${escapeHtml(item.name)}</h3>
+          <div class="tooltip-level">Item Level ${ilvl}</div>
+          <div>Binds when picked up</div>
+          <div>Unique</div>
+          <div class="tooltip-slot"><span>${slots[item.inventory_type]}</span><span>${armorType}</span></div>
+          <ul class="tooltip-stats">${stats(item, ilvl).map(([name, amount]) =>
+            `<li>${name === 'Armor' ? `${amount} Armor` : `+${amount} ${name}`}</li>`).join('')}</ul>
+          <div class="tooltip-requirements">
+            <div>Requires Level ${state.level}</div>
+            <div>Classes: ${item.class_id ? escapeHtml(item.class_name) : 'CoA custom classes'}</div>
+          </div>
+          <p class="tooltip-power">Equip: ${escapeHtml(power(item, ilvl))}</p>
+        </div>`;
+    }
+
+    function renderDetail(item) {
+      const content = item ? tooltip(item) : '<div class="detail-notes">Select an item to see its tooltip.</div>';
+      document.getElementById('item-detail').innerHTML = content;
+      document.getElementById('dialog-detail').innerHTML = item ? content : '';
+    }
+
+    function render() {
+      const ilvl = state.level + 12;
+      const visible = catalog.filter(item =>
+        (state.classId === 'all' || (state.classId === 'shared' ? !item.class_id :
+          !item.class_id || item.class_id === Number(state.classId))) &&
+        (state.slot === 'all' || item.inventory_type === Number(state.slot)) &&
+        `${item.name} ${item.class_name} ${power(item, ilvl)}`.toLowerCase().includes(state.query));
+      if (!visible.some(item => item.id === state.selectedId)) state.selectedId = visible[0]?.id ?? null;
+      document.getElementById('count').textContent = `${visible.length} ${visible.length === 1 ? 'item' : 'items'}`;
+      document.getElementById('level-context').innerHTML = `Required <strong>${state.level}</strong>
+        <span aria-hidden="true"> / </span> Item level <strong>${ilvl}</strong>`;
+      classFilter.value = state.classId;
+      for (const button of classList.querySelectorAll('button')) {
+        button.setAttribute('aria-pressed', button.dataset.class === state.classId);
+      }
+      for (const button of slotFilter.querySelectorAll('button')) {
+        button.setAttribute('aria-pressed', button.dataset.slot === state.slot);
+      }
+
+      const groups = new Map();
+      for (const item of visible) {
+        if (!groups.has(item.class_id)) groups.set(item.class_id, []);
+        groups.get(item.class_id).push(item);
+      }
+      items.innerHTML = [...groups].map(([classId, group]) => `
+        <section class="class-group" aria-label="${escapeHtml(classId ? group[0].class_name : 'Shared items')}">
+          <h2 class="group-heading">${escapeHtml(classId ? group[0].class_name : 'Shared items')}
+            <span>${group.length}</span></h2>
+          ${group.map(item => `
+            <button type="button" class="item-row" data-item="${item.id}"
+              aria-pressed="${item.id === state.selectedId}" aria-label="View ${escapeHtml(item.name)}">
+              <span class="row-top"><span class="item-name">${escapeHtml(item.name)}</span>
+                <span class="row-slot">${slots[item.inventory_type]}</span></span>
+              <span class="row-stats">${stats(item, ilvl).map(([name, amount]) =>
+                `<span title="${name}">${amount} ${abbreviations[name]}</span>`).join('')}</span>
+              <span class="row-effect">${escapeHtml(power(item, ilvl))}</span>
+            </button>`).join('')}
+        </section>`).join('') || `<div class="empty">No items match these filters.
+          <button type="button" class="clear-filters" data-clear>Clear filters</button></div>`;
+      renderDetail(visible.find(item => item.id === state.selectedId));
+    }
+
+    function clearFilters() {
+      state.classId = state.slot = 'all';
+      state.query = search.value = '';
+      render();
+    }
+
+    function setLevel(value) {
+      const number = Number(value);
+      if (!Number.isFinite(number) || value === '') return;
+      state.level = Math.min(60, Math.max(1, Math.round(number)));
+      level.value = levelInput.value = state.level;
+      render();
+    }
+
+    function classButton(value, name, count) {
+      return `<button type="button" data-class="${value}" aria-pressed="${value === state.classId}">
+        ${escapeHtml(name)}<span>${count}</span></button>`;
+    }
+
+    classList.innerHTML = classButton('all', 'All classes', 64) + classButton('shared', 'Shared items', 1) +
+      '<div class="nav-rule"></div>' + [...classes].map(([id, name]) => classButton(id, name, 3)).join('');
+    for (const [id, name] of classes) classFilter.add(new Option(name, id));
+    classList.addEventListener('click', event => {
+      const button = event.target.closest('button[data-class]');
+      if (!button) return;
+      state.classId = button.dataset.class;
+      render();
+    });
+    classFilter.addEventListener('change', () => {
+      state.classId = classFilter.value;
+      render();
+    });
+    slotFilter.addEventListener('click', event => {
+      const button = event.target.closest('button[data-slot]');
+      if (!button) return;
+      state.slot = button.dataset.slot;
+      render();
+    });
+    search.addEventListener('input', () => {
+      state.query = search.value.trim().toLowerCase();
+      render();
+    });
+    level.addEventListener('input', () => setLevel(level.value));
+    levelInput.addEventListener('input', () => setLevel(levelInput.value));
+    levelInput.addEventListener('blur', () => { levelInput.value = state.level; });
+    items.addEventListener('click', event => {
+      if (event.target.closest('[data-clear]')) return clearFilters();
+      const button = event.target.closest('button[data-item]');
+      if (!button) return;
+      state.selectedId = Number(button.dataset.item);
+      for (const row of items.querySelectorAll('[data-item]')) {
+        row.setAttribute('aria-pressed', Number(row.dataset.item) === state.selectedId);
+      }
+      renderDetail(catalog.find(item => item.id === state.selectedId));
+      if (window.matchMedia('(max-width: 740px)').matches) dialog.showModal();
+    });
+    render();
+  </script>
+</body>
+</html>

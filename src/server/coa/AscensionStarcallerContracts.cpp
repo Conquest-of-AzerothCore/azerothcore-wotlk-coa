@@ -14,6 +14,10 @@ void ApplyContracts(SpellInfo* info)
     if (!info || info->SpellFamilyName != 32)
         return;
     uint32 id = info->Id;
+    if (id == 680805 && info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_ADD_PCT_MODIFIER &&
+        info->Effects[EFFECT_0].MiscValue == SPELLMOD_BONUS_MULTIPLIER &&
+        info->Effects[EFFECT_0].SpellClassMask == flag96(0, 4096, 0))
+        info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
     auto dummy = [info](uint8 slot) {
         info->Effects[slot].ApplyAuraName = SPELL_AURA_DUMMY;
         info->Effects[slot].TriggerSpell = 0;
@@ -117,9 +121,9 @@ void ApplyContracts(SpellInfo* info)
         info->MaxAffectedTargets = 0;
     if (id == 92133)
         info->Effects[0].BasePoints = 7;
-    if (id == 92132 || id == 574349)
+    if (id == 92132 || id == 574349 || id == 680789)
         dummy(id == 92132 ? 2 : 0);
-    if (id == 100250 || id == 801148 || id == 706436)
+    if (id == 100250 || id == 801148 || id == 706436 || id == 680790)
         info->DurationEntry = sSpellDurationStore.LookupEntry(21);
     if (id == 704787)
     {
@@ -266,13 +270,6 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_DEST_AREA_ENEMY);
         info->Effects[0].RadiusEntry = info->Effects[2].RadiusEntry;
         info->Effects[2].Effect = 0;
-    }
-    if (id == 807992)
-    {
-        info->Effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
-        info->Effects[0].ApplyAuraName = SPELL_AURA_PERIODIC_DUMMY;
-        info->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
-        info->Effects[0].TargetB = SpellImplicitTargetInfo();
     }
     for (uint32 sid : {801148, 100250, 680790, 706436})
         if (id == sid)

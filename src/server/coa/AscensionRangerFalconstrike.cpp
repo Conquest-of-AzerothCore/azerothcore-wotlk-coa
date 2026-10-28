@@ -5,6 +5,7 @@
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
+#include "TemporarySummon.h"
 #include <array>
 
 namespace
@@ -13,7 +14,8 @@ enum FalconstrikeSpells : uint32
 {
     SPELL_FALCONSTRIKE_TALENT = 573060,
     SPELL_FALCONSTRIKE_COUNTER = 573248,
-    SPELL_FALCONSTRIKE_READY = 573338
+    SPELL_FALCONSTRIKE_READY = 573338,
+    SPELL_FALCONSTRIKE_SUMMON = 520588
 };
 
 constexpr std::array<uint32, 7> QuickShots = {500074, 572727, 572728, 572729, 572730, 572731, 572732};
@@ -30,31 +32,33 @@ void SyncFalconstrike(Player* player)
 {
     if (player->getClass() != CLASS_RANGER)
         return;
-    bool ready = FalconstrikeReady(player);
-    uint32 replacement = 0;
-    if (ready)
+    if (!player->HasAura(SPELL_FALCONSTRIKE_TALENT))
     {
-        replacement = Falconstrikes.front();
         for (uint32 rank : Falconstrikes)
-            if (SpellInfo const* info = sSpellMgr->GetSpellInfo(rank); info && info->SpellLevel <= player->GetLevel())
-                replacement = rank;
-        if (player->GetSpellMap().find(replacement) == player->GetSpellMap().end())
-            player->learnSpell(replacement, true);
+            if (player->GetSpellMap().find(rank) != player->GetSpellMap().end())
+                player->removeSpell(rank, SPEC_MASK_ALL, true);
+        player->RemoveAurasDueToSpell(SPELL_FALCONSTRIKE_COUNTER, player->GetGUID());
+        player->RemoveAurasDueToSpell(SPELL_FALCONSTRIKE_READY, player->GetGUID());
+        for (uint32 quick : QuickShots)
+            player->SetTemporarySpellReplacement(quick, 0);
+        return;
     }
+    uint32 replacement = Falconstrikes.front();
+    for (uint32 rank : Falconstrikes)
+        if (SpellInfo const* info = sSpellMgr->GetSpellInfo(rank); info && info->SpellLevel <= player->GetLevel())
+            replacement = rank;
+    bool ready = FalconstrikeReady(player);
+    if (ready && player->GetSpellMap().find(replacement) == player->GetSpellMap().end())
+        player->learnSpell(replacement, true);
+    for (uint32 rank : Falconstrikes)
+        if (rank != replacement && player->GetSpellMap().find(rank) != player->GetSpellMap().end())
+            player->removeSpell(rank, SPEC_MASK_ALL, true);
     for (uint32 quick : QuickShots)
     {
         if (ready && player->HasActiveSpell(quick) && player->HasActiveSpell(replacement))
             player->SetTemporarySpellReplacement(quick, replacement);
         else
             player->SetTemporarySpellReplacement(quick, 0);
-    }
-    for (uint32 rank : Falconstrikes)
-        if (rank != replacement && player->GetSpellMap().find(rank) != player->GetSpellMap().end())
-            player->removeSpell(rank, SPEC_MASK_ALL, true);
-    if (!player->HasAura(SPELL_FALCONSTRIKE_TALENT))
-    {
-        player->RemoveAurasDueToSpell(SPELL_FALCONSTRIKE_COUNTER, player->GetGUID());
-        player->RemoveAurasDueToSpell(SPELL_FALCONSTRIKE_READY, player->GetGUID());
     }
 }
 
@@ -120,11 +124,24 @@ public:
     void OnPlayerLogin(Player* player) override { SyncFalconstrike(player); }
     void OnPlayerUpdate(Player* player, uint32) override { SyncFalconstrike(player); }
 };
+
+class ranger_falconstrike_summon : public AllSpellScript
+{
+public:
+    ranger_falconstrike_summon() : AllSpellScript("ranger_falconstrike_summon", {ALLSPELLHOOK_ON_GUARDIAN_SUMMONED}) { }
+
+    void OnGuardianSummoned(Spell* spell, TempSummon* summon) override
+    {
+        if (spell->GetSpellInfo()->Id == SPELL_FALCONSTRIKE_SUMMON && summon)
+            summon->SetReactState(REACT_DEFENSIVE);
+    }
+};
 }
 
 void AddSC_AscensionRangerFalconstrike()
 {
     new ranger_falconstrike_casts();
     new ranger_falconstrike_lifecycle();
+    new ranger_falconstrike_summon();
     RegisterSpellScript(spell_ascension_ranger_falconstrike);
 }

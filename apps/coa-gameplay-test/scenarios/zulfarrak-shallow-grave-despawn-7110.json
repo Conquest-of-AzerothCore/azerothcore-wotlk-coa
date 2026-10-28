@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "name": "Zul'Farrak: a Shallow Grave 128403 despawns after it is opened (COA-7110)",
+  "contract": "Opening a Shallow Grave summons its Zul'Farrak zombies once and the grave then despawns, like Shallow Grave 128308, so the same grave cannot be opened again to farm zombies.",
+  "timeout_ms": 120000,
+  "location": { "map": 1, "x": 1629.36, "y": -4373.39, "z": 31.26, "o": 0 },
+  "players": [
+    { "id": "digger", "race": 2, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "summon_gameobject", "label": "A Shallow Grave in front of the player", "actor": "digger", "entry": 128403, "distance": 3 },
+    { "action": "assert", "label": "SETUP: the grave stands in front of the player", "actor": "digger",
+      "metric": "nearby_gameobject_count", "entry": 128403, "equals": 1, "within_ms": 5000 },
+    { "action": "use_nearby_gameobject", "label": "Open the Shallow Grave", "actor": "digger", "entry": 128403, "owner": "digger" },
+    { "action": "assert", "label": "the opened grave despawns", "actor": "digger",
+      "metric": "nearby_gameobject_count", "entry": 128403, "equals": 0, "within_ms": 8000 }
+  ]
+}

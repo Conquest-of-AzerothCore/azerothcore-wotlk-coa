@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Delivery to Silverpine Forest: Johaan's Findings can be handed to Apothecary Renferrel (#5514)",
+  "contract": [
+    "Quest 445 Delivery to Silverpine Forest starts at Apothecary Johaan 1518 in Brill, who provides Johaan's Findings",
+    "3238, and ends at Apothecary Renferrel 1937 at the Sepulcher (guid 17612, 522.449 1652.3 125.843), which needs",
+    "that item. Expected: an Undead at level 10 can take the quest, and in the world phase a courier carrying the",
+    "findings sees Renferrel's turn-in marker and can hand the quest in."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": 520.5, "y": 1650.5, "z": 125.85, "o": 0.7},
+  "players": [{"id": "courier", "race": 5, "class": 1, "level": 10}],
+  "steps": [
+    {"action": "wait", "label": "Let login settle", "ms": 3000},
+    {"action": "assert", "label": "The Undead can take the delivery", "actor": "courier", "metric": "quest_takeable",
+     "quest": 445, "equals": 1},
+    {"action": "set_phase", "actor": "courier", "value": 1},
+    {"action": "assert", "label": "Apothecary Renferrel stands at the Sepulcher", "actor": "courier",
+     "metric": "nearby_creature_count", "entry": 1937, "equals": 1, "within_ms": 10000},
+    {"action": "prepare_quest", "label": "Fixture: the courier carries Johaan's Findings", "actor": "courier",
+     "quest": 445},
+    {"action": "assert", "label": "SETUP: the findings are in the bags", "actor": "courier", "metric": "item_count",
+     "item": 3238, "equals": 1},
+    {"action": "assert", "label": "Renferrel shows the turn-in marker", "actor": "courier", "metric": "dialog_status",
+     "entry": 1937, "equals": 10, "within_ms": 5000},
+    {"action": "reward_quest", "label": "Hand in the delivery", "actor": "courier", "quest": 445},
+    {"action": "assert", "label": "Delivery to Silverpine Forest is rewarded", "actor": "courier",
+     "metric": "quest_rewarded", "quest": 445, "equals": 1}
+  ]
+}

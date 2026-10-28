@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Gadrin's Blessing holds in Echo Isles while an Echo Isles quest is taken (#4628)",
+  "contract": "Gadrin's Blessing 675910 (+100% swim speed) is cast on a player standing in Echo Isles (area 368) who has Minshina's Skull 808, Practical Prey 817, A Solvent Spirit 818 or Zalazane 826 in the log, incomplete or complete, and is removed once that quest is rewarded. The players stand at Zalazane's spawn (creature guid 13001), which the server map grid 0013442 places in area 368. Expected: no blessing before a quest is taken, the blessing on taking 808 (incomplete) and 826 (complete), and none after 826 is rewarded.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": -1286.96, "y": -5534.33, "z": 15.3023, "o": 0 },
+  "players": [
+    { "id": "seeker", "race": 8, "class": 1, "level": 10 },
+    { "id": "hunter", "race": 2, "class": 1, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "SETUP: no blessing in Echo Isles without a quest", "actor": "seeker",
+      "metric": "aura", "spell": 675910, "equals": 0
+    },
+    { "action": "prepare_quest", "label": "Take Minshina's Skull", "actor": "seeker", "quest": 808, "complete": false },
+    {
+      "action": "assert", "label": "Taking Minshina's Skull in Echo Isles grants the blessing", "actor": "seeker",
+      "metric": "aura", "spell": 675910, "equals": 1, "within_ms": 3000
+    },
+    { "action": "prepare_quest", "label": "Take and complete Zalazane", "actor": "hunter", "quest": 826 },
+    {
+      "action": "assert", "label": "A completed Zalazane still carries the blessing", "actor": "hunter",
+      "metric": "aura", "spell": 675910, "equals": 1, "within_ms": 3000
+    },
+    { "action": "reward_quest", "label": "Turn in Zalazane", "actor": "hunter", "quest": 826 },
+    {
+      "action": "assert", "label": "SETUP: Zalazane is rewarded", "actor": "hunter",
+      "metric": "quest_rewarded", "quest": 826, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Turning in Zalazane removes the blessing", "actor": "hunter",
+      "metric": "aura", "spell": 675910, "equals": 0, "within_ms": 3000
+    }
+  ]
+}

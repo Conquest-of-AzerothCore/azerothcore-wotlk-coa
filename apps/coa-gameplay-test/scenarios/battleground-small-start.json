@@ -1,0 +1,286 @@
+{
+  "schema": 1,
+  "name": "Warsong Gulch starts with one player per faction and admits late arrivals",
+  "contract": "With default queue overrides, one Alliance and one Horde player can enter Warsong Gulch. The match remains open beyond the five-minute low-population timer. A second pair can then join the same battleground, preserving normal team capacity.",
+  "timeout_ms": 600000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "alliance",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "horde",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "late_alliance",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "late_horde",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "actor": "alliance",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "horde",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "actor": "alliance",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "alliance"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "alliance enters Warsong Gulch",
+      "actor": "alliance",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "horde",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "horde"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "horde enters Warsong Gulch",
+      "actor": "horde",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "ms": 450000
+    },
+    {
+      "action": "assert",
+      "label": "Small match remains open",
+      "actor": "alliance",
+      "metric": "map_id",
+      "equals": 489
+    },
+    {
+      "action": "assert",
+      "label": "Small match remains open",
+      "actor": "horde",
+      "metric": "map_id",
+      "equals": 489
+    },
+    {
+      "action": "client_packet",
+      "actor": "late_alliance",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "late_horde",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "actor": "late_alliance",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "late_alliance"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "late_alliance enters Warsong Gulch",
+      "actor": "late_alliance",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "late_horde",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "late_horde"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "late_horde enters Warsong Gulch",
+      "actor": "late_horde",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    }
+  ]
+}

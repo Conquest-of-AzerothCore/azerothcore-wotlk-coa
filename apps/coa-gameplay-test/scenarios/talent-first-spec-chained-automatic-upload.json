@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "First specialization save keeps automatic entries chained on the new identity",
+  "contract": "A character choosing its first specialization uploads the identity and signature entries together with the zero-cost automatic entries that require them, so the save must activate the specialization and grant those spells instead of refusing the whole upload. Sun Cleric Piety (46) chains entry 31194 Dawnsear 500146 on identity 4046 (#8771), Fleshwarden War (18) chains entry 12166 Warbringer 570727 on identity 4016 (#8817), and Chronomancer Time (33) chains entries 12853 Artificer's Wand 804478 and 31183 Shatter Echo 804503 on identity 4033 and signature 30855 (#8820). Levels match the reports. The control adds Fleshwarden entry 12166 to the Sun Cleric's save, which must be refused, so the listed entries demonstrably reach the server.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "cleric", "race": 1, "class": 27, "level": 11},
+    {"id": "fleshwarden", "race": 10, "class": 17, "level": 11},
+    {"id": "chronomancer", "race": 1, "class": 22, "level": 10}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks and class synchronisation settle", "ms": 5000},
+    {"action": "assert", "label": "Dawnsear is not known before the save", "actor": "cleric", "metric": "knows_spell", "spell": 500146, "equals": 0},
+    {"action": "specialization", "label": "Control: a Fleshwarden entry in the same save reaches the server and is refused", "actor": "cleric", "id": 46, "entries": [31194, 12166], "refused": true},
+    {"action": "specialization", "label": "Piety save carries Dawnsear", "actor": "cleric", "id": 46, "entries": [31194]},
+    {"action": "assert", "label": "Dawnsear is granted with Piety", "actor": "cleric", "metric": "knows_spell", "spell": 500146, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "Warbringer is not known before the save", "actor": "fleshwarden", "metric": "knows_spell", "spell": 570727, "equals": 0},
+    {"action": "specialization", "label": "War save carries Warbringer", "actor": "fleshwarden", "id": 18, "entries": [12166]},
+    {"action": "assert", "label": "Warbringer is granted with War", "actor": "fleshwarden", "metric": "knows_spell", "spell": 570727, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "Shatter Echo is not known before the save", "actor": "chronomancer", "metric": "knows_spell", "spell": 804503, "equals": 0},
+    {"action": "specialization", "label": "Time save carries its two automatic entries", "actor": "chronomancer", "id": 33, "entries": [12853, 31183]},
+    {"action": "assert", "label": "Artificer's Wand is granted with Time", "actor": "chronomancer", "metric": "knows_spell", "spell": 804478, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "Shatter Echo is granted with Time", "actor": "chronomancer", "metric": "knows_spell", "spell": 804503, "equals": 1, "within_ms": 3000}
+  ]
+}

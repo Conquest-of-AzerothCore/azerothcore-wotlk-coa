@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "name": "Runemaster Wind Walker shortens Rune cooldowns every 5 sec only while Runic Tattoos: Air is active (#3670)",
+  "contract": [
+    "Wind Walker 807376 reads 'While Runic Tattoos: Air is active, the remaining cooldown of Rune spells is reduced by",
+    "$807529s1% every $t1 sec.' Its three native SPELL_AURA_PERIODIC_TRIGGER_SPELL effects (amplitude 5000 ms) trigger",
+    "807746, 807529 and 807991, whose effects are the Ascension effect 192 (reduce the remaining cooldown of spell",
+    "MiscValue by the effect value %). 807529 names Ice Rune 524930, Guarding Rune 500464 and Speed Rune 801103 at",
+    "EffectBasePoints 4 + DieSides 1 = 5%. Effect 192 is EffectNULL unless spell_ascension_the_bieko_effect is bound, and",
+    "no binding existed, so the talent did nothing. Expected: with its own Runic Tattoos: Air 802630 active, a Guarding",
+    "Rune (RecoveryTime 120000 ms) cooldown loses 5% of its remaining time on each tick; three or four ticks fall in a",
+    "16 s window, which removes roughly 14 to 20 s beyond elapsed time. Without the Air tattoo the talent does nothing.",
+    "A control Runemaster without the talent starts the same cooldown at the same moment, so the relative difference",
+    "isolates the talent. Fails before the fix (difference near zero); passes after."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "control", "race": 1, "class": 32, "level": 80},
+    {"id": "talent", "race": 1, "class": 32, "level": 80},
+    {"id": "no_air", "race": 1, "class": 32, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the characters settle", "ms": 3000},
+    {"action": "learn", "actor": "control", "spell": 500464},
+    {"action": "learn", "actor": "talent", "spell": 500464},
+    {"action": "learn", "actor": "no_air", "spell": 500464},
+    {"action": "learn", "actor": "control", "spell": 802630},
+    {"action": "learn", "actor": "talent", "spell": 802630},
+    {"action": "learn", "actor": "talent", "spell": 807376},
+    {"action": "learn", "actor": "no_air", "spell": 807376},
+    {"action": "assert", "label": "SETUP: Wind Walker is applied", "actor": "talent", "metric": "aura",
+      "spell": 807376, "equals": 1, "within_ms": 1000},
+
+    {"action": "cast", "actor": "control", "spell": 802630},
+    {"action": "cast", "actor": "talent", "spell": 802630},
+    {"action": "assert", "label": "SETUP: the control has Runic Tattoos: Air", "actor": "control", "metric": "aura",
+      "spell": 802630, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "SETUP: the talented Runemaster has Runic Tattoos: Air", "actor": "talent",
+      "metric": "aura", "spell": 802630, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "SETUP: the no-Air Runemaster has no Air tattoo", "actor": "no_air",
+      "metric": "aura", "spell": 802630, "equals": 0},
+    {"action": "wait", "label": "Let the global cooldown clear", "ms": 2000},
+
+    {"action": "cast", "actor": "control", "spell": 500464},
+    {"action": "cast", "actor": "talent", "spell": 500464},
+    {"action": "cast", "actor": "no_air", "spell": 500464},
+    {"action": "assert", "label": "SETUP: the control's Guarding Rune cooldown started", "actor": "control",
+      "metric": "cooldown_ms", "spell": 500464, "min": 110000},
+    {"action": "assert", "label": "SETUP: the talented Guarding Rune cooldown started", "actor": "talent",
+      "metric": "cooldown_ms", "spell": 500464, "min": 110000},
+    {"action": "assert", "label": "SETUP: the no-Air Guarding Rune cooldown started", "actor": "no_air",
+      "metric": "cooldown_ms", "spell": 500464, "min": 110000},
+
+    {"action": "wait", "label": "Pass three or four Wind Walker ticks", "ms": 16000},
+    {"action": "snapshot", "label": "Control Guarding Rune cooldown after elapsed time alone", "actor": "control",
+      "metric": "cooldown_ms", "spell": 500464, "save_as": "control_cooldown"},
+    {"action": "assert", "label": "CONTRACT: with Runic Tattoos: Air, Wind Walker removed 5% per tick",
+      "actor": "talent", "metric": "cooldown_ms", "spell": 500464, "relative_to": "control_cooldown",
+      "min": -22000, "max": -9000},
+    {"action": "assert", "label": "CONTRACT: without Runic Tattoos: Air, Wind Walker changes nothing",
+      "actor": "no_air", "metric": "cooldown_ms", "spell": 500464, "relative_to": "control_cooldown",
+      "min": -1500, "max": 1500}
+  ]
+}

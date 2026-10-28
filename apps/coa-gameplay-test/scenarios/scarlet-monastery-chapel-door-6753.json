@@ -1,0 +1,210 @@
+{
+  "schema": 1,
+  "name": "Scarlet Monastery Cathedral: the Chapel Door answers as an unlocked door and takes a click",
+  "contract": "Quest-free dungeon case for #6753, 'Scarlet Monastery Cathedral Door': clicking the Chapel Door 104591 at the end of the cathedral corridor answered 'Invalid Target' and never opened. The door is a GAMEOBJECT_TYPE_DOOR with displayId 1207 and, in stock data, lock 299 (gameobject_template.Data1) plus GO_FLAG_LOCKED on the template addon - the server's own use path never checks a lock, so it is the client that refuses the click, and rev_20261003_10_dm_maraudon.sql already cleared both ('Locked' flag: clicking gave 'Invalid target') for every vanilla door including 104591, 104589 and 104600. What was not covered is a case that keeps them cleared, so this one asks the server for each object through the client's own CMSG_GAMEOBJECT_QUERY and reads the answer out of SMSG_GAMEOBJECT_QUERY_RESPONSE: the Chapel Door must answer as type 0 with displayId 1207, closed (Data0 0) and unlocked (Data1 0), its Lever 104589 as type 1 and unlocked, and the High Inquisitor's Door 104600 as type 0 and unlocked. It then stands the character where the reporter stood, shows the door and the lever are both spawned in world phase 1, and feeds the server both CMSG_GAMEOBJ_USE packets a real client sends - the door click the report was about and the lever pull whose smart_scripts row activates guid 11875. The harness cannot read a gameobject's open state (its gameobject metrics cover player-owned objects and their display and timer only), so what this case proves is the data the client decides the click on plus the use path behind it, not the resulting door state.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 189,
+    "x": 1069.61,
+    "y": 1397.51,
+    "z": 30.7628,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, the phase the Chapel Door and its lever are spawned in (the case lane phase hides them)",
+      "actor": "c",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the chapel's grid activate",
+      "ms": 2500
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the server about the Chapel Door the way the client does when the object comes into view",
+      "actor": "c",
+      "opcode": 94,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 104591
+        },
+        {
+          "u64": 11875
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: 104591 answers as a door (type 0), not as some other object",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 95,
+      "row": 104591,
+      "offset": 4,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: and as the chapel's own model, displayId 1207",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 95,
+      "row": 104591,
+      "offset": 8,
+      "index": 0,
+      "equals": 1207,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the door starts closed: Data0 startOpen is 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 95,
+      "row": 104591,
+      "offset": 12,
+      "skip_strings": 7,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the door carries no lock any more, so the client has nothing to refuse a plain click with (stock lock 299 and its GO_FLAG_LOCKED are gone)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 95,
+      "row": 104591,
+      "offset": 12,
+      "skip_strings": 7,
+      "index": 1,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask about the Lever that stands beside the door",
+      "actor": "c",
+      "opcode": 94,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 104589
+        },
+        {
+          "u64": 11881
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the lever answers as a button (type 1)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 95,
+      "row": 104589,
+      "offset": 4,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "and it is unlocked as well, so a player can still pull it",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 95,
+      "row": 104589,
+      "offset": 12,
+      "skip_strings": 7,
+      "index": 1,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask about the High Inquisitor's Door, the other door of this wing the same fix covered",
+      "actor": "c",
+      "opcode": 94,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 104600
+        },
+        {
+          "u64": 11877
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: 104600 answers as a door too (type 0)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 95,
+      "row": 104600,
+      "offset": 4,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "and it is unlocked as well, so this wing has no key-gated door left",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 95,
+      "row": 104600,
+      "offset": 12,
+      "skip_strings": 7,
+      "index": 1,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The Chapel Door stands at the end of the cathedral corridor, 1.7 yd from where the report was filed",
+      "actor": "c",
+      "metric": "nearby_gameobject_count",
+      "entry": 104591,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "and its lever is spawned beside it",
+      "actor": "c",
+      "metric": "nearby_gameobject_count",
+      "entry": 104589,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Click the door: the CMSG_GAMEOBJ_USE a client sends once it has no lock to complain about",
+      "actor": "c",
+      "entry": 104591
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Pull the lever as well, whose smart_scripts row activates guid 11875",
+      "actor": "c",
+      "entry": 104589
+    }
+  ]
+}

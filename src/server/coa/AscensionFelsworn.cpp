@@ -14,6 +14,7 @@
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include <algorithm>
+#include <array>
 #include <memory>
 #include <mutex>
 #include <unordered_map>
@@ -38,6 +39,19 @@ FelswornState& State(Player* player)
 bool Named(SpellInfo const* info, uint32 root)
 {
     return info && sSpellMgr->GetFirstSpellInChain(info->Id) == sSpellMgr->GetFirstSpellInChain(root);
+}
+bool CanLearnRift(Player const* player, uint32 spellId)
+{
+    if (!player)
+        return false;
+    constexpr std::array<uint32, 8> factionRifts = {535595, 535596, 535597, 535598, 535599, 535600, 535601, 535602};
+    if (std::find(factionRifts.begin(), factionRifts.end(), spellId) == factionRifts.end())
+        return true;
+    auto const bounds = sSpellMgr->GetSkillLineAbilityMapBounds(spellId);
+    for (auto itr = bounds.first; itr != bounds.second; ++itr)
+        if (itr->second->RaceMask && !(itr->second->RaceMask & player->getRaceMask()))
+            return false;
+    return true;
 }
 bool Spender(SpellInfo const* info)
 {
@@ -85,7 +99,7 @@ void SettleDebt(Player* player)
     for (auto const& debt : state.debt)
         amount += debt.remaining;
     state.debt.clear();
-    state.timers.CancelEvent(807727);
+    state.timers.CancelEvent(StaggerTick);
     if (player->IsAlive() && amount)
         Unit::DealDamage(player, player, uint32(std::min<uint64>(amount, UINT32_MAX)), nullptr, NODAMAGE,
                          SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
@@ -333,10 +347,18 @@ class felsworn_player : public PlayerScript
         if (!Owner(player))
             return;
         auto& state = State(player);
+        if (state.rushSurgeMs)
+        {
+            if (player->IsAlive() && player->GetSpeedRate(MOVE_RUN) != state.rushSurgeRate)
+                player->SetSpeed(MOVE_RUN, state.rushSurgeRate, true);
+            state.rushSurgeMs = state.rushSurgeMs > diff ? state.rushSurgeMs - diff : 0;
+            if (!state.rushSurgeMs)
+                player->UpdateSpeed(MOVE_RUN, true);
+        }
         state.timers.Update(diff);
         state.scheduler.Update(diff);
         while (uint32 event = state.timers.ExecuteEvent())
-            if (event == 807727)
+            if (event == StaggerTick)
             {
                 uint64 amount = 0;
                 for (auto& debt : state.debt)
@@ -353,21 +375,21 @@ class felsworn_player : public PlayerScript
                     Unit::DealDamage(player, player, uint32(std::min<uint64>(amount, UINT32_MAX)), nullptr, NODAMAGE,
                                      SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
                 if (!state.debt.empty())
-                    state.timers.ScheduleEvent(807727, 1s);
+                    state.timers.ScheduleEvent(StaggerTick, 1s);
             }
         if (!player->IsAlive())
         {
             state.debt.clear();
             player->RemoveAurasDueToSpell(804216);
         }
-        if (!state.timers.HasTimeUntilEvent(1))
+        if (!state.timers.HasTimeUntilEvent(RefreshEvent))
         {
             Refresh(player);
             state.infernals.erase(
                 std::remove_if(state.infernals.begin(), state.infernals.end(),
                                [player](ObjectGuid guid) { return !ObjectAccessor::GetCreature(*player, guid); }),
                 state.infernals.end());
-            state.timers.ScheduleEvent(1, 250ms);
+            state.timers.ScheduleEvent(RefreshEvent, 250ms);
         }
     }
     void OnPlayerBeforeLogout(Player* player) override

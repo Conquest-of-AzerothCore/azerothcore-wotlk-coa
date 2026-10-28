@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "PvP Power on a level 60 Bloodforged item is the client value, not half of it",
+  "contract": "The Bloodforged Ango'rosh Breastplate (100079, required level 60) carries the equip spell PvP Power (+21) but the client's ItemAddon.dbc gives it 42 PvP Power, the value its tooltip shows. The server applies 42 x 0.05% = 2.1% to a level 60 attacker's damage against another player, not the 1.05% of the spell. Requires PvpPower.Enable = 1 in coa.conf and ItemAddon.dbc in DataDir/dbc.",
+  "players": [
+    {
+      "id": "k",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "v",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "script_melee_damage_taken",
+      "target": "k",
+      "equals": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 750
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 8737
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 9078
+    },
+    {
+      "action": "add_item",
+      "actor": "k",
+      "item": 100079,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "k",
+      "item": 100079,
+      "slot": 4
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "script_melee_damage_taken",
+      "target": "k",
+      "min": 1020,
+      "max": 1022
+    }
+  ]
+}

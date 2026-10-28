@@ -1,0 +1,11 @@
+UPDATE `trainer_spell` SET `ReqAbility1` = 801839 WHERE `TrainerId` = 900016 AND `SpellId` = 501450;
+UPDATE `trainer_spell` SET `ReqAbility1` = 804017 WHERE `TrainerId` = 900016 AND `SpellId` = 503352;
+UPDATE `trainer_spell` SET `ReqAbility1` = 802354 WHERE `TrainerId` = 900016 AND `SpellId` = 570161;
+UPDATE `trainer_spell` SET `ReqAbility1` = 807105 WHERE `TrainerId` = 900016 AND `SpellId` = 807106;
+UPDATE `trainer_spell` SET `ReqAbility1` = 802581 WHERE `TrainerId` = 900017 AND `SpellId` = 802582;
+UPDATE `trainer_spell` SET `ReqAbility1` = 804353 WHERE `TrainerId` = 900017 AND `SpellId` = 806869;
+UPDATE `trainer_spell` SET `ReqAbility1` = 801772 WHERE `TrainerId` = 900018 AND `SpellId` = 501066;
+UPDATE `trainer_spell` SET `ReqAbility1` = 801776 WHERE `TrainerId` = 900018 AND `SpellId` = 501068;
+UPDATE `trainer_spell` SET `ReqAbility1` = 801291 WHERE `TrainerId` = 900022 AND `SpellId` = 501831;
+UPDATE `trainer_spell` SET `ReqAbility1` = 561284 WHERE `TrainerId` = 900022 AND `SpellId` = 561354;
+UPDATE `trainer_spell` SET `ReqAbility1` = 802174 WHERE `TrainerId` = 900024 AND `SpellId` = 803407;

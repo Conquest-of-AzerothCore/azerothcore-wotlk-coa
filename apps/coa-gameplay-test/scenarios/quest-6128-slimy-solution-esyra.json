@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Slimy Solution: Esyra wears her preset display and takes the quest back (#6128)",
+  "contract": "Quest 17003 Slimy Solution is started and ended by Esyra 900017 (rev_20260923_01 starter and ender rows), whose spawn 9002201 stands on the client's turn-in point, QuestSuperTrack 3304. Esyra is drawn from creature_display_preset row (900017, 50); rev_20261001_20 had moved her model to display 3768, which matches no preset, so the client did not draw her and the reporter found no one to hand the quest to. rev_20261002_00 put her back on display 50. Expected: a summoned Esyra uses display 50, and with the quest complete her quest menu lists 17003. Client rendering is outside this harness's reach.",
+  "timeout_ms": 30000,
+  "location": { "map": 0, "x": -9562.33, "y": -722.93, "z": 64.74, "o": 0 },
+  "players": [
+    { "id": "angler", "race": 1, "class": 1, "level": 10 }
+  ],
+  "creatures": [
+    { "id": "esyra", "owner": "angler", "entry": 900017, "distance": 2, "faction": 12 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "Esyra uses the display her preset is keyed to", "actor": "esyra",
+      "metric": "display_id", "equals": 50
+    },
+    { "action": "prepare_quest", "label": "Finish Slimy Solution", "actor": "angler", "quest": 17003 },
+    { "action": "gossip_hello", "label": "Talk to Esyra", "actor": "angler", "target": "esyra" },
+    {
+      "action": "assert", "label": "Esyra offers Slimy Solution for turn-in", "actor": "angler",
+      "metric": "quest_menu_has", "quest": 17003, "equals": 1
+    }
+  ]
+}

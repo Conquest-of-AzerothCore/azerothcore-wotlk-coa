@@ -507,9 +507,7 @@ class spell_item_with_mount_speed : public AuraScript
     void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
     {
         Unit* target = GetTarget();
-        // Local enchantment policy removes level requirements from Mithril Spurs only.
-        // Carrot on a Stick and Riding Crop retain their original item restrictions.
-        if ((target->IsPlayer() && m_scriptSpellId == SPELL_MITHRIL_SPURS) || target->GetLevel() <= 70)
+        if (target->GetLevel() <= 70)
         {
             if (auto spellId = getMountSpellId())
             {
@@ -1965,6 +1963,13 @@ class spell_item_flask_of_the_north : public SpellScript
                 possibleSpells.push_back(SPELL_FLASK_OF_THE_NORTH_SP);
                 possibleSpells.push_back(SPELL_FLASK_OF_THE_NORTH_AP);
                 break;
+            default:
+            {
+                bool const spellPower = caster->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_MAGIC) >
+                    caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                possibleSpells.push_back(spellPower ? SPELL_FLASK_OF_THE_NORTH_SP : SPELL_FLASK_OF_THE_NORTH_AP);
+                break;
+            }
         }
 
         caster->CastSpell(caster, possibleSpells[irand(0, (possibleSpells.size() - 1))], true, nullptr);

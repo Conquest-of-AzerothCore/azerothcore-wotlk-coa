@@ -1,148 +1,659 @@
 {
   "schema": 1,
   "name": "Stormbringer: Titanstorm reduces the cast rank only on Call Lightning and Electrocute (#686)",
-  "contract": "Titanstorm 801869 (Spell.dbc: passive, Effect[0] APPLY_AURA / aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 801854) promises \"Casting Call Lightning or Electrocute now reduces the cooldown of Arm of Thorim and Lightning Cage by $/1000;801854S1 sec\". 801854 carries two SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN effects with EffectBasePoints -1501 + EffectDieSides 1 = -1500 ms, EffectMiscValue[0] 801847 Arm of Thorim and EffectMiscValue[1] 560030 Lightning Cage. Two defects are covered here. First, 801869's DBC ProcFlags 327680 (DONE_SPELL_MAGIC_DMG_CLASS_NEG | DONE_PERIODIC) make SpellMgr::LoadSpellProcs generate an entry whose SpellFamilyName is 0, so no spell filter applies and any negative magic spell reduces both cooldowns; Shock 504634 (SpellFamilyFlags0 0x800, outside the talent's Electrocute 0x2000000 and Call Lightning 0x10 masks) is the probe for that. Second, Player::ModifySpellCooldown keys the cooldown map by the exact EffectMiscValue id, so naming rank 1 (801847) leaves the rank a level-80 player casts untouched: Arm of Thorim is a 9-rank chain (spell_ranks first_spell_id 801847, rank 9 = 567520) with Category 981 and RecoveryTime/CategoryRecoveryTime 20000, while Lightning Cage is a single rank with RecoveryTime 180000 and is reduced correctly today. An identical unarmed control player casts the same spells in lockstep, so every assertion on the armed player is a difference against the control's cooldown at the same instant and ordinary decay cancels out.",
+  "contract": [
+    "Titanstorm 801869 (Spell.dbc: passive, Effect[0] APPLY_AURA / aura 42 PROC_TRIGGER_SPELL,",
+    "EffectTriggerSpell 801854) promises \"Casting Call Lightning or Electrocute now reduces the cooldown of",
+    "Arm of Thorim and Lightning Cage by $/1000;801854S1 sec\". 801854 carries two",
+    "SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN effects with EffectBasePoints -1501 + EffectDieSides 1 = -1500",
+    "ms, EffectMiscValue[0] 801847 Arm of Thorim and EffectMiscValue[1] 560030 Lightning Cage. Two defects",
+    "are covered here. First, 801869's DBC ProcFlags 327680 (DONE_SPELL_MAGIC_DMG_CLASS_NEG | DONE_PERIODIC)",
+    "make SpellMgr::LoadSpellProcs generate an entry whose SpellFamilyName is 0, so no spell filter applies",
+    "and any negative magic spell reduces both cooldowns; Shock 504634 (SpellFamilyFlags0 0x800, outside the",
+    "talent's Electrocute 0x2000000 and Call Lightning 0x10 masks) is the probe for that. Second,",
+    "Player::ModifySpellCooldown keys the cooldown map by the exact EffectMiscValue id, so naming rank 1",
+    "(801847) leaves the rank a level-80 player casts untouched: Arm of Thorim is a 9-rank chain (spell_ranks",
+    "first_spell_id 801847, rank 9 = 567520) with Category 981 and RecoveryTime/CategoryRecoveryTime 20000,",
+    "while Lightning Cage is a single rank with RecoveryTime 180000 and is reduced correctly today. An",
+    "identical unarmed control player casts the same spells in lockstep, so every assertion on the armed",
+    "player is a difference against the control's cooldown at the same instant and ordinary decay cancels",
+    "out. Both targets use Harvest Golem 36, whose native AI does not flee. Rabbit 721 runs CritterAI; a",
+    "recorded native Call Lightning refusal with UNIT_NOT_INFRONT left no Titanstorm reduction. Every normal",
+    "cast must be accepted and observed before its original matched-control cooldown assertions; proc amount,",
+    "rank checks and off-family Shock controls remain unchanged. Refill the original Static resource before",
+    "each Call Lightning after Arm of Thorim consumes the prior pool.",
+    "BASELINE: Call Lightning takes 1500 ms off Lightning Cage (801854 -1501 + 1 die side), which already",
+    "works",
+    "BASELINE: Electrocute is the tooltip's second source, so Lightning Cage is now 3000 ms shorter in total",
+    "DISCRIMINATING: Arm of Thorim rank 9 is 3000 ms shorter in total after Call Lightning and Electrocute",
+    "DISCRIMINATING: Shock is outside the talent's family masks, so Lightning Cage stays at the same 3000 ms",
+    "total"
+  ],
   "timeout_ms": 90000,
   "players": [
-    { "id": "control", "race": 2, "class": 16, "level": 80, "spell_hit_rating": 10000 },
-    { "id": "armed", "race": 2, "class": 16, "level": 80, "spell_hit_rating": 10000 }
+    {
+      "id": "control",
+      "race": 2,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "armed",
+      "race": 2,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
   ],
   "creatures": [
-    { "id": "control_dummy", "owner": "control", "entry": 721, "health": 1000000, "distance": 3 },
-    { "id": "armed_dummy", "owner": "armed", "entry": 721, "health": 1000000, "distance": 3 }
+    {
+      "id": "control_dummy",
+      "owner": "control",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "armed_dummy",
+      "owner": "armed",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
   ],
   "steps": [
-    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
-    { "action": "learn", "actor": "control", "spell": 567520 },
-    { "action": "learn", "actor": "control", "spell": 560030 },
-    { "action": "learn", "actor": "control", "spell": 501399 },
-    { "action": "learn", "actor": "control", "spell": 501432 },
-    { "action": "learn", "actor": "control", "spell": 504634 },
-    { "action": "learn", "actor": "armed", "spell": 567520 },
-    { "action": "learn", "actor": "armed", "spell": 560030 },
-    { "action": "learn", "actor": "armed", "spell": 501399 },
-    { "action": "learn", "actor": "armed", "spell": 501432 },
-    { "action": "learn", "actor": "armed", "spell": 504634 },
-    { "action": "learn", "actor": "armed", "spell": 801869 },
     {
-      "action": "assert", "label": "SETUP: Titanstorm is passive (Attributes 464) and self-applies on learn",
-      "actor": "armed", "metric": "aura", "spell": 801869, "equals": 1, "within_ms": 1000
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
     },
     {
-      "action": "assert", "label": "SETUP: the control never learns Titanstorm",
-      "actor": "control", "metric": "aura", "spell": 801869, "equals": 0
-    },
-    { "action": "set_aura", "actor": "control", "spell": 803102, "stacks": 100 },
-    { "action": "set_aura", "actor": "armed", "spell": 803102, "stacks": 100 },
-    { "action": "cast", "actor": "control", "spell": 567520, "target": "control_dummy" },
-    { "action": "cast", "actor": "armed", "spell": 567520, "target": "armed_dummy" },
-    { "action": "wait", "ms": 2600 },
-    { "action": "cast", "actor": "control", "spell": 560030 },
-    { "action": "cast", "actor": "armed", "spell": 560030 },
-    { "action": "wait", "ms": 1000 },
-    {
-      "action": "assert", "label": "SETUP: Arm of Thorim rank 9 runs its 20000 ms RecoveryTime",
-      "actor": "control", "metric": "cooldown_ms", "spell": 567520, "min": 14000, "max": 20000
+      "action": "learn",
+      "actor": "control",
+      "spell": 567520
     },
     {
-      "action": "assert", "label": "SETUP: Lightning Cage runs its 180000 ms RecoveryTime",
-      "actor": "control", "metric": "cooldown_ms", "spell": 560030, "min": 170000, "max": 180000
+      "action": "learn",
+      "actor": "control",
+      "spell": 560030
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 501399
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 501432
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 504634
+    },
+    {
+      "action": "learn",
+      "actor": "armed",
+      "spell": 567520
+    },
+    {
+      "action": "learn",
+      "actor": "armed",
+      "spell": 560030
+    },
+    {
+      "action": "learn",
+      "actor": "armed",
+      "spell": 501399
+    },
+    {
+      "action": "learn",
+      "actor": "armed",
+      "spell": 501432
+    },
+    {
+      "action": "learn",
+      "actor": "armed",
+      "spell": 504634
+    },
+    {
+      "action": "learn",
+      "actor": "armed",
+      "spell": 801869
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Titanstorm is passive (Attributes 464) and self-applies on learn",
+      "actor": "armed",
+      "metric": "aura",
+      "spell": 801869,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the control never learns Titanstorm",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 801869,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "armed",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 567520,
+      "target": "control_dummy"
+    },
+    {
+      "action": "cast",
+      "actor": "armed",
+      "spell": 567520,
+      "target": "armed_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2600
+    },
+    {
+      "action": "assert",
+      "label": "Normal cast is accepted with the non-fleeing combat fixture",
+      "actor": "control",
+      "metric": "cast_failure",
+      "spell": 567520,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Both normal casts complete before the matched cooldown comparison",
+      "actor": "control",
+      "metric": "spell_cast_count",
+      "spell": 567520,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Normal cast is accepted with the non-fleeing combat fixture",
+      "actor": "armed",
+      "metric": "cast_failure",
+      "spell": 567520,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Both normal casts complete before the matched cooldown comparison",
+      "actor": "armed",
+      "metric": "spell_cast_count",
+      "spell": 567520,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 560030
+    },
+    {
+      "action": "cast",
+      "actor": "armed",
+      "spell": 560030
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Normal cast is accepted with the non-fleeing combat fixture",
+      "actor": "control",
+      "metric": "cast_failure",
+      "spell": 560030,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Both normal casts complete before the matched cooldown comparison",
+      "actor": "control",
+      "metric": "spell_cast_count",
+      "spell": 560030,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Normal cast is accepted with the non-fleeing combat fixture",
+      "actor": "armed",
+      "metric": "cast_failure",
+      "spell": 560030,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Both normal casts complete before the matched cooldown comparison",
+      "actor": "armed",
+      "metric": "spell_cast_count",
+      "spell": 560030,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Arm of Thorim rank 9 runs its 20000 ms RecoveryTime",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 567520,
+      "min": 14000,
+      "max": 20000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Lightning Cage runs its 180000 ms RecoveryTime",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 560030,
+      "min": 170000,
+      "max": 180000
     },
     {
       "action": "assert",
       "label": "SETUP: Category 981 also stores the cooldown under rank 1 (801847), which the tooltip names",
-      "actor": "control", "metric": "cooldown_ms", "spell": 801847, "min": 14000, "max": 20000
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 801847,
+      "min": 14000,
+      "max": 20000
     },
-    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 567520, "save_as": "thorim_start" },
     {
-      "action": "assert", "label": "SETUP: both players start from the same Arm of Thorim rank 9 cooldown",
-      "actor": "armed", "metric": "cooldown_ms", "spell": 567520,
-      "relative_to": "thorim_start", "min": -600, "max": 600
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 567520,
+      "save_as": "thorim_start"
     },
-    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 560030, "save_as": "cage_start" },
-    {
-      "action": "assert", "label": "SETUP: both players start from the same Lightning Cage cooldown",
-      "actor": "armed", "metric": "cooldown_ms", "spell": 560030,
-      "relative_to": "cage_start", "min": -600, "max": 600
-    },
-    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 801847, "save_as": "rank1_start" },
-    {
-      "action": "assert", "label": "SETUP: both players start from the same Arm of Thorim rank 1 entry",
-      "actor": "armed", "metric": "cooldown_ms", "spell": 801847,
-      "relative_to": "rank1_start", "min": -600, "max": 600
-    },
-    { "action": "cast", "actor": "control", "spell": 501399, "target": "control_dummy" },
-    { "action": "cast", "actor": "armed", "spell": 501399, "target": "armed_dummy" },
-    { "action": "wait", "ms": 2600 },
-    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 560030, "save_as": "cage_lightning" },
     {
       "action": "assert",
-      "label": "BASELINE: Call Lightning takes 1500 ms off Lightning Cage (801854 -1501 + 1 die side), which already works",
-      "actor": "armed", "metric": "cooldown_ms", "spell": 560030,
-      "relative_to": "cage_lightning", "min": -2100, "max": -900
+      "label": "SETUP: both players start from the same Arm of Thorim rank 9 cooldown",
+      "actor": "armed",
+      "metric": "cooldown_ms",
+      "spell": 567520,
+      "relative_to": "thorim_start",
+      "min": -600,
+      "max": 600
     },
-    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 567520, "save_as": "thorim_lightning" },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 560030,
+      "save_as": "cage_start"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: both players start from the same Lightning Cage cooldown",
+      "actor": "armed",
+      "metric": "cooldown_ms",
+      "spell": 560030,
+      "relative_to": "cage_start",
+      "min": -600,
+      "max": 600
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 801847,
+      "save_as": "rank1_start"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: both players start from the same Arm of Thorim rank 1 entry",
+      "actor": "armed",
+      "metric": "cooldown_ms",
+      "spell": 801847,
+      "relative_to": "rank1_start",
+      "min": -600,
+      "max": 600
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 501399,
+      "target": "control_dummy"
+    },
+    {
+      "action": "set_aura",
+      "actor": "armed",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "armed",
+      "spell": 501399,
+      "target": "armed_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2600
+    },
+    {
+      "action": "assert",
+      "label": "Normal cast is accepted with the non-fleeing combat fixture",
+      "actor": "control",
+      "metric": "cast_failure",
+      "spell": 501399,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Both normal casts complete before the matched cooldown comparison",
+      "actor": "control",
+      "metric": "spell_cast_count",
+      "spell": 501399,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Normal cast is accepted with the non-fleeing combat fixture",
+      "actor": "armed",
+      "metric": "cast_failure",
+      "spell": 501399,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Both normal casts complete before the matched cooldown comparison",
+      "actor": "armed",
+      "metric": "spell_cast_count",
+      "spell": 501399,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 560030,
+      "save_as": "cage_lightning"
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Call Lightning takes 1500 ms off Lightning Cage (801854 -1501 + 1 die side), which…",
+      "actor": "armed",
+      "metric": "cooldown_ms",
+      "spell": 560030,
+      "relative_to": "cage_lightning",
+      "min": -2100,
+      "max": -900
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 567520,
+      "save_as": "thorim_lightning"
+    },
     {
       "action": "assert",
       "label": "DISCRIMINATING: the 1500 ms lands on Arm of Thorim rank 9, the rank a level-80 player casts",
-      "actor": "armed", "metric": "cooldown_ms", "spell": 567520,
-      "relative_to": "thorim_lightning", "min": -2100, "max": -900
+      "actor": "armed",
+      "metric": "cooldown_ms",
+      "spell": 567520,
+      "relative_to": "thorim_lightning",
+      "min": -2100,
+      "max": -900
     },
-    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 801847, "save_as": "rank1_lightning" },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 801847,
+      "save_as": "rank1_lightning"
+    },
     {
       "action": "assert",
       "label": "BASELINE: the rank 1 entry named by EffectMiscValue[0] also loses 1500 ms",
-      "actor": "armed", "metric": "cooldown_ms", "spell": 801847,
-      "relative_to": "rank1_lightning", "min": -2100, "max": -900
+      "actor": "armed",
+      "metric": "cooldown_ms",
+      "spell": 801847,
+      "relative_to": "rank1_lightning",
+      "min": -2100,
+      "max": -900
     },
-    { "action": "set_health", "actor": "control_dummy", "value": 300000 },
-    { "action": "set_health", "actor": "armed_dummy", "value": 300000 },
-    { "action": "wait", "ms": 1500 },
-    { "action": "cast", "actor": "control", "spell": 501432, "target": "control_dummy" },
-    { "action": "cast", "actor": "armed", "spell": 501432, "target": "armed_dummy" },
-    { "action": "wait", "ms": 1700 },
-    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 560030, "save_as": "cage_electrocute" },
+    {
+      "action": "set_health",
+      "actor": "control_dummy",
+      "value": 300000
+    },
+    {
+      "action": "set_health",
+      "actor": "armed_dummy",
+      "value": 300000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 501432,
+      "target": "control_dummy"
+    },
+    {
+      "action": "cast",
+      "actor": "armed",
+      "spell": 501432,
+      "target": "armed_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
     {
       "action": "assert",
-      "label": "BASELINE: Electrocute is the tooltip's second source, so Lightning Cage is now 3000 ms shorter in total",
-      "actor": "armed", "metric": "cooldown_ms", "spell": 560030,
-      "relative_to": "cage_electrocute", "min": -3600, "max": -2400
+      "label": "Normal cast is accepted with the non-fleeing combat fixture",
+      "actor": "control",
+      "metric": "cast_failure",
+      "spell": 501432,
+      "equals": 0
     },
-    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 567520, "save_as": "thorim_electrocute" },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: Arm of Thorim rank 9 is 3000 ms shorter in total after Call Lightning and Electrocute",
-      "actor": "armed", "metric": "cooldown_ms", "spell": 567520,
-      "relative_to": "thorim_electrocute", "min": -3600, "max": -2400
+      "label": "Both normal casts complete before the matched cooldown comparison",
+      "actor": "control",
+      "metric": "spell_cast_count",
+      "spell": 501432,
+      "equals": 1,
+      "within_ms": 500
     },
-    { "action": "snapshot", "actor": "armed_dummy", "metric": "health", "save_as": "dummy_before_shock" },
-    { "action": "cast", "actor": "control", "spell": 504634, "target": "control_dummy" },
-    { "action": "cast", "actor": "armed", "spell": 504634, "target": "armed_dummy" },
-    { "action": "wait", "ms": 2600 },
-    {
-      "action": "assert", "label": "SETUP: the Shock cast really landed, so the next assertions are not a silent no-cast",
-      "actor": "armed_dummy", "metric": "health", "relative_to": "dummy_before_shock", "max": -1, "within_ms": 3000
-    },
-    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 560030, "save_as": "cage_shock" },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: Shock is outside the talent's family masks, so Lightning Cage stays at the same 3000 ms total",
-      "actor": "armed", "metric": "cooldown_ms", "spell": 560030,
-      "relative_to": "cage_shock", "min": -3600, "max": -2400
+      "label": "Normal cast is accepted with the non-fleeing combat fixture",
+      "actor": "armed",
+      "metric": "cast_failure",
+      "spell": 501432,
+      "equals": 0
     },
-    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 567520, "save_as": "thorim_shock" },
+    {
+      "action": "assert",
+      "label": "Both normal casts complete before the matched cooldown comparison",
+      "actor": "armed",
+      "metric": "spell_cast_count",
+      "spell": 501432,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 560030,
+      "save_as": "cage_electrocute"
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Electrocute is the tooltip's second source, so Lightning Cage is now 3000 ms shorter in…",
+      "actor": "armed",
+      "metric": "cooldown_ms",
+      "spell": 560030,
+      "relative_to": "cage_electrocute",
+      "min": -3600,
+      "max": -2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 567520,
+      "save_as": "thorim_electrocute"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Arm of Thorim rank 9 is 3000 ms shorter in total after Call Lightning and…",
+      "actor": "armed",
+      "metric": "cooldown_ms",
+      "spell": 567520,
+      "relative_to": "thorim_electrocute",
+      "min": -3600,
+      "max": -2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "armed_dummy",
+      "metric": "health",
+      "save_as": "dummy_before_shock"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 504634,
+      "target": "control_dummy"
+    },
+    {
+      "action": "cast",
+      "actor": "armed",
+      "spell": 504634,
+      "target": "armed_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2600
+    },
+    {
+      "action": "assert",
+      "label": "Normal cast is accepted with the non-fleeing combat fixture",
+      "actor": "control",
+      "metric": "cast_failure",
+      "spell": 504634,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Both normal casts complete before the matched cooldown comparison",
+      "actor": "control",
+      "metric": "spell_cast_count",
+      "spell": 504634,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Normal cast is accepted with the non-fleeing combat fixture",
+      "actor": "armed",
+      "metric": "cast_failure",
+      "spell": 504634,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Both normal casts complete before the matched cooldown comparison",
+      "actor": "armed",
+      "metric": "spell_cast_count",
+      "spell": 504634,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Shock cast really landed, so the next assertions are not a silent no-cast",
+      "actor": "armed_dummy",
+      "metric": "health",
+      "relative_to": "dummy_before_shock",
+      "max": -1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 560030,
+      "save_as": "cage_shock"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Shock is outside the talent's family masks, so Lightning Cage stays at the same…",
+      "actor": "armed",
+      "metric": "cooldown_ms",
+      "spell": 560030,
+      "relative_to": "cage_shock",
+      "min": -3600,
+      "max": -2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 567520,
+      "save_as": "thorim_shock"
+    },
     {
       "action": "assert",
       "label": "DISCRIMINATING: Shock leaves Arm of Thorim rank 9 at the same 3000 ms total",
-      "actor": "armed", "metric": "cooldown_ms", "spell": 567520,
-      "relative_to": "thorim_shock", "min": -3600, "max": -2400
+      "actor": "armed",
+      "metric": "cooldown_ms",
+      "spell": 567520,
+      "relative_to": "thorim_shock",
+      "min": -3600,
+      "max": -2400
     },
-    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 801847, "save_as": "rank1_shock" },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 801847,
+      "save_as": "rank1_shock"
+    },
     {
       "action": "assert",
       "label": "DISCRIMINATING: Shock leaves the rank 1 entry at the same 3000 ms total",
-      "actor": "armed", "metric": "cooldown_ms", "spell": 801847,
-      "relative_to": "rank1_shock", "min": -3600, "max": -2400
+      "actor": "armed",
+      "metric": "cooldown_ms",
+      "spell": 801847,
+      "relative_to": "rank1_shock",
+      "min": -3600,
+      "max": -2400
     }
   ]
 }

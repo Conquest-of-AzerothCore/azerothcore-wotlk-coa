@@ -28,13 +28,14 @@ void SyncReplacements(Player* player)
         if (Family(info, 1, 4) && id != Volley)
         {
             selected = true;
-            if (player->HasAura(VolleyReady) || (player->HasAura(Gift) && HasSummon(player, NpcMimic)))
+            if ((player->HasAura(VolleyReady) || (player->HasAura(Gift) && HasSummon(player, NpcMimic))) &&
+                id == KnownRank(player, id))
                 child = Volley;
         }
         else if (IsHex(info))
         {
             selected = true;
-            if (player->HasAura(UmbralReady))
+            if (player->HasAura(UmbralReady) && id == KnownRank(player, id))
                 child = Umbral;
         }
         else if (Family(info, 1, 32768) && !IsArrow(info) && id != HexfireWrath)
@@ -76,7 +77,7 @@ void SyncReplacements(Player* player)
             continue;
         if (child && !player->HasSpell(child))
             player->learnSpell(child, true);
-        player->SetTemporarySpellReplacement(id, child);
+        player->SetTemporarySpellReplacement(id, child, child != Volley && child != Umbral);
     }
 }
 }

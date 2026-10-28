@@ -1,0 +1,14 @@
+-- #5758: rev_20260914_06_runemaster_travel.sql creates creature_template rows 50063 "Echo Rune" and
+-- 51335 "Warpdagger" (the Runemaster travel markers spawned by AscensionRunemasterTravel.cpp) with no
+-- unit_flags, so hostile mobs can target and kill them, breaking the travel/return spell while they are
+-- alive to aggro.
+--
+-- Comparable CoA-owned marker/trigger NPCs set both UNIT_FLAG_NON_ATTACKABLE (0x2) and
+-- UNIT_FLAG_NOT_SELECTABLE (0x2000000) in their AI: AscensionStormbringerSphere.cpp:46 and
+-- AscensionStormbringerThunderOrb.cpp:56 both call
+-- `me->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE)` for their own summoned
+-- marker/trigger units. npc_ascension_runemaster_marker (AscensionRunemasterTravel.cpp) sets neither, so
+-- its only protection was whatever the template's unit_flags column carried -- which was 0. Setting
+-- unit_flags = 33554434 (UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE) on both rows matches that
+-- convention.
+UPDATE `creature_template` SET `unit_flags` = 33554434 WHERE `entry` IN (50063, 51335) AND `unit_flags` = 0;

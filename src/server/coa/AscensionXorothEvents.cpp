@@ -131,7 +131,7 @@ class aura_ascension_xoroth_event : public AuraScript
             if (e.GetHitMask() & PROC_HIT_CRITICAL)
                 Cast(player, target, 524919);
             if (uint64 left = GetAura()->GetScriptValue(id); left > 1)
-                GetAura()->SetScriptValue(id, left - 1);
+                SetRemainingUses(GetAura(), uint8(left - 1));
             else
                 GetAura()->Remove();
             break;

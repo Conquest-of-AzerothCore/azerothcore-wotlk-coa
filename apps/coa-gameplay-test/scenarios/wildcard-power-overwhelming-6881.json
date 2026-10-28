@@ -1,0 +1,157 @@
+{
+  "schema": 1,
+  "name": "Wildcard Power Overwhelming takes cooldown off Presence of Mind on direct spell damage (#6881)",
+  "contract": [
+    "Power Overwhelming 283578 reads 'Dealing direct damage with spells and abilities now reduces the cooldown of your Arcane Power and Presence of Mind by 1.5 seconds. This can only occur from abilities that trigger the global cooldown.'",
+    "Its Spell.dbc proc mask is family flag 0x800 (Arcane Missiles), whose damage comes from a triggered missile without that flag, so it never procced.",
+    "Presence of Mind 12043 starts its 2 minute cooldown when its aura is removed; a Frostbolt that lands 6 seconds later must leave it more than 6 seconds lower."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "wild",
+      "race": 1,
+      "class": 10,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "name": "Wildpower"
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "wild",
+      "entry": 1601,
+      "level": 80,
+      "health": 10000000,
+      "distance": 12,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Wildpower"
+    },
+    {
+      "action": "assert",
+      "label": "The Hero plays Wildcard",
+      "actor": "wild",
+      "metric": "game_mode_mask",
+      "min": 64
+    },
+    {
+      "action": "learn",
+      "actor": "wild",
+      "spell": 283578
+    },
+    {
+      "action": "learn",
+      "actor": "wild",
+      "spell": 12043
+    },
+    {
+      "action": "learn",
+      "actor": "wild",
+      "spell": 116
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Power Overwhelming is up",
+      "actor": "wild",
+      "metric": "aura",
+      "spell": 283578,
+      "equals": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wild",
+      "spell": 12043
+    },
+    {
+      "action": "cast",
+      "actor": "wild",
+      "spell": 12043
+    },
+    {
+      "action": "assert",
+      "label": "12043 is accepted",
+      "actor": "wild",
+      "metric": "cast_failure",
+      "spell": 12043,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "set_aura",
+      "actor": "wild",
+      "spell": 12043,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "snapshot",
+      "label": "Presence of Mind's cooldown before the Frostbolt",
+      "actor": "wild",
+      "metric": "cooldown_ms",
+      "spell": 12043,
+      "save_as": "before"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wild",
+      "spell": 116
+    },
+    {
+      "action": "cast",
+      "actor": "wild",
+      "spell": 116,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "label": "116 is accepted",
+      "actor": "wild",
+      "metric": "cast_failure",
+      "spell": 116,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "Frostbolt hit",
+      "actor": "wild",
+      "metric": "spell_damage_count",
+      "spell": 116,
+      "target": "e",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The cooldown dropped by more than the 6 seconds waited",
+      "actor": "wild",
+      "metric": "cooldown_ms",
+      "spell": 12043,
+      "relative_to": "before",
+      "max": -7000
+    }
+  ]
+}

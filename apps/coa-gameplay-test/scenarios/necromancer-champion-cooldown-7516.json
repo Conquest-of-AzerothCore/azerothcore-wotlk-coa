@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "name": "Necromancer Champions keep the client's own 5 minute cooldown and share 3 minutes (#7516)",
+  "contract": "Spell.dbc (client patch-T.MPQ, identical to the server Spell.dbc) gives Gravebound 805049, Spellbound 807811 and Icebound 807813 Category 55, RecoveryTime 300000 ms and CategoryRecoveryTime 180000 ms, so the cast Champion is on a 5 minute cooldown and the other Champions on the 3 minute shared cooldown that the tooltip names ('Shares a $?s301198[2min][3min] cooldown with other Champion spells'). Game of Bones 301198 is a SPELLMOD_COOLDOWN flat -60000 ms on family 29 mask (0, 0, 0x800000), which Player::AddSpellAndCategoryCooldowns applies to both values: 240000 ms on the cast Champion and 120000 ms shared. A control Necromancer and one with Game of Bones each summon a Gravebound Champion once; the cast Champion must carry the 5 (4) minute cooldown, the other Champions the 3 (2) minute shared cooldown.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "control", "race": 5, "class": 23, "level": 80 },
+    { "id": "bones", "race": 5, "class": 23, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "control", "spell": 805049 },
+    { "action": "learn", "actor": "control", "spell": 807811 },
+    { "action": "learn", "actor": "control", "spell": 807813 },
+    { "action": "learn", "actor": "bones", "spell": 805049 },
+    { "action": "learn", "actor": "bones", "spell": 807811 },
+    { "action": "learn", "actor": "bones", "spell": 807813 },
+    { "action": "learn", "actor": "bones", "spell": 301198 },
+    {
+      "action": "assert", "label": "SETUP: the Game of Bones passive aura is applied", "actor": "bones",
+      "metric": "aura", "spell": 301198, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTROL: no Champion is on cooldown before the cast", "actor": "control",
+      "metric": "cooldown_ms", "spell": 805049, "equals": 0
+    },
+    { "action": "cast", "label": "Control summons a Gravebound Champion", "actor": "control", "spell": 805049 },
+    { "action": "cast", "label": "Game of Bones summons a Gravebound Champion", "actor": "bones", "spell": 805049 },
+    {
+      "action": "assert", "label": "SETUP: the control's Champion buff is active", "actor": "control",
+      "metric": "aura", "spell": 805050, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "SETUP: the Game of Bones Champion buff is active", "actor": "bones",
+      "metric": "aura", "spell": 805050, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the cast Gravebound Champion has the client's 5 minute cooldown",
+      "actor": "control", "metric": "cooldown_ms", "spell": 805049, "min": 290000, "max": 300000
+    },
+    {
+      "action": "assert", "label": "Icebound Champion shares the 3 minute category cooldown", "actor": "control",
+      "metric": "cooldown_ms", "spell": 807813, "min": 170000, "max": 180000
+    },
+    {
+      "action": "assert", "label": "Spellbound Champion shares the 3 minute category cooldown", "actor": "control",
+      "metric": "cooldown_ms", "spell": 807811, "min": 170000, "max": 180000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Game of Bones leaves 4 minutes on the cast Champion",
+      "actor": "bones", "metric": "cooldown_ms", "spell": 805049, "min": 230000, "max": 240000
+    },
+    {
+      "action": "assert", "label": "Game of Bones leaves a 2 minute shared cooldown on Icebound Champion",
+      "actor": "bones", "metric": "cooldown_ms", "spell": 807813, "min": 110000, "max": 120000
+    },
+    {
+      "action": "assert", "label": "Game of Bones leaves a 2 minute shared cooldown on Spellbound Champion",
+      "actor": "bones", "metric": "cooldown_ms", "spell": 807811, "min": 110000, "max": 120000
+    }
+  ]
+}

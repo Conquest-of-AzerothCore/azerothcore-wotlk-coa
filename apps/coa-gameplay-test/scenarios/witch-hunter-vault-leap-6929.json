@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Vault leaps the caster forward and lands on the ground it started from (#6929)",
+  "contract": "#6929: Vault 500085 moved the caster with a server KnockbackFrom whose vertical speed was 5, a flat 0.65 yd hop over a 0.52 s flight, and nothing clamped the destination. The stored tooltip (Spell.dbc description, field 170) reads 'Dash in the direction you are moving[, regenerating ...]. Distance scales with movement speed. Not usable while rooted.', and the report that the ability 'used to move you like a No-Clipped gmod player, in a straight line' is about the heading, not the height. The handler now keeps the movement-flag heading, the run-speed-scaled travel and the Parkour bonus, and launches the caster with vertical speed 10 instead of 5, a taller leap than the class's own shadowhound leap, over a sixteen-yard base travel instead of ten. The server drives the arc and leaves the caster's facing to the client, and the same path is taken whether or not the caster is moving. The horizontal speed is the collision-clamped distance * gravity / (2 * 10), so the flight covers sixteen yards at 15.4 yd/s while the launch peaks at about 2.59 yd after about 0.52 s (the old knockback peaked at 0.65 yd). The height sample mid-flight is the discriminating assertion: the old hop is about 0.4 yd up at 100 ms, this leap is about 2.59 yd up at 500 ms. Assumes the fixture ground is flat (the open fixture at the default location). This assertion is timing-sensitive (the sample lands near the apex of a 1.04 s flight); report it as acceleration-sensitive if it flakes.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "vh", "race": 1, "class": 15, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "vh", "entry": 36, "level": 60, "health": 1000000, "distance": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "vh", "spell": 500085, "label": "Learn Vault" },
+    { "action": "assert", "label": "SETUP: the Witch Hunter knows Vault", "actor": "vh", "metric": "knows_spell", "spell": 500085, "equals": 1 },
+    { "action": "set_power", "label": "SETUP: enough Rage for Vault", "actor": "vh", "power": 1, "value": 1000 },
+    { "action": "snapshot", "label": "Baseline distance to the dummy ahead", "actor": "vh", "metric": "distance_2d", "target": "dummy", "save_as": "d0" },
+    { "action": "snapshot", "label": "Baseline height", "actor": "vh", "metric": "position_z", "save_as": "z0" },
+    { "action": "cast", "label": "Vault forward", "actor": "vh", "spell": 500085 },
+    { "action": "wait", "label": "Sample near the apex of the flight, about 0.5 s after the cast", "ms": 500 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the leap launched the caster well off the ground",
+      "actor": "vh", "metric": "position_z", "relative_to": "z0", "min": 2.0, "max": 3.2
+    },
+    { "action": "wait", "label": "Let the leap land", "ms": 1500 },
+    {
+      "action": "assert", "label": "Vault carried the caster about 16 yd toward the dummy",
+      "actor": "vh", "metric": "distance_2d", "target": "dummy", "relative_to": "d0", "min": -17, "max": -14
+    },
+    {
+      "action": "assert", "label": "The caster landed on the ground it started on",
+      "actor": "vh", "metric": "position_z", "relative_to": "z0", "min": -0.5, "max": 0.5
+    }
+  ]
+}

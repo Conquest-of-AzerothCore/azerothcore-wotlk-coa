@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "name": "chronomancer-artificer-native-echo-generation-4558",
+  "contract": [
+    "At level 11 the native Artificer specialization 33 grants free Echo Fragments passive 92120. Wand of Time",
+    "520175 promises one fragment after a landed wand attack when the passive is owned. Verify its acquisition, a",
+    "real landed Wand of Time attack and the resulting fragment stack without a GM-granted passive. Native",
+    "Artificer also grants the Artificer\u2019s Wand replacement parent and Shatter Echo, and a level-eleven character",
+    "can spend a talent point on Concentrated Fate through the advancement handler."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 22,
+      "level": 11,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "c",
+      "id": 33
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "knows_spell",
+      "spell": 92120,
+      "equals": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "c",
+      "item": 5069
+    },
+    {
+      "action": "equip",
+      "actor": "c",
+      "item": 5069,
+      "slot": 17
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "c",
+      "spell": 520175
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "aura_stacks",
+      "spell": 804455,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 520175,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_damage_count",
+      "spell": 520175,
+      "target": "target",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "aura_stacks",
+      "spell": 804455,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "knows_spell",
+      "spell": 804478,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "knows_spell",
+      "spell": 561284,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "knows_spell",
+      "spell": 804503,
+      "equals": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "c",
+      "entry": 6574,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "aura",
+      "spell": 706122,
+      "equals": 1
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "c",
+      "entry": 36,
+      "level": 11,
+      "health": 1000000,
+      "distance": 5
+    }
+  ]
+}

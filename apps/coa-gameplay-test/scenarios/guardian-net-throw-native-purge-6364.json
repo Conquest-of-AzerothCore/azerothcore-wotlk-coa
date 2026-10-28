@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "name": "A paid native Guardian purge removes Net Throw and keeps it removed (#6364)",
+  "contract": "NetThrow802304 is classAE purchase29430. At reported level16 a legitimate purchase followed by native purge opcode531, original payment token919291 and funded money must remove it, acknowledge success and not restore it on actual relog.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 18,
+      "level": 16,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_money",
+      "actor": "p",
+      "value": 1000000
+    },
+    {
+      "action": "specialization",
+      "actor": "p",
+      "id": 19
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "p",
+      "entry": 29430,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 802304,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 919291
+    },
+    {
+      "action": "client_packet",
+      "actor": "p",
+      "opcode": 531
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "server_packet_contains",
+      "opcode": 1835,
+      "text": "CA_PURGE_TALENTS_OK",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 802304,
+      "equals": 0
+    },
+    {
+      "action": "relog",
+      "actor": "p"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 802304,
+      "equals": 0
+    }
+  ]
+}

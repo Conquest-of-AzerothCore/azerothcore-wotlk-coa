@@ -1,0 +1,186 @@
+{
+  "schema": 1,
+  "name": "A boss that does not finish any dungeon gives no Dungeon Finder reward",
+  "contract": "Interrogator Vishas is not the final boss of any Scarlet Monastery wing, so crediting him leaves the assigned group without the Classic Random completion quest.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p1",
+      "race": 1,
+      "class": 1,
+      "level": 59
+    },
+    {
+      "id": "p2",
+      "race": 1,
+      "class": 1,
+      "level": 59
+    },
+    {
+      "id": "p3",
+      "race": 1,
+      "class": 1,
+      "level": 59
+    },
+    {
+      "id": "p4",
+      "race": 1,
+      "class": 1,
+      "level": 59
+    },
+    {
+      "id": "p5",
+      "race": 1,
+      "class": 1,
+      "level": 59
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p2"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p3"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p4"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p5"
+    },
+    {
+      "action": "lfg_dungeon",
+      "label": "The group is assigned Scarlet Monastery - Graveyard",
+      "actor": "p1",
+      "dungeon": 18
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p1"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p2"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p3"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p4"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p5"
+    },
+    {
+      "action": "assert",
+      "label": "p1 enters Scarlet Monastery",
+      "actor": "p1",
+      "metric": "map_id",
+      "equals": 189,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "p2 enters Scarlet Monastery",
+      "actor": "p2",
+      "metric": "map_id",
+      "equals": 189,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "p3 enters Scarlet Monastery",
+      "actor": "p3",
+      "metric": "map_id",
+      "equals": 189,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "p4 enters Scarlet Monastery",
+      "actor": "p4",
+      "metric": "map_id",
+      "equals": 189,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "p5 enters Scarlet Monastery",
+      "actor": "p5",
+      "metric": "map_id",
+      "equals": 189,
+      "within_ms": 15000
+    },
+    {
+      "action": "encounter_credit",
+      "label": "Interrogator Vishas is credited",
+      "actor": "p1",
+      "entry": 3983
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "p1 is not rewarded the Classic Random 56-60 quest",
+      "actor": "p1",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "p2 is not rewarded the Classic Random 56-60 quest",
+      "actor": "p2",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "p3 is not rewarded the Classic Random 56-60 quest",
+      "actor": "p3",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "p4 is not rewarded the Classic Random 56-60 quest",
+      "actor": "p4",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "p5 is not rewarded the Classic Random 56-60 quest",
+      "actor": "p5",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 0
+    }
+  ]
+}

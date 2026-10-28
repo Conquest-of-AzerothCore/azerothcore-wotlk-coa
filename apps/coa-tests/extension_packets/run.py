@@ -37,6 +37,10 @@ def method_or(source, signature, fallback):
     return method(source, signature) if signature in source else fallback
 
 
+def method_in(source, anchor, signature):
+    return method(source[source.index(anchor):], signature)
+
+
 def main():
     parser = argparse.ArgumentParser(description=CLI_DESCRIPTION)
     parser.add_argument('--source-ref', help='Read production code from a local Git ref for regression checks.')
@@ -66,21 +70,34 @@ def main():
             items, 'void WorldSession::SendItemQuerySingleResponse(',
             'void WorldSession::SendItemQuerySingleResponse(uint32) { }')),
         ('OPCODES', opcodes(compat)),
+        ('RECEIVES_CLIENT_REQUESTS', method_or(compat, 'bool ReceivesClientRequests(Player const *player)', '')),
         ('PROGRESS_EVENT', method(player_script, 'enum class CoAProgressEvent') + ';'),
         ('QUEUE_LIMIT', constant(compat, 'MAX_QUEUED_EXTENSION_PACKETS')),
         ('CONFIG_KEYS', method(compat, 'enum class AscensionCompatConfig') + ';'),
         ('SEND_REALM_INFO', method(compat, 'void SendRealmInfo(WorldSession *session')),
+        ('REALM_TYPE_MASK', method_or(compat, 'uint8 GetRealmTypeMask()', '')),
         ('SEND_GAME_MODE_STATE', method_or(compat, 'void SendGameModeState(Player *player)',
                                            'void SendGameModeState(Player*) { }')),
         ('SEND_SECURE_ADDON_LIST', method_or(compat, 'void SendSecureAddonList(WorldSession* session)', '')),
         ('QUEUE_CLIENT_PACKET', method(compat, 'void QueueClientPacket(uint32 accountId')),
         ('REJECT_CLIENT_PACKET', method_or(compat, 'void RejectClientPacket(uint32 accountId', '')),
-        ('TAKE_CLIENT_PACKETS', method_or(compat, 'std::vector<WorldPacket> TakeClientPackets(uint32 accountId)', '')),
-        ('ON_PLAYER_UPDATE', method(compat, 'void OnPlayerUpdate(Player *player, uint32 diff) {')),
+        ('TAKE_CLIENT_PACKETS', method_or(compat, 'std::vector<WorldPacket> TakeClientPackets(uint32 accountId', '')),
+        ('PENDING_OUTFIT', method_or(compat, 'bool HasPendingOutfitCommit(ObjectGuid guid)',
+                                   'bool HasPendingOutfitCommit(ObjectGuid) { return false; }')),
+        ('ON_PLAYER_UPDATE', method_in(compat, 'class AscensionCollectionService',
+                                       'void OnPlayerUpdate(Player *player, uint32 diff) {')),
         ('HANDLE_CLIENT_PACKET', method(compat, 'void HandleClientPacket(Player *player')),
         ('CAN_PACKET_RECEIVE_EARLY', method(compat, 'bool CanPacketReceiveEarly(WorldSession *session')),
+        ('CAN_PACKET_SEND', method(compat, 'bool CanPacketSend(WorldSession* session')),
         ('POINT_SPEND', method_or(compat, 'void HandlePointSpendRequest(Player* player', '')),
+        ('TOKEN_PURCHASE', 'void PurchaseVanityItemWithBazaarTokens(Player*, uint32) { }'
+                           if 'void PurchaseVanityItemWithBazaarTokens(' in compat else ''),
         ('DELIVER_VANITY', method(compat, 'void DeliverVanityItem(Player *player, uint32 itemId)')),
+        ('WITHHELD_VANITY', '\n'.join([
+            (re.search(r'static constexpr std::array<uint32, \d+> MysticAltarVanityItems = [^;]+;', compat) or [''])[0],
+            method_or(compat, 'static bool IsWithheldVanityItem(uint32 itemId)',
+                      'static bool IsWithheldVanityItem(uint32) { return false; }'),
+        ])),
         ('BANK_VANITY', '\n'.join([re.search(r'static constexpr std::array<uint32, \d+> BankVanityItems = [^;]+;',
                                              compat)[0]] + [method(compat, signature) for signature in (
             'static bool IsBankVanityItem(uint32 itemId)',
@@ -111,10 +128,11 @@ def main():
         executable = out / ('regressions.exe' if os.name == 'nt' else 'regressions')
         if Path(compiler).stem.lower() == 'cl':
             flags = ['/nologo', '/std:c++20', '/EHsc', '/utf-8', *['/I' + str(p) for p in includes],
-                     str(cpp), '/Fe' + str(executable)]
+                     str(cpp), str(ROOT / 'src/common/Utilities/Tokenize.cpp'), '/Fe' + str(executable)]
         else:
             flags = ['-std=c++20', '-Wall', '-Wextra', '-Werror', '-Wno-unused-const-variable',
-                     *['-I' + str(p) for p in includes], str(cpp), '-o', str(executable)]
+                     *['-I' + str(p) for p in includes], str(cpp),
+                     str(ROOT / 'src/common/Utilities/Tokenize.cpp'), '-o', str(executable)]
         subprocess.run([compiler, *flags], cwd=out, check=True)
         return subprocess.run([str(executable)], cwd=out).returncode
 

@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "Valkyr's Grip exempts a Sun Cleric from the Titan's Grip damage penalty (#9006)",
+  "contract": [
+    "Player::CanTitanGrip() and the equip-swap path already treat HasBurningCommander() and HasValkyrGrip() as",
+    "equivalent, parallel conditions granting dual two-handed weapon use. Player::UpdateTitansGrip() only checked",
+    "HasBurningCommander() before applying the native -10% Titan's Grip damage-reduction aura (49152), so a Sun",
+    "Cleric with Valkyr's Grip (707072) who equips two two-handed weapons kept the stock Warrior/Hero penalty this",
+    "ability was never meant to carry. Adding HasValkyrGrip() to that same check removes the aura for a Sun",
+    "Cleric while a stock Warrior with native Titan's Grip (46917) still gets it, exactly as before."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "valkyrie", "race": 1, "class": 27, "level": 10 },
+    { "id": "warrior", "race": 1, "class": 1, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "valkyrie", "spell": 202 },
+    { "action": "learn", "actor": "valkyrie", "spell": 707072 },
+    { "action": "add_item", "actor": "valkyrie", "item": 1194 },
+    { "action": "equip", "label": "Two-hander in the main hand", "actor": "valkyrie", "item": 1194, "slot": 15 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "No Titan's Grip penalty with only one two-hander equipped",
+      "actor": "valkyrie", "metric": "aura", "spell": 49152, "equals": 0
+    },
+    { "action": "add_item", "actor": "valkyrie", "item": 1198 },
+    { "action": "equip", "label": "Second two-hander in the off hand", "actor": "valkyrie", "item": 1198, "slot": 16 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "Off-hand two-hander carries real weapon damage (the equip itself succeeded)",
+      "actor": "valkyrie", "metric": "weapon_damage_min", "hand": 1, "min": 1
+    },
+    {
+      "action": "assert", "label": "Valkyr's Grip exempts the Sun Cleric from the Titan's Grip damage penalty",
+      "actor": "valkyrie", "metric": "aura", "spell": 49152, "equals": 0
+    },
+    { "action": "learn", "actor": "warrior", "spell": 674 },
+    { "action": "learn", "actor": "warrior", "spell": 202 },
+    { "action": "learn", "actor": "warrior", "spell": 46917 },
+    { "action": "add_item", "actor": "warrior", "item": 1194 },
+    { "action": "equip", "actor": "warrior", "item": 1194, "slot": 15 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "add_item", "actor": "warrior", "item": 1198 },
+    { "action": "equip", "actor": "warrior", "item": 1198, "slot": 16 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "Off-hand two-hander carries real weapon damage for the Warrior too",
+      "actor": "warrior", "metric": "weapon_damage_min", "hand": 1, "min": 1
+    },
+    {
+      "action": "assert", "label": "A stock Warrior's native Titan's Grip keeps its own damage penalty",
+      "actor": "warrior", "metric": "aura", "spell": 49152, "equals": 1
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  }
+}

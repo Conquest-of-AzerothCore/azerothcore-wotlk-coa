@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "A Divine Fury button is saved as Vindication (#5469)",
+  "contract": "Divine Fury 563269 (cast at 10 stacks of 563270) is bound to aura_ascension_templar_lifecycle; its apply calls AscensionTemplar::Replacement(player, 801446, 500689) (AscensionTemplarAuras.cpp:152-153) and its removal Replacement(player, 801446, 0) (lines 223-224). Replacement (AscensionTemplar.cpp:129-143) learns Divine Fury 500689 with learnSpell(..., true) (line 132) and replaces every known Vindication rank (chain of 801446) through SetTemporarySpellReplacement (line 139). The scenario fixtures Divine Fury (8 s). 500689 is never written to character_spell, so a button holding it must be saved as Vindication 801446, the spell persisted_action_button reads from Player::GetSavedActionButtonSpell; a button holding Vindication itself is saved unchanged.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "templar", "race": 1, "class": 19, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login state settle", "ms": 3000 },
+    { "action": "learn", "actor": "templar", "spell": 801446 },
+    { "action": "set_aura", "label": "Divine Fury is ready", "actor": "templar", "spell": 563269, "stacks": 1 },
+    {
+      "action": "assert",
+      "label": "Vindication is replaced with Divine Fury",
+      "actor": "templar",
+      "metric": "temporary_spell_replacement",
+      "spell": 801446,
+      "equals": 500689,
+      "within_ms": 2000
+    },
+    { "action": "set_action_button", "actor": "templar", "button": 2, "spell": 500689 },
+    { "action": "set_action_button", "actor": "templar", "button": 3, "spell": 801446 },
+    {
+      "action": "assert",
+      "label": "The bar holds Divine Fury",
+      "actor": "templar",
+      "metric": "action_button",
+      "button": 2,
+      "equals": 500689
+    },
+    {
+      "action": "assert",
+      "label": "The Divine Fury button is saved as Vindication",
+      "actor": "templar",
+      "metric": "persisted_action_button",
+      "button": 2,
+      "equals": 801446
+    },
+    {
+      "action": "assert",
+      "label": "Control: the Vindication button is saved unchanged",
+      "actor": "templar",
+      "metric": "persisted_action_button",
+      "button": 3,
+      "equals": 801446
+    }
+  ]
+}

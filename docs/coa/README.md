@@ -11,7 +11,8 @@ Sources live in `src/server/coa/`, focused regressions in `apps/coa-tests/`, and
 configuration templates in `src/server/coa/conf/`. They install to
 `etc/modules/coa.conf` and `etc/modules/coa_bugreport.conf`; runtime configuration is
 supplied there, not by committing live local credentials. CoA logs under `coa`,
-`coa.gameplay_test` and `coa.highrisk`.
+`coa.gameplay_test`, `coa.highrisk` and `coa.hotpatch`. Server-sent interface Lua is described in
+`client-hot-patch.md`.
 
 This fork, CoA included, is licensed under the root `LICENSE` (GNU GPL v2), like
 AzerothCore. Most CoA source files still carry the short "GNU AGPL v3" notice from
@@ -61,11 +62,66 @@ them; running it and the CoA tests in `apps/coa-tests/` that read client data do
 `COA_DBC_DIR` when the tests should read another directory.
 [`apps/coa-dbc`](../../apps/coa-dbc/README.md) extracts and checks them.
 
+The models of the Venomancer Beetle, Venomwing and Weaver Forms (CreatureModelData 20612
+`custom_nerubianbeetle`, 22063 `custom_flyingnerubian2` and 23813
+`maldraxxusmutant_noarmor`) have hand attachment points but lack the `0x10` flag that
+native animal forms such as Cat, Bear and Ghost Wolf carry, so the client hangs a drawn
+weapon on them in combat (#5128). The Spider and Sea Serpent Form models have no hand
+attachments. The weapon's visibility is decided by the client alone. When preparing a
+requested client update, run `apps/coa-spells/venomancer_form_weapons.py --input
+<CreatureModelData.dbc> --output <candidate-CreatureModelData.dbc>`; it sets the flag on
+those three rows in a separate output and never packages or installs a client archive.
+
 ## World database installation
 
 Import the [world database package](../../apps/coa-world/README.md) into an empty
 world schema before the first worldserver startup. The same guide covers auditing
 an existing database and updating the package.
+
+## Equipped gear drops
+
+Rewarded enemy kills can drop one existing wearable item with the same display as the enemy's armor,
+weapon or shield. Armor comes from the active `creature_display_preset` or the current model's
+`CreatureDisplayInfoExtra` outfit. Weapon entries supply their display and weapon type. Preset slots contain
+display IDs, not loot item IDs. Matching also preserves the equipment slot, including robe/chest variants.
+Mage-class creatures prefer Intellect gear; shield bearers prefer defenses and Stamina; other creatures
+prefer Strength, Agility or attack power. Equal matches prefer the closest eligible level, then quality,
+with a stable item-ID tie break. Unknown outfits and appearances without a wearable match produce no drop.
+
+`CoA.EquippedGearLoot` enables the feature; `CoA.EquippedGearLootChance` is a reloadable per-kill percentage,
+defaulting to 5. Only unbound or BoE gear through uncommon quality is eligible. Required level must not
+exceed the creature's level; items without one use item level minus five, floored at zero. NPC placeholders,
+deprecated, conjured, quest, random-affix and requirement-gated items are excluded, as are pets, summons, controlled
+creatures, dungeon bosses and disabled loot rewards. Drops are generated once with corpse loot, including
+creatures without an ordinary loot table, before native group permissions and quality thresholds. Existing
+loot remains, exact item duplicates are skipped, and the loot-window capacity is respected. Native item
+scaling can lift the chosen reward while preserving its appearance. Obtaining the
+item uses the existing appearance collection path when `CoA.AutoCollectAppearances` is enabled.
+Scaled items without a direct wardrobe mapping use their base item's mapping, while collection persistence
+retains the obtained item as its source.
+Items missing a direct `ItemAppearances` row inherit an existing equipment appearance only when display,
+slot, class and subclass match that appearance's captured source item. Direct mappings remain authoritative;
+robe/chest and weapon-hand variants share a slot. An item mapping whose source appearance has a different
+display cannot supply an alias. Looks absent from the captured wardrobe catalog remain uncollectible.
+No appearance record or client DBC row is invented.
+
+The [archived public changelog](https://github.com/hertigservices/ascension-data/blob/main/datasets/research-jeff-fro-coa-changelog-public-73833f29a4c2999b26184e55affe3c769682ccdb4431b2b6e9a4ebb4bbfaf72f.json)
+describes immersive gear in entries 62796/62797 (2025-07-28), caster additions in 63297/63298 (2025-08-09),
+and increased rogue drop chances in 64953 (2025-10-20). It supplies neither item pools nor exact probabilities.
+The rate, quality cap and selection policy here are reconstruction choices. Generic loot rates are unchanged;
+the archived generic-loot reductions cannot be reproduced exactly from those notes. The extensions
+[appearance API](https://github.com/firstoni-dev/ascension-extensions-reconstruction/blob/main/src/Ascension/AscAppearance.cpp)
+maps items to collected appearances; its `GetCreatureDisplayItems` function concerns incarnation appearances,
+and supplies no enemy loot table. This feature needs no new client packet or invented item template.
+
+`python -B tools/verify_all.py --stages harness --harness equipped_gear_loot` exercises the production selector,
+configuration callbacks and native `Loot::AddItem`/`FillLoot` with bounded APIs. Setting
+`COA_EQUIPPED_LOOT_BEFORE=1` selects the `origin/main` loot integration as a failing control;
+`COA_EQUIPPED_LOOT_BASE` can pin another pre-feature Git revision. The harness
+covers roles, appearance slots, model alternatives, presets, weapons, exclusions, capacity, duplicates,
+empty loot tables and group rights. It does not verify client rendering or a player collecting the appearance.
+The `equipped-gear-loot` gameplay scenario checks the installed caster/shield equipment and generated item
+templates through native loot processing, with ordinary creature fixtures and the default 5% configuration.
 
 ## Automatic specialization talents
 
@@ -375,12 +431,10 @@ zone gets its buff, players entering later get it for the time left, and a secon
 scroll of the same kind is refused while one is active. The registry lives in
 memory, so a restart clears active blessings.
 
-Keeper's Scroll: Steadfast (91770) ships as an empty dummy; the server rewrites it
-into +25% mounted speed with the stacking mount speed aura Crusader Aura uses. Its
-client row has no tooltip either. When preparing a requested client update, run
-`apps/coa-spells/keepers_scroll_steadfast.py --input <Spell.dbc> --output
-<candidate-Spell.dbc>`; it edits one row in a separate output and never packages or
-installs a client archive.
+Keeper's Scroll: Steadfast's item spell (91770) is an empty dummy with no tooltip,
+so its blessing is the aura spell 91769 instead: +25% mounted speed for one hour
+with the client's own tooltip. A scroll whose blessing is a different spell gives
+it to the user as well.
 
 ## Login and natural regeneration
 
@@ -423,6 +477,9 @@ supports. Client binaries are maintained outside this repository.
 - `SMSG_ACCOUNT_INFO` (0x09BB) is sent at login with the account's GM level and characters.
 - Help menu tickets use the ticket packets 0x0701-0x071E and the `.support` GM commands; see
   [player tickets](player-tickets.md).
+- `SMSG_PATCH_GLOBAL_STRINGS` (0x0676) carries the eight PvE and PvP Power tooltip lines at login with `%g` in
+  place of the client's `%d`, so the character sheet shows the exact percentage; see
+  [item power](item-power.md).
 - Requests the core session handles like stock ones, registered in its opcode table and let
   through the CoA packet filter: the portrait menu's reset all dungeons (`CMSG_RESET_DUNGEONS`,
   0x061F); the ghost frame's return to graveyard (`CMSG_PORT_GRAVEYARD`, 0x0544), which

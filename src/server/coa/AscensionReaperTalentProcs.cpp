@@ -3,22 +3,63 @@
 #include "AscensionReaperTalentProcs.h"
 #include "Player.h"
 #include "ScriptMgr.h"
+#include "Spell.h"
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
 #include "SpellInfo.h"
+#include "SpellMgr.h"
 #include "SpellScript.h"
 #include "Unit.h"
 #include <algorithm>
+#include <limits>
 
 namespace
 {
 using AscensionReaperTalentProcs::Rules;
 
+constexpr uint32 CrimsonDeath = 705414;
 constexpr uint32 JailersWill = 524939;
 constexpr uint32 JailersWillHelper = 578264;
 constexpr float JailersWillStrengthCoefficient = 0.3f;
+constexpr uint32 SiphonAnimaAura = 572768;
+constexpr uint32 SiphonAnimaHeal = 504306;
 constexpr uint32 DeathchaserExtender = 807546;
 constexpr uint32 DeathchaserFirstRank = 805190;
+constexpr uint32 SoulsForSlaughterDamage = 575847;
+
+class aura_ascension_reaper_souls_for_slaughter : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_reaper_souls_for_slaughter);
+
+    bool Validate(SpellInfo const*) override { return ValidateSpellInfo({SoulsForSlaughterDamage}); }
+
+    bool Check(ProcEventInfo& event)
+    {
+        Unit* player = GetTarget();
+        Unit* target = event.GetActionTarget();
+        DamageInfo const* damage = event.GetDamageInfo();
+        return player->IsPlayer() && player->getClass() == CLASS_REAPER && player->IsAlive() &&
+            player == GetCaster() && event.GetActor() == player && !event.GetSpellInfo() && target &&
+            target != player && !player->IsFriendlyTo(target) && damage && damage->GetDamage() &&
+            (event.GetTypeMask() & PROC_FLAG_DONE_MELEE_AUTO_ATTACK);
+    }
+
+    void Proc(AuraEffect const* effect, ProcEventInfo& event)
+    {
+        PreventDefaultAction();
+        uint64 const amount = uint64(event.GetDamageInfo()->GetDamage()) * std::clamp(effect->GetAmount(), 0, 100) / 100;
+        if (amount)
+            GetTarget()->CastCustomSpell(SoulsForSlaughterDamage, SPELLVALUE_BASE_POINT0,
+                int32(std::min<uint64>(amount, std::numeric_limits<int32>::max())), event.GetActionTarget(),
+                TRIGGERED_FULL_MASK);
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(aura_ascension_reaper_souls_for_slaughter::Check);
+        OnEffectProc += AuraEffectProcFn(aura_ascension_reaper_souls_for_slaughter::Proc, EFFECT_0, AuraType(354));
+    }
+};
 
 class aura_ascension_reaper_jailers_will_helper : public AuraScript
 {
@@ -80,9 +121,19 @@ class spell_ascension_reaper_talent_proc : public AuraScript
             rule->Spells.end();
     }
 
+    void RepeatSlaughter(AuraEffect const* effect, ProcEventInfo& event)
+    {
+        PreventDefaultAction();
+        if (SpellInfo const* source = event.GetSpellInfo(); source && event.GetActionTarget())
+            GetTarget()->CastSpell(event.GetActionTarget(), source->Id, TRIGGERED_FULL_MASK, nullptr, effect);
+    }
+
     void Register() override
     {
         DoCheckProc += AuraCheckProcFn(spell_ascension_reaper_talent_proc::CheckProc);
+        if (m_scriptSpellId == CrimsonDeath)
+            OnEffectProc += AuraEffectProcFn(spell_ascension_reaper_talent_proc::RepeatSlaughter,
+                EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
     }
 };
 
@@ -154,12 +205,50 @@ class aura_ascension_reaper_soulrot : public AuraScript
         AfterDispel += AuraDispelFn(aura_ascension_reaper_soulrot::HandleDispel);
     }
 };
+
+class aura_ascension_reaper_siphon_anima : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_reaper_siphon_anima);
+
+    bool Validate(SpellInfo const* info) override
+    {
+        return info->Id == SiphonAnimaAura &&
+            info->Effects[EFFECT_0].TriggerSpell == SiphonAnimaHeal &&
+            ValidateSpellInfo({SiphonAnimaHeal});
+    }
+
+    bool CheckProc(ProcEventInfo& event)
+    {
+        Unit* owner = GetTarget();
+        Unit* victim = event.GetActionTarget();
+        DamageInfo const* damage = event.GetDamageInfo();
+        return owner->IsAlive() && event.GetActor() == owner && victim && victim != owner &&
+            !owner->IsFriendlyTo(victim) && damage && damage->GetDamage();
+    }
+
+    void Heal(AuraEffect const* effect, ProcEventInfo& event)
+    {
+        PreventDefaultAction();
+        uint64 amount = uint64(event.GetDamageInfo()->GetDamage()) * std::max(0, effect->GetAmount()) / 100;
+        if (amount)
+            GetTarget()->CastCustomSpell(SiphonAnimaHeal, SPELLVALUE_BASE_POINT0,
+                int32(std::min<uint64>(amount, std::numeric_limits<int32>::max())), GetTarget(), TRIGGERED_FULL_MASK);
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(aura_ascension_reaper_siphon_anima::CheckProc);
+        OnEffectProc += AuraEffectProcFn(aura_ascension_reaper_siphon_anima::Heal, EFFECT_0, AuraType(354));
+    }
+};
 }
 
 void AddSC_AscensionReaperTalentProcs()
 {
+    RegisterSpellScript(aura_ascension_reaper_souls_for_slaughter);
     RegisterSpellScript(aura_ascension_reaper_jailers_will_helper);
     RegisterSpellScript(spell_ascension_reaper_talent_proc);
     RegisterSpellScript(spell_ascension_reaper_chasing_death_extender);
     RegisterSpellScript(aura_ascension_reaper_soulrot);
+    RegisterSpellScript(aura_ascension_reaper_siphon_anima);
 }

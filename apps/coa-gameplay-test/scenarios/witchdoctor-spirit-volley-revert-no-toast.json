@@ -1,0 +1,123 @@
+{
+  "schema": 1,
+  "name": "Spirit Volley handing Reclamation back draws no New Spell Learned toast",
+  "contract": "SetTemporarySpellReplacement swaps the client's bars with SMSG_SUPERCEDED_SPELL, and the client announces the spell it swaps in as learned when that spell's SpellCustomAttr row carries the notable bit 0x400 (Extensions.dll, OnSupersededSpell -> OnSpellLearned -> NOTABLE_SPELL_LEARNED, which the 'New Spell Learned' toast answers). mod-spellbook sets that bit for every Book of Ascension spell. Spirit Volley 504582 carries no row, but Reclamation 680904 (row 22286) is notable, so each time Spirit Volley Ready (505158) ended, the swap back announced Reclamation as newly learned. The swap notice now arrives with Reclamation muted (its row pushed with the bit cleared just before it) and the row restored right after, so a genuine learn of Reclamation is still announced. spellbook_loud_supersedes_for counts notices that swapped Reclamation in while the client still held it notable; spellbook_client_notable reads the bit of the last row pushed for it.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks and class synchronisation settle",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 806288
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 680902
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 680903
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 680904
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 504582
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "set_aura",
+      "label": "Spirit Volley Ready",
+      "actor": "caster",
+      "spell": 505158,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Reclamation turns into Spirit Volley",
+      "actor": "caster",
+      "metric": "temporary_spell_replacement",
+      "spell": 680904,
+      "equals": 504582,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spellbook_superseded_for",
+      "spell": 680904,
+      "save_as": "handed_back_before"
+    },
+    {
+      "action": "set_aura",
+      "label": "Spirit Volley Ready ends",
+      "actor": "caster",
+      "spell": 505158,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Spirit Volley hands Reclamation back",
+      "actor": "caster",
+      "metric": "temporary_spell_replacement",
+      "spell": 680904,
+      "equals": 680904,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the client was told Reclamation came back",
+      "actor": "caster",
+      "metric": "spellbook_superseded_for",
+      "spell": 680904,
+      "relative_to": "handed_back_before",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Reclamation came back muted, so no toast",
+      "actor": "caster",
+      "metric": "spellbook_loud_supersedes_for",
+      "spell": 680904,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Reclamation is notable again, so a genuine learn is still announced",
+      "actor": "caster",
+      "metric": "spellbook_client_notable",
+      "spell": 680904,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Every pushed row carried the row id the client's own table holds for it",
+      "actor": "caster",
+      "metric": "spellbook_notify_id_mismatches",
+      "spell": 680904,
+      "equals": 0
+    }
+  ]
+}

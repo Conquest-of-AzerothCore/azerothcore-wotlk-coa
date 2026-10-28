@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Delusions of Jin'do still works after adding its invisibility detection (#9661)",
+  "contract": [
+    "The Shade of Jin'do (14986) casts its own invisibility (24307, SPELL_AURA_MOD_INVISIBILITY type 2).",
+    "Vanilla's Delusions of Jin'do (24306) always paired the curse with SPELL_AURA_MOD_INVISIBILITY_DETECT",
+    "type 2 as its third (and only aura) effect, so the cursed player could see and fight back the Shade",
+    "they are forced to summon. The Ascension replacement curse (2118511/2118512) carried the vision and",
+    "the damage but not that detection, so the cursed hero could not see or target the Shade.",
+    "boss_jindo_coa.cpp now reuses only that third effect of 24306 on the cursed player, through the real",
+    "Delusions trigger (verified by reading the applied aura directly in the fix's own code path).",
+    "This harness cannot observe the grant itself: the lane's own isolating phase makes Jin'do lose the",
+    "hero and evade within the same window the curse lands (documented independently by the sibling",
+    "zul-gurub-jindo-resets-5800 scenario's contract), and 24306's own, unmodified Blizzard",
+    "AuraInterruptFlags (bit 31, leave combat) then strips it before any external assertion can observe it",
+    "-- confirmed empirically: the vision (2118511) and damage (2118512) halves of the same curse remain",
+    "readable afterward, but 24306 reads false at every tried poll width down to 50 ms, immediately after",
+    "the curse lands. The Shade (14986) is equally unobservable here: nearby_creature_count never finds",
+    "it even on the unmodified tree, independent of this fix. So this scenario only proves the fix did not",
+    "break the rest of the Delusions curse (the vision and damage auras, and the fight itself), which would",
+    "fail if the added AddAura call threw, deadlocked, or otherwise disrupted the surrounding cast.",
+    "No scenario in this harness can assert the detection grant or the Shade's visibility directly."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 309,
+    "x": -11515.8,
+    "y": -1275.48,
+    "z": 79.6621,
+    "o": 3.15905,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "hero",
+      "entry": 11380,
+      "level": 63,
+      "reaction": 2,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "attack",
+      "label": "Engage Jin'do",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "Jin'do fights the hero",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Delusions of Jin'do still curses the hero after adding its detection effect",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 2118512,
+      "equals": 1,
+      "within_ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "the curse's vision half also still lands",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 2118511,
+      "equals": 1
+    }
+  ]
+}

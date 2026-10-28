@@ -1,0 +1,146 @@
+{
+  "schema": 1,
+  "name": "Login announces the released Heroic and Mythic dungeon events",
+  "contract": "The client offers Random Classic Dungeon Heroic (1258) and Mythic (2258) only while one of their game events is active (C_LFG.RequiresGameEvent), otherwise it reports the difficulty as not released. Each login sends one active SMSG_GAME_EVENT_INFO (0x09BD) for every Heroic event (394, 395, 396, 436, 437, 447) and every Mythic event (728 to 732, 734). This checks the packets the server builds for a socketless session, not the client's rendering of the Dungeon Finder.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p1",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The client learns that the Heroic Blackrock Spire event (394) is active",
+      "actor": "p1",
+      "metric": "server_packets",
+      "opcode": 2493,
+      "row": 394,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The client learns that the Heroic Blackrock Depths event (395) is active",
+      "actor": "p1",
+      "metric": "server_packets",
+      "opcode": 2493,
+      "row": 395,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The client learns that the Heroic Scholomance event (396) is active",
+      "actor": "p1",
+      "metric": "server_packets",
+      "opcode": 2493,
+      "row": 396,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The client learns that the Heroic Stratholme event (436) is active",
+      "actor": "p1",
+      "metric": "server_packets",
+      "opcode": 2493,
+      "row": 436,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The client learns that the Heroic Maraudon event (437) is active",
+      "actor": "p1",
+      "metric": "server_packets",
+      "opcode": 2493,
+      "row": 437,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The client learns that the Heroic Dire Maul event (447) is active",
+      "actor": "p1",
+      "metric": "server_packets",
+      "opcode": 2493,
+      "row": 447,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The client learns that the Mythic Blackrock Spire event (728) is active",
+      "actor": "p1",
+      "metric": "server_packets",
+      "opcode": 2493,
+      "row": 728,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The client learns that the Mythic Blackrock Depths event (729) is active",
+      "actor": "p1",
+      "metric": "server_packets",
+      "opcode": 2493,
+      "row": 729,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The client learns that the Mythic Scholomance event (730) is active",
+      "actor": "p1",
+      "metric": "server_packets",
+      "opcode": 2493,
+      "row": 730,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The client learns that the Mythic Stratholme event (731) is active",
+      "actor": "p1",
+      "metric": "server_packets",
+      "opcode": 2493,
+      "row": 731,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The client learns that the Mythic Maraudon event (732) is active",
+      "actor": "p1",
+      "metric": "server_packets",
+      "opcode": 2493,
+      "row": 732,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The client learns that the Mythic Dire Maul event (734) is active",
+      "actor": "p1",
+      "metric": "server_packets",
+      "opcode": 2493,
+      "row": 734,
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

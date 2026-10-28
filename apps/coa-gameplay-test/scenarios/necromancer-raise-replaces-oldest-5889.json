@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "name": "Necromancer: a raise at full Life Force replaces the oldest minion (#5889)",
+  "contract": [
+    "Life Force 805011 is a stacked aura whose stack count is the capacity (Spell.dbc StackAmount 2, raised only by",
+    "SPELLMOD_MAX_AURA_STACKS passives such as Master Animator 504431 and Scourge Apprentice Training 680283, which",
+    "this fixture does not learn); Free Life Force 525004 carries the free amount and is removed at 0. Raise: Lesser",
+    "Skeletal Warrior 500970 (50065), Raise: Skeletal Rogue 500969 (50078) and Raise: Ghoul 500971 (50073) each read",
+    "'occupying 1 Life Force'; Raise: Abomination 500335 (50068) reads 'occupying 3 Life Force'. #5889 asks that a",
+    "raise at full Life Force cycles the new minion in, and the maintainer chose that the oldest raised minions are",
+    "unsummoned until the new one fits. A level-60 Necromancer with capacity 2 raises a warrior and then a rogue,",
+    "which fills its Life Force. A Ghoul raised at full Life Force must appear while the warrior, the oldest, is",
+    "unsummoned and the rogue stays. A raise that can never fit, an Abomination costing 3 against a capacity of 2, is",
+    "still refused with SPELL_FAILED_ALREADY_HAVE_SUMMON (7) before mana is spent, and unsummons nothing."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the Life Force aura synchronize", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 500970 },
+    { "action": "learn", "actor": "n", "spell": 500969 },
+    { "action": "learn", "actor": "n", "spell": 500971 },
+    { "action": "learn", "actor": "n", "spell": 500335 },
+    {
+      "action": "assert", "label": "PRECONDITION: Life Force capacity is 2 without Life Force talents", "actor": "n",
+      "metric": "aura_stacks", "spell": 805011, "equals": 2, "within_ms": 3000
+    },
+    { "action": "cast", "label": "Raise the oldest minion, a Lesser Skeletal Warrior", "actor": "n", "spell": 500970 },
+    {
+      "action": "assert", "label": "SETUP: one Lesser Skeletal Warrior", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50065, "equals": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 500 },
+    { "action": "cast", "label": "Raise a Skeletal Rogue to fill the Life Force", "actor": "n", "spell": 500969 },
+    {
+      "action": "assert", "label": "SETUP: one Skeletal Rogue", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50078, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "PRECONDITION: no Life Force is left free", "actor": "n",
+      "metric": "aura_stacks", "spell": 525004, "equals": 0, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 500 },
+    { "action": "cast", "label": "Raise a Ghoul at full Life Force", "actor": "n", "spell": 500971 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Ghoul is raised at full Life Force", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50073, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "The raise at full Life Force was not refused", "actor": "n",
+      "metric": "cast_failure", "spell": 500971, "equals": 0
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the oldest minion, the warrior, is unsummoned", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50065, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The newer Skeletal Rogue stays", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50078, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The capacity is unchanged", "actor": "n",
+      "metric": "aura_stacks", "spell": 805011, "equals": 2, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The Life Force is full again", "actor": "n",
+      "metric": "aura_stacks", "spell": 525004, "equals": 0, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 500 },
+    { "action": "snapshot", "actor": "n", "metric": "power", "power": 0, "save_as": "mana_before_abomination" },
+    { "action": "cast", "label": "Raise an Abomination (3 Life Force) at capacity 2", "actor": "n", "spell": 500335 },
+    {
+      "action": "assert", "label": "A minion that can never fit is refused as SPELL_FAILED_ALREADY_HAVE_SUMMON (7)",
+      "actor": "n", "metric": "cast_failure", "spell": 500335, "equals": 7, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The refused raise spends no mana", "actor": "n",
+      "metric": "power", "power": 0, "relative_to": "mana_before_abomination", "min": 0
+    },
+    { "action": "wait", "label": "Outlast the Abomination cast time", "ms": 3500 },
+    {
+      "action": "assert", "label": "No Abomination was raised", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50068, "equals": 0
+    },
+    {
+      "action": "assert", "label": "The refused raise unsummons no Ghoul", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50073, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The refused raise unsummons no Skeletal Rogue", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50078, "equals": 1
+    }
+  ]
+}

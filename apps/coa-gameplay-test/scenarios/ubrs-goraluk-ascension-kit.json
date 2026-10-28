@@ -1,0 +1,749 @@
+{
+  "schema": 1,
+  "name": "Upper Blackrock Spire: Goraluk Anvilcrack fights with Ascension's kit",
+  "contract": [
+    "Goraluk Anvilcrack keeps Strike, Head Crack and Backhand and adds the abilities of Ascension's kit for",
+    "him (db.exil.es/npc/10899): Fierce Blow 975011, Stunning Strike 2102553 and his two stacking",
+    "self-enchants, Enchant Armor - Protection V 2102138 and Enchant Pickaxe - Efficieny V 2102137. Fierce",
+    "Blow and Strike are both original next-swing spells and share CURRENT_MELEE_SPELL, where a later queue",
+    "replaces the earlier one. Original SmartAI schedules Strike every 4-6 seconds and Fierce Blow every 6-8",
+    "seconds, so demanding the first Fierce Blow within fifteen seconds can fail despite a working native",
+    "rotation. Observe 240 seconds of ordinary accelerated combat, maintaining the already authored",
+    "high-health observer every four seconds, before requiring every original kit packet. Boss timers, queued",
+    "spell replacement and hit rolls are unchanged. Head Crack recomputes player maximum health from native",
+    "stat modifiers, replacing a direct maximum-field override. Original 2156414 applies only a +10000000",
+    "flat health aura and lasts seven days. Supply and assert that native modifier, its lifetime and the",
+    "resulting maximum before combat, refill health within that derived maximum, and require the same native",
+    "maximum and survival after the sample. It changes no armor, hit, damage, timers or spell selection.",
+    "Apply the original persistent health budget before the initial settling wait: the spawned boss is",
+    "already aggressive at melee range, so waiting with ordinary base health can leave no living observer on",
+    "which to apply the later aura. Require survival before and after settling; raw health refills do not",
+    "resurrect a dead actor."
+  ],
+  "timeout_ms": 400000,
+  "location": {
+    "map": 229,
+    "x": 141.0,
+    "y": -242.7,
+    "z": 110.9,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "hero",
+      "entry": 10899,
+      "level": 61,
+      "health": 400000,
+      "reaction": 2,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 2156414,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura_amount",
+      "spell": 2156414,
+      "effect": 0,
+      "equals": 10000000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura_duration_ms",
+      "spell": 2156414,
+      "min": 400000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "max_health",
+      "min": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1,
+      "label": "The boss-kit observer is alive with its original persistent health budget"
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Upper Blackrock Spire",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 229
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1,
+      "label": "The boss-kit observer is alive with its original persistent health budget"
+    },
+    {
+      "action": "attack",
+      "label": "Engage Goraluk Anvilcrack",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Goraluk Anvilcrack fights the hero",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Head Crack lowers the hero's Stamina",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 16172,
+      "min": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "assert",
+      "label": "Goraluk uses Fierce Blow",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 10899,
+      "spell": 975011,
+      "min": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Goraluk enchants his armor",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 10899,
+      "spell": 2102138,
+      "min": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Goraluk uses Stunning Strike",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 10899,
+      "spell": 2102553,
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "Goraluk enchants his pickaxe",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 10899,
+      "spell": 2102137,
+      "min": 1,
+      "within_ms": 45000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "max_health",
+      "min": 10000000,
+      "label": "The native health modifier survives Head Crack stat recalculation"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero survives the fight",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Barbarian percentage Energy costs use base Energy, not the doubled maximum (#7604)",
+  "contract": "Berserker Aura (560543) and Headbutt (520523) cost 50% and 20% of Energy in Spell.dbc, and the client tooltip shows 50 and 20 Energy, which is the percentage of the 100 base Energy pool. Excessive Power (92081) doubles the maximum Energy to 200, so a cast must spend 50 Energy, not 100.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "b", "spell": 92081 },
+    { "action": "learn", "actor": "b", "spell": 560543 },
+    { "action": "learn", "actor": "b", "spell": 520523 },
+    { "action": "assert", "label": "Excessive Power doubles maximum Energy", "actor": "b", "metric": "max_power", "power": 3, "equals": 200, "within_ms": 3000 },
+    { "action": "assert", "label": "Berserker Aura costs 50% of base Energy", "actor": "b", "metric": "spell_power_cost", "spell": 560543, "power": 3, "equals": 50 },
+    { "action": "assert", "label": "Headbutt costs 20% of base Energy", "actor": "b", "metric": "spell_power_cost", "spell": 520523, "power": 3, "equals": 20 },
+    { "action": "set_power", "actor": "b", "power": 3, "value": 60 },
+    { "action": "cast", "actor": "b", "spell": 560543, "target": "b" },
+    { "action": "assert", "label": "Berserker Aura is applied", "actor": "b", "metric": "aura", "spell": 560543, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "The cast spent 50 Energy", "actor": "b", "metric": "power", "power": 3, "min": 10, "max": 20 }
+  ]
+}

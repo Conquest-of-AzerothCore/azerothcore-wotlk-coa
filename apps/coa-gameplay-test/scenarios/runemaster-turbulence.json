@@ -11,7 +11,10 @@
     "and no spell_bonus_data row gave its tick the 0.135 attack power. Expected: 5-6 gust ticks, each also leaving",
     "one spiral at the caster; an enemy 2 yd away takes spiral damage; the last spiral outlasts Turbulence and all",
     "expire within 6 sec after. A tick gains 0.135 per point of attack power times the caster's own damage done",
-    "(about 1.11 on this fixture), a 0.13-0.16 window that excludes the 0.17 of 706526's stale helper text x1.11."
+    "(about 1.11 on this fixture), a 0.13-0.16 window that excludes the 0.17 of 706526's stale helper text x1.11.",
+    "After the first spiral, move its caster five yards sideways. The victim stays in the first three-yard",
+    "spiral and within the six-yard gust radius, while later spirals are outside the victim. This exercises",
+    "the authored leave-behind condition without overlapping same-caster periodic area aura applications."
   ],
   "timeout_ms": 60000,
   "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
@@ -67,6 +70,18 @@
     {
       "action": "assert", "label": "Turbulence leaves a Turbulent Spiral behind", "actor": "rm",
       "metric": "dynamic_object", "spell": 707153, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "teleport", "actor": "rm", "map": 0, "x": -8949.95, "y": -127.493, "z": 83.5312, "o": 0,
+      "label": "Leave the first spiral behind before later spirals form"
+    },
+    {
+      "action": "assert", "actor": "rm", "metric": "distance", "target": "dummy", "min": 5.2, "max": 5.6,
+      "within_ms": 1000, "label": "CONTROL: victim stays inside gust radius and outside later spiral radius"
+    },
+    {
+      "action": "assert", "actor": "rm", "metric": "aura", "spell": 705575, "equals": 1,
+      "label": "CONTROL: movement preserves active Turbulence"
     },
     {
       "action": "assert", "label": "An enemy in the spiral takes its Nature damage", "actor": "rm",

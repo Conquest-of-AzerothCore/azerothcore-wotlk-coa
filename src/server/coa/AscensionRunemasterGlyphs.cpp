@@ -170,6 +170,20 @@ class spell_ascension_runemaster_glyph_cast : public SpellScript
     bool _released = false;
 };
 
+class spell_ascension_runemaster_runic_obliteration_glyph : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_runemaster_runic_obliteration_glyph);
+
+    bool Load() override { return IsRunemaster(GetCaster()); }
+
+    void Generate() { GenerateGlyph(GetCaster()); }
+
+    void Register() override
+    {
+        AfterCast += SpellCastFn(spell_ascension_runemaster_runic_obliteration_glyph::Generate);
+    }
+};
+
 class spell_ascension_runemaster_glyph_payload : public SpellScript
 {
     PrepareSpellScript(spell_ascension_runemaster_glyph_payload);
@@ -281,6 +295,13 @@ class spell_ascension_runemaster_overloaded_frost : public AuraScript
 
 void ApplyAscensionRunemasterGlyphContracts(SpellInfo* info)
 {
+    if (info && info->Id == SPELL_UNLEASHED_ARCANE &&
+        info->SpellFamilyName == uint32(CLASS_SPIRIT_MAGE) + 6 &&
+        info->Effects[EFFECT_0].Effect == SPELL_EFFECT_SCHOOL_DAMAGE &&
+        info->Effects[EFFECT_0].TargetA.GetTarget() == TARGET_UNIT_TARGET_ENEMY &&
+        info->Effects[EFFECT_0].TargetB.GetTarget() == TARGET_UNIT_DEST_AREA_ENEMY)
+        info->AttributesEx2 |= SPELL_ATTR2_ALLOW_DEAD_TARGET;
+
     if (info && info->Id == SPELL_ARCANE_GLYPH_PASSIVE &&
         info->SpellFamilyName == uint32(CLASS_SPIRIT_MAGE) + 6)
     {
@@ -312,6 +333,7 @@ void ApplyAscensionRunemasterGlyphContracts(SpellInfo* info)
 void AddAscensionRunemasterGlyphScripts()
 {
     RegisterSpellScript(spell_ascension_runemaster_glyph_cast);
+    RegisterSpellScript(spell_ascension_runemaster_runic_obliteration_glyph);
     RegisterSpellScript(spell_ascension_runemaster_glyph_payload);
     RegisterSpellScript(spell_ascension_runemaster_overloaded_frost);
 }

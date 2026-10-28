@@ -37,7 +37,8 @@ results as single-scenario evidence.
 - The gameplay stage runs up to 15 scenarios at once in one worldserver on a simulated clock. Keep timing
   assertions robust to one world step (up to 25 ms in a `wait`, 10 ms while polling `within_ms`). Refer to players
   by actor id: `Harness<a..h>` is rewritten only in `console` and `command` text, and explicit fixture names are
-  not made unique per lane. A scenario that reads or changes process-global state (the Who list, `set_phase 1`)
+  not made unique per lane. A `set_phase` mask that includes the normal world phase (mask 1) automatically makes
+  the scenario exclusive, including exploratory scenarios. Other process-global state (such as the Who list)
   needs an entry with its reason in `apps/coa-gameplay-test/clock_policy.json`. Creature text with area, zone or
   map range crosses phases and counts in `system_messages`, so an exact delta can pick up another lane's
   creature on the same map.
@@ -69,18 +70,18 @@ results as single-scenario evidence.
    missing prerequisite; exit code 2 means the invocation or settings were invalid and nothing ran. Diagnose
    infrastructure failures before interpreting gameplay outcomes. Use a new run after a correction; each run
    writes a new output directory, preserving evidence of the failed attempt.
-5. By default the stage runs accelerated: an `acceleration_sensitive` id failed on the simulated clock but passed
-   its real-pace rerun on the same server. First read its accelerated attempt (`cases.<id>.batch.message`): a
-   message beginning `Worldserver exited` or reporting `Case ... timed out after <n> s` means the worldserver
-   crashed or hung, so report the crash or hang. Otherwise report the id as timing-sensitive, not as a clean pass,
-   and confirm it with `--gameplay-clock real`, the real-clock reference (`docs/coa/verification.md`, Real-clock
-   reference runs).
-   On the real clock, queue mode runs many scenarios in one worldserver per worker. A `batch_sensitive` id failed
-   in the batch but passed its isolated single-scenario rerun: report it as sensitive to shared server state or
-   order, not as a clean pass. An `isolated_only` id did not fail in the batch (it did not run there, or its
-   server's cleanup failed) and passed only in its rerun. A scenario whose `contract` requires specific config
-   values needs a separate run whose `--settings` names a matching configuration; one configuration cannot
-   satisfy every catalog scenario (`docs/coa/verification.md`, Full runs).
+5. The default stage runs accelerated only: a fast failure remains failed. Inspect the native result, verify
+   the authored contract, and repair the mechanic or fixture before another accelerated run. Random failures
+   need enough eligible trials and a statistical check; a passing retry alone is not a timing diagnosis.
+   `--gameplay-real-pace-rerun` explicitly opts into slower same-server diagnostics and reports ids passing only
+   there in `acceleration_sensitive`; these are diagnostic-only passes, not clean accelerated passes. Read the
+   accelerated attempt (`cases.<id>.batch.message`) first: `Worldserver exited` or a case timeout means a crash or
+   hang. Confirm an actual repeatable clock dependency with a focused `--gameplay-clock real` reference during
+   its repair. Use accelerated verification for normal batches afterward.
+   On the real clock, a `batch_sensitive` id failed in the batch but passed an isolated rerun. An `isolated_only`
+   id passed only in its rerun without a batch failure verdict. Report their limited scope accurately. A contract
+   requiring specific configuration needs matching settings; one configuration cannot satisfy every catalog
+   scenario (`docs/coa/verification.md`, Full runs).
 6. Check `world_cache` in the summary: a retained, verified world is intentional, and each gameplay worker (one
    on the simulated clock) has its own slot under `.cache/coa-gameplay-tests/world-cache/slots/`. A scenario that
    writes world data discards that slot's copy after its server stops, and later cases on that server see the

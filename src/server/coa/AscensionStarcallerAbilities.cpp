@@ -11,6 +11,7 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 #include <algorithm>
+#include <cmath>
 namespace
 {
 using namespace AscensionStarcaller;
@@ -322,12 +323,14 @@ class starcaller_spells : public AllSpellScript
                             break;
                     }
             }
-            if ((Any(info, {801990, 574328}) && player->HasAura(800504)) ||
-                (Any(info, {575030, 801987}) && critical && player->HasAura(704725)))
+            if (Any(info, {801990, 574328}) && (player->HasAura(800504) || player->HasAura(803554)))
                 Cast(player, target, 574154);
             if (Any(info, {801990, 574328}) && player->HasAura(300237))
                 Copy(player, target, 524703, healing / 10);
         }
+        if (spell->GetScriptHealingIncludingOverheal() && critical && Any(info, {575030, 801987}) &&
+            player->HasAura(704725))
+            Cast(player, target, 574154);
         State(player).event = old;
     }
     void OnSpellCast(Spell* spell, Unit* caster, SpellInfo const* info, bool) override
@@ -422,6 +425,42 @@ class starcaller_spells : public AllSpellScript
             FinishSelected(player, spell);
     }
 };
+class aura_ascension_starcaller_shattered_stars : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_starcaller_shattered_stars);
+
+    bool Validate(SpellInfo const*) override { return ValidateSpellInfo({707724, 707725}); }
+
+    void Extend(AuraEffect const* effect)
+    {
+        Player* player = GetCaster() ? GetCaster()->ToPlayer() : nullptr;
+        if (!player || player->getClass() != CLASS_STARCALLER || player != GetTarget() ||
+            int32(effect->GetTickNumber()) != effect->GetTotalTicks())
+            return;
+        AuraEffect const* talent = player->GetAuraEffect(704771, EFFECT_0, player->GetGUID());
+        if (!talent || talent->GetAmount() <= 0)
+            return;
+        float const length = GetSpellInfo()->Effects[EFFECT_0].CalcRadius(player);
+        float const radius = sSpellMgr->AssertSpellInfo(707725)->Effects[EFFECT_0].CalcRadius(player);
+        if (radius <= 0.0f)
+            return;
+        uint32 const segments = uint32(std::ceil(talent->GetAmount() / (2.0f * radius)));
+        for (uint32 segment = 1; segment <= segments; ++segment)
+        {
+            float const distance = length + float(talent->GetAmount()) * segment / segments;
+            Position position = player->GetPosition();
+            player->MovePositionToFirstCollision(position, distance, 0.0f);
+            player->CastSpell(position.GetPositionX(), position.GetPositionY(), position.GetPositionZ(), 707725, true);
+        }
+    }
+
+    void Register() override
+    {
+        OnEffectPeriodic += AuraEffectPeriodicFn(aura_ascension_starcaller_shattered_stars::Extend,
+            EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+    }
+};
+
 class spell_ascension_starcaller_ability : public SpellScript
 {
     PrepareSpellScript(spell_ascension_starcaller_ability);
@@ -467,5 +506,6 @@ class spell_ascension_starcaller_ability : public SpellScript
 void AddSC_AscensionStarcallerAbilities()
 {
     new starcaller_spells();
+    RegisterSpellScript(aura_ascension_starcaller_shattered_stars);
     RegisterSpellScript(spell_ascension_starcaller_ability);
 }

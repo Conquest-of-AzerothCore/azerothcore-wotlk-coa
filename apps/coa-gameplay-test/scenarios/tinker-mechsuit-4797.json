@@ -1,20 +1,28 @@
 {
   "schema": 1,
   "name": "Tinker: Mechsuit abilities keep the suit while Scrap lasts (#4797)",
-  "contract": "Build: Mechsuit (801384) drains 5 Scrap (801816) every second and ejects the Tinker only when Scrap runs out, as its tooltip states. While Scrap lasts, Gatling Gun (500213) and Mechsuit: Laser Beam (805372) keep the suit on and deal damage, at level 13 and at level 60, including the automatic dismount (CMSG_CANCEL_MOUNT_AURA) the client sends with every cast from the suit's mount. Cancelling the Build: Mechsuit aura leaves the suit, and at zero Scrap the suit is removed.",
+  "contract": [
+    "Build: Mechsuit (801384) drains 5 Scrap (801816) every second and ejects the Tinker only when Scrap runs",
+    "out, as its tooltip states. While Scrap lasts, Gatling Gun (500213) and Mechsuit: Laser Beam (805372)",
+    "keep the suit on and deal damage, at level 13 and at level 60, including the automatic dismount",
+    "(CMSG_CANCEL_MOUNT_AURA) the client sends with every cast from the suit's mount. Cancelling the Build:",
+    "Mechsuit aura leaves the suit, and at zero Scrap the suit is removed."
+  ],
   "timeout_ms": 90000,
   "players": [
     {
       "id": "t13",
       "race": 1,
       "class": 28,
-      "level": 13
+      "level": 13,
+      "ranged_hit_rating": 10000
     },
     {
       "id": "t60",
       "race": 1,
       "class": 28,
-      "level": 60
+      "level": 60,
+      "ranged_hit_rating": 10000
     }
   ],
   "creatures": [

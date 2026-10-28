@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "name": "Vanity heirlooms need a level 60 on the realm to be delivered and equipped",
+  "contract": "Heirloom quality items of VanityCollection.dbc follow Aura of Experience (818059): while no character on the account has reached level 60, the Vanity collection's Deliver Item request (CMSG_CUSTOM_ASCENSION_POINT_SPEND_REQUEST 0x0523, u8 currency 2, u32 item) hands over nothing and answers: This item requires you to have a level 60 on this realm to be able to use. An owned copy cannot be equipped either. CoA.UnlockAllVanity is on in the test realm, so every character is entitled to every vanity entry. A level 59 character alone on its account is refused Pendant of Adventure (339076) and cannot equip it; a level 60 character is delivered Pendant of Discovery (339100); a level 10 character whose other character is saved at level 60 equips Pendant of Adventure. Extension packets are queued per account and drained by any of its online characters, so delivery is only requested by characters alone on their account.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "low", "race": 1, "class": 1, "level": 59 },
+    { "id": "veteran", "race": 1, "class": 1, "level": 60 },
+    { "id": "alt", "race": 1, "class": 1, "level": 10 },
+    { "id": "main", "race": 1, "class": 1, "level": 60, "account_of": "alt" }
+  ],
+  "steps": [
+    { "action": "relog", "actor": "main" },
+    {
+      "action": "client_packet", "label": "Deliver Pendant of Adventure", "actor": "low", "opcode": 1315,
+      "fields": [ { "u8": 2 }, { "u32": 339076 } ]
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "system_message_contains",
+      "text": "This item requires you to have a level 60 on this realm to be able to use.",
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "A level 59 character is told the heirloom needs a level 60 on the realm"
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "item_count",
+      "item": 339076,
+      "equals": 0,
+      "label": "A level 59 character is not delivered the heirloom"
+    },
+    { "action": "add_item", "actor": "low", "item": 339076 },
+    { "action": "equip", "actor": "low", "item": 339076, "slot": 1, "rejected": true },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "equipped_item",
+      "slot": 1,
+      "equals": 0,
+      "label": "An owned vanity heirloom cannot be equipped without a level 60 on the account"
+    },
+    {
+      "action": "client_packet", "label": "Deliver Pendant of Discovery", "actor": "veteran", "opcode": 1315,
+      "fields": [ { "u8": 2 }, { "u32": 339100 } ]
+    },
+    {
+      "action": "assert",
+      "actor": "veteran",
+      "metric": "item_count",
+      "item": 339100,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "A level 60 character is delivered the heirloom"
+    },
+    { "action": "add_item", "actor": "alt", "item": 339076 },
+    { "action": "equip", "actor": "alt", "item": 339076, "slot": 1 },
+    {
+      "action": "assert",
+      "actor": "alt",
+      "metric": "equipped_item",
+      "slot": 1,
+      "equals": 339076,
+      "label": "A saved level 60 character on the account lets the alt equip the heirloom"
+    }
+  ]
+}

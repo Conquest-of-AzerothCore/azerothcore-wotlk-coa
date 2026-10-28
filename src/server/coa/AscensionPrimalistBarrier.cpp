@@ -17,8 +17,6 @@ enum BarrierSpells : uint32
     EarthmotherProtection = 560298
 };
 
-constexpr uint32 HandOfEarthmotherFamilyMask1 = 8;
-
 class aura_ascension_earthmother_protection_link : public AuraScript
 {
     PrepareAuraScript(aura_ascension_earthmother_protection_link);
@@ -37,10 +35,13 @@ class aura_ascension_earthmother_protection_link : public AuraScript
     {
         Unit* owner = GetTarget();
         Aura* barrier = owner->GetAura(RockBarrier, owner->GetGUID());
-        if (!barrier || !owner->HasAura(EarthmotherProtection))
+        AuraEffect const* talent = owner->GetAuraEffect(EarthmotherProtection, EFFECT_0, owner->GetGUID());
+        if (!barrier || !talent)
             return;
         if (Aura* helper = owner->AddAura(BarrierModifiers, owner))
         {
+            if (AuraEffect* discount = helper->GetEffect(EFFECT_2))
+                discount->ChangeAmount(talent->GetAmount());
             helper->SetMaxDuration(barrier->GetMaxDuration());
             helper->SetDuration(barrier->GetDuration());
         }
@@ -91,11 +92,7 @@ public:
         }
         if (info->Id == EarthmotherProtection && info->SpellFamilyName == 37 &&
             info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_ADD_FLAT_MODIFIER)
-        {
-            info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_ADD_PCT_MODIFIER;
-            info->Effects[EFFECT_0].MiscValue = SPELLMOD_COST;
-            info->Effects[EFFECT_0].SpellClassMask = flag96(0, HandOfEarthmotherFamilyMask1, 0);
-        }
+            info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
     }
 };
 
@@ -135,8 +132,6 @@ class spell_ascension_fury_of_earthmother_charge : public SpellScript
         Aura* barrier = owner->GetAura(RockBarrier, owner->GetGUID());
         if (!barrier)
             return;
-        if (barrier->GetCharges() < 255)
-            barrier->SetCharges(barrier->GetCharges() + 1);
         if (Aura* helper = owner->GetAura(BarrierModifiers, owner->GetGUID()))
         {
             helper->SetMaxDuration(std::max(helper->GetMaxDuration(), barrier->GetDuration()));

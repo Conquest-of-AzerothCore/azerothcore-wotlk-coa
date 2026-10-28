@@ -1,0 +1,352 @@
+{
+  "schema": 1,
+  "name": "Lo'sho Amplification gates Starfire Shot's Lunar Eclipse trigger/consume (#5815)",
+  "contract": [
+    "Issue 5815 (level 14 Starcaller): Starfire Shot 801978 'doesn't consume nor trigger the Lunar Eclipse",
+    "effect'. AscensionStarcaller.cpp's Lunar(info, player) only matches 801978 when the caster also has aura",
+    "500205 (Lo'sho Amplification), the same pattern already shipped for 680220/92134 (Huntress Shot/Moon",
+    "Priest): 500205's tooltip reads 'Your Starfire Shot now has a Lunar Eclipse effect', mirroring 92134's",
+    "'Your Huntress Shot now has a Lunar Eclipse effect'. When Lunar() matches,",
+    "AscensionStarcallerAbilities.cpp's Snapshot() tags both the Lunar Eclipse aura 800386 and the Starfire",
+    "Shot cast with a shared generation; OnSpellHitResult then casts the Burn DoT 561122 (Named(info,801978)",
+    "&& spell->GetScriptValue(800386) && player->HasAura(500205)), and FinishSelected removes aura 800386 for",
+    "a matching generation on any non-triggered cast. Without 500205 none of this is tagged, so Lunar Eclipse",
+    "is neither triggered (no 561122) nor consumed (800386 stays), exactly the reported symptom. This",
+    "scenario pins both outcomes: a control fixture without 500205 keeps Lunar Eclipse and gets no Burn DoT",
+    "after casting Starfire Shot, while an otherwise identical fixture with 500205 loses Lunar Eclipse and",
+    "gets the Burn DoT. Starfire Shot requires an equipped ranged weapon (EquippedItemClass 2,",
+    "EquippedItemSubClassMask 262156, matching 680220, satisfied here with the same Worn Shortbow 2504 the",
+    "shipped Huntress Shot scenario uses) and a target that already carries Scattered Star 804378",
+    "(TargetAuraSpell), so both fixtures first cast Fan of Knives 680703 (no weapon requirement) on their own",
+    "dummy to apply one stack. Both fixtures reach 4 Lunar Phase stacks (802985) plus the threshold marker",
+    "704519 by fixture aura, then cast Lunar Eclipse 800386 on themselves, exactly as the shipped",
+    "lunar-eclipse-consumption.json regression does. The setup Fan of Knives 680703 is an authored Melee",
+    "attack, so both matching fixtures explicitly configure and assert native melee hit and expertise before",
+    "requiring a real hit and Scattered Star. The original Lunar Eclipse learned/unlearned controls and Burn",
+    "observations remain unchanged."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "ranged_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "star",
+      "race": 1,
+      "class": 26,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "ranged_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy_control",
+      "owner": "control",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 6.5
+    },
+    {
+      "id": "dummy_star",
+      "owner": "star",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 6.5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 680703
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 800386
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 801978
+    },
+    {
+      "action": "learn",
+      "actor": "star",
+      "spell": 680703
+    },
+    {
+      "action": "learn",
+      "actor": "star",
+      "spell": 800386
+    },
+    {
+      "action": "learn",
+      "actor": "star",
+      "spell": 801978
+    },
+    {
+      "action": "learn",
+      "label": "Only the star fixture holds Lo'sho Amplification",
+      "actor": "star",
+      "spell": 500205
+    },
+    {
+      "action": "add_item",
+      "actor": "control",
+      "item": 2504
+    },
+    {
+      "action": "equip",
+      "actor": "control",
+      "item": 2504,
+      "slot": 17
+    },
+    {
+      "action": "add_item",
+      "actor": "star",
+      "item": 2504
+    },
+    {
+      "action": "equip",
+      "actor": "star",
+      "item": 2504,
+      "slot": 17
+    },
+    {
+      "action": "wait",
+      "label": "Let the equipment settle",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "melee_hit_chance",
+      "min": 100,
+      "label": "Fan of Knives has native melee accuracy"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "expertise",
+      "min": 100,
+      "label": "Native expertise covers melee dodge and parry"
+    },
+    {
+      "action": "assert",
+      "actor": "star",
+      "metric": "melee_hit_chance",
+      "min": 100,
+      "label": "Fan of Knives has native melee accuracy"
+    },
+    {
+      "action": "assert",
+      "actor": "star",
+      "metric": "expertise",
+      "min": 100,
+      "label": "Native expertise covers melee dodge and parry"
+    },
+    {
+      "action": "cast",
+      "label": "Control's dummy gains a Scattered Star",
+      "actor": "control",
+      "spell": 680703,
+      "target": "dummy_control"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "cast_failure",
+      "spell": 680703,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 680703,
+      "target": "dummy_control",
+      "min": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "dummy_control",
+      "metric": "aura_stacks",
+      "spell": 804378,
+      "caster": "control",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "Star's dummy gains a Scattered Star",
+      "actor": "star",
+      "spell": 680703,
+      "target": "dummy_star"
+    },
+    {
+      "action": "assert",
+      "actor": "star",
+      "metric": "cast_failure",
+      "spell": 680703,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "star",
+      "metric": "spell_damage_count",
+      "spell": 680703,
+      "target": "dummy_star",
+      "min": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "dummy_star",
+      "metric": "aura_stacks",
+      "spell": 804378,
+      "caster": "star",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let Fan of Knives' cooldown clear",
+      "ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "label": "Four Lunar Phase stacks on the control fixture",
+      "actor": "control",
+      "spell": 802985,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "The four-stack marker Lunar Eclipse needs",
+      "actor": "control",
+      "spell": 704519,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "label": "Control activates Lunar Eclipse",
+      "actor": "control",
+      "spell": 800386
+    },
+    {
+      "action": "assert",
+      "label": "Lunar Eclipse is active on the control fixture",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 800386,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "label": "Four Lunar Phase stacks on the star fixture",
+      "actor": "star",
+      "spell": 802985,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "The four-stack marker Lunar Eclipse needs",
+      "actor": "star",
+      "spell": 704519,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "label": "Star activates Lunar Eclipse",
+      "actor": "star",
+      "spell": 800386
+    },
+    {
+      "action": "assert",
+      "label": "Lunar Eclipse is active on the star fixture",
+      "actor": "star",
+      "metric": "aura",
+      "spell": 800386,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let Lunar Eclipse's own cast settle before Starfire Shot",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Control fires Starfire Shot without Lo'sho Amplification",
+      "actor": "control",
+      "spell": 801978,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "label": "Star fires Starfire Shot with Lo'sho Amplification",
+      "actor": "star",
+      "spell": 801978,
+      "target": "dummy_star"
+    },
+    {
+      "action": "wait",
+      "label": "Let both 2.5 s casts land and the hit callback run",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Without Lo'sho Amplification, Starfire Shot does not trigger the Burn DoT",
+      "actor": "dummy_control",
+      "metric": "aura",
+      "spell": 561122,
+      "caster": "control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Without Lo'sho Amplification, Lunar Eclipse is not consumed",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 800386,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "With Lo'sho Amplification, Starfire Shot triggers the Burn DoT",
+      "actor": "dummy_star",
+      "metric": "aura",
+      "spell": 561122,
+      "caster": "star",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "With Lo'sho Amplification, Starfire Shot consumes Lunar Eclipse",
+      "actor": "star",
+      "metric": "aura",
+      "spell": 800386,
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,369 @@
+{
+  "schema": 1,
+  "name": "Casting Desecrate always triggers Shadowstorm (#5807)",
+  "contract": "Shadowstorm 520277 (Spell.dbc, read 2026-09-30) Description: 'Damage dealt by Pommel Smash now has a $h% chance to trigger a Shadowstorm. Casting Desecrate always triggers Shadowstorm.' ProcChance is 20 and its effect 0 triggers 520278. Desecrate 680518 (family 21, flags word 2 0x800000) requires caster aura 803166 and a weapon. Each Desecrate cast must produce one Shadowstorm SMSG_SPELL_GO, six casts in sequence; with only the 20% Pommel Smash path six consecutive casts all succeeding has probability 0.2^6. Desecrate's EquippedItemSubClassMask 1378 admits only two-handed weapons, so the fixture equips Bastard Sword 1194 (two-handed sword) with Two-Handed Swords 202.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "wh",
+      "race": 1,
+      "class": 15,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e1",
+      "owner": "wh",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 202
+    },
+    {
+      "action": "add_item",
+      "actor": "wh",
+      "item": 1194
+    },
+    {
+      "action": "equip",
+      "actor": "wh",
+      "item": 1194,
+      "slot": 15
+    },
+    {
+      "action": "wait",
+      "label": "Let the weapon swap cooldown expire",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "label": "Desecrate",
+      "actor": "wh",
+      "spell": 680518
+    },
+    {
+      "action": "learn",
+      "label": "Shadowstorm",
+      "actor": "wh",
+      "spell": 520277
+    },
+    {
+      "action": "assert",
+      "label": "Shadowstorm is active",
+      "actor": "wh",
+      "metric": "aura",
+      "spell": 520277,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Desecrate 1: grant the avoided-attack aura",
+      "actor": "wh",
+      "spell": 803166,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 680518
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Cast Desecrate 1",
+      "actor": "wh",
+      "spell": 680518,
+      "target": "e1"
+    },
+    {
+      "action": "assert",
+      "label": "Desecrate 1 damages the target",
+      "actor": "wh",
+      "metric": "spell_damage_count",
+      "spell": 680518,
+      "target": "e1",
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Desecrate 1 always triggers a Shadowstorm (cumulative count 1)",
+      "actor": "wh",
+      "metric": "spell_go_count",
+      "spell": 520278,
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "label": "Desecrate 2: grant the avoided-attack aura",
+      "actor": "wh",
+      "spell": 803166,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 680518
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Cast Desecrate 2",
+      "actor": "wh",
+      "spell": 680518,
+      "target": "e1"
+    },
+    {
+      "action": "assert",
+      "label": "Desecrate 2 damages the target",
+      "actor": "wh",
+      "metric": "spell_damage_count",
+      "spell": 680518,
+      "target": "e1",
+      "min": 2,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Desecrate 2 always triggers a Shadowstorm (cumulative count 2)",
+      "actor": "wh",
+      "metric": "spell_go_count",
+      "spell": 520278,
+      "min": 2,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "label": "Desecrate 3: grant the avoided-attack aura",
+      "actor": "wh",
+      "spell": 803166,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 680518
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Cast Desecrate 3",
+      "actor": "wh",
+      "spell": 680518,
+      "target": "e1"
+    },
+    {
+      "action": "assert",
+      "label": "Desecrate 3 damages the target",
+      "actor": "wh",
+      "metric": "spell_damage_count",
+      "spell": 680518,
+      "target": "e1",
+      "min": 3,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Desecrate 3 always triggers a Shadowstorm (cumulative count 3)",
+      "actor": "wh",
+      "metric": "spell_go_count",
+      "spell": 520278,
+      "min": 3,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "label": "Desecrate 4: grant the avoided-attack aura",
+      "actor": "wh",
+      "spell": 803166,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 680518
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Cast Desecrate 4",
+      "actor": "wh",
+      "spell": 680518,
+      "target": "e1"
+    },
+    {
+      "action": "assert",
+      "label": "Desecrate 4 damages the target",
+      "actor": "wh",
+      "metric": "spell_damage_count",
+      "spell": 680518,
+      "target": "e1",
+      "min": 4,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Desecrate 4 always triggers a Shadowstorm (cumulative count 4)",
+      "actor": "wh",
+      "metric": "spell_go_count",
+      "spell": 520278,
+      "min": 4,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "label": "Desecrate 5: grant the avoided-attack aura",
+      "actor": "wh",
+      "spell": 803166,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 680518
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Cast Desecrate 5",
+      "actor": "wh",
+      "spell": 680518,
+      "target": "e1"
+    },
+    {
+      "action": "assert",
+      "label": "Desecrate 5 damages the target",
+      "actor": "wh",
+      "metric": "spell_damage_count",
+      "spell": 680518,
+      "target": "e1",
+      "min": 5,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Desecrate 5 always triggers a Shadowstorm (cumulative count 5)",
+      "actor": "wh",
+      "metric": "spell_go_count",
+      "spell": 520278,
+      "min": 5,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "label": "Desecrate 6: grant the avoided-attack aura",
+      "actor": "wh",
+      "spell": 803166,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wh",
+      "spell": 680518
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Cast Desecrate 6",
+      "actor": "wh",
+      "spell": 680518,
+      "target": "e1"
+    },
+    {
+      "action": "assert",
+      "label": "Desecrate 6 damages the target",
+      "actor": "wh",
+      "metric": "spell_damage_count",
+      "spell": 680518,
+      "target": "e1",
+      "min": 6,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Desecrate 6 always triggers a Shadowstorm (cumulative count 6)",
+      "actor": "wh",
+      "metric": "spell_go_count",
+      "spell": 520278,
+      "min": 6,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 2000
+    }
+  ]
+}

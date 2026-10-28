@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "name": "Arcane Runes: the Standard Issue Flare Gun calls Pilot Xiggs Fuselighter to the Azshara helipad",
+  "contract": "Quest 3449 'Arcane Runes' is turned in to Pilot Xiggs Fuselighter 8392, who has no world spawn in stock data, in the Exiles DB or in pfQuest: the quest log tells the player to signal him from the small island off southern Azshara, and the Standard Issue Flare Gun 10444 (reward of 3451 'Signal for Pickup') casts 12283 'Xiggs Signal Flare', which needs the Makeshift Helipad spell focus 403 (gameobject 150086, base guid 48357 at 2253.68 -7221.79) and sends event 3084, which summons 8392 at 2249 -7221.97 for five minutes (#6487). The lane phase hides the world helipad, so the case summons an owned Makeshift Helipad at the same spot. Fired away from the helipad the flare is refused for its spell focus and no pilot comes; at the helipad no pilot is there before the flare; one is there after it, and a second flare while he stands within 20 yards (conditions 17/12283) calls no second pilot.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 1,
+    "x": 2253.68,
+    "y": -7221.79,
+    "z": 10.1571,
+    "o": 3.14159
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 3,
+      "class": 1,
+      "level": 55
+    }
+  ],
+  "steps": [
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 3449 'Arcane Runes' with all four rubbings, the way the reporter did",
+      "actor": "c",
+      "quest": 3449,
+      "complete": true
+    },
+    {
+      "action": "add_item",
+      "label": "SETUP: the Standard Issue Flare Gun that 3451 'Signal for Pickup' hands out",
+      "actor": "c",
+      "item": 10444
+    },
+    {
+      "action": "use_item",
+      "label": "VARIANT: fire the flare gun with no helipad in reach",
+      "actor": "c",
+      "item": 10444,
+      "spell": 12283
+    },
+    {
+      "action": "assert",
+      "label": "VARIANT: the client is told the flare needs its spell focus (SPELL_FAILED_REQUIRES_SPELL_FOCUS 102)",
+      "actor": "c",
+      "metric": "cast_failure",
+      "spell": 12283,
+      "equals": 102,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "VARIANT: and no pilot comes",
+      "actor": "c",
+      "metric": "owned_creature_count",
+      "entry": 8392,
+      "equals": 0
+    },
+    {
+      "action": "summon_gameobject",
+      "label": "SETUP: the Makeshift Helipad 150086 (spell focus 403, radius 10) under the character, where base guid 48357 stands",
+      "actor": "c",
+      "entry": 150086,
+      "distance": 2
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Pilot Xiggs Fuselighter stands at the helipad before the signal, as the reporter saw",
+      "actor": "c",
+      "metric": "owned_creature_count",
+      "entry": 8392,
+      "equals": 0
+    },
+    {
+      "action": "use_item",
+      "label": "Fire the flare gun at the helipad",
+      "actor": "c",
+      "item": 10444,
+      "spell": 12283
+    },
+    {
+      "action": "assert",
+      "label": "the flare is not refused at the helipad",
+      "actor": "c",
+      "metric": "cast_failure",
+      "spell": 12283,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the signal brings Pilot Xiggs Fuselighter, the ender of 3449, to the helipad",
+      "actor": "c",
+      "metric": "owned_creature_count",
+      "entry": 8392,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "and he is still there a little later, inside his five-minute stay",
+      "actor": "c",
+      "metric": "owned_creature_count",
+      "entry": 8392,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "label": "VARIANT: fire the flare gun again while the pilot is within 20 yards",
+      "actor": "c",
+      "item": 10444,
+      "spell": 12283
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "VARIANT: the condition on 12283 keeps it to one pilot",
+      "actor": "c",
+      "metric": "owned_creature_count",
+      "entry": 8392,
+      "equals": 1
+    }
+  ]
+}

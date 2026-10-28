@@ -1,7 +1,26 @@
 {
   "schema": 1,
   "name": "Azzinoth's Assault extends Inner Demon's duration (#4664)",
-  "contract": "Azzinoth's Assault (803472) tooltip reads (conditional on Inner Demon): 'Extends the duration of Inner Demon by $/1000;803089s1 sec.' 803472's own DBC effects only trigger its two weapon hits (520262, 572585); 803089 (EffectMiscValue 804216 = Inner Demon, EffectBasePoints 2999 + DieSides 1 = 3000ms, EffectBonusMultiplier 0.4 = AP scaling) was never cast by 803472 anywhere, and even if it had been, SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION (177) had no registered handler in src/server/coa for Felsworn, unlike the same custom effect on Reaper/Witch Hunter/Venomancer. The fix (a) casts 803089 from felsworn_casts::OnSpellHitResult when 803472 lands on a hostile target while Inner Demon is active, and (b) registers a SpellEffectFn on 803089's EFFECT_0 (following the exact Reaper/Venomancer pattern) that calls AscensionFelsworn::Extend, the same helper already used for Inner Demon's stack-based duration, with GetEffectValue() - a new FelswornCoefficients row (803089, effect 0, ap 0.4) feeds the AP scaling through the same ModifySpellEffectBaseValue hook the class already uses for every other AP/SP-scaled effect, so GetEffectValue() resolves the DBC's full 3000ms-plus-AP formula. Inner Demon's own max duration is 5000ms per Felfury stack (OnCalcMaxDuration); fixturing 2 Felfury before casting Inner Demon gives a known 10000ms baseline duration to extend from.",
+  "contract": [
+    "Azzinoth's Assault (803472) tooltip reads (conditional on Inner Demon): 'Extends the duration of Inner",
+    "Demon by $/1000;803089s1 sec.' 803472's own DBC effects only trigger its two weapon hits (520262, 572585);",
+    "803089 (EffectMiscValue 804216 = Inner Demon, EffectBasePoints 2999 + DieSides 1 = 3000ms,",
+    "EffectBonusMultiplier 0.4 = AP scaling) was never cast by 803472 anywhere, and even if it had been,",
+    "SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION (177) had no registered handler in src/server/coa for",
+    "Felsworn, unlike the same custom effect on Reaper/Witch Hunter/Venomancer. The fix (a) casts 803089 from",
+    "felsworn_casts::OnSpellHitResult when 803472 lands on a hostile target while Inner Demon is active, and",
+    "(b) registers a SpellEffectFn on 803089's EFFECT_0 (following the exact Reaper/Venomancer pattern) that",
+    "calls AscensionFelsworn::Extend, the same helper already used for Inner Demon's stack-based duration, with",
+    "GetEffectValue() - a new FelswornCoefficients row (803089, effect 0, ap 0.4) feeds the AP scaling through",
+    "the same ModifySpellEffectBaseValue hook the class already uses for every other AP/SP-scaled effect, so",
+    "GetEffectValue() resolves the DBC's full 3000ms-plus-AP formula. Inner Demon's own max duration is 5000ms",
+    "per Felfury stack (OnCalcMaxDuration); fixturing 2 Felfury before casting Inner Demon gives a known",
+    "10000ms baseline duration to extend from. The parent 803472 and both weapon strikes are DmgClass MELEE",
+    "(2), so the duration fixture uses melee hit/expertise, both original one-handed weapon slots and trained",
+    "native weapon skills. Spell hit does not remove its melee miss/dodge/parry rolls. The helper must actually",
+    "cast, both weapon strikes must deal damage, and the original independent duration-extension lower bound",
+    "remains unchanged."
+  ],
   "timeout_ms": 90000,
   "players": [
     {
@@ -9,7 +28,8 @@
       "race": 1,
       "class": 14,
       "level": 80,
-      "spell_hit_rating": 10000
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
     }
   ],
   "creatures": [
@@ -26,6 +46,85 @@
       "action": "wait",
       "label": "Let spawn AI and level scaling settle",
       "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "felsworn",
+      "spell": 201
+    },
+    {
+      "action": "learn",
+      "actor": "felsworn",
+      "spell": 1180
+    },
+    {
+      "action": "learn",
+      "actor": "felsworn",
+      "spell": 674
+    },
+    {
+      "action": "add_item",
+      "actor": "felsworn",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "felsworn",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "felsworn",
+      "item": 2092
+    },
+    {
+      "action": "equip",
+      "actor": "felsworn",
+      "item": 2092,
+      "slot": 16
+    },
+    {
+      "action": "set_skill",
+      "actor": "felsworn",
+      "skill": 43,
+      "value": 400,
+      "maximum": 400
+    },
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "skill_value",
+      "skill": 43,
+      "equals": 400
+    },
+    {
+      "action": "set_skill",
+      "actor": "felsworn",
+      "skill": 173,
+      "value": 400,
+      "maximum": 400
+    },
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "skill_value",
+      "skill": 173,
+      "equals": 400
+    },
+    {
+      "action": "assert",
+      "label": "Native melee accuracy applies to the authored Melee attack",
+      "actor": "felsworn",
+      "metric": "melee_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "label": "Native expertise covers melee dodge and parry",
+      "actor": "felsworn",
+      "metric": "expertise",
+      "min": 100
     },
     {
       "action": "learn",
@@ -89,6 +188,35 @@
       "metric": "cast_failure",
       "spell": 803472,
       "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The duration-extension helper is cast after the parent attack lands",
+      "actor": "felsworn",
+      "metric": "spell_cast_count",
+      "spell": 803089,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "The ordinary main-hand strike deals native damage",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 520262,
+      "target": "dummy",
+      "min": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "The ordinary off-hand strike deals native damage",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 572585,
+      "target": "dummy",
+      "min": 1,
+      "within_ms": 500
     },
     {
       "action": "assert",

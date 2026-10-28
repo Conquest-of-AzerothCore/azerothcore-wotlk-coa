@@ -1,0 +1,161 @@
+{
+  "schema": 1,
+  "name": "Tinker: Build: Mechsuit shows its suit inside dungeons (#5880)",
+  "contract": [
+    "Build: Mechsuit (801384) is a combat form, not a travel mount. Inside a dungeon that forbids mounts,",
+    "such as Wailing Caverns, it applies its mount helper (803451), which carries the suit's model and form,",
+    "and Gatling Gun (500213) still fires from the suit. Original parent 500213 and shot 500577 use RANGED",
+    "hit resolution. Supply and assert native ranged accuracy, require the ordinary Gatling cast to be",
+    "accepted and its enemy channel aura to land, and retain the immediate client dismount attempt before",
+    "checking dungeon damage and the retained suit model."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 17,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "t",
+      "entry": 36,
+      "level": 17,
+      "distance": 5
+    }
+  ],
+  "location": {
+    "map": 43,
+    "x": -109.486,
+    "y": 205.483,
+    "z": -82.4763,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP the Tinker is in Wailing Caverns",
+      "actor": "t",
+      "metric": "map_id",
+      "equals": 43
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "combat_rating",
+      "rating": 6,
+      "equals": 10000
+    },
+    {
+      "action": "learn",
+      "label": "Fixture: Mechsuit talent",
+      "actor": "t",
+      "spell": 92141
+    },
+    {
+      "action": "learn",
+      "label": "Fixture: Build: Mechsuit",
+      "actor": "t",
+      "spell": 801384
+    },
+    {
+      "action": "learn",
+      "label": "Fixture: Gatling Gun",
+      "actor": "t",
+      "spell": 500213
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture: pre-fill Scrap",
+      "actor": "t",
+      "spell": 801816,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "label": "The Tinker enters the Mechsuit inside the dungeon",
+      "actor": "t",
+      "spell": 801384
+    },
+    {
+      "action": "assert",
+      "label": "The Mechsuit is on",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 801384,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT the suit's mount helper carries its model inside the dungeon",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 803451,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "The Tinker casts Gatling Gun at the dummy",
+      "actor": "t",
+      "spell": 500213,
+      "target": "dummy"
+    },
+    {
+      "action": "cancel_mount",
+      "label": "The client dismounts with the cast, as a real client does",
+      "actor": "t"
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "cast_failure",
+      "spell": 500213,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "spell_cast_count",
+      "spell": 500213,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 500213,
+      "caster": "t",
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Gatling Gun fires from the suit inside the dungeon",
+      "actor": "t",
+      "metric": "spell_damage_total",
+      "spell": 500577,
+      "target": "dummy",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The suit and its model stay on after the cast",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 803451,
+      "equals": 1
+    }
+  ]
+}

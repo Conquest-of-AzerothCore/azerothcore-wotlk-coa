@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "A Warrior's Training is offered to a Warrior and not to a Guardian (#5529)",
+  "contract": [
+    "Quest 1638 A Warrior's Training (Lyria Du Lac 913, Goldshire) is Warrior-only: quest_template_addon",
+    "AllowableClasses = 1. Guardian (class 18) maps to the Warrior family, but ExpandLegacyQuestClassMask keeps a",
+    "single stock class mask closed to the custom classes of that family. Expected: at level 10 the Warrior can take",
+    "the quest and the Guardian cannot."
+  ],
+  "location": {"map": 0, "x": -9463.5, "y": 108.5, "z": 57.88, "o": 0},
+  "players": [
+    {"id": "warrior", "race": 1, "class": 1, "level": 10},
+    {"id": "guardian", "race": 1, "class": 18, "level": 10}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login settle", "ms": 3000},
+    {"action": "assert", "label": "The Warrior can take A Warrior's Training", "actor": "warrior",
+     "metric": "quest_takeable", "quest": 1638, "equals": 1},
+    {"action": "assert", "label": "The Guardian cannot take A Warrior's Training", "actor": "guardian",
+     "metric": "quest_takeable", "quest": 1638, "equals": 0}
+  ]
+}

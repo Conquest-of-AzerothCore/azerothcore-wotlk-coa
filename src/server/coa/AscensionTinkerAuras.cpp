@@ -148,6 +148,12 @@ class aura_ascension_tinker_lifecycle : public AuraScript
             PreventDefaultAction();
             Resource(player,Scrap,-1);
         }
+        if (GetId() == GatlingGun && effect->GetEffIndex() == EFFECT_0)
+        {
+            PreventDefaultAction();
+            if (Unit* enemy = GetTarget(); enemy->IsAlive() && player->IsInWorld())
+                player->CastSpell(enemy,500577,TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_DISALLOW_PROC_EVENTS));
+        }
         if (GetId() == 807635 && effect->GetEffIndex() == EFFECT_0)
         {
             PreventDefaultAction();
@@ -181,7 +187,7 @@ class aura_ascension_tinker_lifecycle : public AuraScript
         }
         if (GetId() == 560709 && effect->GetEffIndex() == EFFECT_0)
         {
-            amount += int32(GetTarget()->GetStat(STAT_STAMINA));
+            amount += int32(GetUnitOwner()->GetStat(STAT_STAMINA));
             recalculate = false;
         }
         if (GetId() == 808008 && effect->GetEffIndex() < EFFECT_2)

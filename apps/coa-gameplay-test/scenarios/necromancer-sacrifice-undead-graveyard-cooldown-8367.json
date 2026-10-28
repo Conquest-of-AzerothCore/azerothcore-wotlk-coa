@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Graveyard does not start Sacrifice Undead's cooldown (#8367)",
+  "contract": "Graveyard 805197 and Sacrifice Undead 805027/807938-807941 both carry Spell.dbc Category 164 with a 180 sec CategoryRecoveryTime, so the client greyed Sacrifice Undead out whenever Graveyard was cast even though the two abilities are unrelated. Sacrifice Undead keeps its own 30 sec RecoveryTime but must leave category 164: casting Graveyard must start only Graveyard's own 180 sec cooldown and must not start any cooldown on Sacrifice Undead.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "learn", "actor": "necro", "spell": 807941 },
+    { "action": "learn", "actor": "necro", "spell": 805197 },
+    {
+      "action": "assert", "label": "SETUP: both abilities are known",
+      "actor": "necro", "metric": "knows_spell", "spell": 807941, "equals": 1
+    },
+    { "action": "reset_cooldown", "actor": "necro", "spell": 807941 },
+    {
+      "action": "assert", "label": "SETUP: Sacrifice Undead has no cooldown before Graveyard",
+      "actor": "necro", "metric": "cooldown_ms", "spell": 807941, "equals": 0
+    },
+    {
+      "action": "cast", "label": "Cast Graveyard at the nearby ground", "actor": "necro", "spell": 805197,
+      "destination": { "x": -8945.0, "y": -132.493, "z": 83.5312 }
+    },
+    {
+      "action": "assert", "label": "CONTROL: Graveyard starts its own 180 sec cooldown",
+      "actor": "necro", "metric": "cooldown_ms", "spell": 805197, "min": 170000, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Sacrifice Undead is still ready",
+      "actor": "necro", "metric": "cooldown_ms", "spell": 807941, "equals": 0
+    }
+  ]
+}

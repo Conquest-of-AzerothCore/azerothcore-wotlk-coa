@@ -16,6 +16,8 @@ if mode in ['douse', 'sacred-grove']:
     coefficient = .08 if mode == 'douse' else 1
     for phase in ['base', 'ap', 'sp']:
         expected = int(1000 + values[phase + 'ap'] * coefficient)
+        if mode == 'douse':
+            expected = int(expected * .7)
         assert abs(values[phase + 'query'] - expected) <= 1, (phase, values, expected)
     assert values['apap'] > values['baseap']
     assert values['apquery'] > values['basequery']

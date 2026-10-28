@@ -1,0 +1,249 @@
+{
+  "schema": 1,
+  "name": "Wildcard mounts preserve the chosen mount's cast time and cancellation (#4600)",
+  "contract": "Wildcard Mount 91944 and Wildcard Flying Mount 93539 must use a normal mount cast. Green Riding Nether Ray 39798 has a 1500 ms cast (SpellCastTimes 16) and native local-mount variants 498697 on the ground or 498695 with 300 riding in Outland. A normal 39798 cast is the control. Wildcard selection must start that same cast, remain unmounted during it, honor a native cancel request, and mount only after completion. The flying fixture also knows ground-only Brewfest Kodo 49322, which must not be selected for the flying action. The Outland coordinates come from the world game_tele HellfirePeninsula row. This observes native casts and mounted auras, not a rendered cast bar. CoA.UnlockAllVanity is off for this case, so no account collection mount is taught: the ground actor knows only 39798, and the flying actor knows 39798 plus ground-only 49322. This makes both random selections deterministic without seeding a cast or mounted aura.",
+  "timeout_ms": 30000,
+  "vanity_ownership": {
+    "unlock_all": false
+  },
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "ground",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "flying",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_skill",
+      "actor": "ground",
+      "skill": 762,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "ground",
+      "spell": 39798
+    },
+    {
+      "action": "learn",
+      "actor": "ground",
+      "spell": 91944
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 49322
+    },
+    {
+      "action": "assert",
+      "actor": "ground",
+      "metric": "spell_cast_time_ms",
+      "spell": 39798,
+      "equals": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "ground",
+      "spell": 39798,
+      "target": "ground"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "ground",
+      "metric": "cast_remaining_ms",
+      "spell": 39798,
+      "min": 1300,
+      "max": 1500,
+      "label": "An ordinary mount retains its native cast time"
+    },
+    {
+      "action": "assert",
+      "actor": "ground",
+      "metric": "mount_display_id",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ground",
+      "metric": "aura",
+      "spell": 498697,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "ground"
+    },
+    {
+      "action": "cast",
+      "actor": "ground",
+      "spell": 91944,
+      "target": "ground"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "ground",
+      "metric": "cast_remaining_ms",
+      "spell": 39798,
+      "min": 1300,
+      "max": 1500,
+      "label": "Wildcard Mount starts an ordinary mount cast"
+    },
+    {
+      "action": "assert",
+      "actor": "ground",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "label": "The mount is not applied before the cast finishes"
+    },
+    {
+      "action": "client_packet",
+      "actor": "ground",
+      "opcode": 303,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u32": 39798
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "ground",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "label": "Canceling the cast prevents mounting"
+    },
+    {
+      "action": "cast",
+      "actor": "ground",
+      "spell": 91944,
+      "target": "ground"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "ground",
+      "metric": "cast_remaining_ms",
+      "spell": 39798,
+      "min": 1300,
+      "max": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "ground",
+      "metric": "aura",
+      "spell": 498697,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "A completed Wildcard cast applies the ground mount"
+    },
+    {
+      "action": "teleport",
+      "actor": "flying",
+      "map": 530,
+      "x": -211.237,
+      "y": 4278.54,
+      "z": 86.5678,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_skill",
+      "actor": "flying",
+      "skill": 762,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "flying",
+      "spell": 39798
+    },
+    {
+      "action": "learn",
+      "actor": "flying",
+      "spell": 49322
+    },
+    {
+      "action": "learn",
+      "actor": "flying",
+      "spell": 93539
+    },
+    {
+      "action": "cast",
+      "actor": "flying",
+      "spell": 93539,
+      "target": "flying"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "flying",
+      "metric": "cast_remaining_ms",
+      "spell": 39798,
+      "min": 1300,
+      "max": 1500,
+      "label": "Flying selection excludes the known ground-only mount"
+    },
+    {
+      "action": "assert",
+      "actor": "flying",
+      "metric": "mount_display_id",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "flying",
+      "metric": "aura",
+      "spell": 498695,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "The chosen flying mount applies after casting"
+    }
+  ]
+}

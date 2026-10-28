@@ -16,6 +16,11 @@
 namespace
 {
 using namespace AscensionVenomancer;
+bool HasPowerCost(SpellInfo const* info)
+{
+    return info && (info->ManaCost || info->ManaCostPerlevel || info->ManaCostPercentage ||
+        info->ManaPerSecond || info->ManaPerSecondPerLevel);
+}
 bool Select(uint32 id, SpellInfo const* info)
 {
     switch (id)
@@ -28,7 +33,7 @@ bool Select(uint32 id, SpellInfo const* info)
         case 681321: case 706032: return Named(info,800946);
         case 706272: return Any(info,{800880,504705});
         case 800906: return Any(info,{800880,504705});
-        case 504341: return info != nullptr;
+        case 504341: return HasPowerCost(info);
         case 806602: return Any(info,{804977,706962,800871});
         default: return false;
     }
@@ -164,7 +169,7 @@ public:
         if (spell->IsTriggered())
             return;
         Finish(player,spell);
-        if (Chance(player,500219))
+        if (!info->HasAura(SPELL_AURA_MOD_SHAPESHIFT) && Chance(player,500219))
             Cast(player,player,800861);
         if (info->SpellFamilyName != 35)
             return;
@@ -207,8 +212,8 @@ public:
             if (marks >= 5 && player->HasAura(706270))
                 player->EnergizeBySpell(player,572584,Amount(572584),POWER_ENERGY);
         }
-        if (Any(info,{803193,803199}) && player->HasAura(Beetle) && Chance(player,704264) && target)
-            Summon(player,target,560989);
+        if (Any(info,{803193,803199}) && player->HasAura(Beetle) && Chance(player,704264))
+            Summon(player,target ? target : player->GetVictim(),560989);
         if (Named(info,800880) && player->HasAura(807600))
             Cast(player,player,807244);
         if (id == 504705)
@@ -275,7 +280,7 @@ class spell_ascension_venomancer_ability : public SpellScript
         if (!player)
             return;
         uint32 id = GetSpellInfo()->Id;
-        Unit* target = GetHitUnit();
+        Unit* target = IsInTargetHook() ? GetHitUnit() : nullptr;
         if (GetSpellInfo()->Effects[index].Effect != SPELL_EFFECT_DUMMY)
             return;
         PreventHitDefaultEffect(index);
@@ -290,22 +295,23 @@ class spell_ascension_venomancer_ability : public SpellScript
             ApplyVenoms(player,target);
         if (id == 803196)
         {
-            if (Aura* stinger = target->GetAura(803206,player->GetGUID()))
+            Aura* stinger = target->GetAura(803206,player->GetGUID());
+            bool ripped = stinger != nullptr;
+            if (ripped)
             {
                 Cast(player,target,803208);
                 stinger->Remove();
                 target->RemoveAurasDueToSpell(680854,player->GetGUID());
             }
-            else
+            Cast(player,target,803206);
+            if (Aura* added = target->GetAura(803206,player->GetGUID()))
             {
-                Cast(player,target,803206);
-                if (Aura* added = target->GetAura(803206,player->GetGUID()))
-                {
-                    int32 duration = added->GetMaxDuration() + int32(GetSpell()->GetScriptValue(Exposed+1));
-                    added->SetMaxDuration(duration);
-                    added->SetDuration(duration);
-                }
+                int32 duration = added->GetMaxDuration() + int32(GetSpell()->GetScriptValue(Exposed+1));
+                added->SetMaxDuration(duration);
+                added->SetDuration(duration);
             }
+            if (!ripped)
+                Cast(player,target,803220);
         }
         if (id == 805102)
             Expose(player,15,true);
@@ -347,7 +353,7 @@ class spell_ascension_venomancer_ability : public SpellScript
         if (id == 681056)
         {
             for (uint32 n = 0; n < 12; ++n)
-                Mushroom(player,player->GetNearPosition(Radius(681056),n * .52359878f));
+                Mushroom(player,player->GetRandomPoint(*player,Radius(680764)));
             player->CastSpell(player->GetPositionX(),player->GetPositionY(),player->GetPositionZ(),681291,true);
         }
         if (id == 806217 && GetExplTargetDest())

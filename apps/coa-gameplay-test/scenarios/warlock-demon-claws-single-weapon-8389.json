@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Warlock: Demon Claws strikes twice with a single weapon (#8389)",
+  "contract": "Demon Claws 217364 advertises 'Strike twice, dealing ... Physical damage per strike' with two TRIGGER_SPELL_WITH_VALUE effects: 281295 requires a main-hand weapon (AttributesEx3 0x400) and 281296 requires an off-hand weapon (0x1000000). Without a second weapon only the main-hand strike landed, so a two-hander or a lone one-hander dealt one strike. When the off-hand equipment slot is empty, the cast repeats the main-hand strike 281295 once, so the advertised two strikes land.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "warlock", "race": 1, "class": 9, "level": 20 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "warlock", "entry": 36, "faction": 14, "level": 20, "health": 100000, "distance": 4 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "warlock", "spell": 217364 },
+    { "action": "add_item", "actor": "warlock", "item": 629948 },
+    { "action": "equip", "actor": "warlock", "item": 629948, "slot": 15 },
+    {
+      "action": "assert", "label": "SETUP: the two-handed staff occupies the main hand",
+      "actor": "warlock", "metric": "equipped_item", "slot": 15, "equals": 629948
+    },
+    {
+      "action": "snapshot", "label": "Remember the main-hand strike count", "actor": "warlock",
+      "metric": "spell_damage_count", "spell": 281295, "save_as": "main"
+    },
+    {
+      "action": "snapshot", "label": "Remember the off-hand strike count", "actor": "warlock",
+      "metric": "spell_damage_count", "spell": 281296, "save_as": "off"
+    },
+    { "action": "cast", "label": "Cast Demon Claws", "actor": "warlock", "spell": 217364, "target": "enemy" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: two main-hand strikes land without an off-hand weapon",
+      "actor": "warlock", "metric": "spell_damage_count", "spell": 281295,
+      "relative_to": "main", "equals": 2, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "CONTROL: the off-hand-only strike did not fire",
+      "actor": "warlock", "metric": "spell_damage_count", "spell": 281296,
+      "relative_to": "off", "equals": 0
+    }
+  ]
+}

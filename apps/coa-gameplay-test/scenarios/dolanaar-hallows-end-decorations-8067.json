@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "name": "Dolanaar: Hallow's End decorations follow the moved inn and druid tower",
+  "contract": "rev_20260924_11 rotated the Dolanaar inn by 73.74 degrees around (9809.86, 956.56) onto (9821.90, 898.06) and the druid tower by -58.67 degrees around (9905.72, 987.78) onto (9955.57, 888.76), moving their residents but leaving the event 12 Hallow's End decorations at the old building sites about 60 yards away (#8067). With the event started, this case stands on the moved spots of an inn candle (guid 34376), an inn pumpkin (guid 36187), a tower candle (guid 34377) and an inn ghost (guid 37513) and counts that decoration entry within 20 yards. Before the fix each count is 0; the same building transform puts each decoration back inside its building.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 1,
+    "x": 9791.3455,
+    "y": 892.784,
+    "z": 1313.2959,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 4,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where the event spawns live",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "game_event",
+      "label": "Hallow's End is running",
+      "event": 12,
+      "active": true
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the inn candle 34376 stands inside the moved inn",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 180415,
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "Walk to the moved inn pumpkin 36187",
+      "actor": "p",
+      "map": 1,
+      "x": 9815.1473,
+      "y": 895.9043,
+      "z": 1321.6759
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the inn pumpkin 36187 stands inside the moved inn",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 180405,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "Walk to the moved inn ghost 37513",
+      "actor": "p",
+      "map": 1,
+      "x": 9820.7692,
+      "y": 938.8791,
+      "z": 1321.9659
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the inn ghost 37513 moved with the inn",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 180411,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "Walk to the moved tower candle 34377",
+      "actor": "p",
+      "map": 1,
+      "x": 9925.3142,
+      "y": 900.0061,
+      "z": 1317.5263
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the tower candle 34377 stands inside the moved druid tower",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 180415,
+      "min": 1,
+      "within_ms": 10000
+    }
+  ]
+}

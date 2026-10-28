@@ -21,6 +21,8 @@
 #include "SpellScriptLoader.h"
 #include "molten_core.h"
 
+#include <algorithm>
+
 enum Texts
 {
     SAY_SUMMON_MAJ                          = 0,
@@ -38,16 +40,19 @@ enum Texts
 
 enum Spells
 {
-    SPELL_HAND_OF_RAGNAROS                  = 19780,
-    SPELL_WRATH_OF_RAGNAROS                 = 20566,
+    SPELL_HAND_OF_RAGNAROS                  = 2108612,  // Ascension: periodic-trigger debuff on the victim; SpellDifficulty group 2213 already scales Heroic-Ascended. Was 19780.
+    SPELL_WRATH_OF_RAGNAROS                 = 2108623,  // Ascension: area hit on the victim; SpellDifficulty group 2215 already scales Heroic-Ascended. Was 20566.
     SPELL_LAVA_BURST                        = 21908,    // Randomly trigger one of server side spells (21886, 21900 - 21907) which summons Go 178088
-    SPELL_MAGMA_BLAST                       = 20565,    // Ranged attack
+    SPELL_MAGMA_BLAST                       = 2108607,  // Ascension: dummy, chained to SPELL_MAGMA_BLAST_EFFECT by spell_ragnaros_magma_blast_coa_dummy below. Was 20565, ranged attack.
+    SPELL_MAGMA_BLAST_EFFECT                = 2108608,  // Ascension: bound to spell_coa_damage_info_hit (coa_spell_damage_info) for the real per-difficulty damage.
     SPELL_SONS_OF_FLAME_DUMMY               = 21108,    // Server side effect
     SPELL_RAGSUBMERGE                       = 21107,    // Stealth aura
     SPELL_RAGNA_SUBMERGE_VISUAL             = 20567,    // Visual for submerging into lava
     SPELL_RAGEMERGE                         = 20568,
     SPELL_RAGNAROS_SUBMERGE_EFFECT          = 21859,    // Applies pacify state and applies all schools immunity (server side)
     SPELL_ELEMENTAL_FIRE_KILL               = 19773,    // Spell is used only on Majordomo
+    SPELL_SUPER_NOVA_A                      = 2108627,  // Ascension: D0..D3 are consecutive ids, area hit on every enemy at any distance
+    SPELL_SUPER_NOVA_B                      = 2108662,  // Ascension: second group, D0..D3 consecutive ids
     SPELL_MIGHT_OF_RAGNAROS                 = 21154,
     SPELL_INTENSE_HEAT                      = 21155,
     SPELL_SUMMON_SONS_FLAME                 = 21108,    // Trigger the eight spells summoning the Son of Flame adds
@@ -83,6 +88,8 @@ enum Events
     EVENT_MELEE_SCAN,
     EVENT_SUBMERGE,
     EVENT_LAVA_BURST_TRIGGER,
+    EVENT_SUPER_NOVA_A,
+    EVENT_SUPER_NOVA_B,
 
     // Submerge
     EVENT_EMERGE,
@@ -111,7 +118,27 @@ enum Misc
     PHASE_SUBMERGED                         = 3,        // events which are executed while Ragnaros is submerged (not visible)
 };
 
-constexpr float DEATH_ORIENTATION = 4.0f;
+// Ascension video evidence (MC_PV Video 3, CoA): Ragnaros is already at 50% health when he
+// becomes attackable, on every difficulty (Normal 20.3M/17 players = 50% of 40.7M; Ascended
+// 60M/17 = 50% of 120M). coa_boss_flex's hp_d0..d3 hold his full (100%) pool; this constant is
+// applied once, right before he can be attacked, so FlexHealth's own "keep the current
+// percentage" recompute (OnUnitEnterCombat) carries the 50% through unchanged.
+constexpr uint32 RAGNAROS_COA_ENGAGE_HEALTH_PCT = 50;
+
+// Archive combat logs (12 Ragnaros pulls): Super Nova group A first lands 10.0s after the pull, group B 15.0s
+// after it, and each repeats every 12.0s (12.0-12.2s between salvos) while Ragnaros is emerged.
+constexpr Milliseconds SUPER_NOVA_A_FIRST = 10000ms;
+constexpr Milliseconds SUPER_NOVA_B_FIRST = 15000ms;
+constexpr Milliseconds SUPER_NOVA_PERIOD = 12000ms;
+
+// Live-Ascension evidence (diag-G3.md "Ascension evidence" #1, 54-log corpus, 2 full kills):
+// Ragnaros submerges at health-percentage thresholds, not the stock 180s elapsed-time timer --
+// the first time at ~35% (starting from his own 50% engage health), the second at ~20%, each
+// lasting ~55-70s. The stock 180s timer let a fast-killing raid (high player count/Ascended
+// gear) never submerge at all, matching the "never submerges" report. Both numbers rest on only
+// 2 independent kills; a maintainer should treat them as a strong first estimate.
+constexpr float RAGNAROS_SUBMERGE_HEALTH_PCT_FIRST = 35.0f;
+constexpr float RAGNAROS_SUBMERGE_HEALTH_PCT_SECOND = 20.0f;
 
 struct boss_ragnaros : public BossAI
 {
@@ -120,6 +147,7 @@ struct boss_ragnaros : public BossAI
         _hasYelledMagmaBurst(false),
         _processingMagmaBurst(false),
         _hasSubmergedOnce(false),
+        _hasSubmergedTwice(false),
         _isKnockbackEmoteAllowed(true)
     {
     }
@@ -138,11 +166,13 @@ struct boss_ragnaros : public BossAI
             me->SetImmuneToAll(false);
             me->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
             me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
+            me->SetHealth(me->CountPctFromMaxHealth(RAGNAROS_COA_ENGAGE_HEALTH_PCT));
         }
 
         _hasYelledMagmaBurst = false;
         _processingMagmaBurst = false;
         _hasSubmergedOnce = false;
+        _hasSubmergedTwice = false;
         _isKnockbackEmoteAllowed = true;
         me->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
         me->SetControlled(true, UNIT_STATE_ROOT);
@@ -204,7 +234,6 @@ struct boss_ragnaros : public BossAI
     {
         _JustDied();
         extraEvents.Reset();
-        me->SetFacingTo(DEATH_ORIENTATION);
     }
 
     void KilledUnit(Unit* victim) override
@@ -243,6 +272,7 @@ struct boss_ragnaros : public BossAI
                         me->RemoveUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
                         me->SetImmuneToAll(false);
                         me->SetReactState(REACT_AGGRESSIVE);
+                        me->SetHealth(me->CountPctFromMaxHealth(RAGNAROS_COA_ENGAGE_HEALTH_PCT));
                         DoZoneInCombat();
                         break;
                     }
@@ -307,7 +337,9 @@ struct boss_ragnaros : public BossAI
                 }
                 case EVENT_HAND_OF_RAGNAROS:
                 {
-                    DoCastSelf(SPELL_HAND_OF_RAGNAROS);
+                    // Ascension's Hand of Ragnaros targets the victim, not an
+                    // area around the caster (see the Spells enum above).
+                    DoCastVictim(SPELL_HAND_OF_RAGNAROS);
                     if (_isKnockbackEmoteAllowed)
                     {
                         Talk(SAY_KNOCKBACK);
@@ -320,6 +352,18 @@ struct boss_ragnaros : public BossAI
                 case EVENT_LAVA_BURST:
                 {
                     DoCastAOE(SPELL_LAVA_BURST);
+                    break;
+                }
+                case EVENT_SUPER_NOVA_A:
+                {
+                    DoCastSelf(SuperNovaFor(SPELL_SUPER_NOVA_A));
+                    events.Repeat(SUPER_NOVA_PERIOD);
+                    break;
+                }
+                case EVENT_SUPER_NOVA_B:
+                {
+                    DoCastSelf(SuperNovaFor(SPELL_SUPER_NOVA_B));
+                    events.Repeat(SUPER_NOVA_PERIOD);
                     break;
                 }
                 case EVENT_MELEE_SCAN:
@@ -386,6 +430,13 @@ struct boss_ragnaros : public BossAI
                 }
                 case EVENT_SUBMERGE:
                 {
+                    float const threshold = _hasSubmergedOnce ? RAGNAROS_SUBMERGE_HEALTH_PCT_SECOND : RAGNAROS_SUBMERGE_HEALTH_PCT_FIRST;
+                    if (_hasSubmergedTwice || me->GetHealthPct() > threshold)
+                    {
+                        events.Repeat(500ms);
+                        break;
+                    }
+
                     events.CancelEventGroup(PHASE_EMERGED);
                     events.SetPhase(PHASE_SUBMERGED);
                     extraEvents.SetPhase(PHASE_SUBMERGED);
@@ -402,10 +453,14 @@ struct boss_ragnaros : public BossAI
 
                     DoCastAOE(SPELL_SUMMON_SONS_FLAME);
 
-                    if (!_hasSubmergedOnce)
-                        _hasSubmergedOnce = true;
+                    if (_hasSubmergedOnce)
+                        _hasSubmergedTwice = true;
+                    _hasSubmergedOnce = true;
 
-                    extraEvents.ScheduleEvent(EVENT_EMERGE, 90s, PHASE_SUBMERGED, PHASE_SUBMERGED);
+                    // diag-G3.md: both measured submerges lasted ~55-70s; 60s matches that
+                    // window (was 90s), and SummonedCreatureDies still emerges early once every
+                    // Son of Flame is cleared.
+                    extraEvents.ScheduleEvent(EVENT_EMERGE, 60s, PHASE_SUBMERGED, PHASE_SUBMERGED);
                     break;
                 }
             }
@@ -423,6 +478,7 @@ private:
     bool _hasYelledMagmaBurst;
     bool _processingMagmaBurst;
     bool _hasSubmergedOnce;
+    bool _hasSubmergedTwice;
     bool _isKnockbackEmoteAllowed;  // Prevents possible text overlap
 
     GuidSet _lavaBurstGUIDS;
@@ -454,9 +510,17 @@ private:
         events.RescheduleEvent(EVENT_WRATH_OF_RAGNAROS, 30s, PHASE_EMERGED, PHASE_EMERGED);
         events.RescheduleEvent(EVENT_HAND_OF_RAGNAROS, 25s, PHASE_EMERGED, PHASE_EMERGED);
         events.RescheduleEvent(EVENT_LAVA_BURST, 10s, PHASE_EMERGED, PHASE_EMERGED);
-        events.RescheduleEvent(EVENT_SUBMERGE, 180s, PHASE_EMERGED, PHASE_EMERGED);
+        events.RescheduleEvent(EVENT_SUPER_NOVA_A, SUPER_NOVA_A_FIRST, PHASE_EMERGED, PHASE_EMERGED);
+        events.RescheduleEvent(EVENT_SUPER_NOVA_B, SUPER_NOVA_B_FIRST, PHASE_EMERGED, PHASE_EMERGED);
+        if (!_hasSubmergedTwice)
+            events.RescheduleEvent(EVENT_SUBMERGE, 500ms, PHASE_EMERGED, PHASE_EMERGED);
         events.RescheduleEvent(EVENT_MIGHT_OF_RAGNAROS, 11s, PHASE_EMERGED, PHASE_EMERGED);
         events.RescheduleEvent(EVENT_MELEE_SCAN, 500ms, PHASE_EMERGED, PHASE_EMERGED);
+    }
+
+    uint32 SuperNovaFor(uint32 baseSpell) const
+    {
+        return baseSpell + std::min<uint32>(uint32(me->GetMap()->GetSpawnMode()), 3);
     }
 
     bool IsVictimWithinMeleeRange() const
@@ -524,9 +588,34 @@ class spell_ragnaros_summon_sons_of_flame : public SpellScript
     }
 };
 
+// 2108607 - Magma Blast (Ascension dummy; interrupting the cast must not deal damage)
+class spell_ragnaros_magma_blast_coa_dummy : public SpellScript
+{
+    PrepareSpellScript(spell_ragnaros_magma_blast_coa_dummy);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_MAGMA_BLAST_EFFECT });
+    }
+
+    void HandleScript(SpellEffIndex /*effIndex*/)
+    {
+        Unit* caster = GetCaster();
+        Unit* target = GetHitUnit();
+        if (caster && target)
+            caster->CastSpell(target, SPELL_MAGMA_BLAST_EFFECT, true);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_ragnaros_magma_blast_coa_dummy::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
+};
+
 void AddSC_boss_ragnaros()
 {
     RegisterMoltenCoreCreatureAI(boss_ragnaros);
     RegisterSpellScript(spell_ragnaros_lava_burst_randomizer);
     RegisterSpellScript(spell_ragnaros_summon_sons_of_flame);
+    RegisterSpellScript(spell_ragnaros_magma_blast_coa_dummy);
 }

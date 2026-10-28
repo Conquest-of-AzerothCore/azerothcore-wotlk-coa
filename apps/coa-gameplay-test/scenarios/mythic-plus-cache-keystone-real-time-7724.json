@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Mythical Caches and Mythic Keystones run out while their owner is logged off (#7724)",
+  "contract": [
+    "#7724: a Mythical Cache (24 h) and a Mythic Keystone (7 days) only aged while their owner was logged in, so",
+    "logging off kept them forever. Both now count down in real time: after an hour offline the cache and the key",
+    "each have an hour less left, and after more than a day offline the cache is gone while the key remains."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [ { "id": "hero", "race": 1, "class": 1, "level": 60 } ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "add_item", "actor": "hero", "item": 2093952, "count": 1 },
+    { "action": "add_item", "actor": "hero", "item": 1233152, "count": 1 },
+    { "action": "assert", "label": "SETUP: a fresh cache has 24 h", "actor": "hero", "metric": "item_duration", "item": 2093952, "min": 86000, "max": 86400 },
+    { "action": "assert", "label": "SETUP: a fresh keystone has 7 days", "actor": "hero", "metric": "item_duration", "item": 1233152, "min": 604400, "max": 604800 },
+    { "action": "relog", "actor": "hero", "offline_seconds": 3600 },
+    { "action": "assert", "label": "the cache lost the hour spent offline", "actor": "hero", "metric": "item_duration", "item": 2093952, "min": 82400, "max": 82800 },
+    { "action": "assert", "label": "the keystone lost the hour spent offline", "actor": "hero", "metric": "item_duration", "item": 1233152, "min": 600800, "max": 601200 },
+    { "action": "relog", "actor": "hero", "offline_seconds": 86400 },
+    { "action": "assert", "label": "the cache ran out while its owner was offline", "actor": "hero", "metric": "item_count", "item": 2093952, "equals": 0 },
+    { "action": "assert", "label": "the keystone is still there with 25 h less", "actor": "hero", "metric": "item_duration", "item": 1233152, "min": 514400, "max": 514800 }
+  ]
+}

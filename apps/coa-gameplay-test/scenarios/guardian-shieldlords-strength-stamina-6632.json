@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "name": "Guardian Shieldlord's Strength adds Stamina damage to Heavy Blow, Hammer of Kings and Hammer of the Law (COA-6632)",
+  "contract": "Shieldlord's Strength 803738 applies 807794, a flat damage modifier worth 20% of Stamina. Its tooltip names Heavy Blow (family flags[1] 0x400000), Hammer of Kings (flags[1] 0x10) and Hammer of the Law (flags[2] 0x2000), but the class mask set in ApplyContracts was (0, 0x400010, 0), so Hammer of the Law got no Stamina damage. Every listed spell must get the same positive flat damage, and none without the talent.",
+  "timeout_ms": 60000,
+  "players": [ { "id": "g", "race": 1, "class": 18, "level": 60 } ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "assert", "label": "Control: no talent, no Heavy Blow bonus", "actor": "g", "metric": "spell_modifier", "spell": 503119, "op": 0, "base": 0, "equals": 0 },
+    { "action": "learn", "actor": "g", "spell": 803738 },
+    { "action": "assert", "label": "Shieldlord's Strength applies its Stamina damage aura", "actor": "g", "metric": "aura", "spell": 807794, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "Heavy Blow gains Stamina damage", "actor": "g", "metric": "spell_modifier", "spell": 503119, "op": 0, "base": 0, "min": 1 },
+    { "action": "assert", "label": "Hammer of Kings gains Stamina damage", "actor": "g", "metric": "spell_modifier", "spell": 503127, "op": 0, "base": 0, "min": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: Hammer of the Law gains Stamina damage", "actor": "g", "metric": "spell_modifier", "spell": 704418, "op": 0, "base": 0, "min": 1 }
+  ]
+}

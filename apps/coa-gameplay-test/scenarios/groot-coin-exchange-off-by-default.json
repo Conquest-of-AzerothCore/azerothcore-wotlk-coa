@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "name": "Groot Coins ship disabled: Tiraxis keeps his five menus and players cannot reach .groot",
+  "contract": "GrootCoin.Enable and GrootCoin.ExchangeEnable default to 0 (modules/mod-ethereal-bazaar/conf/ethereal_bazaar.conf.dist). With the shipped config Tiraxis (900007, npc_tiraxis) offers exactly his five existing vendor menus and no exchange option. The .groot commands need RBAC 1001/1002, which no role grants, so an ordinary player is refused even with coins in the bags, and the coins stay where they are.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8816.5, "y": 627.0, "z": 94.1, "o": 3.8 },
+  "players": [
+    { "id": "player", "race": 1, "class": 1, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "tiraxis", "owner": "player", "entry": 900007, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the fixture settle", "ms": 2000 },
+    { "action": "add_item", "actor": "player", "item": 910001, "count": 3 },
+    { "action": "gossip_hello", "actor": "player", "target": "tiraxis", "label": "Talk to Tiraxis" },
+    { "action": "assert", "label": "Only the five existing menus", "actor": "player", "metric": "gossip_options", "equals": 5 },
+    { "action": "assert", "label": "Heirlooms is still the fifth", "actor": "player", "metric": "gossip_option_text", "index": 4, "text": "I want to browse Heirlooms.", "equals": 1 },
+    { "action": "command", "actor": "player", "command": ".groot status", "rejected": true },
+    { "action": "command", "actor": "player", "command": ".groot award Harnessa 5 1 \"self\" \"self\"", "rejected": true },
+    { "action": "assert", "label": "Coins untouched", "actor": "player", "metric": "item_count", "item": 910001, "equals": 3 },
+    { "action": "assert", "label": "No tokens appeared", "actor": "player", "metric": "item_count", "item": 975001, "equals": 0 }
+  ]
+}

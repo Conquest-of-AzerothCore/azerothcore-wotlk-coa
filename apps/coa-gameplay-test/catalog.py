@@ -62,7 +62,16 @@ def bindings(directory=DIRECTORY):
 def catalog(directory=DIRECTORY):
     checks = bindings(directory)
     rows = []
-    for path in sorted((directory / 'scenarios').glob('*.json')):
+    inactive = {}
+    paths = list((directory / 'scenarios').glob('*.json'))
+    if directory.resolve() == DIRECTORY.resolve():
+        paths += list((ROOT / 'modules').glob('*/tests/gameplay/*.json'))
+        for manifest in (ROOT / 'modules').glob('*/tests/gameplay.json'):
+            for case in read_json(manifest).get('disabled_scenarios', []):
+                if case in inactive:
+                    raise ValueError(f'Duplicate disabled scenario: {case}')
+                inactive[case] = manifest.parents[1]
+    for path in sorted(paths):
         data = read_json(path)
         contract = data.get('contract', '')
         if isinstance(contract, list) and all(isinstance(item, str) for item in contract):
@@ -83,6 +92,16 @@ def catalog(directory=DIRECTORY):
                      'checks': [c for c in checks if path.stem in c['scenarios']],
                      'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
                      'evidence': 'scenario definition; execution not established'})
+        module = path.parents[2] if path.parent != directory / 'scenarios' else inactive.get(path.stem)
+        if module:
+            requirements = read_json(module / 'tests/gameplay.json')
+            rows[-1].update(module=module.name, configuration=requirements['configuration'],
+                            module_active=path.stem not in inactive)
+    ids = [row['id'] for row in rows]
+    if len(ids) != len(set(ids)):
+        raise ValueError('Duplicate scenario ids across core and modules')
+    if set(inactive) - set(ids):
+        raise ValueError(f'Unknown disabled scenarios: {sorted(set(inactive) - set(ids))}')
     return rows
 
 

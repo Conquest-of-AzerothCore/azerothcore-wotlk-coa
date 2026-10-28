@@ -1,7 +1,19 @@
 {
   "schema": 1,
   "name": "Skinning in a dungeon follows the level a scaled character is shown (#5289)",
-  "contract": "Requires DestinyWeaver.Enable=1, DestinyWeaver.LevelScaling=1 and DestinyWeaver.Scaling.Offset=3. Inside a normal five-player dungeon the Destiny Weaver view holds a creature within the character's band on both sides (ScaleDungeonCreatureLevelForViewer), so a level-15 character is sent a level-20 creature as level 18. The 3.3.5 client colours a corpse's Skinnable line from the level it was sent, and the server requirement (Spell::CheckCast: skill < 100 needs (level - 10) * 10) must be computed from the same level: 80 for the level-18 view, 100 for the authored level 20. Skinning 85 therefore skins the corpse the client shows as orange, Skinning 75 is refused with SPELL_FAILED_LOW_CASTLEVEL (49) as the client's red line says, and with scaling off the authored level 20 applies again and 85 is refused. Black Riding Wolf 5194 is a beast with skinning table 100001 and no creature loot or money, so its corpse becomes skinnable as soon as it dies. The Stockade (map 34) is a normal dungeon.",
+  "contract": [
+    "Requires CoALegendaryItems.DropChance=0: this scenario checks skinning an otherwise empty corpse.",
+    "Requires DestinyWeaver.Enable=1 and DestinyWeaver.LevelScaling=1. Inside a scaled five-player dungeon every",
+    "creature stands at the viewer's own level held inside the dungeon's LFGDungeons.dbc band",
+    "(ScaleDungeonCreatureLevelForViewer); the Stockade (map 34, finder entry 12) has the band 15-59, so a level-15",
+    "character is sent a level-20 creature as level 15. The 3.3.5 client colours a corpse's Skinnable line from the",
+    "level it was sent, and the server requirement (Spell::CheckCast: skill < 100 needs (level - 10) * 10) must be",
+    "computed from the same level: 50 for the level-15 view, 100 for the authored level 20. Skinning 55 therefore",
+    "skins the corpse the client shows as skinnable, Skinning 45 is refused with SPELL_FAILED_LOW_CASTLEVEL (49) as",
+    "the client's red line says, and with open world scaling off the dungeon keeps the level-15 view, so 85 skins",
+    "the third corpse. Black Riding Wolf 5194 is a beast with skinning table 100001 and no creature loot or money,",
+    "so its corpse becomes skinnable as soon as it dies."
+  ],
   "timeout_ms": 120000,
   "location": {
     "map": 34,
@@ -39,7 +51,7 @@
       "distance": 2
     },
     {
-      "id": "unscaled",
+      "id": "switched_off",
       "owner": "ranger",
       "entry": 5194,
       "level": 20,
@@ -62,7 +74,7 @@
       "action": "set_skill",
       "actor": "ranger",
       "skill": 393,
-      "value": 85,
+      "value": 55,
       "maximum": 150
     },
     {
@@ -72,20 +84,20 @@
     },
     {
       "action": "assert",
-      "label": "The level-20 creature is shown to the level-15 character at 18",
+      "label": "The level-20 creature is shown to the level-15 character at 15",
       "actor": "ranger",
       "metric": "view_level",
       "target": "shown_orange",
-      "equals": 18,
+      "equals": 15,
       "within_ms": 2000
     },
     {
       "action": "assert",
-      "label": "The client is sent level 18",
+      "label": "The client is sent level 15",
       "actor": "ranger",
       "metric": "sent_level",
       "target": "shown_orange",
-      "equals": 18,
+      "equals": 15,
       "within_ms": 3000
     },
     {
@@ -112,7 +124,7 @@
     },
     {
       "action": "assert",
-      "label": "Skinning 85 skins the corpse shown at level 18",
+      "label": "Skinning 55 skins the corpse shown at level 15",
       "actor": "ranger",
       "metric": "spell_cast_count",
       "spell": 8613,
@@ -143,7 +155,7 @@
       "action": "set_skill",
       "actor": "ranger",
       "skill": 393,
-      "value": 75,
+      "value": 45,
       "maximum": 150
     },
     {
@@ -170,7 +182,7 @@
     },
     {
       "action": "assert",
-      "label": "Skinning 75 is below the level-18 requirement of 80",
+      "label": "Skinning 45 is below the level-15 requirement of 50",
       "actor": "ranger",
       "metric": "cast_failure",
       "spell": 8613,
@@ -199,21 +211,21 @@
     },
     {
       "action": "assert",
-      "label": "Scaling off shows the authored level",
+      "label": "Open world scaling off keeps the dungeon view at 15",
       "actor": "ranger",
       "metric": "view_level",
-      "target": "unscaled",
-      "equals": 20,
+      "target": "switched_off",
+      "equals": 15,
       "within_ms": 2000
     },
     {
       "action": "attack",
       "actor": "ranger",
-      "target": "unscaled"
+      "target": "switched_off"
     },
     {
       "action": "assert",
-      "actor": "unscaled",
+      "actor": "switched_off",
       "metric": "alive",
       "equals": 0,
       "within_ms": 30000
@@ -226,24 +238,24 @@
       "action": "cast",
       "actor": "ranger",
       "spell": 8613,
-      "target": "unscaled"
+      "target": "switched_off"
     },
     {
       "action": "assert",
-      "label": "Without scaling the authored level 20 needs 100",
-      "actor": "ranger",
-      "metric": "cast_failure",
-      "spell": 8613,
-      "equals": 49,
-      "within_ms": 2000
-    },
-    {
-      "action": "assert",
-      "label": "Nothing more was skinned",
+      "label": "Skinning 85 skins the corpse still shown at level 15",
       "actor": "ranger",
       "metric": "spell_cast_count",
       "spell": 8613,
-      "equals": 1
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The skinning loot window opens again",
+      "actor": "ranger",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 2000
     }
   ]
 }

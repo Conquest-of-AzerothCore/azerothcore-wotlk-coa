@@ -8,8 +8,9 @@ The book is not its own trainer, and its shop is not its own shop. It is the rea
 rows seen from one place - the same rows, the same states, the same purchase checks, the same
 refusals, only reachable without travelling between sixteen capitals - and beside them a trade
 supplier's counter, so the character who just learned a trade can buy the thread and the flux
-to use it. What it does **not** carry is recipes: a pattern stays at the trainer that teaches
-it, the vendor that sells it, or the drop, quest or discovery it was earned from. And what its
+to use it. It also carries the recipes the realm's profession trainers teach (#5818), shown only
+for a trade the character knows and once their skill reaches each recipe's requirement; patterns
+that are sold, dropped or discovered stay where they were. And what its
 window leaves out is every rank the character cannot train yet: the window is the entry rank
 of each profession, the ranks their skill has reached, and the ranks they already know, never
 the top of a ladder they have not climbed. Everything below is arranged around those rules.
@@ -273,7 +274,10 @@ sold or dropped where it always was. What the SQL leaves behind is checked by re
 * 200001 holds those 93 rows and nothing else, and every one of them is a profession row;
 * 200002 holds the same rows cut at `ReqSkillRank = 0` - 17 of them, row for row identical to the
   full book's;
-* neither book holds a recipe: 110 rows between them, all professions.
+* the full book then adds the recipes profession trainers (`trainer`.`Type` 2) teach under the eleven
+  crafting and secondary trades, each at the lowest requirement any trainer asks
+  (`data/sql/updates/pending_db_world/rev_20261001_10_book_of_artisans_recipes.sql`, which sorts
+  after this module's file and touches none of its rows); the beginner's book holds no recipe.
 
 **The book, in a real worldserver** (`apps/coa-gameplay-test/scenarios/book-of-artisans.json`,
 69 steps, 52 of them assertions) does what a player does: it right-clicks, reads the page, and
@@ -353,9 +357,9 @@ and every step passed.
 2. Go to Ratchet (`/go xyz -887.072 -3778.650 11.735 1`) - a purple flying book outside the
    inn. Right-click it and the page opens with the original's two options: "I require
    training!" and "I would like to browse your goods.". Training gives one row per trade the
-   character can train - no recipe anywhere in the list, and no rank above the one their own
-   skill has reached - and browsing gives Edna Mullby's shelves, at her prices. Learn a
-   profession, raise its skill, reopen the page, and the next rank is there.
+   character can train - no rank or recipe above what their own skill has reached, and no recipe
+   of a trade they do not know - and browsing gives Edna Mullby's shelves, at her prices. Learn a
+   profession, raise its skill, reopen the page, and the next rank and its recipes are there.
 3. `.additem 134987` and use the item: a portable Book of Artisans appears at your side -
    right-click it for the same page and the same shelves. This is the only way to reach 57500;
    it is not spawned anywhere, and using the item again dismisses it.

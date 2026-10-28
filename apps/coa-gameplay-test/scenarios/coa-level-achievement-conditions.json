@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Reaching a level earns only the level achievements of the character's own class, race and game modes",
+  "contract": "Ascension names the condition of its reach-level achievements in the title: 'Level 60 Barbarian' (86000, 'Reach level 60 as a Barbarian'), 'Level 60 Warrior' (149992), 'WildCard Level 60' (6533, 'Reach level 60 In WildCard mode'), 'Draft Level 60' (8533), 'Ironman Level 60' (9724), 'Realm First! Level 60 Gnome' (10454). Achievement_Criteria.dbc gives each of them only a reach-level criterion, so without further conditions every character reaching level 60 earned all 457 of them. A Human Wildcard Hero reaching 60 earns 'Level 60' (11) and 'WildCard Level 60' but no class, Draft, Ironman or Gnome achievement; a Human Barbarian outside Wildcard earns 'Level 60 Barbarian' but not 'Level 60 Witch Doctor' (86001) or 'WildCard Level 60'.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "wild", "race": 1, "class": 10, "level": 1},
+    {"id": "barb", "race": 1, "class": 12, "level": 1}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 3000},
+    {"action": "console", "command": "coa gamemode WildCard on Harnessa"},
+    {"action": "console", "command": "coa gamemode WildCard off Harnessb"},
+    {"action": "set_level", "actor": "wild", "value": 60},
+    {"action": "set_level", "actor": "barb", "value": 60},
+    {"action": "wait", "ms": 500},
+
+    {"action": "assert", "label": "A Wildcard Hero earns Level 60", "actor": "wild", "metric": "has_achievement", "achievement": 11, "equals": 1},
+    {"action": "assert", "label": "and WildCard Level 60", "actor": "wild", "metric": "has_achievement", "achievement": 6533, "equals": 1},
+    {"action": "assert", "label": "but not Level 60 Barbarian", "actor": "wild", "metric": "has_achievement", "achievement": 86000, "equals": 0},
+    {"action": "assert", "label": "nor Level 60 Warrior", "actor": "wild", "metric": "has_achievement", "achievement": 149992, "equals": 0},
+    {"action": "assert", "label": "nor Draft Level 60", "actor": "wild", "metric": "has_achievement", "achievement": 8533, "equals": 0},
+    {"action": "assert", "label": "nor Ironman Level 60", "actor": "wild", "metric": "has_achievement", "achievement": 9724, "equals": 0},
+    {"action": "assert", "label": "nor the Gnome realm first", "actor": "wild", "metric": "has_achievement", "achievement": 10454, "equals": 0},
+
+    {"action": "assert", "label": "A Barbarian earns Level 60 Barbarian", "actor": "barb", "metric": "has_achievement", "achievement": 86000, "equals": 1},
+    {"action": "assert", "label": "but not Level 60 Witch Doctor", "actor": "barb", "metric": "has_achievement", "achievement": 86001, "equals": 0},
+    {"action": "assert", "label": "nor WildCard Level 60 outside Wildcard", "actor": "barb", "metric": "has_achievement", "achievement": 6533, "equals": 0}
+  ]
+}

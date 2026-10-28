@@ -400,15 +400,33 @@ public:
 
     struct npc_llod_genericAI : public CombatAI
     {
-        npc_llod_genericAI(Creature* pCreature) : CombatAI(pCreature) { attackTimer = 0; summonTimer = 1; }
+        npc_llod_genericAI(Creature* pCreature) : CombatAI(pCreature), summons(pCreature) { attackTimer = 0; summonTimer = 1; }
 
         uint32 attackTimer;
         uint32 summonTimer;
+        SummonList summons;
 
         void Reset() override
         {
+            summons.DespawnAll();
             summonTimer = 1;
             CombatAI::Reset();
+        }
+
+        void JustSummoned(Creature* summon) override
+        {
+            summons.Summon(summon);
+        }
+
+        void SummonedCreatureDespawn(Creature* summon) override
+        {
+            summons.Despawn(summon);
+        }
+
+        void JustDied(Unit* killer) override
+        {
+            summons.DespawnAll();
+            CombatAI::JustDied(killer);
         }
 
         void UpdateAI(uint32 diff) override

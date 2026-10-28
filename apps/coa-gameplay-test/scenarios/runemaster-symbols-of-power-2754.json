@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Issue 2754: Symbols of Power raises only Fist of the Ancients while Fire Engraving is active",
+  "contract": [
+    "Symbols of Power 705613/705614 reads 'Increases the damage of Fist of the Ancients while you have Weapon",
+    "Engraving: Fire active by $s1%.' Its only effect is a flat SPELLMOD_EFFECT2 (12) of 15/30 on family 38 mask1 0x2,",
+    "which Fire Engraving 653211 carries; 653211 effect 1 is ADD_PCT_MODIFIER SPELLMOD_DAMAGE with amount 0. In the",
+    "installed patch-T Spell.dbc that effect has an empty class mask, and SpellInfo::IsAffected treats an empty mask",
+    "as every family 38 spell, so the talent raised all Runemaster damage. CoA Tavern lists the effect's affected",
+    "spells as exactly the family 38 mask2 0x8000 set: Fist of the Ancients 712326-712335, 712355, 712403 and Genesis",
+    "Damage 500502. Expected: with the talent and Fire Engraving, Fist of the Ancients gains 15% damage while",
+    "Weapon Engraving: Ice 653217 and Unleashed Flame Glyph 520097 stay unchanged; without Fire Engraving Fist",
+    "returns to its base damage."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the character settle", "ms": 3000},
+    {"action": "assert", "label": "SETUP: Fist of the Ancients starts at base damage", "actor": "rm",
+      "metric": "spell_modifier", "spell": 712326, "op": 0, "base": 100, "min": 99.99, "max": 100.01},
+    {"action": "assert", "label": "SETUP: Weapon Engraving: Ice starts at base damage", "actor": "rm",
+      "metric": "spell_modifier", "spell": 653217, "op": 0, "base": 100, "min": 99.99, "max": 100.01},
+    {"action": "assert", "label": "SETUP: Unleashed Flame Glyph starts at base damage", "actor": "rm",
+      "metric": "spell_modifier", "spell": 520097, "op": 0, "base": 100, "min": 99.99, "max": 100.01},
+    {"action": "learn", "actor": "rm", "spell": 705613},
+    {"action": "assert", "label": "SETUP: Symbols of Power passive is active", "actor": "rm", "metric": "aura",
+      "spell": 705613, "equals": 1, "within_ms": 2000},
+    {"action": "set_aura", "label": "Fire Engraving, the equip spell of Weapon Engraving: Fire", "actor": "rm",
+      "spell": 653211, "stacks": 1},
+    {"action": "assert", "label": "SETUP: Fire Engraving is active", "actor": "rm", "metric": "aura",
+      "spell": 653211, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "CONTRACT: Fist of the Ancients deals 15% more damage", "actor": "rm",
+      "metric": "spell_modifier", "spell": 712326, "op": 0, "base": 100, "min": 114.99, "max": 115.01},
+    {"action": "assert", "label": "CONTRACT: Fist of the Ancients rank 7 deals 15% more damage", "actor": "rm",
+      "metric": "spell_modifier", "spell": 712335, "op": 0, "base": 100, "min": 114.99, "max": 115.01},
+    {"action": "assert", "label": "CONTRACT: Weapon Engraving: Ice damage is unchanged", "actor": "rm",
+      "metric": "spell_modifier", "spell": 653217, "op": 0, "base": 100, "min": 99.99, "max": 100.01},
+    {"action": "assert", "label": "CONTRACT: Unleashed Flame Glyph damage is unchanged", "actor": "rm",
+      "metric": "spell_modifier", "spell": 520097, "op": 0, "base": 100, "min": 99.99, "max": 100.01},
+    {"action": "set_aura", "label": "The engraving ends", "actor": "rm", "spell": 653211, "stacks": 0},
+    {"action": "assert", "label": "CONTRACT: Fist of the Ancients returns to base damage", "actor": "rm",
+      "metric": "spell_modifier", "spell": 712326, "op": 0, "base": 100, "min": 99.99, "max": 100.01}
+  ]
+}

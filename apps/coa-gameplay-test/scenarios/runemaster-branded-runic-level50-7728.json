@@ -1,0 +1,4554 @@
+{
+  "schema": 1,
+  "name": "Issue 7728: the Runic specialization learns Branded at level 50",
+  "contract": [
+    "Branded 707717 is the Runic specialization's level 50 Engravement node after Power Overwhelming 707876:",
+    "'Gaining Power Overwhelming now also guarantees your next Runic Brand to critically strike.' This fork's",
+    "CharacterAdvancement.dbc lacks the node; the bindmysoul CoA Build Hub snapshot of 2026-07-22 lists it as",
+    "32-85-10-8, a free passive at level 50 that depends on Power Overwhelming. A Runic Runemaster learns it on",
+    "reaching level 50, while a level 49 Runic Runemaster and a level 50 Runemaster without the specialization",
+    "do not. Power Overwhelming's trigger 560051 lasts only with Branded, for 6 sec at 100% crit chance. Each",
+    "trial casts Runic Brand, Runeblade and Runic Brand again 2.6 sec later, inside its cooldown, so the second",
+    "cast lands only after a reset. At level 49, where Runic Brand damage 712322 has no crit chance, no Runic",
+    "Brand crits; at level 50 every reset Runic Brand crits. Thirty trials at 35% give 1 to 23 resets outside a",
+    "3e-6 tail."
+  ],
+  "timeout_ms": 480000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "low",
+      "race": 1,
+      "class": 32,
+      "level": 49,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "branded",
+      "race": 1,
+      "class": 32,
+      "level": 49,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "plain",
+      "race": 1,
+      "class": 32,
+      "level": 50,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "low_dummy",
+      "owner": "low",
+      "entry": 36,
+      "level": 50,
+      "health": 5000000,
+      "distance": 3
+    },
+    {
+      "id": "branded_dummy",
+      "owner": "branded",
+      "entry": 36,
+      "level": 50,
+      "health": 5000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks and class synchronisation settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "low",
+      "spell": 201
+    },
+    {
+      "action": "learn",
+      "actor": "low",
+      "spell": 1180
+    },
+    {
+      "action": "learn",
+      "actor": "low",
+      "spell": 674
+    },
+    {
+      "action": "add_item",
+      "actor": "low",
+      "item": 25
+    },
+    {
+      "action": "add_item",
+      "actor": "low",
+      "item": 2092
+    },
+    {
+      "action": "equip",
+      "actor": "low",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "equip",
+      "actor": "low",
+      "item": 2092,
+      "slot": 16
+    },
+    {
+      "action": "learn",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "learn",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "learn",
+      "actor": "branded",
+      "spell": 201
+    },
+    {
+      "action": "learn",
+      "actor": "branded",
+      "spell": 1180
+    },
+    {
+      "action": "learn",
+      "actor": "branded",
+      "spell": 674
+    },
+    {
+      "action": "add_item",
+      "actor": "branded",
+      "item": 25
+    },
+    {
+      "action": "add_item",
+      "actor": "branded",
+      "item": 2092
+    },
+    {
+      "action": "equip",
+      "actor": "branded",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "equip",
+      "actor": "branded",
+      "item": 2092,
+      "slot": 16
+    },
+    {
+      "action": "learn",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "learn",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "learn",
+      "actor": "plain",
+      "spell": 201
+    },
+    {
+      "action": "learn",
+      "actor": "plain",
+      "spell": 1180
+    },
+    {
+      "action": "learn",
+      "actor": "plain",
+      "spell": 674
+    },
+    {
+      "action": "add_item",
+      "actor": "plain",
+      "item": 25
+    },
+    {
+      "action": "add_item",
+      "actor": "plain",
+      "item": 2092
+    },
+    {
+      "action": "equip",
+      "actor": "plain",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "equip",
+      "actor": "plain",
+      "item": 2092,
+      "slot": 16
+    },
+    {
+      "action": "learn",
+      "actor": "plain",
+      "spell": 573445
+    },
+    {
+      "action": "learn",
+      "actor": "plain",
+      "spell": 712304
+    },
+    {
+      "action": "specialization",
+      "label": "low chooses Runic",
+      "actor": "low",
+      "id": 61
+    },
+    {
+      "action": "specialization",
+      "label": "branded chooses Runic",
+      "actor": "branded",
+      "id": 61
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Runic at level 49 owns Power Overwhelming",
+      "actor": "branded",
+      "metric": "knows_spell",
+      "spell": 707876,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Runic at level 49 owns Power Overwhelming",
+      "actor": "low",
+      "metric": "knows_spell",
+      "spell": 707876,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Branded waits for level 50",
+      "actor": "branded",
+      "metric": "knows_spell",
+      "spell": 707717,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "label": "branded reaches level 50",
+      "actor": "branded",
+      "value": 50
+    },
+    {
+      "action": "assert",
+      "label": "Runic at level 50 learns Branded",
+      "actor": "branded",
+      "metric": "knows_spell",
+      "spell": 707717,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Branded passive is active",
+      "actor": "branded",
+      "metric": "aura",
+      "spell": 707717,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Runic at level 49 still lacks Branded",
+      "actor": "low",
+      "metric": "knows_spell",
+      "spell": 707717,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Level 50 without the Runic specialization lacks Branded",
+      "actor": "plain",
+      "metric": "knows_spell",
+      "spell": 707717,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Runic Brand damage cannot crit at level 49",
+      "actor": "low",
+      "metric": "spell_done_crit_chance",
+      "spell": 712322,
+      "target": "low_dummy",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "low",
+      "metric": "spell_cast_count",
+      "spell": 561055,
+      "save_as": "low_resets"
+    },
+    {
+      "action": "snapshot",
+      "actor": "low",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "low_dummy",
+      "critical": true,
+      "save_as": "low_crits"
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_cast_count",
+      "spell": 561055,
+      "save_as": "branded_resets"
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": true,
+      "save_as": "branded_crits"
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 1: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 1: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 1: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 1: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_1"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 1: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 1: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_1",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 2: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 2: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 2: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 2: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 2: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 2: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_2"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 2: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 2: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 2: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_2",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 3: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 3: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 3: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 3: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 3: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 3: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_3"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 3: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 3: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 3: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_3",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 4: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 4: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 4: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 4: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 4: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 4: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_4"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 4: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 4: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 4: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_4",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 5: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 5: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 5: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 5: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 5: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 5: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_5"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 5: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 5: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 5: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_5",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 6: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 6: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 6: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 6: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 6: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 6: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_6"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 6: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 6: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 6: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_6",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 7: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 7: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 7: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 7: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 7: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 7: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_7"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 7: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 7: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 7: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_7",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 8: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 8: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 8: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 8: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 8: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 8: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_8"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 8: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 8: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 8: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_8",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 9: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 9: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 9: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 9: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 9: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 9: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_9"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 9: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 9: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 9: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_9",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 10: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 10: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 10: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 10: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 10: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 10: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_10"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 10: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 10: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 10: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_10",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 11: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 11: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 11: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 11: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 11: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 11: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_11"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 11: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 11: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 11: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_11",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 12: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 12: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 12: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 12: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 12: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 12: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_12"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 12: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 12: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 12: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_12",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 13: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 13: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 13: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 13: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 13: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 13: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_13"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 13: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 13: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 13: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_13",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 14: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 14: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 14: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 14: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 14: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 14: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_14"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 14: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 14: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 14: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_14",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 15: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 15: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 15: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 15: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 15: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 15: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_15"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 15: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 15: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 15: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_15",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 16: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 16: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 16: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 16: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 16: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 16: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_16"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 16: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 16: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 16: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_16",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 17: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 17: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 17: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 17: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 17: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 17: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_17"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 17: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 17: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 17: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_17",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 18: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 18: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 18: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 18: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 18: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 18: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_18"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 18: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 18: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 18: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_18",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 19: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 19: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 19: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 19: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 19: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 19: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_19"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 19: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 19: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 19: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_19",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 20: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 20: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 20: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 20: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 20: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 20: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_20"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 20: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 20: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 20: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_20",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 21: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 21: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 21: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 21: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 21: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 21: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_21"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 21: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 21: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 21: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_21",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 22: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 22: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 22: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 22: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 22: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 22: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_22"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 22: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 22: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 22: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_22",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 23: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 23: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 23: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 23: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 23: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 23: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_23"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 23: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 23: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 23: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_23",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 24: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 24: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 24: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 24: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 24: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 24: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_24"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 24: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 24: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 24: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_24",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 25: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 25: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 25: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 25: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 25: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 25: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_25"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 25: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 25: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 25: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_25",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 26: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 26: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 26: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 26: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 26: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 26: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_26"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 26: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 26: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 26: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_26",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 27: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 27: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 27: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 27: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 27: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 27: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_27"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 27: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 27: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 27: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_27",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 28: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 28: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 28: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 28: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 28: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 28: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_28"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 28: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 28: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 28: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_28",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 29: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 29: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 29: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 29: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 29: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 29: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_29"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 29: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 29: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 29: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_29",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "branded",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Trial 30: Runic Brand",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 30: Runic Brand",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "restore_charges",
+      "actor": "low",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 30: Runeblade",
+      "actor": "low",
+      "spell": 573445,
+      "target": "low_dummy"
+    },
+    {
+      "action": "restore_charges",
+      "actor": "branded",
+      "spell": 573445
+    },
+    {
+      "action": "cast",
+      "label": "Trial 30: Runeblade",
+      "actor": "branded",
+      "spell": 573445,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 30: no crit buff without Branded",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 560051,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 30: Branded keeps the crit buff at most 6 sec",
+      "actor": "branded",
+      "metric": "aura_duration_ms",
+      "spell": 560051,
+      "min": 0,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "save_as": "branded_normal_30"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 30: Runic Brand again",
+      "actor": "low",
+      "spell": 712304,
+      "target": "low_dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Trial 30: Runic Brand again",
+      "actor": "branded",
+      "spell": 712304,
+      "target": "branded_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Trial 30: with Branded a reset Runic Brand never lands without a crit",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": false,
+      "relative_to": "branded_normal_30",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "low",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "low",
+      "spell": 712304
+    },
+    {
+      "action": "set_aura",
+      "actor": "branded",
+      "spell": 560051,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "branded",
+      "spell": 712304
+    },
+    {
+      "action": "assert",
+      "label": "Power Overwhelming resets Runic Brand at level 49",
+      "actor": "low",
+      "metric": "spell_cast_count",
+      "spell": 561055,
+      "relative_to": "low_resets",
+      "min": 1,
+      "max": 23
+    },
+    {
+      "action": "assert",
+      "label": "Without Branded no Runic Brand crits",
+      "actor": "low",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "low_dummy",
+      "critical": true,
+      "relative_to": "low_crits",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Power Overwhelming resets Runic Brand at level 50",
+      "actor": "branded",
+      "metric": "spell_cast_count",
+      "spell": 561055,
+      "relative_to": "branded_resets",
+      "min": 1,
+      "max": 23
+    },
+    {
+      "action": "assert",
+      "label": "With Branded a reset Runic Brand crits",
+      "actor": "branded",
+      "metric": "spell_damage_count",
+      "spell": 712322,
+      "target": "branded_dummy",
+      "critical": true,
+      "relative_to": "branded_crits",
+      "min": 1
+    }
+  ]
+}

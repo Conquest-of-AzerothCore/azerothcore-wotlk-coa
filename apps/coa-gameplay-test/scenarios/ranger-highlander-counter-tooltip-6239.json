@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "name": "Highlander counter tooltip states the fixed three-flower reward (#6239)",
+  "contract": [
+    "Highlander707534 grants a stack each time a green Dreamflower spawns. Counter707539 caps at three,",
+    "then becomes readiness712427. Falconstrike costs30 Focus at one and two counter stacks and0 only",
+    "after three. Readiness effect1 is -100 percent cost; reduction712428 effect0 is -40 percent healing",
+    "received. The counter tooltip must state these fixed future benefits without effect-value tokens",
+    "that the native client multiplies by the counter stacks. Fixture learning561005 invokes the normal",
+    "flower-spawn handler to isolate this counter contract from random critical-hit proc generation."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "learn", "actor": "ranger", "spell": 707534},
+    {"action": "learn", "actor": "ranger", "spell": 92117},
+    {"action": "learn", "actor": "ranger", "spell": 573060},
+    {"action": "learn", "actor": "ranger", "spell": 561005},
+    {"action": "assert", "actor": "ranger", "metric": "spell_power_cost", "spell": 806443, "power": 2, "equals": 30},
+    {"action": "cast", "actor": "ranger", "spell": 561005},
+    {"action": "wait", "ms": 1200},
+    {"action": "assert", "actor": "ranger", "metric": "aura_stacks", "spell": 707539, "equals": 1},
+    {"action": "assert", "actor": "ranger", "metric": "aura", "spell": 712427, "equals": 0},
+    {"action": "assert", "actor": "ranger", "metric": "spell_power_cost", "spell": 806443, "power": 2, "equals": 30},
+    {"action": "cast", "actor": "ranger", "spell": 561005},
+    {"action": "wait", "ms": 1200},
+    {"action": "assert", "actor": "ranger", "metric": "aura_stacks", "spell": 707539, "equals": 2},
+    {"action": "assert", "actor": "ranger", "metric": "aura", "spell": 712427, "equals": 0},
+    {"action": "assert", "actor": "ranger", "metric": "spell_power_cost", "spell": 806443, "power": 2, "equals": 30},
+    {"action": "cast", "actor": "ranger", "spell": 561005},
+    {"action": "wait", "ms": 1200},
+    {"action": "assert", "actor": "ranger", "metric": "aura", "spell": 707539, "equals": 0},
+    {"action": "assert", "actor": "ranger", "metric": "aura", "spell": 712427, "equals": 1},
+    {"action": "assert", "actor": "ranger", "metric": "spell_power_cost", "spell": 806443, "power": 2, "equals": 0},
+    {
+      "action": "assert",
+      "label": "Ready cost modifier is a fixed minus100 percent",
+      "actor": "ranger",
+      "metric": "aura_amount",
+      "spell": 712427,
+      "effect": 1,
+      "equals": -100
+    },
+    {
+      "action": "assert", "actor": "ranger", "metric": "spell_effect_value",
+      "spell": 712428, "effect": 0, "equals": -40
+    },
+    {
+      "action": "assert",
+      "label": "Counter tooltip sends a fixed 100 percent future reward",
+      "actor": "ranger",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 707539,
+      "text": "100% reduced cost",
+      "equals": 1
+    }
+  ]
+}

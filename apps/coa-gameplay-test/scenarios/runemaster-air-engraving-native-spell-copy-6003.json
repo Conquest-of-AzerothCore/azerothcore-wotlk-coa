@@ -1,0 +1,1005 @@
+{
+  "schema": 1,
+  "name": "Air Engraving copies exactly 30% of a native direct spell hit (#6003)",
+  "contract": [
+    "Air653223 promises a 15% chance to copy30% of direct damage, ignoring armor; Master Engraver adds 5 chance points.",
+    "Normal Unleashed Frost Glyph520096 provides a controlled direct source whose actual critical damage is168 in the native before run at level 24. Air must retain that source damage and each copy must deal floor(168 times 30%)=50, with no second critical roll or armor reduction. The helper is learned only as the controlled damage fixture; its cast uses the normal session handler.",
+    "Eighty real direct casts at 20% chance give a no-proc probability below 2e-8; these are actual damage and proc observations, separate from synthetic proc-decision rate checks."
+  ],
+  "timeout_ms": 240000,
+  "players": [
+    {
+      "id": "r",
+      "race": 1,
+      "class": 32,
+      "level": 24,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 100000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "r",
+      "entry": 36,
+      "level": 24,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 1180
+    },
+    {
+      "action": "add_item",
+      "actor": "r",
+      "item": 2092
+    },
+    {
+      "action": "equip",
+      "actor": "r",
+      "item": 2092,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 653222
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 520096
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 705605
+    },
+    {
+      "action": "set_health",
+      "actor": "r",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 520096,
+      "target": "e",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 520096,
+      "target": "e",
+      "critical": true,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_damage_total",
+      "spell": 520096,
+      "target": "e",
+      "equals": 168,
+      "label": "Controlled native direct spell damage is 168 before Air is applied"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 653222,
+      "target_item": 2092
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 653223,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 653225,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 520096,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 520096,
+      "target": "e",
+      "equals": 81
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 520096,
+      "target": "e",
+      "critical": true,
+      "equals": 81
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_damage_total",
+      "spell": 520096,
+      "target": "e",
+      "equals": 13608,
+      "label": "All native source hits retain the controlled damage value"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_proc_count",
+      "spell": 653225,
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_proc_count",
+      "spell": 653225,
+      "save_as": "air_copies"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 653226,
+      "target": "e",
+      "ratio_to": "air_copies",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_damage_total",
+      "spell": 653226,
+      "target": "e",
+      "ratio_to": "air_copies",
+      "equals": 50,
+      "label": "Each actual proc copies floor(168 times 30%) damage exactly"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 653226,
+      "target": "e",
+      "critical": true,
+      "equals": 0,
+      "label": "An Air copy does not roll a second critical hit"
+    }
+  ]
+}

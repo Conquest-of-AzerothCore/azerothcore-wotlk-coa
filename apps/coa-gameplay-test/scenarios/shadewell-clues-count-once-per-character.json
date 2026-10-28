@@ -1,0 +1,155 @@
+{
+  "schema": 1,
+  "name": "They Grabbed Her By The Ankle: a clue counts once for a character and then leaves that character's world",
+  "contract": "Quest 175069 needs 5 credits of [KC] They Grabbed Ankle 164519, given by the five Shadewell Falls clues 2300672-2300676 (type 10 goobers tied to the quest; each one's SmartAI says a clue line and gives one credit on use). The user found in game (2026-10-15) that one clue could be investigated again and again, each time counting, so a single clue finished the quest. Once a character has investigated a clue it must stop counting and stop existing for that character, while the other clues still count. The case joins world phase 1 and uses the world spawns of the Boot (9996003) and the Murloc Tool (9996004); a summoned clue would not do, because an owner always sees its own object.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8333.5,
+    "y": -399.2,
+    "z": 149.8,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where the clues are spawned",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the falls' grid activate",
+      "ms": 2500
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 175069,
+      "complete": false
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Boot is in the character's world before it is investigated",
+      "actor": "p",
+      "metric": "nearby_gameobject_at_client",
+      "entry": 2300675,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Investigate the Boot",
+      "actor": "p",
+      "entry": 2300675
+    },
+    {
+      "action": "assert",
+      "label": "the Boot counts once",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 175069,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "and leaves the character's world",
+      "actor": "p",
+      "metric": "nearby_gameobject_at_client",
+      "entry": 2300675,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Try to investigate the Boot again",
+      "actor": "p",
+      "entry": 2300675
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "the Boot does not count a second time",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 175069,
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "label": "Walk to the Murloc Tool",
+      "actor": "p",
+      "map": 0,
+      "x": -8300.5,
+      "y": -401.4,
+      "z": 150.9,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Murloc Tool is still in the character's world",
+      "actor": "p",
+      "metric": "nearby_gameobject_at_client",
+      "entry": 2300676,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Investigate the Murloc Tool",
+      "actor": "p",
+      "entry": 2300676
+    },
+    {
+      "action": "assert",
+      "label": "a different clue still counts",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 175069,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "teleport",
+      "label": "Walk back to the Boot",
+      "actor": "p",
+      "map": 0,
+      "x": -8333.5,
+      "y": -399.2,
+      "z": 149.8,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the Boot stays gone for this character",
+      "actor": "p",
+      "metric": "nearby_gameobject_at_client",
+      "entry": 2300675,
+      "equals": 0
+    }
+  ]
+}

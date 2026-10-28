@@ -1,0 +1,153 @@
+{
+  "schema": 1,
+  "name": "A Wildcard Hero learns the tame beast abilities, tames a beast, and its summoned demons stay demons",
+  "contract": "The Wildcard entry Tame Beast Abilities (passive 965200) teaches Tame Beast, Call Pet, Dismiss Pet, Feed Pet, Revive Pet and Beast Lore, as its tooltip says, and unlearning the entry takes them away. A Hero tames as a hunter does: after the channel the Young Wolf (299) is its pet. Its pets take their type from the creature family, so a summoned Imp (416) is still a summoned pet.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "tamer",
+      "race": 1,
+      "class": 10,
+      "level": 10
+    },
+    {
+      "id": "summoner",
+      "race": 1,
+      "class": 10,
+      "level": 10
+    }
+  ],
+  "creatures": [
+    {
+      "id": "wolf",
+      "owner": "tamer",
+      "entry": 299,
+      "level": 1,
+      "distance": 8
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessb"
+    },
+    {
+      "action": "learn",
+      "label": "A rolled Tame Beast Abilities",
+      "actor": "tamer",
+      "spell": 965200
+    },
+    {
+      "action": "assert",
+      "label": "The entry taught Tame Beast",
+      "actor": "tamer",
+      "metric": "knows_spell",
+      "spell": 1515,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The entry taught Call Pet",
+      "actor": "tamer",
+      "metric": "knows_spell",
+      "spell": 883,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The entry taught Dismiss Pet",
+      "actor": "tamer",
+      "metric": "knows_spell",
+      "spell": 2641,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The entry taught Feed Pet",
+      "actor": "tamer",
+      "metric": "knows_spell",
+      "spell": 6991,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The entry taught Revive Pet",
+      "actor": "tamer",
+      "metric": "knows_spell",
+      "spell": 982,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The entry taught Beast Lore",
+      "actor": "tamer",
+      "metric": "knows_spell",
+      "spell": 1462,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Tame the Young Wolf",
+      "actor": "tamer",
+      "spell": 1515,
+      "target": "wolf"
+    },
+    {
+      "action": "wait",
+      "ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "The wolf is the Hero's pet",
+      "actor": "tamer",
+      "metric": "pet_entry",
+      "equals": 299
+    },
+    {
+      "action": "learn",
+      "label": "A rolled Summon Imp",
+      "actor": "summoner",
+      "spell": 688
+    },
+    {
+      "action": "cast",
+      "label": "Summon the Imp",
+      "actor": "summoner",
+      "spell": 688
+    },
+    {
+      "action": "wait",
+      "ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "The Imp is the Hero's pet",
+      "actor": "summoner",
+      "metric": "pet_entry",
+      "equals": 416
+    },
+    {
+      "action": "unlearn",
+      "label": "Unlearn Tame Beast Abilities",
+      "actor": "tamer",
+      "spell": 965200
+    },
+    {
+      "action": "assert",
+      "label": "Call Pet went with the entry",
+      "actor": "tamer",
+      "metric": "knows_spell",
+      "spell": 883,
+      "equals": 0
+    }
+  ]
+}

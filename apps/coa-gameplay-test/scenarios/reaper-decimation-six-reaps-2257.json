@@ -1,0 +1,358 @@
+{
+  "schema": 1,
+  "name": "Decimation transforms the seventh Reap and cleans up the replacement (#2257)",
+  "contract": [
+    "Decimation promises that every sixth Reap enables Decimate for the next Reap within 15 seconds. Six",
+    "normal Reaps must land before a replacement is granted, the seventh original Reap request must",
+    "resolve as Decimate, and consuming, expiring or removing the talent must restore Reap. The",
+    "expiry/removal checks use a six-stack fixture after the real acquisition path has been proven.",
+    "Decimate explicitly requires a two-handed melee weapon in its equipment masks, so the fixture learns",
+    "two-handed swords and equips a Battleworn Claymore."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "r",
+      "race": 1,
+      "class": 30,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "r",
+      "entry": 36,
+      "level": 80,
+      "distance": 3,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 202
+    },
+    {
+      "action": "add_item",
+      "actor": "r",
+      "item": 12282,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "r",
+      "item": 12282,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 500357
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 704193
+    },
+    {
+      "action": "assert",
+      "label": "Reap is initially unchanged",
+      "actor": "r",
+      "metric": "temporary_spell_replacement",
+      "spell": 500357,
+      "equals": 500357
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 500357,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Reap cast 1 lands",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 500357,
+      "target": "enemy",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "r"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The replacement waits for six Reaps",
+      "actor": "r",
+      "metric": "temporary_spell_replacement",
+      "spell": 500357,
+      "equals": 500357
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 500357,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Reap cast 2 lands",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 500357,
+      "target": "enemy",
+      "equals": 2,
+      "within_ms": 1500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "r"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The replacement waits for six Reaps",
+      "actor": "r",
+      "metric": "temporary_spell_replacement",
+      "spell": 500357,
+      "equals": 500357
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 500357,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Reap cast 3 lands",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 500357,
+      "target": "enemy",
+      "equals": 3,
+      "within_ms": 1500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "r"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The replacement waits for six Reaps",
+      "actor": "r",
+      "metric": "temporary_spell_replacement",
+      "spell": 500357,
+      "equals": 500357
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 500357,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Reap cast 4 lands",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 500357,
+      "target": "enemy",
+      "equals": 4,
+      "within_ms": 1500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "r"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The replacement waits for six Reaps",
+      "actor": "r",
+      "metric": "temporary_spell_replacement",
+      "spell": 500357,
+      "equals": 500357
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 500357,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Reap cast 5 lands",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 500357,
+      "target": "enemy",
+      "equals": 5,
+      "within_ms": 1500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "r"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The replacement waits for six Reaps",
+      "actor": "r",
+      "metric": "temporary_spell_replacement",
+      "spell": 500357,
+      "equals": 500357
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 500357,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Reap cast 6 lands",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 500357,
+      "target": "enemy",
+      "equals": 6,
+      "within_ms": 1500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "r"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The native counter reaches six",
+      "actor": "r",
+      "metric": "aura_stacks",
+      "spell": 573289,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "Six Reaps enable Decimate",
+      "actor": "r",
+      "metric": "temporary_spell_replacement",
+      "spell": 500357,
+      "equals": 500523
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 500357,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "The next Reap deals Decimate damage",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 500523,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Decimate consumes the replacement",
+      "actor": "r",
+      "metric": "temporary_spell_replacement",
+      "spell": 500357,
+      "equals": 500357
+    },
+    {
+      "action": "assert",
+      "label": "Decimate consumes the counter",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 573289,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "r",
+      "spell": 573289,
+      "stacks": 6
+    },
+    {
+      "action": "assert",
+      "label": "A fresh six-stack fixture enables replacement",
+      "actor": "r",
+      "metric": "temporary_spell_replacement",
+      "spell": 500357,
+      "equals": 500523
+    },
+    {
+      "action": "wait",
+      "ms": 16000
+    },
+    {
+      "action": "assert",
+      "label": "Expiry restores Reap",
+      "actor": "r",
+      "metric": "temporary_spell_replacement",
+      "spell": 500357,
+      "equals": 500357
+    },
+    {
+      "action": "set_aura",
+      "actor": "r",
+      "spell": 573289,
+      "stacks": 6
+    },
+    {
+      "action": "unlearn",
+      "actor": "r",
+      "spell": 704193
+    },
+    {
+      "action": "assert",
+      "label": "Removing the talent restores Reap",
+      "actor": "r",
+      "metric": "temporary_spell_replacement",
+      "spell": 500357,
+      "equals": 500357
+    }
+  ]
+}

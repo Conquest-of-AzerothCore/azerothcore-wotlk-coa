@@ -1,0 +1,195 @@
+{
+  "schema": 1,
+  "name": "Big Bad Voodoo's Spirit of Bwonsamdi carries the field and cannot be attacked (#7788)",
+  "contract": [
+    "Big Bad Voodoo 802719 summons Spirit of Bwonsamdi 310659. The original CoA creature row for 310659 lists the field 802718 among its own spells, and 802718 is SPELL_EFFECT_APPLY_AREA_AURA_OWNER with radius index 18 (15 yd) and TARGET_UNIT_CASTER, so the spirit carries the field and its owner is affected only while within 15 yd of it.",
+    "AscensionWitchDoctorCompletion.cpp rewrote 802718 into a plain ally-target aura and the summon AI cast it on the player, which put the field and its immunity bubble on the Witch Doctor instead of on the spirit.",
+    "The spirit therefore has to hold 802718 itself: its aura visual is Bwonsamdi's bubble, while the Witch Doctor still receives the field's immunity and -50% damage and healing while inside the 15 yd area.",
+    "The summoned spirit appears as the translucent bwonsamdispirit display (142802), dances, and cannot be selected or attacked."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 60,
+      "distance": 10,
+      "reaction": 0,
+      "stationary": true,
+      "health": 1000000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "doctor",
+      "spell": 802719
+    },
+    {
+      "action": "cast",
+      "actor": "doctor",
+      "spell": 802719
+    },
+    {
+      "action": "assert",
+      "label": "Big Bad Voodoo is cast",
+      "actor": "doctor",
+      "metric": "spell_go_count",
+      "spell": 802719,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let the spirit apply its field",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "doctor",
+      "metric": "owned_creature_display",
+      "entry": 310659,
+      "save_as": "spirit_display"
+    },
+    {
+      "action": "snapshot",
+      "actor": "doctor",
+      "metric": "owned_creature_count",
+      "entry": 310659,
+      "spell": 802718,
+      "save_as": "spirit_field_any_caster"
+    },
+    {
+      "action": "snapshot",
+      "actor": "doctor",
+      "metric": "owned_creature_count",
+      "entry": 310659,
+      "spell": 802718,
+      "caster": "doctor",
+      "save_as": "spirit_field_owner_caster"
+    },
+    {
+      "action": "snapshot",
+      "actor": "doctor",
+      "metric": "owned_creature_attackable",
+      "entry": 310659,
+      "target": "enemy",
+      "save_as": "spirit_attackable"
+    },
+    {
+      "action": "snapshot",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 802718,
+      "save_as": "doctor_field"
+    },
+    {
+      "action": "assert",
+      "label": "The summoned spirit carries the field, so its bubble is on Bwonsamdi",
+      "actor": "doctor",
+      "metric": "owned_creature_count",
+      "entry": 310659,
+      "spell": 802718,
+      "caster": "doctor",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The spirit uses the translucent Bwonsamdi spirit display",
+      "actor": "doctor",
+      "metric": "owned_creature_display",
+      "entry": 310659,
+      "equals": 142802
+    },
+    {
+      "action": "assert",
+      "label": "A hostile unit cannot attack the spirit",
+      "actor": "doctor",
+      "metric": "owned_creature_attackable",
+      "entry": 310659,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Witch Doctor still receives the field from the spirit",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 802718,
+      "equals": 1,
+      "within_ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "The field still reduces the Witch Doctor's damage dealt by 50%",
+      "actor": "doctor",
+      "metric": "aura_amount",
+      "spell": 802718,
+      "effect": 1,
+      "equals": -50
+    },
+    {
+      "action": "assert",
+      "label": "The field still reduces the Witch Doctor's healing done by 50%",
+      "actor": "doctor",
+      "metric": "aura_amount",
+      "spell": 802718,
+      "effect": 2,
+      "equals": -50
+    },
+    {
+      "action": "wait",
+      "label": "Let the spirit tick at least twice",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "The spirit keeps the field while it lives",
+      "actor": "doctor",
+      "metric": "owned_creature_count",
+      "entry": 310659,
+      "spell": 802718,
+      "caster": "doctor",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The field stays on the Witch Doctor while he is inside the bubble",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 802718,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The hostile unit still cannot attack the spirit after a tick",
+      "actor": "doctor",
+      "metric": "owned_creature_attackable",
+      "entry": 310659,
+      "target": "enemy",
+      "equals": 0
+    }
+  ]
+}

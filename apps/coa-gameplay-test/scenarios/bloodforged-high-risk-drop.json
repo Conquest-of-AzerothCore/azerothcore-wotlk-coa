@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Bloodforged drop on a High-Risk kill",
-  "contract": "Requires Bloodforged.Enable = 1 with Bloodforged.Rates15 = \"99.98 0.01 0.00\" (a rate that guarantees the roll), PvpPower.Enable = 1 and the catalogue SQL. A level 15 High-Risk character kills a natural Riverpaw Mongrel (level 14) and finds one Bloodforged item on the corpse.",
+  "contract": "Requires Bloodforged.Enable = 1 with Bloodforged.Rates15 = \"99.98 0.01 0.00\" (a rate that guarantees the roll), Rate.Drop.Item.Uncommon, .Rare and .Epic = 1 (they scale Bloodforged drops), PvpPower.Enable = 1 and the catalogue SQL. A level 15 High-Risk character kills a natural Riverpaw Mongrel (level 14) and finds one Bloodforged item on the corpse.",
   "players": [
     {
       "id": "h",

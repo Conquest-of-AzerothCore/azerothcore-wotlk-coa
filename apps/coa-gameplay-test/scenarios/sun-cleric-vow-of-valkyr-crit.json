@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Vow of the Valkyr grants its 5% crit chance component (#5778)",
+  "contract": "Vow of the Valkyr 807749 (Spell.dbc) carries a third effect, SPELL_AURA_DUMMY with base points 4 and die sides 1 (amount 5), which the bug report (#5778) names as its 5% critical chance component; Effects 0 and 1 are the Solar Power and 10% damage components. The aura's melee critical strike chance must exceed the same character's chance without the aura by exactly that amount. The measurement is taken on one character with and without the aura, because a player's critical strike field is only recalculated once a stat-affecting aura changes.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 807749
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 807749
+    },
+    {
+      "action": "assert",
+      "label": "Vow of the Valkyr is active",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 807749,
+      "caster": "cleric",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "cleric",
+      "metric": "melee_crit_chance",
+      "save_as": "crit_with_vow"
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "cleric",
+      "spell": 807749
+    },
+    {
+      "action": "assert",
+      "label": "Vow of the Valkyr is gone",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 807749,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Dropping Vow of the Valkyr removes 5 points of melee critical strike chance",
+      "actor": "cleric",
+      "metric": "melee_crit_chance",
+      "relative_to": "crit_with_vow",
+      "min": -5.1,
+      "max": -4.9,
+      "within_ms": 2000
+    }
+  ]
+}

@@ -1,0 +1,209 @@
+{
+  "schema": 1,
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "guardian",
+      "race": 1,
+      "class": 18,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "wh",
+      "race": 2,
+      "class": 15,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "horde",
+      "race": 2,
+      "class": 1,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "alliance",
+      "race": 1,
+      "class": 1,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "name": "Guardian Standards: cross-faction valiance and Caltrops controls (#4968)",
+  "contract": "Opposite-faction party members must be friendly to player-owned class summons. Human Guardian and Orc Witch Hunter are grouped; ungrouped Horde and Alliance players are hostile controls, with all players PvP-enabled. Standard of Valiance800319/50057 triggers800335 damage every2sec and800629 enemy slow. Over10.5sec, its grouped Horde ally and friendly Alliance players must take no damage or slow; the ungrouped Horde enemy must take damage and be slowed. Health regeneration is disabled so damage cannot be hidden. No fixture changes summon flags or faction.",
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "guardian",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "guardian",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "wh",
+      "map": 0,
+      "x": -9616.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "wh",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "horde",
+      "map": 0,
+      "x": -9615.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "horde",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "alliance",
+      "map": 0,
+      "x": -9614.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "alliance",
+      "enabled": true
+    },
+    {
+      "action": "group",
+      "actor": "guardian",
+      "target": "wh"
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 800319
+    },
+    {
+      "action": "set_power",
+      "actor": "guardian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "guardian",
+      "metric": "health",
+      "save_as": "guardian_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "wh",
+      "metric": "health",
+      "save_as": "wh_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "horde",
+      "metric": "health",
+      "save_as": "horde_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "alliance",
+      "metric": "health",
+      "save_as": "alliance_health"
+    },
+    {
+      "action": "cast",
+      "actor": "guardian",
+      "spell": 800319,
+      "destination": {
+        "x": -9616.06,
+        "y": -288.949,
+        "z": 57.3053
+      }
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "owned_creature_count",
+      "entry": 50057,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 10500
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "health",
+      "relative_to": "guardian_health",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "health",
+      "relative_to": "wh_health",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "health",
+      "relative_to": "alliance_health",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "health",
+      "relative_to": "horde_health",
+      "max": -1
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "aura",
+      "spell": 800629,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "aura",
+      "spell": 800629,
+      "equals": 1
+    }
+  ]
+}

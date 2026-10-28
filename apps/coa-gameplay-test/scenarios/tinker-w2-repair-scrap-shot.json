@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Tinker Repair Shot and Scrap Shot passives: Over-Repaired and Hasty Tech (#801, #1197)",
-  "contract": "#801, #1197: both are native spell modifiers, so neither needs a script. Over-Repaired 807498 carries one ADD_PCT_MODIFIER (aura 108) effect, EffectMiscValue 0 SPELLMOD_DAMAGE, BasePoints 14 DieSides 1 (+15%), EffectSpellClassMask (32768,262144,0). Repair Shot 502573 has SpellFamilyName 34, SpellFamilyFlags (32768,2,0) (bit 15 intersects), effect 0 SPELL_EFFECT_HEAL and AttributesEx3 0, so Unit::SpellHealingBonusDone applies SPELLMOD_DAMAGE to it. Hasty Tech 705805 carries one ADD_PCT_MODIFIER effect, EffectMiscValue 10 SPELLMOD_CASTING_TIME, BasePoints -16 DieSides 1 (-15%), mask (16,2,0): bit 4 is Scrap Shot 500549 (flags (16,0,256), CastingTimeIndex 19 = 2500 ms) and bit 33 is Repair Shot (CastingTimeIndex 5 = 2000 ms). Scrap Shot sets SPELL_ATTR0_USES_RANGED_SLOT (Attributes 0x00010012) and is not an auto-repeat spell (AttributesEx2 0x00020000), so SpellInfo::CalcCastTime (SpellInfo.cpp:2946) adds 500 ms to its SpellCastTimes entry before any modifier is applied: its unmodified cast time is 3000 ms, not 2500 ms. Both spells then go through Unit::ModSpellCastTime (Unit.cpp:12229), which applies SPELLMOD_CASTING_TIME first and then scales by DmgClass: Scrap Shot is SPELL_DAMAGE_CLASS_RANGED and is scaled by m_modAttackSpeedPct[RANGED_ATTACK], Repair Shot is SPELL_DAMAGE_CLASS_MAGIC and is scaled by UNIT_MOD_CAST_SPEED, both 1.0 on an unbuffed level-80 Tinker. So the cast times become 2550 ms and 1700 ms. Player::ApplySpellMod treats SPELLMOD_CASTING_TIME as (base + flat) * mul, and SPELLMOD_DAMAGE percentages multiplicatively. Neither spell carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS, and neither modifier appears in the family-34 routing switch in SpellInfo::IsAffectedBySpellMod, so both fall through to the ordinary class-mask test.",
+  "contract": "#801, #1197: both are native spell modifiers, so neither needs a script. Over-Repaired 807498 carries one ADD_PCT_MODIFIER (aura 108) effect, EffectMiscValue 0 SPELLMOD_DAMAGE, BasePoints 14 DieSides 1 (+15%), EffectSpellClassMask (32768,262144,0). Repair Shot 502573 has SpellFamilyName 34, SpellFamilyFlags (32768,2,0) (bit 15 intersects), effect 0 SPELL_EFFECT_HEAL and AttributesEx3 0, so Unit::SpellHealingBonusDone applies SPELLMOD_DAMAGE to it. Hasty Tech 705805 carries one ADD_PCT_MODIFIER effect, EffectMiscValue 10 SPELLMOD_CASTING_TIME, BasePoints -16 DieSides 1 (-15%), mask (16,2,0): bit 4 is Scrap Shot 500549 (flags (16,0,256), CastingTimeIndex 19 = 2500 ms) and bit 33 is Repair Shot (CastingTimeIndex 5 = 2000 ms). Issue #4112 requires Scrap Shot to use its recorded 2500 ms cast time without an extra ranged windup. Both spells go through Unit::ModSpellCastTime, which applies SPELLMOD_CASTING_TIME first and then scales by DmgClass: Scrap Shot is SPELL_DAMAGE_CLASS_RANGED and is scaled by m_modAttackSpeedPct[RANGED_ATTACK], Repair Shot is SPELL_DAMAGE_CLASS_MAGIC and is scaled by UNIT_MOD_CAST_SPEED, both 1.0 on an unbuffed level-80 Tinker. So Hasty Tech produces 2500 * 0.85 = 2125 ms for Scrap Shot and 2000 * 0.85 = 1700 ms for Repair Shot. Player::ApplySpellMod treats SPELLMOD_CASTING_TIME as (base + flat) * mul, and SPELLMOD_DAMAGE percentages multiplicatively. Neither spell carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS, and neither modifier appears in the family-34 routing switch in SpellInfo::IsAffectedBySpellMod, so both fall through to the ordinary class-mask test.",
   "timeout_ms": 60000,
   "players": [
     { "id": "t", "race": 1, "class": 28, "level": 80 }
@@ -12,8 +12,8 @@
 
     { "action": "assert", "label": "Repair Shot's healing is unmodified before the talents",
       "actor": "t", "metric": "spell_modifier", "spell": 502573, "op": 0, "base": 1000, "equals": 1000 },
-    { "action": "assert", "label": "Scrap Shot casts in 3000 ms before the talents",
-      "actor": "t", "metric": "spell_cast_time_ms", "spell": 500549, "equals": 3000 },
+    { "action": "assert", "label": "Scrap Shot casts in 2500 ms before the talents",
+      "actor": "t", "metric": "spell_cast_time_ms", "spell": 500549, "equals": 2500 },
     { "action": "assert", "label": "Repair Shot casts in 2000 ms before the talents",
       "actor": "t", "metric": "spell_cast_time_ms", "spell": 502573, "equals": 2000 },
     { "action": "snapshot", "label": "Baseline Repair Shot healing done",
@@ -30,8 +30,8 @@
     { "action": "assert", "label": "Over-Repaired does not reach Scrap Shot",
       "actor": "t", "metric": "spell_modifier", "spell": 500549, "op": 0, "base": 1000, "equals": 1000 },
 
-    { "action": "assert", "label": "Hasty Tech cuts Scrap Shot's cast time to 2550 ms",
-      "actor": "t", "metric": "spell_cast_time_ms", "spell": 500549, "equals": 2550 },
+    { "action": "assert", "label": "Hasty Tech cuts Scrap Shot's cast time to 2125 ms",
+      "actor": "t", "metric": "spell_cast_time_ms", "spell": 500549, "equals": 2125 },
     { "action": "assert", "label": "Hasty Tech cuts Repair Shot's cast time to 1700 ms",
       "actor": "t", "metric": "spell_cast_time_ms", "spell": 502573, "equals": 1700 }
   ]

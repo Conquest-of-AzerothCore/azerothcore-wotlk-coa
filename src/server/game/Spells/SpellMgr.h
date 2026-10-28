@@ -33,6 +33,7 @@ class Player;
 class Unit;
 class ProcEventInfo;
 struct SkillLineAbilityEntry;
+struct SpellEntry;
 
 #define SPELL_RELIC_COOLDOWN      1
 
@@ -636,6 +637,44 @@ inline bool IsProfessionOrRidingSkill(uint32 skill)
     return  IsProfessionSkill(skill) || skill == SKILL_RIDING;
 }
 
+// Conquest of Azeroth adds Novice Riding (50) as riding step 1, so the classic ranks start at step 2.
+enum RidingSkillValue : uint16
+{
+    RIDING_SKILL_NOVICE        = 50,
+    RIDING_SKILL_APPRENTICE    = 75,
+    RIDING_SKILL_JOURNEYMAN    = 150,
+    RIDING_SKILL_EXPERT        = 225,
+    RIDING_SKILL_ARTISAN       = 300,
+    RIDING_SKILL_EXTRAORDINARY = 375
+};
+
+constexpr int32 NOVICE_RIDING_MOUNT_SPEED = 40;
+
+// Conquest of Azeroth mounts take their speed from the rider's riding skill instead of the mount spell.
+inline int32 GetRidingGroundMountSpeed(uint16 riding)
+{
+    if (riding >= RIDING_SKILL_JOURNEYMAN)
+        return 100;
+    return riding >= RIDING_SKILL_APPRENTICE ? 60 : NOVICE_RIDING_MOUNT_SPEED;
+}
+
+inline int32 GetRidingFlightMountSpeed(uint16 riding)
+{
+    if (riding >= RIDING_SKILL_EXTRAORDINARY)
+        return 310;
+    if (riding >= RIDING_SKILL_ARTISAN)
+        return 280;
+    return riding >= RIDING_SKILL_EXPERT ? 150 : 0;
+}
+
+inline uint16 GetSkillValueForStep(uint32 skill, uint16 step)
+{
+    if (skill == SKILL_RIDING && step)
+        return step == 1 ? RIDING_SKILL_NOVICE : (step - 1) * 75;
+
+    return step * 75;
+}
+
 // Classic professions end at Artisan (skill step 4); each expansion adds the next rank (Master, Grand Master).
 inline uint16 GetMaxProfessionSkillStep(uint8 expansion)
 {
@@ -775,6 +814,9 @@ public:
     }
     [[nodiscard]] uint32 GetSpellInfoStoreSize() const { return mSpellInfoMap.size(); }
 
+    // Startup-only registration; the store owns the result and refuses to replace existing spells.
+    SpellInfo* RegisterRuntimeSpell(SpellEntry const& entry);
+
     // Talent Additional Set
     [[nodiscard]] bool IsAdditionalTalentSpell(uint32 spellId) const;
 
@@ -790,6 +832,25 @@ public:
     void UnloadSpellInfoChains();
     void LoadSpellTalentRanks();
     void LoadSpellRanks();
+    /// rank chains a module adds after `spell_ranks`; a chain touching an already ranked spell is skipped
+    using AddedSpellRanks = std::vector<std::vector<uint32>> (*)();
+    void SetAddedSpellRanks(AddedSpellRanks ranks) { _addedSpellRanks = ranks; }
+    void LoadAddedSpellRanks();
+    /// (source, twin) spell pairs a module adds; a twin without its own database row takes its source's
+    /// called before spell corrections (ranked = false) and again once rank chains are known (ranked = true)
+    using SpellTwins = std::vector<std::pair<uint32, uint32>> (*)(bool ranked);
+    void SetSpellTwins(SpellTwins twins) { _spellTwinSource = twins; }
+    /// (stock, spell) pairs that share a name but not a layout: matched by id lookups, never given stock data
+    using SpellNamesakes = std::vector<std::pair<uint32, uint32>> (*)();
+    void SetSpellNamesakes(SpellNamesakes namesakes) { _spellNamesakeSource = namesakes; }
+    /// a stock spell with its twins and namesakes
+    [[nodiscard]] std::vector<uint32> GetSpellAndRelatives(uint32 spellId) const;
+    void LoadSpellTwins(bool ranked);
+    [[nodiscard]] std::unordered_multimap<uint32, uint32> const& GetSpellTwins() const { return _spellTwins; }
+    /// the spell a twin takes its data from, or the spell itself
+    [[nodiscard]] uint32 GetSpellTwinSource(uint32 spellId) const;
+    /// the twin or namesake of a stock spell that belongs with a related spell's own twin, or the stock spell
+    [[nodiscard]] uint32 GetSpellTwinFor(uint32 stockSpellId, uint32 relatedSpellId) const;
     void LoadSpellRequired();
     void LoadSpellLearnSkills();
     void LoadSpellTargetPositions();
@@ -820,6 +881,16 @@ public:
     void LoadSpellJumpDistances();
 
 private:
+    template <class Store>
+    void CopyToSpellTwins(Store& store);
+
+    AddedSpellRanks            _addedSpellRanks = nullptr;
+    SpellTwins                 _spellTwinSource = nullptr;
+    std::unordered_multimap<uint32, uint32> _spellTwins;
+    std::unordered_map<uint32, uint32> _spellTwinSources;
+    SpellNamesakes             _spellNamesakeSource = nullptr;
+    std::unordered_multimap<uint32, uint32> _spellNamesakes;
+    std::unordered_map<uint32, uint32> _spellNamesakeSources;
     SpellDifficultySearcherMap mSpellDifficultySearcherMap;
     SpellChainMap              mSpellChains;
     SpellsRequiringSpellMap    mSpellsReqSpell;

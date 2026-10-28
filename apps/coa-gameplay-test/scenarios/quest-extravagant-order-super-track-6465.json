@@ -1,0 +1,185 @@
+{
+  "schema": 1,
+  "name": "Extravagant Order: the in-world turn-in diamond marks Tharynn Bouden, not Remy (#6465)",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1 (the default).",
+    "Quest 17001 Extravagant Order starts and ends with Tharynn Bouden 66 (creature guid 80327 at -9494.13, 83.9096, 56.6586). The reporter's tracked diamond stood 11 yd away: the client resolves it from QuestSuperTrack.dbc row 40 (quest 17001), whose completion node 1080 sits at (-9496.32, 72.83, 56.6), Remy 'Two Times' 241's spawn and the completion node of his quest 47.",
+    "The login patch stream sends coa_client_quest_super_track rows as SMSG_PATCH_QUEST_SUPER_TRACK (0x06BF, 1727) and coa_client_super_track rows as SMSG_PATCH_SUPER_TRACK (0x06BE, 1726). Expected: row 40 is streamed whole with the client's objective 0 node 43 and completion node 21098, and node 21098 stands on Tharynn's spawn with the client's radius 5.5 and NextID 0; node 1080 stays unpatched.",
+    "These are data assertions on the bytes the server sends; the harness cannot see whether the client replaces its own row 40 or how it draws the diamond."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9494.13,
+    "y": 83.91,
+    "z": 56.66,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 17001 Extravagant Order complete, the way the reporter returned it",
+      "actor": "c",
+      "quest": 17001
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the login stream sends QuestSuperTrack row 40, the row of quest 17001, once",
+      "actor": "c",
+      "metric": "server_packets",
+      "opcode": 1727,
+      "row": 40,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Row 40 belongs to quest 17001",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 40,
+      "index": 1,
+      "equals": 17001,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Objective 0 keeps the client's own Jasperlode Mine node 43",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 40,
+      "index": 2,
+      "equals": 43,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Objective 1 has no node, as in the client row",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 40,
+      "index": 22,
+      "equals": 0,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: completion points at node 21098, where the client row has Remy's node 1080",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 40,
+      "index": 82,
+      "equals": 21098,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Row 40 carries all 102 fields",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 40,
+      "index": 101,
+      "equals": 0,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "The login stream sends SuperTrack node 21098 once",
+      "actor": "c",
+      "metric": "server_packets",
+      "opcode": 1726,
+      "row": 21098,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Node 21098 is on the Eastern Kingdoms, MapID 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 21098,
+      "index": 1,
+      "equals": 0,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Node 21098 x is Tharynn Bouden's spawn -9494.13",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 21098,
+      "index": 2,
+      "equals": 3323222149,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Node 21098 y is Tharynn Bouden's spawn 83.9096, 11 yd from Remy's 72.83",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 21098,
+      "index": 3,
+      "equals": 1118294455,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Node 21098 z is Tharynn Bouden's spawn 56.6586",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 21098,
+      "index": 4,
+      "equals": 1113760360,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Node 21098 keeps the client's arrival radius of 5.5 yd",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 21098,
+      "index": 5,
+      "equals": 1085276160,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Node 21098 ends the chain, NextID 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 21098,
+      "index": 6,
+      "equals": 0,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Remy's node 1080 is not patched, so quest 47 Gold Dust Exchange keeps its diamond on him",
+      "actor": "c",
+      "metric": "server_packets",
+      "opcode": 1726,
+      "row": 1080,
+      "equals": 0,
+      "within_ms": 8000
+    }
+  ]
+}

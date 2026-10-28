@@ -1,0 +1,272 @@
+{
+  "schema": 1,
+  "name": "Profession upgrade kits reject incompatible and excluded items",
+  "contract": "Kits require a crafted item from the same profession using the kit material. Runecloth cannot upgrade Mageweave, Blacksmithing mithril cannot upgrade an Engineering gun, and matching-profession shirts, bags and Arclight Spanner are refused without consuming the kit or replacing the target.",
+  "players": [
+    {
+      "id": "crafter",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_skill",
+      "actor": "crafter",
+      "skill": 197,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "crafter",
+      "skill": 164,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "crafter",
+      "skill": 202,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "add_item",
+      "actor": "crafter",
+      "item": 135289
+    },
+    {
+      "action": "add_item",
+      "actor": "crafter",
+      "item": 135285
+    },
+    {
+      "action": "add_item",
+      "actor": "crafter",
+      "item": 121556
+    },
+    {
+      "action": "add_item",
+      "actor": "crafter",
+      "item": 120335
+    },
+    {
+      "action": "add_item",
+      "actor": "crafter",
+      "item": 10001
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "use_item",
+      "actor": "crafter",
+      "item": 135289,
+      "spell": 94722,
+      "target_item": 10001,
+      "label": "Runecloth kit on a Mageweave robe"
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "cast_failure",
+      "spell": 94722,
+      "equals": 12,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "item_count",
+      "item": 135289,
+      "equals": 1,
+      "label": "Refused kit is retained"
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "item_count",
+      "item": 10001,
+      "equals": 1,
+      "label": "Target is retained"
+    },
+    {
+      "action": "add_item",
+      "actor": "crafter",
+      "item": 14046
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "use_item",
+      "actor": "crafter",
+      "item": 135289,
+      "spell": 94722,
+      "target_item": 14046,
+      "label": "Runecloth kit on a Runecloth bag"
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "cast_failure",
+      "spell": 94722,
+      "equals": 12,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "item_count",
+      "item": 135289,
+      "equals": 1,
+      "label": "Refused kit is retained"
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "item_count",
+      "item": 14046,
+      "equals": 1,
+      "label": "Target is retained"
+    },
+    {
+      "action": "add_item",
+      "actor": "crafter",
+      "item": 2576
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "use_item",
+      "actor": "crafter",
+      "item": 135285,
+      "spell": 94714,
+      "target_item": 2576,
+      "label": "Linen kit on a linen shirt"
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "cast_failure",
+      "spell": 94714,
+      "equals": 12,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "item_count",
+      "item": 135285,
+      "equals": 1,
+      "label": "Refused kit is retained"
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "item_count",
+      "item": 2576,
+      "equals": 1,
+      "label": "Target is retained"
+    },
+    {
+      "action": "add_item",
+      "actor": "crafter",
+      "item": 10508
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "use_item",
+      "actor": "crafter",
+      "item": 121556,
+      "spell": 94035,
+      "target_item": 10508,
+      "label": "Blacksmithing kit on an Engineering mithril gun"
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "cast_failure",
+      "spell": 94035,
+      "equals": 12,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "item_count",
+      "item": 121556,
+      "equals": 1,
+      "label": "Refused kit is retained"
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "item_count",
+      "item": 10508,
+      "equals": 1,
+      "label": "Target is retained"
+    },
+    {
+      "action": "add_item",
+      "actor": "crafter",
+      "item": 6219
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "use_item",
+      "actor": "crafter",
+      "item": 120335,
+      "spell": 93983,
+      "target_item": 6219,
+      "label": "Engineering copper kit on Arclight Spanner"
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "cast_failure",
+      "spell": 93983,
+      "equals": 12,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "item_count",
+      "item": 120335,
+      "equals": 1,
+      "label": "Refused kit is retained"
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "item_count",
+      "item": 6219,
+      "equals": 1,
+      "label": "Target is retained"
+    }
+  ]
+}

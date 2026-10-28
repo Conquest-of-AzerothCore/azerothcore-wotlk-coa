@@ -1,0 +1,213 @@
+{
+  "schema": 1,
+  "name": "Blood Elves ride and buy mounts in Brill, Draenei in Darnassus (#7615)",
+  "contract": [
+    "Blood Elves start in Deathknell and Draenei in Shadowglen, so their home riding trainers and mount vendors are",
+    "the Forsaken and Night Elf ones. Velma Warnam (4773) and Jartsam (4753) open the riding trainer window with",
+    "Novice Riding (33379) available, and Zachariah Post (4731) and Lelanai (4730) open their mount shelves, without",
+    "Exalted reputation. Other races still need Exalted: an Orc gets no buy option from Zachariah Post."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "blood_elf",
+      "race": 10,
+      "class": 8,
+      "level": 20
+    },
+    {
+      "id": "draenei",
+      "race": 11,
+      "class": 8,
+      "level": 20
+    },
+    {
+      "id": "orc",
+      "race": 2,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "creatures": [
+    {
+      "id": "velma",
+      "owner": "blood_elf",
+      "entry": 4773,
+      "distance": 2,
+      "faction": 35
+    },
+    {
+      "id": "zachariah",
+      "owner": "blood_elf",
+      "entry": 4731,
+      "distance": 2,
+      "faction": 35
+    },
+    {
+      "id": "jartsam",
+      "owner": "draenei",
+      "entry": 4753,
+      "distance": 2,
+      "faction": 35
+    },
+    {
+      "id": "lelanai",
+      "owner": "draenei",
+      "entry": 4730,
+      "distance": 2,
+      "faction": 35
+    },
+    {
+      "id": "zachariah_for_orc",
+      "owner": "orc",
+      "entry": 4731,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "gossip_hello",
+      "actor": "blood_elf",
+      "target": "velma",
+      "label": "the Blood Elf right-clicks Velma Warnam"
+    },
+    {
+      "action": "assert",
+      "actor": "blood_elf",
+      "metric": "gossip_option_text",
+      "index": 0,
+      "text": "I seek training to ride a steed.",
+      "equals": 1,
+      "label": "Velma offers riding training to a Blood Elf"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "blood_elf",
+      "option": 0,
+      "label": "the Blood Elf chooses riding training"
+    },
+    {
+      "action": "assert",
+      "actor": "blood_elf",
+      "metric": "trainer_window_state",
+      "spell": 33379,
+      "equals": 0,
+      "label": "Novice Riding is available to the Blood Elf"
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "blood_elf",
+      "target": "zachariah",
+      "label": "the Blood Elf right-clicks Zachariah Post"
+    },
+    {
+      "action": "assert",
+      "actor": "blood_elf",
+      "metric": "gossip_option_text",
+      "index": 0,
+      "text": "I would like to buy from you.",
+      "equals": 1,
+      "label": "Zachariah offers his shelves to a Blood Elf"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "blood_elf",
+      "option": 0,
+      "label": "the Blood Elf chooses to buy"
+    },
+    {
+      "action": "assert",
+      "actor": "blood_elf",
+      "metric": "vendor_list_packets",
+      "equals": 1,
+      "label": "the Blood Elf receives Zachariah's vendor list"
+    },
+    {
+      "action": "assert",
+      "actor": "blood_elf",
+      "metric": "vendor_price",
+      "item": 13331,
+      "min": 1,
+      "label": "the Red Skeletal Horse is on sale to the Blood Elf"
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "draenei",
+      "target": "jartsam",
+      "label": "the Draenei right-clicks Jartsam"
+    },
+    {
+      "action": "assert",
+      "actor": "draenei",
+      "metric": "gossip_option_text",
+      "index": 0,
+      "text": "I seek training to ride a steed.",
+      "equals": 1,
+      "label": "Jartsam offers riding training to a Draenei"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "draenei",
+      "option": 0,
+      "label": "the Draenei chooses riding training"
+    },
+    {
+      "action": "assert",
+      "actor": "draenei",
+      "metric": "trainer_window_state",
+      "spell": 33379,
+      "equals": 0,
+      "label": "Novice Riding is available to the Draenei"
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "draenei",
+      "target": "lelanai",
+      "label": "the Draenei right-clicks Lelanai"
+    },
+    {
+      "action": "assert",
+      "actor": "draenei",
+      "metric": "gossip_option_text",
+      "index": 0,
+      "text": "I would like to buy from you.",
+      "equals": 1,
+      "label": "Lelanai offers her shelves to a Draenei"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "draenei",
+      "option": 0,
+      "label": "the Draenei chooses to buy"
+    },
+    {
+      "action": "assert",
+      "actor": "draenei",
+      "metric": "vendor_list_packets",
+      "equals": 1,
+      "label": "the Draenei receives Lelanai's vendor list"
+    },
+    {
+      "action": "assert",
+      "actor": "draenei",
+      "metric": "vendor_price",
+      "item": 8629,
+      "min": 1,
+      "label": "the Striped Nightsaber is on sale to the Draenei"
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "orc",
+      "target": "zachariah_for_orc",
+      "label": "the Orc right-clicks Zachariah Post"
+    },
+    {
+      "action": "assert",
+      "actor": "orc",
+      "metric": "gossip_options",
+      "equals": 0,
+      "label": "an Orc below Exalted with Undercity still gets no buy option"
+    }
+  ]
+}

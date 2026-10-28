@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Defense of the Ancients raises Ranger and party armor by its level-scaled amount (#6248)",
+  "contract": [
+    "Defense of the Ancients 705094 promises 'increasing the Armor of party and raid members by ${$m1}'. Effect 0 is APPLY_AREA_AURA_RAID with SPELL_AURA_MOD_RESISTANCE 22, MiscValue 1 (armor), BasePoints 389, DieSides 1, RealPointsPerLevel 25 and BaseLevel/SpellLevel 30, so a level-60 caster resolves 389 + (60 - 30) * 25 + 1 = 1140. The spell is PASSIVE with SPELL_ATTR1_NO_AURA_ICON, so the client shows no buff icon by design. At the reported level 60, learning the passive must raise the Ranger's and a party member's armor by exactly 1140, and unlearning must remove it from the member."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 60 },
+    { "id": "member", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "group", "label": "Put both players in one party", "actor": "ranger", "target": "member" },
+    { "action": "snapshot", "label": "Baseline Ranger armor", "actor": "ranger", "metric": "armor", "save_as": "armor_r0" },
+    { "action": "snapshot", "label": "Baseline member armor", "actor": "member", "metric": "armor", "save_as": "armor_m0" },
+    { "action": "learn", "actor": "ranger", "spell": 705094 },
+    { "action": "assert", "label": "Defense of the Ancients reaches the Ranger", "actor": "ranger", "metric": "aura", "spell": 705094, "equals": 1, "within_ms": 15000 },
+    { "action": "assert", "label": "Defense of the Ancients reaches the party member", "actor": "member", "metric": "aura", "spell": 705094, "equals": 1, "within_ms": 15000 },
+    { "action": "assert", "label": "Effect 0 resolves to 1140", "actor": "ranger", "metric": "aura_amount", "spell": 705094, "effect": 0, "equals": 1140 },
+    { "action": "assert", "label": "Ranger armor rises by 1140", "actor": "ranger", "metric": "armor", "relative_to": "armor_r0", "equals": 1140 },
+    { "action": "assert", "label": "Member armor rises by 1140", "actor": "member", "metric": "armor", "relative_to": "armor_m0", "equals": 1140 },
+    { "action": "unlearn", "actor": "ranger", "spell": 705094 },
+    { "action": "assert", "label": "Unlearning removes it from the member", "actor": "member", "metric": "aura", "spell": 705094, "equals": 0, "within_ms": 15000 },
+    { "action": "assert", "label": "Member armor returns to baseline", "actor": "member", "metric": "armor", "relative_to": "armor_m0", "equals": 0 }
+  ]
+}

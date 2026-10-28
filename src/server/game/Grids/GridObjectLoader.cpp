@@ -39,8 +39,11 @@ void GridObjectLoader::AddObjectHelper(Map* map, T* obj)
 
 void GridObjectLoader::LoadCreatures(CellGuidSet const& guid_set, Map* map)
 {
-    if (map->IsScriptedPrivateInstance())
+    if (map->IsScriptedPrivateInstance() &&
+        !map->LoadsScriptedPrivateDatabaseSpawns())
+    {
         return;
+    }
 
     for (ObjectGuid::LowType const& guid : guid_set)
     {
@@ -80,8 +83,11 @@ void GridObjectLoader::LoadCreatures(CellGuidSet const& guid_set, Map* map)
 
 void GridObjectLoader::LoadGameObjects(CellGuidSet const& guid_set, Map* map)
 {
-    if (map->IsScriptedPrivateInstance())
+    if (map->IsScriptedPrivateInstance() &&
+        !map->LoadsScriptedPrivateDatabaseSpawns())
+    {
         return;
+    }
 
     for (ObjectGuid::LowType const& guid : guid_set)
     {

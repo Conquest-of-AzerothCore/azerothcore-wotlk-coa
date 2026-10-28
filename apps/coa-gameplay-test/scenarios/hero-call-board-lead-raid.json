@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Lead a Raid!: the group leader who defeats a raid's final boss earns the weekly Call Board credit",
+  "contract": "On Darkmoon - Season 10 Wildcard the Call Boards offered the weekly quest Lead a Raid! (100077, level 60, 10000 Runes of Ascension, quest flags weekly and raid): 'Remain the group leader and defeat the final boss of any raid, then return to the Callboard to claim your reward.' Its objective is one Raid Leader Credit (101000). When a final raid boss dies (Onyxia, Ragnaros, Nefarian, Hakkar, Ossirian, C'Thun, Kel'Thuzad or their Heroic and Mythic copies), mod-hero-call-board credits the killer's group leader in reward range; the classic raids' last encounters have no usable dungeon encounter data on this server, so the final bosses are listed. Other members get nothing, and the raid credit never completes the dungeon quest Lead a Dungeon! (100078).",
+  "timeout_ms": 120000,
+  "location": {"map": 249, "x": -20.0, "y": -219.4, "z": -87.7, "o": 0, "ignore_access": true},
+  "players": [
+    {"id": "leader", "race": 1, "class": 10, "level": 60},
+    {"id": "member", "race": 1, "class": 10, "level": 60}
+  ],
+  "creatures": [
+    {"id": "onyxia", "owner": "leader", "entry": 10184, "level": 63, "health": 20, "distance": 4}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the instance settle", "ms": 3000},
+    {"action": "group", "label": "The leader invites the member", "actor": "leader", "target": "member"},
+    {"action": "prepare_quest", "label": "The leader has Lead a Raid!", "actor": "leader", "quest": 100077, "complete": false},
+    {"action": "prepare_quest", "label": "and Lead a Dungeon!", "actor": "leader", "quest": 100078, "complete": false},
+    {"action": "prepare_quest", "label": "The member has Lead a Raid! too", "actor": "member", "quest": 100077, "complete": false},
+    {"action": "learn", "label": "Death Touch Copy kills outright", "actor": "leader", "spell": 24080},
+    {"action": "cast", "actor": "leader", "spell": 24080, "target": "onyxia"},
+    {"action": "assert", "label": "Onyxia falls", "actor": "onyxia", "metric": "alive", "equals": 0, "within_ms": 45000},
+    {"action": "assert", "label": "The group leader completes Lead a Raid!", "actor": "leader", "metric": "quest_status", "quest": 100077, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "but not Lead a Dungeon!", "actor": "leader", "metric": "quest_status", "quest": 100078, "equals": 3},
+    {"action": "assert", "label": "The member who does not lead gets no credit", "actor": "member", "metric": "quest_status", "quest": 100077, "equals": 3}
+  ]
+}

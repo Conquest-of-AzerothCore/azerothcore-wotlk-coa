@@ -1,0 +1,11 @@
+-- Goldshire's Generosity 1660059 (#6969): the Pumpkins 2300547, Melons 2300548 and Apples 2300549 kept sparkling after
+-- the player had gathered all the produce of that kind, until the whole quest was complete.
+--
+-- rev_20260923_00_coa_goldshire_quests.sql gave the three chests the quest in their chest questId (Data8 = 1660059).
+-- GameObject::ActivateToQuest activates a chest whenever its Data8 quest is incomplete, before it looks at the loot,
+-- so 10 Apples still left every Apple quest-active while Pumpkins or Melons were missing.
+-- Without Data8 a chest is active only while LootTemplates_Gameobject.HaveQuestLootForPlayer finds an item the player
+-- still needs: each chest's own QuestRequired loot (558961 x3, 558962 x3, 558963 x10, the RequiredItemCount of
+-- quest_template 1660059), which rev_20260923_00 already sets together with the gameobject_questitem rows.
+-- The same change was made for the Exalted Pendant 2300515 in rev_20261004_93_coa_exalted_pendant_quest_link.sql.
+UPDATE `gameobject_template` SET `Data8` = 0 WHERE `entry` IN (2300547, 2300548, 2300549);

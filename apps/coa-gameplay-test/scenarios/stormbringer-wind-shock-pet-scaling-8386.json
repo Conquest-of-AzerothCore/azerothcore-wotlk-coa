@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "stormbringer-wind-shock-pet-scaling-8386",
+  "contract": [
+    "Wind Shock (Pet) 892101 is cast by the Stormbringer's Air Elemental (summoned by 804019, entry 500941).",
+    "Its DBC description is '$m1*$<scalingbp>' Nature damage plus a lingering tick: both effect 0 (periodic",
+    "damage) and effect 1 (direct SCHOOL_DAMAGE) carry EffectBasePoints 122/DieSides 1 (raw value 123).",
+    "AscensionScalingBaseData.h's ScalingBaseSpells table drives ascension_scaling_base::ModifySpellEffectBaseValue,",
+    "which multiplies a matched effect's base value by ScalingBase(ownerLevel) = 0.0267291844 + 0.0048541098*L +",
+    "0.0001859598*L^2 using the pet's owner's level. Before the fix the table entry {892101, 1} set EffectMask to",
+    "bit 0 only, so effect 1 (the direct hit) kept the raw 123 at any level: exactly the reported 123 damage at",
+    "character level 2. The fix is {892101, 3} (bits 0 and 1), matching precedent entries such as {891051, 3}.",
+    "At level 2, ScalingBase = 0.0371812431, so 123 * that = ~4.57; at level 80, ScalingBase = 1.6052,",
+    "so 123 * that = ~197.4. Both effects must show this scaled value at both levels once the table bit is added."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "sb2",
+      "race": 1,
+      "class": 16,
+      "level": 2
+    },
+    {
+      "id": "sb80",
+      "race": 1,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let both characters settle", "ms": 3000 },
+    { "action": "learn", "label": "Level 2: learn Summon Air Elemental", "actor": "sb2", "spell": 804019 },
+    { "action": "cast", "label": "Level 2: summon the Air Elemental", "actor": "sb2", "spell": 804019 },
+    { "action": "assert", "label": "Level 2: the Air Elemental (500941) is out",
+      "actor": "sb2", "metric": "pet_entry", "equals": 500941, "within_ms": 25000 },
+    { "action": "assert", "label": "Level 2: Wind Shock's periodic effect (0) is scaled to ~4.6",
+      "actor": "sb2", "metric": "spell_effect_value", "spell": 892101, "effect": 0, "pet": true, "min": 4, "max": 5 },
+    { "action": "assert", "label": "DISCRIMINATING: Level 2: Wind Shock's direct effect (1) is scaled to ~4.6, not the raw 123",
+      "actor": "sb2", "metric": "spell_effect_value", "spell": 892101, "effect": 1, "pet": true, "min": 4, "max": 5 },
+    { "action": "learn", "label": "Level 80: learn Summon Air Elemental", "actor": "sb80", "spell": 804019 },
+    { "action": "cast", "label": "Level 80: summon the Air Elemental", "actor": "sb80", "spell": 804019 },
+    { "action": "assert", "label": "Level 80: the Air Elemental (500941) is out",
+      "actor": "sb80", "metric": "pet_entry", "equals": 500941, "within_ms": 25000 },
+    { "action": "assert", "label": "Level 80: Wind Shock's periodic effect (0) is scaled to ~197",
+      "actor": "sb80", "metric": "spell_effect_value", "spell": 892101, "effect": 0, "pet": true, "min": 190, "max": 205 },
+    { "action": "assert", "label": "Level 80: Wind Shock's direct effect (1) keeps the high-level value at ~197",
+      "actor": "sb80", "metric": "spell_effect_value", "spell": 892101, "effect": 1, "pet": true, "min": 190, "max": 205 }
+  ]
+}

@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "AscensionQuestLog.h"
 #include "CreatureAI.h"
 #include "DisableMgr.h"
 #include "GameEventMgr.h"
@@ -49,15 +50,16 @@ void Player::RefreshQuestLogQueries()
         if (Quest const* quest = sObjectMgr->GetQuestTemplate(questId))
             PlayerTalkClass->SendQuestQueryResponse(quest);
     }
+
+    AscensionQuestLog::SendAll(this);
 }
 
 int32 Player::GetQuestLevel(Quest const* quest) const
 {
     if (!quest)
         return GetLevel();
-    if (LocalLevelScaling::QuestScalingEnabled(this))
-        return LocalLevelScaling::ScaleQuestLevel(quest->GetQuestLevel(), GetLevel());
-    return quest->GetQuestLevel() > 0 ? quest->GetQuestLevel() : GetLevel();
+    return LocalLevelScaling::EffectiveQuestLevel(quest->GetQuestLevel(), GetLevel(),
+        LocalLevelScaling::ScalingCurveFor(LocalLevelScaling::QuestScalingEnabled(this), quest->GetQuestId()));
 }
 
 void Player::PrepareQuestMenu(ObjectGuid guid)
@@ -517,12 +519,14 @@ bool Player::CanRewardQuest(Quest const* quest, uint32 reward, bool msg)
     ItemPosCountVec dest;
     if (quest->GetRewChoiceItemsCount() > 0)
     {
-        if (quest->RewardChoiceItemId[reward])
+        if (uint32 const itemId = LocalLevelScaling::QuestRewardItemFor(this, quest->RewardChoiceItemId[reward],
+            quest))
         {
-            InventoryResult res = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, quest->RewardChoiceItemId[reward], quest->RewardChoiceItemCount[reward]);
+            InventoryResult res = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId,
+                quest->RewardChoiceItemCount[reward]);
             if (res != EQUIP_ERR_OK)
             {
-                SendEquipError(res, nullptr, nullptr, quest->RewardChoiceItemId[reward]);
+                SendEquipError(res, nullptr, nullptr, itemId);
                 return false;
             }
         }
@@ -532,12 +536,13 @@ bool Player::CanRewardQuest(Quest const* quest, uint32 reward, bool msg)
     {
         for (uint32 i = 0; i < quest->GetRewItemsCount(); ++i)
         {
-            if (quest->RewardItemId[i])
+            if (uint32 const itemId = LocalLevelScaling::QuestRewardItemFor(this, quest->RewardItemId[i],
+                quest))
             {
-                InventoryResult res = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, quest->RewardItemId[i], quest->RewardItemIdCount[i]);
+                InventoryResult res = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, quest->RewardItemIdCount[i]);
                 if (res != EQUIP_ERR_OK)
                 {
-                    SendEquipError(res, nullptr, nullptr, quest->RewardItemId[i]);
+                    SendEquipError(res, nullptr, nullptr, itemId);
                     return false;
                 }
             }
@@ -612,11 +617,13 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
     }
 
     // The client caches quest queries per quest ID across characters, so refresh the per-player scaled
-    // level here as well: the copy it holds from another character would otherwise colour the log.
-    if (LocalLevelScaling::QuestScalingEnabled(this))
+    // level and rewards here as well, scaled or not: the copy it holds from another character would
+    // otherwise colour the log.
+    if (LocalLevelScaling::QuestEnabled.load(std::memory_order_relaxed))
         PlayerTalkClass->SendQuestQueryResponse(quest);
 
     SetQuestSlot(log_slot, quest_id, qtime);
+    AscensionQuestLog::SendSlot(this, log_slot);
 
     m_QuestStatusSave[quest_id] = true;
 
@@ -742,13 +749,15 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
 
     if (quest->GetRewChoiceItemsCount())
     {
-        if (uint32 itemId = quest->RewardChoiceItemId[reward])
+        if (uint32 itemId = LocalLevelScaling::QuestRewardItemFor(this, quest->RewardChoiceItemId[reward],
+            quest))
         {
             ItemPosCountVec dest;
             if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, quest->RewardChoiceItemCount[reward]) == EQUIP_ERR_OK)
             {
                 Item* item = StoreNewItem(dest, itemId, true);
                 SendNewItem(item, quest->RewardChoiceItemCount[reward], true, false, false, false);
+                LocalLevelScaling::NotifyQuestRewardItem(this, item, quest);
 
                 sScriptMgr->OnPlayerQuestRewardItem(this, item, quest->RewardChoiceItemCount[reward]);
             }
@@ -763,13 +772,15 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     {
         for (uint32 i = 0; i < quest->GetRewItemsCount(); ++i)
         {
-            if (uint32 itemId = quest->RewardItemId[i])
+            if (uint32 itemId = LocalLevelScaling::QuestRewardItemFor(this, quest->RewardItemId[i],
+                quest))
             {
                 ItemPosCountVec dest;
                 if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, quest->RewardItemIdCount[i]) == EQUIP_ERR_OK)
                 {
                     Item* item = StoreNewItem(dest, itemId, true);
                     SendNewItem(item, quest->RewardItemIdCount[i], true, false, false, false);
+                    LocalLevelScaling::NotifyQuestRewardItem(this, item, quest);
 
                     sScriptMgr->OnPlayerQuestRewardItem(this, item, quest->RewardItemIdCount[i]);
                 }
@@ -1710,7 +1721,7 @@ void Player::SendQuestUpdate(uint32 questId)
     UpdateForQuestWorldObjects();
 }
 
-QuestGiverStatus Player::GetQuestDialogStatus(Object* questgiver)
+QuestGiverStatus Player::GetQuestDialogStatus(Object* questgiver, uint32 questFilter)
 {
     QuestRelationBounds qr;
     QuestRelationBounds qir;
@@ -1722,7 +1733,7 @@ QuestGiverStatus Player::GetQuestDialogStatus(Object* questgiver)
         case TYPEID_GAMEOBJECT:
         {
             QuestGiverStatus questStatus = QuestGiverStatus(sScriptMgr->GetDialogStatus(this, questgiver->ToGameObject()));
-            if (questStatus != DIALOG_STATUS_SCRIPTED_NO_STATUS)
+            if (!questFilter && questStatus != DIALOG_STATUS_SCRIPTED_NO_STATUS)
                 return questStatus;
             qr = sObjectMgr->GetGOQuestRelationBounds(questgiver->GetEntry());
             qir = sObjectMgr->GetGOQuestInvolvedRelationBounds(questgiver->GetEntry());
@@ -1731,7 +1742,7 @@ QuestGiverStatus Player::GetQuestDialogStatus(Object* questgiver)
         case TYPEID_UNIT:
         {
             QuestGiverStatus questStatus = QuestGiverStatus(sScriptMgr->GetDialogStatus(this, questgiver->ToCreature()));
-            if (questStatus != DIALOG_STATUS_SCRIPTED_NO_STATUS)
+            if (!questFilter && questStatus != DIALOG_STATUS_SCRIPTED_NO_STATUS)
                 return questStatus;
             qr = sObjectMgr->GetCreatureQuestRelationBounds(questgiver->GetEntry());
             qir = sObjectMgr->GetCreatureQuestInvolvedRelationBounds(questgiver->GetEntry());
@@ -1749,15 +1760,18 @@ QuestGiverStatus Player::GetQuestDialogStatus(Object* questgiver)
     {
         QuestGiverStatus result2 = DIALOG_STATUS_NONE;
         uint32 questId = i->second;
+        if (questFilter && questId != questFilter)
+            continue;
         Quest const* quest = sObjectMgr->GetQuestTemplate(questId);
         if (!quest)
             continue;
 
+        QuestStatus status = GetQuestStatus(questId);
+        bool const holdsQuest = status == QUEST_STATUS_COMPLETE || status == QUEST_STATUS_INCOMPLETE;
         ConditionList conditions = sConditionMgr->GetConditionsForNotGroupedEntry(CONDITION_SOURCE_TYPE_QUEST_AVAILABLE, quest->GetQuestId());
-        if (!sConditionMgr->IsObjectMeetToConditions(this, conditions))
+        if (!holdsQuest && !sConditionMgr->IsObjectMeetToConditions(this, conditions))
             continue;
 
-        QuestStatus status = GetQuestStatus(questId);
         if (status == QUEST_STATUS_COMPLETE && !GetQuestRewardStatus(questId))
         {
             result2 = DIALOG_STATUS_REWARD;
@@ -1782,6 +1796,8 @@ QuestGiverStatus Player::GetQuestDialogStatus(Object* questgiver)
     {
         QuestGiverStatus result2 = DIALOG_STATUS_NONE;
         uint32 questId = i->second;
+        if (questFilter && questId != questFilter)
+            continue;
         Quest const* quest = sObjectMgr->GetQuestTemplate(questId);
         if (!quest)
             continue;
@@ -2392,6 +2408,16 @@ bool Player::HasQuestForItem(uint32 itemid, uint32 excludeQuestId /* 0 */, bool 
             continue;
 
         QuestStatusData const& q_status = qs_itr->second;
+
+        // A loot window built after the objective was finished must hide the item, not show it locked
+        if (showInLoot && !turnIn && q_status.Status == QUEST_STATUS_COMPLETE)
+        {
+            if (Quest const* qinfo = sObjectMgr->GetQuestTemplate(questid))
+                for (uint8 j = 0; j < QUEST_ITEM_OBJECTIVES_COUNT; ++j)
+                    if (qinfo->RequiredItemId[j] == itemid)
+                        *showInLoot = false;
+            continue;
+        }
 
         if ((q_status.Status == QUEST_STATUS_INCOMPLETE) || (turnIn && q_status.Status == QUEST_STATUS_COMPLETE))
         {

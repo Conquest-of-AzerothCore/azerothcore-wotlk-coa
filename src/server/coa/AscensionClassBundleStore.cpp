@@ -181,6 +181,18 @@ public:
         return true;
     }
 };
+
+class item_coa_class_bundle : public ItemScript
+{
+public:
+    item_coa_class_bundle() : ItemScript("item_coa_class_bundle") { }
+
+    bool OnUse(Player* player, Item* item, SpellCastTargets const&) override
+    {
+        player->SendLoot(item->GetGUID(), LOOT_CORPSE);
+        return true;
+    }
+};
 }
 
 void AddSC_AscensionClassBundleStore()
@@ -190,4 +202,5 @@ void AddSC_AscensionClassBundleStore()
 
     new ascension_class_bundle_store_world();
     new item_coa_class_bundle_token();
+    new item_coa_class_bundle();
 }

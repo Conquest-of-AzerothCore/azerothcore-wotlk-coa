@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "name": "Dungeons: a keyless door opens for the opening spell",
+  "contract": "Instance doors lost their locks (keyless doors), but a client that cached the old lock casts an opening spell at the door instead of using it. That spell opens the door instead of failing with Invalid target.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000,
+      "maximum": 2000000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 189,
+      "x": 1066.5,
+      "y": 1399.1,
+      "z": 30.8,
+      "o": 0.0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Heroic Scarlet Monastery",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "set_phase",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Chapel Door is closed",
+      "actor": "hero",
+      "metric": "nearby_gameobject_state",
+      "entry": 104591,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 3365
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 3365,
+      "target_gameobject": 104591
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "Opening is not refused (Invalid target)",
+      "actor": "hero",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Chapel Door is open",
+      "actor": "hero",
+      "metric": "nearby_gameobject_state",
+      "entry": 104591,
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}

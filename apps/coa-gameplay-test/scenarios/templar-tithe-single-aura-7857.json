@@ -1,0 +1,159 @@
+{
+  "schema": 1,
+  "name": "templar-tithe-single-aura-7857",
+  "contract": [
+    "A Templar keeps one Tithe on the party: casting a second Tithe replaces the first on every member, the Templar",
+    "included. Tithes from a different Templar are untouched and stack with it."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "a",
+      "race": 1,
+      "level": 60,
+      "allow_regeneration": false,
+      "class": 19
+    },
+    {
+      "id": "b",
+      "race": 1,
+      "level": 60,
+      "allow_regeneration": false,
+      "class": 19
+    },
+    {
+      "id": "c",
+      "race": 1,
+      "level": 60,
+      "allow_regeneration": false,
+      "class": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "a",
+      "spell": 804816
+    },
+    {
+      "action": "learn",
+      "actor": "a",
+      "spell": 804782
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 804784
+    },
+    {
+      "action": "group",
+      "actor": "a",
+      "target": "b"
+    },
+    {
+      "action": "group",
+      "actor": "a",
+      "target": "c"
+    },
+    {
+      "action": "cast",
+      "actor": "a",
+      "spell": 804816,
+      "target": "a"
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "aura",
+      "spell": 804816,
+      "caster": "a",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "a",
+      "spell": 804782,
+      "target": "a"
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "aura",
+      "spell": 804782,
+      "caster": "a",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "aura",
+      "spell": 804816,
+      "caster": "a",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "a",
+      "metric": "aura",
+      "spell": 804816,
+      "caster": "a",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "a",
+      "metric": "aura",
+      "spell": 804782,
+      "caster": "a",
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 804784,
+      "target": "b"
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "aura",
+      "spell": 804784,
+      "caster": "b",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "aura",
+      "spell": 804782,
+      "caster": "a",
+      "equals": 1
+    }
+  ]
+}

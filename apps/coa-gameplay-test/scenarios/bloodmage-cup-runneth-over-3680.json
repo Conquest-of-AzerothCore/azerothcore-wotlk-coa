@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "The Cup Runneth Over raises Bloodmoon Blast's spell power scaling (#3680)",
+  "contract": "The Cup Runneth Over 807544: \"Increases the spell power scaling of Bloodmoon Blast, Taldaram's Torment and Bloodbolt by $s1%.\" Effect 0 is aura 108 SPELLMOD_BONUS_MULTIPLIER (op 24) +20 on family 26 mask (0, 0x22000, 0) = Bloodmoon Blast (0x2000) and Bloodbolt (0x20000). Unit::SpellDamageBonusDone only applies SPELLMOD_BONUS_MULTIPLIER when the spell has a nonzero coefficient, and Bloodmoon Blast 500125 has EffectBonusMultiplier 0.0 and no spell_bonus_data row on its chain head, although its description states $sps*0.466229. So Bloodmoon Blast ignores spell power and the talent multiplies nothing. The probe is spell_damage_done on rank 10 572332 (SpellLevel 68, base 1000; rank 1 SpellLevel 1 / MaxLevel 4 leaves a level 80 caster 2.5% of the coefficient through CalculateLevelPenalty) with and without Increase Spell Dam 42062 (+259 spell power), then with the talent. PREREQUISITE and DISCRIMINATING both fail on current main. Effect 1 (op 40, Taldaram's Torment, whose description states no spell power term) is not asserted.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "d", "owner": "b", "entry": 36, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "snapshot", "actor": "b", "metric": "spell_damage_done", "spell": 572332, "target": "d", "save_as": "no_power" },
+    { "action": "set_aura", "label": "Add 259 spell power", "actor": "b", "spell": 42062, "stacks": 1 },
+    {
+      "action": "assert", "label": "SETUP: the caster has Shadow spell power",
+      "actor": "b", "metric": "spell_power", "school": 5, "min": 250
+    },
+    {
+      "action": "assert", "label": "PREREQUISITE: Bloodmoon Blast scales with spell power ($sps*0.466229)",
+      "actor": "b", "metric": "spell_damage_done", "spell": 572332, "target": "d",
+      "relative_to": "no_power", "min": 1
+    },
+    { "action": "snapshot", "actor": "b", "metric": "spell_damage_done", "spell": 572332, "target": "d", "save_as": "with_power" },
+    { "action": "learn", "actor": "b", "spell": 807544 },
+    { "action": "assert", "actor": "b", "metric": "aura", "spell": 807544, "equals": 1, "within_ms": 3000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the talent raises Bloodmoon Blast's spell power share",
+      "actor": "b", "metric": "spell_damage_done", "spell": 572332, "target": "d",
+      "relative_to": "with_power", "min": 1
+    }
+  ]
+}

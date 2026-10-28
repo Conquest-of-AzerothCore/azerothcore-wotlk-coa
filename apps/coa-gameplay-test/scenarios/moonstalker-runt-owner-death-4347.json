@@ -1,0 +1,198 @@
+{
+  "schema": 1,
+  "name": "Moonstalker runts despawn only with their own matriarch (#4347)",
+  "contract": [
+    "The original report requires summoned runts to disappear when their matriarch dies. Two nearby matriarchs",
+    "create runts through their native SmartAI. Killing the first must reduce the live runt count without",
+    "removing the other group or an unrelated wild runt. Killing the second must leave exactly the wild control.",
+    "This accepts either the current combat summon or the separately requested pre-spawn behavior; no summon is",
+    "injected by the test."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": 16226.2,
+    "y": 16257.0,
+    "z": 13.2022,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "mother_a",
+      "owner": "hero",
+      "entry": 2071,
+      "faction": 14,
+      "level": 80,
+      "health": 100000,
+      "reaction": 1,
+      "distance": 3
+    },
+    {
+      "id": "mother_b",
+      "owner": "hero",
+      "entry": 2071,
+      "faction": 14,
+      "level": 80,
+      "health": 100000,
+      "reaction": 1,
+      "distance": 2.5
+    },
+    {
+      "id": "wild_runt",
+      "owner": "hero",
+      "entry": 2070,
+      "faction": 35,
+      "level": 80,
+      "health": 100000,
+      "reaction": 0,
+      "distance": 8
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 10040,
+      "stacks": 20
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 100000
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "mother_a"
+    },
+    {
+      "action": "assert",
+      "actor": "mother_a",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "mother_b"
+    },
+    {
+      "action": "assert",
+      "actor": "mother_b",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 2070,
+      "min": 3,
+      "within_ms": 3000,
+      "label": "Both matriarchs have summoned runts beside the wild control"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 2070,
+      "save_as": "runts_before_deaths"
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "mother_a"
+    },
+    {
+      "action": "set_health",
+      "actor": "mother_a",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "actor": "mother_a",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 5000,
+      "label": "An ordinary melee attack kills the first matriarch"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 2070,
+      "relative_to": "runts_before_deaths",
+      "max": -1,
+      "within_ms": 3000,
+      "label": "The first death removes its own summoned runts"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 2070,
+      "min": 2,
+      "label": "The second group and the wild control remain"
+    },
+    {
+      "action": "assert",
+      "actor": "wild_runt",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "mother_b",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "mother_b"
+    },
+    {
+      "action": "set_health",
+      "actor": "mother_b",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "actor": "mother_b",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 2070,
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "Both summoned groups are gone while the wild runt stays"
+    },
+    {
+      "action": "assert",
+      "actor": "wild_runt",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

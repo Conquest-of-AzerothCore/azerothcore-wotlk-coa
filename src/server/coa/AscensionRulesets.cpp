@@ -1,9 +1,13 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "AscensionRulesets.h"
 #include "Config.h"
+#include "LocalLevelScaling.h"
+#include "Map.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "SpellScript.h"
+#include <atomic>
 
 namespace
 {
@@ -18,8 +22,53 @@ enum RulesetSpells : uint32
     SPELL_MERCENARY = 9930874
 };
 
+std::atomic<bool> pvpRulesetsDisableLevelScaling{true};
+
+bool InPvPRuleset(Player const* player)
+{
+    return player->HasAura(SPELL_HIGH_RISK) || (player->HasAura(SPELL_WAR_MODE) && !player->HasAura(SPELL_PVE));
+}
+
+bool RulesetBlocksLevelScaling(Player const* player)
+{
+    if (!pvpRulesetsDisableLevelScaling.load(std::memory_order_relaxed))
+        return false;
+
+    Map const* map = player->FindMap();
+    return map && !map->Instanceable() && InPvPRuleset(player);
+}
+
+void SyncRulesetPvP(Player* player)
+{
+    if (InPvPRuleset(player))
+    {
+        player->SetPlayerFlag(PLAYER_FLAGS_IN_PVP);
+        player->UpdatePvP(true, true);
+    }
+    else if (player->HasAura(SPELL_PVE) && player->HasPlayerFlag(PLAYER_FLAGS_IN_PVP))
+    {
+        player->RemovePlayerFlag(PLAYER_FLAGS_IN_PVP);
+        player->UpdatePvP(false);
+    }
+}
+
+void RefreshMercenariesFor(Player* viewer)
+{
+    if (Map* map = viewer->FindMap())
+        map->DoForAllPlayers([viewer](Player* mercenary)
+        {
+            if (mercenary == viewer || !mercenary->HasAura(SPELL_MERCENARY))
+                return;
+            mercenary->ForceValuesUpdateAtIndex(UNIT_FIELD_FACTIONTEMPLATE);
+            for (Unit* controlled : mercenary->m_Controlled)
+                if (controlled->GetOwnerGUID() == mercenary->GetGUID())
+                    controlled->ForceValuesUpdateAtIndex(UNIT_FIELD_FACTIONTEMPLATE);
+        });
+}
+
 void ApplyRuleset(Player* player, uint32 selectionId)
 {
+    bool const blockedBefore = RulesetBlocksLevelScaling(player);
     player->RemoveAurasDueToSpell(SPELL_HIGH_RISK);
     player->RemoveAurasDueToSpell(SPELL_WAR_MODE);
     player->RemoveAurasDueToSpell(SPELL_PVE);
@@ -30,6 +79,39 @@ void ApplyRuleset(Player* player, uint32 selectionId)
         player->CastSpell(player, SPELL_PVE, true);
     else
         player->CastSpell(player, SPELL_WAR_MODE, true);
+    player->ForceValuesUpdateAtIndex(UNIT_FIELD_BYTES_2);
+    SyncRulesetPvP(player);
+    RefreshMercenariesFor(player);
+
+    if (player->IsInWorld() && RulesetBlocksLevelScaling(player) != blockedBefore &&
+        !LocalLevelScaling::NotifyScalingChanged(player))
+        player->RefreshQuestLogQueries();
+}
+
+uint32 SelectionSpell(AscensionRulesets::Ruleset ruleset)
+{
+    switch (ruleset)
+    {
+        case AscensionRulesets::Ruleset::HighRisk:
+            return SPELL_SELECT_HIGH_RISK;
+        case AscensionRulesets::Ruleset::PvE:
+            return SPELL_SELECT_PVE;
+        default:
+            return SPELL_SELECT_WAR_MODE;
+    }
+}
+
+uint32 RulesetAura(AscensionRulesets::Ruleset ruleset)
+{
+    switch (ruleset)
+    {
+        case AscensionRulesets::Ruleset::HighRisk:
+            return SPELL_HIGH_RISK;
+        case AscensionRulesets::Ruleset::PvE:
+            return SPELL_PVE;
+        default:
+            return SPELL_WAR_MODE;
+    }
 }
 
 class spell_ascension_ruleset_select : public SpellScript
@@ -78,10 +160,31 @@ public:
     }
 };
 
+class ruleset_level_scaling_configuration : public WorldScript
+{
+public:
+    ruleset_level_scaling_configuration()
+        : WorldScript("ruleset_level_scaling_configuration", {WORLDHOOK_ON_AFTER_CONFIG_LOAD}) { }
+
+    void OnAfterConfigLoad(bool) override
+    {
+        pvpRulesetsDisableLevelScaling.store(
+            sConfigMgr->GetOption<bool>("CoA.Ruleset.DisableLevelScaling", true), std::memory_order_relaxed);
+    }
+};
+
 class ruleset_player_spells : public PlayerScript
 {
 public:
-    ruleset_player_spells() : PlayerScript("ruleset_player_spells", {PLAYERHOOK_ON_LOGIN}) { }
+    ruleset_player_spells()
+        : PlayerScript("ruleset_player_spells", {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_MAP_CHANGED}) { }
+
+    void OnPlayerMapChanged(Player* player) override
+    {
+        SyncRulesetPvP(player);
+        if (pvpRulesetsDisableLevelScaling.load(std::memory_order_relaxed) && InPvPRuleset(player))
+            player->RefreshQuestLogQueries();
+    }
 
     void OnPlayerLogin(Player* player) override
     {
@@ -102,13 +205,27 @@ public:
             !player->HasAura(SPELL_PVE);
         if (noRuleset)
             ApplyRuleset(player, SPELL_SELECT_PVE);
+        else
+            SyncRulesetPvP(player);
     }
 };
 }
 
+void AscensionRulesets::Apply(Player* player, Ruleset ruleset)
+{
+    ApplyRuleset(player, SelectionSpell(ruleset));
+}
+
+bool AscensionRulesets::Has(Player* player, Ruleset ruleset)
+{
+    return player->HasAura(RulesetAura(ruleset));
+}
+
 void AddSC_AscensionRulesets()
 {
+    LocalLevelScaling::RulesetBlocksOwner.store(&RulesetBlocksLevelScaling, std::memory_order_relaxed);
     RegisterSpellScript(spell_ascension_ruleset_select);
     new ruleset_aura_metadata();
+    new ruleset_level_scaling_configuration();
     new ruleset_player_spells();
 }

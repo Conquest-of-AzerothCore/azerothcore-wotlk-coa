@@ -23,6 +23,7 @@
 #include "CombatManager.h"
 #include "Containers.h"
 #include "CreatureScript.h"
+#include "LocalLevelScaling.h"
 #include "PetDefines.h"
 #include "ScriptedCreature.h"
 #include "SpellAuraEffects.h"
@@ -181,6 +182,7 @@ class spell_pet_guard_dog : public AuraScript
             return;
 
         float addThreat = CalculatePct(static_cast<float>(procSpellInfo->Effects[EFFECT_0].CalcValue(caster)), aurEff->GetAmount());
+        addThreat = LocalLevelScaling::PoolThreatFor(caster, target, addThreat);
         target->GetThreatMgr().AddThreat(caster, addThreat, GetSpellInfo());
     }
 

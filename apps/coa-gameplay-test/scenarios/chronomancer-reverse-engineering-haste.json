@@ -1,20 +1,41 @@
 {
   "schema": 1,
   "name": "Reverse Engineering procs from periodic healing ticks (#1965)",
-  "contract": "Reverse Engineering 520875 applies aura 42 (proc trigger spell) twice, on 1257670 (Replenishment) and 520936 (a haste buff), but Spell.dbc gives it ProcFlags 0 and no spell_proc row existed, so it never procced. With a spell_proc row gated on the caster's own periodic damage/healing ticks (15% chance per tick, no family restriction), a single Accelerated Recovery cast (a 1-second-tick heal-over-time) gives many independent per-tick trials, so at least one should land within its duration.",
-  "timeout_ms": 60000,
+  "contract": [
+    "Original Reverse Engineering 520875 procs Replenishment and the 15 percent haste aura 520936 from the",
+    "caster's periodic healing. The effective proc row uses the authored 15 percent chance and no cooldown.",
+    "Collect at least 100 native periodic heals through ten funded ordinary Accelerated Recovery casts,",
+    "injuring the caster before each tick so healing has a real target. Sample native haste amounts and cast",
+    "speed throughout; require an actual triggered haste cast and its authored cast-speed effect at a",
+    "checkpoint. Preserve proc chance, normal costs, cooldowns and native tick scheduling. A single finite",
+    "heal-over-time is insufficient to make a 15 percent chance regression reliable."
+  ],
+  "timeout_ms": 180000,
   "players": [
     {
       "id": "chronomancer",
       "race": 1,
       "class": 22,
-      "level": 80
+      "level": 80,
+      "allow_regeneration": false
     }
   ],
   "steps": [
-    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
-    { "action": "learn", "actor": "chronomancer", "spell": 520875 },
-    { "action": "learn", "actor": "chronomancer", "spell": 800857 },
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 520875
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 800857
+    },
     {
       "action": "assert",
       "label": "No Reverse Engineering haste buff before any periodic tick",
@@ -24,16 +45,2985 @@
       "caster": "chronomancer",
       "equals": 0
     },
-    { "action": "cast", "actor": "chronomancer", "spell": 800857, "target": "chronomancer" },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "baseline_cast_speed"
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 800857,
+      "target": "chronomancer"
+    },
     {
       "action": "assert",
-      "label": "At least one periodic heal tick (15% chance each, roughly one per second) procs the haste buff",
       "actor": "chronomancer",
-      "metric": "aura",
+      "metric": "cast_failure",
+      "spell": 800857,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
       "spell": 520936,
-      "caster": "chronomancer",
+      "effect": 0,
+      "save_as": "haste_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_0"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_1"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_2"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_3"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_4"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_5"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_6"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_7"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_8"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_9"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_9"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_10"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_10"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_11"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_11"
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 800857,
+      "target": "chronomancer"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 800857,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_12"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_12"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_13"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_13"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_14"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_14"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_15"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_15"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_16"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_16"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_17"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_17"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_18"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_18"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_19"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_19"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_20"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_20"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_21"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_21"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_22"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_22"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_23"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_23"
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 800857,
+      "target": "chronomancer"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 800857,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_24"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_24"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_25"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_25"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_26"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_26"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_27"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_27"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_28"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_28"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_29"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_29"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_30"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_30"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_31"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_31"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_32"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_32"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_33"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_33"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_34"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_34"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_35"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_35"
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 800857,
+      "target": "chronomancer"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 800857,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_36"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_36"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_37"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_37"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_38"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_38"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_39"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_39"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_40"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_40"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_41"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_41"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_42"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_42"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_43"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_43"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_44"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_44"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_45"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_45"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_46"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_46"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_47"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_47"
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 800857,
+      "target": "chronomancer"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 800857,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_48"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_48"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_49"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_49"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_50"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_50"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_51"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_51"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_52"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_52"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_53"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_53"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_54"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_54"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_55"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_55"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_56"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_56"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_57"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_57"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_58"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_58"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_59"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_59"
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 800857,
+      "target": "chronomancer"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 800857,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_60"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_60"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_61"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_61"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_62"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_62"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_63"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_63"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_64"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_64"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_65"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_65"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_66"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_66"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_67"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_67"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_68"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_68"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_69"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_69"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_70"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_70"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_71"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_71"
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 800857,
+      "target": "chronomancer"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 800857,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_72"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_72"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_73"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_73"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_74"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_74"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_75"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_75"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_76"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_76"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_77"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_77"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_78"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_78"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_79"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_79"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_80"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_80"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_81"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_81"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_82"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_82"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_83"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_83"
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 800857,
+      "target": "chronomancer"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 800857,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_84"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_84"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_85"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_85"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_86"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_86"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_87"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_87"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_88"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_88"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_89"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_89"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_90"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_90"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_91"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_91"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_92"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_92"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_93"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_93"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_94"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_94"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_95"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_95"
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 800857,
+      "target": "chronomancer"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 800857,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_96"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_96"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_97"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_97"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_98"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_98"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_99"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_99"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_100"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_100"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_101"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_101"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_102"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_102"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_103"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_103"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_104"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_104"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_105"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_105"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_106"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_106"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_107"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_107"
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 800857,
+      "target": "chronomancer"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 800857,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_108"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_108"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_109"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_109"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_110"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_110"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_111"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_111"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_112"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_112"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_113"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_113"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_114"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_114"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_115"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_115"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_116"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_116"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_117"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_117"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_118"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_118"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 520936,
+      "effect": 0,
+      "save_as": "haste_119"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cast_speed_multiplier",
+      "save_as": "speed_119"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_cast_count",
+      "spell": 800857,
+      "equals": 10,
+      "label": "All funded ordinary Accelerated Recovery casts completed"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_heal_count",
+      "spell": 800857,
+      "target": "chronomancer",
+      "min": 100,
+      "label": "At least one hundred native periodic healing events were delivered"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_effective_heal_total",
+      "spell": 800857,
+      "target": "chronomancer",
+      "min": 100,
+      "label": "The periodic heals restore missing health"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_cast_count",
+      "spell": 520936,
       "min": 1,
-      "within_ms": 22000
+      "label": "Reverse Engineering actually casts its haste helper"
     }
   ]
 }

@@ -195,6 +195,9 @@ foreach(SOURCE_MODULE ${MODULES_MODULE_LIST})
 
   if(NOT (${MODULE_MODULE_VARIABLE} STREQUAL "disabled"))
     list(APPEND MODULE_LIST__ ${SOURCE_MODULE})
+    if(SOURCE_MODULE STREQUAL "mod-manastorm-endless")
+      target_compile_definitions(database PRIVATE MOD_MANASTORM_ENDLESS)
+    endif()
   endif()
 
   if((${MODULE_MODULE_VARIABLE} STREQUAL "disabled") OR
@@ -325,6 +328,10 @@ set_target_properties(modules
   PROPERTIES
     FOLDER
       "modules")
+
+if (USE_COREPCH AND CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND NOT MSVC)
+  set_target_properties(modules PROPERTIES PRECOMPILE_HEADERS_REUSE_FROM game)
+endif()
 
 # Generate precompiled header
 # if (USE_SCRIPTPCH)

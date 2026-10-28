@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Hallow's End pumpkins no longer stand inside the patch-WB1 Lakeshire lion statues",
+  "contract": "Issue #8233. patch-WB1 adds four lion statues (STATUELION.M2, MDDF uids 1170952-1170955 in World\\Maps\\Azeroth\\Azeroth_36_49.adt, absent from common-2, patch, patch-2 and patch-3) in Lakeshire exactly where four Hallow's End (game event 12) pumpkins stand: 36410 (180405) at (-9285.58,-2267.99), 36840 (180406) at (-9406.59,-2258.17), 36841 (180406) at (-9288.24,-2302.93) and 37264 (180407) at (-9409.27,-2293.30). The statue model is 3.1 x 4.2 x 4.7 yd with collision from z 0 to 4.69, so the pumpkins are buried in the stone. The pumpkins have no other placement to fall back on, so they are removed. With the event running, the remaining Lakeshire pumpkin 36409 (180405) still spawns, and no pumpkin of the removed spawn's entry remains within 20 yd of any statue.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -9420.0, "y": -2240.0, "z": 68.6, "o": 0.0 },
+  "players": [
+    { "id": "visitor", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "set_phase", "label": "Join world phase 1, where the event spawns live", "actor": "visitor",
+      "value": 1 },
+    { "action": "game_event", "event": 12, "active": true },
+    { "action": "assert", "label": "CONTROL: Hallow's End pumpkin 36409 spawns beside the visitor", "actor": "visitor",
+      "metric": "nearby_gameobject_state", "entry": 180405, "min": 0, "max": 1, "within_ms": 10000 },
+
+    { "action": "teleport", "actor": "visitor", "map": 0, "x": -9285.58, "y": -2267.99, "z": 69.38 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "No pumpkin 180405 inside lion statue 1170955", "actor": "visitor",
+      "metric": "nearby_gameobject_state", "entry": 180405, "equals": 99 },
+
+    { "action": "teleport", "actor": "visitor", "map": 0, "x": -9406.59, "y": -2258.17, "z": 69.38 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "No pumpkin 180406 inside lion statue 1170952", "actor": "visitor",
+      "metric": "nearby_gameobject_state", "entry": 180406, "equals": 99 },
+
+    { "action": "teleport", "actor": "visitor", "map": 0, "x": -9288.24, "y": -2302.93, "z": 69.38 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "No pumpkin 180406 inside lion statue 1170954", "actor": "visitor",
+      "metric": "nearby_gameobject_state", "entry": 180406, "equals": 99 },
+
+    { "action": "teleport", "actor": "visitor", "map": 0, "x": -9409.27, "y": -2293.30, "z": 69.38 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "No pumpkin 180407 inside lion statue 1170953", "actor": "visitor",
+      "metric": "nearby_gameobject_state", "entry": 180407, "equals": 99 }
+  ]
+}

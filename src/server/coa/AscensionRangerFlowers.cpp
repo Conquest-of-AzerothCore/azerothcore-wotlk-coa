@@ -28,7 +28,8 @@ enum RangerFlowerSpells : uint32
     SPELL_HIGHLANDER_STACKS = 707539,
     SPELL_HIGHLANDER_READY = 712427,
     SPELL_HIGHLANDER_REDUCTION = 712428,
-    SPELL_ADVANTAGE = 804329
+    SPELL_ADVANTAGE = 804329,
+    SPELL_FALCONS_CALL = 804715
 };
 
 enum RangerFlowerEntries : uint32
@@ -69,6 +70,7 @@ struct npc_ascension_ranger_flower : ScriptedAI
         me->SetOwnerGUID(player->GetGUID());
         me->SetFaction(player->GetFaction());
         me->SetLevel(player->GetLevel());
+        me->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
         me->SetReactState(REACT_PASSIVE);
         me->GetMotionMaster()->Clear();
         me->GetMotionMaster()->MoveIdle();
@@ -274,6 +276,24 @@ public:
     }
 };
 
+class ranger_falcon_cooldown_metadata : public GlobalScript
+{
+public:
+    ranger_falcon_cooldown_metadata() : GlobalScript("ranger_falcon_cooldown_metadata",
+        {GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR}) { }
+
+    void OnLoadSpellCustomAttr(SpellInfo* info) override
+    {
+        if (info->SpellFamilyName != 27)
+            return;
+        SpellEffectInfo& effect = info->Effects[EFFECT_1];
+        if (effect.Effect == SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN && effect.MiscValue == SPELL_FALCONS_CALL &&
+            effect.MiscValueB == 0 && effect.BasePoints == -1 && effect.DieSides == 1 &&
+            effect.RealPointsPerLevel == 0 && effect.TargetA.GetTarget() == TARGET_UNIT_CASTER)
+            effect.Effect = 0;
+    }
+};
+
 class ranger_highlander_cleanup : public PlayerScript
 {
 public:
@@ -298,5 +318,6 @@ void AddSC_AscensionRangerFlowers()
     RegisterSpellScript(spell_ascension_ranger_highlander);
     new ranger_flower_casts();
     new ranger_flower_metadata();
+    new ranger_falcon_cooldown_metadata();
     new ranger_highlander_cleanup();
 }

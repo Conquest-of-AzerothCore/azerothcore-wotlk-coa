@@ -207,6 +207,104 @@ int main(int, char** argv)
         }
     }
 
+    CoATalentEntry const* sanguineIdentity = Find(4025);
+    CoATalentEntry const* sanguineSignature = Find(29543);
+    CoATalentEntry const* eternalSignature = Find(31117);
+    Check(sanguineIdentity && sanguineSignature && eternalSignature,
+          "Bloodmage archetypes have their native identity and shared signature entries");
+    if (sanguineIdentity && sanguineSignature && eternalSignature)
+    {
+        std::set<std::uint32_t> spellbook = { sanguineIdentity->SpellIds[0], sanguineSignature->SpellIds[0] };
+        std::vector<KnownEntry> const entering = SpecializationSwitch(20,
+            [&spellbook](std::uint32_t id) { return spellbook.contains(id); }, 99);
+        Check(std::none_of(entering.begin(), entering.end(),
+                  [](KnownEntry const& item) { return item.EntryId == 29543; }),
+              "leaving Sanguine removes its shared signature from the native upload");
+        Check(std::any_of(entering.begin(), entering.end(),
+                  [](KnownEntry const& item) { return item.EntryId == 31117 && item.Rank == 1; }),
+              "entering Eternal uploads Blood Pact at rank one");
+        Check(Spent(entering).AE == 1 && Spent(entering).TE == 0,
+              "a native Bloodmage archetype switch fits the level-eleven point budget");
+    }
+
+    SpecializationSlot saved;
+    saved.ClassId = 20;
+    saved.SpecId = 99;
+    for (std::uint32_t id = 1; id <= 80; ++id)
+        saved.Entries.push_back({ id, id % 3 + 1 });
+    saved.Actions = { { 11, 804197 }, { 143, 0x40000001 } };
+    auto record = SpecializationSlotRecord(saved);
+    SpecializationSlot restored;
+    Check(ParseSpecializationSlot(record, restored) && restored.Entries.size() == 80 &&
+              restored.Entries.back().EntryId == 80 && restored.Actions == saved.Actions,
+          "slot records preserve more than 32 rows and complete packed action buttons");
+    record.push_back(0);
+    Check(ParseSpecializationSlot(record, restored), "slot records accept cleared storage tails");
+    record.back() = 1;
+    Check(!ParseSpecializationSlot(record, restored), "slot records reject unknown trailing data");
+    record = SpecializationSlotRecord(saved);
+    record[3] = 0xFFFFFFFF;
+    Check(!ParseSpecializationSlot(record, restored), "slot records reject overflowing row counts");
+    record = SpecializationSlotRecord(saved);
+    record.pop_back();
+    Check(!ParseSpecializationSlot(record, restored), "slot records reject truncated action bars");
+    record = SpecializationSlotRecord(saved);
+    record[0] = 2;
+    Check(!ParseSpecializationSlot(record, restored), "slot records reject unknown revisions");
+    saved.Actions = { { 11, 804197 }, { 11, 801955 } };
+    Check(!ParseSpecializationSlot(SpecializationSlotRecord(saved), restored),
+          "slot records reject duplicated action buttons");
+
+    ResetCredits const fresh{};
+    UnlearnPrice const unlearn13 = UnlearnPriceAt(13, fresh);
+    Check(unlearn13.Money == 104 && unlearn13.Marks == 52, "a level 13 unlearn costs 1g 4c or 52 marks");
+    UnlearnPrice const repeated = UnlearnPriceAt(13, { 0, 1, 1, 0 });
+    Check(repeated.Money == 131 && repeated.Marks == 52,
+          "talent resets and ability unlearns raise the unlearn gold the way the client prices it");
+    Check(UnlearnPriceAt(60, { 0, 0, 0, 5 }).Money == 33315, "talent unlearns alone leave the unlearn price unchanged");
+    Check(UnlearnPriceAt(10, fresh).Money == 0 && UnlearnPriceAt(10, fresh).Marks == 0,
+          "unlearning is free at level 10");
+    Check(UnlearnPriceAt(13, fresh, true).Money == 0, "a free-unlearn entry costs nothing");
+
+    PurgePrice const purge13 = TalentPurgePriceAt(13, fresh);
+    Check(purge13.Money == 261 && purge13.Marks == 1625 && purge13.Item == TALENT_PURGE_ITEM && purge13.ItemCount == 1,
+          "a level 13 talent purge costs one purge item, 1625 marks or 2s 61c");
+    Check(TalentPurgePriceAt(13, { 0, 2, 0, 0 }).Money == 2970, "each talent reset raises the purge gold");
+    Check(TalentPurgePriceAt(80, fresh).Money == 171508 && TalentPurgePriceAt(80, fresh).Marks == 10000,
+          "a level 80 talent purge matches the client price");
+    Check(TalentPurgePriceAt(10, fresh).ItemCount == 0 && TalentPurgePriceAt(10, fresh).Money == 0,
+          "a talent purge is free at level 10");
+
+    RemovalPayment const split = PayForRemovals({ unlearn13, unlearn13 }, 60, 1000);
+    Check(split.Affordable && split.Marks == 52 && split.Money == 104,
+          "removals take marks while a whole price is covered, then gold");
+    Check(!PayForRemovals({ unlearn13, unlearn13 }, 0, 200).Affordable, "removals the gold cannot cover are refused");
+    bool anchorsFree = !CoASpecializations.empty();
+    for (CoASpecialization const& specialization : CoASpecializations)
+    {
+        CoATalentEntry const* identity = Find(specialization.IdentityEntryId);
+        CoATalentEntry const* signature = Find(specialization.SignatureEntryId);
+        anchorsFree = anchorsFree && identity && IsUnpricedRemoval(*identity) &&
+            (!specialization.SignatureEntryId || (signature && IsUnpricedRemoval(*signature)));
+    }
+    Check(anchorsFree, "every specialization identity and signature entry is removed without a charge");
+    CoATalentEntry const* levelPassive = Find(4436);
+    Check(levelPassive && !levelPassive->AECost && !levelPassive->TECost && IsUnpricedRemoval(*levelPassive),
+          "a cost-free automatic entry is removed without a charge");
+    Check(three && !IsUnpricedRemoval(*three), "an ordinary class talent is charged when removed");
+    if (three)
+    {
+        std::vector<std::uint32_t> const aboveOne = SpellsAboveRank(*three, 1);
+        Check(aboveOne.size() == 2 && aboveOne[0] == three->SpellIds[1] && aboveOne[1] == three->SpellIds[2],
+              "the ranks above a set rank are the ones a lower learn must not keep");
+        Check(SpellsAboveRank(*three, 3).empty() && SpellsAboveRank(*three, 0).size() == 3,
+              "a full rank keeps every rank spell and rank 0 keeps none");
+    }
+    CoATalentEntry const* specTalent = FirstPaid(three ? three->ClassId : 0, false);
+    Check(specTalent && !IsUnpricedRemoval(*specTalent), "an ordinary specialization talent is charged when removed");
+    RemovalPayment const nothing = PayForRemovals({ UnlearnPriceAt(10, fresh) }, 0, 0);
+    Check(nothing.Affordable && !nothing.Marks && !nothing.Money, "free removals need no payment");
+
     return failures ? 1 : 0;
 }
 """

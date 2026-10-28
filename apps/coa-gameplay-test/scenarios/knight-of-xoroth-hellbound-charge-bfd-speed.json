@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Hellbound Charge grants its mounted-speed buff inside Blackfathom Deeps (#5493)",
+  "contract": "Hellbound Charge 807247 is a self-cast SPELL_AURA_DUMMY marker; xoroth_casts::OnSpellCast (AscensionXorothAbilities.cpp) reacts to it by applying 807248, which carries SPELL_AURA_MOUNTED (effect 0, MiscValue 914505) and SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED (effect 1, +70%). Spell::CheckCast's SPELL_AURA_MOUNTED case (Spell.cpp) fails with SPELL_FAILED_NO_MOUNTS_ALLOWED whenever the caster's current map has instance_template.AllowMount = 0 and the spell carries no AreaGroupId; Blackfathom Deeps (map 48) is exactly such a map (data/sql/base/db_world/instance_template.sql: '(48,1,...,0)'), and 807248 has no AreaGroupId. Reaching 807248 through a normal CastSpell (as the previous 'Cast(player, player, 807248)' call did) therefore silently failed inside BFD: the player saw Hellbound Charge's own dummy marker go active but never actually mounted or sped up, matching the report. The fix applies 807248 directly via Unit::AddAura, which builds and applies the Aura without going through Spell::CheckCast, bypassing the no-mount gate the same way the adjacent id==801042 case in the same function already does for a different spell.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 60 }
+  ],
+  "location": {
+    "map": 48,
+    "x": -178.368,
+    "y": 52.7392,
+    "z": -49.8229,
+    "o": 1.27409,
+    "ignore_access": true
+  },
+  "steps": [
+    { "action": "wait", "label": "Let Blackfathom Deeps settle", "ms": 8000 },
+    { "action": "learn", "actor": "knight", "spell": 807247 },
+    { "action": "assert", "label": "SETUP: the knight knows Hellbound Charge", "actor": "knight", "metric": "knows_spell", "spell": 807247, "equals": 1 },
+    { "action": "snapshot", "label": "Run speed before Hellbound Charge", "actor": "knight", "metric": "run_speed_rate", "save_as": "speed_before" },
+    { "action": "cast", "actor": "knight", "spell": 807247 },
+    {
+      "action": "assert", "label": "CONTRACT: Hellbound Charge's own dummy marker goes active (this already worked before the fix)",
+      "actor": "knight", "metric": "aura", "spell": 807247, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the mounted-speed aura actually applies despite Blackfathom Deeps disallowing mounts",
+      "actor": "knight", "metric": "aura", "spell": 807248, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: run speed rises because the mounted-speed bonus is actually in effect",
+      "actor": "knight", "metric": "run_speed_rate", "ratio_to": "speed_before", "min": 1.2
+    }
+  ]
+}

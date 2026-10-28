@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Hakkar's Blood Siphon drains every 2 s for its 20 s (#8448)",
+  "contract": [
+    "Hakkar (14834) casts Blood Siphon (2118615) 90 s into the fight: a 3 s cast (SpellCastTimes 14) and a",
+    "channel of up to 60 s (SpellDuration 3) that applies a dummy aura to Hakkar himself (effect 1, caster target).",
+    "The script drains every player every 2 s for SIPHON_LENGTH 20 s, and each drain adds one stack of Anemia",
+    "(2118623, 2.5 s duration from SpellDuration 66, up to 100 stacks), refreshing it. Drains at +2 to +18 s give",
+    "9 stacks. The drains run while Hakkar channels, and the siphon ends his channel at 20 s instead of 60 s."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 309,
+    "x": -11787.4,
+    "y": -1649.34,
+    "z": 54.1017,
+    "o": 4.76475,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "hero",
+      "entry": 14834,
+      "level": 63,
+      "health": 5000000,
+      "reaction": 2,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "attack",
+      "label": "Engage Hakkar",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar fights the hero",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar casts Blood Siphon 90 s into the fight, after its 3 s cast",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 14834,
+      "spell": 2118615,
+      "min": 1,
+      "within_ms": 100000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar channels Blood Siphon",
+      "actor": "boss",
+      "metric": "aura",
+      "spell": 2118615,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the drains at +2 to +18 s stack Anemia 9 times on the hero",
+      "actor": "hero",
+      "metric": "aura_stacks",
+      "spell": 2118623,
+      "caster": "boss",
+      "min": 9,
+      "within_ms": 22000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the siphon ends Hakkar's channel at 20 s, not after the full 60 s",
+      "actor": "boss",
+      "metric": "aura",
+      "spell": 2118615,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero survived the fight",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

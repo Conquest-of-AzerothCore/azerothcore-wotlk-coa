@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Handros gives Smoke on the Horizon after Death and Justice and warns of the climb",
+  "contract": [
+    "rev_20261004_99_coa_handros_smoke_on_the_horizon makes Death and Justice 1660033 the prerequisite of Smoke on the",
+    "Horizon 1660066 and gives Handros 162902 a monster say on accepting it: \"Catch your breath and steel yourself",
+    "before you climb to the Iris Sanctuary. The ascent can be... unforgiving.\" Expected: Death and Tribute 1660030",
+    "alone does not unlock the quest; after 1660033 it can be taken, enters the log and sends exactly one chat line."
+  ],
+  "timeout_ms": 30000,
+  "location": {"map": 1, "x": -2960.59, "y": -252.91, "z": 51.688, "o": 0},
+  "players": [{"id": "hero", "race": 6, "class": 1, "level": 6}],
+  "creatures": [{"id": "handros", "owner": "hero", "entry": 162902, "faction": 35, "level": 8, "distance": 2}],
+  "steps": [
+    {"action": "wait", "ms": 500},
+    {"action": "prepare_quest", "actor": "hero", "quest": 1660030},
+    {"action": "reward_quest", "actor": "hero", "quest": 1660030},
+    {"action": "assert", "label": "Death and Tribute alone does not unlock it", "actor": "hero",
+     "metric": "quest_takeable", "quest": 1660066, "equals": 0},
+    {"action": "prepare_quest", "actor": "hero", "quest": 1660033},
+    {"action": "reward_quest", "actor": "hero", "quest": 1660033},
+    {"action": "assert", "label": "Death and Justice unlocks it", "actor": "hero", "metric": "quest_takeable",
+     "quest": 1660066, "equals": 1},
+    {"action": "wait", "ms": 500},
+    {"action": "snapshot", "actor": "hero", "metric": "system_messages", "save_as": "chat_before_accept"},
+    {"action": "quest_accept", "label": "Accept Smoke on the Horizon from Handros", "actor": "hero", "quest": 1660066,
+     "entry": 162902},
+    {"action": "assert", "label": "The talk-to quest is in the log, ready to hand in", "actor": "hero",
+     "metric": "quest_status", "quest": 1660066, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "Handros speaks his warning", "actor": "hero", "metric": "system_messages",
+     "relative_to": "chat_before_accept", "equals": 1, "within_ms": 2000},
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "label": "and says it only once", "actor": "hero", "metric": "system_messages",
+     "relative_to": "chat_before_accept", "equals": 1}
+  ]
+}

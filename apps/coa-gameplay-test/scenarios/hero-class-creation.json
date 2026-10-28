@@ -1,59 +1,178 @@
 {
   "schema": 1,
   "name": "A free-pick realm creates Heroes with their race's start, the Warrior's outfit and a mana pool",
-  "contract": "CoA.MapClass10ToWarrior turns class 10 into a Warrior only for sessions of the Ascension client, which fixture sessions are not, so the fixtures create class 10 as a free-pick realm (the setting at 0) does. Ascension's free-pick Hero is ChrClasses.dbc class 10 (power type mana), which CharBaseInfo.dbc offers to races 1-8, 10 and 11. A Hero starts where the other classes of its race start (Humans in Northshire on map 0, Blood Elves in Eversong Woods and Draenei on Azuremyst Isle, both on map 530), gets the Warrior's CharStartOutfit.dbc items and a Hearthstone, and has the Paladin's base stats, so it has mana at level 1. Expected: class 10, those maps, the race's Warrior shirt or tunic, one Hearthstone each and a positive maximum mana.",
+  "contract": [
+    "Fixture sessions are not Ascension clients, so CoA.MapClass10ToWarrior does not remap their class-10 Hero.",
+    "Original ChrClasses.dbc gives Hero class 10 Mana; CharBaseInfo.dbc offers it to races 1\u20138, 10 and 11.",
+    "A Hero uses the current per-race start shared by non-Death-Knight classes. Effective playercreateinfo now",
+    "starts Humans in Northshire on map 0, Blood Elves in Deathknell on map 0 and Draenei in Shadowglen on map 1.",
+    "The main race-start migration moved every class except Death Knights; retain those data-derived Hero starts.",
+    "Require the original class, Warrior race outfit, one Hearthstone and positive maximum Mana, plus the new",
+    "race-start maps, coordinates and matching hearthstone binds."
+  ],
   "timeout_ms": 30000,
   "players": [
-    { "id": "human", "race": 1, "class": 10, "level": 1 },
-    { "id": "bloodelf", "race": 10, "class": 10, "level": 1 },
-    { "id": "draenei", "race": 11, "class": 10, "level": 1 }
+    {
+      "id": "human",
+      "race": 1,
+      "class": 10,
+      "level": 1
+    },
+    {
+      "id": "bloodelf",
+      "race": 10,
+      "class": 10,
+      "level": 1
+    },
+    {
+      "id": "draenei",
+      "race": 11,
+      "class": 10,
+      "level": 1
+    }
   ],
   "steps": [
-    { "action": "wait", "label": "Let login settle", "ms": 1000 },
-    { "action": "assert", "label": "The Human is a Hero", "actor": "human", "metric": "player_class", "equals": 10 },
     {
-      "action": "assert", "label": "The Blood Elf is a Hero", "actor": "bloodelf", "metric": "player_class",
+      "action": "wait",
+      "label": "Let login settle",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The Human is a Hero",
+      "actor": "human",
+      "metric": "player_class",
       "equals": 10
     },
     {
-      "action": "assert", "label": "The Draenei is a Hero", "actor": "draenei", "metric": "player_class",
+      "action": "assert",
+      "label": "The Blood Elf is a Hero",
+      "actor": "bloodelf",
+      "metric": "player_class",
       "equals": 10
     },
-    { "action": "assert", "label": "The Human starts on map 0", "actor": "human", "metric": "map_id", "equals": 0 },
     {
-      "action": "assert", "label": "The Blood Elf starts in Eversong Woods", "actor": "bloodelf", "metric": "map_id",
-      "equals": 530
+      "action": "assert",
+      "label": "The Draenei is a Hero",
+      "actor": "draenei",
+      "metric": "player_class",
+      "equals": 10
     },
     {
-      "action": "assert", "label": "The Draenei starts on Azuremyst Isle", "actor": "draenei", "metric": "map_id",
-      "equals": 530
+      "action": "assert",
+      "label": "The Human starts on map 0",
+      "actor": "human",
+      "metric": "map_id",
+      "equals": 0
     },
     {
-      "action": "assert", "label": "The Human gets the Warrior's Recruit's Shirt", "actor": "human",
-      "metric": "item_count", "item": 38, "equals": 1
+      "action": "assert",
+      "label": "The Blood Elf starts in Deathknell on the current race start map",
+      "actor": "bloodelf",
+      "metric": "map_id",
+      "equals": 0
     },
     {
-      "action": "assert", "label": "The Blood Elf gets the Warrior's Recruit's Tunic", "actor": "bloodelf",
-      "metric": "item_count", "item": 20904, "equals": 1
+      "action": "assert",
+      "label": "The Draenei starts in Shadowglen on the current race start map",
+      "actor": "draenei",
+      "metric": "map_id",
+      "equals": 1
     },
     {
-      "action": "assert", "label": "The Draenei gets the Warrior's Recruit's Shirt", "actor": "draenei",
-      "metric": "item_count", "item": 23473, "equals": 1
+      "action": "assert",
+      "actor": "bloodelf",
+      "metric": "position_x",
+      "min": 1674.71,
+      "max": 1678.71
     },
     {
-      "action": "assert", "label": "The Human carries a Hearthstone", "actor": "human", "metric": "item_count",
-      "item": 6948, "equals": 1
+      "action": "assert",
+      "actor": "bloodelf",
+      "metric": "position_y",
+      "min": 1676.31,
+      "max": 1680.31
     },
     {
-      "action": "assert", "label": "The Blood Elf carries a Hearthstone", "actor": "bloodelf",
-      "metric": "item_count", "item": 6948, "equals": 1
+      "action": "assert",
+      "actor": "bloodelf",
+      "metric": "at_homebind",
+      "equals": 1
     },
     {
-      "action": "assert", "label": "The Draenei carries a Hearthstone", "actor": "draenei", "metric": "item_count",
-      "item": 6948, "equals": 1
+      "action": "assert",
+      "actor": "draenei",
+      "metric": "position_x",
+      "min": 10309.3,
+      "max": 10313.3
     },
     {
-      "action": "assert", "label": "A level 1 Hero has mana", "actor": "human", "metric": "max_power", "power": 0,
+      "action": "assert",
+      "actor": "draenei",
+      "metric": "position_y",
+      "min": 830.463,
+      "max": 834.463
+    },
+    {
+      "action": "assert",
+      "actor": "draenei",
+      "metric": "at_homebind",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Human gets the Warrior's Recruit's Shirt",
+      "actor": "human",
+      "metric": "item_count",
+      "item": 38,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Blood Elf gets the Warrior's Recruit's Tunic",
+      "actor": "bloodelf",
+      "metric": "item_count",
+      "item": 20904,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Draenei gets the Warrior's Recruit's Shirt",
+      "actor": "draenei",
+      "metric": "item_count",
+      "item": 23473,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Human carries a Hearthstone",
+      "actor": "human",
+      "metric": "item_count",
+      "item": 6948,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Blood Elf carries a Hearthstone",
+      "actor": "bloodelf",
+      "metric": "item_count",
+      "item": 6948,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Draenei carries a Hearthstone",
+      "actor": "draenei",
+      "metric": "item_count",
+      "item": 6948,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "A level 1 Hero has mana",
+      "actor": "human",
+      "metric": "max_power",
+      "power": 0,
       "min": 1
     }
   ]

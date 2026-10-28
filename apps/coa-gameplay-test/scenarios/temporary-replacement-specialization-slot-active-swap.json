@@ -1,0 +1,170 @@
+{
+  "schema": 1,
+  "name": "Returning to a specialization slot shows a swap that is still active",
+  "contract": [
+    "Specialization slots snapshot every action button when the player leaves a slot (LiveSlot) and re-add them when",
+    "the player returns (SwitchSlot). A swapped button is stored as the spell it replaces, so the snapshot of a slot",
+    "with Transgression 801076 standing in for Blood Curse 562720 holds Blood Curse. Expected: after leaving slot I",
+    "and returning while Transgression is active again, the button shows Transgression, is still saved as Blood Curse",
+    "and survives a relog."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login state settle",
+      "ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "actor": "bloodmage",
+      "opcode": 618,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "bloodmage"
+        }
+      ],
+      "label": "Initialize native advancement"
+    },
+    {
+      "action": "specialization",
+      "label": "Choose Sanguine",
+      "actor": "bloodmage",
+      "id": 26
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 562720
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "bloodmage",
+      "entry": 29543,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "bloodmage",
+      "entry": 4025,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Buy Transgression in slot I",
+      "actor": "bloodmage",
+      "entry": 31175,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Transgression replaces Blood Curse",
+      "actor": "bloodmage",
+      "metric": "temporary_spell_replacement",
+      "spell": 562720,
+      "equals": 801076,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_action_button",
+      "actor": "bloodmage",
+      "button": 2,
+      "spell": 801076
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 979994
+    },
+    {
+      "action": "cast",
+      "label": "Switch to slot II",
+      "actor": "bloodmage",
+      "spell": 979994
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: slot II is active",
+      "actor": "bloodmage",
+      "metric": "player_setting",
+      "source": "core.ascension_slot.active",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Switch back to slot I",
+      "actor": "bloodmage",
+      "spell": 979993
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: slot I is active again",
+      "actor": "bloodmage",
+      "metric": "player_setting",
+      "source": "core.ascension_slot.active",
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Transgression is active again",
+      "actor": "bloodmage",
+      "metric": "temporary_spell_replacement",
+      "spell": 562720,
+      "equals": 801076,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The restored button shows Transgression",
+      "actor": "bloodmage",
+      "metric": "action_button",
+      "button": 2,
+      "equals": 801076
+    },
+    {
+      "action": "assert",
+      "label": "It is still saved as Blood Curse",
+      "actor": "bloodmage",
+      "metric": "persisted_action_button",
+      "button": 2,
+      "equals": 562720
+    },
+    {
+      "action": "relog",
+      "actor": "bloodmage"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The button survives a relog",
+      "actor": "bloodmage",
+      "metric": "action_button",
+      "button": 2,
+      "equals": 562720,
+      "within_ms": 3000
+    }
+  ]
+}

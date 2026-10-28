@@ -830,6 +830,7 @@ public:
         LOG_INFO("server.loading", "Reloading Profanity Names!");
         sObjectMgr->LoadProfanityNamesFromDB();
         sObjectMgr->LoadProfanityNamesFromDBC(); // Needed because we clear the store in LoadProfanityNamesFromDB()
+        sObjectMgr->LoadCoANameFilter();
         handler->SendGlobalGMSysMessage("Profanity Names reloaded.");
         return true;
     }

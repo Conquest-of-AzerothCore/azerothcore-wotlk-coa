@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "name": "Necromancer minions stay summoned but untouchable by NPCs while the owner is mounted or flying (#7457)",
+  "contract": [
+    "Raise: Greater Skeletal Warrior 504901 summons creature 51065 as a guardian with the owner's faction, so hostile",
+    "NPCs can attack it and its combat pulls in the owner. The maintainer requires minions to stay summoned (no",
+    "unsummon, no temporary unsummon). Expected: while the owner is mounted (Brown Horse 458 aura, native",
+    "Unit::Mount) or on a taxi (UNIT_STATE_IN_FLIGHT), a hostile NPC cannot attack the minion; the minion stays",
+    "summoned; after dismounting or landing it is attackable again. A baseline before mounting shows the metric",
+    "reads 1 for an ordinary minion, so the mounted 0 distinguishes the fix from the reported behaviour."
+  ],
+  "timeout_ms": 420000,
+  "location": { "map": 0, "x": -8840.56, "y": 489.7, "z": 109.61, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 1, "class": 23, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "gryphon_master", "owner": "necro", "entry": 352, "faction": 12 },
+    { "id": "enemy", "owner": "necro", "entry": 36, "level": 60, "health": 1000000, "distance": 6 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "necro", "spell": 504901 },
+    { "action": "cast", "actor": "necro", "spell": 504901 },
+    {
+      "action": "assert", "label": "The Greater Skeletal Warrior is summoned", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 51065, "equals": 1, "within_ms": 8000
+    },
+    {
+      "action": "assert", "label": "Baseline: a hostile NPC can attack the unmounted owner's minion", "actor": "necro",
+      "metric": "owned_creature_attackable", "entry": 51065, "target": "enemy", "equals": 1, "within_ms": 2000
+    },
+    { "action": "set_aura", "actor": "necro", "spell": 458, "stacks": 1 },
+    {
+      "action": "assert", "label": "The owner is mounted", "actor": "necro", "metric": "mount_display_id", "min": 1
+    },
+    {
+      "action": "assert", "label": "Mounted: the hostile NPC can no longer attack the minion", "actor": "necro",
+      "metric": "owned_creature_attackable", "entry": 51065, "target": "enemy", "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Mounted: the minion stays summoned", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 51065, "equals": 1
+    },
+    { "action": "wait", "label": "Ride beside the hostile NPC", "ms": 3000 },
+    {
+      "action": "assert", "label": "Mounted: the minion has not engaged the NPC", "actor": "necro",
+      "metric": "owned_creature_victim", "entry": 51065, "target": "enemy", "equals": 0
+    },
+    {
+      "action": "assert", "label": "Mounted: the owner has not been pulled into combat", "actor": "necro",
+      "metric": "combat", "equals": 0
+    },
+    { "action": "cancel_mount", "actor": "necro" },
+    {
+      "action": "assert", "label": "The owner is dismounted", "actor": "necro", "metric": "mount_display_id",
+      "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Dismounted: the minion is attackable again", "actor": "necro",
+      "metric": "owned_creature_attackable", "entry": 51065, "target": "enemy", "equals": 1, "within_ms": 2000
+    },
+    { "action": "discover_taxi_node", "actor": "necro", "entry": 2 },
+    { "action": "discover_taxi_node", "actor": "necro", "entry": 5 },
+    { "action": "set_money", "actor": "necro", "value": 10000 },
+    {
+      "action": "client_packet", "label": "Fly Stormwind - Lakeshire", "actor": "necro", "opcode": 786,
+      "consumed": false,
+      "fields": [ { "actor_guid": "gryphon_master" }, { "u32": 2 }, { "u32": 2 }, { "u32": 5 } ]
+    },
+    {
+      "action": "assert", "label": "The flight starts", "actor": "necro", "metric": "in_flight", "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "In flight: the hostile NPC cannot attack the minion", "actor": "necro",
+      "metric": "owned_creature_attackable", "entry": 51065, "target": "enemy", "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "In flight: the minion stays summoned", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 51065, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The flight lands", "actor": "necro", "metric": "in_flight", "equals": 0,
+      "within_ms": 240000
+    },
+    {
+      "action": "assert", "label": "After landing the minion is still summoned within 100 yards", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 51065, "equals": 1, "within_ms": 10000
+    },
+    {
+      "action": "assert", "label": "After landing the owner is out of combat", "actor": "necro", "metric": "combat",
+      "equals": 0
+    }
+  ]
+}

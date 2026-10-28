@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "name": "Worldforged Grimtotem Bow sits on the ground at Three Totems and can be picked up (COA-6809)",
+  "contract": "The Grimtotem Bow pickup (520699, guid 6941796) was placed in game on the ground at (-3641.917, -1032.398, 204.614) by rev_20261004_20_coa_mulgore_three_totems_placement.sql. rev_20261014_95_worldforged_lootcollector_alignment.sql later moved it to (-3625.9, -1026.73, 220.811), about 16 yd above the ground, where nobody can reach it. A character standing at the in-game spot can open it.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": -3641.0, "y": -1032.4, "z": 204.8, "o": 0 },
+  "players": [ { "id": "p", "race": 6, "class": 1, "level": 10 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the bow is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 520699, "equals": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 520699 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "DISCRIMINATING: the bow is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

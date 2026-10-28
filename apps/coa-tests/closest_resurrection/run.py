@@ -24,13 +24,12 @@ using uint8=std::uint8_t;using uint32=std::uint32_t;
 enum SpellEffIndex : uint8 { EFFECT_0 = 0 };
 enum Rates { RATE_DURABILITY_LOSS_ON_SPIRIT_RESURRECT };
 enum TeleportToOptions : uint32 { TELE_TO_SPELL = 0x10 };
-struct GraveyardStruct { uint32 Map; float x; float y; float z; };
 struct Map { bool instanceable = false; bool Instanceable() const { return instanceable; } };
 struct Battlefield { bool war = false; bool IsWarTime() const { return war; } };
 struct Teleport { uint32 map; float x; float y; float z; float o; uint32 options; };
 struct Player
 {
-    TeamId team = TEAM_ALLIANCE; uint32 level = 80, mapId = 0, zone = 1; float x = 0, y = 0, o = 2;
+    TeamId team = TEAM_ALLIANCE; uint32 level = 80, mapId = 0, zone = 1; float x = 0, y = 0, z = 0, o = 2;
     bool alive = false, veto = false; Map* map = nullptr;
     std::vector<Teleport> teleports; std::vector<float> resurrected; std::vector<bool> sickness;
     std::vector<double> durability; uint32 bones = 0;
@@ -42,6 +41,9 @@ struct Player
     uint32 GetZoneId() const { return zone; }
     Map* GetMap() const { return map; }
     float GetOrientation() const { return o; }
+    float GetPositionX() const { return x; }
+    float GetPositionY() const { return y; }
+    float GetPositionZ() const { return z; }
     float GetExactDist2dSq(float px, float py) const { return (px - x) * (px - x) + (py - y) * (py - y); }
     void ResurrectPlayer(float percent, bool sick) { resurrected.push_back(percent); sickness.push_back(sick); alive = !veto; }
     void DurabilityLossAll(double percent, bool inventory) { assert(inventory); durability.push_back(percent); }
@@ -64,12 +66,18 @@ bool reportedOnce(uint32 spell)
     return reported;
 }
 struct SpellInfo { uint32 Id; };
-struct Graveyards
+struct TaxiNodesEntry { uint32 map_id = 0; float x = 0, y = 0, z = 0; };
+struct TaxiNodesStore
 {
-    std::optional<GraveyardStruct> grave;
-    GraveyardStruct const* GetClosestGraveyard(Player*, TeamId) { return grave ? &*grave : nullptr; }
-} graveyards;
-auto sGraveyard = &graveyards;
+    TaxiNodesEntry entry;
+    TaxiNodesEntry const* LookupEntry(uint32 id) { return id ? &entry : nullptr; }
+} sTaxiNodesStore;
+struct ObjectMgr
+{
+    uint32 node = 0;
+    uint32 GetNearestTaxiNode(float, float, float, uint32, uint32) { return node; }
+} objectMgr;
+auto sObjectMgr = &objectMgr;
 struct Battlefields
 {
     Battlefield field; uint32 zone = 0;
@@ -98,12 +106,13 @@ int main()
 {
     Map open, dungeon; dungeon.instanceable = true;
 
-    // Closest Town: the graveyard the ghost would repop at.
+    // Closest Town: the nearest flight-master town of the player's faction.
     {
         Player p = make(TEAM_HORDE, 1, -2725.0f, -1115.0f, &open);
         Script town{ &p, { SPELL_RESURRECT_CLOSEST_TOWN } };
         assert(town.Load());
-        graveyards.grave = GraveyardStruct{ 1, -2350.0f, -360.0f, -9.0f };
+        objectMgr.node = 1;
+        sTaxiNodesStore.entry = TaxiNodesEntry{ 1, -2350.0f, -360.0f, -9.0f };
         assert(town.CheckCast() == SPELL_CAST_OK);
         realm.rate = 25.0f;
         town.Resurrect(EFFECT_0);
@@ -124,13 +133,13 @@ int main()
         again.Resurrect(EFFECT_0);
         assert(q.alive && q.durability.empty() && q.teleports.size() == 1 && reportedOnce(SPELL_RESURRECT_CLOSEST_TOWN));
 
-        // No graveyard to go to.
-        Player r = make(TEAM_HORDE, 1, 0, 0, &open); graveyards.grave.reset();
+        // No reachable town leaves the spell unusable.
+        Player r = make(TEAM_HORDE, 1, 0, 0, &open); objectMgr.node = 0;
         Script none{ &r, { SPELL_RESURRECT_CLOSEST_TOWN } };
         assert(none.CheckCast() == SPELL_FAILED_NOT_HERE);
         none.Resurrect(EFFECT_0);
         assert(!r.alive && r.teleports.empty() && r.resurrected.empty() && scripts.events.empty());
-        graveyards.grave = GraveyardStruct{ 1, 1.0f, 2.0f, 3.0f };
+        objectMgr.node = 1;
 
         // Dungeons, battlegrounds and arenas use the ordinary way back.
         Player d = make(TEAM_HORDE, 1, 0, 0, &dungeon);
@@ -187,7 +196,8 @@ int main()
     Script gated{ &low, { SPELL_RESURRECT_CLOSEST_CITY } };
     assert(gated.CheckCast() == SPELL_FAILED_LEVEL_REQUIREMENT);
     // The town spell has no level requirement.
-    graveyards.grave = GraveyardStruct{ 0, 1.0f, 2.0f, 3.0f };
+    objectMgr.node = 1;
+    sTaxiNodesStore.entry = TaxiNodesEntry{ 0, 1.0f, 2.0f, 3.0f };
     Script lowTown{ &low, { SPELL_RESURRECT_CLOSEST_TOWN } };
     assert(lowTown.CheckCast() == SPELL_CAST_OK);
     return 0;

@@ -1,0 +1,167 @@
+{
+  "schema": 1,
+  "name": "Named quest item sharing overrides master loot and covers unmarked quest drops",
+  "contract": "Mok'rash 1493 drops Monogrammed Sash 3985 at 100 percent with QuestRequired=0. Item 3985 starts quest 8552. Accepting either sash quest grants its StartItem, so this regression checks pickup before accepting the quest. Each nearby eligible participant, including the original master-loot party and an ungrouped contributor, must collect one independent quest-starting drop.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "owner",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "friend",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "helper",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "mokrash",
+      "owner": "owner",
+      "entry": 1493,
+      "distance": 2,
+      "health": 100000,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "item_count",
+      "item": 3985,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "item_count",
+      "item": 3985,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "helper",
+      "metric": "item_count",
+      "item": 3985,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "quest_status",
+      "quest": 8552,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "quest_status",
+      "quest": 8552,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "helper",
+      "metric": "quest_status",
+      "quest": 8552,
+      "equals": 0
+    },
+    {
+      "action": "group",
+      "actor": "owner",
+      "target": "friend",
+      "loot_method": 2
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "owner",
+      "entry": 1493,
+      "damage_pct": 10
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "helper",
+      "entry": 1493,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "mokrash",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "loot_creature",
+      "actor": "owner",
+      "target": "mokrash"
+    },
+    {
+      "action": "loot_slot",
+      "actor": "owner",
+      "item": 3985
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "item_count",
+      "item": 3985,
+      "equals": 1
+    },
+    {
+      "action": "close_loot",
+      "actor": "owner"
+    },
+    {
+      "action": "loot_creature",
+      "actor": "friend",
+      "target": "mokrash"
+    },
+    {
+      "action": "loot_slot",
+      "actor": "friend",
+      "item": 3985
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "item_count",
+      "item": 3985,
+      "equals": 1
+    },
+    {
+      "action": "close_loot",
+      "actor": "friend"
+    },
+    {
+      "action": "loot_creature",
+      "actor": "helper",
+      "target": "mokrash"
+    },
+    {
+      "action": "loot_slot",
+      "actor": "helper",
+      "item": 3985
+    },
+    {
+      "action": "assert",
+      "actor": "helper",
+      "metric": "item_count",
+      "item": 3985,
+      "equals": 1
+    },
+    {
+      "action": "close_loot",
+      "actor": "helper"
+    }
+  ]
+}

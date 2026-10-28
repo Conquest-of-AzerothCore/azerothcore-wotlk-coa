@@ -106,6 +106,7 @@ struct npc_ascension_xoroth_summon : public ScriptedAI
             me->SetReactState(REACT_DEFENSIVE);
             if (me->GetEntry() == 50301)
             {
+                me->SetCreatorGUID(owner);
                 me->m_ControlledByPlayer = true;
                 me->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
                 me->SetByteValue(UNIT_FIELD_BYTES_2, 1, player->GetByteValue(UNIT_FIELD_BYTES_2, 1));
@@ -157,7 +158,8 @@ struct npc_ascension_xoroth_summon : public ScriptedAI
                 remaining = 0;
                 for (Unit* target : Nearby(me, 10))
                     if (player->IsValidAttackTarget(target) &&
-                        !target->IsImmunedToSpell(sSpellMgr->GetSpellInfo(803185)))
+                        !target->IsImmunedToSpell(sSpellMgr->GetSpellInfo(803185)) &&
+                        !target->IsImmuneToForcedMovement())
                         target->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(),
                                                             20, 10);
             }

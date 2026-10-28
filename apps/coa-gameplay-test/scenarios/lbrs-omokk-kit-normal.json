@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "name": "Lower Blackrock Spire: Highlord Omokk fights with Ascension's kit on Normal",
+  "contract": "Highlord Omokk has a C++ script; coa_dungeon_boss_kit adds his Ascension kit beside it on every dungeon difficulty. On Normal he casts the kit's Fierce Blow (975011) within the first half minute of combat. It does not check timers, damage or the Heroic/Mythic tiers.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 229,
+    "x": -22.79,
+    "y": -300.68,
+    "z": 31.8,
+    "o": 4.65,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "hero",
+      "entry": 9196,
+      "level": 60,
+      "health": 400000,
+      "reaction": 2,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 2156414,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Lower Blackrock Spire",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 229
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the instance is Normal",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "attack",
+      "label": "Engage Highlord Omokk",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Highlord Omokk fights the hero",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Highlord Omokk uses his kit's Fierce Blow on Normal",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 9196,
+      "spell": 975011,
+      "min": 1,
+      "within_ms": 15000
+    }
+  ]
+}

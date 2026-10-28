@@ -1,0 +1,157 @@
+{
+  "schema": 1,
+  "name": "Paragon documents and obeys its Dawn prerequisite (#6557)",
+  "contract": [
+    "Paragon (680639) has CasterAuraSpell 807440, Dawn. Without it a normal cast must fail with CASTER_AURASTATE (22).",
+    "With Dawn active, a normal Paragon cast must apply its 20 percent attribute aura and an armor bonus equal",
+    "to five times current Intellect, while starting the authored five-minute cooldown.",
+    "The outgoing spell description must say Requires Dawn, preserving the existing description and buff tooltip.",
+    "Dawn is isolated native aura fixture state; Paragon uses the normal session cast handler.",
+    "The report level 44 is used. The native packet check covers description data, not rendered client text."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 44
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 680639
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 807440,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 680639
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "cast_failure",
+      "spell": 680639,
+      "equals": 22,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 680639,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "cooldown_ms",
+      "spell": 680639,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture: the documented Dawn prerequisite",
+      "actor": "cleric",
+      "spell": 807440,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 807440,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 680639
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 680639,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "aura_amount",
+      "spell": 680639,
+      "effect": 0,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "cooldown_ms",
+      "spell": 680639,
+      "min": 299000,
+      "max": 300000
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "snapshot",
+      "actor": "cleric",
+      "metric": "stat",
+      "stat": 3,
+      "save_as": "paragon_intellect"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "aura_amount",
+      "spell": 680639,
+      "effect": 1,
+      "ratio_to": "paragon_intellect",
+      "min": 4.999,
+      "max": 5.001
+    },
+    {
+      "action": "assert",
+      "label": "Spell description explains the caster requirement",
+      "actor": "cleric",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 680639,
+      "text": "Requires |cffffffffDawn|r",
+      "equals": 1
+    }
+  ]
+}

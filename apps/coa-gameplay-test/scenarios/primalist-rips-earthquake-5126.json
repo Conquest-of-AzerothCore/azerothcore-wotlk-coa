@@ -1,0 +1,288 @@
+{
+  "schema": 1,
+  "name": "Rips and Tears grants two Rage per Earthquake damage tick (#5126)",
+  "contract": "Rips and Tears 800141 generates two Rage per periodic owner damage event. Earthquake 520745 is a persistent PERIODIC_DAMAGE aura ticking every three seconds for nine seconds. Native landed damage counts independently define how many resource events must occur: 20 internal Rage units per tick, with no-talent and removed-talent controls. The report also names Geode Barrage; its periodic-triggered stones are direct SCHOOL_DAMAGE effects, so they do not establish a periodic-damage expectation.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 100000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 36,
+      "level": 80,
+      "health": 500000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 58
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 800141,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 520745
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520745,
+      "target": "target",
+      "save_as": "baseline_hits_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 521233,
+      "power": 1,
+      "save_as": "baseline_rage_before"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520745
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520745,
+      "destination": {
+        "x": -9614.06,
+        "y": -288.949,
+        "z": 57.3053
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520745,
+      "target": "target",
+      "relative_to": "baseline_hits_before",
+      "min": 2
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520745,
+      "target": "target",
+      "relative_to": "baseline_hits_before",
+      "save_as": "baseline_ticks"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 521233,
+      "power": 1,
+      "relative_to": "baseline_rage_before",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 800141
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520745,
+      "target": "target",
+      "save_as": "talented_hits_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 521233,
+      "power": 1,
+      "save_as": "talented_rage_before"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520745
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520745,
+      "destination": {
+        "x": -9614.06,
+        "y": -288.949,
+        "z": 57.3053
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520745,
+      "target": "target",
+      "relative_to": "talented_hits_before",
+      "min": 2
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520745,
+      "target": "target",
+      "relative_to": "talented_hits_before",
+      "save_as": "talented_ticks"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 521233,
+      "power": 1,
+      "relative_to": "talented_rage_before",
+      "ratio_to": "talented_ticks",
+      "equals": 20
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 800141
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520745,
+      "target": "target",
+      "save_as": "removed_hits_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 521233,
+      "power": 1,
+      "save_as": "removed_rage_before"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520745
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520745,
+      "destination": {
+        "x": -9614.06,
+        "y": -288.949,
+        "z": 57.3053
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520745,
+      "target": "target",
+      "relative_to": "removed_hits_before",
+      "min": 2
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520745,
+      "target": "target",
+      "relative_to": "removed_hits_before",
+      "save_as": "removed_ticks"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 521233,
+      "power": 1,
+      "relative_to": "removed_rage_before",
+      "equals": 0
+    }
+  ]
+}

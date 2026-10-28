@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "name": "Call of the Grave makes Animate: Bone Construct instant and free (#7311)",
+  "contract": "Call of the Grave 707738 (trainer spell, SkillLineAbility 24746) reads \"Beckon the dead, removing the cost and cast time of all Raise spells and Animates for $d.\" Effect 0 is SPELL_AURA_ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST) with EffectSpellClassMask (0x8, 0x10000, 0x20000000) and effect 1 MiscValue 10 (SPELLMOD_CASTING_TIME) with (0x8, 0x10000, 0), both BasePoints -101 + 1 = -100, in SpellFamilyName 29. Raise and Animate summons carry family flag word 0 0x8, but Animate: Bone Construct 531130 (CharacterAdvancement 11619, Animation tab; CastingTimeIndex 14 = 3000 ms, 300 Runic Power) has family flags (0, 0, 0) in the client Spell.dbc, so no modifier matched it. The load contract gives it the Animate flag word 0 0x8, which the other matching modifiers also intend for it: Graverobber 503757 ('Raise and Animate spells') and Grave Mastery 504439 ('all Animates, Raises, and Command spells'). Expected: without the buff Animate: Bone Construct takes 3 sec and costs Runic Power; with Call of the Grave active it is instant and free, and a real cast raises the Bone Construct 503200 without spending Runic Power.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and stat updates settle", "ms": 3000 },
+    { "action": "learn", "actor": "necro", "spell": 531130 },
+    { "action": "learn", "actor": "necro", "spell": 707738 },
+    {
+      "action": "assert", "label": "Animate: Bone Construct carries the Animate family flag", "actor": "necro",
+      "metric": "spell_family_flags", "spell": 531130, "index": 0, "equals": 8
+    },
+    {
+      "action": "assert", "label": "CONTROL: Animate: Bone Construct is a 3 sec cast", "actor": "necro",
+      "metric": "spell_cast_time_ms", "spell": 531130, "min": 2900, "max": 3000
+    },
+    {
+      "action": "assert", "label": "CONTROL: Animate: Bone Construct costs Runic Power", "actor": "necro",
+      "metric": "spell_power_cost", "spell": 531130, "min": 1
+    },
+    { "action": "cast", "label": "Cast Call of the Grave", "actor": "necro", "spell": 707738 },
+    {
+      "action": "assert", "label": "SETUP: Call of the Grave is active", "actor": "necro",
+      "metric": "aura", "spell": 707738, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Animate: Bone Construct is instant", "actor": "necro",
+      "metric": "spell_cast_time_ms", "spell": 531130, "equals": 0
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Animate: Bone Construct is free", "actor": "necro",
+      "metric": "spell_power_cost", "spell": 531130, "equals": 0
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "set_power", "actor": "necro", "power": 6, "value": 500 },
+    { "action": "cast", "label": "Animate a Bone Construct", "actor": "necro", "spell": 531130 },
+    {
+      "action": "assert", "label": "The instant Animate raises the Bone Construct", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 503200, "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The Animate spends no Runic Power", "actor": "necro",
+      "metric": "power", "power": 6, "min": 450
+    }
+  ]
+}

@@ -22,6 +22,7 @@
 #include "Object.h"
 #include "SharedDefines.h"
 #include "SpellAuraDefines.h"
+#include <array>
 #include <boost/container/flat_set.hpp>
 #include "Util.h"
 
@@ -364,8 +365,17 @@ public:
     // Runtime-only opt-in for explicitly authored coefficients. Rank base
     // growth still uses the original SpellLevel and MaxLevel metadata.
     bool IgnoreSpellLevelPenalty = false;
-    uint32 Stances;
-    uint32 StancesNot;
+    // Ascension finishers scale with (AP + SP) * (square * cp * cp + flat) per effect (Eviscerate's
+    // "(AP+SP)*5*5*0.02"); when set, it replaces the stock per-combo-point attack power part.
+    std::array<float, MAX_SPELL_EFFECTS> ComboPointPowerSquare = {};
+    std::array<float, MAX_SPELL_EFFECTS> ComboPointPowerFlat = {};
+    [[nodiscard]] bool HasComboPointPowerBonus(uint8 effIndex) const
+    {
+        return ComboPointPowerSquare[effIndex] != 0.0f || ComboPointPowerFlat[effIndex] != 0.0f;
+    }
+    int32 GetComboPointPowerBonus(Unit* caster, uint8 effIndex, uint32 comboPoints) const;
+    uint64 Stances;
+    uint64 StancesNot;
     uint32 Targets;
     uint32 TargetCreatureType;
     uint32 RequiresSpellFocus;

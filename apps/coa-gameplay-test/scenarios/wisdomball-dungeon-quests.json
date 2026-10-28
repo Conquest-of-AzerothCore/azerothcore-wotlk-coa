@@ -1,11 +1,44 @@
 {
   "schema": 1,
   "name": "The Wondrous Wisdomball: a summoned ball lists the dungeon's own quests and takes the ones a chain hides",
-  "contract": "Spell 83050 summons creature 79025, the companion that carries the quests of the dungeon its owner is standing in and takes them back. The ball owns no quest relations of its own, so its marker, its quest list and its quest packets are the server's script answering for it. The realm's owned-companion login pass (CoA.UnlockAllVanity and CoA.LearnOwnedCompanions, both on in coa.conf.dist; #4223) teaches every character the summon, so the scenario forgets it first. What this scenario proves: using item 101169 teaches the summon; the summon produces a creature the player owns; in a dungeon whose own spawns hand out quests, the ball reports an available marker (8) for that player; a quest whose chain is not finished is refused by the game's own rules yet still granted and handed in at the ball; the list holds the whole dungeon's quests, including ones no creature inside it hands out; a quest the character has taken moves out of the offered half and into the carried one; and out in the world the ball offers nothing, still lists the dungeon quests being carried, marks itself as their turn-in point, and hands one in there. It is one summon for everyone at it: a second player standing by somebody else's ball is listed their own carried quests, is marked the same hand-in point, and can open that window and hand their quest in there, while the summoner's log is left alone. Both clicks a name in that frame can produce are exercised as the client sends them - the query of an offered name, and the complete-quest of one already carried - and each is required to be answered by the ball's own script rather than dropped. The frame's greeting row is asserted by id. The gossip list as the client draws it, the window a click opens and the client's rendering of a right-click on a pet are outside this harness's reach.",
+  "contract": [
+    "Spell 83050 summons creature 79025, the companion that carries the quests of the dungeon its owner is",
+    "standing in and takes them back. The ball owns no quest relations of its own, so its marker, its quest list",
+    "and its quest packets are the server's script answering for it. The realm's owned-companion login pass",
+    "(CoA.UnlockAllVanity and CoA.LearnOwnedCompanions, both on in coa.conf.dist; #4223) teaches every character",
+    "the summon, so the scenario forgets it first. What this scenario proves: using item 101169 teaches the",
+    "summon; the summon produces a creature the player owns; in a dungeon whose own spawns hand out quests, the",
+    "ball reports an available marker (8) for that player; a quest whose chain is not finished is refused by the",
+    "game's own rules yet still granted and handed in at the ball; the list holds the whole dungeon's quests,",
+    "including ones no creature inside it hands out; a quest the character has taken moves out of the offered",
+    "half and into the carried one; and out in the world the ball offers nothing, still lists the dungeon quests",
+    "being carried, marks itself as their turn-in point, and hands one in there. It is one summon for everyone at",
+    "it: a second player standing by somebody else's ball is listed their own carried quests, is marked the same",
+    "hand-in point, and can open that window and hand their quest in there, while the summoner's log is left",
+    "alone. Both clicks a name in that frame can produce are exercised as the client sends them - the query of an",
+    "offered name, and the complete-quest of one already carried - and each is required to be answered by the",
+    "ball's own script rather than dropped. The frame's greeting row is asserted by id. The gossip list as the",
+    "client draws it, the window a click opens and the client's rendering of a right-click on a pet are outside",
+    "this harness's reach.",
+    "Quest 4004 awards one Thrall Resolve 12544, with authored item level 60 and required level 48. Enabled",
+    "quest/item scaling may deliver a higher-level variant with another raw entry. Observe the actually carried",
+    "item by its native canonical base, require it absent before hand-in, and require at least those authored",
+    "levels afterward. Keep the original quest-chain bypass, owner, marker, lists and hand-in assertions."
+  ],
   "timeout_ms": 240000,
   "players": [
-    { "id": "seeker", "race": 2, "class": 1, "level": 80 },
-    { "id": "bystander", "race": 2, "class": 1, "level": 80 }
+    {
+      "id": "seeker",
+      "race": 2,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "bystander",
+      "race": 2,
+      "class": 1,
+      "level": 80
+    }
   ],
   "location": {
     "map": 230,
@@ -16,218 +49,485 @@
     "ignore_access": true
   },
   "steps": [
-    { "action": "wait", "label": "Let the dungeon map, its spawns and level scaling settle", "ms": 8000 },
-    { "action": "console", "command": "server info" },
-    { "action": "unlearn", "label": "fixture: forget the summon the owned-companion login pass taught", "actor": "seeker", "spell": 83050 },
+    {
+      "action": "wait",
+      "label": "Let the dungeon map, its spawns and level scaling settle",
+      "ms": 8000
+    },
+    {
+      "action": "console",
+      "command": "server info"
+    },
+    {
+      "action": "unlearn",
+      "label": "fixture: forget the summon the owned-companion login pass taught",
+      "actor": "seeker",
+      "spell": 83050
+    },
     {
       "action": "assert",
       "label": "Without it the character knows no summon",
-      "actor": "seeker", "metric": "knows_spell", "spell": 83050, "equals": 0
+      "actor": "seeker",
+      "metric": "knows_spell",
+      "spell": 83050,
+      "equals": 0
     },
-    { "action": "add_item", "label": "The companion is obtained, as a purchase would obtain it", "actor": "seeker", "item": 101169, "count": 1 },
+    {
+      "action": "add_item",
+      "label": "The companion is obtained, as a purchase would obtain it",
+      "actor": "seeker",
+      "item": 101169,
+      "count": 1
+    },
     {
       "action": "assert",
       "label": "The Wisdomball item is in the bag",
-      "actor": "seeker", "metric": "item_count", "item": 101169, "equals": 1
+      "actor": "seeker",
+      "metric": "item_count",
+      "item": 101169,
+      "equals": 1
     },
-    { "action": "use_item", "label": "Using the item teaches its summon", "actor": "seeker", "item": 101169, "spell": 55884 },
+    {
+      "action": "use_item",
+      "label": "Using the item teaches its summon",
+      "actor": "seeker",
+      "item": 101169,
+      "spell": 55884
+    },
     {
       "action": "assert",
       "label": "The summon is now in the spellbook",
-      "actor": "seeker", "metric": "knows_spell", "spell": 83050, "equals": 1, "within_ms": 3000
+      "actor": "seeker",
+      "metric": "knows_spell",
+      "spell": 83050,
+      "equals": 1,
+      "within_ms": 3000
     },
-    { "action": "cast", "label": "Summon the ball", "actor": "seeker", "spell": 83050 },
-    { "action": "wait", "label": "Let the summon land in the world", "ms": 3000 },
+    {
+      "action": "cast",
+      "label": "Summon the ball",
+      "actor": "seeker",
+      "spell": 83050
+    },
+    {
+      "action": "wait",
+      "label": "Let the summon land in the world",
+      "ms": 3000
+    },
     {
       "action": "assert",
       "label": "The cast produced a creature this player owns",
-      "actor": "seeker", "metric": "owned_creature_count", "entry": 79025, "min": 1, "within_ms": 5000
+      "actor": "seeker",
+      "metric": "owned_creature_count",
+      "entry": 79025,
+      "min": 1,
+      "within_ms": 5000
     },
     {
       "action": "assert",
       "label": "In a dungeon the ball reports an available marker, so the client draws the ! over it",
-      "actor": "seeker", "metric": "dialog_status", "entry": 79025, "equals": 8, "within_ms": 5000
+      "actor": "seeker",
+      "metric": "dialog_status",
+      "entry": 79025,
+      "equals": 8,
+      "within_ms": 5000
     },
     {
       "action": "snapshot",
-      "label": "Record the bag contents before the hand-in",
-      "actor": "seeker", "metric": "item_count", "item": 12544, "save_as": "choice_before"
+      "label": "Record whether the actual chosen source item or its scaled variant is carried before hand-in",
+      "actor": "seeker",
+      "metric": "carried_item_level",
+      "item": 12544,
+      "save_as": "choice_before"
+    },
+    {
+      "action": "assert",
+      "actor": "seeker",
+      "metric": "carried_item_level",
+      "item": 12544,
+      "equals": 0,
+      "label": "The chosen quest reward is absent before the actual hand-in"
     },
     {
       "action": "assert",
       "label": "The chained quest is not in the log yet",
-      "actor": "seeker", "metric": "quest_status", "quest": 4004, "equals": 0
+      "actor": "seeker",
+      "metric": "quest_status",
+      "quest": 4004,
+      "equals": 0
     },
     {
       "action": "assert",
       "label": "The game itself refuses it, because its chain is unfinished - this is the gap the ball fills",
-      "actor": "seeker", "metric": "quest_takeable", "quest": 4004, "equals": 0
+      "actor": "seeker",
+      "metric": "quest_takeable",
+      "quest": 4004,
+      "equals": 0
     },
-    { "action": "quest_accept", "label": "Accept it at the ball anyway", "actor": "seeker", "quest": 4004, "entry": 79025 },
+    {
+      "action": "quest_accept",
+      "label": "Accept it at the ball anyway",
+      "actor": "seeker",
+      "quest": 4004,
+      "entry": 79025
+    },
     {
       "action": "assert",
       "label": "The ball granted the quest the game refused, and it arrived ready to hand in",
-      "actor": "seeker", "metric": "quest_status", "quest": 4004, "equals": 1, "within_ms": 3000
+      "actor": "seeker",
+      "metric": "quest_status",
+      "quest": 4004,
+      "equals": 1,
+      "within_ms": 3000
     },
-    { "action": "quest_complete", "label": "Finish its objectives, as a dungeon run would", "actor": "seeker", "quest": 4004 },
-    { "action": "quest_turn_in", "label": "Hand it in at the ball", "actor": "seeker", "quest": 4004, "entry": 79025, "reward": 0 },
+    {
+      "action": "quest_complete",
+      "label": "Finish its objectives, as a dungeon run would",
+      "actor": "seeker",
+      "quest": 4004
+    },
+    {
+      "action": "quest_turn_in",
+      "label": "Hand it in at the ball",
+      "actor": "seeker",
+      "quest": 4004,
+      "entry": 79025,
+      "reward": 0
+    },
     {
       "action": "assert",
       "label": "The hand-in left the log and the quest is marked rewarded, so the ball paid it out",
-      "actor": "seeker", "metric": "quest_status", "quest": 4004, "equals": 6, "within_ms": 3000
+      "actor": "seeker",
+      "metric": "quest_status",
+      "quest": 4004,
+      "equals": 6,
+      "within_ms": 3000
     },
     {
       "action": "assert",
-      "label": "And the chosen reward is in the bag",
-      "actor": "seeker", "metric": "item_count", "item": 12544, "relative_to": "choice_before", "min": 1
+      "label": "The chosen Thrall Resolve reward or its scaled variant is actually carried",
+      "actor": "seeker",
+      "metric": "carried_item_level",
+      "item": 12544,
+      "relative_to": "choice_before",
+      "min": 60
+    },
+    {
+      "action": "assert",
+      "actor": "seeker",
+      "metric": "carried_item_required_level",
+      "item": 12544,
+      "min": 48,
+      "label": "The actual quest reward retains at least its authored required level"
     },
     {
       "action": "assert",
       "label": "The ball lists the whole dungeon, not just the NPCs standing inside it",
-      "actor": "seeker", "metric": "ball_offer_count", "min": 20, "within_ms": 5000
+      "actor": "seeker",
+      "metric": "ball_offer_count",
+      "min": 20,
+      "within_ms": 5000
     },
     {
       "action": "assert",
       "label": "A Blackrock Depths quest no creature inside it hands out is listed for it anyway",
-      "actor": "seeker", "metric": "ball_offers_quest", "quest": 4123, "equals": 1
+      "actor": "seeker",
+      "metric": "ball_offers_quest",
+      "quest": 4123,
+      "equals": 1
     },
-    { "action": "quest_open", "label": "Click that offered name, as the client does in the frame's available half", "actor": "seeker", "quest": 4123, "entry": 79025 },
+    {
+      "action": "quest_open",
+      "label": "Click that offered name, as the client does in the frame's available half",
+      "actor": "seeker",
+      "quest": 4123,
+      "entry": 79025
+    },
     {
       "action": "assert",
       "label": "The window it opens asks for the quest rather than taking it",
-      "actor": "seeker", "metric": "quest_status", "quest": 4123, "equals": 0
+      "actor": "seeker",
+      "metric": "quest_status",
+      "quest": 4123,
+      "equals": 0
     },
     {
       "action": "assert",
       "label": "The greeting the frame draws above the list is a row the server can send",
-      "actor": "seeker", "metric": "gossip_text", "id": 790250, "equals": 1
+      "actor": "seeker",
+      "metric": "gossip_text",
+      "id": 790250,
+      "equals": 1
     },
     {
       "action": "assert",
       "label": "Nothing is carried yet, so the list is the dungeon's own quests only",
-      "actor": "seeker", "metric": "ball_carried_count", "equals": 0
+      "actor": "seeker",
+      "metric": "ball_carried_count",
+      "equals": 0
     },
-    { "action": "quest_accept", "label": "Take a second dungeon quest at the ball", "actor": "seeker", "quest": 4123, "entry": 79025 },
+    {
+      "action": "quest_accept",
+      "label": "Take a second dungeon quest at the ball",
+      "actor": "seeker",
+      "quest": 4123,
+      "entry": 79025
+    },
     {
       "action": "assert",
       "label": "It is in the log now, and the list shows it as one the character carries",
-      "actor": "seeker", "metric": "ball_carried_quest", "quest": 4123, "equals": 1, "within_ms": 3000
+      "actor": "seeker",
+      "metric": "ball_carried_quest",
+      "quest": 4123,
+      "equals": 1,
+      "within_ms": 3000
     },
     {
       "action": "assert",
       "label": "And it is no longer counted as something still to be offered",
-      "actor": "seeker", "metric": "ball_offers_quest", "quest": 4123, "equals": 0
+      "actor": "seeker",
+      "metric": "ball_offers_quest",
+      "quest": 4123,
+      "equals": 0
     },
     {
       "action": "assert",
       "label": "Taken, it is unfinished: it asks for an item the character is not carrying",
-      "actor": "seeker", "metric": "quest_status", "quest": 4123, "equals": 3
+      "actor": "seeker",
+      "metric": "quest_status",
+      "quest": 4123,
+      "equals": 3
     },
     {
       "action": "assert",
       "label": "So the ball lists it as carried and not as ready to hand in",
-      "actor": "seeker", "metric": "ball_turn_in_count", "equals": 0
+      "actor": "seeker",
+      "metric": "ball_turn_in_count",
+      "equals": 0
     },
-    { "action": "add_item", "label": "Carry back the item the quest asks for, as the dungeon would drop it", "actor": "seeker", "item": 11309, "count": 1 },
-    { "action": "quest_click", "label": "Click its name at the ball while it is still unfinished - carried, so this is the complete-quest opcode", "actor": "seeker", "quest": 4123, "entry": 79025 },
+    {
+      "action": "add_item",
+      "label": "Carry back the item the quest asks for, as the dungeon would drop it",
+      "actor": "seeker",
+      "item": 11309,
+      "count": 1
+    },
+    {
+      "action": "quest_click",
+      "label": "Click its name at the ball while it is still unfinished - carried, so this is the complete-quest opcode",
+      "actor": "seeker",
+      "quest": 4123,
+      "entry": 79025
+    },
     {
       "action": "assert",
       "label": "The ball's window is what finishes it, as the quest giver's own window would",
-      "actor": "seeker", "metric": "quest_status", "quest": 4123, "equals": 1, "within_ms": 3000
+      "actor": "seeker",
+      "metric": "quest_status",
+      "quest": 4123,
+      "equals": 1,
+      "within_ms": 3000
     },
     {
       "action": "assert",
       "label": "Now it counts as ready to hand in at the ball",
-      "actor": "seeker", "metric": "ball_turn_in_quest", "quest": 4123, "equals": 1
+      "actor": "seeker",
+      "metric": "ball_turn_in_quest",
+      "quest": 4123,
+      "equals": 1
     },
     {
       "action": "teleport",
       "label": "Walk back out into the world",
-      "actor": "seeker", "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0
+      "actor": "seeker",
+      "map": 0,
+      "x": -8949.95,
+      "y": -132.493,
+      "z": 83.5312,
+      "o": 0
     },
-    { "action": "wait", "label": "Let the map change land", "ms": 5000 },
-    { "action": "cast", "label": "Have the ball out in the world", "actor": "seeker", "spell": 83050 },
-    { "action": "wait", "label": "Let the summon land", "ms": 3000 },
+    {
+      "action": "wait",
+      "label": "Let the map change land",
+      "ms": 5000
+    },
+    {
+      "action": "cast",
+      "label": "Have the ball out in the world",
+      "actor": "seeker",
+      "spell": 83050
+    },
+    {
+      "action": "wait",
+      "label": "Let the summon land",
+      "ms": 3000
+    },
     {
       "action": "assert",
       "label": "The ball is out here too",
-      "actor": "seeker", "metric": "owned_creature_count", "entry": 79025, "min": 1, "within_ms": 5000
+      "actor": "seeker",
+      "metric": "owned_creature_count",
+      "entry": 79025,
+      "min": 1,
+      "within_ms": 5000
     },
     {
       "action": "assert",
       "label": "But it offers no dungeon's quests out here",
-      "actor": "seeker", "metric": "ball_offer_count", "equals": 0
+      "actor": "seeker",
+      "metric": "ball_offer_count",
+      "equals": 0
     },
     {
       "action": "assert",
       "label": "It still lists the dungeon quest the character is carrying",
-      "actor": "seeker", "metric": "ball_carried_quest", "quest": 4123, "equals": 1
+      "actor": "seeker",
+      "metric": "ball_carried_quest",
+      "quest": 4123,
+      "equals": 1
     },
     {
       "action": "assert",
       "label": "And with something ready to hand in it marks itself out here too",
-      "actor": "seeker", "metric": "dialog_status", "entry": 79025, "equals": 10, "within_ms": 5000
+      "actor": "seeker",
+      "metric": "dialog_status",
+      "entry": 79025,
+      "equals": 10,
+      "within_ms": 5000
     },
-    { "action": "quest_click", "label": "Click the same carried name out here, where the ball has no dungeon of its own", "actor": "seeker", "quest": 4123, "entry": 79025 },
+    {
+      "action": "quest_click",
+      "label": "Click the same carried name out here, where the ball has no dungeon of its own",
+      "actor": "seeker",
+      "quest": 4123,
+      "entry": 79025
+    },
     {
       "action": "assert",
       "label": "Opening it left it where it was, ready to hand in and unhanded",
-      "actor": "seeker", "metric": "quest_status", "quest": 4123, "equals": 1
+      "actor": "seeker",
+      "metric": "quest_status",
+      "quest": 4123,
+      "equals": 1
     },
-    { "action": "quest_turn_in", "label": "Hand it in at the ball, out of the dungeon", "actor": "seeker", "quest": 4123, "entry": 79025, "reward": 0 },
+    {
+      "action": "quest_turn_in",
+      "label": "Hand it in at the ball, out of the dungeon",
+      "actor": "seeker",
+      "quest": 4123,
+      "entry": 79025,
+      "reward": 0
+    },
     {
       "action": "assert",
       "label": "The hand-in went through out here, so the ball is the turn-in point wherever it is summoned",
-      "actor": "seeker", "metric": "quest_status", "quest": 4123, "equals": 6, "within_ms": 3000
+      "actor": "seeker",
+      "metric": "quest_status",
+      "quest": 4123,
+      "equals": 6,
+      "within_ms": 3000
     },
     {
       "action": "assert",
       "label": "With nothing carried the list is empty again",
-      "actor": "seeker", "metric": "ball_carried_count", "equals": 0
+      "actor": "seeker",
+      "metric": "ball_carried_count",
+      "equals": 0
     },
     {
       "action": "assert",
       "label": "And the marker is gone with it",
-      "actor": "seeker", "metric": "dialog_status", "entry": 79025, "equals": 0
+      "actor": "seeker",
+      "metric": "dialog_status",
+      "entry": 79025,
+      "equals": 0
     },
     {
       "action": "teleport",
       "label": "A second player walks up to the ball somebody else summoned",
-      "actor": "bystander", "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0
+      "actor": "bystander",
+      "map": 0,
+      "x": -8949.95,
+      "y": -132.493,
+      "z": 83.5312,
+      "o": 0
     },
-    { "action": "wait", "label": "Let that teleport land", "ms": 5000 },
-    { "action": "prepare_quest", "label": "The second player carries a dungeon quest of their own", "actor": "bystander", "quest": 4004 },
+    {
+      "action": "wait",
+      "label": "Let that teleport land",
+      "ms": 5000
+    },
+    {
+      "action": "prepare_quest",
+      "label": "The second player carries a dungeon quest of their own",
+      "actor": "bystander",
+      "quest": 4004
+    },
     {
       "action": "assert",
       "label": "The ball lists it for them, though the ball is not theirs",
-      "actor": "bystander", "metric": "ball_carried_quest", "quest": 4004, "equals": 1, "within_ms": 5000
+      "actor": "bystander",
+      "metric": "ball_carried_quest",
+      "quest": 4004,
+      "equals": 1,
+      "within_ms": 5000
     },
     {
       "action": "assert",
       "label": "And the summoner's own list stays their own",
-      "actor": "seeker", "metric": "ball_carried_quest", "quest": 4004, "equals": 0
+      "actor": "seeker",
+      "metric": "ball_carried_quest",
+      "quest": 4004,
+      "equals": 0
     },
     {
       "action": "assert",
       "label": "The ball marks itself for the other player as a hand-in point too",
-      "actor": "bystander", "metric": "dialog_status", "entry": 79025, "equals": 10, "within_ms": 5000
+      "actor": "bystander",
+      "metric": "dialog_status",
+      "entry": 79025,
+      "equals": 10,
+      "within_ms": 5000
     },
-    { "action": "quest_click", "label": "Clicking the carried name opens its window at another player's ball", "actor": "bystander", "quest": 4004, "entry": 79025 },
+    {
+      "action": "quest_click",
+      "label": "Clicking the carried name opens its window at another player's ball",
+      "actor": "bystander",
+      "quest": 4004,
+      "entry": 79025
+    },
     {
       "action": "assert",
       "label": "The window left their quest where it was, ready and unhanded",
-      "actor": "bystander", "metric": "quest_status", "quest": 4004, "equals": 1
+      "actor": "bystander",
+      "metric": "quest_status",
+      "quest": 4004,
+      "equals": 1
     },
-    { "action": "quest_turn_in", "label": "Hand it in at the ball the other player summoned", "actor": "bystander", "quest": 4004, "entry": 79025, "reward": 0 },
+    {
+      "action": "quest_turn_in",
+      "label": "Hand it in at the ball the other player summoned",
+      "actor": "bystander",
+      "quest": 4004,
+      "entry": 79025,
+      "reward": 0
+    },
     {
       "action": "assert",
       "label": "The hand-in went through for them, so the summon serves everyone at it",
-      "actor": "bystander", "metric": "quest_status", "quest": 4004, "equals": 6, "within_ms": 3000
+      "actor": "bystander",
+      "metric": "quest_status",
+      "quest": 4004,
+      "equals": 6,
+      "within_ms": 3000
     },
     {
       "action": "assert",
       "label": "The summoner's own copy of that quest was not touched by it",
-      "actor": "seeker", "metric": "quest_status", "quest": 4004, "equals": 6
+      "actor": "seeker",
+      "metric": "quest_status",
+      "quest": 4004,
+      "equals": 6
     }
   ]
 }

@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Item scaling: a stored client key that equals the item level keeps its ladder row",
+  "contract": "Requires DestinyWeaver.Enable=1, DestinyWeaver.LevelScaling=1, CoA.ItemScaling=1 and CoA.ItemScaling.Native=1, and ItemStat.dbc in the data directory. Preview answers an item stat query whose key equals the item's own item level with the authored item, because an unowned preview is queried at the item level. Lionfur Armor 17922 has item level 10, required level 5 and 108 armor; its ItemStat.dbc row at key 10 requires level 9 with 108 armor. A level 8 character's key is 8 + 2 = 10, so a looted Lionfur Armor stores key 10, equal to its item level, and the character owns an instance at that key. The owned instance must keep the ladder row (required level 9), not fall back to the authored item (required level 5).",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -9465, "y": 64, "z": 56, "o": 0 },
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 8, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "rake", "owner": "hero", "entry": 5807, "level": 10, "health": 1, "distance": 2 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 2000 },
+    { "action": "attack", "actor": "hero", "target": "rake" },
+    { "action": "assert", "actor": "rake", "metric": "alive", "equals": 0, "within_ms": 30000 },
+    { "action": "loot_creature", "actor": "hero", "target": "rake" },
+    { "action": "assert", "label": "The corpse holds the authored Lionfur Armor", "actor": "hero", "metric": "loot_entry", "item": 17922, "equals": 17922 },
+    { "action": "loot_slot", "actor": "hero", "item": 17922 },
+    { "action": "assert", "label": "The looted armor stores the client key 10, its own item level", "actor": "hero", "metric": "carried_item_scaling_level", "item": 17922, "equals": 10, "within_ms": 2000 },
+    { "action": "assert", "label": "The owned armor keeps the ladder row's required level 9, not the authored 5", "actor": "hero", "metric": "carried_item_required_level", "item": 17922, "equals": 9 },
+    { "action": "assert", "label": "The owned armor keeps item level 10", "actor": "hero", "metric": "carried_item_level", "item": 17922, "equals": 10 },
+    { "action": "close_loot", "actor": "hero" }
+  ]
+}

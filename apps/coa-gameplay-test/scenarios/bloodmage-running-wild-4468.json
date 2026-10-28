@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Running Wild is offered at level 20 and works (#4468)",
+  "contract": "#4468 'Running Wild is missing' (Eternal Bloodmage). Running Wild 800175 is a Bloodmage class spell at level 20 in AscensionCompatData::ClassSpells, which mod-spellbook's BuildRows offers; class spells are not auto-learned while CoA.AutoProgression = 0. 800175 is outdoors only, 1 s cast, no stance requirement, +60% speed. Expected: a level-35 Bloodmage sees Running Wild in the spellbook trainer window, can buy it, knows it, and gains the aura when casting it outdoors.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "b", "race": 1, "class": 20, "level": 35 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 4000 },
+    { "action": "money", "actor": "b", "copper": 1000000, "label": "fixture: a purse for the ability the book sells" },
+    { "action": "learn", "actor": "b", "spell": 97930, "label": "learn the book companion spell" },
+    { "action": "cast", "actor": "b", "spell": 97930, "label": "summon the book" },
+    { "action": "assert", "actor": "b", "metric": "owned_creature_count", "entry": 75115, "equals": 1, "within_ms": 5000, "label": "the book is out" },
+    { "action": "gossip_hello", "actor": "b", "label": "open the book" },
+    { "action": "assert", "actor": "b", "metric": "gossip_options", "equals": 0, "label": "the book answered with a trainer window" },
+    { "action": "assert", "actor": "b", "metric": "knows_spell", "spell": 800175, "equals": 0, "label": "SETUP: Running Wild is not known yet" },
+    { "action": "assert", "actor": "b", "metric": "spellbook_offers_spell", "spell": 800175, "equals": 1, "label": "the book offers Running Wild" },
+    { "action": "trainer_buy", "actor": "b", "spell": 800175, "label": "buy Running Wild" },
+    { "action": "assert", "actor": "b", "metric": "spellbook_buy_succeeded", "spell": 800175, "equals": 1, "label": "the purchase was granted" },
+    { "action": "assert", "actor": "b", "metric": "knows_spell", "spell": 800175, "equals": 1, "label": "Running Wild was learned" },
+    { "action": "wait", "ms": 1600, "label": "let the global cooldown the book shares with Running Wild run out" },
+    { "action": "cast", "actor": "b", "spell": 800175, "label": "run wild outdoors" },
+    { "action": "assert", "actor": "b", "metric": "aura", "spell": 800175, "equals": 1, "within_ms": 3000, "label": "Running Wild is active" }
+  ]
+}

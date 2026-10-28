@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Herald of Purity resets Justice's cooldown at its own tooltip chance (#9129)",
+  "contract": "Herald of Purity 806058's tooltip reads 'Damage dealt by Justice now has an 8% chance to reset its own cooldown.' aura_ascension_sun_cleric_event::Check (AscensionSunClericEvents.cpp) gated case 806058 on `info->SpellFamilyFlags[2] == 134217728`, but Justice's root spell 520359 (Spell.dbc) carries its matching family flag bit (8388608) in SpellFamilyFlags word 0, with word 2 always 0, so the comparison could never match any Justice rank and the chance roll (spell_proc Chance 0, deferring to DBC ProcChance 8 per rev_20260919_20_coa_proc_chance_parity.sql) never executed; the fix compares against `Named(info,520359)`, the chain-root helper every other case in this switch uses, so any rank of Justice (520359, 520746...572848) is recognized. aura_proc_rate replays the aura's full proc decision (db filters, conditions, script CheckProc and the native chance roll) 40000 times on a synthetic PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS hit naming Justice rank 520747 as the trigger spell, without needing a live weapon-equipped cast loop; direct = !periodic && !automatic holds for that type_mask, matching Check's own classification. Before the fix this reads 0%; the fixed comparison restores the tooltip's 8%, six-plus standard deviations inside an 8 +/- 1.5 point window at this sample size.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "cleric",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 806058
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Herald of Purity is active",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 806058,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Herald of Purity resets Justice at its tooltip 8% chance, not 0%",
+      "actor": "cleric",
+      "metric": "aura_proc_rate",
+      "spell": 806058,
+      "target": "dummy",
+      "type_mask": 16,
+      "trigger_spell": 520747,
+      "min": 6.5,
+      "max": 9.5
+    }
+  ]
+}

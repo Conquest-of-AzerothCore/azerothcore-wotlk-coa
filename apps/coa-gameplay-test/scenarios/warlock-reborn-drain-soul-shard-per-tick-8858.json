@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "Reborn Drain Soul generates Soul Shards per damage tick, not only on the kill (#8858)",
+  "contract": "Reborn Drain Soul 1101120 (and ranks 1108288, 1108289, 1111675, 1127217, 1147855) reverses the stock chain's effect order: Effect 0 is SPELL_AURA_CHANNEL_DEATH_ITEM (DBC-confirmed with coa-dbc-viewer against /tmp/claude-1000/dbc-clean), Effect 1 is SPELL_AURA_PERIODIC_DAMAGE (SpellDuration 8 = 15000 ms, 3000 ms amplitude, so 5 ticks per channel), Effect 2 is SPELL_AURA_PROC_TRIGGER_SPELL. The stock -1120 script (spell_warl_drain_soul in spell_warlock.cpp) is bound only to the original Drain Soul chain, whose layout is the mirror image (periodic damage at EFFECT_0, death item at EFFECT_1), and ObjectMgr::LoadSpellScriptNames only copies a scripted spell_script_names row to spell_ranks twins with an identical effect layout, never to a namesake with a different one, so the Reborn ranks loaded no per-tick script at all: only the native death-item aura fired, awarding a Soul Shard solely on the target's death, as the report describes. The tooltip reads 'each time the Drain Soul damages the target, it also has a chance to generate a Soul Shard', matching the stock implementation's roll_chance_i(20) per tick (spell_warl_drain_soul::HandleTick, Create Soulshard 43836, EffectItemType[0] 6265). The fix adds spell_warl_drain_soul_reborn, registered on EFFECT_1 PERIODIC_DAMAGE (matching the Reborn layout) and bound through spell_script_names rows for all six ranks (rev_20261027_70_coa_reborn_drain_soul_shard.sql). This case channels the rank-1 spell repeatedly at a non-trivial, non-gray target (Harvest Golem 36, flags_extra 0, leveled to match the caster so isHonorOrXPTarget holds) for 12 full 15 s channels (60 ticks at a 20% per-tick chance, mean 12 casts of 43836, P(fewer than 4) under 0.5%) and asserts spell_cast_count(43836) reaches at least 4, which is only possible if HandleTick fires on the Reborn layout.",
+  "timeout_ms": 240000,
+  "players": [
+    {
+      "id": "warlock",
+      "race": 1,
+      "class": 9,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "warlock",
+      "entry": 36,
+      "level": 60,
+      "health": 5000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "warlock", "spell": 1101120 },
+    {
+      "action": "assert", "label": "SETUP: the target's level matches the caster, so it is not a gray, no-XP target",
+      "actor": "dummy", "metric": "level", "equals": 60
+    },
+    { "action": "cast", "label": "Channel 1/12", "actor": "warlock", "spell": 1101120, "target": "dummy" },
+    { "action": "wait", "ms": 15300 },
+    { "action": "cast", "label": "Channel 2/12", "actor": "warlock", "spell": 1101120, "target": "dummy" },
+    { "action": "wait", "ms": 15300 },
+    { "action": "cast", "label": "Channel 3/12", "actor": "warlock", "spell": 1101120, "target": "dummy" },
+    { "action": "wait", "ms": 15300 },
+    { "action": "cast", "label": "Channel 4/12", "actor": "warlock", "spell": 1101120, "target": "dummy" },
+    { "action": "wait", "ms": 15300 },
+    { "action": "cast", "label": "Channel 5/12", "actor": "warlock", "spell": 1101120, "target": "dummy" },
+    { "action": "wait", "ms": 15300 },
+    { "action": "cast", "label": "Channel 6/12", "actor": "warlock", "spell": 1101120, "target": "dummy" },
+    { "action": "wait", "ms": 15300 },
+    { "action": "cast", "label": "Channel 7/12", "actor": "warlock", "spell": 1101120, "target": "dummy" },
+    { "action": "wait", "ms": 15300 },
+    { "action": "cast", "label": "Channel 8/12", "actor": "warlock", "spell": 1101120, "target": "dummy" },
+    { "action": "wait", "ms": 15300 },
+    { "action": "cast", "label": "Channel 9/12", "actor": "warlock", "spell": 1101120, "target": "dummy" },
+    { "action": "wait", "ms": 15300 },
+    { "action": "cast", "label": "Channel 10/12", "actor": "warlock", "spell": 1101120, "target": "dummy" },
+    { "action": "wait", "ms": 15300 },
+    { "action": "cast", "label": "Channel 11/12", "actor": "warlock", "spell": 1101120, "target": "dummy" },
+    { "action": "wait", "ms": 15300 },
+    { "action": "cast", "label": "Channel 12/12", "actor": "warlock", "spell": 1101120, "target": "dummy" },
+    { "action": "wait", "ms": 15300 },
+    {
+      "action": "assert", "label": "CONTRACT: the Reborn per-tick script created Soul Shards during the channel, not only on a kill",
+      "actor": "warlock", "metric": "spell_cast_count", "spell": 43836, "min": 4
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "name": "Possessed Crows carry the raven eye aura and remain attackable",
+  "contract": "NIs_cJRD9YE at 00:57 shows a perched Possessed Crow with blue glowing eyes. The client Raven aura 365403 attaches SCD_raven_aura twice at the head. Blinding the Black Rook 175325 requires an eye looted from these crows, so the cosmetic aura must survive combat without preventing damage. They are crow-sized at model scale 0.65 (user choice 2026-10-15). This checks the native scale, template aura and damage, not rendered particles or perch animation.",
+  "timeout_ms": 30000,
+  "players": [{"id": "hunter", "race": 1, "class": 8, "level": 80, "spell_hit_rating": 10000}],
+  "creatures": [{"id": "crow", "owner": "hunter", "entry": 164944, "level": 18, "health": 100000, "distance": 3}],
+  "steps": [
+    {"action": "assert", "actor": "crow", "metric": "unit_scale", "min": 0.649, "max": 0.651},
+    {"action": "assert", "actor": "crow", "metric": "aura", "spell": 365403, "equals": 1},
+    {"action": "learn", "actor": "hunter", "spell": 116},
+    {"action": "snapshot", "actor": "crow", "metric": "health", "save_as": "health"},
+    {"action": "cast", "actor": "hunter", "target": "crow", "spell": 116},
+    {"action": "assert", "actor": "crow", "metric": "health", "relative_to": "health", "max": -1, "within_ms": 5000},
+    {"action": "assert", "actor": "crow", "metric": "aura", "spell": 365403, "equals": 1}
+  ]
+}

@@ -1,0 +1,312 @@
+{
+  "schema": 1,
+  "name": "Fiend's streamed tooltip matches its cost-only Infernal Strike benefit (#5293)",
+  "contract": "Fiend talent 705005 says that casting Sever removes the cost of the next Infernal Strike, without promising additional damage. Current native contracts make helper 680197 a -100% cost modifier and disable its second effect. Its authored aura tooltip still says the next strike 'deals ${$w2}% increased damage', which becomes a misleading zero-damage clause in the effective spell row. Publish 'Your next Infernal Strike is free of cost.' through the existing ToolTip override. Normal War specialization and Fiend acquisition, ordinary Sever and Infernal Strike casts, an untalented caster, nonzero pre-buff cost, unchanged damage/unrelated-spell cost, helper consumption and restored cost exercise the benefit independently of the text. Helper 680197 has an authored sixty-second duration and DO_NOT_DISPLAY_DURATION; this regression observes the native duration but does not change that display policy or claim client timer/rendering acceptance.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "control",
+      "race": 1,
+      "class": 17,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "knight",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "control_target",
+      "owner": "control",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "The native spell-text stream is available",
+      "actor": "knight",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500639,
+      "text": "Requires Runeshroud",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "specialization",
+      "actor": "knight",
+      "id": 18
+    },
+    {
+      "action": "specialization",
+      "actor": "control",
+      "id": 18
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "knight",
+      "entry": 7408,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "label": "Fiend is acquired through War's advancement entry",
+      "actor": "knight",
+      "metric": "aura",
+      "spell": 705005,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 705005,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "knight",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "knight",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "control",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "control",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "The normally granted Sever is known",
+      "actor": "knight",
+      "metric": "knows_spell",
+      "spell": 500904,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The normally granted Infernal Strike is known",
+      "actor": "knight",
+      "metric": "knows_spell",
+      "spell": 801016,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Infernal Strike has a nonzero cost without Fiend",
+      "actor": "knight",
+      "metric": "spell_power_cost",
+      "spell": 801016,
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "knight",
+      "metric": "spell_power_cost",
+      "spell": 801016,
+      "save_as": "normal_cost"
+    },
+    {
+      "action": "snapshot",
+      "actor": "knight",
+      "metric": "spell_power_cost",
+      "spell": 800340,
+      "save_as": "meatsaw_cost"
+    },
+    {
+      "action": "snapshot",
+      "actor": "knight",
+      "metric": "spell_modifier",
+      "spell": 801016,
+      "op": 0,
+      "base": 1000,
+      "save_as": "normal_damage"
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 500904,
+      "target": "control_target"
+    },
+    {
+      "action": "assert",
+      "label": "The untalented control completes a normal Sever",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 500904,
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Untalented Sever grants no Fiend benefit",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 680197,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 500904,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "label": "Sever grants the caster-owned Fiend helper",
+      "actor": "knight",
+      "metric": "aura",
+      "spell": 680197,
+      "caster": "knight",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Fiend has the authored finite native duration",
+      "actor": "knight",
+      "metric": "aura_duration_ms",
+      "spell": 680197,
+      "min": 57000,
+      "max": 60000
+    },
+    {
+      "action": "assert",
+      "label": "The next Infernal Strike costs no Rage",
+      "actor": "knight",
+      "metric": "spell_power_cost",
+      "spell": 801016,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Fiend adds no Infernal Strike damage modifier",
+      "actor": "knight",
+      "metric": "spell_modifier",
+      "spell": 801016,
+      "op": 0,
+      "base": 1000,
+      "relative_to": "normal_damage",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Fiend leaves unrelated Meatsaw cost unchanged",
+      "actor": "knight",
+      "metric": "spell_power_cost",
+      "spell": 800340,
+      "relative_to": "meatsaw_cost",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 801016,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "label": "The ordinary Infernal Strike completes",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 801016,
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Infernal Strike consumes Fiend",
+      "actor": "knight",
+      "metric": "aura",
+      "spell": 680197,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The regular Rage cost returns after consumption",
+      "actor": "knight",
+      "metric": "spell_power_cost",
+      "spell": 801016,
+      "relative_to": "normal_cost",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Fiend tooltip row is streamed",
+      "actor": "knight",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 680197,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The tooltip states the cost-only benefit",
+      "actor": "knight",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 680197,
+      "text": "Your next Infernal Strike is free of cost.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The obsolete damage clause is absent",
+      "actor": "knight",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 680197,
+      "text": "increased damage",
+      "equals": 0
+    }
+  ]
+}

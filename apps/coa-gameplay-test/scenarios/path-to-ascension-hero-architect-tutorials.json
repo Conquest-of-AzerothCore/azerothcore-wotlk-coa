@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "name": "Path to Ascension: opening the Hero Architect and loading builds record the Hero Architect tutorials",
+  "contract": "Building Your Class Fantasy (75) is for the Hero class (class mask 0x200), excludes game modes 0x848 and has two objectives: 'Hit N, then click the Hero Architect Tab.' and 'Choose a Featured Build and load it with \"Choose This Build.\"'. Clicking the tab sends the category query CMSG 0x062E {category name}; loading a build sends CMSG 0x05C2 {id, u8, u8} and is answered with ACTIVATE_BUILD_OK on SMSG 0x05C3. The objectives are kept as event bits in core.ascension.tutorial_events index 75 (bit 1 the tab, bit 2 a featured build); the tutorial verifies once both are met. End Game Builds (7), any class, excludes 0x848 and reads 'Load a featured end-game build'. The seeded board has no featured build and a player cannot publish one, so loading the seeded Level 60 PvE build The Tankiest Bear (cac04950-5c76-4ae9-80ed-c81553578d08), an end-game build without the featured flag, completes neither the featured objective of 75 nor tutorial 7. A Hero whose featured objective is already recorded verifies 75 by opening the tab; a Warrior with the same record does not, as 75 is not for that class.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "hero", "race": 1, "class": 10, "level": 60 },
+    { "id": "featured", "race": 1, "class": 10, "level": 60 },
+    { "id": "warrior", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+
+    { "action": "assert", "label": "No Hero Architect objective is recorded yet", "actor": "hero", "metric": "player_setting", "source": "core.ascension.tutorial_events", "index": 75, "equals": 0 },
+    { "action": "assert", "label": "Building Your Class Fantasy is not verified", "actor": "hero", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 75, "equals": 0 },
+    { "action": "assert", "label": "End Game Builds is not verified", "actor": "hero", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 7, "equals": 0 },
+    {
+      "action": "client_packet", "label": "Click the Hero Architect tab, which browses Level 60 PvP", "actor": "hero", "opcode": 1582,
+      "fields": [ { "string": "Level60PvP" } ]
+    },
+    {
+      "action": "assert", "label": "The category is listed", "actor": "hero", "metric": "server_packet_u32",
+      "opcode": 1583, "offset": 0, "skip_strings": 1, "index": 2, "min": 1, "within_ms": 2000
+    },
+    { "action": "assert", "label": "DISCRIMINATING: opening the Hero Architect records the tab objective of Building Your Class Fantasy", "actor": "hero", "metric": "player_setting", "source": "core.ascension.tutorial_events", "index": 75, "equals": 1, "within_ms": 2000 },
+    { "action": "wait", "label": "Give the tutorial a state check", "ms": 2000 },
+    { "action": "assert", "label": "One objective of two leaves Building Your Class Fantasy open", "actor": "hero", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 75, "equals": 0 },
+    {
+      "action": "client_packet", "label": "Load The Tankiest Bear, an end-game build that is not featured", "actor": "hero", "opcode": 1474,
+      "fields": [ { "string": "cac04950-5c76-4ae9-80ed-c81553578d08" }, { "u8": 0 }, { "u8": 0 } ]
+    },
+    {
+      "action": "assert", "label": "The build is loaded", "actor": "hero", "metric": "server_packet_contains",
+      "opcode": 1475, "text": "ACTIVATE_BUILD_OK", "equals": 1, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Give the tutorials a state check", "ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: a build without the featured flag does not verify End Game Builds", "actor": "hero", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 7, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: nor does it record the featured objective of Building Your Class Fantasy", "actor": "hero", "metric": "player_setting", "source": "core.ascension.tutorial_events", "index": 75, "equals": 1 },
+    { "action": "assert", "label": "so Building Your Class Fantasy stays open", "actor": "hero", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 75, "equals": 0 },
+
+    { "action": "set_player_setting", "label": "A Hero has already loaded a featured build", "actor": "featured", "source": "core.ascension.tutorial_events", "index": 75, "value": 2 },
+    { "action": "assert", "label": "Building Your Class Fantasy waits for the tab", "actor": "featured", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 75, "equals": 0 },
+    {
+      "action": "client_packet", "label": "The Hero clicks the Hero Architect tab", "actor": "featured", "opcode": 1582,
+      "fields": [ { "string": "Level60PvP" } ]
+    },
+    {
+      "action": "assert", "label": "The category is listed to the Hero", "actor": "featured", "metric": "server_packet_u32",
+      "opcode": 1583, "offset": 0, "skip_strings": 1, "index": 2, "min": 1, "within_ms": 2000
+    },
+    { "action": "assert", "label": "Both objectives are recorded", "actor": "featured", "metric": "player_setting", "source": "core.ascension.tutorial_events", "index": 75, "equals": 3, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: both objectives verify Building Your Class Fantasy", "actor": "featured", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 75, "equals": 1, "within_ms": 2000 },
+
+    { "action": "set_player_setting", "label": "A Warrior has the same featured-build record", "actor": "warrior", "source": "core.ascension.tutorial_events", "index": 75, "value": 2 },
+    {
+      "action": "client_packet", "label": "The Warrior clicks the Hero Architect tab", "actor": "warrior", "opcode": 1582,
+      "fields": [ { "string": "Level60PvP" } ]
+    },
+    {
+      "action": "assert", "label": "The category is listed to the Warrior", "actor": "warrior", "metric": "server_packet_u32",
+      "opcode": 1583, "offset": 0, "skip_strings": 1, "index": 2, "min": 1, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Give the tutorial a state check", "ms": 2000 },
+    { "action": "assert", "label": "Building Your Class Fantasy is only for the Hero class", "actor": "warrior", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 75, "equals": 0 }
+  ]
+}

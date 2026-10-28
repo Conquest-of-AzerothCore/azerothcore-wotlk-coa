@@ -1,0 +1,213 @@
+{
+  "schema": 1,
+  "name": "Baron Geddon's Living Bomb explodes on its carrier and the units within 5 yd when it expires",
+  "contract": "WoWCombatLog evidence (2026-05-28 Ascended, 08-09 Normal, 08-16 and 08-23 Mythic): at the removal of the Living Bomb carrier aura (2105702 N, 2105703 H, 2105704 M, 2105705 A) one Living Bomb Explosion (2105708 N, 2105709 H, 2105710 M, 2105711 A) hits the carrier and a pet within 5 yd (hidden hit trigger 2105707, SpellRadius 8 = 5 yd). Spell.dbc 2105710 deals 2334-2666 fire damage and 2105712 Living Bomb - Knock Up applies Feather Fall. The server script must therefore cast the DBC explosion on every hostile unit within 5 yd of the carrier, carrier included and a unit 20 yd away excluded, with the damage the DBC defines and not a designed 3200 x difficulty ladder. Baron Geddon (12056) puts the Mythic carrier aura on a player; a second player 3 yd away and a third 20 yd away stand in for the raid. The test reads how often Geddon cast 2105710, each bystander's health loss and the carrier's Feather Fall. The same logs show a Burning Ground aura (2105713 N, 2105714 H, 2105715 M, 2105716 A) landing on the carrier at the same millisecond as the explosion: Spell.dbc 2105715 is a SPELL_EFFECT_PERSISTENT_AREA_AURA (SpellRadius 7 = 2 yd, SPELL_AURA_PERIODIC_DAMAGE every 1000 ms, BasePoints 1332 -> 1333 fire per tick), cast by the script at the carrier's exact position so the fire patch outlives the carrier. The script casts it with no horizontal component to the carrier's Knock Up (MiscValue 0), so the carrier lands back on the same spot and the near player, teleported onto that spot after the explosion, also falls inside the zone. 2105712's EffectBasePoints is lowered from the raw DBC 499 to 353 (SpellInfoCorrections.cpp) so its KNOCK_BACK apex is roughly halved; the test reads the corrected effect value directly.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "carrier",
+      "race": 1,
+      "class": 12,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "near",
+      "race": 1,
+      "class": 8,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "far",
+      "race": 1,
+      "class": 8,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "geddon",
+      "owner": "carrier",
+      "entry": 12056,
+      "health": 5000000,
+      "distance": 40
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "near",
+      "map": 0,
+      "x": -9614.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "far",
+      "map": 0,
+      "x": -9597.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the teleports land",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "label": "Near player health before the bomb",
+      "actor": "near",
+      "metric": "health",
+      "save_as": "near0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Far player health before the bomb",
+      "actor": "far",
+      "metric": "health",
+      "save_as": "far0"
+    },
+    {
+      "action": "cast",
+      "label": "Geddon puts the Mythic Living Bomb carrier aura on the carrier",
+      "actor": "geddon",
+      "spell": 2105704,
+      "target": "carrier"
+    },
+    {
+      "action": "assert",
+      "label": "The carrier aura is on the carrier",
+      "actor": "carrier",
+      "metric": "aura",
+      "spell": 2105704,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let the periodic damage run for most of the aura",
+      "ms": 6000
+    },
+    {
+      "action": "set_health",
+      "label": "Refill the carrier so the periodic damage cannot kill it before the explosion",
+      "actor": "carrier",
+      "value": 20000,
+      "maximum": 20000
+    },
+    {
+      "action": "assert",
+      "label": "Knock Up's Feather Fall lands on the carrier when the aura expires",
+      "actor": "carrier",
+      "metric": "aura",
+      "spell": 2105712,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Geddon cast the Mythic explosion twice: on the carrier and on the player 3 yd away, not on the one 20 yd away",
+      "actor": "geddon",
+      "metric": "spell_cast_count",
+      "spell": 2105710,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "The player 3 yd from the carrier lost the DBC Mythic explosion damage (2334-2666), not a designed 3200 x ladder",
+      "actor": "near",
+      "metric": "health",
+      "relative_to": "near0",
+      "min": -2700,
+      "max": -2300
+    },
+    {
+      "action": "assert",
+      "label": "The player 20 yd from the carrier took nothing",
+      "actor": "far",
+      "metric": "health",
+      "relative_to": "far0",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Burning Ground landed on the carrier at the explosion position",
+      "actor": "carrier",
+      "metric": "aura",
+      "spell": 2105715,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Living Bomb - Knock Up's apex is roughly halved: BasePoints 353 reads as effect value 354, not the raw DBC 500",
+      "actor": "far",
+      "metric": "spell_effect_value",
+      "spell": 2105712,
+      "effect": 0,
+      "equals": 354
+    },
+    {
+      "action": "teleport",
+      "actor": "near",
+      "label": "Move the near player onto the Burning Ground zone left at the carrier's position",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the teleport land",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "label": "Near player health standing in the Burning Ground zone",
+      "actor": "near",
+      "metric": "health",
+      "save_as": "near1"
+    },
+    {
+      "action": "assert",
+      "label": "Burning Ground also applies to a player who steps into the 2 yd zone",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 2105715,
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "label": "Let exactly one Burning Ground tick land: the zone's single periodic timer started when it was created, not when the player stepped into it, so the total wait since creation must land inside the (1000, 2000) ms window for the first tick and stay short of the second",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Burning Ground ticked the DBC Mythic damage (1332 BasePoints -> 1333) on the player standing in the zone",
+      "actor": "near",
+      "metric": "health",
+      "relative_to": "near1",
+      "min": -1600,
+      "max": -1100
+    }
+  ]
+}

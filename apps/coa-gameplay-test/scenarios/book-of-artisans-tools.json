@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Book of Artisans hands over the tool of a trade learned from it",
+  "contract": "Learning a gathering or crafting trade that cannot be worked without a tool from the Book of Artisans puts that tool in the character's bags: the Blacksmith Hammer for Blacksmithing, the Mining Pick for Mining, the Skinning Knife for Skinning and the Fishing Pole for Fishing. A trade that needs no tool, such as Tailoring, hands over nothing, and a character already carrying the tool gets no second one.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "artisan", "race": 1, "class": 1, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "book", "owner": "artisan", "entry": 57500, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "gossip_hello", "actor": "artisan", "target": "book", "label": "right-click the Book of Artisans" },
+    { "action": "gossip_select", "actor": "artisan", "option": 0, "label": "choose \"I require training!\"" },
+    { "action": "snapshot", "actor": "artisan", "metric": "carried_item_count", "save_as": "before", "label": "what the character carries before training" },
+
+    { "action": "trainer_buy", "actor": "artisan", "target": "book", "spell": 3911, "label": "learn Tailoring" },
+    { "action": "assert", "actor": "artisan", "metric": "spellbook_buy_succeeded", "spell": 3911, "equals": 1, "label": "Tailoring was taught" },
+    { "action": "assert", "actor": "artisan", "metric": "carried_item_count", "relative_to": "before", "equals": 0, "label": "Tailoring needs no tool, so nothing was handed over" },
+
+    { "action": "trainer_buy", "actor": "artisan", "target": "book", "spell": 2020, "label": "learn Blacksmithing" },
+    { "action": "assert", "actor": "artisan", "metric": "spellbook_buy_succeeded", "spell": 2020, "equals": 1, "label": "Blacksmithing was taught" },
+    { "action": "assert", "actor": "artisan", "metric": "item_count", "item": 5956, "equals": 1, "label": "the Blacksmith Hammer came with it" },
+
+    { "action": "trainer_buy", "actor": "artisan", "target": "book", "spell": 7733, "label": "learn Fishing, a secondary trade" },
+    { "action": "assert", "actor": "artisan", "metric": "spellbook_buy_succeeded", "spell": 7733, "equals": 1, "label": "Fishing was taught" },
+    { "action": "assert", "actor": "artisan", "metric": "item_count", "item": 6256, "equals": 1, "label": "the Fishing Pole came with it" },
+
+    { "action": "trainer_buy", "actor": "artisan", "target": "book", "spell": 2020, "label": "ask for Blacksmithing again" },
+    { "action": "assert", "actor": "artisan", "metric": "item_count", "item": 5956, "equals": 1, "label": "no second hammer" },
+    { "action": "assert", "actor": "artisan", "metric": "item_count", "item": 6256, "equals": 1, "label": "and no second pole" }
+  ]
+}

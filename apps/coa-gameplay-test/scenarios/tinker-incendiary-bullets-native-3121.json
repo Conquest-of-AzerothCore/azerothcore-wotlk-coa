@@ -1,0 +1,127 @@
+{
+  "schema": 1,
+  "name": "Incendiary Bullets applies both current damage and hit ranks natively (#3121)",
+  "contract": [
+    "Current DBC and Exiles descriptions promise Scrap Shot damage of 15%/30% and all hit chance of",
+    "2%/4%; they do not promise the report's older damage-school conversion. Aura 333 has a native all-",
+    "hit consumer. Learning each rank separately must deliver both benefits through native calculations",
+    "and remove them on unlearning."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "t",
+      "metric": "melee_hit_chance",
+      "save_as": "hit_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "t",
+      "metric": "spell_hit_chance",
+      "save_as": "spell_hit_before"
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 707269
+    },
+    {
+      "action": "assert",
+      "label": "Scrap Shot gets the authored rank damage bonus",
+      "actor": "t",
+      "metric": "spell_modifier",
+      "spell": 500549,
+      "op": 0,
+      "base": 1000,
+      "min": 1149.0,
+      "max": 1151.0
+    },
+    {
+      "action": "assert",
+      "label": "The rank grants its hit chance",
+      "actor": "t",
+      "metric": "melee_hit_chance",
+      "relative_to": "hit_before",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "The rank grants its spell hit chance",
+      "actor": "t",
+      "metric": "spell_hit_chance",
+      "relative_to": "spell_hit_before",
+      "equals": 2
+    },
+    {
+      "action": "unlearn",
+      "actor": "t",
+      "spell": 707269
+    },
+    {
+      "action": "assert",
+      "label": "Removing the rank restores hit chance",
+      "actor": "t",
+      "metric": "melee_hit_chance",
+      "relative_to": "hit_before",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 707841
+    },
+    {
+      "action": "assert",
+      "label": "Scrap Shot gets the authored rank damage bonus",
+      "actor": "t",
+      "metric": "spell_modifier",
+      "spell": 500549,
+      "op": 0,
+      "base": 1000,
+      "min": 1299.0,
+      "max": 1301.0
+    },
+    {
+      "action": "assert",
+      "label": "The rank grants its hit chance",
+      "actor": "t",
+      "metric": "melee_hit_chance",
+      "relative_to": "hit_before",
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "The rank grants its spell hit chance",
+      "actor": "t",
+      "metric": "spell_hit_chance",
+      "relative_to": "spell_hit_before",
+      "equals": 4
+    },
+    {
+      "action": "unlearn",
+      "actor": "t",
+      "spell": 707841
+    },
+    {
+      "action": "assert",
+      "label": "Removing the rank restores hit chance",
+      "actor": "t",
+      "metric": "melee_hit_chance",
+      "relative_to": "hit_before",
+      "equals": 0
+    }
+  ]
+}

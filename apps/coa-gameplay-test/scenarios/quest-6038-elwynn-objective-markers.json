@@ -1,0 +1,812 @@
+{
+  "schema": 1,
+  "name": "Elwynn custom quests: the map marks each objective area, not only the turn-in",
+  "contract": "Quests 17002 'The Master's Orders', 17006 'King's Justice' and 100073 'Supply Run' carried only the turn-in pin rev_20260924_60 wrote, so a player with one open saw nothing on the world map for its objective (#6038). This case asks the server for each quest's points with the CMSG_QUEST_POI_QUERY a real client sends and reads SMSG_QUEST_POI_QUERY_RESPONSE itself. A control query for 17003, which the character does not carry, must come back empty. Each carried quest must answer with its unchanged turn-in pin followed by rectangles in Elwynn Forest (WorldMapAreaId 30) around the spawns rev_20260923_01 placed for the objective: the Defias Rogue Wizards at the Stone Cairn stones for 17002 (item objective, ObjectiveIndex 4), the Defias camp east of Ridgepoint Tower for both 17006 objectives (bandit kills, ObjectiveIndex 0, and the Supply Cache, ObjectiveIndex 4), and the Stolen Goods crates at the Bandit's Bastion for 100073 (ObjectiveIndex 4).",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9562.33,
+    "y": -722.93,
+    "z": 64.74,
+    "o": 0.82
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 17002 'The Master's Orders' unfinished",
+      "actor": "c",
+      "quest": 17002,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: and 17006 'King's Justice' unfinished",
+      "actor": "c",
+      "quest": 17006,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: and 100073 'Supply Run' unfinished, the three quests the report still finds unmarked",
+      "actor": "c",
+      "quest": 100073,
+      "complete": false
+    },
+    {
+      "action": "client_packet",
+      "label": "CONTROL: ask the map to mark 17003, a quest this character does not carry",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 17003
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the answer names 17003, so the packet being read is this query's own answer",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 17003,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: and a quest outside the log gets no POIs",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 17002, exactly what the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 17002
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 17002's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 17002,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 17002 now has two POIs - the turn-in pin and the Defias Rogue Wizard area - where it had only the pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the turn-in pin is still the first POI, id 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "with ObjectiveIndex -1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "as a single point",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "still on the Tower of Azora: x -9562",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294957734,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "y -723",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 4294966573,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "POI id 1 is the Defias Rogue Wizard ground at the Stone Cairn standing stones",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 52,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "it marks the Depleted Mana Gem item objective, RequiredItemId1 157002 (ObjectiveIndex 4)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 56,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on MapID 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 60,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "drawn on Elwynn Forest, WorldMapAreaId 30, as the turn-in pin is",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 64,
+      "index": 0,
+      "equals": 30,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "as a four-corner rectangle, so the client fills a blue area",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its first corner is x -9275",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 84,
+      "index": 0,
+      "equals": 4294958021,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its first corner is y -920",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 88,
+      "index": 0,
+      "equals": 4294966376,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its opposite corner is x -8985",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 100,
+      "index": 0,
+      "equals": 4294958311,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its opposite corner is y -1175",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 104,
+      "index": 0,
+      "equals": 4294966121,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 17006",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 17006
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 17006's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 17006,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 17006 now has three POIs - the turn-in pin and one area per objective - where it had only the pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the turn-in pin is still the first POI, id 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "with ObjectiveIndex -1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "as a single point",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "still on Guard Jacob at Ridgepoint Tower: x -9770",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294957526,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "y -1380",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 4294965916,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "POI id 1 is the Defias camp east of Ridgepoint Tower",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 52,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "it marks the Defias Bandit kill objective, RequiredNpcOrGo1 116 (ObjectiveIndex 0)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 56,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on MapID 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 60,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "drawn on Elwynn Forest, WorldMapAreaId 30, as the turn-in pin is",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 64,
+      "index": 0,
+      "equals": 30,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "as a four-corner rectangle, so the client fills a blue area",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its first corner is x -9845",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 84,
+      "index": 0,
+      "equals": 4294957451,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its first corner is y -1500",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 88,
+      "index": 0,
+      "equals": 4294965796,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its opposite corner is x -9710",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 100,
+      "index": 0,
+      "equals": 4294957586,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its opposite corner is y -1640",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 104,
+      "index": 0,
+      "equals": 4294965656,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "POI id 2 is the same camp, where the Supply Cache stands",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 116,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "it marks the Supply Cache item objective, RequiredItemId1 157013 (ObjectiveIndex 4)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 120,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on MapID 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 124,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "drawn on Elwynn Forest, WorldMapAreaId 30, as the turn-in pin is",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 128,
+      "index": 0,
+      "equals": 30,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "as a four-corner rectangle, so the client fills a blue area",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 144,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its first corner is x -9845",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 148,
+      "index": 0,
+      "equals": 4294957451,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its first corner is y -1500",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 152,
+      "index": 0,
+      "equals": 4294965796,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its opposite corner is x -9710",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 164,
+      "index": 0,
+      "equals": 4294957586,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its opposite corner is y -1640",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 168,
+      "index": 0,
+      "equals": 4294965656,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 100073",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 100073
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 100073's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 100073,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 100073 now has two POIs - the turn-in pin and the Bandit's Bastion area - where it had only the pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the turn-in pin is still the first POI, id 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "with ObjectiveIndex -1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "as a single point",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "still on Goldshire: x -9496",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294957800,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "y 73",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 73,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "POI id 1 is the Bandit's Bastion, where the Stolen Goods crates stand",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 52,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "it marks the Stolen Supply Crate item objective, RequiredItemId1 5055564 (ObjectiveIndex 4)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 56,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on MapID 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 60,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "drawn on Elwynn Forest, WorldMapAreaId 30, as the turn-in pin is",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 64,
+      "index": 0,
+      "equals": 30,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "as a four-corner rectangle, so the client fills a blue area",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its first corner is x -9855",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 84,
+      "index": 0,
+      "equals": 4294957441,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its first corner is y -400",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 88,
+      "index": 0,
+      "equals": 4294966896,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its opposite corner is x -9725",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 100,
+      "index": 0,
+      "equals": 4294957571,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its opposite corner is y -525",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 104,
+      "index": 0,
+      "equals": 4294966771,
+      "within_ms": 4000
+    }
+  ]
+}

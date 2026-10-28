@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Lead a Dungeon!: the group leader who defeats a dungeon's final boss earns the weekly Call Board credit",
+  "contract": "On Darkmoon - Season 10 Wildcard the Call Boards offered the weekly quest Lead a Dungeon! (100078, level 60, 5000 Runes of Ascension): 'Remain the group leader and defeat the final boss of any non-Mythic+ dungeon, then return to the Callboard to claim your reward.' Its objective is one Dungeon Leader Credit (101001). When a dungeon's last encounter falls (Edwin VanCleef, the final encounter of The Deadmines), mod-hero-call-board credits every group leader in reward range; other members get nothing. Turning the quest in pays the 5000 runes.",
+  "timeout_ms": 120000,
+  "location": {"map": 36, "x": -80.0, "y": -819.9, "z": 39.3, "o": 3.14159, "ignore_access": true},
+  "players": [
+    {"id": "leader", "race": 1, "class": 10, "level": 60},
+    {"id": "member", "race": 1, "class": 10, "level": 60}
+  ],
+  "creatures": [
+    {"id": "vancleef", "owner": "leader", "entry": 639, "level": 60, "health": 20, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the instance settle", "ms": 3000},
+    {"action": "group", "label": "The leader invites the member", "actor": "leader", "target": "member"},
+    {"action": "prepare_quest", "label": "The leader has Lead a Dungeon!", "actor": "leader", "quest": 100078, "complete": false},
+    {"action": "prepare_quest", "label": "and so has the member", "actor": "member", "quest": 100078, "complete": false},
+    {"action": "learn", "label": "Death Touch Copy kills outright", "actor": "leader", "spell": 24080},
+    {"action": "cast", "actor": "leader", "spell": 24080, "target": "vancleef"},
+    {"action": "assert", "label": "Edwin VanCleef falls", "actor": "vancleef", "metric": "alive", "equals": 0, "within_ms": 45000},
+    {"action": "assert", "label": "The group leader completes Lead a Dungeon!", "actor": "leader", "metric": "quest_status", "quest": 100078, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "The member who does not lead gets no credit", "actor": "member", "metric": "quest_status", "quest": 100078, "equals": 3},
+    {"action": "snapshot", "actor": "leader", "metric": "item_count", "item": 375250, "save_as": "runes"},
+    {"action": "reward_quest", "label": "Turn the quest in", "actor": "leader", "quest": 100078},
+    {"action": "assert", "label": "It pays 5000 Runes of Ascension", "actor": "leader", "metric": "item_count", "item": 375250, "relative_to": "runes", "equals": 5000}
+  ]
+}

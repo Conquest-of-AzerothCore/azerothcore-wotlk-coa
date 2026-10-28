@@ -1,7 +1,10 @@
 {
   "schema": 1,
   "name": "Primalist Bring Me Their Bones: fifth pet hit, ownership and expiry",
-  "contract": "Only pet ability damage against its owner's marked target counts; the fifth hit consumes owned stacks for an armor-bypassing burst.",
+  "contract": [
+    "Only pet ability damage against its owner's marked target counts; the fifth hit consumes owned stacks",
+    "for an armor-bypassing burst."
+  ],
   "timeout_ms": 100000,
   "players": [
     {
@@ -83,6 +86,26 @@
       "metric": "pet_entry",
       "equals": 1188,
       "within_ms": 24000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 61017,
+      "effect": 0,
+      "min": 100,
+      "within_ms": 4000,
+      "label": "Native pet hit scaling has settled"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 61017,
+      "effect": 2,
+      "min": 100,
+      "within_ms": 4000,
+      "label": "Native pet expertise scaling has settled"
     },
     {
       "action": "learn",

@@ -1,0 +1,292 @@
+{
+  "schema": 1,
+  "name": "Crimson Tide consumes Pooled Vitality and is free in Mortal Form and Sanguine Essence (#5894)",
+  "contract": [
+    "Original Crimson Tide 504134 is the level-60 rank. Empowerment 524896 increases radius by five yards and",
+    "reduces its rage cost by 100%; Pooled Vitality 681078/680687 spends ten stacks. Sanguine Essence 680692",
+    "permits Mortal Form abilities.",
+    "At zero rage and ten vitality stacks, native casts must succeed in Mortal Form and Sanguine Essence, consume",
+    "all ten stacks and apply a damaging Crimson Tide to a target twelve yards away, outside the normal ten-yard",
+    "radius. Ordinary Blood Curse remains a negative control."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "mortal",
+      "race": 1,
+      "class": 20,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "essence",
+      "race": 1,
+      "class": 20,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "curse",
+      "race": 1,
+      "class": 20,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "mortal_target",
+      "owner": "mortal",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 12
+    },
+    {
+      "id": "essence_target",
+      "owner": "essence",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 12
+    },
+    {
+      "id": "curse_target",
+      "owner": "curse",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 12
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "mortal",
+      "spell": 681078
+    },
+    {
+      "action": "learn",
+      "actor": "mortal",
+      "spell": 504134
+    },
+    {
+      "action": "set_aura",
+      "actor": "mortal",
+      "spell": 680687,
+      "stacks": 10
+    },
+    {
+      "action": "set_power",
+      "actor": "mortal",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "actor": "mortal",
+      "metric": "aura_stacks",
+      "spell": 680687,
+      "equals": 10
+    },
+    {
+      "action": "cast",
+      "actor": "mortal",
+      "spell": 504134
+    },
+    {
+      "action": "assert",
+      "actor": "mortal_target",
+      "metric": "aura",
+      "spell": 504134,
+      "caster": "mortal",
+      "equals": 1,
+      "within_ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "mortal",
+      "metric": "cast_failure",
+      "spell": 504134,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "mortal",
+      "metric": "aura_stacks",
+      "spell": 680687,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "mortal",
+      "metric": "power",
+      "power": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "mortal",
+      "metric": "spell_damage_count",
+      "spell": 504134,
+      "target": "mortal_target",
+      "min": 1,
+      "within_ms": 4500
+    },
+    {
+      "action": "learn",
+      "actor": "essence",
+      "spell": 681078
+    },
+    {
+      "action": "learn",
+      "actor": "essence",
+      "spell": 504134
+    },
+    {
+      "action": "set_aura",
+      "actor": "essence",
+      "spell": 680692,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "essence",
+      "spell": 680687,
+      "stacks": 10
+    },
+    {
+      "action": "set_power",
+      "actor": "essence",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "actor": "essence",
+      "metric": "aura_stacks",
+      "spell": 680687,
+      "equals": 10
+    },
+    {
+      "action": "cast",
+      "actor": "essence",
+      "spell": 504134
+    },
+    {
+      "action": "assert",
+      "actor": "essence_target",
+      "metric": "aura",
+      "spell": 504134,
+      "caster": "essence",
+      "equals": 1,
+      "within_ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "essence",
+      "metric": "cast_failure",
+      "spell": 504134,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "essence",
+      "metric": "aura_stacks",
+      "spell": 680687,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "essence",
+      "metric": "power",
+      "power": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "essence",
+      "metric": "spell_damage_count",
+      "spell": 504134,
+      "target": "essence_target",
+      "min": 1,
+      "within_ms": 4500
+    },
+    {
+      "action": "learn",
+      "actor": "curse",
+      "spell": 681078
+    },
+    {
+      "action": "learn",
+      "actor": "curse",
+      "spell": 504134
+    },
+    {
+      "action": "set_aura",
+      "actor": "curse",
+      "spell": 800157,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "curse",
+      "spell": 680687,
+      "stacks": 10
+    },
+    {
+      "action": "set_power",
+      "actor": "curse",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "actor": "curse",
+      "metric": "aura_stacks",
+      "spell": 680687,
+      "equals": 10
+    },
+    {
+      "action": "cast",
+      "actor": "curse",
+      "spell": 504134
+    },
+    {
+      "action": "assert",
+      "actor": "curse",
+      "metric": "cast_failure",
+      "spell": 504134,
+      "equals": 22
+    },
+    {
+      "action": "assert",
+      "actor": "curse",
+      "metric": "aura_stacks",
+      "spell": 680687,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "curse_target",
+      "metric": "aura",
+      "spell": 504134,
+      "caster": "curse",
+      "equals": 0
+    }
+  ]
+}

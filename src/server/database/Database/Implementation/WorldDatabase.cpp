@@ -23,6 +23,22 @@ void WorldDatabaseConnection::DoPrepareStatements()
     if (!m_reconnecting)
         m_stmts.resize(MAX_WORLDDATABASE_STATEMENTS);
 
+    PrepareStatement(WORLD_SEL_ASCENSION_NPC_OVERHEAD_ICONS,
+        "SELECT creature_entry, spell_id FROM ascension_npc_overhead_icons WHERE enabled = 1", CONNECTION_SYNCH);
+
+    PrepareStatement(WORLD_SEL_ASCENSION_QUEST_MARKER_STYLES,
+        "SELECT m.CreatureEntry, m.QuestId, m.Style, m.Priority FROM ascension_quest_marker_style m "
+        "INNER JOIN creature_template c ON c.entry = m.CreatureEntry "
+        "LEFT JOIN quest_template q ON q.ID = m.QuestId WHERE m.QuestId = 0 OR q.ID IS NOT NULL "
+        "ORDER BY m.CreatureEntry, m.Priority DESC, m.QuestId", CONNECTION_SYNCH);
+
+    PrepareStatement(WORLD_SEL_RAF_RECRUIT_MILESTONES,
+        "SELECT reward_id, required_level, realm_mode_mask, item_id, quantity "
+        "FROM recruit_milestone_rewards WHERE enabled = 1 ORDER BY required_level, reward_id", CONNECTION_SYNCH);
+    PrepareStatement(WORLD_SEL_RAF_REWARDS, "SELECT reward_id, required_recruits, realm_mode_mask, item_id, quantity FROM recruit_rewards WHERE enabled = 1 ORDER BY required_recruits, reward_id", CONNECTION_SYNCH);
+
+    PrepareStatement(WORLD_SEL_CROWS_CACHE_REWARDS, "SELECT kind,item,count FROM coa_crows_cache_rewards ORDER BY kind,item", CONNECTION_SYNCH);
+
     PrepareStatement(WORLD_SEL_QUEST_POOLS, "SELECT entry, pool_entry FROM pool_quest", CONNECTION_SYNCH);
     PrepareStatement(WORLD_DEL_CRELINKED_RESPAWN, "DELETE FROM linked_respawn WHERE guid = ?", CONNECTION_ASYNC);
     PrepareStatement(WORLD_REP_CREATURE_LINKED_RESPAWN, "REPLACE INTO linked_respawn (guid, linkedGuid) VALUES (?, ?)", CONNECTION_ASYNC);
@@ -113,7 +129,29 @@ void WorldDatabaseConnection::DoPrepareStatements()
     // 0: uint8
     PrepareStatement(WORLD_SEL_REQ_XP, "SELECT Experience FROM player_xp_for_level WHERE Level = ?", CONNECTION_SYNCH);
     PrepareStatement(WORLD_UPD_VERSION, "UPDATE version SET core_version = ?, core_revision = ?", CONNECTION_ASYNC);
+    PrepareStatement(WORLD_SEL_XP_HOTSPOTS, "SELECT id, payload FROM xp_hotspot_location", CONNECTION_SYNCH);
+    PrepareStatement(WORLD_REP_XP_HOTSPOT, "REPLACE INTO xp_hotspot_location (id, payload) VALUES (?, ?)", CONNECTION_BOTH);
+    PrepareStatement(WORLD_DEL_XP_HOTSPOT, "DELETE FROM xp_hotspot_location WHERE id = ?", CONNECTION_BOTH);
+    PrepareStatement(WORLD_SEL_XP_HOTSPOT_SETTING, "SELECT id, value FROM xp_hotspot_setting", CONNECTION_SYNCH);
+    PrepareStatement(WORLD_UPD_XP_HOTSPOT_SETTING, "REPLACE INTO xp_hotspot_setting (id, value) VALUES (?, ?)", CONNECTION_BOTH);
     PrepareStatement(WORLD_DEL_SPAWNGROUP_MEMBER, "DELETE FROM spawn_group WHERE spawnType = ? AND spawnId = ?", CONNECTION_ASYNC);
+#ifdef MOD_MANASTORM_ENDLESS
+    PrepareStatement(WORLD_SEL_MANASTORM_PRIVATE_CREATURES,
+        "SELECT guid, id, map, phaseMask, equipment_id, position_x, position_y, position_z, orientation, "
+        "spawntimesecs, wander_distance, currentwaypoint, curhealth, curmana, MovementType, npcflag, unit_flags, "
+        "dynamicflags FROM manastorm_private_creature ORDER BY guid", CONNECTION_SYNCH);
+
+    PrepareStatement(WORLD_SEL_MANASTORM_FLOOR_XP,
+        "SELECT enabled, rdf_dungeon_id, multiplier FROM manastorm_floor_experience WHERE id = 1", CONNECTION_SYNCH);
+#endif
+    PrepareStatement(WORLD_SEL_COA_NAME_FILTER, "SELECT term FROM coa_name_filter", CONNECTION_SYNCH);
+    PrepareStatement(WORLD_SEL_CLIENT_SPELL_PATCHES, "SELECT * FROM spell_dbc WHERE ID = ?", CONNECTION_SYNCH);
+    PrepareStatement(WORLD_SEL_CLIENT_SPELL_DESCRIPTIONS,
+        "SELECT ID, Description, ToolTip FROM coa_client_spell_description", CONNECTION_SYNCH);
+    PrepareStatement(WORLD_SEL_CLIENT_SKILL_LINE_ABILITIES,
+        "SELECT ID, SkillLine FROM coa_client_skill_line_ability ORDER BY ID", CONNECTION_SYNCH);
+    PrepareStatement(WORLD_SEL_COA_DUNGEON_LOOT_VARIANT, "SELECT base_item, heroic_item, mythic_item FROM coa_dungeon_loot_variant", CONNECTION_SYNCH);
+    PrepareStatement(WORLD_SEL_COA_DUNGEON_HEALTH, "SELECT map_id, difficulty, creature_entry, max_health FROM coa_dungeon_health", CONNECTION_SYNCH);
 }
 
 WorldDatabaseConnection::WorldDatabaseConnection(MySQLConnectionInfo& connInfo) : MySQLConnection(connInfo)

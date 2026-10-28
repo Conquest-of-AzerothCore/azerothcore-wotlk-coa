@@ -169,6 +169,8 @@ public:
     uint8 totalPass;
     uint8 itemSlot;
     uint8 rollVoteMask;
+    // The item level each roller's frame previewed, filled while the roll is announced (the senders take it as const)
+    mutable std::map<ObjectGuid, uint32> previewLevels;
 };
 
 /** request member stats checken **/

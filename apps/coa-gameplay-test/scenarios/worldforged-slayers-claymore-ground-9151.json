@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "name": "Worldforged Slayer's Claymore stands in the ground, not hovering (#9151)",
+  "contract": "The Stuck Sword pickup (entry 254520, guid 6942199, item 354473) in the Valley of Trials keeps the realm sighting's own stored height, 1.14 yd above the stock terrain there. Restore the terrain height so the sword stands in the ground.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": -363.2, "y": -4288.9, "z": 58.6, "o": 0 },
+  "players": [ { "id": "p", "race": 2, "class": 12, "level": 2 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the Stuck Sword stands in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 254520, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: it stands in the ground, not hovering above it", "actor": "p", "metric": "spawn_ground_gap", "guid": 6942199, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 },
+    { "action": "assert", "label": "it is grounded", "actor": "p", "metric": "spawn_placement", "guid": 6942199, "spawn_type": "gameobject", "tolerance": 1, "equals": 0 }
+  ]
+}

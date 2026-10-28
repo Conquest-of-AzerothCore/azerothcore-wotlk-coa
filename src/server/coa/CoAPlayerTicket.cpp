@@ -186,7 +186,8 @@ namespace
     {
         std::shared_lock<std::shared_mutex> lock(*HashMapHolder<Player>::GetLock());
         for (auto const& [guid, player] : ObjectAccessor::GetPlayers())
-            if (player->IsInWorld() && player->GetSession()->GetAccountId() == ticket.Account)
+            if (player->IsInWorld() && !player->GetSession()->IsBot() &&
+                player->GetSession()->GetAccountId() == ticket.Account)
                 return player;
         return nullptr;
     }
@@ -432,6 +433,9 @@ namespace
 
         void OnPlayerLogout(Player* player) override
         {
+            if (player->GetSession()->IsBot())
+                return;
+
             std::lock_guard<std::mutex> lock(PendingLock);
             PendingRequests.erase(player->GetSession()->GetAccountId());
             AnyPending = !PendingRequests.empty();
@@ -439,7 +443,7 @@ namespace
 
         void OnPlayerUpdate(Player* player, uint32) override
         {
-            if (!AnyPending)
+            if (!AnyPending || player->GetSession()->IsBot())
                 return;
 
             std::deque<Request> requests;

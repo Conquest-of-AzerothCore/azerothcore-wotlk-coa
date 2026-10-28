@@ -1,7 +1,28 @@
 {
   "schema": 1,
   "name": "Tinker pet abilities: the other family abilities do what their tooltips say (#4741, #5412)",
-  "contract": "Spell.dbc descriptions of the Tinker pet abilities taught by #5412, cast by the pet through the native pet cast handler. Mechano-Bear: Crash & Thrash 578340 damages and slows nearby enemies by 35%; Mechano-Growl 806171 taunts nearby enemies and gives the bear 806199 (+100% threat). Rusthound: Manabite 578254 burns mana (POWER_BURN, Fire, 0.5 damage per mana); Rustbite 712423 deals Nature damage; Seek 581311 raises movement speed by 80%; Meltdown 581313 interrupts the cast, locks that school and lowers Fire resistance and healing received by 20%. ZIGGI-6K: Minicopter-Z 801626 heals a party member and pulls them to ZIGGI-6K; Recharge 808010 channels mana every 0.5 s with 50% less damage taken. Scrapmaw: Drill Smash 806173 stuns and deals damage every second; Flamethrower 806168 burns through 807385 every second; Missile Swarm 807386 hits nearby enemies through 807532/807387; Flame Jets 850023 leaves 850024 (Fire damage) and 850026 (slow) at the target. Clockwork Assistant: Capacity Expansion 578122 restores 20% of the Tinker's maximum mana; Throw Wrench 574359 deals damage after a 2 s cast; Crowd Controller 578123 disarms for 8 s; Surprise Dynamite 578124 knocks enemies back at the target location.",
+  "contract": [
+    "Spell.dbc descriptions of the Tinker pet abilities taught by #5412, cast by the pet through the native",
+    "pet cast handler. Mechano-Bear: Crash & Thrash 578340 damages and slows nearby enemies by 35%;",
+    "Mechano-Growl 806171 taunts nearby enemies and gives the bear 806199 (+100% threat). Rusthound: Manabite",
+    "578254 burns mana (POWER_BURN, Fire, 0.5 damage per mana); Rustbite 712423 deals Nature damage; Seek",
+    "581311 raises movement speed by 80%; Meltdown 581313 interrupts the cast, locks that school and lowers",
+    "Fire resistance and healing received by 20%. ZIGGI-6K: Minicopter-Z 801626 heals a party member and",
+    "pulls them to ZIGGI-6K; Recharge 808010 channels mana every 0.5 s with 50% less damage taken. Scrapmaw:",
+    "Drill Smash 806173 stuns and deals damage every second; Flamethrower 806168 burns through 807385 every",
+    "second; Missile Swarm 807386 hits nearby enemies through 807532/807387; Flame Jets 850023 leaves 850024",
+    "(Fire damage) and 850026 (slow) at the target. Clockwork Assistant: Capacity Expansion 578122 restores",
+    "20% of the Tinker's maximum mana; Throw Wrench 574359 deals damage after a 2 s cast; Crowd Controller",
+    "578123 disarms for 8 s; Surprise Dynamite 578124 knocks enemies back at the target location. The",
+    "original accuracy fixture aura 984948 contains only +1000 melee/ranged hit and +100000 expertise. Supply",
+    "and assert it on the pets whose ordinary physical casts must land while checking their ability effects;",
+    "preserve their damage, healing, mana, cooldown, stun and channel contracts. Owner ratings are not",
+    "substituted for pet hit.",
+    "Clockwork Assistant Crowd Controller 578123 uses the original magic hit table. Its pet gets the original",
+    "Krosh Hit Buff 2132158, whose sole aura adds 100 percentage points of spell hit. Assert that native amount",
+    "before normal pet casts; keep the disarm and its original eight-second expiry unchanged.",
+    "Krosh Hit Buff 2132158 uses SpellDuration.dbc index 1 (ten seconds). Earlier knockback, mana and Wrench checks can consume that duration. Renew and assert the unchanged native accuracy immediately before Crowd Controller; retain the normal cast, disarm and eight-second expiry checks."
+  ],
   "timeout_ms": 240000,
   "players": [
     {
@@ -255,6 +276,32 @@
       "metric": "pet_entry",
       "equals": 60672,
       "within_ms": 9000
+    },
+    {
+      "action": "set_aura",
+      "actor": "hound",
+      "spell": 984948,
+      "pet": true,
+      "stacks": 1,
+      "label": "Supply the original pet hit and expertise fixture"
+    },
+    {
+      "action": "assert",
+      "actor": "hound",
+      "metric": "pet_aura_amount",
+      "spell": 984948,
+      "effect": 0,
+      "equals": 1000,
+      "label": "The pet has the original melee and ranged hit prerequisite"
+    },
+    {
+      "action": "assert",
+      "actor": "hound",
+      "metric": "pet_aura_amount",
+      "spell": 984948,
+      "effect": 1,
+      "equals": 100000,
+      "label": "The pet has the original expertise prerequisite"
     },
     {
       "action": "wait",
@@ -750,6 +797,32 @@
       "within_ms": 9000
     },
     {
+      "action": "set_aura",
+      "actor": "scrap",
+      "spell": 984948,
+      "pet": true,
+      "stacks": 1,
+      "label": "Supply the original pet hit and expertise fixture"
+    },
+    {
+      "action": "assert",
+      "actor": "scrap",
+      "metric": "pet_aura_amount",
+      "spell": 984948,
+      "effect": 0,
+      "equals": 1000,
+      "label": "The pet has the original melee and ranged hit prerequisite"
+    },
+    {
+      "action": "assert",
+      "actor": "scrap",
+      "metric": "pet_aura_amount",
+      "spell": 984948,
+      "effect": 1,
+      "equals": 100000,
+      "label": "The pet has the original expertise prerequisite"
+    },
+    {
       "action": "wait",
       "label": "Scrapmaw settles beside the Tinker",
       "ms": 2000
@@ -962,6 +1035,23 @@
       "within_ms": 9000
     },
     {
+      "action": "set_aura",
+      "actor": "clock",
+      "pet": true,
+      "spell": 2132158,
+      "stacks": 1,
+      "label": "Supply original native NPC spell accuracy on Clockwork Assistant"
+    },
+    {
+      "action": "assert",
+      "actor": "clock",
+      "metric": "pet_aura_amount",
+      "spell": 2132158,
+      "effect": 0,
+      "equals": 100,
+      "label": "Original Krosh Hit Buff supplies exactly 100 percentage points of native spell hit"
+    },
+    {
       "action": "wait",
       "label": "Clockwork Assistant settles beside the Tinker",
       "ms": 2000
@@ -1121,6 +1211,31 @@
       "spell": 578123,
       "equals": 1,
       "within_ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "actor": "clock",
+      "pet": true,
+      "spell": 2132158,
+      "stacks": 1,
+      "label": "Renew the original ten-second spell accuracy buff immediately before Crowd Controller"
+    },
+    {
+      "action": "assert",
+      "actor": "clock",
+      "metric": "pet_aura_amount",
+      "spell": 2132158,
+      "effect": 0,
+      "equals": 100,
+      "label": "Crowd Controller has its native 100-percentage-point spell hit prerequisite"
+    },
+    {
+      "action": "assert",
+      "actor": "clock",
+      "metric": "pet_aura_duration_ms",
+      "spell": 2132158,
+      "min": 2000,
+      "label": "The original accuracy buff covers the normal disarm cast"
     },
     {
       "action": "cast_charm",

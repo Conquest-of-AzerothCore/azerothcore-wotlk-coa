@@ -1,0 +1,241 @@
+{
+  "schema": 1,
+  "name": "Fire Palm Sigil 534807: one direct damage copy at 120% (#5786)",
+  "contract": [
+    "Original Spell.dbc and db.exil.es/spell/534807 specify the next direct damaging spell adds 120% bonus damage as Fire and lasts six seconds.",
+    "The active aura percentage is the contract; helper 807012 has stale 100% text shared by all five ranks.",
+    "Normal Elemental Burst casts provide the measured triggering hit. Normal Palm casts use the authored Waveforged alternative gate; its aura is explicit fixture setup.",
+    "One Fire hit must copy the measured damage, consume the aura, and never recur on a following spell. The rank-5 value exceeds 100% and must not be clamped to 100%.",
+    "Original Fire helper 807012 uses melee damage class. A skilled equipped dagger, hit rating and expertise remove its independent avoidance roll from this copied-amount test; no auto attack is started."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 1180
+    },
+    {
+      "action": "add_item",
+      "actor": "rm",
+      "item": 2092,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "rm",
+      "item": 2092,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "rm",
+      "skill": 173,
+      "value": 400,
+      "maximum": 400
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 502838
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 534807
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 807012,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 502838,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 502838,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 807012,
+      "equals": 0,
+      "label": "Without a sigil there is no extra Fire hit"
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 500469,
+      "stacks": 1,
+      "label": "Fixture: the alternative Waveforged window"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 808089,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 534807
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 534807,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura_amount",
+      "spell": 534807,
+      "effect": 0,
+      "equals": 120
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 502838,
+      "target": "dummy",
+      "save_as": "before_hit"
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 502838,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 502838,
+      "target": "dummy",
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 807012,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 1500,
+      "label": "The next direct spell produces one Fire hit"
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 502838,
+      "target": "dummy",
+      "relative_to": "before_hit",
+      "save_as": "trigger_hit"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 807012,
+      "target": "dummy",
+      "ratio_to": "trigger_hit",
+      "min": 1.197,
+      "max": 1.2001,
+      "label": "The Fire hit copies 120% of the actual triggering damage"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 534807,
+      "equals": 0,
+      "label": "The one-use sigil is consumed"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 502838,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 502838,
+      "target": "dummy",
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 807012,
+      "equals": 1,
+      "label": "The following direct spell cannot reuse the consumed sigil"
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "rm",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  }
+}

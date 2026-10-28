@@ -1139,6 +1139,9 @@ BattlegroundTypeId BattlegroundMgr::GetRandomBG(BattlegroundTypeId bgTypeId, uin
             }
         }
 
+        if (ids.empty())
+            return bgTypeId == BATTLEGROUND_RB ? BATTLEGROUND_TYPE_NONE : bgTypeId;
+
         return *Acore::Containers::SelectRandomWeightedContainerElement(ids, weights);
     }
 
@@ -1212,6 +1215,7 @@ std::unordered_map<int, BattlegroundTypeId> BattlegroundMgr::queueToBg =
     { BATTLEGROUND_QUEUE_2v2,   BATTLEGROUND_AA },
     { BATTLEGROUND_QUEUE_3v3,   BATTLEGROUND_AA },
     { BATTLEGROUND_QUEUE_5v5,   BATTLEGROUND_AA },
+    { BATTLEGROUND_QUEUE_1v1,   BATTLEGROUND_AA },
 };
 
 std::unordered_map<int, Battleground*> BattlegroundMgr::bgtypeToBattleground =
@@ -1273,12 +1277,14 @@ std::unordered_map<uint32, BattlegroundQueueTypeId> BattlegroundMgr::ArenaTypeTo
 {
     { ARENA_TYPE_2v2, BATTLEGROUND_QUEUE_2v2 },
     { ARENA_TYPE_3v3, BATTLEGROUND_QUEUE_3v3 },
-    { ARENA_TYPE_5v5, BATTLEGROUND_QUEUE_5v5 }
+    { ARENA_TYPE_5v5, BATTLEGROUND_QUEUE_5v5 },
+    { ARENA_TYPE_1v1, BATTLEGROUND_QUEUE_1v1 }
 };
 
 std::unordered_map<uint32, ArenaType> BattlegroundMgr::QueueToArenaType =
 {
     { BATTLEGROUND_QUEUE_2v2, ARENA_TYPE_2v2 },
     { BATTLEGROUND_QUEUE_3v3, ARENA_TYPE_3v3 },
-    { BATTLEGROUND_QUEUE_5v5, ARENA_TYPE_5v5 }
+    { BATTLEGROUND_QUEUE_5v5, ARENA_TYPE_5v5 },
+    { BATTLEGROUND_QUEUE_1v1, ARENA_TYPE_1v1 }
 };

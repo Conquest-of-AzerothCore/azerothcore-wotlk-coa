@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Might Experience Heirloom Cache gives the Burnished chest and shoulder (#8970)",
+  "contract": "Item 1339056 'Might Experience Heirloom Cache' gave the two set pieces its own description does not list: Polished Breastplate of Might (1548685) and Polished Spaulders of Might (1542949), neither of which carries the set's +10% experience equip spell. Its full cache (1339070) holds the matching Burnished Breastplate of Might (3148685) and Burnished Spaulders of Might (3142949), as every other Experience/full cache pair in the set already matches. The fix updates cache 1339056's two wrong member rows to the Burnished pair; the weapon token and trinket counts are unchanged.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "add_item", "actor": "p", "item": 1339056 },
+    { "action": "fill_bags", "actor": "p", "slots": 7 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "fill_bags", "label": "Refill a slot freed by a filler item that vanished", "actor": "p", "slots": 7 },
+    { "action": "assert", "label": "SETUP: at least seven slots are free", "actor": "p", "metric": "free_inventory_slots", "min": 7 },
+    { "action": "use_item", "label": "Open the cache", "actor": "p", "item": 1339056, "spell": 18282 },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "DISCRIMINATING: the Burnished Breastplate of Might is handed out", "actor": "p", "metric": "item_count", "item": 3148685, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the Burnished Spaulders of Might are handed out", "actor": "p", "metric": "item_count", "item": 3142949, "equals": 1 },
+    { "action": "assert", "label": "Three weapon tokens", "actor": "p", "metric": "item_count", "item": 414010, "equals": 3 },
+    { "action": "assert", "label": "Two Swift Hands of Justice", "actor": "p", "metric": "item_count", "item": 1642991, "equals": 2 },
+    { "action": "assert", "label": "DISCRIMINATING: no Polished Breastplate of Might (lacks the XP bonus)", "actor": "p", "metric": "item_count", "item": 1548685, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: no Polished Spaulders of Might (lacks the XP bonus)", "actor": "p", "metric": "item_count", "item": 1542949, "equals": 0 }
+  ]
+}

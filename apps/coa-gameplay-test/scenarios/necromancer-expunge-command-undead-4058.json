@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "name": "Command: Undead applies Expunge to a diseased enemy (#4058)",
+  "contract": "Expunge 705754 (CharacterAdvancement 34982, Death tab) reads \"Casting Command spells on an enemy now applies Expunge if they are Diseased.\" Command: Undead 504868 is the generic Command spell: SpellFamilyName 29 with family flags word 2 0x81000000, so AscensionNecromancer::Command matches it, and AscensionNecromancerAbilities.cpp lets it start without minions. OnSpellCast casts the trigger 500443 on a valid Command target when the caster has 705754, and the hit handler applies Expunge 573233 (SPELL_AURA_MOD_DAMAGE_FROM_CASTER +10%, 10 sec, 2 stacks) only when the target carries one of the Necromancer's diseases. 500443's TargetAuraSpell 802913 (Plagued, no acquisition) blocked every application until the load contract cleared it. Expected: Command: Undead on an enemy without the Necromancer's disease applies nothing; after Flesh to Worms 500338 the next Command: Undead applies one Expunge stack from the Necromancer, a second adds a stack, and Flesh to Worms is then taken at x1.20.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 10 },
+    { "id": "clean_golem", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 12 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "necro", "spell": 705754 },
+    { "action": "learn", "actor": "necro", "spell": 504868 },
+    { "action": "learn", "actor": "necro", "spell": 500338 },
+    {
+      "action": "assert", "label": "SETUP: the Expunge talent is active", "actor": "necro",
+      "metric": "aura", "spell": 705754, "equals": 1
+    },
+    { "action": "set_power", "actor": "necro", "power": 6, "value": 500 },
+    {
+      "action": "cast", "label": "Command: Undead against an enemy that is not diseased", "actor": "necro",
+      "spell": 504868, "target": "clean_golem"
+    },
+    { "action": "wait", "label": "Let an Expunge application resolve", "ms": 1000 },
+    {
+      "action": "assert", "label": "CONTROL: no Expunge without the Necromancer's disease", "actor": "clean_golem",
+      "metric": "aura", "spell": 573233, "equals": 0
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 600 },
+    { "action": "cast", "label": "Disease the golem", "actor": "necro", "spell": 500338, "target": "golem" },
+    {
+      "action": "assert", "label": "SETUP: the golem carries Flesh to Worms", "actor": "golem",
+      "metric": "aura", "spell": 500338, "caster": "necro", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "snapshot", "actor": "golem", "metric": "spell_damage_taken", "target": "necro",
+      "spell": 500338, "save_as": "disease0"
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "set_power", "actor": "necro", "power": 6, "value": 500 },
+    {
+      "action": "cast", "label": "First Command: Undead", "actor": "necro", "spell": 504868, "target": "golem"
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Command: Undead on the diseased golem applies Expunge",
+      "actor": "golem", "metric": "aura_stacks", "spell": 573233, "caster": "necro", "equals": 1,
+      "within_ms": 2000
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "set_power", "actor": "necro", "power": 6, "value": 500 },
+    {
+      "action": "cast", "label": "Second Command: Undead", "actor": "necro", "spell": 504868, "target": "golem"
+    },
+    {
+      "action": "assert", "label": "The second Command: Undead adds a stack", "actor": "golem",
+      "metric": "aura_stacks", "spell": 573233, "caster": "necro", "equals": 2, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Two stacks raise disease damage taken by 20%", "actor": "golem",
+      "metric": "spell_damage_taken", "target": "necro", "spell": 500338, "ratio_to": "disease0",
+      "min": 1.195, "max": 1.205
+    }
+  ]
+}

@@ -1,0 +1,194 @@
+{
+  "schema": 1,
+  "name": "Wildcard Hero dismisses, recalls, then permanently abandons a tamed beast (#6581)",
+  "contract": "Tame Beast entry965200 grants Call Pet883. Dismiss preserves the beast; native abandonment deletes it and recall never creates a free replacement.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "tamer",
+      "race": 1,
+      "class": 10,
+      "level": 10
+    }
+  ],
+  "creatures": [
+    {
+      "id": "wolf",
+      "owner": "tamer",
+      "entry": 299,
+      "level": 1,
+      "distance": 8
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "learn",
+      "label": "A rolled Tame Beast Abilities",
+      "actor": "tamer",
+      "spell": 965200
+    },
+    {
+      "action": "assert",
+      "label": "The entry taught Tame Beast",
+      "actor": "tamer",
+      "metric": "knows_spell",
+      "spell": 1515,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The entry taught Call Pet",
+      "actor": "tamer",
+      "metric": "knows_spell",
+      "spell": 883,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The entry taught Dismiss Pet",
+      "actor": "tamer",
+      "metric": "knows_spell",
+      "spell": 2641,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The entry taught Feed Pet",
+      "actor": "tamer",
+      "metric": "knows_spell",
+      "spell": 6991,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The entry taught Revive Pet",
+      "actor": "tamer",
+      "metric": "knows_spell",
+      "spell": 982,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The entry taught Beast Lore",
+      "actor": "tamer",
+      "metric": "knows_spell",
+      "spell": 1462,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Tame the Young Wolf",
+      "actor": "tamer",
+      "spell": 1515,
+      "target": "wolf"
+    },
+    {
+      "action": "wait",
+      "ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "The wolf is the Hero's pet",
+      "actor": "tamer",
+      "metric": "pet_entry",
+      "equals": 299
+    },
+    {
+      "action": "cast",
+      "actor": "tamer",
+      "spell": 2641
+    },
+    {
+      "action": "assert",
+      "actor": "tamer",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "actor": "tamer",
+      "opcode": 374,
+      "fields": [
+        {
+          "pet_guid": "tamer"
+        }
+      ],
+      "consumed": false,
+      "cast_before": 883,
+      "pet_loading_before": true,
+      "label": "Recall and abandon in one server tick before native load completion"
+    },
+    {
+      "action": "assert",
+      "actor": "tamer",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "tamer",
+      "metric": "pet_rows",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "tamer",
+      "spell": 883
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "tamer",
+      "metric": "pet_entry",
+      "equals": 0
+    },
+    {
+      "action": "relog",
+      "actor": "tamer"
+    },
+    {
+      "action": "cast",
+      "actor": "tamer",
+      "spell": 883
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "tamer",
+      "metric": "pet_entry",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "tamer",
+      "metric": "pet_rows",
+      "equals": 0
+    }
+  ]
+}

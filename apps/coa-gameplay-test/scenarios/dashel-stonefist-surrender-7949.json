@@ -1,0 +1,151 @@
+{
+  "schema": 1,
+  "name": "Dashel Stonefist surrenders reliably once beaten down (#7949)",
+  "contract": [
+    "The Missing Diplomat (1447): accepting from Dashel Stonefist (4961) turns him",
+    "hostile with an invincibility floor at 1 HP, and at 0-15% health timed list",
+    "496101 must run to completion (quest credit, evade, friendly faction).",
+    "Beating him down within ~2s of accept used to drop that install silently while",
+    "the accept list was still running, so the fight never ended. Row id 2 now",
+    "paces refires past the list runtime and overrides a running list, and the",
+    "evade ends the cycle. This scenario stages 1246, accepts 1447 natively, drops",
+    "him to 1 HP, and proves the floor holds, the quest completes, and he stays",
+    "out of combat (friendly, no re-aggro)."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -9451.3,
+    "y": 62.8,
+    "z": 55.9,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 30,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "summon",
+      "label": "Spawn Dashel Stonefist",
+      "actor": "hero",
+      "entry": 4961,
+      "as": "dashel",
+      "distance": 3
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Stage 1246 in the log",
+      "actor": "hero",
+      "quest": 1246
+    },
+    {
+      "action": "quest_complete",
+      "label": "Force the speak objective complete",
+      "actor": "hero",
+      "quest": 1246
+    },
+    {
+      "action": "quest_turn_in",
+      "label": "Turn 1246 in to Dashel, its ender",
+      "actor": "hero",
+      "quest": 1246,
+      "entry": 4961
+    },
+    {
+      "action": "assert",
+      "label": "1246 rewarded, unlocking 1447",
+      "actor": "hero",
+      "metric": "quest_rewarded",
+      "quest": 1246,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "quest_accept",
+      "label": "Accept Defeat Dashel (1447) from Dashel",
+      "actor": "hero",
+      "quest": 1447,
+      "entry": 4961
+    },
+    {
+      "action": "assert",
+      "label": "1447 in log",
+      "actor": "hero",
+      "metric": "quest_status",
+      "quest": 1447,
+      "equals": 3,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Dashel turns hostile and engages",
+      "actor": "dashel",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "attack",
+      "label": "Engage Dashel in melee",
+      "actor": "hero",
+      "target": "dashel"
+    },
+    {
+      "action": "set_health",
+      "label": "Drop Dashel to 1 HP, inside the 0-15% window at any scaling",
+      "actor": "dashel",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the health event evaluate",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Invincibility floor held: he stays alive at 1 HP",
+      "actor": "dashel",
+      "metric": "alive",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Quest objective credited complete",
+      "actor": "hero",
+      "metric": "quest_status",
+      "quest": 1447,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Give any hostile re-aggro time to return",
+      "ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Surrender sticks: still out of combat",
+      "actor": "dashel",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Quest stays complete",
+      "actor": "hero",
+      "metric": "quest_status",
+      "quest": 1447,
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

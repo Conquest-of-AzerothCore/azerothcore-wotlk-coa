@@ -1,0 +1,146 @@
+{
+  "schema": 1,
+  "name": "Ranger Horn of Endurance healing proc fires on the member's landed casts (#7618)",
+  "contract": [
+    "Horn of Endurance 806359 is a positive caster-cast Horn (family 27, flags (0,0,1), DmgClass MAGIC, instant) that emanates the Endurance of the Ranger proc aura 560809 to the caster and party through its trigger effect, for 30000 ms (SpellDuration 9). 560809's effect 0 is SPELL_AURA_PROC_TRIGGER_SPELL targeting 560808, a self heal, at 30% chance; both tooltips promise a $h% chance when the member casts a spell or ability, at most once every 2 seconds. 560809's DBC record carries ProcFlags 0, and the world had no spell_proc row, so the aura never registered a proc handler and the heal never fired.",
+    "The repair gives 560809 the landed done-spell masks for both damage classes, positive and negative (mask 87312), the tooltip's 30% chance and a 2000 ms cooldown. Auto-attacks, taken damage, kills and the aura's own periodic Focus ticks are deliberately not proc events, so the aura no longer heals the moment it is applied or on every Focus tick.",
+    "The heal 560808 promised ${$560808m1+$560808ppl1+$AP*0.1295} but had no spell_bonus_data row, so it healed only its flat 2 with no attack power. It now carries the tooltip's 0.1295 attack power coefficient: a member with 406 attack power healed 54 for a single cast, which is 2 plus 0.1295 times that attack power.",
+    "The engine's default proc trigger casts the heal on whatever the member cast at, so an attack on a creature aimed the self heal at that creature. Aura 560809 now has an aura script that prevents the default action and casts 560808 on the aura's owner, which is the member the tooltip promises to heal.",
+    "The loaded proc entry is asserted directly: a landed hostile no-damage-class event and a landed positive magic event each proc the aura at about 30%, while a periodic event and an unlanded cast-phase event each proc it zero times.",
+    "A grouped member holding the aura lands fifteen instant Stuns, three on each of five fresh creatures and spaced 2100 ms so each is past the 2 second cooldown; fresh creatures keep every cast a landed hit rather than a diminishing-returns immunity. One to eight procs is consistent with 30% per landed cast and fails when no landed cast ever procs. The proc must heal the member for more than the flat 2 it dealt before, so a heal that ignores attack power fails. The ungrouped control receives neither aura nor heal; the Horn caster's own heals are recorded rather than bounded, because casting the Horn is itself a cast that may proc its own aura.",
+    "The Horn separately grants its caster one Advantage and 3 Focus every 3 seconds; those independent effects are unaffected."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "horn",
+      "race": 1,
+      "class": 21,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "member",
+      "race": 1,
+      "class": 21,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "control",
+      "race": 1,
+      "class": 21,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    { "id": "m1", "owner": "member", "entry": 36, "level": 80, "health": 1000000, "distance": 4 },
+    { "id": "m2", "owner": "member", "entry": 36, "level": 80, "health": 1000000, "distance": 4 },
+    { "id": "m3", "owner": "member", "entry": 36, "level": 80, "health": 1000000, "distance": 4 },
+    { "id": "m4", "owner": "member", "entry": 36, "level": 80, "health": 1000000, "distance": 4 },
+    { "id": "m5", "owner": "member", "entry": 36, "level": 80, "health": 1000000, "distance": 4 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "group", "actor": "horn", "target": "member" },
+    { "action": "learn", "actor": "horn", "spell": 806359 },
+    { "action": "learn", "actor": "member", "spell": 23775 },
+    { "action": "learn", "actor": "member", "spell": 560808 },
+    { "action": "set_health", "label": "Leave room for the heal", "actor": "member", "value": 1000 },
+    { "action": "cast", "label": "The Horn emanates the proc aura to the caster and party", "actor": "horn", "spell": 806359 },
+    { "action": "assert", "label": "SETUP: the Horn caster carries the proc aura", "actor": "horn", "metric": "aura", "spell": 560809, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: the grouped member carries the emanated proc aura", "actor": "member", "metric": "aura", "spell": 560809, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "CONTROL: an ungrouped player carries no aura", "actor": "control", "metric": "aura", "spell": 560809, "equals": 0, "within_ms": 3000 },
+    {
+      "action": "assert",
+      "label": "SETUP: the loaded proc entry matches a landed hostile spell at the tooltip's 30%",
+      "actor": "member", "metric": "aura_proc_rate", "spell": 560809, "target": "m1",
+      "trigger_spell": 23775, "type_mask": 4096, "phase_mask": 2, "spell_type_mask": 7, "hit_mask": 1,
+      "min": 20, "max": 40
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the loaded proc entry matches a landed positive magic spell at 30%",
+      "actor": "member", "metric": "aura_proc_rate", "spell": 560809, "target": "m1",
+      "trigger_spell": 806359, "type_mask": 16384, "phase_mask": 2, "spell_type_mask": 7, "hit_mask": 1,
+      "min": 20, "max": 40
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a periodic Focus tick is not a proc event",
+      "actor": "member", "metric": "aura_proc_rate", "spell": 560809, "target": "m1",
+      "trigger_spell": 23775, "type_mask": 262144, "phase_mask": 2, "spell_type_mask": 7, "hit_mask": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: an unlanded cast phase event is not a proc event",
+      "actor": "member", "metric": "aura_proc_rate", "spell": 560809, "target": "m1",
+      "trigger_spell": 23775, "type_mask": 4096, "phase_mask": 1, "spell_type_mask": 7, "hit_mask": 1,
+      "equals": 0
+    },
+    { "action": "snapshot", "actor": "member", "metric": "spell_heal_count", "spell": 560808, "save_as": "heals_before" },
+    { "action": "snapshot", "actor": "member", "metric": "spell_heal_total", "spell": 560808, "save_as": "heal_total_before" },
+    { "action": "snapshot", "label": "Member melee attack power", "actor": "member", "metric": "attack_power", "save_as": "ap_melee" },
+    { "action": "snapshot", "label": "Member ranged attack power", "actor": "member", "metric": "ranged_attack_power", "save_as": "ap_ranged" },
+    { "action": "cast", "label": "Direct cast of the heal itself", "actor": "member", "spell": 560808 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "snapshot", "label": "Heal events from a direct cast of 560808", "actor": "member", "metric": "spell_heal_count", "spell": 560808, "relative_to": "heals_before", "save_as": "direct_heal_count" },
+    { "action": "snapshot", "label": "Healing done by a direct cast of 560808", "actor": "member", "metric": "spell_heal_total", "spell": 560808, "relative_to": "heal_total_before", "save_as": "direct_heal_total" },
+
+    { "action": "cast", "actor": "member", "spell": 23775, "target": "m1" },
+    { "action": "wait", "ms": 2100 },
+    { "action": "cast", "actor": "member", "spell": 23775, "target": "m1" },
+    { "action": "wait", "ms": 2100 },
+    { "action": "cast", "actor": "member", "spell": 23775, "target": "m1" },
+    { "action": "wait", "ms": 2100 },
+    { "action": "assert", "label": "SETUP: the Stun landed on the first creature", "actor": "m1", "metric": "aura", "spell": 23775, "equals": 1, "within_ms": 2000 },
+    { "action": "cast", "actor": "member", "spell": 23775, "target": "m2" },
+    { "action": "wait", "ms": 2100 },
+    { "action": "cast", "actor": "member", "spell": 23775, "target": "m2" },
+    { "action": "wait", "ms": 2100 },
+    { "action": "cast", "actor": "member", "spell": 23775, "target": "m2" },
+    { "action": "wait", "ms": 2100 },
+    { "action": "cast", "actor": "member", "spell": 23775, "target": "m3" },
+    { "action": "wait", "ms": 2100 },
+    { "action": "cast", "actor": "member", "spell": 23775, "target": "m3" },
+    { "action": "wait", "ms": 2100 },
+    { "action": "cast", "actor": "member", "spell": 23775, "target": "m3" },
+    { "action": "wait", "ms": 2100 },
+
+    { "action": "reset_cooldown", "actor": "horn", "spell": 806359 },
+    { "action": "cast", "label": "Refresh the Horn so the aura covers the remaining casts", "actor": "horn", "spell": 806359 },
+    { "action": "assert", "label": "SETUP: the member still carries the refreshed aura", "actor": "member", "metric": "aura", "spell": 560809, "equals": 1, "within_ms": 3000 },
+
+    { "action": "cast", "actor": "member", "spell": 23775, "target": "m4" },
+    { "action": "wait", "ms": 2100 },
+    { "action": "cast", "actor": "member", "spell": 23775, "target": "m4" },
+    { "action": "wait", "ms": 2100 },
+    { "action": "cast", "actor": "member", "spell": 23775, "target": "m4" },
+    { "action": "wait", "ms": 2100 },
+    { "action": "cast", "actor": "member", "spell": 23775, "target": "m5" },
+    { "action": "wait", "ms": 2100 },
+    { "action": "cast", "actor": "member", "spell": 23775, "target": "m5" },
+    { "action": "wait", "ms": 2100 },
+    { "action": "cast", "actor": "member", "spell": 23775, "target": "m5" },
+    { "action": "wait", "ms": 2500 },
+
+    { "action": "assert", "label": "SETUP: the member cast all fifteen Stuns", "actor": "member", "metric": "spell_cast_count", "spell": 23775, "min": 12, "max": 15 },
+    { "action": "snapshot", "label": "Endurance of the Ranger proc triggers", "actor": "member", "metric": "spell_proc_count", "spell": 560809, "save_as": "procs" },
+    { "action": "assert", "label": "The aura procs from the member's landed casts", "actor": "member", "metric": "spell_proc_count", "spell": 560809, "min": 1, "max": 8 },
+    { "action": "snapshot", "label": "Endurance of the Ranger self heals during the member's landed casts", "actor": "member", "metric": "spell_heal_count", "spell": 560808, "relative_to": "heals_before", "save_as": "heals" },
+    { "action": "assert", "label": "A landed cast procs the Endurance of the Ranger self heal", "actor": "member", "metric": "spell_heal_count", "spell": 560808, "relative_to": "heals_before", "min": 1, "max": 8 },
+    { "action": "assert", "label": "Each heal scales with the member's attack power instead of the flat 2", "actor": "member", "metric": "spell_heal_total", "spell": 560808, "relative_to": "heal_total_before", "ratio_to": "heals", "min": 3 },
+    { "action": "snapshot", "label": "Heals the Horn caster got from casting the Horn itself", "actor": "horn", "metric": "spell_heal_count", "spell": 560808, "save_as": "horn_heals" },
+    { "action": "assert", "label": "CONTROL: the ungrouped player never carries the aura or heals", "actor": "control", "metric": "spell_heal_count", "spell": 560808, "equals": 0 }
+  ]
+}

@@ -1,0 +1,245 @@
+{
+  "schema": 1,
+  "name": "Wildcard Runic Hurricane lands five strikes and cleans up dodge (#6471)",
+  "contract": [
+    "Original Spell.dbc 280930 promises five Nature weapon strikes over 2500 ms and 100% dodge from 280933 while",
+    "the sequence blocks other abilities. Its periodic dummy is 500 ms and its damage payload 280932 is the",
+    "original weapon-percent effect; the authored payload is used without importing the CoA class polynomial.",
+    "Test a real equipped weapon, ordinary cast acceptance and carrier application, exactly five positive damage",
+    "events on the chosen enemy, no events on a neighbor, and helper removal at normal expiry. Repeat against a",
+    "one-health enemy after cooldown to prove target death ends both carrier and protection. These are gameplay",
+    "observations, independent of script names or source patterns."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "neighbor",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 6,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 202
+    },
+    {
+      "action": "set_skill",
+      "actor": "hero",
+      "skill": 55,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 1198
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 1198,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 280930
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: a real sword is equipped",
+      "actor": "hero",
+      "metric": "weapon_damage_min",
+      "min": 5
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hurricane protection is absent before casting",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 280933,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 280930,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: an ordinary Runic Hurricane cast succeeds",
+      "actor": "hero",
+      "metric": "cast_failure",
+      "spell": 280930,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The original Hurricane carrier was applied",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 280930,
+      "equals": 1,
+      "within_ms": 200
+    },
+    {
+      "action": "assert",
+      "label": "The five-strike sequence grants its authored dodge buff",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 280933,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Dodge bonus is the original 100 percent",
+      "actor": "hero",
+      "metric": "aura_amount",
+      "spell": 280933,
+      "effect": 1,
+      "equals": 100
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Five real Nature weapon strikes land on the chosen enemy",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 280932,
+      "target": "enemy",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "The neighboring enemy is not an additional strike target",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 280932,
+      "target": "neighbor",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Hurricane carrier expires",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 280930,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The dodge and ability-lock helper expires with the sequence",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 280933,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 31000
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 280930,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "The second ordinary sequence is accepted",
+      "actor": "hero",
+      "metric": "cast_failure",
+      "spell": 280930,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The second sequence delivers a real initial strike",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 280932,
+      "target": "enemy",
+      "equals": 6,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Its initial weapon strike kills the chosen target",
+      "actor": "enemy",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 500
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "A dead target ends the sequence early",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 280930,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Ending early also removes dodge and the ability lock",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 280933,
+      "equals": 0
+    }
+  ]
+}

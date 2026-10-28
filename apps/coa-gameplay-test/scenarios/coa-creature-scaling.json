@@ -1,0 +1,211 @@
+{
+  "schema": 1,
+  "name": "Creature scaling: regular-difficulty dungeon health",
+  "contract": "With creature scaling enabled at its default multipliers, Normal dungeon creatures from the database take 2.5x their template health and Ragefire Chasm takes its 3.0x map override, civilians included. Heroic and Mythic keep their coa_dungeon_health targets.",
+  "creature_scaling": true,
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "normal",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "heroic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "normal",
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "set_health",
+      "actor": "normal",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_phase",
+      "actor": "normal",
+      "value": 1
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "set_health",
+      "actor": "heroic",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_phase",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "set_health",
+      "actor": "mythic",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_phase",
+      "actor": "mythic",
+      "value": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "normal",
+      "map": 429,
+      "x": 550.38,
+      "y": 533.725,
+      "z": -24.3185
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "nearby_creature_max_health",
+      "entry": 14323,
+      "equals": 153973,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "normal",
+      "map": 389,
+      "x": -147.548,
+      "y": 38.7127,
+      "z": -38.8039
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "nearby_creature_max_health",
+      "entry": 11517,
+      "equals": 15234,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "nearby_creature_max_health",
+      "entry": 11834,
+      "equals": 945,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "heroic",
+      "map": 429,
+      "x": 550.38,
+      "y": 533.725,
+      "z": -24.3185
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "nearby_creature_max_health",
+      "entry": 14323,
+      "equals": 582692,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 429,
+      "x": 550.38,
+      "y": 533.725,
+      "z": -24.3185
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "mythic",
+      "metric": "nearby_creature_max_health",
+      "entry": 14323,
+      "equals": 757500,
+      "within_ms": 5000
+    }
+  ]
+}

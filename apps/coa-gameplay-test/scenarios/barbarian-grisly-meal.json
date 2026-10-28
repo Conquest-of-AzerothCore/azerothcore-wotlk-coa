@@ -1,20 +1,32 @@
 {
   "schema": 1,
   "name": "Grisly Meal marker buff is granted by a kill (#4231)",
-  "contract": "A Barbarian who knows Grisly Meal gains its marker buff (804755) after killing an enemy that yields experience, then can cast Grisly Meal out of combat. A different class killing the same enemy does not gain the buff. The enemies are level 20, like the players, so they yield experience (a level 10 enemy is gray to a level 20 character), and have 1 health so each player kills its own.",
+  "contract": [
+    "A Barbarian who knows Grisly Meal gains its marker buff (804755) after killing an enemy that yields",
+    "experience, then can cast Grisly Meal out of combat. A different class killing the same enemy does not gain",
+    "the buff. The enemies are level 20, like the players, so they yield experience (a level 10 enemy is gray to",
+    "a level 20 character), and have 1 health so each player kills its own.",
+    "Each attacker uses a native Deadly Bronze Poniard (3490), learned daggers, level-20 weapon skill, hit rating",
+    "and expertise. Real melee damage and enemy death are prerequisites; reward assertions retain the original",
+    "spell and XP expectations."
+  ],
   "timeout_ms": 90000,
   "players": [
     {
       "id": "b",
       "race": 1,
       "class": 12,
-      "level": 20
+      "level": 20,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
     },
     {
       "id": "c",
       "race": 1,
       "class": 1,
-      "level": 20
+      "level": 20,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
     }
   ],
   "creatures": [
@@ -39,6 +51,78 @@
     {
       "action": "wait",
       "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 1180
+    },
+    {
+      "action": "add_item",
+      "actor": "b",
+      "item": 3490,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "b",
+      "item": 3490,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "b",
+      "skill": 173,
+      "value": 100,
+      "maximum": 100
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "melee_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "expertise",
+      "min": 100
+    },
+    {
+      "action": "learn",
+      "actor": "c",
+      "spell": 1180
+    },
+    {
+      "action": "add_item",
+      "actor": "c",
+      "item": 3490,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "c",
+      "item": 3490,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "c",
+      "skill": 173,
+      "value": 100,
+      "maximum": 100
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "melee_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "expertise",
+      "min": 100
     },
     {
       "action": "learn",
@@ -72,11 +156,25 @@
     },
     {
       "action": "assert",
+      "actor": "b",
+      "metric": "melee_damage_count",
+      "min": 1,
+      "label": "A trained weapon lands a real damaging kill before evaluating the reward"
+    },
+    {
+      "action": "assert",
       "label": "the Warrior kills its enemy",
       "actor": "f",
       "metric": "alive",
       "equals": 0,
       "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "melee_damage_count",
+      "min": 1,
+      "label": "A trained weapon lands a real damaging kill before evaluating the reward"
     },
     {
       "action": "assert",

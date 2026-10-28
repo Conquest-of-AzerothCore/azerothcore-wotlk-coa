@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Every player on Blessings of the Light can loot the Chalice of Tyrenel without waiting for a respawn (COA-9483)",
+  "contract": "Blessings of the Light 255114 needs one Chalice of Tyrenel 355200 from the single world spawn of its object 255063 (guid 9001310) in Redridge. The object opens with Opening (6478, lock 43) and stands in a Shadowhide gnoll camp, whose attacks would interrupt the cast. After one player on the quest loots the chalice, the object stays, and a second player on the quest opens it and receives their own chalice.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -9008.5, "y": -3220.0, "z": 109.2, "o": 3.9 },
+  "players": [
+    { "id": "a", "race": 1, "class": 1, "level": 25 },
+    { "id": "b", "race": 1, "class": 1, "level": 25 }
+  ],
+  "creatures": [
+    { "id": "norice_a", "owner": "a", "entry": 255207, "distance": 4, "faction": 12, "level": 30 },
+    { "id": "norice_b", "owner": "b", "entry": 255207, "distance": 4, "faction": 12, "level": 30 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "quest_accept", "actor": "a", "quest": 255114, "entry": 255207 },
+    { "action": "quest_accept", "actor": "b", "quest": 255114, "entry": 255207 },
+    { "action": "assert", "label": "SETUP: a is on the quest", "actor": "a", "metric": "quest_status", "quest": 255114, "equals": 3, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: b is on the quest", "actor": "b", "metric": "quest_status", "quest": 255114, "equals": 3, "within_ms": 3000 },
+    { "action": "set_aura", "label": "SETUP: Divine Shield keeps the camp's gnolls from interrupting a's Opening", "actor": "a", "spell": 642, "stacks": 1 },
+    { "action": "set_aura", "label": "SETUP: Divine Shield keeps the camp's gnolls from interrupting b's Opening", "actor": "b", "spell": 642, "stacks": 1 },
+    { "action": "set_phase", "actor": "a", "value": 1 },
+    { "action": "set_phase", "actor": "b", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the chalice object is in the area", "actor": "a", "metric": "nearby_gameobject_count", "entry": 255063, "equals": 1 },
+    { "action": "cast", "actor": "a", "spell": 6478, "target_gameobject": 255063 },
+    { "action": "wait", "label": "let the 1.5 s Opening cast finish", "ms": 2500 },
+    { "action": "assert", "label": "a opens the chalice object", "actor": "a", "metric": "cast_failure", "spell": 6478, "equals": 0 },
+    { "action": "loot_slot", "actor": "a", "item": 355200 },
+    { "action": "close_loot", "actor": "a" },
+    { "action": "assert", "label": "a receives the chalice", "actor": "a", "metric": "item_count", "item": 355200, "equals": 1 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "assert", "label": "DISCRIMINATING: the chalice object is still there for the next player", "actor": "b", "metric": "nearby_gameobject_count", "entry": 255063, "equals": 1 },
+    { "action": "cast", "actor": "b", "spell": 6478, "target_gameobject": 255063 },
+    { "action": "wait", "label": "let the 1.5 s Opening cast finish", "ms": 2500 },
+    { "action": "assert", "label": "b opens the chalice object", "actor": "b", "metric": "cast_failure", "spell": 6478, "equals": 0 },
+    { "action": "loot_slot", "actor": "b", "item": 355200 },
+    { "action": "close_loot", "actor": "b" },
+    { "action": "assert", "label": "b receives the chalice", "actor": "b", "metric": "item_count", "item": 355200, "equals": 1 },
+    { "action": "assert", "label": "b completes the quest", "actor": "b", "metric": "quest_status", "quest": 255114, "equals": 1, "within_ms": 3000 }
+  ]
+}

@@ -1,6 +1,7 @@
 // mod-coa-challenges (review split): CoA.Challenges.Lifecycle.cpp
 // Mechanical split of review-CoAChallenges.cpp; no logic changes.
 #include "CoA.Challenges.Review.h"
+#include "InstanceScript.h"
 
 #include <atomic>
 #include <mutex>
@@ -53,6 +54,15 @@ namespace CoAChallenges
                 guid, challengeID, level))
             return true;
         return false;
+    }
+
+    bool HasAccountCompletionLevel(uint32 account, uint32 challengeID, uint32 level)
+    {
+        auto* statement = CharacterDatabase.GetPreparedStatement(CHAR_SEL_COA_ACCOUNT_CHALLENGE_COMPLETION);
+        statement->SetData(0, account);
+        statement->SetData(1, challengeID);
+        statement->SetData(2, level);
+        return CharacterDatabase.Query(statement) != nullptr;
     }
 
     // Death update (SMSG 0x5A6): same 26-byte active-entry layout as 0x596,
@@ -142,7 +152,7 @@ namespace CoAChallenges
             return;
         uint32 guid = player->GetGUID().GetCounter();
 
-        uint32 mask = 0;
+        uint32 mask = RealmGameModeMask();
         for (ActiveChallengeRow const& row : rows)
             mask |= RequiredGameMode(row.challengeId);
 
@@ -243,6 +253,7 @@ namespace CoAChallenges
         // DB rows.
         CharacterDatabase.DirectExecute("DELETE FROM coa_character_challenge WHERE guid = {}", guid);
         ClearCharChallengeCache(guid);
+        RefreshLevelScalingTracking(player);
         CharacterDatabase.DirectExecute("DELETE FROM coa_character_objective WHERE guid = {}", guid);
         CharacterDatabase.DirectExecute("DELETE FROM coa_challenge_completion WHERE guid = {}", guid);
         CharacterDatabase.DirectExecute("DELETE FROM coa_challenge_failure WHERE guid = {}", guid);
@@ -367,12 +378,42 @@ namespace CoAChallenges
         return false;
     }
 
+    bool AdventureModeChangeBlocked(Player* player)
+    {
+        auto fighting = [](Player* member)
+        {
+            if (member->IsInCombat())
+                return true;
+            for (Unit* controlled : member->m_Controlled)
+                if (controlled && controlled->IsInCombat())
+                    return true;
+            return false;
+        };
+        bool blocked = !player->IsAlive() || player->IsBeingTeleported() || player->IsInFlight()
+            || player->IsCharmed() || fighting(player);
+        if (!player->FindMap())
+            blocked = true;
+        else if (InstanceScript* instance = player->GetInstanceScript())
+            blocked = blocked || instance->IsEncounterInProgress();
+        if (Group* group = player->GetGroup())
+            for (GroupReference* member = group->GetFirstMember(); member; member = member->next())
+                if (Player* participant = member->GetSource())
+                    blocked = blocked || fighting(participant);
+        if (blocked)
+            ChatHandler(player->GetSession()).SendSysMessage(
+                "Adventure Mode cannot change during combat, an encounter, death, flight, control or teleportation. "
+                "Your party and pets must also be out of combat.");
+        return blocked;
+    }
+
     // ---- Challenge activation (shared by StartChallenge and ActivateTrial) --
     // Validates one challenge against the client's activation rules. Returns the
     // Enum.ChallengeResponse code (0 = OK, 1..14 = reason). Sends a chat hint
     // for every rejection so the player always sees WHY activation failed.
     uint32 ValidateChallenge(Player* player, uint32 challengeID, uint32 level)
     {
+        if ((challengeID == 211 || challengeID == 425) && AdventureModeChangeBlocked(player))
+            return 8;
         uint32 guid = player->GetGUID().GetCounter();
 
         if (!ChallengeExists(challengeID))                       // 1 NOT_FOUND
@@ -534,6 +575,7 @@ namespace CoAChallenges
         TrackInvertedBreath(player, challengeID);
         RefreshRegenTracking(player);
         RefreshHighRiskTracking(player);
+        RefreshLevelScalingTracking(player);
         RefreshLootedTracking(player);
         RecomputeRequiredGameModes(player);
         EnforceGroupOnActivation(player);
@@ -558,9 +600,50 @@ namespace CoAChallenges
         BroadcastChallengeSync(player, challengeID, level, false);
     }
 
+    uint32 LowerAdventureModeLevel(Player* player, uint32 challengeID, uint32 level)
+    {
+        uint32 const guid = player->GetGUID().GetCounter();
+        uint32 const current = ActiveChallengeLevel(guid, challengeID);
+        if ((challengeID != 211 && challengeID != 425) || !ActiveChallenges(guid).contains(challengeID)
+            || !level || level >= current || level > ChallengeLevelCount(challengeID))
+        {
+            ChatHandler(player->GetSession()).SendSysMessage("Choose a lower Adventure Mode level, at least 1.");
+            return 4;
+        }
+        if (AdventureModeChangeBlocked(player))
+            return 8;
+        if (!GetActiveCustomTrial(guid).empty() || HasCompletionLevel(guid, challengeID, level))
+        {
+            ChatHandler(player->GetSession()).SendSysMessage(
+                "Cannot lower a custom trial or select an Adventure Mode level already completed.");
+            return 12;
+        }
+
+        auto* update = CharacterDatabase.GetPreparedStatement(CHAR_UPD_COA_ADVENTURE_LEVEL);
+        update->SetData(0, level);
+        update->SetData(1, guid);
+        update->SetData(2, challengeID);
+        CharacterDatabase.DirectExecute(update);
+        ClearCharChallengeCache(guid);
+        RemoveChallengeSpell(player, challengeID);
+        ApplyChallengeSpell(player, challengeID, level);
+        player->RefreshQuestLogQueries();
+        RefreshLevelScalingTracking(player);
+        SendActiveList(player);
+        SendCriteriaState(player);
+        BroadcastChallengeSync(player, challengeID, level, false);
+        ChatHandler(player->GetSession()).PSendSysMessage(
+            "Adventure Mode reduced to level {}. Difficulty and rewards now use this level.", level);
+        return 0;
+    }
+
     // Validate + activate a single challenge. Returns 0 on success.
     uint32 ActivateChallenge(Player* player, uint32 challengeID, uint32 level)
     {
+        if ((challengeID == 211 || challengeID == 425)
+            && ActiveChallenges(player->GetGUID().GetCounter()).contains(challengeID))
+            return LowerAdventureModeLevel(player, challengeID, level);
+
         uint32 code = ValidateChallenge(player, challengeID, level);
         if (code)
             return code;
@@ -588,6 +671,7 @@ namespace CoAChallenges
         UntrackInvertedBreath(player);
         RefreshRegenTracking(player);
         RefreshHighRiskTracking(player);
+        RefreshLevelScalingTracking(player);
         RefreshLootedTracking(player);
         RecomputeRequiredGameModes(player);
 
@@ -1443,19 +1527,30 @@ namespace CoAChallenges
         // Rewards marked IsFirstCompletion are only given the first time this
         // level is completed (relevant only when re-completion is allowed).
         bool const firstCompletion = !HasCompletionLevel(guid, challengeID, level);
+        uint32 const account = player->GetSession()->GetAccountId();
+        bool const firstItemReward = firstCompletion && (!IsTrialChallenge(challengeID)
+            || !HasAccountCompletionLevel(account, challengeID, level));
 
         // Rewards are handed out while the challenge is still recorded as active, and the
         // completion row that marks it done is written straight after. Granting last meant a
         // failed grant (or a realm drop in between) consumed the challenge and paid nothing,
         // with no way to retry; granting first at worst leaves the challenge complete with the
         // reward already paid, which the row written below then records.
-        GrantChallengeRewards(player, challengeID, level, firstCompletion);
+        GrantChallengeRewards(player, challengeID, level, firstItemReward, firstCompletion);
 
-        CharacterDatabase.DirectExecute(
+        CharacterDatabaseTransaction completion = CharacterDatabase.BeginTransaction();
+        completion->Append(
             "INSERT IGNORE INTO coa_challenge_completion (guid, challengeId, level, completeTime, startTime) "
             "VALUES ({}, {}, {}, UNIX_TIMESTAMP(), {})", guid, challengeID, level, startTime);
-        CharacterDatabase.DirectExecute(
+        auto* accountCompletion = CharacterDatabase.GetPreparedStatement(CHAR_INS_COA_ACCOUNT_CHALLENGE_COMPLETION);
+        accountCompletion->SetData(0, account);
+        accountCompletion->SetData(1, challengeID);
+        accountCompletion->SetData(2, level);
+        accountCompletion->SetData(3, startTime);
+        completion->Append(accountCompletion);
+        completion->Append(
             "DELETE FROM coa_character_challenge WHERE guid = {} AND challengeId = {}", guid, challengeID);
+        CharacterDatabase.DirectCommitTransaction(completion);
         ClearCharChallengeCache(guid);
         RemoveChallengeSpell(player, challengeID);
         RemoveMeterAuras(player);
@@ -1468,6 +1563,7 @@ namespace CoAChallenges
         UntrackInvertedBreath(player);
         RefreshRegenTracking(player);
         RefreshHighRiskTracking(player);
+        RefreshLevelScalingTracking(player);
         RefreshLootedTracking(player);
         RecomputeRequiredGameModes(player);
 
@@ -1545,7 +1641,9 @@ namespace CoAChallenges
                     marked = true;
                 }
             }
-            if (marked && ObjectivesAllDone(guid, cid))
+            if (marked && ObjectivesAllDone(guid, cid)
+                && (!IsTrialChallenge(cid)
+                    || player->GetLevel() >= sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL)))
                 CompleteChallenge(player, cid);
         }
     }
@@ -1616,7 +1714,9 @@ namespace CoAChallenges
                 return false;
             }
 
-            if (marked && ObjectivesAllDone(guid, cid))
+            if (marked && ObjectivesAllDone(guid, cid)
+                && (!IsTrialChallenge(cid)
+                    || player->GetLevel() >= sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL)))
                 CompleteChallenge(player, cid);
         }
         return true;
@@ -1695,6 +1795,7 @@ namespace CoAChallenges
         UntrackInvertedBreath(player);
         RefreshRegenTracking(player);
         RefreshHighRiskTracking(player);
+        RefreshLevelScalingTracking(player);
         RefreshLootedTracking(player);
         RecomputeRequiredGameModes(player);
 

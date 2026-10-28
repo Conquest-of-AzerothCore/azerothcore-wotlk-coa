@@ -19,9 +19,12 @@ def check(directory):
             for phase in ('talented', 'removed'):
                 if values[f'{phase}_{suffix}_hits'] != hits:
                     raise ValueError(f'{phase}_{suffix}: unequal damage event counts')
-                for buff, extra in ((560170, 1 + critical), (680441, critical)):
+                critical_hits = values[f'{phase}_{suffix}_crits']
+                if not 0 <= critical_hits <= hits or critical and critical_hits != hits:
+                    raise ValueError(f'{phase}_{suffix}: invalid critical event count {critical_hits}')
+                for buff, additions in ((560170, hits + critical_hits), (680441, critical_hits)):
                     base = values[f'baseline_{suffix}_{buff}']
-                    expected = min(values[f'cap_{buff}'], base + hits * extra) if phase == 'talented' else base
+                    expected = min(values[f'cap_{buff}'], base + additions) if phase == 'talented' else base
                     actual = values[f'{phase}_{suffix}_{buff}']
                     if actual != expected:
                         raise ValueError(f'{phase}_{suffix}_{buff}: {actual}, expected {expected}')

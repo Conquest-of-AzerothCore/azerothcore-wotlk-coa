@@ -1,0 +1,394 @@
+{
+ "schema": 1,
+ "name": "Warcraft Reborn Mystic Enchant Heavy Thunder empowers the next Thunder Clap after a single-target hit",
+ "contract": [
+  "Heavy Thunder 1181080: \"Hitting a single target with Thunder Clap will cause your next Thunder Clap to gain 40% increased critical strike chance and cost no rage.\" Each hit stacks the counter 1181081; the cast's delayed check 1181083 grants 1181082 at one stack. The delayed check had no target and nothing granted the buff."
+ ],
+ "timeout_ms": 90000,
+ "players": [
+  {
+   "id": "w",
+   "race": 1,
+   "class": 1,
+   "level": 80,
+   "melee_hit_rating": 10000,
+   "spell_hit_rating": 10000,
+   "expertise_rating": 10000
+  }
+ ],
+ "creatures": [
+  {
+   "id": "e2",
+   "owner": "w",
+   "entry": 1601,
+   "level": 80,
+   "health": 10000000,
+   "distance": 3,
+   "stationary": true
+  }
+ ],
+ "steps": [
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 43,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 44,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 54,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 55,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 160,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 172,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 95,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "add_item",
+   "actor": "w",
+   "item": 36528
+  },
+  {
+   "action": "equip",
+   "actor": "w",
+   "item": 36528,
+   "slot": 15
+  },
+  {
+   "action": "set_aura",
+   "actor": "w",
+   "spell": 1181080,
+   "stacks": 1
+  },
+  {
+   "action": "wait",
+   "ms": 500
+  },
+  {
+   "action": "assert",
+   "actor": "w",
+   "metric": "aura",
+   "label": "enchant aura active",
+   "spell": 1181080,
+   "equals": 1
+  },
+  {
+   "action": "learn",
+   "actor": "w",
+   "spell": 1147502
+  },
+  {
+   "action": "learn",
+   "actor": "w",
+   "spell": 1102457
+  },
+  {
+   "action": "set_power",
+   "actor": "w",
+   "power": 1,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "actor": "w",
+   "spell": 1102457
+  },
+  {
+   "action": "wait",
+   "ms": 1600
+  },
+  {
+   "action": "assert",
+   "actor": "w",
+   "metric": "aura",
+   "spell": 1102457,
+   "equals": 1,
+   "label": "in Battle Stance"
+  },
+  {
+   "action": "set_power",
+   "actor": "w",
+   "power": 1,
+   "value": 1000
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "w",
+   "spell": 1147502
+  },
+  {
+   "action": "cast",
+   "actor": "w",
+   "spell": 1147502,
+   "target": "e2"
+  },
+  {
+   "action": "wait",
+   "ms": 600
+  },
+  {
+   "action": "wait",
+   "ms": 1000
+  },
+  {
+   "action": "set_power",
+   "actor": "w",
+   "power": 1,
+   "value": 1000
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "w",
+   "spell": 1147502
+  },
+  {
+   "action": "cast",
+   "actor": "w",
+   "spell": 1147502,
+   "target": "e2"
+  },
+  {
+   "action": "wait",
+   "ms": 600
+  },
+  {
+   "action": "wait",
+   "ms": 1000
+  },
+  {
+   "action": "set_power",
+   "actor": "w",
+   "power": 1,
+   "value": 1000
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "w",
+   "spell": 1147502
+  },
+  {
+   "action": "cast",
+   "actor": "w",
+   "spell": 1147502,
+   "target": "e2"
+  },
+  {
+   "action": "wait",
+   "ms": 600
+  },
+  {
+   "action": "wait",
+   "ms": 1000
+  },
+  {
+   "action": "assert",
+   "actor": "w",
+   "metric": "spell_cast_count",
+   "label": "driver Thunder Clap (1147502) went off",
+   "spell": 1147502,
+   "min": 1
+  },
+  {
+   "action": "wait",
+   "ms": 500
+  },
+  {
+   "action": "assert",
+   "actor": "w",
+   "metric": "spell_proc_count",
+   "label": "effect 1 procs (damage)",
+   "spell": 1181080,
+   "min": 1
+  },
+  {
+   "action": "assert",
+   "actor": "w",
+   "metric": "spell_cast_count",
+   "label": "casts Heavy Thunder stack counter (1181081)",
+   "spell": 1181081,
+   "min": 1
+  },
+  {
+   "action": "learn",
+   "actor": "w",
+   "spell": 1147502
+  },
+  {
+   "action": "learn",
+   "actor": "w",
+   "spell": 1102457
+  },
+  {
+   "action": "set_power",
+   "actor": "w",
+   "power": 1,
+   "value": 1000
+  },
+  {
+   "action": "cast",
+   "actor": "w",
+   "spell": 1102457
+  },
+  {
+   "action": "wait",
+   "ms": 1600
+  },
+  {
+   "action": "assert",
+   "actor": "w",
+   "metric": "aura",
+   "spell": 1102457,
+   "equals": 1,
+   "label": "in Battle Stance"
+  },
+  {
+   "action": "set_power",
+   "actor": "w",
+   "power": 1,
+   "value": 1000
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "w",
+   "spell": 1147502
+  },
+  {
+   "action": "cast",
+   "actor": "w",
+   "spell": 1147502,
+   "target": "e2"
+  },
+  {
+   "action": "wait",
+   "ms": 600
+  },
+  {
+   "action": "wait",
+   "ms": 1000
+  },
+  {
+   "action": "set_power",
+   "actor": "w",
+   "power": 1,
+   "value": 1000
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "w",
+   "spell": 1147502
+  },
+  {
+   "action": "cast",
+   "actor": "w",
+   "spell": 1147502,
+   "target": "e2"
+  },
+  {
+   "action": "wait",
+   "ms": 600
+  },
+  {
+   "action": "wait",
+   "ms": 1000
+  },
+  {
+   "action": "set_power",
+   "actor": "w",
+   "power": 1,
+   "value": 1000
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "w",
+   "spell": 1147502
+  },
+  {
+   "action": "cast",
+   "actor": "w",
+   "spell": 1147502,
+   "target": "e2"
+  },
+  {
+   "action": "wait",
+   "ms": 600
+  },
+  {
+   "action": "wait",
+   "ms": 1000
+  },
+  {
+   "action": "assert",
+   "actor": "w",
+   "metric": "spell_cast_count",
+   "label": "driver Thunder Clap (1147502) went off",
+   "spell": 1147502,
+   "min": 1
+  },
+  {
+   "action": "wait",
+   "ms": 500
+  },
+  {
+   "action": "assert",
+   "actor": "w",
+   "metric": "spell_proc_count",
+   "label": "effect 2 procs (cast)",
+   "spell": 1181080,
+   "min": 1
+  },
+  {
+   "action": "assert",
+   "actor": "w",
+   "metric": "spell_cast_count",
+   "label": "casts Heavy Thunder delay trigger (1181083)",
+   "spell": 1181083,
+   "min": 1
+  },
+  {
+   "action": "assert",
+   "actor": "w",
+   "metric": "aura",
+   "spell": 1181082,
+   "equals": 1,
+   "label": "a single-target Thunder Clap empowers the next (Heavy Thunder 1181082)"
+  }
+ ]
+}

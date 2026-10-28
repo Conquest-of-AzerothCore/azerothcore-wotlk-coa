@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Every capital has an Arena Organizer outside the Arena Tournament event",
+  "contract": "Arena team charters are sold only by an Arena Organizer. CoA's client caches know 26012 \"Arena Organizer\", whose only capital spawns belong to the Arena Tournament event 31, which never starts. Each of the eight capitals therefore holds exactly one 26012 in the world phase without that event, so a character standing at its former tournament pedestal finds one Arena Organizer within 60 yards.",
+  "timeout_ms": 240000,
+  "location": { "map": 1, "x": 1563.45, "y": -4410.4, "z": 7.48746, "o": 0.0 },
+  "players": [
+    { "id": "orc", "race": 2, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "set_phase", "actor": "orc", "value": 1 },
+    { "action": "teleport", "actor": "orc", "map": 1, "x": 1563.45, "y": -4410.4, "z": 7.48746, "o": 0.0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "Orgrimmar: Arena Organizer", "actor": "orc", "metric": "nearby_creature_count", "entry": 26012, "equals": 1, "within_ms": 10000 },
+    { "action": "teleport", "actor": "orc", "map": 1, "x": -1277.8, "y": 118.812, "z": 131.236, "o": 0.0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "Thunder Bluff: Arena Organizer", "actor": "orc", "metric": "nearby_creature_count", "entry": 26012, "equals": 1, "within_ms": 10000 },
+    { "action": "teleport", "actor": "orc", "map": 0, "x": 1812.11, "y": 245.365, "z": 60.6701, "o": 0.0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "Undercity: Arena Organizer", "actor": "orc", "metric": "nearby_creature_count", "entry": 26012, "equals": 1, "within_ms": 10000 },
+    { "action": "teleport", "actor": "orc", "map": 530, "x": 9514.55, "y": -7304.63, "z": 14.5456, "o": 0.0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "Silvermoon: Arena Organizer", "actor": "orc", "metric": "nearby_creature_count", "entry": 26012, "equals": 1, "within_ms": 10000 },
+    { "action": "teleport", "actor": "orc", "map": 0, "x": -8822.71, "y": 626.831, "z": 94.356, "o": 0.0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "Stormwind: Arena Organizer", "actor": "orc", "metric": "nearby_creature_count", "entry": 26012, "equals": 1, "within_ms": 10000 },
+    { "action": "teleport", "actor": "orc", "map": 0, "x": -4911.45, "y": -973.228, "z": 501.537, "o": 0.0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "Ironforge: Arena Organizer", "actor": "orc", "metric": "nearby_creature_count", "entry": 26012, "equals": 1, "within_ms": 10000 },
+    { "action": "teleport", "actor": "orc", "map": 1, "x": 9955.84, "y": 2283.01, "z": 1341.48, "o": 0.0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "Darnassus: Arena Organizer", "actor": "orc", "metric": "nearby_creature_count", "entry": 26012, "equals": 1, "within_ms": 10000 },
+    { "action": "teleport", "actor": "orc", "map": 530, "x": -3998.91, "y": -11877.5, "z": -0.234778, "o": 0.0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "The Exodar: Arena Organizer", "actor": "orc", "metric": "nearby_creature_count", "entry": 26012, "equals": 1, "within_ms": 10000 }
+  ]
+}

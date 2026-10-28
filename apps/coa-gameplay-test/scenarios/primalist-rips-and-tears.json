@@ -1,7 +1,11 @@
 {
   "schema": 1,
   "name": "Primalist Rips and Tears owner and pet periodic resources",
-  "contract": "Five own Crash ticks grant ten Rage and twenty-five pet Focus. Eight actual pet Shred ticks grant sixteen Rage and forty Focus. Baseline, talent removal and another class periodic spell grant neither helper resource.",
+  "contract": [
+    "Five own Crash ticks grant ten Rage and twenty-five pet Focus. Eight actual pet Shred ticks grant",
+    "sixteen Rage and forty Focus. Baseline, talent removal and another class periodic spell grant neither",
+    "helper resource."
+  ],
   "players": [
     {
       "id": "primalist",
@@ -61,6 +65,26 @@
       "metric": "pet_entry",
       "equals": 1188,
       "within_ms": 24000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 61017,
+      "effect": 0,
+      "min": 100,
+      "within_ms": 4000,
+      "label": "Native pet hit scaling has settled"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 61017,
+      "effect": 2,
+      "min": 100,
+      "within_ms": 4000,
+      "label": "Native pet expertise scaling has settled"
     },
     {
       "action": "unlearn",

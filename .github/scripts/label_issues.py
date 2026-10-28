@@ -13,22 +13,37 @@ MANAGED_LABELS = [
     "Bloodmage",
     "Bug",
     "Chronomancer",
-    "Class Fix",
     "Config",
     "CPP Edit",
+    "Crash Fix",
+    "Creature",
     "Cultist",
     "DB",
+    "Dungeon",
+    "Druid",
+    "Feature",
     "Felsworn",
     "Guardian",
+    "Hunter",
+    "Item",
     "Knight of Xoroth",
+    "Mage",
+    "Manastorm",
     "Necromancer",
     "Not Tested",
+    "Object",
+    "Paladin",
     "Primalist",
+    "Priest",
     "Pyromancer",
+    "Quest",
+    "Raid",
     "Ranger",
     "Reaper",
+    "Rogue",
     "Runemaster",
     "Script",
+    "Shaman",
     "Starcaller",
     "Stormbringer",
     "Sun Cleric",
@@ -36,6 +51,10 @@ MANAGED_LABELS = [
     "Tested",
     "Tinker",
     "Venomancer",
+    "WarcraftReborn",
+    "Warlock",
+    "Warrior",
+    "Wildcard",
     "Witch Doctor",
     "Witch Hunter",
 ]
@@ -91,13 +110,93 @@ CLASS_ID_LABELS = {
 }
 
 
-CATEGORY_PATTERNS = {
-    "Class Fix": [
-        r"\bclass\s+fix\b",
-        r"\bclass\s+bug\b",
-        r"\bfix\s+class\b",
-    ],
+REBORN_CLASS_ID_LABELS = {
+    1: "Warrior",
+    2: "Paladin",
+    3: "Hunter",
+    4: "Rogue",
+    5: "Priest",
+    7: "Shaman",
+    8: "Mage",
+    9: "Warlock",
+    11: "Druid",
+}
+REBORN_CLASS_MENTION = re.compile(
+    r"\b(?:warcraft\s*)?reborn\s+(" + "|".join(REBORN_CLASS_ID_LABELS.values()) + r")s?\b",
+    re.IGNORECASE,
+)
 
+
+REPORT_SECTION_LABELS = {
+    "quest": "Quest",
+    "item": "Item",
+    "dungeon": "Dungeon",
+    "raid": "Raid",
+    "crash": "Crash Fix",
+    "creature": "Creature",
+    "npc": "Creature",
+    "object": "Object",
+    "gameobject": "Object",
+    "warcraftreborn": "WarcraftReborn",
+}
+
+
+SCOPE_LABELS = {
+    "quest": "Quest",
+    "quests": "Quest",
+    "item": "Item",
+    "items": "Item",
+    "dungeon": "Dungeon",
+    "dungeons": "Dungeon",
+    "raid": "Raid",
+    "raids": "Raid",
+    "manastorm": "Manastorm",
+    "wildcard": "Wildcard",
+    "xoroth": "Knight of Xoroth",
+    "creature": "Creature",
+    "creatures": "Creature",
+    "npc": "Creature",
+    "npcs": "Creature",
+    "object": "Object",
+    "objects": "Object",
+    "gameobject": "Object",
+    "gameobjects": "Object",
+    "warcraftreborn": "WarcraftReborn",
+    **{label.replace(" ", "").casefold(): label for label in CLASS_ID_LABELS.values()},
+    **{label.casefold(): label for label in REBORN_CLASS_ID_LABELS.values()},
+}
+
+
+TITLE_PATTERNS = {
+    "Dungeon": r"\bdungeons?\b",
+    "Raid": r"\braids?\b",
+    "Crash Fix": (
+        r"\b(?:client|server|game|realm|worldserver|instant|core)\s+crash"
+        r"|\bcrash(?:es|ed|ing)?\s+(?:the\s+|my\s+)?(?:client|server|game|realm|worldserver|wow)\b"
+        r"|\b(?:prevent|avoid|fix)\s+(?:a\s+|the\s+)?(?:\w+\s+)?crash\b"
+        r"|\bsegfault|\bSIGSEGV\b"
+    ),
+}
+
+
+DESCRIPTION_PATTERNS = {
+    "Manastorm": r"\bmanastorm\b",
+    "Wildcard": r"\bwildcard\b",
+    "WarcraftReborn": (
+        r"\bwarcraft\s*reborn\b"
+        r"|\breborn\s+(?:warrior|paladin|hunter|rogue|priest|death\s+knight|shaman|mage|warlock|druid)s?\b"
+    ),
+}
+
+
+REPORTER_LINE = re.compile(
+    r"^(?:[ \t]*Class(?:[ \t]+ID)?[ \t]*:|\*\*Character:\*\*).*$",
+    re.IGNORECASE | re.MULTILINE,
+)
+CONVENTIONAL_TITLE = re.compile(r"^(\w+)(?:\(([^)]*)\))?!?:")
+
+
+CATEGORY_PATTERNS = {
     "CPP Edit": [
         r"\bc\+\+(?!\w)",
         r"\bcpp\b",
@@ -180,23 +279,32 @@ def determine_labels(issue):
     body = issue.get("body") or ""
 
     text = f"{title}\n{body}"
+    is_pull_request = "pull_request" in issue
 
     labels = []
 
+    if not is_pull_request and is_spell_report(body):
+        labels.extend(reporter_classes(body))
 
-    for match in re.finditer(
-        r"^[ \t]*Class[ \t]+ID[ \t]*:[ \t]*([0-9]{1,3})[ \t]*\r?$",
-        body,
-        re.IGNORECASE | re.MULTILINE,
-    ):
-        label = CLASS_ID_LABELS.get(int(match.group(1)))
-        if label:
-            labels.append(label)
-
+    described_text = f"{title}\n{REPORTER_LINE.sub('', body)}"
     for label, pattern in CLASS_PATTERNS.items():
-        if re.search(pattern, text, re.IGNORECASE):
+        if re.search(pattern, described_text, re.IGNORECASE):
             labels.append(label)
 
+    if is_pull_request:
+        labels.extend(pull_request_title_labels(title))
+    else:
+        labels.extend(report_section_labels(title, body))
+
+    reported_text = title if is_pull_request else f"{title}\n{report_description(body)}"
+    for label, pattern in DESCRIPTION_PATTERNS.items():
+        if re.search(pattern, reported_text, re.IGNORECASE):
+            labels.append(label)
+    labels.extend(reborn_class_mentions(reported_text))
+
+    for label, pattern in TITLE_PATTERNS.items():
+        if re.search(pattern, title, re.IGNORECASE):
+            labels.append(label)
 
     for label, patterns in CATEGORY_PATTERNS.items():
         for pattern in patterns:
@@ -204,11 +312,86 @@ def determine_labels(issue):
                 labels.append(label)
                 break
 
+    if any(label in REBORN_CLASS_ID_LABELS.values() for label in labels):
+        labels.append("WarcraftReborn")
+
     status = determine_testing_status(body)
     if status:
         labels.append(status)
 
     return list(dict.fromkeys(labels))
+
+
+def is_spell_report(body):
+    return bool(re.search(
+        r"^(?:####[ \t]+Spell|\*\*Category:\*\*[ \t]*Spell\b)[^\n]*$",
+        body,
+        re.IGNORECASE | re.MULTILINE,
+    ))
+
+
+def reporter_classes(body):
+    labels = []
+    for match in re.finditer(
+        r"^[ \t]*Class[ \t]+ID[ \t]*:[ \t]*([0-9]{1,3})[ \t]*\r?$",
+        body,
+        re.IGNORECASE | re.MULTILINE,
+    ):
+        class_id = int(match.group(1))
+        label = CLASS_ID_LABELS.get(class_id) or REBORN_CLASS_ID_LABELS.get(class_id)
+        if label:
+            labels.append(label)
+
+    for character in re.findall(r"^\*\*Character:\*\*.*$", body, re.IGNORECASE | re.MULTILINE):
+        for label, pattern in CLASS_PATTERNS.items():
+            if re.search(pattern, character, re.IGNORECASE):
+                labels.append(label)
+        for label in REBORN_CLASS_ID_LABELS.values():
+            if re.search(rf"\blevel\s+\d+\s+{label}\b", character, re.IGNORECASE):
+                labels.append(label)
+    return labels
+
+
+def reborn_class_mentions(text):
+    by_name = {label.casefold(): label for label in REBORN_CLASS_ID_LABELS.values()}
+    return [by_name[match.casefold()] for match in REBORN_CLASS_MENTION.findall(text)]
+
+
+def report_section_labels(title, body):
+    sections = re.findall(r"^####[ \t]+(\w+)[ \t]*\r?$", body, re.MULTILINE)
+    categories = re.findall(r"^\*\*Category:\*\*[ \t]*(.+?)[ \t]*\r?$", body, re.IGNORECASE | re.MULTILINE)
+    sections += [part for category in categories for part in category.split("/")]
+    prefix = re.match(r"\[([^\]]+)\]", title)
+    if prefix:
+        sections += prefix.group(1).split("/")
+    return [
+        REPORT_SECTION_LABELS[section.strip().casefold()]
+        for section in sections
+        if section.strip().casefold() in REPORT_SECTION_LABELS
+    ]
+
+
+def report_description(body):
+    match = re.search(
+        r"^(?:####[ \t]+Issue|###[ \t]+Description)[ \t]*\r?$(.*?)(?=^Location:|^###[ \t]|^<sub>|\Z)",
+        body,
+        re.IGNORECASE | re.MULTILINE | re.DOTALL,
+    )
+    return match.group(1) if match else ""
+
+
+def pull_request_title_labels(title):
+    match = CONVENTIONAL_TITLE.match(title)
+    if not match:
+        return []
+
+    kind, scope = match.groups()
+    labels = ["Feature"] if kind.casefold() == "feat" else []
+    for part in (scope or "").split("/"):
+        label = SCOPE_LABELS.get(part.strip().casefold())
+        if label:
+            labels.append(label)
+    return labels
 
 
 def determine_testing_status(body):

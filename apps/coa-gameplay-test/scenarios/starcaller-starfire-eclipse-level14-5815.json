@@ -1,0 +1,336 @@
+{
+  "schema": 1,
+  "name": "Level-14 Starfire Shot consumes Lunar Eclipse with Lo'sho Amplification (#5815)",
+  "contract": [
+    "Original Spell.dbc 500205 says Starfire Shot now has a Lunar Eclipse effect; 801978 requires a Scattered",
+    "Star (804378) and a ranged weapon. This uses the reported level 14.",
+    "Both fixtures cast Lunar Eclipse and Starfire Shot normally. Only the fixture with Lo'sho Amplification must",
+    "apply Burn 561122 and consume Eclipse; the other retains Eclipse. Fan of Knives 680703 has the original",
+    "Melee damage class, so both fixtures need native hit rating and expertise to apply Scattered Star reliably.",
+    "Require an accepted normal cast and actual damage before checking its star, preserving level 14."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 14,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "ranged_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "star",
+      "race": 1,
+      "class": 26,
+      "level": 14,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "ranged_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy_control",
+      "owner": "control",
+      "entry": 36,
+      "level": 14,
+      "health": 1000000,
+      "distance": 6.5
+    },
+    {
+      "id": "dummy_star",
+      "owner": "star",
+      "entry": 36,
+      "level": 14,
+      "health": 1000000,
+      "distance": 6.5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 680703
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 800386
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 801978
+    },
+    {
+      "action": "learn",
+      "actor": "star",
+      "spell": 680703
+    },
+    {
+      "action": "learn",
+      "actor": "star",
+      "spell": 800386
+    },
+    {
+      "action": "learn",
+      "actor": "star",
+      "spell": 801978
+    },
+    {
+      "action": "learn",
+      "label": "Only the star fixture holds Lo'sho Amplification",
+      "actor": "star",
+      "spell": 500205
+    },
+    {
+      "action": "add_item",
+      "actor": "control",
+      "item": 2504
+    },
+    {
+      "action": "equip",
+      "actor": "control",
+      "item": 2504,
+      "slot": 17
+    },
+    {
+      "action": "add_item",
+      "actor": "star",
+      "item": 2504
+    },
+    {
+      "action": "equip",
+      "actor": "star",
+      "item": 2504,
+      "slot": 17
+    },
+    {
+      "action": "wait",
+      "label": "Let the equipment settle",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Control has native melee accuracy",
+      "actor": "control",
+      "metric": "melee_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "label": "Control's expertise covers dodge and parry",
+      "actor": "control",
+      "metric": "expertise",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "label": "Star has native melee accuracy",
+      "actor": "star",
+      "metric": "melee_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "label": "Star's expertise covers dodge and parry",
+      "actor": "star",
+      "metric": "expertise",
+      "min": 100
+    },
+    {
+      "action": "cast",
+      "label": "Control's dummy gains a Scattered Star",
+      "actor": "control",
+      "spell": 680703,
+      "target": "dummy_control"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "cast_failure",
+      "spell": 680703,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 680703,
+      "target": "dummy_control",
+      "min": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "dummy_control",
+      "metric": "aura_stacks",
+      "spell": 804378,
+      "caster": "control",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "Star's dummy gains a Scattered Star",
+      "actor": "star",
+      "spell": 680703,
+      "target": "dummy_star"
+    },
+    {
+      "action": "assert",
+      "actor": "star",
+      "metric": "cast_failure",
+      "spell": 680703,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "star",
+      "metric": "spell_damage_count",
+      "spell": 680703,
+      "target": "dummy_star",
+      "min": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "dummy_star",
+      "metric": "aura_stacks",
+      "spell": 804378,
+      "caster": "star",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let Fan of Knives' cooldown clear",
+      "ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "label": "Four Lunar Phase stacks on the control fixture",
+      "actor": "control",
+      "spell": 802985,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "The four-stack marker Lunar Eclipse needs",
+      "actor": "control",
+      "spell": 704519,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "label": "Control activates Lunar Eclipse",
+      "actor": "control",
+      "spell": 800386
+    },
+    {
+      "action": "assert",
+      "label": "Lunar Eclipse is active on the control fixture",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 800386,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "label": "Four Lunar Phase stacks on the star fixture",
+      "actor": "star",
+      "spell": 802985,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "The four-stack marker Lunar Eclipse needs",
+      "actor": "star",
+      "spell": 704519,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "label": "Star activates Lunar Eclipse",
+      "actor": "star",
+      "spell": 800386
+    },
+    {
+      "action": "assert",
+      "label": "Lunar Eclipse is active on the star fixture",
+      "actor": "star",
+      "metric": "aura",
+      "spell": 800386,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let Lunar Eclipse's own cast settle before Starfire Shot",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Control fires Starfire Shot without Lo'sho Amplification",
+      "actor": "control",
+      "spell": 801978,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "label": "Star fires Starfire Shot with Lo'sho Amplification",
+      "actor": "star",
+      "spell": 801978,
+      "target": "dummy_star"
+    },
+    {
+      "action": "wait",
+      "label": "Let both 2.5 s casts land and the hit callback run",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Without Lo'sho Amplification, Starfire Shot does not trigger the Burn DoT",
+      "actor": "dummy_control",
+      "metric": "aura",
+      "spell": 561122,
+      "caster": "control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Without Lo'sho Amplification, Lunar Eclipse is not consumed",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 800386,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "With Lo'sho Amplification, Starfire Shot triggers the Burn DoT",
+      "actor": "dummy_star",
+      "metric": "aura",
+      "spell": 561122,
+      "caster": "star",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "With Lo'sho Amplification, Starfire Shot consumes Lunar Eclipse",
+      "actor": "star",
+      "metric": "aura",
+      "spell": 800386,
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,186 @@
+{
+  "schema": 1,
+  "name": "Westfall rare elites award elite kill experience",
+  "contract": "The Ascension creaturecache.wdb captures (up to 2026-09-05) give the Westfall rares Vultros 462, Sergeant Brashclaw 506, Slark 519, Brack 520, Leprithus 572, Foe Reaper 4000 573 and Master Digger 1424 rank 2 (rare elite); the server carried rank 4 (rare), which Creature::isElite excludes. An elite kill multiplies the base gain by Rate.XP.Elite 1.44 (Formulas.cpp). An elite kill therefore awards about 1.44 times a normal kill of the same level whatever Rate.XP.Kill and Rate.XP.Global are (truncation keeps the ratio within 1.41-1.46: 210/146 with the shipped rates, 193/134 with Rate.XP.Kill 1), and a rank-4 rare awards the same as a normal kill. Foe Reaper 4000 is level 20 natively and Vultros is pinned to level 20 so both share the base gain of 145; neither has a per-creature experience modifier. The warrior carries melee_hit_rating, expertise_rating and melee_crit_rating 10000 for the reason given in xp-ascension-rates.json: none of them enters the XP calculation.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 1,
+      "level": 20,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "melee_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "normal",
+      "owner": "hunter",
+      "entry": 2158,
+      "level": 20,
+      "health": 20,
+      "distance": 2
+    },
+    {
+      "id": "foe_reaper",
+      "owner": "hunter",
+      "entry": 573,
+      "level": 20,
+      "health": 20,
+      "distance": 2
+    },
+    {
+      "id": "vultros",
+      "owner": "hunter",
+      "entry": 462,
+      "level": 20,
+      "health": 20,
+      "distance": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "command",
+      "actor": "hunter",
+      "command": ".xp 1"
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "level",
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "foe_reaper",
+      "metric": "level",
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "vultros",
+      "metric": "level",
+      "equals": 20
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "xp",
+      "save_as": "normal_before"
+    },
+    {
+      "action": "attack",
+      "actor": "hunter",
+      "target": "normal"
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Normal kill awards experience",
+      "actor": "hunter",
+      "metric": "xp",
+      "relative_to": "normal_before",
+      "min": 100,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "xp",
+      "relative_to": "normal_before",
+      "save_as": "normal_gain"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hunter"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "xp",
+      "save_as": "foe_reaper_before"
+    },
+    {
+      "action": "attack",
+      "actor": "hunter",
+      "target": "foe_reaper"
+    },
+    {
+      "action": "assert",
+      "actor": "foe_reaper",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Foe Reaper 4000 is a rare elite and awards elite kill experience",
+      "actor": "hunter",
+      "metric": "xp",
+      "relative_to": "foe_reaper_before",
+      "ratio_to": "normal_gain",
+      "min": 1.41,
+      "max": 1.46,
+      "within_ms": 5000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hunter"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "xp",
+      "save_as": "vultros_before"
+    },
+    {
+      "action": "attack",
+      "actor": "hunter",
+      "target": "vultros"
+    },
+    {
+      "action": "assert",
+      "actor": "vultros",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Vultros is a rare elite and awards elite kill experience",
+      "actor": "hunter",
+      "metric": "xp",
+      "relative_to": "vultros_before",
+      "ratio_to": "normal_gain",
+      "min": 1.41,
+      "max": 1.46,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "level",
+      "equals": 20
+    }
+  ]
+}

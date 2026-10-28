@@ -25,27 +25,28 @@ struct ZoneScrollEntry
 {
     uint32 ItemEntry;
     uint32 SpellId;
+    uint32 AuraId;
     char const* Name;
 };
 
 constexpr ZoneScrollEntry kZoneScrolls[] = {
-    { 696661, 993961, "Golganneth" },
-    { 696662, 993943, "Norgannon" },
-    { 696663, 993955, "Khaz'goroth" },
-    { 696664, 993959, "Aggramar" },
-    { 696665, 993957, "Eonar" },
-    { 1179240, 91770, "Steadfast" },
-    { 1179261, 91796, "Featherfall" },
-    { 1179266, 91803, "Ghost Runner" },
-    { 1179269, 91814, "Crafting Speed" },
+    { 696661, 993961, 993961, "Golganneth" },
+    { 696662, 993943, 993943, "Norgannon" },
+    { 696663, 993955, 993955, "Khaz'goroth" },
+    { 696664, 993959, 993959, "Aggramar" },
+    { 696665, 993957, 993957, "Eonar" },
+    { 1179240, 91770, 91769, "Steadfast" },
+    { 1179261, 91796, 91796, "Featherfall" },
+    { 1179266, 91803, 91803, "Ghost Runner" },
+    { 1179269, 91814, 91814, "Crafting Speed" },
 };
 
-uint32 SpellForItem(uint32 itemEntry)
+ZoneScrollEntry const* ScrollForItem(uint32 itemEntry)
 {
     for (ZoneScrollEntry const& entry : kZoneScrolls)
         if (entry.ItemEntry == itemEntry)
-            return entry.SpellId;
-    return 0;
+            return &entry;
+    return nullptr;
 }
 
 constexpr char const* ANNOUNCE_TAG_COLOR = "ffa54a";
@@ -132,11 +133,11 @@ void SyncZoneBlessings(Player* player, uint32 zoneId)
     time_t now = GameTime::GetGameTime().count();
     for (ZoneScrollEntry const& entry : kZoneScrolls)
     {
-        time_t expiry = BlessingExpiry(player, zoneId, entry.SpellId);
+        time_t expiry = BlessingExpiry(player, zoneId, entry.AuraId);
         if (expiry > now)
-            ApplyZoneScrollAura(player, entry.SpellId, int32((expiry - now) * 1000));
-        else if (player->HasAura(entry.SpellId))
-            player->RemoveAurasDueToSpell(entry.SpellId);
+            ApplyZoneScrollAura(player, entry.AuraId, int32((expiry - now) * 1000));
+        else if (player->HasAura(entry.AuraId))
+            player->RemoveAurasDueToSpell(entry.AuraId);
     }
 
     SyncGhostRunner(player);
@@ -189,14 +190,16 @@ public:
     {
         Player* player = caster ? caster->ToPlayer() : nullptr;
         Item* item = spell->m_CastItem;
-        if (!player || !item || SpellForItem(item->GetEntry()) != spellInfo->Id)
+        ZoneScrollEntry const* scroll = item ? ScrollForItem(item->GetEntry()) : nullptr;
+        if (!player || !scroll || scroll->SpellId != spellInfo->Id)
             return;
 
-        int32 durationMs = spellInfo->GetMaxDuration();
+        SpellInfo const* auraInfo = sSpellMgr->GetSpellInfo(scroll->AuraId);
+        int32 durationMs = auraInfo ? auraInfo->GetMaxDuration() : 0;
         if (durationMs <= 0)
             return;
 
-        ZoneBlessing blessing{player->GetZoneId(), player->GetInstanceId(), spellInfo->Id, player->GetGUID(),
+        ZoneBlessing blessing{player->GetZoneId(), player->GetInstanceId(), scroll->AuraId, player->GetGUID(),
             player->GetTeamId(), GameTime::GetGameTime().count() + durationMs / 1000};
         {
             std::lock_guard<std::mutex> lock(g_zoneScrollLock);
@@ -212,9 +215,9 @@ public:
                 !SharesBlessing(recipient, blessing))
                 continue;
 
-            if (recipient != player)
+            if (recipient != player || scroll->AuraId != spellInfo->Id)
             {
-                ApplyZoneScrollAura(recipient, spellInfo->Id, durationMs);
+                ApplyZoneScrollAura(recipient, scroll->AuraId, durationMs);
                 SyncGhostRunner(recipient);
             }
             ChatHandler(recipient->GetSession()).SendSysMessage(announcement);
@@ -243,12 +246,12 @@ public:
     bool OnPlayerCanCastItemUseSpell(Player* player, Item* item, SpellCastTargets const&,
         uint8 castCount, uint32) override
     {
-        uint32 spellId = SpellForItem(item->GetEntry());
-        if (!spellId)
+        ZoneScrollEntry const* scroll = ScrollForItem(item->GetEntry());
+        if (!scroll)
             return true;
 
-        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
-        if (!spellInfo || BlessingExpiry(player, player->GetZoneId(), spellId) <= GameTime::GetGameTime().count())
+        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(scroll->AuraId);
+        if (!spellInfo || BlessingExpiry(player, player->GetZoneId(), scroll->AuraId) <= GameTime::GetGameTime().count())
             return true;
 
         Spell::SendCastResult(player, spellInfo, castCount, SPELL_FAILED_AURA_BOUNCED);

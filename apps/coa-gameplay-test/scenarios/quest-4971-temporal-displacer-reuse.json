@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "A Matter of Time: the Temporal Displacer can be used more than once (#6555)",
+  "contract": "Quest 4971 requires ten Temporal Parasites 10717, and creature 10717 has no world spawn: the quest's source item Temporal Displacer 12627 carries the on-use spell Displacing Temporal Rift 16613 (BagFamily 12, spelltrigger_1 0, spellcooldown_1 30000). That spell summons 10717 (SPELL_EFFECT_SUMMON, TARGET_DEST_CASTER_SUMMON) and triggers 16630 (Quest - Temporal Parasite Summon #2), whose own trigger continues the chain, so one use of the item exposes three parasites and the quest needs about four uses. The item also carried spellcharges_1 -25, and Spell::TakeCastItem marks an item expendable when its spell's charge cost is negative, decrements the item's own counter and destroys the item once that counter reads 0, which is the single use the report describes. The item is now authored without a charge cost, so the expendable path never applies to it and the 30 second cooldown is the only limit: the displacer survives every use until the quest turn-in takes it back (TakeQuestSourceItem). Expected: one use lands Spell 16613, exposes at least one Temporal Parasite, and leaves the displacer in the bags; after the cooldown is cleared, a second use lands and the displacer is still in the bags.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": 1479.1, "y": -1818.86, "z": 59.1302, "o": 0 },
+  "players": [
+    { "id": "chronie", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "add_item", "label": "The quest hands over the displacer", "actor": "chronie", "item": 12627, "count": 1 },
+    {
+      "action": "assert", "label": "SETUP: the displacer is in the bags", "actor": "chronie",
+      "metric": "item_count", "item": 12627, "equals": 1
+    },
+    {
+      "action": "snapshot", "label": "Count the displacer uses before the cast", "actor": "chronie",
+      "metric": "spell_go_count", "spell": 16613, "save_as": "uses"
+    },
+    { "action": "use_item", "label": "Use the Temporal Displacer", "actor": "chronie", "item": 12627, "spell": 16613 },
+    {
+      "action": "assert", "label": "The displacing rift lands", "actor": "chronie",
+      "metric": "spell_go_count", "spell": 16613, "relative_to": "uses", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The use reveals a Temporal Parasite", "actor": "chronie",
+      "metric": "nearby_creature_count", "entry": 10717, "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The displacer survives its own use", "actor": "chronie",
+      "metric": "item_count", "item": 12627, "equals": 1, "within_ms": 3000
+    },
+    { "action": "reset_cooldown", "label": "Wait out the 30 second item cooldown", "actor": "chronie", "spell": 16613 },
+    { "action": "use_item", "label": "Use the displacer a second time", "actor": "chronie", "item": 12627, "spell": 16613 },
+    {
+      "action": "assert", "label": "The second use lands", "actor": "chronie",
+      "metric": "spell_go_count", "spell": 16613, "relative_to": "uses", "equals": 2, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The displacer is still in the bags after two uses", "actor": "chronie",
+      "metric": "item_count", "item": 12627, "equals": 1, "within_ms": 3000
+    }
+  ]
+}

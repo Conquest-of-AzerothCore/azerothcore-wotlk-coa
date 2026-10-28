@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "name": "Venomancer: the Fungarian follows its owner to a new target",
+  "contract": [
+    "Fungal Assailant 504344 summons the Fungarian 45896 for 20 sec \"to attack an enemy\" (live tooltip, AscensionDB",
+    "and Exiles DB). Like every assisting summon it attacks what its owner fights: when the owner turns to another",
+    "enemy, attacking it or selecting it and damaging it with a spell, the Fungarian leaves its first target and",
+    "attacks the new one. The owner here selects the second dummy and applies Spore 572869 to it without melee."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "v",
+      "race": 1,
+      "class": 29,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "first",
+      "owner": "v",
+      "entry": 36,
+      "level": 60,
+      "health": 4000000,
+      "distance": 5
+    },
+    {
+      "id": "second",
+      "owner": "v",
+      "entry": 36,
+      "level": 60,
+      "health": 4000000,
+      "distance": 8
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 504344
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 572869
+    },
+    {
+      "action": "cast",
+      "label": "Summon the Fungarian at the first dummy",
+      "actor": "v",
+      "spell": 504344,
+      "target": "first"
+    },
+    {
+      "action": "assert",
+      "label": "The Fungarian attacks the first dummy",
+      "actor": "v",
+      "metric": "owned_creature_victim",
+      "entry": 45896,
+      "target": "first",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 1500
+    },
+    {
+      "action": "client_packet",
+      "label": "Select the second dummy (CMSG_SET_SELECTION)",
+      "actor": "v",
+      "opcode": 317,
+      "fields": [
+        {
+          "actor_guid": "second"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "cast",
+      "label": "Spore the second dummy",
+      "actor": "v",
+      "spell": 572869,
+      "target": "second"
+    },
+    {
+      "action": "assert",
+      "label": "Spore finishes its 1.5 sec cast on the second dummy",
+      "actor": "second",
+      "metric": "aura",
+      "spell": 572869,
+      "within_ms": 3000,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Fungarian turns to the owner's new target",
+      "actor": "v",
+      "metric": "owned_creature_victim",
+      "entry": 45896,
+      "target": "second",
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

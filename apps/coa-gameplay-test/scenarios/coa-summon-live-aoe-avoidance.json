@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "name": "CoA summons wear the area-of-effect avoidance their live counterparts show",
+  "contract": "Live CoA combat logs (C:/CoA/SUB/old-logs, 2026-05) give each summon's damage from a creature's area spell as a ratio of the damage the players took from the same cast. Stock guardians with 32233 'Pet Avoidance' (aura 310 -90%, aura 229 -20%, x0.08) show 0.16-0.17. The CoA guardians and pets show 0.08-0.19 (Greater Skeletal Warrior 0.095, Greater Imp has no sample), so they get 32233. Abomination 50068 shows 0.042, matching 680927 'Avoidance' (aura 310 -95%, aura 229 -20%, x0.04). Spectral Scythe 250305 applies 500485 'Spectral Scythe Passive' to itself in the logs (aura 229 -90%). Serpent Ward 50105 and Mimic Ward 300659 show 0.012-0.013; 992173 'Mechanical Ward' (aura 229 -98%, x0.02) is the closest aura without side effects. Steps: 504901 'Raise: Greater Skeletal Warrior' -> 51065 (guardian), 500335 'Raise: Abomination' -> 50068 (guardian, 3 Life Force after 680283), 500576 'Spectral Scythe' -> 250305 (guardian), 500960 'Serpent Ward' -> 50105 (totem, outside Guardian::InitStatsForLevel) and 520661 'Summon: Greater Imp' -> 510100 (real pet). Expected: each summon wears its aura. Before the change none of them did.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "warrior_necro", "race": 1, "class": 23, "level": 60 },
+    { "id": "abomination_necro", "race": 1, "class": 23, "level": 60 },
+    { "id": "reaper", "race": 2, "class": 30, "level": 60, "spell_hit_rating": 10000, "melee_hit_rating": 10000 },
+    { "id": "doctor", "race": 2, "class": 13, "level": 60 },
+    { "id": "knight", "race": 1, "class": 17, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "reaper", "entry": 36, "level": 60, "health": 4000000, "distance": 4 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let login, spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "warrior_necro", "spell": 504901 },
+    { "action": "learn", "label": "Third Life Force", "actor": "abomination_necro", "spell": 680283 },
+    { "action": "learn", "actor": "abomination_necro", "spell": 500335 },
+    { "action": "learn", "actor": "reaper", "spell": 500576 },
+    { "action": "learn", "actor": "doctor", "spell": 500960 },
+    { "action": "learn", "label": "Greater Imp passive", "actor": "knight", "spell": 92101 },
+    {
+      "action": "assert", "label": "SETUP: the Greater Imp passive teaches Summon: Greater Imp", "actor": "knight",
+      "metric": "knows_spell", "spell": 520661, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: the necromancer has three Life Force", "actor": "abomination_necro",
+      "metric": "aura_stacks", "spell": 805011, "equals": 3, "within_ms": 3000
+    },
+    { "action": "cast", "label": "Raise: Greater Skeletal Warrior", "actor": "warrior_necro", "spell": 504901 },
+    {
+      "action": "assert", "label": "SETUP: the Greater Skeletal Warrior is raised", "actor": "warrior_necro",
+      "metric": "owned_creature_count", "entry": 51065, "min": 1, "within_ms": 8000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the Greater Skeletal Warrior wears Pet Avoidance 32233",
+      "actor": "warrior_necro", "metric": "owned_creature_count", "entry": 51065, "spell": 32233, "min": 1,
+      "within_ms": 2000
+    },
+    { "action": "cast", "label": "Raise: Abomination", "actor": "abomination_necro", "spell": 500335 },
+    {
+      "action": "assert", "label": "SETUP: the Abomination is raised", "actor": "abomination_necro",
+      "metric": "owned_creature_count", "entry": 50068, "min": 1, "within_ms": 8000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the Abomination wears Avoidance 680927", "actor": "abomination_necro",
+      "metric": "owned_creature_count", "entry": 50068, "spell": 680927, "min": 1, "within_ms": 2000
+    },
+    { "action": "set_aura", "label": "Reaped Souls", "actor": "reaper", "spell": 500363, "stacks": 3 },
+    { "action": "set_aura", "label": "Soul Infusion", "actor": "reaper", "spell": 803031, "stacks": 1 },
+    { "action": "cast", "label": "Spectral Scythe", "actor": "reaper", "spell": 500576, "target": "dummy" },
+    {
+      "action": "assert", "label": "SETUP: the Spectral Scythe is summoned", "actor": "reaper",
+      "metric": "owned_creature_count", "entry": 250305, "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the Spectral Scythe wears Spectral Scythe Passive 500485",
+      "actor": "reaper",
+      "metric": "owned_creature_count", "entry": 250305, "spell": 500485, "min": 1, "within_ms": 2000
+    },
+    { "action": "cast", "label": "Serpent Ward", "actor": "doctor", "spell": 500960, "target": "doctor" },
+    {
+      "action": "assert", "label": "SETUP: the Serpent Ward totem is placed", "actor": "doctor",
+      "metric": "owned_creature_count", "entry": 50105, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the Serpent Ward wears Mechanical Ward 992173", "actor": "doctor",
+      "metric": "owned_creature_count", "entry": 50105, "spell": 992173, "equals": 1, "within_ms": 2000
+    },
+    { "action": "cast", "label": "Summon: Greater Imp", "actor": "knight", "spell": 520661 },
+    {
+      "action": "assert", "label": "SETUP: the Greater Imp is the knight's pet", "actor": "knight",
+      "metric": "pet_entry", "equals": 510100, "within_ms": 12000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the Greater Imp wears Pet Avoidance 32233", "actor": "knight",
+      "metric": "owned_creature_count", "entry": 510100, "spell": 32233, "equals": 1, "within_ms": 2000
+    }
+  ]
+}

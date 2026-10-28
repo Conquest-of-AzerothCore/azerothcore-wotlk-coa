@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "An elemental Primordial Blast button is saved as Primordial Blast (#5469)",
+  "contract": "An Elemental Mastery transform aura (Ignis 713003, Lithos 717070, Hydros 718040, Stratus 721085) runs aura_ascension_runemaster_primordial_alteration::Transform (AscensionRunemasterElementalTalents.cpp:182), which learns the matching elemental blast (Ignis: 712668) as a temporary spell (learnSpell(alteration->Blast, true), line 195) and replaces every known Primordial Blast rank (chain 800732) with it through SetTemporarySpellReplacement (line 197). A temporary spell is never written to character_spell, and Player::_LoadActions runs before the transform is applied again, so a saved elemental blast button would be refused and deleted at login. persisted_action_button reads Player::GetSavedActionButtonSpell, the spell id _SaveActions writes: a button holding the Ignis blast must be saved as Primordial Blast, and a button holding Primordial Blast itself is saved unchanged.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login state settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 800732},
+    {"action": "set_aura", "label": "Fixture: Ignis transform", "actor": "rm", "spell": 713003, "stacks": 1},
+    {
+      "action": "assert", "label": "Ignis replaces Primordial Blast with its elemental version", "actor": "rm",
+      "metric": "temporary_spell_replacement", "spell": 800732, "equals": 712668, "within_ms": 1000
+    },
+    {"action": "set_action_button", "actor": "rm", "button": 2, "spell": 712668},
+    {"action": "set_action_button", "actor": "rm", "button": 3, "spell": 800732},
+    {
+      "action": "assert", "label": "The bar holds the Ignis blast", "actor": "rm", "metric": "action_button",
+      "button": 2, "equals": 712668
+    },
+    {
+      "action": "assert", "label": "The Ignis blast button is saved as Primordial Blast", "actor": "rm",
+      "metric": "persisted_action_button", "button": 2, "equals": 800732
+    },
+    {
+      "action": "assert", "label": "Control: an ordinary known spell is saved unchanged", "actor": "rm",
+      "metric": "persisted_action_button", "button": 3, "equals": 800732
+    }
+  ]
+}

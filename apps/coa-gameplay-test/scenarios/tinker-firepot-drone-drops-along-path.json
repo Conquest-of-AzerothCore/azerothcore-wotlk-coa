@@ -1,0 +1,213 @@
+{
+  "schema": 1,
+  "name": "Firepot Drone drops capped ground firepots along its whole path",
+  "contract": "Firepot 500601 states that the Firepot Drone drops firepots on the ground beneath it as it flies to its target and that the amount dropped is based on distance travelled. Live combat logs (C:/CoA/SUB/old-logs, 2026-07/08, 1975 drones) show one drop about every second of flight, so a 34-yard flight drops at least three firepots before its landing explosion, and each oil cast 500753 follows a drop. The installed Spell.dbc 500601 hits at most 5 targets (MaxAffectedTargets) in a 5-yard radius around its ground destination, so a drop over seven clustered enemies damages only five of them; the drop selects targets in GUID order, so the two enemies spawned last stay untouched. The first drop happens while the drone is still flying, and its oil lies on the ground beneath it.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 60,
+      "distance": 34,
+      "health": 1000000,
+      "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "cluster_1",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 60,
+      "distance": 10,
+      "health": 1000000,
+      "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "cluster_2",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 60,
+      "distance": 10,
+      "health": 1000000,
+      "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "cluster_3",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 60,
+      "distance": 10,
+      "health": 1000000,
+      "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "cluster_4",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 60,
+      "distance": 10,
+      "health": 1000000,
+      "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "cluster_5",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 60,
+      "distance": 10,
+      "health": 1000000,
+      "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "cluster_6",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 60,
+      "distance": 10,
+      "health": 1000000,
+      "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "cluster_7",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 60,
+      "distance": 10,
+      "health": 1000000,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "snapshot",
+      "actor": "cluster_1",
+      "metric": "health",
+      "save_as": "first_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "cluster_6",
+      "metric": "health",
+      "save_as": "sixth_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "cluster_7",
+      "metric": "health",
+      "save_as": "seventh_before"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500600,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "Construction completes and creates exactly one drone"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_cast_count",
+      "spell": 500753,
+      "min": 1,
+      "within_ms": 2500,
+      "label": "The flying drone drops its first firepot"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 1,
+      "label": "The drone is still flying when it drops the first firepot"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "dynamic_object_height",
+      "spell": 500753,
+      "max": 1,
+      "label": "The first firepot's oil lies on the ground beneath the drone"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 0,
+      "within_ms": 8000,
+      "label": "The drone reaches its target, detonates and disappears"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_cast_count",
+      "spell": 500753,
+      "min": 4,
+      "label": "A 34-yard flight drops at least three firepots before the landing explosion"
+    },
+    {
+      "action": "assert",
+      "actor": "cluster_1",
+      "metric": "health",
+      "relative_to": "first_before",
+      "max": -1,
+      "label": "The firepot over the cluster damages the first enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "cluster_6",
+      "metric": "health",
+      "relative_to": "sixth_before",
+      "equals": 0,
+      "label": "A firepot damages at most five enemies"
+    },
+    {
+      "action": "assert",
+      "actor": "cluster_7",
+      "metric": "health",
+      "relative_to": "seventh_before",
+      "equals": 0,
+      "label": "A firepot damages at most five enemies"
+    }
+  ]
+}

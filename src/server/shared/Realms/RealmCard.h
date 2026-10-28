@@ -35,6 +35,7 @@ struct RealmCardStyle
     uint32 Expansion;
     uint32 GameMode;
     std::string Image;
+    uint32 DescriptionSpell;
 };
 
 RealmCardSlot GetRealmCardSlot(std::size_t order);

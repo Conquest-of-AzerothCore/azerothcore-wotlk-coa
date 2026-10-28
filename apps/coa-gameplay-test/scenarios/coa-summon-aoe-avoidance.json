@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "name": "CoA summons without live area-of-effect avoidance wear Pet Avoidance",
+  "contract": "Design choice by the maintainer (2026-10-09), not live parity: in live CoA combat logs (2026-05) these summons took as much area damage as the players hit by the same cast, and the maintainer chose to protect them like the stock guardians. 32233 'Pet Avoidance' (aura 310 -90% creature area damage, aura 229 -20%) is the avoidance Guardian::InitStatsForLevel gives the stock guardians. Summons: 13049 'Dragon's Call' -> 8776 Emerald Dragon Whelp, 6251 'Summon Crimson Cannon' -> 11199 Crimson Cannon, 26066 'Defender of the Timbermaw' -> 15720 Timbermaw Ancestor, 504344 'Fungal Assailant' -> 45896 Fungarian (guardians) and 804834 'Ancestor's Call' -> 51265 Honored Ancestor (SPELL_EFFECT_SUMMON_PET). 525379 'Animate: Zombie' -> 503031 Zombie needs a corpse and is covered by the same entry list without a step here. 706756 'Chains of Xoroth' -> 51323 is left out: its script makes it non-attackable, so area damage cannot reach it. Expected: each summon wears 32233. Before the change none of them did.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 29, "level": 60, "spell_hit_rating": 10000 },
+    { "id": "barbarian", "race": 11, "class": 12, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "caster", "entry": 36, "level": 60, "health": 4000000, "distance": 6 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let login, spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "caster", "spell": 13049 },
+    { "action": "learn", "actor": "caster", "spell": 6251 },
+    { "action": "learn", "actor": "caster", "spell": 26066 },
+    { "action": "learn", "actor": "caster", "spell": 504344 },
+    { "action": "learn", "actor": "barbarian", "spell": 804834 },
+    { "action": "cast", "label": "Dragon's Call", "actor": "caster", "spell": 13049 },
+    {
+      "action": "assert", "label": "SETUP: the Emerald Dragon Whelp is summoned", "actor": "caster",
+      "metric": "owned_creature_count", "entry": 8776, "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the Emerald Dragon Whelp wears Pet Avoidance", "actor": "caster",
+      "metric": "owned_creature_count", "entry": 8776, "spell": 32233, "min": 1, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 2000 },
+    { "action": "cast", "label": "Summon Crimson Cannon", "actor": "caster", "spell": 6251 },
+    {
+      "action": "assert", "label": "SETUP: the Crimson Cannon is summoned", "actor": "caster",
+      "metric": "owned_creature_count", "entry": 11199, "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the Crimson Cannon wears Pet Avoidance", "actor": "caster",
+      "metric": "owned_creature_count", "entry": 11199, "spell": 32233, "min": 1, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 2000 },
+    { "action": "cast", "label": "Defender of the Timbermaw", "actor": "caster", "spell": 26066 },
+    {
+      "action": "assert", "label": "SETUP: the Timbermaw Ancestor is summoned", "actor": "caster",
+      "metric": "owned_creature_count", "entry": 15720, "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the Timbermaw Ancestor wears Pet Avoidance", "actor": "caster",
+      "metric": "owned_creature_count", "entry": 15720, "spell": 32233, "min": 1, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 2000 },
+    { "action": "cast", "label": "Fungal Assailant at the dummy", "actor": "caster", "spell": 504344, "target": "dummy" },
+    {
+      "action": "assert", "label": "SETUP: the Fungarian is summoned", "actor": "caster",
+      "metric": "owned_creature_count", "entry": 45896, "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the Fungarian wears Pet Avoidance", "actor": "caster",
+      "metric": "owned_creature_count", "entry": 45896, "spell": 32233, "min": 1, "within_ms": 2000
+    },
+    { "action": "cast", "label": "Ancestor's Call", "actor": "barbarian", "spell": 804834 },
+    {
+      "action": "assert", "label": "SETUP: the Honored Ancestor is the Barbarian's pet", "actor": "barbarian",
+      "metric": "pet_entry", "equals": 51265, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the Honored Ancestor wears Pet Avoidance", "actor": "barbarian",
+      "metric": "owned_creature_count", "entry": 51265, "spell": 32233, "equals": 1, "within_ms": 2000
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Worldforged Abandoned Boots sits on the ground in Tethris Aran, not buried (COA-7650)",
+  "contract": "The Abandoned Boots pickup (item 354159, GO 254259, guid 6941376) kept the Z of its pre-realm-map row (118.991) when the realm-map pass moved its XY to Tethris Aran, Desolace, 16 yd from the old spot. The ground there is 119.725, so the pickup sat 0.73 yd underground.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": 13.2, "y": 1763.4, "z": 119.9, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 10 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the boots pickup is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 254259, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the pickup sits on the ground, not buried", "actor": "p", "metric": "nearby_gameobject_ground_offset", "entry": 254259, "min": -0.15, "max": 0.5 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 254259 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "the pickup opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

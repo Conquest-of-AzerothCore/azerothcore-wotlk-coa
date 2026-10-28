@@ -1,18 +1,107 @@
 {
- "schema": 1,
- "name": "Soulsight raises party crit chance and procs Soul Fragment on direct damage",
- "contract": "Soulsight 300565 promises 3% party/raid crit and a 15% chance for direct damage to generate a Soul Fragment (805077). EFFECT_0 is native SPELL_EFFECT_APPLY_AREA_AURA_RAID with SPELL_AURA_MOD_CRIT_PCT (290), EffectBasePoints 2 + DieSides 1 = 3. EFFECT_1 is SPELL_EFFECT_APPLY_AURA with SPELL_AURA_PROC_TRIGGER_SPELL (42) triggering 805077 at ProcChance 15; the DBC record carries ProcFlags 0, but rev_20260921_20_reaper_talent_procs_two.sql (already on main) inserts a spell_proc row (SpellId 300565, ProcFlags 69652 = done melee auto attack + done spell melee/none-negative dmg class) and binds spell_script_names 300565 -> spell_ascension_reaper_talent_proc, whose AscensionReaperTalentProcs::Rules entry for 300565 is {{0}} (no spell filter, any qualifying direct damage). #3895's zero-hits static grep predates this fix; ALREADY_FIXED_ON_MAIN.",
- "timeout_ms": 180000,
- "players": [{"id": "reaper", "race": 10, "class": 30, "level": 80}],
- "creatures": [{"id": "enemy", "owner": "reaper", "entry": 1601, "level": 80}],
- "steps": [
-  {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 6000},
-  {"action": "learn", "actor": "reaper", "spell": 300565},
-  {"action": "assert", "label": "Soulsight applied to the caster", "actor": "reaper", "metric": "aura", "spell": 300565, "equals": 1, "within_ms": 3000},
-  {"action": "assert", "label": "The buff grants 3% critical strike chance", "actor": "reaper", "metric": "aura_amount", "spell": 300565, "effect": 0, "equals": 3},
-  {"action": "attack", "actor": "reaper", "target": "enemy"},
-  {"action": "assert", "label": "The Reaper is engaged", "actor": "reaper", "metric": "combat", "equals": 1, "within_ms": 4000},
-  {"action": "wait", "label": "Let repeated melee swings roll the 15% proc chance (~60 swings, false-failure well under 1%)", "ms": 120000},
-  {"action": "assert", "label": "Direct damage generated at least one Soul Fragment", "actor": "reaper", "metric": "spell_cast_count", "spell": 805077, "min": 1}
- ]
+  "schema": 1,
+  "name": "Soulsight raises party crit chance and procs Soul Fragment on direct damage",
+  "contract": [
+    "Soulsight 300565 grants 3% party/raid critical strike chance. Qualifying direct damage has an authored",
+    "15% chance to generate Soul Fragment 805077. Preserve that loaded chance and require at least 100",
+    "damaging main-hand hits before checking native fragment generation. Hit and expertise fixtures exclude",
+    "missed trials."
+  ],
+  "timeout_ms": 420000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "location": {
+    "map": 530,
+    "x": 10349.6,
+    "y": -6357.29,
+    "z": 33.4026,
+    "o": 5.31605
+  },
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "reaper",
+      "entry": 1601,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 300565
+    },
+    {
+      "action": "assert",
+      "label": "Soulsight applied to the caster",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 300565,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The buff grants 3% critical strike chance",
+      "actor": "reaper",
+      "metric": "aura_amount",
+      "spell": 300565,
+      "effect": 0,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "The authored proc chance remains 15%",
+      "actor": "reaper",
+      "metric": "spell_proc_chance",
+      "spell": 300565,
+      "equals": 15
+    },
+    {
+      "action": "attack",
+      "actor": "reaper",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "The Reaper is engaged",
+      "actor": "reaper",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "label": "Let repeated damaging melee swings exercise the authored 15% proc chance",
+      "ms": 360000
+    },
+    {
+      "action": "assert",
+      "label": "At least 100 damaging main-hand hits exercised proc generation",
+      "actor": "reaper",
+      "metric": "melee_damage_count",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "label": "Direct damage generated at least one Soul Fragment",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 805077,
+      "min": 1
+    }
+  ]
 }

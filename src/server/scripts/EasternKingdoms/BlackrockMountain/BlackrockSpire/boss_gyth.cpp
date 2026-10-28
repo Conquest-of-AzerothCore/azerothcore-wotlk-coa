@@ -28,7 +28,6 @@ enum Spells
     SPELL_FLAMEBREATH                 = 16390, // Combat (Self cast)
     SPELL_FREEZE                      = 16350, // Combat (Self cast)
     SPELL_KNOCK_AWAY                  = 10101, // Combat
-    SPELL_SUMMON_REND                 = 16328, // Summons Rend near death
     SPELL_CHROMATIC_PROTECTION_FIRE   = 16373,
     SPELL_CHROMATIC_PROTECTION_FROST  = 16392,
     SPELL_CHROMATIC_PROTECTION_NATURE = 16391,
@@ -57,6 +56,12 @@ struct boss_gyth : public BossAI
 
     void Reset() override
     {
+        if (instance->GetBossState(DATA_WARCHIEF_REND_BLACKHAND) == DONE)
+        {
+            events.Reset();
+            return;
+        }
+
         if (instance->GetBossState(DATA_GYTH) == IN_PROGRESS)
         {
             instance->SetBossState(DATA_GYTH, NOT_STARTED);
@@ -67,7 +72,8 @@ struct boss_gyth : public BossAI
         SetInvincibility(true); // Don't let boss die before summoning Rend.
 
         ScheduleHealthCheckEvent(25, [&] {
-            DoCastAOE(SPELL_SUMMON_REND, true);
+            // Summon Rend Blackhand (16328) is absent from the CoA Spell.dbc.
+            me->SummonCreature(NPC_WARCHIEF_REND_BLACKHAND, me->GetRandomNearPosition(3.0f));
             me->RemoveAura(SPELL_REND_MOUNTS);
             SetInvincibility(false);
         });
@@ -85,7 +91,8 @@ struct boss_gyth : public BossAI
 
     void EnterEvadeMode(EvadeReason why) override
     {
-        instance->SetBossState(DATA_WARCHIEF_REND_BLACKHAND, FAIL);
+        if (instance->GetBossState(DATA_WARCHIEF_REND_BLACKHAND) != DONE)
+            instance->SetBossState(DATA_WARCHIEF_REND_BLACKHAND, FAIL);
         BossAI::EnterEvadeMode(why);
     }
 

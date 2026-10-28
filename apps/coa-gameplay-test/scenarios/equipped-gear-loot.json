@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "name": "Enemies drop wearable gear matching their visible equipment",
+  "contract": "With CoA.EquippedGearLoot=1 and CoA.EquippedGearLootChance=5, ordinary Defias Pillagers and shield-bearing Vanguard Gus generate equipped gear through native corpse-loot processing even with an empty template. Every generated item must match a displayed piece, obey level/quality/binding limits and grant native loot ownership. Pillagers can drop the installed Balanced Spell Staff 60219, whose appearance matches their equipped NPC staff and whose stats include Intellect. Five thousand rolls per assertion allow a broad 1-9% overall interval and a positive staff observation. These fixtures are ordinary creatures created on the map without spawning them into combat; rendering, death dispatch and collection acquisition are outside this scenario.",
+  "players": [
+    { "id": "looter", "race": 1, "class": 1, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "actor": "looter", "metric": "equipped_gear_loot_rate", "entry": 589, "min": 1, "max": 9 },
+    { "action": "assert", "actor": "looter", "metric": "equipped_gear_loot_rate", "entry": 589, "item": 60219, "min": 0.02, "max": 9 },
+    { "action": "assert", "actor": "looter", "metric": "equipped_gear_loot_rate", "entry": 50324, "min": 1, "max": 9 }
+  ]
+}

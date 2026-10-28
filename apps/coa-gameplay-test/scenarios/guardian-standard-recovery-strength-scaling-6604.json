@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Guardian Standard of Recovery heals the amount its buff advertises, including Strength scaling (#6604, #8369)",
+  "contract": "Standard of Recovery 500260 summons creature 50053, which casts 500266 on itself: an APPLY_AREA_AURA_FRIEND whose effect 0 is aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL with Amplitude 3000, triggering the direct heal 500248. The buff's own tooltip (Spell.dbc column 187) reads 'A nearby Standard of Recovery is causing you to regenerate ${$w1+$STR*.25} health every $t1 sec', and the cast tooltip ($500248m1+$500248ppl1+$STR*.25) bills the same base, so the aura's $w1 base must be the triggered heal's own 1, not a flat 80 that made a level-2 standard heal about 70 per tick (#8369). Effect 1 is the '+$s2% healing received' half, aura 319 with BasePoints 5. The tick is script-driven: aura_ascension_guardian_recovery::Tick prevents the native trigger and re-casts 500248 with the aura's amount plus 0.25 x the owner's Strength. This scenario pins the contract at level 1: the owner's Strength must read 27, the aura's effect 0 amount must read 1, and one tick must land at (1 + floor(0.25 x 27)) x the buff's own +6% healing received = 7.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "players": [
+    { "id": "g", "race": 1, "class": 18, "level": 1, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "g", "spell": 500260 },
+    {
+      "action": "assert", "label": "SETUP: the starter Hearthstone satisfies 500260's TotemCategory 5",
+      "actor": "g", "metric": "item_count", "item": 6948, "equals": 1
+    },
+    { "action": "set_power", "actor": "g", "power": 3, "value": 100 },
+    {
+      "action": "cast", "actor": "g", "spell": 500260,
+      "destination": { "x": -8946.95, "y": -132.493, "z": 83.5312 }
+    },
+    {
+      "action": "assert", "label": "The Standard of Recovery banner summons",
+      "actor": "g", "metric": "owned_creature_count", "entry": 50053, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The owner carries the Standard's periodic buff",
+      "actor": "g", "metric": "aura", "spell": 500266, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the buff's advertised $w1 base is the triggered heal's own 1, not the flat 80 that ignored level scaling",
+      "actor": "g", "metric": "aura_amount", "spell": 500266, "effect": 0, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: the owner's Strength is the fixed 27 the tooltip's $STR term multiplies by 0.25, so the tick's amount is determinate",
+      "actor": "g", "metric": "stat", "stat": 0, "equals": 27
+    },
+    {
+      "action": "set_health", "actor": "g", "value": 1, "maximum": 100000,
+      "label": "Fixture a low health inside a large pool so the tick is never overhealed"
+    },
+    {
+      "action": "assert",
+      "label": "One tick heals (1 + floor(0.25 x 27)) x the buff's own +6% = 7; the band admits that tick and rejects the previous flat-80 tick at 84",
+      "actor": "g", "metric": "spell_effective_heal_total", "spell": 500248, "target": "g",
+      "min": 7, "max": 8, "within_ms": 8000
+    },
+    {
+      "action": "assert", "label": "The heal lands through the native heal log",
+      "actor": "g", "metric": "spell_heal_count", "spell": 500248, "min": 1, "within_ms": 8000
+    }
+  ]
+}

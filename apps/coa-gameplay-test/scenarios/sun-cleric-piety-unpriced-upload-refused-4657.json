@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "name": "Unpriced non-automatic Piety upload is refused (#4657)",
+  "contract": "Entry 31194 (Dawnsear 500146, Piety tab, zero cost) requires entry 4046, so a Sun Cleric that never selected the Piety specialization cannot be granted it automatically. Uploading rank 1 must be refused with CA_UPDATE_ENTRIES_BAD_ENTRY and must not learn the spell, instead of the previous silent drop that left the tree corrupted. Entry 29510 (Horusath Blast 500154, class tab, AE cost 1, no requirements) uploads normally as the control.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "cleric", "race": 1, "class": 27, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks and class synchronisation settle", "ms": 5000},
+    {"action": "assert", "label": "Dawnsear is not known before the upload", "actor": "cleric", "metric": "knows_spell", "spell": 500146, "equals": 0},
+    {"action": "advancement_rank", "label": "Unpriced entry without its requirement is refused", "actor": "cleric", "entry": 31194, "rank": 1, "refused": true},
+    {"action": "assert", "label": "Refused rank stays unapplied", "actor": "cleric", "metric": "knows_spell", "spell": 500146, "equals": 0},
+    {"action": "advancement_rank", "label": "Priced entry without requirements uploads", "actor": "cleric", "entry": 29510, "rank": 1},
+    {"action": "assert", "label": "Control entry learns its spell", "actor": "cleric", "metric": "knows_spell", "spell": 500154, "equals": 1, "within_ms": 3000}
+  ]
+}

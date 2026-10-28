@@ -1,0 +1,142 @@
+{
+  "schema": 1,
+  "name": "Rotation assistance: Incineration priorities override the generic spell order",
+  "contract": [
+    "With CoA.RotationAssist.Enable=1, an Incineration Pyromancer (class 24, specialization 38) with Ignite",
+    "800791 and Flare Bolt 800790 uses the imported priority: apply Ignite, then cast Flare Bolt while that",
+    "Ignite remains active.",
+    "A learned Fire Blast rank 2 (2137, SpellLevel 14) would precede Ignite (SpellLevel 13) and Flare Bolt",
+    "(SpellLevel 1) in the generic fallback. Neither press may cast it. The fixture teaches these spells",
+    "directly to isolate selection; it does not assert acquisition or damage balance.",
+    "The IDs, spell levels and periodic Ignite effect come from the client Spell.dbc. The expected priority",
+    "comes from the pinned mod-playerbots Incineration profile."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "pyro",
+      "race": 1,
+      "class": 24,
+      "level": 14,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "pyro",
+      "entry": 36,
+      "level": 14,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "specialization",
+      "actor": "pyro",
+      "id": 38
+    },
+    {
+      "action": "learn",
+      "actor": "pyro",
+      "spell": 800790
+    },
+    {
+      "action": "learn",
+      "actor": "pyro",
+      "spell": 800791
+    },
+    {
+      "action": "learn",
+      "actor": "pyro",
+      "spell": 2137
+    },
+    {
+      "action": "client_packet",
+      "actor": "pyro",
+      "opcode": 317,
+      "fields": [
+        {
+          "actor_guid": "target"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "command",
+      "actor": "pyro",
+      "command": ".rotation"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "spell_go_count",
+      "spell": 800791,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 800791,
+      "caster": "pyro",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "spell_go_count",
+      "spell": 2137,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "command",
+      "actor": "pyro",
+      "command": ".rotation"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "spell_go_count",
+      "spell": 800790,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "spell_go_count",
+      "spell": 800791,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "spell_go_count",
+      "spell": 2137,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "spell_go_count",
+      "spell": 800790,
+      "equals": 1
+    }
+  ]
+}

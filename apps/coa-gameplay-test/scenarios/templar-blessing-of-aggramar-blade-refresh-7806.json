@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "Blessing of Aggramar refreshes Blade of Faith only at 10 Oath Chain stacks (#7806)",
+  "contract": [
+    "Blessing of Aggramar 300502 Description[enUS]: 'Casting an Oath Breaker with 10 stacks of your Oath Chain now refreshes the duration of Blade of Faith on all nearby enemies.'",
+    "AscensionTemplarAbilities.cpp OnSpellCast: Breaker(info) && player->HasAura(300502) && spell->GetScriptValue(704576) >= 10 refreshes every nearby (40 yd) Blade of Faith (803872) aura the player owns to its max duration; the stack count is captured at cast start. Righteous Upheaval 501562 has SpellFamilyName 25, FamilyFlags[2] 128, so Breaker(501562) is true.",
+    "No merged PR and no scenario cover #7806. A prior investigation comment reported 10 stacks refreshed the Blade and 9 did not, matching the tooltip; this scenario proves that already-working threshold with an independent expected value: the duration recorded right after Blade of Faith is first cast (its own max duration), not a number taken from the implementation."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "templar", "race": 1, "class": 19, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "target", "owner": "templar", "entry": 36, "level": 60, "health": 1000000, "distance": 3, "faction": 14, "reaction": 0, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "add_item", "actor": "templar", "item": 36 },
+    { "action": "equip", "actor": "templar", "item": 36, "slot": 15 },
+    { "action": "learn", "actor": "templar", "spell": 300502 },
+    { "action": "learn", "actor": "templar", "spell": 803872 },
+    { "action": "learn", "actor": "templar", "spell": 501562 },
+    { "action": "set_aura", "label": "Both 803872 and 501562 require an active Oath Chain to cast", "actor": "templar", "spell": 704576, "stacks": 1 },
+    { "action": "cast", "label": "Blade of Faith on the target", "actor": "templar", "spell": 803872, "target": "target" },
+    {
+      "action": "assert", "label": "SETUP: Blade of Faith is applied", "actor": "target",
+      "metric": "aura", "spell": 803872, "caster": "templar", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "snapshot", "label": "Its own max duration, recorded right after it was applied", "actor": "target",
+      "metric": "aura_duration_ms", "spell": 803872, "caster": "templar", "save_as": "max_duration"
+    },
+    { "action": "wait", "label": "Let the Blade decay", "ms": 4000 },
+    {
+      "action": "snapshot", "actor": "target", "metric": "aura_duration_ms", "spell": 803872, "caster": "templar",
+      "save_as": "pre_nine"
+    },
+    { "action": "set_aura", "actor": "templar", "spell": 704576, "stacks": 9 },
+    { "action": "cast", "label": "Oath Breaker finisher at 9 Oath Chain stacks", "actor": "templar", "spell": 501562, "target": "target" },
+    { "action": "assert", "actor": "templar", "metric": "cast_failure", "spell": 501562, "equals": 0 },
+    {
+      "action": "assert", "label": "9 stacks does not refresh the Blade; it only keeps decaying", "actor": "target",
+      "metric": "aura_duration_ms", "spell": 803872, "caster": "templar", "relative_to": "pre_nine", "max": 0
+    },
+    { "action": "wait", "label": "Let the Blade decay further", "ms": 2000 },
+    {
+      "action": "snapshot", "actor": "target", "metric": "aura_duration_ms", "spell": 803872, "caster": "templar",
+      "save_as": "pre_ten"
+    },
+    { "action": "reset_cooldown", "actor": "templar", "spell": 501562 },
+    { "action": "set_aura", "actor": "templar", "spell": 704576, "stacks": 10 },
+    { "action": "cast", "label": "Oath Breaker finisher at 10 Oath Chain stacks", "actor": "templar", "spell": 501562, "target": "target" },
+    { "action": "assert", "actor": "templar", "metric": "cast_failure", "spell": 501562, "equals": 0 },
+    {
+      "action": "assert", "label": "10 stacks refreshes the Blade past its pre-cast decayed value", "actor": "target",
+      "metric": "aura_duration_ms", "spell": 803872, "caster": "templar", "relative_to": "pre_ten", "min": 1500
+    },
+    {
+      "action": "assert", "label": "10 stacks returns the Blade to (near) its own recorded max duration", "actor": "target",
+      "metric": "aura_duration_ms", "spell": 803872, "caster": "templar", "relative_to": "max_duration", "min": -500
+    }
+  ]
+}

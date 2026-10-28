@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "A Hero's critical damage talents do not stack with each other (#7028)",
+  "contract": [
+    "Ice Shards, Burnout and Ruin (Talent.dbc first ranks 11207, 44449, 17959) are SPELL_AURA_MOD_CRIT_DAMAGE_BONUS on all schools, and each tooltip reads 'Your spell critical strikes now deal 180% damage. This does not stack with other similar effects.'",
+    "spell_critical_damage computes Frostbolt 116's critical hit from a fixed 1000 base, so only the crit bonus moves it.",
+    "Ice Shards rank 5 (815049) raises that critical hit; Burnout rank 5 (44472) and Ruin rank 5 (59741) on top leave it where Ice Shards put it.",
+    "Unfixed, the three bonuses summed and each talent raised it again."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "caster", "race": 1, "class": 10, "level": 80, "spell_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "enemy", "owner": "caster", "entry": 36, "level": 80, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 3000},
+    {"action": "snapshot", "label": "Frostbolt critical damage with no talent", "actor": "caster", "metric": "spell_critical_damage", "spell": 116, "target": "enemy", "save_as": "plain"},
+    {"action": "learn", "label": "Ice Shards rank 5", "actor": "caster", "spell": 815049},
+    {"action": "assert", "label": "Ice Shards is up", "actor": "caster", "metric": "aura", "spell": 815049, "equals": 1, "within_ms": 1000},
+    {"action": "snapshot", "label": "Frostbolt critical damage with Ice Shards", "actor": "caster", "metric": "spell_critical_damage", "spell": 116, "target": "enemy", "save_as": "ice_shards"},
+    {"action": "assert", "label": "Ice Shards raises the critical hit", "actor": "caster", "metric": "spell_critical_damage", "spell": 116, "target": "enemy", "relative_to": "plain", "min": 100},
+    {"action": "learn", "label": "Burnout rank 5", "actor": "caster", "spell": 44472},
+    {"action": "assert", "label": "Burnout is up", "actor": "caster", "metric": "aura", "spell": 44472, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "Burnout does not add to Ice Shards", "actor": "caster", "metric": "spell_critical_damage", "spell": 116, "target": "enemy", "relative_to": "ice_shards", "min": -1, "max": 1},
+    {"action": "learn", "label": "Ruin rank 5", "actor": "caster", "spell": 59741},
+    {"action": "assert", "label": "Ruin is up", "actor": "caster", "metric": "aura", "spell": 59741, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "Nor does Ruin", "actor": "caster", "metric": "spell_critical_damage", "spell": 116, "target": "enemy", "relative_to": "ice_shards", "min": -1, "max": 1}
+  ]
+}

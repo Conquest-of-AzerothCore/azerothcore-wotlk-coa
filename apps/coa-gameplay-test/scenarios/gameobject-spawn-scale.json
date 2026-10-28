@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "name": "World: a game object spawn keeps its stored scale",
+  "contract": "A scale stored for a game object spawn with .gobject set scale is applied at once to a loaded spawn and to a spawn that loads later, while other spawns keep their template size.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Northshire mailbox starts at its template size",
+      "actor": "hero",
+      "metric": "nearby_gameobject_scale",
+      "entry": 142075,
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "console",
+      "command": "gobject set scale 7500085 2.5"
+    },
+    {
+      "action": "console",
+      "command": "gobject set scale 26784 0.4"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "the loaded Northshire mailbox is respawned at its stored scale",
+      "actor": "hero",
+      "metric": "nearby_gameobject_scale",
+      "entry": 142075,
+      "min": 2.499,
+      "max": 2.501
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 0,
+      "x": -9473.0,
+      "y": 13.0,
+      "z": 56.7,
+      "o": 0.0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "the Goldshire mailbox loads at its stored scale",
+      "actor": "hero",
+      "metric": "nearby_gameobject_scale",
+      "entry": 142075,
+      "min": 0.399,
+      "max": 0.401
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "A creature tapped inside a restricted challenge cannot be attacked from outside it",
+  "contract": "Adventure Mode (211) carries STRICT_CHALLENGE_RESTRICTED_TAPPING: a creature tapped by a player in the mode denies rewards to characters outside it. Such a creature is also not a valid attack target for a character outside the mode: an attack attempt is refused with 'This target is already tapped by another challenge.', while the tapper keeps fighting it.",
+  "timeout_ms": 180000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [
+    { "id": "tapper", "race": 1, "class": 1, "level": 1 },
+    { "id": "outsider", "race": 1, "class": 1, "level": 1 }
+  ],
+  "creatures": [
+    { "id": "tap_wolf", "owner": "tapper", "entry": 299, "faction": 7, "level": 1, "health": 42, "distance": 2 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "start_challenge", "actor": "tapper", "challenge": 211, "level": 1 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "assert", "label": "Adventure Mode starts", "actor": "tapper", "metric": "challenge_start_code",
+      "equals": 0 },
+    { "action": "attack", "actor": "tapper", "target": "tap_wolf" },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "the tapper is fighting the wolf", "actor": "tap_wolf", "metric": "combat",
+      "equals": 1 },
+    { "action": "assert", "label": "the wolf is still alive", "actor": "tap_wolf", "metric": "alive", "equals": 1 },
+    { "action": "client_packet", "actor": "outsider", "opcode": 321, "consumed": false,
+      "fields": [ { "actor_guid": "tap_wolf" } ] },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "a character outside the mode is refused the attack", "actor": "outsider",
+      "metric": "system_message_contains", "text": "already tapped by another challenge", "equals": 1 }
+  ]
+}

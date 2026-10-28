@@ -1,0 +1,255 @@
+{
+  "schema": 1,
+  "name": "A WildCard Hero spends and recovers Blood Strike and Plague Strike runes (#6311)",
+  "contract": "BloodStrike45902 consumes one Blood rune and PlagueStrike45462 one Unholy rune. The two initial runes permit exactly two normal landed casts before a third is rejected, then a cast works after native ten-second recharge. Each sequence starts after existing runes recover and tests actual damage, not packet display alone.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 10,
+      "level": 3,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "p",
+      "entry": 36,
+      "level": 3,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "p",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 45902
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 45462
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 45902,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 45902,
+      "target": "enemy",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 45902,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 45902,
+      "target": "enemy",
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 45902,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 45902,
+      "target": "enemy",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 45902,
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 45902,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 45902,
+      "target": "enemy",
+      "equals": 3,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 45462,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 45462,
+      "target": "enemy",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 45462,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 45462,
+      "target": "enemy",
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 45462,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 45462,
+      "target": "enemy",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 45462,
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 45462,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 45462,
+      "target": "enemy",
+      "equals": 3,
+      "within_ms": 2000
+    }
+  ]
+}

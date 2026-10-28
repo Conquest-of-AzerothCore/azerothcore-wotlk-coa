@@ -4,6 +4,7 @@
 #include "Spell.h"
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
+#include "SpellInfo.h"
 #include "SpellScript.h"
 #include "WorldPacket.h"
 #include <algorithm>
@@ -13,8 +14,43 @@ namespace
 enum DisappearanceSpells : uint32
 {
     SPELL_PHASE_OUT = 500671,
+    SPELL_PHASE_OUT_STEALTH = 560269,
+    SPELL_RUNESHROUD = 500288,
     SPELL_GLYPH_OF_DISAPPEARANCE = 560037,
     SPELL_DISAPPEARANCE_WINDOW = 561059
+};
+
+class spell_ascension_runemaster_phase_out : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_runemaster_phase_out);
+
+    bool Validate(SpellInfo const* info) override
+    {
+        SpellEffectInfo const& effect = info->Effects[EFFECT_2];
+        return info->Id == SPELL_PHASE_OUT_STEALTH &&
+            effect.Effect == SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN &&
+            effect.MiscValue == int32(SPELL_RUNESHROUD) &&
+            ValidateSpellInfo({SPELL_RUNESHROUD});
+    }
+
+    bool Load() override
+    {
+        Unit* caster = GetCaster();
+        return caster && caster->IsPlayer() && caster->getClass() == CLASS_SPIRIT_MAGE;
+    }
+
+    void ApplyRuneshroud(SpellEffIndex effIndex)
+    {
+        PreventHitDefaultEffect(effIndex);
+        if (Unit* target = GetHitUnit())
+            target->CastSpell(target, SPELL_RUNESHROUD, true);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_ascension_runemaster_phase_out::ApplyRuneshroud,
+            EFFECT_2, SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN);
+    }
 };
 
 class runemaster_glyph_of_disappearance : public AllSpellScript
@@ -90,4 +126,5 @@ void AddSC_AscensionRunemasterDisappearance()
 {
     new runemaster_glyph_of_disappearance();
     RegisterSpellScript(spell_ascension_runemaster_disappearance_window);
+    RegisterSpellScript(spell_ascension_runemaster_phase_out);
 }

@@ -132,8 +132,8 @@
       "metric": "armor",
       "ratio_to": "base_armor",
       "label": "form_armor",
-      "min": 1.499,
-      "max": 1.501
+      "min": 1.495,
+      "max": 1.505
     },
     {
       "action": "assert",

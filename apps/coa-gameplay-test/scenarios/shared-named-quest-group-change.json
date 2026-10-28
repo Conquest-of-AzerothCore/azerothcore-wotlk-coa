@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "bot",
+      "race": 6,
+      "class": 1,
+      "level": 80,
+      "bot": true
+    },
+    {
+      "id": "solo",
+      "race": 6,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "party",
+      "race": 6,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "friend",
+      "race": 6,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "observer",
+      "race": 6,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "name": "Named quest credit survives the original tagger leaving their party",
+  "contract": "Captain Perrine is a single-kill quest objective. The original tagger leaves a three-member party during combat; the two remaining nearby members still need their own shared quest credit after contributing damage.",
+  "creatures": [
+    {
+      "id": "captain",
+      "owner": "bot",
+      "entry": 1662,
+      "distance": 2,
+      "health": 100000,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "prepare_quest",
+      "actor": "bot",
+      "quest": 370,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "solo",
+      "quest": 370,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "party",
+      "quest": 370,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "friend",
+      "quest": 370,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "observer",
+      "quest": 370,
+      "complete": false
+    },
+    {
+      "action": "group",
+      "actor": "bot",
+      "target": "party",
+      "loot_method": 2
+    },
+    {
+      "action": "group",
+      "actor": "bot",
+      "target": "friend",
+      "loot_method": 2
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "bot",
+      "entry": 1662,
+      "damage_pct": 10
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "party",
+      "entry": 1662,
+      "damage_pct": 10
+    },
+    {
+      "action": "leave_group",
+      "actor": "bot"
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "solo",
+      "entry": 1662,
+      "damage_pct": 10
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "bot",
+      "entry": 1662,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "bot",
+      "metric": "quest_objective_count",
+      "equals": 1,
+      "quest": 370
+    },
+    {
+      "action": "assert",
+      "actor": "solo",
+      "metric": "quest_objective_count",
+      "equals": 1,
+      "quest": 370
+    },
+    {
+      "action": "assert",
+      "actor": "party",
+      "metric": "quest_objective_count",
+      "equals": 1,
+      "quest": 370
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "quest_objective_count",
+      "equals": 1,
+      "quest": 370
+    },
+    {
+      "action": "assert",
+      "actor": "observer",
+      "metric": "quest_objective_count",
+      "equals": 0,
+      "quest": 370
+    }
+  ]
+}

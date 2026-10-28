@@ -1,0 +1,216 @@
+{
+  "schema": 1,
+  "name": "Battleground ghost joins the spirit guide's resurrection queue on release",
+  "contract": "A player who dies in a running Warsong Gulch match and releases their spirit is placed in the resurrection queue of their own team's spirit guide at the graveyard they are sent to, without clicking the guide: they get Waiting to Resurrect and the next spirit heal brings them back to life once.",
+  "timeout_ms": 300000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "alliance",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "horde",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the characters settle",
+      "ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "label": "The Alliance player queues for Warsong Gulch",
+      "actor": "alliance",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The Horde player queues for Warsong Gulch",
+      "actor": "horde",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "label": "Let the queue invite both players",
+      "ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "The Alliance player enters the battleground",
+      "actor": "alliance",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "alliance"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The Horde player enters the battleground",
+      "actor": "horde",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "horde"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The Alliance player is in Warsong Gulch",
+      "actor": "alliance",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "The Horde player is in Warsong Gulch",
+      "actor": "horde",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "The match is still in preparation",
+      "actor": "alliance",
+      "metric": "aura",
+      "spell": 44521,
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The match starts and Preparation fades",
+      "actor": "alliance",
+      "metric": "aura",
+      "spell": 44521,
+      "equals": 0,
+      "within_ms": 150000
+    },
+    {
+      "action": "die",
+      "label": "The Alliance player dies during the match",
+      "actor": "alliance"
+    },
+    {
+      "action": "release_spirit",
+      "label": "and releases their spirit",
+      "actor": "alliance"
+    },
+    {
+      "action": "assert",
+      "label": "The ghost waits to resurrect without clicking the spirit guide",
+      "actor": "alliance",
+      "metric": "aura",
+      "spell": 2584,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The next spirit heal resurrects the player",
+      "actor": "alliance",
+      "metric": "alive",
+      "equals": 1,
+      "within_ms": 40000
+    },
+    {
+      "action": "wait",
+      "label": "Let a duplicate resurrection finish if one was queued",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The player is resurrected once",
+      "actor": "alliance",
+      "metric": "spell_cast_count",
+      "spell": 6962,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "with a single resurrection visual",
+      "actor": "alliance",
+      "metric": "spell_cast_count",
+      "spell": 24171,
+      "equals": 1
+    }
+  ]
+}

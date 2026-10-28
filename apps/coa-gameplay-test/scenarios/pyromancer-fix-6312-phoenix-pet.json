@@ -1,0 +1,179 @@
+{
+  "schema": 1,
+  "name": "Phoenix Egg summons the Phoenix as the caster's controllable pet, which follows its owner and keeps its model after its commands (#6312)",
+  "contract": "#6312: Phoenix Egg 800796 effect 0 summons creature 50258 with SummonProperties 1561 (Spell.dbc EffectMiscValueB, server and client DBC alike), whose SummonProperties.dbc row is Control 2 (SUMMON_CATEGORY_PET), Title 1 (pet). A pet-category summon is a controllable guardian (Guardian constructor in TemporarySummon.cpp adds UNIT_MASK_CONTROLLABLE_GUARDIAN and charm info), so the owner's pet slot holds it and the client shows its pet bar. The reporter saw a stationary Phoenix without a pet bar. A controllable guardian on the follow command follows its owner, as the native pet bar's Follow does; Phoenix Dive and Kael's Command move or hold it only for their own durations. Asserted: after one cast the caster owns exactly one 50258 and the caster's guardian pet is that Phoenix (pet_entry reads Player::GetGuardianPet, the pet slot), and a Phoenix summoned 10 yards away comes to its owner's side (pet_distance, the 2D distance of that pet, falls from at least 6 on arrival to at most 5 yards while the owner stands still). Creature 50258's own model is display 17765 at DisplayScale 0.6 (creature_template_model); Kael's Command 800816 turns it into the egg display 20245 for the dormancy of 707060, whose DurationIndex 1 is 10 s, and the reporter saw the Phoenix stay an egg after a Phoenix Dive 706854 and long after the dormancy. Phoenix Dive needs one Ember 807533 (CasterAuraSpell), set here as fixture state. Asserted: 5 s after a dive the pet shows display 17765 at scale 0.6; after Kael's Command it shows 20245, still does 8 s later, shows 17765 at scale 0.6 again within 4 s more and then returns to its owner's side.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000,
+      "label": "Let spawn AI and level scaling settle"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800796
+    },
+    {
+      "action": "assert",
+      "label": "No pet before the cast",
+      "actor": "caster",
+      "metric": "pet_entry",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800796,
+      "destination": {
+        "x": -8907.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "assert",
+      "label": "The caster owns one Phoenix",
+      "actor": "caster",
+      "metric": "owned_creature_count",
+      "entry": 50258,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The Phoenix lands where the egg was thrown",
+      "actor": "caster",
+      "metric": "pet_distance",
+      "min": 6
+    },
+    {
+      "action": "assert",
+      "label": "The Phoenix occupies the caster's pet slot",
+      "actor": "caster",
+      "metric": "pet_entry",
+      "equals": 50258,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The Phoenix has its own size",
+      "actor": "caster",
+      "metric": "pet_scale",
+      "min": 0.59,
+      "max": 0.61
+    },
+    {
+      "action": "assert",
+      "label": "The Phoenix follows its owner",
+      "actor": "caster",
+      "metric": "pet_distance",
+      "max": 5,
+      "within_ms": 10000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 706854
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800816
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 807533,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 706854,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The Phoenix keeps its own model after a dive",
+      "actor": "caster",
+      "metric": "pet_display",
+      "equals": 17765
+    },
+    {
+      "action": "assert",
+      "label": "The Phoenix keeps its own size after a dive",
+      "actor": "caster",
+      "metric": "pet_scale",
+      "min": 0.59,
+      "max": 0.61
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800816
+    },
+    {
+      "action": "assert",
+      "label": "Kael's Command turns the Phoenix into an egg",
+      "actor": "caster",
+      "metric": "pet_display",
+      "equals": 20245,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "The Phoenix is still dormant after 7 s",
+      "actor": "caster",
+      "metric": "pet_display",
+      "equals": 20245
+    },
+    {
+      "action": "assert",
+      "label": "The Phoenix hatches when the 10 s dormancy ends",
+      "actor": "caster",
+      "metric": "pet_display",
+      "equals": 17765,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The Phoenix hatches at its own size",
+      "actor": "caster",
+      "metric": "pet_scale",
+      "min": 0.59,
+      "max": 0.61
+    },
+    {
+      "action": "assert",
+      "label": "The hatched Phoenix follows its owner",
+      "actor": "caster",
+      "metric": "pet_distance",
+      "max": 5,
+      "within_ms": 10000
+    }
+  ]
+}

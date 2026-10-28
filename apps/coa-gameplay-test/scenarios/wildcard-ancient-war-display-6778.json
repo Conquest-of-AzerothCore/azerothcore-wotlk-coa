@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "name": "Wildcard Ancient of War selects the Ancient model and restores the original display",
+  "contract": [
+    "Ascension Spell281261 transforms into creature346922, whose Ancient of War form display111212 has",
+    "client scale 0.7; NPC display1461 has client scale 3.0 and blocks the screen (#7519). A normal cast",
+    "must select display111212 rather than native missing-template pig fallback, retain its authored",
+    "twenty-point crit bonus, and restore display/crit on expiry. This checks server display selection;",
+    "rendered models are outside this harness."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 281261
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "display_id",
+      "save_as": "normal"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_crit_chance",
+      "save_as": "crit"
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 281261,
+      "target": "hero"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 281261,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "display_id",
+      "equals": 111212
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_crit_chance",
+      "relative_to": "crit",
+      "min": 19.99,
+      "max": 20.01
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 281261,
+      "equals": 0,
+      "within_ms": 40000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "display_id",
+      "relative_to": "normal",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_crit_chance",
+      "relative_to": "crit",
+      "min": -0.01,
+      "max": 0.01
+    }
+  ]
+}

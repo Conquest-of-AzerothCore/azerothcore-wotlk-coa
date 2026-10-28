@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "name": "Malgorm's telegraphed charge tramples the player in its path and ends against his hut wall",
+  "contract": [
+    "npc_coa_malgorm_hollowhoof charges every 20 seconds: a red line telegraph 255356 and Ground Tremor 64228 pulses",
+    "through the 2.5-second windup 256743, then a run along that line until he strikes a wall, trampling the players in",
+    "the path (256745) and striking the wall (256746). Expected: the line shows and the ground shakes during the windup,",
+    "the player in his path is trampled, and the charge ends against the wall of his hut with the line gone."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 1,
+    "x": -3462.84,
+    "y": -1157.95,
+    "z": 214.871,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 6,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "creatures": [
+    {
+      "id": "malgorm",
+      "owner": "hero",
+      "entry": 161816,
+      "faction": 16,
+      "level": 7,
+      "health": 100000,
+      "reaction": 2,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 2156414,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 5000000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 1,
+      "x": -3457.84,
+      "y": -1157.95,
+      "z": 214.871,
+      "o": 3.14
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "malgorm"
+    },
+    {
+      "action": "assert",
+      "label": "The line telegraph shows during the windup",
+      "actor": "malgorm",
+      "metric": "aura",
+      "spell": 255356,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "The ground shakes under him through the windup",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "spell": 64228,
+      "entry": 161816,
+      "min": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The charge tramples the player in its path",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "spell": 256745,
+      "entry": 161816,
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "The charge ends against the hut wall",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "spell": 256746,
+      "entry": 161816,
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "The line is gone once he has charged",
+      "actor": "malgorm",
+      "metric": "aura",
+      "spell": 255356,
+      "equals": 0
+    }
+  ]
+}

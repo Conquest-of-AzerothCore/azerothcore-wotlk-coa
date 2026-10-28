@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Haunt's visage has real health instead of being a one-hit-kill decoy (#9260)",
+  "contract": "Haunt 573425 (only castable while stealthed, per its own ONLY_STEALTHED requirement) summons the 'Uncanny Likeness' visage (840000, a level-1 0.5-HealthModifier template, ~21 max health regardless of the summoning player's level) for CLASS_REAPER in AscensionWitchDoctorSummons.cpp. Before this fix no SetMaxHealth/SetHealth override was applied in this branch (unlike the other Witch Doctor pet branches a few lines below, which do scale HP off the player's level), so the decoy could be one-shot before it ever drew a hit away from the player, matching the report's 'kept getting dropped almost immediately'. The fix scales the visage's max health to player level * 10 like those sibling branches. 1% of the old ~21 max health rounds to 0 (the harness's own CountPctFromMaxHealth, which the set_health_pct action uses, refuses to deal zero damage), while 1% of a level-80 player's 800 scaled max health is a clean 8 - an independent, harness-native way to distinguish the two without needing a mob to land the first hit.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "reaper", "race": 1, "class": 30, "level": 80 }
+  ],
+  "steps": [
+    { "action": "learn", "actor": "reaper", "spell": 573425 },
+    { "action": "learn", "actor": "reaper", "spell": 800797 },
+    { "action": "cast", "label": "Haunt is only castable while stealthed", "actor": "reaper", "spell": 800797 },
+    {
+      "action": "assert", "label": "SETUP: the player is stealthed",
+      "actor": "reaper", "metric": "aura", "spell": 800797, "equals": 1, "within_ms": 3000
+    },
+    { "action": "cast", "actor": "reaper", "spell": 573425 },
+    {
+      "action": "assert", "label": "SETUP: the visage is summoned",
+      "actor": "reaper", "metric": "owned_creature_count", "entry": 840000, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "set_health_pct",
+      "label": "DISCRIMINATING: 1% of the scaled max health is 8, not 0 like the old ~21 hp template",
+      "actor": "reaper", "entry": 840000, "pct": 1
+    },
+    {
+      "action": "assert", "label": "The visage is still alive after being reduced to 1% of its real max health",
+      "actor": "reaper", "metric": "owned_creature_count", "entry": 840000, "equals": 1
+    }
+  ]
+}

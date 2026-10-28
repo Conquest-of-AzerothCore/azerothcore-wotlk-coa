@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Bloodforged gear grants no PvE Power",
+  "contract": "Bloodforged Avenger's Armor carried a PvE Power (+38) marker before the marker data was corrected. Equipping it must leave a level 60 player's damage dealt to and taken from a creature at the base value. Requires PvePower.Enable = 1 in coa.conf.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "k", "race": 1, "class": 1, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "e", "owner": "k", "entry": 36, "level": 60, "health": 500000, "distance": 15 }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "add_item", "actor": "k", "item": 6331104, "count": 1 },
+    { "action": "equip", "actor": "k", "item": 6331104, "slot": 4 },
+    { "action": "assert", "label": "A Bloodforged chestpiece adds no damage dealt", "actor": "k", "metric": "script_melee_damage_dealt", "target": "e", "equals": 1000 },
+    { "action": "assert", "label": "A Bloodforged chestpiece removes no damage taken", "actor": "k", "metric": "script_melee_damage_taken", "target": "e", "equals": 1000 }
+  ]
+}

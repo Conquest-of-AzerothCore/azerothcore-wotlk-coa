@@ -1,0 +1,3 @@
+DELETE FROM `creature` WHERE `guid` = 79963;
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`, `CreateObject`, `Comment`) VALUES
+(79963, 375, 0, 0, 0, 1, 1, 1, -8851.09, -193.34, 81.933, 2.54818, 180, 0, 0, 102, 0, 0, 0, 0, 0, '', 0, 0, 'Priestess Anetta, Northshire Abbey priest trainer (2.5 yd clear of Chaplain Nysoni, as rev_20260924_13 placed her)');

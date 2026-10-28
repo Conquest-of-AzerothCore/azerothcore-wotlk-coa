@@ -28,7 +28,9 @@ def main():
     code = code.replace('// SOURCE', source)
     native = (ROOT / 'src/server/game/Combat/ThreatManager.cpp').read_text()
     code = code.replace('// NATIVE', method(native, 'void ThreatManager::RegisterRedirectThreat(') +
-                        method(native, 'void ThreatManager::UnregisterRedirectThreat(uint32 spellId)'))
+                        method(native, 'void ThreatManager::UnregisterRedirectThreat(uint32 spellId)') +
+                        method(native, 'void ThreatManager::UnregisterRedirectThreat(uint32 spellId, '
+                                       'ObjectGuid const& victim)'))
     raw = (dbc_dir() / 'Spell.dbc').read_bytes()
     count = struct.unpack_from('<I', raw, 4)[0]
     parents = (574356, 534605, 534480)
@@ -41,6 +43,12 @@ def main():
         assert row[80] + row[74] == 100 and row[86:88] == (57, 1) and row[40] == 9
     for sid in children:
         assert rows[sid][71:74] == (6, 0, 0) and rows[sid][95] == 4 and rows[sid][40] == 35
+    barrier = {r[0]: r for r in struct.iter_unpack('<234I', raw[20:20 + count * 936])
+               if r[0] in (805417, 807698, 807694)}
+    assert barrier[805417][71:74] == (65, 65, 65) and barrier[805417][86:89] == (1, 1, 1)
+    assert barrier[805417][95:98] == (87, 23, 319) and barrier[805417][116:119] == (0, 807698, 0)
+    assert barrier[807698][71:74] == (140, 0, 0) and barrier[807698][116] == 807694
+    assert barrier[807694][71:74] == (130, 0, 0) and barrier[807694][95:98] == (0, 0, 0)
     raw = (dbc_dir() / 'SpellDuration.dbc').read_bytes()
     count = struct.unpack_from('<I', raw, 4)[0]
     durations = {r[0]: r[1] for r in struct.iter_unpack('<4i', raw[20:20 + count * 16])}
@@ -81,7 +89,15 @@ def main():
             (s, 'aura_ascension_threat_redirect_active') for s in children]:
         assert db.execute('SELECT COUNT(*) FROM spell_script_names WHERE spell_id=? AND ScriptName=?',
                           (sid, name)).fetchone() == (1,)
-    print('PASS: redirect activation, expiry/cancel/dispel/death, unrelated registrations and SQL replay')
+    sql = (ROOT / 'data/sql/updates/pending_db_world/rev_1792856057617408800.sql').read_text()
+    db.executescript(sql)
+    before = list(db.iterdump())
+    db.executescript(sql)
+    assert list(db.iterdump()) == before
+    assert db.execute("SELECT spell_id FROM spell_script_names WHERE ScriptName='aura_ascension_barrier_of_light'"
+                      ).fetchall() == [(805417,)]
+    print('PASS: redirect activation, expiry/cancel/dispel/death, Barrier of Light cleanup, '
+          'unrelated registrations and SQL replay')
 
 
 if __name__ == '__main__':

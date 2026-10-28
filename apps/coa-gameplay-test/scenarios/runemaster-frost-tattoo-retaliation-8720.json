@@ -1,0 +1,454 @@
+{
+  "schema": 1,
+  "name": "Frost Tattoos retaliate on incoming attacks across all ranks (#8720)",
+  "contract": [
+    "Spell descriptions 807834..807839 promise a movement and attack speed slow on melee and ranged attackers.",
+    "A successful melee hit must apply native slow 707731; without the tattoo the same attack must not apply it.",
+    "This scenario covers melee retaliation on every rank; ranged attack coverage remains a manual acceptance check."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 80
+    },
+    {
+      "id": "enemy",
+      "race": 5,
+      "class": 1,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "pvp",
+      "actor": "rm",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy",
+      "map": 0,
+      "x": -9615.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.14159
+    },
+    {
+      "action": "attack",
+      "actor": "enemy",
+      "target": "rm"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "melee_damage_count",
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Control: no retaliation without Frost Tattoos",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 707731,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "rm",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 807834,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "enemy",
+      "spell": 707731,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "melee_damage_count",
+      "save_as": "hits_807834"
+    },
+    {
+      "action": "attack",
+      "actor": "enemy",
+      "target": "rm"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "melee_damage_count",
+      "relative_to": "hits_807834",
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 807834 slows its attacker",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 707731,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "run_speed_rate",
+      "max": 0.99
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 807834,
+      "stacks": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "rm",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 807835,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "enemy",
+      "spell": 707731,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "melee_damage_count",
+      "save_as": "hits_807835"
+    },
+    {
+      "action": "attack",
+      "actor": "enemy",
+      "target": "rm"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "melee_damage_count",
+      "relative_to": "hits_807835",
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 807835 slows its attacker",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 707731,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "run_speed_rate",
+      "max": 0.99
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 807835,
+      "stacks": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "rm",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 807836,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "enemy",
+      "spell": 707731,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "melee_damage_count",
+      "save_as": "hits_807836"
+    },
+    {
+      "action": "attack",
+      "actor": "enemy",
+      "target": "rm"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "melee_damage_count",
+      "relative_to": "hits_807836",
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 807836 slows its attacker",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 707731,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "run_speed_rate",
+      "max": 0.99
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 807836,
+      "stacks": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "rm",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 807837,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "enemy",
+      "spell": 707731,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "melee_damage_count",
+      "save_as": "hits_807837"
+    },
+    {
+      "action": "attack",
+      "actor": "enemy",
+      "target": "rm"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "melee_damage_count",
+      "relative_to": "hits_807837",
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 807837 slows its attacker",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 707731,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "run_speed_rate",
+      "max": 0.99
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 807837,
+      "stacks": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "rm",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 807838,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "enemy",
+      "spell": 707731,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "melee_damage_count",
+      "save_as": "hits_807838"
+    },
+    {
+      "action": "attack",
+      "actor": "enemy",
+      "target": "rm"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "melee_damage_count",
+      "relative_to": "hits_807838",
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 807838 slows its attacker",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 707731,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "run_speed_rate",
+      "max": 0.99
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 807838,
+      "stacks": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "rm",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 807839,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "enemy",
+      "spell": 707731,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "melee_damage_count",
+      "save_as": "hits_807839"
+    },
+    {
+      "action": "attack",
+      "actor": "enemy",
+      "target": "rm"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "melee_damage_count",
+      "relative_to": "hits_807839",
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 807839 slows its attacker",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 707731,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "run_speed_rate",
+      "max": 0.99
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 807839,
+      "stacks": 0
+    }
+  ]
+}

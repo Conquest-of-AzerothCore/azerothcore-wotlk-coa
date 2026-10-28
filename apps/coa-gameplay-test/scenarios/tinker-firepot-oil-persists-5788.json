@@ -1,0 +1,150 @@
+{
+  "schema": 1,
+  "name": "Firepot oil persists after its drone detonates (#5788)",
+  "contract": "Build: Firepot Drone 500600 states that landing leaves oil for $500753d and slows enemies by $500753s1%. The installed Spell.dbc 500753 is a persistent area aura with -30 percent movement speed; SpellDuration 32 is six seconds. An ordinary drone must arrive, detonate and disappear, while its landing oil continues to apply the authored snare to a stationary enemy for at least another two seconds. The oil then expires naturally and movement returns to its prior rate. The existing multi-trial travel regression separately covers bomb and drone arrival, native detonation packets and damage. The construction assertion allows four seconds, matching the existing travel fixture and covering the authored two-second cast plus native handler scheduling.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 60,
+      "distance": 20,
+      "health": 1000000,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "run_speed_rate",
+      "save_as": "speed_before"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "power",
+      "power": 0,
+      "min": 500,
+      "label": "The fixture starts with enough native mana for one drone"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500600,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "Construction completes and creates exactly one drone"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500601,
+      "entry": 226112,
+      "min": 1,
+      "within_ms": 6000,
+      "label": "The drone reaches its target and detonates"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The detonated drone disappears"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 500753,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "Landing oil remains after the drone disappears"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_amount",
+      "spell": 500753,
+      "effect": 0,
+      "equals": -30
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "run_speed_rate",
+      "ratio_to": "speed_before",
+      "min": 0.699,
+      "max": 0.701,
+      "label": "Oil actually slows the enemy by thirty percent"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 500753,
+      "equals": 1,
+      "label": "Oil persists for the authored duration"
+    },
+    {
+      "action": "wait",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 500753,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "run_speed_rate",
+      "ratio_to": "speed_before",
+      "min": 0.999,
+      "max": 1.001,
+      "label": "Oil expiration restores normal movement"
+    }
+  ]
+}

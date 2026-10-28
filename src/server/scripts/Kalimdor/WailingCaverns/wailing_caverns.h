@@ -28,6 +28,7 @@ enum DataTypes
     TYPE_LORD_SERPENTIS         = 3,
     TYPE_MUTANUS                = 4,
     MAX_ENCOUNTERS              = 5,
+    TYPE_NARALEX_EVENT_BLOCKED  = 5,
 
     NPC_DISCIPLE_OF_NARALEX     = 3678,
     NPC_LORD_SERPENTIS          = 3673,

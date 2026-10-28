@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "AscensionFlightMasters.h"
 #include "DBCStores.h"
 #include "ObjectMgr.h"
 #include "Player.h"
@@ -10,8 +11,8 @@ namespace
 {
 TaxiNodesEntry const* NearestFlightMaster(Player const* player)
 {
-    uint32 node = sObjectMgr->GetNearestTaxiNode(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(),
-        player->GetMapId(), player->GetTeamId());
+    uint32 node = AscensionFlightMasters::NearestNode(player->GetPositionX(), player->GetPositionY(),
+        player->GetPositionZ(), player->GetMapId(), player->GetTeamId());
     return node ? sTaxiNodesStore.LookupEntry(node) : nullptr;
 }
 

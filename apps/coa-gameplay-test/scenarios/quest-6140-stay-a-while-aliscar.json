@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Stay a While: Aliscar Lend wears his preset display and takes the quest back (#6140)",
+  "contract": "Quest 1660060 Stay a While is started and ended by Aliscar Lend 162806 (rev_20260923_00 rows), whose spawn 9002004 stands on the client's quest point, QuestSuperTrack 8842. Aliscar is drawn from creature_display_preset row (162806, 49); rev_20261001_20 had moved his model to display 5080, which matches no preset, so the client did not draw him and the reporter could not reach him. rev_20261002_00 put him back on display 49. Expected: a summoned Aliscar uses display 49, and with the quest complete his quest menu lists 1660060. Client rendering is outside this harness's reach.",
+  "timeout_ms": 30000,
+  "location": { "map": 0, "x": -9397.41, "y": -12.37, "z": 62.13, "o": 0 },
+  "players": [
+    { "id": "listener", "race": 1, "class": 1, "level": 10 }
+  ],
+  "creatures": [
+    { "id": "aliscar", "owner": "listener", "entry": 162806, "distance": 2, "faction": 12 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "Aliscar uses the display his preset is keyed to", "actor": "aliscar",
+      "metric": "display_id", "equals": 49
+    },
+    { "action": "prepare_quest", "label": "Finish Stay a While", "actor": "listener", "quest": 1660060 },
+    { "action": "gossip_hello", "label": "Talk to Aliscar Lend", "actor": "listener", "target": "aliscar" },
+    {
+      "action": "assert", "label": "Aliscar offers Stay a While for turn-in", "actor": "listener",
+      "metric": "quest_menu_has", "quest": 1660060, "equals": 1
+    }
+  ]
+}

@@ -75,7 +75,10 @@ def make_harness(native, source_path, ai_name):
     code = code.replace("// NATIVE_ENUMS", "\n".join(enums))
     code = "#include <algorithm>\n#include <cmath>\n#include <list>\n" + code
     code = code.replace("struct SpellImplicitTargetInfo", "using WorldLocation = Position;\nstruct Unit;\nstruct SpellImplicitTargetInfo")
-    code = code.replace("uint32 Effect = 0;", "uint32 Effect = 0, MiscValue = 0, TriggerSpell = 0;")
+    code = code.replace("uint32 target = 0;", "uint32 target = 0;\n    uint32 GetTarget() const { return target; }")
+    code = code.replace("uint32 Effect = 0;", """uint32 Effect = 0, MiscValue = 0, TriggerSpell = 0;
+        int32 MiscValueB = 0, BasePoints = 0, DieSides = 0;
+        float RealPointsPerLevel = 0;""")
     code = code.replace("struct SpellInfo\n{", "struct SpellInfo\n{\n    SpellInfo() { }")
     code = code.replace("int32 duration = 20000;", """int32 duration = 20000;
         uint32 StackAmount = 3, ProcChance = 20, CasterAuraSpell = 0;

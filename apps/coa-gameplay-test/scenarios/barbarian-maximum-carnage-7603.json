@@ -1,0 +1,170 @@
+{
+  "schema": 1,
+  "name": "Maximum Carnage deals its per-tick amount (#7603)",
+  "contract": "#7603: tooltip reads as a 491 total while each of the 6 ticks deals ~that amount. Mechanics verified correct: 560932 applies once per 1s tick as 150-153 + 0.3*AP (naked L59 AP 372 -> ~250/tick, ~1250 total). This pins the mechanism: fails if ticks double-apply (floor -2200), if the AP term vanishes (ceiling -1000), or if the aura never ticks. AP band [200,800] guards the calibration; recalibrate bounds if base AP changes. Tooltip wording itself is verified in game (harness has no tooltip metric); the 560933 cast here bypasses the 561359 talent, which is unchanged and covered by in-game testing.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "barb",
+      "race": 1,
+      "class": 12,
+      "level": 59
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "barb",
+      "entry": 36,
+      "level": 59,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "barb",
+      "label": "Learn Maximum Carnage aura",
+      "spell": 560933
+    },
+    {
+      "action": "assert",
+      "actor": "barb",
+      "equals": 1,
+      "label": "SETUP: the Barbarian knows Maximum Carnage",
+      "metric": "knows_spell",
+      "spell": 560933
+    },
+    {
+      "action": "snapshot",
+      "actor": "barb",
+      "label": "Baseline attack power",
+      "metric": "attack_power",
+      "save_as": "ap"
+    },
+    {
+      "action": "assert",
+      "actor": "barb",
+      "label": "SETUP: attack power in calibrated band",
+      "metric": "attack_power",
+      "min": 200,
+      "max": 800
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy",
+      "label": "Baseline dummy health",
+      "metric": "health",
+      "save_as": "h0"
+    },
+    {
+      "action": "cast",
+      "actor": "barb",
+      "label": "Cast Maximum Carnage",
+      "spell": 560933
+    },
+    {
+      "action": "assert",
+      "actor": "barb",
+      "equals": 1,
+      "label": "SETUP: the aura applied",
+      "metric": "aura",
+      "spell": 560933,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Tick window 1",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy",
+      "label": "Health after tick window 1",
+      "metric": "health",
+      "save_as": "h1"
+    },
+    {
+      "action": "wait",
+      "label": "Tick window 2",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy",
+      "label": "Health after tick window 2",
+      "metric": "health",
+      "save_as": "h2"
+    },
+    {
+      "action": "wait",
+      "label": "Tick window 3",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy",
+      "label": "Health after tick window 3",
+      "metric": "health",
+      "save_as": "h3"
+    },
+    {
+      "action": "wait",
+      "label": "Tick window 4",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy",
+      "label": "Health after tick window 4",
+      "metric": "health",
+      "save_as": "h4"
+    },
+    {
+      "action": "wait",
+      "label": "Tick window 5",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy",
+      "label": "Health after tick window 5",
+      "metric": "health",
+      "save_as": "h5"
+    },
+    {
+      "action": "wait",
+      "label": "Tick window 6",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy",
+      "label": "Health after tick window 6",
+      "metric": "health",
+      "save_as": "h6"
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "label": "DISCRIMINATING: six ticks of single-application 150+0.3AP damage, not doubled or zeroed",
+      "metric": "health",
+      "relative_to": "h0",
+      "min": -2200,
+      "max": -1000
+    }
+  ]
+}

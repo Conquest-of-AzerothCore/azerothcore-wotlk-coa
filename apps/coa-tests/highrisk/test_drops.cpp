@@ -1,5 +1,6 @@
 #include "../../../src/server/coa/AscensionBloodforgedPolicy.h"
 #include <cassert>
+#include <cmath>
 #include <iostream>
 
 int main()
@@ -9,15 +10,15 @@ int main()
     for (unsigned level = 15; level <= 60; ++level)
     {
         auto const& rates = DefaultRates[Band(level)];
-        std::array<unsigned, 5> counts{};
-        for (unsigned roll = 0; roll < 10000; ++roll)
+        assert(ValidRates(rates));
+        for (unsigned quality = 0; quality < rates.size(); ++quality)
         {
-            ++counts[RollQuality(roll, rates)];
+            float total = 0.0f;
+            for (std::size_t pool : {1u, 5u, 9u, 250u})
+                total += EntryChance(rates[quality], pool) * static_cast<float>(pool);
+            assert(std::abs(total - 4.0f * static_cast<float>(rates[quality]) / 100.0f) < 0.01f);
             ++checked;
         }
-        assert(counts[2] == rates[0] && counts[3] == rates[1] && counts[4] == rates[2]);
-        assert(counts[0] == 10000 - rates[0] - rates[1] - rates[2]);
-        assert(counts[2] > counts[3] && counts[3] > counts[4]);
         assert(!EligibleItem(70, 80, level));
         assert(!EligibleItem(80, 100, level));
         assert(!EligibleItem(1, 150, level));
@@ -40,6 +41,7 @@ int main()
     assert(InGearTier(61, 60, 90));
     assert(!InGearTier(15, 60, 90));
     assert(InGearTier(37, 55, 37));
-    assert(RollQuality(10000, DefaultRates[0]) == 0);
-    std::cout << checked << " deterministic roll outcomes verified\n";
+    assert(EntryChance(450, 0) == 0.0f);
+    assert(std::abs(EntryChance(450, 9) - 0.5f) < 0.0001f);
+    std::cout << checked << " rate invariants verified\n";
 }

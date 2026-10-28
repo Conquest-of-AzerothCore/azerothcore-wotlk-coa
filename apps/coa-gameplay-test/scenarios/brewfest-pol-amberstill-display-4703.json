@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "name": "Brewfest: Pol Amberstill wears a dwarf display the client can texture",
+  "contract": "Pol Amberstill 24468 stands at the Ironforge Brewfest grounds (guid 88855, event 24). His stock display 22455 (male dwarf model 53) points at CreatureDisplayInfoExtra 15349, which neither the installed client nor the server DBC contains, so the client draws him untextured (#4703). No source has his original textures, so Veron Amberstill's male dwarf display 2790 (model 53, extra 1126 present in both) stands in as a placeholder. A visitor beside him with Brewfest started therefore sees display 2790. Rendering is untested.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -5204.76,
+    "y": -487.627,
+    "z": 388.905,
+    "o": 0.0
+  },
+  "players": [
+    { "id": "visitor", "race": 3, "class": 1, "level": 29 }
+  ],
+  "steps": [
+    { "action": "set_phase", "label": "Join world phase 1, where the event spawns live", "actor": "visitor", "value": 1 },
+    { "action": "game_event", "event": 24, "active": true },
+    { "action": "assert", "label": "CONTROL: Pol Amberstill stands beside the visitor", "actor": "visitor",
+      "metric": "nearby_creature_count", "entry": 24468, "min": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "Pol Amberstill wears the placeholder dwarf display 2790", "actor": "visitor",
+      "metric": "nearby_creature_display", "entry": 24468, "equals": 2790 }
+  ]
+}

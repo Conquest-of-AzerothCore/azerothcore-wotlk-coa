@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "name": "Reborn guardians keep the stock guardians' area-of-effect avoidance",
+  "contract": "Reborn class spells summon copies of the stock guardians at entry 1100000 + stock entry: 1151533 'Feral Spirit' summons two 1129264 (stock 51533 summons 29264) and 1170907 'Summon Water Elemental' summons 1100510 (stock 510) as a pet, so a second mage casts it rather than replacing the first mage's elemental. Guardian::InitStatsForLevel gives the stock Spirit Wolf and temporary Water Elemental 32233 'Pet Avoidance' (aura 310 -90% creature area damage, aura 229 -20%) together with their scaling auras. Live CoA combat logs (2026-05) show the reborn Spirit Wolf, Treant, Water Elemental, Fire Elemental and Shadowfiend taking about a tenth of the area damage players took from the same cast, and the 1134433 'Shadowfiend' tooltip says 'Damage taken by area of effect attacks is reduced.' Expected: every reborn copy wears 32233 like its stock guardian. Before the fix the guardian switch compared the raw entry, so the reborn copies wore no 32233.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "shaman", "race": 2, "class": 7, "level": 60 },
+    { "id": "mage", "race": 1, "class": 8, "level": 60 },
+    { "id": "reborn_mage", "race": 1, "class": 8, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "shaman", "spell": 51533 },
+    { "action": "learn", "actor": "shaman", "spell": 1151533 },
+    { "action": "learn", "actor": "mage", "spell": 31687 },
+    { "action": "learn", "actor": "reborn_mage", "spell": 1170907 },
+    { "action": "cast", "label": "Stock Feral Spirit", "actor": "shaman", "spell": 51533 },
+    {
+      "action": "assert", "label": "SETUP: two stock Spirit Wolves are active", "actor": "shaman",
+      "metric": "owned_creature_count", "entry": 29264, "equals": 2, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTROL: stock Spirit Wolves wear Pet Avoidance", "actor": "shaman",
+      "metric": "owned_creature_count", "entry": 29264, "spell": 32233, "equals": 2, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 2000 },
+    { "action": "cast", "label": "Reborn Feral Spirit", "actor": "shaman", "spell": 1151533 },
+    {
+      "action": "assert", "label": "SETUP: two reborn Spirit Wolves are active", "actor": "shaman",
+      "metric": "owned_creature_count", "entry": 1129264, "equals": 2, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: reborn Spirit Wolves wear Pet Avoidance", "actor": "shaman",
+      "metric": "owned_creature_count", "entry": 1129264, "spell": 32233, "equals": 2, "within_ms": 2000
+    },
+    { "action": "cast", "label": "Stock Summon Water Elemental", "actor": "mage", "spell": 31687 },
+    {
+      "action": "assert", "label": "SETUP: the stock Water Elemental is active", "actor": "mage",
+      "metric": "owned_creature_count", "entry": 510, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTROL: the stock Water Elemental wears Pet Avoidance", "actor": "mage",
+      "metric": "owned_creature_count", "entry": 510, "spell": 32233, "equals": 1, "within_ms": 2000
+    },
+    { "action": "cast", "label": "Reborn Summon Water Elemental", "actor": "reborn_mage", "spell": 1170907 },
+    {
+      "action": "assert", "label": "SETUP: the reborn Water Elemental is active", "actor": "reborn_mage",
+      "metric": "owned_creature_count", "entry": 1100510, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the reborn Water Elemental wears Pet Avoidance", "actor": "reborn_mage",
+      "metric": "owned_creature_count", "entry": 1100510, "spell": 32233, "equals": 1, "within_ms": 2000
+    }
+  ]
+}

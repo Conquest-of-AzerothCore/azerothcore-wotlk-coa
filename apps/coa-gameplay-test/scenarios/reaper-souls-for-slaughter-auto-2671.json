@@ -1,0 +1,160 @@
+{
+  "schema": 1,
+  "name": "Souls for the Slaughter adds the authored auto-attack Shadow damage (#2671)",
+  "contract": [
+    "The existing Slaughter-critical proc grants helper buff 504304 for five seconds, with its effect",
+    "amount 85 and trigger 575847. The missing buff handler must add Shadow damage equal to 85% of each",
+    "resolved melee auto attack, without applying armor or source scaling a second time, and stop after",
+    "expiry. This isolates the buff with a fixture and observes real auto-attack and spell damage",
+    "packets; the unchanged parent critical-proc eligibility is not exercised here."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "r",
+      "race": 1,
+      "class": 30,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "r",
+      "entry": 36,
+      "level": 80,
+      "distance": 3,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "r",
+      "item": 25,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "r",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "r",
+      "spell": 504304,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "The buff promises eighty-five percent attack damage",
+      "actor": "r",
+      "metric": "aura_amount",
+      "spell": 504304,
+      "effect": 0,
+      "equals": 85
+    },
+    {
+      "action": "attack",
+      "actor": "r",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "One normal auto attack lands",
+      "actor": "r",
+      "metric": "melee_damage_count",
+      "target": "enemy",
+      "hand": 0,
+      "min": 1,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "r"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "melee_damage_total",
+      "target": "enemy",
+      "hand": 0,
+      "save_as": "auto_damage"
+    },
+    {
+      "action": "assert",
+      "label": "The auto attack triggers the native Shadow helper",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 575847,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Shadow damage is eighty-five percent of resolved auto damage",
+      "actor": "r",
+      "metric": "spell_damage_total",
+      "spell": 575847,
+      "target": "enemy",
+      "ratio_to": "auto_damage",
+      "min": 0.8,
+      "max": 0.86
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 575847,
+      "target": "enemy",
+      "save_as": "extra_count"
+    },
+    {
+      "action": "attack",
+      "actor": "r",
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "r"
+    },
+    {
+      "action": "assert",
+      "label": "Auto attacks after expiry add no Shadow damage",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 575847,
+      "target": "enemy",
+      "relative_to": "extra_count",
+      "equals": 0
+    }
+  ]
+}

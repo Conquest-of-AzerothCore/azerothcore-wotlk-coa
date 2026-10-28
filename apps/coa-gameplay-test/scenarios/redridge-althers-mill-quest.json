@@ -1,0 +1,208 @@
+{
+  "schema": 1,
+  "name": "Redridge quest Reclaiming Alther's Mill restored from Ascension can be completed",
+  "contract": "The Ascension questcache.wdb capture (2026-09-07..08) lists Reclaiming Alther's Mill 255116, given and taken back by Lady Idelia Solomon 255206 (client QuestSuperTrack 21397), which the server lacked: it needs six Greater Tarantulas 505 killed, and each kill advances the objective by one.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9480.0,
+    "y": -2120.0,
+    "z": 87.66,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 25
+    }
+  ],
+  "creatures": [
+    {
+      "id": "idelia",
+      "owner": "p",
+      "entry": 255206,
+      "distance": 4,
+      "faction": 12,
+      "level": 30
+    },
+    {
+      "id": "tarantula1",
+      "owner": "p",
+      "entry": 505,
+      "distance": 3,
+      "level": 19
+    },
+    {
+      "id": "tarantula2",
+      "owner": "p",
+      "entry": 505,
+      "distance": 3,
+      "level": 19
+    },
+    {
+      "id": "tarantula3",
+      "owner": "p",
+      "entry": 505,
+      "distance": 3,
+      "level": 19
+    },
+    {
+      "id": "tarantula4",
+      "owner": "p",
+      "entry": 505,
+      "distance": 3,
+      "level": 19
+    },
+    {
+      "id": "tarantula5",
+      "owner": "p",
+      "entry": 505,
+      "distance": 3,
+      "level": 19
+    },
+    {
+      "id": "tarantula6",
+      "owner": "p",
+      "entry": 505,
+      "distance": 3,
+      "level": 19
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "label": "take quest 255116 from its giver",
+      "action": "quest_accept",
+      "actor": "p",
+      "quest": 255116,
+      "entry": 255206
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255116,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "label": "kill a Greater Tarantula",
+      "action": "attack_nearby",
+      "actor": "p",
+      "entry": 505,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 255116,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "label": "kill a Greater Tarantula",
+      "action": "attack_nearby",
+      "actor": "p",
+      "entry": 505,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 255116,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "label": "kill a Greater Tarantula",
+      "action": "attack_nearby",
+      "actor": "p",
+      "entry": 505,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 255116,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "label": "kill a Greater Tarantula",
+      "action": "attack_nearby",
+      "actor": "p",
+      "entry": 505,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 255116,
+      "equals": 4,
+      "within_ms": 3000
+    },
+    {
+      "label": "kill a Greater Tarantula",
+      "action": "attack_nearby",
+      "actor": "p",
+      "entry": 505,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 255116,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "label": "kill a Greater Tarantula",
+      "action": "attack_nearby",
+      "actor": "p",
+      "entry": 505,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 255116,
+      "equals": 6,
+      "within_ms": 3000
+    },
+    {
+      "label": "quest 255116 is complete",
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255116,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "label": "hand quest 255116 in at its ender",
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255116,
+      "entry": 255206
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255116,
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

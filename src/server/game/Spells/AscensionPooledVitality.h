@@ -20,6 +20,19 @@ enum Spells : uint32
     CursedForm = 802877
 };
 
+constexpr uint32 BloodmageSpellFamily = 26;
+
+// The client's spell data excludes mortal abilities with the raw Cursed Form
+// check marker (524861), which is live for every Cursed Form; the server
+// rewrites it to the internal marker (802877) that only restricting forms
+// carry. Shared so the runtime redirect and the client spell patch stream
+// stay identical.
+inline uint32 RuntimeExcludeCasterAuraSpell(uint32 spellFamily, uint32 excludeCasterAuraSpell)
+{
+    return spellFamily == BloodmageSpellFamily && excludeCasterAuraSpell == CursedFormCheck
+        ? CursedForm : excludeCasterAuraSpell;
+}
+
 enum Empowerment : uint32
 {
     None, Mend, CrimsonTide, Heartbreak, Fleshcraft, Bloodbolt, AnimatedBlood, Transfusion, Apotheosis

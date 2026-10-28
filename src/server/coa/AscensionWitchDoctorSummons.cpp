@@ -190,6 +190,7 @@ namespace
 {
 using namespace AscensionWitchDoctor;
 constexpr uint32 NpcHauntVisage = 840000;
+constexpr uint32 BwonsamdiDisplay = 142802;
 constexpr float HauntRunDistance = 25.0f;
 class npc_ascension_witch_doctor : public ScriptedAI
 {
@@ -214,6 +215,8 @@ class npc_ascension_witch_doctor : public ScriptedAI
             me->SetCreatorGUID(_owner);
             me->SetFaction(player->GetFaction());
             me->SetLevel(player->GetLevel());
+            me->SetMaxHealth(std::max(5u, uint32(player->GetLevel()) * 10));
+            me->SetHealth(me->GetMaxHealth());
             player->CastSpell(me, CloneMe, true);
             me->SetReactState(REACT_PASSIVE);
             me->SetCombatMovement(false);
@@ -226,11 +229,16 @@ class npc_ascension_witch_doctor : public ScriptedAI
         me->SetOwnerGUID(_owner);
         me->SetCreatorGUID(_owner);
         me->SetFaction(player->GetFaction());
+        me->m_ControlledByPlayer = true;
+        me->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
+        me->SetByteValue(UNIT_FIELD_BYTES_2, 1, player->GetByteValue(UNIT_FIELD_BYTES_2, 1));
         me->SetLevel(player->GetLevel());
         me->SetMaxHealth(std::max(5u, uint32(player->GetLevel()) * 10));
         me->SetHealth(me->GetMaxHealth());
         me->SetReactState(REACT_PASSIVE);
         me->SetCombatMovement(false);
+        if (me->GetEntry() == NpcCauldron)
+            me->SetVisible(false);
         State(player).summons.push_back(me->GetGUID());
         if (me->GetEntry() == NpcMirage)
         {
@@ -243,6 +251,13 @@ class npc_ascension_witch_doctor : public ScriptedAI
         {
             me->SetMaxHealth(std::max(100u, uint32(player->GetStat(STAT_INTELLECT) * 8)));
             me->SetHealth(me->GetMaxHealth());
+        }
+        if (me->GetEntry() == NpcBwonsamdi)
+        {
+            me->SetDisplayId(BwonsamdiDisplay);
+            me->SetEmoteState(EMOTE_STATE_DANCE);
+            me->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
+            me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
         }
         if (me->GetEntry() == NpcMarionette)
             _timer = 2000;
@@ -288,6 +303,8 @@ class npc_ascension_witch_doctor : public ScriptedAI
                 me->SetFloatValue(UNIT_FIELD_MAXDAMAGE, target->GetFloatValue(UNIT_FIELD_MAXDAMAGE));
                 me->SetCombatMovement(true);
                 AttackStart(target);
+                if (me->GetVictim() == target)
+                    me->EngageWithTarget(target);
             }
     }
     ObjectGuid GetGUID(int32 key) const override { return key == DataTarget ? _target : _owner; }
@@ -376,6 +393,8 @@ class npc_ascension_witch_doctor : public ScriptedAI
             me->DespawnOrUnsummon();
             return;
         }
+        if (player->getClass() == CLASS_WITCH_DOCTOR)
+            me->SetByteValue(UNIT_FIELD_BYTES_2, 1, player->GetByteValue(UNIT_FIELD_BYTES_2, 1));
         if (me->GetEntry() == NpcHauntVisage)
             return;
         _age += diff;
@@ -491,16 +510,7 @@ class npc_ascension_witch_doctor : public ScriptedAI
             _timer = 1500;
         }
         if (entry == NpcBwonsamdi)
-        {
-            if (player->IsWithinDistInMap(me, 10.0f))
-            {
-                Field(player, BigVoodooField);
-                Cast(player, player, BigVoodooLock);
-            }
-            for (Unit* ally : Allies(player, me, 10.0f))
-                if (ally != player)
-                    Field(ally, VoodooProtectionSpell);
-        }
+            Field(me, BigVoodooField);
         if (entry == NpcMarionette)
         {
             if (++_marionetteTicks <= 4 && (player->HasAura(Marionette) || _age >= 8000))

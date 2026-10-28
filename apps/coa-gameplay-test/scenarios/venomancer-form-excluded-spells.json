@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Venom Bolt is refused in Spider and Beetle Form (forms above 32)",
+  "contract": [
+    "Spider Form 800841 applies SPELL_AURA_MOD_SHAPESHIFT form 52 and Beetle Form 803183 form 53.",
+    "Spell.dbc stores m_shapeshiftExclude as 64 bits; Venom Bolt 800869 has 0x08000000 in the low word (form 28) and 0x00180000 in the high word (forms 52 and 53).",
+    "The client refuses Venom Bolt in either form, so the server must answer SPELL_FAILED_NOT_SHAPESHIFT (68) there and let it hit outside any form."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "v", "race": 1, "class": 29, "level": 51, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "target", "owner": "v", "entry": 36, "level": 51, "health": 500000, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "v", "spell": 800841 },
+    { "action": "learn", "actor": "v", "spell": 803183 },
+    { "action": "learn", "actor": "v", "spell": 800869 },
+    { "action": "cast", "actor": "v", "spell": 800841 },
+    {
+      "action": "assert", "label": "Spider Form is active", "actor": "v",
+      "metric": "aura", "spell": 800841, "equals": 1, "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "snapshot", "actor": "target", "metric": "health", "save_as": "health_before_spider" },
+    { "action": "cast", "actor": "v", "spell": 800869, "target": "target" },
+    {
+      "action": "assert", "label": "Venom Bolt is refused in Spider Form", "actor": "v",
+      "metric": "cast_failure", "spell": 800869, "equals": 68, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Past Venom Bolt's cast time", "ms": 3000 },
+    {
+      "action": "assert", "label": "The refused Venom Bolt deals no damage", "actor": "target",
+      "metric": "health", "relative_to": "health_before_spider", "equals": 0
+    },
+    { "action": "cancel_aura", "actor": "v", "spell": 800841 },
+    {
+      "action": "assert", "label": "Spider Form ended", "actor": "v",
+      "metric": "aura", "spell": 800841, "equals": 0, "within_ms": 2000
+    },
+    { "action": "snapshot", "actor": "target", "metric": "health", "save_as": "health_before_unshifted" },
+    { "action": "cast", "actor": "v", "spell": 800869, "target": "target" },
+    {
+      "action": "assert", "label": "Outside any form Venom Bolt hits", "actor": "target",
+      "metric": "health", "relative_to": "health_before_unshifted", "max": -1, "within_ms": 6000
+    },
+    {
+      "action": "assert", "label": "Outside any form Venom Bolt is not refused", "actor": "v",
+      "metric": "cast_failure", "spell": 800869, "equals": 0
+    },
+    { "action": "cast", "actor": "v", "spell": 803183 },
+    {
+      "action": "assert", "label": "Beetle Form is active", "actor": "v",
+      "metric": "aura", "spell": 803183, "equals": 1, "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "cast", "actor": "v", "spell": 800869, "target": "target" },
+    {
+      "action": "assert", "label": "Venom Bolt is refused in Beetle Form", "actor": "v",
+      "metric": "cast_failure", "spell": 800869, "equals": 68, "within_ms": 2000
+    }
+  ]
+}

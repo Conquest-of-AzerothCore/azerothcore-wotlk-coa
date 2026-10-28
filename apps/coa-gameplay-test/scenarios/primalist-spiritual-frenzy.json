@@ -1,7 +1,13 @@
 {
   "schema": 1,
   "name": "Primalist Spiritual Frenzy pet auto-attack target cap",
-  "contract": "First/highest Primal Shred applies a twenty-one-second pet window. Native pet auto-attacks damage their original victim and exactly three of five other melee enemies; a farther enemy stays untouched. Baseline, expiry and talent removal stop cleaving. After checking each native Primal Shred application, wait for its bleed and buff to expire before seeding a separate cleave window; health deltas then contain only pet attacks.",
+  "contract": [
+    "First/highest Primal Shred applies a twenty-one-second pet window. Native pet auto-attacks damage their",
+    "original victim and exactly three of five other melee enemies; a farther enemy stays untouched.",
+    "Baseline, expiry and talent removal stop cleaving. After checking each native Primal Shred application,",
+    "wait for its bleed and buff to expire before seeding a separate cleave window; health deltas then",
+    "contain only pet attacks."
+  ],
   "players": [
     {
       "id": "primalist",
@@ -141,6 +147,26 @@
       "metric": "pet_entry",
       "equals": 1188,
       "within_ms": 24000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 61017,
+      "effect": 0,
+      "min": 100,
+      "within_ms": 4000,
+      "label": "Native pet hit scaling has settled"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 61017,
+      "effect": 2,
+      "min": 100,
+      "within_ms": 4000,
+      "label": "Native pet expertise scaling has settled"
     },
     {
       "action": "unlearn",

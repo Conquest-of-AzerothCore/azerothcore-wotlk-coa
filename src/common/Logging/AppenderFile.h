@@ -19,6 +19,7 @@
 #define APPENDERFILE_H
 
 #include "Appender.h"
+#include <chrono>
 #include <atomic> // NOTE: this import is NEEDED (even though some IDEs report it as unused)
 #include <vector>
 
@@ -42,6 +43,7 @@ private:
     bool _backup;
     uint64 _maxFileSize;
     std::atomic<uint64> _fileSize;
+    std::chrono::steady_clock::time_point _lastFlush{};
 };
 
 #endif

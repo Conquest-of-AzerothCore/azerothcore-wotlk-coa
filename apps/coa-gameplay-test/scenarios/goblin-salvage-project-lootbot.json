@@ -1,0 +1,217 @@
+{
+  "schema": 1,
+  "name": "The Goblin Salvage Project field test lends a Lootbot and its last step awards Lootbot 3000",
+  "contract": "Lootbot 3000 (57000) leaves the Bazaar and becomes the reward of the Goblin Salvage Project. Field Testing (176003) hands out the Lootbot Field Remote (9707006), which summons the real Lootbot 3000 (44022) through 9930889 without teaching the companion. With it out, a Venture Co. Geologist the player kills yields its Field Test Sample (9707007) without a loot window, but only when the player stands within 10 yd of the corpse: the Lootbot's own 40 yd sweep (84419) would otherwise loot corpses the player never walked up to. Exactly one sample afterwards also shows the distant corpse stayed unlooted. Turning in Field Testing takes the remote back, and Licensed Salvage Assistant (176004) rewards the Lootbot 3000 item. The case runs with CoA.UnlockAllVanity off, as on a realm where Lootbot 3000 is earned, so the companion timer that teaches every unlocked companion cannot mask a remote that teaches it.",
+  "timeout_ms": 90000,
+  "vanity_ownership": {
+    "unlock_all": false,
+    "starter_items": []
+  },
+  "location": {
+    "map": 0,
+    "x": -9458.0,
+    "y": 42.0,
+    "z": 55.5
+  },
+  "players": [
+    {
+      "id": "salvager",
+      "race": 1,
+      "class": 1,
+      "level": 37,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 7000
+    },
+    {
+      "action": "set_health",
+      "actor": "salvager",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "salvager",
+      "quest": 176003,
+      "complete": false
+    },
+    {
+      "action": "assert",
+      "label": "accepting Field Testing hands out the Lootbot Field Remote",
+      "actor": "salvager",
+      "metric": "item_count",
+      "item": 9707006,
+      "equals": 1
+    },
+    {
+      "action": "destroy_item",
+      "actor": "salvager",
+      "item": 9707007
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the fixture's Field Test Samples are gone before the field test",
+      "actor": "salvager",
+      "metric": "item_count",
+      "item": 9707007,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the character does not know the Lootbot 3000 companion before using the remote",
+      "actor": "salvager",
+      "metric": "knows_spell",
+      "spell": 9930889,
+      "equals": 0
+    },
+    {
+      "action": "use_item",
+      "actor": "salvager",
+      "item": 9707006,
+      "spell": 9930889
+    },
+    {
+      "action": "assert",
+      "label": "the remote summons Lootbot 3000",
+      "actor": "salvager",
+      "metric": "pet_entry",
+      "equals": 44022,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the remote does not teach the Lootbot 3000 companion",
+      "actor": "salvager",
+      "metric": "knows_spell",
+      "spell": 9930889,
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "salvager",
+      "entry": 1096,
+      "as": "distant_geologist",
+      "distance": 18
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "salvager",
+      "entry": 1096,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "distant_geologist",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the distant corpse lies beyond the 10 yd field-test reach but inside the Lootbot's 40 yd sweep",
+      "actor": "salvager",
+      "metric": "distance",
+      "target": "distant_geologist",
+      "min": 14,
+      "max": 30
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: during Field Testing the Lootbot leaves a corpse the player stands 14+ yd from",
+      "actor": "salvager",
+      "metric": "item_count",
+      "item": 9707007,
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "salvager",
+      "entry": 1096,
+      "as": "geologist",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "salvager",
+      "entry": 1096,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "geologist",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "the Lootbot collects the Field Test Sample from the Geologist at the player's side without a loot window",
+      "actor": "salvager",
+      "metric": "item_count",
+      "item": 9707007,
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "add_item",
+      "actor": "salvager",
+      "item": 9707007,
+      "count": 7
+    },
+    {
+      "action": "reward_quest",
+      "actor": "salvager",
+      "quest": 176003
+    },
+    {
+      "action": "assert",
+      "label": "turning in Field Testing takes the remote back",
+      "actor": "salvager",
+      "metric": "item_count",
+      "item": 9707006,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "salvager",
+      "quest": 176004
+    },
+    {
+      "action": "reward_quest",
+      "actor": "salvager",
+      "quest": 176004
+    },
+    {
+      "action": "assert",
+      "label": "Licensed Salvage Assistant rewards Lootbot 3000",
+      "actor": "salvager",
+      "metric": "item_count",
+      "item": 57000,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the Salvage License Application is handed in",
+      "actor": "salvager",
+      "metric": "item_count",
+      "item": 9707008,
+      "equals": 0
+    }
+  ]
+}

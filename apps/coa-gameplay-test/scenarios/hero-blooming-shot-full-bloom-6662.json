@@ -1,0 +1,349 @@
+{
+  "schema": 1,
+  "name": "Blooming Shot recharges its original full-bloom bonus (#6662)",
+  "contract": "Blooming Shot276884 original tooltip and276897 duration promise400percent damage/healing and40percent mana reduction after20seconds without firing. Learning it must make a fully bloomed shot available after that interval.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "ranged_hit_rating": 10000,
+      "spell_crit_rating": 10000,
+      "ranged_crit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 84867
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 276884
+    },
+    {
+      "action": "wait",
+      "ms": 21000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 276927,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_modifier",
+      "spell": 276884,
+      "op": 0,
+      "base": 100,
+      "equals": 500
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_modifier",
+      "spell": 276884,
+      "op": 14,
+      "base": 1000,
+      "equals": 600
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_modifier",
+      "spell": 3044,
+      "op": 0,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "creature_model_display",
+      "entry": 160001,
+      "index": 0,
+      "equals": 11686
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 2504
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 264
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 2504,
+      "slot": 17
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 276884,
+      "destination": {
+        "x": -8907.41016,
+        "y": -115.852997,
+        "z": 82.3711014
+      }
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "cast_failure",
+      "spell": 276884,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 276884,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_heal_count",
+      "spell": 276926,
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_damage_total",
+      "spell": 276884,
+      "save_as": "bloomed_damage"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_heal_total",
+      "spell": 276926,
+      "save_as": "bloomed_heal"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 276927,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 276897,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 276884,
+      "destination": {
+        "x": -8907.41016,
+        "y": -115.852997,
+        "z": 82.3711014
+      }
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "cast_failure",
+      "spell": 276884,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 276884,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_heal_count",
+      "spell": 276926,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_damage_total",
+      "spell": 276884,
+      "relative_to": "bloomed_damage",
+      "save_as": "ordinary_damage"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_heal_total",
+      "spell": 276926,
+      "relative_to": "bloomed_heal",
+      "save_as": "ordinary_heal"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_total",
+      "spell": 276884,
+      "ratio_to": "ordinary_damage",
+      "min": 5.8,
+      "max": 6.2
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_heal_total",
+      "spell": 276926,
+      "ratio_to": "ordinary_heal",
+      "min": 5.8,
+      "max": 6.2
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 3044
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "aura_duration_ms",
+      "spell": 276897,
+      "save_as": "before_hunter_shot"
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 3044,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "cast_failure",
+      "spell": 3044,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura_duration_ms",
+      "spell": 276897,
+      "relative_to": "before_hunter_shot",
+      "min": -5250,
+      "max": -3950,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 276927,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 12000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 276927,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 276927,
+      "equals": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "hero",
+      "spell": 276884
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 276927,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 276897,
+      "equals": 0
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 10
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41016,
+    "y": -115.852997,
+    "z": 82.3711014,
+    "o": 0
+  }
+}

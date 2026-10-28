@@ -1,0 +1,485 @@
+{
+  "schema": 1,
+  "name": "Goblin Salvage Project: the map marks each objective and the tracker follows it",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1 (the default).",
+    "The questline 176000-176014 is new, so the client has no QuestSuperTrack row and the server had no quest_poi row for it: the world map and the tracker showed nothing. rev_20261023_51 adds both.",
+    "A real client asks CMSG_QUEST_POI_QUERY (483) for the quests in its log and reads SMSG_QUEST_POI_QUERY_RESPONSE (484): quest count, quest id, POI count, then per POI its id, objective index, map, area, floor, priority, flags, point count and integer points, in quest_poi id order. For 176001 One Goblin's Junk it must hold the turn-in pin on Fizzlebolt Gearwhistle, then the item areas.",
+    "The 3.3.5a client draws the selected quest's areas in WorldMapBlobFrame:DrawQuestBlob (0x58ED80), which copies each POI's points plus three closing entries into a 15-entry stack buffer: a POI may hold at most 12 points. Blizzard's quest_poi_points never exceed 12; a 14-point Field Testing area overwrote the frame's own pointer and crashed the client when the map opened.",
+    "The login patch stream sends coa_client_quest_super_track rows as SMSG_PATCH_QUEST_SUPER_TRACK (1727) and coa_client_super_track rows as SMSG_PATCH_SUPER_TRACK (1726). Row 33401 (176001) must point objective 0-2 at the gearbox, Shredder and canister nodes and its completion at node 20900 on Fizzlebolt's spawn; the Horde row 33414 (176014) completes at the client's own Baron Revilgaz node 131, which stays unpatched.",
+    "These are data assertions on the bytes the server sends; the harness cannot see how the client draws the map areas or the diamond."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -11307.4,
+    "y": -191.2,
+    "z": 75.35,
+    "o": 1.95
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 7,
+      "class": 1,
+      "level": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 176001 One Goblin's Junk unfinished",
+      "actor": "c",
+      "quest": 176001,
+      "complete": false
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 176001, exactly what the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 176001
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 176001's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 176001,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the map gets nine POIs for 176001: the turn-in pin, three worker areas, three Shredder spots and two canister spots",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 9,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The first POI is the turn-in pin, ObjectiveIndex -1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on the Stranglethorn map, WorldMapAreaId 37",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 37,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "as a single point",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on Fizzlebolt Gearwhistle at the Rebel Camp: x -11307",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294955989,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "y -191",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 4294967105,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The second POI is id 1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 52,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "it marks the Salvaged Gearbox item objective, RequiredItemId1 (ObjectiveIndex 4)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 56,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on the Stranglethorn map, WorldMapAreaId 37",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 64,
+      "index": 0,
+      "equals": 37,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "drawn as the padded hull of the 29 Venture Co. workers at the Base Camp, cut to the client's 12 points",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "index": 0,
+      "equals": 12,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its first corner is x -12196",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 84,
+      "index": 0,
+      "equals": 4294955100,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "and y -756",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 88,
+      "index": 0,
+      "equals": 4294966540,
+      "within_ms": 4000
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character also carries 176003 Field Testing unfinished",
+      "actor": "c",
+      "quest": 176003,
+      "complete": false
+    },
+    {
+      "action": "client_packet",
+      "label": "Open the map on 176003, the quest whose areas crashed the client",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 176003
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 176003's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 176003,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "176003 has the turn-in pin and the three worker areas for the Field Test Samples",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Base Camp area has 12 points, not 14: DrawQuestBlob copies points + 3 into a 15-entry buffer, so a 13th point overwrote its frame and crashed the client",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "index": 0,
+      "equals": 12,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The northern camp area (17 workers) has 12 points, not 16",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 208,
+      "index": 0,
+      "equals": 12,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The third worker area has 12 points",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 336,
+      "index": 0,
+      "equals": 12,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the login stream sends QuestSuperTrack row 33401 once",
+      "actor": "c",
+      "metric": "server_packets",
+      "opcode": 1727,
+      "row": 33401,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Row 33401 belongs to quest 176001",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 33401,
+      "equals": 176001,
+      "within_ms": 8000,
+      "index": 1
+    },
+    {
+      "action": "assert",
+      "label": "Objective 0, the gearboxes, points first at the Base Camp worker node 20903",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 33401,
+      "equals": 20903,
+      "within_ms": 8000,
+      "index": 2
+    },
+    {
+      "action": "assert",
+      "label": "then at the northern camp node 20904",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 33401,
+      "equals": 20904,
+      "within_ms": 8000,
+      "index": 3
+    },
+    {
+      "action": "assert",
+      "label": "Objective 1, the Shredder Power Core, points at Shredder node 20906",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 33401,
+      "equals": 20906,
+      "within_ms": 8000,
+      "index": 22
+    },
+    {
+      "action": "assert",
+      "label": "Objective 2, the fuel canister, points at canister node 20909",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 33401,
+      "equals": 20909,
+      "within_ms": 8000,
+      "index": 42
+    },
+    {
+      "action": "assert",
+      "label": "Completion points at node 20900, Fizzlebolt Gearwhistle",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 33401,
+      "equals": 20900,
+      "within_ms": 8000,
+      "index": 82
+    },
+    {
+      "action": "assert",
+      "label": "Row 33401 carries all 102 fields",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 33401,
+      "equals": 0,
+      "within_ms": 8000,
+      "index": 101
+    },
+    {
+      "action": "assert",
+      "label": "The Horde row 33414 belongs to quest 176014",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 33414,
+      "equals": 176014,
+      "within_ms": 8000,
+      "index": 1
+    },
+    {
+      "action": "assert",
+      "label": "and completes at the client's own Baron Revilgaz node 131",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 33414,
+      "equals": 131,
+      "within_ms": 8000,
+      "index": 82
+    },
+    {
+      "action": "assert",
+      "label": "The login stream sends SuperTrack node 20900 once",
+      "actor": "c",
+      "metric": "server_packets",
+      "opcode": 1726,
+      "row": 20900,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Node 20900 is on the Eastern Kingdoms, MapID 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 20900,
+      "equals": 0,
+      "within_ms": 8000,
+      "index": 1
+    },
+    {
+      "action": "assert",
+      "label": "Node 20900 x is Fizzlebolt's spawn -11307.4",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 20900,
+      "equals": 3325078938,
+      "within_ms": 8000,
+      "index": 2
+    },
+    {
+      "action": "assert",
+      "label": "Node 20900 y is Fizzlebolt's spawn -191.2",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 20900,
+      "equals": 3275698995,
+      "within_ms": 8000,
+      "index": 3
+    },
+    {
+      "action": "assert",
+      "label": "Node 20900 z is Fizzlebolt's spawn 75.35",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 20900,
+      "equals": 1117172531,
+      "within_ms": 8000,
+      "index": 4
+    },
+    {
+      "action": "assert",
+      "label": "Node 20900 keeps the client's arrival radius of 5.5 yd",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 20900,
+      "equals": 1085276160,
+      "within_ms": 8000,
+      "index": 5
+    },
+    {
+      "action": "assert",
+      "label": "Node 20900 ends the chain, NextID 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 20900,
+      "equals": 0,
+      "within_ms": 8000,
+      "index": 6
+    },
+    {
+      "action": "assert",
+      "label": "Baron Revilgaz's node 131 is not patched",
+      "actor": "c",
+      "metric": "server_packets",
+      "opcode": 1726,
+      "row": 131,
+      "equals": 0,
+      "within_ms": 8000
+    }
+  ]
+}

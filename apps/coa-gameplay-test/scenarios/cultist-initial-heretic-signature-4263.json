@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Initial Heretic selection applies its requested Void Shield signature (#4263)",
+  "contract": [
+    "ChrSpecs 40 (Heretic, internal Influence) specifies signature spell 500715 and identity entry 4042. The",
+    "native client specialization upload explicitly includes Void Shield entry 29265 rank 1. It is a paid",
+    "shared-class node (AE 1), so the expected behavior is automatic allocation of the first class point, not a",
+    "free spell or cost override. A fresh level-10 player must receive the requested signature; later",
+    "specialization switches preserve their saved builds."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 25,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "knows_spell",
+      "label": "Void Shield is absent before selecting Heretic",
+      "spell": 500715,
+      "equals": 0
+    },
+    {
+      "action": "specialization",
+      "actor": "c",
+      "id": 40
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "knows_spell",
+      "label": "The initial specialization upload grants its requested Void Shield",
+      "spell": 500715,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "player_setting",
+      "label": "Heretic is active",
+      "source": "core.ascension_active_spec",
+      "index": 0,
+      "equals": 40
+    }
+  ]
+}

@@ -1,1 +1,107 @@
-{"schema": 1, "name": "Reaper: Soul Harvester grants its buff on a killing blow", "contract": "Landing the killing blow on a target that yields experience or honor grants Soul Harvester (804312) for 10 sec.", "timeout_ms": 90000, "players": [{"id": "r", "race": 5, "class": 30, "level": 30}], "creatures": [{"id": "d", "owner": "r", "entry": 299, "level": 30, "distance": 2}], "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0}, "steps": [{"action": "wait", "ms": 3000}, {"action": "learn", "spell": 804311, "actor": "r"}, {"action": "assert", "label": "buff absent before the kill", "actor": "r", "metric": "aura", "spell": 804312, "equals": 0}, {"action": "set_health", "actor": "d", "value": 1}, {"action": "attack", "actor": "r", "target": "d"}, {"action": "assert", "label": "dummy dies", "actor": "d", "metric": "alive", "equals": 0, "within_ms": 8000}, {"action": "assert", "label": "killing blow grants Soul Harvester", "actor": "r", "metric": "aura", "spell": 804312, "equals": 1, "within_ms": 15000}]}
+{
+  "schema": 1,
+  "name": "Reaper: Soul Harvester grants its buff on a killing blow",
+  "contract": [
+    "Soul Harvester 804311 grants 804312 for ten seconds on an experience/honor-yielding killing blow. The buff triggers Runic Energize 359018 each second, whose native amount is 20 internal units, or two displayed Runic Power.",
+    "The killing blow must grant the buff, its periodic interval must be one second, and two ticks must restore Runic Power. Player regeneration is disabled to distinguish the spell from ordinary regeneration."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "r",
+      "race": 5,
+      "class": 30,
+      "level": 30,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "r",
+      "entry": 299,
+      "level": 30,
+      "distance": 2
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "spell": 804311,
+      "actor": "r"
+    },
+    {
+      "action": "assert",
+      "label": "buff absent before the kill",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 804312,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "d",
+      "value": 1
+    },
+    {
+      "action": "attack",
+      "actor": "r",
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "dummy dies",
+      "actor": "d",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "killing blow grants Soul Harvester",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 804312,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "aura_amplitude_ms",
+      "spell": 804312,
+      "effect": 1,
+      "equals": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "r",
+      "power": 6,
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "power",
+      "power": 6,
+      "min": 40,
+      "max": 60,
+      "label": "Soul Harvester restores two displayed Runic Power each second (#4010)"
+    }
+  ]
+}

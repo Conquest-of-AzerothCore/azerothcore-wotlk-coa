@@ -10,6 +10,7 @@
 #include "SpellScript.h"
 #include "WorldSession.h"
 #include <algorithm>
+#include <array>
 #include <limits>
 
 namespace
@@ -20,6 +21,44 @@ constexpr uint32 RANGER_SPELL_FAMILY = 27;
 constexpr uint32 SPELL_RANGER_WILD_STRIKE_OFF_HAND = 560962;
 constexpr int32 WILD_STRIKE_OFF_HAND_COPIED_BASE_POINTS = 318;
 constexpr uint32 RUSTY_SHIV_DAMAGE_DIVISOR = 5;
+constexpr int32 FALCONSTRIKE_WEAPON_BASE_POINTS = 120;
+
+struct FalconstrikeRank
+{
+    uint32 SpellId;
+    int32 MalformedBasePoints;
+};
+
+constexpr std::array<FalconstrikeRank, 7> FALCONSTRIKE_RANKS = {{
+    {806437, 928},
+    {806438, 1143},
+    {806439, 1404},
+    {806440, 1725},
+    {806441, 2119},
+    {806442, 2603},
+    {806443, 3196}
+}};
+
+void ApplyFalconstrikeWeaponContract(SpellInfo* spellInfo)
+{
+    auto const rank = std::find_if(FALCONSTRIKE_RANKS.begin(), FALCONSTRIKE_RANKS.end(),
+        [spellInfo](FalconstrikeRank const& value) { return value.SpellId == spellInfo->Id; });
+    if (rank == FALCONSTRIKE_RANKS.end())
+        return;
+
+    SpellEffectInfo& percent = spellInfo->Effects[EFFECT_2];
+    bool const shape = spellInfo->SpellFamilyName == RANGER_SPELL_FAMILY &&
+        spellInfo->Effects[EFFECT_0].Effect == SPELL_EFFECT_NORMALIZED_WEAPON_DMG &&
+        percent.Effect == SPELL_EFFECT_WEAPON_PERCENT_DAMAGE && percent.DieSides == 1 &&
+        !percent.RealPointsPerLevel && !percent.PointsPerComboPoint;
+    if (shape && percent.BasePoints == FALCONSTRIKE_WEAPON_BASE_POINTS)
+        return;
+
+    if (shape && percent.BasePoints == rank->MalformedBasePoints)
+        percent.BasePoints = FALCONSTRIKE_WEAPON_BASE_POINTS;
+    else
+        LOG_ERROR("coa", "Skipped unexpected Falconstrike weapon record {}", spellInfo->Id);
+}
 
 bool IsRustyShivContract(SpellInfo const* spellInfo)
 {
@@ -179,6 +218,7 @@ void ApplyAscensionRangerDamageContracts(SpellInfo* spellInfo)
         return;
 
     ApplyWildStrikeOffHandContract(spellInfo);
+    ApplyFalconstrikeWeaponContract(spellInfo);
 
     if (spellInfo->Id != SPELL_RANGER_RUSTY_SHIV ||
         spellInfo->SpellFamilyName != RANGER_SPELL_FAMILY)

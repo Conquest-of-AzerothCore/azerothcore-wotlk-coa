@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Pol Hunter sells the White Stallion and Palomino bridles in the Goldshire stable",
+  "contract": [
+    "rev_20261022_71_coa_goldshire_pol_hunter restores Pol Hunter 97920, the Traveling Mount Merchant beside Garion",
+    "Hunter in the Goldshire stable. As on live he sells only White Stallion Bridle 12353 and Palomino Bridle 12354.",
+    "Expected: his shop opens with exactly those two items, each at a money price."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -9421.86, "y": 7.52, "z": 57.97, "o": 1.027},
+  "players": [{"id": "human", "race": 1, "class": 1, "level": 20}],
+  "creatures": [{"id": "pol", "owner": "human", "entry": 97920, "faction": 35, "distance": 2}],
+  "steps": [
+    {"action": "wait", "ms": 500},
+    {"action": "client_packet", "label": "Ask Pol Hunter for his wares", "actor": "human", "opcode": 414,
+     "fields": [{"actor_guid": "pol"}], "consumed": false},
+    {"action": "assert", "label": "His shop opens", "actor": "human", "metric": "vendor_list_packets", "equals": 1,
+     "within_ms": 2000},
+    {"action": "assert", "label": "He sells two mounts", "actor": "human", "metric": "vendor_items", "equals": 2},
+    {"action": "assert", "label": "The White Stallion Bridle is on sale", "actor": "human", "metric": "vendor_price",
+     "item": 12353, "min": 1},
+    {"action": "assert", "label": "The Palomino Bridle is on sale", "actor": "human", "metric": "vendor_price",
+     "item": 12354, "min": 1}
+  ]
+}

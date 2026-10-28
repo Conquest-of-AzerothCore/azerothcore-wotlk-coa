@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "name": "Loot in a scaled dungeon scales down to the looter, never up, even with a level-60 leader whose open world scaling is off",
+  "contract": [
+    "Requires DestinyWeaver.Enable=1, DestinyWeaver.LevelScaling=1 with the default DestinyWeaver.Scaling.DungeonIds,",
+    "CoA.ItemScaling=1 and CoA.ItemScaling.Native=1 with ItemStat.dbc in the data directory. Loot scales only inside",
+    "a scaled dungeon, whatever the leader's open world switch, and only down to the looter's level: an item whose",
+    "own item level is at or below it keeps its authored stats. War Master Voone 9237 drops Flightblade Throwing",
+    "Axe 28972 (blue, item level 57, required level 55, 5 stamina, 8 attack power) at 100%; the client's item key",
+    "for level 30 is 30 + 3 = 33, and its ItemStat.dbc row at 33 requires level 30 and carries 2 stamina and",
+    "2 attack power. The Rake 5807 drops Lionfur Armor 17922",
+    "(green, item level 10, required level 5, 108 armor) at 100%. In Maraudon (map 349) a level-30 member of a group",
+    "led by a level-60 character with the switch off loots the axe at scaling level 33 with that row's stats, and",
+    "Lionfur Armor stays authored rather than rising to 30. The leader's own axe stays authored, because level 60",
+    "is above its item level. Free-for-all loot keeps a roll out of the way."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 349,
+    "x": 1019.69,
+    "y": -458.31,
+    "z": -43.43,
+    "o": 0.31,
+    "ignore_access": true
+  },
+  "players": [
+    { "id": "leader", "race": 1, "class": 1, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 },
+    { "id": "member", "race": 1, "class": 1, "level": 30, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "member_voone", "owner": "member", "entry": 9237, "level": 59, "health": 1, "distance": 2 },
+    { "id": "member_rake", "owner": "member", "entry": 5807, "level": 10, "health": 1, "distance": 3 },
+    { "id": "leader_voone", "owner": "leader", "entry": 9237, "level": 59, "health": 1, "distance": 2 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 2000 },
+    { "action": "level_scaling_packet", "actor": "leader", "value": 0 },
+    { "action": "level_scaling_packet", "actor": "member", "value": 1 },
+    { "action": "group", "actor": "leader", "target": "member", "loot_method": 0 },
+    { "action": "wait", "label": "Let the group's switch reach the member", "ms": 1000 },
+    {
+      "action": "assert",
+      "label": "The member sees War Master Voone at their own level",
+      "actor": "member",
+      "metric": "view_level",
+      "target": "member_voone",
+      "equals": 30,
+      "within_ms": 2000
+    },
+    { "action": "attack", "actor": "member", "target": "member_voone" },
+    { "action": "assert", "actor": "member_voone", "metric": "alive", "equals": 0, "within_ms": 30000 },
+    { "action": "loot_creature", "actor": "member", "target": "member_voone" },
+    {
+      "action": "assert",
+      "label": "The corpse holds the authored Flightblade Throwing Axe",
+      "actor": "member",
+      "metric": "loot_entry",
+      "item": 28972,
+      "equals": 28972
+    },
+    { "action": "loot_slot", "actor": "member", "item": 28972 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the item-level-57 axe scales down to the client key 33 for the member's level 30",
+      "actor": "member",
+      "metric": "carried_item_scaling_level",
+      "item": 28972,
+      "equals": 33,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The axe requires the member's level 30 from its row at 33 instead of 55",
+      "actor": "member",
+      "metric": "carried_item_required_level",
+      "item": 28972,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "The axe carries the row's 2 stamina instead of 5",
+      "actor": "member",
+      "metric": "carried_item_stat",
+      "item": 28972,
+      "stat": 7,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "The axe carries the row's 2 attack power instead of 8",
+      "actor": "member",
+      "metric": "carried_item_stat",
+      "item": 28972,
+      "stat": 38,
+      "equals": 2
+    },
+    { "action": "close_loot", "actor": "member" },
+
+    { "action": "attack", "actor": "member", "target": "member_rake" },
+    { "action": "assert", "actor": "member_rake", "metric": "alive", "equals": 0, "within_ms": 30000 },
+    { "action": "loot_creature", "actor": "member", "target": "member_rake" },
+    {
+      "action": "assert",
+      "label": "The corpse holds the authored Lionfur Armor",
+      "actor": "member",
+      "metric": "loot_entry",
+      "item": 17922,
+      "equals": 17922
+    },
+    { "action": "loot_slot", "actor": "member", "item": 17922 },
+    {
+      "action": "assert",
+      "label": "The item-level-10 armor gets no scaling level rather than rising to 30",
+      "actor": "member",
+      "metric": "carried_item_scaling_level",
+      "item": 17922,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The armor keeps its authored 108 armor",
+      "actor": "member",
+      "metric": "carried_item_armor",
+      "item": 17922,
+      "equals": 108
+    },
+    { "action": "close_loot", "actor": "member" },
+
+    { "action": "attack", "actor": "leader", "target": "leader_voone" },
+    { "action": "assert", "actor": "leader_voone", "metric": "alive", "equals": 0, "within_ms": 30000 },
+    { "action": "loot_creature", "actor": "leader", "target": "leader_voone" },
+    { "action": "loot_slot", "actor": "leader", "item": 28972 },
+    {
+      "action": "assert",
+      "label": "The level-60 leader's axe gets no scaling level",
+      "actor": "leader",
+      "metric": "carried_item_scaling_level",
+      "item": 28972,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The leader's axe keeps its authored required level 55",
+      "actor": "leader",
+      "metric": "carried_item_required_level",
+      "item": 28972,
+      "equals": 55
+    },
+    {
+      "action": "assert",
+      "label": "The leader's axe keeps its authored 5 stamina",
+      "actor": "leader",
+      "metric": "carried_item_stat",
+      "item": 28972,
+      "stat": 7,
+      "equals": 5
+    },
+    { "action": "close_loot", "actor": "leader" }
+  ]
+}

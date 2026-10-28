@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Prestige Mode: dungeon quests and quests that scale with the player can be done again (#5585, #6152)",
+  "contract": "A prestige hands the levelling quests back to the character. On live Ascension dungeon quests were reset by every prestige (#5585), and the Deathknell quest Restless Family Members 1660025 and its follow-up An Unspeakable Secret 1660026, which scale with the player (QuestLevel -1, MinLevel 3), are offered again (#6152). After choosing 'I would like to prestige!' at Chromie 178081, the dungeon quest What Comes Around... 386 (Stockade, QuestInfoID 81), 1660025 and 1660026 are no longer rewarded, like the zone quest Raven Hill 163. The raid quest The Darkstone Tablet 4768 (QuestInfoID 62) stays done.",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -8816.5, "y": 627.0, "z": 94.1, "o": 3.8 },
+  "players": [
+    { "id": "prestiger", "race": 1, "class": 20, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "chromie", "owner": "prestiger", "entry": 178081, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the fixture settle", "ms": 3000 },
+    { "action": "specialization", "actor": "prestiger", "id": 25 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "prepare_quest", "actor": "prestiger", "quest": 163 },
+    { "action": "reward_quest", "actor": "prestiger", "quest": 163 },
+    { "action": "prepare_quest", "actor": "prestiger", "quest": 386 },
+    { "action": "reward_quest", "actor": "prestiger", "quest": 386 },
+    { "action": "prepare_quest", "actor": "prestiger", "quest": 1660025 },
+    { "action": "reward_quest", "actor": "prestiger", "quest": 1660025 },
+    { "action": "prepare_quest", "actor": "prestiger", "quest": 1660026 },
+    { "action": "reward_quest", "actor": "prestiger", "quest": 1660026 },
+    { "action": "prepare_quest", "actor": "prestiger", "quest": 4768 },
+    { "action": "reward_quest", "actor": "prestiger", "quest": 4768 },
+    { "action": "assert", "label": "Raven Hill is done", "actor": "prestiger", "metric": "quest_rewarded", "quest": 163, "equals": 1 },
+    { "action": "assert", "label": "The Stockade quest is done", "actor": "prestiger", "metric": "quest_rewarded", "quest": 386, "equals": 1 },
+    { "action": "assert", "label": "Restless Family Members is done", "actor": "prestiger", "metric": "quest_rewarded", "quest": 1660025, "equals": 1 },
+    { "action": "assert", "label": "An Unspeakable Secret is done", "actor": "prestiger", "metric": "quest_rewarded", "quest": 1660026, "equals": 1 },
+    { "action": "assert", "label": "The raid quest is done", "actor": "prestiger", "metric": "quest_rewarded", "quest": 4768, "equals": 1 },
+
+    { "action": "gossip_hello", "actor": "prestiger", "target": "chromie", "label": "Speak to Chromie" },
+    { "action": "gossip_select", "actor": "prestiger", "option": 0, "label": "I would like to prestige!" },
+    { "action": "assert", "label": "Back to level 1", "actor": "prestiger", "metric": "level", "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "Raven Hill can be done again", "actor": "prestiger", "metric": "quest_rewarded", "quest": 163, "equals": 0 },
+    { "action": "assert", "label": "The dungeon quest can be done again", "actor": "prestiger", "metric": "quest_rewarded", "quest": 386, "equals": 0 },
+    { "action": "assert", "label": "Restless Family Members can be done again", "actor": "prestiger", "metric": "quest_rewarded", "quest": 1660025, "equals": 0 },
+    { "action": "assert", "label": "An Unspeakable Secret can be done again", "actor": "prestiger", "metric": "quest_rewarded", "quest": 1660026, "equals": 0 },
+    { "action": "assert", "label": "The raid quest stays done", "actor": "prestiger", "metric": "quest_rewarded", "quest": 4768, "equals": 1 }
+  ]
+}

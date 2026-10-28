@@ -44,7 +44,12 @@ def main():
             p_value = check_probability(successes, 100, .1)
             print(f'{phase}: {successes}/100 procs, exact binomial p={p_value:.5f}')
         assert values['magic_procs'] == 0
-        assert values['six_tick_damage'] == 6 * (44 * 90 // 100), values['six_tick_damage']
+        base_tick = 43 + 1
+        pvp_tuning_level = min(80, 60) - 10
+        pvp_damage_percent = -11 + int(pvp_tuning_level * -.4) + 1
+        outgoing_tick = base_tick * (100 + pvp_damage_percent) // 100
+        expected_damage = 6 * (outgoing_tick * 90 // 100)
+        assert values['six_tick_damage'] == expected_damage, (values['six_tick_damage'], expected_damage)
         assert all(values['break_initial_'+str(i)] == 1 for i in range(30))
         breaks = sum(values['break_after_'+str(i)] == 0 for i in range(30))
         p_value = check_probability(breaks, 30, .4)

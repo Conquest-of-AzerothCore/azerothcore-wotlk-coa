@@ -1,0 +1,429 @@
+{
+  "schema": 1,
+  "name": "Slimy Solution: the map marks both murloc shores that carry the spittle",
+  "contract": "Quest 17003 'Slimy Solution' is collected with Simple Crystal Vial 157006 from the Murloc Foragers (46) and Lurkers (732) around the lake at Eastvale Lodging Camp and is credited through the kill-credit creature 300220, which has no spawn in the world at all - the credit comes from the spellhit hook rev_20260923_01_coa_elwynn_quests.sql puts on the murlocs. Until rev_20261007_30 the only quest_poi row 17003 had was its turn-in pin (id 0, ObjectiveIndex -1, Tower of Azora), so a player carrying the open quest saw nothing on the world map for the objective (#6754). This case asks the server for 17003's points the way the quest log does - the CMSG_QUEST_POI_QUERY a real client sends and the SMSG_QUEST_POI_QUERY_RESPONSE it answers with - and reads the fields out of the packet itself, so the whole server-to-client path is covered rather than the database rows. The first query is a control for a quest the character does not carry (17002), which must come back with no points at all; the second is 17003, which must answer with its untouched turn-in pin followed by two kill-objective areas (ObjectiveIndex 0) drawn around the west and the east murloc shore in Elwynn Forest (WorldMapAreaId 30). Because the two shores are 450 yd apart with the open lake between them, both areas are asserted corner by corner. The last two steps walk the player onto a real world murloc on each shore and show that the ground the areas cover is where those murlocs stand, which is the only way the objective can be found in game.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9562.33,
+    "y": -722.93,
+    "z": 64.74,
+    "o": 0.82
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 1,
+      "level": 17
+    }
+  ],
+  "steps": [
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 17003 'Slimy Solution' unfinished, the way the reporter did",
+      "actor": "c",
+      "quest": 17003,
+      "complete": false
+    },
+    {
+      "action": "client_packet",
+      "label": "CONTROL: ask the map to mark 17002, a quest this character does not carry",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        { "u32": 1 },
+        { "u32": 17002 }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the answer for 17002 names the quest and carries no points, so the packet being read is this query's own answer",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 17002,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: and 17002 really has zero POIs, so the reading is not off by a whole row",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 17003, exactly what the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        { "u32": 1 },
+        { "u32": 17003 }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 17003's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 17003,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the map now gets three POIs for 17003 - the turn-in pin plus one area per murloc shore",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The turn-in pin is still the first POI, id 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "and still carries ObjectiveIndex -1, the turn-in marker it had before",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "with its single point unchanged at the Tower of Azora (-9562, -723)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the turn-in point's x is still -9562",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294957734,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the turn-in point's y is still -723",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 4294966573,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The second POI is the west murloc shore, id 1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 52,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "it marks the quest's first NPC objective, RequiredNpcOrGo1 300220 (ObjectiveIndex 0)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 56,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on the Eastern Kingdoms map, MapID 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 60,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "and it is drawn on the Elwynn Forest map, WorldMapAreaId 30, the same value the turn-in pin uses",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 64,
+      "index": 0,
+      "equals": 30,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the west area is a rectangle of four corners, so the client fills a blue area instead of pinning one spot",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its north-west corner is x -9990",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 84,
+      "index": 0,
+      "equals": 4294957306,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its north-west corner is y -1030",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 88,
+      "index": 0,
+      "equals": 4294966266,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its south-west corner is x -9990",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 108,
+      "index": 0,
+      "equals": 4294957306,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its south-west corner is y -1260",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 112,
+      "index": 0,
+      "equals": 4294966036,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its south-east corner is x -9770, so the area stops at the lake and not short of the shore",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 100,
+      "index": 0,
+      "equals": 4294957526,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The third POI is the east murloc shore, id 2",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 116,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "it marks the same objective, ObjectiveIndex 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 120,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on MapID 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 124,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "and on Elwynn Forest, WorldMapAreaId 30",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 128,
+      "index": 0,
+      "equals": 30,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the east area is a four-corner rectangle as well",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 144,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its north-west corner is x -9345",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 148,
+      "index": 0,
+      "equals": 4294957951,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its north-west corner is y -1105",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 152,
+      "index": 0,
+      "equals": 4294966191,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its south-east corner is x -8890",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 164,
+      "index": 0,
+      "equals": 4294958406,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its south-east corner is y -1275",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 168,
+      "index": 0,
+      "equals": 4294966021,
+      "within_ms": 4000
+    },
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, the phase every Elwynn murloc spawn lives in (the lane phase hides them)",
+      "actor": "c",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the lake's grids activate",
+      "ms": 2000
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "Walk to the world's Murloc Forager on the west shore (spawn 81203)",
+      "actor": "c",
+      "guid": 81203
+    },
+    {
+      "action": "assert",
+      "label": "The west area is murloc ground: a living Murloc Forager stands within 60 yd of it",
+      "actor": "c",
+      "metric": "nearby_creature_count",
+      "entry": 46,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "Walk to the world's Murloc Forager on the east shore (spawn 81278)",
+      "actor": "c",
+      "guid": 81278
+    },
+    {
+      "action": "assert",
+      "label": "The east area is murloc ground too: another living Murloc Forager within 60 yd",
+      "actor": "c",
+      "metric": "nearby_creature_count",
+      "entry": 46,
+      "min": 1,
+      "within_ms": 10000
+    }
+  ]
+}

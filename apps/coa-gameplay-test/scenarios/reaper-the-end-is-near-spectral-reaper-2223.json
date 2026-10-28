@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "The End Is Near summons a spectral copy of the Reaper that fights its target (#2223)",
+  "contract": [
+    "The End Is Near 680996 reads 'Wraithblade now creates a spectral version of yourself for 12 sec that casts Dirge",
+    "and Murder on enemies'. Its proc casts 707100, which summons creature 850000; that creature had no template, so",
+    "nothing appeared. The live creature cache names 850000 Spectral Reaper on the invisible stalker display; it now",
+    "wears the Reaper's look through Clone Me and casts the Reaper's Dirge and Murder ranks at the Reaper's target.",
+    "Expected: Wraithblade summons one Spectral Reaper wearing the Reaper's display, it attacks the golem and damages",
+    "it while the Reaper stands idle, and it is gone after its 12 s."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "p", "race": 1, "class": 30, "level": 80, "spell_hit_rating": 10000, "melee_hit_rating": 10000,
+     "expertise_rating": 10000, "allow_regeneration": false}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "p", "entry": 36, "level": 80, "health": 10000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 5000},
+    {"action": "learn", "actor": "p", "spell": 197},
+    {"action": "set_skill", "actor": "p", "skill": 172, "value": 400, "maximum": 400},
+    {"action": "add_item", "actor": "p", "item": 12282},
+    {"action": "equip", "actor": "p", "item": 12282, "slot": 15},
+    {"action": "wait", "label": "Let the weapon swap cooldown expire", "ms": 2000},
+    {"action": "learn", "actor": "p", "spell": 680996},
+    {"action": "learn", "actor": "p", "spell": 805258},
+    {"action": "set_power", "actor": "p", "power": 6, "value": 1000},
+    {"action": "cast", "label": "Wraithblade", "actor": "p", "spell": 805258, "target": "dummy"},
+    {"action": "assert", "label": "One Spectral Reaper appears", "actor": "p", "metric": "owned_creature_count",
+     "entry": 850000, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "It wears the Reaper's look", "actor": "p", "metric": "owned_creature_count",
+     "entry": 850000, "owner_display": true, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "It attacks the Reaper's target", "actor": "p", "metric": "owned_creature_victim",
+     "entry": 850000, "target": "dummy", "equals": 1, "within_ms": 3000},
+    {"action": "stop_attack", "label": "The Reaper stands idle", "actor": "p"},
+    {"action": "wait", "ms": 500},
+    {"action": "snapshot", "actor": "dummy", "metric": "health", "save_as": "golem_health"},
+    {"action": "wait", "label": "Let the spectral copy fight alone", "ms": 4000},
+    {"action": "assert", "label": "The spectral copy damages the golem", "actor": "dummy", "metric": "health",
+     "relative_to": "golem_health", "max": -1},
+    {"action": "assert", "label": "The spectral copy leaves after 12 s", "actor": "p", "metric": "owned_creature_count",
+     "entry": 850000, "equals": 0, "within_ms": 10000}
+  ]
+}

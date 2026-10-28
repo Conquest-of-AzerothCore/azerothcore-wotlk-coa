@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Adventure Mode's random aggro pulse waits out its 2-minute recovery",
+  "contract": "Issue #9031. Each Adventure Mode physical difficulty aura carries SPELL_AURA_PERIODIC_TRIGGER_SPELL for Adventurer Mode Random Aggro (888071): at tier 100 (302883) every 15 seconds. 888071 is a threat effect on every enemy within 25 yards with a 120000 ms RecoveryTime in Spell.dbc, and players on live described the pulse as rare. A periodic trigger casts with the spell and category cooldowns ignored, so the recovery is enforced by the spell's own script: after one pulse pulls a passive wolf 12 yards away into combat, the caster's 888071 cooldown runs for 2 minutes, a passive bat summoned 12 yards away on the other side stays out of combat through the five or more periods that tick inside it, and the first period after the recovery pulls the bat in. The pulser's health is raised so the wolf it pulled cannot kill it during the wait.",
+  "timeout_ms": 300000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    { "id": "pulser", "race": 1, "class": 1, "level": 1 }
+  ],
+  "creatures": [
+    { "id": "first_wolf", "owner": "pulser", "entry": 299, "faction": 7, "level": 1, "health": 42, "distance": 12 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "assert", "label": "the passive wolf starts out of combat", "actor": "first_wolf", "metric": "combat",
+      "equals": 0 },
+
+    { "action": "start_challenge", "actor": "pulser", "challenge": 211, "level": 100 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "assert", "label": "tier 100 starts", "actor": "pulser", "metric": "challenge_start_code", "equals": 0 },
+    { "action": "assert", "label": "tier 100 physical difficulty aura", "actor": "pulser", "metric": "aura",
+      "spell": 302883, "equals": 1 },
+    { "action": "set_health", "actor": "pulser", "value": 100000, "maximum": 100000 },
+
+    { "action": "assert", "label": "the first pulse pulls the wolf 12 yards away into combat", "actor": "first_wolf",
+      "metric": "combat", "equals": 1, "within_ms": 20000 },
+    { "action": "assert", "label": "and starts the 2-minute recovery of Adventurer Mode Random Aggro",
+      "actor": "pulser", "metric": "cooldown_ms", "spell": 888071, "min": 100000, "max": 120000 },
+
+    { "action": "summon", "actor": "pulser", "as": "late_bat", "entry": 1512, "distance": -12 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "a passive bat summoned 12 yards away starts out of combat", "actor": "late_bat",
+      "metric": "combat", "equals": 0 },
+    { "action": "wait", "label": "Outlast five tier 100 periods inside the recovery", "ms": 85000 },
+    { "action": "assert", "label": "no pulse inside the recovery pulls the bat into combat", "actor": "late_bat",
+      "metric": "combat", "equals": 0 },
+    { "action": "assert", "label": "the recovery is still running", "actor": "pulser", "metric": "cooldown_ms",
+      "spell": 888071, "min": 1 },
+    { "action": "assert", "label": "the first period after the recovery pulls the bat into combat", "actor": "late_bat",
+      "metric": "combat", "equals": 1, "within_ms": 60000 },
+    { "action": "assert", "label": "and starts the next recovery", "actor": "pulser", "metric": "cooldown_ms",
+      "spell": 888071, "min": 100000, "max": 120000 }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Potion of Experience needs a level 60 on the realm and is only for alts below the account's highest level",
+  "contract": "Potion of Experience (818046) follows Aura of Experience (818059): it is refused, and kept, while no character on the account has reached level 60. For a CoA class character (Resilient Constitution 552011) its tooltip also states: This item can only be used on alt characters who are not the highest level on your account. A level 20 character whose other character is level 30 is refused because nobody on the account is level 60. Once the other character is saved at level 60, the level 20 alt drinks one potion and receives aura 818046. Raised to level 60 itself, the alt is no longer below the account's highest level and is refused again.",
+  "players": [
+    { "id": "alt", "race": 1, "class": 12, "level": 20 },
+    { "id": "main", "race": 1, "class": 1, "level": 30, "account_of": "alt" }
+  ],
+  "steps": [
+    { "action": "relog", "actor": "main" },
+    { "action": "assert", "actor": "alt", "metric": "knows_spell", "spell": 552011, "equals": 1 },
+    { "action": "add_item", "actor": "alt", "item": 818046, "count": 3 },
+    { "action": "use_item", "actor": "alt", "item": 818046, "spell": 818046 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert",
+      "actor": "alt",
+      "metric": "aura",
+      "spell": 818046,
+      "equals": 0,
+      "label": "A higher level 30 character does not unlock the potion without a level 60 on the account"
+    },
+    {
+      "action": "assert",
+      "actor": "alt",
+      "metric": "cast_failure",
+      "spell": 818046,
+      "equals": 27,
+      "label": "The refusal answers SPELL_FAILED_DONT_REPORT beside the requirement text"
+    },
+    { "action": "assert", "actor": "alt", "metric": "item_count", "item": 818046, "equals": 3 },
+    { "action": "set_level", "actor": "main", "value": 60 },
+    { "action": "relog", "actor": "main" },
+    { "action": "use_item", "actor": "alt", "item": 818046, "spell": 818046 },
+    {
+      "action": "assert",
+      "actor": "alt",
+      "metric": "aura",
+      "spell": 818046,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "A saved level 60 character on the account lets the lower alt drink the potion"
+    },
+    { "action": "assert", "actor": "alt", "metric": "item_count", "item": 818046, "equals": 2 },
+    { "action": "set_level", "actor": "alt", "value": 60 },
+    { "action": "use_item", "actor": "alt", "item": 818046, "spell": 818046 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert",
+      "actor": "alt",
+      "metric": "item_count",
+      "item": 818046,
+      "equals": 2,
+      "label": "A character at the account's highest level cannot drink the potion"
+    }
+  ]
+}

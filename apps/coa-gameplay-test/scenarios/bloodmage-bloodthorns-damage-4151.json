@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Bloodthorns deals its 10 base damage scaled by the spec tuning (#4151)",
+  "contract": "#4151: Bloodthorns rank 3 501663 (level 26) names 10 damage in its tooltip but hits for 8. 501663 is SPELL_AURA_DAMAGE_SHIELD with amount 10. Unit::DealDamageShieldDamage passes the amount through SpellPctDamageModsDone, which includes the PvE specialization tuning aura: Fleshweaver 887048 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, BasePoints -1 + DieSides 1 with RealPointsPerLevel -0.66 over levels 10..60, which is -11% at level 28 (Eternal 887049 is also -11%, Sanguine 887046 +5%). 10 x 0.89 = 8.9, dealt as 8. Expected: the base amount stays 10 and the done-damage bonus equals the spec tuning, so 8 is the intended tuned result, not a defect. Passes on main.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "b", "race": 1, "class": 20, "level": 28 }
+  ],
+  "creatures": [
+    { "id": "d", "owner": "b", "entry": 299, "level": 28, "distance": 5, "health": 1000000 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 4000 },
+    { "action": "specialization", "actor": "b", "id": 25 },
+    { "action": "learn", "actor": "b", "spell": 501663 },
+    { "action": "cast", "actor": "b", "spell": 501663, "target": "b" },
+    { "action": "assert", "label": "Bloodthorns is up", "actor": "b", "metric": "aura", "spell": 501663, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "The thorns amount is the tooltip's 10", "actor": "b", "metric": "aura_amount", "spell": 501663, "effect": 0, "equals": 10 },
+    { "action": "assert", "label": "Fleshweaver tuning is -11% at level 28", "actor": "b", "metric": "aura_amount", "spell": 887048, "effect": 0, "equals": -11 },
+    { "action": "assert", "label": "Done damage for Bloodthorns is scaled by 0.89", "actor": "b", "metric": "spell_damage_done", "spell": 501663, "target": "d", "effect": 0, "min": 880, "max": 899 }
+  ]
+}

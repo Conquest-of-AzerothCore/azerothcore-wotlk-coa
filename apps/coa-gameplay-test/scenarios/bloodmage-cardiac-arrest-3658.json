@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "Cardiac Arrest adds a leeching Shadow DoT to Valanar's Vengeance (#3658)",
+  "contract": "Cardiac Arrest 806944: \"Your Valanar's Vengeance now deals an additional 50% of its initial damage dealt over $806946d, healing you for 50% of the damage dealt.\" 806944 is one SPELL_EFFECT_APPLY_AURA with aura 354 (no AuraEffectHandler entry, no HandleProc case), amount 13, TriggerSpell 806946 and ProcFlags 0, and it has no spell_proc row, so the talent does nothing. 806946 is aura 53 SPELL_AURA_PERIODIC_LEECH, Amplitude 500, DurationIndex 39 (2 s, 4 ticks), EffectMultipleValue 0.5 (the 50% heal), BasePoints 0 - the per-tick amount has to be supplied by the caller. Valanar's Vengeance 572795 (SpellFamilyFlags0 0x40000) is the probe, following bloodmage-blood-moon.json: 6 s cast, POWER_HEALTH cost, so fixture health is 4000 and landing windows are 9000 ms. DISCRIMINATING: after the talent, the target carries 806946 from the caster and 806946 deals damage ticks; before it, neither happens. The tooltip's 50% total is the expectation (user decision): the record's amount 13 would be 52% over four ticks (coatavern shows 5 and a 10 s duration), so each of the four ticks carries 12.5% of the Valanar's Vengeance hit and the ticks together deal 50% of it.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "caster", "entry": 36, "level": 1, "health": 1000000, "distance": 25 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "caster", "spell": 572795 },
+    {
+      "action": "assert", "label": "SETUP: the probe's health cost fits inside the 4000 fixture health",
+      "actor": "caster", "metric": "spell_power_cost", "spell": 572795, "max": 3999
+    },
+    { "action": "set_health", "actor": "caster", "value": 4000 },
+    { "action": "snapshot", "actor": "caster", "metric": "spell_damage_count", "spell": 572795, "target": "dummy", "save_as": "control_hits" },
+    { "action": "cast", "actor": "caster", "spell": 572795, "target": "dummy" },
+    {
+      "action": "assert", "label": "SETUP: the control cast lands",
+      "actor": "caster", "metric": "spell_damage_count", "spell": 572795, "target": "dummy",
+      "relative_to": "control_hits", "min": 1, "within_ms": 9000
+    },
+    {
+      "action": "assert", "label": "Control: without the talent no Cardiac Arrest DoT follows",
+      "actor": "caster", "metric": "spell_damage_count", "spell": 806946, "target": "dummy", "equals": 0
+    },
+    { "action": "learn", "actor": "caster", "spell": 806944 },
+    { "action": "assert", "actor": "caster", "metric": "aura", "spell": 806944, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "label": "Let the first cast's global cooldown expire", "ms": 1600 },
+    { "action": "reset_cooldown", "actor": "caster", "spell": 572795 },
+    { "action": "set_health", "actor": "caster", "value": 4000 },
+    { "action": "snapshot", "actor": "caster", "metric": "spell_damage_total", "spell": 572795, "target": "dummy", "save_as": "vv_before" },
+    { "action": "cast", "actor": "caster", "spell": 572795, "target": "dummy" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the hit applies Cardiac Arrest 806946 to the target",
+      "actor": "dummy", "metric": "aura", "spell": 806946, "equals": 1, "within_ms": 9000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Cardiac Arrest ticks damage on the target",
+      "actor": "caster", "metric": "spell_damage_count", "spell": 806946, "target": "dummy",
+      "min": 1, "within_ms": 3000
+    },
+    { "action": "snapshot", "actor": "caster", "metric": "spell_damage_total", "spell": 572795, "target": "dummy", "relative_to": "vv_before", "save_as": "vv_hit" },
+    {
+      "action": "assert", "label": "Four ticks of 12.5% deal 50% of the Valanar's Vengeance hit in total",
+      "actor": "caster", "metric": "spell_damage_total", "spell": 806946, "target": "dummy",
+      "ratio_to": "vv_hit", "min": 0.49, "max": 0.51, "within_ms": 4000
+    }
+  ]
+}

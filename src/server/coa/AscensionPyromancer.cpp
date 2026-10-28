@@ -38,6 +38,10 @@ PyromancerState& State(Player* player)
 }
 bool Named(SpellInfo const* info, uint32 root)
 {
+    if (info && root == 802174 &&
+        std::find(std::begin(PyromancerEchoRanks), std::end(PyromancerEchoRanks), info->Id) !=
+            std::end(PyromancerEchoRanks))
+        return true;
     return info && sSpellMgr->GetFirstSpellInChain(info->Id) == sSpellMgr->GetFirstSpellInChain(root);
 }
 bool Any(SpellInfo const* info, std::initializer_list<uint32> roots)
@@ -119,6 +123,38 @@ uint32 Highest(Player* player, uint32 root)
             sSpellMgr->GetSpellInfo(pair.first)->SpellLevel >= sSpellMgr->GetSpellInfo(result)->SpellLevel)
             result = pair.first;
     return result;
+}
+void SyncActionBars(Player* player)
+{
+    bool changed = false;
+    bool const converted = player->HasAura(520937);
+    uint32 const echo = converted ? Highest(player, 802174) : 0;
+    uint32 fallback = 0;
+    if (!converted)
+        for (auto const& pair : player->GetSpellMap())
+            if (player->HasSpell(pair.first) && Named(sSpellMgr->GetSpellInfo(pair.first), 800792) &&
+                (!fallback ||
+                    sSpellMgr->GetSpellInfo(pair.first)->SpellLevel < sSpellMgr->GetSpellInfo(fallback)->SpellLevel))
+                fallback = pair.first;
+    for (uint8 button = 0; button < MAX_ACTION_BUTTONS; ++button)
+    {
+        ActionButton const* action = player->GetActionButton(button);
+        if (!action || action->GetType() != ACTION_BUTTON_SPELL)
+            continue;
+        uint32 const current = action->GetAction();
+        uint32 desired = current;
+        if (converted && player->HasSpell(current) && Named(sSpellMgr->GetSpellInfo(current), 800792))
+            desired = echo;
+        else if (!converted && fallback &&
+            std::find(std::begin(PyromancerEchoRanks), std::end(PyromancerEchoRanks), current) !=
+                std::end(PyromancerEchoRanks))
+            desired = fallback;
+        if (desired != current && desired && player->HasSpell(desired) &&
+            player->addActionButton(button, desired, ACTION_BUTTON_SPELL))
+            changed = true;
+    }
+    if (changed)
+        player->SendActionButtons(1);
 }
 void Flames(Player* player, uint32 count)
 {
@@ -363,16 +399,20 @@ void Refresh(Player* player)
         player->learnSpell(802117, true);
     if (!player->HasAura(92128))
         player->removeSpell(802117, SPEC_MASK_ALL, true);
+    if (player->HasAura(802117) && player->GetDisplayId() == player->GetNativeDisplayId())
+        player->SetDisplayId(PyromancerDraconicDisplay);
     if (player->HasAura(520937))
         for (uint32 id : PyromancerEchoRanks)
-            if (sSpellMgr->GetSpellInfo(id)->SpellLevel <= player->GetLevel() && !player->HasSpell(id))
-                player->learnSpell(id, true);
+            if ((id == 802174 || sSpellMgr->GetSpellInfo(id)->SpellLevel <= player->GetLevel()) &&
+                !player->HasSpell(id))
+                player->learnSpell(id);
     for (auto const& pair : player->GetSpellMap())
         if (player->HasSpell(pair.first) && Named(sSpellMgr->GetSpellInfo(pair.first), 800792))
             player->SetTemporarySpellReplacement(pair.first, player->HasAura(520937) ? Highest(player, 802174) : 0);
     if (!player->HasAura(520937))
         for (uint32 id : PyromancerEchoRanks)
-            player->removeSpell(id, SPEC_MASK_ALL, true);
+            player->removeSpell(id, SPEC_MASK_ALL, false);
+    SyncActionBars(player);
     if (player->HasAura(300751) && Count(player, EmberAura))
     {
         if (!player->HasAura(807542))
@@ -410,14 +450,37 @@ void StartDash(Player* player)
                    : player->HasUnitMovementFlag(MOVEMENTFLAG_STRAFE_RIGHT) ? -1
                                                                             : 0;
     float angle = forward || strafe ? std::atan2(strafe, forward) : 0;
-    Position end = player->GetPosition();
     float distance = sSpellMgr->GetSpellInfo(801929)->Effects[0].CalcRadius(player);
-    player->MovePositionToFirstCollision(end, distance > 0 ? distance : 15, angle);
+    if (distance <= 0)
+        distance = 15;
+    if (forward || strafe)
+    {
+        float rate = player->GetSpeedRate(MOVE_RUN);
+        float speed = player->GetSpeed(MOVE_RUN);
+        if (speed > 0 && speed < 35.0f)
+        {
+            float surge = rate * 35.0f / speed;
+            state.surgeMs = uint32(1000.0f * distance / 35.0f);
+            state.surgeRate = surge;
+            player->SetSpeed(MOVE_RUN, surge, true);
+        }
+        return;
+    }
+    Position end = player->GetPosition();
+    player->MovePositionToFirstCollision(end, distance, angle);
     player->GetMotionMaster()->MoveCharge(end.GetPositionX(), end.GetPositionY(), end.GetPositionZ(), 35);
 }
 void UpdateDash(Player* player, uint32 diff)
 {
     auto& state = State(player);
+    if (state.surgeMs)
+    {
+        if (player->IsAlive() && player->GetSpeedRate(MOVE_RUN) != state.surgeRate)
+            player->SetSpeed(MOVE_RUN, state.surgeRate, true);
+        state.surgeMs = state.surgeMs > diff ? state.surgeMs - diff : 0;
+        if (!state.surgeMs)
+            player->UpdateSpeed(MOVE_RUN, true);
+    }
     if (!state.dashMs)
         return;
     float dx = player->GetPositionX() - state.dashPrevious.GetPositionX();

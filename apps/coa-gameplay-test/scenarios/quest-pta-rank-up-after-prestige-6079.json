@@ -1,0 +1,221 @@
+{
+  "schema": 1,
+  "name": "Path to Ascension: Prestige tells the client its tutorial state and refused starts get an answer (#6079)",
+  "contract": [
+    "Tutorial 56 (Tutorial.dbc: achievement 87246, quest 1903520 'Path to Ascension: Rank Up Your Spells', level 8) is a tracking quest view: the book's Start Quest button sends CMSG_QUESTGIVER_ACCEPT_QUEST (393) with an empty quest giver, which puts 1903520 in the log and sets core.ascension.tutorial_tracking[56].",
+    "Prestige (quest 580183: 'Your quest log will be wiped') abandons 1903520 but keeps the Path to Ascension claims. The client only learns the claimed list from SMSG_TUTORIAL_REWARDED_LIST (0x6B0, 1712), which was sent at login alone, so after Prestige it kept offering a tutorial the server refused.",
+    "After Prestige the server must resend 0x6B0 and clear the tracking marker whose quest is no longer in the log.",
+    "A Start Quest the server refuses must be answered on SMSG_CLAIM_TUTORIAL_REWARD_RESULT (0x6AF, 1711), the C string PathToAscension.lua shows in UIErrorsFrame: below level 8 the tutorial is not available, and a claimed tutorial reports its reward as already collected. Neither refusal adds the quest.",
+    "The client's Objectives pane is not observable here; it remains an in-game check."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8816.5,
+    "y": 627.0,
+    "z": 94.1,
+    "o": 3.8
+  },
+  "players": [
+    {
+      "id": "prestiger",
+      "race": 1,
+      "class": 20,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "chromie",
+      "owner": "prestiger",
+      "entry": 178081,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login rewards and the tutorial state settle",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "prestiger",
+      "id": 25
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "client_packet",
+      "label": "Start tutorial 56's tracking quest from the book",
+      "actor": "prestiger",
+      "opcode": 393,
+      "fields": [{"u64": 0}, {"u32": 1903520}, {"u32": 0}]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the tracking quest is in the log",
+      "actor": "prestiger",
+      "metric": "quest_status",
+      "quest": 1903520,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: tutorial 56 is tracked",
+      "actor": "prestiger",
+      "metric": "player_setting",
+      "source": "core.ascension.tutorial_tracking",
+      "index": 56,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Rewarded lists sent so far (login)",
+      "actor": "prestiger",
+      "metric": "server_packets",
+      "opcode": 1712,
+      "save_as": "rewarded_lists"
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "prestiger",
+      "target": "chromie"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "prestiger",
+      "option": 0,
+      "label": "I would like to prestige!"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: back to level 1",
+      "actor": "prestiger",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Prestige wiped the tracking quest from the log",
+      "actor": "prestiger",
+      "metric": "quest_status",
+      "quest": 1903520,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Prestige resends the rewarded tutorial list",
+      "actor": "prestiger",
+      "metric": "server_packets",
+      "opcode": 1712,
+      "relative_to": "rewarded_lists",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the tracking marker of the wiped quest is cleared",
+      "actor": "prestiger",
+      "metric": "player_setting",
+      "source": "core.ascension.tutorial_tracking",
+      "index": 56,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Tutorial results sent so far",
+      "actor": "prestiger",
+      "metric": "server_packets",
+      "opcode": 1711,
+      "save_as": "results"
+    },
+    {
+      "action": "client_packet",
+      "label": "Start tutorial 56's quest at level 1",
+      "actor": "prestiger",
+      "opcode": 393,
+      "fields": [{"u64": 0}, {"u32": 1903520}, {"u32": 0}]
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the refused start is answered",
+      "actor": "prestiger",
+      "metric": "server_packets",
+      "opcode": 1711,
+      "relative_to": "results",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "as not available below level 8",
+      "actor": "prestiger",
+      "metric": "server_packet_contains",
+      "opcode": 1711,
+      "text": "not available for your character",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "and the quest stays out of the log",
+      "actor": "prestiger",
+      "metric": "quest_status",
+      "quest": 1903520,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "label": "Level up past the tutorial's level 8",
+      "actor": "prestiger",
+      "value": 10
+    },
+    {
+      "action": "set_player_setting",
+      "label": "Tutorial 56 was claimed in the run before Prestige",
+      "actor": "prestiger",
+      "source": "core.ascension.tutorial_rewards",
+      "index": 56,
+      "value": 1
+    },
+    {
+      "action": "client_packet",
+      "label": "Start the claimed tutorial's quest",
+      "actor": "prestiger",
+      "opcode": 393,
+      "fields": [{"u64": 0}, {"u32": 1903520}, {"u32": 0}]
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the refused start is answered",
+      "actor": "prestiger",
+      "metric": "server_packets",
+      "opcode": 1711,
+      "relative_to": "results",
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "as already collected",
+      "actor": "prestiger",
+      "metric": "server_packet_contains",
+      "opcode": 1711,
+      "text": "already been collected",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "and the quest stays out of the log",
+      "actor": "prestiger",
+      "metric": "quest_status",
+      "quest": 1903520,
+      "equals": 0
+    }
+  ]
+}

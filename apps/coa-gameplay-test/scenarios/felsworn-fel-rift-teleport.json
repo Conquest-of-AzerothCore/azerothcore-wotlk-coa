@@ -1,7 +1,22 @@
 {
   "schema": 1,
   "name": "Fel Rift: Altar of Storms spawns its portal and teleports the caster (#5166, #4185)",
-  "contract": "Fel Rift: Altar of Storms 535603 is a FelswornRifts entry (AscensionFelswornData.h) whose single effect is SPELL_EFFECT_TRANS_DOOR (50) with raw DBC EffectMiscValue[0] 1005760 - not a real gameobject_template entry. AscensionFelsworn::ApplyContracts is meant to rewrite it to the rift's real GO entry (9000147, inserted by rev_20260909_05_felsworn_completion.sql, ScriptName go_ascension_felsworn_rift), which Spell::EffectTransmitted then spawns via sObjectMgr->GetGameObjectTemplate(Effects[0].MiscValue) at TARGET_DEST_CASTER_FRONT. Before the fix, ApplyContracts returned on `info->SpellFamilyName != 20` before ever reaching the rift-patch loop (535603 carries SpellFamilyName 0, confirmed via coa-dbc-viewer), so MiscValue stayed 1005760, no matching gameobject_template existed, and EffectTransmitted spawned nothing - exactly 'no portal produced'. go_ascension_felsworn_rift::OnGossipHello teleports the clicking owner to the rift's FelswornRifts row (map 0, -7616.9, -744.571, 190.288) on a successful click.",
+  "contract": [
+    "Fel Rift: Altar of Storms 535603 is a FelswornRifts entry (AscensionFelswornData.h) whose single effect",
+    "is SPELL_EFFECT_TRANS_DOOR (50) with raw DBC EffectMiscValue[0] 1005760 - not a real gameobject_template",
+    "entry. AscensionFelsworn::ApplyContracts is meant to rewrite it to the rift's real GO entry (9000147,",
+    "inserted by rev_20260909_05_felsworn_completion.sql, ScriptName go_ascension_felsworn_rift), which",
+    "Spell::EffectTransmitted then spawns via sObjectMgr->GetGameObjectTemplate(Effects[0].MiscValue) at",
+    "TARGET_DEST_CASTER_FRONT. Before the fix, ApplyContracts returned on `info->SpellFamilyName != 20`",
+    "before ever reaching the rift-patch loop (535603 carries SpellFamilyName 0, confirmed via",
+    "coa-dbc-viewer), so MiscValue stayed 1005760, no matching gameobject_template existed, and",
+    "EffectTransmitted spawned nothing - exactly 'no portal produced'.",
+    "go_ascension_felsworn_rift::OnGossipHello teleports the clicking owner to the rift's FelswornRifts row",
+    "(map 0, -7616.9, -744.571, 190.288) on a successful click. The original out-of-combat restriction",
+    "remains enabled and is asserted before the normal five-second cast.",
+    "DISCRIMINATING: the cast spawns the rift's own gameobject_template entry (9000147), not the raw DBC",
+    "MiscValue"
+  ],
   "timeout_ms": 90000,
   "players": [
     {
@@ -37,6 +52,22 @@
       "item": 5565
     },
     {
+      "action": "assert",
+      "label": "Fel Rift requires the caster to be out of combat normally",
+      "actor": "felsworn",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "global_cooldown_ms",
+      "spell": 535603,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
       "action": "cast",
       "actor": "felsworn",
       "spell": 535603
@@ -50,7 +81,7 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: the cast spawns the rift's own gameobject_template entry (9000147), not the raw DBC MiscValue",
+      "label": "DISCRIMINATING: the cast spawns the rift's own gameobject_template entry (9000147), not the raw…",
       "actor": "felsworn",
       "metric": "owned_gameobject_count",
       "entry": 9000147,

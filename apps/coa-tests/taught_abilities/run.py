@@ -28,6 +28,25 @@ method = runpy.run_path(str(HERE.parent / "client_compat/run.py"))["method"]
 catalog_text = runpy.run_path(str(HERE.parent / "coa_talent_catalog.py"))["catalog_text"]
 NEW_GRANTS = {804729: 804834, 561069: 801662, 92097: 804019, 92114: 800157,
               92119: 806291, 92131: 520326, 680750: 567524}
+ARCHIVED_NODES = {707717: 707876}
+REPLACEMENT_ROOTS = {
+    (14, 9, 520853, 500028): 500610,
+    (17, 18, 570727, 801059): 802581,
+    (17, 17, 301302, 801016): 804353,
+    (17, 17, 706755, 804883): 707666,
+    (16, 13, 707615, 800227): 802354,
+    (16, 13, 707615, 500040): 801839,
+    (16, 14, 560020, 804020): 807105,
+    (16, 14, 560020, 500040): 804017,
+    (16, 13, 704222, 526362): 704201,
+    (20, 25, 505188, 562720): 680692,
+    (20, 26, 504728, 562720): 801076,
+    (20, 27, 504710, 562720): 562572,
+    (22, 32, 707430, 520175): 801291,
+    (22, 33, 804478, 804418): 561284,
+    (30, 56, 805708, 500376): 572382,
+    (30, 56, 504269, 803985): 807234,
+}
 
 
 def check_data(header, catalog, replacement_header, dbc, trainer):
@@ -37,10 +56,15 @@ def check_data(header, catalog, replacement_header, dbc, trainer):
              if line.startswith("    {")]
     assert entries and len({entry[4] for entry in entries}) == len(entries), "Child ownership must be unique"
     assert not {entry[3] for entry in entries} & {entry[4] for entry in entries}, "Grant callbacks must not cycle"
-    for cls, spec, level, parent, _ in entries if catalog else ():
+    assert {entry[4]: entry[3] for entry in entries if entry[4] in ARCHIVED_NODES} == ARCHIVED_NODES
+    for cls, spec, level, parent, child in entries if catalog else ():
+        archived = child in ARCHIVED_NODES
+        assert not archived or not any(len(node) == 10 and child in node[7:] for node in nodes), child
         assert any(len(node) == 10 and node[1] == cls and node[2] == spec and
-                   node[6] == level and parent in node[7:] for node in nodes), (cls, spec, level, parent)
+                   (node[6] <= level if archived else node[6] == level) and parent in node[7:]
+                   for node in nodes), (cls, spec, level, parent)
     replacements = []
+    replacement_roots = {}
     for cls, spec, parent, original, body in re.findall(
             r"\{ (\d+), (\d+), (\d+), (\d+), \{\{(.*?)\}\} \}", replacement_header, re.S):
         ranks = [tuple(map(int, pair)) for pair in re.findall(r"\{ (\d+), (\d+) \}", body)]
@@ -48,8 +72,11 @@ def check_data(header, catalog, replacement_header, dbc, trainer):
         assert not catalog or any(len(node) == 10 and node[1] == cls and node[2] == spec and parent in node[7:]
                                   for node in nodes)
         assert ranks and ranks[0][1] == 0 and sorted(ranks, key=lambda rank: rank[1]) == ranks
+        key = cls, spec, parent, original
+        assert key not in replacement_roots, f"Duplicate replacement route: {key}"
+        replacement_roots[key] = ranks[0][0]
         replacements.append((cls, parent, original, ranks))
-    assert len(replacements) == 13
+    assert replacement_roots == REPLACEMENT_ROOTS, (replacement_roots, REPLACEMENT_ROOTS)
     children = {spell for _, _, _, ranks in replacements for spell, _ in ranks}
     assert not children & {value for _, parent, original, _ in replacements for value in (parent, original)}
     assert not children & {entry[4] for entry in entries}, "Replacement and taught ownership must be disjoint"
@@ -149,6 +176,8 @@ def main():
         ("HOOKS", "\n".join(method(service, signature).replace(" override", "") for signature in (
             "void OnPlayerLearnSpell(", "void OnPlayerForgotSpell(", "void OnPlayerAfterSpecSlotChanged("))),
         ("PLAYER", "\n".join((add, remove, method(player, "void Player::learnSpell("),
+            method(player, "void Player::learnSpellWithoutAnnouncement("),
+            method(player, "void Player::_learnSpell("),
             method(player, "bool Player::HasSpell("), method(player, "bool Player::HasActiveSpell("),
             method(storage, "void Player::_SaveSpells("), method(player, "void Player::SetTemporarySpellReplacement("),
             method(player, "uint32 Player::GetTemporarySpellReplacement(")))),

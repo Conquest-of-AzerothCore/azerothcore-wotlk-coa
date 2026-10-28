@@ -4,6 +4,7 @@
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
+#include "SpellAuraEffects.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
@@ -17,6 +18,9 @@ constexpr uint32 SPELL_RUNIC_BRAND_MARK = 712323;
 constexpr uint32 SPELL_RUNIC_EXPLOSION = 712324;
 constexpr uint32 SPELL_GENESIS = 500501;
 constexpr uint32 SPELL_GENESIS_DAMAGE = 500502;
+constexpr uint32 SPELL_FRIGID_FUSION = 803225;
+constexpr uint32 SPELL_FRIGID_FUSION_DAMAGE = 572338;
+constexpr uint32 SPELL_FRIGID_ELEMENTS = 707654;
 constexpr uint32 SPELL_FIRE_ENGRAVING = 653211;
 constexpr uint32 SPELL_FIREBRAND = 653210;
 constexpr uint32 SPELL_WATER_ENGRAVING = 653214;
@@ -177,8 +181,9 @@ public:
     {
         if (!damage || !victim || attacker == victim || !IsRunemaster(attacker))
             return;
-        if (Aura* genesis = victim->GetAura(SPELL_GENESIS, attacker->GetGUID()))
-            genesis->SetScriptValue(SPELL_GENESIS, genesis->GetScriptValue(SPELL_GENESIS) + damage);
+        for (uint32 spell : {SPELL_GENESIS, SPELL_FRIGID_FUSION})
+            if (Aura* accumulator = victim->GetAura(spell, attacker->GetGUID()))
+                accumulator->SetScriptValue(spell, accumulator->GetScriptValue(spell) + damage);
     }
 };
 
@@ -208,6 +213,38 @@ class aura_ascension_runemaster_genesis : public AuraScript
     void Register() override
     {
         AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_runemaster_genesis::Unleash, EFFECT_0,
+            SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
+class aura_ascension_runemaster_frigid_fusion : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_runemaster_frigid_fusion);
+
+    bool Validate(SpellInfo const*) override
+    {
+        return ValidateSpellInfo({SPELL_FRIGID_FUSION_DAMAGE, SPELL_FRIGID_ELEMENTS});
+    }
+
+    void Release(AuraEffect const*, AuraEffectHandleModes)
+    {
+        Unit* caster = GetCaster();
+        Unit* target = GetTarget();
+        if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE || !IsRunemaster(caster) ||
+            !caster->IsAlive() || !target->IsAlive())
+            return;
+        int32 percent = GetSpellInfo()->Effects[EFFECT_1].MiscValueB;
+        if (AuraEffect const* elements = caster->GetAuraEffect(SPELL_FRIGID_ELEMENTS, EFFECT_2))
+            percent += elements->GetAmount();
+        uint64 const amount = GetAura()->GetScriptValue(SPELL_FRIGID_FUSION) * std::clamp(percent, 0, 100) / 100;
+        if (amount)
+            caster->CastCustomSpell(SPELL_FRIGID_FUSION_DAMAGE, SPELLVALUE_BASE_POINT0,
+                int32(std::min<uint64>(amount, std::numeric_limits<int32>::max())), target, TRIGGERED_FULL_MASK);
+    }
+
+    void Register() override
+    {
+        AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_runemaster_frigid_fusion::Release, EFFECT_0,
             SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
     }
 };
@@ -253,6 +290,23 @@ void ApplyGenesisContracts(SpellInfo* info)
         info->Effects[EFFECT_0].BonusMultiplier = 0.0f;
     }
 }
+
+void ApplyFrigidFusionContracts(SpellInfo* info)
+{
+    SpellEffectInfo const& fusion = info->Effects[EFFECT_0];
+    SpellEffectInfo& accumulation = info->Effects[EFFECT_1];
+    if (info->Id == SPELL_FRIGID_FUSION && accumulation.IsAura(SPELL_AURA_SCHOOL_ABSORB) &&
+        accumulation.MiscValueB == 20 && fusion.IsAura(SPELL_AURA_DUMMY) &&
+        fusion.TriggerSpell == SPELL_FRIGID_FUSION_DAMAGE)
+        accumulation.ApplyAuraName = SPELL_AURA_DUMMY;
+
+    if (info->Id == SPELL_FRIGID_FUSION_DAMAGE && info->Effects[EFFECT_0].Effect == SPELL_EFFECT_SCHOOL_DAMAGE)
+    {
+        info->AttributesEx3 |= SPELL_ATTR3_IGNORE_CASTER_MODIFIERS;
+        info->AscensionInheritsResolvedAmount = true;
+        info->Effects[EFFECT_0].BonusMultiplier = 0.0f;
+    }
+}
 }
 
 void TriggerRunemasterWeaponEngravings(Unit* caster, Unit* target)
@@ -268,6 +322,12 @@ void ApplyAscensionRunemasterBrandContracts(SpellInfo* info)
         return;
 
     ApplyGenesisContracts(info);
+    ApplyFrigidFusionContracts(info);
+
+    SpellEffectInfo& fistBonus = info->Effects[EFFECT_1];
+    if (info->Id == SPELL_FIRE_ENGRAVING && fistBonus.IsAura(SPELL_AURA_ADD_PCT_MODIFIER) &&
+        fistBonus.MiscValue == SPELLMOD_DAMAGE && !fistBonus.SpellClassMask)
+        fistBonus.SpellClassMask = flag96(0, 0, 0x00008000);
 
     SpellEffectInfo& effect = info->Effects[EFFECT_0];
     if (info->Id == SPELL_RUNIC_BRAND_MARK && !info->ProcFlags && !info->ProcCharges && !info->StackAmount &&
@@ -293,5 +353,6 @@ void AddAscensionRunemasterBrandScripts()
     RegisterSpellScript(spell_ascension_runemaster_brand_runeblade);
     new runemaster_genesis_accumulation();
     RegisterSpellScript(aura_ascension_runemaster_genesis);
+    RegisterSpellScript(aura_ascension_runemaster_frigid_fusion);
     RegisterSpellScript(spell_ascension_runemaster_genesis_damage);
 }

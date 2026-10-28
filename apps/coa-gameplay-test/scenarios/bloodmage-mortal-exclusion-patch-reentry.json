@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "name": "A same-session world-entry notice inside the resend cooldown is still answered (#5737, #6394)",
+  "contract": [
+    "The client keeps the server's SMSG_PATCH_SPELL rows only for the world entry that received them, so",
+    "every world entry - the first, a loading screen and a reload - has to be answered with the patch stream.",
+    "The stream is sent from the collection queue when the client's CMSG_EXTENSION_INITIALIZED (0x561)",
+    "world-entry notice is handled, and a second notice inside the resend cooldown is throttled so one entry",
+    "cannot flood the client with the whole row set. Throttling has to defer that entry's stream, not discard",
+    "it: the first stream erases the display patch service's resend timer, so a throttled notice that only",
+    "records the cooldown leaves the late entry without its rows until the next relog and the client falls",
+    "back to its own Spell.dbc. Unlike the relog scenario this one never leaves the session, so a logout",
+    "cannot clear the cooldown state in between. This scenario waits for the first world entry's stream,",
+    "snapshots its row count for spell 500125, sends the world-entry notice again inside the cooldown and",
+    "asserts the count grows by one more row. Expected before: the throttled notice is consumed, nothing",
+    "retries and the count never grows. Expected after: the throttled notice is answered once the cooldown",
+    "expires and the late world entry receives the Mortal Form row again."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 12,
+      "level": 32
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the first world entry and its patch stream settle",
+      "ms": 7000
+    },
+    {
+      "action": "snapshot",
+      "label": "Record the first world entry's row count inside the cooldown window",
+      "actor": "bloodmage",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 500125,
+      "save_as": "first_entry_rows"
+    },
+    {
+      "action": "client_packet",
+      "actor": "bloodmage",
+      "opcode": 1377
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the throttled re-entry is still answered with one more row",
+      "actor": "bloodmage",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 500125,
+      "relative_to": "first_entry_rows",
+      "min": 1,
+      "within_ms": 25000
+    }
+  ]
+}

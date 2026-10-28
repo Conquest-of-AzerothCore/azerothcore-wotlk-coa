@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "name": "A swapped button survives a real relog (#5469)",
+  "contract": [
+    "A Sanguine Bloodmage's Transgression talent 504728 swaps Blood Curse 562720 for Transgression 801076, a",
+    "temporary spell that is never saved. A button holding Transgression was written to character_action as 801076,",
+    "which _LoadActions refused at the next login and deleted. Expected: after a real logout and login through the",
+    "native paths, the button comes back and Transgression stands in for Blood Curse again."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bm",
+      "race": 1,
+      "class": 20,
+      "level": 16
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login state settle",
+      "ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "actor": "bm",
+      "opcode": 618,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "bm"
+        }
+      ],
+      "label": "Initialize native advancement"
+    },
+    {
+      "action": "specialization",
+      "label": "Choose Sanguine",
+      "actor": "bm",
+      "id": 26
+    },
+    {
+      "action": "learn",
+      "actor": "bm",
+      "spell": 562720
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "bm",
+      "entry": 29543,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "bm",
+      "entry": 4025,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Buy Transgression",
+      "actor": "bm",
+      "entry": 31175,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Transgression replaces Blood Curse",
+      "actor": "bm",
+      "metric": "temporary_spell_replacement",
+      "spell": 562720,
+      "equals": 801076,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_action_button",
+      "actor": "bm",
+      "button": 61,
+      "spell": 801076
+    },
+    {
+      "action": "relog",
+      "actor": "bm"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The button survives the relog",
+      "actor": "bm",
+      "metric": "action_button",
+      "button": 61,
+      "equals": 562720,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Transgression stands in for Blood Curse again",
+      "actor": "bm",
+      "metric": "temporary_spell_replacement",
+      "spell": 562720,
+      "equals": 801076,
+      "within_ms": 3000
+    }
+  ]
+}

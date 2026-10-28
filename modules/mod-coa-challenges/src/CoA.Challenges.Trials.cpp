@@ -790,6 +790,15 @@ namespace CoAChallenges
         if (trialID.empty())
             return;
 
+        std::set<uint32> const active = ActiveChallenges(guid);
+        if ((active.contains(211) || active.contains(425)) && AdventureModeChangeBlocked(player))
+        {
+            SendActiveTrial(player, GetActiveCustomTrial(guid));
+            SendActiveList(player);
+            SendCriteriaState(player);
+            return;
+        }
+
         uint32 ownerGuid = TrialOwnerGuid(trialID);
         std::string eTrialId = trialID;
         CharacterDatabase.EscapeString(eTrialId);

@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "name": "Ranger waterskins share the potion-sickness pool with potions (#6911)",
+  "contract": "Crude Waterskin 10521 (spell 800269) and Minor Healing Potion 118 (spell 439) both declare item category 5004 with a 60s cooldown, and the client enforces that pool across spell families. Using a potion must put the waterskin spell on ~60s server cooldown and block waterskin use; using a waterskin must put potion spells on ~60s and block potion use. Potion 441 cross-lock is the working reference. Each direction runs on a fresh actor so no waits are needed.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "ranger1",
+      "race": 1,
+      "class": 21,
+      "level": 20
+    },
+    {
+      "id": "ranger2",
+      "race": 1,
+      "class": 21,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "settle",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "ranger1",
+      "item": 118,
+      "count": 2
+    },
+    {
+      "action": "add_item",
+      "actor": "ranger1",
+      "item": 10521,
+      "count": 2
+    },
+    {
+      "action": "add_item",
+      "actor": "ranger2",
+      "item": 10521,
+      "count": 2
+    },
+    {
+      "action": "add_item",
+      "actor": "ranger2",
+      "item": 118,
+      "count": 2
+    },
+    {
+      "action": "use_item",
+      "actor": "ranger1",
+      "item": 118,
+      "spell": 439
+    },
+    {
+      "action": "assert",
+      "label": "REF: potion locks other potion spell 441",
+      "actor": "ranger1",
+      "metric": "cooldown_ms",
+      "spell": 441,
+      "min": 55000,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DIR-B: potion locks waterskin spell 800269",
+      "actor": "ranger1",
+      "metric": "cooldown_ms",
+      "spell": 800269,
+      "min": 55000,
+      "within_ms": 5000
+    },
+    {
+      "action": "use_item",
+      "actor": "ranger1",
+      "item": 10521,
+      "spell": 800269
+    },
+    {
+      "action": "assert",
+      "label": "DIR-B: waterskin unusable during potion lock",
+      "actor": "ranger1",
+      "metric": "cast_failure",
+      "spell": 800269,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "use_item",
+      "actor": "ranger2",
+      "item": 10521,
+      "spell": 800269
+    },
+    {
+      "action": "assert",
+      "label": "SELF: waterskin locks itself",
+      "actor": "ranger2",
+      "metric": "cooldown_ms",
+      "spell": 800269,
+      "min": 55000,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DIR-A: waterskin locks potion spell 439",
+      "actor": "ranger2",
+      "metric": "cooldown_ms",
+      "spell": 439,
+      "min": 55000,
+      "within_ms": 5000
+    },
+    {
+      "action": "use_item",
+      "actor": "ranger2",
+      "item": 118,
+      "spell": 439
+    },
+    {
+      "action": "assert",
+      "label": "DIR-A: potion unusable during waterskin lock",
+      "actor": "ranger2",
+      "metric": "cast_failure",
+      "spell": 439,
+      "min": 1,
+      "within_ms": 5000
+    }
+  ]
+}

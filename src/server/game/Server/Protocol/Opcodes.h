@@ -1359,6 +1359,7 @@ enum Opcodes : uint16
     // tracked objective; supplies the type name + values the 0x59A handler
     // resolves by typeIdx. Handler RVA 0x139CD0.
     SMSG_COA_CHALLENGE_REQUIREMENT                  = 0x5B6,
+    SMSG_COA_PATCH_CHALLENGE_REQUIREMENT_TYPE       = 0x5BC,
     SMSG_COA_CHALLENGE_SYNC_REQUEST                 = 0x59B,
     CMSG_COA_SYNC_RESPONSE                          = 0x59C,
     CMSG_COA_SAVE_TRIAL                             = 0x5A7,
@@ -1422,6 +1423,7 @@ enum Opcodes : uint16
     SMSG_QUERY_INSTANCE_BINDS_RESULT                = 0x6FE,
     // Reset Instances list entry (C_LootLockout.ResetInstanceDifficulty(), u32 map, u8 difficulty).
     CMSG_RESET_INSTANCE                             = 0x58C,
+    CMSG_COA_SET_DUNGEON_DIFFICULTY                  = 0x773,
     // Spell Activation Overlay (the "proc glow" the client paints on the
     // action button of the marked spell). Client handlers: 0x9B1 -> 0x10235A90
     // (fires Lua SPELL_ACTIVATION_SHOW), 0x9B2 -> 0x10235840 (SPELL_ACTIVATION_HIDE).

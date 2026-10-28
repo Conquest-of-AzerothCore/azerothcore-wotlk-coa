@@ -66,7 +66,7 @@ class aura_ascension_starcaller_event : public AuraScript
                 return false;
             }
         }
-        if (!outgoing || (!damage && !healing))
+        if (!outgoing || (!damage && !healing && !(id == 504001 && criticalHeal(e, info))))
             return false;
         switch (id)
         {
@@ -122,8 +122,7 @@ class aura_ascension_starcaller_event : public AuraScript
     }
     bool criticalHeal(ProcEventInfo& e, SpellInfo const* info)
     {
-        return (e.GetHitMask() & PROC_HIT_CRITICAL) && e.GetHealInfo() && e.GetHealInfo()->GetEffectiveHeal() && info &&
-               info->Id == 801990;
+        return (e.GetHitMask() & PROC_HIT_CRITICAL) && e.GetHealInfo() && info && info->Id == 801990;
     }
     void Proc(ProcEventInfo& e)
     {

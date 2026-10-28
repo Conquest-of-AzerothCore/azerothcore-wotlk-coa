@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "name": "Huntress Shot Lunar Eclipse line promises 2 additional Scattered Stars (#7527)",
+  "contract": "#7527: Moon Priest 92134 reads 'Huntress Shot: Applies 2 additional Scattered Stars' and the server applies Stars(1) plus Stars(2) while Lunar Eclipse 800386 is active (3 total, reporter-verified), but every Huntress Shot rank's own DBC line reads 'Lunar Eclipse: Applies an additional Scattered Star' (singular). The shipped starcaller-moon-priest-huntress-shot-stars.json (#345) pins the 1-without / 3-within-eclipse mechanic and explicitly leaves the singular/plural conflict unresolved; this scenario resolves the text half. Fix: rev_20261018_35 republishes all five ranks (680220/680586/680587/680588/680589) through coa_client_spell_description with 'Applies 2 additional Scattered Stars'. STREAM asserts fail pre-fix (rows absent, stale singular present); the Soulrend 573316 control proves the patch stream itself is alive.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "star",
+      "race": 1,
+      "class": 26,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI, level scaling and the login patch stream settle",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Huntress Shot rank 1 (680220) reaches the client with the 2-star line",
+      "actor": "star",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 680220,
+      "text": "2 additional",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Huntress Shot rank 2 (680586) reaches the client with the 2-star line",
+      "actor": "star",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 680586,
+      "text": "2 additional",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Huntress Shot rank 3 (680587) reaches the client with the 2-star line",
+      "actor": "star",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 680587,
+      "text": "2 additional",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Huntress Shot rank 4 (680588) reaches the client with the 2-star line",
+      "actor": "star",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 680588,
+      "text": "2 additional",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Huntress Shot max rank (680589) reaches the client with the 2-star line",
+      "actor": "star",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 680589,
+      "text": "2 additional",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: the max rank no longer carries the stale singular line",
+      "actor": "star",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 680589,
+      "text": "Applies an additional",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the shared description table still streams Soulrend's own requirement line",
+      "actor": "star",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 573316,
+      "text": "Requires Soul Infusion",
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

@@ -1,0 +1,646 @@
+{
+  "schema": 1,
+  "name": "The Nature of Freedom and Stay a While: the map marks their objectives in Tirisfal Glades",
+  "contract": "CoA-added quests showed only their turn-in pin on the world map while in progress. rev_20261018_40_coa_quest_objective_map_areas.sql gives 34 of them an area per objective. This case sends the CMSG_QUEST_POI_QUERY a real client sends for each quest in the log and reads SMSG_QUEST_POI_QUERY_RESPONSE: The Nature of Freedom (254064) must answer with its turn-in pin and five objective areas (ObjectiveIndex 0 skeletons, 1 zombies in two areas, 2 banshees, 3 Mallek the Tormented), and Stay a While (1660054) with its turn-in pin on Tirisfal Glades (WorldMapAreaId 20, not 22) and an area on Dark Priestess Ashara. A control query for 17003, which the character does not carry, must come back empty.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": 2250.0,
+    "y": 280.0,
+    "z": 34.0,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 5,
+      "class": 1,
+      "level": 8
+    }
+  ],
+  "steps": [
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 254064 'The Nature of Freedom' unfinished",
+      "actor": "c",
+      "quest": 254064,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 1660054 'Stay a While' unfinished",
+      "actor": "c",
+      "quest": 1660054,
+      "complete": false
+    },
+    {
+      "action": "client_packet",
+      "label": "CONTROL: ask the map to mark 17003, a quest this character does not carry",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 17003
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the answer names 17003, so the packet being read is this query's own answer",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 17003,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a quest outside the log gets no POIs",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 254064 'The Nature of Freedom', as the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 254064
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 254064's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 254064,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 254064 answers with 6 POIs, the turn-in pin and five objective areas",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 6,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 0 is the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 0 carries ObjectiveIndex -1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 0 has 1 point",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 1 follows",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 52,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 254064 POI id 1 marks the skeletons around Agamand Mills (ObjectiveIndex 0)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 56,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 1 is drawn on WorldMapAreaId 20 (Tirisfal Glades)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 64,
+      "index": 0,
+      "equals": 20,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 1 has 13 points",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "index": 0,
+      "equals": 13,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 1 first point x 2490",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 84,
+      "index": 0,
+      "equals": 2490,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 1 first point y 826",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 88,
+      "index": 0,
+      "equals": 826,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 2 follows",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 188,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 254064 POI id 2 marks the zombies east of the Mills (ObjectiveIndex 1)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 192,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 2 is drawn on WorldMapAreaId 20 (Tirisfal Glades)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 200,
+      "index": 0,
+      "equals": 20,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 2 has 6 points",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 216,
+      "index": 0,
+      "equals": 6,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 2 first point x 2948",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 220,
+      "index": 0,
+      "equals": 2948,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 2 first point y 756",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 224,
+      "index": 0,
+      "equals": 756,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 3 follows",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 268,
+      "index": 0,
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 254064 POI id 3 marks the zombies south of the Mills (ObjectiveIndex 1)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 272,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 3 is drawn on WorldMapAreaId 20 (Tirisfal Glades)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 280,
+      "index": 0,
+      "equals": 20,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 3 has 6 points",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 296,
+      "index": 0,
+      "equals": 6,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 3 first point x 2825",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 300,
+      "index": 0,
+      "equals": 2825,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 3 first point y 717",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 304,
+      "index": 0,
+      "equals": 717,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 4 follows",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 348,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 254064 POI id 4 marks the banshees (ObjectiveIndex 2)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 352,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 4 is drawn on WorldMapAreaId 20 (Tirisfal Glades)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 360,
+      "index": 0,
+      "equals": 20,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 4 has 6 points",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 376,
+      "index": 0,
+      "equals": 6,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 4 first point x 2879",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 380,
+      "index": 0,
+      "equals": 2879,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 4 first point y 553",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 384,
+      "index": 0,
+      "equals": 553,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 5 follows",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 428,
+      "index": 0,
+      "equals": 5,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 254064 POI id 5 marks Mallek the Tormented (ObjectiveIndex 3)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 432,
+      "index": 0,
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 5 is drawn on WorldMapAreaId 20 (Tirisfal Glades)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 440,
+      "index": 0,
+      "equals": 20,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 5 has 4 points",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 456,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 5 first point x 2794",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 460,
+      "index": 0,
+      "equals": 2794,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254064: POI id 5 first point y 733",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 464,
+      "index": 0,
+      "equals": 733,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 1660054 'Stay a While'",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 1660054
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 1660054's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 1660054,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 1660054 answers with 2 POIs, the turn-in pin and Ashara's sermon",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660054: POI id 0 carries ObjectiveIndex -1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 1660054 turn-in pin is drawn on WorldMapAreaId 20 (Tirisfal Glades), not 22",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 20,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660054: POI id 1 follows",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 52,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660054: POI id 1 marks the sermon (ObjectiveIndex 0)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 56,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660054: POI id 1 is drawn on WorldMapAreaId 20",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 64,
+      "index": 0,
+      "equals": 20,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660054: POI id 1 has 4 points",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660054: POI id 1 first point x 2213 (Dark Priestess Ashara)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 84,
+      "index": 0,
+      "equals": 2213,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660054: POI id 1 first point y 353 (Dark Priestess Ashara)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 88,
+      "index": 0,
+      "equals": 353,
+      "within_ms": 4000
+    }
+  ]
+}

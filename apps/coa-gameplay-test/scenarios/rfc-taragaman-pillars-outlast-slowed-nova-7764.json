@@ -1,0 +1,178 @@
+{
+  "schema": 1,
+  "name": "Ragefire Chasm Normal: Taragaman's pillars stand until a slowed Massive Fire Nova lands (#7764)",
+  "contract": [
+    "Taragaman the Hungerer (11520) starts Massive Fire Nova (2102516, 6 s cast, magic) 7 s after raising the",
+    "Rumbling Earth pillars (663030), and cast slows on him lengthen it (#7764). The pillars despawned 15 s after",
+    "they rose, so a nova slowed past 8 s landed with no cover left. Here Taragaman slows his own casting with",
+    "Curse of Sloth (901801, -50% spell haste); a control requires the started nova to have more than 8.5 s left,",
+    "so it lands more than 15.5 s after the pillars rose. At least one pillar must still stand when it lands, and",
+    "the pillars crumble within a few seconds after it. It does not check damage or line-of-sight cover."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 389,
+    "x": -0.05,
+    "y": -23.92,
+    "z": -20.59,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 2,
+      "class": 1,
+      "level": 18,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "hero",
+      "entry": 11520,
+      "level": 16,
+      "health": 400000,
+      "reaction": 2,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Ragefire Chasm",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 389
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the instance is Normal",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no pillar stands before the fight",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 663030,
+      "equals": 0
+    },
+    {
+      "action": "attack",
+      "label": "Engage Taragaman the Hungerer",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Taragaman fights the hero",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Taragaman raises three Rumbling Earth pillars on Normal",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 663030,
+      "equals": 3,
+      "within_ms": 25000
+    },
+    {
+      "action": "cast",
+      "label": "Curse of Sloth slows Taragaman's casting",
+      "actor": "boss",
+      "spell": 901801
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Curse of Sloth is on Taragaman",
+      "actor": "boss",
+      "metric": "aura",
+      "spell": 901801,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "No Massive Fire Nova was cast before the pillars stood",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11520,
+      "spell": 2102516,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the slowed Massive Fire Nova starts with more than 8.5 s to go",
+      "actor": "boss",
+      "metric": "cast_remaining_ms",
+      "spell": 2102516,
+      "min": 8500,
+      "within_ms": 9000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "assert",
+      "label": "The slowed Massive Fire Nova lands",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11520,
+      "spell": 2102516,
+      "min": 1,
+      "within_ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "The pillars still stand when the slowed nova goes off",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 663030,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The pillars crumble after the nova lands",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 663030,
+      "equals": 0,
+      "within_ms": 4000
+    }
+  ]
+}

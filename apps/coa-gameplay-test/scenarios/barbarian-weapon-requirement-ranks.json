@@ -1,7 +1,19 @@
 {
   "schema": 1,
   "name": "Barbarian: every Brutal Swing and Decapitate rank accepts a one-handed weapon (#5124, #5135)",
-  "contract": "Brutal Swing rank 2 (500996) and Decapitate rank 2 (806905) carry an EquippedItemInventoryTypeMask that their own EquippedItemSubClassMask contradicts: the subclass list admits one-handed axes, maces, swords, fists, daggers and spears, but the slot mask accepts only a two-handed weapon. A Barbarian wielding a one-handed weapon therefore gets SPELL_FAILED_EQUIPPED_ITEM_CLASS (29) from rank 2 onwards while rank 1 (500913, 804414) succeeds. Every rank of both chains must accept the same one-handed weapon, and every rank must still refuse to cast with no weapon equipped. Decapitate is only usable on enemies below 35% health (TargetAuraState, checked before the weapon requirement), so both targets are lowered to 30% before any Decapitate cast.",
+  "contract": [
+    "Brutal Swing rank 2 (500996) and Decapitate rank 2 (806905) carry an EquippedItemInventoryTypeMask that",
+    "their own EquippedItemSubClassMask contradicts: the subclass list admits one-handed axes, maces, swords,",
+    "fists, daggers and spears, but the slot mask accepts only a two-handed weapon. A Barbarian wielding a",
+    "one-handed weapon therefore gets SPELL_FAILED_EQUIPPED_ITEM_CLASS (29) from rank 2 onwards while rank 1",
+    "(500913, 804414) succeeds. Every rank of both chains must accept the same one-handed weapon, and every",
+    "rank must still refuse to cast with no weapon equipped. Decapitate is only usable on enemies below 35%",
+    "health (TargetAuraState, checked before the weapon requirement), so both targets are lowered to 30% before",
+    "any Decapitate cast. Each lower-rank control casts before learning its replacing higher rank; the native",
+    "spellbook deactivates lower ranks when a higher rank is learned. Brutal Swing is an authored on-next-swing",
+    "ability: each accepted queue executes on a real melee attack before the cast-count check. The explicit",
+    "flat spawn faces the +X target."
+  ],
   "timeout_ms": 120000,
   "players": [
     {
@@ -50,6 +62,12 @@
       "item": 25
     },
     {
+      "action": "learn",
+      "actor": "onehand",
+      "spell": 201,
+      "label": "Prepare the sword proficiency before equipping the one-handed fixture"
+    },
+    {
       "action": "equip",
       "actor": "onehand",
       "item": 25,
@@ -63,17 +81,7 @@
     {
       "action": "learn",
       "actor": "onehand",
-      "spell": 500996
-    },
-    {
-      "action": "learn",
-      "actor": "onehand",
       "spell": 804414
-    },
-    {
-      "action": "learn",
-      "actor": "onehand",
-      "spell": 806905
     },
     {
       "action": "learn",
@@ -94,6 +102,20 @@
       "action": "learn",
       "actor": "bare",
       "spell": 806905
+    },
+    {
+      "action": "destroy_item",
+      "actor": "bare",
+      "item": 629997,
+      "label": "Remove the Barbarian starter weapon before the unarmed control"
+    },
+    {
+      "action": "assert",
+      "actor": "bare",
+      "metric": "item_count",
+      "item": 629997,
+      "equals": 0,
+      "label": "The unarmed control no longer carries its starter weapon"
     },
     {
       "action": "set_power",
@@ -122,10 +144,21 @@
       "value": 100
     },
     {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the previous ordinary global cooldown"
+    },
+    {
       "action": "cast",
       "actor": "onehand",
       "spell": 500913,
       "target": "enemy"
+    },
+    {
+      "action": "attack",
+      "actor": "onehand",
+      "target": "enemy",
+      "label": "Execute the queued Brutal Swing on an actual native melee swing"
     },
     {
       "action": "assert",
@@ -145,16 +178,37 @@
       "label": "Brutal Swing rank 1 really cast"
     },
     {
+      "action": "stop_attack",
+      "actor": "onehand"
+    },
+    {
       "action": "set_power",
       "actor": "onehand",
       "power": 3,
       "value": 100
     },
     {
+      "action": "learn",
+      "actor": "onehand",
+      "spell": 500996,
+      "label": "Activate the higher rank only after the lower-rank control"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the previous ordinary global cooldown"
+    },
+    {
       "action": "cast",
       "actor": "onehand",
       "spell": 500996,
       "target": "enemy"
+    },
+    {
+      "action": "attack",
+      "actor": "onehand",
+      "target": "enemy",
+      "label": "Execute the queued Brutal Swing on an actual native melee swing"
     },
     {
       "action": "assert",
@@ -174,6 +228,10 @@
       "label": "Brutal Swing rank 2 really cast"
     },
     {
+      "action": "stop_attack",
+      "actor": "onehand"
+    },
+    {
       "action": "set_health",
       "actor": "enemy",
       "value": 150000,
@@ -184,6 +242,11 @@
       "actor": "onehand",
       "power": 3,
       "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the previous ordinary global cooldown"
     },
     {
       "action": "cast",
@@ -204,6 +267,17 @@
       "actor": "onehand",
       "power": 3,
       "value": 100
+    },
+    {
+      "action": "learn",
+      "actor": "onehand",
+      "spell": 806905,
+      "label": "Activate the higher rank only after the lower-rank control"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the previous ordinary global cooldown"
     },
     {
       "action": "cast",
@@ -229,6 +303,10 @@
       "label": "Decapitate rank 2 really cast"
     },
     {
+      "action": "stop_attack",
+      "actor": "onehand"
+    },
+    {
       "action": "set_health",
       "actor": "undefended",
       "value": 150000,
@@ -239,6 +317,11 @@
       "actor": "bare",
       "power": 3,
       "value": 100
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Update the below-35-percent target aura state before testing the weapon refusal"
     },
     {
       "action": "cast",
@@ -254,5 +337,12 @@
       "equals": 29,
       "label": "An unarmed Barbarian still has no weapon that fits Decapitate rank 2"
     }
-  ]
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  }
 }

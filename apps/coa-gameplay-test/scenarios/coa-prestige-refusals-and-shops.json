@@ -33,7 +33,7 @@
 
     { "action": "gossip_hello", "actor": "warrior", "target": "chromie_warrior" },
     { "action": "gossip_select", "actor": "warrior", "option": 0, "label": "A Warrior asks to prestige" },
-    { "action": "assert", "actor": "warrior", "metric": "system_message_contains", "text": "only available to Conquest of Azeroth classes", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "actor": "warrior", "metric": "system_message_contains", "text": "only available to Conquest of Azeroth", "equals": 1, "within_ms": 2000 },
     { "action": "assert", "actor": "warrior", "metric": "level", "equals": 60 },
     { "action": "assert", "actor": "warrior", "metric": "aura", "spell": 9930831, "equals": 0 },
 

@@ -1,13 +1,14 @@
 {
   "schema": 1,
   "name": "The server serves the Witch Hunter Black Knight specialization tree (#214)",
-  "contract": "ChrSpecs.dbc row 97 is class token WITCHHUNTER, tab token WITCHKNIGHT (CharacterAdvancementTabTypes 94), displayed 'Black Knight', identity entry 7553. LoadCoATalentData joins CharacterAdvancement rows by (class token, tab token), which gives spec 97 its 38 entries, the same 38 nodes the client's CoATalentNodeData.lua files under the tab 'Black Knight'. CharacterAdvancementEssence gives class 15 one specialization point at level 11. Selecting the specialization grants the identity passive Grasp of the Undying 707064 (entry 7553, an automatic entry), and the specialization point buys Noctis Blade 802280 (entry 7569, TECost 1). Switching to Houndmaster (spec 11) removes the Black Knight tree's spells. An empty Black Knight tab in the client is the compat client's tab-alias table lacking WitchKnight -> Black Knight, which client patch revision 6 adds.",
+  "contract": "ChrSpecs.dbc row 97 is class token WITCHHUNTER, tab token WITCHKNIGHT (CharacterAdvancementTabTypes 94),\ndisplayed 'Black Knight', identity entry 7553. LoadCoATalentData joins CharacterAdvancement rows by\n(class token, tab token), which gives spec 97 its 38 entries, the same 38 nodes the client's\nCoATalentNodeData.lua files under the tab 'Black Knight'. CharacterAdvancementEssence gives class 15 one\nspecialization point at level 11. Selecting the specialization grants the identity passive Grasp of the\nUndying 707064 (entry 7553, an automatic entry), and the specialization point buys Noctis Blade 802280\n(entry 7569, TECost 1). Switching to Houndmaster (spec 11) removes the Black Knight tree's spells. An\nempty Black Knight tab in the client is the compat client's tab-alias table lacking WitchKnight -> Black\nKnight, which client patch revision 6 adds. Native removals and resets retain their original prices;\nfixture actors have 100 gold to pay them.",
   "timeout_ms": 60000,
   "players": [
     {"id": "wh", "race": 1, "class": 15, "level": 11}
   ],
   "steps": [
     {"action": "wait", "label": "Let login hooks and class synchronisation settle", "ms": 5000},
+    {"action": "set_money", "label": "Fund the original native removal and purge prices", "actor": "wh", "value": 1000000},
     {"action": "assert", "label": "No Black Knight identity before the specialization", "actor": "wh", "metric": "knows_spell", "spell": 707064, "equals": 0},
     {"action": "specialization", "actor": "wh", "id": 97},
     {"action": "assert", "label": "Black Knight grants its identity passive", "actor": "wh", "metric": "knows_spell", "spell": 707064, "equals": 1, "within_ms": 3000},

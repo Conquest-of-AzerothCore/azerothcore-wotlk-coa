@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Ranger Pilfering: Dirty Blades swings heal for 50% of Dirty Blades' damage (#2516)",
-  "contract": "Pilfering 705087 (Brigand row 7 col 9) reads 'Adds 10% to the damage dealt by Dirty Blades and causes its damage dealt to heal you equal to 50% of the value.' Effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER SPELLMOD_EFFECT1 +10 on Dirty Blades (class mask 0x1000000), effect 1 is Ascension aura 354 with BasePoints 49 + 1 = 50 and TriggerSpell 520880 'Dirty Blades' (SPELL_EFFECT_HEAL on the caster, SPELL_ATTR2_CANT_CRIT, SPELL_ATTR3_IGNORE_CASTER_MODIFIERS). Dirty Blades 680276 effect 0 is aura 354 with BasePoints 69 + 1 = 70, its share of each melee auto attack. aura_ascension_ranger_pilfering (spell_proc ProcFlags 4, melee auto attack) never attached before this fix because its Load() read AuraScript::GetTarget(), which is null while the script loads. Expected: with Pilfering learned and no Dirty Blades, swings heal nothing; with Dirty Blades up its effect 0 is 80 (70 + Pilfering's 10) and every swing heals for swing damage x 80% x 50% = 40% of the swing (the golem is stunned, so every swing is a plain hit). Each heal is rounded down to a whole point, so with unarmed swings of 20-30 damage the ratio sits between 0.33 and 0.40; the pre-fix reading of 50% of the whole swing gives 0.5 and a script that never attaches gives no heal at all.",
+  "contract": "Pilfering 705087 adds 10 percentage points to Dirty Blades 680276's native effect-0 modifier and heals for 50% of its actual Nature damage. Dirty Blades now casts 520571 from landed melee auto attacks; that helper's AfterHit observes damage after resistance and absorption, then casts 520880 using Pilfering's effect-1 percentage. Without Dirty Blades, white swings produce neither Nature damage nor a heal. With both buffs, the Dirty Blades amount is 80 and an unabsorbed Nature hit heals half its resolved damage, rounded down. The level-28 ordinary-cast, healing-debuff and Nature-absorb controls are in ranger-dirty-blades-6714.",
   "timeout_ms": 90000,
   "location": {
     "map": 0,
@@ -18,7 +18,8 @@
       "level": 80,
       "melee_hit_rating": 10000,
       "expertise_rating": 10000,
-      "allow_regeneration": false
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000
     }
   ],
   "creatures": [
@@ -109,8 +110,9 @@
     {
       "action": "snapshot",
       "actor": "ranger",
-      "metric": "melee_damage_total",
-      "save_as": "melee_before"
+      "metric": "spell_damage_total",
+      "save_as": "nature_before",
+      "spell": 520571
     },
     {
       "action": "snapshot",
@@ -150,20 +152,21 @@
     {
       "action": "snapshot",
       "actor": "ranger",
-      "metric": "melee_damage_total",
-      "relative_to": "melee_before",
-      "save_as": "blades_melee"
+      "metric": "spell_damage_total",
+      "relative_to": "nature_before",
+      "save_as": "blades_nature",
+      "spell": 520571
     },
     {
       "action": "assert",
-      "label": "The heal is 50% of Dirty Blades' 80% share of the swing (integer heal per swing)",
+      "label": "The heal is 50% of resolved Dirty Blades Nature damage, rounded per hit",
       "actor": "ranger",
       "metric": "spell_heal_total",
       "spell": 520880,
       "relative_to": "heal_before",
-      "ratio_to": "blades_melee",
-      "min": 0.33,
-      "max": 0.401
+      "ratio_to": "blades_nature",
+      "min": 0.45,
+      "max": 0.501
     }
   ]
 }

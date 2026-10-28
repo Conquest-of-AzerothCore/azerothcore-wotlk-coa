@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "name": "Fired Up! buff text states the 30% crit its DBC variable omits (#7688)",
+  "contract": [
+    "Fired Up! 704823 is granted by CharacterAdvancement entry 33877 in the",
+    "Incineration tab, but its SkillLineAbility.dbc row 90281 points at SkillLine",
+    "86 (Flameweaving), so the client files it under the wrong spellbook tab.",
+    "The fix publishes that row with SkillLine 85 (Incineration), streamed as",
+    "SMSG_PATCH_SKILL_LINE_ABILITY, which the gameplay observer does not parse,",
+    "so no scenario step can assert the tab move itself.",
+    "The same report notes the buff never mentions its 30% critical strike chance",
+    "even though Effect[2] grants a fixed 29 (shown as 30%) that nothing rescales.",
+    "The DBC text carries that line as a bare $s3% variable, which does not",
+    "render on the buff. The fix publishes the unchanged DBC text with 30%",
+    "stated outright in coa_client_spell_description, streamed as SMSG_PATCH_SPELL",
+    "(opcode 2346) at login, following the buff-text pattern Fire and Brimstone",
+    "707480 uses. This scenario reads the streamed row and proves the working",
+    "$h% and $d parts are preserved: row 500639 (Runeshroud, published by the",
+    "same table) is the control for the stream."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "pyromancer",
+      "race": 1,
+      "class": 24,
+      "level": 19
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "pyromancer",
+      "entry": 36,
+      "level": 19,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI, level scaling and the login patch stream settle",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the shared description table still streams Runeshroud's own text as row 500639",
+      "actor": "pyromancer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500639,
+      "text": "Requires Runeshroud",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Fired Up! (704823) reaches the client stating its 30% critical strike chance",
+      "actor": "pyromancer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 704823,
+      "text": "critically strike by 30%",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: the unrendered $s3 variable is gone from that row",
+      "actor": "pyromancer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 704823,
+      "text": "$s3",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: the working refund-chance part of the same row is preserved",
+      "actor": "pyromancer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 704823,
+      "text": "$h% chance to refund",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: the buff-voiced tooltip row carries the same 40% refund and 30% crit facts",
+      "actor": "pyromancer",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 704823,
+      "text": "have a 40% chance to refund their cost and increase your chance to critically strike by 30%",
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

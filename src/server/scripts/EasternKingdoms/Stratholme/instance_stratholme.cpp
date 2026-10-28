@@ -16,7 +16,9 @@
  */
 
 #include "InstanceMapScript.h"
+#include "Group.h"
 #include "InstanceScript.h"
+#include "LFGMgr.h"
 #include "Player.h"
 #include "ScriptedCreature.h"
 #include "stratholme.h"
@@ -81,11 +83,25 @@ public:
             _gateTrapsCooldown[0] = false;
             _gateTrapsCooldown[1] = false;
 
+            _gatesDecided = false;
+            _gatesLocked = false;
+
             events.Reset();
         }
 
         void OnPlayerEnter(Player* player) override
         {
+            // The first player in decides how the large portcullises start: a Dungeon Finder group
+            // sent to the Service Entrance finds them closed, everybody else finds them open.
+            if (!_gatesDecided)
+            {
+                _gatesDecided = true;
+                if (Group* group = player->GetGroup())
+                    if (group->isLFGGroup())
+                        _gatesLocked = IsServiceEntranceDungeon(sLFGMgr->GetDungeon(group->GetGUID()));
+                ApplyGates();
+            }
+
             if (_baronRunTime > 0)
                 if (Aura* aura = player->AddAura(SPELL_BARON_ULTIMATUM, player))
                     aura->SetDuration(_baronRunTime * MINUTE * IN_MILLISECONDS);
@@ -208,14 +224,28 @@ public:
                 case GO_GAUNTLET_GATE:
                     go->AllowSaveToDB(true);
                     _gauntletGateGUID = go->GetGUID();
-                    if (_zigguratState1 == 2 && _zigguratState2 == 2 && _zigguratState3 == 2)
-                        go->SetGoState(GO_STATE_ACTIVE);
+                    ApplyGate(go);
                     break;
                 case GO_SLAUGTHER_GATE:
                     go->AllowSaveToDB(true);
                     _slaughterGateGUID = go->GetGUID();
-                    if (_zigguratState1 == 2 && _zigguratState2 == 2 && _zigguratState3 == 2)
-                        go->SetGoState(GO_STATE_ACTIVE);
+                    ApplyGate(go);
+                    break;
+                case GO_LARGE_PORTCULLIS_01:
+                    _portcullisGUIDs[0] = go->GetGUID();
+                    ApplyGate(go);
+                    break;
+                case GO_LARGE_PORTCULLIS_02:
+                    _portcullisGUIDs[1] = go->GetGUID();
+                    ApplyGate(go);
+                    break;
+                case GO_LARGE_PORTCULLIS_03:
+                    _portcullisGUIDs[2] = go->GetGUID();
+                    ApplyGate(go);
+                    break;
+                case GO_LARGE_PORTCULLIS_04:
+                    _portcullisGUIDs[3] = go->GetGUID();
+                    ApplyGate(go);
                     break;
                 case GO_ZIGGURAT_DOORS4:
                     go->AllowSaveToDB(true);
@@ -348,6 +378,11 @@ public:
                 case TYPE_MALLOW:
                     ++_postboxesOpened;
                     break;
+                case TYPE_GATES_LOCKED:
+                    _gatesDecided = true;
+                    _gatesLocked = data != 0;
+                    ApplyGates();
+                    return;
                 case TYPE_BARTHILAS_RUN:
                     if (data == DONE)
                     {
@@ -609,6 +644,49 @@ public:
         ObjectGuid _barthilasGUID;
 
         bool _gateTrapsCooldown[2];
+        bool _gatesDecided;
+        bool _gatesLocked;
+        ObjectGuid _portcullisGUIDs[4];  // large portcullis 01-04
+
+        static bool IsServiceEntranceDungeon(uint32 dungeonId)
+        {
+            // LFGDungeons.dbc: Stratholme - Service Entrance on Normal, Heroic and Mythic.
+            return dungeonId == 274 || dungeonId == 1274 || dungeonId == 2274;
+        }
+
+        bool ZigguratsDone() const
+        {
+            return _zigguratState1 == 2 && _zigguratState2 == 2 && _zigguratState3 == 2;
+        }
+
+        // The large portcullises stand open, and players cannot click them shut. On a locked run
+        // (Mythic+ keystone or Dungeon Finder for the Service Entrance) they start closed: players
+        // may open 03 and 04 themselves, 01 and 02 stay shut, and 05/06 (Slaughter Square and the
+        // Gauntlet) open with the ziggurats as before.
+        void ApplyGate(GameObject* go)
+        {
+            uint32 const entry = go->GetEntry();
+            bool const playerGate = entry == GO_LARGE_PORTCULLIS_03 || entry == GO_LARGE_PORTCULLIS_04;
+            bool open = !_gatesLocked;
+            if (entry == GO_GAUNTLET_GATE || entry == GO_SLAUGTHER_GATE)
+                open = open || ZigguratsDone();
+
+            go->SetGoState(open ? GO_STATE_ACTIVE : GO_STATE_READY);
+            if (_gatesLocked && playerGate)
+                go->RemoveGameObjectFlag(GO_FLAG_NOT_SELECTABLE);
+            else
+                go->SetGameObjectFlag(GO_FLAG_NOT_SELECTABLE);
+        }
+
+        void ApplyGates()
+        {
+            for (ObjectGuid const& guid : _portcullisGUIDs)
+                if (GameObject* go = instance->GetGameObject(guid))
+                    ApplyGate(go);
+            for (ObjectGuid const& guid : { _gauntletGateGUID, _slaughterGateGUID })
+                if (GameObject* go = instance->GetGameObject(guid))
+                    ApplyGate(go);
+        }
         ObjectGuid _trappedPlayerGUID;
         ObjectGuid _trapGatesGUIDs[4];
 

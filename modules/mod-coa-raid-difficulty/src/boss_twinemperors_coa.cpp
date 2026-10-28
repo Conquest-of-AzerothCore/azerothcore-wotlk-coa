@@ -269,8 +269,8 @@ namespace
                 // The bond heals while they stand together; the upper hand is
                 // whoever has more health.
                 Creature* twin = GetTwin();
-                if (twin && twin->IsAlive() && me->IsWithinDist(twin, BOND_RANGE))
-                    me->CastSpell(me, SPELL_BOND_HEAL, true);
+                if (IAmVeklor() && twin && twin->IsAlive() && me->IsWithinDist(twin, BOND_RANGE))
+                    me->CastSpell(twin, SPELL_BOND_HEAL, true);
                 bool const upper = twin && me->GetHealthPct() > twin->GetHealthPct();
                 if (upper && !me->HasAura(SPELL_UPPER_HAND))
                     me->AddAura(SPELL_UPPER_HAND, me);

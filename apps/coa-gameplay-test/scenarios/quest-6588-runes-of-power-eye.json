@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Runes of Power: the Eye of the Beholder in the Abbey hands a Runemaster the quest item (#6588)",
+  "contract": "Runes of Power (200109, Runemaster, Northshire, from Wanda Belezin 50291 after Runic Inscription 49988) wants one 661330 (RequiredItemId1) from the Eye of the Beholder chest 9301102 (lock 43, loot 9301102 -> 661330 quest-required, Data8 200109, visible only while 200109 is taken). Its one spawn is gameobject guid 7912104 at -8898.6, -181.2 in the Abbey main hall. rev_20260930_98_northshire_baseline_restore deleted that spawn with the rest of the class-chain objects, so the eye did not exist and the quest could not be finished; rev_20261007_20_coa_northshire_class_chain_spawns.sql (#6844) republishes it. Expected: a Runemaster with 200109 in the log finds the world eye lit as a quest object next to its authored spot, and the chest's loot path hands over 661330. The loot actions only open a gameobject the player summoned, so a copy beside the world spawn proves the loot path while the quest-active read proves the world spawn.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8909.81, "y": -214.7, "z": 81.94, "o": 4.7 },
+  "players": [
+    { "id": "r", "race": 1, "class": 32, "level": 8 }
+  ],
+  "steps": [
+    { "action": "set_phase", "label": "Join the world phase the Abbey's CoA spawns live in", "actor": "r", "value": 1 },
+    { "action": "wait", "label": "Let the Abbey's spawns and the login stream settle", "ms": 6000 },
+    {
+      "action": "teleport", "label": "Stand in front of Wanda Belezin in the Abbey", "actor": "r",
+      "map": 0, "x": -8909.81, "y": -214.7, "z": 81.94, "o": 4.7
+    },
+    { "action": "wait", "label": "Let the grid load", "ms": 2500 },
+    { "action": "prepare_quest", "label": "Finish the prerequisite Runic Inscription (49988) as a fixture", "actor": "r", "quest": 49988 },
+    { "action": "reward_quest", "label": "Hand it in so the chain unlocks", "actor": "r", "quest": 49988 },
+    {
+      "action": "quest_accept", "label": "Take Runes of Power (200109) from Wanda the way a player does", "actor": "r",
+      "quest": 200109, "entry": 50291
+    },
+    {
+      "action": "assert", "label": "Runes of Power is in the log and incomplete", "actor": "r",
+      "metric": "quest_status", "quest": 200109, "equals": 3, "within_ms": 4000
+    },
+    {
+      "action": "teleport", "label": "Go to the Eye of the Beholder in the Abbey main hall", "actor": "r",
+      "map": 0, "x": -8900.6, "y": -181.6, "z": 81.939, "o": 0.2
+    },
+    { "action": "wait", "label": "Let the grid load", "ms": 2500 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the world eye exists and lights up as a quest object for a Runemaster on 200109",
+      "actor": "r", "metric": "nearby_gameobject_quest_active", "entry": 9301102, "equals": 1, "within_ms": 8000
+    },
+    {
+      "action": "assert", "label": "CONTROL: the bags hold no 661330 yet", "actor": "r",
+      "metric": "item_count", "item": 661330, "equals": 0, "within_ms": 4000
+    },
+    {
+      "action": "summon_gameobject", "label": "Stand in a copy of the eye beside the world spawn so the loot actions can open it",
+      "actor": "r", "entry": 9301102, "distance": 2, "duration_s": 300
+    },
+    {
+      "action": "assert", "label": "the copy is the only eye the loot actions can see", "actor": "r",
+      "metric": "owned_gameobject_count", "entry": 9301102, "equals": 1, "within_ms": 4000
+    },
+    { "action": "wait", "label": "Let the copy become ready", "ms": 1000 },
+    { "action": "loot_gameobject", "label": "Open the copy's loot window", "actor": "r", "entry": 9301102 },
+    {
+      "action": "loot_slot", "label": "DISCRIMINATING: take 661330 out of the copy - it only rolls for a player on 200109",
+      "actor": "r", "item": 661330
+    },
+    { "action": "close_loot", "label": "Close the copy's loot window", "actor": "r" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the eye pays out the 661330 Runes of Power needs", "actor": "r",
+      "metric": "item_count", "item": 661330, "min": 1, "within_ms": 8000
+    }
+  ]
+}

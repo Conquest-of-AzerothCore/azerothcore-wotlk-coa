@@ -230,7 +230,7 @@ void OpcodeTable::Initialize()
     /*0x063*/ DEFINE_SERVER_OPCODE_HANDLER(SMSG_WHO,                                                STATUS_NEVER);
     /*0x064*/ DEFINE_HANDLER(CMSG_WHOIS,                                                            STATUS_LOGGEDIN,   PROCESS_THREADUNSAFE,   &WorldSession::HandleWhoisOpcode                        );
     /*0x065*/ DEFINE_SERVER_OPCODE_HANDLER(SMSG_WHOIS,                                              STATUS_NEVER);
-    /*0x066*/ DEFINE_HANDLER(CMSG_CONTACT_LIST,                                                     STATUS_LOGGEDIN,   PROCESS_THREADSAFE,     &WorldSession::HandleContactListOpcode                  );
+    /*0x066*/ DEFINE_HANDLER(CMSG_CONTACT_LIST,                                                     STATUS_LOGGEDIN,   PROCESS_THREADUNSAFE,   &WorldSession::HandleContactListOpcode                  );
     /*0x067*/ DEFINE_SERVER_OPCODE_HANDLER(SMSG_CONTACT_LIST,                                       STATUS_NEVER);
     /*0x068*/ DEFINE_SERVER_OPCODE_HANDLER(SMSG_FRIEND_STATUS,                                      STATUS_NEVER);
     /*0x069*/ DEFINE_HANDLER(CMSG_ADD_FRIEND,                                                       STATUS_LOGGEDIN,   PROCESS_THREADUNSAFE,   &WorldSession::HandleAddFriendOpcode                    );
@@ -1473,8 +1473,14 @@ void OpcodeTable::Initialize()
     {
         if (_internalTableClient[i])
             continue;
+        // Native Manastorm gameplay runs on the world thread after login.
+        // The compatibility early hook can still route these to the donor when
+        // the SQL-backed module is disabled.
+        bool const manastorm = i == 0x651 || i == 0x665 || i == 0x689;
         ValidateAndSetClientOpcode<decltype(&WorldSession::Handle_NULL), &WorldSession::Handle_NULL>(
-            static_cast<OpcodeClient>(i), "UNKNOWN_EXTENSION_OPCODE", STATUS_NEVER, PROCESS_INPLACE);
+            static_cast<OpcodeClient>(i), manastorm ? "CMSG_MANASTORM" : "UNKNOWN_EXTENSION_OPCODE",
+            manastorm ? STATUS_LOGGEDIN : STATUS_NEVER,
+            manastorm ? PROCESS_THREADUNSAFE : PROCESS_INPLACE);
     }
 
 #undef DEFINE_HANDLER

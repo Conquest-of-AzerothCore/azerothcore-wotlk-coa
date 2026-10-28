@@ -1,7 +1,24 @@
 {
   "schema": 1,
   "name": "Blood Plague raises critical damage against Diseased targets (#2185)",
-  "contract": "Blood Plague 575335 has two effects, both aura 112 (SPELL_AURA_OVERRIDE_CLASS_SCRIPTS) with MiscValueB 31, BasePoints 9 / DieSides 1 (i.e. 10) and class mask (0, 8388609, 0): effect 0 carries MiscValue 20000 (masked critical strike chance) and effect 1 MiscValue 20001 (masked critical damage). Both are raw private selectors, which SpellAuraDefines.h states are not implicitly enabled, so Unit::GetAscensionConditionalCombatModifier fell through to its default and returned 0. Condition 31 is the reviewed disease selector: the core already honoured it for the Necromancer's Fiend contract by scanning the victim for a caster-owned aura of the caster's own SpellFamilyName with Dispel = DISPEL_DISEASE, and it now does the same for the Bloodmage (family 26). Rotclaw 503486, the rank a level-80 character owns per AscensionSpellProgressionData.h, is SpellFamilyName 26 with Dispel 3 (DISPEL_DISEASE) and applies its aura to nearby enemies, so it supplies the caster-owned disease. spell_critical_damage calculates a critical hit from a fixed base of 1000 through Unit::SpellCriticalDamageBonus, which is where ASCENSION_CONDITIONAL_CRIT_DAMAGE is added; Ravenous Strike 501679 is DmgClass 2, so its critical bonus is the full 1000 and a 10-point critical damage modifier moves the result by exactly 200. The critical strike chance half of the same record shares the identical selector and condition evaluation but is added inside Unit::SpellTakenCritChance, which no harness metric reaches.",
+  "contract": [
+    "Blood Plague 575335 has two effects, both aura 112 (SPELL_AURA_OVERRIDE_CLASS_SCRIPTS) with MiscValueB 31,",
+    "BasePoints 9 / DieSides 1 (i.e. 10) and class mask (0, 8388609, 0): effect 0 carries MiscValue 20000",
+    "(masked critical strike chance) and effect 1 MiscValue 20001 (masked critical damage). Both are raw",
+    "private selectors, which SpellAuraDefines.h states are not implicitly enabled, so",
+    "Unit::GetAscensionConditionalCombatModifier fell through to its default and returned 0. Condition 31 is",
+    "the reviewed disease selector: the core already honoured it for the Necromancer's Fiend contract by",
+    "scanning the victim for a caster-owned aura of the caster's own SpellFamilyName with Dispel =",
+    "DISPEL_DISEASE, and it now does the same for the Bloodmage (family 26). Rotclaw 503486, the rank a",
+    "level-80 character owns per AscensionSpellProgressionData.h, is SpellFamilyName 26 with Dispel 3",
+    "(DISPEL_DISEASE) and applies its aura to nearby enemies, so it supplies the caster-owned disease.",
+    "spell_critical_damage calculates a critical hit from a fixed base of 1000 through",
+    "Unit::SpellCriticalDamageBonus, which is where ASCENSION_CONDITIONAL_CRIT_DAMAGE is added; Ravenous Strike",
+    "501679 is DmgClass 2, so its critical bonus is the full 1000 and a 10-point critical damage modifier moves",
+    "the result by exactly 200. The critical strike chance half of the same record shares the identical",
+    "selector and condition evaluation but is added inside Unit::SpellTakenCritChance, which no harness metric",
+    "reaches."
+  ],
   "timeout_ms": 90000,
   "players": [
     {
@@ -9,7 +26,9 @@
       "race": 1,
       "class": 20,
       "level": 80,
-      "spell_hit_rating": 10000
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
     }
   ],
   "creatures": [

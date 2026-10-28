@@ -65,6 +65,7 @@ public:
     virtual void EventInform(uint32 /*eventId*/) {}
     virtual void SpellHit(Unit* /*unit*/, SpellInfo const* /*spellInfo*/) {}
     virtual bool CanBeSeen(Player const* /*seer*/) { return true; }
+    virtual bool CanActivateToQuest(Player* /*player*/) { return true; }
 
     // Called while this gameobject's update block is built for one specific player, so a script can
     // give that viewer its own client-side flags: dynFlags land in GAMEOBJECT_DYNAMIC

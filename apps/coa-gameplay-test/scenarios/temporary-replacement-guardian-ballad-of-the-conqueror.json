@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Ballad of the Conqueror on the action bar is saved as Pulverize (#5469)",
+  "contract": "Inspiring Leader 505344, the Inspiration specialization 20 aura, turns Guardian attacks into Ballads. Synchronize in AscensionGuardianTalents.cpp, run on every guardian_talents::OnPlayerUpdate (AscensionGuardianTalents.cpp:105-108), picks for an active Pulverize 800311 the highest Ballad of the Conqueror rank whose SpellLevel the character has reached (AscensionGuardianTalents.cpp:52-55, 501068 at level 18), teaches it with learnSpell(replacement, true) (AscensionGuardianTalents.cpp:94), a temporary spell never written to character_spell, and registers it with Player::SetTemporarySpellReplacement (AscensionGuardianTalents.cpp:95). The same routine replaces Heavy Blow with Paragon Smash 802629 under 706514 and 707138, and Advance with its stomp 500673. Before the fix Player::_SaveActions wrote 501068 for a button holding the Ballad, and Player::_LoadActions at the next login runs before Synchronize teaches it again, so the button was refused and deleted. persisted_action_button reads Player::GetSavedActionButtonSpell, the id _SaveActions writes. A button holding Ballad of the Conqueror must be saved as Pulverize; a button holding Pulverize is saved unchanged.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "guardian", "race": 1, "class": 18, "level": 18 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login state settle", "ms": 3000 },
+    { "action": "specialization", "label": "Choose Inspiration", "actor": "guardian", "id": 20 },
+    {
+      "action": "assert",
+      "label": "Inspiration grants Inspiring Leader",
+      "actor": "guardian",
+      "metric": "aura",
+      "spell": 505344,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    { "action": "learn", "actor": "guardian", "spell": 800311 },
+    {
+      "action": "assert",
+      "label": "Inspiring Leader replaces Pulverize with Ballad of the Conqueror",
+      "actor": "guardian",
+      "metric": "temporary_spell_replacement",
+      "spell": 800311,
+      "equals": 501068,
+      "within_ms": 3000
+    },
+    { "action": "set_action_button", "actor": "guardian", "button": 2, "spell": 501068 },
+    { "action": "set_action_button", "actor": "guardian", "button": 3, "spell": 800311 },
+    {
+      "action": "assert",
+      "label": "The bar holds Ballad of the Conqueror",
+      "actor": "guardian",
+      "metric": "action_button",
+      "button": 2,
+      "equals": 501068
+    },
+    {
+      "action": "assert",
+      "label": "The Ballad button is saved as Pulverize",
+      "actor": "guardian",
+      "metric": "persisted_action_button",
+      "button": 2,
+      "equals": 800311
+    },
+    {
+      "action": "assert",
+      "label": "Control: an ordinary known spell is saved unchanged",
+      "actor": "guardian",
+      "metric": "persisted_action_button",
+      "button": 3,
+      "equals": 800311
+    }
+  ]
+}

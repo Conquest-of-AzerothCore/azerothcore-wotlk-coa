@@ -1,0 +1,148 @@
+{
+  "schema": 1,
+  "name": "CoA legendary catalog: only levels 1 through 60 are streamed",
+  "contract": [
+    "Requires the legendary catalog and its level-cap migration.",
+    "Level-60 variants retain item level 72 and required level 60.",
+    "Removed level-61 and level-80 client definitions are not patched.",
+    "Historical server templates remain for saved-item compatibility."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "viewer",
+      "race": 1,
+      "class": 12,
+      "level": 59
+    }
+  ],
+  "steps": [
+    {
+      "action": "client_packet",
+      "actor": "viewer",
+      "opcode": 1563,
+      "fields": [
+        {
+          "u32": 6
+        },
+        {
+          "u32": 9700060
+        },
+        {
+          "u32": 9700061
+        },
+        {
+          "u32": 9700080
+        },
+        {
+          "u32": 9706360
+        },
+        {
+          "u32": 9706361
+        },
+        {
+          "u32": 9706380
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 88,
+      "row": 9700060,
+      "equals": 9700060
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 88,
+      "row": 9700060,
+      "offset": 16,
+      "skip_strings": 4,
+      "index": 9,
+      "equals": 72
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 88,
+      "row": 9700060,
+      "offset": 16,
+      "skip_strings": 4,
+      "index": 10,
+      "equals": 60
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 88,
+      "row": 9706360,
+      "equals": 9706360
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 88,
+      "row": 9706360,
+      "offset": 16,
+      "skip_strings": 4,
+      "index": 9,
+      "equals": 72
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 88,
+      "row": 9706360,
+      "offset": 16,
+      "skip_strings": 4,
+      "index": 10,
+      "equals": 60
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2354,
+      "row": 9700061,
+      "equals": -1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2354,
+      "row": 9700080,
+      "equals": -1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2354,
+      "row": 9706361,
+      "equals": -1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2354,
+      "row": 9706380,
+      "equals": -1
+    }
+  ]
+}

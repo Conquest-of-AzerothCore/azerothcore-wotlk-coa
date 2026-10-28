@@ -1,0 +1,14 @@
+-- Coldridge Ritual Circle (9301152) for Call of Death (200043, #8140): the circle renders on
+-- the ground after rev_20261019_11 yet right-clicks never reach the server (live packet trace shows
+-- quest-status queries but zero CMSG_GAMEOBJECT_USE while the player clicks it, quest 200043
+-- incomplete in log). Server side is verified clean (template, spawn, starter/ender, all three
+-- SmartAI rows, no C++ hook, no NOT_SELECTABLE flag path), so the click dies in the client's
+-- mesh hit-test. Display 6679 stayed unclickable at every size and height tested (visible the
+-- whole time, zero USE on the live trace), so its effect mesh never hit-tests - corroborated
+-- by the no-collision sibling Creature_ScourgeRuneCircleCrystal_No_Coll in the same model
+-- family. Per request, the summoning circle from the Binding quests: display 465
+-- (G_RuneGroundPurple, the stock warlock Summoning Circle used by entries 37097, 92015,
+-- 105576 and 185127, including Strahad's own circle). Size 2.5 per Strahad's spec so the
+-- runes read at full scale, type 2 QUESTGIVER, SmartGameObjectAI and gossipID 0 untouched,
+-- as do spawn z, quests and scripts.
+UPDATE `gameobject_template` SET `displayId` = 465, `size` = 2.5 WHERE `entry` = 9301152;

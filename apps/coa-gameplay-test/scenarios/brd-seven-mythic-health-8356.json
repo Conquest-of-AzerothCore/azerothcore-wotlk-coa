@@ -1,0 +1,240 @@
+{
+  "schema": 1,
+  "name": "Blackrock Depths: the Seven have 100000 health each on Mythic (#8356)",
+  "contract": [
+    "#8356: on Mythic each of the Seven (Hate'rel, Anger'rel, Vile'rel, Gloom'rel, Seeth'rel, Doom'rel, Dope'rel) had",
+    "490200 health, a model estimate with no live record, for a fight against all seven for one piece of loot. Each",
+    "now has 100000 on Mythic, and Heroic keeps its Mythic/1.30 derivation (76923)."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "heroic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "set_health",
+      "actor": "heroic",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_phase",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "set_health",
+      "actor": "mythic",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_phase",
+      "actor": "mythic",
+      "value": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "heroic",
+      "map": 230,
+      "x": 1250.0,
+      "y": -240.0,
+      "z": -85.59
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: heroic is in a Heroic Blackrock Depths",
+      "actor": "heroic",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Hate'rel has 76923 health on Heroic",
+      "actor": "heroic",
+      "metric": "nearby_creature_max_health",
+      "entry": 9034,
+      "equals": 76923,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Anger'rel has 76923 health on Heroic",
+      "actor": "heroic",
+      "metric": "nearby_creature_max_health",
+      "entry": 9035,
+      "equals": 76923,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Vile'rel has 76923 health on Heroic",
+      "actor": "heroic",
+      "metric": "nearby_creature_max_health",
+      "entry": 9036,
+      "equals": 76923,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Gloom'rel has 76923 health on Heroic",
+      "actor": "heroic",
+      "metric": "nearby_creature_max_health",
+      "entry": 9037,
+      "equals": 76923,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Seeth'rel has 76923 health on Heroic",
+      "actor": "heroic",
+      "metric": "nearby_creature_max_health",
+      "entry": 9038,
+      "equals": 76923,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Doom'rel has 76923 health on Heroic",
+      "actor": "heroic",
+      "metric": "nearby_creature_max_health",
+      "entry": 9039,
+      "equals": 76923,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Dope'rel has 76923 health on Heroic",
+      "actor": "heroic",
+      "metric": "nearby_creature_max_health",
+      "entry": 9040,
+      "equals": 76923,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 230,
+      "x": 1250.0,
+      "y": -240.0,
+      "z": -85.59
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: mythic is in a Mythic Blackrock Depths",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Hate'rel has 100000 health on Mythic",
+      "actor": "mythic",
+      "metric": "nearby_creature_max_health",
+      "entry": 9034,
+      "equals": 100000,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Anger'rel has 100000 health on Mythic",
+      "actor": "mythic",
+      "metric": "nearby_creature_max_health",
+      "entry": 9035,
+      "equals": 100000,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Vile'rel has 100000 health on Mythic",
+      "actor": "mythic",
+      "metric": "nearby_creature_max_health",
+      "entry": 9036,
+      "equals": 100000,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Gloom'rel has 100000 health on Mythic",
+      "actor": "mythic",
+      "metric": "nearby_creature_max_health",
+      "entry": 9037,
+      "equals": 100000,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Seeth'rel has 100000 health on Mythic",
+      "actor": "mythic",
+      "metric": "nearby_creature_max_health",
+      "entry": 9038,
+      "equals": 100000,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Doom'rel has 100000 health on Mythic",
+      "actor": "mythic",
+      "metric": "nearby_creature_max_health",
+      "entry": 9039,
+      "equals": 100000,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Dope'rel has 100000 health on Mythic",
+      "actor": "mythic",
+      "metric": "nearby_creature_max_health",
+      "entry": 9040,
+      "equals": 100000,
+      "within_ms": 5000
+    }
+  ]
+}

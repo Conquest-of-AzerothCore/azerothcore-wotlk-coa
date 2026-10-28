@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "name": "The Satchel of Helpful Goods from the Dungeon Finder holds gear for Conquest of Azeroth classes",
+  "contract": "The 56-60 Classic Random completion satchel (52002) opens with its four reward slots for a stock class and for a Conquest of Azeroth class alike. Its class conditions list only the stock class masks, so a Conquest of Azeroth class opens it empty.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "stock",
+      "race": 1,
+      "class": 1,
+      "level": 59
+    },
+    {
+      "id": "coa",
+      "race": 1,
+      "class": 18,
+      "level": 59
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "stock",
+      "item": 52002,
+      "count": 1
+    },
+    {
+      "action": "open_item",
+      "actor": "stock",
+      "item": 52002
+    },
+    {
+      "action": "assert",
+      "label": "The stock class satchel offers its four slots",
+      "actor": "stock",
+      "metric": "loot_count",
+      "min": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "coa",
+      "item": 52002,
+      "count": 1
+    },
+    {
+      "action": "open_item",
+      "actor": "coa",
+      "item": 52002
+    },
+    {
+      "action": "assert",
+      "label": "The Conquest of Azeroth class satchel is not empty",
+      "actor": "coa",
+      "metric": "loot_count",
+      "min": 1
+    }
+  ]
+}

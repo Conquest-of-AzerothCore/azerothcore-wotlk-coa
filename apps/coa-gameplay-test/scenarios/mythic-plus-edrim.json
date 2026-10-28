@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Edrim Skysong upgrades and recycles Mythic items for Mythic Coins",
+  "contract": "With Highest Mythic Level Completed 1, Edrim Skysong's Upgrade Items turns Robes of Arugal (Mythic Dungeon, 1656324) into its Mythic 1 version (400168) for 130 Mythic Coins. Recycle Items then takes the Mythic 1 robes for 46 Mythic Coins (45 + level).",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "summon", "actor": "hero", "entry": 416000, "as": "edrim", "distance": 3 },
+    { "action": "add_item", "actor": "hero", "item": 1656324, "count": 1 },
+    { "action": "add_item", "actor": "hero", "item": 1414500, "count": 200 },
+    { "action": "console", "command": "mythic setbest 1 Harnessa" },
+    { "action": "gossip_hello", "actor": "hero", "target": "edrim" },
+    { "action": "gossip_select", "actor": "hero", "option": 4 },
+    { "action": "gossip_select", "actor": "hero", "option": 3 },
+    { "action": "assert", "label": "the Mythic Dungeon robes are gone", "actor": "hero", "metric": "item_count", "item": 1656324, "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "label": "the Mythic 1 robes are there", "actor": "hero", "metric": "item_count", "item": 400168, "equals": 1 },
+    { "action": "assert", "label": "130 coins paid", "actor": "hero", "metric": "item_count", "item": 1414500, "equals": 70 },
+    { "action": "gossip_hello", "actor": "hero", "target": "edrim" },
+    { "action": "gossip_select", "actor": "hero", "option": 7 },
+    { "action": "gossip_select", "actor": "hero", "option": 4 },
+    { "action": "assert", "label": "the robes are recycled", "actor": "hero", "metric": "item_count", "item": 400168, "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "label": "46 coins for Mythic 1", "actor": "hero", "metric": "item_count", "item": 1414500, "equals": 116 }
+  ]
+}

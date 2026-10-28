@@ -1,0 +1,284 @@
+{
+  "schema": 1,
+  "name": "Breath of the North becomes usable after spending Fill Level (#5803)",
+  "contract": [
+    "Breath of the North rank 802388 requires Empty Tankard 806055, whose SpellDuration 28 is 5000 ms.",
+    "Its tooltip permits casting only after emptying the Tankard. Keg Smash explicitly consumes Fill Level",
+    "and shares the resource's authored cooldown-modifier mask. Spending even a partially filled Tankard",
+    "must create the Empty Tankard window; merely learning or removing the level passive must not create it.",
+    "The reported level-43 Breath rank must then deal native cone damage and apply its authored 30 percent",
+    "slow, and become unavailable again when the five-second window expires. Removing Fill Level must clear",
+    "an active Empty Tankard window and stop the native periodic refill."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 43,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "b",
+      "entry": 36,
+      "level": 43,
+      "health": 500000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "b",
+      "id": 3
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 800838
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 802388
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 805808
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 806804
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "knows_spell",
+      "spell": 802388,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "knows_spell",
+      "spell": 806804,
+      "equals": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "b",
+      "spell": 92083,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 92083
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 802388
+    },
+    {
+      "action": "assert",
+      "label": "Breath is unavailable before spending Fill Level",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 802388,
+      "equals": 22
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura_stacks",
+      "spell": 805813,
+      "equals": 3,
+      "within_ms": 6500
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 806804,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 806804,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura_stacks",
+      "spell": 805813,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Spending a partial Tankard enables Breath",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 806055,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura_duration_ms",
+      "spell": 806055,
+      "min": 4500,
+      "max": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 802388
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 802388,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Breath deals damage through the normal cone cast",
+      "actor": "b",
+      "metric": "spell_damage_count",
+      "spell": 802388,
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_amount",
+      "spell": 802388,
+      "effect": 1,
+      "equals": -30
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 806055,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 802388
+    },
+    {
+      "action": "assert",
+      "label": "Breath is unavailable after the Empty Tankard window expires",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 802388,
+      "equals": 22
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 806804,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 806804,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 806055,
+      "equals": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "b",
+      "spell": 92083,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 500061,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura_stacks",
+      "spell": 805813,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 806055,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura_stacks",
+      "spell": 805813,
+      "equals": 0
+    }
+  ]
+}

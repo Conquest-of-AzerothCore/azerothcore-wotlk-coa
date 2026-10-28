@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Annihilation gets the Knight of Xoroth spellbook tab, not General (#7465)",
+  "contract": [
+    "Annihilation 504581 is a temporary replacement AscensionXoroth.cpp swaps in for 800340 (skill line 64,",
+    "SkillLineAbility row 86489) while auras 706502 and 712294 are both active. 504581 had no SkillLineAbility",
+    "row of its own, so the client placed it under General instead of the Knight of Xoroth tab - the same",
+    "defect and fix shape as Primal Weapons (#8295, rev_20261020_83_coa_primal_weapons_skill_line.sql). The",
+    "fix repurposes SkillLineAbility.dbc row 777 (a duplicate of row 12820: both map spell 965426 'Meditate'",
+    "with the same SkillLine/RaceMask/ClassMask and differ only in MinSkillLineRank, which AcquireMethod 0",
+    "ignores, so row 12820 keeps covering 965426) for 504581 at skill line 64, the same line",
+    "800340 already carries. This proves the server's own loaded SkillLineAbility data now places 504581 on",
+    "line 64 before and after the swap, independent of the client-rendered tab itself, which this harness",
+    "cannot observe."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "assert", "label": "CONTROL: the base ability's own skill line is 64, Knight of Xoroth", "actor": "knight", "metric": "skill_line_for_spell", "spell": 800340, "equals": 64 },
+    { "action": "assert", "label": "THE FIX: Annihilation now carries the same skill line as the ability it replaces", "actor": "knight", "metric": "skill_line_for_spell", "spell": 504581, "equals": 64 },
+
+    { "action": "learn", "actor": "knight", "spell": 800340, "label": "FIXTURE: own the base ability the swap replaces" },
+    { "action": "set_aura", "actor": "knight", "spell": 706502, "stacks": 1 },
+    { "action": "set_aura", "actor": "knight", "spell": 712294, "stacks": 1 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "SETUP: the swap actually replaced the base ability", "actor": "knight", "metric": "knows_spell", "spell": 504581, "equals": 1 },
+    { "action": "assert", "label": "Annihilation still carries skill line 64 once the swap is in effect", "actor": "knight", "metric": "skill_line_for_spell", "spell": 504581, "equals": 64 }
+  ]
+}

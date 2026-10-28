@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Gravebound Champion has its own model instead of the Greater Skeletal Warrior's (#4139)",
+  "contract": "Gravebound Champion 805049 summons creature 500482. Live CoA shows it with display 561889, but no installed client or server CreatureDisplayInfo carries that row, so rev_20260909_02 replaced it with 775 (Creature/Skeleton/Skeleton.mdx), the display of Greater Skeletal Warrior 51065, and the Champion looks like an ordinary skeleton minion. The Exiles DB history and the db.exil.es change_event_2026_07 dump (wdb, 2026-07-13) record display 30616 on 500482 before the live 561889: Character/NorthrendSkeleton/Male/NorthrendSkeletonMale.mdx with extra display 20355, present in both the client and the server DBC. The maintainer approved 30616 as the Gravebound Champion's temporary model until the live 561889 row is captured; at display scale 1 it keeps the CreatureDisplayInfo size.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "grave", "race": 5, "class": 23, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and the Life Force aura settle", "ms": 3000 },
+    { "action": "learn", "actor": "grave", "spell": 805049 },
+    { "action": "cast", "label": "Summon the Gravebound Champion", "actor": "grave", "spell": 805049 },
+    {
+      "action": "assert", "label": "SETUP: one Gravebound Champion is summoned", "actor": "grave",
+      "metric": "owned_creature_count", "entry": 500482, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The Gravebound Champion template uses the archived Champion display 30616",
+      "actor": "grave", "metric": "creature_model_display", "entry": 500482, "equals": 30616
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Champion wears 30616, not the Skeletal Warrior 775",
+      "actor": "grave", "metric": "owned_creature_display", "entry": 500482, "equals": 30616
+    },
+    {
+      "action": "assert", "label": "The Champion keeps the display's own size", "actor": "grave",
+      "metric": "owned_creature_scale", "entry": 500482, "min": 0.999, "max": 1.001
+    }
+  ]
+}

@@ -67,7 +67,8 @@ void Replacement(Player* player, uint32 word, uint32 mask, uint32 child)
     if (!player->HasSpell(child))
         player->learnSpell(child, true);
     for (auto const& [id, state] : player->GetSpellMap())
-        if (state->State != PLAYERSPELL_REMOVED && Family(sSpellMgr->GetSpellInfo(id), word, mask) && id != child)
+        if (state->State != PLAYERSPELL_REMOVED && Family(sSpellMgr->GetSpellInfo(id), word, mask) && id != child &&
+            !player->IsTemporarySpellReplacementStandIn(id))
             player->SetTemporarySpellReplacement(id, child);
 }
 
@@ -96,12 +97,34 @@ void ApplyContracts(SpellInfo* info)
     if (!info || info->SpellFamilyName != 21)
         return;
     uint32 id = info->Id;
+    if (id == 802272)
+    {
+        info->AttributesCu &= ~SPELL_ATTR0_CU_FORCE_AURA_SAVING;
+        info->AttributesCu |= SPELL_ATTR0_CU_AURA_CANNOT_BE_SAVED;
+    }
+    if (id == 680376 || id == 681562 || id == 681563 || id == 681564)
+    {
+        info->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+        info->CasterAuraSpell = 802272;
+        info->_InitializeExplicitTargetMask();
+    }
+    if (id == 562026 && info->Effects[EFFECT_1].TriggerSpell == 562027)
+        info->Effects[EFFECT_1].Effect = 0;
+    if (id == 681486 && info->Effects[EFFECT_2].ApplyAuraName == SPELL_AURA_ADD_PCT_MODIFIER &&
+        info->Effects[EFFECT_2].MiscValue == SPELLMOD_DOT &&
+        info->Effects[EFFECT_2].SpellClassMask == flag96(0, 268436480, 0))
+    {
+        info->Effects[EFFECT_2].MiscValue = SPELLMOD_DAMAGE;
+        info->Effects[EFFECT_2].SpellClassMask = flag96(1024, 0, 0);
+    }
     if (Family(info, 1, 4194304))
     {
         info->InterruptFlags |= SPELL_INTERRUPT_FLAG_MOVEMENT;
         info->ChannelInterruptFlags |= AURA_INTERRUPT_FLAG_MOVE;
     }
-    if ((id == 807364 || id == 805751) && info->IsChanneled())
+    if (Family(info, 0, 2) && info->HasAura(SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE))
+        info->AttributesEx |= SPELL_ATTR1_IS_CHANNELED;
+    if ((id == 807364 || id == 805751 || Family(info, 0, 2)) && info->IsChanneled())
         info->AttributesEx5 &= ~SPELL_ATTR5_ALLOW_ACTION_DURING_CHANNEL;
     if (id == 574149 || id == 574163)
         ConvertCreatureTypeDamage(info, EFFECT_1);
@@ -122,7 +145,7 @@ void ApplyContracts(SpellInfo* info)
         info->TargetAuraState = info->CasterAuraState = 0;
     if (id == 802006)
         info->Effects[EFFECT_2].TriggerSpell = 680386;
-    if (Dusk(info))
+    if (Dusk(info) || id == 680230)
         info->AttributesEx3 &= ~SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON;
     if (Heartseeking(info))
         info->Effects[EFFECT_2].TriggerSpell = 807316;
@@ -273,7 +296,11 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[EFFECT_2].Effect = 0;
     }
     if (id == 805757)
+    {
         info->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_DEST_AREA_ALLY);
+        info->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_DEST_DYNOBJ_ALLY);
+        info->AttributesCu &= ~SPELL_ATTR0_CU_NEGATIVE_EFF0;
+    }
     if (id == 500102)
         info->Effects[EFFECT_1].Effect = 0;
     if (id == 504713)
@@ -309,6 +336,7 @@ void ApplyContracts(SpellInfo* info)
     {
         info->Effects[EFFECT_2].Effect = 0;
         info->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_TAKE_DAMAGE | AURA_INTERRUPT_FLAG_DIRECT_DAMAGE;
+        info->AttributesCu |= SPELL_ATTR0_CU_POSITIVE_EFF1;
     }
     if (id == 805773 || id == 92093)
         for (SpellEffectInfo& effect : info->Effects)
@@ -367,6 +395,30 @@ class witch_hunter_scaling : public UnitScript
     }
 };
 
+class witch_hunter_silver_bolts_shadow_trap : public UnitScript
+{
+  public:
+    witch_hunter_silver_bolts_shadow_trap()
+        : UnitScript("witch_hunter_silver_bolts_shadow_trap", true, {UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN})
+    {
+    }
+
+    void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* spellInfo) override
+    {
+        Player* player = attacker ? Owner(attacker) : nullptr;
+        if (!player || !target || !spellInfo || !target->HasAura(SPELL_SHADOW_TRAPPED))
+            return;
+        for (AuraEffect* effect : player->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_DONE_VERSUS))
+            if (effect->GetId() == SPELL_SILVER_BOLTS && effect->IsAffectedOnSpell(spellInfo))
+            {
+                if (target->GetCreatureTypeMask() & effect->GetMiscValue())
+                    return;
+                AddPct(damage, effect->GetSpellInfo()->Effects[EFFECT_2].CalcValue(player));
+                return;
+            }
+    }
+};
+
 class spell_ascension_witch_hunter_copy : public SpellScript
 {
     PrepareSpellScript(spell_ascension_witch_hunter_copy);
@@ -391,5 +443,6 @@ void AddAscensionWitchHunterCompletionScripts()
 {
     new witch_hunter_scaling();
     new witch_hunter_resources();
+    new witch_hunter_silver_bolts_shadow_trap();
     RegisterSpellScript(spell_ascension_witch_hunter_copy);
 }

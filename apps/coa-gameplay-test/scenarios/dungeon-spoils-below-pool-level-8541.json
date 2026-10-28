@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "name": "Dungeon Spoils opened below the lowest pool level gives a lowest-level item (#8541)",
+  "contract": [
+    "#8541: a level 10 character used Dungeon Spoils (2021814) after Ragefire Chasm and nothing happened. The bag has",
+    "no level requirement, but every item of its vanilla dungeon pool requires level 13 or more, so the level-scaled",
+    "pick found no candidate. Opened at level 10 the spoils are now used up and put exactly one item of the lowest",
+    "required level in the pool (13) in the bags."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p1",
+      "race": 1,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "p1",
+      "item": 2021814,
+      "count": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: p1 holds one Dungeon Spoils",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "use_item",
+      "label": "p1 opens the spoils at level 10",
+      "actor": "p1",
+      "item": 2021814,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "label": "p1 no longer holds the opened spoils",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The spoils put exactly one of their items in p1's bags",
+      "actor": "p1",
+      "metric": "carried_pool_item_count",
+      "cache": 2021814,
+      "table": "loot",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "It is an item of the lowest required level in the pool (13)",
+      "actor": "p1",
+      "metric": "carried_pool_item_count",
+      "cache": 2021814,
+      "table": "loot",
+      "min_required_level": 13,
+      "max_required_level": 13,
+      "equals": 1
+    }
+  ]
+}

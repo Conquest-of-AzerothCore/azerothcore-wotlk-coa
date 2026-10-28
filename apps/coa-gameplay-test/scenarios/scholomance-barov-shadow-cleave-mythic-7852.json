@@ -1,0 +1,166 @@
+{
+  "schema": 1,
+  "name": "Scholomance Mythic: Barov's Shadow Cleave deals 20% weapon damage without a dungeon spell multiplier (#7852)",
+  "contract": "On Mythic Scholomance, Lord Alexei Barov's Shadow Cleave (2100356) deals 20% of his Mythic template weapon damage as unmitigated Shadow damage, with no extra CoA dungeon spell multiplier. Barov's Mythic template (210504, level 63, damage modifier 41.05, 2.0 s attack time, 268 attack power) swings for 4509-5977, so one Shadow Cleave lands for 901-1195 and a 1.5x spell critical for 1352-1793. Two casts therefore take 901-3586 health even when one of them misses, while the former x8 multiplier made any landed cast at least 7208. Barov is summoned into the Mythic instance so the native difficulty template is used; Hand of Protection blocks his melee swings and Fierce Blow, and both casts and the measurement finish within seconds of the summon, well before Immolate or a kit cast can land. At most two Unholy Aura ticks of 41-48 can fall inside the window.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "hero",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 289,
+      "x": 175.3,
+      "y": -91.0,
+      "z": 70.86
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is inside Scholomance",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 289,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the instance runs on Mythic difficulty",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "set_aura",
+      "label": "Hand of Protection keeps Barov's physical melee and Fierce Blow out of the measurement",
+      "actor": "hero",
+      "spell": 1022,
+      "stacks": 1
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 10504,
+      "as": "barov",
+      "distance": 4
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the summoned Barov uses the Mythic difficulty template",
+      "actor": "hero",
+      "metric": "nearby_creature_template",
+      "entry": 10504,
+      "equals": 210504
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Barov is level 63",
+      "actor": "barov",
+      "metric": "level",
+      "equals": 63
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Shadow Cleave ignores armor",
+      "actor": "hero",
+      "metric": "spell_uses_armor",
+      "spell": 2100356,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hand of Protection does not make the hero immune to Shadow Cleave",
+      "actor": "hero",
+      "metric": "spell_immune",
+      "spell": 2100356,
+      "target": "barov",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The CoA damage-taken hooks leave Barov's Shadow Cleave unscaled on Mythic",
+      "actor": "hero",
+      "metric": "script_spell_damage_taken",
+      "spell": 2100356,
+      "target": "barov",
+      "equals": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "health",
+      "save_as": "before_cleave"
+    },
+    {
+      "action": "cast",
+      "label": "Barov casts Shadow Cleave at the hero",
+      "actor": "barov",
+      "spell": 2100356,
+      "target": "hero"
+    },
+    {
+      "action": "cast",
+      "label": "Barov casts Shadow Cleave at the hero again",
+      "actor": "barov",
+      "spell": 2100356,
+      "target": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "Two Shadow Cleaves take 20% weapon damage each, far below the former x8 hits",
+      "actor": "hero",
+      "metric": "health",
+      "relative_to": "before_cleave",
+      "min": -3800,
+      "max": -880
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero survives the measurement",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "name": "Ranger Falconstrike swaps in and out without chat lines (#5755, #6007)",
+  "contract": [
+    "With the Falconstrike talent 573060 and its ready buff 573338, SyncFalconstrike keeps the highest Falconstrike",
+    "rank the level allows (806443 at level 80) learned as a temporary spell and swaps every known Quick Shot rank",
+    "for it through SMSG_SUPERCEDED_SPELL; when the buff ends it swaps Quick Shot 500074 back. Every proc printed",
+    "'You have learned a new spell: Falconstrike' and every revert 'You have learned a new spell: Quick Shot'",
+    "(#6007). Extensions.dll silences a swap when either spell, or its first rank, is listed by an indexed",
+    "CharacterAdvancement row, so the server sends a hidden row listing Falconstrike before its first swap. Expected",
+    "over a proc and its revert: both swaps reach the client, Falconstrike is in the client's spellbook, and no line",
+    "is printed for either spell."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login state settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 500074
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 573060
+    },
+    {
+      "action": "snapshot",
+      "actor": "ranger",
+      "metric": "client_chat_lines_for",
+      "spell": 500074,
+      "save_as": "quick_shot_lines"
+    },
+    {
+      "action": "set_aura",
+      "label": "Falconstrike is ready",
+      "actor": "ranger",
+      "spell": 573338,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Quick Shot is swapped for Falconstrike",
+      "actor": "ranger",
+      "metric": "temporary_spell_replacement",
+      "spell": 500074,
+      "equals": 806443,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The swap reaches the client",
+      "actor": "ranger",
+      "metric": "spellbook_superseded_for",
+      "spell": 806443,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Falconstrike reaches the client's spellbook",
+      "actor": "ranger",
+      "metric": "client_knows_spell",
+      "spell": 806443,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "No line for Falconstrike",
+      "actor": "ranger",
+      "metric": "client_chat_lines_for",
+      "spell": 806443,
+      "equals": 0
+    },
+    {
+      "action": "cancel_aura",
+      "label": "The ready buff ends",
+      "actor": "ranger",
+      "spell": 573338
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Quick Shot is back",
+      "actor": "ranger",
+      "metric": "temporary_spell_replacement",
+      "spell": 500074,
+      "equals": 500074,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The swap back reaches the client",
+      "actor": "ranger",
+      "metric": "spellbook_superseded_for",
+      "spell": 500074,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "No line for Quick Shot coming back (#6007)",
+      "actor": "ranger",
+      "metric": "client_chat_lines_for",
+      "spell": 500074,
+      "relative_to": "quick_shot_lines",
+      "equals": 0
+    }
+  ]
+}

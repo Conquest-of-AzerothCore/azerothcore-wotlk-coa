@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "name": "A level-1 Wildcard Hero rolls, locks and rerolls its four starting abilities",
+  "contract": "On Darkmoon - Season 10 Wildcard a new Hero carried the Dice of Destiny (item 777992), whose use (spell 18283) tells the client to roll (SMSG 0x68E DICE_OF_DESTINY_USED). Clicking the dice (CMSG 0x64B) and the server revealed four starting abilities, one SMSG 0x621 each, sent the build (SMSG 0x726) and answered OK (SMSG 0x64C). Locking an entry (CMSG 0x658 -> SMSG 0x659) keeps it through the next reroll, which replaces only the three unlocked abilities; the replaced spells leave the spellbook and the action bar. Unlocking (CMSG 0x65A -> SMSG 0x65B) frees it again. The starting reroll belongs to Wildcard Heroes up to level 9, the last level before the first leveling roll; a build without starting abilities (such as a fresh specialization) still gets its first starting roll at any level (user, S10). A starter skill card from the collection (CMSG 0x622 -> SMSG 0x623, slot update SMSG 0x625) chose the ability of its starting position: normal cards the first two, golden cards the last two. The roll marked the card used (SMSG 0x625) before revealing its ability. Golden cards did not fit normal slots, and only collected cards could be set.",
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "wild", "race": 1, "class": 10, "level": 1},
+    {"id": "plain", "race": 1, "class": 10, "level": 1},
+    {"id": "veteran", "race": 1, "class": 10, "level": 10}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 3000},
+    {"action": "console", "command": "coa gamemode WildCard on Harnessa"},
+    {"action": "console", "command": "coa gamemode WildCard on Harnessc"},
+    {"action": "console", "command": "coa gamemode WildCard off Harnessb"},
+    {"action": "login_hooks", "label": "Log the Wildcard Hero in again", "actor": "wild"},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "A Wildcard Hero carries the Dice of Destiny", "actor": "wild", "metric": "item_count", "item": 777992, "equals": 1},
+    {"action": "use_item", "label": "Use the Dice of Destiny", "actor": "wild", "item": 777992, "spell": 18283},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "Using it tells the client to roll", "actor": "wild", "metric": "server_packet_contains", "opcode": 1678, "text": "DICE_OF_DESTINY_USED", "equals": 1},
+
+    {"action": "client_packet", "label": "Pick Lava Lash as the first starter", "actor": "wild", "opcode": 1570, "fields": [{"u32": 0}, {"string": "SKILL_CARD_STARTER_NORMAL"}, {"u32": 0}, {"u32": 12240}]},
+    {"action": "client_packet", "label": "Try a golden card in a normal slot", "actor": "wild", "opcode": 1570, "fields": [{"u32": 0}, {"string": "SKILL_CARD_STARTER_NORMAL"}, {"u32": 1}, {"u32": 24415}]},
+    {"action": "client_packet", "label": "Try a card outside the collection", "actor": "wild", "opcode": 1570, "fields": [{"u32": 0}, {"string": "SKILL_CARD_STARTER_GOLDEN"}, {"u32": 0}, {"u32": 11923}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The starter card is set", "actor": "wild", "metric": "server_packet_contains", "opcode": 1571, "text": "SET_SKILL_CARD_OK", "equals": 1},
+    {"action": "assert", "label": "and shown in its slot", "actor": "wild", "metric": "server_packets", "opcode": 1573, "equals": 1},
+    {"action": "assert", "label": "Golden cards need golden slots", "actor": "wild", "metric": "server_packet_contains", "opcode": 1571, "text": "SET_SKILL_CARD_UNKNOWN", "equals": 1},
+    {"action": "assert", "label": "Only collected cards can be set", "actor": "wild", "metric": "server_packet_contains", "opcode": 1571, "text": "SET_SKILL_CARD_NOT_COLLECTED", "equals": 1},
+    {"action": "assert", "label": "The card is stored", "actor": "wild", "metric": "player_setting", "source": "core.wildcard.startercards", "index": 0, "equals": 12240},
+
+    {"action": "client_packet", "label": "Click the dice", "actor": "wild", "opcode": 1611},
+    {"action": "wait", "ms": 1500},
+    {"action": "assert", "label": "Four abilities are revealed", "actor": "wild", "metric": "server_packets", "opcode": 1569, "equals": 4},
+    {"action": "assert", "label": "The reroll answers OK", "actor": "wild", "metric": "server_packet_contains", "opcode": 1612, "text": "OK", "equals": 1},
+    {"action": "assert", "label": "The build goes out before and after the reveal", "actor": "wild", "metric": "server_packets", "opcode": 1830, "equals": 2},
+    {"action": "assert", "label": "The four starter spells are learned", "actor": "wild", "metric": "wildcard_starter_spells_known", "equals": 4},
+    {"action": "assert", "label": "The fourth slot is filled", "actor": "wild", "metric": "player_setting", "source": "core.wildcard", "index": 3, "min": 1},
+    {"action": "assert", "label": "The starter card chose the first ability", "actor": "wild", "metric": "player_setting", "source": "core.wildcard", "index": 0, "equals": 41029},
+    {"action": "assert", "label": "and was marked used before its reveal", "actor": "wild", "metric": "server_packets", "opcode": 1573, "equals": 2},
+    {"action": "assert", "label": "The card stays in its slot as used", "actor": "wild", "metric": "player_setting", "source": "core.wildcard.startercards", "index": 0, "equals": 2147495888},
+
+    {"action": "set_action_button", "label": "Put the third starter on the action bar", "actor": "wild", "button": 10, "wildcard_slot": 2},
+    {"action": "assert", "label": "It sits on the bar", "actor": "wild", "metric": "action_button", "button": 10, "min": 1},
+    {"action": "assert", "label": "Every spell on the bar is known", "actor": "wild", "metric": "action_bar_unknown_spells", "equals": 0},
+
+    {"action": "snapshot", "actor": "wild", "metric": "player_setting", "source": "core.wildcard", "index": 1, "save_as": "second_slot"},
+    {"action": "client_packet", "label": "Lock the second ability", "actor": "wild", "opcode": 1624, "fields": [{"wildcard_entry": 1}]},
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "label": "The lock answers OK", "actor": "wild", "metric": "server_packet_contains", "opcode": 1625, "text": "OK", "equals": 1},
+    {"action": "assert", "label": "The lock is stored with the slot", "actor": "wild", "metric": "player_setting", "source": "core.wildcard", "index": 1, "relative_to": "second_slot", "equals": 2147483648},
+
+    {"action": "client_packet", "label": "Reroll the unlocked abilities", "actor": "wild", "opcode": 1611},
+    {"action": "wait", "ms": 1500},
+    {"action": "assert", "label": "Only the three unlocked abilities are revealed", "actor": "wild", "metric": "server_packets", "opcode": 1569, "equals": 7},
+    {"action": "assert", "label": "The locked ability stays in its slot", "actor": "wild", "metric": "player_setting", "source": "core.wildcard", "index": 1, "relative_to": "second_slot", "equals": 2147483648},
+    {"action": "assert", "label": "The replaced spells leave the spellbook", "actor": "wild", "metric": "wildcard_starter_spells_known", "equals": 4},
+    {"action": "assert", "label": "and the action bar", "actor": "wild", "metric": "action_bar_unknown_spells", "equals": 0},
+
+    {"action": "client_packet", "label": "Unlock the second ability", "actor": "wild", "opcode": 1626, "fields": [{"wildcard_entry": 1}]},
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "label": "The unlock answers OK", "actor": "wild", "metric": "server_packet_contains", "opcode": 1627, "text": "OK", "equals": 1},
+    {"action": "assert", "label": "The slot is unlocked again", "actor": "wild", "metric": "player_setting", "source": "core.wildcard", "index": 1, "relative_to": "second_slot", "equals": 0},
+
+    {"action": "client_packet", "label": "A Hero outside Wildcard clicks", "actor": "plain", "opcode": 1611},
+    {"action": "client_packet", "label": "A level-10 Wildcard Hero without starters clicks", "actor": "veteran", "opcode": 1611},
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "label": "Outside Wildcard the reroll is refused", "actor": "plain", "metric": "server_packet_contains", "opcode": 1612, "text": "NOT_ALLOWED", "equals": 1},
+    {"action": "assert", "label": "and nothing is revealed", "actor": "plain", "metric": "server_packets", "opcode": 1569, "equals": 0},
+    {"action": "assert", "label": "An empty build gets its starting roll at any level", "actor": "veteran", "metric": "wildcard_starter_spells_known", "equals": 4},
+    {"action": "client_packet", "label": "It clicks again", "actor": "veteran", "opcode": 1611},
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "label": "Past level 9 the starting reroll is refused", "actor": "veteran", "metric": "server_packet_contains", "opcode": 1612, "text": "NOT_ALLOWED", "equals": 1},
+    {"action": "assert", "label": "and the starters stay", "actor": "veteran", "metric": "wildcard_starter_spells_known", "equals": 4}
+  ]
+}

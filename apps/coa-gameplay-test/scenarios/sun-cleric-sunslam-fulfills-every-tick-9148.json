@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Sunslam fulfills a Vow on each of its four ticks, not just once (#9148)",
+  "contract": [
+    "Sunslam 805629 channels for 4 seconds, triggering its melee-class damage spell 805639 once per second (4",
+    "ticks total). AscensionSunCleric::Fulfill() gated the once-per-cast 807441 flag on the Origin()-translated",
+    "Spell*, which for 805639 is always the same shared channeled Spell* object (Origin() redirects every tick",
+    "back to the channel): the first tick fulfilled a Vow and set the flag, so the remaining three ticks of the",
+    "same channel silently found it already set and bailed out. Fulfilling a Vow while Trial of Valor (805581) is",
+    "active reduces Horusath Blast's (500154) cooldown by Amount(807445) ms, an externally observable side effect:",
+    "with the fix each of the four Sunslam ticks must fulfill the active Vow of the Valkyr (807749) independently,",
+    "reducing Horusath Blast's cooldown four times, not once."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 1,
+    "x": -8914.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "cleric",
+      "entry": 299,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and class synchronisation settle", "ms": 3000 },
+    { "action": "learn", "actor": "cleric", "spell": 804584 },
+    { "action": "learn", "actor": "cleric", "spell": 807749 },
+    { "action": "cast", "actor": "cleric", "spell": 807749 },
+    {
+      "action": "assert", "label": "Vow of the Valkyr is active",
+      "actor": "cleric", "metric": "aura", "spell": 807749, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "wait", "ms": 1200,
+      "label": "Vow of the Valkyr and Horusath Blast share StartRecoveryCategory 133 (1000 ms); let that GCD clear"
+    },
+    { "action": "learn", "actor": "cleric", "spell": 805581 },
+    {
+      "action": "assert", "label": "Trial of Valor's passive is active",
+      "actor": "cleric", "metric": "aura", "spell": 805581, "equals": 1, "within_ms": 2000
+    },
+    { "action": "learn", "actor": "cleric", "spell": 500154 },
+    { "action": "learn", "actor": "cleric", "spell": 805629 },
+    {
+      "action": "set_aura", "label": "Fixture: Dawn requires 20 Solar Power (500149) to cast",
+      "actor": "cleric", "spell": 500149, "stacks": 20
+    },
+    {
+      "action": "set_aura", "label": "Fixture: Dawn's own CasterAuraSpell readiness marker",
+      "actor": "cleric", "spell": 704396, "stacks": 1
+    },
+    { "action": "cast", "actor": "cleric", "spell": 804584 },
+    {
+      "action": "assert", "label": "Dawn is active",
+      "actor": "cleric", "metric": "aura", "spell": 807440, "equals": 1, "within_ms": 2000
+    },
+    { "action": "cast", "actor": "cleric", "spell": 500154, "target": "dummy" },
+    {
+      "action": "assert", "label": "Horusath Blast lands and starts its cooldown",
+      "actor": "cleric", "metric": "cast_failure", "spell": 500154, "equals": 0
+    },
+    {
+      "action": "snapshot", "label": "Horusath Blast cooldown before the Sunslam channel",
+      "actor": "cleric", "metric": "cooldown_ms", "spell": 500154, "save_as": "hb_before"
+    },
+    {
+      "action": "wait", "ms": 1600,
+      "label": "Horusath Blast and Sunslam share StartRecoveryCategory 133 (1500 ms); let that GCD clear"
+    },
+    { "action": "cast", "actor": "cleric", "spell": 805629, "target": "dummy" },
+    { "action": "wait", "label": "Let the full 4-tick Sunslam channel complete", "ms": 4300 },
+    {
+      "action": "assert", "label": "All four Sunslam ticks land",
+      "actor": "cleric", "metric": "spell_damage_count", "spell": 805639, "target": "dummy", "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: four Vow fulfillments reduce Horusath Blast's cooldown far more than one would",
+      "actor": "cleric", "metric": "cooldown_ms", "spell": 500154, "relative_to": "hb_before", "max": -9000
+    }
+  ]
+}

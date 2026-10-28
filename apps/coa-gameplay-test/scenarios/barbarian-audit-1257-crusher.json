@@ -1,8 +1,20 @@
 {
   "schema": 1,
   "name": "Barbarian audit: Crusher resets Crush's cooldown from a native DBC-generated proc, no code needed (#1257)",
-  "contract": "Crusher rank 2 (807875, passive) has one effect: APPLY_AURA SPELL_AURA_PROC_TRIGGER_SPELL (42) triggering 807911 with EffectBasePoints 0. Spell.dbc gives 807875 ProcFlags 4 (PROC_FLAG_DONE_MELEE_AUTO_ATTACK) and ProcChance 20, matching the tooltip 'Melee auto attacks now have a 20% chance to reset the cooldown of Crush'. No spell_proc/spell_linked_spell/spell_proc_event row exists for 807875 anywhere in the repository. That looked like the same gap as Essence Harvester (#1182, see bloodmage-essence-harvester-fang-reset.json): SpellMgr::LoadSpellProcs only builds a spell_proc row from a spell's own DBC ProcFlags when that field is nonzero (SpellMgr.cpp ~2253, 'Skip if no proc flags in DBC'); Essence Harvester's DBC ProcFlags is 0, so it needed an explicit row. Crusher's DBC ProcFlags is 4 (nonzero), so the same loader's default-proc generator (SpellMgr.cpp 2194-2328, isTriggerAura[SPELL_AURA_PROC_TRIGGER_SPELL] = true) builds one automatically from the DBC ProcFlags/ProcChance -- no SQL or C++ change needed. The triggered spell 807911 has one effect, SPELL_EFFECT_ASCENSION_RESET_COOLDOWN (195, EffectMiscValue 500915 = Crush, EffectMiscValueB 0), an existing generic handler (Spell::EffectAscensionResetCooldown) that resets the target spell's cooldown/category through the normal ResetAscensionCooldown path used by every other Ascension reset-on-proc talent in this module. Crush (500915) has RecoveryTime/CategoryRecoveryTime 25000ms, so putting it on cooldown and then landing enough 1900ms-speed auto attacks (Worn Shortsword, item 25) to exceed the 20% chance's false-failure probability (40 swings: 0.8^40 is about 0.013%) proves the whole native chain -- proc generation, trigger dispatch and the reset effect -- without any fix.",
-  "timeout_ms": 120000,
+  "contract": [
+    "Crusher rank 2 (807875) has native DBC ProcFlags 4, ProcChance 20, and aura 42 triggering cooldown reset",
+    "807911 for Crush 500915. No spell_proc row is needed because the nonzero original flags generate its",
+    "native proc. Waiting for Crush's 25-second cooldown to reach zero can accept ordinary expiry after only",
+    "about thirteen swings, leaving an unnecessary 5 percent chance that no actual proc occurred. Twenty",
+    "independent windows each fund and cast Crush normally after a fixture cooldown reset, stop melee until the",
+    "native cooldown is at least 24 seconds, then allow sixteen seconds of ordinary 1900 ms sword attacks.",
+    "Native proc counters and cooldowns are recorded every two seconds while ordinary expiry is still",
+    "impossible. Require twenty accepted normal Crush casts and at least 100 actual melee damage events,",
+    "preserve the original 20 percent chance and attack speed, and independently require an observed native",
+    "proc paired with a zero cooldown inside a window. Fixture cooldown resets happen before each new normal",
+    "cast and cannot satisfy the measured reset contract."
+  ],
+  "timeout_ms": 480000,
   "players": [
     {
       "id": "b",
@@ -14,25 +26,3923 @@
     }
   ],
   "creatures": [
-    { "id": "d", "owner": "b", "entry": 36, "level": 80, "health": 500000, "distance": 3 }
+    {
+      "id": "d",
+      "owner": "b",
+      "entry": 36,
+      "level": 80,
+      "health": 500000,
+      "distance": 3
+    }
   ],
   "steps": [
-    { "action": "wait", "ms": 5000 },
-
-    { "action": "learn", "actor": "b", "spell": 807875 },
-    { "action": "learn", "actor": "b", "spell": 500915 },
-    { "action": "add_item", "actor": "b", "item": 25 },
-    { "action": "equip", "actor": "b", "item": 25, "slot": 15 },
-    { "action": "wait", "ms": 2000 },
-
-    { "action": "cast", "actor": "b", "spell": 500915, "target": "d" },
-    { "action": "assert", "label": "Crush enters its native 25s cooldown", "actor": "b", "metric": "cooldown_ms", "spell": 500915, "min": 20000, "within_ms": 3000 },
-
-    { "action": "attack", "actor": "b", "target": "d" },
-    { "action": "assert", "label": "b enters native melee combat", "actor": "b", "metric": "combat", "equals": 1, "within_ms": 5000 },
-    { "action": "assert", "actor": "d", "metric": "alive", "equals": 1 },
-
-    { "action": "assert", "label": "Crusher's DBC-generated proc resets Crush's cooldown without any code or SQL change", "actor": "b", "metric": "cooldown_ms", "spell": 500915, "equals": 0, "within_ms": 100000 },
-    { "action": "assert", "label": "the proc was actually recorded against Crusher's aura", "actor": "b", "metric": "spell_proc_count", "spell": 807875, "min": 1 }
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 807875
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 500915
+    },
+    {
+      "action": "add_item",
+      "actor": "b",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "b",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 807875,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "b",
+      "spell": 500915
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 500915,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 500915,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "min": 24000,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "before_0"
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_0_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_0_0"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_0_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_0_1"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_0_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_0_2"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_0_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_0_3"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_0_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_0_4"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_0_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_0_5"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_0_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_0_6"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_0_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_0_7"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "b",
+      "spell": 500915
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 500915,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 500915,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "min": 24000,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "before_1"
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_1_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_1_0"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_1_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_1_1"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_1_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_1_2"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_1_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_1_3"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_1_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_1_4"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_1_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_1_5"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_1_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_1_6"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_1_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_1_7"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "b",
+      "spell": 500915
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 500915,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 500915,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "min": 24000,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "before_2"
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_2_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_2_0"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_2_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_2_1"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_2_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_2_2"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_2_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_2_3"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_2_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_2_4"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_2_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_2_5"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_2_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_2_6"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_2_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_2_7"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "b",
+      "spell": 500915
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 500915,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 500915,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "min": 24000,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "before_3"
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_3_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_3_0"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_3_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_3_1"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_3_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_3_2"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_3_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_3_3"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_3_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_3_4"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_3_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_3_5"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_3_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_3_6"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_3_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_3_7"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "b",
+      "spell": 500915
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 500915,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 500915,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "min": 24000,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "before_4"
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_4_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_4_0"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_4_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_4_1"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_4_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_4_2"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_4_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_4_3"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_4_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_4_4"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_4_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_4_5"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_4_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_4_6"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_4_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_4_7"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "b",
+      "spell": 500915
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 500915,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 500915,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "min": 24000,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "before_5"
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_5_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_5_0"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_5_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_5_1"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_5_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_5_2"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_5_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_5_3"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_5_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_5_4"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_5_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_5_5"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_5_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_5_6"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_5_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_5_7"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "b",
+      "spell": 500915
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 500915,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 500915,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "min": 24000,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "before_6"
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_6_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_6_0"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_6_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_6_1"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_6_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_6_2"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_6_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_6_3"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_6_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_6_4"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_6_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_6_5"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_6_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_6_6"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_6_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_6_7"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "b",
+      "spell": 500915
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 500915,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 500915,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "min": 24000,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "before_7"
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_7_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_7_0"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_7_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_7_1"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_7_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_7_2"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_7_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_7_3"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_7_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_7_4"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_7_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_7_5"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_7_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_7_6"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_7_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_7_7"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "b",
+      "spell": 500915
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 500915,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 500915,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "min": 24000,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "before_8"
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_8_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_8_0"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_8_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_8_1"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_8_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_8_2"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_8_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_8_3"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_8_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_8_4"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_8_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_8_5"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_8_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_8_6"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_8_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_8_7"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "b",
+      "spell": 500915
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 500915,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 500915,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "min": 24000,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "before_9"
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_9_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_9_0"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_9_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_9_1"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_9_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_9_2"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_9_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_9_3"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_9_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_9_4"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_9_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_9_5"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_9_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_9_6"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_9_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_9_7"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "b",
+      "spell": 500915
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 500915,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 500915,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "min": 24000,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "before_10"
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_10_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_10_0"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_10_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_10_1"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_10_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_10_2"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_10_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_10_3"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_10_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_10_4"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_10_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_10_5"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_10_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_10_6"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_10_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_10_7"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "b",
+      "spell": 500915
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 500915,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 500915,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "min": 24000,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "before_11"
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_11_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_11_0"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_11_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_11_1"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_11_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_11_2"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_11_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_11_3"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_11_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_11_4"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_11_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_11_5"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_11_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_11_6"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_11_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_11_7"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "b",
+      "spell": 500915
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 500915,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 500915,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "min": 24000,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "before_12"
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_12_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_12_0"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_12_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_12_1"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_12_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_12_2"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_12_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_12_3"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_12_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_12_4"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_12_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_12_5"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_12_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_12_6"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_12_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_12_7"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "b",
+      "spell": 500915
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 500915,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 500915,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "min": 24000,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "before_13"
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_13_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_13_0"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_13_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_13_1"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_13_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_13_2"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_13_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_13_3"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_13_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_13_4"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_13_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_13_5"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_13_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_13_6"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_13_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_13_7"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "b",
+      "spell": 500915
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 500915,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 500915,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "min": 24000,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "before_14"
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_14_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_14_0"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_14_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_14_1"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_14_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_14_2"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_14_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_14_3"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_14_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_14_4"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_14_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_14_5"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_14_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_14_6"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_14_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_14_7"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "b",
+      "spell": 500915
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 500915,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 500915,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "min": 24000,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "before_15"
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_15_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_15_0"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_15_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_15_1"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_15_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_15_2"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_15_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_15_3"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_15_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_15_4"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_15_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_15_5"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_15_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_15_6"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_15_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_15_7"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "b",
+      "spell": 500915
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 500915,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 500915,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "min": 24000,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "before_16"
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_16_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_16_0"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_16_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_16_1"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_16_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_16_2"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_16_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_16_3"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_16_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_16_4"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_16_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_16_5"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_16_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_16_6"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_16_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_16_7"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "b",
+      "spell": 500915
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 500915,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 500915,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "min": 24000,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "before_17"
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_17_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_17_0"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_17_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_17_1"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_17_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_17_2"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_17_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_17_3"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_17_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_17_4"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_17_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_17_5"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_17_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_17_6"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_17_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_17_7"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "b",
+      "spell": 500915
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 500915,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 500915,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "min": 24000,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "before_18"
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_18_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_18_0"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_18_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_18_1"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_18_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_18_2"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_18_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_18_3"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_18_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_18_4"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_18_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_18_5"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_18_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_18_6"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_18_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_18_7"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "b",
+      "spell": 500915
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 500915,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 500915,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "min": 24000,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "before_19"
+    },
+    {
+      "action": "attack",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_19_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_19_0"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_19_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_19_1"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_19_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_19_2"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_19_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_19_3"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_19_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_19_4"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_19_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_19_5"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_19_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_19_6"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "save_as": "proc_19_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 500915,
+      "save_as": "cooldown_19_7"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "b"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spell_cast_count",
+      "spell": 500915,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "melee_damage_count",
+      "target": "d",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spell_proc_count",
+      "spell": 807875,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "d",
+      "metric": "alive",
+      "equals": 1
+    }
   ]
 }

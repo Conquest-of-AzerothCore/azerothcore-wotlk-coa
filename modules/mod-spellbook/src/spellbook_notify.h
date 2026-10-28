@@ -24,6 +24,24 @@ namespace SpellbookNotify
     /// The same for a list, in order. The bulk "learn everything" action uses it per spell, so
     /// each learn arrives announced exactly as a single purchase is.
     void Push(Player *player, std::vector<std::uint32_t> const &spellIds);
+
+    /// Takes the notable bit off one spell's row, so the client does not announce it, until Push
+    /// puts it back. A temporary spell replacement that ends tells the client it "learned" the
+    /// spell it hands back; wrapped in Mute and Push, that notice stays silent while a genuine
+    /// learn of the same spell is still announced.
+    void Mute(Player *player, std::uint32_t spellId);
+
+    /// Sends one spell's row with the client's quiet-learn and no-placement bits set and the notable bit
+    /// cleared, so the next SMSG_LEARNED_SPELL for it prints no chat line, shows no toast and places no
+    /// button. A spell
+    /// with no row in the book data or the client's table borrows one spare row id.
+    void Quiet(Player *player, std::uint32_t spellId);
+
+    /// Reads Spellbook.Notify.Enable; called once at startup and on every config reload.
+    void LoadConfig();
+
+    /// Puts back the row Quiet replaced, so a later genuine learn of the spell is announced as usual.
+    void Unquiet(Player *player, std::uint32_t spellId);
 }
 
 #endif

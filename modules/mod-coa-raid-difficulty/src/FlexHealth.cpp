@@ -27,6 +27,8 @@
  * it applies equally to bosses that keep their stock script, like Ragnaros.
  */
 
+#include "FlexHealth.h"
+
 #include "Creature.h"
 #include "DBCEnums.h"
 #include "DatabaseEnv.h"
@@ -36,6 +38,7 @@
 #include "Player.h"
 #include "QueryResult.h"
 #include "ScriptMgr.h"
+#include "World.h"
 
 #include <algorithm>
 #include <limits>
@@ -45,10 +48,32 @@ namespace
 {
     constexpr uint32 FLEX_MIN_PLAYERS = 10;
     constexpr uint32 FLEX_MAX_PLAYERS = 25;
+}
 
+namespace coa_flex
+{
+    uint32 CountPlayers(Map* map)
+    {
+        uint32 count = 0;
+        map->DoForAllPlayers([&count](Player* player)
+        {
+            if (!player->IsGameMaster())
+                ++count;
+        });
+        return std::clamp(count, FLEX_MIN_PLAYERS, FLEX_MAX_PLAYERS);
+    }
+}
+
+namespace
+{
     struct FlexRow
     {
-        uint32 perPlayer[MAX_RAID_DIFFICULTY];
+        // Positive: health per player, multiplied by the instance's actual
+        // player count (clamped 10..25) as usual. Negative: health per
+        // player, but always multiplied by FLEX_MAX_PLAYERS (25) regardless
+        // of how many players are actually there (e.g. Basalthane's Mythic/
+        // Ascended, which are 25-man-locked difficulties, not dynamic flex).
+        int32 perPlayer[MAX_RAID_DIFFICULTY];
     };
 
     std::unordered_map<uint32, FlexRow> g_flex;
@@ -68,28 +93,48 @@ namespace
                 Field* f = result->Fetch();
                 FlexRow& row = g_flex[f[0].Get<uint32>()];
                 for (uint8 i = 0; i < MAX_RAID_DIFFICULTY; ++i)
-                    row.perPlayer[i] = f[1 + i].Get<uint32>();
+                    row.perPlayer[i] = f[1 + i].Get<int32>();
             } while (result->NextRow());
         }
         LOG_INFO("server.loading", ">> Loaded flex health for {} bosses", uint32(g_flex.size()));
     }
 
-    uint32 CountPlayers(Map* map)
-    {
-        uint32 count = 0;
-        map->DoForAllPlayers([&count](Player* player)
-        {
-            if (!player->IsGameMaster())
-                ++count;
-        });
-        return std::clamp(count, FLEX_MIN_PLAYERS, FLEX_MAX_PLAYERS);
-    }
-
     // Scales health and keeps the current percentage, so a boss that is
     // already hurt stays exactly as hurt.
+    // CONFIRMED 2026-10-02: entry 310189 (Basalthane's Molten Blood ooze, Onyxia's
+    // Lair) is not a difficulty-variant of anything - it's an unrelated creature whose
+    // own entry number happens to equal 10189 + 300000, which BaseEntry's "+N*100000
+    // per difficulty" convention misreads as the 25-man (D3) variant of Basalthane
+    // (entry 10189). That made this ooze silently get Basalthane's own per-player HP
+    // applied to it. The ooze has its own real per-player flex logic (measured from
+    // combat logs, see MoltenBloodHpPerPlayerFor in spell_basalthane.cpp) applied
+    // directly at spawn time instead of through this shared table - skip it here so a
+    // later OnUnitEnterCombat call doesn't silently undo that with Basalthane's values.
+    constexpr uint32 ENTRY_BASALTHANE_MOLTEN_BLOOD_OOZE = 310189;
+
+    float HealthRate(uint32 rank)
+    {
+        switch (rank)
+        {
+            case CREATURE_ELITE_NORMAL:
+                return sWorld->getRate(RATE_CREATURE_NORMAL_HP);
+            case CREATURE_ELITE_RAREELITE:
+                return sWorld->getRate(RATE_CREATURE_ELITE_RAREELITE_HP);
+            case CREATURE_ELITE_WORLDBOSS:
+                return sWorld->getRate(RATE_CREATURE_ELITE_WORLDBOSS_HP);
+            case CREATURE_ELITE_RARE:
+                return sWorld->getRate(RATE_CREATURE_ELITE_RARE_HP);
+            default:
+                return sWorld->getRate(RATE_CREATURE_ELITE_ELITE_HP);
+        }
+    }
+
     void ApplyFlex(Creature* creature)
     {
         if (!creature || !creature->GetMap() || !creature->GetMap()->IsRaid())
+            return;
+
+        if (creature->GetEntry() == ENTRY_BASALTHANE_MOLTEN_BLOOD_OOZE)
             return;
 
         auto it = g_flex.find(BaseEntry(creature->GetEntry()));
@@ -100,8 +145,10 @@ namespace
         if (mode >= MAX_RAID_DIFFICULTY || !it->second.perPlayer[mode])
             return;
 
-        uint32 const players = CountPlayers(creature->GetMap());
-        uint64 const wanted = uint64(it->second.perPlayer[mode]) * players;
+        int32 const configured = it->second.perPlayer[mode];
+        uint32 const players = configured < 0 ? FLEX_MAX_PLAYERS : coa_flex::CountPlayers(creature->GetMap());
+        uint64 const measured = uint64(configured < 0 ? uint32(-configured) : uint32(configured)) * players;
+        uint64 const wanted = std::max<uint64>(1, uint64(double(measured) * HealthRate(creature->GetCreatureTemplate()->rank)));
         uint32 const health = uint32(std::min<uint64>(wanted, std::numeric_limits<uint32>::max()));
 
         float const pct = creature->GetMaxHealth() ? creature->GetHealthPct() : 100.0f;

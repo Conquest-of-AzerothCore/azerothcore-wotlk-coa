@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Sun Stride starts its 24 s cooldown on cast and refuses a recast until it elapses (#5247)",
+  "contract": "Issue #5247 (class 27 Sun Cleric, lvl 15): 'Sun Stride doesn't go on cd, so can only use it once per session.' Spell.dbc 680700 carries RecoveryTime 24000, Category 0, CategoryRecoveryTime 0, StartRecoveryTime 0 -- a plain per-spell cooldown, independent of session. A first cast (with no cooldown-reducing talent learned) must leave Player::GetSpellCooldownDelay(680700) close to 24000 ms and make an immediate second cast fail with SPELL_FAILED_NOT_READY (67); once that window elapses the cooldown must read 0 again and a third cast must succeed. A missing or desynced cooldown (the reported symptom) would instead let the second cast through immediately with cast_failure 0.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "cleric", "spell": 680700 },
+    { "action": "assert", "label": "SETUP: no cooldown before the first cast", "actor": "cleric", "metric": "cooldown_ms", "spell": 680700, "equals": 0 },
+
+    { "action": "cast", "actor": "cleric", "spell": 680700 },
+    { "action": "assert", "label": "SETUP: the first cast succeeds", "actor": "cleric", "metric": "cast_failure", "spell": 680700, "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: casting Sun Stride starts its 24 s cooldown", "actor": "cleric", "metric": "cooldown_ms", "spell": 680700, "min": 23000, "max": 24000 },
+
+    { "action": "cast", "actor": "cleric", "spell": 680700 },
+    { "action": "assert", "label": "DISCRIMINATING: a recast while the cooldown is active is refused (fails today if the cooldown never starts: cast_failure stays 0)", "actor": "cleric", "metric": "cast_failure", "spell": 680700, "equals": 67 },
+
+    { "action": "wait", "label": "Let the 24 s cooldown elapse", "ms": 24500 },
+    { "action": "assert", "label": "CONTRACT: the cooldown clears after 24 s", "actor": "cleric", "metric": "cooldown_ms", "spell": 680700, "equals": 0 },
+    { "action": "cast", "actor": "cleric", "spell": 680700 },
+    { "action": "assert", "label": "CONTRACT: a fresh cast after the cooldown elapses succeeds, independent of session", "actor": "cleric", "metric": "cast_failure", "spell": 680700, "equals": 0 }
+  ]
+}

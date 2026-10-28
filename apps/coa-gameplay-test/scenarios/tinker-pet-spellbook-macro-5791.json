@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Tinker builds send their pet spellbook, so pet abilities resolve in macros (#5791)",
+  "contract": [
+    "Tinker builds summon mechanical SUMMON_PET pets that learn their abilities (ZIGGI-6K 500481: Minicopter-Z 801626,",
+    "Revitalizing Aura 524839, Recharge 808010). Player::PetSpellInitialize writes the pet spellbook into",
+    "SMSG_PET_SPELLS only when Pet::IsPermanentPetFor is true, which held for Warlock demons, Death Knight ghouls and",
+    "the Mage's Water Elemental, so the Tinker's pet bar worked but the client got an empty pet spellbook and a",
+    "'/cast <pet ability>' macro found nothing. A Tinker's mechanical summon pet now counts as permanent. Expected: the",
+    "built ZIGGI-6K knows Minicopter-Z and the latest SMSG_PET_SPELLS (0x179) lists at least three pet spells (the",
+    "count byte after the 18-byte header and ten action slots). The client's macro lookup is not observable here."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "ziggi", "race": 1, "class": 28, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login state settle", "ms": 3000},
+    {"action": "learn", "label": "Build: ZIGGI-6K", "actor": "ziggi", "spell": 524840},
+    {"action": "cast", "label": "Build: ZIGGI-6K", "actor": "ziggi", "spell": 524840},
+    {"action": "assert", "label": "SETUP: ZIGGI-6K is built", "actor": "ziggi", "metric": "pet_entry", "equals": 500481,
+     "within_ms": 9000},
+    {"action": "assert", "label": "SETUP: ZIGGI-6K knows Minicopter-Z", "actor": "ziggi", "metric": "pet_knows_spell",
+     "spell": 801626, "equals": 1, "within_ms": 5000},
+    {"action": "wait", "label": "Let the pet spell packets settle", "ms": 1000},
+    {"action": "assert", "label": "The pet spellbook reaches the client", "actor": "ziggi", "metric": "server_packet_u8",
+     "opcode": 377, "index": 58, "min": 3}
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Cleansing the Scar stays a Priest quest that a Sun Cleric is not offered (#5756)",
+  "contract": "Quest 9489 Cleansing the Scar (Ponaris 16276, Eversong Woods) has quest_template_addon AllowableClasses 16 (Priest only), and its credit comes from the Eversong Ranger 15938 smart_scripts spell-hit events for the eight Priest Power Word: Fortitude ranks. The report came from a Sun Cleric (class 27) on revision 526d04340, when every legacy quest class mask was widened to the custom classes of the same family, so Priest-only quests reached the Sun Cleric without its spell. ExpandLegacyQuestClassMask now keeps a single stock class quest closed to custom classes. Expected: a level 8 blood elf Priest can take 9489 and a level 8 blood elf Sun Cleric cannot.",
+  "timeout_ms": 30000,
+  "location": { "map": 530, "x": 9467.96, "y": -6846.61, "z": 28.38, "o": 0 },
+  "players": [
+    { "id": "priest", "race": 10, "class": 5, "level": 8 },
+    { "id": "sun_cleric", "race": 10, "class": 27, "level": 8 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "SETUP: the Priest can take Cleansing the Scar", "actor": "priest",
+      "metric": "quest_takeable", "quest": 9489, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The Sun Cleric cannot take Cleansing the Scar", "actor": "sun_cleric",
+      "metric": "quest_takeable", "quest": 9489, "equals": 0
+    }
+  ]
+}

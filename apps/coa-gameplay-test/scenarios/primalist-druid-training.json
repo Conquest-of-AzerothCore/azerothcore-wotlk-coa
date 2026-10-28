@@ -1,7 +1,12 @@
 {
   "schema": 1,
   "name": "Primalist Druid Training Geode healing around the caster",
-  "contract": "Each of three real Geode Barrage stones heals the caster and every tested ally within twenty yards for 10% of damage dealt. A farther ally and the enemy receive none. A spell-power buff increases the source damage without adding another healing coefficient; baseline and removal produce no helper heals.",
+  "contract": [
+    "Each of three real Geode Barrage stones heals the caster and every tested ally within twenty yards for",
+    "10% of damage dealt. A farther ally and the enemy receive none. Compare the spell-power bonus using the",
+    "same fixed base damage before each normal cast. Healing remains 10% of the actual stone damage without",
+    "another healing coefficient; baseline and removal produce no helper heals."
+  ],
   "players": [
     {
       "id": "primalist",
@@ -433,6 +438,14 @@
       "save_as": "talented_n0"
     },
     {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "target",
+      "save_as": "talented_source_damage"
+    },
+    {
       "action": "cast",
       "actor": "primalist",
       "spell": 502777,
@@ -663,6 +676,14 @@
       "spell": 803138,
       "target": "target",
       "save_as": "power_n0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "target",
+      "save_as": "power_source_damage"
     },
     {
       "action": "cast",

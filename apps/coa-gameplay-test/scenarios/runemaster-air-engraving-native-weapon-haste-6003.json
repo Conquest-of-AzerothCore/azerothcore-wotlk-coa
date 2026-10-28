@@ -1,0 +1,179 @@
+{
+  "schema": 1,
+  "name": "Air Engraving provides 10% melee, ranged and casting haste from its normal weapon enchant (#6003)",
+  "contract": [
+    "Normal653222 at reported level 24 enchants an owned weapon with999, whose equip aura653223 promises10% melee, ranged and casting speed.",
+    "Compare actual native attack and cast-time multipliers before and after the normal item-target cast; exactly10% speed means time divided by1.1. Replacing Air with normal Ice must remove both Air auras and restore baseline speeds."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "r",
+      "race": 1,
+      "class": 32,
+      "level": 24
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 1180
+    },
+    {
+      "action": "add_item",
+      "actor": "r",
+      "item": 2092
+    },
+    {
+      "action": "equip",
+      "actor": "r",
+      "item": 2092,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 653222
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 653264
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "attack_time_ms",
+      "save_as": "melee_before",
+      "hand": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "attack_time_ms",
+      "save_as": "ranged_before",
+      "hand": 2
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "cast_speed_multiplier",
+      "save_as": "casting_before"
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 653222,
+      "target_item": 2092
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 653223,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "ratio_to": "melee_before",
+      "min": 0.908,
+      "max": 0.91,
+      "label": "Normal Air enchant increases melee attack speed by exactly 10%"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "ratio_to": "ranged_before",
+      "min": 0.908,
+      "max": 0.91
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "casting_before",
+      "min": 0.909,
+      "max": 0.9092
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 653225,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 653264,
+      "target_item": 2092
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 653266,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 653223,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 653225,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "ratio_to": "melee_before",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "ratio_to": "ranged_before",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "casting_before",
+      "min": 0.999,
+      "max": 1.001
+    }
+  ]
+}

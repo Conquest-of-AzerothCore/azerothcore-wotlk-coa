@@ -309,7 +309,7 @@ class spell_magtheridon_shadow_grasp : public AuraScript
     {
         OnEffectApply += AuraEffectApplyFn(spell_magtheridon_shadow_grasp::HandleDummyApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
         OnEffectRemove += AuraEffectRemoveFn(spell_magtheridon_shadow_grasp::HandleDummyRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-        OnEffectRemove += AuraEffectRemoveFn(spell_magtheridon_shadow_grasp::HandlePeriodicRemove, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+        OnEffectRemove += AuraEffectRemoveFn(spell_magtheridon_shadow_grasp::HandlePeriodicRemove, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE_PERCENT, AURA_EFFECT_HANDLE_REAL);
     }
 };
 

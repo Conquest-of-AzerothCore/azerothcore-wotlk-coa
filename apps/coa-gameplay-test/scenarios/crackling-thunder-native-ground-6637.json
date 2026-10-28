@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "name": "Crackling Thunder creates native ground damage and caster critical debuff",
+  "contract": [
+    "Crackling Thunder 283571 promises a ground effect after Thunder Clap and 5% critical chance against",
+    "nearby enemies.",
+    "A normal Thunder Clap before learning the talent creates neither the ground object nor the target",
+    "debuff.",
+    "After learning, one multi-target cast creates exactly one native ground spell, affects both enemies",
+    "and deals periodic damage.",
+    "The caster-specific native critical chance against an affected enemy must rise by exactly 5",
+    "percentage points.",
+    "The captured formula also gives 7% spell power and attack power per periodic tick.",
+    "Maximum unarmed skill prevents combat skill gains from changing the critical-chance control."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "second",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 4,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "console", "command": "coa gamemode WildCard on Harnessa"},
+    {"action": "learn", "actor": "hero", "spell": 203},
+    {"action": "set_skill", "actor": "hero", "skill": 162, "value": 300, "maximum": 300},
+    {"action": "learn", "actor": "hero", "spell": 6343},
+    {"action": "set_power", "actor": "hero", "power": 1, "value": 1000},
+    {"action": "cast", "actor": "hero", "spell": 6343},
+    {"action": "assert", "actor": "hero", "metric": "cast_failure", "spell": 6343, "equals": 0},
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "actor": "hero", "metric": "dynamic_object", "spell": 283572, "equals": 0},
+    {"action": "assert", "actor": "enemy", "metric": "aura", "spell": 283573, "equals": 0},
+    {"action": "wait", "ms": 1500},
+    {"action": "learn", "actor": "hero", "spell": 283571},
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_taken_crit_chance",
+      "spell": 6343,
+      "target": "enemy",
+      "save_as": "crit_without_ground"
+    },
+    {"action": "reset_cooldown", "actor": "hero", "spell": 6343},
+    {"action": "set_power", "actor": "hero", "power": 1, "value": 1000},
+    {"action": "cast", "actor": "hero", "spell": 6343},
+    {"action": "assert", "actor": "hero", "metric": "cast_failure", "spell": 6343, "equals": 0},
+    {"action": "assert", "actor": "hero", "metric": "dynamic_object", "spell": 283572, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "actor": "hero", "metric": "spell_cast_count", "spell": 283572, "equals": 1},
+    {"action": "assert", "actor": "second", "metric": "aura", "spell": 283573, "equals": 1},
+    {"action": "assert", "actor": "enemy", "metric": "aura", "spell": 283573, "equals": 1},
+    {"action": "assert", "actor": "enemy", "metric": "aura_amount", "spell": 283573, "effect": 0, "equals": 5},
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_taken_crit_chance",
+      "spell": 6343,
+      "target": "enemy",
+      "relative_to": "crit_without_ground",
+      "min": 4.99,
+      "max": 5.01
+    },
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "before_tick"},
+    {"action": "wait", "ms": 1200},
+    {"action": "assert", "actor": "enemy", "metric": "health", "relative_to": "before_tick", "max": -1}
+  ]
+}

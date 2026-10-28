@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Weaver Form keeps Protraction's Spore and Wilt durations and only hastes ticks (#7591)",
+  "contract": "#7591: with Protraction rank 2 (707871, SPELL_AURA_ADD_FLAT_MODIFIER misc 1 SPELLMOD_DURATION +6000) Spore 804983 (duration index 86, 21 s) lasts 27 s and Wilt 804982 (index 85, 18 s) lasts 24 s, but in Weaver Form 804980 they showed 21/18 s with haste. Weaver Form keeps helper 804981 up (AscensionVenomancer SetHelper), whose effect 2 is SPELL_AURA_PERIODIC_HASTE (316) with family 35 mask (8256, 520, 67174784) covering every Spore and Wilt rank. WotLK aura 316 multiplies both the aura duration (Spell.cpp aura apply, Aura::RefreshDuration/RefreshTimersWithMods) and the period (AuraEffect::CalculatePeriodic) by UNIT_MOD_CAST_SPEED. Maintainer decision: Weaver Form must not cut the duration; haste only shortens the tick interval, so the DoT gets more ticks (GetTotalTicks = max duration / amplitude). Unit::HasDurationShorteningPeriodicHaste ignores 804981 at the duration sites only; other aura 316 sources keep WotLK semantics. Icy Veins 12472 (+20% casting speed) is the haste fixture: the expected duration stays 27000/24000 ms while the 3000 ms period becomes about 2500 ms. Before the fix the durations were 27000 x 0.833 = 22500 and 24000 x 0.833 = 20000 ms.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "v", "race": 1, "class": 29, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "spore_dummy", "owner": "v", "entry": 36, "level": 80, "health": 1000000, "distance": 5 },
+    { "id": "wilt_dummy", "owner": "v", "entry": 36, "level": 80, "health": 1000000, "distance": 8 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "v", "spell": 707871 },
+    { "action": "learn", "actor": "v", "spell": 804980 },
+    { "action": "learn", "actor": "v", "spell": 804982 },
+    { "action": "learn", "actor": "v", "spell": 804983 },
+    {
+      "action": "assert", "label": "SETUP: Protraction rank 2 is active", "actor": "v",
+      "metric": "aura", "spell": 707871, "equals": 1, "within_ms": 2000
+    },
+    { "action": "cast", "label": "Enter Weaver Form", "actor": "v", "spell": 804980 },
+    {
+      "action": "assert", "label": "SETUP: Weaver Form is active", "actor": "v",
+      "metric": "aura", "spell": 804980, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: the Weaver Form periodic haste helper is active", "actor": "v",
+      "metric": "aura", "spell": 804981, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "set_aura", "label": "Haste fixture: Icy Veins +20% casting speed", "actor": "v",
+      "spell": 12472, "stacks": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: Icy Veins hastes the Venomancer", "actor": "v",
+      "metric": "cast_speed_multiplier", "min": 0.8, "max": 0.87
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "cast", "label": "Spore in Weaver Form", "actor": "v", "spell": 804983, "target": "spore_dummy" },
+    {
+      "action": "assert", "label": "SETUP: the dummy carries Spore", "actor": "spore_dummy",
+      "metric": "aura", "spell": 804983, "caster": "v", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Spore keeps 21 + 6 sec in Weaver Form (was 22.5 sec)",
+      "actor": "spore_dummy", "metric": "aura_duration_ms", "spell": 804983, "caster": "v",
+      "min": 25500, "max": 27000
+    },
+    {
+      "action": "assert", "label": "Weaver Form still hastes the Spore period (3000 / 1.2)",
+      "actor": "spore_dummy", "metric": "aura_amplitude_ms", "spell": 804983, "caster": "v", "effect": 0,
+      "min": 2450, "max": 2550
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "cast", "label": "Wilt in Weaver Form", "actor": "v", "spell": 804982, "target": "wilt_dummy" },
+    {
+      "action": "assert", "label": "SETUP: the dummy carries Wilt", "actor": "wilt_dummy",
+      "metric": "aura", "spell": 804982, "caster": "v", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Wilt keeps 18 + 6 sec in Weaver Form (was 20 sec)",
+      "actor": "wilt_dummy", "metric": "aura_duration_ms", "spell": 804982, "caster": "v",
+      "min": 22500, "max": 24000
+    },
+    {
+      "action": "assert", "label": "Weaver Form still hastes the Wilt period (3000 / 1.2)",
+      "actor": "wilt_dummy", "metric": "aura_amplitude_ms", "spell": 804982, "caster": "v", "effect": 0,
+      "min": 2450, "max": 2550
+    }
+  ]
+}

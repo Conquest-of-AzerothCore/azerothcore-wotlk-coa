@@ -1,0 +1,643 @@
+{
+  "schema": 1,
+  "name": "Script-rolled proc talents keep spell_proc.Chance 100",
+  "contract": "Every listed aura rolls its own proc chance in its AuraScript CheckProc. Its effective SpellProcEntry Chance, after SpellMgr::LoadSpellProcs fills a zero Chance from the DBC ProcChance, must stay 100 so the native roll in Aura::GetProcEffectMask cannot square it (rev_20260919_20 regression, #4275). proc-chance-script-rolled-rates-4275.json measures the resulting rates.",
+  "timeout_ms": 30000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 300278,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 300300,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 300313,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 300369,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 300480,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 300490,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 300855,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 302548,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 503851,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 503856,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 503960,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 504375,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 504406,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 524642,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 538441,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 560091,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 560200,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 560207,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 560264,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 560281,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 560320,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 560639,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 560785,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 561022,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 561336,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 562029,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 572367,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 573034,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 574354,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 680663,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 680975,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 681242,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 704264,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 704610,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 704741,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 704800,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 704920,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 704971,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 705993,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 705998,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 706018,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 706030,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 706035,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 706230,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 706239,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 706245,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 706271,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 706370,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 706502,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 706590,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 706911,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 707233,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 707483,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 707629,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 707640,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 800214,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 800394,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 800443,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 800463,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 801065,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 801143,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 802068,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 802603,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 802604,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 802605,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 802935,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 803035,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 803037,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 803082,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 803210,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 803339,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 804141,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 804345,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 804629,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 804822,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 804981,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 804987,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 805098,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 805110,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 805245,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 805505,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 805606,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 805647,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 806058,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 806603,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 806629,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 806699,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 806736,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_proc_chance",
+      "spell": 806758,
+      "equals": 100
+    }
+  ]
+}

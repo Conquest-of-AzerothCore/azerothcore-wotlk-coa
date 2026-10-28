@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Battle Cleric leaves Sun Stride's cooldown alone (COA-7224)",
+  "contract": "Battle Cleric 300347 shortens Paragon 680639 to a 1 minute cooldown. It must not touch Sun Stride 680700, which shares Paragon's class flag and keeps its 24 second cooldown.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "s",
+      "race": 1,
+      "class": 27,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 300347
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 680700
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 680700,
+      "target": "s"
+    },
+    {
+      "action": "assert",
+      "label": "Sun Stride is cast",
+      "actor": "s",
+      "metric": "cast_failure",
+      "spell": 680700,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Sun Stride goes on cooldown with Battle Cleric learned",
+      "actor": "s",
+      "metric": "cooldown_ms",
+      "spell": 680700,
+      "min": 15000,
+      "within_ms": 2000
+    }
+  ]
+}

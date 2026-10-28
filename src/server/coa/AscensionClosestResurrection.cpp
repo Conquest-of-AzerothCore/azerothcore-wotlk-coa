@@ -2,8 +2,9 @@
 
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
-#include "GameGraveyard.h"
+#include "DBCStores.h"
 #include "Map.h"
+#include "ObjectMgr.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "SpellScript.h"
@@ -60,11 +61,13 @@ bool CanResurrectHere(Player* player)
 
 std::optional<Destination> FindClosestTown(Player* player)
 {
-    GraveyardStruct const* graveyard = sGraveyard->GetClosestGraveyard(player, player->GetTeamId());
-    if (!graveyard)
+    uint32 node = sObjectMgr->GetNearestTaxiNode(player->GetPositionX(), player->GetPositionY(),
+        player->GetPositionZ(), player->GetMapId(), player->GetTeamId());
+    TaxiNodesEntry const* entry = node ? sTaxiNodesStore.LookupEntry(node) : nullptr;
+    if (!entry)
         return std::nullopt;
 
-    return Destination{ graveyard->Map, graveyard->x, graveyard->y, graveyard->z, player->GetOrientation() };
+    return Destination{ entry->map_id, entry->x, entry->y, entry->z, player->GetOrientation() };
 }
 
 std::optional<Destination> FindClosestCity(Player* player)
@@ -130,7 +133,7 @@ class spell_ascension_closest_resurrection : public SpellScript
         if (player->IsAlive() || !destination)
             return;
 
-        player->ResurrectPlayer(RESURRECT_RESTORE_PERCENT, true);
+        player->ResurrectPlayer(RESURRECT_RESTORE_PERCENT, false);
 
         if (!player->IsAlive())
             return;

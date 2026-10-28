@@ -25,7 +25,7 @@ def main():
               if args.source_ref else ROOT.joinpath(path).read_text(encoding="utf-8"))
     shared = (ROOT / "src/server/shared/SharedDefines.h").read_text(encoding="utf-8")
     code = "#include <algorithm>\n#include <array>\n#include <cassert>\n#include <cstdint>\n"
-    code += "#include <map>\n#include <unordered_set>\n"
+    code += "#include <map>\n#include <mutex>\n#include <unordered_set>\n"
     code += "using uint8=std::uint8_t;using uint16=std::uint16_t;using uint32=std::uint32_t;\n"
     code += method(shared, "enum SkillType") + ";\n"
     for name in ("AscensionCustomClassData.h", "AscensionLiveBaselineData.h"):
@@ -61,6 +61,7 @@ auto sSpellMgr=&manager;
 struct Service
 {
     std::unordered_set<uint32> _proficiencySynchronizations;
+    std::mutex _stateLock;
 '''
     code += method(source, "void SynchronizeProficiencies(") + "};\n"
     code += r'''
@@ -85,6 +86,12 @@ int main()
             }
         }
     }
+    Player guardian;guardian.cls=18;guardian.level=20;
+    guardian.spells.insert(5009);guardian.skills[SKILL_WANDS]={0,100,100};
+    service.SynchronizeProficiencies(&guardian);
+    assert(!guardian.HasSpell(5009) && !guardian.HasSkill(SKILL_WANDS));
+    Player mage;mage.cls=20;mage.level=20;service.SynchronizeProficiencies(&mage);
+    assert(mage.HasSpell(5009) && mage.HasSkill(SKILL_WANDS));
     Player legacy;legacy.cls=1;service.SynchronizeProficiencies(&legacy);
     assert(legacy.skills.at(SKILL_DEFENSE).value==3 && legacy.skills.at(SKILL_UNARMED).value==2);
     Player missing;missing.skills.erase(SKILL_UNARMED);service.SynchronizeProficiencies(&missing);

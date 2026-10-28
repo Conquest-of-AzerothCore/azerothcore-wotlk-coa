@@ -1,14 +1,20 @@
 {
   "schema": 1,
-  "name": "Gravity Bomb's explosion scales with spell power (#3202)",
-  "contract": "Gravity Bomb 801281 states its explosion as ${($801282m1+$801282ppl1+$SP*1.2+$RAP*0.3)}. The explosion is the child 801282, a single SPELL_EFFECT_SCHOOL_DAMAGE whose EffectBonusMultiplier is 0.0 and which had no spell_bonus_data row, no rank chain and no script, so Unit::SpellDamageBonusDone added no coefficient at all. With direct_bonus 1.2 and a fixture +2000 spell damage from Drink Fel Infusion 44505 (aura 13 SPELL_AURA_MOD_DAMAGE_DONE, EffectMiscValue 127, EffectBasePoints 1999, die 1), the harness's fixed 1000 base must become 1000 + 2000*1.2 = 3400, or 2920 if Unit::CalculateLevelPenalty applies; without the row it stays exactly 1000. The tooltip's $RAP*0.3 term is NOT implemented: 801282 is DmgClass 1 with EquippedItemClass -1 and no SPELL_ATTR0_USES_RANGED_SLOT, so a plain ap_bonus would read melee attack power, and choosing between that and the UseRangedAttackPowerForDamage opt-in is a design decision. The delayed explosion and the 15 yd pull run on native handlers (aura 23 periodic triggers at EffectAmplitude 5999 and 5499 inside a DurationIndex 32 = 6000 ms aura) and are only regression-checked here.",
+  "name": "Gravity Bomb retains spell-power scaling and adds ranged attack power (#3202)",
+  "contract": [
+    "Gravity Bomb 801281 advertises its delayed explosion as base plus 120% spell power and 30% ranged attack power.",
+    "Child 801282 does the damage. Its SQL spell-power coefficient must remain 1.2; ap_bonus 0.3 must select ranged attack power without changing its native magic damage class.",
+    "Wand Expert 574308 adds 100% of Spirit to ranged attack power without adding melee attack power or spell power. The explosion calculation's gain must match 30% of that independent stat gain, including integer rounding.",
+    "The normal parent cast must still plant its aura and cause its native delayed explosion. Native calculation probes exclude hit rolls and mitigation; the parent damage log observes a real hit.",
+    "The level-58 rank is tested at the current rank cap of 60, so the native level penalty does not change its advertised 120% spell-power term. Higher-level downranking behavior is preserved."
+  ],
   "timeout_ms": 90000,
   "players": [
     {
       "id": "chronomancer",
       "race": 1,
       "class": 22,
-      "level": 80,
+      "level": 60,
       "spell_hit_rating": 10000
     }
   ],
@@ -17,7 +23,7 @@
       "id": "dummy",
       "owner": "chronomancer",
       "entry": 36,
-      "level": 80,
+      "level": 60,
       "health": 1000000,
       "distance": 3
     }
@@ -35,13 +41,95 @@
     },
     {
       "action": "assert",
-      "label": "With no spell power the fixed 1000 base is unchanged",
+      "actor": "chronomancer",
+      "metric": "spell_power",
+      "school": 5,
+      "equals": 0,
+      "label": "The ranged-attack-power control begins without spell power"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "spell_damage_done",
+      "save_as": "damage_before_rap",
+      "spell": 801282,
+      "target": "dummy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "ranged_attack_power",
+      "save_as": "rap_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "attack_power",
+      "save_as": "ap_before"
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 574308
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "ranged_attack_power",
+      "save_as": "rap_gain",
+      "relative_to": "rap_before"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "ranged_attack_power",
+      "relative_to": "rap_before",
+      "min": 10,
+      "label": "Wand Expert supplies a measurable ranged-only stat gain"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "attack_power",
+      "relative_to": "ap_before",
+      "equals": 0,
+      "label": "The ranged stat fixture does not alter melee attack power"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_power",
+      "school": 5,
+      "equals": 0,
+      "label": "Wand Expert does not add spell power to the ranged-only control"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_damage_done",
+      "spell": 801282,
+      "target": "dummy",
+      "relative_to": "damage_before_rap",
+      "ratio_to": "rap_gain",
+      "min": 0.29,
+      "max": 0.31,
+      "label": "Gravity Bomb gains exactly its advertised ranged attack power share"
+    },
+    {
+      "action": "snapshot",
       "actor": "chronomancer",
       "metric": "spell_damage_done",
       "spell": 801282,
       "effect": 0,
       "target": "dummy",
-      "equals": 1000
+      "save_as": "damage_before_sp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "spell_power",
+      "school": 5,
+      "save_as": "sp_before"
     },
     {
       "action": "set_aura",
@@ -58,6 +146,14 @@
       "min": 2000
     },
     {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "sp_before",
+      "save_as": "sp_gain"
+    },
+    {
       "action": "assert",
       "label": "The explosion now carries its 120% spell power coefficient",
       "actor": "chronomancer",
@@ -65,7 +161,10 @@
       "spell": 801282,
       "effect": 0,
       "target": "dummy",
-      "min": 2500
+      "relative_to": "damage_before_sp",
+      "ratio_to": "sp_gain",
+      "min": 1.19,
+      "max": 1.21
     },
     {
       "action": "snapshot",

@@ -1,0 +1,157 @@
+{
+  "schema": 1,
+  "name": "Dungeon Spoils give items within two levels of the opener (#6909)",
+  "contract": [
+    "#6909: Dungeon Spoils (2021814) opened at level 44 could give an item that requires level 39, five levels",
+    "below the opener. The pick now keeps only items within two levels of the highest required level the opener can",
+    "use, so a level 44 Warrior who opens six spoils gets six items that require level 42-44. The pool holds 48 items",
+    "that require level 39-41 and 45 that require 42-44, so the old window would put an item below 42 in the bags",
+    "about once in every two opens."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p1",
+      "race": 1,
+      "class": 1,
+      "level": 44
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "p1",
+      "item": 2021814,
+      "count": 6
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: p1 holds six Dungeon Spoils",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 6,
+      "within_ms": 2000
+    },
+    {
+      "action": "open_item",
+      "actor": "p1",
+      "item": 2021814
+    },
+    {
+      "action": "assert",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "p1",
+      "item": 2021814
+    },
+    {
+      "action": "assert",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 4,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "p1",
+      "item": 2021814
+    },
+    {
+      "action": "assert",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "p1",
+      "item": 2021814
+    },
+    {
+      "action": "assert",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "p1",
+      "item": 2021814
+    },
+    {
+      "action": "assert",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "p1",
+      "item": 2021814
+    },
+    {
+      "action": "assert",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The six spoils put six of their items in p1's bags",
+      "actor": "p1",
+      "metric": "carried_pool_item_count",
+      "cache": 2021814,
+      "table": "loot",
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "Every item requires level 42-44",
+      "actor": "p1",
+      "metric": "carried_pool_item_count",
+      "cache": 2021814,
+      "table": "loot",
+      "min_required_level": 42,
+      "max_required_level": 44,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "None requires level 39-41, which the five-level window allowed",
+      "actor": "p1",
+      "metric": "carried_pool_item_count",
+      "cache": 2021814,
+      "table": "loot",
+      "min_required_level": 39,
+      "max_required_level": 41,
+      "equals": 0
+    }
+  ]
+}

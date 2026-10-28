@@ -1,0 +1,174 @@
+{
+ "schema": 1,
+ "name": "Warcraft Reborn Mystic Enchant Shield Master's Resolve grants Shield Block when hit below 35% health",
+ "contract": [
+  "Shield Master's Resolve 1556002: \"Taking melee or ranged damage while below 35% health grants you Shield Block for 4 seconds.\" Its 1-point absorb was drained by the first hit, which removed the enchant aura, and its conditions read the attacker's health instead of the wearer's."
+ ],
+ "timeout_ms": 102750,
+ "players": [
+  {
+   "id": "w",
+   "race": 1,
+   "class": 1,
+   "level": 80,
+   "melee_hit_rating": 10000,
+   "spell_hit_rating": 10000,
+   "expertise_rating": 10000
+  }
+ ],
+ "creatures": [
+  {
+   "id": "a0",
+   "owner": "w",
+   "entry": 25761,
+   "faction": 14,
+   "reaction": 1,
+   "level": 80,
+   "health": 1000000,
+   "distance": 2,
+   "stationary": true
+  }
+ ],
+ "steps": [
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 43,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 44,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 54,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 55,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 160,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 172,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 95,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "add_item",
+   "actor": "w",
+   "item": 36528
+  },
+  {
+   "action": "equip",
+   "actor": "w",
+   "item": 36528,
+   "slot": 15
+  },
+  {
+   "action": "add_item",
+   "actor": "w",
+   "item": 36458
+  },
+  {
+   "action": "equip",
+   "actor": "w",
+   "item": 36458,
+   "slot": 16
+  },
+  {
+   "action": "set_aura",
+   "actor": "w",
+   "spell": 1556002,
+   "stacks": 1
+  },
+  {
+   "action": "wait",
+   "ms": 500
+  },
+  {
+   "action": "assert",
+   "actor": "w",
+   "metric": "aura",
+   "label": "enchant aura active",
+   "spell": 1556002,
+   "equals": 1
+  },
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "attack",
+   "actor": "w",
+   "target": "a0"
+  },
+  {
+   "action": "wait",
+   "ms": 1500
+  },
+  {
+   "action": "set_health",
+   "actor": "w",
+   "value": 15000,
+   "maximum": 50000
+  },
+  {
+   "action": "wait",
+   "ms": 20000
+  },
+  {
+   "action": "stop_attack",
+   "actor": "w"
+  },
+  {
+   "action": "wait",
+   "ms": 500
+  },
+  {
+   "action": "assert",
+   "actor": "w",
+   "metric": "spell_proc_count",
+   "label": "effect 0 procs (damaged)",
+   "spell": 1556002,
+   "min": 1
+  },
+  {
+   "action": "assert",
+   "actor": "w",
+   "metric": "spell_cast_count",
+   "label": "casts Shield Block duration trigger (1556013)",
+   "spell": 1556013,
+   "min": 1
+  }
+ ]
+}

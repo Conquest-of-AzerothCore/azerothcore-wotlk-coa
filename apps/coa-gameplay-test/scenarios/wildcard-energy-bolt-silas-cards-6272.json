@@ -1,0 +1,177 @@
+{
+  "schema": 1,
+  "name": "Silas sells the original Energy Bolt skill card (#6272)",
+  "contract": "Original SkillCard.dbc maps normal item2205304 to Energy Bolt274732. Silas store5 must sell the authentic card for tickets, and using spell92657 must consume it and collect/reveal the card. The golden card2205339 must also be offered and collected for250 Golden Darkmoon Tickets.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 246190,
+      "count": 2500
+    },
+    {
+      "action": "client_packet",
+      "actor": "hero",
+      "opcode": 1721,
+      "fields": [
+        {
+          "u32": 5
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "client_packet",
+      "actor": "hero",
+      "opcode": 1723,
+      "fields": [
+        {
+          "u32": 2205304
+        },
+        {
+          "u32": 1
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "server_packet_contains",
+      "opcode": 1724,
+      "text": "PURCHASE_CUSTOM_STORE_ITEM_OK",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 2205304,
+      "equals": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "hero",
+      "item": 2205304,
+      "spell": 92657
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "wildcard_cards_collected",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 2205304,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 97399,
+      "count": 250
+    },
+    {
+      "action": "client_packet",
+      "actor": "hero",
+      "opcode": 1721,
+      "fields": [
+        {
+          "u32": 6
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "client_packet",
+      "actor": "hero",
+      "opcode": 1723,
+      "fields": [
+        {
+          "u32": 2205339
+        },
+        {
+          "u32": 1
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 2205339,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 97399,
+      "equals": 0
+    },
+    {
+      "action": "use_item",
+      "actor": "hero",
+      "item": 2205339,
+      "spell": 92657
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "wildcard_cards_collected",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 2205339,
+      "equals": 0
+    }
+  ]
+}

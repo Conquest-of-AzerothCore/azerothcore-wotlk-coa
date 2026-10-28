@@ -198,6 +198,16 @@
     },
     {
       "action": "assert",
+      "label": "The talented expiry trigger has applied its root before the amount is measured",
+      "actor": "eots_dummy",
+      "metric": "aura",
+      "spell": 807712,
+      "caster": "s",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
       "label": "DISCRIMINATING: Thundershocker raises the root's damage-from-caster amount to 30",
       "actor": "eots_dummy",
       "metric": "aura_amount",

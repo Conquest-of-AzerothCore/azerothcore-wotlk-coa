@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "The Rescue jailors guard Durnholde and drop the chain keys",
+  "contract": "Issue #6459. The Rescue (498) asks the player to free Drull and Tog'thar from their Locked ball and chain (1721, lock 36 opened by Dull Iron Key 3467; 1722, lock 37 opened by Burnished Gold Key 3499). Jailor Eston (2427) drops the Dull Iron Key and Jailor Marlgen (2428) the Burnished Gold Key on every kill while the quest is active. Both jailors are world spawns in Durnholde Keep within 60 yards of where the report was filed (-479.9, -1459.96, 88.2), as on Ascension live, and both chains stand in the world.",
+  "timeout_ms": 180000,
+  "location": { "map": 0, "x": -479.93, "y": -1459.96, "z": 88.22, "o": 0.0 },
+  "players": [
+    { "id": "hero", "race": 2, "class": 1, "level": 26, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "eston", "owner": "hero", "entry": 2427, "faction": 16, "level": 24, "health": 12, "distance": 3 },
+    { "id": "marlgen", "owner": "hero", "entry": 2428, "faction": 16, "level": 24, "health": 12, "distance": 4 }
+  ],
+  "steps": [
+    { "action": "prepare_quest", "actor": "hero", "quest": 498, "complete": false },
+    { "action": "assert", "actor": "hero", "metric": "item_count", "item": 3467, "equals": 0 },
+    { "action": "assert", "actor": "hero", "metric": "item_count", "item": 3499, "equals": 0 },
+
+    { "action": "attack", "actor": "hero", "target": "eston" },
+    { "action": "assert", "actor": "eston", "metric": "alive", "equals": 0, "within_ms": 60000 },
+    { "action": "stop_attack", "actor": "hero" },
+    { "action": "wait", "ms": 1000 },
+    { "action": "loot_creature", "actor": "hero", "target": "eston" },
+    { "action": "loot_slot", "actor": "hero", "item": 3467 },
+    { "action": "assert", "label": "Jailor Eston drops the Dull Iron Key", "actor": "hero", "metric": "item_count",
+      "item": 3467, "equals": 1 },
+    { "action": "close_loot", "actor": "hero" },
+
+    { "action": "attack", "actor": "hero", "target": "marlgen" },
+    { "action": "assert", "actor": "marlgen", "metric": "alive", "equals": 0, "within_ms": 60000 },
+    { "action": "stop_attack", "actor": "hero" },
+    { "action": "wait", "ms": 1000 },
+    { "action": "loot_creature", "actor": "hero", "target": "marlgen" },
+    { "action": "loot_slot", "actor": "hero", "item": 3499 },
+    { "action": "assert", "label": "Jailor Marlgen drops the Burnished Gold Key", "actor": "hero",
+      "metric": "item_count", "item": 3499, "equals": 1 },
+    { "action": "close_loot", "actor": "hero" },
+
+    { "action": "set_phase", "actor": "hero", "value": 1 },
+    { "action": "teleport", "actor": "hero", "map": 0, "x": -479.93, "y": -1459.96, "z": 88.22, "o": 0.0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "Jailor Eston stands in Durnholde Keep", "actor": "hero",
+      "metric": "nearby_creature_count", "entry": 2427, "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "Jailor Marlgen stands in Durnholde Keep", "actor": "hero",
+      "metric": "nearby_creature_count", "entry": 2428, "equals": 1, "within_ms": 10000 },
+
+    { "action": "teleport", "actor": "hero", "map": 0, "x": -447.85, "y": -1486.69, "z": 92.09, "o": 0.0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "Tog'thar's ball and chain stands in the keep", "actor": "hero",
+      "metric": "nearby_gameobject_state", "entry": 1722, "max": 1, "within_ms": 10000 },
+    { "action": "teleport", "actor": "hero", "map": 0, "x": -487.26, "y": -1343.86, "z": 53.65, "o": 0.0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "Drull's ball and chain stands in the world", "actor": "hero",
+      "metric": "nearby_gameobject_state", "entry": 1721, "max": 1, "within_ms": 10000 }
+  ]
+}

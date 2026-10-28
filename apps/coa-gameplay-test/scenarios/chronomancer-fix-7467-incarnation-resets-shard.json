@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Chronomancer: Incarnation of Chaos resets Chromatic Shard (#7467)",
+  "contract": "Incarnation of Chaos 570067 (3 min cooldown) reads 'instantly resetting the cooldown of Chromatic Shard'. Its DBC effects are two spellmods and a +% damage aura; no effect or script performed the reset, so Chromatic Shard (801292 and ranks 501836-501840, 574346, 567543-567544, 30 s category cooldown) stayed on cooldown after Incarnation. chronomancer_secondary_casts now removes the cooldown of every known Chromatic Shard rank when Incarnation of Chaos is cast.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "chrono", "race": 1, "class": 22, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "chrono", "entry": 36, "level": 80, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "learn", "actor": "chrono", "spell": 801292 },
+    { "action": "learn", "actor": "chrono", "spell": 570067 },
+    { "action": "cast", "label": "Chromatic Shard starts its cooldown", "actor": "chrono", "spell": 801292, "target": "dummy" },
+    {
+      "action": "assert", "label": "SETUP: Chromatic Shard is on cooldown", "actor": "chrono",
+      "metric": "cooldown_ms", "spell": 801292, "min": 25000, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1500 },
+    { "action": "cast", "label": "Incarnation of Chaos", "actor": "chrono", "spell": 570067 },
+    {
+      "action": "assert", "label": "Incarnation resets Chromatic Shard's cooldown", "actor": "chrono",
+      "metric": "cooldown_ms", "spell": 801292, "max": 0, "within_ms": 2000
+    }
+  ]
+}

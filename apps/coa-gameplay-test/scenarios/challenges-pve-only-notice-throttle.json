@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Adventure Mode tells a player once, not on every attack attempt, that it is PvE only",
+  "contract": "CanUnitAttack is evaluated for every attack attempt. A player in Adventure Mode (211, PVE_ONLY) who tries to attack a PvP-enabled player of the other faction, one the core would let them fight, is refused with 'Your challenge is PvE only: you cannot fight players.'; repeating the attempt three times within a few seconds must show that notice once, not once per attempt.",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053 },
+  "players": [
+    { "id": "adventurer", "race": 1, "class": 1, "level": 1 },
+    { "id": "bystander", "race": 2, "class": 1, "level": 1 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "start_challenge", "actor": "adventurer", "challenge": 211, "level": 1 },
+    { "action": "pvp", "actor": "bystander", "enabled": true },
+    { "action": "wait", "ms": 1500 },
+    { "action": "assert", "label": "Adventure Mode starts", "actor": "adventurer", "metric": "challenge_start_code",
+      "equals": 0 },
+    { "action": "snapshot", "actor": "adventurer", "metric": "system_messages", "save_as": "before_attempts" },
+    { "action": "client_packet", "actor": "adventurer", "opcode": 321, "consumed": false,
+      "fields": [ { "actor_guid": "bystander" } ] },
+    { "action": "client_packet", "actor": "adventurer", "opcode": 321, "consumed": false,
+      "fields": [ { "actor_guid": "bystander" } ] },
+    { "action": "client_packet", "actor": "adventurer", "opcode": 321, "consumed": false,
+      "fields": [ { "actor_guid": "bystander" } ] },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "the player is told it is PvE only", "actor": "adventurer",
+      "metric": "system_message_contains", "text": "Your challenge is PvE only", "equals": 1 },
+    { "action": "assert", "label": "three attempts in a row show the notice once", "actor": "adventurer",
+      "metric": "system_messages", "relative_to": "before_attempts", "equals": 1 }
+  ]
+}

@@ -80,13 +80,14 @@ class runemaster_manuscription_casts : public AllSpellScript
 {
 public:
     runemaster_manuscription_casts() : AllSpellScript("runemaster_manuscription_casts",
-        {ALLSPELLHOOK_ON_PREPARE, ALLSPELLHOOK_ON_CAST, ALLSPELLHOOK_ON_HIT_RESULT}) { }
+        {ALLSPELLHOOK_ON_PREPARE, ALLSPELLHOOK_ON_BEFORE_EFFECTS,
+            ALLSPELLHOOK_ON_CAST, ALLSPELLHOOK_ON_HIT_RESULT}) { }
 
-    void OnSpellPrepare(Spell* spell, Unit* caster, SpellInfo const* info) override
+    void SelectChapter(Spell* spell, Unit* caster, SpellInfo const* info)
     {
         Player* player = caster ? caster->ToPlayer() : nullptr;
         if (!player || player->getClass() != CLASS_SPIRIT_MAGE || info->SpellFamilyName != 38 ||
-            spell->IsTriggered() || !IsDirectChapterCast(info))
+            spell->IsTriggered() || spell->GetScriptValue(SELECTED_CHAPTER) || !IsDirectChapterCast(info))
             return;
         for (Chapter const& chapter : Chapters)
             if (Aura* aura = player->GetAura(chapter.AuraId, player->GetGUID()); aura && aura->GetCharges())
@@ -95,6 +96,16 @@ public:
                 spell->SetScriptValue(TRANSCRIBING, chapter.Damage);
                 break;
             }
+    }
+
+    void OnSpellPrepare(Spell* spell, Unit* caster, SpellInfo const* info) override
+    {
+        SelectChapter(spell, caster, info);
+    }
+
+    void OnSpellBeforeEffects(Spell* spell, Unit* caster, SpellInfo const* info) override
+    {
+        SelectChapter(spell, caster, info);
     }
 
     void OnSpellCast(Spell* spell, Unit* caster, SpellInfo const* info, bool) override

@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Worldforged gear pickups stand only at their recorded spots: misplaced copies removed, a lone misplaced one moved, a missing one added",
+  "contract": "Recorded find positions (LootCollector Vol'jin/Bronzebeard databases, archived Ascension pins) put One Ring to Flame Them All (item 515383, object 95934) only in Un'Goro Crater, Ambercoil Pendant (515163, object 96138) in Feralas and Durnar's Stein (object 1345041) in Loch Modan. Before rev_20261024_90 the ring also stood in the Valley of Trials (guid 6942006) and Ashenvale (guid 6942007), the pendant stood only in the Arathi Highlands (guid 6940038), and the stein had no spawn at all.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -4971.7, "y": -3142.8, "z": 322.2, "o": 0 },
+  "players": [
+    { "id": "p", "race": 6, "class": 1, "level": 60 },
+    { "id": "q", "race": 6, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "set_phase", "actor": "q", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the stein has a spawn at its recorded Loch Modan spot", "actor": "q", "metric": "nearby_gameobject_count", "entry": 1345041, "equals": 1 },
+    { "action": "cast", "actor": "q", "spell": 3365, "target_gameobject": 1345041 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "the added stein is within reach and opens", "actor": "q", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "q", "metric": "loot_count", "min": 1, "within_ms": 3000 },
+
+    { "action": "teleport", "actor": "p", "map": 1, "x": -7134.1, "y": -1272.5, "z": -197.8, "o": 0 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "the ring stands at its recorded Un'Goro spot", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95934, "equals": 1 },
+
+    { "action": "teleport", "actor": "p", "map": 1, "x": -424.5, "y": -4299.4, "z": 44.8, "o": 0 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: no misplaced ring copy in the Valley of Trials", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95934, "equals": 0 },
+
+    { "action": "teleport", "actor": "p", "map": 1, "x": 2850.4, "y": -1121.9, "z": 221.3, "o": 0 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: no misplaced ring copy in Ashenvale", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95934, "equals": 0 },
+
+    { "action": "teleport", "actor": "p", "map": 0, "x": -1642.8, "y": -3677.2, "z": 186.7, "o": 0 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the pendant no longer stands in the Arathi Highlands", "actor": "p", "metric": "nearby_gameobject_count", "entry": 96138, "equals": 0 },
+
+    { "action": "teleport", "actor": "p", "map": 1, "x": -5281.0, "y": 10.0, "z": 19.9, "o": 0 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the pendant stands at its recorded Feralas spot", "actor": "p", "metric": "nearby_gameobject_count", "entry": 96138, "equals": 1 }
+  ]
+}

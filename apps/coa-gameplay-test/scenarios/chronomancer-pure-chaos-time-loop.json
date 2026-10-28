@@ -1,7 +1,20 @@
 {
   "schema": 1,
   "name": "Damage during Incarnation of Chaos locks in a Time Loop (#3684)",
-  "contract": "Pure Chaos 807569 applies aura 42 (proc trigger spell) on Time Loop 807571, which is fully native (aura 23 re-casting Chromatic Shard free of cost every 1000 ms, aura 33, and aura 263 SPELL_AURA_ALLOW_ONLY_ABILITY class-masked to Chromatic Shard), but Spell.dbc gives 807569 ProcFlags 0, so SpellMgr::LoadSpellProcs generated no entry and Aura::GetProcEffectMask returned 0 for every event. Its tooltip is \"While Incarnation of Chaos is active, all damage dealt now has a $h% chance to lock yourself in a time loop for 3 sec\", with $h = the record's own ProcChance of 10; the \"while Incarnation of Chaos is active\" clause is the new conditions row, which the first assertion checks by dealing periodic damage with no Incarnation up. ACHIEVED FALSE-FAILURE PROBABILITY: 0.87%. Trials must all fall inside Incarnation of Chaos's window - duration index 8 = 15000 ms, extended to 18000 ms by Chaos Fusion 807578's native aura 107 SPELLMOD_DURATION, and its own cooldown is 180000 ms so there is no second window - and Time Loop's trace lasts only 3000 ms (duration index 27), so only ticks raised while the assertion is polling count. Eight Decomposition DoTs (Amplitude 4000) give 23 ticks in that window, Timerend (Amplitude 1000) gives 5, three self-cast DoT fixtures on the caster give 13 and a final Unmake (Amplitude 250) gives 4: 45 independent trials, 0.9^45 = 0.0087. Melee auto-attack is started as well and raises PROC_FLAG_DONE_MELEE_AUTO_ATTACK events that the row also matches, but those swings are not counted in that figure, so the real probability is better. The real 10% chance is not lowered.",
+  "contract": [
+    "Original Pure Chaos 807569 gives all damage a 10 percent chance to apply the three-second Time Loop 807571",
+    "only during Incarnation of Chaos 570067. Existing spell_proc flags and the aura condition preserve that",
+    "chance and gate.",
+    "Eight independent Chronomancers normally cast Decomposition 800856 on eight level-80 enemies before opening",
+    "one Incarnation window each. Actual periodic damage without Incarnation must produce no Time Loop. Chaos",
+    "Fusion 807578 extends the original 15-second parent to 18 seconds; normal mana costs, global cooldowns and",
+    "the 180-second cooldown remain enabled.",
+    "During the parent windows, trained dagger auto attacks and pre-existing enemy DoTs supply at least 200",
+    "measured eligible damage events. The checker requires a native Pure Chaos proc, an observed self-cast Time",
+    "Loop with its original duration, and automatic Chromatic Shard casts. At the original 10 percent chance,",
+    "zero successes in 200 trials has probability 0.9^200, below 1e-9. Every aura sample is less than one second",
+    "apart, so a three-second proc cannot fall between checkpoints. No self-damage aura is injected."
+  ],
   "timeout_ms": 120000,
   "players": [
     {
@@ -10,7 +23,71 @@
       "class": 22,
       "level": 80,
       "spell_hit_rating": 10000,
-      "melee_hit_rating": 10000
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "chrono2",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "chrono3",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "chrono4",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "chrono5",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "chrono6",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "chrono7",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "chrono8",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
     }
   ],
   "creatures": [
@@ -18,64 +95,125 @@
       "id": "dummy1",
       "owner": "chronomancer",
       "entry": 36,
+      "level": 80,
       "health": 1000000,
       "distance": 3
     },
     {
       "id": "dummy2",
-      "owner": "chronomancer",
+      "owner": "chrono2",
       "entry": 36,
+      "level": 80,
       "health": 1000000,
-      "distance": 5
+      "distance": 3
     },
     {
       "id": "dummy3",
-      "owner": "chronomancer",
+      "owner": "chrono3",
       "entry": 36,
+      "level": 80,
       "health": 1000000,
-      "distance": 7
+      "distance": 3
     },
     {
       "id": "dummy4",
-      "owner": "chronomancer",
+      "owner": "chrono4",
       "entry": 36,
+      "level": 80,
       "health": 1000000,
-      "distance": 9
+      "distance": 3
     },
     {
       "id": "dummy5",
-      "owner": "chronomancer",
+      "owner": "chrono5",
       "entry": 36,
+      "level": 80,
       "health": 1000000,
-      "distance": 11
+      "distance": 3
     },
     {
       "id": "dummy6",
-      "owner": "chronomancer",
+      "owner": "chrono6",
       "entry": 36,
+      "level": 80,
       "health": 1000000,
-      "distance": 13
+      "distance": 3
     },
     {
       "id": "dummy7",
-      "owner": "chronomancer",
+      "owner": "chrono7",
       "entry": 36,
+      "level": 80,
       "health": 1000000,
-      "distance": 15
+      "distance": 3
     },
     {
       "id": "dummy8",
-      "owner": "chronomancer",
+      "owner": "chrono8",
       "entry": 36,
+      "level": 80,
       "health": 1000000,
-      "distance": 17
+      "distance": 3
     }
   ],
   "steps": [
     {
       "action": "wait",
-      "label": "Let spawn AI and level scaling settle",
-      "ms": 5000
+      "ms": 5000,
+      "label": "Let spawn AI and level scaling settle"
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_health",
+      "actor": "chrono2",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_health",
+      "actor": "chrono3",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_health",
+      "actor": "chrono4",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_health",
+      "actor": "chrono5",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_health",
+      "actor": "chrono6",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_health",
+      "actor": "chrono7",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_health",
+      "actor": "chrono8",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 1180
     },
     {
       "action": "learn",
@@ -98,14 +236,475 @@
       "spell": 800856
     },
     {
-      "action": "learn",
+      "action": "add_item",
       "actor": "chronomancer",
-      "spell": 801291
+      "item": 3490,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "chronomancer",
+      "item": 3490,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "chronomancer",
+      "skill": 173,
+      "value": 400,
+      "maximum": 400
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "melee_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "expertise",
+      "min": 100
     },
     {
       "action": "learn",
-      "actor": "chronomancer",
-      "spell": 804418
+      "actor": "chrono2",
+      "spell": 1180
+    },
+    {
+      "action": "learn",
+      "actor": "chrono2",
+      "spell": 807569
+    },
+    {
+      "action": "learn",
+      "actor": "chrono2",
+      "spell": 570067
+    },
+    {
+      "action": "learn",
+      "actor": "chrono2",
+      "spell": 807578
+    },
+    {
+      "action": "learn",
+      "actor": "chrono2",
+      "spell": 800856
+    },
+    {
+      "action": "add_item",
+      "actor": "chrono2",
+      "item": 3490,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "chrono2",
+      "item": 3490,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "chrono2",
+      "skill": 173,
+      "value": 400,
+      "maximum": 400
+    },
+    {
+      "action": "assert",
+      "actor": "chrono2",
+      "metric": "spell_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "chrono2",
+      "metric": "melee_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "chrono2",
+      "metric": "expertise",
+      "min": 100
+    },
+    {
+      "action": "learn",
+      "actor": "chrono3",
+      "spell": 1180
+    },
+    {
+      "action": "learn",
+      "actor": "chrono3",
+      "spell": 807569
+    },
+    {
+      "action": "learn",
+      "actor": "chrono3",
+      "spell": 570067
+    },
+    {
+      "action": "learn",
+      "actor": "chrono3",
+      "spell": 807578
+    },
+    {
+      "action": "learn",
+      "actor": "chrono3",
+      "spell": 800856
+    },
+    {
+      "action": "add_item",
+      "actor": "chrono3",
+      "item": 3490,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "chrono3",
+      "item": 3490,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "chrono3",
+      "skill": 173,
+      "value": 400,
+      "maximum": 400
+    },
+    {
+      "action": "assert",
+      "actor": "chrono3",
+      "metric": "spell_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "chrono3",
+      "metric": "melee_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "chrono3",
+      "metric": "expertise",
+      "min": 100
+    },
+    {
+      "action": "learn",
+      "actor": "chrono4",
+      "spell": 1180
+    },
+    {
+      "action": "learn",
+      "actor": "chrono4",
+      "spell": 807569
+    },
+    {
+      "action": "learn",
+      "actor": "chrono4",
+      "spell": 570067
+    },
+    {
+      "action": "learn",
+      "actor": "chrono4",
+      "spell": 807578
+    },
+    {
+      "action": "learn",
+      "actor": "chrono4",
+      "spell": 800856
+    },
+    {
+      "action": "add_item",
+      "actor": "chrono4",
+      "item": 3490,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "chrono4",
+      "item": 3490,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "chrono4",
+      "skill": 173,
+      "value": 400,
+      "maximum": 400
+    },
+    {
+      "action": "assert",
+      "actor": "chrono4",
+      "metric": "spell_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "chrono4",
+      "metric": "melee_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "chrono4",
+      "metric": "expertise",
+      "min": 100
+    },
+    {
+      "action": "learn",
+      "actor": "chrono5",
+      "spell": 1180
+    },
+    {
+      "action": "learn",
+      "actor": "chrono5",
+      "spell": 807569
+    },
+    {
+      "action": "learn",
+      "actor": "chrono5",
+      "spell": 570067
+    },
+    {
+      "action": "learn",
+      "actor": "chrono5",
+      "spell": 807578
+    },
+    {
+      "action": "learn",
+      "actor": "chrono5",
+      "spell": 800856
+    },
+    {
+      "action": "add_item",
+      "actor": "chrono5",
+      "item": 3490,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "chrono5",
+      "item": 3490,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "chrono5",
+      "skill": 173,
+      "value": 400,
+      "maximum": 400
+    },
+    {
+      "action": "assert",
+      "actor": "chrono5",
+      "metric": "spell_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "chrono5",
+      "metric": "melee_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "chrono5",
+      "metric": "expertise",
+      "min": 100
+    },
+    {
+      "action": "learn",
+      "actor": "chrono6",
+      "spell": 1180
+    },
+    {
+      "action": "learn",
+      "actor": "chrono6",
+      "spell": 807569
+    },
+    {
+      "action": "learn",
+      "actor": "chrono6",
+      "spell": 570067
+    },
+    {
+      "action": "learn",
+      "actor": "chrono6",
+      "spell": 807578
+    },
+    {
+      "action": "learn",
+      "actor": "chrono6",
+      "spell": 800856
+    },
+    {
+      "action": "add_item",
+      "actor": "chrono6",
+      "item": 3490,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "chrono6",
+      "item": 3490,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "chrono6",
+      "skill": 173,
+      "value": 400,
+      "maximum": 400
+    },
+    {
+      "action": "assert",
+      "actor": "chrono6",
+      "metric": "spell_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "chrono6",
+      "metric": "melee_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "chrono6",
+      "metric": "expertise",
+      "min": 100
+    },
+    {
+      "action": "learn",
+      "actor": "chrono7",
+      "spell": 1180
+    },
+    {
+      "action": "learn",
+      "actor": "chrono7",
+      "spell": 807569
+    },
+    {
+      "action": "learn",
+      "actor": "chrono7",
+      "spell": 570067
+    },
+    {
+      "action": "learn",
+      "actor": "chrono7",
+      "spell": 807578
+    },
+    {
+      "action": "learn",
+      "actor": "chrono7",
+      "spell": 800856
+    },
+    {
+      "action": "add_item",
+      "actor": "chrono7",
+      "item": 3490,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "chrono7",
+      "item": 3490,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "chrono7",
+      "skill": 173,
+      "value": 400,
+      "maximum": 400
+    },
+    {
+      "action": "assert",
+      "actor": "chrono7",
+      "metric": "spell_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "chrono7",
+      "metric": "melee_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "chrono7",
+      "metric": "expertise",
+      "min": 100
+    },
+    {
+      "action": "learn",
+      "actor": "chrono8",
+      "spell": 1180
+    },
+    {
+      "action": "learn",
+      "actor": "chrono8",
+      "spell": 807569
+    },
+    {
+      "action": "learn",
+      "actor": "chrono8",
+      "spell": 570067
+    },
+    {
+      "action": "learn",
+      "actor": "chrono8",
+      "spell": 807578
+    },
+    {
+      "action": "learn",
+      "actor": "chrono8",
+      "spell": 800856
+    },
+    {
+      "action": "add_item",
+      "actor": "chrono8",
+      "item": 3490,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "chrono8",
+      "item": 3490,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "chrono8",
+      "skill": 173,
+      "value": 400,
+      "maximum": 400
+    },
+    {
+      "action": "assert",
+      "actor": "chrono8",
+      "metric": "spell_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "chrono8",
+      "metric": "melee_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "chrono8",
+      "metric": "expertise",
+      "min": 100
     },
     {
       "action": "set_power",
@@ -115,23 +714,980 @@
     },
     {
       "action": "cast",
-      "label": "Negative control: damage without Incarnation of Chaos",
       "actor": "chronomancer",
       "spell": 800856,
       "target": "dummy1"
     },
     {
+      "action": "set_power",
+      "actor": "chrono2",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono2",
+      "spell": 800856,
+      "target": "dummy1"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono3",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono3",
+      "spell": 800856,
+      "target": "dummy1"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono4",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono4",
+      "spell": 800856,
+      "target": "dummy1"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono5",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono5",
+      "spell": 800856,
+      "target": "dummy1"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono6",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono6",
+      "spell": 800856,
+      "target": "dummy1"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono7",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono7",
+      "spell": 800856,
+      "target": "dummy1"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono8",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono8",
+      "spell": 800856,
+      "target": "dummy1"
+    },
+    {
       "action": "wait",
-      "label": "Let the control DoT tick twice",
-      "ms": 9000
+      "ms": 1600,
+      "label": "Respect the normal global cooldown before another DoT"
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "dummy2"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono2",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono2",
+      "spell": 800856,
+      "target": "dummy2"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono3",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono3",
+      "spell": 800856,
+      "target": "dummy2"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono4",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono4",
+      "spell": 800856,
+      "target": "dummy2"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono5",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono5",
+      "spell": 800856,
+      "target": "dummy2"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono6",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono6",
+      "spell": 800856,
+      "target": "dummy2"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono7",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono7",
+      "spell": 800856,
+      "target": "dummy2"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono8",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono8",
+      "spell": 800856,
+      "target": "dummy2"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Respect the normal global cooldown before another DoT"
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "dummy3"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono2",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono2",
+      "spell": 800856,
+      "target": "dummy3"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono3",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono3",
+      "spell": 800856,
+      "target": "dummy3"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono4",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono4",
+      "spell": 800856,
+      "target": "dummy3"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono5",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono5",
+      "spell": 800856,
+      "target": "dummy3"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono6",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono6",
+      "spell": 800856,
+      "target": "dummy3"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono7",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono7",
+      "spell": 800856,
+      "target": "dummy3"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono8",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono8",
+      "spell": 800856,
+      "target": "dummy3"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Respect the normal global cooldown before another DoT"
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "dummy4"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono2",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono2",
+      "spell": 800856,
+      "target": "dummy4"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono3",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono3",
+      "spell": 800856,
+      "target": "dummy4"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono4",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono4",
+      "spell": 800856,
+      "target": "dummy4"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono5",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono5",
+      "spell": 800856,
+      "target": "dummy4"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono6",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono6",
+      "spell": 800856,
+      "target": "dummy4"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono7",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono7",
+      "spell": 800856,
+      "target": "dummy4"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono8",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono8",
+      "spell": 800856,
+      "target": "dummy4"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Respect the normal global cooldown before another DoT"
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "dummy5"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono2",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono2",
+      "spell": 800856,
+      "target": "dummy5"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono3",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono3",
+      "spell": 800856,
+      "target": "dummy5"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono4",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono4",
+      "spell": 800856,
+      "target": "dummy5"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono5",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono5",
+      "spell": 800856,
+      "target": "dummy5"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono6",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono6",
+      "spell": 800856,
+      "target": "dummy5"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono7",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono7",
+      "spell": 800856,
+      "target": "dummy5"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono8",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono8",
+      "spell": 800856,
+      "target": "dummy5"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Respect the normal global cooldown before another DoT"
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "dummy6"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono2",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono2",
+      "spell": 800856,
+      "target": "dummy6"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono3",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono3",
+      "spell": 800856,
+      "target": "dummy6"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono4",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono4",
+      "spell": 800856,
+      "target": "dummy6"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono5",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono5",
+      "spell": 800856,
+      "target": "dummy6"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono6",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono6",
+      "spell": 800856,
+      "target": "dummy6"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono7",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono7",
+      "spell": 800856,
+      "target": "dummy6"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono8",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono8",
+      "spell": 800856,
+      "target": "dummy6"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Respect the normal global cooldown before another DoT"
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "dummy7"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono2",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono2",
+      "spell": 800856,
+      "target": "dummy7"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono3",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono3",
+      "spell": 800856,
+      "target": "dummy7"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono4",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono4",
+      "spell": 800856,
+      "target": "dummy7"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono5",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono5",
+      "spell": 800856,
+      "target": "dummy7"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono6",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono6",
+      "spell": 800856,
+      "target": "dummy7"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono7",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono7",
+      "spell": 800856,
+      "target": "dummy7"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono8",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono8",
+      "spell": 800856,
+      "target": "dummy7"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Respect the normal global cooldown before another DoT"
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "dummy8"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono2",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono2",
+      "spell": 800856,
+      "target": "dummy8"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono3",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono3",
+      "spell": 800856,
+      "target": "dummy8"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono4",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono4",
+      "spell": 800856,
+      "target": "dummy8"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono5",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono5",
+      "spell": 800856,
+      "target": "dummy8"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono6",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono6",
+      "spell": 800856,
+      "target": "dummy8"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono7",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono7",
+      "spell": 800856,
+      "target": "dummy8"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono8",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono8",
+      "spell": 800856,
+      "target": "dummy8"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Respect the normal global cooldown before another DoT"
     },
     {
       "action": "assert",
-      "label": "The conditions gate holds: no Time Loop without Incarnation of Chaos",
+      "actor": "chronomancer",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "min": 1,
+      "label": "Negative control deals real enemy damage without Incarnation"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_proc_count",
+      "spell": 807569,
+      "equals": 0
+    },
+    {
+      "action": "assert",
       "actor": "chronomancer",
       "metric": "aura",
       "spell": 807571,
-      "caster": "chronomancer",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chrono2",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "min": 1,
+      "label": "Negative control deals real enemy damage without Incarnation"
+    },
+    {
+      "action": "assert",
+      "actor": "chrono2",
+      "metric": "spell_proc_count",
+      "spell": 807569,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 807571,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chrono3",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "min": 1,
+      "label": "Negative control deals real enemy damage without Incarnation"
+    },
+    {
+      "action": "assert",
+      "actor": "chrono3",
+      "metric": "spell_proc_count",
+      "spell": 807569,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 807571,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chrono4",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "min": 1,
+      "label": "Negative control deals real enemy damage without Incarnation"
+    },
+    {
+      "action": "assert",
+      "actor": "chrono4",
+      "metric": "spell_proc_count",
+      "spell": 807569,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 807571,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chrono5",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "min": 1,
+      "label": "Negative control deals real enemy damage without Incarnation"
+    },
+    {
+      "action": "assert",
+      "actor": "chrono5",
+      "metric": "spell_proc_count",
+      "spell": 807569,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 807571,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chrono6",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "min": 1,
+      "label": "Negative control deals real enemy damage without Incarnation"
+    },
+    {
+      "action": "assert",
+      "actor": "chrono6",
+      "metric": "spell_proc_count",
+      "spell": 807569,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 807571,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chrono7",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "min": 1,
+      "label": "Negative control deals real enemy damage without Incarnation"
+    },
+    {
+      "action": "assert",
+      "actor": "chrono7",
+      "metric": "spell_proc_count",
+      "spell": 807569,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 807571,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chrono8",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "min": 1,
+      "label": "Negative control deals real enemy damage without Incarnation"
+    },
+    {
+      "action": "assert",
+      "actor": "chrono8",
+      "metric": "spell_proc_count",
+      "spell": 807569,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 807571,
       "equals": 0
     },
     {
@@ -142,216 +1698,3981 @@
     },
     {
       "action": "cast",
-      "label": "Decomposition on dummy 1",
-      "actor": "chronomancer",
-      "spell": 800856,
-      "target": "dummy1"
-    },
-    {
-      "action": "wait",
-      "ms": 1600
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Decomposition on dummy 2",
-      "actor": "chronomancer",
-      "spell": 800856,
-      "target": "dummy2"
-    },
-    {
-      "action": "wait",
-      "ms": 1600
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Decomposition on dummy 3",
-      "actor": "chronomancer",
-      "spell": 800856,
-      "target": "dummy3"
-    },
-    {
-      "action": "wait",
-      "ms": 1600
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Decomposition on dummy 4",
-      "actor": "chronomancer",
-      "spell": 800856,
-      "target": "dummy4"
-    },
-    {
-      "action": "wait",
-      "ms": 1600
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Decomposition on dummy 5",
-      "actor": "chronomancer",
-      "spell": 800856,
-      "target": "dummy5"
-    },
-    {
-      "action": "wait",
-      "ms": 1600
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Decomposition on dummy 6",
-      "actor": "chronomancer",
-      "spell": 800856,
-      "target": "dummy6"
-    },
-    {
-      "action": "wait",
-      "ms": 1600
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Decomposition on dummy 7",
-      "actor": "chronomancer",
-      "spell": 800856,
-      "target": "dummy7"
-    },
-    {
-      "action": "wait",
-      "ms": 1600
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Decomposition on dummy 8",
-      "actor": "chronomancer",
-      "spell": 800856,
-      "target": "dummy8"
-    },
-    {
-      "action": "wait",
-      "ms": 1600
-    },
-    {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
-    },
-    {
-      "action": "cast",
-      "label": "Incarnation of Chaos opens the gate",
       "actor": "chronomancer",
       "spell": 570067
     },
     {
-      "action": "wait",
-      "ms": 1600
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 570067,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "parent_start_chronomancer"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "save_as": "periodic_before_chronomancer"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "melee_damage_count",
+      "save_as": "melee_before_chronomancer"
     },
     {
       "action": "set_power",
-      "actor": "chronomancer",
+      "actor": "chrono2",
       "power": 0,
       "value": 2500
     },
     {
       "action": "cast",
-      "label": "Timerend: six one-second ticks",
-      "actor": "chronomancer",
-      "spell": 801291,
-      "target": "dummy2"
+      "actor": "chrono2",
+      "spell": 570067
     },
     {
-      "action": "wait",
-      "ms": 1600
+      "action": "assert",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 570067,
+      "equals": 1,
+      "within_ms": 500
     },
     {
-      "action": "set_aura",
-      "label": "Self-cast Decomposition adds ticks the player deals",
-      "actor": "chronomancer",
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "parent_start_chrono2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "spell_damage_count",
       "spell": 800856,
-      "stacks": 1
+      "save_as": "periodic_before_chrono2"
     },
     {
-      "action": "set_aura",
-      "label": "Self-cast Timerend adds ticks the player deals",
-      "actor": "chronomancer",
-      "spell": 801291,
-      "stacks": 1
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "melee_damage_count",
+      "save_as": "melee_before_chrono2"
     },
     {
-      "action": "set_aura",
-      "label": "Self-cast Unmake adds ticks the player deals",
-      "actor": "chronomancer",
-      "spell": 804418,
-      "stacks": 1
+      "action": "set_power",
+      "actor": "chrono3",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono3",
+      "spell": 570067
+    },
+    {
+      "action": "assert",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 570067,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "parent_start_chrono3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "save_as": "periodic_before_chrono3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "melee_damage_count",
+      "save_as": "melee_before_chrono3"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono4",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono4",
+      "spell": 570067
+    },
+    {
+      "action": "assert",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 570067,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "parent_start_chrono4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "save_as": "periodic_before_chrono4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "melee_damage_count",
+      "save_as": "melee_before_chrono4"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono5",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono5",
+      "spell": 570067
+    },
+    {
+      "action": "assert",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 570067,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "parent_start_chrono5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "save_as": "periodic_before_chrono5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "melee_damage_count",
+      "save_as": "melee_before_chrono5"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono6",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono6",
+      "spell": 570067
+    },
+    {
+      "action": "assert",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 570067,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "parent_start_chrono6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "save_as": "periodic_before_chrono6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "melee_damage_count",
+      "save_as": "melee_before_chrono6"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono7",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono7",
+      "spell": 570067
+    },
+    {
+      "action": "assert",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 570067,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "parent_start_chrono7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "save_as": "periodic_before_chrono7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "melee_damage_count",
+      "save_as": "melee_before_chrono7"
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono8",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chrono8",
+      "spell": 570067
+    },
+    {
+      "action": "assert",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 570067,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "parent_start_chrono8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "save_as": "periodic_before_chrono8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "melee_damage_count",
+      "save_as": "melee_before_chrono8"
     },
     {
       "action": "attack",
-      "label": "Auto-attack adds further damage events",
       "actor": "chronomancer",
       "target": "dummy1"
     },
     {
-      "action": "set_power",
-      "actor": "chronomancer",
-      "power": 0,
-      "value": 2500
+      "action": "attack",
+      "actor": "chrono2",
+      "target": "dummy2"
     },
     {
-      "action": "cast",
-      "label": "Unmake resolves inside the polling window",
-      "actor": "chronomancer",
-      "spell": 804418,
+      "action": "attack",
+      "actor": "chrono3",
       "target": "dummy3"
     },
     {
-      "action": "assert",
-      "label": "Damage dealt during Incarnation of Chaos locks the caster in a Time Loop",
+      "action": "attack",
+      "actor": "chrono4",
+      "target": "dummy4"
+    },
+    {
+      "action": "attack",
+      "actor": "chrono5",
+      "target": "dummy5"
+    },
+    {
+      "action": "attack",
+      "actor": "chrono6",
+      "target": "dummy6"
+    },
+    {
+      "action": "attack",
+      "actor": "chrono7",
+      "target": "dummy7"
+    },
+    {
+      "action": "attack",
+      "actor": "chrono8",
+      "target": "dummy8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "checkpoint_parent_0"
+    },
+    {
+      "action": "snapshot",
       "actor": "chronomancer",
       "metric": "aura",
       "spell": 807571,
       "caster": "chronomancer",
-      "equals": 1,
-      "within_ms": 15000
+      "save_as": "loop_chronomancer_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_duration_chronomancer_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_chrono2_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_duration_chrono2_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_chrono3_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_duration_chrono3_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_chrono4_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_duration_chrono4_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_chrono5_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_duration_chrono5_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_chrono6_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_duration_chrono6_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_chrono7_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_duration_chrono7_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_chrono8_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_duration_chrono8_0"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "checkpoint_parent_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_chronomancer_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_duration_chronomancer_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_chrono2_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_duration_chrono2_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_chrono3_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_duration_chrono3_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_chrono4_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_duration_chrono4_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_chrono5_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_duration_chrono5_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_chrono6_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_duration_chrono6_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_chrono7_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_duration_chrono7_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_chrono8_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_duration_chrono8_1"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "checkpoint_parent_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_chronomancer_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_duration_chronomancer_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_chrono2_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_duration_chrono2_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_chrono3_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_duration_chrono3_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_chrono4_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_duration_chrono4_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_chrono5_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_duration_chrono5_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_chrono6_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_duration_chrono6_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_chrono7_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_duration_chrono7_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_chrono8_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_duration_chrono8_2"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "checkpoint_parent_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_chronomancer_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_duration_chronomancer_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_chrono2_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_duration_chrono2_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_chrono3_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_duration_chrono3_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_chrono4_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_duration_chrono4_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_chrono5_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_duration_chrono5_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_chrono6_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_duration_chrono6_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_chrono7_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_duration_chrono7_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_chrono8_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_duration_chrono8_3"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "checkpoint_parent_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_chronomancer_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_duration_chronomancer_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_chrono2_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_duration_chrono2_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_chrono3_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_duration_chrono3_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_chrono4_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_duration_chrono4_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_chrono5_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_duration_chrono5_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_chrono6_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_duration_chrono6_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_chrono7_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_duration_chrono7_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_chrono8_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_duration_chrono8_4"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "checkpoint_parent_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_chronomancer_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_duration_chronomancer_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_chrono2_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_duration_chrono2_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_chrono3_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_duration_chrono3_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_chrono4_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_duration_chrono4_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_chrono5_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_duration_chrono5_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_chrono6_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_duration_chrono6_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_chrono7_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_duration_chrono7_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_chrono8_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_duration_chrono8_5"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "checkpoint_parent_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_chronomancer_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_duration_chronomancer_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_chrono2_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_duration_chrono2_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_chrono3_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_duration_chrono3_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_chrono4_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_duration_chrono4_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_chrono5_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_duration_chrono5_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_chrono6_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_duration_chrono6_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_chrono7_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_duration_chrono7_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_chrono8_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_duration_chrono8_6"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "checkpoint_parent_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_chronomancer_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_duration_chronomancer_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_chrono2_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_duration_chrono2_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_chrono3_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_duration_chrono3_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_chrono4_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_duration_chrono4_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_chrono5_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_duration_chrono5_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_chrono6_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_duration_chrono6_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_chrono7_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_duration_chrono7_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_chrono8_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_duration_chrono8_7"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "checkpoint_parent_8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_chronomancer_8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_duration_chronomancer_8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_chrono2_8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_duration_chrono2_8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_chrono3_8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_duration_chrono3_8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_chrono4_8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_duration_chrono4_8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_chrono5_8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_duration_chrono5_8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_chrono6_8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_duration_chrono6_8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_chrono7_8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_duration_chrono7_8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_chrono8_8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_duration_chrono8_8"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "checkpoint_parent_9"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_chronomancer_9"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_duration_chronomancer_9"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_chrono2_9"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_duration_chrono2_9"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_chrono3_9"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_duration_chrono3_9"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_chrono4_9"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_duration_chrono4_9"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_chrono5_9"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_duration_chrono5_9"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_chrono6_9"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_duration_chrono6_9"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_chrono7_9"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_duration_chrono7_9"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_chrono8_9"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_duration_chrono8_9"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "checkpoint_parent_10"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_chronomancer_10"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_duration_chronomancer_10"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_chrono2_10"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_duration_chrono2_10"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_chrono3_10"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_duration_chrono3_10"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_chrono4_10"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_duration_chrono4_10"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_chrono5_10"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_duration_chrono5_10"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_chrono6_10"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_duration_chrono6_10"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_chrono7_10"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_duration_chrono7_10"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_chrono8_10"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_duration_chrono8_10"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "checkpoint_parent_11"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_chronomancer_11"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_duration_chronomancer_11"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_chrono2_11"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_duration_chrono2_11"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_chrono3_11"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_duration_chrono3_11"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_chrono4_11"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_duration_chrono4_11"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_chrono5_11"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_duration_chrono5_11"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_chrono6_11"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_duration_chrono6_11"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_chrono7_11"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_duration_chrono7_11"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_chrono8_11"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_duration_chrono8_11"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "checkpoint_parent_12"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_chronomancer_12"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_duration_chronomancer_12"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_chrono2_12"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_duration_chrono2_12"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_chrono3_12"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_duration_chrono3_12"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_chrono4_12"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_duration_chrono4_12"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_chrono5_12"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_duration_chrono5_12"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_chrono6_12"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_duration_chrono6_12"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_chrono7_12"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_duration_chrono7_12"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_chrono8_12"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_duration_chrono8_12"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "checkpoint_parent_13"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_chronomancer_13"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_duration_chronomancer_13"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_chrono2_13"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_duration_chrono2_13"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_chrono3_13"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_duration_chrono3_13"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_chrono4_13"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_duration_chrono4_13"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_chrono5_13"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_duration_chrono5_13"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_chrono6_13"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_duration_chrono6_13"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_chrono7_13"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_duration_chrono7_13"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_chrono8_13"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_duration_chrono8_13"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "checkpoint_parent_14"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_chronomancer_14"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_duration_chronomancer_14"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_chrono2_14"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_duration_chrono2_14"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_chrono3_14"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_duration_chrono3_14"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_chrono4_14"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_duration_chrono4_14"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_chrono5_14"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_duration_chrono5_14"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_chrono6_14"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_duration_chrono6_14"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_chrono7_14"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_duration_chrono7_14"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_chrono8_14"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_duration_chrono8_14"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "checkpoint_parent_15"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_chronomancer_15"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_duration_chronomancer_15"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_chrono2_15"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_duration_chrono2_15"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_chrono3_15"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_duration_chrono3_15"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_chrono4_15"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_duration_chrono4_15"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_chrono5_15"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_duration_chrono5_15"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_chrono6_15"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_duration_chrono6_15"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_chrono7_15"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_duration_chrono7_15"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_chrono8_15"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_duration_chrono8_15"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "checkpoint_parent_16"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_chronomancer_16"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_duration_chronomancer_16"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_chrono2_16"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_duration_chrono2_16"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_chrono3_16"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_duration_chrono3_16"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_chrono4_16"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_duration_chrono4_16"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_chrono5_16"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_duration_chrono5_16"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_chrono6_16"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_duration_chrono6_16"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_chrono7_16"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_duration_chrono7_16"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_chrono8_16"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_duration_chrono8_16"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "checkpoint_parent_17"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_chronomancer_17"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_duration_chronomancer_17"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_chrono2_17"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_duration_chrono2_17"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_chrono3_17"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_duration_chrono3_17"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_chrono4_17"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_duration_chrono4_17"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_chrono5_17"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_duration_chrono5_17"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_chrono6_17"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_duration_chrono6_17"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_chrono7_17"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_duration_chrono7_17"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_chrono8_17"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_duration_chrono8_17"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "checkpoint_parent_18"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_chronomancer_18"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_duration_chronomancer_18"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_chrono2_18"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_duration_chrono2_18"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_chrono3_18"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_duration_chrono3_18"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_chrono4_18"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_duration_chrono4_18"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_chrono5_18"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_duration_chrono5_18"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_chrono6_18"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_duration_chrono6_18"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_chrono7_18"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_duration_chrono7_18"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_chrono8_18"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_duration_chrono8_18"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "checkpoint_parent_19"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_chronomancer_19"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_duration_chronomancer_19"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_chrono2_19"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_duration_chrono2_19"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_chrono3_19"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_duration_chrono3_19"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_chrono4_19"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_duration_chrono4_19"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_chrono5_19"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_duration_chrono5_19"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_chrono6_19"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_duration_chrono6_19"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_chrono7_19"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_duration_chrono7_19"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_chrono8_19"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_duration_chrono8_19"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "checkpoint_parent_20"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_chronomancer_20"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_duration_chronomancer_20"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_chrono2_20"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_duration_chrono2_20"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_chrono3_20"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_duration_chrono3_20"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_chrono4_20"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_duration_chrono4_20"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_chrono5_20"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_duration_chrono5_20"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_chrono6_20"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_duration_chrono6_20"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_chrono7_20"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_duration_chrono7_20"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_chrono8_20"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_duration_chrono8_20"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "checkpoint_parent_21"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_chronomancer_21"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_duration_chronomancer_21"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_chrono2_21"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_duration_chrono2_21"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_chrono3_21"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_duration_chrono3_21"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_chrono4_21"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_duration_chrono4_21"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_chrono5_21"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_duration_chrono5_21"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_chrono6_21"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_duration_chrono6_21"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_chrono7_21"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_duration_chrono7_21"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_chrono8_21"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_duration_chrono8_21"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "checkpoint_parent_22"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_chronomancer_22"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_duration_chronomancer_22"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_chrono2_22"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_duration_chrono2_22"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_chrono3_22"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_duration_chrono3_22"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_chrono4_22"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_duration_chrono4_22"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_chrono5_22"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_duration_chrono5_22"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_chrono6_22"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_duration_chrono6_22"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_chrono7_22"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_duration_chrono7_22"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_chrono8_22"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_duration_chrono8_22"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "save_as": "checkpoint_parent_23"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_chronomancer_23"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chronomancer",
+      "save_as": "loop_duration_chronomancer_23"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_chrono2_23"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono2",
+      "save_as": "loop_duration_chrono2_23"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_chrono3_23"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono3",
+      "save_as": "loop_duration_chrono3_23"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_chrono4_23"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono4",
+      "save_as": "loop_duration_chrono4_23"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_chrono5_23"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono5",
+      "save_as": "loop_duration_chrono5_23"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_chrono6_23"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono6",
+      "save_as": "loop_duration_chrono6_23"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_chrono7_23"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono7",
+      "save_as": "loop_duration_chrono7_23"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_chrono8_23"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 807571,
+      "caster": "chrono8",
+      "save_as": "loop_duration_chrono8_23"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "min": 1000,
+      "label": "All counted damage remains inside the real Incarnation window"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "relative_to": "periodic_before_chronomancer",
+      "save_as": "periodic_trials_chronomancer"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "melee_damage_count",
+      "relative_to": "melee_before_chronomancer",
+      "save_as": "melee_trials_chronomancer"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "spell_proc_count",
+      "spell": 807569,
+      "save_as": "procs_chronomancer"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "spell_cast_count",
+      "spell": 801292,
+      "save_as": "shards_chronomancer"
+    },
+    {
+      "action": "assert",
+      "actor": "chrono2",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "min": 1000,
+      "label": "All counted damage remains inside the real Incarnation window"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "relative_to": "periodic_before_chrono2",
+      "save_as": "periodic_trials_chrono2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "melee_damage_count",
+      "relative_to": "melee_before_chrono2",
+      "save_as": "melee_trials_chrono2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "spell_proc_count",
+      "spell": 807569,
+      "save_as": "procs_chrono2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono2",
+      "metric": "spell_cast_count",
+      "spell": 801292,
+      "save_as": "shards_chrono2"
+    },
+    {
+      "action": "assert",
+      "actor": "chrono3",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "min": 1000,
+      "label": "All counted damage remains inside the real Incarnation window"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "relative_to": "periodic_before_chrono3",
+      "save_as": "periodic_trials_chrono3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "melee_damage_count",
+      "relative_to": "melee_before_chrono3",
+      "save_as": "melee_trials_chrono3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "spell_proc_count",
+      "spell": 807569,
+      "save_as": "procs_chrono3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono3",
+      "metric": "spell_cast_count",
+      "spell": 801292,
+      "save_as": "shards_chrono3"
+    },
+    {
+      "action": "assert",
+      "actor": "chrono4",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "min": 1000,
+      "label": "All counted damage remains inside the real Incarnation window"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "relative_to": "periodic_before_chrono4",
+      "save_as": "periodic_trials_chrono4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "melee_damage_count",
+      "relative_to": "melee_before_chrono4",
+      "save_as": "melee_trials_chrono4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "spell_proc_count",
+      "spell": 807569,
+      "save_as": "procs_chrono4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono4",
+      "metric": "spell_cast_count",
+      "spell": 801292,
+      "save_as": "shards_chrono4"
+    },
+    {
+      "action": "assert",
+      "actor": "chrono5",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "min": 1000,
+      "label": "All counted damage remains inside the real Incarnation window"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "relative_to": "periodic_before_chrono5",
+      "save_as": "periodic_trials_chrono5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "melee_damage_count",
+      "relative_to": "melee_before_chrono5",
+      "save_as": "melee_trials_chrono5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "spell_proc_count",
+      "spell": 807569,
+      "save_as": "procs_chrono5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono5",
+      "metric": "spell_cast_count",
+      "spell": 801292,
+      "save_as": "shards_chrono5"
+    },
+    {
+      "action": "assert",
+      "actor": "chrono6",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "min": 1000,
+      "label": "All counted damage remains inside the real Incarnation window"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "relative_to": "periodic_before_chrono6",
+      "save_as": "periodic_trials_chrono6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "melee_damage_count",
+      "relative_to": "melee_before_chrono6",
+      "save_as": "melee_trials_chrono6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "spell_proc_count",
+      "spell": 807569,
+      "save_as": "procs_chrono6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono6",
+      "metric": "spell_cast_count",
+      "spell": 801292,
+      "save_as": "shards_chrono6"
+    },
+    {
+      "action": "assert",
+      "actor": "chrono7",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "min": 1000,
+      "label": "All counted damage remains inside the real Incarnation window"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "relative_to": "periodic_before_chrono7",
+      "save_as": "periodic_trials_chrono7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "melee_damage_count",
+      "relative_to": "melee_before_chrono7",
+      "save_as": "melee_trials_chrono7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "spell_proc_count",
+      "spell": 807569,
+      "save_as": "procs_chrono7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono7",
+      "metric": "spell_cast_count",
+      "spell": 801292,
+      "save_as": "shards_chrono7"
+    },
+    {
+      "action": "assert",
+      "actor": "chrono8",
+      "metric": "aura_duration_ms",
+      "spell": 570067,
+      "min": 1000,
+      "label": "All counted damage remains inside the real Incarnation window"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "spell_damage_count",
+      "spell": 800856,
+      "relative_to": "periodic_before_chrono8",
+      "save_as": "periodic_trials_chrono8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "melee_damage_count",
+      "relative_to": "melee_before_chrono8",
+      "save_as": "melee_trials_chrono8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "spell_proc_count",
+      "spell": 807569,
+      "save_as": "procs_chrono8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono8",
+      "metric": "spell_cast_count",
+      "spell": 801292,
+      "save_as": "shards_chrono8"
     }
   ]
 }

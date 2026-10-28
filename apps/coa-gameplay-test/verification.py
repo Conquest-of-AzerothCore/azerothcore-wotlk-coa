@@ -29,7 +29,7 @@ def verify(directories, directory=catalog.DIRECTORY, expected_scenarios=()):
         raise ValueError(f'Unknown required scenarios: {sorted(selected - cases.keys())}')
     fingerprints = {}
     for key, case in cases.items():
-        definition = catalog.read_json(directory / 'scenarios' / (key + '.json'))
+        definition = catalog.read_json(catalog.ROOT / case['path'])
         fingerprints[json.dumps(definition, sort_keys=True)] = key
     results, evidence, failures, check_results = {}, {}, [], []
     observed = set()

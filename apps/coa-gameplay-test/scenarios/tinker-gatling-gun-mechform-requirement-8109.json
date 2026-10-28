@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Gatling Gun tooltip states its Mechform requirement (#8109)",
+  "contract": "#8109: Gatling Gun 500213 is learned early but rejected outside the Mechsuit (SPELL_FAILED_ONLY_MOUNTED), while its tooltip names no requirement; only its Mechsuit:-prefixed bar neighbours hint at the form lock. Build: Mechsuit 801384 already documents the Scrap Shot transformation, so only the Gatling line is published, following the Soulrend pattern (white requirement line inside the form aura, red outside). STREAM asserts fail pre-fix (row absent). The Soulrend 573316 control proves the patch stream itself is alive.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI, level scaling and the login patch stream settle",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Gatling Gun (500213) reaches the client with the Mechform line",
+      "actor": "tinker",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500213,
+      "text": "Requires Mechform",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the shared description table still streams Soulrend's own requirement line",
+      "actor": "tinker",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 573316,
+      "text": "Requires Soul Infusion",
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

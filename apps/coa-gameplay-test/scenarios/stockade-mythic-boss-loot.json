@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Stockade Mythic bosses drop their Mythic items instead of the Normal loot list",
+  "contract": "Bruegal Ironknuckle on Mythic (201720) has its own loot: one of Jimmied Handcuffs, Prison Shank or Iron Knuckles in their Mythic versions (1652941-1653228, epic) every kill, the boss sigil at 1 %, and quest drops only for players on the quest. The Normal list (Wool and Silk Cloth, food, potions) is no longer rolled, so the corpse holds no common or uncommon item.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "set_health", "actor": "hero", "value": 5000000, "maximum": 5000000 },
+    { "action": "ascension_dungeon_difficulty_packet", "actor": "hero", "value": 2 },
+    { "action": "wait", "ms": 250 },
+    { "action": "teleport", "actor": "hero", "map": 34, "x": 54.23, "y": 0.28, "z": -18.34 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "summon", "actor": "hero", "entry": 1720, "as": "bruegal", "distance": 4 },
+    { "action": "wait", "ms": 300 },
+    { "action": "attack_nearby", "actor": "hero", "entry": 1720, "kill": true },
+    { "action": "assert", "actor": "bruegal", "metric": "alive", "equals": 0, "within_ms": 10000 },
+    { "action": "loot_creature", "actor": "hero", "target": "bruegal" },
+    { "action": "assert", "label": "One epic item on the corpse", "actor": "hero", "metric": "loot_count", "quality": 4, "equals": 1 },
+    { "action": "assert", "label": "It is a Mythic version of Bruegal's items", "actor": "hero", "metric": "loot_entry", "quality": 4, "min": 1652941, "max": 1653228 },
+    { "action": "assert", "label": "No Normal loot (common items)", "actor": "hero", "metric": "loot_count", "quality": 1, "equals": 0 },
+    { "action": "assert", "label": "No Normal loot (uncommon items)", "actor": "hero", "metric": "loot_count", "quality": 2, "equals": 0 },
+    { "action": "close_loot", "actor": "hero" }
+  ]
+}

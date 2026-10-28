@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Issue 5740: a level 5 Runemaster casts Palm Sigil: Fire after casting Runeshroud",
+  "contract": [
+    "The report: a level 5 Runemaster cannot cast Palm Sigil: Fire 534803 while stealthed in Runeshroud 500288.",
+    "534803 (BaseLevel 4) has CasterAuraSpell 808089 'Runeshroud or Waveforged', which SyncRuneshroudOrWaveforged",
+    "applies when Runeshroud 500288 (BaseLevel 4) is applied, so a character who casts Runeshroud for real",
+    "must pass the caster-aura gate and receive the 534803 aura. Outside Runeshroud the cast is refused with",
+    "SPELL_FAILED_CASTER_AURASTATE (22)."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 5}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the character settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 500288},
+    {"action": "learn", "actor": "rm", "spell": 534803},
+    {"action": "cast", "actor": "rm", "spell": 534803},
+    {"action": "assert", "label": "SETUP: outside Runeshroud the cast is refused with 'You can't do that yet'",
+      "actor": "rm", "metric": "cast_failure", "spell": 534803, "equals": 22, "within_ms": 1000},
+    {"action": "cast", "actor": "rm", "spell": 500288},
+    {"action": "assert", "label": "SETUP: the Runeshroud cast applies the aura", "actor": "rm", "metric": "aura",
+      "spell": 500288, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "SETUP: Runeshroud opens the Palm Sigil gate", "actor": "rm", "metric": "aura",
+      "spell": 808089, "equals": 1, "within_ms": 1000},
+    {"action": "wait", "label": "Clear the global cooldown", "ms": 1600},
+    {"action": "cast", "actor": "rm", "spell": 534803},
+    {"action": "assert", "label": "CONTRACT: inside Runeshroud Palm Sigil: Fire completes at level 5", "actor": "rm",
+      "metric": "aura", "spell": 534803, "equals": 1, "within_ms": 3000}
+  ]
+}

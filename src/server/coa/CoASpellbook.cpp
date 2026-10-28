@@ -29,3 +29,9 @@ double CoASpellbook::CoversSpell(Player* player, std::uint32_t spellId)
 {
     return SpellbookProvider.CoversSpell ? double(SpellbookProvider.CoversSpell(player, spellId)) : -1.0;
 }
+
+std::vector<std::uint32_t> CoASpellbook::UpgradeRanksAbove(Player* player, std::uint8_t level)
+{
+    return SpellbookProvider.UpgradeRanksAbove ? SpellbookProvider.UpgradeRanksAbove(player, level)
+        : std::vector<std::uint32_t>{};
+}

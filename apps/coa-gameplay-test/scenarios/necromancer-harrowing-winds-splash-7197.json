@@ -1,0 +1,152 @@
+{
+ "schema": 1,
+ "name": "Necromancer: Harrowing Winds splashes once around the Glacial Impact target (#7197)",
+ "contract": "Harrowing Winds 705745 turns Glacial Impact damage 707592 into one Harrowing Winds 707575 cast at the primary target: TARGET_DEST_TARGET_ENEMY with TARGET_UNIT_DEST_AREA_ENEMY in a 6 yard radius (SpellRadius 29), up to 8 enemies, line of sight from the primary target. Each enemy in the radius, the primary target included, takes it once, and an enemy 9 yards away takes none. Live combat logs from 2026-08 show the primary target among the hits in 2514 of 2583 splashes, never one enemy twice and at most 8 enemies.",
+ "timeout_ms": 90000,
+ "players": [
+  {
+   "id": "n",
+   "race": 5,
+   "class": 23,
+   "level": 60,
+   "spell_hit_rating": 10000
+  }
+ ],
+ "creatures": [
+  {
+   "id": "d",
+   "owner": "n",
+   "entry": 299,
+   "level": 60,
+   "distance": 12,
+   "stationary": true
+  },
+  {
+   "id": "g",
+   "owner": "n",
+   "entry": 299,
+   "level": 60,
+   "distance": 13,
+   "stationary": true
+  },
+  {
+   "id": "e",
+   "owner": "n",
+   "entry": 299,
+   "level": 60,
+   "distance": 14,
+   "stationary": true
+  },
+  {
+   "id": "f",
+   "owner": "n",
+   "entry": 299,
+   "level": 60,
+   "distance": 21,
+   "stationary": true
+  }
+ ],
+ "location": {
+  "map": 0,
+  "x": -8917.41,
+  "y": -115.853,
+  "z": 82.3711,
+  "o": 0
+ },
+ "steps": [
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "learn",
+   "spell": 704355,
+   "actor": "n"
+  },
+  {
+   "action": "learn",
+   "spell": 705745,
+   "actor": "n"
+  },
+  {
+   "action": "assert",
+   "actor": "n",
+   "metric": "aura",
+   "spell": 705745,
+   "equals": 1,
+   "within_ms": 5000
+  },
+  {
+   "action": "set_aura",
+   "actor": "n",
+   "spell": 801747,
+   "stacks": 1
+  },
+  {
+   "action": "cast",
+   "spell": 704355,
+   "actor": "n",
+   "target": "d"
+  },
+  {
+   "action": "assert",
+   "label": "Glacial Impact hit its primary target",
+   "actor": "n",
+   "metric": "spell_damage_count",
+   "spell": 707592,
+   "target": "d",
+   "equals": 1,
+   "within_ms": 8000
+  },
+  {
+   "action": "assert",
+   "label": "Harrowing Winds reached the enemy two yards from the primary target",
+   "actor": "n",
+   "metric": "spell_damage_count",
+   "spell": 707575,
+   "target": "e",
+   "min": 1,
+   "within_ms": 5000
+  },
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "assert",
+   "label": "Harrowing Winds hit the primary target once",
+   "actor": "n",
+   "metric": "spell_damage_count",
+   "spell": 707575,
+   "target": "d",
+   "equals": 1
+  },
+  {
+   "action": "assert",
+   "label": "Harrowing Winds hit the enemy one yard from the primary target once",
+   "actor": "n",
+   "metric": "spell_damage_count",
+   "spell": 707575,
+   "target": "g",
+   "equals": 1
+  },
+  {
+   "action": "assert",
+   "label": "Harrowing Winds hit the enemy two yards from the primary target once",
+   "actor": "n",
+   "metric": "spell_damage_count",
+   "spell": 707575,
+   "target": "e",
+   "equals": 1
+  },
+  {
+   "action": "assert",
+   "label": "Harrowing Winds spared the enemy nine yards from the primary target, outside its 6 yard radius",
+   "actor": "n",
+   "metric": "spell_damage_count",
+   "spell": 707575,
+   "target": "f",
+   "equals": 0
+  }
+ ]
+}

@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Worldforged Chipped Sentinel Blade stands inside the Md_Jungleden cave, not on the cliff above it (#8501)",
+  "contract": "The pickup (entry 90562, guid 6941560) stood at its catalog XY with the realm-map pass's Z, stranding it on the cliff above Md_Jungleden's roof, 30 yd above the cave and unreachable. The fix restores the catalog position inside the cave, where the reporter found it stuck to the wall; no copy remains on the cliff.",
+  "timeout_ms": 90000,
+  "location": { "map": 1, "x": 10089.2, "y": 1456.59, "z": 1279.0, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "the Chipped Sentinel Blade stands inside the cave", "actor": "p", "metric": "nearby_gameobject_count", "entry": 90562, "equals": 1 },
+    { "action": "assert", "label": "it rests on the cave floor, not floating or sunk into it", "actor": "p", "metric": "spawn_ground_gap", "guid": 6941560, "spawn_type": "gameobject", "min": -2, "max": 2 },
+    { "action": "assert", "label": "it is grounded", "actor": "p", "metric": "spawn_placement", "guid": 6941560, "spawn_type": "gameobject", "tolerance": 2, "equals": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 90562 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "it is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

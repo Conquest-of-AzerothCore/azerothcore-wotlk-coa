@@ -221,6 +221,9 @@ public:
                         }
                         // ray passes through both nodes
                         // push back node
+                        if (stackPos >= MAX_STACK_SIZE)
+                            return;
+
                         stack[stackPos].node = back;
                         stack[stackPos].tnear = (tb >= intervalMin) ? tb : intervalMin;
                         stack[stackPos].tfar = intervalMax;

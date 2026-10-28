@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Witch Hunter Deadeye pays native damage-based rage for each ranged auto attack (#7290, #7659)",
+  "contract": [
+    "Deadeye 92093 (Houndmaster passive, 'Your ranged auto attacks now generate Rage') used to pay a flat 50 internal",
+    "rage per Auto Shot whatever the shot hit for. Ascension scales Auto Shot rage with damage (Zandalari Windreaver",
+    "902137 raises it through SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT, which only scales the damage-based part), so a shot",
+    "now pays Unit::RewardRage(damage, ranged speed x 3.5, crit doubled) like a main-hand swing. At level 60 the rage",
+    "conversion is 230.6; with the 2.5 s Light Crossbow (factor 8) every shot below 82 damage, and every crit below 164,",
+    "is capped by the damage term 15 x damage / 230.6, so rage per point of shot damage is 150 / 230.6 = 0.65 internal",
+    "less up to one truncated point per shot. Expected: shots of 25-70 damage and 0.58-0.67 internal rage per point of",
+    "Auto Shot damage. The old flat 50 gives at least 0.71 at those damage values."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "wh", "race": 1, "class": 15, "level": 60, "ranged_hit_rating": 10000, "allow_regeneration": false}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "wh", "entry": 36, "level": 60, "health": 1000000, "distance": 15}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "actor": "wh", "spell": 5011},
+    {"action": "learn", "actor": "wh", "spell": 75},
+    {"action": "learn", "actor": "wh", "spell": 92093},
+    {"action": "assert", "label": "SETUP: Deadeye is active", "actor": "wh", "metric": "aura", "spell": 92093,
+     "equals": 1, "within_ms": 3000},
+    {"action": "add_item", "actor": "wh", "item": 15807},
+    {"action": "equip", "actor": "wh", "item": 15807, "slot": 17},
+    {"action": "wait", "label": "Let the weapon swap cooldown expire", "ms": 2000},
+    {"action": "set_power", "label": "Start from empty rage", "actor": "wh", "power": 1, "value": 0},
+    {"action": "cast", "label": "Start Auto Shot", "actor": "wh", "spell": 75, "target": "dummy"},
+    {"action": "assert", "label": "SETUP: Auto Shot lands repeatedly", "actor": "wh", "metric": "spell_damage_count",
+     "spell": 75, "target": "dummy", "min": 6, "within_ms": 30000},
+    {"action": "set_health", "label": "Let the next shot end the stream", "actor": "dummy", "value": 1},
+    {"action": "assert", "label": "SETUP: the target died and Auto Shot stopped", "actor": "dummy", "metric": "alive",
+     "equals": 0, "within_ms": 10000},
+    {"action": "wait", "label": "Let any projectile in flight land", "ms": 2000},
+    {"action": "snapshot", "actor": "wh", "metric": "spell_damage_count", "spell": 75, "target": "dummy",
+     "save_as": "shots"},
+    {"action": "snapshot", "actor": "wh", "metric": "spell_damage_total", "spell": 75, "target": "dummy",
+     "save_as": "shot_damage"},
+    {"action": "assert", "label": "SETUP: Light Crossbow shots stay in the damage-capped band", "actor": "wh",
+     "metric": "spell_damage_total", "spell": 75, "target": "dummy", "ratio_to": "shots", "min": 25, "max": 70},
+    {"action": "assert", "label": "Rage scales with shot damage at 150 / 230.6 internal per point", "actor": "wh",
+     "metric": "power", "power": 1, "ratio_to": "shot_damage", "min": 0.58, "max": 0.67}
+  ]
+}

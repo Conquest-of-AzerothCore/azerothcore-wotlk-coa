@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Morriga speaks twice when Death and Justice is turned in",
+  "contract": [
+    "rev_20261004_85_coa_morriga_turn_in_lines gives Morriga Hollowhoof 161818 CoA's two lines on the reward of Death",
+    "and Justice 1660033: her thanks at once and her warning about the lake 6 seconds later. Expected: turning the quest",
+    "in at Morriga brings one chat message at once and a second one about 6 seconds later."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 1, "x": -2712.6, "y": 19.0, "z": 14.5, "o": 0},
+  "players": [{"id": "hero", "race": 6, "class": 1, "level": 10}],
+  "creatures": [{"id": "morriga", "owner": "hero", "entry": 161818, "faction": 35, "level": 15, "distance": 2}],
+  "steps": [
+    {"action": "prepare_quest", "actor": "hero", "quest": 1660033},
+    {"action": "quest_complete", "actor": "hero", "quest": 1660033},
+    {"action": "wait", "ms": 500},
+    {"action": "snapshot", "actor": "hero", "metric": "system_messages", "save_as": "before"},
+    {"action": "quest_turn_in", "actor": "hero", "quest": 1660033, "entry": 161818},
+    {"action": "assert", "label": "Death and Justice is rewarded", "actor": "hero", "metric": "quest_rewarded",
+     "quest": 1660033, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "Morriga voices her gratitude at once", "actor": "hero", "metric": "system_messages",
+     "relative_to": "before", "min": 1, "max": 1, "within_ms": 2000},
+    {"action": "assert", "label": "A few moments later she warns of the lake", "actor": "hero",
+     "metric": "system_messages", "relative_to": "before", "min": 2, "within_ms": 9000}
+  ]
+}

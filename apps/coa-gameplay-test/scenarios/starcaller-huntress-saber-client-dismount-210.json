@@ -1,0 +1,246 @@
+{
+  "schema": 1,
+  "name": "Huntress Saber survives the client dismount packet accompanying damage and healing (#210)",
+  "contract": [
+    "Huntress Saber 524643 says casting does not dismount its Starcaller and permits offensive",
+    "casts while moving. Its helper 704772 lasts 30 seconds and the lifecycle uses mount display",
+    "9991. Frostbolt must damage a target while moving and Lesser Heal must heal the wounded",
+    "caster, including the CMSG_CANCEL_MOUNT_AURA the client sends alongside mounted casts.",
+    "Observe the native mount display rather than only the retained dummy aura. A Starcaller",
+    "on an ordinary Brown Horse must still dismount, and explicit Saber aura cancellation must work."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "saber",
+      "race": 1,
+      "class": 26,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "ordinary",
+      "race": 1,
+      "class": 26,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "saber",
+      "entry": 36,
+      "level": 60,
+      "health": 100000,
+      "distance": 15,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "set_skill",
+      "actor": "ordinary",
+      "skill": 762,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "ordinary",
+      "spell": 458
+    },
+    {
+      "action": "cast",
+      "actor": "ordinary",
+      "spell": 458
+    },
+    {
+      "action": "assert",
+      "label": "The control mounts normally",
+      "actor": "ordinary",
+      "metric": "mount_display_id",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "ordinary"
+    },
+    {
+      "action": "assert",
+      "label": "The control remains able to dismount",
+      "actor": "ordinary",
+      "metric": "mount_display_id",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "saber",
+      "spell": 524643
+    },
+    {
+      "action": "learn",
+      "actor": "saber",
+      "spell": 116
+    },
+    {
+      "action": "learn",
+      "actor": "saber",
+      "spell": 2050
+    },
+    {
+      "action": "cast",
+      "actor": "saber",
+      "spell": 524643
+    },
+    {
+      "action": "assert",
+      "label": "Huntress Saber actually mounts the caster",
+      "actor": "saber",
+      "metric": "mount_display_id",
+      "equals": 9991,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The mount cast's global cooldown has finished",
+      "actor": "saber",
+      "metric": "global_cooldown_ms",
+      "spell": 116,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_moving",
+      "actor": "saber",
+      "enabled": true
+    },
+    {
+      "action": "cast",
+      "actor": "saber",
+      "spell": 116,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "label": "The moving offensive cast is accepted",
+      "actor": "saber",
+      "metric": "cast_failure",
+      "spell": 116,
+      "equals": 0
+    },
+    {
+      "action": "cancel_mount",
+      "label": "The client sends its dismount request with the offensive cast",
+      "actor": "saber"
+    },
+    {
+      "action": "assert",
+      "label": "The offensive cast request retains the actual mount",
+      "actor": "saber",
+      "metric": "mount_display_id",
+      "equals": 9991
+    },
+    {
+      "action": "assert",
+      "label": "The offensive spell actually damages its target while moving",
+      "actor": "saber",
+      "metric": "spell_damage_count",
+      "spell": 116,
+      "target": "target",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_moving",
+      "actor": "saber",
+      "enabled": false
+    },
+    {
+      "action": "set_health",
+      "actor": "saber",
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "saber",
+      "metric": "health",
+      "save_as": "before_heal"
+    },
+    {
+      "action": "cast",
+      "actor": "saber",
+      "spell": 2050
+    },
+    {
+      "action": "assert",
+      "label": "The mounted healing cast is accepted",
+      "actor": "saber",
+      "metric": "cast_failure",
+      "spell": 2050,
+      "equals": 0
+    },
+    {
+      "action": "cancel_mount",
+      "label": "The client sends its dismount request with the healing cast",
+      "actor": "saber"
+    },
+    {
+      "action": "assert",
+      "label": "The healing cast request retains the actual mount",
+      "actor": "saber",
+      "metric": "mount_display_id",
+      "equals": 9991
+    },
+    {
+      "action": "assert",
+      "label": "The healing spell actually heals the wounded caster",
+      "actor": "saber",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "saber",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "saber",
+      "metric": "health",
+      "relative_to": "before_heal",
+      "min": 1
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "saber",
+      "spell": 704772
+    },
+    {
+      "action": "assert",
+      "label": "Cancelling the Saber aura removes its mount",
+      "actor": "saber",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "saber",
+      "metric": "aura",
+      "spell": 704772,
+      "equals": 0
+    }
+  ]
+}

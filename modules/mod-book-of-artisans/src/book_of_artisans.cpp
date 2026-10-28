@@ -16,7 +16,9 @@
  * nobody can buy: a character who has never held a needle gets shown Grand Master Tailoring, and
  * there is nothing to do about it from there. So the books ask for the trainable rows
  * (`SendTrainerList`'s `onlyTrainable`, a plain argument to `Trainer::SendSpells`): the entry rank
- * of each profession, the ranks they have reached, and the ranks they already know, drawn greyed.
+ * of each profession and the ranks they have reached. A rank they already hold is left out too: the
+ * client re-reads the open window's rank rows whenever a spell is learned and draws a held rank as
+ * available again, so a greyed rank row would turn green after the next recipe was trained.
  * Train the apprentice rank, put the skill to 50, and journeyman is in the next window sent.
  *
  * What the module adds is the two things data cannot express:
@@ -49,7 +51,10 @@
  */
 
 #include "Creature.h"
+#include "DatabaseEnv.h"
+#include "Item.h"
 #include "Log.h"
+#include "Mail.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"
 #include "Player.h"
@@ -76,6 +81,34 @@ namespace
 
         uint32 const entry = creature->GetEntry();
         return entry == BOOK_OF_ARTISANS_ENTRY || entry == BEGINNERS_BOOK_ENTRY;
+    }
+
+    // The tool a trade cannot work without. Woodcutting's Lumber Axe is handed out by mod-woodworking.
+    constexpr std::pair<uint32, uint32> PROFESSION_TOOLS[] =
+    {
+        { SKILL_BLACKSMITHING, 5956 },  // Blacksmith Hammer
+        { SKILL_JEWELCRAFTING, 20815 }, // Jeweler's Kit
+        { SKILL_INSCRIPTION,   39505 }, // Virtuoso Inking Set
+        { SKILL_MINING,        2901 },  // Mining Pick
+        { SKILL_SKINNING,      7005 },  // Skinning Knife
+        { SKILL_FISHING,       6256 },  // Fishing Pole
+    };
+
+    void GiveTool(Player* player, uint32 itemId)
+    {
+        if (player->HasItemCount(itemId, 1, true) || player->AddItem(itemId, 1))
+            return;
+
+        CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+        MailDraft draft("Book of Artisans", "The tool of your new trade did not fit in your bags.");
+        if (Item* item = Item::CreateItem(itemId, 1, player))
+        {
+            item->SaveToDB(trans);
+            draft.AddItem(item);
+        }
+
+        draft.SendMailTo(trans, player, MailSender(MAIL_CREATURE, BOOK_OF_ARTISANS_ENTRY));
+        CharacterDatabase.CommitTransaction(trans);
     }
 }
 
@@ -149,7 +182,19 @@ public:
         // packets and the same learned spell as training from a placed trainer.
         if (Trainer::Trainer* trainer = sObjectMgr->GetTrainer(book->GetEntry()))
             if (spellId > 0)
+            {
+                std::vector<uint32> untrainedSkills;
+                for (auto const& [skill, tool] : PROFESSION_TOOLS)
+                    if (!player->HasSkill(skill))
+                        untrainedSkills.push_back(skill);
+
                 trainer->TeachSpell(book, player, uint32(spellId));
+
+                for (auto const& [skill, tool] : PROFESSION_TOOLS)
+                    if (player->HasSkill(skill)
+                        && std::find(untrainedSkills.begin(), untrainedSkills.end(), skill) != untrainedSkills.end())
+                        GiveTool(player, tool);
+            }
 
         // Learning a profession, buying a rank or learning a recipe changes other rows too:
         // what the purchase made available, and what it made known. The client only sees that

@@ -1,0 +1,114 @@
+{
+  "schema": 1,
+  "name": "primalist rush passing targets 5032",
+  "contract": "Primal Rush 502724 charges 20 yards forward and damages enemies along the path. Near and far enemies within the path must each receive one landed damage event, with the near hit occurring while the caster remains short of the final destination. An enemy beyond the authored line radius must not be damaged. This checks server damage timing and movement, not client interpolation.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 60,
+      "spell_hit_rating": 100000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "position_x",
+      "save_as": "start_x"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 502724,
+      "target": "near",
+      "equals": 1,
+      "within_ms": 250
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "position_x",
+      "relative_to": "start_x",
+      "max": 17
+    },
+    {
+      "action": "wait",
+      "ms": 900
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 502724,
+      "target": "far",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 502724,
+      "target": "beyond",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "position_x",
+      "relative_to": "start_x",
+      "min": 19,
+      "max": 21
+    }
+  ],
+  "creatures": [
+    {
+      "id": "near",
+      "owner": "primalist",
+      "entry": 36,
+      "level": 60,
+      "health": 500000,
+      "distance": 5
+    },
+    {
+      "id": "far",
+      "owner": "primalist",
+      "entry": 36,
+      "level": 60,
+      "health": 500000,
+      "distance": 15
+    },
+    {
+      "id": "beyond",
+      "owner": "primalist",
+      "entry": 36,
+      "level": 60,
+      "health": 500000,
+      "distance": 35
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
+}

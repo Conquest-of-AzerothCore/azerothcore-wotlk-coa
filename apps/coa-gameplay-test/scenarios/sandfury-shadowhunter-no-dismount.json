@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "name": "Sandfury Shadowhunter (7246) does not cast Dismounting Blast on a mounted player",
+  "contract": [
+    "Dismounting Blast (18396) knocks the target back and removes its mount aura.",
+    "Ascension lists no Dismounting Blast for 7246 (casts Hex, Shoot; db.exil.es 2026-08-29).",
+    "A mounted player that the creature engages must keep Brown Horse (458) and the creature must have cast 18396 zero times.",
+    "The rider faces the creature (o 0, creature along +X) so melee from the side or behind cannot daze it off the mount."
+  ],
+  "timeout_ms": 45000,
+  "location": {
+    "map": 1,
+    "x": 16226.2,
+    "y": 16257.0,
+    "z": 13.2022,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "rider",
+      "race": 1,
+      "class": 1,
+      "level": 44
+    }
+  ],
+  "creatures": [
+    {
+      "id": "mob",
+      "owner": "rider",
+      "entry": 7246,
+      "faction": 14,
+      "level": 44,
+      "health": 100000,
+      "reaction": 2,
+      "distance": 8
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_aura",
+      "actor": "rider",
+      "spell": 458,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "The rider is mounted",
+      "actor": "rider",
+      "metric": "aura",
+      "spell": 458,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Sandfury Shadowhunter engages the mounted rider",
+      "actor": "mob",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Dismounting Blast casts on aggro",
+      "actor": "mob",
+      "metric": "spell_cast_count",
+      "spell": 18396,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The rider is still mounted",
+      "actor": "rider",
+      "metric": "aura",
+      "spell": 458,
+      "equals": 1
+    }
+  ]
+}

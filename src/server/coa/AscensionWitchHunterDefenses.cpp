@@ -1,7 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "AscensionRealmClock.h"
 #include "AscensionWitchHunterCompletion.h"
-#include "GameTime.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
@@ -9,7 +9,6 @@
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
-#include "Timer.h"
 #include <algorithm>
 #include <array>
 #include <limits>
@@ -17,12 +16,6 @@
 namespace
 {
 using namespace AscensionWitchHunter;
-
-bool Night()
-{
-    uint32 const hour = Acore::Time::GetHours(GameTime::GetGameTime());
-    return hour < 6 || hour >= 18;
-}
 
 void Tracking(Player* player, bool night)
 {
@@ -59,7 +52,7 @@ class aura_ascension_witch_hunter_lifecycle : public AuraScript
             recalculate = false;
         }
         if (GetId() == 562225 && effect->GetEffIndex() == EFFECT_1)
-            amount = Night() ? 100 : 0;
+            amount = AscensionRealmClock::IsNight() ? 100 : 0;
         if (Family(GetSpellInfo(), 2, 4) && effect->GetEffIndex() == EFFECT_0)
             if (Unit* caster = GetCaster())
                 if (Player* modOwner = caster->GetSpellModOwner())
@@ -110,7 +103,7 @@ class aura_ascension_witch_hunter_lifecycle : public AuraScript
         if (id == 804185 && player)
         {
             PreventDefaultAction();
-            bool night = Night();
+            bool night = AscensionRealmClock::IsNight();
             player->RemoveAurasDueToSpell(night ? 807231 : 807198);
             if (Aura* aura = player->GetAura(night ? 807198 : 807231))
                 aura->RefreshDuration();
@@ -120,8 +113,8 @@ class aura_ascension_witch_hunter_lifecycle : public AuraScript
         if (id == 562225 && player)
         {
             PreventDefaultAction();
-            Tracking(player, Night());
-            GetEffect(EFFECT_1)->ChangeAmount(Night() ? 100 : 0);
+            Tracking(player, AscensionRealmClock::IsNight());
+            GetEffect(EFFECT_1)->ChangeAmount(AscensionRealmClock::IsNight() ? 100 : 0);
         }
         if (id == 804068)
         {

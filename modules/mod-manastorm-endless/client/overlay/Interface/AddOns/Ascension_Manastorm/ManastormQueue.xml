@@ -1,0 +1,380 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+https://raw.githubusercontent.com/Ascension-Addons/UI.xsd/main/UI.xsd">
+    <Script file="ManastormQueue.lua"/>
+    
+    <Button name="ManastormLevelScrollListItemTemplate" inherits="ScrollListItemTextTemplate" virtual="true">
+        <Size x="200" y="20"/>
+        
+        <Scripts>
+            <OnLoad>
+                MixinAndLoadScripts(self, "ManastormLevelScrollListItemMixin")
+            </OnLoad>
+        </Scripts>
+    </Button>
+    
+    <Button name="ManastormPotentialRewardTemplate" inherits="ItemIconTemplate" virtual="true">
+        <Size x="38" y="38"/>
+        <Layers>
+            <Layer level="OVERLAY">
+                <Texture name="$parentLockedOverlay" parentKey="LockedOverlay" file="Interface\Buttons\WHITE8x8" hidden="true">
+                    <Anchors>
+                        <Anchor point="TOPLEFT"/>
+                        <Anchor point="BOTTOMRIGHT"/>
+                    </Anchors>
+                    <Color r="0" g="0" b="0" a="0.55"/>
+                </Texture>
+                <Texture name="$parentLockedIcon" parentKey="LockedIcon" hidden="true">
+                    <Size x="18" y="18"/>
+                    <Anchors>
+                        <Anchor point="CENTER" y="4"/>
+                    </Anchors>
+                </Texture>
+                <FontString name="$parentLockTime" parentKey="LockTime" inherits="GameFontHighlightSmall" justifyH="CENTER">
+                    <Size x="38" y="10"/>
+                    <Anchors>
+                        <Anchor point="BOTTOM" y="2"/>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+        <Scripts>
+            <OnLoad>
+                MixinAndLoadScripts(self, "ManastormPotentialRewardMixin")
+                self.LockedIcon:SetAtlas("Garr_LockedBuilding", Const.TextureKit.IgnoreAtlasSize)
+            </OnLoad>
+        </Scripts>
+    </Button>
+    
+    <Frame name="ManastormHighestTemplate" virtual="true">
+        <Size x="200" y="70"/>
+        <Layers>
+            <Layer level="ARTWORK">
+                <FontString name="$parentLabel" parentKey="Label" justifyH="RIGHT" inherits="GameFontNormalLarge">
+                    <Size x="200" y="0"/>
+                    <Anchors>
+                        <Anchor point="TOP"/>
+                    </Anchors>
+                </FontString>
+                <FontString name="$parentText" parentKey="Text" text="0" justifyH="RIGHT"  inherits="GameFontHighlightGiant">
+                    <Size x="200" y="0"/>
+                    <Anchors>
+                        <Anchor point="TOP" relativeTo="$parentLabel" relativePoint="BOTTOM" y="-4"/>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+    </Frame>
+
+    <Frame name="ManastormQueueFrame" parent="AscensionLFGFrameContent" enableMouse="true" setAllPoints="true">
+        <Size x="788" y="512"/>
+
+        <Layers>
+            <Layer level="BACKGROUND">
+                <Texture name="$parentBackground" parentKey="Background">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" x="4"/>
+                        <Anchor point="BOTTOMRIGHT"/>
+                    </Anchors>
+                </Texture>
+            </Layer>
+
+            <Layer level="OVERLAY">
+                <FontString name="$parentTitle" parentKey="Title" text="THE_MANASTORM" justifyH="LEFT" inherits="GameFontNormalHuge">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" y="-8" x="18"/>
+                    </Anchors>
+                </FontString>
+
+                <Texture name="$parentTitleDiv" file="Interface\Common\ui-tooltipdivider-transparent">
+                    <Size x="350" y="8"/>
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeTo="$parentTitle" relativePoint="BOTTOMLEFT" y="-2"/>
+                    </Anchors>
+                </Texture>
+
+                <FontString name="$parentAbout" parentKey="About" text="ABOUT_THE_MANASTORM" justifyH="LEFT" justifyV="TOP" inherits="GameFontHighlight">
+                    <Size x="350" y="0"/>
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeTo="$parentTitleDiv" relativePoint="BOTTOMLEFT"  y="-4"/>
+                    </Anchors>
+                </FontString>
+
+                <FontString name="$parentRewards" parentKey="Rewards" text="POTENTIAL_REWARDS" justifyH="LEFT" inherits="GameFontNormalHuge">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeTo="$parentAbout" relativePoint="BOTTOMLEFT"  y="-8"/>
+                    </Anchors>
+                </FontString>
+
+                <Texture name="$parentRewardDiv" parentKey="RewardDiv" file="Interface\Common\ui-tooltipdivider-transparent">
+                    <Size x="350" y="8"/>
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeTo="$parentRewards" relativePoint="BOTTOMLEFT" y="-2"/>
+                    </Anchors>
+                </Texture>
+
+                <FontString name="$parentLoadoutTitle" parentKey="LoadoutTitle" text="MANASTORM_SPELL_LOADOUT" justifyH="LEFT" inherits="GameFontNormalHuge">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeTo="$parentRewardDiv" relativePoint="BOTTOMLEFT" y="-48"/>
+                    </Anchors>
+                </FontString>
+
+                <Texture name="$parentLoadoutDiv" parentKey="LoadoutDiv" file="Interface\Common\ui-tooltipdivider-transparent">
+                    <Size x="350" y="8"/>
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeTo="$parentLoadoutTitle" relativePoint="BOTTOMLEFT" y="-2"/>
+                    </Anchors>
+                </Texture>
+
+                <FontString name="$parentLoadoutAbout" parentKey="LoadoutAbout" text="MANASTORM_SPELL_LOADOUT_ABOUT" justifyH="LEFT" inherits="GameFontHighlight">
+                    <Size x="350" y="0"/>
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeTo="$parentLoadoutDiv" relativePoint="BOTTOMLEFT"  y="-4"/>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+        
+        <Frames>
+            <Frame name="$parentInset" parentKey="Inset" inherits="NineSlicePanelTemplate2">
+                <Anchors>
+                    <Anchor point="TOPLEFT" x="4" y="-1"/>
+                    <Anchor point="BOTTOMRIGHT" x="-1" y="2"/>
+                </Anchors>
+                <Attributes>
+                    <Attribute name="layoutType" value="InsetFrameTemplate" type="string"/>
+                </Attributes>
+            </Frame>
+
+            <Frame name="$parentShadowOverlay" parentKey="ShadowOverlay" inherits="NineSlicePanelTemplate2" setAllPoints="true">
+
+                <Attributes>
+                    <Attribute name="layoutType" value="LargeShadowOverlay" type="string"/>
+                </Attributes>
+
+                <Scripts>
+                    <OnLoad>
+                        MixinAndLoad(self, "NineSlicePanelMixin")
+                        UseParentLevel(self)
+                    </OnLoad>
+                </Scripts>
+            </Frame>
+            
+            <Button name="$parentReward1" inherits="ManastormPotentialRewardTemplate" id="1">
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="$parentRewardDiv" relativePoint="BOTTOMLEFT" y="-4"/>
+                </Anchors>
+                <Attributes>
+                    <Attribute name="item" value="97884" type="number"/>
+                    <Attribute name="count" value="1" type="number"/>
+                </Attributes>
+            </Button>
+
+            <Button name="$parentReward2" inherits="ManastormPotentialRewardTemplate" id="2">
+                <Anchors>
+                    <Anchor point="LEFT" relativeTo="$parentReward1" relativePoint="RIGHT" x="8"/>
+                </Anchors>
+                <Attributes>
+                    <Attribute name="item" value="1297307" type="number"/>
+                    <Attribute name="count" value="1" type="number"/>
+                </Attributes>
+            </Button>
+
+            <Button name="$parentReward3" inherits="ManastormPotentialRewardTemplate" id="3">
+                <Anchors>
+                    <Anchor point="LEFT" relativeTo="$parentReward2" relativePoint="RIGHT" x="8"/>
+                </Anchors>
+                <Attributes>
+                    <Attribute name="item" value="1297308" type="number"/>
+                    <Attribute name="count" value="1" type="number"/>
+                </Attributes>
+            </Button>
+
+            <Button name="$parentReward4" inherits="ManastormPotentialRewardTemplate" id="4">
+                <Anchors>
+                    <Anchor point="LEFT" relativeTo="$parentReward3" relativePoint="RIGHT" x="8"/>
+                </Anchors>
+                <Attributes>
+                    <Attribute name="item" value="1278049" type="number"/>
+                    <Attribute name="count" value="1" type="number"/>
+                </Attributes>
+            </Button>
+
+            <Button name="$parentReward5" inherits="ManastormPotentialRewardTemplate" id="5">
+                <Anchors>
+                    <Anchor point="LEFT" relativeTo="$parentReward4" relativePoint="RIGHT" x="8"/>
+                </Anchors>
+                <Attributes>
+                    <Attribute name="item" value="1278048" type="number"/>
+                    <Attribute name="count" value="1" type="number"/>
+                </Attributes>
+            </Button>
+
+            <Button name="$parentReward6" inherits="ManastormPotentialRewardTemplate" id="6">
+                <Anchors>
+                    <Anchor point="LEFT" relativeTo="$parentReward5" relativePoint="RIGHT" x="8"/>
+                </Anchors>
+                <Attributes>
+                    <Attribute name="item" value="97886" type="number"/>
+                    <Attribute name="count" value="1" type="number"/>
+                </Attributes>
+            </Button>
+
+            <Button name="$parentReward7" inherits="ManastormPotentialRewardTemplate" id="7">
+                <Anchors>
+                    <Anchor point="LEFT" relativeTo="$parentReward6" relativePoint="RIGHT" x="8"/>
+                </Anchors>
+                <Attributes>
+                    <Attribute name="item" value="97885" type="number"/>
+                    <Attribute name="count" value="1" type="number"/>
+                </Attributes>
+            </Button>
+
+            <Frame name="$parentCurrencyBar" parentKey="CurrencyBar" inherits="CurrencyBarTemplate">
+                <Size x="320" y="20"/>
+                <Anchors>
+                    <Anchor point="BOTTOMLEFT" x="10" y="4"/>
+                </Anchors>
+            </Frame>
+            
+            <Frame name="$parentLoadout" parentKey="Loadout" inherits="ManastormLoadoutTemplate">
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="$parentLoadoutAbout" relativePoint="BOTTOMLEFT" y="-8"/>
+                </Anchors>
+            </Frame>
+            
+            <Frame name="$parentRightPanel" parentKey="RightPanel">
+                <Size x="220" y="512"/>
+                <Anchors>
+                    <Anchor point="TOPRIGHT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Anchors>
+
+                <Frames>
+                    <Frame name="$parentHighestSolo" parentKey="HighestSolo" inherits="ManastormHighestTemplate">
+                        <Anchors>
+                            <Anchor point="TOP" x="-18" y="-28"/>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                self.Label:SetText(HIGHEST_SOLO_MANASTORM_LEVEL)
+                            </OnLoad>
+                        </Scripts>
+                    </Frame>
+                    
+                    <Frame name="$parentHighestDuo" parentKey="HighestDuo" inherits="ManastormHighestTemplate">
+                        <Anchors>
+                            <Anchor point="TOP" relativeTo="$parentHighestSolo" relativePoint="BOTTOM"/>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                self.Label:SetText(HIGHEST_DUO_MANASTORM_LEVEL)
+                            </OnLoad>
+                        </Scripts>
+                    </Frame>
+                    
+                    <Frame name="$parentHighestTrio" parentKey="HighestTrio" inherits="ManastormHighestTemplate">
+                        <Anchors>
+                            <Anchor point="TOP" relativeTo="$parentHighestDuo" relativePoint="BOTTOM"/>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                self.Label:SetText(HIGHEST_TRIO_MANASTORM_LEVEL)
+                            </OnLoad>
+                        </Scripts>
+                    </Frame>
+                    
+                    <Frame name="$parentHighestGroup" parentKey="HighestGroup" inherits="ManastormHighestTemplate">
+                        <Anchors>
+                            <Anchor point="TOP" relativeTo="$parentHighestTrio" relativePoint="BOTTOM"/>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                self.Label:SetText(HIGHEST_GROUP_MANASTORM_LEVEL)
+                            </OnLoad>
+                        </Scripts>
+                    </Frame>
+
+                    <Button name="$parentEnterButton" parentKey="EnterButton" text="ENTER_MANASTORM_SOLO" motionScriptsWhileDisabled="true" inherits="SharedGoldRedButtonLargeTemplate">
+                        <Size x="200" y="38"/>
+                        <Anchors>
+                            <Anchor point="BOTTOM" y="28"/>
+                        </Anchors>
+
+                        <Scripts>
+                            <OnClick>
+                                PlaySound(SOUNDKIT.SPELL_MA_ARCANEORB_IMPACT_01)
+                                ManastormQueueFrame:EnterQueue()
+                            </OnClick>
+                            <OnEnter>
+                                GameTooltip_GenericTooltip(self, "ANCHOR_TOP")
+                            </OnEnter>
+                            <OnLeave function="GameTooltip_Hide"/>
+                        </Scripts>
+                    </Button>
+
+                    <Frame name="$parentLevelDropDown" parentKey="LevelDropDown" inherits="UIDropDownMenuTemplate2">
+                        <Size x="200" y="32"/>
+                        <Anchors>
+                            <Anchor point="BOTTOM" relativeTo="$parentEnterButton" relativePoint="TOP" y="4"/>
+                        </Anchors>
+                    </Frame>
+
+                    <Frame name="$parentLevelSelect" parentKey="LevelSelect" hidden="true">
+                        <Size x="224" y="132"/>
+                        <Anchors>
+                            <Anchor point="BOTTOM" relativeTo="$parentLevelDropDown" relativePoint="TOP"/>
+                        </Anchors>
+
+                        <Frames>
+                            <Frame name="$parentScrollList" parentKey="ScrollList" inherits="ProportionalScrollListTemplate">
+                                <Size x="200" y="124"/>
+                                <Anchors>
+                                    <Anchor point="TOPLEFT" x="2" y="-4"/>
+                                </Anchors>
+                            </Frame>
+                        </Frames>
+
+                        <Backdrop bgFile="Interface\Buttons\WHITE8x8" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+                            <Color r="0" g="0" b="0" a="0.9"/>
+                            <EdgeSize val="16"/>
+                            <TileSize val="16"/>
+                            <BackgroundInsets left="5" right="5" top="5" bottom="5"/>
+                        </Backdrop>
+                    </Frame>
+                </Frames>
+            </Frame>
+
+            <Frame name="$parentError" parentKey="Error" hidden="true" frameLevel="40" toplevel="false" inherits="InputBlockTextTemplate">
+                <Anchors>
+                    <Anchor point="TOPLEFT" x="4"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Anchors>
+
+                <Attributes>
+                    <Attribute name="alpha" value="0.9" type="number"/>
+                </Attributes>
+
+                <Frames>
+                    <Button name="$parentCloseButton" parentKey="CloseButton" text="CLOSE" inherits="SharedButtonTemplate">
+                        <Size x="100" y="28"/>
+                        <Anchors>
+                            <Anchor point="BOTTOM" y="128"/>
+                        </Anchors>
+
+                        <Scripts>
+                            <OnClick>
+                                self:GetParent():Hide()
+                            </OnClick>
+                        </Scripts>
+                    </Button>
+                </Frames>
+            </Frame>
+        </Frames>
+        
+        <Scripts>
+            <OnLoad>
+                MixinAndLoadScripts(self, "ManastormQueueMixin")
+            </OnLoad>
+        </Scripts>
+    </Frame>
+</Ui>

@@ -1,7 +1,23 @@
 {
   "schema": 1,
   "name": "Ranger War Falcons hit with their owner's level of weapon damage (#4546)",
-  "contract": "War Falcon 50393 (Falcon Dive 806341, two SPELL_EFFECT_SUMMON effects, SummonProperties 61 = ally guardian) has a pinned 1/1 creature_template level band, so Creature::SelectLevel writes level-1 creature_classlevelstats weapon damage and attack power when the summon is created. Guardian::InitStats then raises it to the owner's level through Guardian::InitStatsForLevel, but for a guardian that is neither a hunter nor a summon pet that function re-derives weapon damage only for a hardcoded entry list, so every falcon kept its level-1 white hit (the 3-damage hits of #4546) while its level said 80. ranger_wingman_companions re-derives base weapon damage and attack power from creature_classlevelstats at the guardian's level in OnPlayerAfterGuardianInitStatsForLevel, which runs after the owner is set. The hook covers every companion entry, so Falcon's Call (804715, which summons 50264 through 800251) is checked as well. owned_creature_weapon_damage_min reports the lowest value across all copies, so both falcons of a Falcon Dive must meet each bound. Expected: a level-80 Ranger's War Falcons report level-80 minimum weapon damage, several times a level-20 Ranger's falcons; before the fix both show the same level-1 value.",
+  "contract": [
+    "War Falcon 50393 (Falcon Dive 806341, two SPELL_EFFECT_SUMMON effects, SummonProperties 61 = ally",
+    "guardian) has a pinned 1/1 creature_template level band, so Creature::SelectLevel writes level-1",
+    "creature_classlevelstats weapon damage and attack power when the summon is created. Guardian::InitStats",
+    "then raises it to the owner's level through Guardian::InitStatsForLevel, but for a guardian that is",
+    "neither a hunter nor a summon pet that function re-derives weapon damage only for a hardcoded entry",
+    "list, so every falcon kept its level-1 white hit (the 3-damage hits of #4546) while its level said 80.",
+    "ranger_wingman_companions re-derives base weapon damage and attack power from creature_classlevelstats",
+    "at the guardian's level in OnPlayerAfterGuardianInitStatsForLevel, which runs after the owner is set.",
+    "The hook covers every companion entry, so Falcon's Call (804715, which summons 50264 through 800251) is",
+    "checked as well. owned_creature_weapon_damage_min reports the lowest value across all copies, so both",
+    "falcons of a Falcon Dive must meet each bound. Expected: a level-80 Ranger's War Falcons report level-80",
+    "minimum weapon damage, several times a level-20 Ranger's falcons; before the fix both show the same",
+    "level-1 value. Original Falcon's Call summons a falcon for each enemy affected in its target area; a",
+    "cast into an empty area correctly summons none. Each owner now targets an actual passive low-level enemy",
+    "and funds the native 30 Focus cost."
+  ],
   "timeout_ms": 60000,
   "location": {
     "map": 0,
@@ -113,16 +129,51 @@
       "spell": 804715
     },
     {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear Falcon Dive global cooldown before the next summon"
+    },
+    {
+      "action": "set_power",
+      "actor": "ranger",
+      "power": 2,
+      "value": 100
+    },
+    {
       "action": "cast",
       "label": "Level-80 Falcon's Call",
       "actor": "ranger",
-      "spell": 804715
+      "spell": 804715,
+      "target": "ranger_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 804715,
+      "equals": 0,
+      "label": "The ordinary area summon cast is accepted"
+    },
+    {
+      "action": "set_power",
+      "actor": "novice",
+      "power": 2,
+      "value": 100
     },
     {
       "action": "cast",
       "label": "Level-20 Falcon's Call",
       "actor": "novice",
-      "spell": 804715
+      "spell": 804715,
+      "target": "novice_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "novice",
+      "metric": "cast_failure",
+      "spell": 804715,
+      "equals": 0,
+      "label": "The ordinary area summon cast is accepted"
     },
     {
       "action": "assert",
@@ -173,6 +224,24 @@
       "entry": 50264,
       "ratio_to": "novice_call",
       "min": 3
+    }
+  ],
+  "creatures": [
+    {
+      "id": "ranger_enemy",
+      "owner": "ranger",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "novice_enemy",
+      "owner": "novice",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 3
     }
   ]
 }
