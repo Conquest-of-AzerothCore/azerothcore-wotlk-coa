@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "name": "Worldforged Scorpionscale Mantle stands only in Silithus, not the Valley of Trials (#9179)",
+  "contract": "Item 410068 (Scorpionscale Mantle, item level 57, pickup template 518462) belongs to the Silithus worldforged set (its sibling 410065 Idol of Shifting Sands was fixed the same way by #6485/PR #9610). The Silithus copy (guid 6942146, map 1, -8106.8,970.1,59.503) is correct. The realm-map migration also placed a second copy, guid 6942147, inside the Valley of Trials starting zone (map 1, -341.6,-4344.9,59.937), handing a level 56-57 item to level 1-5 orc/troll starters. Remove the Valley of Trials copy; the Silithus copy is untouched.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "p", "race": 2, "class": 12, "level": 10 }
+  ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "teleport", "actor": "p", "map": 1, "x": -341.6, "y": -4344.9, "z": 60.5, "o": 0 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: no misplaced mantle copy in the Valley of Trials", "actor": "p", "metric": "nearby_gameobject_count", "entry": 518462, "equals": 0 },
+    { "action": "teleport", "actor": "p", "map": 1, "x": -8106.8, "y": 970.1, "z": 61.5, "o": 0 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "the mantle stands at its recorded Silithus spot", "actor": "p", "metric": "nearby_gameobject_count", "entry": 518462, "equals": 1 }
+  ]
+}

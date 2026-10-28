@@ -1,0 +1,118 @@
+{
+  "schema": 1,
+  "name": "Wailing Caverns: Lord Serpentis's Fierce Blow follows Normal dungeon kit softening (#9297, #9344, #8917)",
+  "contract": "Lord Serpentis (3673, Wailing Caverns map 43, Normal) casts the restored Ascension kit's Poison Bolt Storm (2102617, already registered in coa_dungeon_normal_spell_damage) and Fierce Blow (975011, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, previously unregistered). Poison Bolt Storm from a level 28 caster already lands like Aku'mai's in Blackfathom Deeps (dungeon-normal-boss-kit-damage.json): 285 of 937.5 direct (0.304) plus a quarter-health area cap, proving CoADungeonNormal is boss-agnostic and already tunes this ability for Serpentis too, so #8917 is not a separate defect. Fierce Blow has no own low-level rank with a matching effect structure, so it is registered with normal_spell_id 0 and high 0.512 (Heroic / 1.66 * 0.85), the table's existing pattern for such spells: CoADungeonNormal::Factor() returns 0.512 unconditionally, then the single-target 40% max-health cap (CoA.DungeonNormal.TargetHitCapPct) applies. Measured on the module damage-taken hooks from a fixed 1000, as the Aku'mai scenario does.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 43,
+    "x": -120.163,
+    "y": -24.624,
+    "z": -28.5832,
+    "o": 2.83,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 15,
+      "level": 28
+    },
+    {
+      "id": "healer",
+      "race": 1,
+      "class": 15,
+      "level": 28
+    }
+  ],
+  "creatures": [
+    {
+      "id": "serpentis",
+      "owner": "tank",
+      "entry": 3673,
+      "level": 28,
+      "health": 100000,
+      "distance": 6
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "set_health",
+      "actor": "healer",
+      "value": 1000,
+      "maximum": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the group is in Wailing Caverns",
+      "actor": "tank",
+      "metric": "map_id",
+      "equals": 43
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the instance is Normal",
+      "actor": "tank",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "#8917: Poison Bolt Storm from a level 28 Lord Serpentis already hits like Aku'mai's, same as Blackfathom Deeps",
+      "actor": "tank",
+      "metric": "script_spell_damage_taken",
+      "spell": 2102617,
+      "target": "serpentis",
+      "min": 302,
+      "max": 305
+    },
+    {
+      "action": "assert",
+      "label": "#8917: and its poison already ticks like the Normal rank's",
+      "actor": "tank",
+      "metric": "script_periodic_damage_taken",
+      "spell": 2102617,
+      "target": "serpentis",
+      "min": 70,
+      "max": 72
+    },
+    {
+      "action": "assert",
+      "label": "No area hit from Poison Bolt Storm takes more than a quarter of a 1000 health healer",
+      "actor": "healer",
+      "metric": "script_spell_damage_taken",
+      "spell": 2102617,
+      "target": "serpentis",
+      "equals": 250
+    },
+    {
+      "action": "assert",
+      "label": "Fierce Blow now follows the Heroic / 1.66 * 0.85 Normal softening for a high-health target",
+      "actor": "tank",
+      "metric": "script_spell_damage_taken",
+      "spell": 975011,
+      "target": "serpentis",
+      "equals": 512
+    },
+    {
+      "action": "assert",
+      "label": "Fierce Blow is additionally capped at 40% of a low-health target's maximum health",
+      "actor": "healer",
+      "metric": "script_spell_damage_taken",
+      "spell": 975011,
+      "target": "serpentis",
+      "equals": 400
+    }
+  ]
+}

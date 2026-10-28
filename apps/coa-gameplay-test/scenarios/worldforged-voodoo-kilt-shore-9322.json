@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Worldforged Voodoo Kilt stands on the Darkspear Strand shore, not the cliff top (#9322)",
+  "contract": "Makashar's Belongings (entry 95666, guid 6942391, item 450687) stood on the cliff top at the realm-map marker, 27 yd above the atlas sighting on the shore below. Restore the shore position near the LootCollector pin so the chest is reachable from the beach.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": -518.4, "y": -5212.5, "z": 10.0, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the pickup stands in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95666, "equals": 1 },
+    { "action": "assert", "label": "it rests on the shore, not the cliff top", "actor": "p", "metric": "spawn_ground_gap", "guid": 6942391, "spawn_type": "gameobject", "min": -0.3, "max": 0.3 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 95666 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "DISCRIMINATING: it is within reach from the beach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

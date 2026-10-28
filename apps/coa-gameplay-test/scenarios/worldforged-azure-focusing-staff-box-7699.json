@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "name": "Worldforged Azure Focusing Staff stands on its recorded height in the Mazthoril stone box (COA-7699)",
+  "contract": "The Azure Focusing Staff pickup (item 410113, GO 96244, guid 6941421) was recorded on the realm at z 689.612. rev_20261006_65_worldforged_openworld_float_heights.sql lowered it to 686.3715 (the local terrain height), 3.2 yd below its recorded spot and inside the stone box floor. The fix restores the recorded height.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": 6246.0, "y": -4389.3, "z": 686.5, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the staff pickup is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 96244, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the pickup stands at its recorded height above the box floor, not buried at terrain level", "actor": "p", "metric": "nearby_gameobject_ground_offset", "entry": 96244, "min": 2.0, "max": 4.0 }
+  ]
+}

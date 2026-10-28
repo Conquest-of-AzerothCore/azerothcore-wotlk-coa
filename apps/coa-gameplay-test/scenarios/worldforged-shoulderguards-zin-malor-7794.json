@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Worldforged Shoulderguards of Zin-Malor stands on its floor in Azshara (#7794)",
+  "contract": "The Shoulderguards of Zin-Malor pickup (254459, guid 6942173) hovered 4.6 yd above the floor of a multi-storey structure, 3.5-4.3 yd above the navmesh polygon the reporter stood on. rev_20261028_04 lowers it to that floor height; XY is unchanged since it already lies over the same floor polygon. Naga guards (creature 6196) patrol that floor and their blows interrupt Opening, so the opener carries a fixture Divine Shield 642 while it casts, as worldforged-group-loot-7541 does for its own guarded cache; it changes nothing about the placement being asserted.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": 3547.196, "y": -5331.112, "z": 134.253, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the shoulderguards are in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 254459, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the pickup stands within a yard of a floor", "actor": "p", "metric": "spawn_ground_gap", "guid": 6942173, "spawn_type": "gameobject", "min": -1.5, "max": 1.5 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 254459 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "the shoulderguards are within reach and open", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

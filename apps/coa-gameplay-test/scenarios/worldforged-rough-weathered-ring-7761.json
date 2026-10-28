@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Worldforged Rough Weathered Ring stands on open ground in Arathi Highlands (#7761)",
+  "contract": "The Rough Weathered Ring pickup (1345116, guid 6940979) had no walkable navmesh polygon at its spawn XY at all (blocked by a map doodad the reporter described as rock). rev_20261028_03 moves it to the reporter's own position, which lands on a walkable polygon at the terrain height.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -831.49, "y": -3277.81, "z": 79.44, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the ring is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 1345116, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the pickup is grounded", "actor": "p", "metric": "spawn_placement", "guid": 6940979, "spawn_type": "gameobject", "tolerance": 1.5, "equals": 0 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 1345116 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "the ring is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

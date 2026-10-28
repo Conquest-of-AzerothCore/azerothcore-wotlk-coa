@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Stand Against Darkness's helper stays permanent (#9519)",
+  "contract": "Talent 707078 applies helper 707768 through AscensionSunCleric.cpp's Refresh (every 500 ms via OnPlayerUpdate) whenever it is daytime and 707078 is known. Unlike the other day/health-gated helper pairs in the same loop (e.g. Pure Light 300314/301341), 707768 was only ever re-applied with SetHelper, which leaves its native 15000 ms DBC duration in place and keeps resetting it to a fresh countdown every refresh tick instead of making it permanent. Refresh now calls KeepHelper for 707768, matching the sibling pairs: once applied, its duration is forced to -1 (permanent) and stays -1 across further refresh ticks. The default accelerated gameplay clock anchors realm-local time at hour 10, inside Daytime()'s 06:00-18:00 window, so the talent's day gate is satisfied deterministically for the short window this scenario runs.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "cleric", "spell": 707078 },
+    {
+      "action": "assert", "label": "SETUP: the helper is applied", "actor": "cleric",
+      "metric": "aura", "spell": 707768, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The helper is permanent, not a countdown", "actor": "cleric",
+      "metric": "aura_duration_ms", "spell": 707768, "equals": -1, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Let several more refresh ticks run", "ms": 3000 },
+    {
+      "action": "assert", "label": "The helper stays permanent across refresh ticks", "actor": "cleric",
+      "metric": "aura_duration_ms", "spell": 707768, "equals": -1
+    },
+    {
+      "action": "assert", "label": "The helper is still applied", "actor": "cleric",
+      "metric": "aura", "spell": 707768, "equals": 1
+    },
+    { "action": "unlearn", "actor": "cleric", "spell": 707078 },
+    {
+      "action": "assert", "label": "Unlearning the talent removes the helper", "actor": "cleric",
+      "metric": "aura", "spell": 707768, "equals": 0, "within_ms": 2000
+    }
+  ]
+}

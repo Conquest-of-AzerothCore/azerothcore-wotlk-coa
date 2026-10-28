@@ -1641,7 +1641,9 @@ namespace CoAChallenges
                     marked = true;
                 }
             }
-            if (marked && ObjectivesAllDone(guid, cid))
+            if (marked && ObjectivesAllDone(guid, cid)
+                && (!IsTrialChallenge(cid)
+                    || player->GetLevel() >= sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL)))
                 CompleteChallenge(player, cid);
         }
     }
@@ -1712,7 +1714,9 @@ namespace CoAChallenges
                 return false;
             }
 
-            if (marked && ObjectivesAllDone(guid, cid))
+            if (marked && ObjectivesAllDone(guid, cid)
+                && (!IsTrialChallenge(cid)
+                    || player->GetLevel() >= sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL)))
                 CompleteChallenge(player, cid);
         }
         return true;

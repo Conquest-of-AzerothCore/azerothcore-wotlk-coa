@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "name": "Betrayal from Within marks Kuz's Skull at Kuz's own spawn",
+  "contract": "Quest 879 'Betrayal from Within' (Camp Taurajo, Barrens) wants Nak, Kuz and Lok Orcbane's skulls. Until rev_20261027_84_coa_quest_879_kuz_skull_poi the Kuz's Skull marker (quest_poi id 0, ObjectiveIndex 4) sat at (-3764, -1833), about 132 yards from Kuz's own spawn (creature.sql guid 14383: -3814.72, -1955.13, map 1), well outside the Razormane camp the pin pointed at (#7721). This case asks the server for 879's points with the CMSG_QUEST_POI_QUERY a real client sends and reads SMSG_QUEST_POI_QUERY_RESPONSE itself, independently computing Kuz's rounded spawn coordinates as the expected pin.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -3814.72,
+    "y": -1955.13,
+    "z": 94.3856,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 2,
+      "class": 20,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 2000
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 879 'Betrayal from Within' unfinished, the way the reporter did",
+      "actor": "c",
+      "quest": 879,
+      "complete": false
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 879, exactly what the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 879
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 879's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 879,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the map gets its four known markers - Nak, Kuz, Lok Orcbane and the Mangletooth turn-in",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The first POI is Kuz's Skull, id 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "it marks the Kuz's Skull item objective, RequiredItemId1 5074 (ObjectiveIndex 4)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on the Kalimdor map, MapID 1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 20,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "WorldMapAreaId 11, the Barrens",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 11,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pin is a single point, not the old four-corner-free stray marker",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pin's x is -3815, Kuz's own rounded spawn x (-3814.72), not the old -3764",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294963481,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pin's y is -1955, Kuz's own rounded spawn y (-1955.13), not the old -1833",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 4294965341,
+      "within_ms": 4000
+    }
+  ]
+}

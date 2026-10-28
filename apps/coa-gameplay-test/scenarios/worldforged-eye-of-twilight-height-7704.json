@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Worldforged Eye of Twilight stands within reach of the ground in Searing Gorge (#7704)",
+  "contract": "The Eye of Twilight pickup (158333, guid 6940452) stood 6.8 yd above the terrain at its spawn XY, out of the 5 yd interaction range from a character standing on the ground beside it. rev_20261028_01 restores it to the stock terrain height (287.094) that 2026_09_23_05_worldforged_map.sql used before 2026_09_23_06_worldforged_recorded_heights.sql lifted it to an unreachable client sighting.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -6677.74, "y": -902.75, "z": 287.08, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the Eye of Twilight is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 158333, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the pickup stands within a yard of the ground", "actor": "p", "metric": "spawn_ground_gap", "guid": 6940452, "spawn_type": "gameobject", "min": -1, "max": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 158333 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "the Eye of Twilight is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

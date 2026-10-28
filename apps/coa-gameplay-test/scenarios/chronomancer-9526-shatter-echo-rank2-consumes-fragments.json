@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Chronomancer: Shatter Echo rank 807950 consumes Echo Fragments (#9526)",
+  "contract": "Shatter Echo's ResourceCostRules only covered the base rank 804503 and the max rank 572417; the four intermediate ranks learned between level 20 and 50 (807950-807953) had no row at all, so casting them left Echo Fragments (804455) untouched. AscensionCustomResourceData.h now carries one ResourceCostRule row per intermediate rank id, consuming all held fragments on cast exactly like the base and max ranks already did.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "chrono", "race": 1, "class": 22, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "chrono", "entry": 36, "level": 80, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "learn", "actor": "chrono", "spell": 92120 },
+    { "action": "learn", "actor": "chrono", "spell": 561284 },
+    { "action": "learn", "actor": "chrono", "spell": 807950 },
+    { "action": "cast", "label": "Gain an Echo Fragment", "actor": "chrono", "spell": 561284, "target": "dummy" },
+    {
+      "action": "assert", "label": "SETUP: one Echo Fragment is held", "actor": "chrono",
+      "metric": "aura_stacks", "spell": 804455, "caster": "chrono", "min": 1, "within_ms": 3000
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1500 },
+    { "action": "cast", "label": "Shatter Echo rank 807950 with a fragment held", "actor": "chrono", "spell": 807950, "target": "dummy" },
+    {
+      "action": "assert", "label": "The cast is accepted", "actor": "chrono",
+      "metric": "cast_failure", "spell": 807950, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The Echo Fragment is consumed by the cast", "actor": "chrono",
+      "metric": "aura_stacks", "spell": 804455, "caster": "chrono", "equals": 0, "within_ms": 2000
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Realm First! race/class achievements grant their CharTitles title (#9530, #9531)",
+  "contract": "Achievement 86207 'Realm First! Level 60 Night Elf Reaper' and achievement 86056 'Realm First! Level 60 Undead Witch Hunter' complete on reaching level 60 as that race/class (achievement_criteria_data type 21, S_PLAYER_CLASS_RACE). Before the fix neither had an achievement_reward row, so completing them granted the achievement but no title. CharTitles.dbc 115 is '%s, Champion of Elune' (Alliance) and 119 is '%s the Forsaken' (Horde); achievement_reward now sets TitleA=115 for 86207 and TitleH=119 for 86056.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "elf", "race": 4, "class": 30, "level": 1 },
+    { "id": "forsaken", "race": 5, "class": 15, "level": 1 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "set_level", "actor": "elf", "value": 60 },
+    { "action": "set_level", "actor": "forsaken", "value": 60 },
+    { "action": "wait", "ms": 500 },
+
+    { "action": "assert", "label": "Night Elf Reaper earns the realm-first achievement", "actor": "elf", "metric": "has_achievement", "achievement": 86207, "equals": 1 },
+    { "action": "assert", "label": "and the Champion of Elune title", "actor": "elf", "metric": "has_title", "title": 115, "equals": 1 },
+
+    { "action": "assert", "label": "Undead Witch Hunter earns the realm-first achievement", "actor": "forsaken", "metric": "has_achievement", "achievement": 86056, "equals": 1 },
+    { "action": "assert", "label": "and the Forsaken title", "actor": "forsaken", "metric": "has_title", "title": 119, "equals": 1 }
+  ]
+}

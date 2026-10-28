@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "name": "Necromancer: an idle Abomination's Disease Cloud still hits hidden enemy players",
+  "contract": [
+    "Disease Cloud 802353 (SCHOOL_DAMAGE, TARGET_UNIT_SRC_AREA_ENEMY, 10 yd) used to pulse every 3 s from an idle Abomination 50068. AzerothCore lets area spells hit stealthed and invisible units, so the idle cloud damaged and revealed hostile players who came near an out-of-combat necromancer.",
+    "Limiting the idle pulse to combat stopped it hitting neutral and invisible creatures, but also stopped that PvP interaction. The idle Abomination must still pulse whenever an attackable enemy player is in the cloud.",
+    "A PvP-flagged Alliance rogue in Stealth 1784 and a mage under Invisibility 32612 stand next to a PvP-flagged Forsaken necromancer. Once the Abomination is raised, with nobody attacking, its Disease Cloud must damage both."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 },
+    { "id": "rogue", "race": 1, "class": 4, "level": 80 },
+    { "id": "mage", "race": 1, "class": 8, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling and the Life Force aura settle", "ms": 3000 },
+    { "action": "pvp", "actor": "n", "enabled": true },
+    { "action": "pvp", "actor": "rogue", "enabled": true },
+    { "action": "pvp", "actor": "mage", "enabled": true },
+    { "action": "learn", "actor": "n", "spell": 92123 },
+    { "action": "learn", "actor": "n", "spell": 680283 },
+    { "action": "learn", "actor": "n", "spell": 500335 },
+    {
+      "action": "assert", "label": "SETUP: two Life Force passives raise the capacity to 4", "actor": "n",
+      "metric": "aura_stacks", "spell": 805011, "equals": 4, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: the necromancer can attack the PvP-flagged rogue", "actor": "n",
+      "metric": "can_attack", "target": "rogue", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "SETUP: the necromancer can attack the PvP-flagged mage", "actor": "n",
+      "metric": "can_attack", "target": "mage", "equals": 1, "within_ms": 5000
+    },
+    { "action": "set_aura", "actor": "rogue", "spell": 1784, "stacks": 1 },
+    { "action": "set_aura", "actor": "mage", "spell": 32612, "stacks": 1 },
+    {
+      "action": "assert", "label": "SETUP: the rogue is stealthed", "actor": "rogue",
+      "metric": "aura", "spell": 1784, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: the mage is invisible", "actor": "mage",
+      "metric": "aura", "spell": 32612, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: the necromancer cannot target the invisible mage", "actor": "n",
+      "metric": "can_attack", "target": "mage", "equals": 0
+    },
+    { "action": "cast", "label": "Raise the Abomination", "actor": "n", "spell": 500335 },
+    {
+      "action": "assert", "label": "SETUP: one Abomination", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50068, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the idle Abomination's cloud hits the stealthed rogue", "actor": "n",
+      "metric": "spell_damage_count", "spell": 802353, "entry": 50068, "target": "rogue", "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the idle Abomination's cloud hits the invisible mage", "actor": "n",
+      "metric": "spell_damage_count", "spell": 802353, "entry": 50068, "target": "mage", "min": 1,
+      "within_ms": 8000
+    }
+  ]
+}

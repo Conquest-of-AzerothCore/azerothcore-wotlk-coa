@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Worldforged Venture Co. Boots stand in the Barrens tower, not under it (#9299)",
+  "contract": "The pickup (entry 1345156, guid 6942379, item 521190) stood at the realm-map terrain fallback, 19.8 yd under the Abandonedorcgreathall.wmo tower floor the reporter describes ('in a box in the tower'). Move it onto the tower's upper floor near the LootCollector pin.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": 1349.5, "y": -3648.5, "z": 112.0, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the boots stand in the tower, not 20 yd below it", "actor": "p", "metric": "nearby_gameobject_count", "entry": 1345156, "equals": 1 },
+    { "action": "assert", "label": "the new spot is a real floor, not a float", "actor": "p", "metric": "spawn_ground_gap", "guid": 6942379, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 1345156 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "it is within reach of the tower floor and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

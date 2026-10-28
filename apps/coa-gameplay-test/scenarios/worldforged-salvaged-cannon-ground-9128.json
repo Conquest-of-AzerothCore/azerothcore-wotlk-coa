@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "name": "Worldforged Salvaged Cannon rests on the ground in Dun Morogh (#9128)",
+  "contract": "The Discarded Hand Cannon pickup (entry 95617, guid 6940999, item 450684) stands at the realm-map marker XY in Dun Morogh, 0.52 yd under the terrain there (gap -0.519). Restore its stored height to the terrain.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -6043.8, "y": -216.8, "z": 416.0, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the Discarded Hand Cannon stands in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95617, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: it rests on the ground, not sunk into it", "actor": "p", "metric": "spawn_ground_gap", "guid": 6940999, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 },
+    { "action": "assert", "label": "it is grounded", "actor": "p", "metric": "spawn_placement", "guid": 6940999, "spawn_type": "gameobject", "tolerance": 1, "equals": 0 }
+  ]
+}

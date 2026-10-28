@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "name": "Summoner's Stone: Subdued Mistress reskins the Hero's summoned demon (#8201)",
+  "contract": [
+    "The wardrobe's Summoned Demon category (AppearanceCategories 34, APPEARANCE_TYPE_COSMETIC_PET, class mask 768 = Warlock and Hero) lists Summoner's Stones; each Appearances.dbc row names a creature entry at field 8. Appearance 753 (item 204016, Summoner's Stone: Subdued Mistress) names creature 45906, display 70007 (AscensionCollectionModelData).",
+    "Only the Tamed Beast category (33) had a handler (#7160); category 34 was saved but never read back by anything, so confirming a Summoner's Stone never changed how the Hero's demon looked (reported against the Enslave Demon pet, #8201; the pet-power half of the same report is #8291, out of scope here).",
+    "The fix reads the saved selection's creature display the same way RefreshIncarnationGuardian does for incarnations, and applies it to any Warlock or Hero SUMMON_PET-type guardian both when it is (re)summoned and when the selection changes while it is already out; clearing the selection restores its native display. This scenario proves the mechanism with Summon Imp (688), which already reaches the same Guardian::InitStatsForLevel hook as the Enslave Demon kit's own Summon Demon (884); a class outside the mask is refused."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "hero",
+      "name": "Stonecaller",
+      "race": 4,
+      "class": 10,
+      "level": 80
+    },
+    {
+      "id": "warrior",
+      "name": "Noplace",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "learn", "actor": "hero", "spell": 688 },
+    { "action": "set_aura", "actor": "hero", "spell": 10040, "stacks": 3 },
+    { "action": "assert", "label": "SETUP: mana pool for the summon", "actor": "hero", "metric": "max_power", "power": 0, "min": 20000, "within_ms": 2000 },
+    { "action": "set_power", "actor": "hero", "power": 0, "value": 20000 },
+    { "action": "reset_cooldown", "actor": "hero", "spell": 688 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "cast", "label": "Summon Imp", "actor": "hero", "spell": 688 },
+    { "action": "assert", "label": "SETUP: the imp is out", "actor": "hero", "metric": "pet_entry", "equals": 416, "within_ms": 15000 },
+    { "action": "snapshot", "label": "The imp's own model, before any Summoner's Stone is selected", "actor": "hero", "metric": "pet_display", "save_as": "stock_imp" },
+    {
+      "action": "apply_appearances",
+      "label": "Select the Subdued Mistress Summoner's Stone with the imp out",
+      "actor": "hero",
+      "selection": { "34": 753 }
+    },
+    {
+      "action": "assert", "label": "The selection is accepted", "actor": "hero",
+      "metric": "server_packet_contains", "opcode": 1688, "text": "APPLY_APPEARANCES_OK", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "THE FIX: the imp takes the Subdued Mistress display at once", "actor": "hero",
+      "metric": "pet_display", "equals": 70007, "within_ms": 1000
+    },
+    { "action": "set_power", "actor": "hero", "power": 0, "value": 20000 },
+    { "action": "reset_cooldown", "actor": "hero", "spell": 688 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "cast", "label": "Summon the imp again", "actor": "hero", "spell": 688 },
+    { "action": "wait", "ms": 12000 },
+    {
+      "action": "assert", "label": "THE FIX: a newly summoned imp also takes the selected display", "actor": "hero",
+      "metric": "pet_display", "equals": 70007, "within_ms": 3000
+    },
+    {
+      "action": "apply_appearances",
+      "label": "Clear the Summoned Demon selection",
+      "actor": "hero",
+      "selection": {}
+    },
+    {
+      "action": "assert", "label": "Clearing the selection restores the imp's own model", "actor": "hero",
+      "metric": "pet_display", "relative_to": "stock_imp", "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "apply_appearances",
+      "label": "A Warrior selects the Subdued Mistress Summoner's Stone",
+      "actor": "warrior",
+      "selection": { "34": 753 }
+    },
+    {
+      "action": "assert", "label": "Summoned Demon appearances are not offered to warriors", "actor": "warrior",
+      "metric": "server_packet_contains", "opcode": 1688, "text": "APPLY_APPEARANCES_NOT_AVAILABLE_FOR_CLASS", "equals": 1, "within_ms": 2000
+    }
+  ]
+}
