@@ -24,6 +24,7 @@
 #include "ArenaTeam.h"
 #include "ArenaTeamMgr.h"
 #include "ArenaSeasonMgr.h"
+#include "AscensionBazaarTokenReserve.h"
 #include "AscensionPooledVitality.h"
 #include "AscensionVanityOwnership.h"
 #include "Battlefield.h"
@@ -4334,6 +4335,9 @@ void Player::DeleteFromDB(ObjectGuid::LowType lowGuid, uint32 accountId, bool up
     // we set it to mode CHAR_DELETE_REMOVE
     if (deleteFinally || sCharacterCache->GetCharacterLevelByGuid(playerGuid) < charDelete_minLvl)
         charDelete_method = CHAR_DELETE_REMOVE;
+
+    // Its Bazaar Tokens leave the account: they use up the Elite Warchest reserve first.
+    AscensionBazaarTokenReserve::OnCharacterDeleted(accountId, lowGuid);
 
     if (uint32 guildId = sCharacterCache->GetCharacterGuildIdByGuid(playerGuid))
         if (Guild* guild = sGuildMgr->GetGuildById(guildId))

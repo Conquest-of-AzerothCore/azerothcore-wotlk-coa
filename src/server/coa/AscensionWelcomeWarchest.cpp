@@ -1,4 +1,5 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+#include "AscensionBazaarTokenReserve.h"
 #include "AscensionWildcard.h"
 #include "DatabaseEnv.h"
 #include "DBCStores.h"
@@ -138,6 +139,10 @@ constexpr uint32 SCROLL_OF_RETREAT_ALLIANCE = 1175626;
 
 void DeliverOrQueueMail(Player* player, std::vector<Item*>& mailQueue, uint32 entry, uint32 count)
 {
+    // The warchest's Bazaar Tokens are Realm Bound (in bags or mailed to this character, both stay on the account).
+    if (entry == AscensionBazaarTokenReserve::TOKEN_ITEM)
+        AscensionBazaarTokenReserve::AddReserve(player, count);
+
     ItemPosCountVec dest;
     if (player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, entry, count) == EQUIP_ERR_OK)
     {

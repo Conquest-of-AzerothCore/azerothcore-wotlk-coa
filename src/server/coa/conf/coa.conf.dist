@@ -38,6 +38,12 @@ CoA.ProbeRelay.AccountPrefix = "COALAB"
 # Log each consumed extension packet during protocol discovery.
 CoA.LogConsumedPackets = 1
 
+# Realm Bound Bazaar Tokens from the Elite Warchest (2977351). The 1500 Bazaar Tokens (975001) it holds are
+# counted as a per-account reserve: purchases use the reserve first, and tokens can only be traded, mailed to
+# another account, auctioned or put in a guild bank while the account keeps at least the reserve. Mail between
+# the account's own characters is free. Farmed tokens above the reserve stay tradeable.
+CoA.BazaarTokens.WarchestRealmBound = 1
+
 # Ascension character screen: enable/disable (activate/deactivate) and the
 # per-account character list sort order.
 # Requests: CMSG 0x072E / 0x072F / 0x0772.
