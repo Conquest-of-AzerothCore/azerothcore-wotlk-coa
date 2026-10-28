@@ -452,12 +452,19 @@
     },
     {
       "action": "assert",
-      "label": "1357 is in the log and already complete",
+      "label": "1357 is in the log with its objectives open",
       "actor": "p",
       "metric": "quest_status",
       "quest": 1357,
-      "equals": 1,
+      "equals": 3,
       "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: the 10 objective item(s) 201083",
+      "actor": "p",
+      "item": 201083,
+      "count": 10
     },
     {
       "action": "assert",
