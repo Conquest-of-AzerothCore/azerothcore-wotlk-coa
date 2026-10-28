@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "name": "Skinpeeler Nytharos: crushing depths solo",
+  "contract": [
+    "A solo player takes the full per-tick share instead of a divided budget.",
+    "The channel alone must not kill them: they keep at least 80 percent of their bar."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 1,
+    "x": 2269.03,
+    "y": -6608.37,
+    "z": 125.192,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "tank",
+      "entry": 9916214,
+      "level": 60,
+      "health": 1000000,
+      "reaction": 2,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the boss and local AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "attack",
+      "label": "Establish threat",
+      "actor": "tank",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "Boss enters combat",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "label": "Reach the first channel",
+      "ms": 12000
+    },
+    {
+      "action": "wait",
+      "label": "Let the channel tick out",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Solo pool survives one channel",
+      "actor": "tank",
+      "metric": "health_pct",
+      "min": 5.0,
+      "max": 75.0
+    },
+    {
+      "action": "assert",
+      "label": "Solo player is alive",
+      "actor": "tank",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

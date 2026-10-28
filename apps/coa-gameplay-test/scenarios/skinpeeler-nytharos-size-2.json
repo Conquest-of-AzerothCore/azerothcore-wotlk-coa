@@ -1,0 +1,242 @@
+{
+  "schema": 1,
+  "name": "Skinpeeler Nytharos: 2 players in level 50-80 gear",
+  "contract": [
+    "2 players in level 50-80 equipment run the full first cycle.",
+    "The pool scales for the headcount, spouts and the shield both appear, and the group survives."
+  ],
+  "timeout_ms": 200000,
+  "location": {
+    "map": 1,
+    "x": 2269.03,
+    "y": -6608.37,
+    "z": 125.192,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps1",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 750
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 16542
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 16544
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 16541
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "tank",
+      "item": 16542,
+      "slot": 0
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "tank",
+      "item": 16544,
+      "slot": 2
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "tank",
+      "item": 16541,
+      "slot": 4
+    },
+    {
+      "action": "learn",
+      "actor": "dps1",
+      "spell": 750
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 16542
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 16544
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 16541
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps1",
+      "item": 16542,
+      "slot": 0
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps1",
+      "item": 16544,
+      "slot": 2
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps1",
+      "item": 16541,
+      "slot": 4
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 754
+    },
+    {
+      "action": "equip",
+      "label": "Weapon",
+      "actor": "tank",
+      "item": 754,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "tank",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 754
+    },
+    {
+      "action": "equip",
+      "label": "Weapon",
+      "actor": "dps1",
+      "item": 754,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "dps1",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "summon",
+      "label": "Spawn the boss",
+      "actor": "tank",
+      "as": "boss",
+      "entry": 9916214,
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "label": "Let the boss settle",
+      "ms": 2500
+    },
+    {
+      "action": "attack",
+      "label": "Establish threat",
+      "actor": "tank",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Establish threat",
+      "actor": "dps1",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "Boss enters combat",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Pool scaled for the group",
+      "actor": "boss",
+      "metric": "max_health",
+      "min": 15000,
+      "max": 200000,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Spouts reach the arena",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 9916216,
+      "min": 1,
+      "within_ms": 45000
+    },
+    {
+      "action": "assert",
+      "label": "Shield appears in the loop",
+      "actor": "boss",
+      "metric": "aura",
+      "spell": 1004300,
+      "equals": 1,
+      "within_ms": 90000
+    },
+    {
+      "action": "assert",
+      "label": "Boss took damage",
+      "actor": "boss",
+      "metric": "health_pct",
+      "max": 99.0,
+      "within_ms": 90000
+    },
+    {
+      "action": "assert",
+      "label": "Group survived the first cycle",
+      "actor": "tank",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

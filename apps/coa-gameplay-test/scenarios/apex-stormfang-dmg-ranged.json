@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Apex Stormfang: ranged damage counts",
+  "contract": [
+    "A hunter auto-shoots the boss.",
+    "The shots are recorded as damage on the boss."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 1,
+    "x": 2269.03,
+    "y": -6608.37,
+    "z": 125.192,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 3,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "learn",
+      "label": "Auto Shot",
+      "actor": "tank",
+      "spell": 75
+    },
+    {
+      "action": "summon",
+      "label": "Spawn stormfang",
+      "actor": "tank",
+      "as": "boss",
+      "entry": 9916212,
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "tank",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "Boss enters combat",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "label": "Ranged window",
+      "ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "Ranged damage reached the boss",
+      "actor": "tank",
+      "metric": "spell_damage_done",
+      "spell": 75,
+      "target": "boss",
+      "min": 1
+    }
+  ]
+}

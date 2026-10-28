@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Skinpeeler Nytharos: warrior protection spec switch",
+  "contract": [
+    "The warrior switches to the protection talent tab.",
+    "The character remains level 60 and valid for the fight."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 1,
+    "x": 2269.03,
+    "y": -6608.37,
+    "z": 125.192,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "specialization",
+      "label": "Switch to protection",
+      "actor": "tank",
+      "id": 163
+    },
+    {
+      "action": "assert",
+      "label": "Spec protection applied",
+      "actor": "tank",
+      "metric": "level",
+      "equals": 60
+    }
+  ]
+}

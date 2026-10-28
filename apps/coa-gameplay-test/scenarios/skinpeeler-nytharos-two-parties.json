@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "name": "Skinpeeler Nytharos: two parties on one boss",
+  "contract": [
+    "Eight characters attack the same boss at once.",
+    "The pool stays inside the normal band rather than growing without bound."
+  ],
+  "timeout_ms": 240000,
+  "location": {
+    "map": 1,
+    "x": 2269.03,
+    "y": -6608.37,
+    "z": 125.192,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps1",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps2",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps3",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps4",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps5",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps6",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps7",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "summon",
+      "label": "Spawn 9916214",
+      "actor": "tank",
+      "as": "boss",
+      "entry": 9916214,
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "tank",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps1",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps2",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps3",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps4",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps5",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps6",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps7",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "Boss enters combat",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "label": "Combined window",
+      "ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "Pool sized for the crowd",
+      "actor": "boss",
+      "metric": "max_health",
+      "min": 14000,
+      "max": 900000
+    }
+  ]
+}

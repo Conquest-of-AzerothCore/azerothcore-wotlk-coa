@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "Skinpeeler Nytharos: two player pool",
+  "contract": [
+    "Two players pull and the probe sizes the pool from their combined output.",
+    "The pool lands inside the two player band and the tank survives."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 1,
+    "x": 2269.03,
+    "y": -6608.37,
+    "z": 125.192,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps1",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "summon",
+      "label": "Spawn the boss",
+      "actor": "tank",
+      "as": "boss",
+      "entry": 9916214,
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "tank",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps1",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "Boss enters combat",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "label": "Probe window",
+      "ms": 18000
+    },
+    {
+      "action": "assert",
+      "label": "Two player pool",
+      "actor": "boss",
+      "metric": "max_health",
+      "min": 9000,
+      "max": 60000
+    },
+    {
+      "action": "assert",
+      "label": "Both players alive",
+      "actor": "tank",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

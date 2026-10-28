@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "name": "Skinpeeler apex: two bosses fight at once",
+  "contract": [
+    "Stormfang and Vaelthara are pulled at the same time.",
+    "Each keeps its own combat state and both stay alive."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 1,
+    "x": 2269.03,
+    "y": -6608.37,
+    "z": 125.192,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps1",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps2",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "summon",
+      "label": "Spawn 9916212",
+      "actor": "tank",
+      "as": "stormfang",
+      "entry": 9916212,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Spawn 9916213",
+      "actor": "tank",
+      "as": "vaelthara",
+      "entry": 9916213,
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "tank",
+      "target": "stormfang"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps1",
+      "target": "vaelthara"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps2",
+      "target": "vaelthara"
+    },
+    {
+      "action": "assert",
+      "label": "Stormfang engaged",
+      "actor": "stormfang",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Vaelthara engaged",
+      "actor": "vaelthara",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "label": "Both fights run",
+      "ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Stormfang alive",
+      "actor": "stormfang",
+      "metric": "health",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Vaelthara alive",
+      "actor": "vaelthara",
+      "metric": "health",
+      "min": 1
+    }
+  ]
+}

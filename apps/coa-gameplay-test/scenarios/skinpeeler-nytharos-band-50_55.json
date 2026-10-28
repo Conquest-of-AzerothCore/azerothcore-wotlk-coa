@@ -1,0 +1,337 @@
+{
+  "schema": 1,
+  "name": "Skinpeeler Nytharos: item level 50-55 group",
+  "contract": [
+    "Three players in item level 50-55 gear run the first forty seconds.",
+    "The scaled pool, the pool remaining and the tank's power are recorded for comparison across bands."
+  ],
+  "timeout_ms": 150000,
+  "location": {
+    "map": 1,
+    "x": 2269.03,
+    "y": -6608.37,
+    "z": 125.192,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps1",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps2",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 750
+    },
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 201
+    },
+    {
+      "action": "set_skill",
+      "actor": "tank",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 7935
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 7937
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 8085
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 754
+    },
+    {
+      "action": "equip",
+      "label": "Band gear",
+      "actor": "tank",
+      "item": 7935,
+      "slot": 4
+    },
+    {
+      "action": "equip",
+      "label": "Band gear",
+      "actor": "tank",
+      "item": 7937,
+      "slot": 0
+    },
+    {
+      "action": "equip",
+      "label": "Band gear",
+      "actor": "tank",
+      "item": 8085,
+      "slot": 6
+    },
+    {
+      "action": "equip",
+      "label": "Band gear",
+      "actor": "tank",
+      "item": 754,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "dps1",
+      "spell": 750
+    },
+    {
+      "action": "learn",
+      "actor": "dps1",
+      "spell": 201
+    },
+    {
+      "action": "set_skill",
+      "actor": "dps1",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 7935
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 7937
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 8085
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 754
+    },
+    {
+      "action": "equip",
+      "label": "Band gear",
+      "actor": "dps1",
+      "item": 7935,
+      "slot": 4
+    },
+    {
+      "action": "equip",
+      "label": "Band gear",
+      "actor": "dps1",
+      "item": 7937,
+      "slot": 0
+    },
+    {
+      "action": "equip",
+      "label": "Band gear",
+      "actor": "dps1",
+      "item": 8085,
+      "slot": 6
+    },
+    {
+      "action": "equip",
+      "label": "Band gear",
+      "actor": "dps1",
+      "item": 754,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "dps2",
+      "spell": 750
+    },
+    {
+      "action": "learn",
+      "actor": "dps2",
+      "spell": 201
+    },
+    {
+      "action": "set_skill",
+      "actor": "dps2",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "add_item",
+      "actor": "dps2",
+      "item": 7935
+    },
+    {
+      "action": "add_item",
+      "actor": "dps2",
+      "item": 7937
+    },
+    {
+      "action": "add_item",
+      "actor": "dps2",
+      "item": 8085
+    },
+    {
+      "action": "add_item",
+      "actor": "dps2",
+      "item": 754
+    },
+    {
+      "action": "equip",
+      "label": "Band gear",
+      "actor": "dps2",
+      "item": 7935,
+      "slot": 4
+    },
+    {
+      "action": "equip",
+      "label": "Band gear",
+      "actor": "dps2",
+      "item": 7937,
+      "slot": 0
+    },
+    {
+      "action": "equip",
+      "label": "Band gear",
+      "actor": "dps2",
+      "item": 8085,
+      "slot": 6
+    },
+    {
+      "action": "equip",
+      "label": "Band gear",
+      "actor": "dps2",
+      "item": 754,
+      "slot": 15
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "summon",
+      "label": "Spawn the boss",
+      "actor": "tank",
+      "as": "boss",
+      "entry": 9916214,
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "label": "Let the boss settle",
+      "ms": 2500
+    },
+    {
+      "action": "attack",
+      "label": "Establish threat",
+      "actor": "tank",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Establish threat",
+      "actor": "dps1",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Establish threat",
+      "actor": "dps2",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "Boss enters combat",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "label": "Measure the first forty seconds",
+      "ms": 40000
+    },
+    {
+      "action": "assert",
+      "label": "Scaled pool",
+      "actor": "boss",
+      "metric": "max_health",
+      "min": 15000,
+      "max": 150000
+    },
+    {
+      "action": "assert",
+      "label": "Pool remaining after the window",
+      "actor": "boss",
+      "metric": "health_pct",
+      "min": 0.1,
+      "max": 100.0
+    },
+    {
+      "action": "assert",
+      "label": "Tank attack power",
+      "actor": "tank",
+      "metric": "attack_power",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Tank surviving",
+      "actor": "tank",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Tank health taken",
+      "actor": "tank",
+      "metric": "health_pct",
+      "min": 0.0,
+      "max": 100.0
+    }
+  ]
+}

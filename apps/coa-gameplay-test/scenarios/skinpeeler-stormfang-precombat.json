@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Skinpeeler Stormfang: no pre-pull abilities",
+  "contract": [
+    "Stormcall and Storm Howl must not fire before combat starts.",
+    "Their first cycle must begin after the pull, not from creature spawn time."
+  ],
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -155.771, "y": -2879.57, "z": 117.037, "o": 0 },
+  "players": [
+    { "id": "tank", "race": 1, "class": 1, "level": 60, "allow_regeneration": false },
+    { "id": "dps", "race": 1, "class": 1, "level": 60, "allow_regeneration": false }
+  ],
+  "creatures": [
+    { "id": "boss", "owner": "tank", "entry": 9916212, "level": 60, "health": 5000000, "reaction": 0, "distance": 4 }
+  ],
+  "steps": [
+    { "action": "set_health", "actor": "tank", "value": 100000000, "maximum": 100000000 },
+    { "action": "set_health", "actor": "dps", "value": 100000000, "maximum": 100000000 },
+    { "action": "wait", "label": "Let the boss and local AI settle", "ms": 3000 },
+    { "action": "wait", "label": "Remain out of combat through the old pre-pull timers", "ms": 35000 },
+    { "action": "assert", "label": "Boss does not auto-aggro before being attacked", "actor": "boss", "metric": "combat", "equals": 0 },
+    { "action": "assert", "label": "Stormcall did not start before combat", "actor": "tank", "metric": "spell_go_count", "entry": 9916212, "spell": 1004117, "equals": 0 },
+    { "action": "assert", "label": "Stormcall did not root the boss before combat", "actor": "boss", "metric": "rooted", "equals": 0 },
+    { "action": "assert", "label": "Storm Howl did not summon before combat", "actor": "tank", "metric": "nearby_creature_count", "entry": 9916211, "equals": 0 },
+    { "action": "attack", "label": "Pull the boss", "actor": "tank", "target": "boss" },
+    { "action": "wait", "label": "Wait for the first in-combat Stormcall", "ms": 30000 },
+    { "action": "assert", "label": "Stormcall starts after the pull", "actor": "boss", "metric": "rooted", "equals": 1, "within_ms": 10000 }
+  ]
+}

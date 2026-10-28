@@ -1,0 +1,475 @@
+{
+  "schema": 1,
+  "name": "Skinpeeler Nytharos: five player fight covers two loop cycles",
+  "contract": [
+    "A five player group in level 50-80 gear sees spouts and the shield in the first cycle.",
+    "A second cycle follows within the run and the boss is still fighting at the end."
+  ],
+  "timeout_ms": 240000,
+  "location": {
+    "map": 1,
+    "x": 2269.03,
+    "y": -6608.37,
+    "z": 125.192,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps1",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps2",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps3",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps4",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 750
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 16542
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 16544
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 16541
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "tank",
+      "item": 16542,
+      "slot": 0
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "tank",
+      "item": 16544,
+      "slot": 2
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "tank",
+      "item": 16541,
+      "slot": 4
+    },
+    {
+      "action": "learn",
+      "actor": "dps1",
+      "spell": 750
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 16542
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 16544
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 16541
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps1",
+      "item": 16542,
+      "slot": 0
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps1",
+      "item": 16544,
+      "slot": 2
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps1",
+      "item": 16541,
+      "slot": 4
+    },
+    {
+      "action": "learn",
+      "actor": "dps2",
+      "spell": 750
+    },
+    {
+      "action": "add_item",
+      "actor": "dps2",
+      "item": 16542
+    },
+    {
+      "action": "add_item",
+      "actor": "dps2",
+      "item": 16544
+    },
+    {
+      "action": "add_item",
+      "actor": "dps2",
+      "item": 16541
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps2",
+      "item": 16542,
+      "slot": 0
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps2",
+      "item": 16544,
+      "slot": 2
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps2",
+      "item": 16541,
+      "slot": 4
+    },
+    {
+      "action": "learn",
+      "actor": "dps3",
+      "spell": 750
+    },
+    {
+      "action": "add_item",
+      "actor": "dps3",
+      "item": 16542
+    },
+    {
+      "action": "add_item",
+      "actor": "dps3",
+      "item": 16544
+    },
+    {
+      "action": "add_item",
+      "actor": "dps3",
+      "item": 16541
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps3",
+      "item": 16542,
+      "slot": 0
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps3",
+      "item": 16544,
+      "slot": 2
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps3",
+      "item": 16541,
+      "slot": 4
+    },
+    {
+      "action": "learn",
+      "actor": "dps4",
+      "spell": 750
+    },
+    {
+      "action": "add_item",
+      "actor": "dps4",
+      "item": 16542
+    },
+    {
+      "action": "add_item",
+      "actor": "dps4",
+      "item": 16544
+    },
+    {
+      "action": "add_item",
+      "actor": "dps4",
+      "item": 16541
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps4",
+      "item": 16542,
+      "slot": 0
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps4",
+      "item": 16544,
+      "slot": 2
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps4",
+      "item": 16541,
+      "slot": 4
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps3",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps4",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 11326
+    },
+    {
+      "action": "equip",
+      "label": "Weapon",
+      "actor": "tank",
+      "item": 11326,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "tank",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 11326
+    },
+    {
+      "action": "equip",
+      "label": "Weapon",
+      "actor": "dps1",
+      "item": 11326,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "dps1",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "add_item",
+      "actor": "dps2",
+      "item": 11326
+    },
+    {
+      "action": "equip",
+      "label": "Weapon",
+      "actor": "dps2",
+      "item": 11326,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "dps2",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "add_item",
+      "actor": "dps3",
+      "item": 11326
+    },
+    {
+      "action": "equip",
+      "label": "Weapon",
+      "actor": "dps3",
+      "item": 11326,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "dps3",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "add_item",
+      "actor": "dps4",
+      "item": 11326
+    },
+    {
+      "action": "equip",
+      "label": "Weapon",
+      "actor": "dps4",
+      "item": 11326,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "dps4",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "summon",
+      "label": "Spawn the boss",
+      "actor": "tank",
+      "as": "boss",
+      "entry": 9916214,
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "label": "Let the boss settle",
+      "ms": 2500
+    },
+    {
+      "action": "attack",
+      "label": "Establish threat",
+      "actor": "tank",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Establish threat",
+      "actor": "dps1",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Establish threat",
+      "actor": "dps2",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Establish threat",
+      "actor": "dps3",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Establish threat",
+      "actor": "dps4",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "Boss enters combat",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Spouts reached the group",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 9916216,
+      "min": 1,
+      "within_ms": 45000
+    },
+    {
+      "action": "assert",
+      "label": "Shield applied",
+      "actor": "boss",
+      "metric": "aura",
+      "spell": 1004300,
+      "equals": 1,
+      "within_ms": 50000
+    },
+    {
+      "action": "wait",
+      "label": "Second loop",
+      "ms": 45000
+    },
+    {
+      "action": "assert",
+      "label": "Second spout wave",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 9916216,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Boss still fighting",
+      "actor": "boss",
+      "metric": "health",
+      "min": 1
+    }
+  ]
+}
