@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "The Kleptomanic Demon Leash loots kills like Lootbot 3000 (#8553, #8643)",
+  "contract": "Item 101172's tooltip promises the same auto-loot as Lootbot 3000. ProcessCompanionLoot only recognized creature 44022 (Lootbot 3000) as a loot companion, so the Kleptomanic Demon (summoned by spell 83086, creature 79026) never swept kills. The fix adds 79026 to the recognized companions. CONTROL: a kill made before summoning the demon leaves its guaranteed drop on the corpse.",
+  "timeout_ms": 90000,
+  "vanity_ownership": {
+    "unlock_all": false,
+    "starter_items": []
+  },
+  "location": { "map": 0, "x": -9791.9, "y": -2219.1, "z": 58.627, "o": 3.14 },
+  "players": [ { "id": "owner", "race": 1, "class": 25, "level": 60 } ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_aura", "actor": "owner", "spell": 642, "stacks": 0 },
+    { "action": "set_aura", "actor": "owner", "spell": 642, "stacks": 1 },
+
+    { "action": "summon", "actor": "owner", "entry": 2408, "as": "before_demon", "distance": 4 },
+    { "action": "wait", "ms": 300 },
+    { "action": "attack_nearby", "actor": "owner", "entry": 2408, "kill": true },
+    { "action": "assert", "actor": "before_demon", "metric": "alive", "equals": 0, "within_ms": 2000 },
+    { "action": "wait", "ms": 3500 },
+    { "action": "assert", "label": "CONTROL: without the demon the Turtle Meat stays on the corpse", "actor": "owner", "metric": "item_count", "item": 3712, "equals": 0 },
+
+    { "action": "set_aura", "actor": "owner", "spell": 642, "stacks": 0 },
+    { "action": "set_aura", "actor": "owner", "spell": 642, "stacks": 1 },
+    { "action": "learn", "actor": "owner", "spell": 83086 },
+    { "action": "cast", "actor": "owner", "spell": 83086 },
+    { "action": "assert", "label": "the leash summons the Kleptomanic Demon", "actor": "owner", "metric": "pet_entry", "equals": 79026, "within_ms": 4000 },
+
+    { "action": "summon", "actor": "owner", "entry": 2408, "as": "after_demon", "distance": 4 },
+    { "action": "wait", "ms": 300 },
+    { "action": "attack_nearby", "actor": "owner", "entry": 2408, "kill": true },
+    { "action": "assert", "actor": "after_demon", "metric": "alive", "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: the Kleptomanic Demon collects the Turtle Meat without a loot window", "actor": "owner", "metric": "item_count", "item": 3712, "min": 1, "within_ms": 10000 }
+  ]
+}

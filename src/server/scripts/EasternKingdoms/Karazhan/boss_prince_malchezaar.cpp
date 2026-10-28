@@ -85,6 +85,7 @@ struct boss_malchezaar : public BossAI
         clearweapons();
         relays.clear();
         infernalTargets.clear();
+        _enfeebleTargets.clear();
     }
 
     void clearweapons()
@@ -263,6 +264,8 @@ struct boss_malchezaar : public BossAI
                 }
             }
         }
+
+        _enfeebleTargets.clear();
     }
 
     private:

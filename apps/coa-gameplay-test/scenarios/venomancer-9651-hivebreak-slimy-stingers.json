@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Slimy Stingers also procs Beetle Slime off Hivebreak (#9651)",
+  "contract": "#9651 reports Slimy Stingers (706001) only affecting Carapace Crash, not Hivebreak, even though both are level-28+ Beetle Form single-target strikes meant to proc Beetle Slime (704347). AscensionVenomancerEvents.cpp:93's Check() gated the proc on `Named(info,803199)` (Carapace Crash's chain root only); AscensionVenomancerAbilities.cpp:215 already treats Hivebreak (803193) and Carapace Crash (803199) as an equivalent pair for a sibling effect via `Any(info,{803193,803199})`. The fix widens the Check() for 706001 to the same `Any(info,{803193,803199})`. Hivebreak's Spell.dbc record (id 803193) confirms Effect[0]=SPELL_EFFECT_SCHOOL_DAMAGE, EffectImplicitTargetA[0]=TARGET_UNIT_TARGET_ENEMY (single target, no AoE radius needed), DmgClass=SPELL_DAMAGE_CLASS_MELEE (unlike Carapace Crash's SPELL_DAMAGE_CLASS_MAGIC, so the fixture needs melee_hit_rating/expertise_rating, not spell_hit_rating, to guarantee the hit), PowerType=1 (Rage), ManaCost=200 (20 displayed Rage), and CasterAuraSpell=803183 (Beetle Form, same cast-time form requirement as Carapace Crash). This scenario casts literal Hivebreak (803193) directly, confirmed via DBC comparison, not by implementation assumption.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "v", "race": 1, "class": 29, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "d1", "owner": "v", "entry": 36, "level": 60, "health": 500000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn settle", "ms": 3000 },
+    { "action": "learn", "actor": "v", "spell": 706001 },
+    { "action": "learn", "actor": "v", "spell": 803193 },
+    { "action": "learn", "actor": "v", "spell": 803183 },
+    { "action": "cast", "actor": "v", "spell": 803183, "label": "Enter Beetle Form: Hivebreak carries CasterAuraSpell 803183" },
+    { "action": "assert", "label": "SETUP: Beetle Form is active", "actor": "v", "metric": "aura", "spell": 803183, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "label": "Clear the GCD from entering Beetle Form", "ms": 1500 },
+    { "action": "assert", "label": "BASELINE: d1 has not taken any Beetle Slime damage yet",
+      "actor": "v", "metric": "spell_damage_count", "spell": 704347, "target": "d1", "equals": 0 },
+    { "action": "set_power", "actor": "v", "power": 1, "value": 1000, "label": "Fill Rage: Hivebreak costs 20 raw Rage (ManaCost 200)" },
+    { "action": "cast", "actor": "v", "spell": 803193, "target": "d1" },
+    { "action": "assert", "label": "SETUP: Hivebreak cast succeeded", "actor": "v",
+      "metric": "cast_failure", "spell": 803193, "equals": 0 },
+    { "action": "assert", "label": "SETUP: Hivebreak hit d1", "actor": "v",
+      "metric": "spell_damage_count", "spell": 803193, "target": "d1", "min": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: d1 also takes Beetle Slime puddle damage from Hivebreak", "actor": "v",
+      "metric": "spell_damage_count", "spell": 704347, "target": "d1", "min": 1, "within_ms": 5000 }
+  ]
+}

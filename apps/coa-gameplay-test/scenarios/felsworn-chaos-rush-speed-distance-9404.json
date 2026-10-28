@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "name": "Chaos Rush keeps a consistent distance whether the Felsworn is standing still or already moving (#9404)",
+  "contract": "Chaos Rush Jump 802028 (SPELL_EFFECT_CHARGE_DEST) natively calls MotionMaster::MoveCharge at the fixed SPEED_CHARGE (42 yd/s) regardless of the caster's own movement. Spell::EffectChargeDest's forced PointMovementGenerator fights the caster's own live WASD movement/prediction, so a Chaos Rush used while already moving reports a shorter, variable displacement than the same cast while standing still ('always shorter than or equal to your distance if you use it while standing still'). This mirrors AscensionPyromancer.cpp's Flame Step fix (#6527): a stationary cast keeps the native MoveCharge lunge (10 yd, SpellRadius 13), while a cast made with a movement key already held skips the forced spline entirely and instead applies a brief run-speed surge (to SPEED_CHARGE) sized to the same 10 yd, leaving the caster's own client-steered movement in charge of the actual displacement instead of fighting it. The harness fixtures a held movement key without a client continuously steering position, so the discriminating evidence is that the moving cast neither forces a spline displacement nor leaves the run speed permanently raised, while the standing cast still lunges the full radius.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "dh", "race": 1, "class": 14, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "dh", "entry": 36, "level": 80, "health": 1000000, "distance": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "dh", "spell": 500028 },
+    { "action": "assert", "label": "SETUP: the Felsworn knows Chaos Rush", "actor": "dh", "metric": "knows_spell", "spell": 500028, "equals": 1 },
+    { "action": "snapshot", "label": "Baseline distance to the dummy ahead", "actor": "dh", "metric": "distance_2d", "target": "dummy", "save_as": "d0" },
+    { "action": "snapshot", "label": "Baseline run speed rate", "actor": "dh", "metric": "run_speed_rate", "save_as": "rate0" },
+    { "action": "assert", "label": "SETUP: the fixture starts at an unsurging run speed rate", "actor": "dh", "metric": "run_speed_rate", "min": 0.5, "max": 1.2 },
+
+    { "action": "set_moving", "label": "Start moving forward, as auto-run or a held key does", "actor": "dh", "enabled": true },
+    { "action": "assert", "label": "SETUP: the Felsworn is moving", "actor": "dh", "metric": "moving", "equals": 1 },
+    { "action": "reset_cooldown", "actor": "dh", "spell": 500028 },
+    { "action": "cast", "label": "Chaos Rush while moving", "actor": "dh", "spell": 500028 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the moving dash surges run speed toward SPEED_CHARGE instead of forcing a spline",
+      "actor": "dh", "metric": "run_speed_rate", "relative_to": "rate0", "min": 2.0, "within_ms": 500
+    },
+    { "action": "wait", "label": "Let the surge (10 yd / 42 yd/s) and any residual charge finish", "ms": 1500 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the moving cast leaves the caster where the client is steering it instead of a shorter forced displacement",
+      "actor": "dh", "metric": "distance_2d", "target": "dummy", "relative_to": "d0", "min": -0.5, "max": 0.5
+    },
+    {
+      "action": "assert", "label": "The dash restored the run speed rate it borrowed",
+      "actor": "dh", "metric": "run_speed_rate", "relative_to": "rate0", "min": -0.05, "max": 0.05, "within_ms": 1500
+    },
+
+    { "action": "set_moving", "label": "Stop moving", "actor": "dh", "enabled": false },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "SETUP: the Felsworn is standing still", "actor": "dh", "metric": "moving", "equals": 0 },
+    { "action": "snapshot", "label": "Distance to the dummy before the standing dash", "actor": "dh", "metric": "distance_2d", "target": "dummy", "save_as": "d1" },
+    { "action": "reset_cooldown", "actor": "dh", "spell": 500028 },
+    { "action": "cast", "label": "Chaos Rush while standing still", "actor": "dh", "spell": 500028 },
+    { "action": "wait", "label": "Let the standing dash finish", "ms": 2000 },
+    {
+      "action": "assert", "label": "REGRESSION: a standing caster still dashes forward the full SpellRadius 13 (10 yd)",
+      "actor": "dh", "metric": "distance_2d", "target": "dummy", "relative_to": "d1", "min": -14, "max": -4
+    }
+  ]
+}

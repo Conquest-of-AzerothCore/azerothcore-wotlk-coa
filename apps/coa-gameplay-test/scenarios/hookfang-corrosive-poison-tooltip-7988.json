@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Hookfang Shanker's Corrosive Poison names its real per-tick damage instead of a constant zero (#7988)",
+  "contract": "Spell 13526 (Corrosive Poison, Hookfang Shanker's chance-on-hit proc) is a periodic Nature damage aura (effect 0, EffectBasePoints 0 / EffectDieSides 1 / EffectRealPointsPerLevel 0.25, amplitude 3 sec) plus an armor-bypass aura (effect 1, base 2 = 3%); the aura itself computes and ticks the real per-level amount. Only the client's own Spell.dbc Description is wrong: it reads 'deals ${$abs(0)} Nature damage every 3 sec', a constant zero instead of the level-scaled '$s1' reference that every other periodic-damage tooltip uses for its own effect. AscensionCompat streams coa_client_spell_description to every client as SMSG_PATCH_SPELL (opcode 2346) at login, so the fix republishes 13526's own sentence with '$s1' in place of the dead '${$abs(0)}' term, leaving the rest (the 3 sec tick and the armor-bypass clause) untouched. This scenario reads the streamed row for 13526, with row 500639 (Runeshroud, published by the same table) as the control that the stream itself is captured. Expected before the SQL: the row carries '${$abs(0)}'. Expected after: it carries '$s1' instead, and still names the 3 sec tick and the armor-bypass clause.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "players": [
+    { "id": "g", "race": 1, "class": 18, "level": 55 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the login spell patch stream settle", "ms": 7000 },
+    {
+      "action": "assert", "label": "CONTROL: the shared description table still streams row 500639, so the patch stream is being captured",
+      "actor": "g", "metric": "server_packet_contains",
+      "opcode": 2346, "row": 500639, "text": "Requires Runeshroud", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "CONTROL: this table really does publish a row for 13526, so the absence check below cannot pass vacuously",
+      "actor": "g", "metric": "server_packets",
+      "opcode": 2346, "row": 13526, "min": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "THE FIX: the constant-zero placeholder is gone from the description",
+      "actor": "g", "metric": "server_packet_contains",
+      "opcode": 2346, "row": 13526, "text": "$abs(0)", "equals": 0
+    },
+    {
+      "action": "assert", "label": "THE FIX: the description now names the real per-tick damage",
+      "actor": "g", "metric": "server_packet_contains",
+      "opcode": 2346, "row": 13526, "text": "deals $s1 Nature damage every 3 sec", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "CONTROL: the armor-bypass clause still names its own effect",
+      "actor": "g", "metric": "server_packet_contains",
+      "opcode": 2346, "row": 13526, "text": "bypass $s2% of targets armor for $d", "equals": 1
+    }
+  ]
+}

@@ -1,0 +1,246 @@
+{
+  "schema": 2,
+  "name": "Prince Malchezaar's Enfeeble does not restore a stale earlier-wave health (#8319)",
+  "contract": [
+    "Enfeeble (30843) captures each enfeebled raider's health and restores it 9 seconds later.",
+    "boss_malchezaar is registered through RegisterKarazhanCreatureAI/GetInstanceAI, so its real script",
+    "(including the Enfeeble bug) only runs on the real Karazhan spawn (creature guid 135477, map 532,",
+    "-10962.2/-2018.73/275.443; data/sql/base/db_world/creature.sql) inside the real instance_karazhan",
+    "InstanceScript, not on a fixture copy summoned in the open world. A raider enfeebled in the first wave,",
+    "then moved out of Enfeeble's 200-yard radius (SpellRadius 22) and given a different health before the",
+    "second wave casts, keeps that later health instead of being silently reset to the first wave's stale",
+    "captured value 9 seconds after the second cast."
+  ],
+  "timeout_ms": 240000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 18,
+      "level": 80
+    },
+    {
+      "id": "raider",
+      "race": 1,
+      "class": 18,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    {
+      "action": "group",
+      "label": "raider joins the tank's group, so both bind to the same Karazhan instance",
+      "actor": "tank",
+      "target": "raider"
+    },
+    {
+      "action": "set_phase",
+      "label": "tank sees the real Karazhan spawns",
+      "actor": "tank",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "raider sees the real Karazhan spawns",
+      "actor": "raider",
+      "value": 1
+    },
+    {
+      "action": "teleport",
+      "label": "tank enters the real Karazhan at Prince Malchezaar's chamber",
+      "actor": "tank",
+      "map": 532,
+      "x": -10959.2,
+      "y": -2018.73,
+      "z": 275.443,
+      "o": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: tank is in Karazhan",
+      "actor": "tank",
+      "metric": "map_id",
+      "equals": 532,
+      "within_ms": 15000
+    },
+    {
+      "action": "teleport",
+      "label": "raider enters far from the chamber, out of melee/AOE range, to avoid incidental damage before the first wave",
+      "actor": "raider",
+      "map": 532,
+      "x": -12100.0,
+      "y": -2003.98,
+      "z": 49.8927,
+      "o": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: raider is in Karazhan",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 532,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the real Prince Malchezaar spawn stands in his chamber",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 15690,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Malchezaar is undamaged, so the instance is fresh",
+      "actor": "tank",
+      "metric": "nearby_creature_health_pct",
+      "entry": 15690,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: nobody pulled Malchezaar before the encounter",
+      "actor": "tank",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "encounter_start",
+      "actor": "tank",
+      "boss_entry": 15690,
+      "radius": 40
+    },
+    {
+      "action": "set_health",
+      "label": "Tank survives the whole encounter",
+      "actor": "tank",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Engage the real Prince Malchezaar so his Enfeeble schedule starts",
+      "actor": "tank",
+      "entry": 15690
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Malchezaar engages",
+      "actor": "tank",
+      "metric": "timeline_count",
+      "event": "enter_combat",
+      "source_entry": 15690,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Keep the raider out of incidental raid damage until just before the scheduled +30s Enfeeble cast",
+      "ms": 27000
+    },
+    {
+      "action": "teleport",
+      "label": "Bring the raider into Enfeeble's radius only now, right before the cast",
+      "actor": "raider",
+      "map": 532,
+      "x": -10959.2,
+      "y": -2021.73,
+      "z": 275.443,
+      "o": 0
+    },
+    {
+      "action": "set_health",
+      "label": "Known, uncontaminated baseline health for Enfeeble's capture",
+      "actor": "raider",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the first wave's Enfeeble cast happens",
+      "actor": "tank",
+      "metric": "timeline_count",
+      "event": "cast",
+      "spell": 30843,
+      "source_entry": 15690,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "teleport",
+      "label": "Move the raider to safety right after being captured; same map, so the scripted reset 9s later still finds and restores them",
+      "actor": "raider",
+      "map": 532,
+      "x": -12100.0,
+      "y": -2003.98,
+      "z": 49.8927,
+      "o": 0
+    },
+    {
+      "action": "set_health",
+      "label": "Survive out of combat; the scripted reset restores the stored 100000 regardless of this",
+      "actor": "raider",
+      "value": 50000,
+      "maximum": 100000
+    },
+    {
+      "action": "wait",
+      "label": "Cross wave 1's own 9s-later reset",
+      "ms": 11000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: wave 1's own reset restores the raider's captured health",
+      "actor": "raider",
+      "metric": "health",
+      "equals": 100000,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_health",
+      "label": "Give the raider a health value wave 1's stale capture (100000) would not produce; still out of Enfeeble's 200-yard radius for wave 2",
+      "actor": "raider",
+      "value": 37500,
+      "maximum": 100000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the second wave's Enfeeble cast happens (the raider is out of range)",
+      "actor": "tank",
+      "metric": "timeline_count",
+      "event": "cast",
+      "spell": 30843,
+      "source_entry": 15690,
+      "min": 2,
+      "within_ms": 60000
+    },
+    {
+      "action": "wait",
+      "label": "Cross wave 2's 9s-later reset",
+      "ms": 11000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the raider's deliberately set health survives wave 2's reset untouched",
+      "actor": "raider",
+      "metric": "health",
+      "equals": 37500
+    },
+    {
+      "action": "assert",
+      "label": "The tank survived the encounter",
+      "actor": "tank",
+      "metric": "health",
+      "min": 1
+    }
+  ]
+}

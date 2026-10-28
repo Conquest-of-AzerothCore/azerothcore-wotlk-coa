@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Xoroth: Drag Through Hell summons a distant party member (#9597)",
+  "contract": "#9597 reports Drag Through Hell (804773) does not summon the targeted player at the end of the cast. Spell.dbc comparison shows 804773.RangeIndex=1 (SpellRange.dbc[1] 'Self Only', 0-0 yd) where the native spell it is modeled on, Ritual of Summoning (7720, same Effect[0]=SPELL_EFFECT_SUMMON_PLAYER, same ONLY_PEACEFUL_TARGETS attribute), carries RangeIndex=13 ('Anywhere', 0-50000 yd). Spell::CheckRange (Spell.cpp:~7265) enforces RangeIndex generically against m_targets.GetUnitTarget() (the cast packet's explicit unit target) before Spell::CheckCast's own SPELL_EFFECT_SUMMON_PLAYER branch (Spell.cpp:6629-6639, which separately reads the caster's selection via Player::GetTarget()/UNIT_FIELD_TARGET, requires the resolved target to share the caster's group via Player::IsInSameRaidWith, and requires no summon already pending) is ever reached, so a 'Self Only' range made any cast on a party member at nonzero distance fail with SPELL_FAILED_OUT_OF_RANGE (97) before the summon-specific logic could run. The fix widens 804773's RangeEntry to 'Anywhere' in AscensionXorothContracts.cpp::ApplyContracts, the same load-time SpellInfo correction mechanism already used there for Flesh Hook Pull's range. This scenario groups a Xoroth caster with a same-faction ally, sets the caster's selection to the ally via CMSG_SET_SELECTION (opcode 317, so the SPELL_EFFECT_SUMMON_PLAYER branch resolves the same ally rather than failing SPELL_FAILED_BAD_TARGETS for no selection), separates them by 20 yd (well past the 'Self Only' range's 0 yd, while staying within line of sight on the same open, flat, widely-reused test ground so the measurement isolates the range defect and does not also exercise line-of-sight, which 804773 does not ignore, unlike 7720's own SPELL_ATTR2_IGNORE_LINE_OF_SIGHT attribute -- a separate, unconfirmed observation outside #9597's reported symptom). 804773.Totem[0]=5565 (Infernal Stone) is a non-consumed focus-item check unrelated to the reported range defect (the reporter's own words, 'does not use stone', describe the stone-free summon outcome, not this unconsumed carry-requirement), so the caster carries one before casting. The scenario then casts 804773 with that ally as the explicit unit target: before the fix the cast fails with SPELL_FAILED_OUT_OF_RANGE at that separation; after the fix it completes.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "caster", "race": 2, "class": 17, "level": 60 },
+    { "id": "ally", "race": 2, "class": 12, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 3000 },
+    { "action": "teleport", "actor": "caster", "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+    { "action": "teleport", "actor": "ally", "map": 0, "x": -8917.41, "y": -95.853, "z": 82.3711, "o": 0 },
+    { "action": "group", "actor": "caster", "target": "ally" },
+    { "action": "learn", "actor": "caster", "spell": 804773 },
+    { "action": "add_item", "label": "Carry the Infernal Stone 804773's Totem[0] requires", "actor": "caster", "item": 5565 },
+    {
+      "action": "client_packet", "label": "Select the ally: EffectSummonPlayer resolves the caster's selection, not the cast target map",
+      "actor": "caster", "opcode": 317, "consumed": false, "fields": [ { "actor_guid": "ally" } ]
+    },
+    { "action": "cast", "actor": "caster", "spell": 804773, "target": "ally" },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the cast on a distant party member does not fail with SPELL_FAILED_OUT_OF_RANGE (#9597)",
+      "actor": "caster", "metric": "cast_failure", "spell": 804773, "equals": 0, "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The cast against the distant ally completed rather than failing (804773 has a 5000 ms cast time)",
+      "actor": "caster", "metric": "spell_cast_count", "spell": 804773, "min": 1, "within_ms": 6000
+    }
+  ]
+}

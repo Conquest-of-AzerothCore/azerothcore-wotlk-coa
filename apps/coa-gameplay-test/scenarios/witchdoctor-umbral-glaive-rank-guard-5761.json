@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Umbral Glaive swaps only the active Hex of Malice rank (#5761)",
+  "contract": "Hex of Malice (chain 801693) is a mana spell, so SpellInfo::IsStackableWithRanks() is true and Player::addSpell never deactivates a lower rank when a higher one is learned: every learned rank stays Active in GetSpellMap(), exactly like the Reclamation chain in witchdoctor-spirit-volley-reclamation-rank-spam.json. AscensionWitchDoctor::SyncReplacements must still restrict the Umbral Glaive swap to the player's single active/highest rank, the same way its Volley branch restricts to the active Reclamation rank via id == KnownRank(player, id). #5761 reports the action bar reverting to a lower Hex of Malice rank after casting Umbral Glaive: without that guard, every known rank (lower and highest) independently registers itself with Player::SetTemporarySpellReplacement while UmbralReady is up, so Player::GetSavedActionButtonSpell can resolve a button through whichever rank last won the unordered_map race instead of the player's actual highest rank.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "wd",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy0",
+      "owner": "wd",
+      "entry": 36,
+      "level": 60,
+      "distance": 4,
+      "health": 100000
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks and class synchronisation settle", "ms": 4000 },
+    { "action": "learn", "actor": "wd", "spell": 501153 },
+    { "action": "learn", "actor": "wd", "spell": 501156 },
+    {
+      "action": "assert", "label": "SETUP: the lower Hex of Malice rank stays known",
+      "actor": "wd", "metric": "knows_spell", "spell": 501153, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: the lower rank stays active, unlike a superseded normal rank",
+      "actor": "wd", "metric": "spell_active", "spell": 501153, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: the highest learned Hex of Malice rank is known and active",
+      "actor": "wd", "metric": "spell_active", "spell": 501156, "equals": 1
+    },
+    { "action": "set_aura", "actor": "wd", "spell": 504588, "stacks": 1 },
+    {
+      "action": "assert", "label": "Umbral Glaive Ready retargets the highest Hex of Malice rank",
+      "actor": "wd", "metric": "temporary_spell_replacement", "spell": 501156, "equals": 501134,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The lower Hex of Malice rank is left untouched",
+      "actor": "wd", "metric": "temporary_spell_replacement", "spell": 501153, "equals": 501153
+    },
+    { "action": "set_action_button", "actor": "wd", "button": 2, "spell": 501134 },
+    { "action": "set_action_button", "actor": "wd", "button": 3, "spell": 501153 },
+    {
+      "action": "assert", "label": "The Umbral Glaive button is saved as the highest Hex of Malice rank",
+      "actor": "wd", "metric": "persisted_action_button", "button": 2, "equals": 501156
+    },
+    {
+      "action": "assert", "label": "Control: a button on the lower rank is saved unchanged",
+      "actor": "wd", "metric": "persisted_action_button", "button": 3, "equals": 501153
+    },
+    { "action": "cast", "actor": "wd", "spell": 501134, "target": "enemy0" },
+    {
+      "action": "assert", "label": "Casting Umbral Glaive consumes the proc",
+      "actor": "wd", "metric": "aura", "spell": 504588, "equals": 0, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "The action bar reverts to the highest Hex of Malice rank",
+      "actor": "wd", "metric": "temporary_spell_replacement", "spell": 501156, "equals": 501156,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The saved button still resolves to the highest Hex of Malice rank",
+      "actor": "wd", "metric": "persisted_action_button", "button": 2, "equals": 501156
+    }
+  ]
+}

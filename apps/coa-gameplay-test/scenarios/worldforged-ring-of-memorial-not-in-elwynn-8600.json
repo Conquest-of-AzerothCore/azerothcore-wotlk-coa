@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Worldforged Ring of Memorial is obtainable only in Eastern Plaguelands, not Elwynn Stonefield Farm (#8600)",
+  "contract": "A LootCollector pin conversion placed an extra copy of the level-53 Ring of Memorial (entry 90526, guid 6940964) at Stonefield Farm in Elwynn Forest. The item's own recorded find is Eastern Plaguelands only, where the other copy (guid 6940965) already stands. The fix removes the Elwynn copy; the Eastern Plaguelands one stays obtainable.",
+  "timeout_ms": 90000,
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "teleport", "actor": "p", "map": 0, "x": -9940.2, "y": 313.9, "z": 36.5, "o": 0 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: no Ring of Memorial copy in Elwynn Stonefield Farm", "actor": "p", "metric": "nearby_gameobject_count", "entry": 90526, "equals": 0 },
+
+    { "action": "teleport", "actor": "p", "map": 0, "x": 1374.0, "y": -3700.3, "z": 79.5, "o": 0 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "the Ring of Memorial stands in Eastern Plaguelands", "actor": "p", "metric": "nearby_gameobject_count", "entry": 90526, "equals": 1 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 90526 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "it is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

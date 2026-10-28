@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Spare Bag rests on the edge of the Darkshire fountain (#8853)",
+  "contract": "A LootCollector alignment pass overwrote the realm's own authored Darkshire fountain placement of Lohgan's Best Bag (gameobject entry 95821, guid 6940709) with a position at the Elwynn stone fence, 400+ yd from any fountain. Restore the authored fountain-rim position.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -10563.3, "y": -1173.1, "z": 29.5, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 30 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the bag stands at the fountain, not the stone fence", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95821, "equals": 1 },
+    { "action": "assert", "label": "it rests on the fountain rim", "actor": "p", "metric": "spawn_ground_gap", "guid": 6940709, "spawn_type": "gameobject", "min": -1, "max": 1.5 },
+    { "action": "assert", "label": "it is grounded", "actor": "p", "metric": "spawn_placement", "guid": 6940709, "spawn_type": "gameobject", "tolerance": 1.5, "equals": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 95821 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "it is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

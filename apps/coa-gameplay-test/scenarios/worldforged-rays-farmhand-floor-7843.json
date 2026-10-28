@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Worldforged Ray's Farmhand pickup stands on Farmer Ray's floor (#7843)",
+  "contract": "The Well Kept Hatchet pickup (95946, guid 6940938, item Ray's Farmhand) floated 1.3-1.4 yd above the floor of Farmer Ray's house in Hillsbrad Fields, above both the reporter and Farmer Ray himself. rev_20261028_07 sets it to that floor height.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -346.89, "y": 7.037, "z": 60.276, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the hatchet is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95946, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the pickup stands within half a yard of the floor", "actor": "p", "metric": "spawn_ground_gap", "guid": 6940938, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 95946 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "the hatchet is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}
