@@ -818,6 +818,33 @@ namespace
                     if (state.stalkThreatPushed)
                         creature->GetThreatMgr().AddThreat(target, -VAELTHARA_STALK_THREAT);
                     target->RemoveAurasDueToSpell(VAELTHARA_STALKED);
+
+                    // Subtracting the fixation weight is not enough: threat modifiers make it
+                    // non-invertible, so she stays on the stalked player. Hand the fight back
+                    // to the highest-threat player other than the one she just fixated.
+                    if (creature->IsInCombat())
+                    {
+                        Player* best = nullptr;
+                        float bestThreat = -1.0f;
+                        Map::PlayerList const& players = creature->GetMap()->GetPlayers();
+                        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                        {
+                            Player* candidate = itr->GetSource();
+                            if (!candidate || candidate == target || !candidate->IsAlive() ||
+                                !candidate->InSamePhase(creature) || !candidate->IsInWorld())
+                                continue;
+
+                            float const threat = creature->GetThreatMgr().GetThreat(candidate, true);
+                            if (threat > bestThreat)
+                            {
+                                bestThreat = threat;
+                                best = candidate;
+                            }
+                        }
+
+                        if (best)
+                            creature->AttackStart(best);
+                    }
                 }
 
                 LOG_INFO("coa", "VAELTHARA: stalk ended ({})", early ? "target lost" : "expired");
