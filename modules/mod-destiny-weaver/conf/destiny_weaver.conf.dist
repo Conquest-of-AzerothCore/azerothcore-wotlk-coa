@@ -70,10 +70,10 @@ DestinyWeaver.Scaling.WorldMaps = "0 1"
 #                     choice; only a challenge rule holds a character to its authored levels. The
 #                     entries of the default list always scale, so a config written before an entry
 #                     joined the default still scales it; entries listed here add to them.
-#        Default:     "1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 163 164 165 272 273 274 276 601 402"
+#        Default:     "1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 163 164 165 272 273 274 276 601 402 401"
 #        Reloadable:  yes (.reload config)
 
-DestinyWeaver.Scaling.DungeonIds = "1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 163 164 165 272 273 274 276 601 402"
+DestinyWeaver.Scaling.DungeonIds = "1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 163 164 165 272 273 274 276 601 402 401"
 
 #    DestinyWeaver.Scaling.DungeonBands
 #        Description: Bands that replace the LFGDungeons.dbc band of a dungeon finder entry, as
