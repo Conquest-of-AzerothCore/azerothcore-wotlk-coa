@@ -1,0 +1,218 @@
+{
+  "schema": 1,
+  "name": "Tinker: leaving the Mechsuit gives the bar back its Scrap Shot (COA-7344, #9272)",
+  "contract": "Build: Mechsuit 801384 turns Scrap Shot into Gatling Gun 500213 while it is on, through SMSG_SUPERCEDED_SPELL. A Tinker who trained several Scrap Shot ranks must get exactly one swap to Gatling Gun on entry and one swap back to the highest rank on exit, with no removal of Gatling Gun in between, so the client's action button goes back to Scrap Shot.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "fixture: Mechsuit talent",
+      "actor": "tinker",
+      "spell": 92141
+    },
+    {
+      "action": "learn",
+      "label": "fixture: Scrap Shot 500549",
+      "actor": "tinker",
+      "spell": 500549
+    },
+    {
+      "action": "learn",
+      "label": "fixture: Scrap Shot 500556",
+      "actor": "tinker",
+      "spell": 500556
+    },
+    {
+      "action": "learn",
+      "label": "fixture: Scrap Shot 500557",
+      "actor": "tinker",
+      "spell": 500557
+    },
+    {
+      "action": "learn",
+      "label": "fixture: Scrap Shot 500558",
+      "actor": "tinker",
+      "spell": 500558
+    },
+    {
+      "action": "learn",
+      "label": "fixture: Scrap Shot 500559",
+      "actor": "tinker",
+      "spell": 500559
+    },
+    {
+      "action": "learn",
+      "label": "fixture: Scrap Shot 500560",
+      "actor": "tinker",
+      "spell": 500560
+    },
+    {
+      "action": "learn",
+      "label": "fixture: Scrap Shot 500561",
+      "actor": "tinker",
+      "spell": 500561
+    },
+    {
+      "action": "learn",
+      "label": "fixture: Build: Mechsuit",
+      "actor": "tinker",
+      "spell": 801384
+    },
+    {
+      "action": "set_action_button",
+      "label": "fixture: Scrap Shot on the main bar",
+      "actor": "tinker",
+      "spell": 500561,
+      "button": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_aura",
+      "label": "fixture: pre-fill Scrap",
+      "actor": "tinker",
+      "spell": 801816,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "label": "enter the Mechsuit",
+      "actor": "tinker",
+      "spell": 801384
+    },
+    {
+      "action": "assert",
+      "label": "the Mechsuit is on",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 801384,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT entering sends one Scrap Shot to Gatling Gun swap",
+      "actor": "tinker",
+      "metric": "spellbook_superseded_for",
+      "spell": 500213,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT the client is never told Gatling Gun was removed",
+      "actor": "tinker",
+      "metric": "client_chat_lines_for",
+      "spell": 500213,
+      "equals": 0
+    },
+    {
+      "action": "cancel_aura",
+      "label": "leave the Mechsuit",
+      "actor": "tinker",
+      "spell": 801384
+    },
+    {
+      "action": "assert",
+      "label": "the Mechsuit is off",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 801384,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT leaving swaps Gatling Gun back to the rank on the bar",
+      "actor": "tinker",
+      "metric": "spellbook_superseded_for",
+      "spell": 500561,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT no swap names lower rank 500549",
+      "actor": "tinker",
+      "metric": "spellbook_superseded_for",
+      "spell": 500549,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT no swap names lower rank 500556",
+      "actor": "tinker",
+      "metric": "spellbook_superseded_for",
+      "spell": 500556,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT no swap names lower rank 500557",
+      "actor": "tinker",
+      "metric": "spellbook_superseded_for",
+      "spell": 500557,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT no swap names lower rank 500558",
+      "actor": "tinker",
+      "metric": "spellbook_superseded_for",
+      "spell": 500558,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT no swap names lower rank 500559",
+      "actor": "tinker",
+      "metric": "spellbook_superseded_for",
+      "spell": 500559,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT no swap names lower rank 500560",
+      "actor": "tinker",
+      "metric": "spellbook_superseded_for",
+      "spell": 500560,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT the main bar still holds Scrap Shot",
+      "actor": "tinker",
+      "metric": "action_button",
+      "button": 0,
+      "equals": 500561
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Only one Worldforged Redrock Sash pickup stands at its Durotar spot (#8479)",
+  "contract": [
+    "LootCollector (installed StarterDB 2026-08-20, union pins in Worldforged-data wf_pins_union.csv) records the Redrock Sash",
+    "(item 521081, pickup Lost Goods 90596) in Durotar at 53.23, 74.33, world (-811.4, -4776.8) on map 1.",
+    "Report #8479 found two Lost Goods boxes there that both gave the sash: the LootCollector alignment had moved the second spawn",
+    "(guid 6942071) beside the first (guid 6942072). Expected: a character at the reported spot finds exactly one Lost Goods box",
+    "within 20 yd and can open it. The Clattering Scorpid (3125) wandering by the box is killed first so its attack",
+    "cannot interrupt the opening."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": -805.5, "y": -4770.5, "z": 23.0, "o": 0 },
+  "players": [ { "id": "p", "race": 2, "class": 1, "level": 8 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: exactly one Lost Goods box at the Durotar spot", "actor": "p",
+      "metric": "nearby_gameobject_count", "entry": 90596, "equals": 1 },
+    { "action": "attack_nearby", "label": "SETUP: the Clattering Scorpid wandering by the box cannot interrupt the opening",
+      "actor": "p", "entry": 3125, "kill": true },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 90596 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "the box is within reach and opens", "actor": "p", "metric": "cast_failure",
+      "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

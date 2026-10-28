@@ -1,0 +1,13 @@
+-- Ragglesnout's kit Dominate Mind picks a random hostile player other than his current victim, like his native row 3.
+-- Charming his only target made him evade and reset whenever he fought one player (#7999).
+DELETE FROM `smart_scripts` WHERE `entryorguid` = 7354 AND `source_type` = 0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `event_param6`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_param4`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+(7354, 0, 1, 0, 0, 0, 100, 16, 0, 0, 3000, 4000, 0, 0, 11, 12471, 64, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0.0, 0.0, 0.0, 0.0, 'Ragglesnout - In Combat - Cast Shadow Bolt'),
+(7354, 0, 2, 0, 0, 0, 100, 16, 3000, 5000, 20000, 25000, 0, 0, 11, 11639, 1, 0, 0, 0, 0, 5, 30, 0, 0, 0, 0.0, 0.0, 0.0, 0.0, 'Ragglesnout - In Combat - Cast Shadow Word: Pain'),
+(7354, 0, 3, 0, 0, 0, 100, 16, 9000, 13000, 15000, 20000, 0, 0, 11, 7645, 1, 0, 0, 0, 0, 6, 20, 0, 0, 0, 0.0, 0.0, 0.0, 0.0, 'Ragglesnout - In Combat - Cast Dominate Mind'),
+(7354, 0, 4, 0, 2, 0, 100, 0, 0, 40, 12000, 16000, 0, 0, 11, 12039, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0.0, 0.0, 0.0, 0.0, 'Ragglesnout - Between 0-40% Health - Cast Heal'),
+(7354, 0, 9000, 0, 0, 0, 100, 0, 1000, 1500, 3800, 4300, 0, 0, 11, 2102544, 64, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0.0, 0.0, 0.0, 0.0, 'Ragglesnout - Ascension kit - In Combat (first 1-1.5 s, then every 3.8-4.3 s) - Cast ''Shadow Bolt'''),
+(7354, 0, 9001, 0, 0, 0, 100, 0, 9300, 11300, 10000, 12000, 0, 0, 11, 2102726, 0, 0, 0, 0, 0, 5, 0, 1, 0, 0, 0.0, 0.0, 0.0, 0.0, 'Ragglesnout - Ascension kit - In Combat (first 9.3-11.3 s, then every 10-12 s) - Cast ''Shadow Word: Pain'''),
+(7354, 0, 9002, 0, 0, 0, 100, 0, 7000, 9000, 7000, 8000, 0, 0, 218, 975011, 2, 200, 0, 0, 0, 2, 0, 0, 0, 0, 0.0, 0.0, 0.0, 0.0, 'Ragglesnout - Ascension kit - In Combat (first 7-9 s, then every 7-8 s) - Custom Cast ''Fierce Blow'' (200)'),
+(7354, 0, 9003, 0, 0, 0, 100, 0, 13800, 15800, 20000, 22000, 0, 0, 11, 377065, 0, 0, 0, 0, 0, 6, 0, 1, 0, 0, 0.0, 0.0, 0.0, 0.0, 'Ragglesnout - Ascension kit - In Combat (first 13.8-15.8 s, then every 20-22 s) - Cast ''Dominate Mind'''),
+(7354, 0, 9010, 0, 2, 0, 100, 0, 0, 40, 10000, 10000, 0, 0, 11, 381459, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0.0, 0.0, 0.0, 0.0, 'Ragglesnout - Ascension kit - Between 0-40% Health (every 10-10 s) - Cast ''Heal''');

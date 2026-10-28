@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Everything Will Be Alright needs the Auchindoun chain that makes Greatfather Aldrimus visible (#8183)",
+  "contract": [
+    "Greatfather Aldrimus (19698) starts and ends quest 10164 and carries Ancestor Invisibility (32648, invisibility type 4).",
+    "spell_area grants Commune With The Ancestors (32649, invisibility detection type 4) in area 3688 only once Vision of the Dead",
+    "(10252) or Material Components (10045) is rewarded, so a character without either can never see the ender.",
+    "Expected: a level 68 Human with no Auchindoun quest cannot take 10164; after Vision of the Dead is rewarded he can."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 530, "x": -3343.0, "y": 5185.0, "z": -101.0, "o": 0 },
+  "players": [ { "id": "seeker", "race": 1, "class": 1, "level": 68 } ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: no Auchindoun chain quest is rewarded", "actor": "seeker",
+      "metric": "quest_status", "quest": 10252, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: Everything Will Be Alright cannot be taken without the chain",
+      "actor": "seeker", "metric": "quest_takeable", "quest": 10164, "equals": 0 },
+    { "action": "prepare_quest", "label": "Fixture: Vision of the Dead is complete", "actor": "seeker", "quest": 10252 },
+    { "action": "reward_quest", "actor": "seeker", "quest": 10252 },
+    { "action": "assert", "label": "SETUP: Vision of the Dead is rewarded", "actor": "seeker",
+      "metric": "quest_status", "quest": 10252, "equals": 6 },
+    { "action": "assert", "label": "Everything Will Be Alright can be taken once Aldrimus is visible", "actor": "seeker",
+      "metric": "quest_takeable", "quest": 10164, "equals": 1 }
+  ]
+}
