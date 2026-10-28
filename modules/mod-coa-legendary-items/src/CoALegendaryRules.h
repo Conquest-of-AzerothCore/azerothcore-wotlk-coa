@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <optional>
+#include <string_view>
 
 namespace CoALegendary
 {
@@ -13,10 +14,10 @@ namespace CoALegendary
     constexpr uint32_t TooltipEntryBase = 9720000;
     constexpr uint32_t DesignCount = 64;
     constexpr uint32_t MaximumCreatureLevel = 60;
-    constexpr uint32_t ItemLevelBonus = 12;
+    constexpr uint32_t ItemLevelBonus = 6;
+    constexpr std::string_view TooltipTag = "@Fabled@";
     constexpr uint32_t KillPowerDurationMs = 8000;
     constexpr float DefaultDropChance = 0.05f;
-    constexpr uint32_t DefaultStopDropLevel = 45;
     constexpr uint32_t DefaultStopPowerLevel = 60;
 
     enum class Power : uint8_t
@@ -104,10 +105,9 @@ namespace CoALegendary
         return Variant{ design, level };
     }
 
-    constexpr bool CanDrop(uint32_t classId, uint32_t playerLevel, uint32_t creatureLevel,
-        uint32_t stopDropLevel, bool grantsKillReward)
+    constexpr bool CanDrop(uint32_t classId, uint32_t playerLevel, uint32_t creatureLevel, bool grantsKillReward)
     {
-        return IsCustomClass(classId) && playerLevel > 0 && playerLevel < stopDropLevel &&
+        return IsCustomClass(classId) && playerLevel > 0 &&
             creatureLevel > 0 && creatureLevel <= MaximumCreatureLevel && grantsKillReward;
     }
 
@@ -138,12 +138,12 @@ namespace CoALegendary
 
     constexpr int32_t AttackPowerBonus(uint32_t requiredLevel)
     {
-        return int32_t(ItemLevel(requiredLevel) * 2);
+        return int32_t(ItemLevel(requiredLevel));
     }
 
     constexpr int32_t SpellPowerBonus(uint32_t requiredLevel)
     {
-        return int32_t(ItemLevel(requiredLevel));
+        return int32_t(ItemLevel(requiredLevel) / 2);
     }
 
 }

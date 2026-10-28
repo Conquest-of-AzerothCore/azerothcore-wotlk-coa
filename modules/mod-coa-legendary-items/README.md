@@ -1,17 +1,20 @@
 # CoA Legendary Items
 
 64 original non-set leveling legendaries: three per custom class (IDs 12–32), plus a shared cloak.
+They are rare (blue), Realm Bound and carry a green `@Fabled@` tooltip tag, like worldforged items.
+Their stats sit slightly above worldforged gear of the same level and below epics; the legendary power is
+the main draw.
 See the [interactive preview](preview.html) or the [complete catalog](CATALOG.md).
 
 Eligible creature kills have a configurable 0.05% chance to add one legendary to normal corpse loot.
 The loot owner determines the class pool. Normal group loot rules apply. Pets can earn a drop for their owner;
 player-owned creatures, critters, totems, creatures without XP eligibility and gray creatures cannot drop one.
-By default, players at level 45 or above receive no new drops, and equipped legendaries grant no powers from
-level 60 (`CoALegendaryItems.StopDropLevel`, `CoALegendaryItems.StopPowerLevel`). Their native item stats remain.
+Drops have no player level cutoff. By default, equipped legendaries grant no powers from level 60
+(`CoALegendaryItems.StopPowerLevel`). Their native item stats remain.
 
 Required level is `creature->getLevelForTarget(lootOwner)`, the same per-player level used by Destiny Weaver.
-Item level is always required level + 12. A level-32 player killing a wolf scaled from 10 to 29 receives a
-level-29, item-level-41 variant. Without scaling, that gray level-10 wolf is ineligible. Normal and quest loot
+Item level is always required level + 6. A level-32 player killing a wolf scaled from 10 to 29 receives a
+level-29, item-level-35 variant. Without scaling, that gray level-10 wolf is ineligible. Normal and quest loot
 continue through their existing paths. Each design has level-1 through level-60 variants with fixed stats;
 equipping one does not increase its level.
 
@@ -46,6 +49,9 @@ The module migration runs afterwards under a new name and hash,
 so an existing migration ledger cannot mistake it for a rename and skip reinstalling the data.
 Historical level-61 through level-80 item templates remain in the module for saved-item compatibility;
 only level-1 through level-60 variants have client rows and can drop or grant powers.
+The pending world migration `rev_20261028_99_coa_legendary_items_fabled.sql` upgrades installed level-1 through
+level-60 variants to rare, Realm Bound, tagged items with their current stats and tooltips. It changes nothing
+when the module's client item rows are absent; historical variants keep their original templates.
 Excluding the module from a fresh build installs none of its data. After a module has been installed, its data
 can remain in the database when it is excluded; its drop and power scripts are absent and patches are not registered.
 Excluding it during the first upgrade from shared migrations preserves legacy item templates for saved inventory
@@ -57,7 +63,7 @@ The module validates its item and spell records at startup and disables drops an
 The enabled module explicitly registers its variants and power spells with the shared patch registries.
 SQL-only item rows require registration; core registers its Heartwood Key independently. Server-only SQL spells
 are streamed only for description overrides or explicit registrations. All variants use on-demand streaming
-and existing client appearances. Names, orange legendary quality,
+and existing client appearances. Names, rare quality, the tooltip tag,
 requirements and stats come from native item query responses.
 
 Legendary powers use native equip-spell tooltip lines. Each level variant has a separate display-only

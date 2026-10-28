@@ -57,7 +57,7 @@
       "actor": "viewer",
       "metric": "aura_amount",
       "spell": 9710000,
-      "equals": 82
+      "equals": 35
     },
     {
       "action": "assert",

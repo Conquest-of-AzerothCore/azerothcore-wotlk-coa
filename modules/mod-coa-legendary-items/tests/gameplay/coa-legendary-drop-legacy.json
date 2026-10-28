@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "CoA Legendary Items: drop legacy",
-  "contract": "Requires CoALegendaryItems.Enable=1, DropChance=100, StopDropLevel=60, DestinyWeaver.Enable=1, LevelScaling=1, offset=5, CoA.SendDisplayPatches=1. An eligible corpse receives exactly one class-pool legendary. Required level equals its effective NPC level. Gray creatures, level-60 players and legacy classes receive none. Loot uses the native kill and corpse handlers.",
+  "contract": "Requires CoALegendaryItems.Enable=1, DropChance=100, DestinyWeaver.Enable=1, LevelScaling=1, offset=5, CoA.SendDisplayPatches=1. An eligible corpse receives exactly one class-pool legendary. Required level equals its effective NPC level. Gray creatures and legacy classes receive none. Loot uses the native kill and corpse handlers.",
   "timeout_ms": 180000,
   "location": {
     "map": 0,
@@ -66,7 +66,7 @@
       "action": "assert",
       "actor": "looter",
       "metric": "loot_count",
-      "quality": 5,
+      "quality": 3,
       "equals": 0
     }
   ]
