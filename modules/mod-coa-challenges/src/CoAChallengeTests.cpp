@@ -800,6 +800,21 @@ namespace CoAChallenges
                     Unit::Kill(killer, c);   // CreditKill shares it with the group
             }
             for (Player* p : players)
+            {
+                if (p->GetLevel() >= maxLevel)
+                    continue;
+                uint32 guid = p->GetGUID().GetCounter();
+                bool completedEarly = (bool)CharacterDatabase.Query(
+                    "SELECT 1 FROM coa_challenge_completion WHERE guid = {} AND challengeId = {}",
+                    guid, challengeId);
+                if (completedEarly)
+                {
+                    BroadcastTestLine(players, "  [{}] completed before level cap at level {} (unexpected)",
+                        p->GetName(), p->GetLevel());
+                    pass = false;
+                }
+            }
+            for (Player* p : players)
                 if (p->GetLevel() < level)
                     p->GiveLevel(static_cast<uint8>(level));
         }
