@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Hellfire Stirrups raises the Xorothian Warsteed's speed by 75% (#9850)",
+  "contract": [
+    "Hellfire Stirrups 804785 requires Xorothian Warsteed 804703 (CasterAuraSpell) and promises +75% mount speed.",
+    "Effect 0 is SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED with BasePoints 74 (75%).",
+    "The Warsteed is a learned mount, so its own effect 0 (same aura) is set from riding skill: 150 gives 100%.",
+    "The core keeps only the largest MOD_INCREASE_MOUNTED_SPEED amount, so a bare 75 loses to the mount's 100.",
+    "Expected: the Stirrups effect carries the mount's 100 plus its 75, giving 175% and a run speed rate of at",
+    "least 2.75 while Path of Hellfire stacks (a separate non-stacking multiplier) can only raise it further.",
+    "Before the fix the Stirrups amount is 75 and the mounted speed stays at the Warsteed's own 100%."
+  ],
+  "timeout_ms": 45000,
+  "location": { "map": 0, "x": -8841.82, "y": 643.944, "z": 96.0247, "o": 0 },
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 4000, "label": "Let login and level scaling settle" },
+    { "action": "set_skill", "actor": "knight", "skill": 762, "value": 150, "maximum": 150 },
+    { "action": "learn", "actor": "knight", "spell": 804703 },
+    { "action": "learn", "actor": "knight", "spell": 804785 },
+    { "action": "cast", "actor": "knight", "spell": 804703, "label": "mount the Xorothian Warsteed" },
+    { "action": "assert", "actor": "knight", "metric": "aura", "spell": 804703, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "actor": "knight", "metric": "aura_amount", "spell": 804703, "effect": 0, "equals": 100, "label": "the Warsteed runs at the riding-skill 100%" },
+    { "action": "wait", "ms": 1600, "label": "let the mount's global cooldown run out" },
+    { "action": "cast", "actor": "knight", "spell": 804785, "label": "use Hellfire Stirrups" },
+    { "action": "assert", "actor": "knight", "metric": "aura", "spell": 804785, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "actor": "knight", "metric": "aura_amount", "spell": 804785, "effect": 0, "equals": 175, "label": "Stirrups adds its 75% on top of the mount's 100%" },
+    { "action": "assert", "actor": "knight", "metric": "run_speed_rate", "min": 2.74, "label": "the mounted run speed reflects at least 175%" }
+  ]
+}
