@@ -1,4 +1,4 @@
-﻿-- The apex spawns were placed on GUIDs that rev_20261024_91_stv_venture_co_base_camp.sql
+-- The apex spawns were placed on GUIDs that rev_20261024_91_stv_venture_co_base_camp.sql
 -- already owns, which turned Venture Co goblins into bosses. Restore those spawns and move
 -- both the apex bosses and the huntmasters onto GUIDs nothing else uses.
 DELETE FROM `creature` WHERE `guid` IN (9999265, 9999266, 9999267, 9999268, 9999269);

@@ -1,4 +1,4 @@
-﻿-- The client cannot gain a QuestSuperTrack row at runtime: that table's patch has no
+-- The client cannot gain a QuestSuperTrack row at runtime: that table's patch has no
 -- rebuild hook, so only rows already in its file are consulted. So the quests move
 -- onto ids the client already tracks: 17839 (Alliance) and 17844 (Horde), each with
 -- rows for objectives 0,1,2 whose nodes are 7301/7302/7303 and 7309/7310/7311.
