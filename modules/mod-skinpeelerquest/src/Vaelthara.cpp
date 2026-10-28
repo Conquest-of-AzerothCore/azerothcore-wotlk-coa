@@ -857,6 +857,26 @@ namespace
                 state.nextStalk = now + 5000;
                 return;
             }
+
+            // She must not fixate the player she is already fighting: with the
+            // current victim in the pool every pick looks like "the tank again"
+            // the moment the fixate expires and threat pulls her back.
+            if (candidates.size() > 1)
+            {
+                Player* current = creature->GetVictim() && creature->GetVictim()->IsPlayer()
+                    ? creature->GetVictim()->ToPlayer() : nullptr;
+                if (current)
+                {
+                    for (auto itr = candidates.begin(); itr != candidates.end(); ++itr)
+                    {
+                        if (*itr == current)
+                        {
+                            candidates.erase(itr);
+                            break;
+                        }
+                    }
+                }
+            }
             // Random on purpose: never the lowest health, never the tank by rule.
             Player* target = candidates[urand(0, uint32(candidates.size()) - 1)];
 
