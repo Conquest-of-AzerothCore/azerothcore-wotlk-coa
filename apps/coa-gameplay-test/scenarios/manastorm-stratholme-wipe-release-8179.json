@@ -1,0 +1,118 @@
+{
+  "schema": 1,
+  "name": "Manastorm Stratholme: a solo wipe at Magistrate Barthilas ejects the player to the faction hub on release (#8179, #8083)",
+  "contract": [
+    "#8179/#8083: a wiped solo Manastorm run could never reach ManastormMgr::HandleReleaseAfterWipe because",
+    "AscensionDungeonRelease's generic InstanceStart fallback (any areatrigger_teleport row whose",
+    "target_mapId matches the current map) always matched Stratholme's public entrance rows and claimed",
+    "the release first, short-circuiting PLAYERHOOK_CAN_REPOP_AT_GRAVEYARD before manastorm_playerscript's",
+    "own boolean handler ever ran. The player was resurrected at 50% HP and near-teleported to the public",
+    "entrance while still inside the private Manastorm instance, and ManastormMgr::FailRun was never called:",
+    "the run stayed stuck in AwaitingExit (\"manastorm still running, can't release\").",
+    "The fix adds an OnPlayerReleasedGhost handler to manastorm_playerscript. That hook is dispatched by",
+    "CALL_ENABLED_HOOKS (every registered script runs, unlike the short-circuiting boolean hook) and fires",
+    "from Player::BuildPlayerRepop before WorldSession::HandleRepopRequestOpcode calls RepopAtGraveyard, so",
+    "the wipe ejection to the faction hub now always runs before AscensionDungeonRelease's fallback gets a",
+    "chance to claim the release.",
+    "This scenario proves setup correctness (private run, Active stage, boss safety bubble cleared) up to",
+    "the kill, then drives an actual wipe (self-damage death, no resurrection charge used) and release",
+    "through the native CMSG_REPOP_REQUEST path the harness's 'release_spirit' action sends, exactly as",
+    "the client does, and asserts the player lands at the Horde Manastorm hub pad re-added in #9640",
+    "(gameobject 6901539, map 1) rather than staying stuck in the private instance."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "n",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "command",
+      "actor": "n",
+      "command": ".manastorm segment test 138"
+    },
+    {
+      "action": "assert",
+      "label": "The player entered a private Manastorm instance",
+      "actor": "n",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "Match the native phase 1 Manastorm room so the instance is visible to this lane",
+      "actor": "n",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "n",
+      "guid": 9950286
+    },
+    {
+      "action": "assert",
+      "label": "Leaving the preparation bubble at the boss clears its safety aura and the stage goes Active",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "die",
+      "actor": "n"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the lone member's death wiped the run",
+      "actor": "n",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "release_spirit",
+      "actor": "n"
+    },
+    {
+      "action": "assert",
+      "label": "The wipe ejected the player out of the private Manastorm instance",
+      "actor": "n",
+      "metric": "private_instance",
+      "within_ms": 5000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The release resurrected the player instead of leaving them stuck as a ghost in the instance",
+      "actor": "n",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The player landed on Kalimdor, where the Horde Manastorm hub pad is",
+      "actor": "n",
+      "metric": "map_id",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The player landed at the Horde Manastorm hub pad, not a Stratholme entrance",
+      "actor": "n",
+      "metric": "point_distance_2d",
+      "x": 1648.1,
+      "y": -4431.11,
+      "max": 5
+    }
+  ]
+}
