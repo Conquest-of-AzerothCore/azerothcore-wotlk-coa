@@ -1,0 +1,127 @@
+{
+  "schema": 1,
+  "name": "Skinpeeler Nytharos: crushing depths against five",
+  "contract": [
+    "A full group takes the same share of its own pool, scaled down by the per-tick group budget.",
+    "Every victim keeps at least 88 percent of its bar through one channel."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 1,
+    "x": 2269.03,
+    "y": -6608.37,
+    "z": 125.192,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps1",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps2",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps3",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps4",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "tank",
+      "entry": 9916214,
+      "level": 60,
+      "health": 1000000,
+      "reaction": 2,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the boss and local AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "attack",
+      "label": "Establish threat",
+      "actor": "tank",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "Boss enters combat",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "label": "Reach the first channel",
+      "ms": 12000
+    },
+    {
+      "action": "wait",
+      "label": "Let the channel tick out",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "First victim keeps its bar",
+      "actor": "dps1",
+      "metric": "health_pct",
+      "min": 88.0,
+      "max": 97.0
+    },
+    {
+      "action": "assert",
+      "label": "Second victim keeps its bar",
+      "actor": "dps2",
+      "metric": "health_pct",
+      "min": 88.0,
+      "max": 97.0
+    },
+    {
+      "action": "assert",
+      "label": "Third victim keeps its bar",
+      "actor": "dps3",
+      "metric": "health_pct",
+      "min": 88.0,
+      "max": 97.0
+    },
+    {
+      "action": "assert",
+      "label": "Fourth victim keeps its bar",
+      "actor": "dps4",
+      "metric": "health_pct",
+      "min": 88.0,
+      "max": 97.0
+    }
+  ]
+}

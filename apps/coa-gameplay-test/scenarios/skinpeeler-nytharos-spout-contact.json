@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "name": "Skinpeeler Nytharos: waterspouts make contact",
+  "contract": [
+    "Four spouts exist after the first melee window.",
+    "A spout that reaches a player applies the Soaked slow within the spout lifetime."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 1,
+    "x": 2269.03,
+    "y": -6608.37,
+    "z": 125.192,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps1",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps2",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "tank",
+      "entry": 9916214,
+      "level": 60,
+      "health": 1000000,
+      "reaction": 2,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the boss and local AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "attack",
+      "label": "Establish threat",
+      "actor": "tank",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "Boss enters combat",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "label": "Reach the spout step of the loop",
+      "ms": 26000
+    },
+    {
+      "action": "assert",
+      "label": "Spouts exist",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 9916216,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Soaked applied on contact",
+      "actor": "tank",
+      "metric": "aura",
+      "spell": 1004292,
+      "equals": 1,
+      "within_ms": 20000
+    }
+  ]
+}
