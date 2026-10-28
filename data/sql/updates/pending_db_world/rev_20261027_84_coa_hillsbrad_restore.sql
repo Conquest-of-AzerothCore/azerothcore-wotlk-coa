@@ -182,7 +182,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (9950713, 312397, 0, 0, 0, 1, 1, 0, 42.6, -883.3, 58.9, 3.49, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Cirenia Phoenixfell (client SuperTrack point; facing estimated)'),
 (9950714, 312443, 0, 0, 0, 1, 1, 0, 26.3, -888.1, 62.3, 1.67, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Shadowmage Greenfield (client SuperTrack point; facing estimated)'),
 (9950715, 312428, 0, 0, 0, 1, 1, 0, 36.8, -918.5, 96.7, 2.4, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Asteria the Soulcleaver (client SuperTrack point; facing estimated)'),
-(9950716, 312429, 0, 0, 0, 1, 1, 0, 36.4, -913.7, 96.7, 2.77, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Priestess Mar''lynn Evermorne (client SuperTrack point; facing estimated)'),
+(9950716, 312429, 0, 0, 0, 1, 1, 0, 36.4, -913.7, 96.7, 2.77, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Priestess Mar''lynn Evermorne (beside Asteria at the 255128 turn-in point; spot and facing estimated)'),
 (9950717, 312439, 0, 0, 0, 1, 1, 0, 44.1, -907.2, 96.8, 0.19, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Magister Morninglare (client SuperTrack point; facing estimated)'),
 (9950718, 312402, 0, 0, 0, 1, 1, 0, 27.9, -911.3, 62.4, 5.34, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Bergamont Lestern (client SuperTrack turn-in point of 1377; facing estimated)'),
 (9950719, 312406, 0, 0, 0, 1, 1, 0, 26.0, -931.7, 88.1, 0.54, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Shadowmage Krenna (client SuperTrack point; facing estimated)'),
@@ -590,7 +590,8 @@ INSERT INTO `quest_template_addon` (`ID`, `MaxLevel`, `AllowableClasses`, `Sourc
 (255154, 0, 0, 0, 255153, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 -- Givers and enders follow the captured texts (Details speaker, EndText target) and the client SuperTrack turn-in
--- points. 1377 ends at Bergamont Lestern (its CompletedText) on the tower's ground floor. 255136 follows the Silverpine
+-- points. 1377 ends at Bergamont Lestern (its CompletedText) on the tower's ground floor. Priestess Mar'lynn gives
+-- 255128 and Asteria the Soulcleaver ends it; Mar'lynn stands beside Asteria. 255136 follows the Silverpine
 -- Blighthollow chain: Apothecary Holm (500329), who ends 255135, gives it with the logbook 650200; Holm and that chain
 -- are not on this server, so 255136 has no giver here. Apothecary Lydon ends it as the text says.
 DELETE FROM `creature_queststarter` WHERE `quest` IN (1327,1328,1329,1330,1331,1332,1333,1334,1335,1336,1337,1343,1344,
@@ -682,7 +683,7 @@ INSERT INTO `creature_questender` (`id`, `quest`) VALUES
 (312414, 1354),
 (312428, 1376),
 (312428, 1378),
-(312429, 255128),
+(312428, 255128),
 (312443, 255126),
 (312505, 255124),
 (312505, 255125),
