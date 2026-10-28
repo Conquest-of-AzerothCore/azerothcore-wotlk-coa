@@ -13,7 +13,7 @@
   "players": [
     {"id": "hero", "name": "Coatokenhero", "race": 1, "class": 1, "level": 10},
     {"id": "alt", "name": "Coatokenalt", "race": 1, "class": 1, "level": 1, "account_of": "hero"},
-    {"id": "other", "name": "Coatokenother", "race": 1, "class": 1, "level": 1}
+    {"id": "other", "name": "Coatokenoth", "race": 1, "class": 1, "level": 1}
   ],
   "steps": [
     {"action": "wait", "ms": 1000},
@@ -35,7 +35,7 @@
 
     {"action": "client_packet", "label": "Mail the 1500 warchest tokens to another account", "actor": "hero",
      "opcode": 568, "consumed": false,
-     "fields": [{"gameobject_guid": 142119}, {"string": "Coatokenother"}, {"string": "Tokens"}, {"string": "Realm bound"},
+     "fields": [{"gameobject_guid": 142119}, {"string": "Coatokenoth"}, {"string": "Tokens"}, {"string": "Realm bound"},
                 {"u32": 41}, {"u32": 0}, {"u8": 1}, {"u8": 0}, {"item_guid": 975001}, {"u32": 0}, {"u32": 0},
                 {"u64": 0}, {"u8": 0}]},
     {"action": "assert", "label": "DISCRIMINATING: warchest tokens cannot be mailed to another account", "actor": "hero",
@@ -57,7 +57,7 @@
      "fields": [{"item_bag": 975001}, {"item_slot": 975001}, {"u8": 22}, {"u8": 14}, {"u32": 500}]},
     {"action": "client_packet", "label": "Mail the 500 free tokens to another account", "actor": "hero",
      "opcode": 568, "consumed": false,
-     "fields": [{"gameobject_guid": 142119}, {"string": "Coatokenother"}, {"string": "Tokens"}, {"string": "Free"},
+     "fields": [{"gameobject_guid": 142119}, {"string": "Coatokenoth"}, {"string": "Tokens"}, {"string": "Free"},
                 {"u32": 41}, {"u32": 0}, {"u8": 1}, {"u8": 0}, {"item_guid": 975001}, {"u32": 0}, {"u32": 0},
                 {"u64": 0}, {"u8": 0}]},
     {"action": "assert", "label": "DISCRIMINATING: the reserve was spent first, so 500 tokens are free", "actor": "hero",
@@ -67,7 +67,7 @@
 
     {"action": "client_packet", "label": "Mail the 900 reserved tokens to another account", "actor": "hero",
      "opcode": 568, "consumed": false,
-     "fields": [{"gameobject_guid": 142119}, {"string": "Coatokenother"}, {"string": "Tokens"}, {"string": "Reserved"},
+     "fields": [{"gameobject_guid": 142119}, {"string": "Coatokenoth"}, {"string": "Tokens"}, {"string": "Reserved"},
                 {"u32": 41}, {"u32": 0}, {"u8": 1}, {"u8": 0}, {"item_guid": 975001}, {"u32": 0}, {"u32": 0},
                 {"u64": 0}, {"u8": 0}]},
     {"action": "assert", "label": "The 900 reserved tokens stay on the account", "actor": "hero",
