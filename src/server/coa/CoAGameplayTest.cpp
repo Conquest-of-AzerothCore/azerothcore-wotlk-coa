@@ -6019,6 +6019,17 @@ private:
                     player->GetSession()->HandleLootOpcode(packet);
             }
         }
+        else if (action == "select_nearby")
+        {
+            float const radius = step.get<float>("radius", 40.0f);
+            Creature* creature = player->FindNearestCreature(step.get<uint32>("entry"), radius, true);
+            Require(creature != nullptr, "Select needs a living creature of that entry within " +
+                std::to_string(radius) + " yards");
+            WorldPacket packet(CMSG_SET_SELECTION, 8);
+            packet << creature->GetGUID();
+            player->GetSession()->HandleSetSelectionOpcode(packet);
+            Require(player->GetTarget() == creature->GetGUID(), "Selection did not take effect");
+        }
         else if (action == "loot_creature")
         {
             Unit* target = GetUnit(step.get<std::string>("target"));
