@@ -1,9 +1,0 @@
-## Campaign010 group4 — resumed session
-
-- 270423 Controlled Burn: implemented. Chaos Bolt now extends only caster-owned Immolate by native6000ms helper amount; Immolate periodic critical hits dispatch native Ignite rolling damage using the learned talent percentage, without broadening effect198 or duplicating prior New Moon workaround.
-- 270426 Infinite Burn: implemented. Damage from the four tooltip spells grants native buff270425. Immolate/Shadowflame periodic damage invokes native family-cooldown helper270435 once per1000ms. Next landed Conflagrate preserves owned Immolate and consumes the buff; existing glyph and Shadowflame rules retained.
-- 270428 Heating Up!: partial. Read-only DB confirms direct-Conflagrate rule and generic binding; native helper270429 already applies caster-only3% Fire damage with native stacks/duration. No confirmed source defect found. Static-only finding, not gameplay verified and no milestone credit; avoid repeat absence scans.
-- 270495 Guardians of the Grove: blocked. Treant1964 template has no dedicated healer AI; no current source restoration found.66%health reduction/90%threshold/known Druid heals/PvP instant restriction established. Native ownership/stat scaling, heal eligibility and noncombat AI/casting integration need a complete scoped summon implementation; retain reconstruction, no partial health-only credit.
-- 277555 Battle Glaive: blocked. Reused prior root/helper evidence: next-cast40%damage and explicit cooldown reset conflict with helper277557 fixed14-second reduction. Multi-projectile next-cast consumption and actual Glaive Toss cooldown/charge route remain unestablished; no arbitrary reset rewrite.
-
-Cumulative82/100. All implementations runtime-unverified. Formatting only; no builds/tests/SQL deployment/server changes/Git.

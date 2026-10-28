@@ -1,9 +1,0 @@
-## Campaign010 group11 — resumed session
-
-- 271151 Tree of Wrath: implemented. Custom form48 was omitted from native shapeshift snare cleanup and lacked tooltip cast restrictions/hitbonus. Added form48 cleanup and healing/LightningBolt/ChainLightning permissions, including form exit; Lightning spells gain100hitpercentagepoints. Native linked34123healing6%/86436HoT20%cost effects retained; suppressed duplicate34123costmodifier only while TreeWrath active, keeping ordinary TreeofLife unchanged.
-- 271153 Living Lightning: blocked. Native chain-heal targets/jumps/diminishing multiplier exist; EffectMiscValueB3does not implement the promised final fork into ChainLightning. Need evidenced final healed-target/enemy selection, damage rank and origin relationship before completing mixed heal/damage behavior.
-- 271165 Rooted in Storm: implemented. Existing direct-heal proc used raw healing and triggered on100%overheal. Added reusable effective-heal eligibility gate requiring GetEffectiveHeal()>0 while retaining native2-second LivingLightning CDR and existing direct-heal filter/helper; no duplicate cooldown action.
-- 271175 Lightning Rod: blocked. Existing LB applies271152but hidden86439/271178 show overlapping older/newer contracts. Single-target replacement, critical direct Nature-heal return bolt and LivingLightning charge generation/consumption need one complete shared controller; exact per-crit/per-heal charge relationship not established. No grant-only completion.
-- 284057 Inescapable Roots: blocked. User pending-native-data decision preserved: first-half anti-break timing is known, stronger damage-break susceptibility rule lacks original quantitative contract. No invented damage-break multiplier.
-
-Cumulative95/100. All implementations runtime-unverified. Formatting only; no builds/tests/SQL deployment/server changes/Git.

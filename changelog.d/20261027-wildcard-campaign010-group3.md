@@ -1,9 +1,0 @@
-## Group3
-
-- 270362 Infecting Strikes: implemented. Existing Maul proc applies Infected Blood270355 but missing bonus row uses default scaling instead of tooltip0.05SP+0.05AP per tick. Added explicit periodic coefficients, preserving native1.63-per-level scaling from baselevel10 and native tick interval/duration.
-- 270391 Low Tide: implemented. Donor modifier increased Riptide spell crit rather than Nature healing on the caster-owned Riptide target. Converted root modifier to dummy; scoped target-side crit calculation adds native20% amount only to Nature heal/direct or eligible periodic-heal snapshots with caster-owned Riptide. Unrelated targets, schools, damage and another caster Riptide excluded.
-- 270358 Spreading Plague: blocked. Existing Thrash proc reaches spread helpers270360/270361, but native effect169 remains unimplemented. Trigger aura IDs are known; radius/selection semantics for misc1 and duration/snapshot transfer are not yet established. Keep shared spread-handler reconstruction queued; Infected Blood coefficient correction benefits its payload but does not repair spreading.
-- 270395 Spreading Tides: blocked. Existing critical-heal proc dispatches270392, whose native nearby-ally helper only heals1/applies dummy. Missing effective-heal/caster-Riptide validation, lowest-health15-yard selection and actual Riptide cast. Need ranked Riptide cast/refresh contract before full implementation.
-- 275739 Goldrinn's Fury: blocked. Reused existing275740 periodic helper investigation: known0.08SP/AP and level term, but Worgen-only periodic critical behavior and snapshot/stack semantics remain unresolved. No repeated broad research or speculative formula.
-
-Cumulative80/100, six new roots; all runtime-unverified. Additional shared beneficiary270358 receives corrected payload scaling but remains blocked. No compilation/testing/Git/SQL execution/server changes. Formatting only.

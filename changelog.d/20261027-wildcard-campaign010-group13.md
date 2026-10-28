@@ -1,8 +1,0 @@
-## Campaign010 group13 — resumed session
-
-- 271315 Frozen Light: implemented. Wrong aura271was a damage modifier and never increased Cryotherapy healing. Converted only FrozenLight effect1to native caster-owned healing modifier283; scoped its effect to Cryotherapy271303 per active tooltip despite shared family mask with other Cryotherapist heals. Native30%amount, duration and single-target-per-caster flag retained.
-- 271317 Fingers of Light: implemented. Existing directHolyheal proc and native10%perstack FingersOfFrost chance spellmod worked, but five-stack buff had no consumption route. Added AfterProc hook to both native FoF talent ranks44543/44545 to clear271318only after successful FoF proc; failed rolls preserve it, existing chance/family filters unchanged.
-- 271321 Lesser Frozen Light: implemented. Existing Holy-direct-heal application worked, but helper271329used damage modifier271and never amplified healing. Converted only helper effect0to native caster-owned healing modifier283, preserving10%nativeamount/duration and Cryotherapist family mask; other caster heals excluded by shared native handler.
-- 271323 Spirit Frost: partial. Existing two-effect conditional rules alternate blocker271351and buff271316; native5charged spellmods provide GreaterHeal100%/PrayerOfHealing50%cast reductions and normal successful-cast charge consumption. No confirmed static defect; no new implementation credit. Remaining group13root271341not investigated beyond saved diagnostic because20newimplementationtarget reached.
-
-Cumulative100/100. All implementations runtime-unverified. Formatting only; no builds/tests/SQL deployment/server changes/Git.
