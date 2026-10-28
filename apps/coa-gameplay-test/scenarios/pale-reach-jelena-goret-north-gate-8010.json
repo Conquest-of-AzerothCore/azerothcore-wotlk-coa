@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Jelena Goret joins the other Voices at the North Gate NPCs (#8010)",
+  "contract": [
+    "Quest 175198 'Voices at the North Gate' is satisfied by speaking to any of 5 NPCs clustered at Stormwind's",
+    "north gate: Baldur, Gareth Lindgren, Sereniel, Brother Caesar and Jelena Goret (164982, guid 9920211).",
+    "Jelena was captured in-game at (-8373.63,647.412), 27 yards from the cluster the other 4 share, isolated",
+    "near the gate opening rather than 'in the croud at the gate' the quest text and the other 4 establish.",
+    "She moves to (-8348.0,639.0), next to Baldur. nearby_creature_count's native search only looks 60 yards",
+    "around the player. Expected: a hero 40 yards from the new placement and 66.98 yards from the old isolated",
+    "spot (beyond that 60-yard search) still finds her; at the old spot she would not be found there at all."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8309.996, "y": 626.53, "z": 95.3, "o": 0.32},
+  "players": [{"id": "courier", "race": 1, "class": 12, "level": 10}],
+  "steps": [
+    {"action": "wait", "label": "Let login settle", "ms": 3000},
+    {"action": "set_phase", "actor": "courier", "value": 1},
+    {"action": "assert", "label": "Jelena Goret stands within reach of the north gate cluster",
+     "actor": "courier", "metric": "nearby_creature_count", "entry": 164982, "equals": 1, "within_ms": 10000}
+  ]
+}

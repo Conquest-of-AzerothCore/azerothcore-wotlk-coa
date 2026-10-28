@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "A Trogg Idol of The Cleansing of Grimepit can be used again after it respawns (COA-9476)",
+  "contract": "The Cleansing of Grimepit 175016 asks for five Trogg Idols 2300633 destroyed in Grimepit. Using an idol credits the player and its SmartAI despawns it after 1 s, back in 2 minutes. The respawned idol (guid 9987006 here) accepts the next player on the quest, who is credited too. The camp's troggs are kept from interrupting with Divine Shield.",
+  "timeout_ms": 200000,
+  "location": { "map": 0, "x": -6540.0, "y": 916.0, "z": 370.0, "o": 0.3 },
+  "players": [
+    { "id": "a", "race": 1, "class": 1, "level": 25 },
+    { "id": "b", "race": 1, "class": 1, "level": 25 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "prepare_quest", "actor": "a", "quest": 175016, "complete": false },
+    { "action": "prepare_quest", "actor": "b", "quest": 175016, "complete": false },
+    { "action": "set_aura", "label": "SETUP: Divine Shield keeps the camp's troggs off a", "actor": "a", "spell": 642, "stacks": 1 },
+    { "action": "set_aura", "label": "SETUP: Divine Shield keeps the camp's troggs off b", "actor": "b", "spell": 642, "stacks": 1 },
+    { "action": "set_phase", "actor": "a", "value": 1 },
+    { "action": "set_phase", "actor": "b", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: one idol stands by the east camp's trading post", "actor": "a", "metric": "nearby_gameobject_count", "entry": 2300633, "equals": 1 },
+    { "action": "use_nearby_gameobject", "actor": "a", "entry": 2300633 },
+    { "action": "assert", "label": "a destroys the idol", "actor": "a", "metric": "quest_objective_count", "quest": 175016, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "the idol is gone after use", "actor": "b", "metric": "nearby_gameobject_at_client", "entry": 2300633, "equals": 0, "within_ms": 5000 },
+    { "action": "assert", "label": "the idol respawns after 2 minutes", "actor": "b", "metric": "nearby_gameobject_at_client", "entry": 2300633, "equals": 1, "within_ms": 140000 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "use_nearby_gameobject", "actor": "b", "entry": 2300633 },
+    { "action": "assert", "label": "DISCRIMINATING: the respawned idol accepts b, who destroys it", "actor": "b", "metric": "quest_objective_count", "quest": 175016, "equals": 1, "within_ms": 2000 }
+  ]
+}

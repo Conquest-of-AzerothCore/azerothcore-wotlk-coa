@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Worldforged Kal'ai Jewel stands on the Kal'ai Ruins floor and can be reached (#7799)",
+  "contract": "The Kal'ai Jewel pickup (95729, guid 6940676) spawned 3.55 yd below the ground, inside a ruin pillar; the realm-map marker XY is 16.2 yd from the object's own recorded sighting, whose Z already matches its ground to 0.02 yd. rev_20261028_06 moves it to that sighting, so a character there can open it (before the fix, Opening fails: the pickup is 16 yd away).",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -12176.2, "y": -22.97, "z": -10.5, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the jewel is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95729, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the pickup stands within half a yard of the ground", "actor": "p", "metric": "spawn_ground_gap", "guid": 6940676, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 95729 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "the jewel is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

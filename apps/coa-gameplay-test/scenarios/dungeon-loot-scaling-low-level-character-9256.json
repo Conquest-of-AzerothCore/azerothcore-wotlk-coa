@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "name": "Loot in a scaled dungeon scales down to a level-16 looter (#9256, #9548)",
+  "contract": [
+    "#9256/#9548: a level-16/22 character in a Random Dungeon Finder run of a vanilla dungeon found the dropped",
+    "gear unusable. Gnomeregan (map 90) is LFGDungeons.dbc id 14, in DEFAULT_SCALING_DUNGEONS",
+    "(modules/mod-destiny-weaver/src/destiny_weaver_scaling.cpp). docs/coa/level-scaling.md requires dungeon loot",
+    "to scale down to the looter's own level whatever their or their leader's open-world switch. War Master Voone",
+    "9237 drops Flightblade Throwing Axe 28972 (item level 57, required level 55, 5 stamina, 8 attack power) at",
+    "100%. ItemLadder::ClientKey(16) = 16 + 2 = 18 (AscensionItemLadder.cpp), so a level-16 looter's drop key is",
+    "18; ItemStat.dbc's row for item 28972 at level 18 (parsed directly: RequiredLevel field, stat type 7",
+    "(stamina) and 38 (attack power)) carries required level 17, 1 stamina and 1 attack power. Native item",
+    "scaling (CoA.ItemScaling.Native, default on) must assign that level-18 ladder row to the looted axe instead",
+    "of leaving it at its authored item level 57 / required level 55, which a level-16 character could not equip."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 90,
+    "x": -757.33,
+    "y": 258.36,
+    "z": -273.08,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    { "id": "looter", "race": 1, "class": 12, "level": 16 }
+  ],
+  "creatures": [
+    { "id": "voone", "owner": "looter", "entry": 9237, "level": 59, "health": 1, "distance": 2 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 2000 },
+    { "action": "attack", "actor": "looter", "target": "voone" },
+    { "action": "assert", "actor": "voone", "metric": "alive", "equals": 0, "within_ms": 30000 },
+    { "action": "loot_creature", "actor": "looter", "target": "voone" },
+    {
+      "action": "assert",
+      "label": "The corpse holds the authored Flightblade Throwing Axe",
+      "actor": "looter",
+      "metric": "loot_entry",
+      "item": 28972,
+      "equals": 28972
+    },
+    { "action": "loot_slot", "actor": "looter", "item": 28972 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the item-level-57 axe scales down to the client key 18 for the looter's level 16",
+      "actor": "looter",
+      "metric": "carried_item_scaling_level",
+      "item": 28972,
+      "equals": 18,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The axe requires the row's level 17 instead of 55",
+      "actor": "looter",
+      "metric": "carried_item_required_level",
+      "item": 28972,
+      "equals": 17
+    },
+    {
+      "action": "assert",
+      "label": "The axe carries the row's 1 stamina instead of 5",
+      "actor": "looter",
+      "metric": "carried_item_stat",
+      "item": 28972,
+      "stat": 7,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The axe carries the row's 1 attack power instead of 8",
+      "actor": "looter",
+      "metric": "carried_item_stat",
+      "item": 28972,
+      "stat": 38,
+      "equals": 1
+    },
+    { "action": "close_loot", "actor": "looter" }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "name": "Rune of Descension Pouch (509894) description no longer says Ascension (#4754)",
+  "contract": "rev_20260921_10 renamed item 509894 to 'Rune of Descension Pouch (39,000)' but only its name, not its description: its on-use spell is dummy 18282 ('Dummy Spell'), so the tooltip text players see is item_template.description, confirmed live to still contain 'Ascension'. rev_20261027_91 replaces that word in the stored description. CMSG_ITEM_QUERY_SINGLE (opcode 86) takes only the item entry in this fork; the response (opcode 88) carries the description text verbatim.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "shopper", "race": 1, "class": 12, "level": 10 }
+  ],
+  "steps": [
+    {
+      "action": "client_packet", "actor": "shopper", "opcode": 86, "consumed": false,
+      "fields": [ { "u32": 509894 } ]
+    },
+    {
+      "action": "assert", "label": "The description no longer names Ascension", "actor": "shopper",
+      "metric": "server_packet_contains", "opcode": 88, "row": 509894, "text": "Ascension", "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The description now names Descension", "actor": "shopper",
+      "metric": "server_packet_contains", "opcode": 88, "row": 509894, "text": "Descension", "equals": 1
+    }
+  ]
+}

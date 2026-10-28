@@ -40,6 +40,8 @@ struct FelswornState
     uint32 ruin = 0;
     uint32 carveSteps = 0;
     uint32 spenderCrit = 0;
+    uint32 rushSurgeMs = 0;
+    float rushSurgeRate = 0.0f;
     bool event = false;
     bool refreshing = false;
 };

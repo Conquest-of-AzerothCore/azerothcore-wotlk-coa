@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "A scaled copy's ArmorDamageModifier split never underflows the unsigned armor (#9342)",
+  "contract": "Stonefist Girdle (6742, armor 234, ArmorDamageModifier 100) is the second choice of quest 1101 'The Crone of the Kraul' (min level 23). Player::_ApplyItemBonuses subtracted the item's ArmorDamageModifier from the ladder row's reborn armor on a uint32 without saturating; at a low scaling key the reborn armor is below the modifier (100) and the subtraction wrapped to about 4.29e9, applied as a garbage flat armor modifier. A level-26 Witch Hunter who receives the belt from this quest stores scaling key 22 (the quest's own QuestTemplateScaling.dbc curve, not the character's raw level; measured with the harness, not assumed) and its ladder row's reborn armor is 77, below the modifier, exercising the saturating path. The reward auto-equips the belt, so the snapshot is taken before the reward. A level-60 character given the authored copy directly (no scaling key; add_item does not auto-equip) is a control: its ItemAddon.dbc reborn armor (206) already exceeds the modifier, so the split there was never starved and its delta is unaffected by the fix.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "scaled", "race": 1, "class": 15, "level": 26 },
+    { "id": "authored", "race": 1, "class": 15, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    { "action": "learn", "actor": "scaled", "spell": 8737 },
+    { "action": "learn", "actor": "authored", "spell": 8737 },
+
+    { "action": "snapshot", "actor": "scaled", "metric": "armor", "save_as": "scaled_bare" },
+    { "action": "prepare_quest", "actor": "scaled", "quest": 1101 },
+    { "action": "reward_quest", "actor": "scaled", "quest": 1101, "choice": 1 },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "SETUP: the belt stores its scaling key", "actor": "scaled", "metric": "carried_item_scaling_level", "item": 6742, "equals": 22 },
+    { "action": "assert", "label": "SETUP: the reward auto-equips the belt", "actor": "scaled", "metric": "equipped_item", "slot": 5, "equals": 6742 },
+    { "action": "assert", "label": "DISCRIMINATING: equipping adds exactly its ladder row's reborn armor, not a wrapped value", "actor": "scaled", "metric": "armor", "relative_to": "scaled_bare", "equals": 77 },
+
+    { "action": "snapshot", "actor": "authored", "metric": "armor", "save_as": "authored_bare" },
+    { "action": "add_item", "actor": "authored", "item": 6742 },
+    { "action": "assert", "label": "authored-copy control has no scaling key", "actor": "authored", "metric": "carried_item_scaling_level", "item": 6742, "equals": 0 },
+    { "action": "equip", "actor": "authored", "item": 6742, "slot": 5 },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "the authored copy's own armor is unaffected by the fix", "actor": "authored", "metric": "armor", "relative_to": "authored_bare", "equals": 206 }
+  ]
+}

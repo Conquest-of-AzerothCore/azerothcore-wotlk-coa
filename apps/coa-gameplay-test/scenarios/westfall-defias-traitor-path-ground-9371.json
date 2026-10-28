@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "name": "The Defias Brotherhood: the Defias Traitor's escort points down Sentinel Hill lie on the ground (COA-9371)",
+  "contract": [
+    "The Defias Traitor 467 walks escort path waypoints 467 from the Sentinel Hill terrace to the road. Points 2-9 sat 1 to 6 yd above the slope, so he walked in the air and dropped back to the road. rev_20261028_00 puts each point on the ground.",
+    "The harness has no metric for a waypoint row, so this records the corrected heights against the server's terrain and collision; the walk itself is checked in game."
+  ],
+  "timeout_ms": 30000,
+  "location": {
+    "map": 0,
+    "x": -10508.4,
+    "y": 1068,
+    "z": 55.3,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "a",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "assert",
+      "label": "escort point 2 lies on the slope",
+      "actor": "a",
+      "metric": "point_ground_gap",
+      "map": 0,
+      "x": -10518.3,
+      "y": 1074.84,
+      "z": 52.9,
+      "min": -0.3,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "label": "escort point 3 lies on the slope",
+      "actor": "a",
+      "metric": "point_ground_gap",
+      "map": 0,
+      "x": -10534.8,
+      "y": 1081.92,
+      "z": 47.25,
+      "min": -0.3,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "label": "escort point 4 lies on the slope",
+      "actor": "a",
+      "metric": "point_ground_gap",
+      "map": 0,
+      "x": -10546.5,
+      "y": 1084.88,
+      "z": 44.25,
+      "min": -0.3,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "label": "escort point 5 lies on the slope",
+      "actor": "a",
+      "metric": "point_ground_gap",
+      "map": 0,
+      "x": -10555.3,
+      "y": 1084.45,
+      "z": 41.56,
+      "min": -0.3,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "label": "escort point 6 lies on the slope",
+      "actor": "a",
+      "metric": "point_ground_gap",
+      "map": 0,
+      "x": -10566.6,
+      "y": 1083.53,
+      "z": 37.87,
+      "min": -0.3,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "label": "escort point 7 lies on the slope",
+      "actor": "a",
+      "metric": "point_ground_gap",
+      "map": 0,
+      "x": -10575.8,
+      "y": 1082.34,
+      "z": 36.2,
+      "min": -0.3,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "label": "escort point 8 lies on the slope",
+      "actor": "a",
+      "metric": "point_ground_gap",
+      "map": 0,
+      "x": -10585.7,
+      "y": 1081.08,
+      "z": 35.8,
+      "min": -0.3,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "label": "escort point 9 lies on the slope",
+      "actor": "a",
+      "metric": "point_ground_gap",
+      "map": 0,
+      "x": -10600.1,
+      "y": 1078.19,
+      "z": 35.4,
+      "min": -0.3,
+      "max": 0.3
+    }
+  ]
+}

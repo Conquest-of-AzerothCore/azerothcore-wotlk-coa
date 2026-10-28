@@ -17,6 +17,8 @@
 
 #include "SocialMgr.h"
 #include "AccountMgr.h"
+#include "CharacterCache.h"
+#include "WorldSessionMgr.h"
 #include "DatabaseEnv.h"
 #include "ObjectMgr.h"
 #include "Player.h"
@@ -24,6 +26,7 @@
 #include "Util.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
+#include "AccountFriends.h"
 
 PlayerSocial::PlayerSocial(): m_playerGUID() { }
 
@@ -40,6 +43,9 @@ uint32 PlayerSocial::GetNumberOfSocialsWithFlag(SocialFlag flag) const
 
 bool PlayerSocial::AddToSocialList(ObjectGuid const& friendGuid, SocialFlag flag)
 {
+    if (flag == SOCIAL_FLAG_FRIEND && UsesAccountFriends())
+        return AccountFriends::Add(GetPlayerGUID(), friendGuid);
+
     // check client limits
     if (GetNumberOfSocialsWithFlag(flag) >= (((flag & SOCIAL_FLAG_FRIEND) != 0) ? SOCIALMGR_FRIEND_LIMIT : SOCIALMGR_IGNORE_LIMIT))
         return false;
@@ -74,6 +80,11 @@ bool PlayerSocial::AddToSocialList(ObjectGuid const& friendGuid, SocialFlag flag
 
 void PlayerSocial::RemoveFromSocialList(ObjectGuid const& friendGuid, SocialFlag flag)
 {
+    if (flag == SOCIAL_FLAG_FRIEND && UsesAccountFriends())
+    {
+        AccountFriends::Remove(GetPlayerGUID(), friendGuid);
+        return;
+    }
     auto itr = m_playerSocialMap.find(friendGuid);
     if (itr == m_playerSocialMap.end())                     // not exist
         return;
@@ -105,6 +116,11 @@ void PlayerSocial::RemoveFromSocialList(ObjectGuid const& friendGuid, SocialFlag
 
 void PlayerSocial::SetFriendNote(ObjectGuid const& friendGuid, std::string note)
 {
+    if (UsesAccountFriends() && AccountFriends::Has(GetPlayerGUID(), friendGuid))
+    {
+        AccountFriends::SetNote(GetPlayerGUID(), friendGuid, note);
+        return;
+    }
     auto itr = m_playerSocialMap.find(friendGuid);
     if (itr == m_playerSocialMap.end())                     // not exist
         return;
@@ -122,10 +138,17 @@ void PlayerSocial::SetFriendNote(ObjectGuid const& friendGuid, std::string note)
     m_playerSocialMap[friendGuid].Note = note;
 }
 
-void PlayerSocial::SendSocialList(Player* player, uint32 flags)
+void PlayerSocial::SendSocialList(Player* player, uint32 flags, ObjectGuid excluded)
 {
     if (!player)
         return;
+
+    std::unique_lock lock(AccountFriends::GetMutex(), std::defer_lock);
+    if (UsesAccountFriends())
+    {
+        lock.lock();
+        ProjectAccountFriends(player, excluded);
+    }
 
     uint32 friendsCount = 0;
     uint32 ignoredCount = 0;
@@ -156,6 +179,8 @@ void PlayerSocial::SendSocialList(Player* player, uint32 flags)
         ++totalCount;
 
         sSocialMgr->GetFriendInfo(player, itr.first, friendInfo);
+        if (itr.first == excluded)
+            friendInfo.Status = FRIEND_STATUS_OFFLINE;
 
         data << itr.first;                                    // player guid
         data << uint32(contactFlags);                         // player flag (0x1 = Friend, 0x2 = Ignored, 0x4 = Muted)
@@ -174,6 +199,8 @@ void PlayerSocial::SendSocialList(Player* player, uint32 flags)
 
     data.put<uint32>(countPos, totalCount);
     player->SendDirectMessage(&data);
+    if (UsesAccountFriends())
+        AccountFriends::SendMetadata(player, m_playerSocialMap);
     LOG_DEBUG("network", "WORLD: Sent SMSG_CONTACT_LIST");
 }
 
@@ -188,6 +215,8 @@ bool PlayerSocial::_checkContact(ObjectGuid const& guid, SocialFlag flags) const
 
 bool PlayerSocial::HasFriend(ObjectGuid const& friend_guid) const
 {
+    if (UsesAccountFriends())
+        return AccountFriends::Has(GetPlayerGUID(), friend_guid);
     return _checkContact(friend_guid, SOCIAL_FLAG_FRIEND);
 }
 
@@ -295,7 +324,25 @@ void SocialMgr::SendFriendStatus(Player* player, FriendsResult result, ObjectGui
             break;
     }
 
-    if (broadcast)
+    if (broadcast && player->GetSocial()->UsesAccountFriends())
+    {
+        ObjectGuid excluded = result == FRIEND_OFFLINE ? player->GetGUID() : ObjectGuid::Empty;
+        for (auto& [guid, social] : m_socialMap)
+            if (social.HasFriend(player->GetGUID()))
+                if (Player* observer = ObjectAccessor::FindPlayer(guid))
+                {
+                    auto previous = social.m_playerSocialMap.find(player->GetGUID());
+                    bool wasOnline = previous != social.m_playerSocialMap.end() &&
+                        previous->second.Status != FRIEND_STATUS_OFFLINE;
+                    FriendInfo current;
+                    GetFriendInfo(observer, player->GetGUID(), current);
+                    social.SendSocialList(observer, SOCIAL_FLAG_ALL, excluded);
+                    if ((result == FRIEND_OFFLINE && wasOnline) ||
+                        (result == FRIEND_ONLINE && current.Status != FRIEND_STATUS_OFFLINE))
+                        observer->SendDirectMessage(&data);
+                }
+    }
+    else if (broadcast)
         BroadcastToFriendListers(player, &data);
     else
         player->SendDirectMessage(&data);

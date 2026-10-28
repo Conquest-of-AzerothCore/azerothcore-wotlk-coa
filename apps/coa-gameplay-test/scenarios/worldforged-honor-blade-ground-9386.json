@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "name": "Worldforged Honor Blade rests on the ground, not stuck midair (#9386)",
+  "contract": "The Honor Blade pickup (entry 90302, guid 6941840, item 450641) floats 1.14 yd above the terrain; the earlier open-world float-height pass only snapped rows more than 2 yd off, leaving this one midair. Restore the terrain height.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": -40.85, "y": -1411.19, "z": 92.0, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the Honor Blade stands in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 90302, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: it rests on the ground, not floating above it", "actor": "p", "metric": "spawn_ground_gap", "guid": 6941840, "spawn_type": "gameobject", "min": -0.3, "max": 0.3 },
+    { "action": "assert", "label": "it is grounded", "actor": "p", "metric": "spawn_placement", "guid": 6941840, "spawn_type": "gameobject", "tolerance": 0.8, "equals": 0 }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "name": "Worldforged Wailing Sash stands on the Chapel of Final Grace table (#9296)",
+  "contract": "Offering For the Dead (entry 517367, guid 6941315, item 521040) was pulled down to the stock terrain, 18.4 yd from the chapel table it stood on, because the chapel has no vmap collision there and every ground probe reads the table-top box as floating by design. Restore the client's own atlas sighting, 0.3 yd from the reporter's position. Do not assert spawn_ground_gap/spawn_placement here; reachability is proven by a successful Opening cast with line of sight.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": 1902.87, "y": -156.07, "z": 40.4, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the pickup stands in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 517367, "equals": 1 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 517367 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "DISCRIMINATING: it is within reach of the catalog spot and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

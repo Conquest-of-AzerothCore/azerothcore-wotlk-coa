@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "A looted Gnoll Food Barrel of Food Fit for Gnolls respawns within a minute (COA-9470)",
+  "contract": "Food Fit for Gnolls 255113 needs 8 Gnoll Food Supplies 355199, one per Gnoll Food Barrel 255062. The barrels stand in pairs at five gnoll camps, open with Opening (6478) and are consumed when looted. A looted barrel is back within a minute, so a player can finish at one camp. The camp's gnolls are kept from interrupting with Divine Shield.",
+  "timeout_ms": 150000,
+  "location": { "map": 0, "x": -9795.0, "y": -2203.0, "z": 58.6, "o": 5.5 },
+  "players": [
+    { "id": "a", "race": 1, "class": 1, "level": 25 }
+  ],
+  "creatures": [
+    { "id": "giver", "owner": "a", "entry": 255204, "distance": 4, "faction": 12, "level": 30 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "quest_accept", "actor": "a", "quest": 255113, "entry": 255204 },
+    { "action": "assert", "label": "SETUP: a is on the quest", "actor": "a", "metric": "quest_status", "quest": 255113, "equals": 3, "within_ms": 3000 },
+    { "action": "set_aura", "label": "SETUP: Divine Shield keeps the camp's gnolls from interrupting a's Opening", "actor": "a", "spell": 642, "stacks": 1 },
+    { "action": "set_phase", "actor": "a", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the nearest barrel is in sight", "actor": "a", "metric": "nearby_gameobject_at_client", "entry": 255062, "equals": 1 },
+    { "action": "cast", "actor": "a", "spell": 6478, "target_gameobject": 255062 },
+    { "action": "wait", "label": "let the 1.5 s Opening cast finish", "ms": 2500 },
+    { "action": "assert", "label": "a opens a barrel", "actor": "a", "metric": "cast_failure", "spell": 6478, "equals": 0 },
+    { "action": "loot_slot", "actor": "a", "item": 355199 },
+    { "action": "close_loot", "actor": "a" },
+    { "action": "assert", "label": "a receives the food", "actor": "a", "metric": "item_count", "item": 355199, "equals": 1 },
+    { "action": "assert", "label": "the looted barrel is gone", "actor": "a", "metric": "nearby_gameobject_at_client", "entry": 255062, "equals": 0, "within_ms": 5000 },
+    { "action": "assert", "label": "DISCRIMINATING: the barrel is back within 75 s", "actor": "a", "metric": "nearby_gameobject_at_client", "entry": 255062, "equals": 1, "within_ms": 75000 }
+  ]
+}

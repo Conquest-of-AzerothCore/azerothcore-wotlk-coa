@@ -199,7 +199,7 @@ class aura_ascension_hammer_of_life : public AuraScript
             return;
         int32 value = int32(std::min<uint64>(amount, std::numeric_limits<int32>::max()));
         GetTarget()->CastCustomSpell(SPELL_HAMMER_OF_LIFE_HEAL, SPELLVALUE_BASE_POINT0, value, GetTarget(),
-            TRIGGERED_FULL_MASK);
+            TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_DISALLOW_PROC_EVENTS));
         GetTarget()->CastCustomSpell(SPELL_HAMMER_OF_LIFE_DAMAGE, SPELLVALUE_BASE_POINT0, value, GetTarget(),
             TRIGGERED_FULL_MASK);
     }

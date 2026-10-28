@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Worldforged Ravencrest Signet stands on the ground at the Ravencrest Monument (#7796)",
+  "contract": "The Glinting Signet Stone pickup (254434, guid 6942064) spawned 0.85 yd under the ground at its own spawn XY. rev_20261028_05 sets it to the stock terrain height there.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": 2467.2, "y": -6927.4, "z": 110.6, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the signet is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 254434, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the pickup stands within a third of a yard of the ground", "actor": "p", "metric": "spawn_ground_gap", "guid": 6942064, "spawn_type": "gameobject", "min": -0.3, "max": 0.3 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 254434 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "the signet is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

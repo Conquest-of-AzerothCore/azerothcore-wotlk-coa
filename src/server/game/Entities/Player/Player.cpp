@@ -7247,6 +7247,10 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
 
     // If set ScalingStatValue armor get it or use item armor
     uint32 armor = LocalLevelScaling::WornArmorFor(this, proto, proto->Armor);
+    // A native-scaled copy's ladder row can list less armor than the template's own
+    // ArmorDamageModifier (e.g. a reborn-armor column below the modifier at a low scaling
+    // key); saturate the split so it never underflows the unsigned armor below.
+    uint32 armorDamageModifierBonus = uint32(std::max(proto->ArmorDamageModifier, 0.0f));
     if (ssv)
     {
         if (uint32 ssvarmor = ssv->getArmorMod(ScalingStatValue))
@@ -7254,7 +7258,10 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
                 armor = ssvarmor;
     }
     else if (armor && proto->ArmorDamageModifier)
-        armor -= uint32(proto->ArmorDamageModifier);
+    {
+        armorDamageModifierBonus = std::min(armor, uint32(proto->ArmorDamageModifier));
+        armor -= armorDamageModifierBonus;
+    }
 
     if (armor)
     {
@@ -7281,7 +7288,7 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
 
     // Add armor bonus from ArmorDamageModifier if > 0
     if (proto->ArmorDamageModifier > 0 && sScriptMgr->OnPlayerCanArmorDamageModifier(this))
-        HandleStatFlatModifier(UNIT_MOD_ARMOR, TOTAL_VALUE, float(proto->ArmorDamageModifier), apply);
+        HandleStatFlatModifier(UNIT_MOD_ARMOR, TOTAL_VALUE, float(armorDamageModifierBonus), apply);
 
     if (proto->Block)
         HandleBaseModFlatValue(SHIELD_BLOCK_VALUE, float(proto->Block), apply);

@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "name": "Worldforged Thunderwalk Breastplate rests on the ground in Mulgore (#9166)",
+  "contract": "Pickup template 1345152 (item 521064, guid 6942324) stands at the realm-map marker XY in Mulgore, 1.38 yd under the terrain there (gap -1.383). Restore its stored height to the terrain, 5.7 yd from the LootCollector pin for item 521064.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": -995.4, "y": -576.5, "z": -54.0, "o": 0 },
+  "players": [ { "id": "p", "race": 2, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the Thunderwalk Breastplate stands in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 1345152, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: it rests on the ground, not sunk into it", "actor": "p", "metric": "spawn_ground_gap", "guid": 6942324, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 },
+    { "action": "assert", "label": "it is grounded", "actor": "p", "metric": "spawn_placement", "guid": 6942324, "spawn_type": "gameobject", "tolerance": 1, "equals": 0 }
+  ]
+}

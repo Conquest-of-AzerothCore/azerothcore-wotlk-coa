@@ -86,6 +86,16 @@ bool HasItemEnchantTemplate(int32 entry)
     return RandomItemEnch.find(entry) != RandomItemEnch.end();
 }
 
+std::vector<uint32> GetItemEnchantModChoices(int32 entry)
+{
+    std::vector<uint32> choices;
+    EnchantmentStore::const_iterator tab = RandomItemEnch.find(entry);
+    if (tab != RandomItemEnch.end())
+        for (EnchStoreItem const& choice : tab->second)
+            choices.push_back(choice.ench);
+    return choices;
+}
+
 uint32 GetItemEnchantMod(int32 entry)
 {
     if (!entry)

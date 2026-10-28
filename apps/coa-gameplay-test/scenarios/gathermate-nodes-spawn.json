@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Gathering nodes from Ascension GatherMate2 data spawn where the addon recorded them",
+  "contract": "rev_20261027_60_coa_gathermate_nodes places herb, ore, tree and fishing nodes at the Ascension GatherMate2 positions, converted to world coordinates and server heights, in spot pools (one node per spot) grouped by 200 yd area with about a third of the spots active. A lone Silverleaf 1617 spot in Westfall (spawn 12001165, spot pool 20001166, the only spot of area pool 20001165) is always active, so it is spawned on the map once a player is there.",
+  "timeout_ms": 300000,
+  "location": {
+    "map": 0,
+    "x": -11201.08,
+    "y": 1329.48,
+    "z": 89.25,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "the Silverleaf spot from the addon data is spawned",
+      "actor": "p",
+      "metric": "spawn_active",
+      "spawn": 12001165,
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

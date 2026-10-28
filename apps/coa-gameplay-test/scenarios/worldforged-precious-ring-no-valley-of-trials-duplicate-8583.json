@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Worldforged Precious Ring has no duplicate standing in the Valley of Trials",
+  "contract": "Issue #8583: a player found the Worldforged Precious Ring (item 515383, object 95934) repeated nearby in the Valley of Trials (Durotar), near (-420.158, -4307.51, 43.9616) map 1. The restoration once placed two live copies of this object a few yards apart there: guid 6930084 at (-423, -4303.17) and guid 6942006 at (-424.5, -4299.4). Rev_20261024_90 (fix for #8904) already removed the 6942006 copy as a misplaced spawn, since the item's only recorded spot is Un'Goro Crater. This case checks the other historical duplicate spot (6930084) independently: no live copy of object 95934 stands at either position today.",
+  "timeout_ms": 30000,
+  "location": { "map": 1, "x": -423.0, "y": -4303.17, "z": 44.332, "o": 0 },
+  "players": [
+    { "id": "p", "race": 2, "class": 12, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "no Precious Ring copy at the 6930084 spot", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95934, "equals": 0 },
+
+    { "action": "teleport", "actor": "p", "map": 1, "x": -424.5, "y": -4299.4, "z": 44.8, "o": 0 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "no Precious Ring copy at the 6942006 spot", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95934, "equals": 0 }
+  ]
+}

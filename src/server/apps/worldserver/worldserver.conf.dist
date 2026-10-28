@@ -5118,3 +5118,11 @@ Cluster.IsCrossrealm=0
 # CLUSTER SETTINGS END                                                                            #
 #                                                                                                 #
 ###################################################################################################
+
+# Social.AccountWideFriends
+# Share friends/notes across owner characters and follow the friend's current character.
+# Requires the Ascension client friend-metadata protocol. Not for stock 3.3.5 clients.
+# Existing character friendships are imported once per account on first use after enabling.
+# Conflicting notes or more than 50 friend accounts require administrator reconciliation.
+# Ignore lists remain character-specific. Restart required; default disabled.
+Social.AccountWideFriends = 0
