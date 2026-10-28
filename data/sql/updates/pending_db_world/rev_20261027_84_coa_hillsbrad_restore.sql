@@ -128,7 +128,7 @@ VALUES
 (312436, 0, 0, 0, 0, 0, 'Captive Mage', NULL, NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.128, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
 (312438, 0, 0, 0, 0, 0, 'Captive Warlock', NULL, NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.128, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
 (312412, 0, 0, 0, 0, 0, 'Fresh Corpse', NULL, NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.128, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
-(312432, 0, 0, 0, 0, 0, 'Dead Body Prop', NULL, NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.128, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
+(312432, 0, 0, 0, 0, 0, 'Dead Body Prop', NULL, NULL, 0, 30, 30, 0, 35, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 33554944, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.128, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
 (512390, 0, 0, 0, 0, 0, 'Forsaken Captive', NULL, NULL, 0, 29, 29, 0, 14, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.072, 1, 1, 1, 0, 999, 1, 0, 0, '', 0),
 (512442, 0, 0, 0, 0, 0, 'Cow', NULL, NULL, 0, 5, 5, 0, 190, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 0, 2048, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 0.0112, 1, 1, 1, 0, 999, 1, 0, 0, '', 0),
 (255529, 0, 0, 0, 0, 0, 'Forsaken Raider', NULL, NULL, 0, 31, 31, 0, 14, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 0, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 0.5, 1, 1, 1, 0, 999, 1, 0, 0, '', 0),
@@ -356,7 +356,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (9950717, 312439, 0, 0, 0, 1, 1, 0, 44.1, -907.2, 96.8, 0.19, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Magister Morninglare (client SuperTrack point; facing estimated)'),
 (9950718, 312402, 0, 0, 0, 1, 1, 0, 27.9, -911.3, 62.4, 5.34, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Bergamont Lestern (client SuperTrack turn-in point of 1377; facing estimated)'),
 (9950719, 312406, 0, 0, 0, 1, 1, 0, 26.0, -931.7, 88.1, 0.54, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Shadowmage Krenna (client SuperTrack point; facing estimated)'),
-(9950720, 312405, 0, 0, 0, 1, 1, 0, 32.7, -906.5, 72.7, 0.17, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Shadowmage Vorman (client SuperTrack point; facing estimated)'),
+(9950720, 312405, 0, 0, 0, 1, 1, 0, 31.5, -905.5, 72.7, 0.17, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Shadowmage Vorman (client SuperTrack point moved 1.5 yd clear of the wall; facing estimated)'),
 (9950721, 312506, 0, 0, 0, 1, 1, 0, 33.6, -814.8, 87.9, 6.14, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Farlang Woodmarg (client SuperTrack point; facing estimated)'),
 (9950722, 312505, 0, 0, 0, 1, 1, 0, -91.8, -811.5, 57.9, 5.77, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Surgeon Batharis (client SuperTrack point; facing estimated)'),
 (9950723, 312503, 0, 0, 0, 1, 1, 0, -90.7, -807.5, 57.67, 5.77, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Glutton (4 yd left of Surgeon Batharis; spot, z terrain and facing estimated)'),
@@ -408,9 +408,9 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (9950769, 2347, 0, 0, 0, 1, 1, 0, -341.9, -1572.1, 79.89, 2.86, 300, 5, 0, 0, 0, 1, 0, 0, 0, '', 0, 0, 'Wild Gryphon (Wild Gryphon nest of quest 1344; spot, z terrain and facing estimated)'),
 (9950770, 312401, 0, 0, 0, 1, 1, 0, 36.0, -915.5, 62.4, 5.73, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Shadowmage Jenthorne (Tarren Mill tower floor where the live video shows the Forsaken mages; spot and facing estimated)'),
 (9950771, 312400, 0, 0, 0, 1, 1, 0, 30.5, -922.0, 62.4, 3.14, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Shadowmage Warren (Tarren Mill tower floor where the live video shows the Forsaken mages; spot and facing estimated)'),
-(9950772, 312404, 0, 0, 0, 1, 1, 0, 30.0, -904.0, 72.7, 4.62, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Shadowmage Thravian (Tarren Mill tower floor where the live video shows the Forsaken mages; spot and facing estimated)'),
-(9950773, 312407, 0, 0, 0, 1, 1, 0, 28.0, -908.0, 72.7, 4.99, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Shadowmage Whitford (Tarren Mill tower floor where the live video shows the Forsaken mages; spot and facing estimated)'),
-(9950774, 312408, 0, 0, 0, 1, 1, 0, 26.5, -904.5, 72.7, 4.62, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Shadowmage Louvre (Tarren Mill tower floor where the live video shows the Forsaken mages; spot and facing estimated)'),
+(9950772, 312404, 0, 0, 0, 1, 1, 0, 32.0, -911.0, 72.9, 5.36, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Shadowmage Thravian (Tarren Mill tower floor where the live video shows the Forsaken mages; spot and facing estimated)'),
+(9950773, 312407, 0, 0, 0, 1, 1, 0, 33.0, -915.5, 73.0, 0.56, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Shadowmage Whitford (Tarren Mill tower floor where the live video shows the Forsaken mages; spot and facing estimated)'),
+(9950774, 312408, 0, 0, 0, 1, 1, 0, 34.0, -921.5, 73.2, 1.3, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Shadowmage Louvre (Tarren Mill tower floor where the live video shows the Forsaken mages; spot and facing estimated)'),
 (9950775, 312403, 0, 0, 0, 1, 1, 0, 21.0, -918.0, 88.0, 0.92, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Soulbound Captive (Tarren Mill tower floor where the live video shows the Forsaken mages; spot and facing estimated)'),
 (9950776, 312403, 0, 0, 0, 1, 1, 0, 21.5, -927.5, 88.1, 0.92, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Soulbound Captive (Tarren Mill tower floor where the live video shows the Forsaken mages; spot and facing estimated)'),
 (9950777, 312403, 0, 0, 0, 1, 1, 0, 30.0, -929.5, 88.0, 4.25, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Soulbound Captive (Tarren Mill tower floor where the live video shows the Forsaken mages; spot and facing estimated)'),
@@ -438,25 +438,25 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (9950799, 512390, 0, 0, 0, 1, 1, 0, -743.0, -655.0, 40.5, 5.07, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Forsaken Captive (barracks'' upper floor as in the live video; live video; spot and facing estimated)'),
 (9950800, 312417, 0, 0, 0, 1, 1, 0, 15.0, -943.0, 56.4, 2.52, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Barnaby Gutsby (behind the Tarren Mill inn''s ground-floor counter: SUB creature_spawn 63, 18 of the 2026-10-04 dump and the live video; facing estimated)'),
 (9950801, 312519, 0, 0, 0, 1, 1, 0, -41.5, -936.0, 54.32, 2.06, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Victoria Rotlimb (live video; spot, z terrain and facing estimated)'),
-(9950802, 312396, 0, 0, 0, 1, 1, 0, -64.0, -888.0, 56.46, 4.56, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Tielle Sunbloom (live video; spot, z terrain and facing estimated)'),
+(9950802, 312396, 0, 0, 0, 1, 1, 0, -64.0, -887.5, 56.49, 4.56, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Tielle Sunbloom (live video; spot, z terrain and facing estimated)'),
 (9950803, 312395, 0, 0, 0, 1, 1, 0, -66.5, -884.5, 56.76, 3.45, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Virena Sunbloom (live video; spot, z terrain and facing estimated)'),
-(9950804, 12343, 0, 0, 0, 1, 1, 0, -69.0, -893.0, 56.19, 0.94, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Red Skeletal Horse (live video; spot, z terrain and facing estimated)'),
-(9950805, 12342, 0, 0, 0, 1, 1, 0, -66.0, -897.0, 55.94, 1.68, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Brown Skeletal Horse (live video; spot, z terrain and facing estimated)'),
+(9950804, 12343, 0, 0, 0, 1, 1, 0, -67.0, -894.5, 56.16, 1.68, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Red Skeletal Horse (live video; spot, z terrain and facing estimated)'),
+(9950805, 12342, 0, 0, 0, 1, 1, 0, -66.0, -897.5, 55.86, 1.68, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Brown Skeletal Horse (live video; spot, z terrain and facing estimated)'),
 (9950806, 312413, 0, 0, 0, 1, 1, 0, -23.0, -982.0, 55.92, 0.9, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Groundskeeper Hestern (live video; spot, z terrain and facing estimated)'),
 (9950807, 312412, 0, 0, 0, 1, 1, 0, -16.0, -984.0, 56.37, 3.12, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Fresh Corpse (live video; spot, z terrain and facing estimated)'),
 (9950808, 312412, 0, 0, 0, 1, 1, 0, -24.0, -990.0, 56.24, 0.16, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Fresh Corpse (live video; spot, z terrain and facing estimated)'),
 (9950809, 312412, 0, 0, 0, 1, 1, 0, -18.0, -992.0, 56.11, 2.38, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Fresh Corpse (live video; spot, z terrain and facing estimated)'),
-(9950810, 312394, 0, 0, 0, 1, 1, 0, 46.0, -888.0, 58.91, 0.56, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Libelria Featherstride (live video; spot, z terrain and facing estimated)'),
+(9950810, 312394, 0, 0, 0, 1, 1, 0, 45.5, -889.5, 58.88, 0.19, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Libelria Featherstride (live video; spot, z terrain and facing estimated)'),
 (9950811, 312398, 0, 0, 0, 1, 1, 0, 50.0, -893.0, 59.62, 3.52, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Welthin Dawnfellow (live video; spot, z terrain and facing estimated)'),
-(9950812, 312399, 0, 0, 0, 1, 1, 0, 41.0, -894.0, 58.74, 0.56, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Groundskeeper Hirayn (live video; spot, z terrain and facing estimated)'),
+(9950812, 312399, 0, 0, 0, 1, 1, 0, 40.0, -895.5, 58.73, 0.19, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Groundskeeper Hirayn (live video; spot, z terrain and facing estimated)'),
 (9950813, 312452, 0, 0, 0, 1, 1, 0, -80.0, -930.0, 55.81, 0.52, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Magistrate Gallows (Ascension WDB creature without a captured spawn; spot, z terrain and facing estimated)'),
 (9950814, 312518, 0, 0, 0, 1, 1, 0, -36.0, -924.0, 54.91, 3.54, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Jak''zul Zanzabar (Ascension WDB creature without a captured spawn; spot, z terrain and facing estimated)'),
 (9950815, 312527, 0, 0, 0, 1, 1, 0, -40.0, -919.0, 55.04, 5.39, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Sy''rila (Ascension WDB creature without a captured spawn; spot, z terrain and facing estimated)'),
-(9950816, 312496, 0, 0, 0, 1, 1, 0, -58.0, -962.0, 54.49, 6.1, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Ollie Witherfield (Ascension WDB creature without a captured spawn; spot, z terrain and facing estimated)'),
-(9950817, 312525, 0, 0, 0, 1, 1, 0, -68.0, -978.0, 55.79, 0.57, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Silester the Enchanting (Ascension WDB creature without a captured spawn; spot, z terrain and facing estimated)'),
+(9950816, 312496, 0, 0, 0, 1, 1, 0, -57.0, -960.5, 54.49, 0.19, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Ollie Witherfield (Ascension WDB creature without a captured spawn; spot, z terrain and facing estimated)'),
+(9950817, 312525, 0, 0, 0, 1, 1, 0, -67.5, -978.0, 55.76, 0.94, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Silester the Enchanting (Ascension WDB creature without a captured spawn; spot, z terrain and facing estimated)'),
 (9950818, 312520, 0, 0, 0, 1, 1, 0, -66.0, -916.0, 55.8, 5.74, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Marghoof the Broad (Ascension WDB creature without a captured spawn; spot, z terrain and facing estimated)'),
-(9950819, 312526, 0, 0, 0, 1, 1, 0, -70.0, -912.0, 55.59, 0.2, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Conga Dawnhoof (Ascension WDB creature without a captured spawn; spot, z terrain and facing estimated)'),
-(9950820, 312521, 0, 0, 0, 1, 1, 0, -30.0, -968.0, 54.6, 0.59, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Jenna Cher (Ascension WDB creature without a captured spawn; spot, z terrain and facing estimated)'),
+(9950819, 312526, 0, 0, 0, 1, 1, 0, -69.5, -913.0, 55.67, 0.57, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Conga Dawnhoof (Ascension WDB creature without a captured spawn; spot, z terrain and facing estimated)'),
+(9950820, 312521, 0, 0, 0, 1, 1, 0, -29.5, -968.0, 54.64, 0.96, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Jenna Cher (Ascension WDB creature without a captured spawn; spot, z terrain and facing estimated)'),
 (9950821, 312528, 0, 0, 0, 1, 1, 0, -12.0, -880.0, 58.97, 3.56, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'William Grenn (Ascension WDB creature without a captured spawn; spot, z terrain and facing estimated)'),
 (9950822, 312509, 0, 0, 0, 1, 1, 0, -56.0, -906.0, 55.74, 5.37, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Melania Vale (Ascension WDB creature without a captured spawn; spot, z terrain and facing estimated)'),
 (9950823, 312507, 0, 0, 0, 1, 1, 0, 5.0, -868.0, 57.77, 2.08, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Bat Groundskeeper (Ascension WDB creature without a captured spawn; spot, z terrain and facing estimated)'),
@@ -526,22 +526,28 @@ INSERT INTO `creature_default_trainer` (`CreatureId`, `TrainerId`) VALUES
 (512386, 83);
 
 -- Stock Tarren Mill and Southshore spawns that float or sink: z follows the floor under them (vmap floors of the
--- inn, chapel and houses), and Tallow moves up to the inn's upper floor as in the live video.
+-- inn, chapel and houses), Tallow moves up to the inn's upper floor as in the live video, and spawns standing in a
+-- wall, doorway or tree (vmap ray test) move to the nearest open spot; spots estimated.
 UPDATE `creature` SET `position_z` = 63.3 WHERE `guid` = 14853;
 UPDATE `creature` SET `position_z` = 63.3 WHERE `guid` = 14854;
 UPDATE `creature` SET `position_z` = 55.8 WHERE `guid` = 15284;
+UPDATE `creature` SET `position_x` = -49.4, `position_y` = -970.4, `position_z` = 56.9 WHERE `guid` = 15285;
 UPDATE `creature` SET `position_z` = 55.8 WHERE `guid` = 15287;
+UPDATE `creature` SET `position_x` = -22.0, `position_y` = -958.0, `position_z` = 55.4 WHERE `guid` = 15289;
 UPDATE `creature` SET `position_z` = 56.4 WHERE `guid` = 15292;
-UPDATE `creature` SET `position_z` = 55.6 WHERE `guid` = 15293;
-UPDATE `creature` SET `position_z` = 57.8 WHERE `guid` = 15306;
-UPDATE `creature` SET `position_z` = 54.3 WHERE `guid` = 15531;
-UPDATE `creature` SET `position_x` = 16.0, `position_y` = -943.0, `position_z` = 63.3 WHERE `guid` = 15534;
-UPDATE `creature` SET `position_z` = 63.3 WHERE `guid` = 15891;
-UPDATE `creature` SET `position_z` = 63.3 WHERE `guid` = 15892;
-UPDATE `creature` SET `position_z` = 63.3 WHERE `guid` = 15893;
+UPDATE `creature` SET `position_x` = -9.3, `position_y` = -902.0, `position_z` = 57.5 WHERE `guid` = 15293;
+UPDATE `creature` SET `position_x` = -75.6, `position_y` = -979.7, `position_z` = 57.7 WHERE `guid` = 15306;
+UPDATE `creature` SET `position_x` = 20.4, `position_y` = -879.1, `position_z` = 58.3443 WHERE `guid` = 15355;
+UPDATE `creature` SET `position_x` = -24.8, `position_y` = -934.7, `position_z` = 55.6 WHERE `guid` = 15525;
+UPDATE `creature` SET `position_x` = -42.0, `position_y` = -937.5, `position_z` = 54.9 WHERE `guid` = 15529;
+UPDATE `creature` SET `position_x` = -64.0, `position_y` = -891.5, `position_z` = 54.3 WHERE `guid` = 15531;
+UPDATE `creature` SET `position_x` = 16.5, `position_y` = -943.5, `position_z` = 63.3 WHERE `guid` = 15534;
+UPDATE `creature` SET `position_x` = -0.6, `position_y` = -946.5, `position_z` = 63.3 WHERE `guid` = 15891;
+UPDATE `creature` SET `position_x` = -8.1, `position_y` = -944.3, `position_z` = 63.3 WHERE `guid` = 15892;
+UPDATE `creature` SET `position_x` = -0.7, `position_y` = -938.0, `position_z` = 63.3 WHERE `guid` = 15893;
 UPDATE `creature` SET `position_z` = 15.5 WHERE `guid` = 15937;
 UPDATE `creature` SET `position_z` = 56.4 WHERE `guid` = 89389;
-UPDATE `creature` SET `position_z` = 56.4 WHERE `guid` = 89390;
+UPDATE `creature` SET `position_x` = -10.0, `position_y` = -932.6, `position_z` = 56.4 WHERE `guid` = 89390;
 UPDATE `creature` SET `position_z` = 58.2 WHERE `guid` = 94659;
 
 -- Quest objects: WDB gameobjectcache captures up to 2026-09-05.
