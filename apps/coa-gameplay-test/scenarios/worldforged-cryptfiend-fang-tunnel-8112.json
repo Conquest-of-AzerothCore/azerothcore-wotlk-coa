@@ -9,6 +9,8 @@
     { "action": "set_phase", "actor": "p", "value": 1 },
     { "action": "wait", "ms": 3000 },
     { "action": "assert", "label": "SETUP: the Cryptfiend Fang pickup is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 1345027, "equals": 1 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
     { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 1345027 },
     { "action": "wait", "ms": 5500 },
     { "action": "assert", "label": "the Cryptfiend Fang is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
