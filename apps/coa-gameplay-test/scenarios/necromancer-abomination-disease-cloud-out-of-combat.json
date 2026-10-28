@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "name": "Necromancer: the Abomination's Disease Cloud pulses only in combat",
+  "name": "Necromancer: an idle Abomination's Disease Cloud spares neutral and invisible creatures",
   "contract": [
     "Raise: Abomination 500335 summons creature 50068. Its AI self-casts Disease Cloud 802353 every 3 s (SCHOOL_DAMAGE, TARGET_UNIT_SRC_AREA_ENEMY, 10 yd radius). AzerothCore lets area spells hit invisible units, so an idle Abomination damaged nearby neutral and invisible creatures such as the Lordaeron Citizen spirits (3617, Greater Invisibility 34426) and dragged them and the necromancer into a fight the Abomination could not answer.",
     "With a Lordaeron Citizen (template faction 7) and a passive golem within 10 yd, an idle Abomination must deal no Disease Cloud damage and the necromancer must stay out of combat through three pulse windows. Before the repair the cloud hits both fixtures and puts the necromancer in combat.",
