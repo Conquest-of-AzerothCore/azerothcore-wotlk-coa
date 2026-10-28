@@ -1,0 +1,1363 @@
+{
+  "schema": 1,
+  "name": "Hillsbrad Horde quests restored from Ascension can be taken, completed and rewarded",
+  "contract": "rev_20261027_84_coa_hillsbrad_restore.sql restores the Hillsbrad Foothills quests the server lacked, from the Ascension questcache.wdb captures and the client QuestSuperTrack data. This case covers the 25 quests of Tarren Mill and the Shadow Tower: each is taken natively from its giver, in chain order so every PrevQuestID gate applies, its objectives are fixture-completed (objective items are granted, kill and event credit is set), and it is handed in natively at its ender, which must reward it. For Want of Mana 255128 is given by Priestess Mar'lynn Evermorne 312429 and ends at Asteria the Soulcleaver 312428, and In Fear of Death 1377 ends at Bergamont Lestern 312402 (its CompletedText); each is first offered to the wrong NPC, which must not reward it. A Report for the Dark Lady 255136 has no giver until the Silverpine Blighthollow chain is restored, so it is carried as a fixture and handed in at Apothecary Lydon 2216.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -6.6,
+    "y": -899.4,
+    "z": 57.63,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 5,
+      "class": 1,
+      "level": 40
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "summon",
+      "label": "High Executor Darthalia stands beside the player",
+      "actor": "p",
+      "as": "n2215",
+      "entry": 2215,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Apothecary Lydon stands beside the player",
+      "actor": "p",
+      "as": "n2216",
+      "entry": 2216,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Derak Nightfall stands beside the player",
+      "actor": "p",
+      "as": "n2397",
+      "entry": 2397,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Monika Sengutz stands beside the player",
+      "actor": "p",
+      "as": "n3982",
+      "entry": 3982,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Salazar Bloch stands beside the player",
+      "actor": "p",
+      "as": "n4581",
+      "entry": 4581,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Cirenia Phoenixfell stands beside the player",
+      "actor": "p",
+      "as": "n312397",
+      "entry": 312397,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Bergamont Lestern stands beside the player",
+      "actor": "p",
+      "as": "n312402",
+      "entry": 312402,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Cleric Abigail stands beside the player",
+      "actor": "p",
+      "as": "n312414",
+      "entry": 312414,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Asteria the Soulcleaver stands beside the player",
+      "actor": "p",
+      "as": "n312428",
+      "entry": 312428,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Priestess Mar'lynn Evermorne stands beside the player",
+      "actor": "p",
+      "as": "n312429",
+      "entry": 312429,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Shadowmage Greenfield stands beside the player",
+      "actor": "p",
+      "as": "n312443",
+      "entry": 312443,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Surgeon Batharis stands beside the player",
+      "actor": "p",
+      "as": "n312505",
+      "entry": 312505,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Farlang Woodmarg stands beside the player",
+      "actor": "p",
+      "as": "n312506",
+      "entry": 312506,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Venesra Evermorne stands beside the player",
+      "actor": "p",
+      "as": "n312513",
+      "entry": 312513,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Rak'til stands beside the player",
+      "actor": "p",
+      "as": "n312517",
+      "entry": 312517,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Juliette Livingston stands beside the player",
+      "actor": "p",
+      "as": "n991521",
+      "entry": 991521,
+      "distance": 3
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: a 16-slot bag for the rewards",
+      "actor": "p",
+      "item": 4500
+    },
+    {
+      "action": "equip",
+      "label": "fixture: wear the bag",
+      "actor": "p",
+      "item": 4500,
+      "slot": 19
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1344 'Terrifying Beasts' from Rak'til",
+      "actor": "p",
+      "quest": 1344,
+      "entry": 312517
+    },
+    {
+      "action": "assert",
+      "label": "1344 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1344,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 1344's kill, use or event objectives",
+      "actor": "p",
+      "quest": 1344
+    },
+    {
+      "action": "assert",
+      "label": "1344 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1344,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1344,
+      "reward": 0,
+      "label": "hand 1344 in at Rak'til",
+      "entry": 312517
+    },
+    {
+      "action": "assert",
+      "label": "1344 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1344,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1347 'Rotten Inside and Out' from Venesra Evermorne",
+      "actor": "p",
+      "quest": 1347,
+      "entry": 312513
+    },
+    {
+      "action": "assert",
+      "label": "1347 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1347,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: the 8 objective item(s) 509",
+      "actor": "p",
+      "item": 509,
+      "count": 8
+    },
+    {
+      "action": "assert",
+      "label": "1347 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1347,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1347,
+      "reward": 0,
+      "label": "hand 1347 in at Venesra Evermorne",
+      "entry": 312513
+    },
+    {
+      "action": "assert",
+      "label": "1347 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1347,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1349 'Continuing Complaints' from Venesra Evermorne",
+      "actor": "p",
+      "quest": 1349,
+      "entry": 312513
+    },
+    {
+      "action": "assert",
+      "label": "1349 is in the log and already complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1349,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "1349 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1349,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1349,
+      "reward": 0,
+      "label": "hand 1349 in at Cirenia Phoenixfell",
+      "entry": 312397
+    },
+    {
+      "action": "assert",
+      "label": "1349 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1349,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1350 'A Burning Desire' from Cirenia Phoenixfell",
+      "actor": "p",
+      "quest": 1350,
+      "entry": 312397
+    },
+    {
+      "action": "assert",
+      "label": "1350 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1350,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: the 8 objective item(s) 1305",
+      "actor": "p",
+      "item": 1305,
+      "count": 8
+    },
+    {
+      "action": "assert",
+      "label": "1350 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1350,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1350,
+      "reward": 0,
+      "label": "hand 1350 in at Derak Nightfall",
+      "entry": 2397
+    },
+    {
+      "action": "assert",
+      "label": "1350 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1350,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1353 'What the Dead Remember' from High Executor Darthalia",
+      "actor": "p",
+      "quest": 1353,
+      "entry": 2215
+    },
+    {
+      "action": "assert",
+      "label": "1353 is in the log and already complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1353,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "1353 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1353,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1353,
+      "reward": 0,
+      "label": "hand 1353 in at Juliette Livingston",
+      "entry": 991521
+    },
+    {
+      "action": "assert",
+      "label": "1353 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1353,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1354 'The Pains of Healing' from Cleric Abigail",
+      "actor": "p",
+      "quest": 1354,
+      "entry": 312414
+    },
+    {
+      "action": "assert",
+      "label": "1354 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1354,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: the 3 objective item(s) 510",
+      "actor": "p",
+      "item": 510,
+      "count": 3
+    },
+    {
+      "action": "assert",
+      "label": "1354 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1354,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1354,
+      "reward": 0,
+      "label": "hand 1354 in at Cleric Abigail",
+      "entry": 312414
+    },
+    {
+      "action": "assert",
+      "label": "1354 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1354,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1357 'A Gift of Silver' from Juliette Livingston",
+      "actor": "p",
+      "quest": 1357,
+      "entry": 991521
+    },
+    {
+      "action": "assert",
+      "label": "1357 is in the log and already complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1357,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "1357 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1357,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1357,
+      "reward": 0,
+      "label": "hand 1357 in at Juliette Livingston",
+      "entry": 991521
+    },
+    {
+      "action": "assert",
+      "label": "1357 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1357,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1400 'A Letter for Romeno' from Juliette Livingston",
+      "actor": "p",
+      "quest": 1400,
+      "entry": 991521
+    },
+    {
+      "action": "assert",
+      "label": "1400 is in the log and already complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1400,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "1400 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1400,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "summon_gameobject",
+      "label": "the Hidden Altar 1000027",
+      "actor": "p",
+      "entry": 1000027
+    },
+    {
+      "action": "wait",
+      "label": "let the altar become ready",
+      "ms": 1000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1400,
+      "reward": 0,
+      "label": "hand 1400 in at the Hidden Altar",
+      "gameobject": 1000027
+    },
+    {
+      "action": "assert",
+      "label": "1400 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1400,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1401 'A Final Mercy' from Juliette Livingston",
+      "actor": "p",
+      "quest": 1401,
+      "entry": 991521
+    },
+    {
+      "action": "assert",
+      "label": "1401 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1401,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 1401's kill, use or event objectives",
+      "actor": "p",
+      "quest": 1401
+    },
+    {
+      "action": "assert",
+      "label": "1401 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1401,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1401,
+      "reward": 0,
+      "label": "hand 1401 in at Juliette Livingston",
+      "entry": 991521
+    },
+    {
+      "action": "assert",
+      "label": "1401 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1401,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255118 'Water Fit For the Living' from Monika Sengutz",
+      "actor": "p",
+      "quest": 255118,
+      "entry": 3982
+    },
+    {
+      "action": "assert",
+      "label": "255118 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255118,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: the 1 objective item(s) 355206",
+      "actor": "p",
+      "item": 355206,
+      "count": 1
+    },
+    {
+      "action": "assert",
+      "label": "255118 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255118,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255118,
+      "reward": 0,
+      "label": "hand 255118 in at Monika Sengutz",
+      "entry": 3982
+    },
+    {
+      "action": "assert",
+      "label": "255118 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255118,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255119 'Water Fit for the Dead' from Monika Sengutz",
+      "actor": "p",
+      "quest": 255119,
+      "entry": 3982
+    },
+    {
+      "action": "assert",
+      "label": "255119 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255119,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: the 1 objective item(s) 355207",
+      "actor": "p",
+      "item": 355207,
+      "count": 1
+    },
+    {
+      "action": "assert",
+      "label": "255119 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255119,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255119,
+      "reward": 0,
+      "label": "hand 255119 in at Monika Sengutz",
+      "entry": 3982
+    },
+    {
+      "action": "assert",
+      "label": "255119 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255119,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255120 'Water Fit for the Insane' from Monika Sengutz",
+      "actor": "p",
+      "quest": 255120,
+      "entry": 3982
+    },
+    {
+      "action": "assert",
+      "label": "255120 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255120,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: the 1 objective item(s) 355208",
+      "actor": "p",
+      "item": 355208,
+      "count": 1
+    },
+    {
+      "action": "assert",
+      "label": "255120 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255120,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255120,
+      "reward": 0,
+      "label": "hand 255120 in at Monika Sengutz",
+      "entry": 3982
+    },
+    {
+      "action": "assert",
+      "label": "255120 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255120,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255121 'A Tasty Revenge' from Derak Nightfall",
+      "actor": "p",
+      "quest": 255121,
+      "entry": 2397
+    },
+    {
+      "action": "assert",
+      "label": "255121 is in the log and already complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255121,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "255121 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255121,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255121,
+      "reward": 0,
+      "label": "hand 255121 in at Venesra Evermorne",
+      "entry": 312513
+    },
+    {
+      "action": "assert",
+      "label": "255121 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255121,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255122 'Long Forgotten History' from Rak'til",
+      "actor": "p",
+      "quest": 255122,
+      "entry": 312517
+    },
+    {
+      "action": "assert",
+      "label": "255122 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255122,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: the 5 objective item(s) 355203",
+      "actor": "p",
+      "item": 355203,
+      "count": 5
+    },
+    {
+      "action": "assert",
+      "label": "255122 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255122,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255122,
+      "reward": 0,
+      "label": "hand 255122 in at Rak'til",
+      "entry": 312517
+    },
+    {
+      "action": "assert",
+      "label": "255122 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255122,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255123 'Exotic Tastes' from Farlang Woodmarg",
+      "actor": "p",
+      "quest": 255123,
+      "entry": 312506
+    },
+    {
+      "action": "assert",
+      "label": "255123 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255123,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: the 10 objective item(s) 355214",
+      "actor": "p",
+      "item": 355214,
+      "count": 10
+    },
+    {
+      "action": "assert",
+      "label": "255123 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255123,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255123,
+      "reward": 0,
+      "label": "hand 255123 in at Farlang Woodmarg",
+      "entry": 312506
+    },
+    {
+      "action": "assert",
+      "label": "255123 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255123,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255124 'Glutton's Gluttony' from Surgeon Batharis",
+      "actor": "p",
+      "quest": 255124,
+      "entry": 312505
+    },
+    {
+      "action": "assert",
+      "label": "255124 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255124,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 255124's kill, use or event objectives",
+      "actor": "p",
+      "quest": 255124
+    },
+    {
+      "action": "assert",
+      "label": "255124 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255124,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255124,
+      "reward": 0,
+      "label": "hand 255124 in at Surgeon Batharis",
+      "entry": 312505
+    },
+    {
+      "action": "assert",
+      "label": "255124 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255124,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255125 'Gorger's Gorging' from Surgeon Batharis",
+      "actor": "p",
+      "quest": 255125,
+      "entry": 312505
+    },
+    {
+      "action": "assert",
+      "label": "255125 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255125,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 255125's kill, use or event objectives",
+      "actor": "p",
+      "quest": 255125
+    },
+    {
+      "action": "assert",
+      "label": "255125 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255125,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255125,
+      "reward": 0,
+      "label": "hand 255125 in at Surgeon Batharis",
+      "entry": 312505
+    },
+    {
+      "action": "assert",
+      "label": "255125 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255125,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255126 'Curiosity Kills' from Shadowmage Greenfield",
+      "actor": "p",
+      "quest": 255126,
+      "entry": 312443
+    },
+    {
+      "action": "assert",
+      "label": "255126 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255126,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 255126's kill, use or event objectives",
+      "actor": "p",
+      "quest": 255126
+    },
+    {
+      "action": "assert",
+      "label": "255126 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255126,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255126,
+      "reward": 0,
+      "label": "hand 255126 in at Shadowmage Greenfield",
+      "entry": 312443
+    },
+    {
+      "action": "assert",
+      "label": "255126 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255126,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1376 'The Shadow Tower' from Shadowmage Greenfield",
+      "actor": "p",
+      "quest": 1376,
+      "entry": 312443
+    },
+    {
+      "action": "assert",
+      "label": "1376 is in the log and already complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1376,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "1376 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1376,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1376,
+      "reward": 0,
+      "label": "hand 1376 in at Asteria the Soulcleaver",
+      "entry": 312428
+    },
+    {
+      "action": "assert",
+      "label": "1376 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1376,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1377 'In Fear of Death' from Asteria the Soulcleaver",
+      "actor": "p",
+      "quest": 1377,
+      "entry": 312428
+    },
+    {
+      "action": "assert",
+      "label": "1377 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1377,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 1377's kill, use or event objectives",
+      "actor": "p",
+      "quest": 1377
+    },
+    {
+      "action": "assert",
+      "label": "1377 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1377,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "label": "CONTROL: offer 1377 to Asteria the Soulcleaver, who does not end it",
+      "actor": "p",
+      "quest": 1377,
+      "entry": 312428
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Asteria the Soulcleaver does not reward 1377",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1377,
+      "equals": 0
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1377,
+      "reward": 0,
+      "label": "hand 1377 in at Bergamont Lestern",
+      "entry": 312402
+    },
+    {
+      "action": "assert",
+      "label": "1377 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1377,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255127 'Searching for Souls' from Bergamont Lestern",
+      "actor": "p",
+      "quest": 255127,
+      "entry": 312402
+    },
+    {
+      "action": "assert",
+      "label": "255127 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255127,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: the 12 objective item(s) 355218",
+      "actor": "p",
+      "item": 355218,
+      "count": 12
+    },
+    {
+      "action": "assert",
+      "label": "255127 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255127,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255127,
+      "reward": 0,
+      "label": "hand 255127 in at Bergamont Lestern",
+      "entry": 312402
+    },
+    {
+      "action": "assert",
+      "label": "255127 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255127,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1378 'A Useful Pawn' from Bergamont Lestern",
+      "actor": "p",
+      "quest": 1378,
+      "entry": 312402
+    },
+    {
+      "action": "assert",
+      "label": "1378 is in the log and already complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1378,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "1378 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1378,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1378,
+      "reward": 0,
+      "label": "hand 1378 in at Asteria the Soulcleaver",
+      "entry": 312428
+    },
+    {
+      "action": "assert",
+      "label": "1378 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1378,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 1379 'A Sensitive Delivery' from Asteria the Soulcleaver",
+      "actor": "p",
+      "quest": 1379,
+      "entry": 312428
+    },
+    {
+      "action": "assert",
+      "label": "1379 is in the log and already complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1379,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "1379 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1379,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 1379,
+      "reward": 0,
+      "label": "hand 1379 in at Salazar Bloch",
+      "entry": 4581
+    },
+    {
+      "action": "assert",
+      "label": "1379 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 1379,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255128 'For Want of Mana' from Priestess Mar'lynn Evermorne",
+      "actor": "p",
+      "quest": 255128,
+      "entry": 312429
+    },
+    {
+      "action": "assert",
+      "label": "255128 is in the log with its objectives open",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255128,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: the 6 objective item(s) 355221",
+      "actor": "p",
+      "item": 355221,
+      "count": 6
+    },
+    {
+      "action": "assert",
+      "label": "255128 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255128,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "label": "CONTROL: offer 255128 to Priestess Mar'lynn Evermorne, who does not end it",
+      "actor": "p",
+      "quest": 255128,
+      "entry": 312429
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Priestess Mar'lynn Evermorne does not reward 255128",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255128,
+      "equals": 0
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255128,
+      "reward": 0,
+      "label": "hand 255128 in at Asteria the Soulcleaver",
+      "entry": 312428
+    },
+    {
+      "action": "assert",
+      "label": "255128 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255128,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: 255136 'A Report for the Dark Lady' has no giver on this server; carry it as the Silverpine chain would hand it over",
+      "actor": "p",
+      "quest": 255136
+    },
+    {
+      "action": "assert",
+      "label": "255136 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255136,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255136,
+      "reward": 0,
+      "label": "hand 255136 in at Apothecary Lydon",
+      "entry": 2216
+    },
+    {
+      "action": "assert",
+      "label": "255136 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255136,
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}
