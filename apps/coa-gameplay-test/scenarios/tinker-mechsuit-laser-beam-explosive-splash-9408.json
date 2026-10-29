@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "name": "Tinker: Explosive Augmentation procs from Laser Beam inside the Mechsuit (#9408)",
+  "contract": "Explosive Augmentation (653237, spell_proc ProcFlags 320 = PROC_FLAG_DONE_RANGED_AUTO_ATTACK | PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS, no SpellFamily or class-mask filter) triggers its splash explosion 653238 (5 yd radius around the struck enemy) on ranged hits. Mechsuit: Laser Beam (805372) is a direct, untriggered player cast with DmgClass 3 (ranged) whose own weapon-damage effects (121 normalized weapon damage, 31 weapon percent damage) strike the target, so its hit takes the same proc path as a Scrap Shot. Inside the Mechsuit it must therefore splash a second enemy standing 3 yd behind the struck one, just like Gatling Gun does in #9417.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 60,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 60,
+      "health": 2000000,
+      "distance": 10
+    },
+    {
+      "id": "splash",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 60,
+      "health": 2000000,
+      "distance": 13
+    }
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "add_item", "label": "Fixture: ranged gun", "actor": "tinker", "item": 450265},
+    {"action": "equip", "label": "Equip the gun", "actor": "tinker", "item": 450265, "slot": 17},
+    {"action": "assert", "actor": "tinker", "metric": "equipped_item", "slot": 17, "equals": 450265},
+    {"action": "learn", "actor": "tinker", "spell": 653236},
+    {"action": "cast", "actor": "tinker", "spell": 653236},
+    {"action": "assert", "label": "Explosive Augmentation is on the gun", "actor": "tinker", "metric": "aura", "spell": 653237, "equals": 1, "within_ms": 2000},
+    {"action": "wait", "label": "Let the global cooldown clear", "ms": 1700},
+    {"action": "learn", "actor": "tinker", "spell": 92141},
+    {"action": "learn", "actor": "tinker", "spell": 801384},
+    {"action": "learn", "actor": "tinker", "spell": 805372},
+    {"action": "set_aura", "actor": "tinker", "spell": 801816, "stacks": 100},
+    {"action": "cast", "actor": "tinker", "spell": 801384},
+    {"action": "assert", "label": "Mechsuit is on", "actor": "tinker", "metric": "aura", "spell": 803451, "equals": 1, "within_ms": 2000},
+    {"action": "wait", "label": "Let the global cooldown clear", "ms": 1700},
+    {"action": "snapshot", "actor": "tinker", "metric": "spell_damage_count", "spell": 653238, "target": "splash", "save_as": "splash_before"},
+    {"action": "cast", "actor": "tinker", "spell": 805372, "target": "target"},
+    {"action": "assert", "label": "Laser Beam hits its target inside the Mechsuit", "actor": "tinker", "metric": "spell_damage_total", "spell": 805372, "target": "target", "min": 1, "within_ms": 3000},
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING (#9408): a Laser Beam hit inside the Mechsuit procs Explosive Augmentation's splash onto a nearby enemy",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 653238,
+      "target": "splash",
+      "relative_to": "splash_before",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}
