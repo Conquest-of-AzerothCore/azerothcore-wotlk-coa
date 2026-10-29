@@ -822,20 +822,7 @@ namespace
             text += victim->GetName();
             text += ".";
 
-            // Only the people actually fighting her see this.
-            Map::PlayerList const& players = creature->GetMap()->GetPlayers();
-            for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-            {
-                Player* player = itr->GetSource();
-                if (!player || !player->GetSession())
-                    continue;
-                if (!IsFighting(creature, player))
-                    continue;
-
-                WorldPacket data;
-                ChatHandler::BuildChatPacket(data, CHAT_MSG_MONSTER_EMOTE, LANG_UNIVERSAL, creature, player, text);
-                player->GetSession()->SendPacket(&data);
-            }
+            creature->TextEmote(text, victim);
         }
 
         static void EndStalk(Creature* creature, VaeltharaState& state, uint32 now, bool early)

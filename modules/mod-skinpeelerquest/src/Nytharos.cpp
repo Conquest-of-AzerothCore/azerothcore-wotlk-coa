@@ -620,8 +620,7 @@ namespace
 
             _expireAt = getMSTime() + NY_SPOUT_LIFE_MS;
             _nextMove = 0;
-            _nextSound = getMSTime() + 500;
-            _soundsLeft = 2;
+            _nextSound = getMSTime() + 300;
             _nextContact = 0;
 
             _originX = me->GetPositionX();
@@ -653,16 +652,13 @@ namespace
             // player touches the spout, not on a one second beat.
             DoContact(now);
 
-            // TornadoLoop is a 5.9 s file. Two plays (spawn + 6 s) cover the
-            // fifteen second life and the last one ends before the spout
-            // despawns, so nothing is left playing afterwards. It is fired a
-            // beat after spawn because at InitializeAI time the summoned spout
-            // is not visible to the client yet and the object sound reaches
-            // nobody.
-            if (_soundsLeft && now >= _nextSound)
+            // The tornado ambience is a short one-shot gust re-triggered while
+            // the spout lives, so it stops as soon as the spout is gone. A
+            // looping file cannot be stopped by the server (the client keeps
+            // looping it after the object despawns).
+            if (now >= _nextSound)
             {
-                --_soundsLeft;
-                _nextSound = now + 6000;
+                _nextSound = now + 900;
                 me->PlayDistanceSound(NY_SOUND_TORNADO);
             }
 
@@ -677,7 +673,6 @@ namespace
         uint32 _expireAt = 0;
         uint32 _nextMove = 0;
         uint32 _nextSound = 0;
-        int _soundsLeft = 0;
         uint32 _nextContact = 0;
         ObjectGuid _chaseTarget;
         float _originX = 0.0f;
