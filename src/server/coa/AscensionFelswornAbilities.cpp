@@ -464,7 +464,8 @@ class spell_ascension_felsworn_chaos_rush : public SpellScript
             return;
         bool moving = player->HasUnitMovementFlag(MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_BACKWARD |
                                                     MOVEMENTFLAG_STRAFE_LEFT | MOVEMENTFLAG_STRAFE_RIGHT);
-        if (!moving)
+        bool airborne = player->HasUnitMovementFlag(MOVEMENTFLAG_FALLING | MOVEMENTFLAG_FALLING_FAR);
+        if (!moving || airborne)
             return;
         float distance = GetSpellInfo()->Effects[EFFECT_0].CalcRadius(player);
         if (distance <= 0.0f)

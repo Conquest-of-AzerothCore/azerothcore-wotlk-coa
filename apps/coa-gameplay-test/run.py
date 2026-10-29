@@ -611,8 +611,8 @@ def validate(scenario):
         if action in {'pvp', 'set_moving'}:
             require(type(step['enabled']) is bool, f'{where}: enabled must be boolean')
         if action == 'set_moving' and 'flag' in step:
-            require(step['flag'] in {'forward', 'backward', 'strafe_left', 'strafe_right'},
-                f'{where}: flag must be forward, backward, strafe_left or strafe_right')
+            require(step['flag'] in {'forward', 'backward', 'strafe_left', 'strafe_right', 'falling'},
+                f'{where}: flag must be forward, backward, strafe_left, strafe_right or falling')
         if 'all_specs' in step:
             require(type(step['all_specs']) is bool, f'{where}: all_specs must be boolean')
         if action == 'talent' and 'command' in step:
