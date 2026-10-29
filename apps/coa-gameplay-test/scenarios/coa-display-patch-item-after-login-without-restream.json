@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "An item obtained after login gets its patch row without a stream resend",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1. The login stream only carries rows for items the character owns at that",
+    "moment; it used to be resent on every world entry, which also refreshed items obtained since. Now it is sent",
+    "once per login, so an obtained item must get its SMSG_PATCH_ITEM (0x0932) row when it is created. After the",
+    "login stream, obtaining Infused, Infernos of Elemental Fury 998102 sends its row once. A far teleport with the client's world-entry notice neither restreams (SMSG_PATCH_LOADING_SCREENS",
+    "0x05F8 stays at one) nor sends the row again. A relog streams again and carries the owned item's row."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "client",
+      "race": 1,
+      "class": 1,
+      "level": 32
+    }
+  ],
+  "steps": [
+    { "action": "client_packet", "actor": "client", "opcode": 1377 },
+    { "action": "assert", "label": "SETUP: the login stream arrived", "actor": "client", "metric": "server_packets", "opcode": 1528, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: the item is not owned yet, so the login stream has no row for it", "actor": "client", "metric": "server_packets", "opcode": 2354, "row": 998102, "equals": 0 },
+    { "action": "add_item", "actor": "client", "item": 998102 },
+    { "action": "assert", "label": "The obtained item's row is sent when it is created", "actor": "client", "metric": "server_packets", "opcode": 2354, "row": 998102, "equals": 1, "within_ms": 2000 },
+    { "action": "teleport", "actor": "client", "map": 1, "x": 1676.21, "y": -4315.29, "z": 61.52, "o": 0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "client_packet", "actor": "client", "opcode": 1377 },
+    { "action": "wait", "label": "Outlast the former resend cooldown", "ms": 12000 },
+    { "action": "assert", "label": "DISCRIMINATING: no second stream after the teleport", "actor": "client", "metric": "server_packets", "opcode": 1528, "equals": 1 },
+    { "action": "assert", "label": "The item row is not sent again", "actor": "client", "metric": "server_packets", "opcode": 2354, "row": 998102, "equals": 1 },
+    { "action": "relog", "actor": "client" },
+    { "action": "wait", "ms": 3000 },
+    { "action": "client_packet", "actor": "client", "opcode": 1377 },
+    { "action": "assert", "label": "A relog streams again", "actor": "client", "metric": "server_packets", "opcode": 1528, "equals": 2, "within_ms": 5000 },
+    { "action": "assert", "label": "The relog stream carries the owned item's row", "actor": "client", "metric": "server_packets", "opcode": 2354, "row": 998102, "equals": 2, "within_ms": 5000 }
+  ]
+}

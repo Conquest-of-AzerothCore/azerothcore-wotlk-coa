@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "A late world-entry notice after the fallback stream is not answered again",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1. SMSG_PATCH_LOADING_SCREENS (0x05F8) opens every display patch stream. A",
+    "client that has not sent CMSG_EXTENSION_INITIALIZED (0x561) within 5 s of login receives the stream from the",
+    "login fallback timer. A notice arriving after that stream belongs to the same login, whose rows the client",
+    "already holds, so it must not stream again, also past the former ten-second resend cooldown."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "client",
+      "race": 1,
+      "class": 1,
+      "level": 32
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "No world-entry notice: let the 5 s fallback fire", "ms": 6000 },
+    { "action": "assert", "label": "The fallback streams once", "actor": "client", "metric": "server_packets", "opcode": 1528, "equals": 1 },
+    { "action": "client_packet", "actor": "client", "opcode": 1377, "label": "A late world-entry notice" },
+    { "action": "wait", "label": "Outlast the former resend cooldown", "ms": 12000 },
+    { "action": "assert", "label": "DISCRIMINATING: the late notice is not answered with a second stream", "actor": "client", "metric": "server_packets", "opcode": 1528, "equals": 1 }
+  ]
+}
