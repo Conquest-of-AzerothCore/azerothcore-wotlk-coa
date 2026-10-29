@@ -3211,7 +3211,7 @@ int32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask, S
     if (PowerType == POWER_MANA && caster->IsPlayer() && caster->getClass() == CLASS_CULTIST && SpellFamilyName == 31)
     {
         uint32 insanity = caster->GetAura(500706) ? caster->GetAura(500706)->GetStackAmount() : 0;
-        if (Id == 801153 && insanity > 60)
+        if (Id == 801153 && insanity >= 60)
             return 0;
         if (!IsChanneled() && (!CastTimeEntry || CastTimeEntry->CastTime == 0))
             if (AuraEffect const* talent = caster->GetAuraEffect(582307, EFFECT_0))
