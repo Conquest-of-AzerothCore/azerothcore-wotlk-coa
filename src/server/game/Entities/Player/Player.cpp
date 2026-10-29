@@ -1776,7 +1776,9 @@ void Player::ProcessDelayedOperations()
             {
                 RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
             }
-            AddAura(m_entryPointData.mountSpell, this);
+            // cast, not AddAura: the spell's own target handling decides which of its effects apply here,
+            // so a flying mount restored outside a flying area stays a ground mount
+            CastSpell(this, m_entryPointData.mountSpell, true);
             m_entryPointData.mountSpell = 0;
         }
     }
