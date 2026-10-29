@@ -196,7 +196,10 @@ int main() {
     { Fixture f; f.donor.group=nullptr; f.target.group=nullptr; f.propose(); f.accept(); f.unchanged("two ungrouped players"); }
     { Fixture f; f.propose(); f.target.group=nullptr; f.accept(); f.unchanged("group changed after proposal"); }
     { Fixture f; f.propose(); f.donor.near=false; f.accept(); f.unchanged("distance changed after proposal"); }
-    { Fixture f; f.propose(); f.target.team=1; f.accept(); f.unchanged("faction changed after proposal"); }
+    { Fixture f; f.target.team=1; f.propose(); f.accept();
+      check(f.target.level==11 && f.donor.m_grantableLevels==0,"cross-faction grant"); }
+    { Fixture f; f.propose(); f.target.team=1; f.accept();
+      check(f.target.level==11 && f.donor.m_grantableLevels==0,"faction change does not invalidate grant"); }
     { Fixture f; f.propose(); f.donor.session.recruiterId=33; f.accept(); f.unchanged("link changed after proposal"); }
     { Fixture f; f.propose(); GameTime::now+=61; f.accept(); f.unchanged("expired proposal"); }
     { Fixture f; f.propose(); f.target.reject=true; f.accept(); f.unchanged("GiveLevel rejection does not spend credit"); }

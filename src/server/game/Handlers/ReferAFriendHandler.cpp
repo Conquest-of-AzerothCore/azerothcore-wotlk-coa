@@ -62,8 +62,6 @@ namespace
             (donor->GetSession()->GetRecruiterId() != target->GetSession()->GetAccountId() &&
                 target->GetSession()->GetRecruiterId() != donor->GetSession()->GetAccountId()))
             return ERR_REFER_A_FRIEND_NOT_REFERRED_BY;
-        if (donor->GetTeamId() != target->GetTeamId())
-            return ERR_REFER_A_FRIEND_DIFFERENT_FACTION;
         if (target->GetLevel() >= donor->GetLevel())
             return ERR_REFER_A_FRIEND_TARGET_TOO_HIGH;
         if (target->GetLevel() >= sWorld->getIntConfig(CONFIG_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL) ||
@@ -202,8 +200,6 @@ bool WorldSession::InviteRecruitAFriend(Player* target)
         return reject("That account already has another recruiter. Existing recruitment links cannot be changed.");
     if (recruiterId == recipient->GetAccountId())
         return reject("That account is your recruiter. Recruiting them would create a recruitment cycle.");
-    if (target->GetTeamId() != _player->GetTeamId())
-        return reject("You can only recruit a character of the same faction.");
     if (!_player->IsAlive() || !target->IsAlive())
         return reject("Both characters must be alive before you can send a recruitment invitation.");
     if (_player->IsInCombat() || target->IsInCombat())
@@ -258,7 +254,7 @@ bool WorldSession::HandleRecruitAFriendInviteResponse(uint32 menuId, uint32 acti
     }
     if (action != AcceptRecruitment || recruiterId ||
         GetAccountId() == inviter->GetSession()->GetAccountId() ||
-        inviter->GetTeamId() != _player->GetTeamId() || !_player->IsAlive() || !inviter->IsAlive() ||
+        !_player->IsAlive() || !inviter->IsAlive() ||
         _player->IsInCombat() || inviter->IsInCombat())
         return true;
 
@@ -590,7 +586,7 @@ bool WorldSession::HandleRecruitAFriendRewardsCommand(std::string const& command
         chat.PSendSysMessage("{} has {} stored RAF level credits. Each credit grants one level to another character.",
             _player->GetName(), uint32(_player->GetGrantableLevels()));
         chat.SendSysMessage("Credits belong to this character. They can be used on your recruiter or your direct recruits, never your own account or another recruit of the same recruiter.");
-        chat.PSendSysMessage("The recipient must be your faction, in your group, nearby on the same map, below your level and below the RAF level limit of {} and their own level cap.",
+        chat.PSendSysMessage("The recipient must be in your group, nearby on the same map, below your level and below the RAF level limit of {} and their own level cap.",
             sWorld->getIntConfig(CONFIG_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL));
         chat.SendSysMessage("Both characters must be alive, out of combat, not flying or teleporting. Active Prestige and other server progression restrictions can prevent a grant.");
         Player* target = _player->GetSelectedPlayer();
@@ -608,7 +604,6 @@ bool WorldSession::HandleRecruitAFriendRewardsCommand(std::string const& command
             case ERR_REFER_A_FRIEND_NOT_REFERRED_BY:
                 reason = "the accounts are not directly linked recruiter/recruit accounts";
                 break;
-            case ERR_REFER_A_FRIEND_DIFFERENT_FACTION: reason = "the recipient must be your faction"; break;
             case ERR_REFER_A_FRIEND_TARGET_TOO_HIGH: reason = "the recipient must be below your level"; break;
             case ERR_REFER_A_FRIEND_GRANT_LEVEL_MAX_I: reason = "the recipient has reached a grant level cap"; break;
             case ERR_REFER_A_FRIEND_NOT_IN_GROUP: reason = "you must be in the same group"; break;
