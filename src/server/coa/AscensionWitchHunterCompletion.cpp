@@ -319,7 +319,8 @@ void ApplyContracts(SpellInfo* info)
                 effect.BonusMultiplier = 0.0f;
     if (id == 574335 || id == 574337 || id == 681270 || id == 680532 || id == 807262 || id == 567570)
     {
-        info->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT;
+        if (id != 567570)
+            info->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT;
         info->AttributesEx3 |= SPELL_ATTR3_IGNORE_CASTER_MODIFIERS;
         info->AttributesEx4 |= SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS;
         info->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
