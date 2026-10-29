@@ -412,6 +412,23 @@ private:
             ReadyToKill(barbarian);
     }
 };
+
+class barbarian_thanes_grip : public PlayerScript
+{
+public:
+    barbarian_thanes_grip() : PlayerScript("barbarian_thanes_grip", {PLAYERHOOK_ON_FORGOT_SPELL}) { }
+
+    void OnPlayerForgotSpell(Player* player, uint32 spellId) override
+    {
+        constexpr uint32 ThanesGrip = 803798;
+        constexpr uint32 TwoHandedOffhandPenalty = 49152;
+        if (spellId != ThanesGrip || player->getClass() != CLASS_BARBARIAN || !player->CanTitanGrip())
+            return;
+        player->SetCanTitanGrip(false);
+        player->RemoveAurasDueToSpell(TwoHandedOffhandPenalty);
+        player->AutoUnequipOffhandIfNeed();
+    }
+};
 }
 
 void AddAscensionBarbarianEventScripts()
@@ -422,4 +439,5 @@ void AddAscensionBarbarianEventScripts()
     RegisterSpellScript(aura_ascension_barbarian_bleed);
     new barbarian_grisly_meal();
     new barbarian_killing_spree();
+    new barbarian_thanes_grip();
 }
