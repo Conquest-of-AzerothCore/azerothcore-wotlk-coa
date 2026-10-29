@@ -1395,13 +1395,21 @@ namespace CoAChallenges
         {
             if (!player || !trans)
                 return;
-            trans->Append("DELETE FROM coa_challenge_failure WHERE guid = {}", player->GetGUID().GetCounter());
+            uint32 guid = player->GetGUID().GetCounter();
+            trans->Append("DELETE FROM coa_challenge_failure WHERE guid = {}", guid);
+            for (uint32 challengeId : ActiveChallenges(guid))
+                if (IsPrestigeChallenge(challengeId))
+                    trans->Append("DELETE FROM coa_character_objective WHERE guid = {} AND challengeId = {}",
+                        guid, challengeId);
         }
 
         void OnPlayerCoAPrestigeSaved(Player* player) override
         {
             if (player)
+            {
                 SendFailureList(player);
+                SendCriteriaState(player);
+            }
         }
 
         bool OnPlayerGetGameModeMask(Player const* player, uint32& mask) override
