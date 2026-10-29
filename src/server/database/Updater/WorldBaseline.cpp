@@ -10,6 +10,7 @@
 #include "Util.h"
 #include <algorithm>
 #include <array>
+#include <boost/bind/placeholders.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <fstream>
