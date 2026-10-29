@@ -1,4 +1,4 @@
-﻿#include "Nytharos.h"
+#include "Nytharos.h"
 
 #include "ApexScaling.h"
 #include "AscensionClientSpellPatches.h"
@@ -177,6 +177,7 @@ namespace
         uint32 baseMaxHealth = 0;
         uint32 nextCrushTick = 0;
         uint32 spoutsUntil = 0;
+        uint32 secondSpoutSoundAt = 0;
 
         uint32 probeStart = 0;
         uint64 probeDamage = 0;
@@ -340,6 +341,12 @@ namespace
             uint32 const now = getMSTime();
             NytharosState& state = g_nytharosStates[me->GetGUID().GetCounter()];
 
+            if (state.secondSpoutSoundAt && now >= state.secondSpoutSoundAt)
+            {
+                state.secondSpoutSoundAt = 0;
+                me->PlayRadiusSound(NY_SOUND_TORNADO, 100.0f);
+            }
+
             UpdatePhase(state);
             UpdateProbe(state, now);
             RunLoop(state, now);
@@ -485,6 +492,7 @@ namespace
 
             me->HandleEmoteCommand(NY_EMOTE_CAST_OMNI);
             me->PlayRadiusSound(NY_SOUND_TORNADO, 100.0f);
+            state.secondSpoutSoundAt = now + 7500;
 
             std::vector<Player*> targets;
             Map::PlayerList const& players = me->GetMap()->GetPlayers();
