@@ -779,7 +779,7 @@ public:
     // own, so it would resend the same mail every cycle without this guard.
     bool OnPlayerCanGiveMailRewardAtGiveLevel(Player* player, uint8 /*level*/) override
     {
-        return !IsActive(player);
+        return !LoadState(player).active;
     }
 
     // A client that reconnects to a character still in the world gets its initial packets again but
