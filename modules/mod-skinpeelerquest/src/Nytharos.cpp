@@ -484,7 +484,7 @@ namespace
             state.spoutsUntil = now + NY_SPOUT_LIFE_MS;
 
             me->HandleEmoteCommand(NY_EMOTE_CAST_OMNI);
-            me->PlayDistanceSound(NY_SOUND_TORNADO);
+            me->PlayRadiusSound(NY_SOUND_TORNADO, 100.0f);
 
             std::vector<Player*> targets;
             Map::PlayerList const& players = me->GetMap()->GetPlayers();
