@@ -169,10 +169,10 @@ CoA.LegacyMountFlight = 0
 # Set to 0 to leave such characters on Ruleset.None instead.
 CoA.RulesetLoginDefault = 1
 
-# War Mode (1004119 without PvE Mode) and High-Risk (1004019) switch creature, chest and quest level
-# scaling off in the open world, as their tooltips state: "Level scaling is disabled while in War
-# Mode / High-Risk". Instances keep the character's own choice. Set to 0 to let the rulesets scale.
-CoA.Ruleset.DisableLevelScaling = 1
+# War Mode (1004119 without PvE Mode) and High-Risk (1004019) keep creature, chest and quest level
+# scaling in the open world, as on Ascension. Set to 1 to switch level scaling off for both rulesets
+# in the open world. Instances keep the character's own choice.
+CoA.Ruleset.DisableLevelScaling = 0
 
 # GatherMate gathering areas (pools 20000000-20099999) keep a share of their spots up that follows the
 # players in the area's zone: MinFraction with nobody there, plus PerPlayerFraction for each player, up to

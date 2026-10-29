@@ -22,7 +22,7 @@ enum RulesetSpells : uint32
     SPELL_MERCENARY = 9930874
 };
 
-std::atomic<bool> pvpRulesetsDisableLevelScaling{true};
+std::atomic<bool> pvpRulesetsDisableLevelScaling{false};
 
 bool InPvPRuleset(Player const* player)
 {
@@ -169,7 +169,7 @@ public:
     void OnAfterConfigLoad(bool) override
     {
         pvpRulesetsDisableLevelScaling.store(
-            sConfigMgr->GetOption<bool>("CoA.Ruleset.DisableLevelScaling", true), std::memory_order_relaxed);
+            sConfigMgr->GetOption<bool>("CoA.Ruleset.DisableLevelScaling", false), std::memory_order_relaxed);
     }
 };
 
