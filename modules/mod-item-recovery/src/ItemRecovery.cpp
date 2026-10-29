@@ -2,6 +2,7 @@
 
 #include "AscensionCoAConfig.h"
 #include "ExactItemRecovery.h"
+#include "WorldforgedRefunds.h"
 #include "Config.h"
 #include "CharacterCache.h"
 #include "Realm.h"
@@ -24,6 +25,10 @@
 
 namespace
 {
+    constexpr uint16 CMSG_QUERY_WORLDFORGED_RECOVERY = 0x0682;
+    constexpr uint16 SMSG_QUERY_WORLDFORGED_RECOVERY_RESULT = 0x0683;
+    constexpr uint16 CMSG_RECOVER_WORLDFORGED = 0x0684;
+    constexpr uint16 SMSG_RECOVER_WORLDFORGED_RESULT = 0x0685;
     constexpr uint16 CMSG_QUERY_DELETED_CHARACTER_RECOVERY = 0x05DA;
     constexpr uint16 SMSG_QUERY_DELETED_CHARACTER_RECOVERY_RESULT = 0x05DB;
     constexpr uint16 CMSG_RECOVER_DELETED_CHARACTER = 0x05DC;
@@ -45,6 +50,7 @@ namespace
     {
         bool query = false;
         bool character = false;
+        bool worldforged = false;
         bool deleted = false;
         uint32 index = 0;
         std::string id;
@@ -68,6 +74,7 @@ namespace
         std::deque<Request> requests;
         std::array<std::vector<Offer>, 2> offers;
         std::vector<std::pair<uint32, uint32>> characters;
+        std::vector<WorldforgedRefunds::Offer> worldforged;
     };
 
     std::atomic<bool> enabled{false};
@@ -202,6 +209,52 @@ namespace
         result("OK");
     }
 
+    void SendWorldforged(Player* player)
+    {
+        auto offers = WorldforgedRefunds::Offers(player);
+        WorldPacket response(SMSG_QUERY_WORLDFORGED_RECOVERY_RESULT, 4 + offers.size() * 96);
+        response << uint32(offers.size());
+        for (auto const& offer : offers)
+        {
+            response << WorldforgedRefunds::Id(offer) << offer.required << offer.refunded << uint32(1);
+            response << std::string() << uint32(0) << uint8(0) << uint64(offer.starts) << offer.runes;
+            for (uint32 entry : { offer.required, offer.refunded, 375250u })
+            {
+                WorldPacket query(CMSG_ITEM_QUERY_SINGLE, sizeof(uint32));
+                query << entry;
+                player->GetSession()->HandleItemQuerySingleOpcode(query);
+            }
+        }
+        {
+            std::lock_guard<std::mutex> lock(stateMutex);
+            states[player->GetSession()->GetAccountId()].worldforged = std::move(offers);
+        }
+        player->SendDirectMessage(&response);
+    }
+
+    void RecoverWorldforged(Player* player, Request const& request)
+    {
+        auto result = [player](char const* suffix)
+        {
+            WorldPacket response(SMSG_RECOVER_WORLDFORGED_RESULT, 64);
+            response << (std::string("WORLDFORGED_ITEM_RECOVERY_") + suffix);
+            player->SendDirectMessage(&response);
+            SendWorldforged(player);
+        };
+        WorldforgedRefunds::Offer offer{};
+        {
+            std::lock_guard<std::mutex> lock(stateMutex);
+            auto const found = states.find(player->GetSession()->GetAccountId());
+            if (found != states.end() && request.index < found->second.worldforged.size())
+                offer = found->second.worldforged[request.index];
+        }
+        if (!offer.id)
+            return result("OUT_OF_RANGE");
+        if (request.id != WorldforgedRefunds::Id(offer))
+            return result("ID_MISMATCH");
+        result(WorldforgedRefunds::Restore(player, offer));
+    }
+
     void SendCharacters(Player* player)
     {
         WorldPacket response(SMSG_QUERY_DELETED_CHARACTER_RECOVERY_RESULT, 4);
@@ -329,7 +382,13 @@ namespace
 class ItemRecoveryWorld final : public WorldScript
 {
 public:
-    ItemRecoveryWorld() : WorldScript("ItemRecoveryWorld", { WORLDHOOK_ON_AFTER_CONFIG_LOAD }) { }
+    ItemRecoveryWorld() : WorldScript("ItemRecoveryWorld", { WORLDHOOK_ON_AFTER_CONFIG_LOAD, WORLDHOOK_ON_STARTUP }) { }
+
+    void OnStartup() override
+    {
+        started = true;
+        WorldforgedRefunds::Load();
+    }
 
     void OnAfterConfigLoad(bool /*reload*/) override
     {
@@ -338,7 +397,12 @@ public:
         charactersEnabled.store(enabled.load() &&
             sConfigMgr->GetOption<bool>("ItemRecovery.Characters.Enable", true));
         ExactItemRecovery::Configure();
+        if (started)
+            WorldforgedRefunds::Load();
     }
+
+private:
+    bool started = false;
 };
 
 class ItemRecoveryNetwork final : public ServerScript
@@ -351,7 +415,8 @@ public:
         uint16 const opcode = packet.GetOpcode();
         if ((opcode != CMSG_QUERY_VENDORED_ITEM_RECOVERY && opcode != CMSG_RECOVER_VENDORED_ITEM &&
             opcode != CMSG_QUERY_DELETED_ITEM_RECOVERY && opcode != CMSG_RECOVER_DELETED_ITEM &&
-            opcode != CMSG_QUERY_DELETED_CHARACTER_RECOVERY && opcode != CMSG_RECOVER_DELETED_CHARACTER)
+            opcode != CMSG_QUERY_DELETED_CHARACTER_RECOVERY && opcode != CMSG_RECOVER_DELETED_CHARACTER &&
+            opcode != CMSG_QUERY_WORLDFORGED_RECOVERY && opcode != CMSG_RECOVER_WORLDFORGED)
             || !session || !enabled.load())
             return true;
 
@@ -359,9 +424,10 @@ public:
             return false;
 
         Request request;
+        request.worldforged = opcode == CMSG_QUERY_WORLDFORGED_RECOVERY || opcode == CMSG_RECOVER_WORLDFORGED;
         request.character = opcode == CMSG_QUERY_DELETED_CHARACTER_RECOVERY || opcode == CMSG_RECOVER_DELETED_CHARACTER;
         request.query = opcode == CMSG_QUERY_VENDORED_ITEM_RECOVERY || opcode == CMSG_QUERY_DELETED_ITEM_RECOVERY ||
-            opcode == CMSG_QUERY_DELETED_CHARACTER_RECOVERY;
+            opcode == CMSG_QUERY_DELETED_CHARACTER_RECOVERY || opcode == CMSG_QUERY_WORLDFORGED_RECOVERY;
         request.deleted = opcode == CMSG_QUERY_DELETED_ITEM_RECOVERY || opcode == CMSG_RECOVER_DELETED_ITEM;
         if (request.query ? !packet.empty() : !ReadRecoverRequest(packet, request))
             return false;
@@ -417,7 +483,14 @@ public:
 
         for (Request const& request : requests)
         {
-            if (request.character)
+            if (request.worldforged)
+            {
+                if (request.query)
+                    SendWorldforged(player);
+                else
+                    RecoverWorldforged(player, request);
+            }
+            else if (request.character)
             {
                 if (request.query)
                     SendCharacters(player);
@@ -440,6 +513,7 @@ void AddItemRecoveryScripts()
         config.Booleans.emplace_back(RecoveryConfigKey, enabled.load());
         config.Booleans.emplace_back(DeletedRecoveryConfigKey, archiveEnabled.load());
         config.Booleans.emplace_back("CONFIG_RECOVERY_DELETED_CHARACTER_ENABLED", charactersEnabled.load());
+        config.Booleans.emplace_back("CONFIG_RECOVERY_WORLDFORGED_ITEM_ENABLED", WorldforgedRefunds::Available());
     });
     new ItemRecoveryWorld();
     new ItemRecoveryNetwork();

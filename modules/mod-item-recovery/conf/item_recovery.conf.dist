@@ -30,3 +30,13 @@ ItemRecovery.Archive.Enable = 1
 #                     CharDelete.Method = 1 retains future deletions; purged characters cannot be recovered.
 #        Default:     1 - Enabled under ItemRecovery.Enable.
 ItemRecovery.Characters.Enable = 1
+
+#    ItemRecovery.Worldforged.Enable
+#        Description: Answer native, time-limited Worldforged item/rune exchange offers.
+#                     Requires both pending recovery_worldforged migrations and authored offer rows.
+#                     Client category is enabled only while a valid offer is active.
+#                     Supports saved, unequipped, unmodified weapon/armor instances in bags.
+#                     Enchants, random properties, used charges and worn items are not discarded.
+#                     No refund campaigns or universal eligibility periods are invented.
+#        Default:     0 - Disabled until reviewed offer data is installed.
+ItemRecovery.Worldforged.Enable = 0
