@@ -16,10 +16,12 @@
  */
 
 #include "PoolMgr.h"
+#include "Config.h"
 #include "Containers.h"
 #include "Log.h"
 #include "MapMgr.h"
 #include "ObjectMgr.h"
+#include "Player.h"
 #include "QueryResult.h"
 #include "Transport.h"
 
@@ -1125,6 +1127,49 @@ void PoolMgr::ReSpawnPoolQuests()
     }
 }
 
+// GatherMate gathering areas (pools 20000000-20099999) keep fewer of their spots up when their zone is empty
+// and more as players arrive, so a busy zone has nodes to compete for and an empty one is not left full.
+uint32 PoolMgr::GatherNodeLimit(uint32 spots, uint32 players, float minFraction, float perPlayer, float maxFraction)
+{
+    float const fraction = std::min(maxFraction, minFraction + perPlayer * players);
+    return std::clamp<uint32>(uint32(std::lround(spots * fraction)), 1, std::max<uint32>(1, spots));
+}
+
+uint32 PoolMgr::PoolLimit(SpawnedPoolData const& spawnedPoolData, uint32 pool_id)
+{
+    uint32 const maxLimit = mPoolTemplate[pool_id].MaxLimit;
+    Map* map = spawnedPoolData.GetMap();
+    if (pool_id < 20000000 || pool_id > 20099999 || !map || !sConfigMgr->GetOption<bool>("CoA.GatherNodes.ScaleWithZonePlayers", true))
+        return maxLimit;
+
+    auto group = mPoolPoolGroups.find(pool_id);
+    if (group == mPoolPoolGroups.end() || group->second.IsEmpty())
+        return maxLimit;
+
+    auto zone = mGatherPoolZones.find(pool_id);
+    if (zone == mGatherPoolZones.end())
+    {
+        uint32 zoneId = 0;
+        auto spot = mPoolGameobjectGroups.find(group->second.GetFirstEqualChancedObjectId());
+        if (spot != mPoolGameobjectGroups.end() && !spot->second.IsEmpty())
+            if (GameObjectData const* data = sObjectMgr->GetGameObjectData(spot->second.GetFirstEqualChancedObjectId()))
+                zoneId = map->GetZoneId(data->phaseMask, data->posX, data->posY, data->posZ);
+        zone = mGatherPoolZones.emplace(pool_id, zoneId).first;
+    }
+    if (!zone->second)
+        return maxLimit;
+
+    uint32 players = 0;
+    for (auto const& ref : map->GetPlayers())
+        if (Player* player = ref.GetSource(); player && player->GetZoneId() == zone->second)
+            ++players;
+
+    return GatherNodeLimit(uint32(group->second.GetEqualChanced().size()), players,
+        sConfigMgr->GetOption<float>("CoA.GatherNodes.MinFraction", 0.10f),
+        sConfigMgr->GetOption<float>("CoA.GatherNodes.PerPlayerFraction", 0.015f),
+        sConfigMgr->GetOption<float>("CoA.GatherNodes.MaxFraction", 0.35f));
+}
+
 // Call to spawn a pool, if cache if true the method will spawn only if cached entry is different
 // If it's same, the creature is respawned only (added back to map)
 template<>
@@ -1152,7 +1197,7 @@ void PoolMgr::SpawnPool<Pool>(SpawnedPoolData& spawnedPoolData, uint32 pool_id, 
 {
     auto it = mPoolPoolGroups.find(pool_id);
     if (it != mPoolPoolGroups.end() && !it->second.IsEmpty())
-        it->second.SpawnObject(spawnedPoolData, mPoolTemplate[pool_id].MaxLimit, sub_pool_id);
+        it->second.SpawnObject(spawnedPoolData, PoolLimit(spawnedPoolData, pool_id), sub_pool_id);
 }
 
 // Call to spawn a pool

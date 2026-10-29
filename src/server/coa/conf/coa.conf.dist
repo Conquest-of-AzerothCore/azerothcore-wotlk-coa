@@ -174,6 +174,15 @@ CoA.RulesetLoginDefault = 1
 # Mode / High-Risk". Instances keep the character's own choice. Set to 0 to let the rulesets scale.
 CoA.Ruleset.DisableLevelScaling = 1
 
+# GatherMate gathering areas (pools 20000000-20099999) keep a share of their spots up that follows the
+# players in the area's zone: MinFraction with nobody there, plus PerPlayerFraction for each player, up to
+# MaxFraction. The limit is read whenever a node respawns, so a zone fills up or thins out as nodes are
+# gathered; nothing is deleted. Set ScaleWithZonePlayers to 0 to use the pool_template max_limit instead.
+CoA.GatherNodes.ScaleWithZonePlayers = 1
+CoA.GatherNodes.MinFraction = 0.10
+CoA.GatherNodes.PerPlayerFraction = 0.015
+CoA.GatherNodes.MaxFraction = 0.35
+
 # Quests with a row in the client's QuestTemplateScaling.dbc trail the character: the row's highest
 # point at or below the character's level sets the quest to that level plus its offset (the shipped
 # rows trail by 4 to 1 levels), held within the row's minimum and maximum level and never below the
