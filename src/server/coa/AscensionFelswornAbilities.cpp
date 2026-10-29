@@ -66,9 +66,16 @@ class felsworn_casts : public AllSpellScript
     void OnSpellCheckCast(Spell* spell, bool, SpellCastResult& result) override
     {
         Player* player = Owner(spell->GetCaster());
-        if (!player || Triggered(spell) || result != SPELL_CAST_OK)
+        if (!player || result != SPELL_CAST_OK)
             return;
         uint32 id = spell->GetSpellInfo()->Id;
+        if (id == 804349 && !Inner(player))
+        {
+            result = SPELL_FAILED_CASTER_AURASTATE;
+            return;
+        }
+        if (Triggered(spell))
+            return;
         if (id == 804216 && !Fury(player))
             result = SPELL_FAILED_NO_POWER;
         if (id == 561216)
