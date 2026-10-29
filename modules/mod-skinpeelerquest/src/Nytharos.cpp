@@ -61,7 +61,7 @@ namespace
     constexpr uint32 NY_SPOUT_KIT = 99110;          // effect 145178 tornado model
     constexpr uint32 NY_SPOUT_DMG = 1004291;        // 250 nature
     constexpr uint32 NY_SPOUT_SLOW = 1004292;       // -30% for 2 s
-    constexpr uint32 NY_SOUND_TORNADO = 10045;      // TornadoLoop.wav; the client loops it while the spout exists
+    constexpr uint32 NY_SOUND_TORNADO = 7386644;    // custom one-shot streamed SoundEntries row
     constexpr uint32 NY_EMOTE_CAST_OMNI = 463;      // ONESHOT_SPELL_CAST_OMNI
 
     constexpr uint32 NY_SPOUT_LIFE_MS = 15000;
@@ -484,6 +484,7 @@ namespace
             state.spoutsUntil = now + NY_SPOUT_LIFE_MS;
 
             me->HandleEmoteCommand(NY_EMOTE_CAST_OMNI);
+            me->PlayDistanceSound(NY_SOUND_TORNADO);
 
             std::vector<Player*> targets;
             Map::PlayerList const& players = me->GetMap()->GetPlayers();
@@ -657,16 +658,6 @@ namespace
             // Contact is checked every tick so the slow lands the instant a
             // player touches the spout, not on a one second beat.
             DoContact(now);
-
-            // TornadoLoop is a looping file: the client keeps it running for as
-            // long as the spout object exists. It is fired a beat after spawn
-            // because at InitializeAI time the summoned spout is not visible to
-            // the client yet and the object sound reaches nobody.
-            if (_nextSound && now >= _nextSound)
-            {
-                _nextSound = 0;
-                me->PlayDistanceSound(NY_SOUND_TORNADO);
-            }
 
             if (now >= _nextMove)
             {
