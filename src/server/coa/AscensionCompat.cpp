@@ -4881,6 +4881,8 @@ private:
     for (std::string const &text : strings)
       AppendSizedString(packet, text);
 
+    LOG_INFO("coa", "Streamed custom tornado SoundEntries row {} ({} bytes) to {}", SOUND_ID, packet.size(),
+             player->GetName());
     return SendRowPacket(player, packet);
   }
 
