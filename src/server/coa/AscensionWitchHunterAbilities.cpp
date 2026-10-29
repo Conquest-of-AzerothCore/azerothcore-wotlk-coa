@@ -237,6 +237,8 @@ class spell_ascension_witch_hunter_ability : public SpellScript
     {
         Player* player = Owner(GetCaster());
         Unit* target = GetHitUnit();
+        if (player && target == player && _anguish && Family(GetSpellInfo(), 0, 2))
+            player->RemoveAurasDueToSpell(500566);
         if (!player || !target || target == player)
             return;
         uint32 id = GetSpellInfo()->Id;
@@ -404,8 +406,6 @@ class spell_ascension_witch_hunter_ability : public SpellScript
             player->RemoveAurasDueToSpell(500161);
         if (_dawnKnight && Family(info, 0, 1024))
             player->RemoveAurasDueToSpell(681390);
-        if (_anguish && Family(info, 0, 2))
-            player->RemoveAurasDueToSpell(500566);
         if (Family(info, 1, 134217728))
         {
             talent(705480, 806191);
