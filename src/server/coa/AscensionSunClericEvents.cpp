@@ -217,7 +217,7 @@ class aura_ascension_sun_cleric_event : public AuraScript
                 auto allies = Allies(player, player, Radius(505197));
                 allies.sort([player](Unit* a, Unit* b) { return player->GetDistance(a) < player->GetDistance(b); });
                 if (!allies.empty())
-                    Copy(player, allies.front(), 505197, CalculatePct(amount, Amount(807750) *
+                    Copy(player, allies.front(), 505197, CalculatePct(amount, Amount(807750, 0, player) *
                         (player->HasAura(704934) ? 2 : 1) * (fulfillment ? 2 : 1)));
             }
             if (id == 807749 && fulfillment && !automatic)
