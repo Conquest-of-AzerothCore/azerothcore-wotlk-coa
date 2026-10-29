@@ -363,7 +363,7 @@ class aura_wildcard_tree_healing : public AuraScript
     PrepareAuraScript(aura_wildcard_tree_healing);
     void Amount(AuraEffect const*, int32& amount, bool&)
     {
-        if (GetTarget()->HasAura(271151))
+        if (Unit* owner = GetUnitOwner(); owner && owner->HasAura(271151))
             amount = 0;
     }
     void Register() override
