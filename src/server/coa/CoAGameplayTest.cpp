@@ -135,6 +135,7 @@ public:
     }
 };
 constexpr uint32 MaximumCreatures = 8;
+constexpr uint32 MeleeHitSamples = 2000;
 
 uint32 MaximumPlayers(uint32 schema)
 {
@@ -4130,6 +4131,21 @@ private:
                 float maxDamage = float(damage);
                 sScriptMgr->ModifyMeleeDamageRange(player, attacker, minDamage, maxDamage);
                 return (minDamage + maxDamage) / 2.0f;
+            }
+            if (metric == "script_melee_hit_taken")
+            {
+                double total = 0.0;
+                for (uint32 sample = 0; sample < MeleeHitSamples; ++sample)
+                {
+                    uint32 damage = attacker->CalculateDamage(BASE_ATTACK, false, true, 0, player);
+                    damage = attacker->MeleeDamageBonusDone(player, damage, BASE_ATTACK, nullptr,
+                        SPELL_SCHOOL_MASK_NORMAL);
+                    damage = player->MeleeDamageBonusTaken(attacker, damage, BASE_ATTACK, nullptr,
+                        SPELL_SCHOOL_MASK_NORMAL);
+                    sScriptMgr->ModifyMeleeDamage(player, attacker, damage);
+                    total += damage;
+                }
+                return total / MeleeHitSamples;
             }
             Require(info != nullptr, "Unknown spell for scripted damage taken");
             if (metric == "script_spell_damage_taken")

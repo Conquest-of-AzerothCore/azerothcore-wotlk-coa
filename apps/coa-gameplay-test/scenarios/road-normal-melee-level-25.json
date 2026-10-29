@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Road to De Other Side Normal trash hits a level 25 player like Vaults of the Inquisition, not like Mythic",
+  "contract": "Road to De Other Side (map 937) had no Heroic/Mythic creature templates, so its Normal tier used the Mythic DamageModifier (Interstitial Wanderer 4) and hit far harder than Vaults of the Inquisition. Its trash now has templates at +100000/+200000 that keep those values, and the Normal templates are fitted at level 25: on live (2026-09 logs, same tank, level 10 creatures) Road hit like Vaults, so the Road targets are the 2026-09 Road medians times the Vaults June/September ratio (9.27): Interstitial Wanderer (162765) 111 and Spider of the Other Side (162770) 46. The class 1 average blow at level 25 is 40.5 per point of DamageModifier (see vaults-normal-melee-level-25), so the Normal templates carry 2.75 and 1.146. DestinyWeaver scales Road's Normal tier with finder entry 402 (band 15-59).",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 937,
+    "x": 480.61,
+    "y": -232.172,
+    "z": 173.47,
+    "o": 4.15317,
+    "ignore_access": true
+  },
+  "players": [
+    { "id": "tank", "race": 1, "class": 1, "level": 25 }
+  ],
+  "creatures": [
+    { "id": "wanderer", "owner": "tank", "entry": 162765, "level": 60, "distance": 5 },
+    { "id": "spider", "owner": "tank", "entry": 162770, "level": 60, "distance": 7 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the fixture settle", "ms": 2000 },
+    { "action": "assert", "label": "CONTROL: the player is in Road to De Other Side", "actor": "tank",
+      "metric": "map_id", "equals": 937 },
+    { "action": "assert", "label": "CONTROL: the instance is Normal", "actor": "tank", "metric": "map_difficulty",
+      "equals": 0 },
+    { "action": "assert", "label": "Interstitial Wanderer hits a level 25 player for about 111, not its Mythic 162",
+      "actor": "tank", "metric": "script_melee_hit_taken", "target": "wanderer", "min": 104.5, "max": 118 },
+    { "action": "assert", "label": "Spider of the Other Side hits a level 25 player for about 46",
+      "actor": "tank", "metric": "script_melee_hit_taken", "target": "spider", "min": 43.5, "max": 49 }
+  ]
+}

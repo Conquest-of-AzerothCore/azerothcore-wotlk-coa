@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Vaults of the Inquisition Normal trash hits a level 25 player as hard as in the June 2026 Normal log",
+  "contract": "Vaults of the Inquisition (map 936) Normal creatures are level 59-60 and DestinyWeaver scales each blow to the viewer's level (finder entry 401, band 10-59). #9826 tuned their Normal DamageModifier so that no Normal hit at 60 exceeds Heroic, which left a level 25 player taking 5-12 per blow. The Normal combat log of 2026-06-06 (level 25 group) shows median non-crit melee of 49 from Inquisitorial Torturer (162733) and 78 from Darkandle Brute (162763). The class 1 average blow at level 25 is (11.7485 * 1.25 + 86 / 14 * 2) * 1.5 (CoA.CreatureScaling dungeon damage) = 40.5 per point of DamageModifier, so the Normal templates carry 1.211 and 1.928. script_melee_hit_taken averages the creature's own blows through the melee range hooks, the done/taken bonuses and DestinyWeaver's view of a level 25 player, before armor.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 936,
+    "x": -6658.51,
+    "y": -5569.48,
+    "z": 175.073,
+    "o": 4.72967,
+    "ignore_access": true
+  },
+  "players": [
+    { "id": "tank", "race": 1, "class": 1, "level": 25 }
+  ],
+  "creatures": [
+    { "id": "torturer", "owner": "tank", "entry": 162733, "level": 60, "distance": 5 },
+    { "id": "brute", "owner": "tank", "entry": 162763, "level": 60, "distance": 7 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the fixture settle", "ms": 2000 },
+    { "action": "assert", "label": "CONTROL: the player is in Vaults of the Inquisition", "actor": "tank",
+      "metric": "map_id", "equals": 936 },
+    { "action": "assert", "label": "CONTROL: the instance is Normal", "actor": "tank", "metric": "map_difficulty",
+      "equals": 0 },
+    { "action": "assert", "label": "Inquisitorial Torturer hits a level 25 player for about 49, as in the log",
+      "actor": "tank", "metric": "script_melee_hit_taken", "target": "torturer", "min": 46, "max": 52 },
+    { "action": "assert", "label": "Darkandle Brute hits a level 25 player for about 78, as in the log",
+      "actor": "tank", "metric": "script_melee_hit_taken", "target": "brute", "min": 73.5, "max": 82.5 }
+  ]
+}

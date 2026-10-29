@@ -762,6 +762,9 @@ periodic aura effect's snapshotted crit chance; `aura_script_value` requires `ke
 `script_spell_damage_taken` and `script_periodic_damage_taken` require `target` as the attacker (and `spell` for
 the latter two) and return 1000 after the registered module damage-taken hooks. `script_heal_received` requires
 `spell` and `target` as the healer and returns 1000 after the registered heal-received hooks, with the actor as recipient.
+`script_melee_hit_taken` requires `target` as the attacker and returns the mean of 2000 of its main-hand blows
+on the actor before armor: the weapon roll with the melee range hooks, the done and taken bonuses and the melee
+damage hooks, as `Unit::CalculateMeleeDamage` applies them.
 `script_melee_damage_dealt` requires `target` as the victim and returns 1000 after the registered melee damage hooks
 with the actor as the attacker.
 `set_health` also accepts a creature actor, or `pet: true` with a player actor to set its current pet's health.
