@@ -10,7 +10,9 @@
     "every two seconds, the brand must still tick on its three-second cadence: a refresh may extend the duration but",
     "must not restart the tick timer, or a two-second refresh would stop every tick until March ends. Within 9.5",
     "seconds of the first pulse the brand ticks at about 3, 6 and 9 seconds, so at least two ticks are required,",
-    "while a restarting timer would give none before March's last refresh. March's own pulses must also land."
+    "while a restarting timer would give none before March's last refresh. March's own pulses must also land:",
+    "with SPELL_ATTR5_EXTRA_INITIAL_PERIOD it pulses at 0, 2, 4, 6 and 8 seconds (and 10), so at least five",
+    "hits by the end of its ten-second lifetime."
   ],
   "timeout_ms": 60000,
   "players": [
@@ -29,6 +31,6 @@
     { "action": "assert", "label": "A March pulse hits the target", "actor": "hunter", "metric": "spell_damage_count", "spell": 681094, "target": "target", "min": 1, "within_ms": 2500 },
     { "action": "assert", "label": "The direct March hit applies Shadow Brand", "actor": "target", "metric": "aura", "spell": 680517, "caster": "hunter", "equals": 1, "within_ms": 1000 },
     { "action": "assert", "label": "Shadow Brand keeps ticking while March refreshes it every two seconds", "actor": "hunter", "metric": "spell_damage_count", "spell": 680517, "target": "target", "min": 2, "within_ms": 9500 },
-    { "action": "assert", "label": "March keeps dealing its own damage alongside the brand", "actor": "hunter", "metric": "spell_damage_count", "spell": 681094, "target": "target", "min": 4 }
+    { "action": "assert", "label": "March keeps dealing its own damage alongside the brand", "actor": "hunter", "metric": "spell_damage_count", "spell": 681094, "target": "target", "min": 5, "within_ms": 6000 }
   ]
 }
