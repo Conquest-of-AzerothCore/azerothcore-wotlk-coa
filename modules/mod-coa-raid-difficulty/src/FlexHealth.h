@@ -15,6 +15,7 @@ class Map;
 namespace coa_flex
 {
     uint32 CountPlayers(Map* map);
+    uint32 CountHealthPlayers(Map* map);
 }
 
 #endif
