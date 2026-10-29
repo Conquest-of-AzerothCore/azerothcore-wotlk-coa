@@ -1,0 +1,185 @@
+{
+  "schema": 2,
+  "name": "Dire Maul North: the tribute guards buff the new King of the Gordok",
+  "contract": [
+    "Issue #9414: after a tribute run King Gordok's death makes Mizzle the Crafty name the player King of the Gordok",
+    "(22799), a forced friendly reaction to the Gordok ogres (faction 38, template 45). The surviving guards then offer",
+    "the new king a gossip option that casts their buff on the player: Guard Fengus Fengus' Ferocity (22817), Guard",
+    "Mol'dar Mol'dar's Moxie (22818), Guard Slip'kik Slip'kik's Savvy (22820). The guards stand in the instance with",
+    "their own faction 45; before the king's aura the player can attack them."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 429,
+    "x": 352.0,
+    "y": 258.3,
+    "z": 11.7,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "king",
+      "race": 2,
+      "class": 1,
+      "level": 58
+    }
+  ],
+  "creatures": [
+    {
+      "id": "fengus",
+      "owner": "king",
+      "entry": 14321,
+      "distance": 3,
+      "faction": 45,
+      "level": 59
+    },
+    {
+      "id": "moldar",
+      "owner": "king",
+      "entry": 14326,
+      "distance": 4,
+      "faction": 45,
+      "level": 59
+    },
+    {
+      "id": "slipkik",
+      "owner": "king",
+      "entry": 14323,
+      "distance": 5,
+      "faction": 45,
+      "level": 59
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: before the king's aura the guard is hostile",
+      "actor": "king",
+      "metric": "can_attack",
+      "target": "fengus",
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "king",
+      "spell": 22799,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "The player is King of the Gordok",
+      "actor": "king",
+      "metric": "aura",
+      "spell": 22799,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the king cannot attack the guards",
+      "actor": "king",
+      "metric": "can_attack",
+      "target": "fengus",
+      "equals": 0
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "king",
+      "target": "fengus"
+    },
+    {
+      "action": "assert",
+      "label": "Fengus asks what the king wants",
+      "actor": "king",
+      "metric": "gossip_option_text",
+      "index": 0,
+      "text": "So, now that I'm the king... what have you got for me?!",
+      "equals": 1
+    },
+    {
+      "action": "gossip_select",
+      "actor": "king",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "label": "Fengus' Ferocity lands on the king",
+      "actor": "king",
+      "metric": "aura",
+      "spell": 22817,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "king",
+      "target": "moldar"
+    },
+    {
+      "action": "assert",
+      "label": "Mol'dar asks what the king wants",
+      "actor": "king",
+      "metric": "gossip_option_text",
+      "index": 0,
+      "text": "Call me \"Boss\".  What have you got for me!",
+      "equals": 1
+    },
+    {
+      "action": "gossip_select",
+      "actor": "king",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mol'dar's Moxie lands on the king",
+      "actor": "king",
+      "metric": "aura",
+      "spell": 22818,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "king",
+      "target": "slipkik"
+    },
+    {
+      "action": "assert",
+      "label": "Slip'kik offers the king's taunt",
+      "actor": "king",
+      "metric": "gossip_option_text",
+      "index": 0,
+      "text": "Yeah, you're a real brainiac.  Just how smart do you think you are, Slip'kik?",
+      "equals": 1
+    },
+    {
+      "action": "gossip_select",
+      "actor": "king",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "label": "Slip'kik's Savvy lands on the king",
+      "actor": "king",
+      "metric": "aura",
+      "spell": 22820,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "king",
+      "target": "fengus"
+    },
+    {
+      "action": "assert",
+      "label": "A buffed king is not offered Fengus' option again",
+      "actor": "king",
+      "metric": "gossip_options",
+      "equals": 0
+    }
+  ]
+}
