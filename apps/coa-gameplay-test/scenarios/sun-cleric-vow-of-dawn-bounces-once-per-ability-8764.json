@@ -1,0 +1,169 @@
+{
+  "schema": 1,
+  "name": "Vow of Dawn bounces once per ability, not once per target struck (#8764)",
+  "contract": "Issue #8764 (class 27 Sun Cleric): Vow of Dawn did 431k damage in a level 30 dungeon. Spell.dbc 803491 Vow of Dawn: 'Direct ability damage or healing generates 1 Solar Power and bounces to $803492s1 additional nearby targets'. aura_ascension_sun_cleric_event (AscensionSunClericEvents.cpp) ran the 803491 bounce once for every target an ability struck, so an area ability that hits five enemies cast five rounds of 803493 copies. The handler now remembers the Spell that already bounced and skips its later targets. The bounce count per round is whatever Amount(803492) resolves to, so the scenario measures it rather than assuming it: a single-target Frostbolt on one of five clustered dummies gives the per-ability bounce count, and an Arcane Explosion that strikes all five must then cast the same number of 803493 copies (ratio 1), where the old handler cast five times as many.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 27,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d1",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "d2",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 4,
+      "stationary": true
+    },
+    {
+      "id": "d3",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 5,
+      "stationary": true
+    },
+    {
+      "id": "d4",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 6,
+      "stationary": true
+    },
+    {
+      "id": "d5",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 7,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803491
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 116
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 1449
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803491
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Vow of Dawn is active on the caster",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803491,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1500,
+      "label": "Let the shared global cooldown clear"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 116,
+      "target": "d1"
+    },
+    {
+      "action": "wait",
+      "ms": 2500,
+      "label": "Let the single-target hit and its bounce round resolve"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: a single-target hit bounces at least once",
+      "actor": "caster",
+      "metric": "spell_cast_count",
+      "spell": 803493,
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_cast_count",
+      "spell": 803493,
+      "save_as": "single_round"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Arcane Explosion strikes all five dummies",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 1449,
+      "target": "d5",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Arcane Explosion strikes the first dummy",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 1449,
+      "target": "d1",
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2500,
+      "label": "Let every bounce of the area hit resolve"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: an ability striking five targets bounces exactly one round",
+      "actor": "caster",
+      "metric": "spell_cast_count",
+      "spell": 803493,
+      "relative_to": "single_round",
+      "ratio_to": "single_round",
+      "equals": 1
+    }
+  ]
+}

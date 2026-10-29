@@ -34,13 +34,13 @@ TEST(CoALegendaryCatalog, CoversOnlyTheTwentyOneCustomClasses)
     }
 }
 
-TEST(CoALegendaryVariants, PreserveCreatureLevelAndTwelveItemLevels)
+TEST(CoALegendaryVariants, PreserveCreatureLevelAndSixItemLevels)
 {
     auto const wolf = DecodeEntry(9700029);
     ASSERT_TRUE(wolf);
     EXPECT_EQ(wolf->requiredLevel, 29);
-    EXPECT_EQ(ItemLevel(wolf->requiredLevel), 41);
-    EXPECT_EQ(ItemLevel(20), 32);
+    EXPECT_EQ(ItemLevel(wolf->requiredLevel), 35);
+    EXPECT_EQ(ItemLevel(20), 26);
     for (uint32_t index = 0; index < DesignCount; ++index)
         for (uint32_t level = 1; level <= MaximumCreatureLevel; ++level)
         {
@@ -58,31 +58,32 @@ TEST(CoALegendaryVariants, PreserveCreatureLevelAndTwelveItemLevels)
     EXPECT_FALSE(DecodeEntry(9706401));
 }
 
-TEST(CoALegendaryDrops, ExcludesGrayTargetsAndThePlayerLevelCutoff)
+TEST(CoALegendaryDrops, ExcludeGrayTargetsAndCreaturesAboveTheCatalog)
 {
-    EXPECT_TRUE(CanDrop(12, 32, 29, 60, true));
-    EXPECT_TRUE(CanDrop(32, 59, 60, 60, true));
-    EXPECT_FALSE(CanDrop(32, 59, 61, 60, true));
-    EXPECT_FALSE(CanDrop(32, 59, 62, 60, true));
-    EXPECT_FALSE(CanDrop(12, 32, 10, 60, false));
-    EXPECT_FALSE(CanDrop(12, 60, 57, 60, true));
-    EXPECT_FALSE(CanDrop(12, 80, 80, 60, true));
-    EXPECT_FALSE(CanDrop(8, 32, 29, 60, true));
-    EXPECT_FALSE(CanDrop(10, 32, 29, 60, true));
-    EXPECT_FALSE(CanDrop(33, 32, 29, 60, true));
-    EXPECT_FALSE(CanDrop(12, 32, 0, 60, true));
-    EXPECT_FALSE(CanDrop(12, 32, 81, 60, true));
-    EXPECT_FALSE(CanDrop(12, 1, 1, 1, true));
-    EXPECT_TRUE(CanDrop(12, 60, 60, 70, true));
+    EXPECT_TRUE(CanDrop(12, 32, 29, true));
+    EXPECT_TRUE(CanDrop(32, 59, 60, true));
+    EXPECT_FALSE(CanDrop(32, 59, 61, true));
+    EXPECT_FALSE(CanDrop(32, 59, 62, true));
+    EXPECT_FALSE(CanDrop(12, 32, 10, false));
+    EXPECT_TRUE(CanDrop(12, 60, 57, true));
+    EXPECT_FALSE(CanDrop(12, 80, 80, true));
+    EXPECT_FALSE(CanDrop(8, 32, 29, true));
+    EXPECT_FALSE(CanDrop(10, 32, 29, true));
+    EXPECT_FALSE(CanDrop(33, 32, 29, true));
+    EXPECT_FALSE(CanDrop(12, 32, 0, true));
+    EXPECT_FALSE(CanDrop(12, 32, 81, true));
+    EXPECT_TRUE(CanDrop(12, 1, 1, true));
+    EXPECT_FALSE(CanDrop(12, 0, 1, true));
+    EXPECT_TRUE(CanDrop(12, 60, 60, true));
 }
 
-TEST(CoALegendaryDrops, DefaultToATwentiethOfAPercentThatEndsAtLevelFortyFive)
+TEST(CoALegendaryDrops, DefaultToATwentiethOfAPercentAtEveryPlayerLevel)
 {
     EXPECT_FLOAT_EQ(DefaultDropChance, 0.05f);
-    EXPECT_TRUE(CanDrop(12, 44, 44, DefaultStopDropLevel, true));
-    EXPECT_TRUE(CanDrop(12, 44, 49, DefaultStopDropLevel, true));
-    EXPECT_FALSE(CanDrop(12, 45, 45, DefaultStopDropLevel, true));
-    EXPECT_FALSE(CanDrop(12, 59, 59, DefaultStopDropLevel, true));
+    EXPECT_TRUE(CanDrop(12, 44, 44, true));
+    EXPECT_TRUE(CanDrop(12, 45, 45, true));
+    EXPECT_TRUE(CanDrop(12, 59, 59, true));
+    EXPECT_TRUE(CanDrop(12, 80, 60, true));
 }
 
 TEST(CoALegendaryPowers, RequireTheItemLevelAndStopAtLevelSixtyByDefault)
@@ -109,6 +110,6 @@ TEST(CoALegendaryPowers, ConditionsHaveInclusiveHealthBoundariesAndExpire)
     EXPECT_FALSE(ConditionActive(Condition::OutOfCombat, 100.0f, true, 0));
     EXPECT_TRUE(ConditionActive(Condition::InCombat, 100.0f, true, 0));
     EXPECT_FALSE(ConditionActive(Condition::InCombat, 100.0f, false, 0));
-    EXPECT_EQ(AttackPowerBonus(29), 82);
-    EXPECT_EQ(SpellPowerBonus(29), 41);
+    EXPECT_EQ(AttackPowerBonus(29), 35);
+    EXPECT_EQ(SpellPowerBonus(29), 17);
 }

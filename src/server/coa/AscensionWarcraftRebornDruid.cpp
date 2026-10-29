@@ -38,6 +38,12 @@ constexpr uint32 DRUID_STARSURGE = 0x80000;
 constexpr std::array<uint32, 7> RAKE = { 1101822, 1101823, 1101824, 1109904, 1127003, 1148573, 1148574 };
 constexpr std::array<uint32, 3> FERAL_INSTINCT = { 1116947, 1116948, 1116949 };
 
+constexpr uint32 FERAL_SWIFTNESS_RANK_1 = 1117002;
+constexpr uint32 FERAL_SWIFTNESS_RANK_2 = 1124866;
+constexpr uint32 FERAL_SWIFTNESS_ENCHANT = 1324866;
+constexpr std::array<uint32, 2> FERAL_SWIFTNESS_SPEED = { 1117001, 1124865 };
+constexpr std::array<uint32, 2> FERAL_SWIFTNESS_DODGE = { 1124867, 1124864 };
+
 template <std::size_t N>
 bool Contains(std::array<uint32, N> const& ids, uint32 id)
 {
@@ -86,6 +92,45 @@ class spell_ascension_reborn_primal_fury : public AuraScript
     {
         DoCheckProc += AuraCheckProcFn(spell_ascension_reborn_primal_fury::CheckProc);
         OnEffectProc += AuraEffectProcFn(spell_ascension_reborn_primal_fury::HandleProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
+    }
+};
+
+class spell_ascension_reborn_feral_swiftness : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_reborn_feral_swiftness);
+
+    bool Validate(SpellInfo const*) override
+    {
+        return ValidateSpellInfo({ FERAL_SWIFTNESS_SPEED[0], FERAL_SWIFTNESS_SPEED[1], FERAL_SWIFTNESS_DODGE[0],
+            FERAL_SWIFTNESS_DODGE[1] });
+    }
+
+    void AfterApply(AuraEffect const* aurEff, AuraEffectHandleModes)
+    {
+        Player* player = GetTarget()->ToPlayer();
+        if (!player)
+            return;
+        uint8 const rank = player->HasSpell(FERAL_SWIFTNESS_RANK_2) || player->HasAura(FERAL_SWIFTNESS_ENCHANT) ? 2 :
+            player->HasSpell(FERAL_SWIFTNESS_RANK_1) ? 1 : 0;
+        if (!rank)
+            return;
+        if (player->GetShapeshiftForm() == FORM_CAT)
+            player->CastSpell(player, FERAL_SWIFTNESS_SPEED[rank - 1], true, nullptr, aurEff);
+        player->CastSpell(player, FERAL_SWIFTNESS_DODGE[rank - 1], true, nullptr, aurEff);
+    }
+
+    void AfterRemove(AuraEffect const*, AuraEffectHandleModes)
+    {
+        for (uint32 spellId : FERAL_SWIFTNESS_SPEED)
+            GetTarget()->RemoveAurasDueToSpell(spellId);
+        for (uint32 spellId : FERAL_SWIFTNESS_DODGE)
+            GetTarget()->RemoveAurasDueToSpell(spellId);
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(spell_ascension_reborn_feral_swiftness::AfterApply, EFFECT_0, SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL);
+        AfterEffectRemove += AuraEffectRemoveFn(spell_ascension_reborn_feral_swiftness::AfterRemove, EFFECT_0, SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL);
     }
 };
 
@@ -203,4 +248,5 @@ void AddAscensionWarcraftRebornDruidScripts()
     using namespace AscensionWarcraftReborn;
     RegisterSpellScript(spell_ascension_reborn_eclipse);
     RegisterSpellScript(spell_ascension_reborn_primal_fury);
+    RegisterSpellScript(spell_ascension_reborn_feral_swiftness);
 }

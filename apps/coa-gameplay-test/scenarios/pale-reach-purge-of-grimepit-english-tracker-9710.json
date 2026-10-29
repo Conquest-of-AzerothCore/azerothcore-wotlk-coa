@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "name": "The Purge of Grimepit: the quest tracker's turn-in line is English (COA-9710)",
+  "contract": "Issue #9710: once The Purge of Grimepit 175015 is complete, the tracker shows the quest's QuestCompletionLog, which read 'Informa a Padre Amrod' (Spanish, also in Ascension's own cache). Father Amrod 164196 ends the quest. The case sends the native quest query and reads the string the client receives.",
+  "timeout_ms": 30000,
+  "location": { "map": 0, "x": -6847.06, "y": 1356.65, "z": 312.82, "o": 0 },
+  "players": [
+    { "id": "p", "race": 1, "class": 1, "level": 30 }
+  ],
+  "steps": [
+    { "action": "client_packet", "label": "Query quest 175015", "actor": "p", "opcode": 92, "consumed": false, "fields": [{ "u32": 175015 }] },
+    { "action": "assert", "label": "the tracker sends players to Father Amrod in English", "actor": "p", "metric": "quest_query_text_contains", "quest": 175015, "text": "Report to Father Amrod", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: no Spanish turn-in line remains", "actor": "p", "metric": "quest_query_text_contains", "quest": 175015, "text": "Informa a", "equals": 0, "within_ms": 2000 }
+  ]
+}

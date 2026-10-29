@@ -28,6 +28,8 @@ constexpr uint32 IMPROVED_SPELL_REFLECTION = 59088;
 constexpr uint32 IMPROVED_SPELL_REFLECTION_PARTY = 59725;
 constexpr int32 IMPROVED_SPELL_REFLECTION_RADIUS_MOD = 2000;
 
+constexpr uint32 PROTECTION_MASTERY = 1134996;
+
 class spell_ascension_reborn_shockwave : public SpellScript
 {
     PrepareSpellScript(spell_ascension_reborn_shockwave);
@@ -223,6 +225,10 @@ void ApplyAscensionWarcraftRebornWarriorContracts(SpellInfo* spellInfo)
     using namespace AscensionWarcraftReborn;
     if (!spellInfo || spellInfo->Id < REBORN_SPELL_OFFSET || spellInfo->SpellFamilyName != SPELLFAMILY_WARRIOR)
         return;
+
+    if (spellInfo->Id == PROTECTION_MASTERY && spellInfo->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_MOD_THREAT &&
+        !spellInfo->Effects[EFFECT_0].MiscValue)
+        spellInfo->Effects[EFFECT_0].MiscValue = SPELL_SCHOOL_MASK_ALL;
 
     if ((spellInfo->SpellFamilyFlags[1] & VICTORY_RUSH_FLAG) && !spellInfo->Effects[EFFECT_0].BasePoints &&
         spellInfo->Effects[EFFECT_0].Effect == SPELL_EFFECT_SCHOOL_DAMAGE)

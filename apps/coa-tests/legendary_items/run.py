@@ -21,12 +21,33 @@ class LegendaryCatalogTest(unittest.TestCase):
 
     def test_stats_and_descriptions_match_a_level_29_drop(self):
         catalog = CATALOG.load_catalog()
-        self.assertEqual(CATALOG.item_stats(catalog[0], 41), [4, 14, 7, 18, 38, 41, 0, 0])
-        self.assertEqual(CATALOG.item_stats(catalog[3], 41), [5, 14, 7, 18, 45, 22, 0, 0])
-        self.assertEqual(CATALOG.item_stats(catalog[6], 41), [3, 14, 7, 18, 38, 41, 45, 14])
+        self.assertEqual(CATALOG.item_stats(catalog[0], 35), [4, 4, 7, 5, 38, 10, 0, 0])
+        self.assertEqual(CATALOG.item_stats(catalog[3], 35), [5, 4, 7, 5, 45, 6, 0, 0])
+        self.assertEqual(CATALOG.item_stats(catalog[6], 35), [3, 4, 7, 5, 38, 5, 45, 2])
         self.assertEqual(CATALOG.power_text(catalog[0], 29),
-            'Gain 82 melee and ranged attack power for 8 sec after killing a non-gray creature.')
+            'Gain 35 melee and ranged attack power for 8 sec after killing a non-gray creature.')
         self.assertEqual(CATALOG.power_text(catalog[63], 29), 'Gain 20% armor while at or below 35% health.')
+
+    def test_stat_budget_sits_between_worldforged_and_epic_items(self):
+        weights = {38: 0.5, 45: 0.86}
+        for item in CATALOG.load_catalog():
+            for level in (20, 40, 60):
+                ilvl = level + CATALOG.ITEM_LEVEL_BONUS
+                stats = CATALOG.item_stats(item, ilvl)
+                points = sum(value * weights.get(stat, 1) for stat, value in zip(stats[::2], stats[1::2]))
+                with self.subTest(item=item['name'], level=level):
+                    self.assertGreaterEqual(points / ilvl, 0.35)
+                    self.assertLessEqual(points / ilvl, 0.5)
+
+    def test_items_are_rare_realm_bound_with_the_fabled_tag(self):
+        sql = CATALOG.render_sql(CATALOG.load_catalog())
+        item_rows = sql.split('INSERT INTO `item_dbc`', 1)[0]
+        quality_and_flags = re.findall(r"^\(970\d{4}, 4, \d+, -1, '(?:[^'\\]|\\.)*', \d+, (\d+), (\d+),",
+            item_rows, re.MULTILINE)
+        self.assertEqual(len(quality_and_flags), 3840)
+        self.assertEqual(set(quality_and_flags), {('3', str(0x08000000))})
+        self.assertEqual(item_rows.count("'@Fabled@'"), 3840)
+        self.assertNotIn("''", item_rows)
 
     def test_movement_is_exclusive_to_boots(self):
         catalog = CATALOG.load_catalog()

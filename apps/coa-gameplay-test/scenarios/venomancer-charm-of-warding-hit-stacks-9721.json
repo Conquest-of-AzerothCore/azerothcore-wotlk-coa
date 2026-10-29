@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Charm of Warding learned mid-fight heals on Exposed Flesh stacks from hits (#9721)",
+  "contract": [
+    "#9721: a level 31 Venomancer learned Charm of Warding (705967) mid-fight in Shadowfang Keep and saw no heal when",
+    "Exposed Flesh (805095) stacks were gained. Client and server Spell.dbc agree with AscensionDB/SUB: 'When a stack of",
+    "Exposed Flesh is applied you are now healed for $s1% of your maximum health' ($s1 = 1). The existing #5546 scenario",
+    "covers only Molt; this one drives the hit path: in Beetle Form, hostile hits proc 805098 (92144's helper), which",
+    "calls Expose(player, 1). The talent is learned while the attackers are already swinging, Exposed Flesh is cleared",
+    "below its cap, and each newly gained stack must log a Charm of Warding heal (spell_heal_count from native heal logs)."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "v", "race": 1, "class": 29, "level": 31 }
+  ],
+  "steps": [
+    { "action": "set_aura", "actor": "v", "spell": 10040, "stacks": 1 },
+    { "action": "learn", "actor": "v", "spell": 803183 },
+    { "action": "learn", "actor": "v", "spell": 92144 },
+    { "action": "cast", "actor": "v", "spell": 803183, "label": "Enter Beetle Form" },
+    { "action": "assert", "label": "SETUP: Beetle Form", "actor": "v", "metric": "aura", "spell": 803183, "equals": 1,
+      "within_ms": 3000 },
+    { "action": "set_health", "actor": "v", "value": 10000 },
+    { "action": "assert", "label": "SETUP: the attackers are in combat", "actor": "a0", "metric": "combat",
+      "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "SETUP: hits grant Exposed Flesh before the talent is learned", "actor": "v",
+      "metric": "aura", "spell": 805095, "equals": 1, "within_ms": 6000 },
+    { "action": "assert", "label": "SETUP: no Charm of Warding heal without the talent", "actor": "v",
+      "metric": "spell_heal_count", "spell": 705967, "equals": 0 },
+    { "action": "learn", "actor": "v", "spell": 705967, "label": "Learn Charm of Warding mid-fight" },
+    { "action": "assert", "label": "SETUP: Charm of Warding is active while in combat", "actor": "v", "metric": "aura",
+      "spell": 705967, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: still in combat", "actor": "v", "metric": "combat", "equals": 1 },
+    { "action": "set_aura", "label": "Clear Exposed Flesh below its cap", "actor": "v", "spell": 805095, "stacks": 0 },
+    { "action": "set_health", "actor": "v", "value": 10000 },
+    { "action": "snapshot", "actor": "v", "metric": "spell_heal_count", "spell": 705967, "save_as": "heals_before" },
+    { "action": "assert", "label": "SETUP: hits grant new Exposed Flesh stacks", "actor": "v", "metric": "aura_stacks",
+      "spell": 805095, "min": 2, "within_ms": 8000 },
+    { "action": "assert", "label": "DISCRIMINATING: each stack gained from a hit logs a Charm of Warding heal",
+      "actor": "v", "metric": "spell_heal_count", "spell": 705967, "relative_to": "heals_before", "min": 2 }
+  ],
+  "creatures": [
+    { "id": "a0", "owner": "v", "entry": 16334, "faction": 14, "level": 25, "health": 100000, "reaction": 2,
+      "distance": 3 },
+    { "id": "a1", "owner": "v", "entry": 16334, "faction": 14, "level": 25, "health": 100000, "reaction": 2,
+      "distance": 3 },
+    { "id": "a2", "owner": "v", "entry": 16334, "faction": 14, "level": 25, "health": 100000, "reaction": 2,
+      "distance": 3 },
+    { "id": "a3", "owner": "v", "entry": 16334, "faction": 14, "level": 25, "health": 100000, "reaction": 2,
+      "distance": 3 }
+  ]
+}

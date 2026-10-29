@@ -410,6 +410,8 @@ only when the scenario specifically exercises GM/admin-gated behavior through th
 `spell_crit_rating`, `melee_crit_rating`, `ranged_crit_rating`, `ranged_hit_rating`, `melee_hit_rating` and
 `expertise_rating` add fixture ratings through normal calculations, useful for preventing misses, dodges and
 parries, or forcing critical hits, in deterministic tests.
+Optional `attack_power`, `ranged_attack_power` and `spell_power` add flat fixture bonuses through the native stat
+modifiers, so a test character can carry raid-level stats without gear.
 Optional `allow_regeneration: false` suppresses only that fixture player's ordinary health/power regeneration
 through the native regeneration hook. Spell costs, healing, energize effects and combat remain enabled.
 It defaults to true and has no effect on other players or on a disabled harness.
@@ -908,7 +910,8 @@ aura expiry is a separate event.
 `owned_creature_weapon_damage_min` requires a player and `entry`. It returns the lowest minimum weapon damage (`UNIT_FIELD_MINDAMAGE`) across their living
 owned creatures of that entry in the same phase and within 100 yards, so every copy of a guardian must meet an asserted `min`; zero when there are none.
 `owned_creature_armor` requires a player and a present owned creature selected by `entry`. It reads that creature's
-native `GetArmor()`, zero when absent.
+native `GetArmor()`, zero when absent. `owned_creature_max_health` reads the same creature's `GetMaxHealth()` and
+requires it to be present.
 `owned_gameobject_count` requires a player and `entry`. It counts their summoned gameobjects of that entry
 in the same phase and within 100 yards. `gameobject_display` and `gameobject_scale` read the single owned
 object's native display id and scale, returning zero when absent. They do not verify client rendering.

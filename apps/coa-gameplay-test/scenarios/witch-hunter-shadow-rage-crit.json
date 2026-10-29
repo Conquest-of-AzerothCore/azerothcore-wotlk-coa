@@ -1,0 +1,327 @@
+{
+  "schema": 1,
+  "name": "Shadow Rage procs crit with the striker's critical strike chance",
+  "contract": [
+    "In live raid logs (2026-08-27 and 2026-08-31) Shadow Rage (567570) crits 44% of the time from the owner, 60% from",
+    "the permanent Shadowhound and 56% from Lesser Shadowhounds, matching the owner's Auto Shot and the hounds'",
+    "melee crit rates, and a crit deals 2.0 times a normal hit. The owner's procs use its ranged crit chance; a",
+    "hound's use its own melee crit plus the owner's ranged crit above 5%, as its swings do. With a fixture rating",
+    "that caps the owner's ranged crit, every proc from the hound and from Coordinated Killing crits. Expected: at",
+    "least 5 critical procs and no normal one."
+  ],
+  "timeout_ms": 150000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "wh",
+      "race": 1,
+      "class": 15,
+      "level": 60,
+      "ranged_crit_rating": 100000,
+      "ranged_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "golem",
+      "owner": "wh",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "distance": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 5011
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 75
+    },
+    {
+      "action": "add_item",
+      "actor": "wh",
+      "item": 15807
+    },
+    {
+      "action": "equip",
+      "actor": "wh",
+      "item": 15807,
+      "slot": 17
+    },
+    {
+      "action": "wait",
+      "label": "Let the weapon swap cooldown expire",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 680264
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 801343
+    },
+    {
+      "action": "learn",
+      "label": "Shadow Rage for the hound",
+      "actor": "wh",
+      "spell": 705455
+    },
+    {
+      "action": "learn",
+      "label": "Coordinated Killing: Shadow Rage on Auto Shot",
+      "actor": "wh",
+      "spell": 705463
+    },
+    {
+      "action": "cast",
+      "label": "Houndmaster's Whistle",
+      "actor": "wh",
+      "spell": 801343
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Shadowhound is out",
+      "actor": "wh",
+      "metric": "pet_entry",
+      "equals": 50124,
+      "within_ms": 5000
+    },
+    {
+      "action": "attack",
+      "label": "Send the hound in",
+      "actor": "wh",
+      "target": "golem",
+      "pet": true
+    },
+    {
+      "action": "cast",
+      "label": "Start Auto Shot",
+      "actor": "wh",
+      "spell": 75,
+      "target": "golem"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Shadowblast grants Shadow Rage",
+      "actor": "wh",
+      "spell": 680264,
+      "target": "golem"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Shadowblast grants Shadow Rage",
+      "actor": "wh",
+      "spell": 680264,
+      "target": "golem"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Shadowblast grants Shadow Rage",
+      "actor": "wh",
+      "spell": 680264,
+      "target": "golem"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Shadowblast grants Shadow Rage",
+      "actor": "wh",
+      "spell": 680264,
+      "target": "golem"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Shadowblast grants Shadow Rage",
+      "actor": "wh",
+      "spell": 680264,
+      "target": "golem"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Shadowblast grants Shadow Rage",
+      "actor": "wh",
+      "spell": 680264,
+      "target": "golem"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Shadowblast grants Shadow Rage",
+      "actor": "wh",
+      "spell": 680264,
+      "target": "golem"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Shadowblast grants Shadow Rage",
+      "actor": "wh",
+      "spell": 680264,
+      "target": "golem"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Shadowblast grants Shadow Rage",
+      "actor": "wh",
+      "spell": 680264,
+      "target": "golem"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Shadowblast grants Shadow Rage",
+      "actor": "wh",
+      "spell": 680264,
+      "target": "golem"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the hound carries Shadow Rage",
+      "actor": "wh",
+      "metric": "pet_aura_stacks",
+      "spell": 804192,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Shadow Rage procs crit",
+      "actor": "wh",
+      "metric": "spell_damage_count",
+      "spell": 567570,
+      "target": "golem",
+      "critical": true,
+      "min": 5
+    },
+    {
+      "action": "assert",
+      "label": "No Shadow Rage proc lands without a crit",
+      "actor": "wh",
+      "metric": "spell_damage_count",
+      "spell": 567570,
+      "target": "golem",
+      "critical": false,
+      "equals": 0
+    }
+  ]
+}

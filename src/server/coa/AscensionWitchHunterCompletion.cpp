@@ -122,9 +122,7 @@ void ApplyContracts(SpellInfo* info)
         info->InterruptFlags |= SPELL_INTERRUPT_FLAG_MOVEMENT;
         info->ChannelInterruptFlags |= AURA_INTERRUPT_FLAG_MOVE;
     }
-    if (Family(info, 0, 2) && info->HasAura(SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE))
-        info->AttributesEx |= SPELL_ATTR1_IS_CHANNELED;
-    if ((id == 807364 || id == 805751 || Family(info, 0, 2)) && info->IsChanneled())
+    if ((id == 807364 || id == 805751) && info->IsChanneled())
         info->AttributesEx5 &= ~SPELL_ATTR5_ALLOW_ACTION_DURING_CHANNEL;
     if (id == 574149 || id == 574163)
         ConvertCreatureTypeDamage(info, EFFECT_1);
@@ -321,7 +319,8 @@ void ApplyContracts(SpellInfo* info)
                 effect.BonusMultiplier = 0.0f;
     if (id == 574335 || id == 574337 || id == 681270 || id == 680532 || id == 807262 || id == 567570)
     {
-        info->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT;
+        if (id != 567570)
+            info->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT;
         info->AttributesEx3 |= SPELL_ATTR3_IGNORE_CASTER_MODIFIERS;
         info->AttributesEx4 |= SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS;
         info->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;

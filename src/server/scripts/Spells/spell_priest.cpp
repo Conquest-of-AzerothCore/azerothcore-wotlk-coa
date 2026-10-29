@@ -36,6 +36,7 @@ enum PriestSpells
     SPELL_PRIEST_GLYPH_OF_LIGHTWELL                 = 55673,
     SPELL_PRIEST_GLYPH_OF_PRAYER_OF_HEALING_HEAL    = 56161,
     SPELL_PRIEST_GUARDIAN_SPIRIT_HEAL               = 48153,
+    SPELL_PRIEST_GLYPH_OF_GUARDIAN_SPIRIT           = 63231,
     SPELL_PRIEST_ITEM_EFFICIENCY                    = 37595,
     SPELL_PRIEST_LIGHTWELL_CHARGES                  = 59907,
     SPELL_PRIEST_MANA_LEECH_PROC                    = 34650,
@@ -327,10 +328,24 @@ class spell_pri_guardian_spirit : public AuraScript
         absorbAmount = dmgInfo.GetDamage();
     }
 
+    // Glyph of Guardian Spirit: lasting the entire duration without being triggered resets the cooldown to the
+    // glyph's amount (60 sec)
+    void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
+            return;
+        Player* caster = GetCaster() ? GetCaster()->ToPlayer() : nullptr;
+        if (!caster)
+            return;
+        if (AuraEffect const* glyph = caster->GetAuraEffectOfRankedSpellOrTwin(SPELL_PRIEST_GLYPH_OF_GUARDIAN_SPIRIT, EFFECT_0))
+            caster->AddSpellCooldown(GetId(), 0, uint32(std::max(glyph->GetAmount(), 0)) * IN_MILLISECONDS, true);
+    }
+
     void Register() override
     {
         DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_guardian_spirit::CalculateAmount, EFFECT_1, SPELL_AURA_SCHOOL_ABSORB);
         OnEffectAbsorb += AuraEffectAbsorbFn(spell_pri_guardian_spirit::Absorb, EFFECT_1);
+        AfterEffectRemove += AuraEffectRemoveFn(spell_pri_guardian_spirit::HandleRemove, EFFECT_1, SPELL_AURA_SCHOOL_ABSORB, AURA_EFFECT_HANDLE_REAL);
     }
 };
 

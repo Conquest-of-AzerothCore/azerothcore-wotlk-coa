@@ -83,7 +83,7 @@ std::vector<std::pair<uint32, uint32>> EnchantTwins()
     for (AscensionMysticEnchant::Enchant const& enchant : catalog.Rows)
     {
         if (!enchant.Realms[SEASONAL] || !AscensionMysticEnchant::ClassAllowed(enchant, AscensionMysticEnchant::HERO_CLASS) ||
-            enchant.Taught || enchant.Spell < BLIZZARD_SPELL_END)
+            !enchant.Taught.empty() || enchant.Spell < BLIZZARD_SPELL_END)
             continue;
         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(enchant.Spell);
         std::optional<SpellLayout> const layout = LayoutOf(enchant.Spell);

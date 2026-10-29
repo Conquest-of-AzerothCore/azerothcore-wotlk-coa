@@ -10,7 +10,9 @@
 #include "DatabaseEnv.h"
 #include "Errors.h"
 #include "GameObject.h"
+#include "Group.h"
 #include "Item.h"
+#include "LFGMgr.h"
 #include "LootMgr.h"
 #include "Map.h"
 #include "ObjectMgr.h"
@@ -84,6 +86,28 @@ std::string SelectItemInstance(uint64 chestId, uint8 slot)
 bool InHighRisk(Player const* player)
 {
     return player->HasAura(HighRiskAura);
+}
+
+bool CannotQueue(Player const* player)
+{
+    return QueueBlocked(InHighRisk(player), OpenWorld(player), player->HasPlayerFlag(PLAYER_FLAGS_RESTING),
+        player->GetSession()->IsBot());
+}
+
+bool RefuseOutsideRest(Player* player, bool wholeGroup, std::string_view action)
+{
+    Player* blocked = CannotQueue(player) ? player : nullptr;
+    if (Group* group = wholeGroup ? player->GetGroup() : nullptr)
+        for (GroupReference* member = group->GetFirstMember(); member && !blocked; member = member->next())
+            if (Player* source = member->GetSource(); source && CannotQueue(source))
+                blocked = source;
+    if (!blocked)
+        return false;
+
+    ChatHandler(player->GetSession()).SendSysMessage(Acore::StringFormat(
+        "{} must be in a city or inn to {} while in High-Risk.", blocked == player ? "You" : blocked->GetName(),
+        action));
+    return true;
 }
 
 void Commit(CharacterDatabaseTransaction transaction)
@@ -545,6 +569,56 @@ public:
     }
 };
 
+class RiskQueues final : public PlayerScript
+{
+public:
+    RiskQueues() : PlayerScript("highrisk_queues", {PLAYERHOOK_CAN_JOIN_LFG, PLAYERHOOK_CAN_LFG_TELEPORT,
+        PLAYERHOOK_CAN_JOIN_IN_BATTLEGROUND_QUEUE, PLAYERHOOK_CAN_JOIN_IN_ARENA_QUEUE,
+        PLAYERHOOK_CAN_BATTLEFIELD_PORT}) { }
+
+    bool OnPlayerCanJoinLfg(Player* player, uint8, lfg::LfgDungeonSet&, std::string const&) override
+    {
+        if (!RefuseOutsideRest(player, true, "queue"))
+            return true;
+        player->GetSession()->SendLfgJoinResult(lfg::LfgJoinResultData(
+            player->GetGroup() ? lfg::LFG_JOIN_PARTY_NOT_MEET_REQS : lfg::LFG_JOIN_NOT_MEET_REQS));
+        return false;
+    }
+
+    bool OnPlayerCanJoinInBattlegroundQueue(Player* player, ObjectGuid, BattlegroundTypeId, uint8 joinAsGroup,
+        GroupJoinBattlegroundResult& err) override
+    {
+        return !Refuse(player, joinAsGroup, err);
+    }
+
+    bool OnPlayerCanJoinInArenaQueue(Player* player, ObjectGuid, uint8, BattlegroundTypeId, uint8 joinAsGroup,
+        uint8, GroupJoinBattlegroundResult& err) override
+    {
+        return !Refuse(player, joinAsGroup, err);
+    }
+
+    bool OnPlayerCanLfgTeleport(Player* player) override
+    {
+        return !RefuseOutsideRest(player, false, "teleport into a dungeon");
+    }
+
+    bool OnPlayerCanBattleFieldPort(Player* player, uint8, BattlegroundTypeId, uint8 action) override
+    {
+        return action != BattlefieldPortEnter || !RefuseOutsideRest(player, false, "enter");
+    }
+
+private:
+    static constexpr uint8 BattlefieldPortEnter = 1;
+
+    static bool Refuse(Player* player, uint8 joinAsGroup, GroupJoinBattlegroundResult& err)
+    {
+        if (!RefuseOutsideRest(player, joinAsGroup, "queue"))
+            return false;
+        err = ERR_BATTLEGROUND_NONE;
+        return true;
+    }
+};
+
 class RiskMaps final : public AllMapScript
 {
 public:
@@ -636,6 +710,7 @@ void AddSC_AscensionHighRisk()
 {
     new HighRisk::RiskWorld();
     new HighRisk::RiskPlayer();
+    new HighRisk::RiskQueues();
     new HighRisk::RiskMaps();
     new HighRisk::RiskChest();
     new HighRisk::RiskPackets();

@@ -152,12 +152,34 @@ class aura_ascension_sun_cleric_event : public AuraScript
             uint32 amount = damage ? damage : healing;
             if (id == 803489)
                 Copy(player, target, damage ? 803490 : 803816, CalculatePct(amount, Amount(id,1) * (fulfillment ? 2 : 1)));
-            if (id == 803491)
+            bool const bounced = spell && State(player).vowSpell == spell &&
+                getMSTimeDiff(State(player).vowTime, GameTime::GetGameTimeMS().count()) < 2000;
+            if (id == 803491 && !bounced)
             {
+                if (spell)
+                {
+                    State(player).vowSpell = spell;
+                    State(player).vowTime = GameTime::GetGameTimeMS().count();
+                }
                 auto nearby = damage ? Nearby(target, 10) : Allies(player, target, 10);
                 nearby.remove(target);
+                if (spell)
+                {
+                    std::list<TargetInfo> const& struck = *spell->GetUniqueTargetInfo();
+                    nearby.sort([&struck](Unit* a, Unit* b)
+                    {
+                        auto const hit = [&struck](Unit* unit)
+                        {
+                            return std::any_of(struck.begin(), struck.end(),
+                                [unit](TargetInfo const& info) { return info.targetGUID == unit->GetGUID(); });
+                        };
+                        return !hit(a) && hit(b);
+                    });
+                }
                 nearby.remove_if([player,damage](Unit* unit) { return damage && !player->IsValidAttackTarget(unit); });
-                uint32 count = uint32(Amount(803492)) * (fulfillment ? 2 : 1);
+                uint32 count = uint32(Amount(803492));
+                if (fulfillment)
+                    count = (count + 1) * 2 - 1;
                 for (Unit* unit : nearby)
                 {
                     if (!count--)

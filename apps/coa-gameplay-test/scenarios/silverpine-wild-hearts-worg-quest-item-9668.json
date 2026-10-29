@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Wild Hearts and other quest drops are advertised in the dropping creature's query (COA-9668)",
+  "contract": "Issue #9668: the Mottled Worg 1766 drops Discolored Worg Heart 3164 for Wild Hearts 429, but its creature query listed no quest item, so the tooltip never marked it. Ascension's creature cache lists 3164 on all four worgs that drop it; 15 more creatures had the same gap for a quest-required drop in their own loot table. The case queries the reported worg, Gorefang, a murloc carrying a second item and the Frostmaul Giant carrying a third, with a stock item as control.",
+  "timeout_ms": 30000,
+  "location": { "map": 0, "x": 1020.22, "y": 1314.63, "z": 38.2, "o": 0 },
+  "players": [
+    { "id": "p", "race": 5, "class": 1, "level": 30 }
+  ],
+  "steps": [
+    { "action": "client_packet", "label": "Query Mottled Worg", "actor": "p", "opcode": 96, "consumed": false, "fields": [{ "u32": 1766 }, { "u64": 0 }] },
+    { "action": "assert", "label": "DISCRIMINATING: Mottled Worg advertises Discolored Worg Heart", "actor": "p", "metric": "creature_query_quest_item", "entry": 1766, "item": 3164, "equals": 1, "within_ms": 2000 },
+    { "action": "client_packet", "label": "Query Gorefang", "actor": "p", "opcode": 96, "consumed": false, "fields": [{ "u32": 12431 }, { "u64": 0 }] },
+    { "action": "assert", "label": "Gorefang advertises Discolored Worg Heart", "actor": "p", "metric": "creature_query_quest_item", "entry": 12431, "item": 3164, "equals": 1, "within_ms": 2000 },
+    { "action": "client_packet", "label": "Query Murloc Scout", "actor": "p", "opcode": 96, "consumed": false, "fields": [{ "u32": 578 }, { "u64": 0 }] },
+    { "action": "assert", "label": "CONTROL: Murloc Scout keeps its stock quest item", "actor": "p", "metric": "creature_query_quest_item", "entry": 578, "item": 1467, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "Murloc Scout also advertises Murloc Fin", "actor": "p", "metric": "creature_query_quest_item", "entry": 578, "item": 1468, "equals": 1, "within_ms": 2000 },
+    { "action": "client_packet", "label": "Query Frostmaul Giant", "actor": "p", "opcode": 96, "consumed": false, "fields": [{ "u32": 7428 }, { "u64": 0 }] },
+    { "action": "assert", "label": "Frostmaul Giant advertises its third quest drop", "actor": "p", "metric": "creature_query_quest_item", "entry": 7428, "item": 12436, "equals": 1, "within_ms": 2000 }
+  ]
+}

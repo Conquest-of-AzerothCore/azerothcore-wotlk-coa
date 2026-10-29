@@ -2435,7 +2435,7 @@ InventoryResult Player::CanUseItem(ItemTemplate const* proto) const
         }
     }
 
-    if (proto->RequiredSpell != 0 && !HasSpell(proto->RequiredSpell))
+    if (proto->RequiredSpell != 0 && !HasSpellOrTwin(proto->RequiredSpell))
     {
         return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
     }
@@ -2491,7 +2491,7 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
     if ((proto->AllowableClass & getClassMask()) == 0 || (proto->AllowableRace & getRaceMask()) == 0)
         return EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
 
-    if (proto->RequiredSpell != 0 && !HasSpell(proto->RequiredSpell))
+    if (proto->RequiredSpell != 0 && !HasSpellOrTwin(proto->RequiredSpell))
         return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
 
     if (proto->RequiredSkill != 0)

@@ -2,10 +2,12 @@
  * Copyright (C) 2016+ AzerothCore <www.azerothcore.org>, released under GNU AGPL v3 license: https://github.com/azerothcore/azerothcore-wotlk/blob/master/LICENSE-AGPL3
  */
 
+#include "Containers.h"
 #include "DatabaseEnv.h"
 #include "Field.h"
 #include "GameTime.h"
 #include "Log.h"
+#include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "QueryResult.h"
@@ -21,6 +23,10 @@
 #include "Tokenize.h"
 #include "Unit.h"
 #include "UnitScript.h"
+#include "AllCreatureScript.h"
+#include "Creature.h"
+#include "Pet.h"
+#include "PetScript.h"
 #include "WorldScript.h"
 #include <algorithm>
 #include <array>
@@ -90,6 +96,9 @@ struct EffectRule
     std::vector<uint32> ConsumeAura;
     float Chance = 100.0f;
     Milliseconds Cooldown = 0ms;
+    std::vector<uint32> TriggerSpells;
+    float AmountPct = 0.0f;
+    float ChancePerCombo = 0.0f;
 };
 
 struct AuraLink
@@ -97,6 +106,42 @@ struct AuraLink
     uint32 Enchant = 0;
     uint32 Grant = 0;
 };
+
+struct MinionAura
+{
+    uint32 Enchant = 0;
+    uint32 Entry = 0;
+    uint32 Aura = 0;
+};
+std::vector<MinionAura> MinionAuras;
+
+void SyncMinionAuras(Unit* owner, Unit* minion)
+{
+    for (MinionAura const& listener : MinionAuras)
+    {
+        if (listener.Entry && minion->GetEntry() != listener.Entry)
+            continue;
+        if (!owner->HasAura(listener.Enchant))
+            minion->RemoveAurasDueToSpell(listener.Aura);
+        else if (!minion->HasAura(listener.Aura))
+            minion->AddAura(listener.Aura, minion);
+    }
+}
+
+void SyncMinionAuras(Unit* owner)
+{
+    for (Unit* minion : owner->m_Controlled)
+        if (minion && minion->IsInWorld())
+            SyncMinionAuras(owner, minion);
+}
+
+bool HasMinionAura(uint32 enchant)
+{
+    return std::any_of(MinionAuras.begin(), MinionAuras.end(),
+        [enchant](MinionAura const& listener) { return listener.Enchant == enchant; });
+}
+
+constexpr AuraType SPELL_AURA_ASCENSION_PROC_TRIGGER_PCT = AuraType(354);
 
 std::unordered_map<uint32, std::array<std::vector<EffectRule const*>, MAX_SPELL_EFFECTS>> Rules;
 std::vector<EffectRule> Storage;
@@ -182,7 +227,13 @@ int32 Stacks(Unit const* unit, uint32 aura, ObjectGuid caster = ObjectGuid::Empt
 std::pair<Unit*, Unit*> Sides(Unit* owner, ProcEventInfo& eventInfo)
 {
     Unit* actor = eventInfo.GetActor();
-    return { owner, actor == owner ? eventInfo.GetActionTarget() : actor };
+    if (actor != owner)
+        return { owner, actor };
+    Unit* target = eventInfo.GetActionTarget();
+    if (!target)
+        if (Spell const* spell = eventInfo.GetProcSpell())
+            target = spell->m_targets.GetUnitTarget();
+    return { owner, target };
 }
 
 bool Holds(Condition const& condition, Unit* owner, ProcEventInfo& eventInfo)
@@ -218,6 +269,11 @@ bool Holds(Condition const& condition, Unit* owner, ProcEventInfo& eventInfo)
             return target && !target->IsInCombat();
     }
     return false;
+}
+
+bool TargetsEnemy(SpellInfo const* trigger)
+{
+    return trigger->Effects[EFFECT_0].TargetA.GetTarget() == TARGET_UNIT_TARGET_ENEMY;
 }
 
 bool Periodic(ProcEventInfo const& eventInfo)
@@ -361,7 +417,21 @@ class spell_ascension_mystic_enchant_proc : public AuraScript
         TimePoint const now = GameTime::Now();
         if (now < _ready[effect->GetEffIndex()])
             return false;
-        if (rule->Chance < 100.0f && !roll_chance_f(rule->Chance))
+        float chance = rule->Chance;
+        if (rule->ChancePerCombo > 0.0f && !rule->TargetAura.empty())
+        {
+            Unit const* target = Sides(GetTarget(), eventInfo).second;
+            int32 stacks = 0;
+            for (uint32 aura : rule->TargetAura)
+                stacks = std::max(stacks, Stacks(target, aura, GetTarget()->GetGUID()));
+            chance = rule->ChancePerCombo * float(stacks);
+        }
+        else if (rule->ChancePerCombo > 0.0f)
+        {
+            Player const* player = GetTarget()->ToPlayer();
+            chance = player ? rule->ChancePerCombo * float(player->GetComboPoints()) : 0.0f;
+        }
+        if (chance < 100.0f && !roll_chance_f(chance))
             return false;
         _fired[effect->GetEffIndex()] = rule;
         return true;
@@ -369,18 +439,88 @@ class spell_ascension_mystic_enchant_proc : public AuraScript
 
     void AimCastTrigger(AuraEffect const* effect, ProcEventInfo& eventInfo)
     {
-        if (eventInfo.GetActionTarget() || HasActionScript())
+        EffectRule const* rule = _fired[effect->GetEffIndex()];
+        bool const ruleTrigger = rule && !rule->TriggerSpells.empty();
+        if (!ruleTrigger && (eventInfo.GetActionTarget() || HasActionScript()))
             return;
+        SpellInfo const* trigger = sSpellMgr->GetSpellInfo(ruleTrigger ?
+            Acore::Containers::SelectRandomContainerElement(rule->TriggerSpells) :
+            effect->GetSpellInfo()->Effects[effect->GetEffIndex()].TriggerSpell);
+        if (!trigger)
+            return;
+        Unit* caster = GetTarget();
+        Spell const* spell = eventInfo.GetProcSpell();
+        Unit* target = eventInfo.GetActionTarget() != caster ? eventInfo.GetActionTarget() : nullptr;
+        if (!target && spell)
+            target = spell->m_targets.GetUnitTarget();
+        if (!target || (trigger->IsPositive() && !caster->IsFriendlyTo(target) && !TargetsEnemy(trigger)))
+            target = caster;
+        PreventDefaultAction();
+        if (target != caster && trigger->Effects[EFFECT_0].TargetA.GetReferenceType() == TARGET_REFERENCE_TYPE_DEST)
+            caster->CastSpell(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), trigger->Id, true,
+                nullptr, effect);
+        else
+            caster->CastSpell(target, trigger, true, nullptr, effect);
+    }
+
+    void CastPctTrigger(AuraEffect const* effect, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
         SpellInfo const* trigger = sSpellMgr->GetSpellInfo(effect->GetSpellInfo()->Effects[effect->GetEffIndex()].TriggerSpell);
+        DamageInfo const* damage = eventInfo.GetDamageInfo();
+        HealInfo const* heal = eventInfo.GetHealInfo();
+        uint32 const amount = damage && damage->GetDamage() ? damage->GetDamage() : heal ? heal->GetHeal() : 0;
+        Unit* caster = GetTarget();
+        Unit* target = eventInfo.GetActionTarget();
+        if (!trigger || !amount || !target)
+            return;
+        int32 basePoints = std::max(1, int32(CalculatePct(amount, effect->GetAmount())));
+        caster->CastCustomSpell(target, trigger->Id, &basePoints, nullptr, nullptr, true, nullptr, effect);
+    }
+
+    bool CheckDummy(AuraEffect const* effect, ProcEventInfo& eventInfo)
+    {
+        auto const itr = Rules.find(GetId());
+        if (itr == Rules.end() || itr->second[effect->GetEffIndex()].empty())
+            return true;
+        return CheckEffect(effect, eventInfo);
+    }
+
+    void CastRuleTrigger(AuraEffect const* effect, ProcEventInfo& eventInfo)
+    {
+        EffectRule const* rule = _fired[effect->GetEffIndex()];
+        if (!rule)
+            return;
+        PreventDefaultAction();
+        uint32 const triggerId = !rule->TriggerSpells.empty() ? Acore::Containers::SelectRandomContainerElement(rule->TriggerSpells) :
+            effect->GetSpellInfo()->Effects[effect->GetEffIndex()].TriggerSpell;
+        SpellInfo const* trigger = sSpellMgr->GetSpellInfo(triggerId);
         if (!trigger)
             return;
         Unit* caster = GetTarget();
         Spell const* spell = eventInfo.GetProcSpell();
         Unit* target = spell ? spell->m_targets.GetUnitTarget() : nullptr;
-        if (!target || (trigger->IsPositive() && !caster->IsFriendlyTo(target)))
+        if (!target)
+            target = eventInfo.GetActionTarget() != caster ? eventInfo.GetActionTarget() : nullptr;
+        if (!target || (trigger->IsPositive() && !caster->IsFriendlyTo(target) && !TargetsEnemy(trigger)))
             target = caster;
-        PreventDefaultAction();
-        caster->CastSpell(target, trigger, true, nullptr, effect);
+        if (rule->AmountPct <= 0.0f)
+        {
+            caster->CastSpell(target, trigger, true, nullptr, effect);
+            return;
+        }
+        DamageInfo const* damage = eventInfo.GetDamageInfo();
+        HealInfo const* heal = eventInfo.GetHealInfo();
+        uint32 const amount = damage && damage->GetDamage() ? damage->GetDamage() : heal ? heal->GetHeal() : 0;
+        if (!amount)
+            return;
+        uint32 ticks = 1;
+        for (SpellEffectInfo const& triggered : trigger->Effects)
+            if (triggered.Amplitude && trigger->GetMaxDuration() > 0 &&
+                (triggered.IsAura(SPELL_AURA_PERIODIC_DAMAGE) || triggered.IsAura(SPELL_AURA_PERIODIC_HEAL)))
+                ticks = std::max<uint32>(1, uint32(trigger->GetMaxDuration()) / triggered.Amplitude);
+        int32 basePoints = std::max(1, int32(float(amount) * rule->AmountPct / 100.0f / float(ticks)));
+        caster->CastCustomSpell(target, trigger->Id, &basePoints, nullptr, nullptr, true, nullptr, effect);
     }
 
     bool HasActionScript() const
@@ -389,15 +529,20 @@ class spell_ascension_mystic_enchant_proc : public AuraScript
         return std::distance(bounds.first, bounds.second) > 1;
     }
 
-    void Consume(AuraEffect const* effect, ProcEventInfo&)
+    void Consume(AuraEffect const* effect, ProcEventInfo& eventInfo)
     {
         EffectRule const* rule = _fired[effect->GetEffIndex()];
         _fired[effect->GetEffIndex()] = nullptr;
         if (!rule)
             return;
         _ready[effect->GetEffIndex()] = GameTime::Now() + rule->Cooldown;
+        Unit* target = eventInfo.GetActionTarget() != GetTarget() ? eventInfo.GetActionTarget() : nullptr;
         for (uint32 aura : rule->ConsumeAura)
+        {
             GetTarget()->RemoveAurasDueToSpell(aura);
+            if (target)
+                target->RemoveAurasDueToSpell(aura, GetTarget()->GetGUID());
+        }
     }
 
     void Register() override
@@ -408,6 +553,16 @@ class spell_ascension_mystic_enchant_proc : public AuraScript
             SPELL_AURA_PROC_TRIGGER_SPELL);
         AfterEffectProc += AuraEffectProcFn(spell_ascension_mystic_enchant_proc::Consume, EFFECT_ALL,
             SPELL_AURA_PROC_TRIGGER_SPELL);
+        DoCheckEffectProc += AuraCheckEffectProcFn(spell_ascension_mystic_enchant_proc::CheckDummy, EFFECT_ALL,
+            SPELL_AURA_DUMMY);
+        OnEffectProc += AuraEffectProcFn(spell_ascension_mystic_enchant_proc::CastRuleTrigger, EFFECT_ALL, SPELL_AURA_DUMMY);
+        AfterEffectProc += AuraEffectProcFn(spell_ascension_mystic_enchant_proc::Consume, EFFECT_ALL, SPELL_AURA_DUMMY);
+        DoCheckEffectProc += AuraCheckEffectProcFn(spell_ascension_mystic_enchant_proc::CheckEffect, EFFECT_ALL,
+            SPELL_AURA_ASCENSION_PROC_TRIGGER_PCT);
+        OnEffectProc += AuraEffectProcFn(spell_ascension_mystic_enchant_proc::CastPctTrigger, EFFECT_ALL,
+            SPELL_AURA_ASCENSION_PROC_TRIGGER_PCT);
+        AfterEffectProc += AuraEffectProcFn(spell_ascension_mystic_enchant_proc::Consume, EFFECT_ALL,
+            SPELL_AURA_ASCENSION_PROC_TRIGGER_PCT);
     }
 };
 
@@ -420,6 +575,14 @@ public:
 
     void OnAuraApply(Unit* unit, Aura* aura) override
     {
+        if (unit->IsPlayer() && HasMinionAura(aura->GetId()))
+            SyncMinionAuras(unit);
+        if (unit->IsPlayer())
+            for (auto const& [watched, links] : Links)
+                for (AuraLink const& link : links)
+                    if (link.Enchant == aura->GetId() && watched != aura->GetId() && unit->HasAura(watched) &&
+                        !unit->HasAura(link.Grant))
+                        unit->CastSpell(unit, link.Grant, true);
         auto const itr = Links.find(aura->GetId());
         if (itr == Links.end() || !unit->IsPlayer())
             return;
@@ -430,6 +593,13 @@ public:
 
     void OnAuraRemove(Unit* unit, AuraApplication* application, AuraRemoveMode) override
     {
+        if (unit->IsPlayer() && HasMinionAura(application->GetBase()->GetId()))
+            SyncMinionAuras(unit);
+        if (unit->IsPlayer())
+            for (auto const& [watched, links] : Links)
+                for (AuraLink const& link : links)
+                    if (link.Enchant == application->GetBase()->GetId())
+                        unit->RemoveAurasDueToSpell(link.Grant);
         auto const itr = Links.find(application->GetBase()->GetId());
         if (itr == Links.end() || !unit->IsPlayer())
             return;
@@ -493,7 +663,8 @@ private:
         Rules.clear();
         Storage.clear();
         QueryResult result = WorldDatabase.Query("SELECT enchant_spell, effect, event, school_mask, spells, chance, "
-            "cooldown_ms, requires_aura, target_aura, conditions, consume_aura FROM coa_mystic_enchant_proc");
+            "cooldown_ms, requires_aura, target_aura, conditions, consume_aura, trigger_spells, amount_pct, chance_per_combo "
+            "FROM coa_mystic_enchant_proc");
         if (!result)
         {
             LOG_INFO("server.loading", ">> Loaded 0 Mystic Enchant proc rules");
@@ -539,6 +710,9 @@ private:
                 continue;
             }
             rule.ConsumeAura = Ids(fields[10].Get<std::string>());
+            rule.TriggerSpells = Ids(fields[11].Get<std::string>());
+            rule.AmountPct = fields[12].Get<float>();
+            rule.ChancePerCombo = fields[13].Get<float>();
             Storage.push_back(std::move(rule));
             keys.emplace_back(spell, effect);
         } while (result->NextRow());
@@ -569,6 +743,54 @@ private:
             } while (result->NextRow());
         }
         LOG_INFO("server.loading", ">> Loaded {} Mystic Enchant aura links", count);
+
+        MinionAuras.clear();
+        if (QueryResult minions = WorldDatabase.Query("SELECT enchant_spell, minion_entry, aura FROM coa_mystic_enchant_minion_aura"))
+            do
+            {
+                Field* fields = minions->Fetch();
+                MinionAura listener{ fields[0].Get<uint32>(), fields[1].Get<uint32>(), fields[2].Get<uint32>() };
+                if (!sSpellMgr->GetSpellInfo(listener.Aura))
+                {
+                    LOG_ERROR("sql.sql", "coa_mystic_enchant_minion_aura: aura {} does not exist", listener.Aura);
+                    continue;
+                }
+                MinionAuras.push_back(listener);
+            } while (minions->NextRow());
+        LOG_INFO("server.loading", ">> Loaded {} Mystic Enchant minion auras", MinionAuras.size());
+    }
+};
+
+class AscensionMysticEnchantPets final : public PetScript
+{
+public:
+    AscensionMysticEnchantPets() : PetScript("AscensionMysticEnchantPets", { PETHOOK_ON_PET_ADD_TO_WORLD }) { }
+
+    void OnPetAddToWorld(Pet* pet) override
+    {
+        if (MinionAuras.empty() || !pet->GetOwner())
+            return;
+        ObjectGuid const ownerGuid = pet->GetOwner()->GetGUID();
+        pet->m_Events.AddEventAtOffset([pet, ownerGuid]()
+        {
+            if (Player* owner = ObjectAccessor::FindPlayer(ownerGuid); owner && pet->IsInWorld())
+                SyncMinionAuras(owner, pet);
+        }, 500ms);
+    }
+};
+
+class AscensionMysticEnchantMinions final : public AllCreatureScript
+{
+public:
+    AscensionMysticEnchantMinions() : AllCreatureScript("AscensionMysticEnchantMinions") { }
+
+    void OnCreatureAddWorld(Creature* creature) override
+    {
+        if (MinionAuras.empty() || !creature->IsSummon())
+            return;
+        Unit* owner = creature->GetOwner();
+        if (owner && owner->IsPlayer())
+            SyncMinionAuras(owner, creature);
     }
 };
 }
@@ -578,4 +800,6 @@ void AddSC_AscensionMysticEnchantProcs()
     RegisterSpellScript(spell_ascension_mystic_enchant_proc);
     new AscensionMysticEnchantProcsUnit();
     new AscensionMysticEnchantProcsWorld();
+    new AscensionMysticEnchantMinions();
+    new AscensionMysticEnchantPets();
 }

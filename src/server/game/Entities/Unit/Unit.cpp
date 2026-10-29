@@ -2070,6 +2070,16 @@ void Unit::CalculateMeleeDamage(Unit* victim, CalcDamageInfo* damageInfo, Weapon
                 }
             }
 
+            // Ascension Iron Guard (Warcraft Reborn Mystic Enchant): a successful block reduces the rest of the hit
+            constexpr uint32 IronGuard = 1181340;
+            if (AuraEffect const* ironGuard = damageInfo->target->GetAuraEffect(IronGuard, EFFECT_0))
+                for (uint8 i = 0; i < MAX_ITEM_PROTO_DAMAGES; ++i)
+                {
+                    uint32 const reduced = CalculatePct(damageInfo->damages[i].damage, std::max(0, 100 - ironGuard->GetAmount()));
+                    damageInfo->cleanDamage += damageInfo->damages[i].damage - reduced;
+                    damageInfo->damages[i].damage = reduced;
+                }
+
             // full block
             if (fullBlockMask == ((1 << 0) | (1 << 1)))
             {
@@ -4943,6 +4953,9 @@ bool Unit::CanCastSpellWhileMoving(SpellInfo const* info) const
     // All movement gates must agree on the active Manastorm mixture.
     // Its aura 313 family differs from CoA class spells such as Elemental Burst.
     if (HasManastormMovementGrace())
+        return true;
+    // Ascension Fire Walk With Me (Warcraft Reborn Mystic Enchant): "your Scorch can be cast while moving"
+    if (IsPlayer() && info->SpellFamilyName == SPELLFAMILY_MAGE && (info->SpellFamilyFlags[0] & 0x10) && HasAura(1584166))
         return true;
     if (IsPlayer() && getClass() == CLASS_STARCALLER &&
         (info->Id == 801990 || info->Id == 802682 || (HasAura(704772) && !info->IsPositive())))
@@ -9433,11 +9446,14 @@ float Unit::SpellPctDamageModsDone(Unit* victim, SpellInfo const* spellProto, Da
             // Ice Lance
             if (spellProto->SpellIconID == 186)
             {
-                if (victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
+                // Ice Barrage (Mystic Enchant 1570523): "At 5 stacks, your Ice Lance will treat the target as frozen"
+                if (victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this) ||
+                    (owner->HasAura(1570523) && owner->HasAura(985158)))
                 {
-                    // Glyph of Ice Lance
-                    if (owner->HasAuraOrTwin(56377) && victim->GetLevel() > owner->GetLevel())
-                        DoneTotalMod *= 4.0f;
+                    // Glyph of Ice Lance: Ascension's glyph carries the multiplier in effect 0's MiscValue (5x; stock 4x)
+                    AuraEffect const* glyph = owner->GetAuraEffectOfRankedSpellOrTwin(56377, EFFECT_0);
+                    if (glyph && victim->GetLevel() > owner->GetLevel())
+                        DoneTotalMod *= glyph->GetMiscValue() > 0 ? float(glyph->GetMiscValue()) : 4.0f;
                     else
                         DoneTotalMod *= 3.0f;
                 }
@@ -9446,8 +9462,14 @@ float Unit::SpellPctDamageModsDone(Unit* victim, SpellInfo const* spellProto, Da
             // Torment the weak
             if (spellProto->SpellFamilyFlags[0] & 0x20600021 || spellProto->SpellFamilyFlags[1] & 0x9000)
                 if (victim->HasAuraWithMechanic((1ULL << MECHANIC_SNARE) | (1ULL << MECHANIC_SLOW_ATTACK)))
-                    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, 3263, EFFECT_0))
+                {
+                    // Ascension's Torment the Weak (stock, Reborn and crossover ranks) is a mage-family spell
+                    AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_MAGE, 3263, EFFECT_0);
+                    if (!aurEff)
+                        aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, 3263, EFFECT_0);
+                    if (aurEff)
                         AddPct(DoneTotalMod, aurEff->GetAmount());
+                }
             break;
         case SPELLFAMILY_PRIEST:
             // Mind Flay
@@ -9476,10 +9498,10 @@ float Unit::SpellPctDamageModsDone(Unit* victim, SpellInfo const* spellProto, Da
             // Shadow Word: Death
             else if (spellProto->SpellFamilyFlags[1] & 0x2)
             {
-                // Glyph of Shadow Word: Death
+                // Glyph of Shadow Word: Death: the Ascension glyph gives 1% (effect 1) for every 1% of health under 35%
                 if (AuraEffect* aurEff = GetAuraEffectOfRankedSpellOrTwin(55682, 1))
                     if (victim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
-                        AddPct(DoneTotalMod, aurEff->GetAmount());
+                        AddPct(DoneTotalMod, aurEff->GetAmount() * std::max(0.0f, 35.0f - victim->GetHealthPct()));
             }
 
             break;
@@ -10273,6 +10295,14 @@ float Unit::SpellTakenCritChance(Unit const* caster, SpellInfo const* spellProto
                                 if (HasAura(6788))
                                     crit_chance += (*i)->GetAmount();
                                 break;
+                            case 7798: // Glyph of Regrowth: Ascension's glyph also adds crit chance (effect 1)
+                                if (GetAuraEffect(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_DRUID, 0x40, 0, 0))
+                                    crit_chance += (*i)->GetSpellInfo()->Effects[EFFECT_1].CalcValue(caster);
+                                break;
+                            case 20016: // Ascension: crit chance against a target below MiscValueB% health (Spark of Hope)
+                                if (HealthBelowPct((*i)->GetMiscValueB()))
+                                    crit_chance += (*i)->GetAmount();
+                                break;
                             default:
                                 break;
                         }
@@ -10281,11 +10311,11 @@ float Unit::SpellTakenCritChance(Unit const* caster, SpellInfo const* spellProto
                     switch (spellProto->SpellFamilyName)
                     {
                         case SPELLFAMILY_MAGE:
-                            // Glyph of Fire Blast
+                            // Glyph of Fire Blast: Ascension's glyph "guarantees the critical strike" (stock: +50%)
                             if (spellProto->SpellFamilyFlags[0] == 0x2 && spellProto->SpellIconID == 12)
                                 if (HasAuraWithMechanic((1ULL << MECHANIC_STUN) | (1ULL << MECHANIC_KNOCKOUT)))
-                                    if (AuraEffect const* aurEff = caster->GetAuraEffectOfRankedSpellOrTwin(56369, EFFECT_0))
-                                        crit_chance += aurEff->GetAmount();
+                                    if (caster->GetAuraEffectOfRankedSpellOrTwin(56369, EFFECT_0))
+                                        crit_chance = std::max(crit_chance, 100.0f);
                             break;
                         case SPELLFAMILY_DRUID:
                             // Improved Faerie Fire
@@ -16684,6 +16714,10 @@ float Unit::MeleeSpellMissChance(Unit const* victim, WeaponAttackType attType, i
     {
         missChance += 19;
     }
+
+    // Ascension: chance to hit with off-hand auto attacks (Fury Mastery)
+    if (!spellId && attType == OFF_ATTACK)
+        missChance -= float(GetTotalAuraModifier(SPELL_AURA_ASCENSION_MOD_OFFHAND_HIT_CHANCE));
 
     // bonus from skills is 0.04%
     //miss_chance -= skillDiff * 0.04f;

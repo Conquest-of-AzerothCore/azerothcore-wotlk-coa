@@ -181,10 +181,15 @@ public:
     uint32 GetCreaturePoolId(uint32 guid) const;
     uint32 GetGameObjectPoolId(uint32 guid) const;
 
+    static uint32 GatherNodeLimit(uint32 spots, uint32 players, float minFraction, float perPlayer, float maxFraction);
+
     friend class PoolQuestReloadFixTest;
 private:
     template<typename T>
     void SpawnPool(SpawnedPoolData& spawnedPoolData, uint32 pool_id, uint32 db_guid_or_pool_id);
+
+    uint32 PoolLimit(SpawnedPoolData const& spawnedPoolData, uint32 pool_id);
+    std::unordered_map<uint32, uint32> mGatherPoolZones;
 
     typedef std::unordered_map<uint32, PoolTemplateData>      PoolTemplateDataMap;
     typedef std::unordered_map<uint32, PoolGroup<Creature>>   PoolGroupCreatureMap;

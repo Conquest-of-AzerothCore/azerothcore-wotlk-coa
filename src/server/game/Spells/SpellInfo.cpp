@@ -3039,6 +3039,9 @@ float SpellInfo::GetMaxRange(bool positive, Unit* caster, Spell* spell) const
     if (caster)
         if (Player* modOwner = caster->GetSpellModOwner())
             modOwner->ApplySpellMod(Id, SPELLMOD_RANGE, range, spell);
+    // Ascension Fire Walk With Me (Warcraft Reborn Mystic Enchant): "but its range is reduced by 10 yards"
+    if (caster && SpellFamilyName == SPELLFAMILY_MAGE && (SpellFamilyFlags[0] & 0x10) && caster->HasAura(1584166))
+        range = std::max(0.0f, range - 10.0f);
     if (caster && caster->IsPlayer() && caster->getClass() == CLASS_STARCALLER && caster->HasAura(801975) &&
         SpellFamilyName == 32 && DmgClass == SPELL_DAMAGE_CLASS_RANGED)
         range = 50.0f;
@@ -3222,7 +3225,7 @@ int32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask, S
     if (PowerType == POWER_MANA && caster->IsPlayer() && caster->getClass() == CLASS_CULTIST && SpellFamilyName == 31)
     {
         uint32 insanity = caster->GetAura(500706) ? caster->GetAura(500706)->GetStackAmount() : 0;
-        if (Id == 801153 && insanity > 60)
+        if (Id == 801153 && insanity >= 60)
             return 0;
         if (!IsChanneled() && (!CastTimeEntry || CastTimeEntry->CastTime == 0))
             if (AuraEffect const* talent = caster->GetAuraEffect(582307, EFFECT_0))

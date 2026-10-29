@@ -15,6 +15,11 @@ constexpr bool Eligible(unsigned level, bool highRisk, bool instance, bool bot)
     return level >= MinimumLevel && highRisk && !instance && !bot;
 }
 
+constexpr bool QueueBlocked(bool highRisk, bool openWorld, bool resting, bool bot)
+{
+    return highRisk && openWorld && !resting && !bot;
+}
+
 constexpr unsigned GearLimit(unsigned level)
 {
     return level >= MaximumLevel ? 2 : 1;

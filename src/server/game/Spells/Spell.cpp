@@ -5865,6 +5865,8 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* /*param1*/, uint32* /*para
             checkForm = false;
             break;
         }
+        if (checkForm && sScriptMgr->CanIgnoreShapeshift(this))
+            checkForm = false;
         // CoA: Venomancer forms are stances, not shapeshift-locked kits; let a mount cast drop
         // them the way Unit::Mount does for every other player, instead of refusing the cast.
         bool prophetMount = m_caster->IsPlayer() && m_caster->getClass() == CLASS_PROPHET &&

@@ -1730,6 +1730,8 @@ public:
     void VehicleSpellInitialize();
     void SendRemoveControlBar();
     [[nodiscard]] bool HasSpell(uint32 spell) const override;
+    /// HasSpell that also matches a stock spell's twins and namesakes (SpellMgr::GetSpellAndRelatives)
+    [[nodiscard]] bool HasSpellOrTwin(uint32 spell) const;
     [[nodiscard]] bool HasActiveSpell(uint32 spell) const;            // show in spellbook
     [[nodiscard]] bool IsSpellFitByClassAndRace(uint32 spell_id) const;
     bool IsNeedCastPassiveSpellAtLearn(SpellInfo const* spellInfo) const;

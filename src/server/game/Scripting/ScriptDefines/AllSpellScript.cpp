@@ -35,6 +35,12 @@ bool ScriptMgr::OnSpellFocusAnswered(Spell* spell)
         script->OnSpellFocusAnswered(spell));
 }
 
+bool ScriptMgr::CanIgnoreShapeshift(Spell const* spell)
+{
+    CALL_ENABLED_BOOLEAN_HOOKS_WITH_DEFAULT_FALSE(AllSpellScript, ALLSPELLHOOK_CAN_IGNORE_SHAPESHIFT,
+        script->CanIgnoreShapeshift(spell));
+}
+
 bool ScriptMgr::CanPrepare(Spell* spell, SpellCastTargets const* targets, AuraEffect const* triggeredByAura)
 {
     CALL_ENABLED_BOOLEAN_HOOKS(AllSpellScript, ALLSPELLHOOK_CAN_PREPARE, !script->CanPrepare(spell, targets, triggeredByAura));

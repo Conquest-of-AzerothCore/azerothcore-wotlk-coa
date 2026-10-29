@@ -1267,7 +1267,9 @@ class spell_hun_lock_and_load : public AuraScript
         PreventDefaultAction();
 
         Unit* caster = eventInfo.GetActor();
-        caster->CastSpell(caster, SPELL_LOCK_AND_LOAD_TRIGGER, true);
+        // the rank's own trigger: Warcraft Reborn's (1156453) is a short window whose payload resets the shots
+        uint32 const trigger = GetSpellInfo()->Effects[EFFECT_0].TriggerSpell;
+        caster->CastSpell(caster, trigger ? trigger : uint32(SPELL_LOCK_AND_LOAD_TRIGGER), true);
         caster->CastSpell(caster, SPELL_LOCK_AND_LOAD_MARKER, true);
     }
 

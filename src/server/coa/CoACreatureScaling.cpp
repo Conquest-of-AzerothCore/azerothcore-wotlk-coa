@@ -12,6 +12,7 @@
 #include "Map.h"
 #include "QueryResult.h"
 #include "SpellInfo.h"
+#include "TemporarySummon.h"
 #include "UnitScript.h"
 #include "WorldScript.h"
 #include <atomic>
@@ -50,9 +51,20 @@ namespace
         return script == "npc_training_dummy" || script == "npc_target_dummy";
     }
 
+    bool SummonedByPlayer(Creature const* creature)
+    {
+        TempSummon const* summon = creature->ToTempSummon();
+        if (!summon)
+            return false;
+        if (summon->GetSummonerGUID().IsPlayer())
+            return true;
+        Unit const* summoner = summon->GetSummonerUnit();
+        return summoner && (summoner->IsControlledByPlayer() || summoner->GetCharmerOrOwnerPlayerOrPlayerItself());
+    }
+
     bool IsEligible(Creature const* creature)
     {
-        return creature && !creature->IsPet() && !creature->IsSummon() && !creature->IsTotem() && !creature->IsTrigger()
+        return creature && !creature->IsPet() && !SummonedByPlayer(creature) && !creature->IsTotem() && !creature->IsTrigger()
             && !creature->IsCritter() && !creature->GetCharmerOrOwnerGUID() && !IsDummy(creature);
     }
 

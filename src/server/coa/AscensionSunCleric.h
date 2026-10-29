@@ -34,6 +34,8 @@ struct SunClericState
     bool landingDawn = false, landingFulfillment = false;
     bool gavelHealing = false;
     bool healthyAbove80 = false;
+    Spell const* vowSpell = nullptr;
+    uint32 vowTime = 0;
 };
 Player* Owner(Unit const* unit);
 SunClericState& State(Player* player);

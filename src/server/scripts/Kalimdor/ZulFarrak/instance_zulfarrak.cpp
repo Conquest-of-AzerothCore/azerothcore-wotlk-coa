@@ -197,10 +197,20 @@ public:
 
         void OnUnitDeath(Unit* unit) override
         {
-            if (unit->GetEntry() == NPC_BLY)
+            switch (unit->GetEntry())
             {
-                PyramidPhase = PYRAMID_DONE;
-                SaveToDB();
+                case NPC_BLY:
+                    PyramidPhase = PYRAMID_DONE;
+                    SaveToDB();
+                    HandleGameObject(EndDoorGUID, true);
+                    break;
+                case NPC_WEEGLI:
+                    // nobody is left to blow up the gate
+                    if (PyramidPhase < PYRAMID_GATES_DESTROYED)
+                        HandleGameObject(EndDoorGUID, true);
+                    break;
+                default:
+                    break;
             }
         }
 

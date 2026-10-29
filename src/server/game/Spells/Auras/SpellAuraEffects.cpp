@@ -422,7 +422,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     nullptr,                                                      //353 unknown Ascension aura
     nullptr,                                                      //354 unknown Ascension aura
     nullptr,                                                      //355 unknown Ascension aura
-    nullptr,                                                      //356 unknown Ascension aura
+    &AuraEffect::HandleNoImmediateEffect,                         //356 SPELL_AURA_ASCENSION_MOD_OFFHAND_HIT_CHANCE implemented in Unit::MeleeSpellMissChance
     &AuraEffect::HandleNoImmediateEffect,                         //357 SPELL_AURA_ASCENSION_MOD_INSTANT_MANA_COST_PCT
     nullptr,                                                      //358 unknown Ascension aura
     nullptr,                                                      //359 unknown Ascension aura
