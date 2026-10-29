@@ -23,3 +23,10 @@ ItemRecovery.Enable = 1
 #                     Does not enable disenchantment, recycling, character restoration or refunds.
 #        Default:     1 - Enabled when ItemRecovery.Enable is enabled.
 ItemRecovery.Archive.Enable = 1
+
+#    ItemRecovery.Characters.Enable
+#        Description: Restore this account's retained soft-deleted characters without a fee.
+#                     Existing name and account/realm character limits apply.
+#                     CharDelete.Method = 1 retains future deletions; purged characters cannot be recovered.
+#        Default:     1 - Enabled under ItemRecovery.Enable.
+ItemRecovery.Characters.Enable = 1

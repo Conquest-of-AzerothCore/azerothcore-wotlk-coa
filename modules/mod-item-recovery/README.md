@@ -14,7 +14,9 @@ Extends the Ascension native Recovery Service; no replacement addon, NPC module 
 
 Legacy `recovery_item` records retain the core GM restore path and are not offered as exact snapshots. No missing historical properties or quantities are invented. Unsupported items include bags/containers, wrapped items, active refunds/trade windows, expiring/conjured items, temporary enchants, instance-scaled items and generated-loot containers. Special external item-instance state is not reconstructed by the native field snapshot; Worldforged refunds and other specialized services remain outside this implementation. Exactness is limited to the native fields and text recorded here, not arbitrary module-owned tables.
 
-Disenchanted/recycled items, deleted characters, Worldforged refunds and Wildcard roll recovery are not implemented by this change. Reversing material-producing actions needs an independently verified output-repayment contract to prevent duplication. The new native Deleted Items category visibility and packet behavior still require real-client acceptance; no unverified client-config key was invented.
+Deleted Characters now uses the original native service (0x05DA–0x05DD) to restore retained soft-deleted characters belonging to the requesting account. Restoration is free, requires an available original name and account/realm character slots, rejects stale deletion IDs, and refreshes the character cache after commit. It does not recreate purged characters or bypass character bans.
+
+Disenchanted/recycled items, Worldforged refunds and Wildcard roll recovery remain unsupported. Reversing material-producing actions needs an independently verified output-repayment contract to prevent duplication. The new native Deleted Items category visibility and packet behavior still require real-client acceptance; no unverified client-config key was invented.
 
 ## Configuration and SQL
 
@@ -23,3 +25,5 @@ Disenchanted/recycled items, deleted characters, Worldforged refunds and Wildcar
 ## Verification
 
 Source/formatting review only. Compilation, native UI visibility, packet exchange, transaction failure/replay, restart persistence and actual mail/property preservation remain runtime-unverified. Do not label this implementation live-qualified until those checks pass.
+
+`ItemRecovery.Characters.Enable = 1` enables the independent Deleted Characters category under the main switch. `CharDelete.Method = 1`, `CharDelete.MinLevel` and `CharDelete.KeepDays` govern future retention. Existing local configuration files are unchanged. No migration is required for character restoration.
