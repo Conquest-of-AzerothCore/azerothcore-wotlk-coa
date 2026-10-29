@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <mutex>
 #include <unordered_map>
 #include <vector>
 
@@ -179,6 +180,9 @@ namespace
         bool probeDone = false;
     };
 
+    // His brain is per creature, but the state map is process-wide; the lock keeps a
+    // second instance's thread from rehashing the map under a reader.
+    std::recursive_mutex g_nytharosStateMutex;
     std::unordered_map<uint32, NytharosState> g_nytharosStates;
 
     class NytharosAI : public CreatureAI
@@ -188,6 +192,8 @@ namespace
 
         void InitializeAI() override
         {
+            std::lock_guard<std::recursive_mutex> lock(g_nytharosStateMutex);
+
             me->SetReactState(REACT_DEFENSIVE);
 
             NytharosState& state = g_nytharosStates[me->GetGUID().GetCounter()];
@@ -201,6 +207,8 @@ namespace
 
         void Reset() override
         {
+            std::lock_guard<std::recursive_mutex> lock(g_nytharosStateMutex);
+
             NytharosState& state = g_nytharosStates[me->GetGUID().GetCounter()];
             uint32 const base = state.baseMaxHealth;
             state = NytharosState();
@@ -211,6 +219,8 @@ namespace
 
         void JustEngagedWith(Unit* /*who*/) override
         {
+            std::lock_guard<std::recursive_mutex> lock(g_nytharosStateMutex);
+
             me->PlayDirectSound(NY_SOUND_AGGRO);
             me->HandleEmoteCommand(NY_EMOTE_ROAR);
 
@@ -242,6 +252,8 @@ namespace
         {
             if (!attacker || !attacker->IsAlive() || !me->IsAlive())
                 return;
+
+            std::lock_guard<std::recursive_mutex> lock(g_nytharosStateMutex);
 
             if (!me->IsInCombat() || !me->GetVictim())
                 AttackStart(attacker);
@@ -295,6 +307,8 @@ namespace
 
         void UpdateAI(uint32 /*diff*/) override
         {
+            std::lock_guard<std::recursive_mutex> lock(g_nytharosStateMutex);
+
             if (!UpdateVictim())
                 return;
 

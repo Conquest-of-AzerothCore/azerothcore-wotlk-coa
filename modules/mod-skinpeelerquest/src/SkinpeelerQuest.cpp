@@ -27,7 +27,9 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <mutex>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace
@@ -77,6 +79,9 @@ namespace
 
     // Stormfang has no CreatureAI of its own: its brain is the creature update below.
     // The probe therefore lives in a map the unit script can feed from the damage hook.
+    // The update and damage hooks can run on different map threads, so every access is
+    // locked.
+    std::recursive_mutex g_stormfangStateMutex;
     std::unordered_map<uint32, ApexScaling::Probe> g_stormfangProbes;
 
     std::vector<Player*> NearbyPlayers(Creature* creature, float radius,
@@ -227,6 +232,8 @@ namespace
         if (!wolf->IsInCombat() || !victim)
             return;
 
+        std::lock_guard<std::recursive_mutex> lock(g_stormfangStateMutex);
+
         // Keyed by GUID because every summon gets a fresh one. Entries are
         // pruned on a slow beat: without it the map grows for the whole uptime,
         // since a wolf despawns instead of reusing its key.
@@ -339,6 +346,8 @@ namespace
                     KeepWolfSeparation(creature);
                 return;
             }
+
+            std::lock_guard<std::recursive_mutex> lock(g_stormfangStateMutex);
 
             if (creature->GetReactState() == REACT_AGGRESSIVE && !creature->IsInCombat())
                 creature->SetReactState(REACT_DEFENSIVE);
@@ -596,8 +605,21 @@ namespace
         {9916114, 9999265, 17844}}};
 
     // Rebuilt markers follow every quest packet the client processes, so the override
-    // is re-applied on the update after one of those, not on a timer.
+    // is re-applied on the update after one of those, not on a timer. Packet sends can
+    // happen on a session thread while player updates run on every map thread, so both
+    // the dirty set and the tracking state below are locked.
+    std::mutex g_apexIconMutex;
     std::unordered_set<uint32> g_apexIconDirty;
+
+    struct ApexIconTrack
+    {
+        uint32 timer = 0;
+        std::array<uint32, APEX_ICON_NPCS.size()> sent = {};
+        std::array<uint32, APEX_ICON_NPCS.size()> seen = {};
+    };
+
+    std::mutex g_apexIconTrackMutex;
+    std::unordered_map<uint32, ApexIconTrack> g_apexIconTracks;
 
     class SkinpeelerIconTriggerScript : public ServerScript
     {
@@ -619,7 +641,10 @@ namespace
                 case SMSG_QUEST_QUERY_RESPONSE:
                 case SMSG_QUESTUPDATE_COMPLETE:
                     if (session && session->GetPlayer())
+                    {
+                        std::lock_guard<std::mutex> lock(g_apexIconMutex);
                         g_apexIconDirty.insert(session->GetPlayer()->GetGUID().GetCounter());
+                    }
                     break;
                 default:
                     break;
@@ -639,22 +664,42 @@ namespace
                 return;
 
             uint32 const guid = player->GetGUID().GetCounter();
-            bool const dirty = g_apexIconDirty.count(guid) != 0;
 
-            uint32& timer = _timers[guid];
-            timer += p_time;
+            bool iconDirty = false;
+            {
+                std::lock_guard<std::mutex> lock(g_apexIconMutex);
+                auto itr = g_apexIconDirty.find(guid);
+                if (itr != g_apexIconDirty.end())
+                {
+                    iconDirty = true;
+                    g_apexIconDirty.erase(itr);
+                }
+            }
+
+            ApexIconTrack track;
+            {
+                std::lock_guard<std::mutex> lock(g_apexIconTrackMutex);
+                auto itr = g_apexIconTracks.find(guid);
+                if (itr != g_apexIconTracks.end())
+                    track = itr->second;
+            }
+
+            track.timer += p_time;
 
             // A quest packet was just sent, so the client has already rebuilt with the
             // native model. Run now instead of waiting for the next second.
-            if (!dirty && timer < 1000)
-                return;
-
-            timer = 0;
-
-            for (ApexIconNpc const& npc : APEX_ICON_NPCS)
+            if (!iconDirty && track.timer < 1000)
             {
-                uint32& sent = _lastState[player->GetGUID().GetCounter() * 8 + npc.Entry % 8];
-                uint32& seen = _lastSeen[player->GetGUID().GetCounter() * 8 + npc.Entry % 8];
+                std::lock_guard<std::mutex> lock(g_apexIconTrackMutex);
+                g_apexIconTracks[guid] = track;
+                return;
+            }
+
+            track.timer = 0;
+
+            for (std::size_t index = 0; index < APEX_ICON_NPCS.size(); ++index)
+            {
+                ApexIconNpc const& npc = APEX_ICON_NPCS[index];
                 QuestStatus const status = player->GetQuestStatus(npc.QuestId);
                 uint32 state = APEX_ICON_NONE;
 
@@ -673,13 +718,12 @@ namespace
                 Creature* creature = player->FindNearestCreature(npc.Entry, 200.0f, true);
                 if (!creature)
                 {
-                    seen = 0;
+                    track.seen[index] = 0;
                     continue;
                 }
 
-                bool const firstSight = (seen == 0);
-                bool const dirty = g_apexIconDirty.count(player->GetGUID().GetCounter()) != 0;
-                if (!firstSight && !dirty && sent == state)
+                bool const firstSight = (track.seen[index] == 0);
+                if (!firstSight && !iconDirty && track.sent[index] == state)
                     continue;
 
                 WorldPacket packet(SMSG_UPDATE_QUEST_ICON, 16);
@@ -689,18 +733,13 @@ namespace
                 LOG_INFO("coa", "APEX ICON: {} -> kind {} state {}", player->GetName(),
                     APEX_ICON_KIND, state);
 
-                sent = state;
-                seen = 1;
+                track.sent[index] = state;
+                track.seen[index] = 1;
             }
 
-            g_apexIconDirty.erase(player->GetGUID().GetCounter());
-
+            std::lock_guard<std::mutex> lock(g_apexIconTrackMutex);
+            g_apexIconTracks[guid] = track;
         }
-
-    private:
-        std::unordered_map<uint32, uint32> _timers;
-        std::unordered_map<uint32, uint32> _lastState;
-        std::unordered_map<uint32, uint32> _lastSeen;
     };
 
     class SkinpeelerStormfangUnitScript : public UnitScript
@@ -716,6 +755,8 @@ namespace
         {
             if (!victim || !victim->IsCreature() || victim->GetEntry() != APEX_STORMSFANG_ENTRY)
                 return;
+
+            std::lock_guard<std::recursive_mutex> lock(g_stormfangStateMutex);
 
             auto itr = g_stormfangProbes.find(victim->GetGUID().GetCounter());
             if (itr != g_stormfangProbes.end())
