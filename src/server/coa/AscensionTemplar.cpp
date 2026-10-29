@@ -167,8 +167,9 @@ void GrantOath(Player* player, uint32 oath)
     if (Aura* aura = player->GetAura(704576))
     {
         aura->SetDuration(aura->GetMaxDuration());
-        if (Aura* granted = player->GetAura(oath))
-            granted->SetDuration(aura->GetDuration());
+        for (uint32 held : oaths)
+            if (Aura* granted = player->GetAura(held))
+                granted->SetDuration(aura->GetDuration());
     }
     if (first && State(player).retribution)
     {
