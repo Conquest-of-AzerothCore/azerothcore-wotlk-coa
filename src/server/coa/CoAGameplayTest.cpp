@@ -4358,7 +4358,12 @@ private:
         }
         if (metric == "owned_creature_count")
         {
-            uint32 entry = step.get<uint32>("entry");
+            uint32 entry = step.get<uint32>("entry", 0);
+            if (auto summonSpell = step.get_optional<uint32>("summon_spell"))
+                for (SpellEffectInfo const& effect : sSpellMgr->AssertSpellInfo(*summonSpell)->Effects)
+                    if (effect.Effect == SPELL_EFFECT_SUMMON)
+                        entry = uint32(effect.MiscValue);
+            Require(entry != 0, "owned_creature_count needs a creature entry");
             Require(!spell || sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown owned creature aura spell");
             ObjectGuid caster;
             if (auto id = step.get_optional<std::string>("caster"))
