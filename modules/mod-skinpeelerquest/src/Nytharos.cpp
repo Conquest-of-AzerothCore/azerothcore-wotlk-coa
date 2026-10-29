@@ -524,7 +524,11 @@ namespace
         {
             for (ObjectGuid const& guid : g_spoutSummons)
                 if (Creature* spout = ObjectAccessor::GetCreature(*me, guid))
+                {
+                    spout->PlayDirectSound(0);
+                    spout->PlayDistanceSound(0);
                     spout->DespawnOrUnsummon();
+                }
             g_spoutSummons.clear();
         }
 
@@ -644,6 +648,8 @@ namespace
             {
                 g_spoutSummons.erase(std::remove(g_spoutSummons.begin(), g_spoutSummons.end(), me->GetGUID()),
                     g_spoutSummons.end());
+                me->PlayDirectSound(0);
+                me->PlayDistanceSound(0);
                 me->DespawnOrUnsummon();
                 return;
             }
