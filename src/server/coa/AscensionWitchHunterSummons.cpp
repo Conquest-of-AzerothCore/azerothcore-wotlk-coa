@@ -321,6 +321,11 @@ struct npc_ascension_witch_hunter_field : ScriptedAI
         me->SetLevel(owner->GetLevel());
         me->SetReactState(REACT_PASSIVE);
         me->SetImmuneToNPC(true);
+        if (me->GetEntry() >= 506250 && me->GetEntry() <= 506253)
+        {
+            me->SetImmuneToPC(true);
+            me->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+        }
         me->GetMotionMaster()->Clear();
         me->GetMotionMaster()->MoveIdle();
         if (me->GetEntry() == 50519)

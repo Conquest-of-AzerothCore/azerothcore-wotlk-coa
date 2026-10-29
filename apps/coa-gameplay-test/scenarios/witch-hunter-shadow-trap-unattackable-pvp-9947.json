@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Witch Hunter: Shadow Trap cannot be attacked by hostile players (#9947)",
+  "contract": [
+    "Shadow Trap 680238 reads 'Place a dark trap on the ground lasting $d that will curse the first enemy to",
+    "approach it'. Like native hunter traps it is a ground object, not a combatant: the field entity 506250 it",
+    "summons is only the trap's carrier and must never be a valid attack target. With the Orc Witch Hunter and",
+    "an ungrouped Human player both PvP-flagged, Caltrops 503679 summons (creature 506010, attackable by",
+    "hostile players per #4968) show that the hostile player can attack the Witch Hunter's ordinary field",
+    "summons, while the Shadow Trap carrier placed out of trigger range must not be attackable through native",
+    "IsValidAttackTarget. The trap must stay armed and owned."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    { "id": "wh", "race": 2, "class": 15, "level": 60, "allow_regeneration": false },
+    { "id": "alliance", "race": 1, "class": 1, "level": 60, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "teleport", "actor": "wh", "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "teleport", "actor": "alliance", "map": 0, "x": -9632.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "pvp", "actor": "wh", "enabled": true },
+    { "action": "pvp", "actor": "alliance", "enabled": true },
+    { "action": "learn", "actor": "wh", "spell": 680238 },
+    { "action": "learn", "actor": "wh", "spell": 503679 },
+    { "action": "wait", "ms": 1100 },
+    { "action": "cast", "actor": "wh", "spell": 680238 },
+    {
+      "action": "assert", "label": "SETUP: Shadow Trap is placed", "actor": "wh",
+      "metric": "owned_creature_count", "entry": 506250, "equals": 1, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Let the trap arm", "ms": 1500 },
+    { "action": "cast", "actor": "wh", "spell": 503679, "destination": { "x": -9604.06, "y": -288.949, "z": 57.3053 } },
+    {
+      "action": "assert", "label": "SETUP: Caltrops are summoned", "actor": "wh",
+      "metric": "owned_creature_count", "entry": 506010, "equals": 12, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTROL: the hostile player can attack ordinary field summons", "actor": "wh",
+      "metric": "owned_creature_attackable", "entry": 506010, "target": "alliance", "equals": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the hostile player cannot attack the Shadow Trap", "actor": "wh",
+      "metric": "owned_creature_attackable", "entry": 506250, "target": "alliance", "equals": 0
+    },
+    {
+      "action": "assert", "label": "The untriggered trap stays armed", "actor": "wh",
+      "metric": "owned_creature_count", "entry": 506250, "equals": 1
+    }
+  ]
+}
