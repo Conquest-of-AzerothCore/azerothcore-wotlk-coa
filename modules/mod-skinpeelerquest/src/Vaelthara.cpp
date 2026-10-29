@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <array>
+#include <mutex>
 #include <unordered_map>
 
 namespace
@@ -237,7 +238,10 @@ namespace
     };
 
     // Shared between the creature script (state machine) and the unit script
-    // (melee damage hook), so a landed hit can feed the meter.
+    // (melee damage hook), so a landed hit can feed the meter. Both run on the map
+    // thread of the instance she is in; the lock keeps a second instance's thread
+    // (or a hook running elsewhere) from rehashing the map under a reader.
+    std::recursive_mutex g_vaeltharaStateMutex;
     std::unordered_map<uint32, VaeltharaState> g_vaeltharaStates;
 
     // "Is this player fighting her?" She can hold a victim without a threat
@@ -269,6 +273,8 @@ namespace
             if (!attacker || !attacker->IsAlive() || !me->IsAlive())
                 return;
 
+            std::lock_guard<std::recursive_mutex> lock(g_vaeltharaStateMutex);
+
             auto itr = g_vaeltharaStates.find(me->GetGUID().GetCounter());
             if (itr != g_vaeltharaStates.end())
                 ApexScaling::ObserveProbe(itr->second.probe, damage);
@@ -281,6 +287,8 @@ namespace
 
         void UpdateAI(uint32 /*diff*/) override
         {
+            std::lock_guard<std::recursive_mutex> lock(g_vaeltharaStateMutex);
+
             if (me->IsInCombat())
             {
                 // Damage normally extends the leash for ~15 s, after which
@@ -367,6 +375,8 @@ namespace
             if (!creature || creature->GetEntry() != VAELTHARA_ENTRY)
                 return;
 
+            std::lock_guard<std::recursive_mutex> lock(g_vaeltharaStateMutex);
+
             ApexScaling::TuneHitbox(creature);
             creature->SetReactState(REACT_DEFENSIVE);
 
@@ -383,13 +393,18 @@ namespace
         void OnCreatureRemoveWorld(Creature* creature) override
         {
             if (creature && creature->GetEntry() == VAELTHARA_ENTRY)
+            {
+                std::lock_guard<std::recursive_mutex> lock(g_vaeltharaStateMutex);
                 g_vaeltharaStates.erase(creature->GetGUID().GetCounter());
+            }
         }
 
         void OnAllCreatureUpdate(Creature* creature, uint32) override
         {
             if (!creature || creature->GetEntry() != VAELTHARA_ENTRY)
                 return;
+
+            std::lock_guard<std::recursive_mutex> lock(g_vaeltharaStateMutex);
 
             // Her patrol spans far more than the 30-yard home leash, so keep home
             // on the current patrol point until she is engaged.
@@ -761,6 +776,8 @@ namespace
             {
                 if (!creature || !creature->IsAlive())
                     return;
+
+                std::lock_guard<std::recursive_mutex> lock(g_vaeltharaStateMutex);
 
                 auto const found = g_vaeltharaStates.find(creature->GetGUID().GetCounter());
                 if (found == g_vaeltharaStates.end() || !found->second.bloodrushInAir)
@@ -1229,6 +1246,8 @@ namespace
 
             if (!attacker->IsCreature() || attacker->GetEntry() != VAELTHARA_ENTRY)
                 return;
+
+            std::lock_guard<std::recursive_mutex> lock(g_vaeltharaStateMutex);
 
             auto itr = g_vaeltharaStates.find(attacker->GetGUID().GetCounter());
             if (itr == g_vaeltharaStates.end())
