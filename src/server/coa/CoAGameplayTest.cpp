@@ -4423,6 +4423,12 @@ private:
             Require(creature != nullptr, "Armor observation needs a present owned creature");
             return creature->GetArmor();
         }
+        if (metric == "owned_creature_max_health")
+        {
+            Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
+            Require(creature != nullptr, "Health observation needs a present owned creature");
+            return creature->GetMaxHealth();
+        }
         if (metric == "owned_creature_virtual_item")
         {
             Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));

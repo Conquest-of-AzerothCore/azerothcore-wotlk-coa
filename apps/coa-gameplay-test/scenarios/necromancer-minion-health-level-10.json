@@ -1,0 +1,188 @@
+{
+  "schema": 1,
+  "name": "Necromancer minions have live-scaled health at level 10",
+  "contract": [
+    "Live combat logs and a live A/B test (owner +8 Stamina gave Ghoul +10, Warrior +20, Abomination +60 health)",
+    "fit minion health = b x the owner's naked health + h x the minion's inherited Stamina, where the minion",
+    "inherits 0.2714 x Life Force x owner Stamina (whole points), h = 10 health per Stamina (Ghoul 5) and b =",
+    "0.54 for Skeletal Warriors, 0.66 for the Ghoul and 1.38 for the Abomination. A naked level-10 Undead",
+    "Necromancer has 29 Stamina and 260 naked health, so: Lesser Skeletal Warrior 210 (old formula 1137); Ghoul",
+    "207 (old formula 1137); Abomination 589 (old formula 2911). Expected: within 5%."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "warrior",
+      "race": 5,
+      "class": 23,
+      "level": 10,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ghoul",
+      "race": 5,
+      "class": 23,
+      "level": 10,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "abom",
+      "race": 5,
+      "class": 23,
+      "level": 10,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling and the Life Force aura settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the naked owner has its class base Stamina",
+      "actor": "warrior",
+      "metric": "stat",
+      "stat": 2,
+      "min": 28.5,
+      "max": 29.5
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the naked owner has its class base Stamina",
+      "actor": "ghoul",
+      "metric": "stat",
+      "stat": 2,
+      "min": 28.5,
+      "max": 29.5
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the naked owner has its class base Stamina",
+      "actor": "abom",
+      "metric": "stat",
+      "stat": 2,
+      "min": 28.5,
+      "max": 29.5
+    },
+    {
+      "action": "learn",
+      "actor": "abom",
+      "spell": 92123
+    },
+    {
+      "action": "learn",
+      "actor": "abom",
+      "spell": 680283
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: two Life Force passives make room for an Abomination",
+      "actor": "abom",
+      "metric": "aura_stacks",
+      "spell": 805011,
+      "min": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "warrior",
+      "spell": 500970
+    },
+    {
+      "action": "cast",
+      "label": "Raise the Lesser Skeletal Warrior",
+      "actor": "warrior",
+      "spell": 500970
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: one Lesser Skeletal Warrior",
+      "actor": "warrior",
+      "metric": "owned_creature_count",
+      "entry": 50065,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "ghoul",
+      "spell": 500971
+    },
+    {
+      "action": "cast",
+      "label": "Raise the Ghoul",
+      "actor": "ghoul",
+      "spell": 500971
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: one Ghoul",
+      "actor": "ghoul",
+      "metric": "owned_creature_count",
+      "entry": 50073,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "abom",
+      "spell": 500335
+    },
+    {
+      "action": "cast",
+      "label": "Raise the Abomination",
+      "actor": "abom",
+      "spell": 500335
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: one Abomination",
+      "actor": "abom",
+      "metric": "owned_creature_count",
+      "entry": 50068,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Let the minions refresh their stats from their owners",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The Lesser Skeletal Warrior has about 210 health",
+      "actor": "warrior",
+      "metric": "owned_creature_max_health",
+      "entry": 50065,
+      "min": 199,
+      "max": 221
+    },
+    {
+      "action": "assert",
+      "label": "The Ghoul has about 207 health",
+      "actor": "ghoul",
+      "metric": "owned_creature_max_health",
+      "entry": 50073,
+      "min": 196,
+      "max": 217
+    },
+    {
+      "action": "assert",
+      "label": "The Abomination has about 589 health",
+      "actor": "abom",
+      "metric": "owned_creature_max_health",
+      "entry": 50068,
+      "min": 559,
+      "max": 619
+    }
+  ]
+}

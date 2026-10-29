@@ -908,7 +908,8 @@ aura expiry is a separate event.
 `owned_creature_weapon_damage_min` requires a player and `entry`. It returns the lowest minimum weapon damage (`UNIT_FIELD_MINDAMAGE`) across their living
 owned creatures of that entry in the same phase and within 100 yards, so every copy of a guardian must meet an asserted `min`; zero when there are none.
 `owned_creature_armor` requires a player and a present owned creature selected by `entry`. It reads that creature's
-native `GetArmor()`, zero when absent.
+native `GetArmor()`, zero when absent. `owned_creature_max_health` reads the same creature's `GetMaxHealth()` and
+requires it to be present.
 `owned_gameobject_count` requires a player and `entry`. It counts their summoned gameobjects of that entry
 in the same phase and within 100 yards. `gameobject_display` and `gameobject_scale` read the single owned
 object's native display id and scale, returning zero when absent. They do not verify client rendering.

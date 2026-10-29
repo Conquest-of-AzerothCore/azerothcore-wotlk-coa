@@ -182,13 +182,63 @@ bool Responds(uint32 entry, uint32 command)
         return false;
     }
 }
+constexpr float OwnerStaminaPerLifeForce = 0.2714f;
+float NakedHealth(Player const* player)
+{
+    float stamina = player->GetCreateStat(STAT_STAMINA);
+    float firstTwenty = std::min(stamina, 20.0f);
+    return player->GetCreateHealth() + firstTwenty + (stamina - firstTwenty) * 10.0f;
+}
+float HealthShare(uint32 entry, uint8 cost)
+{
+    switch (entry)
+    {
+    case 50065:
+    case 51065:
+        return 0.54f;
+    case 50073:
+    case 50075:
+        return 0.66f;
+    case 50115:
+        return 0.79f;
+    case 50323:
+        return 0.94f;
+    case 50068:
+        return 1.38f;
+    case 51275:
+        return 1.44f;
+    case 50177:
+        return 2.53f;
+    case 500482:
+    case 500483:
+    case 500484:
+        return 4.0f;
+    default:
+        break;
+    }
+    switch (cost)
+    {
+    case 1:
+        return 0.54f;
+    case 2:
+        return 0.94f;
+    case 3:
+        return 1.38f;
+    default:
+        return 1.0f;
+    }
+}
+float HealthPerStamina(uint32 entry)
+{
+    return entry == 50073 ? 5.0f : 10.0f;
+}
 void Scale(Player* player, Creature* minion, uint8 cost, float& inheritedSpeed)
 {
     float weight = float(std::max<uint8>(1, cost));
     float healthFraction = minion->GetHealthPct() / 100.0f;
     float manaFraction =
         minion->GetMaxPower(POWER_MANA) ? float(minion->GetPower(POWER_MANA)) / minion->GetMaxPower(POWER_MANA) : 1.0f;
-    float stamina = (player->GetLevel() * 3.0f + player->GetStat(STAT_STAMINA) * 0.3f) * weight;
+    float stamina = player->GetStat(STAT_STAMINA) * OwnerStaminaPerLifeForce * cost;
     float intellect = player->GetStat(STAT_INTELLECT);
     float spellPower = float(std::max(player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FROST),
                                       player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW)));
@@ -197,8 +247,10 @@ void Scale(Player* player, Creature* minion, uint8 cost, float& inheritedSpeed)
     minion->SetStatFlatModifier(UNIT_MOD_STAT_INTELLECT, BASE_VALUE, intellect * 0.3f * weight);
     minion->UpdateStats(STAT_STAMINA);
     minion->UpdateStats(STAT_INTELLECT);
+    float minionStamina = std::max(0.0f, minion->GetStat(STAT_STAMINA) - minion->GetCreateStat(STAT_STAMINA));
     minion->SetStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE,
-                                50.0f * player->GetLevel() * weight + minion->GetStat(STAT_STAMINA) * 10);
+                                NakedHealth(player) * HealthShare(minion->GetEntry(), cost) +
+                                    minionStamina * HealthPerStamina(minion->GetEntry()));
     minion->UpdateMaxHealth();
     minion->SetHealth(std::max(1u, uint32(healthFraction * minion->GetMaxHealth())));
     minion->setPowerType(POWER_MANA);
