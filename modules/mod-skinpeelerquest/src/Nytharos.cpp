@@ -24,6 +24,8 @@
 
 namespace
 {
+    std::unordered_map<ObjectGuid, ObjectGuid> g_spoutInitialTargets;
+
     constexpr uint32 NYTHAROS_ENTRY = 9916224;
 
     // Full Oracle voice kit (creature\oracle\*.ogg). The oracle2 display rows
@@ -473,6 +475,18 @@ namespace
 
             me->HandleEmoteCommand(NY_EMOTE_CAST_OMNI);
 
+            std::vector<Player*> targets;
+            Map::PlayerList const& players = me->GetMap()->GetPlayers();
+            for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+            {
+                Player* player = itr->GetSource();
+                if (!player || !player->IsAlive() || !player->InSamePhase(me))
+                    continue;
+                targets.push_back(player);
+            }
+
+            uint32 const offset = targets.empty() ? 0 : urand(0, uint32(targets.size()) - 1);
+
             for (uint32 i = 0; i < count; ++i)
             {
                 float const angle = float(i) * (2.0f * float(M_PI) / float(count))
@@ -482,8 +496,10 @@ namespace
                 float const y = me->GetPositionY() + std::sin(angle) * dist;
                 float const z = me->GetPositionZ();
 
-                me->SummonCreature(NY_TORNADO_ENTRY, x, y, z, me->GetOrientation(),
+                Creature* spout = me->SummonCreature(NY_TORNADO_ENTRY, x, y, z, me->GetOrientation(),
                     TEMPSUMMON_TIMED_DESPAWN, NY_SPOUT_LIFE_MS);
+                if (spout && !targets.empty())
+                    g_spoutInitialTargets[spout->GetGUID()] = targets[(offset + i) % targets.size()]->GetGUID();
             }
 
             LOG_INFO("coa", "NYTHAROS: waterspouts x{}", count);
@@ -588,6 +604,13 @@ namespace
 
             _originX = me->GetPositionX();
             _originY = me->GetPositionY();
+
+            auto const initial = g_spoutInitialTargets.find(me->GetGUID());
+            if (initial != g_spoutInitialTargets.end())
+            {
+                _chaseTarget = initial->second;
+                g_spoutInitialTargets.erase(initial);
+            }
 
             CreatureAI::InitializeAI();
         }
