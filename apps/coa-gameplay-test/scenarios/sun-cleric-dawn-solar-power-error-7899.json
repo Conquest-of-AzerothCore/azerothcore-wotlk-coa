@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Dawn without twenty Solar Power is refused as not ready, not for mana (#7899, #9727)",
+  "contract": "Dawn 804584 costs no mana (PowerType 0, ManaCost 0); its raw readiness requirement is CasterAuraSpell 704396, the hidden '20 Solar Power' marker that the Sun Cleric resource code keeps while Solar Power 500149 is at 20 stacks and Dawn 807440 is inactive. A missing CasterAuraSpell is refused natively with SPELL_FAILED_CASTER_AURASTATE (22). The Sun Cleric check cast refused Dawn below twenty Solar Power with SPELL_FAILED_NO_POWER (85), which the client prints as 'Not enough mana' for this mana-typed spell. With nineteen Solar Power the cast must fail with reason 22 and start no Dawn phase; with twenty Solar Power and the marker the same native cast must start Dawn.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 15 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "cleric", "spell": 804584 },
+    { "action": "set_aura", "actor": "cleric", "spell": 500149, "stacks": 19 },
+    { "action": "cast", "actor": "cleric", "spell": 804584 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Dawn below twenty Solar Power is refused as not ready",
+      "actor": "cleric", "metric": "cast_failure", "spell": 804584, "equals": 22, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The refused cast starts no Dawn phase",
+      "actor": "cleric", "metric": "aura", "spell": 807440, "equals": 0
+    },
+    {
+      "action": "assert", "label": "The refused cast spends no Solar Power",
+      "actor": "cleric", "metric": "aura_stacks", "spell": 500149, "equals": 19
+    },
+    { "action": "set_aura", "actor": "cleric", "spell": 500149, "stacks": 20 },
+    { "action": "set_aura", "actor": "cleric", "spell": 704396, "stacks": 1 },
+    { "action": "wait", "label": "Let the global cooldown clear", "ms": 1600 },
+    { "action": "cast", "actor": "cleric", "spell": 804584 },
+    {
+      "action": "assert", "label": "CONTROL: Dawn at twenty Solar Power starts the phase",
+      "actor": "cleric", "metric": "aura", "spell": 807440, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTROL: the accepted cast is not refused",
+      "actor": "cleric", "metric": "cast_failure", "spell": 804584, "equals": 0
+    }
+  ]
+}
