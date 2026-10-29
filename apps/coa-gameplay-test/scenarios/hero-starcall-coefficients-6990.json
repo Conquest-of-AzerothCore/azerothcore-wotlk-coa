@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Hero Starcall adds its tooltip spell power and attack power to the Arcane hit (#6990)",
+  "contract": [
+    "Starcall 289250 tooltip (Spell.dbc Description[enUS]): 'Smash up to $i enemies, dealing",
+    "${$m1+$spa*0.3+$AP*0.15+0} Arcane damage'. Effect0 is SPELL_EFFECT_SCHOOL_DAMAGE with BasePoints 1 and",
+    "DieSides 1, so without the 30% Arcane spell power and 15% attack power terms a hit deals 2 damage. With a",
+    "1000 spell power and 1000 attack power fixture each hit promises at least 2 + 300 + 150 = 452 before",
+    "mitigation; the assertion leaves room for partial resists and still separates the reported ~2 damage hit."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero", "race": 1, "class": 10, "level": 60, "spell_hit_rating": 10000, "spell_power": 1000,
+      "attack_power": 1000
+    }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "hero", "entry": 36, "level": 60, "health": 2000000, "distance": 3, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "hero", "spell": 289250 },
+    {
+      "action": "snapshot", "actor": "hero", "metric": "spell_damage_count", "spell": 289250, "target": "enemy",
+      "save_as": "hits_before"
+    },
+    {
+      "action": "snapshot", "actor": "hero", "metric": "spell_damage_total", "spell": 289250, "target": "enemy",
+      "save_as": "damage_before"
+    },
+    { "action": "cast", "actor": "hero", "spell": 289250 },
+    {
+      "action": "assert", "label": "Starcall hits the adjacent enemy once",
+      "actor": "hero", "metric": "spell_damage_count", "spell": 289250, "target": "enemy",
+      "relative_to": "hits_before", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the hit carries the spell power and attack power terms, not only its 2 base points",
+      "actor": "hero", "metric": "spell_damage_total", "spell": 289250, "target": "enemy",
+      "relative_to": "damage_before", "min": 200
+    }
+  ]
+}
