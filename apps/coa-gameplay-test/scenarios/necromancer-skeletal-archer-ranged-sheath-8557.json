@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Necromancer: animated Skeletal Archers keep their bows drawn (#8557)",
+  "contract": [
+    "Animate: Skeletal Archer 805040 triggers 500330, which summons three Skeletal Archers (creature 50076)",
+    "carrying bows in their ranged equipment slots. An archer holds its bow only while its sheath state is",
+    "ranged (2); the melee state used by default for creatures without an addon leaves the hands empty",
+    "because the archers own no melee weapon. Every archer must therefore be ranged-sheathed when it is",
+    "animated and stay so while idle out of combat. A second nearby Necromancer owns none of these archers.",
+    "This covers the server sheath state, not rendered client animations."
+  ],
+  "timeout_ms": 45000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 36 },
+    { "id": "other", "race": 5, "class": 23, "level": 36 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "necro", "spell": 805040 },
+    { "action": "assert", "actor": "necro", "metric": "owned_creature_count", "entry": 50076, "equals": 0 },
+    { "action": "cast", "actor": "necro", "spell": 805040 },
+    {
+      "action": "assert", "label": "The cast animates three archers", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50076, "equals": 3, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Every animated archer holds its bow drawn", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50076, "ranged_weapon_subclass": 2, "sheath_state": 2,
+      "equals": 3
+    },
+    {
+      "action": "assert", "label": "No animated archer has its melee sheath ready", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50076, "sheath_state": 1, "equals": 0
+    },
+    {
+      "action": "assert", "label": "The nearby player owns no drawn archers", "actor": "other",
+      "metric": "owned_creature_count", "entry": 50076, "sheath_state": 2, "equals": 0
+    },
+    { "action": "wait", "ms": 5000 },
+    {
+      "action": "assert", "label": "Idle archers out of combat keep their bows drawn", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50076, "sheath_state": 2, "equals": 3
+    }
+  ]
+}

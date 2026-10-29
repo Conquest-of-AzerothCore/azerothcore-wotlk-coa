@@ -4380,10 +4380,14 @@ private:
             auto const rangedWeaponSubclass = step.get_optional<uint32>("ranged_weapon_subclass");
             Require(!rangedWeaponSubclass || *rangedWeaponSubclass < MAX_ITEM_SUBCLASS_WEAPON,
                 "Invalid ranged weapon subclass");
+            auto const sheathState = step.get_optional<uint32>("sheath_state");
+            Require(!sheathState || *sheathState < MAX_SHEATH_STATE, "Invalid sheath state");
             return std::count_if(creatures.begin(), creatures.end(),
                 [player, spell, caster, minDistance, ownerDisplay, creatorOnly,
-                 rangedWeaponSubclass](Creature* creature)
+                 rangedWeaponSubclass, sheathState](Creature* creature)
             {
+                if (sheathState && creature->GetSheath() != SheathState(*sheathState))
+                    return false;
                 if (rangedWeaponSubclass)
                 {
                     ItemTemplate const* weapon = sObjectMgr->GetItemTemplate(
