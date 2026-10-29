@@ -47,6 +47,7 @@ namespace CoAChallenges
     // Helpers exposed for the test harness.
     int QuestColor(uint32 questLevel, uint32 playerLevel);
     bool IsQuestWithoutObjectives(Quest const* quest);
+    bool IsFetchOrCollectionQuest(Quest const* quest);
     bool Test_SpellCheckCastBlocked(Player* player, uint32 spellId, bool triggered = false);
     void Test_SetQuiet(bool quiet);
     // Spellbind roulette (GM `.coa ruletestall` regression tests).

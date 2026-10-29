@@ -14,6 +14,10 @@ enum class Ruleset
     PvE
 };
 
+using Guard = bool (*)(Player*, Ruleset);
+
+void RegisterGuard(Guard guard);
+bool CanApply(Player* player, Ruleset ruleset);
 void Apply(Player* player, Ruleset ruleset);
 bool Has(Player* player, Ruleset ruleset);
 }

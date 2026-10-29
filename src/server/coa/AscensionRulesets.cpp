@@ -8,6 +8,7 @@
 #include "ScriptMgr.h"
 #include "SpellScript.h"
 #include <atomic>
+#include <vector>
 
 namespace
 {
@@ -23,6 +24,7 @@ enum RulesetSpells : uint32
 };
 
 std::atomic<bool> pvpRulesetsDisableLevelScaling{true};
+std::vector<AscensionRulesets::Guard> rulesetGuards;
 
 bool InPvPRuleset(Player const* player)
 {
@@ -66,8 +68,19 @@ void RefreshMercenariesFor(Player* viewer)
         });
 }
 
+AscensionRulesets::Ruleset SelectedRuleset(uint32 selectionId)
+{
+    if (selectionId == SPELL_SELECT_HIGH_RISK)
+        return AscensionRulesets::Ruleset::HighRisk;
+    if (selectionId == SPELL_SELECT_PVE)
+        return AscensionRulesets::Ruleset::PvE;
+    return AscensionRulesets::Ruleset::WarMode;
+}
+
 void ApplyRuleset(Player* player, uint32 selectionId)
 {
+    if (!AscensionRulesets::CanApply(player, SelectedRuleset(selectionId)))
+        return;
     bool const blockedBefore = RulesetBlocksLevelScaling(player);
     player->RemoveAurasDueToSpell(SPELL_HIGH_RISK);
     player->RemoveAurasDueToSpell(SPELL_WAR_MODE);
@@ -128,7 +141,10 @@ class spell_ascension_ruleset_select : public SpellScript
     SpellCastResult CheckCast()
     {
         Player* player = GetCaster()->ToPlayer();
-        return player && player->HasPlayerFlag(PLAYER_FLAGS_RESTING) ? SPELL_CAST_OK : SPELL_FAILED_NOT_HERE;
+        if (!player || !player->HasPlayerFlag(PLAYER_FLAGS_RESTING))
+            return SPELL_FAILED_NOT_HERE;
+        return AscensionRulesets::CanApply(player, SelectedRuleset(GetSpellInfo()->Id)) ?
+            SPELL_CAST_OK : SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
     }
 
     void Select(SpellEffIndex)
@@ -209,6 +225,22 @@ public:
             SyncRulesetPvP(player);
     }
 };
+}
+
+void AscensionRulesets::RegisterGuard(Guard guard)
+{
+    if (guard)
+        rulesetGuards.push_back(guard);
+}
+
+bool AscensionRulesets::CanApply(Player* player, Ruleset ruleset)
+{
+    if (!player)
+        return false;
+    for (Guard guard : rulesetGuards)
+        if (!guard(player, ruleset))
+            return false;
+    return true;
 }
 
 void AscensionRulesets::Apply(Player* player, Ruleset ruleset)
