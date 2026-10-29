@@ -1590,6 +1590,17 @@ public:
     return itr != entries.end() && itr->EntryId == entryId ? &*itr : nullptr;
   }
 
+  static std::vector<AscensionCoATalentState::KnownEntry> EntriesOfSpecialization(
+      std::vector<AscensionCoATalentState::KnownEntry> known, uint32 specializationId)
+  {
+    std::erase_if(known, [specializationId](AscensionCoATalentState::KnownEntry const& item)
+    {
+      AscensionCompatData::CoATalentEntry const* entry = FindTalentEntry(item.EntryId);
+      return entry && entry->SpecId && entry->SpecId != specializationId;
+    });
+    return known;
+  }
+
   static AscensionCoATalentState::HasSpell SpellbookOf(Player const* player)
   {
     return [player](uint32 spellId) { return player->HasSpell(spellId); };
@@ -1913,7 +1924,7 @@ public:
 
       bool const classTree = entry.SpecId == 0;
       AscensionCoATalentState::SpentPoints const spent =
-          AscensionCoATalentState::Spent(KnownTalentEntries(player));
+          AscensionCoATalentState::Spent(EntriesOfSpecialization(KnownTalentEntries(player), activeSpecialization));
       uint32 const used = classTree ? spent.AE : spent.TE;
       uint32 const budget = classTree ? classBudget : specializationBudget;
       uint32 const cost = (rank - currentRank) * uint32(classTree ? entry.AECost : entry.TECost);
@@ -2128,7 +2139,8 @@ public:
     std::vector<AscensionCoATalentState::KnownEntry> priced;
     for (AscensionCompatData::CoATalentEntry const& entry : AscensionCompatData::CoATalentEntries)
     {
-      if (entry.ClassId != player->getClass() || (!entry.AECost && !entry.TECost))
+      if (entry.ClassId != player->getClass() || (!entry.AECost && !entry.TECost) ||
+          (entry.SpecId && entry.SpecId != targetSpec))
         continue;
       auto itr = wanted.find(entry.EntryId);
       uint32 const rank = std::max(itr == wanted.end() ? 0 : itr->second, PersistentRank(player, entry));
