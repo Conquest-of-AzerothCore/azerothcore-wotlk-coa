@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "name": "Uldaman: The Lost Dwarves fight an Alliance player once a Horde player engages them",
+  "contract": [
+    "Issue #9641: Baelog, Eric \"The Swift\" and Olaf carry faction template 122 (Ironforge): hostile to the Horde,",
+    "friendly to the Alliance. In a mixed CoA group the Alliance members could not fight them. Once a fight starts they",
+    "turn on everyone (faction 14), and when they evade, here after their only attacker dies, they take their own faction back."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -6070.0,
+    "y": -2955.0,
+    "z": 209.8,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "horde",
+      "race": 2,
+      "class": 1,
+      "level": 40
+    },
+    {
+      "id": "alliance",
+      "race": 1,
+      "class": 1,
+      "level": 40
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "horde",
+      "target": "alliance"
+    },
+    {
+      "action": "teleport",
+      "actor": "alliance",
+      "map": 70,
+      "x": -335.5,
+      "y": 123.2,
+      "z": -53.1,
+      "o": 0.0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Alliance player is in Uldaman",
+      "actor": "alliance",
+      "metric": "map_id",
+      "equals": 70,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "summon",
+      "actor": "alliance",
+      "as": "olaf",
+      "entry": 6908,
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Before a fight Olaf is friendly to the Alliance player",
+      "actor": "alliance",
+      "metric": "can_attack",
+      "target": "olaf",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Olaf is not fighting yet",
+      "actor": "olaf",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "horde",
+      "map": 70,
+      "x": -335.5,
+      "y": 123.2,
+      "z": -53.1,
+      "o": 0.0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Horde player is in Uldaman",
+      "actor": "horde",
+      "metric": "map_id",
+      "equals": 70,
+      "within_ms": 10000
+    },
+    {
+      "action": "snapshot",
+      "actor": "horde",
+      "metric": "instance_id",
+      "save_as": "instance"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: both players share the group's instance",
+      "actor": "alliance",
+      "metric": "instance_id",
+      "relative_to": "instance",
+      "equals": 0
+    },
+    {
+      "action": "attack",
+      "actor": "horde",
+      "target": "olaf"
+    },
+    {
+      "action": "assert",
+      "label": "Olaf fights the Horde player",
+      "actor": "olaf",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "In the fight the Alliance player may attack Olaf",
+      "actor": "alliance",
+      "metric": "can_attack",
+      "target": "olaf",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "die",
+      "label": "The Horde player dies, leaving Olaf nobody to fight",
+      "actor": "horde"
+    },
+    {
+      "action": "assert",
+      "label": "After evading Olaf is friendly to the Alliance player again",
+      "actor": "alliance",
+      "metric": "can_attack",
+      "target": "olaf",
+      "equals": 0,
+      "within_ms": 15000
+    }
+  ]
+}
