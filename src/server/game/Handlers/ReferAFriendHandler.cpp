@@ -585,6 +585,45 @@ bool WorldSession::HandleRecruitAFriendRewardsCommand(std::string const& command
     if (!_player || !_player->IsInWorld())
         return false;
     ChatHandler chat(this);
+    if (command == "levels")
+    {
+        chat.PSendSysMessage("{} has {} stored RAF level credits. Each credit grants one level to another character.",
+            _player->GetName(), uint32(_player->GetGrantableLevels()));
+        chat.SendSysMessage("Credits belong to this character. They can be used on your recruiter or your direct recruits, never your own account or another recruit of the same recruiter.");
+        chat.PSendSysMessage("The recipient must be your faction, in your group, nearby on the same map, below your level and below the RAF level limit of {} and their own level cap.",
+            sWorld->getIntConfig(CONFIG_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL));
+        chat.SendSysMessage("Both characters must be alive, out of combat, not flying or teleporting. Active Prestige and other server progression restrictions can prevent a grant.");
+        Player* target = _player->GetSelectedPlayer();
+        if (!target || target == _player)
+        {
+            chat.SendSysMessage("Select the intended recipient and use .raf levels again to check their current eligibility. Use the character portrait's Grant A Level action to make the grant.");
+            return true;
+        }
+        char const* reason = nullptr;
+        switch (GrantLevelError(_player, target))
+        {
+            case ERR_REFER_A_FRIEND_NONE: break;
+            case ERR_REFER_A_FRIEND_NO_TARGET: reason = "select another player"; break;
+            case ERR_REFER_A_FRIEND_INSUFFICIENT_GRANTABLE_LEVELS: reason = "you have no stored credits"; break;
+            case ERR_REFER_A_FRIEND_NOT_REFERRED_BY:
+                reason = "the accounts are not directly linked recruiter/recruit accounts";
+                break;
+            case ERR_REFER_A_FRIEND_DIFFERENT_FACTION: reason = "the recipient must be your faction"; break;
+            case ERR_REFER_A_FRIEND_TARGET_TOO_HIGH: reason = "the recipient must be below your level"; break;
+            case ERR_REFER_A_FRIEND_GRANT_LEVEL_MAX_I: reason = "the recipient has reached a grant level cap"; break;
+            case ERR_REFER_A_FRIEND_NOT_IN_GROUP: reason = "you must be in the same group"; break;
+            case ERR_REFER_A_FRIEND_TOO_FAR: reason = "you must be nearby on the same map"; break;
+            default: reason = "a current character state or server progression restriction prevents granting"; break;
+        }
+        if (!reason && target->GetSession()->_rafGrantExpiry > GameTime::GetGameTime().count())
+            reason = "the recipient already has a pending level-grant request";
+        if (reason)
+            chat.PSendSysMessage("{} cannot receive a level right now: {}.", target->GetName(), reason);
+        else
+            chat.PSendSysMessage("{} currently meets the RAF grant requirements. The recipient must accept; eligibility is checked again on acceptance.",
+                target->GetName());
+        return true;
+    }
     UpdateRecruitAFriendRewards(true);
     if (command == "status")
     {

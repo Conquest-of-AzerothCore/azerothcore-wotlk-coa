@@ -115,12 +115,12 @@ public:
     {
         if (!args || !*args)
         {
-            handler->SendSysMessage("Usage: .raf <online player>. The recipient must accept the permanent account link.");
+            handler->SendSysMessage("Usage: .raf <online player> | status | levels | rewards | claim [reward_id]. Recruitment links require acceptance.");
             return false;
         }
 
         std::string name(args);
-        if (name == "status" || name == "rewards" || name == "claim" || name.rfind("claim ", 0) == 0)
+        if (name == "status" || name == "levels" || name == "rewards" || name == "claim" || name.rfind("claim ", 0) == 0)
             return handler->GetSession()->HandleRecruitAFriendRewardsCommand(name);
 
         if (!normalizePlayerName(name))
