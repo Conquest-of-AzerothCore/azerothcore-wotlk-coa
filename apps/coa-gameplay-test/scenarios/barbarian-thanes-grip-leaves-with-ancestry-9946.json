@@ -29,6 +29,12 @@
       "spell": 674
     },
     {
+      "action": "set_money",
+      "label": "FIXTURE: a purse for the unlearn price of the Ancestry talents the Brutality switch removes",
+      "actor": "barbarian",
+      "value": 1000000
+    },
+    {
       "action": "specialization",
       "label": "Enter Ancestry with eight Ancestry points and Thane's Grip",
       "actor": "barbarian",
