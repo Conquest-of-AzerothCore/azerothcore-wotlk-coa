@@ -818,6 +818,16 @@ struct SpellEnergizeEvent
     uint32 amount = 0;
 };
 
+struct MeleeOutcomes
+{
+    uint32 swings = 0;
+    uint32 crits = 0;
+    uint32 glancing = 0;
+    uint32 plain = 0;
+    uint64 plainDamage = 0;
+    uint64 damage = 0;
+};
+
 struct Actor
 {
     Tree definition;
@@ -875,6 +885,7 @@ struct Actor
     uint32 lootReceived = 0;
     std::array<uint32, 2> meleeAttacksByHand{};
     std::map<ObjectGuid, uint32> meleeAttacksTakenFrom;
+    std::map<ObjectGuid, MeleeOutcomes> meleeOutcomesByAttacker;
     std::array<uint32, 2> meleeDamageByHand{};
     std::array<uint64, 2> meleeDamageTotalByHand{};
     uint64 castPushbackMs = 0;
@@ -1311,6 +1322,18 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         }
         if (victim == actor.guid)
             ++actor.meleeAttacksTakenFrom[attacker];
+        MeleeOutcomes& outcome = actor.meleeOutcomesByAttacker[attacker];
+        ++outcome.swings;
+        outcome.damage += damage;
+        if (hitInfo & HITINFO_CRITICALHIT)
+            ++outcome.crits;
+        else if (hitInfo & HITINFO_GLANCING)
+            ++outcome.glancing;
+        else if (damage)
+        {
+            ++outcome.plain;
+            outcome.plainDamage += damage;
+        }
     }
 
     ++actor.packetOrdinal;
@@ -3971,6 +3994,37 @@ private:
             for (auto const& [attacker, count] : actor.meleeAttacksTakenFrom)
                 total += count;
             return total;
+        }
+        if (metric == "pet_melee_swings" || metric == "pet_melee_crits" || metric == "pet_melee_glancing" ||
+            metric == "pet_melee_plain_count" || metric == "pet_melee_plain_damage" || metric == "pet_melee_damage")
+        {
+            Require(unit->IsPlayer(), "Pet melee query needs a player");
+            Actor const& actor = _actors.at(step.get<std::string>("actor"));
+            auto entry = step.get_optional<uint32>("entry");
+            ObjectGuid pet = unit->ToPlayer()->GetPetGUID();
+            Require(entry || !pet.IsEmpty(), "Pet melee query needs a current pet or a creature entry");
+            MeleeOutcomes sum;
+            for (auto const& [attacker, outcome] : actor.meleeOutcomesByAttacker)
+                if (entry ? attacker.GetEntry() == *entry && !attacker.IsPlayer() : attacker == pet)
+                {
+                    sum.swings += outcome.swings;
+                    sum.crits += outcome.crits;
+                    sum.glancing += outcome.glancing;
+                    sum.plain += outcome.plain;
+                    sum.plainDamage += outcome.plainDamage;
+                    sum.damage += outcome.damage;
+                }
+            if (metric == "pet_melee_swings")
+                return sum.swings;
+            if (metric == "pet_melee_crits")
+                return sum.crits;
+            if (metric == "pet_melee_glancing")
+                return sum.glancing;
+            if (metric == "pet_melee_plain_count")
+                return sum.plain;
+            if (metric == "pet_melee_damage")
+                return double(sum.damage);
+            return double(sum.plainDamage);
         }
         if (metric == "melee_attack_count" || metric == "melee_damage_count" ||
             metric == "melee_damage_total")
