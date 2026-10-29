@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Hero Hydromancer: Lightning Bolt on a Doused target triggers Electrocute (#8330)",
+  "contract": [
+    "Hydromancer 272057 tooltip: 'Dealing damage with Frostbolt, Frostfire Bolt and Frost Nova applies Doused.'",
+    "Doused 272029 tooltip: 'Taking damage from Lightning Bolt or Chain Lightning triggers Electrocute.'",
+    "Electrocute 272034 tooltip: 'Deals ${($PL*2.6+$m1)+($SP*0.13)+($AP*0.0845)} Froststorm damage and",
+    "incapacitates the target for 2 seconds. The same enemy can only be incapacitated once every 30 sec.'",
+    "The incapacitate 272053 lasts 2 sec, breaks on damage and applies the 30 sec lockout 272056 to the target.",
+    "At level 30, $PL*2.6 + $m1 is 78 + 4 + 5.46*29 = 240 before spell power, so a landed Electrocute is far",
+    "above zero; the report says Doused is applied but Electrocute never happens."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    { "id": "hero", "race": 1, "class": 10, "level": 30, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "hero", "entry": 36, "level": 30, "health": 2000000, "distance": 15, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "hero", "spell": 272057 },
+    { "action": "learn", "label": "Frostbolt", "actor": "hero", "spell": 116 },
+    { "action": "learn", "label": "Lightning Bolt", "actor": "hero", "spell": 403 },
+    { "action": "cast", "actor": "hero", "spell": 116, "target": "enemy" },
+    {
+      "action": "assert", "label": "SETUP: Frostbolt damage applies Doused",
+      "actor": "enemy", "metric": "aura", "spell": 272029, "caster": "hero", "equals": 1, "within_ms": 4000
+    },
+    {
+      "action": "snapshot", "actor": "hero", "metric": "spell_damage_count", "spell": 272034, "target": "enemy",
+      "save_as": "electrocute_hits_before"
+    },
+    {
+      "action": "snapshot", "actor": "hero", "metric": "spell_damage_total", "spell": 272034, "target": "enemy",
+      "save_as": "electrocute_damage_before"
+    },
+    { "action": "cast", "actor": "hero", "spell": 403, "target": "enemy" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Lightning Bolt on the Doused target triggers Electrocute",
+      "actor": "hero", "metric": "spell_damage_count", "spell": 272034, "target": "enemy",
+      "relative_to": "electrocute_hits_before", "equals": 1, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "Electrocute deals its level-scaled Froststorm damage",
+      "actor": "hero", "metric": "spell_damage_total", "spell": 272034, "target": "enemy",
+      "relative_to": "electrocute_damage_before", "min": 100
+    },
+    {
+      "action": "assert", "label": "The incapacitate landed and started the target's 30 sec lockout",
+      "actor": "enemy", "metric": "aura", "spell": 272056, "equals": 1, "within_ms": 1000
+    }
+  ]
+}
