@@ -63,7 +63,9 @@ void Load()
 {
     std::vector<Offer> loaded;
     if (sConfigMgr->GetOption<bool>("ItemRecovery.Enable", true) &&
-        sConfigMgr->GetOption<bool>("ItemRecovery.Worldforged.Enable", false))
+        sConfigMgr->GetOption<bool>("ItemRecovery.Worldforged.Enable", false) &&
+        CharacterDatabase.Query("SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() "
+            "AND table_name = 'recovery_worldforged_receipt' AND engine = 'InnoDB'"))
         if (QueryResult rows = WorldDatabase.Query(
             "SELECT id, required_item, refunded_item, rune_count, starts_at, ends_at "
             "FROM recovery_worldforged_offer WHERE enabled = 1 ORDER BY starts_at DESC, id DESC LIMIT 5000"))
