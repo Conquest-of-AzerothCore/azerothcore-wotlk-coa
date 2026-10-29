@@ -369,7 +369,26 @@ class witch_hunter_resources : public PlayerScript
 class witch_hunter_scaling : public UnitScript
 {
   public:
-    witch_hunter_scaling() : UnitScript("witch_hunter_scaling", true, {UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE}) {}
+    witch_hunter_scaling()
+        : UnitScript("witch_hunter_scaling", true,
+                     {UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE, UNITHOOK_ON_BEFORE_ROLL_MELEE_OUTCOME_AGAINST})
+    {
+    }
+
+    void OnBeforeRollMeleeOutcomeAgainst(Unit const* attacker, Unit const*, WeaponAttackType, int32&, int32&, int32&,
+                                         int32&, int32& crit, int32& miss, int32& dodge, int32& parry, int32&) override
+    {
+        if (!attacker || (attacker->GetEntry() != 50124 && attacker->GetEntry() != 50224))
+            return;
+        Player* player = attacker->GetCharmerOrOwnerPlayerOrPlayerItself();
+        if (!player || player->getClass() != CLASS_WITCH_HUNTER)
+            return;
+        crit += int32(std::max(0.0f, player->GetFloatValue(PLAYER_RANGED_CRIT_PERCENTAGE) - 5.0f) * 100);
+        miss = std::max(0, miss - int32(std::max(0.0f, player->m_modRangedHitChance) * 100));
+        int32 expertise = int32(std::max(0.0f, player->GetExpertiseDodgeOrParryReduction(BASE_ATTACK)) * 100);
+        dodge = std::max(0, dodge - expertise);
+        parry = std::max(0, parry - expertise);
+    }
 
     void ModifySpellEffectBaseValue(Unit const* caster, SpellInfo const* info, uint8 index, float& value) override
     {

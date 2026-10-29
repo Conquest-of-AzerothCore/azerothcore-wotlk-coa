@@ -9,14 +9,14 @@
     "Compare mean damage per actual proc against a second otherwise identical enemy after five stacks; damage",
     "dealt while building stacks cannot enter the second sample. Assert every native refresh's stack count and",
     "completed normal-cast count. The owner's RAP and both targets stay unchanged; proc chances and attack timers",
-    "are unmodified. Each mean non-critical proc hit must equal the captured native aura amount times its stack count plus the",
-    "unchanged owner RAP times 15 percent per stack, allowing one point of integer rounding; a generic increase",
-    "is insufficient. Original 804192 applies its complete per-application amount and 15 percent owner ranged",
-    "attack power once per stack. Five-stack mean proc damage must therefore be approximately five times the one-",
-    "stack mean; the numerical checker preserves the main regression bounds of 4.5 to 5.3 while comparing",
-    "measured counts rather than assuming a single proc.",
-    "Monster resistance rolls partial resists on Shadow Rage, so a mean may sit up to 25 percent below that amount,",
-    "and Shadow Rage can crit, so both samples count only non-critical hits."
+    "are unmodified. Patch 70961 made stacks raise Shadow Rage's value when it had no attack power part, and 71834",
+    "restored its ranged attack power part; live raid logs fit a proc of the stacked aura amount plus 15 percent",
+    "owner ranged attack power once (the hound's Shadow Rage, Track, Shadow Claw and Houndmaster's Call keep their",
+    "live ratios only that way). Monster resistance rolls partial resists on Shadow Rage, so the numerical checker",
+    "requires each mean proc hit to lie within 75-100 percent of the captured native aura amount times its stack",
+    "count plus 15 percent of the unchanged owner RAP, and the five-stack to one-stack ratio, where resists cancel,",
+    "to match that expectation within 10 percent (about 3.5 at this RAP; counting RAP per stack would give 5).",
+    "Shadow Rage can crit, so both samples count only its non-critical hits."
   ],
   "timeout_ms": 240000,
   "players": [

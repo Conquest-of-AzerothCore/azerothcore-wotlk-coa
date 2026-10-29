@@ -163,7 +163,15 @@ class HoundActions
                 }
                 _ownerRefreshed = true;
                 _me->SetLevel(owner->GetLevel());
-                float damage = owner->GetLevel() + owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.04f;
+                bool const permanent = _me->GetEntry() == 50124;
+                float const spellPower = float(std::max({0, owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW),
+                                                         owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY)}));
+                float const hit = owner->GetLevel() * (permanent ? 3.0f : 0.6f) +
+                                  owner->GetTotalAttackPowerValue(RANGED_ATTACK) * (permanent ? 0.22f : 0.046f) +
+                                  spellPower * (permanent ? 0.39f : 0.08f);
+                float const strength = _me->GetTotalAttackPowerValue(BASE_ATTACK) / 14.0f *
+                                       _me->GetAttackTime(BASE_ATTACK) / 1000.0f;
+                float damage = std::max(1.0f, hit - strength);
                 _me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, damage * 0.9f);
                 _me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, damage * 1.1f);
                 _me->UpdateDamagePhysical(BASE_ATTACK);
@@ -203,6 +211,8 @@ class HoundActions
                               int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.55f);
                 if (owner->HasAura(705450))
                     value += owner->GetLevel() * 2;
+                if (_me->GetEntry() == 50224)
+                    value = int32(value * 0.3f);
                 _me->CastCustomSpell(706332, SPELLVALUE_BASE_POINT1, value, target, TRIGGERED_FULL_MASK);
                 _me->CastCustomSpell(706332, SPELLVALUE_BASE_POINT1, value, target, TRIGGERED_FULL_MASK);
                 if (_called && owner->HasAura(500056))

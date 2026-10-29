@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Shadowhound Track and Shadow Claw scale with the owner's ranged attack power and spell power",
+  "contract": [
+    "In live raid logs a permanent Shadowhound's Track (500181) hit is 0.90-0.99 and a Shadow Claw (800697) tick",
+    "0.19-0.21 of its Shadow Rage proc. With Shadow Rage at five stacks plus 15% ranged attack power that fits",
+    "Track 0.20 x ranged attack power and a Shadow Claw tick 0.036 x ranged attack power; spell power takes the",
+    "class's 1.75:1 share (0.35 and 0.063). Against an owner without fixtures, +10000 ranged attack power or",
+    "spell power adds about 2000 or 3500 to Track and 360 or 630 to each Shadow Claw tick."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "plain", "race": 1, "class": 15, "level": 60},
+    {"id": "ranged", "race": 1, "class": 15, "level": 60, "ranged_attack_power": 10000},
+    {"id": "caster", "race": 1, "class": 15, "level": 60, "spell_power": 10000}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let level scaling settle", "ms": 3000},
+    {"action": "learn", "actor": "plain", "spell": 801343},
+    {"action": "learn", "actor": "ranged", "spell": 801343},
+    {"action": "learn", "actor": "caster", "spell": 801343},
+    {"action": "cast", "label": "Houndmaster's Whistle", "actor": "plain", "spell": 801343},
+    {"action": "cast", "label": "Houndmaster's Whistle", "actor": "ranged", "spell": 801343},
+    {"action": "cast", "label": "Houndmaster's Whistle", "actor": "caster", "spell": 801343},
+    {"action": "assert", "label": "SETUP: the first Shadowhound is out", "actor": "plain", "metric": "pet_entry",
+     "equals": 50124, "within_ms": 5000},
+    {"action": "assert", "label": "SETUP: the second Shadowhound is out", "actor": "ranged", "metric": "pet_entry",
+     "equals": 50124, "within_ms": 5000},
+    {"action": "assert", "label": "SETUP: the third Shadowhound is out", "actor": "caster", "metric": "pet_entry",
+     "equals": 50124, "within_ms": 5000},
+    {"action": "snapshot", "actor": "plain", "metric": "spell_effect_value", "spell": 500181, "effect": 2,
+     "pet": true, "save_as": "track"},
+    {"action": "snapshot", "actor": "plain", "metric": "spell_effect_value", "spell": 800697, "effect": 0,
+     "pet": true, "save_as": "claw"},
+    {"action": "assert", "label": "Ranged attack power raises Track", "actor": "ranged", "metric": "spell_effect_value",
+     "spell": 500181, "effect": 2, "pet": true, "relative_to": "track", "min": 1950, "max": 2050},
+    {"action": "assert", "label": "Spell power raises Track", "actor": "caster", "metric": "spell_effect_value",
+     "spell": 500181, "effect": 2, "pet": true, "relative_to": "track", "min": 3450, "max": 3550},
+    {"action": "assert", "label": "Ranged attack power raises a Shadow Claw tick", "actor": "ranged",
+     "metric": "spell_effect_value", "spell": 800697, "effect": 0, "pet": true, "relative_to": "claw",
+     "min": 345, "max": 375},
+    {"action": "assert", "label": "Spell power raises a Shadow Claw tick", "actor": "caster",
+     "metric": "spell_effect_value", "spell": 800697, "effect": 0, "pet": true, "relative_to": "claw",
+     "min": 610, "max": 650}
+  ]
+}

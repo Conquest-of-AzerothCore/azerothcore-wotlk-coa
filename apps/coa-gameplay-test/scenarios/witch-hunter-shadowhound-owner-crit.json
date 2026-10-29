@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "The Shadowhound crits, hits and gets past dodges and parries with its owner's ranged stats",
+  "contract": [
+    "Live CoA combat logs show hound crit rates tracking the owner's Auto Shot crit rate (owners at 12-27% while",
+    "leveling had hounds at 16-33%, raid owners at 40-50% had hounds at 50-88%), plus hound talents, and live hounds",
+    "almost never miss, are dodged or are parried. A creature's own melee crit is 5% and an equal-level target avoids",
+    "about 15% of its swings. With fixture ratings that cap the owner's ranged crit, ranged hit and expertise, every",
+    "hound swing lands as a crit. Expected: at least 20 swings in 45 s, every one a crit."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "wh", "race": 1, "class": 15, "level": 60, "ranged_crit_rating": 100000, "ranged_hit_rating": 10000,
+     "expertise_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "golem", "owner": "wh", "entry": 36, "level": 60, "health": 10000000, "distance": 15}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "actor": "wh", "spell": 801343},
+    {"action": "cast", "label": "Houndmaster's Whistle", "actor": "wh", "spell": 801343},
+    {"action": "assert", "label": "SETUP: the Shadowhound is out", "actor": "wh", "metric": "pet_entry",
+     "equals": 50124, "within_ms": 5000},
+    {"action": "snapshot", "actor": "wh", "metric": "pet_melee_swings", "save_as": "swings0"},
+    {"action": "snapshot", "actor": "wh", "metric": "pet_melee_crits", "save_as": "crits0"},
+    {"action": "attack", "label": "Send the hound in", "actor": "wh", "target": "golem", "pet": true},
+    {"action": "wait", "label": "Let the hound attack", "ms": 45000},
+    {"action": "assert", "label": "SETUP: the hound swung often enough", "actor": "wh", "metric": "pet_melee_swings",
+     "relative_to": "swings0", "min": 20},
+    {"action": "snapshot", "actor": "wh", "metric": "pet_melee_swings", "relative_to": "swings0", "save_as": "swings"},
+    {"action": "assert", "label": "Every hound swing lands as a crit", "actor": "wh", "metric": "pet_melee_crits",
+     "relative_to": "crits0", "ratio_to": "swings", "equals": 1}
+  ]
+}
