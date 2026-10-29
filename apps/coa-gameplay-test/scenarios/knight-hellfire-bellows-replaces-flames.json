@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "name": "Knight of Xoroth: Hellfire Bellows replaces Flames of Xoroth in Defiance",
+  "contract": "CharacterAdvancement 7887 (Defiance, ChrSpecs 17, one specialization point) teaches the talent aura Hellfire Bellows 807587, which transforms Flames of Xoroth (root 801059) into Hellfire Bellows 520292. Nothing else teaches 520292 (SkillLineAbility 23513 has AcquireMethod 0), and Player::SetTemporarySpellReplacement ignores a replacement the player does not know, so AscensionXoroth::Refresh alone cannot map Flames to Bellows. The TalentReplacements row (17, 17, 807587, 801059) learns 520292 while the talent is owned. Expected: buying 7887 maps the level 40 Flames rank 802414 to 520292; removing it clears the mapping and the temporary spell.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "k", "race": 1, "class": 17, "level": 40 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login state settle", "ms": 3000 },
+    { "action": "set_money", "label": "Fund the native removal price", "actor": "k", "value": 1000000 },
+    { "action": "learn", "actor": "k", "spell": 802414 },
+    { "action": "specialization", "actor": "k", "id": 17 },
+    {
+      "action": "assert",
+      "label": "Control: Flames of Xoroth is not replaced without the talent",
+      "actor": "k",
+      "metric": "temporary_spell_replacement",
+      "spell": 802414,
+      "equals": 802414
+    },
+    { "action": "advancement_rank", "label": "Buy Hellfire Bellows", "actor": "k", "entry": 7887, "rank": 1 },
+    {
+      "action": "assert",
+      "label": "SETUP: the Hellfire Bellows talent aura is present",
+      "actor": "k",
+      "metric": "aura",
+      "spell": 807587,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert",
+      "label": "Hellfire Bellows is known while the talent is owned",
+      "actor": "k",
+      "metric": "knows_spell",
+      "spell": 520292,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Flames of Xoroth is replaced by Hellfire Bellows",
+      "actor": "k",
+      "metric": "temporary_spell_replacement",
+      "spell": 802414,
+      "equals": 520292
+    },
+    { "action": "advancement_rank", "label": "Remove Hellfire Bellows", "actor": "k", "entry": 7887, "rank": 0 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert",
+      "label": "The temporary Hellfire Bellows spell is gone",
+      "actor": "k",
+      "metric": "knows_spell",
+      "spell": 520292,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Flames of Xoroth is native again",
+      "actor": "k",
+      "metric": "temporary_spell_replacement",
+      "spell": 802414,
+      "equals": 802414
+    }
+  ]
+}
