@@ -199,6 +199,7 @@ constexpr uint16 SMSG_PATCH_SPELL_VISUAL = 0x092C;
 constexpr uint16 SMSG_PATCH_SPELL_VISUAL_KIT = 0x092D;
 constexpr uint16 SMSG_PATCH_SPELL_VISUAL_KIT_MODEL_ATTACH = 0x092E;
 constexpr uint16 SMSG_PATCH_SPELL_VISUAL_EFFECT_NAME = 0x092F;
+constexpr uint16 SMSG_PATCH_SOUND_ENTRIES = 0x098B;
 constexpr uint16 SMSG_PATCH_SUPER_TRACK = 0x06BE;
 constexpr uint16 SMSG_PATCH_QUEST_SUPER_TRACK = 0x06BF;
 constexpr uint16 SMSG_PATCH_SKILL_LINE_ABILITY = 0x0934;
@@ -4215,6 +4216,7 @@ public:
       bytes += SendQuestSuperTrackRow(player, QuestSuperTrackRowFor(patch, player->getRaceMask()));
 
     bytes += SendSpellVisualRows(player);
+    bytes += SendSoundEntryRows(player);
 
     for (SkillLineAbilityPatchRow const& row : rows.SkillLineAbilities)
         bytes += SendSkillLineAbilityRow(player, row);
@@ -4851,6 +4853,27 @@ private:
 
     LOG_INFO("coa", "Streamed {} SpellVisual, {} SpellVisualKit, {} attach and {} effect rows to {}",
              visuals, kits, attaches, effects, player->GetName());
+
+    return bytes;
+  }
+
+  std::size_t SendSoundEntryRows(Player *player) const {
+    std::size_t bytes = 0;
+    uint32 count = 0;
+
+    if (QueryResult result = WorldDatabase.Query("SELECT * FROM `soundentries_dbc`")) {
+      do {
+        Field *fields = result->Fetch();
+        std::vector<uint32> values(30);
+        for (uint32 i = 0; i < 30; ++i)
+          values[i] = fields[i].Get<uint32>();
+        bytes += SendSpellVisualRow(player, SMSG_PATCH_SOUND_ENTRIES, values);
+        ++count;
+      } while (result->NextRow());
+    }
+
+    if (count)
+      LOG_INFO("coa", "Streamed {} SoundEntries rows to {}", count, player->GetName());
 
     return bytes;
   }
