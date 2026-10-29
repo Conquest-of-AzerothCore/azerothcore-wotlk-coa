@@ -5,9 +5,13 @@
 #include "DBCStores.h"
 #include "Log.h"
 #include <algorithm>
+#include <cstdlib>
+#include <cctype>
 #include <cmath>
+#include <string>
 #include <string_view>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace AscensionMysticEnchant
 {
@@ -254,10 +258,11 @@ Enchant const* Catalog::FindItem(std::uint32_t item) const
 
 namespace
 {
-std::unordered_map<std::uint32_t, std::uint32_t> TaughtSpells()
+std::unordered_map<std::uint32_t, std::vector<std::uint32_t>> TaughtSpells()
 {
     constexpr std::uint32_t SPELL_DESCRIPTION = 170;
-    std::unordered_map<std::uint32_t, std::uint32_t> taught;
+    constexpr std::string_view CROSSOVER_TEACHES = "][]Teaches you";
+    std::unordered_map<std::uint32_t, std::vector<std::uint32_t>> taught;
     ClientDBC spells;
     if (!spells.Load(GetClientDBCPath("Spell.dbc"), SPELL_DESCRIPTION + 1))
         return taught;
@@ -265,19 +270,61 @@ std::unordered_map<std::uint32_t, std::uint32_t> TaughtSpells()
     {
         ClientDBC::Record const record = spells.GetRecord(index);
         std::string_view const description = record.GetString(SPELL_DESCRIPTION);
-        std::size_t const teaches = description.starts_with("Teaches you") ? 0 : description.find("\nTeaches you");
+        std::size_t const crossover = description.find(CROSSOVER_TEACHES);
+        std::size_t const teaches = description.starts_with("Teaches you") ? 0 :
+            crossover != std::string_view::npos ? crossover : description.find("\nTeaches you");
         if (teaches == std::string_view::npos)
             continue;
-        std::size_t const token = description.find("@s:", teaches);
-        if (token == std::string_view::npos)
-            continue;
-        std::uint32_t spell = 0;
-        for (std::size_t at = token + 3; at < description.size() && description[at] >= '0' && description[at] <= '9'; ++at)
-            spell = spell * 10 + std::uint32_t(description[at] - '0');
-        if (spell)
-            taught[record.GetUInt32(0)] = spell;
+        for (std::size_t token = description.find("@s:", teaches); token != std::string_view::npos;
+            token = description.find("@s:", token + 3))
+        {
+            std::uint32_t spell = 0;
+            for (std::size_t at = token + 3; at < description.size() && description[at] >= '0' && description[at] <= '9'; ++at)
+                spell = spell * 10 + std::uint32_t(description[at] - '0');
+            if (spell)
+                taught[record.GetUInt32(0)].push_back(spell);
+            if (crossover == std::string_view::npos)
+                break;
+        }
     }
     return taught;
+}
+
+NamedTransform ParseNamedTransform(std::string const& description)
+{
+    NamedTransform named;
+    std::string_view const text = description;
+    std::size_t const marker = text.find(" is transformed into ");
+    std::size_t const reference = text.find("@s:");
+    if (marker == std::string_view::npos || reference == std::string_view::npos)
+        return named;
+    std::size_t const start = text.find_last_of(".\n", marker);
+    std::string_view from = text.substr(start == std::string_view::npos ? 0 : start + 1,
+        marker - (start == std::string_view::npos ? 0 : start + 1));
+    while (!from.empty() && from.front() == ' ')
+        from.remove_prefix(1);
+    named.From = std::string(from);
+    named.To = std::uint32_t(std::strtoul(description.c_str() + reference + 3, nullptr, 10));
+    return named;
+}
+
+std::unordered_map<std::uint32_t, NamedTransform> TransformingSpells()
+{
+    constexpr std::uint32_t SPELL_DESCRIPTION = 170;
+    std::unordered_map<std::uint32_t, NamedTransform> transforming;
+    ClientDBC spells;
+    if (!spells.Load(GetClientDBCPath("Spell.dbc"), SPELL_DESCRIPTION + 1))
+        return transforming;
+    for (std::uint32_t index = 0; index < spells.GetRecordCount(); ++index)
+    {
+        ClientDBC::Record const record = spells.GetRecord(index);
+        std::string const description(record.GetString(SPELL_DESCRIPTION));
+        std::string lower = description;
+        std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) { return char(std::tolower(c)); });
+        if (lower.find("transform") != std::string::npos)
+            transforming[record.GetUInt32(0)] = ParseNamedTransform(description);
+    }
+    return transforming;
 }
 }
 
@@ -286,7 +333,8 @@ bool LoadCatalog(Catalog& catalog)
     ClientDBC file;
     if (!file.Load(GetClientDBCPath("MysticEnchant.dbc"), FIELD_COUNT))
         return false;
-    std::unordered_map<std::uint32_t, std::uint32_t> const taught = TaughtSpells();
+    std::unordered_map<std::uint32_t, std::vector<std::uint32_t>> const taught = TaughtSpells();
+    std::unordered_map<std::uint32_t, NamedTransform> const transforming = TransformingSpells();
 
     Catalog loaded;
     for (std::uint32_t index = 0; index < file.GetRecordCount(); ++index)
@@ -294,6 +342,11 @@ bool LoadCatalog(Catalog& catalog)
         loaded.Rows.push_back(ReadEnchant(file.GetRecord(index)));
         if (auto const itr = taught.find(loaded.Rows.back().Spell); itr != taught.end())
             loaded.Rows.back().Taught = itr->second;
+        if (auto const itr = transforming.find(loaded.Rows.back().Spell); itr != transforming.end())
+        {
+            loaded.Rows.back().Transforms = true;
+            loaded.Rows.back().Named = itr->second;
+        }
         loaded.BySpell[loaded.Rows.back().Spell] = loaded.Rows.size() - 1;
         loaded.ByItem[loaded.Rows.back().Item] = loaded.Rows.size() - 1;
     }

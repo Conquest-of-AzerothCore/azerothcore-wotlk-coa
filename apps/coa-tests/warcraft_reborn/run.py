@@ -309,6 +309,9 @@ int main(int, char** argv)
     Check(twinned(53, 1100053) && twinned(20271, 1120271), "Reborn Backstab and Judgement of Light are twins");
     Check(twinned(12867, 1312867) && twinned(56638, 1356638) && twinned(26016, 1326016),
         "crossover Mystic Enchants Deep Wounds, Taste for Blood and Vindication twin their stock talents");
+    Check(twinned(1112497, 1312497) && twinned(1118095, 1318095) && !twinned(12497, 1312497) && twinned(12848, 1312848),
+        "crossover Frostbite and Nightfall copy the Reborn talent, not the stock one, and twin the Reborn talent; "
+        "crossover Ignite still twins stock Ignite");
     Check(!twinned(160, 1100160) && std::none_of(twins.begin(), twins.end(),
             [&layouts](auto const& pair) { return layouts[pair.first] != layouts[pair.second]; }),
         "a stock spell and an unrelated spell 1100000 above it (Forked Lightning, Glyph of Slam) are not twins");

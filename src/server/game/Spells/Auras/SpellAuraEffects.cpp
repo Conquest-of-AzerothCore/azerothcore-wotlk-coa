@@ -401,7 +401,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     nullptr,                                                      //334 unknown Ascension aura
     nullptr,                                                      //335 unknown Ascension aura
     nullptr,                                                      //336 unknown Ascension aura
-    nullptr,                                                      //337 unknown Ascension aura
+    &AuraEffect::HandleNoImmediateEffect,                         //337 Ascension ability override: AscensionMysticEnchant replaces MiscValue with the amount
     &AuraEffect::HandleNoImmediateEffect,                         //338 SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT
     nullptr,                                                      //339 unknown Ascension aura
     nullptr,                                                      //340 unknown Ascension aura
@@ -420,7 +420,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     nullptr,                                                      //353 unknown Ascension aura
     nullptr,                                                      //354 unknown Ascension aura
     nullptr,                                                      //355 unknown Ascension aura
-    nullptr,                                                      //356 unknown Ascension aura
+    &AuraEffect::HandleNoImmediateEffect,                         //356 SPELL_AURA_ASCENSION_MOD_OFFHAND_HIT_CHANCE implemented in Unit::MeleeSpellMissChance
     &AuraEffect::HandleNoImmediateEffect,                         //357 SPELL_AURA_ASCENSION_MOD_INSTANT_MANA_COST_PCT
     nullptr,                                                      //358 unknown Ascension aura
     nullptr,                                                      //359 unknown Ascension aura

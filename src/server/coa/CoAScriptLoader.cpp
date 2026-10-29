@@ -116,6 +116,8 @@ void AddAscensionFreepickScripts();
 void AddAscensionHeroBloomingShotScripts();
 void AddAscensionMysticEnchantScripts();
 void AddSC_AscensionMysticEnchantProcs();
+void AddSC_AscensionMysticEnchantBonus();
+void AddSC_AscensionMysticEnchantMechanics();
 void AddSC_AscensionMysticEnchantScripts();
 void AddAscensionBuildCreatorScripts();
 void AddAscensionWarcraftRebornScripts();
@@ -745,6 +747,8 @@ void AddCoAScripts()
     AddAscensionHeroBloomingShotScripts();
     AddAscensionMysticEnchantScripts();
     AddSC_AscensionMysticEnchantProcs();
+    AddSC_AscensionMysticEnchantBonus();
+    AddSC_AscensionMysticEnchantMechanics();
     AddSC_AscensionMysticEnchantScripts();
     AddAscensionBuildCreatorScripts();
     AddAscensionWarcraftRebornScripts();

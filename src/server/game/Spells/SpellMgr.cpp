@@ -1529,11 +1529,19 @@ void SpellMgr::LoadSpellTwins(bool ranked)
 
 uint32 SpellMgr::GetSpellTwinSource(uint32 spellId) const
 {
-    if (auto const itr = _spellTwinSources.find(spellId); itr != _spellTwinSources.end())
-        return itr->second;
-    if (auto const itr = _spellNamesakeSources.find(spellId); itr != _spellNamesakeSources.end())
-        return itr->second;
-    return spellId;
+    // two hops at most: a Warcraft Reborn crossover Mystic Enchant twins the Reborn row, itself a twin or namesake of
+    // the stock spell the callers compare against (Improved Fear, Improved Healthstone)
+    uint32 source = spellId;
+    for (uint8 hop = 0; hop < 2; ++hop)
+    {
+        if (auto const itr = _spellTwinSources.find(source); itr != _spellTwinSources.end())
+            source = itr->second;
+        else if (auto const itr = _spellNamesakeSources.find(source); itr != _spellNamesakeSources.end())
+            source = itr->second;
+        else
+            break;
+    }
+    return source;
 }
 
 uint32 SpellMgr::GetSpellTwinFor(uint32 stockSpellId, uint32 relatedSpellId) const

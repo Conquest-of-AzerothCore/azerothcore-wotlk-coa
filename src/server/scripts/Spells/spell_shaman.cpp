@@ -744,6 +744,11 @@ class spell_sha_earthliving_weapon : public AuraScript
             }
         }
 
+        // the script rolls instead of the proc system, so the proc chance modifiers are applied here (Glyph of
+        // Earthliving Weapon: +10%)
+        if (Player* modOwner = caster->GetSpellModOwner())
+            modOwner->ApplySpellMod(GetId(), SPELLMOD_CHANCE_OF_SUCCESS, chance);
+
         return roll_chance_i(chance);
     }
 
@@ -1226,6 +1231,8 @@ class spell_sha_stoneclaw_totem : public SpellScript
     void HandleScriptEffect(SpellEffIndex /*effIndex*/)
     {
         Unit* target = GetHitUnit();
+        // a Warcraft Reborn totem shields with its own absorb twin
+        uint32 const absorb = sSpellMgr->GetSpellTwinFor(SPELL_SHAMAN_STONECLAW_TOTEM, GetSpellInfo()->Id);
 
         // Cast Absorb on totems
         for (uint8 slot = SUMMON_SLOT_TOTEM_FIRE; slot < MAX_TOTEM_SLOT; ++slot)
@@ -1235,12 +1242,12 @@ class spell_sha_stoneclaw_totem : public SpellScript
 
             Creature* totem = target->GetMap()->GetCreature(target->m_SummonSlot[slot]);
             if (totem && totem->IsTotem())
-                GetCaster()->CastCustomSpell(SPELL_SHAMAN_STONECLAW_TOTEM, SPELLVALUE_BASE_POINT0, GetEffectValue(), totem, true);
+                GetCaster()->CastCustomSpell(absorb, SPELLVALUE_BASE_POINT0, GetEffectValue(), totem, true);
         }
 
         // Glyph of Stoneclaw Totem
         if (AuraEffect* aur = target->GetAuraEffect(SPELL_SHAMAN_GLYPH_OF_STONECLAW_TOTEM, 0))
-            GetCaster()->CastCustomSpell(SPELL_SHAMAN_STONECLAW_TOTEM, SPELLVALUE_BASE_POINT0, GetEffectValue() * aur->GetAmount(), target, true);
+            GetCaster()->CastCustomSpell(absorb, SPELLVALUE_BASE_POINT0, GetEffectValue() * aur->GetAmount(), target, true);
     }
 
     void Register() override

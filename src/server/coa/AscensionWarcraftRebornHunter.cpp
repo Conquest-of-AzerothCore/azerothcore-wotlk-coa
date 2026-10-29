@@ -18,6 +18,9 @@ constexpr uint32 IMPROVED_STEADY_SHOT_BUFF = 1153220;
 constexpr uint32 AUTO_SHOT_FLAG = 0x00000001;
 constexpr uint32 KILL_SHOT_FLAG = 0x00800000;
 
+constexpr std::array<uint32, 8> CARVE = { 1101500, 1101501, 1101502, 1101503, 1101504, 1101505, 1101506, 1101507 };
+constexpr uint32 CARVE_FLAG2 = 0x10000000;
+
 template <std::size_t N>
 bool IsOneOf(std::array<uint32, N> const& spells, uint32 spellId)
 {
@@ -66,6 +69,9 @@ void ApplyAscensionWarcraftRebornHunterContracts(SpellInfo* spellInfo)
         spellInfo->Effects[EFFECT_0].SpellClassMask[0] |= AUTO_SHOT_FLAG;
         spellInfo->Effects[EFFECT_1].BasePoints = spellInfo->Effects[EFFECT_0].BasePoints;
     }
+
+    if (IsOneOf(CARVE, spellInfo->Id) && !spellInfo->SpellFamilyFlags)
+        spellInfo->SpellFamilyFlags[2] |= CARVE_FLAG2;
 
     if (IsOneOf(HAWK_EYE, spellInfo->Id) && spellInfo->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_ADD_FLAT_MODIFIER)
         spellInfo->Effects[EFFECT_0].SpellClassMask[1] |= KILL_SHOT_FLAG;

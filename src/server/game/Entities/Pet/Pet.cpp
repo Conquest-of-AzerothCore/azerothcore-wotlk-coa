@@ -114,9 +114,12 @@ void Pet::AddToWorld()
                 owner->SetLastPetSpell(GetUInt32Value(UNIT_CREATED_BY_SPELL));
             }
         }
-
-        sScriptMgr->OnPetAddToWorld(this);
     }
+
+    // a tamed pet enters the world before Unit::SetMinion gives it its owner GUID (Spell::EffectTameCreature):
+    // the hook goes by the owning player the pet was created for
+    if (GetOwner())
+        sScriptMgr->OnPetAddToWorld(this);
 }
 
 void Pet::RemoveFromWorld()

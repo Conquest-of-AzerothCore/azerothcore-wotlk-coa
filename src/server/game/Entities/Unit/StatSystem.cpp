@@ -1503,6 +1503,12 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
     float attPowerMod = GetFlatModifierValue(unitMod, TOTAL_VALUE);
     float attPowerMultiplier = GetPctModifierValue(unitMod, TOTAL_PCT) - 1.0f;
 
+    // Glyph of Felguard: the Felguard's total attack power +20%
+    if (GetStockPetEntry(GetEntry()) == NPC_FELGUARD)
+        if (Unit* owner = GetOwner())
+            if (AuraEffect const* glyph = owner->GetAuraEffectOfRankedSpellOrTwin(SPELL_GLYPH_OF_FELGUARD, EFFECT_0))
+                attPowerMultiplier += glyph->GetAmount() / 100.0f;
+
     //UNIT_FIELD_(RANGED)_ATTACK_POWER field
     SetInt32Value(UNIT_FIELD_ATTACK_POWER, (int32)base_attPower);
     //UNIT_FIELD_(RANGED)_ATTACK_POWER_MODS field

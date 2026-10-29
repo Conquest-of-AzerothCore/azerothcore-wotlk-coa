@@ -3844,7 +3844,10 @@ void Spell::EffectTameCreature(SpellEffIndex /*effIndex*/)
     if (creatureTarget->IsPet())
         return;
 
-    if (!m_caster->IsClass(CLASS_HUNTER, CLASS_CONTEXT_PET))
+    // a non-hunter tames through a channel it knows: Warcraft Reborn's Tether Elemental is a shaman Mystic Enchant
+    bool const knowsChannel = m_caster->IsPlayer() && m_triggeredByAuraSpell.spellInfo &&
+        m_caster->ToPlayer()->HasSpell(m_triggeredByAuraSpell.spellInfo->Id);
+    if (!m_caster->IsClass(CLASS_HUNTER, CLASS_CONTEXT_PET) && !knowsChannel)
         return;
 
     // cast finish successfully

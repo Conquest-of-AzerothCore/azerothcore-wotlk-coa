@@ -4297,6 +4297,14 @@ bool Player::HasSpell(uint32 spell) const
     return (itr != m_spells.end() && itr->second->State != PLAYERSPELL_REMOVED && itr->second->IsInSpec(m_activeSpec));
 }
 
+bool Player::HasSpellOrTwin(uint32 spell) const
+{
+    for (uint32 relative : sSpellMgr->GetSpellAndRelatives(spell))
+        if (HasSpell(relative))
+            return true;
+    return false;
+}
+
 bool Player::HasTalent(uint32 spell, uint8 spec) const
 {
     PlayerTalentMap::const_iterator itr = m_talents.find(spell);
