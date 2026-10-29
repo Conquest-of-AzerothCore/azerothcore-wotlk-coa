@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Feast of Talons does not trigger when Darkflock strikes only four enemies",
+  "contract": [
+    "Feast of Talons 500056 needs at least 5 enemies struck by Darkflock. Expected: with four enemies 3-6 yd in front,",
+    "every 520271 hit of a full 8 s Darkflock lands on all four and none of them ever gets crows (500564)."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "wh", "race": 1, "class": 15, "level": 60, "spell_hit_rating": 10000, "ranged_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "a", "owner": "wh", "entry": 36, "level": 60, "health": 1000000, "distance": 3},
+    {"id": "b", "owner": "wh", "entry": 36, "level": 60, "health": 1000000, "distance": 4},
+    {"id": "c", "owner": "wh", "entry": 36, "level": 60, "health": 1000000, "distance": 5},
+    {"id": "d", "owner": "wh", "entry": 36, "level": 60, "health": 1000000, "distance": 6}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "label": "Darkflock rank 5", "actor": "wh", "spell": 562025},
+    {"action": "learn", "label": "Feast of Talons", "actor": "wh", "spell": 500056},
+    {"action": "assert", "label": "SETUP: Feast of Talons is active", "actor": "wh", "metric": "aura", "spell": 500056,
+     "equals": 1},
+    {"action": "set_power", "actor": "wh", "power": 1, "value": 1000},
+    {"action": "cast", "label": "Darkflock", "actor": "wh", "spell": 562025, "target": "a"},
+    {"action": "assert", "label": "Darkflock runs out", "actor": "wh", "metric": "aura", "spell": 562025, "equals": 0,
+     "within_ms": 9000},
+    {"action": "assert", "label": "SETUP: the farthest enemy took every hit", "actor": "wh",
+     "metric": "spell_damage_count", "spell": 520271, "target": "d", "min": 3},
+    {"action": "assert", "label": "No crows on the first enemy", "actor": "a", "metric": "aura", "spell": 500564,
+     "equals": 0},
+    {"action": "assert", "label": "No crows on the fourth enemy", "actor": "d", "metric": "aura", "spell": 500564,
+     "equals": 0},
+    {"action": "assert", "label": "The crows never dealt damage", "actor": "wh", "metric": "spell_damage_count",
+     "spell": 500564, "target": "a", "equals": 0}
+  ]
+}
