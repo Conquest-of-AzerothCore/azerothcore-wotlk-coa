@@ -189,6 +189,7 @@ namespace
         void InitializeAI() override
         {
             me->SetReactState(REACT_DEFENSIVE);
+            ApexScaling::TuneHitbox(me);
 
             NytharosState& state = g_nytharosStates[me->GetGUID().GetCounter()];
             state = NytharosState();
@@ -207,6 +208,7 @@ namespace
             state.baseMaxHealth = base;
 
             ApexScaling::RestoreHealth(me, base);
+            ApexScaling::TuneHitbox(me);
         }
 
         void JustEngagedWith(Unit* /*who*/) override
@@ -244,7 +246,7 @@ namespace
                 return;
 
             if (!me->IsInCombat() || !me->GetVictim())
-                AttackStart(attacker);
+                ApexScaling::StartApexPull(me, attacker);
 
             me->AddThreat(attacker, 1.0f);
 
@@ -302,6 +304,9 @@ namespace
             if (!me->IsInCombat())
                 me->SetHomePosition(me->GetPositionX(), me->GetPositionY(),
                     me->GetPositionZ(), me->GetOrientation());
+
+            ApexScaling::KeepApexChase(me);
+            ApexScaling::TuneHitbox(me);
 
             if (!UpdateVictim())
                 return;

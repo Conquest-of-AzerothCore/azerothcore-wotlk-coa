@@ -319,10 +319,10 @@ namespace
         }
     };
 
-    // The core measures the leash from the creature's home position. All three
-    // apex bosses patrol far past the 30-yard radius, so an opening hit from
-    // range was rejected: the boss never engaged and the pull read as "too far".
-    // Anchor home on the attacker at the first hit, then start the fight.
+    // The core measures the leash from the creature's current waypoint node while
+    // the patrol generator owns the idle slot, so an opening hit from range used to
+    // be rejected and the boss never engaged. The shared pull helper opens the leash
+    // window before the first threat reference is built.
     class ApexPullScript : public UnitScript
     {
     public:
@@ -342,13 +342,7 @@ namespace
             if (!attacker->IsControlledByPlayer())
                 return;
 
-            Creature* boss = victim->ToCreature();
-            if (boss->IsInCombat() && boss->GetVictim())
-                return;
-
-            boss->SetHomePosition(attacker->GetPositionX(), attacker->GetPositionY(),
-                attacker->GetPositionZ(), attacker->GetOrientation());
-            boss->AI()->AttackStart(attacker);
+            ApexScaling::StartApexPull(victim->ToCreature(), attacker);
         }
     };
 
@@ -362,8 +356,11 @@ namespace
 
         void OnCreatureAddWorld(Creature* creature) override
         {
-            if (creature && creature->GetEntry() == APEX_STORMSFANG_ENTRY)
-                creature->SetReactState(REACT_DEFENSIVE);
+            if (!creature || creature->GetEntry() != APEX_STORMSFANG_ENTRY)
+                return;
+
+            ApexScaling::TuneHitbox(creature);
+            creature->SetReactState(REACT_DEFENSIVE);
         }
 
         void OnAllCreatureUpdate(Creature* creature, uint32) override
@@ -406,6 +403,12 @@ namespace
                 g_stormfangProbes.erase(key);
                 return;
             }
+
+            // A lost chase generator leaves the patrol on top and he keeps walking
+            // his route while in combat. Stormfang has no CreatureAI of his own, so
+            // the recovery has to live here.
+            ApexScaling::KeepApexChase(creature);
+            ApexScaling::TuneHitbox(creature);
 
             // Same pool blueprint as the other apex bosses: a deliberately large
             // starting pool, a fifteen second measurement, then the real size.

@@ -64,6 +64,24 @@ namespace ApexScaling
     void ScaleHealth(Creature* creature, uint32 baseHealth, float referenceItemLevel);
 
     void RestoreHealth(Creature* creature, uint32 baseHealth);
+
+    // The bosses render at three times their model size, but the server hitbox comes
+    // from creature_model_info rows that are placeholders for these custom displays.
+    // Both fields are streamed to the client, so tuning them keeps client and server
+    // on the same melee range instead of rejecting swings against the visible body.
+    void TuneHitbox(Creature* creature);
+
+    // A patrolling creature's leash area is measured from its current waypoint node,
+    // not from the home position, so the first hit of a pull can be refused as "out
+    // of leash" while the player is touching the boss. Open the leash window before
+    // the threat reference is built so a landed opening hit engages in the same tick.
+    // Only starts a pull: a boss that is already fighting keeps its victim.
+    bool StartApexPull(Creature* creature, Unit* attacker);
+
+    // Anything that pops the chase generator (Winded, a jump, a core reposition
+    // spline, an evade frame) leaves the waypoint generator on top and the boss
+    // patrols while in combat. Re-issue the chase when no higher movement is active.
+    void KeepApexChase(Creature* creature);
 }
 
 #endif

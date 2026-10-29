@@ -1,8 +1,10 @@
 #include "ApexScaling.h"
 
 #include "Creature.h"
+#include "CreatureAI.h"
 #include "Log.h"
 #include "Map.h"
+#include "MotionMaster.h"
 #include "Player.h"
 #include "Spell.h"
 #include "Timer.h"
@@ -229,5 +231,65 @@ namespace ApexScaling
 
         creature->SetMaxHealth(baseHealth);
         creature->SetHealth(baseHealth);
+    }
+
+    void TuneHitbox(Creature* creature)
+    {
+        if (!creature)
+            return;
+
+        // Re-applied by the update paths as well: a display or scale refresh calls
+        // Creature::SetObjectScale, which rebuilds both fields from creature_model_info.
+        if (creature->GetBoundaryRadius() == 3.0f && creature->GetCombatReach() == 5.0f)
+            return;
+
+        // The three models render at three times their natural size, but the server
+        // hitbox comes from the creature_model_info rows behind the custom displays:
+        // 1.0/1.0 placeholders for two of them and no row at all for Stormfang, which
+        // fell back to the 0.389 world-object size. The resulting 5.0-5.83 yard melee
+        // window sits inside the visible body. Both fields are replicated to the
+        // client, so the client's prediction uses the same numbers again.
+        creature->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 3.0f);
+        creature->SetFloatValue(UNIT_FIELD_COMBATREACH, 5.0f);
+    }
+
+    bool StartApexPull(Creature* creature, Unit* attacker)
+    {
+        if (!creature || !attacker || !creature->IsAlive() || !attacker->IsAlive())
+            return false;
+
+        // Hits during the evade walk are no-ops in the core; let the evade finish
+        // instead of clearing UNIT_STATE_EVADE (which would allow re-pull resets).
+        if (creature->IsInEvadeMode())
+            return false;
+
+        // Start a pull only. A boss that already has a victim keeps tank threat.
+        if (creature->IsEngaged() && creature->GetVictim())
+            return false;
+
+        // A patrolling creature's leash area is measured from the current waypoint
+        // node, which can be tens of yards ahead of its actual position. The core
+        // refreshes this window after the AI/script damage hooks, so a spell or DoT
+        // pull builds its first threat reference offline and engagement is deferred
+        // (or lost). Opening the window first makes the pull engage synchronously.
+        creature->UpdateLeashExtensionTime();
+        creature->AI()->AttackStart(attacker);
+        return true;
+    }
+
+    void KeepApexChase(Creature* creature)
+    {
+        if (!creature || !creature->IsAlive() || creature->IsInEvadeMode() || !creature->IsInCombat())
+            return;
+
+        Unit* victim = creature->GetVictim();
+        if (!victim)
+            return;
+
+        // Only restore a lost chase: never interrupt a jump, knockback or an active
+        // chase generator.
+        MovementGeneratorType const motion = creature->GetMotionMaster()->GetCurrentMovementGeneratorType();
+        if (motion == WAYPOINT_MOTION_TYPE || motion == IDLE_MOTION_TYPE)
+            creature->GetMotionMaster()->MoveChase(victim);
     }
 }

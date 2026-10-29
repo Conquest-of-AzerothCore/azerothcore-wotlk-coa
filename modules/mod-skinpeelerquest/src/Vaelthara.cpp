@@ -274,7 +274,7 @@ namespace
                 ApexScaling::ObserveProbe(itr->second.probe, damage);
 
             if (!me->IsInCombat() || !me->GetVictim())
-                AttackStart(attacker);
+                ApexScaling::StartApexPull(me, attacker);
 
             me->AddThreat(attacker, 1.0f);
         }
@@ -367,6 +367,7 @@ namespace
             if (!creature || creature->GetEntry() != VAELTHARA_ENTRY)
                 return;
 
+            ApexScaling::TuneHitbox(creature);
             creature->SetReactState(REACT_DEFENSIVE);
 
             VaeltharaState& state = g_vaeltharaStates[creature->GetGUID().GetCounter()];
@@ -419,6 +420,11 @@ namespace
                 state.inCombat = false;
                 return;
             }
+
+            // A lost chase generator leaves the patrol on top and she keeps walking
+            // her route while in combat.
+            ApexScaling::KeepApexChase(creature);
+            ApexScaling::TuneHitbox(creature);
 
             UpdateHunger(creature, state, now);
             UpdateVoice(creature, state, now);
@@ -785,6 +791,11 @@ namespace
                 ApexScaling::ApplyAoe(creature, caught,
                     {ApexScaling::HEAVY_PCT, 1, 0}, ApexScaling::ABILITY_BUDGET,
                     ApexScaling::ABILITY_CAP_PCT, ApexScaling::CARRIER_PHYSICAL);
+
+                // The jump generator owned the active slot while she was airborne;
+                // give the chase back as soon as she lands.
+                if (Unit* victim = creature->GetVictim())
+                    creature->GetMotionMaster()->MoveChase(victim);
             }, Milliseconds(travel));
         }
 
@@ -898,9 +909,6 @@ namespace
             creature->CastSpell(target, VAELTHARA_STALKED, true);
             SendStalkMessage(creature, target);
             creature->AI()->AttackStart(target);
-            // Keep her facing the fixated player: a stale orientation after a leap or a
-            // knockback makes the client refuse melee swings on her ("facing the wrong way").
-            creature->SetFacingToObject(target);
             DoBloodrush(creature, state, target, now);
 
             LOG_INFO("coa", "VAELTHARA: stalk on {}", target->GetName());
@@ -1006,7 +1014,6 @@ namespace
             if (state.bloodrushInAir)
             {
                 state.bloodrushInAir = false;
-                creature->GetMotionMaster()->Clear();
                 creature->StopMoving();
 
                 float x = creature->GetPositionX();
@@ -1014,6 +1021,11 @@ namespace
                 float z = creature->GetPositionZ();
                 creature->UpdateGroundPositionZ(x, y, z);
                 creature->NearTeleportTo(x, y, z, creature->GetOrientation());
+
+                // MoveChase mutates the active slot, which drops the interrupted jump.
+                // Clear() would also drop the chase and leave the patrol on top.
+                if (Unit* victim = creature->GetVictim())
+                    creature->GetMotionMaster()->MoveChase(victim);
             }
 
             // 2880 is a stock Stun the client already owns, so it draws the
