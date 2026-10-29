@@ -1062,6 +1062,8 @@ class RunnerTests(unittest.TestCase):
             lambda s: s['steps'].append({'action': 'assert', 'actor': 'caster',
                                          'metric': 'melee_damage_done', 'target': 'missing', 'equals': 1000}),
             lambda s: s['players'][0].update(race=0),
+            lambda s: s['players'][0].update(gender=2),
+            lambda s: s['players'][0].update(gender=True),
             lambda s: s['players'][0].update(ranged_hit_rating=-1),
             lambda s: s['players'][0].update(melee_hit_rating=-1),
             lambda s: s['players'][0].update(melee_crit_rating=-1),

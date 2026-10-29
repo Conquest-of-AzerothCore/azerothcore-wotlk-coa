@@ -399,7 +399,8 @@ Arm of Thorim rolls 133–144 base damage at the fixture level, so two independe
 of 1.10–1.31 with its 20% bonus and 0.91–1.09 without it (including integer rounding). Charged Conduit
 preserves Static and must leave the talent without a depletion bonus.
 
-Players require `id`, numeric `race` and `class`; `level` defaults to 80. Optional `bot` logs the actor in on a
+Players require `id`, numeric `race` and `class`; `level` defaults to 80. Optional `gender` (0 male, 1 female,
+default 0) is sent in the character creation packet. Optional `bot` logs the actor in on a
 session flagged as a bot, the way playerbots flags the sessions it creates, so a scenario can check what the
 server does differently for them. Optional `security` (0..3, default 0/`SEC_PLAYER`) raises that one fixture
 session's account security, so a `command` step can reach a GM-gated chat command (for example an authoring

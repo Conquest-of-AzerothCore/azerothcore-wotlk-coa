@@ -458,7 +458,7 @@ def validate(scenario):
     actor_ids = set()
     for player in players:
         keys(player, {'id', 'race', 'class'},
-             {'id', 'race', 'class', 'level', 'bot', 'spell_hit_rating', 'spell_crit_rating',
+             {'id', 'race', 'class', 'gender', 'level', 'bot', 'spell_hit_rating', 'spell_crit_rating',
               'melee_crit_rating', 'ranged_crit_rating', 'ranged_hit_rating', 'melee_hit_rating',
               'expertise_rating', 'attack_power', 'ranged_attack_power', 'spell_power',
               'allow_regeneration', 'name', 'expansion', 'ascension_client', 'account_of',
@@ -476,6 +476,7 @@ def validate(scenario):
                     and len(player['name'].encode('utf-8')) <= 47, 'Invalid fixture character name')
         for key in ('race', 'class'):
             number(player[key], key, 1, 255, True)
+        number(player.get('gender', 0), 'gender', 0, 1, True)
         number(player.get('level', 80), 'level', 1, 255, True)
         number(player.get('expansion', 2), 'expansion', 0, 2, True)
         require(type(player.get('bot', False)) is bool, 'bot must be boolean')

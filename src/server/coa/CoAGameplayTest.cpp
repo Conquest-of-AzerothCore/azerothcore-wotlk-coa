@@ -2407,10 +2407,13 @@ private:
         WorldPacket create(CMSG_CHAR_CREATE, 32);
         uint32 race = actor.definition.get<uint32>("race");
         uint32 playerClass = actor.definition.get<uint32>("class");
+        uint32 gender = actor.definition.get<uint32>("gender", GENDER_MALE);
         Require(race > 0 && race <= 255 && playerClass > 0 && playerClass <= 255,
             "Race/class must fit the character creation packet");
-        create << actor.definition.get<std::string>("name", actor.name) << uint8(race) << uint8(playerClass);
-        for (uint8 i = 0; i < 7; ++i)
+        Require(gender == GENDER_MALE || gender == GENDER_FEMALE, "Gender must be 0 (male) or 1 (female)");
+        create << actor.definition.get<std::string>("name", actor.name) << uint8(race) << uint8(playerClass)
+               << uint8(gender);
+        for (uint8 i = 0; i < 6; ++i)
             create << uint8(0);
         actor.session->HandleCharCreateOpcode(create);
         Reach(actor, ActorStage::Creating);

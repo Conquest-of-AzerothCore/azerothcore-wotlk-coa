@@ -784,11 +784,16 @@ class aura_ascension_bloodmage_female_worgen : public AuraScript
 
     static constexpr uint32 FemaleWorgenDisplay = 142818;
 
+    static bool IsNativelyFemale(Player const* player)
+    {
+        return player->GetByteValue(PLAYER_BYTES_3, PLAYER_BYTES_3_OFFSET_GENDER) == GENDER_FEMALE;
+    }
+
     void Apply(AuraEffect const*, AuraEffectHandleModes)
     {
-        Unit* target = GetTarget();
-        if (target->IsPlayer() && target->getGender() == GENDER_FEMALE && target->getTransForm() == GetId())
-            target->SetDisplayId(FemaleWorgenDisplay);
+        Player* player = GetTarget()->ToPlayer();
+        if (player && IsNativelyFemale(player) && player->getTransForm() == GetId())
+            player->SetDisplayId(FemaleWorgenDisplay);
     }
 
     void Register() override
