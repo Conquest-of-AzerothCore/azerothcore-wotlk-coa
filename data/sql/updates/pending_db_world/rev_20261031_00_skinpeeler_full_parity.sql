@@ -6,6 +6,75 @@
 -- patrol paths, loot, conditions, skills and the full spell/visual kit chain.
 -- Idempotent: each table is cleared for this id set before the exact rows are written.
 
+-- ---- DBC patch tables required by the PR visual streaming (AscensionCompat) ----
+-- SendSpellVisualRows() reads these tables at login. The first-pass delivery
+-- added rows only; the schemas were never shipped, so a clean main DB fails
+-- with "Table 'acore_world.spellvisualkit_dbc' doesn't exist".
+CREATE TABLE IF NOT EXISTS `spellvisualkit_dbc` (
+  `f0` int NOT NULL DEFAULT 0,
+  `f1` int NOT NULL DEFAULT 0,
+  `f2` int NOT NULL DEFAULT 0,
+  `f3` int NOT NULL DEFAULT 0,
+  `f4` int NOT NULL DEFAULT 0,
+  `f5` int NOT NULL DEFAULT 0,
+  `f6` int NOT NULL DEFAULT 0,
+  `f7` int NOT NULL DEFAULT 0,
+  `f8` int NOT NULL DEFAULT 0,
+  `f9` int NOT NULL DEFAULT 0,
+  `f10` int NOT NULL DEFAULT 0,
+  `f11` int NOT NULL DEFAULT 0,
+  `f12` int NOT NULL DEFAULT 0,
+  `f13` int NOT NULL DEFAULT 0,
+  `f14` int NOT NULL DEFAULT 0,
+  `f15` int NOT NULL DEFAULT 0,
+  `f16` int NOT NULL DEFAULT 0,
+  `f17` int NOT NULL DEFAULT 0,
+  `f18` int NOT NULL DEFAULT 0,
+  `f19` int NOT NULL DEFAULT 0,
+  `f20` int NOT NULL DEFAULT 0,
+  `f21` int NOT NULL DEFAULT 0,
+  `f22` int NOT NULL DEFAULT 0,
+  `f23` int NOT NULL DEFAULT 0,
+  `f24` int NOT NULL DEFAULT 0,
+  `f25` int NOT NULL DEFAULT 0,
+  `f26` int NOT NULL DEFAULT 0,
+  `f27` int NOT NULL DEFAULT 0,
+  `f28` int NOT NULL DEFAULT 0,
+  `f29` int NOT NULL DEFAULT 0,
+  `f30` int NOT NULL DEFAULT 0,
+  `f31` int NOT NULL DEFAULT 0,
+  `f32` int NOT NULL DEFAULT 0,
+  `f33` int NOT NULL DEFAULT 0,
+  `f34` int NOT NULL DEFAULT 0,
+  `f35` int NOT NULL DEFAULT 0,
+  `f36` int NOT NULL DEFAULT 0,
+  `f37` int NOT NULL DEFAULT 0
+  , PRIMARY KEY (`f0`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE IF NOT EXISTS `spellvisualkitmodelattach_dbc` (
+  `ID` int NOT NULL DEFAULT 0,
+  `ParentSpellVisualKitID` int NOT NULL DEFAULT 0,
+  `SpellVisualEffectNameID` int NOT NULL DEFAULT 0,
+  `AttachmentID` int NOT NULL DEFAULT 0,
+  `OffsetX` float NOT NULL DEFAULT 0,
+  `OffsetY` float NOT NULL DEFAULT 0,
+  `OffsetZ` float NOT NULL DEFAULT 0,
+  `Yaw` float NOT NULL DEFAULT 0,
+  `Pitch` float NOT NULL DEFAULT 0,
+  `Roll` float NOT NULL DEFAULT 0,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS `spellvisualeffectname_dbc` (
+  `ID` int NOT NULL DEFAULT 0,
+  `Name` varchar(255) NOT NULL DEFAULT '',
+  `FilePath` varchar(255) NOT NULL DEFAULT '',
+  `Scale` float NOT NULL DEFAULT 0,
+  `Scale2` float NOT NULL DEFAULT 0,
+  `MinScale` float NOT NULL DEFAULT 0,
+  `MaxScale` float NOT NULL DEFAULT 0,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 START TRANSACTION;
 
 -- ---- superseded first-pass rows (absent from the local database) -----------------
