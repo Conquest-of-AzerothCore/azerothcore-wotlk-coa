@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Tears of Lordaeron restores mana and Runic Power on direct critical strikes (#10007)",
+  "contract": [
+    "Tears of Lordaeron 705752 (CharacterAdvancement 29196, class 23) reads 'Direct critical strikes regenerate",
+    "$705753s2% of your maximum mana and $705753s1% of your maximum runic power.' Proc spell 705753 has two",
+    "SPELL_EFFECT_ENERGIZE_PCT (137) effects on the caster: effect 0 MiscValue 6 (Runic Power) BasePoints 8 +",
+    "DieSides 1 = 9%, effect 1 MiscValue 0 (mana) BasePoints 2 + DieSides 1 = 3%. Lichfrost 801722 deals direct",
+    "Frost damage. With spell critical strike rating far above 100%, every Lichfrost hit is critical, so after",
+    "learning the talent one hit must log a 705753 mana energize of 3% of maximum mana and a Runic Power energize",
+    "of 9% of the 1000 maximum. Without the talent the same critical hit logs no 705753 energize."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000, "spell_crit_rating": 100000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "necro", "spell": 801722 },
+    {
+      "action": "assert", "label": "SETUP: the Necromancer has a mana pool", "actor": "necro",
+      "metric": "max_power", "power": 0, "min": 100
+    },
+    { "action": "snapshot", "actor": "necro", "metric": "max_power", "power": 0, "save_as": "max_mana" },
+    { "action": "cast", "label": "Critical Lichfrost without the talent", "actor": "necro", "spell": 801722,
+      "target": "golem" },
+    {
+      "action": "assert", "label": "SETUP: Lichfrost lands on the golem", "actor": "golem",
+      "metric": "aura", "spell": 801722, "caster": "necro", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "CONTROL: no Tears of Lordaeron energize without the talent", "actor": "necro",
+      "metric": "spell_energize_count", "spell": 705753, "equals": 0
+    },
+    { "action": "learn", "actor": "necro", "spell": 705752 },
+    {
+      "action": "assert", "label": "The talent aura is applied", "actor": "necro",
+      "metric": "aura", "spell": 705752, "equals": 1, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "cast", "label": "Critical Lichfrost with the talent", "actor": "necro", "spell": 801722,
+      "target": "golem" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the critical hit restores 3% of maximum mana", "actor": "necro",
+      "metric": "spell_energize_total", "spell": 705753, "power": 0, "ratio_to": "max_mana",
+      "min": 0.029, "max": 0.031, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "The critical hit restores 9% of maximum Runic Power", "actor": "necro",
+      "metric": "spell_energize_total", "spell": 705753, "power": 6, "equals": 90
+    }
+  ]
+}
