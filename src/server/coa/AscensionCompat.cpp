@@ -5,6 +5,7 @@
  */
 
 #include "AccountMgr.h"
+#include "AscensionAetherialReliquary.h"
 #include "AscensionAccountProgress.h"
 #include "AscensionClientDbcStream.h"
 #include "AscensionFelsworn.h"
@@ -9125,10 +9126,10 @@ class AscensionCompatPlayerScript : public PlayerScript {
         }
     }
 
-    void RemoveExpiredExperienceAura(Player* player)
+    void StoreExperienceBuffsAtRealmCap(Player* player)
     {
-        if (player->GetLevel() >= sWorld->getIntConfig(CONFIG_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL))
-            player->RemoveAurasDueToSpell(818059);
+        if (AetherialReliquary::IsAtCaptureLevel(player, AetherialReliquary::CaptureReason::RealmCap))
+            AetherialReliquary::CaptureBuffs(player, AetherialReliquary::CaptureReason::RealmCap);
     }
 
     static bool CanUseVanityRealmLevelItem(Player* player, Item* item, uint8 castCount)
@@ -9346,7 +9347,7 @@ public:
       AscensionDisplayPatchService::Instance().OnPlayerLogin(player);
       RefreshScaledQuestQueries(player);
       SendAverageItemLevel(player);
-      RemoveExpiredExperienceAura(player);
+      StoreExperienceBuffsAtRealmCap(player);
     }
   }
 
@@ -9367,7 +9368,7 @@ public:
       AscensionClassService::Instance().SendCharacterAdvancementKnownEntries(player);
 
       RefreshScaledQuestQueries(player);
-      RemoveExpiredExperienceAura(player);
+      StoreExperienceBuffsAtRealmCap(player);
     }
   }
 
