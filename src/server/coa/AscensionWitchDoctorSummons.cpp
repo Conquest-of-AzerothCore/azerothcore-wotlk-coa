@@ -215,6 +215,8 @@ class npc_ascension_witch_doctor : public ScriptedAI
             me->SetCreatorGUID(_owner);
             me->SetFaction(player->GetFaction());
             me->SetLevel(player->GetLevel());
+            me->SetMaxHealth(std::max(5u, uint32(player->GetLevel()) * 10));
+            me->SetHealth(me->GetMaxHealth());
             player->CastSpell(me, CloneMe, true);
             me->SetReactState(REACT_PASSIVE);
             me->SetCombatMovement(false);

@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "CoA Legendary Items: drop cap",
-  "contract": "Requires CoALegendaryItems.Enable=1, DropChance=100, StopDropLevel=60, DestinyWeaver.Enable=1, LevelScaling=1, offset=5, CoA.SendDisplayPatches=1. An eligible corpse receives exactly one class-pool legendary. Required level equals its effective NPC level. Gray creatures, level-60 players and legacy classes receive none. Loot uses the native kill and corpse handlers.",
+  "name": "CoA Legendary Items: no player level drop cutoff",
+  "contract": "Requires CoALegendaryItems.Enable=1, DropChance=100, DestinyWeaver.Enable=1, LevelScaling=1, offset=5, CoA.SendDisplayPatches=1. A level-60 player still receives a legendary from a non-gray creature; its required level is the creature's effective level. Loot uses the native kill and corpse handlers. Equipped powers stop at the default StopPowerLevel of 60; the item's native stats remain.",
   "timeout_ms": 180000,
   "location": {
     "map": 0,
@@ -66,8 +66,22 @@
       "action": "assert",
       "actor": "looter",
       "metric": "loot_count",
-      "quality": 5,
-      "equals": 0
+      "quality": 3,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "looter",
+      "metric": "loot_required_level",
+      "quality": 3,
+      "equals": 55
+    },
+    {
+      "action": "assert",
+      "actor": "looter",
+      "metric": "loot_item_level",
+      "quality": 3,
+      "equals": 61
     },
     {
       "action": "add_item",
@@ -86,15 +100,15 @@
       "metric": "aura",
       "spell": 9710001,
       "within_ms": 1000,
-      "equals": 1
+      "equals": 0
     },
     {
       "action": "assert",
       "actor": "looter",
       "metric": "run_speed_rate",
       "within_ms": 1000,
-      "min": 1.1499899999999998,
-      "max": 1.15001
+      "min": 0.99999,
+      "max": 1.00001
     }
   ]
 }

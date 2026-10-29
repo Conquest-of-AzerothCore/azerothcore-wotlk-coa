@@ -2958,13 +2958,14 @@ void DynObjAura::FillTargetMap(std::map<Unit*, uint8>& targets, Unit* /*caster*/
         SpellInfo const* spellInfo = GetSpellInfo();
         SpellEffectInfo const& effect = spellInfo->Effects[effIndex];
         UnitList targetList;
-        // CoA: Eldritch Obelisk (560322), Harvesting Grounds (707591), and Deathwind's Spirit Realm
-        // trigger (effect 1, 582526) encode their ally selectors in EffectImplicitTargetA with TargetB unset.
+        // CoA: Eldritch Obelisk (560322), Harvesting Grounds (707591), Shadra's Lair (804978, effect 2) and
+        // Deathwind's Spirit Realm trigger (effect 1, 582526) encode their ally selectors in EffectImplicitTargetA
+        // with TargetB unset.
         // Other spells also use this selector, so keep the exception scoped to these effects.
         bool const deathwindRank = spellInfo->Id == 800174 || (spellInfo->Id >= 502989 && spellInfo->Id <= 503000);
         bool const deathwindSpiritRealm = deathwindRank && effIndex == 1 && effect.TriggerSpell == 582526;
-        bool const coaTargetAAlly = (spellInfo->Id == 560322 || spellInfo->Id == 707591 || deathwindSpiritRealm) &&
-            effect.TargetA.GetTarget() == TARGET_UNIT_DEST_AREA_ALLY;
+        bool const coaTargetAAlly = (spellInfo->Id == 560322 || spellInfo->Id == 707591 || spellInfo->Id == 804978 ||
+            deathwindSpiritRealm) && effect.TargetA.GetTarget() == TARGET_UNIT_DEST_AREA_ALLY;
         bool const targetBAlly = effect.TargetB.GetTarget() == TARGET_DEST_DYNOBJ_ALLY ||
             effect.TargetB.GetTarget() == TARGET_UNIT_DEST_AREA_ALLY;
         if (targetBAlly || coaTargetAAlly)

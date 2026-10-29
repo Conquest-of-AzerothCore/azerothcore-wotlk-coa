@@ -1,0 +1,313 @@
+{
+  "schema": 1,
+  "name": "Primordial Blast rank 502825 comes back from an Elemental Mastery transform without a New Spell Learned toast (#7515, #7723)",
+  "contract": "#7515 and #7723 report a 'learned Primordial Blast' pop-up each time an Elemental Mastery or Runic Brand transform of Primordial Blast 502825 ends, on a level 38-40 Spiritmage. Both reports came from builds before #7765, which mutes the swap back: SetTemporarySpellReplacement swaps the bars with SMSG_SUPERCEDED_SPELL and the client draws the toast when the swapped-in spell's SpellCustomAttr row carries 0x400. 502825 has no row in the client's own table; mod-spellbook pushes it one (59107) with the bit set when the spell is taught. The transformed spells keep their client rows (712668 row 23389), which lack the bit, so swapping them in is silent. The reported rank, at the reported level, must come back muted both when the transform expires and when its cast consumes it, with no learned-spell packet, and stay notable for a genuine learn.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 32,
+      "level": 40,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 40,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks and class synchronisation settle",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 201
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 1180
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 674
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 502825
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 25
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 2092
+    },
+    {
+      "action": "equip",
+      "label": "Worn Shortsword in the main hand",
+      "actor": "caster",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "equip",
+      "label": "Worn Dagger in the off hand",
+      "actor": "caster",
+      "item": 2092,
+      "slot": 16
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: learning Primordial Blast 502825 is a genuine learn the client was told about",
+      "actor": "caster",
+      "metric": "spellbook_learned_alerts",
+      "spell": 502825,
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spellbook_learned_alerts",
+      "spell": 502825,
+      "save_as": "learned_before"
+    },
+    {
+      "action": "set_aura",
+      "label": "Elemental Mastery transforms Primordial Blast 502825 into Ignis",
+      "actor": "caster",
+      "spell": 713003,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Ignis supersedes Primordial Blast 502825",
+      "actor": "caster",
+      "metric": "temporary_spell_replacement",
+      "spell": 502825,
+      "equals": 712668,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spellbook_superseded_for",
+      "spell": 502825,
+      "save_as": "expiry_before"
+    },
+    {
+      "action": "set_aura",
+      "label": "The transform expires",
+      "actor": "caster",
+      "spell": 713003,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Primordial Blast 502825 comes back",
+      "actor": "caster",
+      "metric": "temporary_spell_replacement",
+      "spell": 502825,
+      "equals": 502825,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the client was told Primordial Blast 502825 came back",
+      "actor": "caster",
+      "metric": "spellbook_superseded_for",
+      "spell": 502825,
+      "relative_to": "expiry_before",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "An expiring transform hands Primordial Blast 502825 back muted",
+      "actor": "caster",
+      "metric": "spellbook_loud_supersedes_for",
+      "spell": 502825,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1300
+    },
+    {
+      "action": "set_aura",
+      "label": "Elemental Mastery transforms Primordial Blast 502825 again",
+      "actor": "caster",
+      "spell": 713003,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Ignis supersedes Primordial Blast 502825",
+      "actor": "caster",
+      "metric": "temporary_spell_replacement",
+      "spell": 502825,
+      "equals": 712668,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spellbook_superseded_for",
+      "spell": 502825,
+      "save_as": "cast_before"
+    },
+    {
+      "action": "cast",
+      "label": "Primordial Blast 502825 as Ignis",
+      "actor": "caster",
+      "spell": 502825,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Ignis strikes in place of Primordial Blast 502825",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 712668,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Primordial Blast 502825 comes back",
+      "actor": "caster",
+      "metric": "temporary_spell_replacement",
+      "spell": 502825,
+      "equals": 502825,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the client was told Primordial Blast 502825 came back",
+      "actor": "caster",
+      "metric": "spellbook_superseded_for",
+      "spell": 502825,
+      "relative_to": "cast_before",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "A consumed transform hands Primordial Blast 502825 back muted",
+      "actor": "caster",
+      "metric": "spellbook_loud_supersedes_for",
+      "spell": 502825,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1300
+    },
+    {
+      "action": "set_aura",
+      "label": "Runic Brand transforms Primordial Blast 502825 into Runic Obliteration (#7723)",
+      "actor": "caster",
+      "spell": 805742,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Runic Obliteration supersedes Primordial Blast 502825",
+      "actor": "caster",
+      "metric": "temporary_spell_replacement",
+      "spell": 502825,
+      "equals": 805794,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spellbook_superseded_for",
+      "spell": 502825,
+      "save_as": "brand_before"
+    },
+    {
+      "action": "set_aura",
+      "label": "The Runic Brand transform expires",
+      "actor": "caster",
+      "spell": 805742,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Primordial Blast 502825 comes back",
+      "actor": "caster",
+      "metric": "temporary_spell_replacement",
+      "spell": 502825,
+      "equals": 502825,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the client was told Primordial Blast 502825 came back",
+      "actor": "caster",
+      "metric": "spellbook_superseded_for",
+      "spell": 502825,
+      "relative_to": "brand_before",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "An ended Runic Brand transform hands Primordial Blast 502825 back muted",
+      "actor": "caster",
+      "metric": "spellbook_loud_supersedes_for",
+      "spell": 502825,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No swap announced Primordial Blast 502825 as learned",
+      "actor": "caster",
+      "metric": "spellbook_learned_alerts",
+      "spell": 502825,
+      "relative_to": "learned_before",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Primordial Blast 502825 is notable again, so a genuine learn is still announced",
+      "actor": "caster",
+      "metric": "spellbook_client_notable",
+      "spell": 502825,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Every pushed row carried the row id the client's own table holds for it",
+      "actor": "caster",
+      "metric": "spellbook_notify_id_mismatches",
+      "spell": 502825,
+      "equals": 0
+    }
+  ]
+}

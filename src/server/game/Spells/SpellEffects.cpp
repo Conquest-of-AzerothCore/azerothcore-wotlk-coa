@@ -303,11 +303,8 @@ void ResetAscensionCooldown(Player* player, uint32 spellId, bool resetCategory)
                 player->RemoveCategoryCooldown(category);
 }
 
-void ModifyAscensionCooldown(Player* player, uint32 spellId, int32 delta, bool resetCategory)
+void ModifyAscensionRankCooldown(Player* player, uint32 spellId, int32 delta, bool resetCategory)
 {
-    if (!player || !spellId)
-        return;
-
     // A zero delta is Ascension's reset sentinel. The extra flag requests
     // clearing a shared category in addition to the named spell.
     if (!delta)
@@ -328,6 +325,19 @@ void ModifyAscensionCooldown(Player* player, uint32 spellId, int32 delta, bool r
     }
 
     player->ModifySpellCooldown(spellId, delta);
+}
+
+// Ascension data usually names the first rank of a ranked ability, while the
+// cooldown the player sees and CheckCast enforces belongs to the rank they own.
+void ModifyAscensionCooldown(Player* player, uint32 spellId, int32 delta, bool resetCategory)
+{
+    if (!player || !spellId)
+        return;
+
+    for (uint32 rankId = sSpellMgr->GetFirstSpellInChain(spellId); rankId;
+        rankId = sSpellMgr->GetNextSpellInChain(rankId))
+        if (rankId == spellId || player->GetSpellCooldownDelay(rankId))
+            ModifyAscensionRankCooldown(player, rankId, delta, resetCategory);
 }
 
 void ModifyAscensionAuraStacks(Unit* caster, Unit* target, uint32 auraSpellId, int32 delta)
@@ -764,7 +774,7 @@ void Spell::EffectAscensionModifyFamilyCooldown(SpellEffIndex effIndex)
                 affected.push_back(spellId);
 
     for (uint32 spellId : affected)
-        ModifyAscensionCooldown(player, spellId, effect.MiscValueB ? 0 : damage, false);
+        ModifyAscensionRankCooldown(player, spellId, effect.MiscValueB ? 0 : damage, false);
 }
 
 void Spell::EffectAscensionRestoreSpellCharges(SpellEffIndex effIndex)
@@ -3661,7 +3671,10 @@ void Spell::EffectEnchantItemTmp(SpellEffIndex effIndex)
     // Rockbiter Weapon apply to both weapon
     if (!itemTarget)
         return;
-    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN && m_spellInfo->SpellFamilyFlags[0] & 0x400000 &&
+    // The hardcoded damage-to-enchant table below only covers the stock ranks (ids below 100000);
+    // GetSpellTwinSource() answers its own id for any spell that is not a registered twin, so a custom spell
+    // sharing this family and flag would wrongly take this branch and leave its own enchant (Effects[effIndex].MiscValue) unapplied.
+    if (m_spellInfo->Id < 100000 && m_spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN && m_spellInfo->SpellFamilyFlags[0] & 0x400000 &&
         sSpellMgr->GetSpellTwinSource(m_spellInfo->Id) == m_spellInfo->Id)
     {
         uint32 spell_id = 0;
@@ -6788,6 +6801,8 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const* 
         {
             ((Guardian*)summon)->InitStatsForLevel(summonLevel);
         }
+
+        sScriptMgr->OnGuardianSummoned(this, summon);
 
         // xinef: if we have more than one guardian, change follow angle
         if (summon->HasUnitTypeMask(UNIT_MASK_MINION) && totalNumGuardians > 1)

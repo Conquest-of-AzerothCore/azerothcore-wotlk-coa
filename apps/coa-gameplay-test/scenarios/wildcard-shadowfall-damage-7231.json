@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Shadowfall deals periodic damage instead of nothing",
+  "contract": [
+    "Shadowfall 284650 triggers 284652 every 1000ms for 8000ms. 284652 is SPELL_EFFECT_DUMMY with no registered",
+    "SpellScript, so each tick is a dispatched no-op (EffectBasePoints[0] = 982678, which with EffectDieSides[0] = 1",
+    "resolves at runtime to 982679 via the standard +1 roll formula). 982679 is a fully-authored SCHOOL_DAMAGE spell",
+    "(Shadow/Arcane) that triggers its own explosion 982681 - an unused, self-consistent chain, mirroring the native",
+    "vanilla Starfall dummy/damage pattern already used elsewhere in this codebase (spell_dru_starfall_dummy).",
+    "Registering a SpellScript for 284652 that casts GetEffectValue() on up to two random, LOS-visible nearby",
+    "enemies wires the existing chain back up. Expected: casting Shadowfall damages nearby enemies via 982679/982681",
+    "instead of doing nothing, and still grants Shadow Trance (17941) via the already-native 8s trigger."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "hero", "race": 1, "class": 10, "level": 60, "spell_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "enemy", "owner": "hero", "entry": 36, "level": 60, "health": 1000000, "distance": 3, "reaction": 0, "stationary": true}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "console", "command": "coa gamemode WildCard on Harnessa"},
+    {"action": "learn", "actor": "hero", "spell": 284650},
+    {"action": "cast", "actor": "hero", "spell": 284650, "target": "hero"},
+    {"action": "assert", "actor": "hero", "metric": "aura", "spell": 284650, "equals": 1, "within_ms": 1000},
+    {"action": "wait", "ms": 1700},
+    {"action": "assert", "actor": "hero", "metric": "spell_damage_count", "spell": 982679, "target": "enemy", "min": 1},
+    {"action": "assert", "actor": "hero", "metric": "spell_damage_count", "spell": 982681, "target": "enemy", "min": 1},
+    {"action": "wait", "ms": 7000},
+    {"action": "assert", "actor": "hero", "metric": "aura", "spell": 17941, "equals": 1, "within_ms": 1500},
+    {"action": "assert", "actor": "hero", "metric": "aura", "spell": 284650, "equals": 0}
+  ]
+}

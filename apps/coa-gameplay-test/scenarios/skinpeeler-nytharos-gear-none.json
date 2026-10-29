@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "name": "Skinpeeler Nytharos: scaling with no gear",
+  "contract": [
+    "An unequipped three player group pulls the boss at the bottom of the gear curve.",
+    "The scaled pool stays inside 14000-18000 on the 21360 template."
+  ],
+  "timeout_ms": 200000,
+  "location": {
+    "map": 1,
+    "x": 2269.03,
+    "y": -6608.37,
+    "z": 125.192,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps1",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps2",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "summon",
+      "label": "Spawn the boss",
+      "actor": "tank",
+      "as": "boss",
+      "entry": 9916214,
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "label": "Let the boss settle",
+      "ms": 2500
+    },
+    {
+      "action": "attack",
+      "label": "Establish threat",
+      "actor": "tank",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "Boss enters combat",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Bottom of the curve",
+      "actor": "boss",
+      "metric": "max_health",
+      "min": 14000,
+      "max": 18000,
+      "within_ms": 4000
+    }
+  ]
+}

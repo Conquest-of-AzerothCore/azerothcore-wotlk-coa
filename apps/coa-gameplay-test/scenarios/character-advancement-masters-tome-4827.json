@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Master's Tome Of Specialization (8-20) unlocks the next unknown slot in order (#4827)",
+  "contract": "Item 97332 requires spell 979987 (specialization slot VII, SPECIALIZATION_SWAP_SPELLS[6]) and casts dummy learner spell 92982 (Learning) on use, charges -1. Spell 92982 is a bare SPELL_EFFECT_LEARN_SPELL with TriggerSpell 0, so Spell::EffectLearnSpell taught nothing and the tome never advanced a character past slot VII. spell_ascension_masters_tome_specialization now binds to 92982 and learns the first unknown spell among SPECIALIZATION_SWAP_SPELLS[7..19] (slots VIII-XX, 979988 first), consuming one tome per use. OnPlayerCanUseItem refuses a further use once slots 8-20 are all known, the way the native Tomes already refuse once their own slot is unlocked. A character without slot VII is refused by the item's own RequiredSpell gate before the script runs (already working, unrelated to this fix) and keeps its tome and its unknown slot.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "unlocked", "race": 1, "class": 32, "level": 11 },
+    { "id": "gated", "race": 1, "class": 32, "level": 11 }
+  ],
+  "steps": [
+    { "action": "learn", "actor": "unlocked", "spell": 979994 },
+    { "action": "learn", "actor": "unlocked", "spell": 979995 },
+    { "action": "learn", "actor": "unlocked", "spell": 979996 },
+    { "action": "learn", "actor": "unlocked", "spell": 979997 },
+    { "action": "learn", "actor": "unlocked", "spell": 979986 },
+    { "action": "learn", "actor": "unlocked", "spell": 979987 },
+    { "action": "add_item", "actor": "unlocked", "item": 97332, "count": 3 },
+    { "action": "use_item", "actor": "unlocked", "item": 97332, "spell": 92982 },
+    { "action": "wait", "ms": 4000 },
+    {
+      "action": "assert", "label": "First use learns the first unknown slot, VIII", "actor": "unlocked",
+      "metric": "knows_spell", "spell": 979988, "equals": 1
+    },
+    {
+      "action": "assert", "label": "It does not skip ahead to slot IX", "actor": "unlocked",
+      "metric": "knows_spell", "spell": 84874, "equals": 0
+    },
+    {
+      "action": "assert", "label": "One tome is consumed", "actor": "unlocked",
+      "metric": "item_count", "item": 97332, "equals": 2
+    },
+    { "action": "use_item", "actor": "unlocked", "item": 97332, "spell": 92982 },
+    { "action": "wait", "ms": 4000 },
+    {
+      "action": "assert", "label": "Second use learns the next unknown slot, IX", "actor": "unlocked",
+      "metric": "knows_spell", "spell": 84874, "equals": 1
+    },
+    {
+      "action": "assert", "label": "It does not skip ahead to slot X", "actor": "unlocked",
+      "metric": "knows_spell", "spell": 84876, "equals": 0
+    },
+    {
+      "action": "assert", "label": "A second tome is consumed", "actor": "unlocked",
+      "metric": "item_count", "item": 97332, "equals": 1
+    },
+    { "action": "add_item", "actor": "gated", "item": 97332, "count": 1 },
+    { "action": "use_item", "actor": "gated", "item": 97332, "spell": 92982 },
+    { "action": "wait", "ms": 2000 },
+    {
+      "action": "assert", "label": "Without slot VII the tome is refused and kept", "actor": "gated",
+      "metric": "item_count", "item": 97332, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Nothing is learned without slot VII", "actor": "gated",
+      "metric": "knows_spell", "spell": 979988, "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "name": "The Redeemer's stored heal lands on the damaged ally, not on the Sun Cleric (#9415)",
+  "contract": "#9415 reports that The Redeemer 300339 never heals when its buff is consumed. The tooltip reads 'When you critically heal your target, they will be healed for 30% of the amount originally healed the next time they take damage.' 300339 effect 0 has EffectBasePoints 29, so 30%. A critical heal applies Redeemed 301005 to the healed ally with that share stored in effect 0. The ally's next direct damage consumes it and must heal the ally through Redeemed 301004 (SPELL_EFFECT_HEAL, TARGET_UNIT_CASTER, SPELL_ATTR3_IGNORE_CASTER_MODIFIERS), cast by the ally on itself with the Sun Cleric as original caster, so the heal log names the Sun Cleric. The old path cast Gavel of Light 707522, whose TARGET_UNIT_CASTER aimed the heal at the Sun Cleric. The fixture's spell critical rating forces the heal to crit; fixture creatures never swing, so a hostile PvP warrior with hit and expertise fixtures lands the direct damage. The ally's regeneration is suppressed.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 60, "spell_crit_rating": 10000 },
+    { "id": "ally", "race": 1, "class": 1, "level": 60, "allow_regeneration": false },
+    { "id": "attacker", "race": 2, "class": 1, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "group", "actor": "cleric", "target": "ally" },
+    { "action": "learn", "actor": "cleric", "spell": 300339 },
+    { "action": "learn", "actor": "cleric", "spell": 500143 },
+    {
+      "action": "assert", "label": "SETUP: The Redeemer passive is active", "actor": "cleric",
+      "metric": "aura", "spell": 300339, "equals": 1, "within_ms": 2000
+    },
+    { "action": "set_health", "label": "Leave the ally room for the critical heal", "actor": "ally", "value": 1000 },
+    {
+      "action": "snapshot", "actor": "cleric", "metric": "spell_effective_heal_total", "spell": 500143,
+      "target": "ally", "save_as": "heal_before"
+    },
+    { "action": "cast", "actor": "cleric", "spell": 500143, "target": "ally" },
+    {
+      "action": "assert", "label": "SETUP: the heal on the ally is critical", "actor": "cleric",
+      "metric": "spell_heal_count", "spell": 500143, "target": "ally", "critical": true, "equals": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "snapshot", "actor": "cleric", "metric": "spell_effective_heal_total", "spell": 500143,
+      "target": "ally", "relative_to": "heal_before", "save_as": "critical_heal"
+    },
+    {
+      "action": "assert", "label": "SETUP: the critical heal leaves Redeemed on the ally", "actor": "ally",
+      "metric": "aura", "spell": 301005, "caster": "cleric", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Redeemed stores 30% of the critical heal", "actor": "ally",
+      "metric": "aura_amount", "spell": 301005, "effect": 0, "ratio_to": "critical_heal", "min": 0.29, "max": 0.31
+    },
+    { "action": "snapshot", "actor": "ally", "metric": "aura_amount", "spell": 301005, "effect": 0, "save_as": "stored" },
+    { "action": "set_health", "label": "Leave the ally room for the stored heal", "actor": "ally", "value": 1000 },
+    { "action": "pvp", "actor": "ally", "enabled": true },
+    { "action": "pvp", "actor": "attacker", "enabled": true },
+    { "action": "attack", "label": "A hostile player swings at the ally", "actor": "attacker", "target": "ally" },
+    {
+      "action": "assert", "label": "SETUP: the ally's first direct damage consumes Redeemed", "actor": "ally",
+      "metric": "aura", "spell": 301005, "equals": 0, "within_ms": 8000
+    },
+    { "action": "stop_attack", "actor": "attacker" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Redeemed 301004 heals the ally once in the Sun Cleric's name",
+      "actor": "cleric", "metric": "spell_heal_count", "spell": 301004, "target": "ally", "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the ally receives the whole stored amount", "actor": "cleric",
+      "metric": "spell_heal_total", "spell": 301004, "target": "ally", "ratio_to": "stored", "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the stored heal no longer goes to the Sun Cleric as Gavel of Light",
+      "actor": "cleric", "metric": "spell_heal_count", "spell": 707522, "equals": 0
+    }
+  ]
+}

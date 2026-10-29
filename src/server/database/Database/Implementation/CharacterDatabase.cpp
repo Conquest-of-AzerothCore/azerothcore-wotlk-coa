@@ -921,6 +921,31 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_DEL_APPEARANCE_OUTFIT,
         "DELETE FROM character_appearance_outfit WHERE guid = ? AND name = ?", CONNECTION_ASYNC);
 
+    PrepareStatement(CHAR_SEL_ACCOUNT_FRIENDS,
+        "SELECT friend_account, original_guid, original_name, note FROM account_friend WHERE account = ? "
+        "UNION ALL SELECT 0, 0, '', ''", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_ACCOUNT_FRIEND,
+        "INSERT INTO account_friend (account, friend_account, original_guid, original_name, note) "
+        "VALUES (?, ?, ?, ?, ?)", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_DEL_ACCOUNT_FRIEND,
+        "DELETE FROM account_friend WHERE account = ? AND friend_account = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_UPD_ACCOUNT_FRIEND_NOTE,
+        "UPDATE account_friend SET note = ? WHERE account = ? AND friend_account = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_FRIEND_FALLBACK,
+        "SELECT guid FROM characters WHERE account = ? AND deleteinfos_name IS NULL ORDER BY guid LIMIT 1",
+        CONNECTION_SYNCH);
+
+    PrepareStatement(CHAR_SEL_ACCOUNT_FRIEND_MIGRATION,
+        "SELECT COUNT(*) FROM account_friend_migration WHERE account = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_ACCOUNT_FRIEND_MIGRATION,
+        "INSERT INTO account_friend_migration (account) VALUES (?)", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_ACCOUNT_FRIEND_LEGACY,
+        "SELECT t.account, t.guid AS original_guid, t.name, s.note, s.guid AS owner_guid, s.flags "
+        "FROM character_social s JOIN characters o ON o.guid=s.guid JOIN characters t ON t.guid=s.friend "
+        "WHERE o.account=? AND s.flags & 1 AND o.account<>t.account "
+        "AND o.deleteinfos_name IS NULL AND t.deleteinfos_name IS NULL "
+        "UNION ALL SELECT 0,0,'','',0,0 ORDER BY owner_guid,original_guid,flags", CONNECTION_SYNCH);
+
     PrepareStatement(CHAR_INS_PLAYER_ANTICHEAT_ALERT, "INSERT INTO player_anticheat_alert (account, guid, name, reason, details, size) VALUES (?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
 #ifdef MOD_MANASTORM_ENDLESS
     PrepareStatement(CHAR_SEL_MANASTORM_XP_LEVEL,

@@ -185,7 +185,7 @@ void FleeingMovementGenerator<T>::SetTargetLocation(T* owner)
 
     Movement::MoveSplineInit init(owner);
     init.MovebyPath(_path->GetPath());
-    init.SetWalk(false);
+    init.SetWalk(_walk);
     int32 traveltime = init.Launch();
     _timer.Reset(traveltime + urand(800, 1500));
 }
@@ -217,7 +217,7 @@ bool FleeingMovementGenerator<T>::RelaunchCurrentLeg(T* owner)
 
     Movement::MoveSplineInit init(owner);
     init.MovebyPath(_path->GetPath());
-    init.SetWalk(false);
+    init.SetWalk(_walk);
     int32 traveltime = init.Launch();
     _timer.Reset(traveltime + urand(800, 1500));
     return true;

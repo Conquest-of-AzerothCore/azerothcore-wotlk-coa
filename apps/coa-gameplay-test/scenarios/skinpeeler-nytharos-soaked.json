@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "name": "Skinpeeler Nytharos: spout contact slows the player",
+  "contract": [
+    "A spout reaches a standing player and applies Soaked.",
+    "The player's run speed drops while the aura is up."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 1,
+    "x": 2269.03,
+    "y": -6608.37,
+    "z": 125.192,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps1",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps2",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "summon",
+      "label": "Spawn 9916214",
+      "actor": "tank",
+      "as": "boss",
+      "entry": 9916214,
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "tank",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps1",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps2",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "Boss enters combat",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Soaked landed",
+      "actor": "tank",
+      "metric": "aura",
+      "spell": 1004292,
+      "equals": 1,
+      "within_ms": 60000
+    },
+    {
+      "action": "wait",
+      "label": "While soaked",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Movement slowed",
+      "actor": "tank",
+      "metric": "run_speed_rate",
+      "min": 0.0,
+      "max": 0.95
+    }
+  ]
+}

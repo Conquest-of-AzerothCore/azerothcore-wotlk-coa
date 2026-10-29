@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Hallow's End: a Brill training fire doused for Fire Training goes out before it relights",
+  "contract": "'Fire Training' 11449 from Masked Orphan Matron 23973 in Brill (area 159) asks for five Headless Horseman - Fire (DND) 23537 credits; five of those training fires burn north of Brill during Hallow's End (event 12), each carrying Headless Horseman - Fire 42074. A Water Bucket 32971 thrown onto a burning fire splashes it with Water Splash 42348, gives one credit and puts that fire out. Before the fix the fire's script relit it on its next update, so the fire never went out and the same fire could be doused five times (#8397); it now stays out for its 5 s relight delay and then burns again. Client visuals are untested.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": 2243.32,
+    "y": 458.44,
+    "z": 38.54,
+    "o": 0.0
+  },
+  "players": [
+    { "id": "trainee", "race": 5, "class": 1, "level": 10 }
+  ],
+  "steps": [
+    { "action": "set_phase", "label": "Join world phase 1, where the event spawns live", "actor": "trainee", "value": 1 },
+    { "action": "game_event", "label": "Hallow's End is running", "event": 12, "active": true },
+    { "action": "teleport", "label": "Go to the Brill matron", "actor": "trainee", "map": 0,
+      "x": 2239.51, "y": 282.798, "z": 34.753 },
+    { "action": "assert", "label": "The Brill matron is spawned", "actor": "trainee",
+      "metric": "nearby_creature_count", "entry": 23973, "equals": 1, "within_ms": 15000 },
+    { "action": "quest_accept", "label": "Accept Fire Training", "actor": "trainee", "quest": 11449, "entry": 23973 },
+    { "action": "assert", "label": "11449 is in the log with no fire put out", "actor": "trainee",
+      "metric": "quest_objective_count", "quest": 11449, "equals": 0, "within_ms": 3000 },
+    { "action": "teleport", "label": "Walk north to the Brill training fires", "actor": "trainee", "map": 0,
+      "x": 2243.32, "y": 458.44, "z": 38.54 },
+    { "action": "assert", "label": "All five Brill training fires burn", "actor": "trainee",
+      "metric": "nearby_creature_aura_count", "entry": 23537, "spell": 42074, "equals": 5, "within_ms": 15000 },
+    { "action": "add_item", "label": "SETUP: a Water Bucket from the barrel", "actor": "trainee", "item": 32971 },
+    { "action": "use_item", "label": "Throw the bucket onto training fire 240025", "actor": "trainee",
+      "item": 32971, "spell": 42340, "destination": { "x": 2240.09, "y": 459.134, "z": 38.4782 } },
+    { "action": "assert", "label": "The doused fire gives one credit", "actor": "trainee",
+      "metric": "quest_objective_count", "quest": 11449, "equals": 1, "within_ms": 5000 },
+    { "action": "wait", "label": "Let the fire script run a few updates", "ms": 1500 },
+    { "action": "assert", "label": "DISCRIMINATING: the doused fire stays out", "actor": "trainee",
+      "metric": "nearby_creature_aura_count", "entry": 23537, "spell": 42074, "equals": 4 },
+    { "action": "assert", "label": "The doused fire relights after its delay", "actor": "trainee",
+      "metric": "nearby_creature_aura_count", "entry": 23537, "spell": 42074, "equals": 5, "within_ms": 15000 }
+  ]
+}

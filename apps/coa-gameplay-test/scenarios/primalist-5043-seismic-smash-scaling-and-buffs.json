@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Seismic Smash scales with AP/STA and grants Thane's Rage and Aftershock (#5043, fix #7828)",
+  "contract": "Issue #5043 (class 31 Primalist, lvl 60): Seismic Smash 300693 dealt about 60 damage instead of the tooltip's ~460, and granted neither Thane's Rage nor Aftershock. Spell.dbc 300693 Description: 'dealing ${$m1+0+$AP*.22+$STA*.5} Physical damage and granting you Thane's Rage and Aftershock', linked spells @s:804124:0@ (Thane's Rage) and @s:301086:0@ (Aftershock). Effect 0 is SPELL_EFFECT_SCHOOL_DAMAGE, EffectBasePoints 93, EffectDieSides 16, EffectRealPointsPerLevel 10.85, BaseLevel/SpellLevel 59. SpellEffectInfo::CalcValue (SpellInfo.cpp) resolves this at level 60 (one level above BaseLevel) to 93 + int32(1 * 10.85) + irand(1, 16) = a 104-119 pre-AP/STA range, then calls sScriptMgr->ModifySpellEffectBaseValue before returning. primalist_seismic_smash_scaling (UnitScript, AscensionPrimalistSeismicResources.cpp) implements exactly that hook for a CLASS_WILDWALKER caster casting SeismicSmash's own first rank, adding GetTotalAttackPowerValue(BASE_ATTACK)*0.22 + GetStat(STAT_STAMINA)*0.5 to the effect value, matching the tooltip formula bit for bit; primalist_seismic_resources (AllSpellScript, OnSpellCast) casts ThanesRage(804124) and Aftershock(301086) on the same cast. A probe run on this tree (level 60 class-31 human, no gear) measured attack_power 126 and STAT_STAMINA 75 (deterministic base stats for that level/class/race with no items), giving an expected spell_effect_value(300693, effect 0) range of [104, 119] + (126*0.22 + 75*0.5 = 65.22) = [169.22, 184.22]; three live reads on this tree returned 171, 182 and 177, all inside that band and far above the pre-fix 104-119 band a missing hook would produce. Casting the spell must also grant both linked auras.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "primalist", "race": 1, "class": 31, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "primalist", "entry": 36, "level": 60, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "primalist", "spell": 300693 },
+
+    { "action": "assert", "label": "SETUP: base attack power at level 60 with no gear", "actor": "primalist", "metric": "attack_power", "equals": 126 },
+    { "action": "assert", "label": "SETUP: base Stamina at level 60 with no gear", "actor": "primalist", "metric": "stat", "stat": 2, "equals": 75 },
+
+    { "action": "assert", "label": "CONTRACT: effect value includes the AP*.22 + STA*.5 tooltip term (sample 1)", "actor": "primalist", "metric": "spell_effect_value", "spell": 300693, "effect": 0, "min": 169, "max": 185 },
+    { "action": "assert", "label": "CONTRACT: effect value includes the AP*.22 + STA*.5 tooltip term (sample 2)", "actor": "primalist", "metric": "spell_effect_value", "spell": 300693, "effect": 0, "min": 169, "max": 185 },
+    { "action": "assert", "label": "CONTRACT: effect value includes the AP*.22 + STA*.5 tooltip term (sample 3)", "actor": "primalist", "metric": "spell_effect_value", "spell": 300693, "effect": 0, "min": 169, "max": 185 },
+
+    { "action": "assert", "label": "SETUP: no Thane's Rage before the cast", "actor": "primalist", "metric": "aura", "spell": 804124, "equals": 0 },
+    { "action": "assert", "label": "SETUP: no Aftershock before the cast", "actor": "primalist", "metric": "aura", "spell": 301086, "equals": 0 },
+
+    { "action": "cast", "actor": "primalist", "spell": 300693, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: the cast lands on the dummy", "actor": "primalist", "metric": "spell_damage_count", "spell": 300693, "target": "dummy", "min": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTRACT: Seismic Smash grants Thane's Rage", "actor": "primalist", "metric": "aura", "spell": 804124, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTRACT: Seismic Smash grants Aftershock", "actor": "primalist", "metric": "aura", "spell": 301086, "equals": 1, "within_ms": 2000 }
+  ]
+}

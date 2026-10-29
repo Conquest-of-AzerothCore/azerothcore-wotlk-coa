@@ -17,8 +17,6 @@ namespace
 {
 using namespace AscensionWitchHunter;
 
-constexpr uint8 DESECRATE_SHADOWSTORM_EVENT = 22;
-
 bool Damage(ProcEventInfo const& event)
 {
     return event.GetDamageInfo() && event.GetDamageInfo()->GetDamage();
@@ -174,13 +172,6 @@ class aura_ascension_witch_hunter_event : public AuraScript
             case 680538:
                 return outgoing && Direct(event) && (Dusk(info) || (info && info->Id == 803502));
             case 520277:
-                if (outgoing && Direct(event) && Desecrate(info))
-                {
-                    if (Spell const* spell = event.GetProcSpell();
-                        spell && spell->TryMarkScriptEventHandled(DESECRATE_SHADOWSTORM_EVENT))
-                        Cast(owner, event.GetActionTarget(), 520278);
-                    return false;
-                }
                 return outgoing && Direct(event) && Family(info, 2, 33554432);
             case 681092:
                 return !outgoing && Direct(event) && (event.GetSchoolMask() & 126);

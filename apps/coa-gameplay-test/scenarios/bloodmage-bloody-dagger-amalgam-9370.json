@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "name": "Animated Blood (Bloody Dagger) summons its amalgam instead of doing nothing (#9370)",
+  "contract": "Spell 909064 'Animated Blood' (the Bloody Dagger's on-use spell) is SPELL_EFFECT_SUMMON of creature 3333313, which had no creature_template row: the cast succeeded but nothing appeared. Registering the creature (mirroring the #51 fix for its sibling ranks) lets the summon resolve. Cast the spell directly to isolate the summon defect from whether the quest-reward item row exists in the harness world database.",
+  "timeout_ms": 60000,
+  "players": [ { "id": "p", "race": 1, "class": 20, "level": 20 } ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    { "action": "learn", "actor": "p", "spell": 909064 },
+    { "action": "cast", "actor": "p", "spell": 909064 },
+    { "action": "assert", "label": "SETUP: the cast succeeds", "actor": "p", "metric": "cast_failure", "spell": 909064, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: the Animated Blood amalgam is summoned", "actor": "p", "metric": "owned_creature_count", "entry": 3333313, "min": 1, "within_ms": 5000 },
+    { "action": "wait", "ms": 11000 },
+    { "action": "assert", "label": "the 10 s amalgam has expired", "actor": "p", "metric": "owned_creature_count", "entry": 3333313, "equals": 0 }
+  ]
+}

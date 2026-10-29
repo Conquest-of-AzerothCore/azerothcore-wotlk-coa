@@ -1,0 +1,185 @@
+{
+  "schema": 1,
+  "name": "The Forgotten Heirloom: a second player loots their own Furlbrow's Pocket Watch from the wardrobe (COA-9221)",
+  "contract": "The Forgotten Heirloom 64 needs Furlbrow's Pocket Watch 841 from Furlbrow's Wardrobe 290 (guid 42673, lock 93, loot 1687, non-consumable). Its 30 s restock left the wardrobe sparkling but empty for the next player after one player looted the watch. Quest-only chests now restock after 1 s, so a second player on the quest who opens the wardrobe moments later finds a watch of their own.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9847.8,
+    "y": 1289.5,
+    "z": 41.9,
+    "o": 3.5
+  },
+  "players": [
+    {
+      "id": "a",
+      "race": 1,
+      "class": 1,
+      "level": 14
+    },
+    {
+      "id": "b",
+      "race": 1,
+      "class": 1,
+      "level": 14
+    }
+  ],
+  "creatures": [
+    {
+      "id": "furlbrow_a",
+      "owner": "a",
+      "entry": 237,
+      "distance": 4,
+      "faction": 35,
+      "level": 15
+    },
+    {
+      "id": "furlbrow_b",
+      "owner": "b",
+      "entry": 237,
+      "distance": 4,
+      "faction": 35,
+      "level": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "quest_accept",
+      "actor": "a",
+      "quest": 64,
+      "entry": 237
+    },
+    {
+      "action": "quest_accept",
+      "actor": "b",
+      "quest": 64,
+      "entry": 237
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: a is on the quest",
+      "actor": "a",
+      "metric": "quest_status",
+      "quest": 64,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: b is on the quest",
+      "actor": "b",
+      "metric": "quest_status",
+      "quest": 64,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "SETUP: Divine Shield keeps the farm's Defias from interrupting a's Opening",
+      "actor": "a",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "SETUP: Divine Shield keeps the farm's Defias from interrupting b's Opening",
+      "actor": "b",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "set_phase",
+      "actor": "a",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "actor": "b",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "a opens the wardrobe (Opening, lock type 12)",
+      "actor": "a",
+      "spell": 6477,
+      "target_gameobject": 290
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "a opens the wardrobe",
+      "actor": "a",
+      "metric": "cast_failure",
+      "spell": 6477,
+      "equals": 0
+    },
+    {
+      "action": "loot_slot",
+      "actor": "a",
+      "item": 841
+    },
+    {
+      "action": "close_loot",
+      "actor": "a"
+    },
+    {
+      "action": "assert",
+      "label": "a receives the watch",
+      "actor": "a",
+      "metric": "item_count",
+      "item": 841,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "label": "b opens the wardrobe (Opening, lock type 12)",
+      "actor": "b",
+      "spell": 6477,
+      "target_gameobject": 290
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "b opens the wardrobe",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 6477,
+      "equals": 0
+    },
+    {
+      "action": "loot_slot",
+      "actor": "b",
+      "item": 841
+    },
+    {
+      "action": "close_loot",
+      "actor": "b"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: b receives a watch of their own",
+      "actor": "b",
+      "metric": "item_count",
+      "item": 841,
+      "equals": 1
+    }
+  ]
+}

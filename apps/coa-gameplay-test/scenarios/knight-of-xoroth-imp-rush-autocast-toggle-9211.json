@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Imp Rush stays off when its autocast toggle is off, in aggressive and defensive stance (#9211)",
+  "contract": "Issue #9211 reports the Greater Imp's Imp Rush (630931) fires on its own in aggressive or defensive stance no matter how its pet-bar autocast toggle is set. Server side, the pet's only combat driver is the core PetAI autocast loop (PetAI::UpdateAI), which only considers a harmful spell once it is present in Pet::m_autospells; Pet::ToggleAutocast adds or removes the spell id from that list and the CMSG_PET_SPELL_AUTOCAST opcode (exercised here through the pet_autocast action) is the player's own toggle. Nothing in src/server/coa/AscensionXoroth*.cpp casts 630931 directly or bypasses that list. Expected: with the toggle explicitly off, the imp lands no Imp Rush hits while aggressive, and still none after switching to defensive with the same live target; after the player turns the toggle back on, the imp lands at least one Imp Rush hit within its 30s cooldown.",
+  "timeout_ms": 180000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 40 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "knight", "entry": 36, "level": 40, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "knight", "spell": 92101 },
+    { "action": "set_aura", "actor": "knight", "spell": 92101, "stacks": 1, "label": "Force the Greater Imp passive aura" },
+    {
+      "action": "assert", "label": "SETUP: the Greater Imp passive teaches Summon: Greater Imp",
+      "actor": "knight", "metric": "knows_spell", "spell": 520661, "equals": 1, "within_ms": 3000
+    },
+    { "action": "cast", "actor": "knight", "spell": 520661 },
+    {
+      "action": "assert", "label": "SETUP: the Greater Imp is the knight's pet",
+      "actor": "knight", "metric": "pet_entry", "equals": 510100, "within_ms": 10000
+    },
+    {
+      "action": "assert", "label": "SETUP: the pet knows Imp Rush",
+      "actor": "knight", "metric": "pet_knows_spell", "spell": 630931, "equals": 1, "within_ms": 10000
+    },
+    { "action": "pet_autocast", "actor": "knight", "spell": 630931, "enabled": false, "label": "Turn Imp Rush autocast off" },
+    {
+      "action": "assert", "label": "SETUP: Imp Rush autocast is off",
+      "actor": "knight", "metric": "pet_autocast_enabled", "spell": 630931, "equals": 0
+    },
+    { "action": "pet_stance", "actor": "knight", "stance": 2, "label": "Aggressive stance" },
+    { "action": "attack", "actor": "knight", "target": "dummy", "pet": true, "label": "Send the imp to attack" },
+    { "action": "wait", "label": "Let the imp swing for a while, aggressive", "ms": 20000 },
+    {
+      "action": "assert", "label": "Imp Rush never lands while off and aggressive",
+      "actor": "knight", "metric": "spell_damage_count", "spell": 630931, "pet": true, "target": "dummy", "equals": 0
+    },
+    { "action": "pet_stance", "actor": "knight", "stance": 1, "label": "Defensive stance, still fighting the dummy" },
+    { "action": "wait", "label": "Let the imp keep swinging, defensive", "ms": 20000 },
+    {
+      "action": "assert", "label": "Imp Rush never lands while off and defensive",
+      "actor": "knight", "metric": "spell_damage_count", "spell": 630931, "pet": true, "target": "dummy", "equals": 0
+    },
+    { "action": "pet_autocast", "actor": "knight", "spell": 630931, "enabled": true, "label": "Turn Imp Rush autocast back on" },
+    {
+      "action": "assert", "label": "SETUP: Imp Rush autocast is on",
+      "actor": "knight", "metric": "pet_autocast_enabled", "spell": 630931, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Imp Rush lands once the toggle is back on",
+      "actor": "knight", "metric": "spell_damage_count", "spell": 630931, "pet": true, "target": "dummy", "min": 1, "within_ms": 70000
+    }
+  ]
+}

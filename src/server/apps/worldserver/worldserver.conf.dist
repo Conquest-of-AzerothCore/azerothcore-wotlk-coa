@@ -3164,6 +3164,15 @@ CreatureFamilyAssistancePeriod = 3000
 CreatureFamilyFleeDelay = 7000
 
 #
+#    CreatureFamilyFleeWalk
+#        Description: Creatures that flee at low health walk instead of running, both while
+#                     seeking assistance and while fleeing without it. Fear effects are unchanged.
+#        Default:     0 - (Disabled, creatures run)
+#                     1 - (Enabled, creatures walk)
+
+CreatureFamilyFleeWalk = 0
+
+#
 #    WorldBossLevelDiff
 #        Description: World boss level difference.
 #        Default:     3
@@ -5118,3 +5127,11 @@ Cluster.IsCrossrealm=0
 # CLUSTER SETTINGS END                                                                            #
 #                                                                                                 #
 ###################################################################################################
+
+# Social.AccountWideFriends
+# Share friends/notes across owner characters and follow the friend's current character.
+# Requires the Ascension client friend-metadata protocol. Not for stock 3.3.5 clients.
+# Existing character friendships are imported once per account on first use after enabling.
+# Conflicting notes or more than 50 friend accounts require administrator reconciliation.
+# Ignore lists remain character-specific. Restart required; default disabled.
+Social.AccountWideFriends = 0

@@ -9,6 +9,7 @@ No database, server build or game client is needed.
 import argparse
 import os
 from pathlib import Path
+import re
 import runpy
 import shutil
 import struct
@@ -246,8 +247,29 @@ def check_records(out):
           'read receipts follow the viewer, and status, assignment and close fields follow the ticket')
 
 
+def check_name_columns():
+    header = (ROOT / 'src/server/game/Globals/ObjectMgr.h').read_text()
+    max_name = int(re.search(r'#define MAX_PLAYER_NAME\s+(\d+)', header).group(1))
+    sql = ROOT / 'data/sql'
+    files = sorted((sql / 'base/db_characters').glob('*.sql')) + sorted((sql / 'updates/db_characters').glob('*.sql'))
+    files += sorted((sql / 'updates/pending_db_characters').glob('*.sql'))
+    widths = {}
+    for path in files:
+        text = path.read_text(encoding='utf-8')
+        if 'ascension_player_ticket' not in text:
+            continue
+        for column in ('creator', 'assigned_to', 'sender', 'read_by'):
+            for match in re.finditer(r'`%s`\s+varchar\((\d+)\)' % column, text, re.IGNORECASE):
+                widths[column] = int(match.group(1))
+    assert set(widths) == {'creator', 'assigned_to', 'sender', 'read_by'}, widths
+    short = {column: width for column, width in widths.items() if width < max_name}
+    assert not short, f'ticket name columns shorter than MAX_PLAYER_NAME ({max_name}): {short}'
+    print(f'PASS: the ticket name columns hold a {max_name}-letter player name')
+
+
 def main():
     argparse.ArgumentParser(description=CLI_DESCRIPTION).parse_args()
+    check_name_columns()
     compiler = shutil.which(os.environ.get('CXX', 'c++'))
     assert compiler, 'A C++20 compiler is required'
     buffer_source = (ROOT / 'src/server/shared/Packets/ByteBuffer.cpp').read_text()

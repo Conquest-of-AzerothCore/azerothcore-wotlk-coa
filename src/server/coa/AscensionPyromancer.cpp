@@ -460,12 +460,9 @@ void StartDash(Player* player)
         if (speed > 0 && speed < 35.0f)
         {
             float surge = rate * 35.0f / speed;
+            state.surgeMs = uint32(1000.0f * distance / 35.0f);
+            state.surgeRate = surge;
             player->SetSpeed(MOVE_RUN, surge, true);
-            state.scheduler.Schedule(Milliseconds(uint32(1000.0f * distance / 35.0f)), [player, rate, surge](TaskContext)
-            {
-                if (player->IsInWorld() && player->GetSpeedRate(MOVE_RUN) == surge)
-                    player->SetSpeed(MOVE_RUN, rate, true);
-            });
         }
         return;
     }
@@ -476,6 +473,14 @@ void StartDash(Player* player)
 void UpdateDash(Player* player, uint32 diff)
 {
     auto& state = State(player);
+    if (state.surgeMs)
+    {
+        if (player->IsAlive() && player->GetSpeedRate(MOVE_RUN) != state.surgeRate)
+            player->SetSpeed(MOVE_RUN, state.surgeRate, true);
+        state.surgeMs = state.surgeMs > diff ? state.surgeMs - diff : 0;
+        if (!state.surgeMs)
+            player->UpdateSpeed(MOVE_RUN, true);
+    }
     if (!state.dashMs)
         return;
     float dx = player->GetPositionX() - state.dashPrevious.GetPositionX();

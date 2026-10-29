@@ -1,0 +1,108 @@
+{
+  "schema": 1,
+  "name": "The Wondrous Wisdomball offers only the player's own faction copy of a quest (COA-7229)",
+  "contract": "Maraudon has Alliance and Horde copies of Corruption of Earth and Seed (7065/7064) and Vyletongue Corruption (7041/7029), split by AllowableRaces. The ball must offer an Alliance Human only the Alliance copies, so the same quest cannot be taken and turned in twice.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "scholar",
+      "race": 1,
+      "class": 1,
+      "level": 50
+    }
+  ],
+  "location": {
+    "map": 349,
+    "x": 752.91,
+    "y": -616.53,
+    "z": -33.11,
+    "o": 1.0,
+    "ignore_access": true
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let Maraudon settle",
+      "ms": 8000
+    },
+    {
+      "action": "add_item",
+      "label": "Obtain the companion, as a purchase would",
+      "actor": "scholar",
+      "item": 101169,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "label": "Using the item teaches its summon",
+      "actor": "scholar",
+      "item": 101169,
+      "spell": 55884
+    },
+    {
+      "action": "assert",
+      "label": "The summon is learned",
+      "actor": "scholar",
+      "metric": "knows_spell",
+      "spell": 83050,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "Summon the ball in Maraudon",
+      "actor": "scholar",
+      "spell": 83050
+    },
+    {
+      "action": "wait",
+      "label": "Let the summon land",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The cast produced a creature this Human owns",
+      "actor": "scholar",
+      "metric": "owned_creature_count",
+      "entry": 79025,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "An Alliance Human is offered the Alliance Corruption of Earth and Seed",
+      "actor": "scholar",
+      "metric": "ball_offers_quest",
+      "quest": 7065,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "but not the Horde copy of it",
+      "actor": "scholar",
+      "metric": "ball_offers_quest",
+      "quest": 7064,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "An Alliance Human is offered the Alliance Vyletongue Corruption",
+      "actor": "scholar",
+      "metric": "ball_offers_quest",
+      "quest": 7041,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "but not the Horde copy of it",
+      "actor": "scholar",
+      "metric": "ball_offers_quest",
+      "quest": 7029,
+      "equals": 0,
+      "within_ms": 5000
+    }
+  ]
+}

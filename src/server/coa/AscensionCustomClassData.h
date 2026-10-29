@@ -13,7 +13,7 @@ struct ClassSpell
     std::uint32_t SpellId;
 };
 
-inline constexpr std::array<ClassSpell, 848> ClassSpells =
+inline constexpr std::array<ClassSpell, 849> ClassSpells =
 {{
     {12, 1, 81},
     {12, 1, 107},
@@ -809,6 +809,7 @@ inline constexpr std::array<ClassSpell, 848> ClassSpells =
     {31, 30, 504856},
     {31, 30, 570752},
     {31, 44, 581314},
+    {31, 59, 300693},
     {31, 60, 570756},
     {31, 60, 572817},
     {31, 60, 582261},

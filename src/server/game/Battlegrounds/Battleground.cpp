@@ -1448,7 +1448,13 @@ bool Battleground::UpdatePlayerScore(Player* player, uint32 type, uint32 value, 
 
 void Battleground::AddPlayerToResurrectQueue(ObjectGuid npc_guid, ObjectGuid player_guid)
 {
-    m_ReviveQueue[npc_guid].push_back(player_guid);
+    for (auto& [guideGuid, queue] : m_ReviveQueue)
+        if (guideGuid != npc_guid)
+            std::erase(queue, player_guid);
+
+    GuidVector& queue = m_ReviveQueue[npc_guid];
+    if (std::find(queue.begin(), queue.end(), player_guid) == queue.end())
+        queue.push_back(player_guid);
 
     Player* player = ObjectAccessor::FindPlayer(player_guid);
     if (!player)

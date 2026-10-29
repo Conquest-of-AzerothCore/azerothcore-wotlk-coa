@@ -1,0 +1,294 @@
+{
+  "schema": 1,
+  "name": "Skinpeeler Nytharos: 5 player party, same window",
+  "contract": [
+    "Every party size is measured over the same forty second window.",
+    "The bar lands in the same band whether or not there is a party."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 1,
+    "x": 2269.03,
+    "y": -6608.37,
+    "z": 125.192,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps1",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps2",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps3",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps4",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 750
+    },
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 11326
+    },
+    {
+      "action": "equip",
+      "label": "Weapon",
+      "actor": "tank",
+      "item": 11326,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "tank",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "dps1",
+      "spell": 750
+    },
+    {
+      "action": "learn",
+      "actor": "dps1",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 11326
+    },
+    {
+      "action": "equip",
+      "label": "Weapon",
+      "actor": "dps1",
+      "item": 11326,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "dps1",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "dps2",
+      "spell": 750
+    },
+    {
+      "action": "learn",
+      "actor": "dps2",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "dps2",
+      "item": 11326
+    },
+    {
+      "action": "equip",
+      "label": "Weapon",
+      "actor": "dps2",
+      "item": 11326,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "dps2",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "dps3",
+      "spell": 750
+    },
+    {
+      "action": "learn",
+      "actor": "dps3",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "dps3",
+      "item": 11326
+    },
+    {
+      "action": "equip",
+      "label": "Weapon",
+      "actor": "dps3",
+      "item": 11326,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "dps3",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "dps4",
+      "spell": 750
+    },
+    {
+      "action": "learn",
+      "actor": "dps4",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "dps4",
+      "item": 11326
+    },
+    {
+      "action": "equip",
+      "label": "Weapon",
+      "actor": "dps4",
+      "item": 11326,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "dps4",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps3",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps4",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "summon",
+      "label": "Spawn the boss",
+      "actor": "tank",
+      "as": "boss",
+      "entry": 9916214,
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "tank",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps1",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps2",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps3",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps4",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "Boss enters combat",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "label": "Same window for every party size",
+      "ms": 40000
+    },
+    {
+      "action": "assert",
+      "label": "Boss health after the window",
+      "actor": "boss",
+      "metric": "health_pct",
+      "min": 50.0,
+      "max": 90.0
+    }
+  ]
+}

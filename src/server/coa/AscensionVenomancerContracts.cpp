@@ -347,7 +347,7 @@ public:
     {
         if (attacker && attacker->HasAura(800921))
             return false;
-        return (info && info->IsAffectingArea()) || !CrossesLair(attacker,target);
+        return !info || info->IsAffectingArea() || !CrossesLair(attacker,target);
     }
     void ModifySpellEffectBaseValue(Unit const* caster, SpellInfo const* info, uint8 index, float& value) override
     {

@@ -1496,6 +1496,32 @@ namespace
         }();
         return targets;
     }
+
+    // DmgClass is an ability-roll category (melee/ranged/magic/none), not "does this deal damage" --
+    // a pure heal like Greater Heal is still SPELL_DAMAGE_CLASS_MAGIC. Flame Throwing's tooltip names
+    // damaging spells specifically, so look for an actual damage-dealing effect instead.
+    bool DealsDamage(SpellInfo const* info)
+    {
+        for (SpellEffectInfo const& effect : info->GetEffects())
+        {
+            switch (effect.Effect)
+            {
+                case SPELL_EFFECT_SCHOOL_DAMAGE:
+                case SPELL_EFFECT_WEAPON_DAMAGE:
+                case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
+                case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
+                case SPELL_EFFECT_HEALTH_LEECH:
+                    return true;
+                default:
+                    break;
+            }
+            if (effect.ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE ||
+                effect.ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE_PERCENT ||
+                effect.ApplyAuraName == SPELL_AURA_PERIODIC_LEECH)
+                return true;
+        }
+        return false;
+    }
 }
 
 bool SpellInfo::IsAffectedBySpellMods() const
@@ -1537,6 +1563,12 @@ bool SpellInfo::IsAffectedBySpellMod(SpellModifier const* mod) const
 
     if (mod->targetSpellId && mod->targetSpellId != Id)
         return false;
+
+    // Flame Throwing has no SpellAffect.dbc row and a zero class mask, so the generic lookup below
+    // would match nothing for its range modifier; its tooltip names every damaging spell of its
+    // owner, not one spell family. Its other (undocumented) modifier effect is left alone.
+    if ((mod->spellId == 11100 || mod->spellId == 12353) && mod->op == SPELLMOD_RANGE)
+        return DealsDamage(this);
 
     if (SpellFamilyName == 31 && affectSpell->SpellFamilyName == 31)
     {

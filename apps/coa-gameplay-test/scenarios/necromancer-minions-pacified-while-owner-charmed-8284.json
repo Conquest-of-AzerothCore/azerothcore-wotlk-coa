@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "necromancer-minions-pacified-while-owner-charmed-8284",
+  "contract": [
+    "#8284: Incite Chaos turned the Necromancer army on the group because the minion AI's AttackStart(Unit*)",
+    "override only forwarded to ScriptedAI::AttackStart when `!Pacified(player)`, and Pacified() ignored the",
+    "owner's charm state. AttackStart is reached natively from Unit::DealDamage -> CreatureAI::OwnerAttackedBy",
+    "-> OnOwnerCombatInteraction whenever something lands a hit on the owner, independent of anything the owner",
+    "casts, so a charmed owner's existing minions kept joining combat against whoever hit them -- including the",
+    "owner's own group. The fix adds `|| player->IsCharmed()` to Pacified(). Reproducing the exact live encounter",
+    "(Blackheart the Inciter's 24 s Incite Chaos cast) needs a working dungeon-boss combat/threat/scheduler",
+    "cycle that this harness could not be made to engage (the boss's own CreatureAI::JustEngagedWith/scheduler",
+    "never started here, independently of this fix, even with a defensive reaction fixture and a direct player",
+    "attack). Spell 260 'Charm (TEST)' is Spell.dbc's own generic SPELL_AURA_MOD_CHARM-only test spell",
+    "(EffectBasePoints 99+1, no caster/target restriction in Spell::CheckCast's SPELL_AURA_MOD_CHARM block, no",
+    "hostility requirement), used here to put the owner into a genuine native Unit::SetCharmedBy(CHARM_TYPE_CHARM)",
+    "state from a second player caster -- GetCharmerGUID() becomes non-zero exactly as Incite Chaos's own",
+    "33684 would do, so Pacified()'s new `player->IsCharmed()` check is exercised through the identical native",
+    "mechanism, independent of the specific charm source. The scenario proves the minion still joins defending",
+    "its owner before the charm (baseline, matching the normal, already-working case) and does not join once",
+    "the owner is charmed (discriminating)."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80 },
+    { "id": "charmer", "race": 5, "class": 23, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "dummy1", "owner": "necro", "entry": 36, "faction": 14, "level": 80, "health": 1000000, "distance": 6, "reaction": 1 },
+    { "id": "dummy2", "owner": "necro", "entry": 36, "faction": 14, "level": 80, "health": 1000000, "distance": 10, "reaction": 1 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+
+    { "action": "learn", "actor": "necro", "spell": 504859 },
+    { "action": "cast", "label": "Raise Crypt Fiend", "actor": "necro", "spell": 504859 },
+    { "action": "assert", "label": "SETUP: Crypt Fiend raised", "actor": "necro", "metric": "owned_creature_count", "entry": 50323, "min": 1, "within_ms": 8000 },
+    { "action": "wait", "label": "Let the minion take formation", "ms": 1500 },
+
+    { "action": "attack", "label": "BASELINE: the owner fights dummy1 (not charmed)", "actor": "necro", "target": "dummy1" },
+    { "action": "assert", "label": "BASELINE: the minion joins defending its uncharmed owner", "actor": "necro", "metric": "owned_creature_victim", "entry": 50323, "target": "dummy1", "equals": 1, "within_ms": 6000 },
+    { "action": "stop_attack", "actor": "necro" },
+
+    { "action": "learn", "actor": "charmer", "spell": 260 },
+    { "action": "cast", "label": "A second player charms the owner with the DBC's own generic MOD_CHARM test spell", "actor": "charmer", "spell": 260, "target": "necro" },
+    { "action": "assert", "label": "DIAGNOSTIC: the cast is accepted", "actor": "charmer", "metric": "cast_failure", "spell": 260, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING SETUP: the owner is genuinely charmed (native MOD_CHARM -> SetCharmedBy, GetCharmerGUID() non-zero)", "actor": "necro", "metric": "aura", "spell": 260, "equals": 1, "within_ms": 3000 },
+
+    { "action": "attack", "label": "A second dummy now hits the charmed owner", "actor": "necro", "target": "dummy2" },
+    { "action": "wait", "label": "Give the native OwnerAttackedBy chain time to fire if it were going to", "ms": 4000 },
+    { "action": "assert", "label": "DISCRIMINATING: the minion does not join combat against whoever hits its charmed owner", "actor": "necro", "metric": "owned_creature_victim", "entry": 50323, "target": "dummy2", "equals": 0 }
+  ]
+}

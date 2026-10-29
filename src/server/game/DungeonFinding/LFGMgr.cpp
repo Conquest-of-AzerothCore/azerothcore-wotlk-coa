@@ -1859,6 +1859,20 @@ namespace lfg
             }
         }
 
+        // Whether any teleported player queued for a random dungeon, independent of whether they
+        // already carry the cooldown aura from a previous pop (#8947): that aura's presence must not
+        // gate the instance-unbind decision below, or a repeat-queue with the same party can reuse the
+        // group's already-progressed instance instead of resetting it.
+        bool hasRandomLfgQueuer = false;
+        for (ObjectGuid const& guid : playersToTeleport)
+        {
+            if (selectedRandomLfgDungeon(guid))
+            {
+                hasRandomLfgQueuer = true;
+                break;
+            }
+        }
+
         bool randomDungeon = false;
         std::vector<Player*> playersTeleported;
         // Teleport Player
@@ -1871,11 +1885,11 @@ namespace lfg
 
                 // Add the cooldown spell if queued for a random dungeon
                 // xinef: add aura
-                if ((randomDungeon || selectedRandomLfgDungeon(player->GetGUID())) && !player->HasAura(LFG_SPELL_DUNGEON_COOLDOWN))
+                if (hasRandomLfgQueuer)
                 {
                     randomDungeon = true;
                     // if player is debugging, don't add dungeon cooldown
-                    if (!m_Testing)
+                    if (!player->HasAura(LFG_SPELL_DUNGEON_COOLDOWN) && !m_Testing)
                     {
                         player->AddAura(LFG_SPELL_DUNGEON_COOLDOWN, player);
                     }
@@ -1883,8 +1897,9 @@ namespace lfg
 
                 if (player->GetMapId() == uint32(dungeon->map))
                 {
-                    // check instance id with leader
-                    if (!leaderTeleportIncluded)
+                    // check instance id with leader, only when the group fills up a dungeon it is still running:
+                    // a new dungeon on the same map (another wing, the same dungeon again) starts a fresh instance
+                    if (!proposal.isNew && !leaderTeleportIncluded)
                     {
                         if (InstancePlayerBind* ilb = sInstanceSaveMgr->PlayerGetBoundInstance(grp->GetLeaderGUID(), dungeon->map, player->GetDungeonDifficulty()))
                         {
@@ -1901,8 +1916,9 @@ namespace lfg
                 }
                 else
                 {
-                    // RDF removes all binds to that map
-                    if (randomDungeon)
+                    // RDF removes all binds to that map, a new dungeon the temporary bind of an earlier run
+                    InstancePlayerBind const* bind = sInstanceSaveMgr->PlayerGetBoundInstance(player->GetGUID(), dungeon->map, player->GetDungeonDifficulty());
+                    if (randomDungeon || (proposal.isNew && bind && !bind->perm))
                         sInstanceSaveMgr->PlayerUnbindInstance(player->GetGUID(), dungeon->map, player->GetDungeonDifficulty(), true);
                 }
 

@@ -64,7 +64,7 @@ dungeon.
 | scope | rule |
 |---|---|
 | open world | the maps in `DestinyWeaver.Scaling.WorldMaps` (default `0 1`) |
-| dungeons | regular difficulty of the default dungeon finder entries (1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 163 164 165 272 273 274 276 601 402), plus any entry `DestinyWeaver.Scaling.DungeonIds` or `DestinyWeaver.Scaling.DungeonBands` adds |
+| dungeons | regular difficulty of the default dungeon finder entries (1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 163 164 165 272 273 274 276 601 402 401), plus any entry `DestinyWeaver.Scaling.DungeonIds` or `DestinyWeaver.Scaling.DungeonBands` adds |
 | never | raids, battlegrounds, arenas, scripted private instances, Heroic/Mythic dungeons |
 
 A creature on a scaled map still keeps its authored level when it is a pet, guardian, totem, trigger,
@@ -355,10 +355,12 @@ trails the character by that point's offset, held between the row's minimum and 
 `Player::GetQuestLevel` answers with `EffectiveQuestLevel`, so the level never goes below the authored
 one, and a character with scaling off (or blocked) plays every quest at its authored level.
 
-One client row is corrected after loading (`CorrectKnownRows`): quest 45 "Discover Rolf's Fate" is an
+A few client rows are corrected after loading (`CorrectKnownRows`): quest 45 "Discover Rolf's Fate" is an
 Elwynn Forest quest whose row caps it at 20, while the other 61 quests of the zone and every quest in
 its chain (35, 37, 40, 71, 59) cap at 60. Elwynn proper scales to 60; only the starting hubs stop at
-20, and this quest is not in one, so its maximum is raised to 60. The client keeps its own row, which
+20, and this quest is not in one, so its maximum is raised to 60. The same applies to the Three Totems
+narrative chain in Mulgore (1660030-1660035, 1660043, "Death and Tribute" through "To Whom I Devote"):
+not a starting-hub errand, so its row's 20 cap is raised to 60 too. The client keeps its own row, which
 it uses only to scale a reward item's stats (`FUN_10213cd0`); the level the server sends is what the
 quest log, the quest giver window and the reward use.
 

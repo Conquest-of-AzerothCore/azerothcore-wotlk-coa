@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Venomancer: leaving Spider Form ends Skulk stealth",
+  "contract": [
+    "Skulk 800843 reads 'Skulk through the shadows, entering stealth. Lasts until cancelled.' It requires Spider Form",
+    "800841 through CasterAuraSpell and has no Stances mask, so the native shapeshift cleanup does not remove it. Its",
+    "effect 1 is SPELL_AURA_MOD_STEALTH and it applies Skulking 520890. Expected: removing Spider Form ends Skulk and",
+    "Skulking, and a hostile creature 25 yd away that could not detect the stealthed Venomancer sees them again."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "v", "race": 1, "class": 29, "level": 20}
+  ],
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "creatures": [
+    {"id": "watcher", "owner": "v", "entry": 36, "level": 20, "health": 500000, "distance": 25, "stationary": true}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "v", "spell": 800841},
+    {"action": "learn", "actor": "v", "spell": 800843},
+    {"action": "cast", "label": "Spider Form", "actor": "v", "spell": 800841},
+    {"action": "assert", "label": "SETUP: Spider Form is active", "actor": "v", "metric": "aura", "spell": 800841,
+     "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "CONTROL: the watcher sees the Venomancer before Skulk", "actor": "watcher",
+     "metric": "can_detect", "target": "v", "equals": 1},
+    {"action": "wait", "label": "Let the global cooldown pass", "ms": 1600},
+    {"action": "cast", "label": "Skulk", "actor": "v", "spell": 800843},
+    {"action": "assert", "label": "SETUP: Skulk is active", "actor": "v", "metric": "aura", "spell": 800843,
+     "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "SETUP: Skulking is active", "actor": "v", "metric": "aura", "spell": 520890,
+     "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "SETUP: the watcher cannot detect the skulking Venomancer", "actor": "watcher",
+     "metric": "can_detect", "target": "v", "equals": 0, "within_ms": 2000},
+    {"action": "cancel_aura", "actor": "v", "spell": 800841},
+    {"action": "assert", "label": "SETUP: Spider Form is gone", "actor": "v", "metric": "aura", "spell": 800841,
+     "equals": 0, "within_ms": 2000},
+    {"action": "assert", "label": "DISCRIMINATING: leaving Spider Form ends Skulk", "actor": "v", "metric": "aura",
+     "spell": 800843, "equals": 0, "within_ms": 2000},
+    {"action": "assert", "label": "Skulking ends with Skulk", "actor": "v", "metric": "aura", "spell": 520890,
+     "equals": 0, "within_ms": 2000},
+    {"action": "assert", "label": "DISCRIMINATING: the watcher sees the Venomancer again", "actor": "watcher",
+     "metric": "can_detect", "target": "v", "equals": 1, "within_ms": 2000}
+  ]
+}

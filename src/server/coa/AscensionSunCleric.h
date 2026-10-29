@@ -15,6 +15,7 @@ namespace AscensionSunCleric
 constexpr uint32 SolarPower = 500149;
 constexpr uint32 Dawn = 807440;
 constexpr uint32 DawnCast = 804584;
+constexpr uint32 RadiantConversion = 807453;
 constexpr uint32 Bless = 804247;
 constexpr uint32 HolyForm = 805301;
 constexpr uint32 Sunrise = 500477;
@@ -64,7 +65,7 @@ void SetAmount(Player* player, uint32 id, uint8 slot, int32 amount);
 void Extend(Player* player, uint32 id, int32 milliseconds);
 void StackWithoutRefresh(Player* player, uint32 id);
 void ActivateDawn(Player* player);
-void Fulfill(Player* player, Spell* spell, Unit* target);
+void Fulfill(Player* player, Spell* spell, Spell* guard, Unit* target);
 void Eclipse(Player* player, Unit* target, uint32 amount);
 void ReleaseSuncharge(Player* player, Unit* target, uint32 stacks);
 bool Daytime();

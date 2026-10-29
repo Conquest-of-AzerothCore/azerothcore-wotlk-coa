@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "name": "Shieldgore ranks 2-7 scale with attack power and block value like rank 1 (#8862)",
+  "contract": "Shieldgore 804353 (rank 1) and its ranks 2-7 (806869-806874, chained to it in spell_ranks by rev_20260924_4930_shieldgore_ranks.sql) all carry the same tooltip template: '${$m2+0+$AP*.35} ... scaling with your block value'. AscensionXorothContracts.cpp's xoroth_scaling::ModifySpellEffectBaseValue adds the AP*0.35 bonus through a loop over XorothCoefficients, and adds the shield's block value separately when the spell equals rank 1. Before this fix XorothCoefficients only listed {804353, 1, ...}, so every higher rank got no AP bonus at all, and the block-value line was gated on a raw 'info->Id == 804353' identity check that likewise excluded every higher rank; both omissions matched the report of a rank far below its tooltip (320+) hitting for only 90-100. The fix adds a {806869..806874, 1, 0, 0.35, 0, 0, 4} row per rank to XorothCoefficients and changes the block-value check to Named(info, 804353), which resolves through the same spell_ranks chain used elsewhere in this file (e.g. the 801016 and 805671 checks). This case equips a Knight of Xoroth (class 17) with a one-handed weapon and a shield (the class's starter weapon is two-handed and blocks an off-hand shield, EQUIP_ERR_CANT_EQUIP_WITH_TWOHANDED, matching knight-of-xoroth-hellfire-forgemaster-block-value.json's fixture), learns rank 7 (806874, the highest rank, L58+), and measures its damage effect's (index 1) base value with spell_effect_value (SpellEffectInfo::CalcValue -> SpellInfo::CalculateSimpleValue -> ScriptMgr::ModifySpellEffectBaseValue, the exact call path that carries both bonuses; spell_damage_done cannot observe either one, since CoAGameplayTest.cpp calls Unit::SpellDamageBonusDone directly with a caller-supplied fixed base of 1000, bypassing CalculateSimpleValue and its ModifySpellEffectBaseValue hook entirely): first while gaining +1000 attack power through the QA Test fixture 10031 (expecting a +0.35 per point gain), then while doubling the equipped shield's block value through Blanket of Stars 804381 applied as a bare aura (bypassing its own class/cast gates, as the existing black-skull-shield scenario does for 804354), expecting the effect value to gain exactly the block-value delta (coefficient 1, matching GetShieldBlockValue() added as-is). Shieldgore's own EffectDieSides[1] is 40 (Spell.dbc), so SpellInfo::CalculateSimpleValue rerolls irand(1,40) on every single spell_effect_value query, independently of the fix under test; two independent snapshots can disagree by up to 39 points purely from that roll (the same phenomenon bloodmage-coefficients.json documents for its own 23/52-sided dice and widens its windows for). The AP phase's 1000-point AP gain (x0.35 = 350 expected) safely dominates that noise, so its window (0.3..0.4) only needs modest slack. The block-value phase cannot rely on a comparably large QA-test fixture (there is no block-value equivalent of 10031, and Blanket of Stars's percent modifier does not stack - StackAmount 0), so the shield itself was swapped from the low-level Worn Wooden Shield (2362, ~55 block at level 60) to Icecrown Glacial Wall (50729, 259 block at level 80, no extra class/skill gate beyond the Shields proficiency already proven by the earlier successful equip) to push the doubled block-value delta (roughly 250+) comfortably above the die-roll noise, and its window (0.85..1.15) is widened to match.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 80
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "knight", "spell": 806874 },
+    { "action": "add_item", "actor": "knight", "item": 629951 },
+    { "action": "equip", "label": "Swap the class's two-handed starter weapon for a one-hander so a shield can be equipped", "actor": "knight", "item": 629951, "slot": 15 },
+    { "action": "add_item", "label": "Icecrown Glacial Wall: a high block-value shield, so the 40-sided die roll on Shieldgore's own damage effect (EffectDieSides[1]=40) cannot swallow the block-value delta", "actor": "knight", "item": 50729 },
+    { "action": "equip", "label": "Equip a shield in the off hand", "actor": "knight", "item": 50729, "slot": 16 },
+    { "action": "wait", "label": "Let the equipment update settle", "ms": 1000 },
+    {
+      "action": "assert", "label": "SETUP: the equipped shield gives a positive block value",
+      "actor": "knight", "metric": "block_value", "min": 1
+    },
+    { "action": "snapshot", "actor": "knight", "metric": "attack_power", "save_as": "ap_before" },
+    {
+      "action": "snapshot", "label": "Shieldgore rank 7 base effect value before the AP fixture",
+      "actor": "knight", "metric": "spell_effect_value", "spell": 806874, "effect": 1, "save_as": "dmg_before_ap"
+    },
+    { "action": "set_aura", "label": "QA Test +1000 Melee and Ranged AP", "actor": "knight", "spell": 10031, "stacks": 1 },
+    { "action": "snapshot", "actor": "knight", "metric": "attack_power", "relative_to": "ap_before", "save_as": "ap_gain" },
+    {
+      "action": "assert", "label": "SETUP: the fixture adds 1000 attack power",
+      "actor": "knight", "metric": "attack_power", "relative_to": "ap_before", "equals": 1000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Shieldgore rank 7 gains 0.35 damage per attack power",
+      "actor": "knight", "metric": "spell_effect_value", "spell": 806874, "effect": 1,
+      "relative_to": "dmg_before_ap", "ratio_to": "ap_gain", "min": 0.3, "max": 0.4
+    },
+    { "action": "snapshot", "actor": "knight", "metric": "block_value", "save_as": "bv_before" },
+    {
+      "action": "snapshot", "label": "Shieldgore rank 7 base effect value before the block value fixture",
+      "actor": "knight", "metric": "spell_effect_value", "spell": 806874, "effect": 1, "save_as": "dmg_before_bv"
+    },
+    { "action": "set_aura", "label": "Blanket of Stars doubles block value", "actor": "knight", "spell": 804381, "stacks": 1 },
+    { "action": "snapshot", "actor": "knight", "metric": "block_value", "relative_to": "bv_before", "save_as": "bv_gain" },
+    {
+      "action": "assert", "label": "SETUP: the fixture doubles block value",
+      "actor": "knight", "metric": "block_value", "ratio_to": "bv_before", "min": 1.95, "max": 2.05
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Shieldgore rank 7 gains exactly its block value delta",
+      "actor": "knight", "metric": "spell_effect_value", "spell": 806874, "effect": 1,
+      "relative_to": "dmg_before_bv", "ratio_to": "bv_gain", "min": 0.85, "max": 1.15
+    }
+  ]
+}

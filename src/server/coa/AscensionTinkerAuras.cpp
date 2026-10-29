@@ -148,6 +148,12 @@ class aura_ascension_tinker_lifecycle : public AuraScript
             PreventDefaultAction();
             Resource(player,Scrap,-1);
         }
+        if (GetId() == GatlingGun && effect->GetEffIndex() == EFFECT_0)
+        {
+            PreventDefaultAction();
+            if (Unit* enemy = GetTarget(); enemy->IsAlive() && player->IsInWorld())
+                player->CastSpell(enemy,500577,TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_DISALLOW_PROC_EVENTS));
+        }
         if (GetId() == 807635 && effect->GetEffIndex() == EFFECT_0)
         {
             PreventDefaultAction();

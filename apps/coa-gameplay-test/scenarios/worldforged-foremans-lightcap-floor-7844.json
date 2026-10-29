@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Worldforged Foreman's Lightcap pickup stands on the Azurelode Mine floor (#7844)",
+  "contract": "The pickup template 515403 (item Foreman's Lightcap, guid 6940496) floated 1.9 yd above the mine floor beside Foreman Bonds in Azurelode Mine, Hillsbrad Foothills. rev_20261028_08 sets it to Foreman Bonds' own floor height.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -793.18, "y": 69.52, "z": 9.05, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the pickup is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 515403, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the pickup stands within half a yard of the floor", "actor": "p", "metric": "spawn_ground_gap", "guid": 6940496, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 515403 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "the pickup is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

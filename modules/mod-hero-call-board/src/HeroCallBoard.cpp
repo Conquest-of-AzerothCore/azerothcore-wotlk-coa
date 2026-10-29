@@ -2,6 +2,7 @@
 
 #include "AllBattlegroundScript.h"
 #include "Battleground.h"
+#include "ConditionMgr.h"
 #include "Config.h"
 #include "DBCStores.h"
 #include "GameObject.h"
@@ -39,7 +40,8 @@ namespace
         CategoryPvE = 1,
         CategoryReturn = 2,
         CategoryProfessions = 3,
-        CategoryPvP = 4
+        CategoryPvP = 4,
+        CategoryHighRisk = 5
     };
 
     enum BoardQuestSort : int32
@@ -64,6 +66,7 @@ namespace
     constexpr uint32 SilvermoonRemnantFaction = 269;
     constexpr uint32 QuelLithienLodgeFactionTemplate = 1576;
     constexpr uint32 EasternPlaguelandsZone = 139;
+    constexpr uint32 HighRiskRulesetAura = 1004019;
     constexpr std::array<uint32, 16> FinalRaidBosses = { 10184, 11502, 11583, 14834, 15339, 15727, 15990, 110184,
         111502, 111583, 114834, 115339, 115727, 115990, 210184, 211502 };
 
@@ -90,8 +93,22 @@ namespace
         }
     }
 
+    bool RequiresHighRisk(Quest const* quest)
+    {
+        ConditionList const conditions = sConditionMgr->GetConditionsForNotGroupedEntry(
+            CONDITION_SOURCE_TYPE_QUEST_AVAILABLE, quest->GetQuestId());
+        return std::any_of(conditions.begin(), conditions.end(), [](Condition const* condition)
+        {
+            return condition->ConditionType == CONDITION_AURA && condition->ConditionValue1 == HighRiskRulesetAura
+                && !condition->NegativeCondition;
+        });
+    }
+
     std::optional<uint32> CategoryOf(Quest const* quest)
     {
+        if (RequiresHighRisk(quest))
+            return CategoryHighRisk;
+
         int32 const sort = quest->GetZoneOrSort();
         if (sort > 0)
             return CategoryPvE;
@@ -118,7 +135,7 @@ namespace
 
     bool IsZoneOrder(Quest const* quest)
     {
-        return quest->GetZoneOrSort() > 0;
+        return quest->GetZoneOrSort() > 0 && !RequiresHighRisk(quest);
     }
 
     Quest const* FactionZoneOrder(Player const* player, uint32 questId)
@@ -208,6 +225,8 @@ namespace
         AddGossipItemFor(player, GOSSIP_ICON_CHAT, "PvE Quests", GOSSIP_SENDER_MAIN, CategoryPvE);
         AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Profession Quests", GOSSIP_SENDER_MAIN, CategoryProfessions);
         AddGossipItemFor(player, GOSSIP_ICON_CHAT, "PvP Quests", GOSSIP_SENDER_MAIN, CategoryPvP);
+        if (player->HasAura(HighRiskRulesetAura))
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "High-Risk Quests", GOSSIP_SENDER_MAIN, CategoryHighRisk);
         SendBoardMenu(player, board);
     }
 
@@ -327,7 +346,8 @@ public:
 
         if (action == CategoryReturn)
             ShowCategories(player, board);
-        else if (action == CategoryPvE || action == CategoryProfessions || action == CategoryPvP)
+        else if (action == CategoryPvE || action == CategoryProfessions || action == CategoryPvP
+            || action == CategoryHighRisk)
             ShowCategory(player, board, action);
         else
             return false;

@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Celerity replaces Spider Form speed instead of stacking with it (#8723)",
+  "contract": "#8723 expected Celerity (804962) to add its 60% to Spider Form (800841) and Versatile and Deadly for 190% run speed. Spell.dbc, the Exiles DB, coatavern and the SUB dump agree that Celerity effect 0 and Spider Form effect 0 are both aura 31 SPELL_AURA_MOD_INCREASE_SPEED (Celerity BasePoints 59 DieSides 1 = 60, Spider Form BasePoints 19 DieSides 1 = 20). Versatile and Deadly rank 2 (681492) effect 1 is a flat SPELLMOD_EFFECT1 (aura 107, misc 3) of +10 with class mask word0 0x400, which selects Spider Form (SpellFamilyFlags word0 1024), so it raises Spider Form's own aura 31 to 30 rather than adding a separate speed aura. Unit::UpdateSpeed takes only the largest positive aura 31 amount for unmounted run speed, so Celerity's 60 replaces Spider Form's 20 or 30 and both players run at 160%. Neither tooltip promises stacking: Celerity says it increases movement speed by 60%. A control without the talent and a talent player each enter Spider Form and cast Celerity, so the talent is the only difference.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    { "id": "ctl", "race": 8, "class": 29, "level": 80 },
+    { "id": "tal", "race": 8, "class": 29, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "ctl", "spell": 800841 },
+    { "action": "learn", "actor": "ctl", "spell": 804962 },
+    { "action": "learn", "actor": "tal", "spell": 800841 },
+    { "action": "learn", "actor": "tal", "spell": 804962 },
+    { "action": "learn", "actor": "tal", "spell": 681492 },
+    {
+      "action": "assert", "label": "SETUP: Versatile and Deadly rank 2 is applied",
+      "actor": "tal", "metric": "aura", "spell": 681492, "equals": 1, "within_ms": 5000
+    },
+    { "action": "snapshot", "actor": "ctl", "metric": "run_speed_rate", "save_as": "run_ctl0" },
+    { "action": "snapshot", "actor": "tal", "metric": "run_speed_rate", "save_as": "run_tal0" },
+    { "action": "cast", "actor": "ctl", "spell": 800841 },
+    { "action": "cast", "actor": "tal", "spell": 800841 },
+    {
+      "action": "assert", "label": "Control Spider Form aura carries speed 20",
+      "actor": "ctl", "metric": "aura_amount", "spell": 800841, "effect": 0, "equals": 20, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Talent Spider Form aura carries speed 30",
+      "actor": "tal", "metric": "aura_amount", "spell": 800841, "effect": 0, "equals": 30, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Spider Form alone runs at 120% without the talent",
+      "actor": "ctl", "metric": "run_speed_rate", "ratio_to": "run_ctl0",
+      "min": 1.199, "max": 1.201, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "Spider Form alone runs at 130% with the talent",
+      "actor": "tal", "metric": "run_speed_rate", "ratio_to": "run_tal0",
+      "min": 1.299, "max": 1.301, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Global cooldown", "ms": 1600 },
+    { "action": "cast", "actor": "ctl", "spell": 804962 },
+    { "action": "cast", "actor": "tal", "spell": 804962 },
+    {
+      "action": "assert", "label": "Control Celerity aura carries speed 60",
+      "actor": "ctl", "metric": "aura_amount", "spell": 804962, "effect": 0, "equals": 60, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Talent Celerity aura carries speed 60",
+      "actor": "tal", "metric": "aura_amount", "spell": 804962, "effect": 0, "equals": 60, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Talent Spider Form stays active under Celerity",
+      "actor": "tal", "metric": "aura", "spell": 800841, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Celerity in Spider Form runs at 160% without the talent",
+      "actor": "ctl", "metric": "run_speed_rate", "ratio_to": "run_ctl0",
+      "min": 1.599, "max": 1.601, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Celerity in Spider Form also runs at 160% with the talent",
+      "actor": "tal", "metric": "run_speed_rate", "ratio_to": "run_tal0",
+      "min": 1.599, "max": 1.601, "within_ms": 3000
+    }
+  ]
+}

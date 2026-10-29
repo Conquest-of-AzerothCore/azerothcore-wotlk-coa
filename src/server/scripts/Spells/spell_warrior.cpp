@@ -50,6 +50,9 @@ enum WarriorSpells
     SPELL_WARRIOR_SLAM                              = 50783,
     SPELL_WARRIOR_STORM_SLAM                        = 903140,
     SPELL_WARRIOR_STORM_SLAM_DAMAGE                 = 903246,
+    SPELL_WARRIOR_FROZEN_SLAM_FIRST_RANK            = 903130,
+    SPELL_WARRIOR_FROZEN_SLAM_LAST_RANK             = 903139,
+    SPELL_WARRIOR_FROZEN_SLAM_DAMAGE                = 903245,
     SPELL_WARRIOR_SUNDER_ARMOR                      = 58567,
     SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK_1   = 12723,
     SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK_2   = 26654,
@@ -325,7 +328,13 @@ class spell_warr_slam : public SpellScript
 
     static uint32 DamageSpell(SpellInfo const* info)
     {
-        return info->Id == SPELL_WARRIOR_STORM_SLAM ? SPELL_WARRIOR_STORM_SLAM_DAMAGE : SPELL_WARRIOR_SLAM;
+        if (info->Id == SPELL_WARRIOR_STORM_SLAM)
+            return SPELL_WARRIOR_STORM_SLAM_DAMAGE;
+
+        if (info->Id >= SPELL_WARRIOR_FROZEN_SLAM_FIRST_RANK && info->Id <= SPELL_WARRIOR_FROZEN_SLAM_LAST_RANK)
+            return SPELL_WARRIOR_FROZEN_SLAM_DAMAGE;
+
+        return SPELL_WARRIOR_SLAM;
     }
 
     bool Validate(SpellInfo const* info) override

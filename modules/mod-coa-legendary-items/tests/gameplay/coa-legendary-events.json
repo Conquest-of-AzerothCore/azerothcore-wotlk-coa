@@ -58,7 +58,7 @@
       "actor": "caster",
       "metric": "aura_amount",
       "spell": 9710003,
-      "equals": 41
+      "equals": 17
     },
     {
       "action": "set_health",
@@ -88,7 +88,7 @@
       "actor": "caster",
       "metric": "aura_amount",
       "spell": 9710003,
-      "equals": 41
+      "equals": 17
     },
     {
       "action": "set_health",
@@ -150,7 +150,7 @@
       "actor": "hybrid",
       "metric": "aura_amount",
       "spell": 9710006,
-      "equals": 82
+      "equals": 35
     },
     {
       "action": "set_health",

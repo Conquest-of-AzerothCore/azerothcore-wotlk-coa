@@ -1,0 +1,161 @@
+{
+  "schema": 1,
+  "name": "Shadowhound keeps its absolute HP across a mount/dismount (#9038)",
+  "contract": [
+    "Shadowhound 50124 is a real Pet; Unit::Mount() calls UnsummonPetTemporaryIfAny(), which saves the pet",
+    "(SavePetToDB writes the raw curhealth column, no percentage math) and removes it, and dismounting calls",
+    "ResummonPetTemporaryUnSummonedIfAny(), which reloads it through Pet::LoadPetFromDB.",
+    "Pet::LoadPetFromDB synchronously calls Guardian::InitStatsForLevel (generic, owner-independent stats and",
+    "SetFullHealth()) and adds the pet to the map, which synchronously constructs its AI (HoundActions),",
+    "scheduling its first EVENT_REFRESH_OWNER tick for 1ms later; the saved absolute health is restored only",
+    "later, from an async DB query callback. Instrumentation (temporary LOG_ERROR traces, removed before this",
+    "commit) showed the callback's _LoadAuras/CastPetAuras calls raise max health further before the health",
+    "column is applied, so the restored absolute health lands against a transient, pre-owner-rescale max",
+    "health, not the hound's settled owner-scaled max. HoundActions::Update's EVENT_REFRESH_OWNER handler then",
+    "ran its percentage rescale (healthFraction = current/transient-max, newHealth = owner-max * fraction)",
+    "on that very first tick, turning the correctly-restored absolute health into a fraction of the wrong",
+    "max and losing HP (traced: 100 HP against a transient max of 1545 -> 6.47% -> 57 HP of the correct 894",
+    "max) with no combat involved. The fix tracks whether HoundActions has run its owner-refresh correction",
+    "before (_ownerRefreshed): on the first correction after (re)construction it clamps the already-correct",
+    "absolute health to the new max instead of re-deriving a fraction, and uses the existing proportional",
+    "rescale only for later corrections (legitimate owner max-health changes while the hound stays alive). The",
+    "fix distinguishes a reload-with-saved-health from a brand-new summon using the exact traced signal: at",
+    "HoundActions construction time, Player::GetTemporaryUnsummonedPetNumber() is still nonzero only when this",
+    "construction is happening inside Player::ResummonPetTemporaryUnSummonedIfAny() (it is cleared only after",
+    "Pet::LoadPetFromDB returns), so only that path is treated as a restore; a brand-new summon never sets it",
+    "and keeps filling to the owner-scaled max in full.",
+    "Expected: the hound's absolute HP is unchanged by a mount/dismount cycle with no combat (first player), and",
+    "a freshly summoned hound (no prior save, second player) starts at its owner-scaled 40%-of-max-health target."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    },
+    {
+      "id": "fresh_hunter",
+      "race": 1,
+      "class": 15,
+      "level": 70
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 801343
+    },
+    {
+      "action": "cast",
+      "label": "Summon Shadowhound",
+      "actor": "hunter",
+      "spell": 801343
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the hunter has a Shadowhound",
+      "actor": "hunter",
+      "metric": "owned_creature_count",
+      "entry": 50124,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "hunter",
+      "pet": true,
+      "value": 100
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: hound at exact absolute 100 HP",
+      "actor": "hunter",
+      "metric": "pet_health",
+      "equals": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "hunter",
+      "spell": 458,
+      "stacks": 1,
+      "label": "Mount"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "hunter"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Hound HP unchanged across mount/dismount, no combat",
+      "actor": "hunter",
+      "metric": "pet_health",
+      "equals": 100
+    },
+    {
+      "action": "learn",
+      "actor": "fresh_hunter",
+      "spell": 801343
+    },
+    {
+      "action": "set_health",
+      "label": "A well-geared owner's max health clears the hound's level-locked generic template health",
+      "actor": "fresh_hunter",
+      "value": 20000,
+      "maximum": 20000
+    },
+    {
+      "action": "cast",
+      "label": "Fresh, never-saved Shadowhound summon",
+      "actor": "fresh_hunter",
+      "spell": 801343
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: fresh_hunter has a Shadowhound",
+      "actor": "fresh_hunter",
+      "metric": "owned_creature_count",
+      "entry": 50124,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "fresh_hunter",
+      "metric": "max_health",
+      "save_as": "fresh_owner_max"
+    },
+    {
+      "action": "assert",
+      "label": "A brand-new Shadowhound (never saved) starts at the owner-scaled 40%-of-max-health target, not a stale generic value",
+      "actor": "fresh_hunter",
+      "metric": "pet_health",
+      "ratio_to": "fresh_owner_max",
+      "min": 0.39,
+      "max": 0.41
+    }
+  ]
+}

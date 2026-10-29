@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Placement metrics on spawns players reported in game",
-  "contract": "Server-side placement metrics measure spawns against the static map and vmap ground of their base map. Expected positions come from players in game, never from the classifier: Runaway's Tunic 6942106 (entry 1345118) on Hermit Ortell's cave floor at map 1 (-7574.46,196.347,11.1919), rev_20261009_50_runaway_tunic_cave.sql and the worldforged-runaway-tunic-3238 scenario, with Hermit Ortell 42919 at (-7578.72,196.914,11.5488); the Silk Drape 6901050 (entry 95535) on the Dalaran Crater ground at map 0 (307.660,174.979,47.629), rev_20261025_69_worldforged_silk_drape_ground.sql; Lucifron 56605 on the Molten Core WMO floor at map 409 (923.3191,-925.5587,-189.90823), the molten-core-lucifron-encounter contract; the Mossy Shortbow placed in game at map 1 (10297.989,1476.818,1342.031) by rev_20261024_93_coa_mossy_shortbow_above_ground.sql. That fix reports the earlier spawn 2.3 yd under the ground; the earlier position is (10269.8,1472.1,1336.6222), the Z set by rev_20261006_65_worldforged_openworld_float_heights.sql over the module row's 1340.21, and it sits on the static ground the server computes, so the reported depth is not visible in map and vmap data; the in-game position after the fix, leaning by the moonwell, reads 4.3 yd above that ground (snapshot on 2026-10-26), so the visible ground there is not in the static data either. The three Mossy Shortbow positions are calibration snapshots, not assertions. Display ids read from the loaded templates on 2026-10-25 (gameobject_template.displayId 1 for 1345118 from modules/mod-worldforged-pickups/data/sql/db-world/2026_09_22_03_worldforged_appearance_and_ground.sql, 1049754 for 95535; creature_template_model 15326 for 15194 and 13031 for 12118) are all dword 0 of a record in /srv/coa/server-data/dbc GameObjectDisplayInfo.dbc and CreatureDisplayInfo.dbc, so each worst display state is 2 (client). The snapshots are calibration data only, uncertain expectations with no asserted bound: the Silk Drape before its fix (module row 2026_09_16_00_worldforged_pickups.sql), the Drudger Smash before and after rev_20261024_92_coa_drudger_smash_on_platform.sql (the after point is the oil platform deck the player stood on; static map and vmap ground lies 1.0 yd below it, and whether the deck surface itself is a gameobject is not established), Right Hand of His Majesty before and after rev_20261025_91_coa_radiance_right_hand_position.sql, and Runaway's Tunic before its cave fix: the row of modules/mod-worldforged-pickups/data/sql/db-world/2026_09_23_05_worldforged_map.sql (Z 29.603) and the Z 27.4579 set by rev_20261006_65_worldforged_openworld_float_heights.sql.",
+  "contract": "Server-side placement metrics measure spawns against the static map and vmap ground of their base map. Expected positions come from players in game, never from the classifier: Runaway's Tunic 6942106 (entry 1345118) on Hermit Ortell's cave floor at map 1 (-7574.46,196.347,11.1919), rev_20261009_50_runaway_tunic_cave.sql and the worldforged-runaway-tunic-3238 scenario, with Hermit Ortell 42919 at (-7578.72,196.914,11.5488); the Silk Drape 6901050 (entry 95535) on the Dalaran Crater ground at map 0 (307.660,174.979,47.629), rev_20261025_69_worldforged_silk_drape_ground.sql; Lucifron 56605 on the Molten Core WMO floor at map 409 (923.3191,-925.5587,-189.90823), the molten-core-lucifron-encounter contract; the Mossy Shortbow placed in game at map 1 (10297.989,1476.818,1342.031) by rev_20261024_93_coa_mossy_shortbow_above_ground.sql. That fix reports the earlier spawn 2.3 yd under the ground; the earlier position is (10269.8,1472.1,1336.6222), the Z set by rev_20261006_65_worldforged_openworld_float_heights.sql over the module row's 1340.21, and it sits on the static ground the server computes, so the reported depth is not visible in map and vmap data; the in-game position after the fix, leaning by the moonwell, reads 4.3 yd above that ground (snapshot on 2026-10-26), so the visible ground there is not in the static data either. The three Mossy Shortbow positions are calibration snapshots, not assertions. Display ids read from the loaded templates on 2026-10-25 (gameobject_template.displayId 1 for 1345118 from modules/mod-worldforged-pickups/data/sql/db-world/2026_09_22_03_worldforged_appearance_and_ground.sql, 1049754 for 95535; creature_template_model 15326 for 15194 and 13031 for 12118) are all dword 0 of a record in /srv/coa/server-data/dbc GameObjectDisplayInfo.dbc and CreatureDisplayInfo.dbc, so each worst display state is 2 (client). The snapshots are calibration data only, uncertain expectations with no asserted bound: the Silk Drape before its fix (module row 2026_09_16_00_worldforged_pickups.sql), the Drudger Smash before and after rev_20261024_92_coa_drudger_smash_on_platform.sql (the after point is the oil platform deck the player stood on; static map and vmap ground lies 1.0 yd below it, and whether the deck surface itself is a gameobject is not established), Right Hand of His Majesty before and after rev_20261025_91_coa_radiance_right_hand_position.sql, and Runaway's Tunic before its cave fix: the row of modules/mod-worldforged-pickups/data/sql/db-world/2026_09_23_05_worldforged_map.sql (Z 29.603) and the Z 27.4579 set by rev_20261006_65_worldforged_openworld_float_heights.sql. The Ashendawn Bow 6940084 (entry 254676, Burning Steppes) is asserted grounded after rev_20261028_09_worldforged_ashendawn_bow_ground.sql restores its stock terrain height (#7858). The Sturdy Helm (#7856) candidate sighting (-1250.94,-1608.29,51.121) is a calibration snapshot only: its ground gap reads 1.07 yd above the static ground, not clearly grounded, so no fix moves guid 6941179 there.",
   "timeout_ms": 60000,
   "players": [
     {
@@ -131,6 +131,16 @@
       "equals": 2
     },
     {
+      "action": "assert",
+      "label": "Ashendawn Bow (#7858) stands within a yard of the ground",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 6940084,
+      "spawn_type": "gameobject",
+      "min": -1,
+      "max": 1
+    },
+    {
       "action": "snapshot",
       "label": "Calibration snapshot only: Mossy Shortbow at its pre-#8943 position, reported 2.3 yd under the ground",
       "actor": "auditor",
@@ -239,6 +249,17 @@
       "y": 200.6,
       "z": 27.4579,
       "save_as": "runaway_tunic_before"
+    },
+    {
+      "action": "snapshot",
+      "label": "Calibration snapshot only: Sturdy Helm (#7856) candidate sighting position",
+      "actor": "auditor",
+      "metric": "point_ground_gap",
+      "map": 0,
+      "x": -1250.94,
+      "y": -1608.29,
+      "z": 51.121,
+      "save_as": "sturdy_helm_candidate_7856"
     }
   ]
 }

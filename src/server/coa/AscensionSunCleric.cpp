@@ -280,11 +280,11 @@ void ActivateDawn(Player* player)
                 Cast(player, player, helper);
     Refresh(player);
 }
-void Fulfill(Player* player, Spell* spell, Unit* target)
+void Fulfill(Player* player, Spell* spell, Spell* guard, Unit* target)
 {
-    if (!spell || !spell->GetScriptValue(Dawn) || spell->GetScriptValue(807441))
+    if (!spell || !guard || !spell->GetScriptValue(Dawn) || guard->GetScriptValue(807441))
         return;
-    spell->SetScriptValue(807441, 1);
+    guard->SetScriptValue(807441, 1);
     if (player->HasAura(805581))
         Reduce(player, 500154, std::abs(Amount(807445)));
     if (player->HasAura(680622))
@@ -354,7 +354,7 @@ void Refresh(Player* player)
                                 std::pair(805267u, 807876u), std::pair(300314u, 301341u)})
         KeepHelper(player, helper, healthy && player->HasAura(talent));
     bool day = player->IsAlive() && Daytime();
-    SetHelper(player, 707768, day && player->HasAura(707078));
+    KeepHelper(player, 707768, day && player->HasAura(707078));
     int32 extraHaste = 0;
     for (uint32 id : {300363, 300621, 300626})
         if (player->HasAura(id))
@@ -377,6 +377,13 @@ void Refresh(Player* player)
             player->SetTemporarySpellReplacement(pair.first, replacement ? 504764 : 0);
     if (!replacement)
         player->removeSpell(504764, SPEC_MASK_ALL, true);
+    bool conversion = player->IsAlive() && player->HasAura(Dawn) && player->HasSpell(DawnCast);
+    if (conversion && !player->HasSpell(RadiantConversion))
+        player->learnSpellWithoutAnnouncement(RadiantConversion);
+    if (player->HasSpell(DawnCast))
+        player->SetTemporarySpellReplacement(DawnCast, conversion ? RadiantConversion : 0);
+    if (!conversion)
+        player->removeSpell(RadiantConversion, SPEC_MASK_ALL, true);
     if (!player->IsInCombat())
         state.firstAttacks.clear();
     state.refreshing = false;

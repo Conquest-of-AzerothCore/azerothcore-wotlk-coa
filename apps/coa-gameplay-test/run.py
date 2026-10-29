@@ -38,7 +38,8 @@ ENCOUNTER_STATES = {'NOT_STARTED', 'IN_PROGRESS', 'FAIL', 'DONE', 'SPECIAL'}
 MAX_ENCOUNTER_RADIUS = 200
 RAID_ROLES = {'tank', 'healer', 'melee', 'ranged'}
 RAID_ROLE_FIELDS = {'rotation', 'heal_spell', 'taunt_spell', 'rotation_assist'}
-SPAWN_PLACEMENT_METRICS = {'spawn_placement', 'spawn_ground_gap', 'spawn_submerged', 'spawn_display_state'}
+SPAWN_PLACEMENT_METRICS = {'spawn_placement', 'spawn_ground_gap', 'spawn_submerged', 'spawn_display_state',
+                            'spawn_stand_state', 'spawn_clearance', 'spawn_headroom'}
 POINT_PLACEMENT_METRICS = {'point_placement', 'point_ground_gap'}
 PLACEMENT_VERDICT_METRICS = {'spawn_placement', 'point_placement'}
 SPAWN_TYPES = {'creature', 'gameobject'}
@@ -56,15 +57,15 @@ METRICS = TIMELINE_METRICS | {
     'pet_power', 'pet_max_power', 'spell_energize_count', 'spell_energize_total',
     'xp', 'next_level_xp', 'skill_value', 'skill_maximum', 'lfg_dungeon_disabled', 'lfg_lock_status', 'lfg_state',
     'lfg_need_allowed',
-    'map_id',
+    'map_id', 'instance_id',
     'in_arena', 'arena_team_members', 'arena_team_season_games', 'arena_team_season_wins',
     'battleground_team', 'team', 'name_query_race',
     'map_difficulty', 'nearby_creature_template', 'nearby_creature_max_health', 'nearby_creature_health_pct',
     'nearby_creature_sent_spellclick', 'nearby_creature_can_attack', 'nearby_creature_mount_display',
     'nearby_creature_display', 'nearby_creature_aura_count',
     'spawn_respawn_remaining',
-    'spawn_placement', 'spawn_ground_gap', 'spawn_submerged', 'spawn_display_state',
-    'point_placement', 'point_ground_gap', 'placement_audit_spawns', 'placement_audit_anomalies',
+    'spawn_placement', 'spawn_ground_gap', 'spawn_submerged', 'spawn_display_state', 'spawn_stand_state',
+    'spawn_clearance', 'spawn_headroom', 'point_placement', 'point_ground_gap', 'placement_audit_spawns', 'placement_audit_anomalies',
     'placement_audit_event_spawns',
     'loot_gear_item_level',
     'position_x', 'position_y', 'position_z',
@@ -78,7 +79,8 @@ METRICS = TIMELINE_METRICS | {
     'carried_aura_count',
     'knows_spell', 'spell_active', 'has_talent', 'talent_points', 'active_talent_spec', 'cooldown_ms', 'global_cooldown_ms', 'spell_charges',
     'action_button', 'action_button_packed', 'persisted_action_button', 'item_count', 'carried_item_count',
-    'carried_pool_item_count', 'carried_variant_item_count', 'client_knows_spell', 'client_spellbook_copies',
+    'carried_pool_item_count', 'carried_variant_item_count', 'carried_statless_armor_count',
+    'client_knows_spell', 'client_spellbook_copies',
     'pool_variant_count', 'pool_retired_item_count', 'pool_row_count', 'pool_item_present',
     'cache_token_count', 'cache_token_stage', 'cache_token_present',
     'free_inventory_slots', 'mail_count', 'mail_item_count', 'mail_has_item',
@@ -111,12 +113,13 @@ METRICS = TIMELINE_METRICS | {
     'spellbook_client_notable', 'spellbook_notify_id_mismatches',
     'spellbook_cues_in_last_buy', 'spellbook_last_buy_cued',
     'spellbook_silent_buys', 'spellbook_multi_announced_buys',
-    'cast_speed_multiplier', 'spell_crit_chance', 'spell_power_cost', 'spell_damage_done', 'melee_damage_done',
+    'cast_speed_multiplier', 'spell_crit_chance', 'spell_power_cost', 'skill_line_for_spell', 'spell_damage_done', 'melee_damage_done',
     'who_count', 'who_class', 'player_name', 'name_lookup', 'loot_count', 'loot_entry', 'loot_received',
     'loot_offered_item_count', 'loot_gold', 'loot_bloodforged', 'loot_required_level', 'loot_item_level', 'loot_base_entry', 'loot_item_armor',
     'carried_item_level', 'carried_item_required_level', 'carried_item_armor', 'carried_item_scaling_level',
     'carried_item_stat',
     'nearby_gameobject_count', 'nearby_gameobject_quest_active', 'nearby_gameobject_state', 'nearby_gameobject_scale',
+    'nearby_gameobject_ground_offset',
     'nearby_creature_count', 'map_creature_count', 'nearby_gameobject_at_client', 'voidportal_group',
     'carried_money',
     'channel_object_entry',
@@ -144,9 +147,9 @@ METRICS = TIMELINE_METRICS | {
     'equipped_item',
     'pet_aura_amount', 'pet_aura_amplitude_ms', 'pet_max_health', 'pet_health', 'pet_attack_power',
     'pet_run_speed_rate',
-    'distance', 'threat', 'threat_per_damage', 'spell_proc_count', 'spell_proc_chance', 'aura_proc_rate', 'temporary_spell_replacement',
+    'distance', 'spawn_active', 'threat', 'threat_per_damage', 'spell_proc_count', 'spell_proc_chance', 'aura_proc_rate', 'temporary_spell_replacement',
     'spell_family_flags',
-    'creature_loot_quality_rate', 'equipped_gear_loot_rate',
+    'creature_loot_quality_rate', 'equipped_gear_loot_rate', 'forced_loot_count',
     'quest_menu_items', 'quest_menu_has', 'player_setting', 'server_packets', 'server_packet_u8', 'server_packet_u32',
     'server_packet_float', 'server_packet_contains',
     'known_entry_rank',
@@ -264,6 +267,7 @@ ACTIONS = {
     'spell_click_nearby': ({'actor', 'entry'}, {'actor', 'entry'}),
     'attack_owned_creature': ({'actor', 'target', 'entry'}, {'actor', 'target', 'entry'}),
     'attack_nearby': ({'actor', 'entry'}, {'actor', 'entry', 'kill', 'damage_pct'}),
+    'select_nearby': ({'actor', 'entry'}, {'actor', 'entry', 'radius'}),
     'summon': ({'actor', 'as', 'entry'}, {'actor', 'as', 'entry', 'distance', 'ai_action'}),
     'loot_nearby': ({'actor', 'entry'}, {'actor', 'entry'}),
     'loot_creature': ({'actor', 'target'}, {'actor', 'target'}),
@@ -457,7 +461,7 @@ def validate(scenario):
              {'id', 'race', 'class', 'level', 'bot', 'spell_hit_rating', 'spell_crit_rating',
               'melee_crit_rating', 'ranged_crit_rating', 'ranged_hit_rating', 'melee_hit_rating',
               'expertise_rating', 'allow_regeneration', 'name', 'expansion', 'ascension_client', 'account_of',
-              'role', 'rotation', 'heal_spell', 'taunt_spell', 'rotation_assist'}, 'player')
+              'role', 'rotation', 'heal_spell', 'taunt_spell', 'rotation_assist', 'security'}, 'player')
         identity = player['id']
         require(isinstance(identity, str) and ACTOR_ID.fullmatch(identity), 'Invalid player id')
         require(identity not in actor_ids, 'Duplicate actor id')
@@ -482,6 +486,7 @@ def validate(scenario):
         number(player.get('ranged_hit_rating', 0), 'ranged_hit_rating', 0, 100000, True)
         number(player.get('melee_hit_rating', 0), 'melee_hit_rating', 0, 100000, True)
         number(player.get('expertise_rating', 0), 'expertise_rating', 0, 100000, True)
+        number(player.get('security', 0), 'security', 0, 3, True)
         require(type(player.get('allow_regeneration', True)) is bool, 'allow_regeneration must be boolean')
         validate_raid_role(player)
     for creature in creatures:
@@ -804,6 +809,8 @@ def validate(scenario):
                 require('target' in step, f'{where}: victim metric requires a target')
             if metric == 'can_attack':
                 require(step.get('target') in actor_ids, f'{where}: can_attack metric needs the attacked unit')
+                if 'spell' in step:
+                    number(step['spell'], f'{where}.spell', 1, 2**32 - 1, True)
             if metric == 'carried_aura_count':
                 require(type(step.get('spells')) is list and 0 < len(step['spells']) <= 50,
                         f'{where}: carried_aura_count must list 1-50 spells')
@@ -833,7 +840,8 @@ def validate(scenario):
                 number(step.get('entry'), f'{where}.entry', 1, 2**31 - 1, True)
             if metric == 'creature_query_quest_item':
                 number(step.get('item'), f'{where}.item', 1, 2**32 - 1, True)
-            if metric in {'map_id', 'map_difficulty', 'nearby_creature_template', 'nearby_creature_max_health',
+            if metric in {'map_id', 'instance_id', 'map_difficulty', 'nearby_creature_template',
+                          'nearby_creature_max_health',
                           'nearby_creature_health_pct', 'nearby_creature_sent_spellclick', 'nearby_creature_can_attack',
                           'nearby_creature_mount_display', 'nearby_creature_display', 'nearby_creature_aura_count',
                           'loot_gear_item_level'}:
@@ -898,6 +906,7 @@ def validate(scenario):
                     'pet_knows_spell', 'client_knows_spell', 'client_spellbook_copies',
                     'pet_aura_stacks', 'pet_aura_duration_ms', 'charm_aura_stacks', 'spell_active',
                     'dynamic_object', 'dynamic_object_duration_ms', 'dynamic_object_height', 'spell_power_cost',
+                    'skill_line_for_spell',
                     'spell_damage_done', 'spell_damage_taken', 'spell_healing_taken', 'spell_hit_bonus_taken',
                     'spell_cast_count', 'spell_go_count', 'spell_modifier', 'spell_cast_time_ms',
                     'client_cast_time_ms', 'client_attributes', 'client_spell_targets',
@@ -993,7 +1002,8 @@ def validate(scenario):
             if 'school' in step and metric == 'spell_crit_chance':
                 number(step['school'], f'{where}.school', 0, 6, True)
             if metric in {'item_count', 'carried_item_level', 'carried_item_required_level', 'carried_item_armor',
-                          'carried_item_scaling_level', 'carried_item_stat', 'loot_offered_item_count'}:
+                          'carried_item_scaling_level', 'carried_item_stat', 'loot_offered_item_count',
+                          'forced_loot_count'}:
                 require('item' in step, f'{where}: metric needs item')
             if metric == 'carried_item_stat':
                 number(step.get('stat'), f'{where}.stat', 0, 255, True)
@@ -1103,8 +1113,9 @@ def validate(scenario):
                         f'{where}: row applies only to captured packet counts, values or text')
                 number(step['row'], f'{where}.row', 0, 2**32 - 1, True)
             if 'quality' in step:
-                require(metric in {'loot_count', 'loot_entry', 'loot_required_level', 'loot_item_level'},
-                        f'{where}: quality applies only to corpse/container loot items')
+                require(metric in {'loot_count', 'loot_entry', 'loot_required_level', 'loot_item_level',
+                                   'carried_pool_item_count'},
+                        f'{where}: quality applies only to loot items and carried cache rewards')
                 number(step['quality'], f'{where}.quality', 0, 7, True)
             if metric == 'at_login_flag':
                 number(step.get('id'), f'{where}.id', 1, 0xFFFF, True)
@@ -1116,6 +1127,7 @@ def validate(scenario):
                           'spell_charges',
                           'action_button', 'action_button_packed', 'persisted_action_button', 'item_count',
                           'carried_item_count', 'carried_pool_item_count', 'carried_variant_item_count',
+                          'carried_statless_armor_count',
                           'bank_bag_slots', 'taxi_node', 'in_flight', 'taxi_destination', 'stabled_pet_count',
                           'stable_result', 'pet_rows', 'instance_binds_listed', 'spell_active',
                           'cast_pushback_ms',
@@ -1150,7 +1162,7 @@ def validate(scenario):
                           'client_spell_row_restored',
                           'spellbook_client_notable',
                           'spellbook_cues_in_last_buy', 'spellbook_last_buy_cued',
-                          'cast_speed_multiplier', 'spell_crit_chance', 'spell_power_cost',
+                          'cast_speed_multiplier', 'spell_crit_chance', 'spell_power_cost', 'skill_line_for_spell',
                           'spell_damage_done', 'melee_damage_done',
                           'who_count', 'who_class',
                           'loot_count', 'loot_entry', 'loot_required_level', 'loot_item_level', 'loot_received',

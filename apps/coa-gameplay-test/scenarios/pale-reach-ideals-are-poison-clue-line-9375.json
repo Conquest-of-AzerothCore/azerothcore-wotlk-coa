@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Ideals Are Poison: an investigated clue describes what was found (COA-9375)",
+  "contract": "Ideals Are Poison 175035 credits Clues found 164511 from the clues 2300646-2300650. Like the Shadewell clues, each clue now has an invisible talker (a 164511 spawn on the clue) that says the clue's line as a yellow emote before the credit. The case uses the Blood Splatter spawn 9992004 and its talker 9992009 in world phase 1.",
+  "timeout_ms": 30000,
+  "location": { "map": 0, "x": -7607.9, "y": 737.4, "z": 137.95, "o": 0.65 },
+  "players": [
+    { "id": "p", "race": 1, "class": 1, "level": 20 }
+  ],
+  "steps": [
+    { "action": "set_phase", "label": "Join world phase 1, where the clues are spawned", "actor": "p", "value": 1 },
+    { "action": "wait", "label": "Let the clue reach the client", "ms": 2500 },
+    { "action": "prepare_quest", "actor": "p", "quest": 175035, "complete": false },
+    { "action": "assert", "label": "SETUP: the Blood Splatter is active for the quest", "actor": "p", "metric": "nearby_gameobject_quest_active", "entry": 2300650, "equals": 1, "within_ms": 3000 },
+    { "action": "snapshot", "actor": "p", "metric": "monster_chat_count", "save_as": "chats" },
+    { "action": "use_nearby_gameobject", "label": "Investigate the Blood Splatter", "actor": "p", "entry": 2300650 },
+    { "action": "assert", "label": "DISCRIMINATING: the clue's line reaches the player", "actor": "p", "metric": "monster_chat_count", "relative_to": "chats", "min": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "and the clue still counts", "actor": "p", "metric": "quest_objective_count", "quest": 175035, "equals": 1, "within_ms": 2000 }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "name": "Ashen Tablet streams its item row with stone-tablet display 3108 (#6749)",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1.",
+    "The client Item.dbc has no row for Ashen Tablet 9302130, a Sunstrider Isle class-letter item whose",
+    "item_template already sets display 3108, the INV_Misc_StoneTablet_04 icon, shared with its siblings",
+    "Bone-Bound Codex 9302123 and Runed Tablet 9302132.",
+    "Obtaining the item streams its SMSG_PATCH_ITEM (0x0932) row with DisplayInfoID 3108 (sixth field), and",
+    "the item query response (0x0058) names display 3108.",
+    "Expected before: no row is streamed and the query names no display at all."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 12,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the first world entry and its patch stream settle",
+      "ms": 7000
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 9302130
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: obtaining Ashen Tablet streams its item row",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 2354,
+      "row": 9302130,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The streamed row carries display 3108",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 2354,
+      "row": 9302130,
+      "index": 5,
+      "equals": 3108
+    },
+    {
+      "action": "client_packet",
+      "actor": "hero",
+      "opcode": 86,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 9302130
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The item query response names display 3108",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 88,
+      "row": 9302130,
+      "offset": 16,
+      "skip_strings": 4,
+      "index": 0,
+      "equals": 3108,
+      "within_ms": 2000
+    }
+  ]
+}

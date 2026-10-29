@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Skinpeeler Nytharos: pool share",
+  "contract": [
+    "Crushing Depths removes the same share of each victim's own health pool, regardless of the pool size.",
+    "A small pool and a large pool lose an equal percentage across the same channel."
+  ],
+  "timeout_ms": 180000,
+  "location": { "map": 1, "x": 2269.03, "y": -6608.37, "z": 125.192, "o": 0 },
+  "players": [
+    { "id": "tank", "race": 1, "class": 1, "level": 60, "allow_regeneration": false },
+    { "id": "small", "race": 1, "class": 1, "level": 60, "allow_regeneration": false },
+    { "id": "large", "race": 1, "class": 1, "level": 60, "allow_regeneration": false }
+  ],
+  "creatures": [
+    { "id": "boss", "owner": "tank", "entry": 9916214, "level": 60, "health": 1000000, "reaction": 2, "distance": 5 }
+  ],
+  "steps": [
+    { "action": "set_health", "actor": "tank", "value": 8000, "maximum": 8000 },
+    { "action": "set_health", "actor": "small", "value": 4000, "maximum": 4000 },
+    { "action": "set_health", "actor": "large", "value": 16000, "maximum": 16000 },
+    { "action": "wait", "label": "Let the boss and local AI settle", "ms": 3000 },
+    { "action": "attack", "label": "Tank establishes threat", "actor": "tank", "target": "boss" },
+    { "action": "assert", "label": "Boss enters combat", "actor": "boss", "metric": "combat", "equals": 1, "within_ms": 10000 },
+    { "action": "wait", "label": "Reach the first Crushing Depths channel", "ms": 12000 },
+    { "action": "wait", "label": "Let the channel tick out", "ms": 5000 },
+    { "action": "assert", "label": "Small pool keeps most of its bar", "actor": "small", "metric": "health_pct", "min": 80.0, "max": 96.0 },
+    { "action": "assert", "label": "Large pool keeps the same share", "actor": "large", "metric": "health_pct", "min": 80.0, "max": 96.0 },
+    { "action": "assert", "label": "The small pool survives", "actor": "small", "metric": "alive", "equals": 1 },
+    { "action": "assert", "label": "The large pool survives", "actor": "large", "metric": "alive", "equals": 1 }
+  ]
+}

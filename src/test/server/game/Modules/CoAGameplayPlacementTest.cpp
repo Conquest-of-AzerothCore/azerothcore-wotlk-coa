@@ -7,9 +7,11 @@
 #include "CreatureData.h"
 #include "gtest/gtest.h"
 
+#include <cmath>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -59,6 +61,54 @@ TEST(CoAGameplayPlacement, GroundedWithinTolerance)
 {
     EXPECT_EQ(ClassifyPlacement(OnFloor(10.0f, 10.5f), Tolerance), PlacementVerdict::Grounded);
     EXPECT_EQ(ClassifyPlacement(OnFloor(10.0f, 9.2f), Tolerance), PlacementVerdict::Grounded);
+}
+
+TEST(CoAGameplayPlacement, LevelRaysCircleAtThreeHeights)
+{
+    std::vector<ClearanceRay> const& rays = LevelRays();
+    ASSERT_EQ(rays.size(), 72u);
+    std::set<float> heights;
+    for (ClearanceRay const& ray : rays)
+    {
+        EXPECT_FLOAT_EQ(ray.dz, 0.0f);
+        EXPECT_NEAR(std::hypot(ray.dx, ray.dy), 1.0f, 1e-5f);
+        heights.insert(ray.originHeight);
+    }
+    EXPECT_EQ(heights, (std::set<float>{ 0.6f, 1.2f, 1.8f }));
+}
+
+TEST(CoAGameplayPlacement, HeadroomRayLooksStraightUp)
+{
+    std::vector<ClearanceRay> const& rays = HeadroomRays();
+    ASSERT_EQ(rays.size(), 1u);
+    EXPECT_FLOAT_EQ(rays.front().dx, 0.0f);
+    EXPECT_FLOAT_EQ(rays.front().dy, 0.0f);
+    EXPECT_FLOAT_EQ(rays.front().dz, 1.0f);
+}
+
+TEST(CoAGameplayPlacement, NearestHitIsReachWithoutHits)
+{
+    EXPECT_FLOAT_EQ(NearestHit(LevelRays(), [](ClearanceRay const&) { return std::optional<float>(); }),
+        ClearanceReach);
+}
+
+TEST(CoAGameplayPlacement, NearestHitIsClosestWall)
+{
+    float const clearance = NearestHit(LevelRays(), [](ClearanceRay const& ray) -> std::optional<float>
+    {
+        if (ray.originHeight == 1.2f && ray.dx > 0.99f)
+            return 0.4f;
+        if (ray.dy > 0.99f)
+            return 3.0f;
+        return std::nullopt;
+    });
+    EXPECT_FLOAT_EQ(clearance, 0.4f);
+}
+
+TEST(CoAGameplayPlacement, NearestHitIgnoresHitsBeyondReach)
+{
+    EXPECT_FLOAT_EQ(NearestHit(HeadroomRays(), [](ClearanceRay const&) { return std::optional<float>(25.0f); }),
+        ClearanceReach);
 }
 
 TEST(CoAGameplayPlacement, FloatingAboveTolerance)

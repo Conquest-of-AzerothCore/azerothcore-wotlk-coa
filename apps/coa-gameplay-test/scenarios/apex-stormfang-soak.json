@@ -1,0 +1,394 @@
+{
+  "schema": 1,
+  "name": "Apex Stormfang: three pull and reset cycles",
+  "contract": [
+    "The same pair pulls three times.",
+    "Every cycle sizes the pool inside the same band."
+  ],
+  "timeout_ms": 600000,
+  "location": {
+    "map": 1,
+    "x": 2269.03,
+    "y": -6608.37,
+    "z": 125.192,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps1",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 750
+    },
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 1008273
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 1008276
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 1008249
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 699810
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "tank",
+      "item": 1008273,
+      "slot": 0
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "tank",
+      "item": 1008276,
+      "slot": 4
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "tank",
+      "item": 1008249,
+      "slot": 6
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "tank",
+      "item": 699810,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "tank",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "dps1",
+      "spell": 750
+    },
+    {
+      "action": "learn",
+      "actor": "dps1",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 1008273
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 1008276
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 1008249
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 699810
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps1",
+      "item": 1008273,
+      "slot": 0
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps1",
+      "item": 1008276,
+      "slot": 4
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps1",
+      "item": 1008249,
+      "slot": 6
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps1",
+      "item": 699810,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "dps1",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 300000,
+      "maximum": 300000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 300000,
+      "maximum": 300000
+    },
+    {
+      "action": "summon",
+      "label": "Pull 1",
+      "actor": "tank",
+      "as": "boss1",
+      "entry": 9916212,
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "tank",
+      "target": "boss1"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps1",
+      "target": "boss1"
+    },
+    {
+      "action": "assert",
+      "label": "Cycle 1 engaged",
+      "actor": "boss1",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "label": "Probe",
+      "ms": 16000
+    },
+    {
+      "action": "assert",
+      "label": "Cycle 1 pool",
+      "actor": "boss1",
+      "metric": "max_health",
+      "min": 14000,
+      "max": 900000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 300000,
+      "maximum": 300000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 300000,
+      "maximum": 300000
+    },
+    {
+      "action": "summon",
+      "label": "Pull 2",
+      "actor": "tank",
+      "as": "boss2",
+      "entry": 9916212,
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "tank",
+      "target": "boss2"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps1",
+      "target": "boss2"
+    },
+    {
+      "action": "assert",
+      "label": "Cycle 2 engaged",
+      "actor": "boss2",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "label": "Probe",
+      "ms": 16000
+    },
+    {
+      "action": "assert",
+      "label": "Cycle 2 pool",
+      "actor": "boss2",
+      "metric": "max_health",
+      "min": 14000,
+      "max": 900000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 300000,
+      "maximum": 300000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 300000,
+      "maximum": 300000
+    },
+    {
+      "action": "summon",
+      "label": "Pull 3",
+      "actor": "tank",
+      "as": "boss3",
+      "entry": 9916212,
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "tank",
+      "target": "boss3"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps1",
+      "target": "boss3"
+    },
+    {
+      "action": "assert",
+      "label": "Cycle 3 engaged",
+      "actor": "boss3",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "label": "Probe",
+      "ms": 16000
+    },
+    {
+      "action": "assert",
+      "label": "Cycle 3 pool",
+      "actor": "boss3",
+      "metric": "max_health",
+      "min": 14000,
+      "max": 900000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 300000,
+      "maximum": 300000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 300000,
+      "maximum": 300000
+    },
+    {
+      "action": "summon",
+      "label": "Pull 4",
+      "actor": "tank",
+      "as": "boss4",
+      "entry": 9916212,
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "wait",
+      "label": "Probe",
+      "ms": 16000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 300000,
+      "maximum": 300000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 300000,
+      "maximum": 300000
+    },
+    {
+      "action": "summon",
+      "label": "Pull 5",
+      "actor": "tank",
+      "as": "boss5",
+      "entry": 9916212,
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "wait",
+      "label": "Probe",
+      "ms": 16000
+    }
+  ]
+}

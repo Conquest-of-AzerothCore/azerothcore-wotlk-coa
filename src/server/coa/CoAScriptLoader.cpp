@@ -21,6 +21,7 @@
 void AddAscensionCompatScripts();
 void AddAscensionTravelPermitScripts();
 void AddSC_AscensionRulesets();
+void AddSC_AscensionTrainerProficiency();
 void AddSC_AscensionMercenary();
 void AddSC_AscensionHighRisk();
 void AddSC_AscensionFelCommutation();
@@ -47,6 +48,7 @@ void AddSC_AscensionPvpTrinketHealth();
 void AddSC_AscensionClosestResurrection();
 void AddSC_AscensionAdventureModeRandomAggro();
 void AddSC_AscensionDungeonRelease();
+void AddSC_AscensionBattlegroundSpiritQueue();
 void AddSC_AscensionRaidRelease();
 void AddSC_AscensionThreatRedirect();
 void AddSC_AscensionTalentDataProcs();
@@ -63,6 +65,7 @@ void AddSC_CoAOtherSideMuzah();
 void AddSC_CoAOtherSideDrakmath();
 void AddSC_CoAOtherSideEmbryo();
 void AddSC_CoAOtherSideTrash();
+void AddSC_CoAVaults();
 void AddSC_CoADungeonCompletion();
 void AddSC_CoADungeonSpoils();
 void AddSC_CoADungeonTuning();
@@ -85,6 +88,7 @@ void AddAscensionWildcardScripts();
 void AddSC_AscensionWildcardRecuperate();
 void AddSC_AscensionWildcardArcane();
 void AddSC_AscensionWildcardCorruptedBear();
+void AddSC_AscensionWildcardMassEntanglement();
 void AddSC_AscensionWildcardPhysical();
 void AddSC_AscensionWildcardBloodbath();
 void AddSC_AscensionWildcardSolarStrike();
@@ -103,6 +107,11 @@ void AddSC_AscensionHeroMissileBarrage();
 void AddSC_AscensionWildcardCremation();
 void AddSC_AscensionWildcardSealOfFervor();
 void AddSC_AscensionWildcardElementalBlast();
+void AddSC_AscensionWildcardShadowfall();
+void AddSC_AscensionWildcardFrostSpree();
+void AddSC_AscensionWildcardCursedEffigy();
+void AddSC_AscensionWildcardConsecratedWeapon();
+void AddSC_AscensionWildcardDeconstruct();
 void AddAscensionFreepickScripts();
 void AddAscensionHeroBloomingShotScripts();
 void AddAscensionMysticEnchantScripts();
@@ -314,6 +323,7 @@ void AddSC_AscensionStormbringerSurge();
 void AddSC_AscensionStormbringerIonicAura();
 void AddSC_AscensionBloodmageSecondary();
 void AddSC_AscensionBloodmageHemostasis();
+void AddSC_AscensionBloodmageDarkwing();
 void AddSC_AscensionRangerSecondary();
 void AddSC_AscensionRangerDirtyFighter();
 void AddSC_AscensionRangerDeadeye();
@@ -403,6 +413,7 @@ void AddSC_AscensionHeirloomWeaponStore();
 void AddSC_AscensionLfgObjective();
 void AddSC_AscensionBushcraft();
 void AddSC_AscensionVoidPortal();
+void AddSC_AscensionWoollyPride();
 
 void AddSC_XPHotspots();
 
@@ -606,6 +617,7 @@ void AddCoAScripts()
     AddSC_AscensionStormbringerIonicAura();
     AddSC_AscensionBloodmageSecondary();
     AddSC_AscensionBloodmageHemostasis();
+    AddSC_AscensionBloodmageDarkwing();
     AddSC_AscensionRangerSecondary();
     AddSC_AscensionRangerDirtyFighter();
     AddSC_AscensionRangerDeadeye();
@@ -705,6 +717,7 @@ void AddCoAScripts()
     AddSC_AscensionWildcardRecuperate();
     AddSC_AscensionWildcardArcane();
     AddSC_AscensionWildcardCorruptedBear();
+    AddSC_AscensionWildcardMassEntanglement();
     AddSC_AscensionWildcardPhysical();
     AddSC_AscensionWildcardBloodbath();
     AddSC_AscensionWildcardSolarStrike();
@@ -723,6 +736,11 @@ void AddCoAScripts()
     AddSC_AscensionWildcardCremation();
     AddSC_AscensionWildcardSealOfFervor();
     AddSC_AscensionWildcardElementalBlast();
+    AddSC_AscensionWildcardShadowfall();
+    AddSC_AscensionWildcardFrostSpree();
+    AddSC_AscensionWildcardCursedEffigy();
+    AddSC_AscensionWildcardConsecratedWeapon();
+    AddSC_AscensionWildcardDeconstruct();
     AddAscensionFreepickScripts();
     AddAscensionHeroBloomingShotScripts();
     AddAscensionMysticEnchantScripts();
@@ -748,6 +766,7 @@ void AddCoAScripts()
     AddCoAGameplayTestScripts();
     AddSC_AscensionResourceTalents();
     AddSC_AscensionRulesets();
+    AddSC_AscensionTrainerProficiency();
     AddSC_AscensionMercenary();
     AddSC_AscensionHighRisk();
     AddSC_AscensionFelCommutation();
@@ -774,6 +793,7 @@ void AddCoAScripts()
     AddSC_AscensionClosestResurrection();
     AddSC_AscensionAdventureModeRandomAggro();
     AddSC_AscensionDungeonRelease();
+    AddSC_AscensionBattlegroundSpiritQueue();
     AddSC_AscensionRaidRelease();
     AddSC_AscensionThreatRedirect();
     AddSC_AscensionTalentDataProcs();
@@ -790,6 +810,7 @@ void AddCoAScripts()
     AddSC_CoAOtherSideDrakmath();
     AddSC_CoAOtherSideEmbryo();
     AddSC_CoAOtherSideTrash();
+    AddSC_CoAVaults();
     AddSC_CoADungeonCompletion();
     AddSC_CoADungeonSpoils();
     AddSC_CoADungeonTuning();
@@ -808,4 +829,5 @@ void AddCoAScripts()
     AddSC_AscensionLfgObjective();
     AddSC_AscensionBushcraft();
     AddSC_AscensionVoidPortal();
+    AddSC_AscensionWoollyPride();
 }

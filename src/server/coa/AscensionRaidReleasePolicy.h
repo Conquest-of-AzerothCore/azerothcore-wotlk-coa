@@ -12,7 +12,6 @@ constexpr std::uint32_t MapOnyxiasLair = 249;
 constexpr std::uint32_t MapBlackwingLair = 469;
 constexpr std::uint32_t MapRuinsOfAhnQiraj = 509;
 constexpr std::uint32_t MapTempleOfAhnQiraj = 531;
-constexpr std::uint32_t MapNaxxramas = 533;
 
 constexpr std::uint32_t StageHeroicDungeons = 1;
 constexpr std::uint32_t StageMythicDungeons = 2;
@@ -33,14 +32,13 @@ struct RaidStage
     std::uint32_t stage;
 };
 
-constexpr std::array<RaidStage, 7> RaidStages = {{
+constexpr std::array<RaidStage, 6> RaidStages = {{
     { MapMoltenCore, StageMoltenCore },
     { MapZulGurub, StageZulGurub },
     { MapOnyxiasLair, StageOnyxiasLair },
     { MapBlackwingLair, StageBlackwingLair },
     { MapRuinsOfAhnQiraj, StageAhnQiraj },
-    { MapTempleOfAhnQiraj, StageAhnQiraj },
-    { MapNaxxramas, StageNaxxramas }
+    { MapTempleOfAhnQiraj, StageAhnQiraj }
 }};
 
 constexpr bool IsRaidReleased(std::uint32_t mapId, std::uint32_t releasedStage)

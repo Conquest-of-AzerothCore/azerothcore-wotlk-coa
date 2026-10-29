@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "name": "Tinker: Explosive Augmentation procs from Gatling Gun inside the Mechsuit (#9417)",
+  "contract": "Explosive Augmentation (653237, spell_proc ProcFlags 320 = PROC_FLAG_DONE_RANGED_AUTO_ATTACK | PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS) triggers its splash explosion 653238 on ranged hits. Gatling Gun's channel (500213) fires its own ranged hit 500577 via a native SPELL_AURA_PERIODIC_TRIGGER_SPELL effect, dispatched with a triggered cast. Two independent engine gates block this: (1) Unit::TriggerAurasProcOnEvent calls SetCantProc(true) for the whole proc-evaluation pass whenever the triggering spell carries TRIGGERED_DISALLOW_PROC_EVENTS, and (2) Aura::GetProcEffectMask separately refuses to let a non-PROC_ATTR_TRIGGERED_CAN_PROC aura react to any triggered spell at all (Spell::IsTriggered(), true for any TriggerCastFlags bit) unless it is an auto-attack, kill or death event. The fix strips the first flag from the re-dispatched shot (C++) and marks 653237 PROC_ATTR_TRIGGERED_CAN_PROC (SQL) to clear the second. Scrap Shot (500549, a direct player cast outside the Mechsuit) is the control: it already procs the enchant without either change, since it carries no triggered flags at all.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 60,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "control_target",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 60,
+      "health": 2000000,
+      "distance": 5
+    },
+    {
+      "id": "target",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 60,
+      "health": 2000000,
+      "distance": 10
+    },
+    {
+      "id": "splash",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 60,
+      "health": 2000000,
+      "distance": 13
+    }
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "add_item", "label": "Fixture: ranged gun", "actor": "tinker", "item": 450265},
+    {"action": "equip", "label": "Equip the gun", "actor": "tinker", "item": 450265, "slot": 17},
+    {"action": "assert", "actor": "tinker", "metric": "equipped_item", "slot": 17, "equals": 450265},
+    {"action": "learn", "actor": "tinker", "spell": 653236},
+    {"action": "cast", "actor": "tinker", "spell": 653236},
+    {"action": "assert", "label": "Explosive Augmentation is on the gun", "actor": "tinker", "metric": "aura", "spell": 653237, "equals": 1, "within_ms": 2000},
+    {"action": "wait", "label": "Let the global cooldown clear", "ms": 1700},
+    {"action": "learn", "actor": "tinker", "spell": 500549},
+    {"action": "snapshot", "actor": "tinker", "metric": "spell_damage_count", "spell": 653238, "target": "control_target", "save_as": "control_before"},
+    {"action": "cast", "actor": "tinker", "spell": 500549, "target": "control_target"},
+    {
+      "action": "assert",
+      "label": "CONTROL: a direct Scrap Shot (outside the Mechsuit) already procs Explosive Augmentation",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 653238,
+      "target": "control_target",
+      "relative_to": "control_before",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {"action": "wait", "ms": 1700},
+    {"action": "learn", "actor": "tinker", "spell": 92141},
+    {"action": "learn", "actor": "tinker", "spell": 801384},
+    {"action": "set_aura", "actor": "tinker", "spell": 801816, "stacks": 100},
+    {"action": "cast", "actor": "tinker", "spell": 801384},
+    {"action": "assert", "label": "Mechsuit is on", "actor": "tinker", "metric": "aura", "spell": 803451, "equals": 1, "within_ms": 2000},
+    {"action": "wait", "label": "Let the global cooldown clear", "ms": 1700},
+    {"action": "snapshot", "actor": "tinker", "metric": "spell_damage_count", "spell": 653238, "target": "splash", "save_as": "splash_before"},
+    {"action": "cast", "actor": "tinker", "spell": 500213, "target": "target"},
+    {"action": "cancel_mount", "actor": "tinker"},
+    {"action": "wait", "ms": 2500},
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING (#9417): a Gatling Gun shot inside the Mechsuit still procs Explosive Augmentation's splash onto a nearby enemy",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 653238,
+      "target": "splash",
+      "relative_to": "splash_before",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

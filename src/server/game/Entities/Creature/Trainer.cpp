@@ -16,6 +16,7 @@
  */
 
 #include "Trainer.h"
+#include "TrainerProficiencyFilter.h"
 #include "Creature.h"
 #include "DBCStores.h"
 #include "NPCPackets.h"
@@ -157,6 +158,9 @@ namespace Trainer
             if (_trainerId != WILDCARD_RANK_TRAINER_ID && !player->IsSpellFitByClassAndRace(trainerSpell.SpellId))
                 continue;
 
+            if (TrainerProficiencyFilter::Refuses(player, trainerSpell.SpellId))
+                continue;
+
             // The state is asked once and then decides both whether the row is written at all and what
             // the row reads: the same call that gates the purchase gates the window, so a trainer can
             // never leave out a spell it would have sold, or offer a row it would have refused.
@@ -279,6 +283,9 @@ namespace Trainer
         // check race/class requirement
         bool const wildcardRanks = _trainerId == WILDCARD_RANK_TRAINER_ID;
         if (!wildcardRanks && !player->IsSpellFitByClassAndRace(trainerSpell->SpellId))
+            return SpellState::Unavailable;
+
+        if (TrainerProficiencyFilter::Refuses(player, trainerSpell->SpellId))
             return SpellState::Unavailable;
 
         // check skill requirement

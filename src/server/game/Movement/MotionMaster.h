@@ -260,7 +260,7 @@ public:
     void MoveJumpFixedFacing(float x, float y, float z, float speedXY, float speedZ, uint32 id = 0);
     void MoveFall(uint32 id = 0, bool addFlagForNPC = false);
 
-    void MoveSeekAssistance(float x, float y, float z);
+    void MoveSeekAssistance(float x, float y, float z, ForcedMovement forcedMovement = FORCED_MOVEMENT_NONE);
     void MoveSeekAssistanceDistract(uint32 timer);
     void MoveTaxiFlight(uint32 path, uint32 pathnode);
     void MoveDistract(uint32 time);

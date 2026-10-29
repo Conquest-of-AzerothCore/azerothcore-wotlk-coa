@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "name": "Skinpeeler Nytharos: class 21 group",
+  "contract": [
+    "Three level 60 characters of class 21 pull the boss and take damage.",
+    "The run records the class pool and the boss state after the window."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 1,
+    "x": 2269.03,
+    "y": -6608.37,
+    "z": 125.192,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 21,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps1",
+      "race": 1,
+      "class": 21,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps2",
+      "race": 1,
+      "class": 21,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "summon",
+      "label": "Spawn 9916214",
+      "actor": "tank",
+      "as": "boss",
+      "entry": 9916214,
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "tank",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps1",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps2",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "Boss enters combat",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Class level",
+      "actor": "tank",
+      "metric": "level",
+      "equals": 60
+    },
+    {
+      "action": "wait",
+      "label": "One window",
+      "ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Class pool",
+      "actor": "tank",
+      "metric": "max_health",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Boss health after the window",
+      "actor": "boss",
+      "metric": "health_pct",
+      "min": 0.0,
+      "max": 100.0
+    }
+  ]
+}

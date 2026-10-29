@@ -1,0 +1,306 @@
+{
+  "schema": 1,
+  "name": "Skinpeeler Nytharos: damage taken with mid gear",
+  "contract": [
+    "One minute of the fight is measured on a fixed pool.",
+    "The share of health taken records the pressure the boss applies at this gear tier."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 1,
+    "x": 2269.03,
+    "y": -6608.37,
+    "z": 125.192,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps1",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps2",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 750
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 9113
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 9114
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 9115
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "tank",
+      "item": 9113,
+      "slot": 4
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "tank",
+      "item": 9114,
+      "slot": 0
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "tank",
+      "item": 9115,
+      "slot": 6
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 11326
+    },
+    {
+      "action": "equip",
+      "label": "Weapon",
+      "actor": "tank",
+      "item": 11326,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 201
+    },
+    {
+      "action": "set_skill",
+      "actor": "tank",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "dps1",
+      "spell": 750
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 9113
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 9114
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 9115
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps1",
+      "item": 9113,
+      "slot": 4
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps1",
+      "item": 9114,
+      "slot": 0
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps1",
+      "item": 9115,
+      "slot": 6
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 11326
+    },
+    {
+      "action": "equip",
+      "label": "Weapon",
+      "actor": "dps1",
+      "item": 11326,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "dps1",
+      "spell": 201
+    },
+    {
+      "action": "set_skill",
+      "actor": "dps1",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "dps2",
+      "spell": 750
+    },
+    {
+      "action": "add_item",
+      "actor": "dps2",
+      "item": 9113
+    },
+    {
+      "action": "add_item",
+      "actor": "dps2",
+      "item": 9114
+    },
+    {
+      "action": "add_item",
+      "actor": "dps2",
+      "item": 9115
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps2",
+      "item": 9113,
+      "slot": 4
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps2",
+      "item": 9114,
+      "slot": 0
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps2",
+      "item": 9115,
+      "slot": 6
+    },
+    {
+      "action": "add_item",
+      "actor": "dps2",
+      "item": 11326
+    },
+    {
+      "action": "equip",
+      "label": "Weapon",
+      "actor": "dps2",
+      "item": 11326,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "dps2",
+      "spell": 201
+    },
+    {
+      "action": "set_skill",
+      "actor": "dps2",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "summon",
+      "label": "Spawn the boss",
+      "actor": "tank",
+      "as": "boss",
+      "entry": 9916214,
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "tank",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps1",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps2",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "Boss enters combat",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "label": "Sixty second pressure window",
+      "ms": 60000
+    },
+    {
+      "action": "assert",
+      "label": "Tank health after a minute",
+      "actor": "tank",
+      "metric": "health_pct",
+      "min": 0.0,
+      "max": 100.0
+    }
+  ]
+}

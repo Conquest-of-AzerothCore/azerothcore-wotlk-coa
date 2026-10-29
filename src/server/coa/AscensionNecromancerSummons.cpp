@@ -42,6 +42,14 @@ bool Follows(uint32 entry)
 {
     return !Stationary(entry) && entry != 523032 && entry != 542065;
 }
+bool PlayerInCloud(Creature* minion, uint32 spell)
+{
+    SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
+    for (Unit* unit : Nearby(minion, info->Effects[EFFECT_0].CalcRadius(minion)))
+        if (unit->GetCharmerOrOwnerPlayerOrPlayerItself() && minion->_IsValidAttackTarget(unit, info))
+            return true;
+    return false;
+}
 bool Travelling(Player const* player)
 {
     return player->IsMounted() || player->IsInFlight();
@@ -384,10 +392,11 @@ class npc_ascension_necromancer : public ScriptedAI
     float _inheritedSpeed = 1.0f;
     float _followRange = 0.0f;
     bool _travelling = false;
+    bool _charmed = false;
 
     bool Pacified(Player const* player) const
     {
-        return _travelling || player->HasAura(500983);
+        return _travelling || player->HasAura(500983) || player->IsCharmed();
     }
     void IsSummonedBy(WorldObject* summoner) override
     {
@@ -404,7 +413,7 @@ class npc_ascension_necromancer : public ScriptedAI
         }
         me->SetOwnerGUID(_owner);
         me->SetCreatorGUID(_owner);
-        me->SetFaction(player->GetFaction());
+        me->SetFaction(player->IsCharmed() ? player->GetOldFactionId() : player->GetFaction());
         me->SetReactState(REACT_DEFENSIVE);
         me->SetCombatMovement(!Stationary(me->GetEntry()) && !Ranged(me->GetEntry()));
         State(player).minions.push_back({me->GetGUID(), _spell, _cost});
@@ -638,6 +647,11 @@ class npc_ascension_necromancer : public ScriptedAI
             me->SetImmuneToNPC(travelling);
             _events.RescheduleEvent(1, 1ms);
         }
+        if (bool charmed = player->IsCharmed(); charmed != _charmed)
+        {
+            _charmed = charmed;
+            _events.RescheduleEvent(1, 1ms);
+        }
         _events.Update(diff);
         while (uint32 event = _events.ExecuteEvent())
         {
@@ -703,7 +717,7 @@ class npc_ascension_necromancer : public ScriptedAI
             {
                 if (!Pacified(player) && !me->HasUnitState(UNIT_STATE_CONTROLLED))
                 {
-                    if (me->GetEntry() == 50068)
+                    if (me->GetEntry() == 50068 && (me->IsInCombat() || PlayerInCloud(me, 802353)))
                         Cast(me, me, 802353);
                     if (Unit* victim = me->GetVictim(); victim && InReach(me, victim))
                         if (uint32 ability = AttackSpell(me->GetEntry()))

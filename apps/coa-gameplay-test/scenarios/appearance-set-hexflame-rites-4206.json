@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Set appearance 17650 Rosethorn Rites of the Hexflame Coven expands into nine distinct slots (#4206)",
+  "contract": "Appearances.dbc row 17650 is category 55 (item set) with SourceItem 61212 (ItemSet.dbc 'Rosethorn Rites of the Hexflame Coven'). Its nine pieces (157159 head, 157160 shoulders, 157161 cloak, 157162 robe/chest, 157171 hands, 157168 feet, 157165 waist, 157166 legs, 157167 wrists; item_template InventoryType confirms each slot) all resolve through ItemAppearances.dbc to an appearance whose own PrimaryCategory is 1 (Head), so applying category 55 used to collapse the whole set into category 1 and leave the other eight empty. ExpandItemSetAppearance now derives the category from each piece's ItemTemplate::InventoryType when the DBC category does not match the real slot, so the nine pieces land in nine distinct categories (1 head, 2 shoulders, 3 cloak, 4 chest, 7 wrists, 8 hands, 9 waist, 10 legs, 11 feet) instead of all competing for category 1. CoA.UnlockLocalAppearanceCatalog defaults to on, so the character already has every appearance collected without a fixture. SMSG_APPEARANCE_ACTIVE_INFO (opcode 1690) carries the full active-appearance array indexed by category (word index 0 is the array length, word index category+1 is that category's appearance id); it is resent on login, so a relog proves the expansion persisted through character_appearance rather than only existing in memory.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "wearer", "race": 1, "class": 12, "level": 20 }
+  ],
+  "steps": [
+    { "action": "apply_appearances", "actor": "wearer", "selection": { "55": 17650 } },
+    {
+      "action": "assert", "label": "The set selection is accepted", "actor": "wearer",
+      "metric": "server_packet_contains", "opcode": 1688, "text": "APPLY_APPEARANCES_OK", "equals": 1
+    },
+    { "action": "relog", "label": "Reload so the saved expansion resends on login", "actor": "wearer" },
+    {
+      "action": "assert", "label": "Head (category 1) shows the head piece", "actor": "wearer",
+      "metric": "server_packet_u32", "opcode": 1690, "index": 2, "equals": 3162
+    },
+    {
+      "action": "assert", "label": "Shoulders (category 2) show the shoulder piece", "actor": "wearer",
+      "metric": "server_packet_u32", "opcode": 1690, "index": 3, "equals": 3163
+    },
+    {
+      "action": "assert", "label": "Cloak (category 3) shows the cloak piece", "actor": "wearer",
+      "metric": "server_packet_u32", "opcode": 1690, "index": 4, "equals": 3164
+    },
+    {
+      "action": "assert", "label": "Chest (category 4) shows the robe piece", "actor": "wearer",
+      "metric": "server_packet_u32", "opcode": 1690, "index": 5, "equals": 3165
+    },
+    {
+      "action": "assert", "label": "Wrists (category 7) show the wrist piece, not left empty", "actor": "wearer",
+      "metric": "server_packet_u32", "opcode": 1690, "index": 8, "equals": 3170
+    },
+    {
+      "action": "assert", "label": "Hands (category 8) show the hand piece, not left empty", "actor": "wearer",
+      "metric": "server_packet_u32", "opcode": 1690, "index": 9, "equals": 3174
+    },
+    {
+      "action": "assert", "label": "Waist (category 9) shows the waist piece, not left empty", "actor": "wearer",
+      "metric": "server_packet_u32", "opcode": 1690, "index": 10, "equals": 3168
+    },
+    {
+      "action": "assert", "label": "Legs (category 10) show the leg piece, not left empty", "actor": "wearer",
+      "metric": "server_packet_u32", "opcode": 1690, "index": 11, "equals": 3169
+    },
+    {
+      "action": "assert", "label": "Feet (category 11) show the feet piece, not left empty", "actor": "wearer",
+      "metric": "server_packet_u32", "opcode": 1690, "index": 12, "equals": 3171
+    }
+  ]
+}

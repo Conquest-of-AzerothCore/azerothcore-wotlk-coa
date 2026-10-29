@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "name": "Apex Stormfang: spirit wolf damage on a 60000 pool",
+  "contract": [
+    "A spirit wolf bites a tank with a 60000 health pool.",
+    "Health lost is recorded so the two pool sizes can be compared as a percentage."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 1,
+    "x": 2269.03,
+    "y": -6608.37,
+    "z": 125.192,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 60000,
+      "maximum": 60000
+    },
+    {
+      "action": "summon",
+      "label": "Spawn 9916211",
+      "actor": "tank",
+      "as": "wolf",
+      "entry": 9916211,
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "tank",
+      "target": "wolf"
+    },
+    {
+      "action": "assert",
+      "label": "Wolf engages",
+      "actor": "wolf",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "label": "Wolf bites",
+      "ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "Tank health after the wolf",
+      "actor": "tank",
+      "metric": "health_pct",
+      "min": 1.0,
+      "max": 100.0
+    }
+  ]
+}

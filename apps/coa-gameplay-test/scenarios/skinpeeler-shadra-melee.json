@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "name": "Shadra: her melee lands on a level 60 player",
+  "contract": "She is level 60, the fixture players are level 60, and she is defensive so she does not aggro at spawn. A second player engages her; over twenty seconds the attacker's recorded melee damage taken must be well above zero. A near-zero value at equal level means her swings are being avoided and the cause is not the level gap.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "owner", "race": 1, "class": 1, "level": 60 },
+    { "id": "tank", "race": 1, "class": 1, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "shadra", "owner": "owner", "entry": 9916213, "level": 60, "health": 900000, "distance": 3, "reaction": 1 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the spawn settle", "ms": 6000 },
+    { "action": "attack", "actor": "tank", "target": "shadra" },
+    { "action": "assert", "label": "She engages the attacker", "actor": "shadra",
+      "metric": "combat", "equals": 1, "within_ms": 10000 },
+    { "action": "wait", "label": "Twenty seconds of melee", "ms": 20000 },
+    { "action": "assert", "label": "The attacker takes melee damage from her", "actor": "tank",
+      "target": "shadra", "metric": "melee_damage_taken", "min": 1 },
+    { "action": "assert", "label": "The attacker is not at full health", "actor": "tank",
+      "metric": "health", "max": 999999 }
+  ]
+}
