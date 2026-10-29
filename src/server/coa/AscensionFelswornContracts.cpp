@@ -50,7 +50,7 @@ void ApplyContracts(SpellInfo* info)
         {
             info->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT;
             info->AttributesEx3 |= SPELL_ATTR3_IGNORE_CASTER_MODIFIERS;
-            info->AttributesEx4 |= SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS;
+            info->AttributesEx4 |= SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS | SPELL_ATTR4_NO_CAST_LOG;
             info->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
             info->ProcFlags = 0;
             info->Effects[0].TargetA = SpellImplicitTargetInfo(
