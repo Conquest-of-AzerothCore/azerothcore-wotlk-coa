@@ -19,14 +19,17 @@ def check(folder):
             raise ValueError(f'{phase}: actual native damage and a positive integral proc count are required')
         means[phase] = damage / count
     amount = values['one_stack_amount']
+    expected = {}
     for phase, stacks in [('one', 1), ('five', 5)]:
-        expected = int(amount * stacks) + int(stacks * values['unchanged_rap'] * 0.15)
-        if expected <= 0 or not 0.75 * expected <= means[phase] <= expected + 1:
+        expected[phase] = int(amount * stacks) + int(values['unchanged_rap'] * 0.15)
+        if expected[phase] <= 0 or not 0.75 * expected[phase] <= means[phase] <= expected[phase] + 1:
             raise ValueError(f'{phase}: mean damage {means[phase]:g} is not {stacks} times the native aura amount '
-                             f'and 15 percent owner RAP ({expected}) less monster partial resists')
+                             f'plus 15 percent owner RAP ({expected[phase]}) less monster partial resists')
     ratio = means['five'] / means['one']
-    if not 4.5 <= ratio <= 5.3:
-        raise ValueError(f'Five stacks must multiply the whole proc damage: observed ratio {ratio:g}')
+    target = expected['five'] / expected['one']
+    if not 0.9 * target <= ratio <= 1.1 * target:
+        raise ValueError(f'Five stacks must multiply only the proc base damage: observed ratio {ratio:g}, '
+                         f'expected {target:g}')
     print(f"One stack: {values['one_stack_procs']:g} procs, mean damage {means['one']:g}; "
           f"five stacks: {values['five_stack_procs']:g} procs, mean damage {means['five']:g}; ratio {ratio:g}")
 

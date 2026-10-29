@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "The Shadowhound's damage follows its owner's ranged attack power and spell power",
+  "contract": [
+    "The Houndmaster passive 802233 says the hound gains damage from the owner's spell power and attack power, and",
+    "patch 71834 made Witch Hunter hound damage use ranged attack power. Live raid and leveling logs fit a permanent",
+    "Shadowhound hit of 3 x level + 0.22 x ranged attack power + 0.39 x spell power (the spell power share is the",
+    "class's usual 1.75:1 spell power to attack power ratio). Its weapon minimum is 90% of that. A level-60 owner with",
+    "+20000 ranged attack power gives about 4150 and one with +10000 spell power about 3700. The old reconstruction",
+    "ignores spell power. Expected: 3940-4370 and 3510-3890."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "ranged", "race": 1, "class": 15, "level": 60, "ranged_attack_power": 20000},
+    {"id": "caster", "race": 1, "class": 15, "level": 60, "spell_power": 10000}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let level scaling settle", "ms": 3000},
+    {"action": "learn", "actor": "ranged", "spell": 801343},
+    {"action": "learn", "actor": "caster", "spell": 801343},
+    {"action": "cast", "label": "Houndmaster's Whistle", "actor": "ranged", "spell": 801343},
+    {"action": "cast", "label": "Houndmaster's Whistle", "actor": "caster", "spell": 801343},
+    {"action": "assert", "label": "SETUP: the first Shadowhound is out", "actor": "ranged", "metric": "pet_entry",
+     "equals": 50124, "within_ms": 5000},
+    {"action": "assert", "label": "SETUP: the second Shadowhound is out", "actor": "caster", "metric": "pet_entry",
+     "equals": 50124, "within_ms": 5000},
+    {"action": "wait", "label": "Let the hounds refresh their damage from the owners", "ms": 2000},
+    {"action": "snapshot", "actor": "ranged", "metric": "ranged_attack_power", "save_as": "ranged_owner_rap"},
+    {"action": "snapshot", "actor": "caster", "metric": "ranged_attack_power", "save_as": "caster_owner_rap"},
+    {"action": "snapshot", "actor": "ranged", "metric": "pet_attack_power", "save_as": "hound_ap"},
+    {"action": "assert", "label": "Ranged attack power sets the hound's damage", "actor": "ranged",
+     "metric": "owned_creature_weapon_damage_min", "entry": 50124, "min": 3940, "max": 4370},
+    {"action": "assert", "label": "Spell power sets the hound's damage", "actor": "caster",
+     "metric": "owned_creature_weapon_damage_min", "entry": 50124, "min": 3510, "max": 3890}
+  ]
+}

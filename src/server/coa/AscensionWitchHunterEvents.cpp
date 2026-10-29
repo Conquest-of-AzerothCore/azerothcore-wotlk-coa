@@ -83,8 +83,7 @@ void StrikeShadowRage(Unit* attacker, AuraEffect* rage, Unit* target)
     Player* caster = Owner(rage->GetCaster());
     if (!caster)
         return;
-    uint32 stacks = std::max<uint32>(1, rage->GetBase()->GetStackAmount());
-    int32 value = rage->GetAmount() + int32(stacks * caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.15f);
+    int32 value = rage->GetAmount() + int32(caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.15f);
     attacker->CastCustomSpell(567570, SPELLVALUE_BASE_POINT0, value, target, TRIGGERED_FULL_MASK, nullptr, rage,
                               caster->GetGUID());
 }

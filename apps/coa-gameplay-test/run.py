@@ -146,6 +146,8 @@ METRICS = TIMELINE_METRICS | {
     'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total',
     'equipped_item',
     'pet_aura_amount', 'pet_aura_amplitude_ms', 'pet_max_health', 'pet_health', 'pet_attack_power',
+    'pet_melee_swings', 'pet_melee_crits', 'pet_melee_glancing', 'pet_melee_plain_count', 'pet_melee_plain_damage',
+    'pet_melee_damage',
     'pet_run_speed_rate',
     'distance', 'spawn_active', 'threat', 'threat_per_damage', 'spell_proc_count', 'spell_proc_chance', 'aura_proc_rate', 'temporary_spell_replacement',
     'spell_family_flags',
@@ -182,6 +184,8 @@ PLAYER_STAT_METRICS = {
     'equipped_item',
     'pet_aura_amount', 'pet_aura_amplitude_ms', 'pet_aura_duration_ms', 'pet_max_health', 'pet_health',
     'pet_attack_power',
+    'pet_melee_swings', 'pet_melee_crits', 'pet_melee_glancing', 'pet_melee_plain_count', 'pet_melee_plain_damage',
+    'pet_melee_damage',
     'pet_run_speed_rate',
 }
 METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item', 'entry', 'button',

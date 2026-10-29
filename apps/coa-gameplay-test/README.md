@@ -676,6 +676,11 @@ accepts `effect` (default 0). These queries submit no attack.
 `melee_damage_total` sums the positive melee damage in those packets and accepts the same hand filter.
 `melee_attacks_taken` counts the melee combat packets whose victim is the player actor, optionally only those from
 the `target` attacker.
+`pet_melee_swings`, `pet_melee_crits`, `pet_melee_glancing`, `pet_melee_plain_count`, `pet_melee_plain_damage`
+and `pet_melee_damage` read the melee combat packets the player actor received from its current pet, or with
+`entry` from every creature of that entry: all swings, critical hits, glancing blows, the count and summed damage
+of the remaining hits that dealt damage, and the summed damage of every swing. Snapshot them around a fight;
+`ratio_to` a plain-count snapshot gives an average plain hit.
 These observations do not test delivery to a network client.
 `spell_damage_count` and `spell_damage_total` require `spell` and count positive direct or periodic spell
 damage events, or sum their post-mitigation damage, from the actor's native combat packets. Optional `target`
