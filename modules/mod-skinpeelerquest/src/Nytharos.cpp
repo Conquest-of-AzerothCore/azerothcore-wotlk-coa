@@ -61,7 +61,7 @@ namespace
     constexpr uint32 NY_SPOUT_KIT = 99110;          // effect 145178 tornado model
     constexpr uint32 NY_SPOUT_DMG = 1004291;        // 250 nature
     constexpr uint32 NY_SPOUT_SLOW = 1004292;       // -30% for 2 s
-    constexpr uint32 NY_SOUND_TORNADO = 5674;       // WhirlwindShort.wav one-shot gust; TornadoLoop.wav loops forever
+    constexpr uint32 NY_SOUND_TORNADO = 10045;      // TornadoLoop.wav; the client loops it while the spout exists
     constexpr uint32 NY_EMOTE_CAST_OMNI = 463;      // ONESHOT_SPELL_CAST_OMNI
 
     constexpr uint32 NY_SPOUT_LIFE_MS = 15000;
@@ -652,13 +652,13 @@ namespace
             // player touches the spout, not on a one second beat.
             DoContact(now);
 
-            // The tornado ambience is a short one-shot gust re-triggered while
-            // the spout lives, so it stops as soon as the spout is gone. A
-            // looping file cannot be stopped by the server (the client keeps
-            // looping it after the object despawns).
-            if (now >= _nextSound)
+            // TornadoLoop is a looping file: the client keeps it running for as
+            // long as the spout object exists. It is fired a beat after spawn
+            // because at InitializeAI time the summoned spout is not visible to
+            // the client yet and the object sound reaches nobody.
+            if (_nextSound && now >= _nextSound)
             {
-                _nextSound = now + 900;
+                _nextSound = 0;
                 me->PlayDistanceSound(NY_SOUND_TORNADO);
             }
 
