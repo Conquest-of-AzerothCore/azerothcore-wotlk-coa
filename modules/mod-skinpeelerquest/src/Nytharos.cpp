@@ -652,12 +652,13 @@ namespace
             // player touches the spout, not on a one second beat.
             DoContact(now);
 
-            // The client streams a patched SoundEntries row for this sound with
-            // the one-shot advanced row, so the 5.92 s TornadoLoop sample is
-            // replayed for the whole spout lifetime and stops when it despawns.
-            if (now >= _nextSound)
+            // TornadoLoop is a looping file: the client keeps it running for as
+            // long as the spout object exists. It is fired a beat after spawn
+            // because at InitializeAI time the summoned spout is not visible to
+            // the client yet and the object sound reaches nobody.
+            if (_nextSound && now >= _nextSound)
             {
-                _nextSound = now + 5900;
+                _nextSound = 0;
                 me->PlayDistanceSound(NY_SOUND_TORNADO);
             }
 
