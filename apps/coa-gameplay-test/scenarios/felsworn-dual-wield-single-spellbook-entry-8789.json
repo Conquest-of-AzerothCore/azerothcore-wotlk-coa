@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Felsworn: Dual Wield is listed once in the spellbook and off-hand weapons still work (#8789)",
+  "contract": [
+    "#8789 reports Dual Wield twice in the Felsworn spellbook. The live Felsworn baseline holds Dual Wield 674 only:",
+    "no Dual Wield skill 118 and no second Dual Wield spell 370094. In the client and server SkillLineAbility,",
+    "674's row 778 sits on skill 118 with ClassMask 909, which excludes class 14, while row 67415 rewards 370094 on",
+    "skill 118 for classes 12-15, 21, 26 and 29-32. Learning 674 must not hand an Ascension class skill 118 through a",
+    "row whose ClassMask excludes it, so 370094 never reaches the server or the client spellbook. Control: Dual Wield",
+    "674 itself still lets the Felsworn fight with a one-handed weapon in the off hand."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "felsworn", "race": 4, "class": 14, "level": 5 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "learn", "actor": "felsworn", "spell": 201 },
+    { "action": "learn", "actor": "felsworn", "spell": 1180 },
+    { "action": "learn", "label": "FIXTURE: Dual Wield from the live baseline", "actor": "felsworn", "spell": 674 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "SETUP: the Felsworn knows Dual Wield 674",
+      "actor": "felsworn", "metric": "knows_spell", "spell": 674, "equals": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: no Dual Wield skill 118 from a row whose ClassMask excludes the Felsworn",
+      "actor": "felsworn", "metric": "skill_maximum", "skill": 118, "equals": 0
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the server never learns the second Dual Wield 370094",
+      "actor": "felsworn", "metric": "knows_spell", "spell": 370094, "equals": 0
+    },
+    {
+      "action": "assert", "label": "The client is never told about the second Dual Wield 370094",
+      "actor": "felsworn", "metric": "client_knows_spell", "spell": 370094, "equals": 0
+    },
+    {
+      "action": "assert", "label": "The client's spellbook holds Dual Wield 674 exactly once",
+      "actor": "felsworn", "metric": "client_spellbook_copies", "spell": 674, "equals": 1
+    },
+    { "action": "add_item", "actor": "felsworn", "item": 25 },
+    { "action": "add_item", "actor": "felsworn", "item": 2092 },
+    { "action": "equip", "label": "Worn Shortsword in the main hand", "actor": "felsworn", "item": 25, "slot": 15 },
+    { "action": "equip", "label": "Worn Dagger in the off hand", "actor": "felsworn", "item": 2092, "slot": 16 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "CONTROL: the off-hand dagger still deals weapon damage",
+      "actor": "felsworn", "metric": "weapon_damage_min", "hand": 1, "min": 1
+    }
+  ]
+}

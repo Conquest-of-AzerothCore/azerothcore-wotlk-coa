@@ -3486,8 +3486,29 @@ bool Player::_addSpell(uint32 spellId, uint8 addSpecMask, bool temporary, bool l
     uint16 maxskill = GetMaxSkillValueForLevel();
     SpellLearnSkillNode const* spellLearnSkill = sSpellMgr->GetSpellLearnSkill(spellId);
     SkillLineAbilityMapBounds skill_bounds = sSpellMgr->GetSkillLineAbilityMapBounds(spellId);
-    // xinef: set appropriate skill value
+    auto abilityMatchesPlayer = [this](SkillLineAbilityEntry const* ability)
+    {
+        return !IsAscensionClass(getClass()) ||
+            ((!ability->ClassMask || (ability->ClassMask & getClassMask())) &&
+             (!ability->RaceMask || (ability->RaceMask & getRaceMask())));
+    };
+    bool learnSkillMatchesPlayer = true;
     if (spellLearnSkill)
+    {
+        bool learnSkillHasAbility = false;
+        bool learnSkillAbilityMatches = false;
+        for (SkillLineAbilityMap::const_iterator _spell_idx = skill_bounds.first; _spell_idx != skill_bounds.second; ++_spell_idx)
+        {
+            if (_spell_idx->second->SkillLine != spellLearnSkill->skill)
+                continue;
+
+            learnSkillHasAbility = true;
+            learnSkillAbilityMatches = learnSkillAbilityMatches || abilityMatchesPlayer(_spell_idx->second);
+        }
+        learnSkillMatchesPlayer = !learnSkillHasAbility || learnSkillAbilityMatches;
+    }
+    // xinef: set appropriate skill value
+    if (spellLearnSkill && learnSkillMatchesPlayer)
     {
         uint32 skill_value = GetPureSkillValue(spellLearnSkill->skill);
         uint32 skill_max_value = GetPureMaxSkillValue(spellLearnSkill->skill);
@@ -3511,7 +3532,7 @@ bool Player::_addSpell(uint32 spellId, uint8 addSpecMask, bool temporary, bool l
 
             /// @todo confirm if rogues start wth lockpicking skill at level 1 but only recieve the spell to use it at level 16
             // Added for runeforging, it is confirmed via sniff that this happens when death knights learn the spell, not on character creation.
-            if ((_spell_idx->second->AcquireMethod == SKILL_LINE_ABILITY_LEARNED_ON_SKILL_LEARN && !HasSkill(pSkill->id)) || ((pSkill->id == SKILL_LOCKPICKING || pSkill->id == SKILL_RUNEFORGING) && _spell_idx->second->TrivialSkillLineRankHigh == 0))
+            if (abilityMatchesPlayer(_spell_idx->second) && ((_spell_idx->second->AcquireMethod == SKILL_LINE_ABILITY_LEARNED_ON_SKILL_LEARN && !HasSkill(pSkill->id)) || ((pSkill->id == SKILL_LOCKPICKING || pSkill->id == SKILL_RUNEFORGING) && _spell_idx->second->TrivialSkillLineRankHigh == 0)))
                 LearnDefaultSkill(pSkill->id, 0);
 
             if (pSkill->id == SKILL_MOUNTS && !Has310Flyer(false))
