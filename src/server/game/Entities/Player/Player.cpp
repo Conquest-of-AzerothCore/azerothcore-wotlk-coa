@@ -3568,7 +3568,7 @@ void Player::_learnSpell(uint32 spellId, bool temporary, bool learnFromSkill, bo
                 return;
 
     // Xinef: don't allow to learn active spell once more
-    if (HasActiveSpell(spellId))
+    if (HasStoredActiveSpell(spellId))
     {
         LOG_DEBUG("entities.player", "Player ({}) tries to learn already active spell: {}", GetGUID().ToString(), spellId);
         return;
@@ -4313,15 +4313,16 @@ bool Player::HasTalent(uint32 spell, uint8 spec) const
     return (itr != m_talents.end() && itr->second->State != PLAYERSPELL_REMOVED && itr->second->IsInSpec(spec));
 }
 
+bool Player::HasStoredActiveSpell(uint32 spell) const
+{
+    auto const itr = m_spells.find(spell);
+    return itr != m_spells.end() && itr->second->State != PLAYERSPELL_REMOVED &&
+        itr->second->Active && itr->second->IsInSpec(m_activeSpec);
+}
+
 bool Player::HasActiveSpell(uint32 spell) const
 {
-    auto active = [this](uint32 id)
-    {
-        auto const itr = m_spells.find(id);
-        return itr != m_spells.end() && itr->second->State != PLAYERSPELL_REMOVED &&
-            itr->second->Active && itr->second->IsInSpec(m_activeSpec);
-    };
-    if (active(spell))
+    if (HasStoredActiveSpell(spell))
         return true;
     SpellInfo const* requested = sSpellMgr->GetSpellInfo(spell);
     if (!requested || requested->IsPassive() || requested->SpellLevel > GetLevel())
@@ -4338,12 +4339,12 @@ bool Player::HasActiveSpell(uint32 spell) const
             continue;
         if (original != original->GetFirstRankSpell() || replacement != replacement->GetFirstRankSpell())
         {
-            if (replacement->Id == spell && active(original->Id))
+            if (replacement->Id == spell && HasStoredActiveSpell(original->Id))
                 return true;
             continue;
         }
         for (SpellInfo const* rank = original; rank; rank = rank->GetNextRankSpell())
-            if (active(rank->Id) && requested->GetRank() <= rank->GetRank())
+            if (HasStoredActiveSpell(rank->Id) && requested->GetRank() <= rank->GetRank())
                 return true;
     }
     return false;
