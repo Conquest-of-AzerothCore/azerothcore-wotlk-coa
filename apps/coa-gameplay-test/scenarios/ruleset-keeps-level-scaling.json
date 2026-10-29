@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "War Mode and High-Risk switch open-world level scaling off",
-  "contract": "The War Mode (1004119) and High-Risk (1004019) auras end their tooltips with \"Level scaling is disabled while in War Mode\" / \"... in High-Risk\"; PvE Mode (9931032) has no such line. Requires DestinyWeaver.Enable=1, DestinyWeaver.LevelScaling=1, offset 4, CoA.QuestLevelScaling=1 and CoA.Ruleset.DisableLevelScaling=1. Every character is level 32, starts in the PvE set the login default gives, and turns open world scaling on through the native request. A level-1 creature is viewed at 28 (32 minus the offset) and Kobold Camp Cleanup (7, authored at 2) plays at 20 from its QuestTemplateScaling.dbc row. Selecting War Mode or High-Risk in an inn holds both to their authored levels in the open world and re-sends the creature's level; selecting PvE Mode again gives the scaling back without a relog.",
+  "name": "War Mode and High-Risk keep open-world level scaling",
+  "contract": "As on Ascension, War Mode (1004119) and High-Risk (1004019) keep creature and quest level scaling in the open world. Requires DestinyWeaver.Enable=1, DestinyWeaver.LevelScaling=1, offset 4, CoA.QuestLevelScaling=1 and CoA.Ruleset.DisableLevelScaling=0 (the default). Every character is level 32, starts in the PvE set the login default gives, and turns open world scaling on through the native request. A level-1 creature is viewed at 28 (32 minus the offset) and Kobold Camp Cleanup (7, authored at 2) plays at 20 from its QuestTemplateScaling.dbc row. Selecting War Mode or High-Risk in an inn keeps both scaled, and selecting PvE Mode again keeps them scaled too.",
   "timeout_ms": 180000,
   "location": {
     "map": 0,
@@ -131,26 +131,26 @@
       "actor": "warmode",
       "metric": "view_level",
       "target": "warmode_target",
-      "equals": 1,
+      "equals": 28,
       "within_ms": 3000,
-      "label": "War Mode keeps the open-world creature at its authored level"
+      "label": "War Mode keeps the open-world creature scaled"
     },
     {
       "action": "assert",
       "actor": "warmode",
       "metric": "sent_level",
       "target": "warmode_target",
-      "equals": 1,
+      "equals": 28,
       "within_ms": 3000,
-      "label": "and the authored level is re-sent when War Mode is selected, without a relog"
+      "label": "and the scaled level is what the client is sent in War Mode"
     },
     {
       "action": "assert",
       "actor": "warmode",
       "metric": "quest_level",
       "quest": 7,
-      "equals": 2,
-      "label": "War Mode keeps the quest at its authored level"
+      "equals": 20,
+      "label": "War Mode keeps quest scaling"
     },
     {
       "action": "assert",
@@ -193,26 +193,26 @@
       "actor": "highrisk",
       "metric": "view_level",
       "target": "highrisk_target",
-      "equals": 1,
+      "equals": 28,
       "within_ms": 3000,
-      "label": "High-Risk keeps the open-world creature at its authored level"
+      "label": "High-Risk keeps the open-world creature scaled"
     },
     {
       "action": "assert",
       "actor": "highrisk",
       "metric": "sent_level",
       "target": "highrisk_target",
-      "equals": 1,
+      "equals": 28,
       "within_ms": 3000,
-      "label": "and the authored level is re-sent when High-Risk is selected, without a relog"
+      "label": "and the scaled level is what the client is sent in High-Risk"
     },
     {
       "action": "assert",
       "actor": "highrisk",
       "metric": "quest_level",
       "quest": 7,
-      "equals": 2,
-      "label": "High-Risk keeps the quest at its authored level"
+      "equals": 20,
+      "label": "High-Risk keeps quest scaling"
     },
     {
       "action": "wait",
@@ -239,7 +239,7 @@
       "target": "warmode_target",
       "equals": 28,
       "within_ms": 3000,
-      "label": "leaving War Mode gives the creature view back"
+      "label": "PvE Mode keeps the creature scaled"
     },
     {
       "action": "assert",
@@ -248,7 +248,7 @@
       "target": "warmode_target",
       "equals": 28,
       "within_ms": 3000,
-      "label": "and re-sends the scaled level without a relog"
+      "label": "and the client is still sent the scaled level"
     },
     {
       "action": "assert",
@@ -256,7 +256,7 @@
       "metric": "quest_level",
       "quest": 7,
       "equals": 20,
-      "label": "and gives quest scaling back"
+      "label": "and quest scaling stays"
     }
   ]
 }

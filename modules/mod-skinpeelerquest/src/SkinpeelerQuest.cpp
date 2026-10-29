@@ -66,9 +66,9 @@ namespace
     constexpr uint32 APEX_PELT_OWLCAT = 1009303;
     constexpr uint32 APEX_PELT_TIDE = 1009304;
 
-    constexpr std::array<uint32, 10> APEX_CLIENT_SPELLS = {
+    constexpr std::array<uint32, 9> APEX_CLIENT_SPELLS = {
         100331, 1004111, 1004112, 1004113, 1004114,
-        1004115, 1004116, 1004117, 1004118, 1004119};
+        1004115, 1004116, 1004117, 1004118};
 
     // Item.dbc rows are only streamed for ids registered here. Without this the
     // client never learns the item, so the bag draws a question mark.
