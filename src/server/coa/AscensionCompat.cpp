@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2016+ AzerothCore <www.azerothcore.org>, released under GNU
  * AGPL v3 license:
  * https://github.com/azerothcore/azerothcore-wotlk/blob/master/LICENSE-AGPL3
@@ -4858,7 +4858,7 @@ private:
   }
 
   std::size_t SendSoundEntryRows(Player *player) const {
-    constexpr uint32 SOUND_ID = 7386644;
+    constexpr uint32 SOUND_ID = 10045;
 
     std::vector<uint32> values(30, 0);
     values[0] = SOUND_ID;

@@ -1,4 +1,4 @@
-#include "Nytharos.h"
+﻿#include "Nytharos.h"
 
 #include "ApexScaling.h"
 #include "AscensionClientSpellPatches.h"
@@ -61,7 +61,7 @@ namespace
     constexpr uint32 NY_SPOUT_KIT = 99110;          // effect 145178 tornado model
     constexpr uint32 NY_SPOUT_DMG = 1004291;        // 250 nature
     constexpr uint32 NY_SPOUT_SLOW = 1004292;       // -30% for 2 s
-    constexpr uint32 NY_SOUND_TORNADO = 7386644;    // custom one-shot streamed SoundEntries row
+    constexpr uint32 NY_SOUND_TORNADO = 10045;    // custom one-shot streamed SoundEntries row
     constexpr uint32 NY_EMOTE_CAST_OMNI = 463;      // ONESHOT_SPELL_CAST_OMNI
 
     constexpr uint32 NY_SPOUT_LIFE_MS = 15000;
