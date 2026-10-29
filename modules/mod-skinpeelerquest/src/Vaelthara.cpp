@@ -822,7 +822,21 @@ namespace
             text += victim->GetName();
             text += ".";
 
-            creature->TextEmote(text, victim, true);
+            // Boss emote so the client draws it centered, but only for the players
+            // actually fighting her (threat list / current victim), not bystanders.
+            Map::PlayerList const& players = creature->GetMap()->GetPlayers();
+            for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+            {
+                Player* player = itr->GetSource();
+                if (!player || !player->GetSession())
+                    continue;
+                if (!IsFighting(creature, player))
+                    continue;
+
+                WorldPacket data;
+                ChatHandler::BuildChatPacket(data, CHAT_MSG_RAID_BOSS_EMOTE, LANG_UNIVERSAL, creature, player, text);
+                player->GetSession()->SendPacket(&data);
+            }
         }
 
         static void EndStalk(Creature* creature, VaeltharaState& state, uint32 now, bool early)
