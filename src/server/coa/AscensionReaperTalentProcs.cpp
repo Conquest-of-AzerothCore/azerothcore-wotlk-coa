@@ -26,6 +26,22 @@ constexpr uint32 SiphonAnimaHeal = 504306;
 constexpr uint32 DeathchaserExtender = 807546;
 constexpr uint32 DeathchaserFirstRank = 805190;
 constexpr uint32 SoulsForSlaughterDamage = 575847;
+constexpr uint32 SoulforgedWeaponryFreeMurder = 705964;
+
+class reaper_soulforged_weaponry_metadata : public GlobalScript
+{
+public:
+    reaper_soulforged_weaponry_metadata() : GlobalScript("reaper_soulforged_weaponry_metadata",
+        {GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR}) { }
+
+    void OnLoadSpellCustomAttr(SpellInfo* info) override
+    {
+        if (info->Id == SoulforgedWeaponryFreeMurder && info->SpellFamilyName == 36 && !info->ProcCharges &&
+            info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_ADD_PCT_MODIFIER &&
+            info->Effects[EFFECT_0].MiscValue == SPELLMOD_COST)
+            info->ProcCharges = 1;
+    }
+};
 
 class aura_ascension_reaper_souls_for_slaughter : public AuraScript
 {
@@ -251,4 +267,5 @@ void AddSC_AscensionReaperTalentProcs()
     RegisterSpellScript(spell_ascension_reaper_chasing_death_extender);
     RegisterSpellScript(aura_ascension_reaper_soulrot);
     RegisterSpellScript(aura_ascension_reaper_siphon_anima);
+    new reaper_soulforged_weaponry_metadata();
 }
