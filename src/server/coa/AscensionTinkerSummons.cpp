@@ -320,6 +320,7 @@ struct npc_ascension_tinker_device : ScriptedAI
         Scale(player,me,true);
         if (Turret(me->GetEntry()))
         {
+            Cast(me, me, 750001);
             Cast(player, player, 807293);
             if (!player->HasSpell(500470))
                 player->learnSpell(500470, true);
