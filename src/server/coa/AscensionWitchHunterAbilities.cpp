@@ -307,7 +307,7 @@ class spell_ascension_witch_hunter_ability : public SpellScript
         if (id == 802139 && !target->IsControlledByPlayer())
             Cast(player, target, 32747);
         if (Family(GetSpellInfo(), 1, 16384) && dealt && player->HasAura(680503))
-            Cast(player, target, 680517);
+            Brand(player, target);
         if (id == 684330)
             Cast(player, target, 504472);
     }

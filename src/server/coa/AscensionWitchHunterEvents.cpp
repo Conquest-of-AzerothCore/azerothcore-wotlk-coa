@@ -316,7 +316,7 @@ class aura_ascension_witch_hunter_event : public AuraScript
                 break;
             }
             case 680516:
-                Cast(owner, other, 680517);
+                Brand(owner, other);
                 break;
             case 805346:
                 for (auto const& [id, state] : player->GetSpellMap())
@@ -326,7 +326,7 @@ class aura_ascension_witch_hunter_event : public AuraScript
                 break;
             case 680528:
             {
-                Cast(owner, other, 680517);
+                Brand(owner, other);
                 SpellInfo const* dot = sSpellMgr->GetSpellInfo(680532);
                 uint32 ticks = std::max(1, dot->GetDuration() / int32(dot->Effects[EFFECT_0].Amplitude));
                 CarryDamage(owner, other, 680532,

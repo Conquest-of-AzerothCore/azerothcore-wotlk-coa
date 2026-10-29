@@ -50,6 +50,13 @@ void Cast(Unit* caster, Unit* target, uint32 id)
         caster->CastSpell(target, id, true);
 }
 
+void Brand(Unit* caster, Unit* target)
+{
+    if (caster && target && target->IsAlive())
+        caster->CastSpell(target, SPELL_SHADOW_BRAND,
+            TriggerCastFlags(TRIGGERED_FULL_MASK | TRIGGERED_NO_PERIODIC_RESET));
+}
+
 void Reset(Player* player, uint32 id)
 {
     if (player)
