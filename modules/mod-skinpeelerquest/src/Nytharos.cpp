@@ -25,6 +25,7 @@
 namespace
 {
     std::unordered_map<ObjectGuid, ObjectGuid> g_spoutInitialTargets;
+    std::vector<ObjectGuid> g_spoutSummons;
 
     constexpr uint32 NYTHAROS_ENTRY = 9916224;
 
@@ -60,7 +61,7 @@ namespace
     constexpr uint32 NY_SPOUT_KIT = 99110;          // effect 145178 tornado model
     constexpr uint32 NY_SPOUT_DMG = 1004291;        // 250 nature
     constexpr uint32 NY_SPOUT_SLOW = 1004292;       // -30% for 2 s
-    constexpr uint32 NY_SOUND_TORNADO = 10045;      // TornadoLoop.wav as a one-shot
+    constexpr uint32 NY_SOUND_TORNADO = 5674;       // WhirlwindShort.wav one-shot gust; TornadoLoop.wav loops forever
     constexpr uint32 NY_EMOTE_CAST_OMNI = 463;      // ONESHOT_SPELL_CAST_OMNI
 
     constexpr uint32 NY_SPOUT_LIFE_MS = 15000;
@@ -212,6 +213,8 @@ namespace
         {
             std::lock_guard<std::recursive_mutex> lock(g_nytharosStateMutex);
 
+            DespawnSpouts();
+
             NytharosState& state = g_nytharosStates[me->GetGUID().GetCounter()];
             uint32 const base = state.baseMaxHealth;
             state = NytharosState();
@@ -219,6 +222,12 @@ namespace
 
             ApexScaling::RestoreHealth(me, base);
             ApexScaling::TuneHitbox(me);
+        }
+
+        void EnterEvadeMode(EvadeReason why) override
+        {
+            DespawnSpouts();
+            CreatureAI::EnterEvadeMode(why);
         }
 
         void JustEngagedWith(Unit* /*who*/) override
@@ -248,6 +257,7 @@ namespace
 
         void JustDied(Unit* /*killer*/) override
         {
+            DespawnSpouts();
             me->PlayDirectSound(NY_SOUND_DEATH);
         }
 
@@ -498,14 +508,26 @@ namespace
 
                 Creature* spout = me->SummonCreature(NY_TORNADO_ENTRY, x, y, z, me->GetOrientation(),
                     TEMPSUMMON_TIMED_DESPAWN, NY_SPOUT_LIFE_MS);
-                if (spout && !targets.empty())
-                    g_spoutInitialTargets[spout->GetGUID()] = targets[(offset + i) % targets.size()]->GetGUID();
+                if (spout)
+                {
+                    g_spoutSummons.push_back(spout->GetGUID());
+                    if (!targets.empty())
+                        g_spoutInitialTargets[spout->GetGUID()] = targets[(offset + i) % targets.size()]->GetGUID();
+                }
             }
 
             LOG_INFO("coa", "NYTHAROS: waterspouts x{}", count);
         }
 
     private:
+        void DespawnSpouts()
+        {
+            for (ObjectGuid const& guid : g_spoutSummons)
+                if (Creature* spout = ObjectAccessor::GetCreature(*me, guid))
+                    spout->DespawnOrUnsummon();
+            g_spoutSummons.clear();
+        }
+
         void DoKnockPulse()
         {
             me->PlayDirectSound(NY_SOUND_KNOCK);
@@ -621,6 +643,8 @@ namespace
 
             if (now >= _expireAt)
             {
+                g_spoutSummons.erase(std::remove(g_spoutSummons.begin(), g_spoutSummons.end(), me->GetGUID()),
+                    g_spoutSummons.end());
                 me->DespawnOrUnsummon();
                 return;
             }
