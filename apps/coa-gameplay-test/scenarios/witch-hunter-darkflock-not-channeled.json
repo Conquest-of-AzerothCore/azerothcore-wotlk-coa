@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "name": "Darkflock is an 8 second caster aura, not a channel, and keeps ticking while other abilities are cast",
+  "contract": [
+    "Darkflock (ranks 520270, 520708, 520709, 562024, 562025) was a channel until Ascension reworked it: the CoA",
+    "client Spell.dbc row has no channel bit (AttributesEx 0, previously 4) and its tooltip changed from 'Channel for",
+    "$d, commanding a flock of crows ...' to 'For $d, command a flock of crows to deal ... to enemies in front of you",
+    "every $t1 sec.' #8428 forced the channel bit back from the older tooltip. Expected: casting Darkflock starts no",
+    "cast or channel timer and puts an 8 s Darkflock aura on the Witch Hunter; Shadowblast cast during it leaves the",
+    "aura in place and 520271 keeps hitting; the aura runs out after 8 s with 3-4 ticks in total. Rank 1 (520270, the",
+    "id the in-game bug form reports) also casts as an 8 s aura with no channel. Do not restore the channel from older",
+    "tooltips, footage or guides: check the current client Spell.dbc row first."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "wh", "race": 1, "class": 15, "level": 60, "spell_hit_rating": 10000, "ranged_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "golem", "owner": "wh", "entry": 36, "level": 60, "health": 1000000, "distance": 5}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "label": "Crossbows skill", "actor": "wh", "spell": 5011},
+    {"action": "add_item", "actor": "wh", "item": 15807},
+    {"action": "equip", "actor": "wh", "item": 15807, "slot": 17},
+    {"action": "wait", "label": "Let the weapon swap cooldown expire", "ms": 2000},
+    {"action": "learn", "label": "Darkflock rank 5", "actor": "wh", "spell": 562025},
+    {"action": "learn", "label": "Shadowblast", "actor": "wh", "spell": 680264},
+    {"action": "set_power", "actor": "wh", "power": 1, "value": 1000},
+    {"action": "cast", "label": "Darkflock", "actor": "wh", "spell": 562025, "target": "golem"},
+    {"action": "assert", "label": "Darkflock puts an 8 s aura on the Witch Hunter", "actor": "wh",
+     "metric": "aura_duration_ms", "spell": 562025, "min": 7000, "max": 8000, "within_ms": 500},
+    {"action": "assert", "label": "Darkflock is not a channel", "actor": "wh", "metric": "cast_remaining_ms",
+     "spell": 562025, "equals": 0},
+    {"action": "wait", "label": "Wait out the global cooldown", "ms": 2000},
+    {"action": "snapshot", "actor": "wh", "metric": "spell_damage_count", "spell": 520271, "target": "golem",
+     "save_as": "flock_before_blast"},
+    {"action": "snapshot", "actor": "wh", "metric": "spell_damage_count", "spell": 680264, "target": "golem",
+     "save_as": "blast_before"},
+    {"action": "cast", "label": "Shadowblast during Darkflock", "actor": "wh", "spell": 680264, "target": "golem"},
+    {"action": "assert", "label": "Shadowblast was cast", "actor": "wh", "metric": "spell_damage_count",
+     "spell": 680264, "target": "golem", "relative_to": "blast_before", "min": 1, "within_ms": 2000},
+    {"action": "assert", "label": "The Darkflock aura stays after Shadowblast", "actor": "wh", "metric": "aura",
+     "spell": 562025, "equals": 1},
+    {"action": "assert", "label": "The flock keeps hitting after Shadowblast", "actor": "wh",
+     "metric": "spell_damage_count", "spell": 520271, "target": "golem", "relative_to": "flock_before_blast",
+     "min": 1, "within_ms": 4000},
+    {"action": "assert", "label": "The Darkflock aura runs out after 8 s", "actor": "wh", "metric": "aura",
+     "spell": 562025, "equals": 0, "within_ms": 6000},
+    {"action": "assert", "label": "Darkflock ticks every 2 s for its full duration", "actor": "wh",
+     "metric": "spell_damage_count", "spell": 520271, "target": "golem", "min": 3, "max": 4, "within_ms": 1000},
+    {"action": "learn", "label": "Darkflock rank 1", "actor": "wh", "spell": 520270},
+    {"action": "reset_cooldown", "actor": "wh", "spell": 562025},
+    {"action": "reset_cooldown", "actor": "wh", "spell": 520270},
+    {"action": "cast", "label": "Darkflock rank 1", "actor": "wh", "spell": 520270, "target": "golem"},
+    {"action": "assert", "label": "Rank 1 also puts an 8 s aura on the Witch Hunter", "actor": "wh",
+     "metric": "aura_duration_ms", "spell": 520270, "min": 7000, "max": 8000, "within_ms": 500},
+    {"action": "assert", "label": "Rank 1 is not a channel either", "actor": "wh", "metric": "cast_remaining_ms",
+     "spell": 520270, "equals": 0}
+  ]
+}
