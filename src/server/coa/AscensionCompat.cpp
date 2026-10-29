@@ -806,6 +806,12 @@ std::vector<AscensionSpecializationSwitchGuard>& SpecializationSwitchGuards()
     return guards;
 }
 
+std::vector<AscensionSpecializationSwitchGuard>& SpecializationSlotSwitchGuards()
+{
+    static std::vector<AscensionSpecializationSwitchGuard> guards;
+    return guards;
+}
+
 std::string SpecializationSwitchRefusal(Player* player, uint32 activeSpecializationId,
                                         uint32 requestedSpecializationId)
 {
@@ -2817,6 +2823,12 @@ public:
         }
         if (index == ActiveSlot(player))
             return true;
+        for (AscensionSpecializationSwitchGuard const& guard : SpecializationSlotSwitchGuards())
+            if (std::string refusal = guard(player, ActiveSlot(player), index); !refusal.empty())
+            {
+                error = refusal;
+                return false;
+            }
 
         AscensionCoATalentState::SpecializationSlot target;
         if (auto const* stored = player->FindPlayerSettings(SlotSetting(index));
@@ -10665,6 +10677,12 @@ void AddAscensionSpecializationSwitchGuard(AscensionSpecializationSwitchGuard gu
 {
     if (guard)
         SpecializationSwitchGuards().push_back(std::move(guard));
+}
+
+void AddAscensionSpecializationSlotSwitchGuard(AscensionSpecializationSwitchGuard guard)
+{
+    if (guard)
+        SpecializationSlotSwitchGuards().push_back(std::move(guard));
 }
 
 std::string AscensionSpecializationSwitchRefusal(Player* player, uint32 activeSpecializationId,

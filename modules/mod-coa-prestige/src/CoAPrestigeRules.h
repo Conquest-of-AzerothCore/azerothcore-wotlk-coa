@@ -59,6 +59,7 @@ namespace CoAPrestige
         bool active = false;
         uint32_t specialization = 0;
         bool signaturePending = false;
+        uint32_t dailyQuest = 0;
 
         bool operator==(State const&) const = default;
     };
@@ -74,14 +75,18 @@ namespace CoAPrestige
             state.specialization = values[2];
         if (values.size() > 3)
             state.signaturePending = values[3] != 0;
+        if (values.size() > 4)
+            state.dailyQuest = values[4];
         return state;
     }
 
     inline std::vector<uint32_t> EncodeState(State const& state)
     {
         std::vector<uint32_t> values{ state.level, state.active ? 1u : 0u, state.specialization };
-        if (state.signaturePending)
-            values.push_back(1);
+        if (state.signaturePending || state.dailyQuest)
+            values.push_back(state.signaturePending ? 1u : 0u);
+        if (state.dailyQuest)
+            values.push_back(state.dailyQuest);
         return values;
     }
 
@@ -164,8 +169,8 @@ namespace CoAPrestige
         return {};
     }
 
-    // Once Prestige Mode is active the specialization stays locked until the character is back at
-    // the required level; choosing the locked specialization again is not a switch.
+    // Warcraft Reborn keeps its talent specialization locked during Prestige. Custom-class
+    // archetypes use separate slot-switch protection instead.
     inline bool IsSpecializationSwitchAllowed(State const& state, uint32_t requestedSpecialization)
     {
         return !state.active || !state.specialization || requestedSpecialization == state.specialization;
