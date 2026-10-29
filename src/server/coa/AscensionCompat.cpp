@@ -4102,6 +4102,12 @@ public:
         SendSpellRow(player, *row);
     }
 
+    void ForgetSwapEntries(Player* player)
+    {
+        std::lock_guard entries(_swapEntryMutex);
+        _sentSwapEntries.erase(player->GetGUID().GetCounter());
+    }
+
     void SendSwapEntries(Player* player, std::vector<uint32> const& spells)
     {
         if (spells.empty() || !ReceivesPatchRows(player) || !player->IsInWorld())
@@ -9375,6 +9381,7 @@ public:
     {
         if (ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED) && player->IsInWorld())
             SendAverageItemLevel(player);
+        AscensionDisplayPatchService::Instance().ForgetSwapEntries(player);
     }
 
   void OnPlayerLearnSpell(Player *player, uint32 spellId) override {
