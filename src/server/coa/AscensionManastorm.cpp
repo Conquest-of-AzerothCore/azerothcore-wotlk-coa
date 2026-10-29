@@ -1236,9 +1236,13 @@ namespace
         {
             for (uint32 item : StarterItems)
                 if (!player->HasItemCount(item, 1, true))
-                    if (!player->AddItem(item, 1))
+                {
+                    if (player->AddItem(item, 1))
+                        player->GetSession()->SendItemQuerySingleResponse(item);
+                    else
                         ChatHandler(player->GetSession()).SendSysMessage(
                             "Make room in your bags, then ask Cogsley to replace your missing starter potions.");
+                }
         }
 
         void ClearStarterItems(Player* player)
