@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Dungeon Finder offers Vaults of the Inquisition and Road to De Other Side on every tier",
-  "contract": "Vaults of the Inquisition (map 936, LFGDungeons 401, 1401, 2401) and Road to De Other Side (map 937, LFGDungeons 402, 1402, 2402) both have spawns, Dungeon Finder entrances and DestinyWeaver level scaling on Normal (bands 10-59 and 15-59). Neither map keeps a `disables` row of type 2 (DISABLE_TYPE_MAP) or type 8 (DISABLE_TYPE_LFG_MAP), so LFGMgr::IsDungeonDisabled reads every tier as enabled and LFGMgr::InitializeLockedDungeons no longer gives them LFG_LOCKSTATUS_RAID_LOCKED (6). A level 20 player can queue for both Normal tiers, and the level 60 Heroic tiers lock that player by level (LFG_LOCKSTATUS_TOO_LOW_LEVEL, 2) instead.",
+  "contract": "Vaults of the Inquisition (map 936, LFGDungeons 401, 1401, 2401) and Road to De Other Side (map 937, LFGDungeons 402, 1402, 2402) both have spawns, Dungeon Finder entrances and DestinyWeaver level scaling on Normal (band 15-59 for both). Neither map keeps a `disables` row of type 2 (DISABLE_TYPE_MAP) or type 8 (DISABLE_TYPE_LFG_MAP), so LFGMgr::IsDungeonDisabled reads every tier as enabled and LFGMgr::InitializeLockedDungeons no longer gives them LFG_LOCKSTATUS_RAID_LOCKED (6). A level 20 player can queue for both Normal tiers, and the level 60 Heroic tiers lock that player by level (LFG_LOCKSTATUS_TOO_LOW_LEVEL, 2) instead.",
   "timeout_ms": 60000,
   "location": {
     "map": 0,

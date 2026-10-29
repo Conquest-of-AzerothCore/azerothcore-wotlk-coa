@@ -81,10 +81,10 @@ DestinyWeaver.Scaling.DungeonIds = "1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 3
 #                     DestinyWeaver.Scaling.DungeonIds leaves it out. The default bands always
 #                     apply: a band listed here for one of them can widen it, never narrow it.
 #                     Only the regular difficulty scales; Heroic and Mythic keep their level.
-#        Default:     "401:10-59 402:15-59" - (Vaults of the Inquisition, Road to De Other Side)
+#        Default:     "401:15-59 402:15-59" - (Vaults of the Inquisition, Road to De Other Side)
 #        Reloadable:  yes (.reload config)
 
-DestinyWeaver.Scaling.DungeonBands = "401:10-59 402:15-59"
+DestinyWeaver.Scaling.DungeonBands = "401:15-59 402:15-59"
 
 #    DestinyWeaver.ExperienceBonusControl
 #        Description: Whether the Experience Bonus Control service exists at all. A character who

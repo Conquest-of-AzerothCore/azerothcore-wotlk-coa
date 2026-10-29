@@ -1785,6 +1785,7 @@ struct Ability
     uint32 firstMs;
     uint32 repeatMs;
     Aim aim;
+    uint8 minDifficulty = 0;
 };
 
 Ability const FierceBlow = { SPELL_FIERCE_BLOW, 7000, 9000, Aim::Victim };
@@ -1793,14 +1794,14 @@ std::unordered_map<uint32, std::vector<Ability>> const Abilities =
 {
     { NPC_TORTURER, { { SPELL_SWORD_STRIKE, 1000, 6500, Aim::Victim }, FierceBlow } },
     { NPC_PHANTASMAL_BOUND, { { SPELL_MANA_BURN, 2500, 16000, Aim::Random }, { SPELL_SILENCE, 7500, 16000, Aim::Self },
-        { SPELL_PSYCHIC_SCREAM, 13000, 16000, Aim::Self }, FierceBlow } },
+        { SPELL_PSYCHIC_SCREAM, 13000, 16000, Aim::Self, 1 }, FierceBlow } },
     { NPC_FREED_PRISONER, { { SPELL_MANIFEST, 4000, 600000, Aim::Self }, FierceBlow } },
-    { NPC_WRATHFUL_TORMENT, { { SPELL_ENDLESS_AFFLICTION, 4500, 8000, Aim::Self }, { SPELL_HAUNTING_WRATH, 9500, 8000, Aim::Self }, FierceBlow } },
+    { NPC_WRATHFUL_TORMENT, { { SPELL_ENDLESS_AFFLICTION, 4500, 8000, Aim::Self }, { SPELL_HAUNTING_WRATH, 9500, 8000, Aim::Self, 1 }, FierceBlow } },
     { NPC_KOBOLD, { { SPELL_PICKAXE_STRIKE, 4300, 10000, Aim::Self }, FierceBlow } },
     { NPC_KOBOLD_NORMAL, { { SPELL_PICKAXE_STRIKE, 4300, 10000, Aim::Self }, FierceBlow } },
     { NPC_KOBOLD_ELITE, { { SPELL_PICKAXE_STRIKE, 4700, 10000, Aim::Self }, FierceBlow } },
-    { NPC_BRUTE, { { SPELL_DARK_WAX_EXPLOSION, 4500, 19500, Aim::Self }, { SPELL_CHARGE_IMPACT, 12500, 19300, Aim::Charge }, FierceBlow } },
-    { NPC_BRUTE_ELITE, { { SPELL_DARK_WAX_EXPLOSION, 4500, 19500, Aim::Self }, { SPELL_CHARGE_IMPACT, 9000, 19300, Aim::Charge }, FierceBlow } },
+    { NPC_BRUTE, { { SPELL_DARK_WAX_EXPLOSION, 4500, 19500, Aim::Self }, { SPELL_CHARGE_IMPACT, 12500, 19300, Aim::Charge, 1 }, FierceBlow } },
+    { NPC_BRUTE_ELITE, { { SPELL_DARK_WAX_EXPLOSION, 4500, 19500, Aim::Self }, { SPELL_CHARGE_IMPACT, 9000, 19300, Aim::Charge, 1 }, FierceBlow } },
     { NPC_KOBOLD_FLAME, { { SPELL_KOBOLD_FLAME, 200, 2000, Aim::Victim }, FierceBlow } },
     { NPC_SHADOW_PROJECTION, { { SPELL_LASH_OF_THE_VOID, 500, 5000, Aim::Near } } },
     { NPC_CORPOREAL_SHADOW, { { SPELL_SHADOWFURY, 5000, 16500, Aim::Random }, FierceBlow } },
@@ -1839,8 +1840,10 @@ struct npc_coa_vaults_trash : public ScriptedAI
         auto itr = Abilities.find(me->GetEntry());
         if (itr == Abilities.end())
             return;
+        uint8 const difficulty = DifficultyIndex(me->GetMap());
         for (Ability const& ability : itr->second)
-            _timers.push_back({ &ability, ability.firstMs + urand(0, 1500) });
+            if (difficulty >= ability.minDifficulty)
+                _timers.push_back({ &ability, ability.firstMs + urand(0, 1500) });
     }
 
     void JustEngagedWith(Unit*) override
