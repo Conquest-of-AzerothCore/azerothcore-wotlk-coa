@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "A female Bloodmage takes the female worgen display in Running Wild",
+  "contract": "In-game report: female worgen form works in Eternal Curse, 'however, Running Wild defaults to the male worgen'. Running Wild 800175 has the same SPELL_AURA_TRANSFORM to creature 56332 (male worgen display 574) as Worgen Form Visual 563124 and Eternal Curse 800157 (server and installed client Spell.dbc agree), but only those two were bound to aura_ascension_bloodmage_female_worgen, which swaps 574 for the female worgen display 142818 when PLAYER_BYTES_3 says the character is female. Expected: a female human Bloodmage wears display 142818 while Running Wild is active and her mortal display returns afterwards. 800175 is outdoors only with a 1 s cast. display_id reads the server's selected display only; client rendering is not tested.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "bloodmage", "race": 1, "class": 20, "gender": 1, "level": 35 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 4000 },
+    { "action": "learn", "actor": "bloodmage", "spell": 800175 },
+    { "action": "snapshot", "actor": "bloodmage", "metric": "display_id", "save_as": "mortal_display" },
+    {
+      "action": "assert", "label": "SETUP: the fixture is a female human (ChrRaces 1 FemaleDisplayId 50)",
+      "actor": "bloodmage", "metric": "display_id", "equals": 50
+    },
+    { "action": "cast", "actor": "bloodmage", "spell": 800175, "label": "run wild outdoors" },
+    {
+      "action": "assert", "label": "SETUP: Running Wild is active", "actor": "bloodmage",
+      "metric": "aura", "spell": 800175, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Running Wild gives her the female worgen display", "actor": "bloodmage",
+      "metric": "display_id", "equals": 142818
+    },
+    { "action": "cancel_aura", "label": "Stop running wild", "actor": "bloodmage", "spell": 800175 },
+    {
+      "action": "assert", "label": "Running Wild ends", "actor": "bloodmage",
+      "metric": "aura", "spell": 800175, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Her mortal display returns after Running Wild", "actor": "bloodmage",
+      "metric": "display_id", "relative_to": "mortal_display", "equals": 0, "within_ms": 2000
+    }
+  ]
+}
