@@ -81,6 +81,7 @@ public:
     static inline std::string GetTableName();
     static std::string GetSourceDirectory();
     static std::string GetBaseFilesDirectory();
+    static std::string GetBaselineManifest();
     static bool IsEnabled(uint32 const updateMask);
     static BaseLocation GetBaseLocationType();
     static bool Create(DatabaseWorkerPool<T>& pool);
@@ -94,6 +95,7 @@ public:
 private:
     static QueryResult Retrieve(DatabaseWorkerPool<T>& pool, std::string const& query);
     static void Apply(DatabaseWorkerPool<T>& pool, std::string const& query);
+    static bool PopulateFromBaseline(DatabaseWorkerPool<T>& pool, Path const& manifest);
     static void ApplyFile(DatabaseWorkerPool<T>& pool, Path const& path);
     static void ApplyFile(DatabaseWorkerPool<T>& pool, std::string const& host, std::string const& user,
                           std::string const& password, std::string const& port_or_socket, std::string const& database, std::string const& ssl, Path const& path);

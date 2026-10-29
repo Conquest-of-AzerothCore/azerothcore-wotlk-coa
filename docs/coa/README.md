@@ -74,9 +74,9 @@ those three rows in a separate output and never packages or installs a client ar
 
 ## World database installation
 
-Import the [world database package](../../apps/coa-world/README.md) into an empty
-world schema before the first worldserver startup. The same guide covers auditing
-an existing database and updating the package.
+The worldserver and `dbimport` populate an empty world database from the
+[world database package](../../apps/coa-world/README.md) instead of `data/sql/base/db_world/`.
+The same guide covers the manual import, auditing an existing database and updating the package.
 
 ## Equipped gear drops
 

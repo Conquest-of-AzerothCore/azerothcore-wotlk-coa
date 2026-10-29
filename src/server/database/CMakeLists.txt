@@ -51,6 +51,7 @@ target_link_libraries(database
   PRIVATE
     acore-core-interface
     mysql
+    zlib
   PUBLIC
     common)
 
