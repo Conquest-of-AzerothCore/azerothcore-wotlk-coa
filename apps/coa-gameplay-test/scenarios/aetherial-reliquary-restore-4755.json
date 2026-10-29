@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Aetherial Reliquary restores the stored experience boosts after Prestige (#4755)",
-  "contract": "#4755: after reaching the realm level cap with Aura of Experience 818059 and Potion of Experience 818046, a character that prestiges with Chromie and uses Aetherial Reliquary 8263512 (Aetherial Displacement: 'Use the charged Aetherial Boon Reliquary to restore your stored buffs.') gets both boosts back, the Potion with the time it had left when it was stored, and the Reliquary is used up. A Reliquary with nothing stored, such as one bought from the Guardian of Time, is kept when used and the player is told it holds nothing; that text is not from a live source.",
+  "contract": "On a level-60 realm (MaxPlayerLevel 60, the cap Prestige also follows), #4755: after reaching the realm level cap with Aura of Experience 818059 and Potion of Experience 818046, a character that prestiges with Chromie and uses Aetherial Reliquary 8263512 (Aetherial Displacement: 'Use the charged Aetherial Boon Reliquary to restore your stored buffs.') gets both boosts back, the Potion with the time it had left when it was stored, and the Reliquary is used up. A Reliquary with nothing stored, such as one bought from the Guardian of Time, is kept when used and the player is told it holds nothing; that text is not from a live source.",
   "timeout_ms": 120000,
   "location": { "map": 0, "x": -8816.5, "y": 627.0, "z": 94.1, "o": 3.8 },
   "players": [

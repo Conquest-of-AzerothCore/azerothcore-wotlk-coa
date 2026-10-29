@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Aetherial Reliquary preserves the experience boosts at the realm level cap (#4755)",
-  "contract": "#4755 (duplicate #4803): on Ascension, reaching max level moved any active store experience boost, Aura of Experience 818059 and the remaining time of Potion of Experience 818046, into Aetherial Reliquary 8263512, removed both auras and showed 'Your Experience boosts have been preserved in your Aetherial Boon Reliquary.' in the centre of the screen (screenshot in the issue). The boosts are stored on the character, so a relog keeps them stored and the item present. A character reaching the cap without either boost gets no Reliquary. Using the Reliquary at the cap restores nothing and keeps the item, because the boosts only work below max level; this refusal text is not from a live source.",
+  "contract": "On a level-60 realm (MaxPlayerLevel 60, the cap Prestige also follows), #4755 (duplicate #4803): on Ascension, reaching max level moved any active store experience boost, Aura of Experience 818059 and the remaining time of Potion of Experience 818046, into Aetherial Reliquary 8263512, removed both auras and showed 'Your Experience boosts have been preserved in your Aetherial Boon Reliquary.' in the centre of the screen (screenshot in the issue). The boosts are stored on the character, so a relog keeps them stored and the item present. A character reaching the cap without either boost gets no Reliquary. Using the Reliquary at the cap restores nothing and keeps the item, because the boosts only work below max level; this refusal text is not from a live source.",
   "timeout_ms": 60000,
   "players": [
     { "id": "boosted", "race": 1, "class": 1, "level": 59 },

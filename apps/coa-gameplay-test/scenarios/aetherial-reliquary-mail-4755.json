@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Aetherial Reliquary is mailed when the bags are full, and later boosts join it (#4755)",
-  "contract": "#4755: when the bags cannot hold Aetherial Reliquary 8263512 at the realm level cap it is mailed instead, and the experience boosts are still removed and stored. The Reliquary only holds the key to boosts stored on the character, so a second capture while one Reliquary already waits in the mailbox merges into it and sends no second item. The second capture here comes from the login hook, which also stores boosts a character at the cap still carries.",
+  "contract": "On a level-60 realm (MaxPlayerLevel 60, the cap Prestige also follows), #4755: when the bags cannot hold Aetherial Reliquary 8263512 at the realm level cap it is mailed instead, and the experience boosts are still removed and stored. The Reliquary only holds the key to boosts stored on the character, so a second capture while one Reliquary already waits in the mailbox merges into it and sends no second item. The second capture here comes from the login hook, which also stores boosts a character at the cap still carries.",
   "timeout_ms": 60000,
   "players": [
     { "id": "packed", "race": 1, "class": 1, "level": 59 }
@@ -10,6 +10,8 @@
     { "action": "wait", "label": "Let the fixture settle", "ms": 3000 },
     { "action": "set_aura", "actor": "packed", "spell": 818059, "stacks": 1 },
     { "action": "fill_bags", "actor": "packed" },
+    { "action": "wait", "ms": 1000 },
+    { "action": "fill_bags", "label": "Refill a slot freed by a filler item that vanished", "actor": "packed" },
     {
       "action": "assert", "label": "SETUP: the bags are full",
       "actor": "packed", "metric": "free_inventory_slots", "equals": 0
