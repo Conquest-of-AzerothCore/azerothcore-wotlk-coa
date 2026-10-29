@@ -39,6 +39,14 @@ bool Select(SpellInfo const* info, uint32 aura)
         return false;
     }
 }
+void StackInnerDemonRecast(Aura* aura, int32 remaining, int32 fury)
+{
+    constexpr int32 msPerFury = 5000;
+    constexpr int32 maxFury = 6;
+    int32 duration = std::max(remaining, std::min(remaining + msPerFury * std::max(1, fury), msPerFury * maxFury));
+    aura->SetMaxDuration(std::max(aura->GetMaxDuration(), duration));
+    aura->SetDuration(duration);
+}
 class felsworn_casts : public AllSpellScript
 {
   public:
@@ -137,7 +145,11 @@ class felsworn_casts : public AllSpellScript
         if (Triggered(spell))
             return;
         if (info->Id == 804216)
+        {
             spell->SetScriptValue(800058, Fury(player));
+            if (Aura const* current = player->GetAura(804216))
+                spell->SetScriptValue(807649, uint64(std::max(0, current->GetDuration())));
+        }
         for (uint32 sid : selected)
             if (Select(info, sid))
                 if (Aura* aura = player->GetAura(sid))
@@ -224,6 +236,9 @@ class felsworn_casts : public AllSpellScript
         }
         if (info->Id == 804216)
         {
+            if (uint64 remaining = spell->GetScriptValue(807649))
+                if (Aura* aura = player->GetAura(804216))
+                    StackInnerDemonRecast(aura, int32(remaining), int32(spell->GetScriptValue(800058)));
             player->RemoveAurasDueToSpell(800058);
             player->RemoveAurasDueToSpell(803468);
             player->RemoveAurasDueToSpell(803465);
