@@ -822,7 +822,7 @@ namespace
             text += victim->GetName();
             text += ".";
 
-            creature->TextEmote(text, victim);
+            creature->TextEmote(text, victim, true);
         }
 
         static void EndStalk(Creature* creature, VaeltharaState& state, uint32 now, bool early)
