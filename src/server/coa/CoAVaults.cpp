@@ -300,6 +300,13 @@ void DealLogged(Unit* caster, Player* target, uint32 spellId, Damage3 const& val
     caster->SendSpellNonMeleeDamageLog(&damage);
 }
 
+// Back to the boss's own model at its own size: RestoreDisplayId sets scale 1 and loses the DisplayScale of
+// creature_template_model (the Deceiver 2.5, the Echo 1.6).
+void RestoreModel(Creature* me)
+{
+    me->SetDisplayId(me->GetNativeDisplayId(), me->GetNativeObjectScale());
+}
+
 void SetEngageable(Creature* me, bool engageable, bool keepCombat = false)
 {
     if (engageable)
@@ -823,7 +830,7 @@ struct boss_coa_vaults_darkandle : public ScriptedAI
             return;
         }
         _introStarted = false;
-        me->RestoreDisplayId();
+        RestoreModel(me);
         SetEngageable(me, false);
         me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
     }
@@ -1345,7 +1352,7 @@ private:
                         helper->DespawnOrUnsummon();
                 break;
             case EVENT_DEC_SEAL_RING:
-                me->RestoreDisplayId();
+                RestoreModel(me);
                 me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
                 KeepAura(me, SPELL_SHADOWY_RING_INNER);
                 break;
