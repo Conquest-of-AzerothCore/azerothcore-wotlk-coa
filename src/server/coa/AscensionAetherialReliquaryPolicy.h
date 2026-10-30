@@ -13,7 +13,10 @@ namespace AetherialReliquary
 {
 constexpr std::uint32_t ReliquaryItem = 8263512;
 constexpr std::uint32_t RestoreSpell = 8263512;
-constexpr std::string_view SettingSource = "coa.aetherial_reliquary";
+constexpr std::string_view SettingSource = "core.coa_aetherial_reliquary";
+constexpr std::string_view PersistentSettingPrefix = "core.";
+
+static_assert(SettingSource.starts_with(PersistentSettingPrefix));
 constexpr std::uint32_t MaxStoredDurationMs = std::numeric_limits<std::int32_t>::max();
 
 enum class BuffKind

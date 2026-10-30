@@ -159,6 +159,14 @@
       "equals": 1
     },
     {
+      "action": "assert",
+      "label": "The stored boosts survived the relog: the Reliquary is not empty",
+      "actor": "boosted",
+      "metric": "notification_contains",
+      "text": "Your Aetherial Reliquary holds no stored buffs.",
+      "equals": 0
+    },
+    {
       "action": "set_level",
       "actor": "plain",
       "value": 60

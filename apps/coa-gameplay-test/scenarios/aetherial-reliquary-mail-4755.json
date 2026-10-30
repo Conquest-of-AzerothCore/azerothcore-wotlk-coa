@@ -52,19 +52,6 @@
       "equals": 0
     },
     {
-      "action": "snapshot",
-      "label": "Mail already held, such as the welcome mail",
-      "actor": "packed",
-      "metric": "mail_count",
-      "save_as": "mail_before"
-    },
-    {
-      "action": "snapshot",
-      "actor": "packed",
-      "metric": "mail_item_count",
-      "save_as": "mail_items_before"
-    },
-    {
       "action": "set_level",
       "actor": "packed",
       "value": 60
@@ -94,12 +81,17 @@
       "equals": 1
     },
     {
-      "action": "assert",
-      "label": "One mail was sent",
+      "action": "snapshot",
+      "label": "Mail held after the cap, level rewards included",
       "actor": "packed",
       "metric": "mail_count",
-      "equals": 1,
-      "relative_to": "mail_before"
+      "save_as": "mail_after_cap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "packed",
+      "metric": "mail_item_count",
+      "save_as": "mail_items_after_cap"
     },
     {
       "action": "set_aura",
@@ -124,16 +116,24 @@
       "label": "The waiting Reliquary took the Potion: no second mail",
       "actor": "packed",
       "metric": "mail_count",
-      "equals": 1,
-      "relative_to": "mail_before"
+      "equals": 0,
+      "relative_to": "mail_after_cap"
     },
     {
       "action": "assert",
-      "label": "Still only one Reliquary in the mailbox",
+      "label": "No second Reliquary was mailed",
       "actor": "packed",
       "metric": "mail_item_count",
-      "equals": 1,
-      "relative_to": "mail_items_before"
+      "equals": 0,
+      "relative_to": "mail_items_after_cap"
+    },
+    {
+      "action": "assert",
+      "label": "The Reliquary still waits in the mailbox",
+      "actor": "packed",
+      "metric": "mail_has_item",
+      "item": 8263512,
+      "equals": 1
     }
   ]
 }

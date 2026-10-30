@@ -24,6 +24,12 @@ TEST(AetherialReliquary, StoresTheAuraAndPotionOfExperience)
     EXPECT_TRUE(AetherialReliquary::HasUniqueEntries());
 }
 
+TEST(AetherialReliquary, StoredBoostsUseASettingSavedWithoutOptionalPlayerSettings)
+{
+    EXPECT_TRUE(AetherialReliquary::SettingSource.starts_with(AetherialReliquary::PersistentSettingPrefix));
+    EXPECT_EQ(AetherialReliquary::PersistentSettingPrefix, "core.");
+}
+
 TEST(AetherialReliquary, NothingStoredIsEmpty)
 {
     EXPECT_TRUE(AetherialReliquary::StoredBuffs{}.Empty());
