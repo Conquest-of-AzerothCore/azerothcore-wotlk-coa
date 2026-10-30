@@ -77,5 +77,6 @@ void Scale(Player* player, Creature* creature, bool initial);
 uint32 SummonVulnerability(Player* player, Unit* attacker, Unit* target);
 void ApplyContracts(SpellInfo* info);
 void ApplyBeaconChargePool(SpellInfo* info);
+void ApplyReplenishmentFieldAura(SpellInfo* info);
 }
 #endif

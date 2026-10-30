@@ -15,6 +15,7 @@
 #include "AscensionCultist.h"
 #include "AscensionVenomancer.h"
 #include "AscensionTinker.h"
+#include "AscensionTinkerData.h"
 #include "AscensionSunCleric.h"
 #include "AscensionXoroth.h"
 #include "AllCreatureScript.h"
@@ -4373,6 +4374,9 @@ private:
   static constexpr uint32 SPELL_CAST_TIME_INDEX_FIELD = 28;
   static constexpr uint32 SPELL_CATEGORY_RECOVERY_TIME_FIELD = 30;
   static constexpr uint32 SPELL_INTERRUPT_FLAGS_FIELD = 31;
+  static constexpr uint32 SPELL_EFFECTS_FIELD = 71;
+  static constexpr uint32 SPELL_EFFECT_TARGETS_FIELD = 86;
+  static constexpr uint32 SPELL_EFFECT_TARGETS_B_FIELD = 89;
   static constexpr uint32 SPELL_FAMILY_NAME_FIELD = 208;
   static constexpr std::array<uint32, 19> RANGED_PREPARATION_CLIENT_SPELLS = {
       504582, 572343, 572344, 572345, 572383, 680902, 680903, 680904, 680905, 806288,
@@ -4381,6 +4385,9 @@ private:
   static constexpr uint32 SPELL_VISUAL_FIELD = 131;
   static constexpr uint32 VAULT_CLIENT_SPELL = 500085;
   static constexpr uint32 CHARGE_SPELL_VISUAL = 867;
+  static constexpr char const* REPLENISHMENT_FIELD_DESCRIPTION =
+      "Nearby allies are restored: $/10;560751s1 Rage, Energy, Focus and Runic Power and $560819s1% base mana "
+      "every $560751T1 sec.";
   struct ClientSpellText {
     std::string Description;
     std::string ToolTip;
@@ -5383,6 +5390,16 @@ private:
       row.Values[SPELL_WIRE_SLOT(SPELL_INTERRUPT_FLAGS_FIELD)] &= ~uint32(SPELL_INTERRUPT_FLAG_MOVEMENT);
     if (info->Id == VAULT_CLIENT_SPELL)
       row.Values[SPELL_WIRE_SLOT(SPELL_VISUAL_FIELD)] = CHARGE_SPELL_VISUAL;
+    if (info->Id == TinkerReplenishmentFieldAura)
+    {
+      for (uint8 effect = 0; effect < 2; ++effect)
+      {
+        row.Values[SPELL_WIRE_SLOT(SPELL_EFFECTS_FIELD + effect)] = SPELL_EFFECT_APPLY_AURA;
+        row.Values[SPELL_WIRE_SLOT(SPELL_EFFECT_TARGETS_FIELD + effect)] = TARGET_UNIT_TARGET_ALLY;
+        row.Values[SPELL_WIRE_SLOT(SPELL_EFFECT_TARGETS_B_FIELD + effect)] = 0;
+      }
+      row.Strings[SPELL_WIRE_DESCRIPTION] = REPLENISHMENT_FIELD_DESCRIPTION;
+    }
 
     if ((info->Attributes & SPELL_ATTR0_USES_RANGED_SLOT) && !info->IsAutoRepeatRangedSpell() &&
         info->CastTimeEntry && (info->CastTimeEntry->CastTime > 0 || !info->IsChanneled()))
@@ -5456,6 +5473,7 @@ private:
     std::unordered_set<uint32> descriptionIds;
     for (uint32 const spellId : RANGED_PREPARATION_CLIENT_SPELLS)
       Ascension::ClientSpellPatches::Instance().Register(spellId);
+    Ascension::ClientSpellPatches::Instance().Register(TinkerReplenishmentFieldAura);
     for (uint32 const spellId : {801292u, 501836u, 501837u, 501838u, 501839u, 501840u, 574346u, 567543u, 567544u,
         805027u, 807938u, 807939u, 807940u, 807941u})
       Ascension::ClientSpellPatches::Instance().Register(spellId);
