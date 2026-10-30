@@ -1,33 +1,122 @@
 {
   "schema": 1,
-  "name": "Wildwalker pets get Spirit Beast Master's extra talent points (#5390)",
+  "name": "Wildwalker pets get Spirit Beast Master's extra talent points, also after a UI reload (#5390)",
   "contract": [
     "ChrSpecs.dbc lists Spirit Beast Master 300716 as the Wildwalker spec (59) passive. Its second effect is",
     "SPELL_AURA_MOD_PET_TALENT_POINTS with base points 5 (+6). Nothing taught it, so a level 60 pet had only the",
     "native (60 - 16) / 4 = 11 points instead of 17. Expected: a level 60 Wildwalker knows 300716 and wears its",
-    "aura, and a level 60 tamed beast has 11 + 6 = 17 free pet talent points."
+    "aura, and a level 60 tamed beast has 11 + 6 = 17 free pet talent points.",
+    "A UI reload clears the client's pet talent points; the client asks again with CMSG_REQUEST_PET_INFO, which",
+    "only rebuilt the pet action bar, so the talent frame showed 0 until the pet was resummoned. Expected: that",
+    "request also sends SMSG_TALENTS_INFO for the pet."
   ],
   "timeout_ms": 120000,
-  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
   "players": [
-    {"id": "p", "race": 1, "class": 31, "level": 60}
+    {
+      "id": "p",
+      "race": 1,
+      "class": 31,
+      "level": 60
+    }
   ],
   "creatures": [
-    {"id": "beast", "owner": "p", "entry": 1188, "level": 60, "health": 100000, "distance": 5}
+    {
+      "id": "beast",
+      "owner": "p",
+      "entry": 1188,
+      "level": 60,
+      "health": 100000,
+      "distance": 5
+    }
   ],
   "steps": [
-    {"action": "wait", "ms": 3000},
-    {"action": "specialization", "actor": "p", "id": 59},
-    {"action": "assert", "label": "SETUP: Spirit Beast Master is known", "actor": "p", "metric": "knows_spell",
-     "spell": 92148, "equals": 1},
-    {"action": "assert", "label": "The Wildwalker spec teaches the pet talent passive", "actor": "p",
-     "metric": "knows_spell", "spell": 300716, "equals": 1},
-    {"action": "assert", "label": "The passive is applied", "actor": "p", "metric": "aura", "spell": 300716,
-     "equals": 1},
-    {"action": "cast", "label": "Harness the beast's spirit", "actor": "p", "spell": 574301, "target": "beast"},
-    {"action": "assert", "label": "SETUP: the beast is tamed", "actor": "p", "metric": "pet_entry", "equals": 1188,
-     "within_ms": 24000},
-    {"action": "assert", "label": "A level 60 pet has 11 native plus 6 extra talent points", "actor": "p",
-     "metric": "pet_free_talent_points", "equals": 17, "within_ms": 3000}
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "p",
+      "id": 59
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Spirit Beast Master is known",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 92148,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Wildwalker spec teaches the pet talent passive",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 300716,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The passive is applied",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 300716,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Harness the beast's spirit",
+      "actor": "p",
+      "spell": 574301,
+      "target": "beast"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the beast is tamed",
+      "actor": "p",
+      "metric": "pet_entry",
+      "equals": 1188,
+      "within_ms": 24000
+    },
+    {
+      "action": "assert",
+      "label": "A level 60 pet has 11 native plus 6 extra talent points",
+      "actor": "p",
+      "metric": "pet_free_talent_points",
+      "equals": 17,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "server_packets",
+      "opcode": 1216,
+      "save_as": "pet_talent_info_before_reload"
+    },
+    {
+      "action": "client_packet",
+      "label": "The client reloads its UI and asks for its pet's data",
+      "actor": "p",
+      "opcode": 633,
+      "consumed": false,
+      "fields": []
+    },
+    {
+      "action": "assert",
+      "label": "The pet's talent points are sent again",
+      "actor": "p",
+      "metric": "server_packets",
+      "opcode": 1216,
+      "relative_to": "pet_talent_info_before_reload",
+      "min": 1,
+      "within_ms": 2000
+    }
   ]
 }
