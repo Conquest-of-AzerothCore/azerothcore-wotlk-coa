@@ -211,9 +211,8 @@ CoA.ItemScaling = 1
 # Weapons and armor that the client's ItemStat.dbc has a level ladder for keep their own entry and are
 # given a scaling level instead of a copy: the looter's level plus LootLevelOffset, from 1 to 65, set
 # once when the item is looted, won in a roll or, with QuestRewards, given by a quest. Inside a dungeon
-# listed in DestinyWeaver.Scaling.DungeonIds loot scales for everyone and only down: an item whose own
-# item level is at or below that level keeps its authored stats. Their stats come
-# from the ladder row for that level, and the client asks for the same row with opcode 0x6FF.
+# listed in DestinyWeaver.Scaling.DungeonIds loot scales for everyone, up or down, to the looter's level.
+# Their stats come from the ladder row for that level, and the client asks for the same row with opcode 0x6FF.
 # Worldforged items and items the copy path never lifts stay as they are. While it is active the copy
 # path (CoA.ItemScaling) makes no new copies at all; copies already handed out keep working.
 # Read at startup only. With 0, items keep their authored stats and the copy path handles them again.

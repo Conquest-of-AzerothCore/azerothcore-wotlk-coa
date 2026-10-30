@@ -368,14 +368,8 @@ void AssignDropLevel(Player* looter, Item* item, uint32 base = 0)
     if (!looter || !item)
         return;
 
-    uint32 const key = DropKey(looter, base);
-    if (LocalLevelScaling::DungeonLootScales(looter))
-    {
-        if (key < item->GetTemplate()->ItemLevel)
-            AssignLevel(looter, item, key);
-    }
-    else if (ScalingChosenBy(looter))
-        AssignLevel(looter, item, key);
+    if (LootScalesFor(looter))
+        AssignLevel(looter, item, DropKey(looter, base));
 }
 
 void AssignQuestRewardLevel(Player* player, Item* item)
