@@ -1459,6 +1459,12 @@ public:
     bool DeleteGameTele(std::string_view name);
 
     Trainer::Trainer* GetTrainer(uint32 creatureId);
+
+    Trainer::Trainer* GetTrainerById(uint32 trainerId)
+    {
+        auto itr = _trainers.find(trainerId);
+        return itr != _trainers.end() ? &itr->second : nullptr;
+    }
     [[nodiscard]] std::unordered_map<uint32, Trainer::Trainer> const& GetTrainers() const { return _trainers; }
     std::vector<Trainer::Trainer const*> const& GetClassTrainers(uint8 classId) const { return _classTrainers.at(classId); }
 

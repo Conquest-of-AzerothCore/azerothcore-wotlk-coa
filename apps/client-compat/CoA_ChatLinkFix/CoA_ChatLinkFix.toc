@@ -1,0 +1,7 @@
+## Interface: 30300
+## Title: CoA Chat Link Fix
+## Notes: Makes shift-clicked item links usable in dot commands.
+## Author: CoA
+## Version: 1.0
+
+CoA_ChatLinkFix.lua
