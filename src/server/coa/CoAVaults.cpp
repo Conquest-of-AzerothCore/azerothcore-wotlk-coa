@@ -1115,6 +1115,7 @@ constexpr Milliseconds DeceiverSealRingAt = 14s;
 constexpr Milliseconds DeceiverRoarAt = 15500ms;
 constexpr Milliseconds DeceiverAwakeAt = 17s;
 constexpr uint32 VoidflareHoldMs = 1000;
+constexpr uint32 DeceiverSubmergedDisplay = 11686;
 constexpr Milliseconds DeceiverCycle = 40s;
 constexpr Milliseconds DeceiverRingDelay = 5s;
 constexpr uint32 DeceiverVeilRecastMs = 29000;
@@ -1149,6 +1150,7 @@ struct boss_coa_vaults_deceiver : public ScriptedAI
         _breaking = false;
         _checkMs = 1000;
         _veilMs = 0;
+        me->SetDisplayId(DeceiverSubmergedDisplay);
         SetEngageable(me, false);
     }
 
@@ -1342,6 +1344,8 @@ private:
                         helper->DespawnOrUnsummon();
                 break;
             case EVENT_DEC_SEAL_RING:
+                me->RestoreDisplayId();
+                me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
                 KeepAura(me, SPELL_SHADOWY_RING_INNER);
                 break;
             case EVENT_DEC_ROAR:
@@ -1857,6 +1861,13 @@ struct npc_coa_vaults_trash : public ScriptedAI
             Talk(SAY_TRASH_DEATH);
     }
 
+    void EnterEvadeMode(EvadeReason why) override
+    {
+        ScriptedAI::EnterEvadeMode(why);
+        if (me->GetVehicle())
+            me->ClearUnitState(UNIT_STATE_EVADE);
+    }
+
     void AttackStart(Unit* who) override
     {
         if (me->GetEntry() == NPC_SHADOW_PROJECTION)
@@ -1880,8 +1891,16 @@ struct npc_coa_vaults_trash : public ScriptedAI
 
     void UpdateAI(uint32 diff) override
     {
-        if (me->GetEntry() == NPC_SHADOW_PROJECTION && !me->IsInCombat())
-            ScanForPlayers(diff);
+        if (me->GetEntry() == NPC_SHADOW_PROJECTION)
+        {
+            if (!me->IsInCombat())
+                ScanForPlayers(diff);
+            else if (PlayersInRange(me, TentacleAggroRange).empty())
+            {
+                EnterEvadeMode(EVADE_REASON_NO_HOSTILES);
+                return;
+            }
+        }
         if (!UpdateVictim())
             return;
         for (Timer& timer : _timers)
