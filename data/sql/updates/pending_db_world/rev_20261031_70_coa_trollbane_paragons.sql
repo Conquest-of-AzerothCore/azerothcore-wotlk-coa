@@ -7,9 +7,11 @@
 -- Ascension Yahola has 68290 base health and each Hand of Yahola 24935, so those are set exactly. Vazul and her
 -- Headhunters keep their cached modifiers.
 -- Damage modifiers are estimates in line with nearby elite bosses (Mogh the Undying 2.4, Kazkaz the Unholy 2.8).
--- Abilities: Yahola's three spells are from Ascension footage. In a 140 s kill she starts a Spectral Bolt every
--- 3.5-4 s and an uninterruptible Spectral Volley about 10 s into the fight and every 11 s after. Army of the Dead
--- (254626 -> 254627, once, about 8 s in) summons Risen Servants (254171, 5420 health at level 59 in the footage).
+-- Abilities: from Ascension footage. In a 140 s kill Yahola starts a Spectral Bolt every 3.5-4 s and an
+-- uninterruptible Spectral Volley about 10 s into the fight and every 11 s after. She casts Army of the Dead
+-- (254626 -> 254627) once, as she drops below 99% health; it raises Risen Servants (254171, 5420 health at level 59).
+-- Vazul opens with Chains of Ice (113), follows at once with Shadow Bolt Volley (9081, the Witherbark caster
+-- Zalas Witherbark's), then only melees for the rest of an 11 s kill.
 -- Loot: of their Ascension drops only Vazul's three Whispershade greens are her own; the rest (Ephemeral Key,
 -- recipes, world greens) are shared world drops. Their chances were not recorded, so they use a common rare-elite
 -- rate: 20% each in one group, at most one per kill (as Geomancer Flintdagger's own greens).
@@ -22,7 +24,7 @@
 -- of the Mossflayer Shadowhunter spawn there (guid 53743), flanked by the Left and Right Hand of Yahola (254172,
 -- 254173, level 59 elites), all facing the wall. Objective: kill before level 59.
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`, `speed_walk`, `speed_run`, `speed_swim`, `speed_flight`, `detection_range`, `rank`, `dmgschool`, `DamageModifier`, `BaseAttackTime`, `RangeAttackTime`, `BaseVariance`, `RangeVariance`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `HoverHeight`, `HealthModifier`, `ManaModifier`, `ArmorModifier`, `ExperienceModifier`, `RacialLeader`, `movementId`, `RegenHealth`, `CreatureImmunitiesId`, `flags_extra`, `ScriptName`, `VerifiedBuild`) VALUES
-(254168,0,0,0,0,0,'Vazul','Witherbark Paragon',NULL,0,40,40,0,654,0,1,1.14286,1,1,20,1,0,2.5,2000,2000,1,1,2,32768,2048,0,0,7,0,254168,0,0,0,0,200,300,'',0,1,9,2,1,1,0,0,1,0,0,'',12340),
+(254168,0,0,0,0,0,'Vazul','Witherbark Paragon',NULL,0,40,40,0,654,0,1,1.14286,1,1,20,1,0,2.5,2000,2000,1,1,2,32768,2048,0,0,7,0,254168,0,0,0,0,200,300,'SmartAI',0,1,9,2,1,1,0,0,1,0,0,'',12340),
 (254170,0,0,0,0,0,'Zazera','Sandfury Paragon',NULL,0,45,45,0,37,0,1,1.14286,1,1,20,1,0,2.5,2000,2000,1,1,2,32768,2048,0,0,7,0,0,0,0,0,0,300,450,'',0,1,9,3,1,1,0,0,1,0,0,'',12340),
 (254169,0,0,0,0,0,'Yahola','Mossflayer Paragon',NULL,0,59,59,0,37,0,1,1.14286,1,1,20,1,0,2.5,2000,2000,1,1,2,32768,2048,0,0,7,0,0,0,0,0,0,600,900,'SmartAI',0,1,28.8265,3.6,1,1,0,0,1,0,0,'',12340),
 (254171,0,0,0,0,0,'Risen Servant',NULL,NULL,0,59,59,0,37,0,1,1.14286,1,1,20,0,0,1,2000,2000,1,1,1,32768,2048,0,0,7,0,0,0,0,0,0,0,0,'SmartAI',0,1,1.8304,1,1,1,0,0,1,0,0,'',12340),
@@ -67,9 +69,11 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Q
 (254168, 2067258, 0, 20, 0, 1, 1, 1, 1, 'Vazul - Mystic Whispershade Belt'),
 (254168, 2072023, 0, 20, 0, 1, 1, 1, 1, 'Vazul - Spiritbound Whispershade Bindings');
 
-DELETE FROM `smart_scripts` WHERE `entryorguid` IN (254169, 254171) AND `source_type` = 0;
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (254168, 254169, 254171) AND `source_type` = 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `event_param6`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_param4`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+(254168, 0, 0, 0, 0, 0, 100, 1, 1000, 2000, 0, 0, 0, 0, 11, 113, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 'Vazul - In Combat - Cast Chains of Ice (once)'),
+(254168, 0, 1, 0, 0, 0, 100, 1, 2000, 3000, 0, 0, 0, 0, 11, 9081, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Vazul - In Combat - Cast Shadow Bolt Volley (once)'),
 (254169, 0, 0, 0, 0, 0, 100, 0, 1000, 2000, 3500, 4000, 0, 0, 11, 254625, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 'Yahola - In Combat - Cast Spectral Bolt'),
-(254169, 0, 1, 0, 0, 0, 100, 1, 7000, 9000, 0, 0, 0, 0, 11, 254626, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Yahola - In Combat - Cast Army of the Dead (once)'),
+(254169, 0, 1, 0, 2, 0, 100, 1, 0, 99, 0, 0, 0, 0, 11, 254626, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Yahola - Below 99% Health - Cast Army of the Dead (once)'),
 (254169, 0, 2, 0, 0, 0, 100, 0, 10000, 11000, 11000, 11000, 0, 0, 11, 254632, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Yahola - In Combat - Cast Spectral Volley'),
 (254171, 0, 0, 0, 54, 0, 100, 0, 0, 0, 0, 0, 0, 0, 49, 0, 0, 0, 0, 0, 0, 25, 30, 1, 0, 0, 0, 0, 0, 0, 'Risen Servant - On Just Summoned - Attack the closest player within 30 yards');
