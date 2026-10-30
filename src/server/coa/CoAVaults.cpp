@@ -2076,9 +2076,9 @@ class spell_coa_vaults_void_wrath_tick : public SpellScript
     }
 };
 
-class spell_coa_custom_dungeon_fierce_blow : public SpellScript
+class spell_coa_custom_dungeon_regular_blow : public SpellScript
 {
-    PrepareSpellScript(spell_coa_custom_dungeon_fierce_blow);
+    PrepareSpellScript(spell_coa_custom_dungeon_regular_blow);
 
     void HandleHit()
     {
@@ -2108,7 +2108,7 @@ class spell_coa_custom_dungeon_fierce_blow : public SpellScript
 
     void Register() override
     {
-        OnHit += SpellHitFn(spell_coa_custom_dungeon_fierce_blow::HandleHit);
+        OnHit += SpellHitFn(spell_coa_custom_dungeon_regular_blow::HandleHit);
     }
 };
 
@@ -2160,6 +2160,6 @@ void AddSC_CoAVaults()
     RegisterSpellAndAuraScriptPair(spell_coa_vaults_damage, spell_coa_vaults_damage_aura);
     RegisterSpellScript(spell_coa_vaults_void_wrath);
     RegisterSpellScript(spell_coa_vaults_void_wrath_tick);
-    RegisterSpellScript(spell_coa_custom_dungeon_fierce_blow);
+    RegisterSpellScript(spell_coa_custom_dungeon_regular_blow);
     new vaults_spell_attributes();
 }
