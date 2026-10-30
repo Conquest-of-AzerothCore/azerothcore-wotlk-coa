@@ -862,6 +862,8 @@ spec: 0 for the primary, 1 for the secondary.
 `pet_entry` measures the player's current guardian pet entry, or the entry of the companion it summoned
 (a minipet, which never occupies the guardian slot), or zero if absent; `pet_display`, `pet_scale`
 and `pet_is_banker` read the same unit, and `pet_distance` is its 2D distance from the player in yards.
+`pet_bearing` is that unit's direction from the player in degrees, counter-clockwise from the player's facing
+(0 ahead, 90 left, 180 behind, 270 right).
 `pet_knows_spell` requires `spell` and is 1 when that unit is a pet whose spellbook holds it.
 `pet_spell_bar_count` counts nonempty spell entries in the current controllable pet's native action bar;
 commands and reactions are excluded. It requires a pet with charm information and does not read rendered UI.
