@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "name": "Celestial Awakening gives an instant resurrect request the dead ally can accept (#9998)",
+  "contract": [
+    "Celestial Awakening 803615 is a player-cast RESURRECT_NEW spell: 'Brings a dead ally back to life.",
+    "Cannot be cast when in combat.' The client disables the resurrect popup's Accept button while",
+    "GetCorpseRecoveryDelay() is above zero, and the server sends the corpse-reclaim delay (30/60/120 s) to",
+    "the victim on death. A player-cast resurrection request must carry the instant (0) overridden timer so",
+    "the victim can accept immediately; the corpse-reclaim delay then only governs running back to the body.",
+    "Fixture: a level-60 Starcaller casts 803615 on a dead, unreleased level-60 ally at the same location."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "starcaller",
+      "race": 1,
+      "class": 26,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the world settle", "ms": 3000 },
+    { "action": "learn", "actor": "starcaller", "spell": 803615 },
+    { "action": "die", "actor": "ally" },
+    {
+      "action": "assert", "label": "SETUP: the ally is dead", "actor": "ally",
+      "metric": "alive", "equals": 0
+    },
+    {
+      "action": "teleport", "label": "Move the Starcaller away from the ally's corpse",
+      "actor": "starcaller", "map": 0, "x": -8939.95, "y": -132.493, "z": 83.5312, "o": 0
+    },
+    {
+      "action": "assert", "label": "SETUP: the caster is 10 yd from the corpse", "actor": "starcaller",
+      "metric": "distance", "target": "ally", "min": 8, "max": 12, "within_ms": 2000
+    },
+    {
+      "action": "cast", "label": "Celestial Awakening on the dead ally", "actor": "starcaller",
+      "spell": 803615, "target": "ally"
+    },
+    {
+      "action": "assert", "label": "the caster completes the resurrection spell", "actor": "starcaller",
+      "metric": "spell_cast_count", "spell": 803615, "equals": 1, "within_ms": 12000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the resurrect request carries the instant timer",
+      "actor": "ally", "metric": "server_packet_u32", "opcode": 347, "offset": 14, "index": 0,
+      "equals": 0, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the request also clears the corpse-reclaim delay",
+      "actor": "ally", "metric": "server_packet_u32", "opcode": 617, "index": 0,
+      "equals": 0, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "the ally is still waiting for consent", "actor": "ally",
+      "metric": "alive", "equals": 0
+    },
+    {
+      "action": "client_packet", "label": "the ally accepts the resurrection", "actor": "ally",
+      "opcode": 348,
+      "fields": [
+        { "actor_guid": "starcaller" },
+        { "u8": 1 }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "assert", "label": "the accepted resurrection revives the ally", "actor": "ally",
+      "metric": "alive", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "the ally returns with health", "actor": "ally",
+      "metric": "health", "min": 1
+    },
+    {
+      "action": "assert", "label": "the ally is not left in combat", "actor": "ally",
+      "metric": "combat", "equals": 0
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the ally revives at the corpse, not at the caster",
+      "actor": "ally", "metric": "distance", "target": "starcaller", "min": 8, "max": 12, "within_ms": 5000
+    }
+  ]
+}
