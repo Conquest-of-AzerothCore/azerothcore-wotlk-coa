@@ -7,6 +7,9 @@
 -- Ascension Yahola has 68290 base health and each Hand of Yahola 24935, so those are set exactly. Vazul and her
 -- Headhunters keep their cached modifiers.
 -- Damage modifiers are estimates in line with nearby elite bosses (Mogh the Undying 2.4, Kazkaz the Unholy 2.8).
+-- Loot: of their Ascension drops only Vazul's three Whispershade greens are her own; the rest (Ephemeral Key,
+-- recipes, world greens) are shared world drops. Their chances were not recorded, so they use a common rare-elite
+-- rate: 20% each in one group, at most one per kill (as Geomancer Flintdagger's own greens).
 
 -- Vazul <Witherbark Paragon> (254168): level 40 elite in the Witherbark Village cave, Arathi Highlands,
 -- guarded by two Elite Witherbark Headhunters (254176, level 34-35). Objective: kill before level 40.
@@ -16,7 +19,7 @@
 -- of the Mossflayer Shadowhunter spawn there (guid 53743), flanked by the Left and Right Hand of Yahola (254172,
 -- 254173, level 59 elites), all facing the wall. Objective: kill before level 59.
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`, `speed_walk`, `speed_run`, `speed_swim`, `speed_flight`, `detection_range`, `rank`, `dmgschool`, `DamageModifier`, `BaseAttackTime`, `RangeAttackTime`, `BaseVariance`, `RangeVariance`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `HoverHeight`, `HealthModifier`, `ManaModifier`, `ArmorModifier`, `ExperienceModifier`, `RacialLeader`, `movementId`, `RegenHealth`, `CreatureImmunitiesId`, `flags_extra`, `ScriptName`, `VerifiedBuild`) VALUES
-(254168,0,0,0,0,0,'Vazul','Witherbark Paragon',NULL,0,40,40,0,654,0,1,1.14286,1,1,20,1,0,2.5,2000,2000,1,1,2,32768,2048,0,0,7,0,0,0,0,0,0,200,300,'',0,1,9,2,1,1,0,0,1,0,0,'',12340),
+(254168,0,0,0,0,0,'Vazul','Witherbark Paragon',NULL,0,40,40,0,654,0,1,1.14286,1,1,20,1,0,2.5,2000,2000,1,1,2,32768,2048,0,0,7,0,254168,0,0,0,0,200,300,'',0,1,9,2,1,1,0,0,1,0,0,'',12340),
 (254170,0,0,0,0,0,'Zazera','Sandfury Paragon',NULL,0,45,45,0,37,0,1,1.14286,1,1,20,1,0,2.5,2000,2000,1,1,2,32768,2048,0,0,7,0,0,0,0,0,0,300,450,'',0,1,9,3,1,1,0,0,1,0,0,'',12340),
 (254169,0,0,0,0,0,'Yahola','Mossflayer Paragon',NULL,0,59,59,0,37,0,1,1.14286,1,1,20,1,0,2.5,2000,2000,1,1,2,32768,2048,0,0,7,0,0,0,0,0,0,600,900,'',0,1,28.8265,3.6,1,1,0,0,1,0,0,'',12340),
 (254172,0,0,0,0,0,'Left Hand of Yahola',NULL,NULL,0,59,59,0,37,0,1,1.14286,1,1,20,1,0,1.5,2000,2000,1,1,1,32768,2048,0,0,7,0,0,0,0,0,0,200,400,'',0,1,8.4211,1,1,1,0,0,1,0,0,'',12340),
@@ -52,3 +55,9 @@ INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, 
 (2541684, 2541684, 0, 0, 7, 0, 0),
 (2541684, 2541685, 3, 90, 7, 0, 0),
 (2541684, 2541686, 3, 270, 7, 0, 0);
+
+DELETE FROM `creature_loot_template` WHERE `Entry` = 254168;
+INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`, `MinCount`, `MaxCount`, `Comment`) VALUES
+(254168, 2061076, 0, 20, 0, 1, 1, 1, 1, 'Vazul - Vazul''s Whispershade Blindfold'),
+(254168, 2067258, 0, 20, 0, 1, 1, 1, 1, 'Vazul - Mystic Whispershade Belt'),
+(254168, 2072023, 0, 20, 0, 1, 1, 1, 1, 'Vazul - Spiritbound Whispershade Bindings');
