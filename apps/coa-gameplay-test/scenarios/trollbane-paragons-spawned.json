@@ -21,8 +21,10 @@
     { "action": "assert", "label": "Vazul uses her own model", "actor": "p", "metric": "nearby_creature_display", "entry": 254168, "equals": 254026 },
     { "action": "assert", "label": "Vazul can be attacked", "actor": "p", "metric": "nearby_creature_can_attack", "entry": 254168, "equals": 1 },
     { "action": "assert", "label": "Two Elite Witherbark Headhunters guard her", "actor": "p", "metric": "nearby_creature_count", "entry": 254176, "min_level": 34, "max_level": 35, "equals": 2 },
-    { "action": "teleport", "actor": "v", "map": 0, "x": -2065.27, "y": -3266.685, "z": 50.2637 },
+    { "action": "teleport_to_spawn", "actor": "v", "guid": 2541680 },
+    { "action": "assert", "label": "The level 40 player stands at Vazul", "actor": "v", "metric": "nearby_creature_count", "entry": 254168, "equals": 1, "within_ms": 10000 },
     { "action": "attack_nearby", "actor": "v", "entry": 254168 },
+    { "action": "assert", "label": "Attacking Vazul puts the level 40 player in combat", "actor": "v", "metric": "combat", "equals": 1, "within_ms": 3000 },
     { "action": "assert", "label": "Vazul opens the fight against a level 40 player with Chains of Ice", "actor": "v", "metric": "aura", "spell": 113, "equals": 1, "within_ms": 6000 },
 
     { "action": "teleport", "actor": "p", "map": 1, "x": -7189.39, "y": -3003.82, "z": 31.232 },
@@ -40,7 +42,10 @@
     { "action": "assert", "label": "The Left Hand of Yahola has Ascension's 24935 health, within 5%", "actor": "p", "metric": "nearby_creature_max_health", "entry": 254172, "min": 23688, "max": 26182 },
     { "action": "assert", "label": "The Right Hand of Yahola guards her at level 59", "actor": "p", "metric": "nearby_creature_count", "entry": 254173, "min_level": 59, "max_level": 59, "equals": 1 },
     { "action": "assert", "label": "The Right Hand of Yahola has Ascension's 24935 health, within 5%", "actor": "p", "metric": "nearby_creature_max_health", "entry": 254173, "min": 23688, "max": 26182 },
+    { "action": "teleport_to_spawn", "actor": "p", "guid": 2541684 },
+    { "action": "assert", "label": "The player stands at Yahola", "actor": "p", "metric": "nearby_creature_count", "entry": 254169, "equals": 1, "within_ms": 10000 },
     { "action": "attack_nearby", "actor": "p", "entry": 254169 },
+    { "action": "assert", "label": "Attacking Yahola puts the player in combat", "actor": "p", "metric": "combat", "equals": 1, "within_ms": 3000 },
     { "action": "set_health_pct", "actor": "p", "entry": 254169, "pct": 98 },
     { "action": "assert", "label": "Below 99% health Yahola casts Army of the Dead, which raises four Risen Servants", "actor": "p", "metric": "nearby_creature_count", "entry": 254171, "min": 4, "within_ms": 15000 },
     { "action": "assert", "label": "Each Risen Servant has Ascension's 5420 health, within 5%", "actor": "p", "metric": "nearby_creature_max_health", "entry": 254171, "min": 5149, "max": 5691 }
