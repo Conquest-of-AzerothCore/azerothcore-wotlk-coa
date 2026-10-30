@@ -377,7 +377,21 @@ class spell_ascension_tinker_ability : public SpellScript
         }
         if ((id == 802176 || id == 802236) && GetCaster()->IsCreature())
             if (Creature* device = GetCaster()->ToCreature(); Owned(player,device) && device->GetEntry() == 50300)
-                device->DespawnOrUnsummon(100ms);
+            {
+                ObjectGuid const guid = device->GetGUID();
+                player->m_Events.AddEventAtOffset([player, guid]()
+                {
+                    if (!player)
+                        return;
+                    player->RemoveAurasDueToSpell(804673);
+                    Creature* bot = ObjectAccessor::GetCreature(*player, guid);
+                    if (!bot)
+                        return;
+                    if (bot->GetCharmerGUID() == player->GetGUID())
+                        bot->RemoveCharmedBy(player);
+                    bot->DespawnOrUnsummon();
+                }, 100ms);
+            }
     }
     void Hit()
     {
