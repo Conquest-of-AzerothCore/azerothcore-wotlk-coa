@@ -2084,21 +2084,13 @@ class spell_coa_custom_dungeon_fierce_blow : public SpellScript
     {
         Unit* caster = GetCaster();
         Unit* target = GetHitUnit();
-        if (!caster || !target || !caster->IsCreature() || !GetHitDamage())
+        if (!caster || !target || !caster->IsCreature())
             return;
         uint32 const mapId = caster->GetMapId();
         if (mapId != VAULTS_MAP_ID && mapId != OTHER_SIDE_MAP_ID)
             return;
-        uint32 blow = caster->CalculateDamage(BASE_ATTACK, false, true, 0, target);
-        blow = caster->MeleeDamageBonusDone(target, blow, BASE_ATTACK, nullptr, SPELL_SCHOOL_MASK_NORMAL);
-        blow = target->MeleeDamageBonusTaken(caster, blow, BASE_ATTACK, nullptr, SPELL_SCHOOL_MASK_NORMAL);
-        sScriptMgr->ModifyMeleeDamage(target, caster, blow);
-        constexpr int32 Probe = 1000000;
-        int32 taken = Probe;
-        sScriptMgr->ModifySpellDamageTaken(target, caster, taken, GetSpellInfo());
-        if (taken <= 0)
-            return;
-        SetHitDamage(std::max<int32>(1, int32(std::lround(double(blow) * Probe / taken))));
+        PreventHitDamage();
+        caster->AttackerStateUpdate(target, BASE_ATTACK, true);
     }
 
     void Register() override
