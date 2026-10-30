@@ -398,13 +398,57 @@ TWIN_COPIES = {
         "CopyToSpellTwins(mSpellBonusMap);", "CopyToSpellTwins(mSpellThreatMap);",
         "CopyToSpellTwins(mSpellMixologyMap);", "CopyToSpellTwins(mSpellCones);", "twinRequirements", "twinGroups",
         "twinLinks", "GetSpellTwinFor(spellReq, twin->second)", "mSpellTargetPositions[{ twin, SpellEffIndex(i) }]", "mSpellPetAuraMap.emplace((twin << 8) + i",
-        "databaseAttributes.contains(twin)"],
+        "databaseAttributes.contains(twin)",
+        "twinInfo->ProcFlags ? twinInfo->ProcFlags : sourceInfo->ProcFlags",
+        "twinInfo->ProcChance ? twinInfo->ProcChance : sourceInfo->ProcChance",
+        "spellInfo->ProcFlags || !twinSourceInfo ? spellInfo->ProcFlags : twinSourceInfo->ProcFlags",
+        "spellInfo->ProcChance || !twinSourceInfo ? spellInfo->ProcChance : twinSourceInfo->ProcChance"],
     "src/server/game/Globals/ObjectMgr.cpp": ["sSpellMgr->GetSpellTwins()"],
     "src/server/game/World/World.cpp": ["sSpellMgr->LoadSpellTwins(false);", "sSpellMgr->LoadSpellTwins(true);"],
     "src/server/game/Spells/SpellInfoCorrections.cpp": ["SameSpellTuning(spellInfo, twin)"],
     "src/server/coa/AscensionWarcraftReborn.cpp": ["sSpellMgr->SetSpellTwins(&AscensionWarcraftReborn::LoadTwins);"],
     "src/server/scripts/Spells/spell_warlock.cpp": ["bonus ? bonus->direct_damage : 0.5f"],
 }
+
+
+PROC_FALLBACK_TWINS = {20375: 1120375, 31801: 1131801, 53736: 1153736, 31641: 1131641, 9452: 1109452, 58914: 1158914}
+MAELSTROM_SQL = ROOT / "data/sql/updates/pending_db_world/rev_20261030_60_coa_reborn_maelstrom_weapon.sql"
+
+
+def spell_rows(dbc, wanted):
+    data = (dbc / "Spell.dbc").read_bytes()
+    count, fields, size, strings = struct.unpack_from("<4I", data, 4)
+    rows = {}
+    for row in range(count):
+        record = struct.unpack_from("<%dI" % fields, data, 20 + row * size)
+        if record[0] in wanted:
+            rows[record[0]] = record
+    return rows
+
+
+def check_twin_proc_fallback(dbc):
+    rows = spell_rows(dbc, set(PROC_FALLBACK_TWINS) | set(PROC_FALLBACK_TWINS.values()))
+    ok = len(rows) == 2 * len(PROC_FALLBACK_TWINS) and all(
+        any(rows[source][field] and not rows[twin][field] for field in (34, 35))
+        for source, twin in PROC_FALLBACK_TWINS.items())
+    print(f"{'PASS' if ok else 'FAIL'}: Reborn Seal of Command, Seal of Vengeance, Seal of Corruption, Blazing Speed, "
+          "Vindication and Kill Command lack the proc flags or chance of their stock spell, so their entries take stock's")
+    return ok
+
+
+def check_maelstrom_weapon(dbc):
+    rows = spell_rows(dbc, {1151528, 1151529, 1151530, 1153817, 1153816, 1153822})
+    text = MAELSTROM_SQL.read_text(encoding="utf-8")
+    ranks = re.findall(r"\((115152[89]|1151530), 0, 0, 0, 0, 0, 0, 0x1, 0x2, 0, 0, 0, ([0-9.]+), 0, 0, 0\)", text)
+    buff = re.search(r"\(1153817, 0, 11, 0x000001C3, 0x00008000, 0, 0, 0x0, 0x1, 0, 0x8, 0, 0, 100, 0, 0\)", text)
+    ok = (len(rows) == 6 and all(not rows[r][35] and rows[r][34] for r in (1151528, 1151529, 1151530)) and
+          all(rows[r][116] == 1153817 and rows[r][117] == 1153816 for r in (1151528, 1151529, 1151530)) and
+          rows[1153817][49] == 8 and rows[1153816][49] == 8 and struct.unpack("<i", struct.pack("<I", rows[1153822][80]))[0] + 1 == 5 and
+          sorted(float(p) for _, p in ranks) == [2.0, 4.0, 6.0] and buff is not None and
+          "(1153817, 'spell_ascension_reborn_maelstrom_weapon')" in text)
+    print(f"{'PASS' if ok else 'FAIL'}: Reborn Maelstrom Weapon ranks proc per minute from weapon damage and stack the "
+          "8-stack buff, which a Lightning Bolt, Chain Lightning, heal or Hex consumes 5 at a time")
+    return ok
 
 
 COEFFICIENTS_SQL = ROOT / "data/sql/updates/pending_db_world/rev_20261008_20_coa_reborn_spell_coefficients.sql"
@@ -517,7 +561,9 @@ def main():
         if build.returncode:
             raise SystemExit("Warcraft Reborn rules harness did not compile:\n" + build.stdout + build.stderr)
         result = subprocess.run([str(executable), str(args.dbc_dir.resolve())], text=True)
-        bindings_ok = check_form_only_bindings(args.dbc_dir.resolve()) & check_deep_freeze_immunity(args.dbc_dir.resolve())
+        bindings_ok = (check_form_only_bindings(args.dbc_dir.resolve()) &
+                       check_deep_freeze_immunity(args.dbc_dir.resolve()) &
+                       check_twin_proc_fallback(args.dbc_dir.resolve()) & check_maelstrom_weapon(args.dbc_dir.resolve()))
         twins_ok = (check_twin_copies() & check_reborn_coefficients(args.dbc_dir.resolve()) &
                     check_class_spell_bindings(args.dbc_dir.resolve()))
         raise SystemExit(result.returncode or (0 if bindings_ok and twins_ok else 1))
