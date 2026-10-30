@@ -4494,11 +4494,11 @@ private:
             Require(creature != nullptr, "Armor observation needs a present owned creature");
             return creature->GetArmor();
         }
-        if (metric == "owned_creature_max_health")
+        if (metric == "owned_creature_max_health" || metric == "owned_creature_health")
         {
             Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
             Require(creature != nullptr, "Health observation needs a present owned creature");
-            return creature->GetMaxHealth();
+            return metric == "owned_creature_health" ? creature->GetHealth() : creature->GetMaxHealth();
         }
         if (metric == "owned_creature_virtual_item")
         {
@@ -6049,6 +6049,14 @@ private:
             player->GetSession()->HandleGroupDisbandOpcode(packet);
             Require(!player->GetGroup(), "Native leave request kept the player grouped");
         }
+        else if (action == "die" && step.get<bool>("pet", false))
+        {
+            Pet* pet = player->GetPet();
+            Require(pet && pet->IsAlive(), "Pet death fixture needs a living pet");
+            Unit::DealDamage(pet, pet, pet->GetHealth(), nullptr, SELF_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr,
+                false);
+            Require(!pet->IsAlive(), "Self damage did not kill the pet");
+        }
         else if (action == "die")
         {
             Require(player->IsAlive(), "Death fixture needs a living player");
@@ -6620,6 +6628,11 @@ private:
             {
                 target = player->GetPet();
                 Require(target != nullptr, "Cast at a pet needs a current pet");
+            }
+            if (auto ownedEntry = step.get_optional<uint32>("target_owned_entry"))
+            {
+                target = GetOwnedCreature(player, *ownedEntry);
+                Require(target != nullptr, "Cast at an owned creature needs a living creature of that entry");
             }
             if (auto targetItem = step.get_optional<uint32>("target_item"))
             {

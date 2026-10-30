@@ -503,7 +503,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `encounter_credit` | Player `actor` in a dungeon, creature `entry`: credits that dungeon boss kill to the actor's map through the native encounter update, as a boss death does, including the Dungeon Finder completion it triggers. |
 | `encounter_start` | Player `actor`, `boss_entry`, optional `radius` (yards, default 100, maximum 200): finds the nearest living creature of that entry in the actor's phase and starts recording its [encounter timeline](#encounter-timelines). It fails at once with `encounter_start found no creature <entry> within <radius> yards` when none is in range. A scenario has at most one; the case runs exclusively because the recorder is process-global. |
 | `leave_group` | Player `actor`: native `CMSG_GROUP_DISBAND` leave request; fails if the player stays grouped. |
-| `die` | Player `actor`: fixture death through self damage equal to current health; the body stays unreleased. |
+| `die` | Player `actor`: fixture death through self damage equal to current health; the body stays unreleased. `pet: true` kills the actor's current pet the same way. |
 | `release_spirit` | Player `actor`: native `CMSG_REPOP_REQUEST` for an unreleased body; fails if the player is neither a ghost nor alive afterwards. |
 | `cast_charm` | Same fields: native pet-cast handler, with the charmed unit as the default target. `pet: true` casts from the player's pet instead. |
 | `gossip_hello` | `actor`, optional `target`: native gossip handler; defaults to the actor's summoned companion. |
@@ -566,6 +566,7 @@ a previously named snapshot of the same metric; it is available on snapshots and
 `ratio_to` then divides by a nonzero snapshot, including a different numeric metric such as healing/damage.
 `cast` accepts an optional `destination` with `x`, `y`, `z` to send an explicit ground target.
 `target_pet: true` in place of `target` sends a player's cast at their current pet.
+`target_owned_entry` in place of `target` sends it at the player's living creature of that entry.
 
 Metrics: `health`, `max_health`, `creature_type`, `power`, `max_power`, `alive`, `map_id`, `combat`, `casting`,
 `level`, `quest_objective_count` (needs `quest`, optional `index`), `knows_spell`, `has_talent`, `talent_points`, `active_talent_spec`,
@@ -921,8 +922,8 @@ aura expiry is a separate event.
 `owned_creature_weapon_damage_min` requires a player and `entry`. It returns the lowest minimum weapon damage (`UNIT_FIELD_MINDAMAGE`) across their living
 owned creatures of that entry in the same phase and within 100 yards, so every copy of a guardian must meet an asserted `min`; zero when there are none.
 `owned_creature_armor` requires a player and a present owned creature selected by `entry`. It reads that creature's
-native `GetArmor()`, zero when absent. `owned_creature_max_health` reads the same creature's `GetMaxHealth()` and
-requires it to be present.
+native `GetArmor()`, zero when absent. `owned_creature_max_health` and `owned_creature_health` read the same
+creature's `GetMaxHealth()` and `GetHealth()` and require it to be present.
 `owned_gameobject_count` requires a player and `entry`. It counts their summoned gameobjects of that entry
 in the same phase and within 100 yards. `gameobject_display` and `gameobject_scale` read the single owned
 object's native display id and scale, returning zero when absent. They do not verify client rendering.
