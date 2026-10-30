@@ -10,8 +10,8 @@
 -- Abilities: from Ascension footage. In a 140 s kill Yahola starts a Spectral Bolt every 3.5-4 s and an
 -- uninterruptible Spectral Volley about 10 s into the fight and every 11 s after. She casts Army of the Dead
 -- (254626 -> 254627) once, as she drops below 99% health; it raises Risen Servants (254171, 5420 health at level 59).
--- Vazul opens with Chains of Ice (113), follows at once with Shadow Bolt Volley (9081, the Witherbark caster
--- Zalas Witherbark's), then only melees for the rest of an 11 s kill.
+-- Vazul opens with Chains of Ice (113) and follows at once with Shadow Bolt Volley (9081, the Witherbark caster
+-- Zalas Witherbark's). She died 11 s in without casting again, so her repeat timers (12-16 s) are estimated.
 -- Loot: of their Ascension drops only Vazul's three Whispershade greens are her own; the rest (Ephemeral Key,
 -- recipes, world greens) are shared world drops. Their chances were not recorded, so they use a common rare-elite
 -- rate: 20% each in one group, at most one per kill (as Geomancer Flintdagger's own greens).
@@ -71,8 +71,8 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Q
 
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (254168, 254169, 254171) AND `source_type` = 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `event_param6`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_param4`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
-(254168, 0, 0, 0, 0, 0, 100, 1, 1000, 2000, 0, 0, 0, 0, 11, 113, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 'Vazul - In Combat - Cast Chains of Ice (once)'),
-(254168, 0, 1, 0, 0, 0, 100, 1, 2000, 3000, 0, 0, 0, 0, 11, 9081, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Vazul - In Combat - Cast Shadow Bolt Volley (once)'),
+(254168, 0, 0, 0, 0, 0, 100, 0, 1000, 2000, 12000, 16000, 0, 0, 11, 113, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 'Vazul - In Combat - Cast Chains of Ice'),
+(254168, 0, 1, 0, 0, 0, 100, 0, 2000, 3000, 12000, 16000, 0, 0, 11, 9081, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Vazul - In Combat - Cast Shadow Bolt Volley'),
 (254169, 0, 0, 0, 0, 0, 100, 0, 1000, 2000, 3500, 4000, 0, 0, 11, 254625, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 'Yahola - In Combat - Cast Spectral Bolt'),
 (254169, 0, 1, 0, 2, 0, 100, 1, 0, 99, 0, 0, 0, 0, 11, 254626, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Yahola - Below 99% Health - Cast Army of the Dead (once)'),
 (254169, 0, 2, 0, 0, 0, 100, 0, 10000, 11000, 11000, 11000, 0, 0, 11, 254632, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Yahola - In Combat - Cast Spectral Volley'),
