@@ -1619,6 +1619,8 @@ public:
     // we can skip channeled or delayed checks using flags
     [[nodiscard]] bool IsNonMeleeSpellCast(bool withDelayed, bool skipChanneled = false, bool skipAutorepeat = false, bool isAutoshoot = false, bool skipInstant = true, bool skipGeneric = false) const;
     [[nodiscard]] bool HasManastormMovementGrace() const;
+    void GrantFormLandingGrace(Milliseconds duration);
+    [[nodiscard]] bool HasFormLandingGrace() const;
 
     // set withDelayed to true to interrupt delayed spells too
     // delayed+channeled spells are always interrupted
@@ -2288,6 +2290,7 @@ private:
     uint32 _oldFactionId;           ///< faction before charm
     bool _isWalkingBeforeCharm;     ///< Are we walking before we were charmed?
     bool _isCombatDisallowed;
+    Milliseconds _formLandingGraceEnd{0};
 
     uint32 _lastExtraAttackSpell;
     std::unordered_map<ObjectGuid /*guid*/, uint32 /*count*/> extraAttacksTargets;
