@@ -52,6 +52,7 @@
 #include "Log.h"
 #include "LocalLevelScaling.h"
 #include "LootMgr.h"
+#include "InstanceSaveMgr.h"
 #include "Map.h"
 #include "MapMgr.h"
 #include "MoveSpline.h"
@@ -5300,6 +5301,13 @@ private:
             return SentAddonField<float>(player, step, AverageItemLevelAddonField);
         if (metric == "sent_average_item_level_count")
             return double(SentAddonFieldUpdates(player, step, AverageItemLevelAddonField).size());
+        if (metric == "raid_reset_period")
+        {
+            uint32 const mapId = step.get<uint32>("id");
+            Difficulty const difficulty = Difficulty(step.get<uint32>("index", 0));
+            return double(sInstanceSaveMgr->GetExtendedResetTimeFor(mapId, difficulty) -
+                sInstanceSaveMgr->GetResetTimeFor(mapId, difficulty));
+        }
         if (metric == "server_packet_contains")
         {
             Actor const& actor = _actors.at(step.get<std::string>("actor"));

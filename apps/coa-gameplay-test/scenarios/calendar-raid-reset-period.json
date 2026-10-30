@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "name": "Calendar: every raid is sent with a reset period of at least a day",
+  "contract": "#4116 / COA-3415: opening the calendar froze the 3.3.5 client. SMSG_CALENDAR_SEND_CALENDAR sends, per raid map, period = GetExtendedResetTimeFor - GetResetTimeFor (CalendarHandler.cpp), and the client steps through the month's raid resets by that period. InstanceSaveMgr::LoadResetTimes set the extended reset to the reset itself at startup, so every raid went out with period 0 until its first runtime reset and the client never finished laying out the month. Upstream AzerothCore sets it one period past the reset ('An extended lock runs one period past the reset', as _ResetOrWarnAll does after a runtime reset), which also keeps extended lockouts past the reset. Expected, right after startup: Molten Core 409, Naxxramas 533 (10 and 25) and Icecrown Citadel 631 each report a period of at least one day (86400 s); before the fix each reported 0.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "p", "race": 1, "class": 1, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "Molten Core's calendar reset period is at least a day", "actor": "p", "metric": "raid_reset_period", "id": 409, "min": 86400 },
+    { "action": "assert", "label": "Naxxramas 10's calendar reset period is at least a day", "actor": "p", "metric": "raid_reset_period", "id": 533, "index": 0, "min": 86400 },
+    { "action": "assert", "label": "Naxxramas 25's calendar reset period is at least a day", "actor": "p", "metric": "raid_reset_period", "id": 533, "index": 1, "min": 86400 },
+    { "action": "assert", "label": "Icecrown Citadel's calendar reset period is at least a day", "actor": "p", "metric": "raid_reset_period", "id": 631, "min": 86400 }
+  ]
+}

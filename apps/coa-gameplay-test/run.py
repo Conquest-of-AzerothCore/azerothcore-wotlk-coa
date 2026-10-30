@@ -155,7 +155,7 @@ METRICS = TIMELINE_METRICS | {
     'server_packet_float', 'server_packet_contains',
     'known_entry_rank',
     'pet_autocast_enabled', 'pet_react_state', 'pet_player_react_state', 'combo_points', 'game_mode_mask', 'owned_creature_spell_proc_count',
-    'player_class', 'cached_class', 'at_login_flag', 'wildcard_starter_spells_known', 'action_bar_unknown_spells',
+    'player_class', 'cached_class', 'at_login_flag', 'raid_reset_period', 'wildcard_starter_spells_known', 'action_bar_unknown_spells',
     'wildcard_spells_known', 'wildcard_cards_pending', 'wildcard_cards_collected', 'wildcard_roll_cards_set',
     'wildcard_roll_cards_used', 'wildcard_bonus_pack_progress',
 }
@@ -1138,6 +1138,9 @@ def validate(scenario):
                 number(step['quality'], f'{where}.quality', 0, 7, True)
             if metric == 'at_login_flag':
                 number(step.get('id'), f'{where}.id', 1, 0xFFFF, True)
+            if metric == 'raid_reset_period':
+                number(step.get('id'), f'{where}.id', 1, 0xFFFF, True)
+                number(step.get('index', 0), f'{where}.index', 0, 3, True)
             if metric == 'server_packet_contains':
                 require(isinstance(step.get('text'), str) and step['text'].strip(),
                         f'{where}: metric needs the text to look for')

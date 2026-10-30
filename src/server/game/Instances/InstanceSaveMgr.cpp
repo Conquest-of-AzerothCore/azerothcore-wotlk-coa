@@ -374,7 +374,7 @@ void InstanceSaveMgr::LoadResetTimes()
             continue;
         }
 
-        SetExtendedResetTimeFor(mapid, difficulty, t);
+        SetExtendedResetTimeFor(mapid, difficulty, t + period);
 
         // schedule the global reset/warning
         uint8 type;
